@@ -1,5 +1,5 @@
 /*
- * $LynxId: SGML.c,v 1.115 2008/09/17 00:45:07 tom Exp $
+ * $LynxId: SGML.c,v 1.117 2008/09/21 18:34:39 tom Exp $
  *
  *			General SGML Parser code		SGML.c
  *			========================
@@ -1140,7 +1140,7 @@ static void end_element(HTStream *context, HTTag * old_tag)
 	}
 
 	e = NORMAL_TAGNUM(TAGNUM_OF_TAGP(t));
-	CTRACE2(TRACE_SGML, (tfp, "tagnum(%p) = %d\n", t, (int) e));
+	CTRACE2(TRACE_SGML, (tfp, "tagnum(%p) = %d\n", (void *) t, (int) e));
 #ifdef USE_PRETTYSRC
 	if (!psrc_view)		/* Don't actually pass call on if viewing psrc - kw */
 #endif
@@ -1562,6 +1562,36 @@ static void discard_empty(HTStream *context)
 
     /* do not call end_element() if start_element() was not called */
 }
+
+#ifdef USE_PRETTYSRC
+static BOOL end_if_prettysrc(HTStream *context, HTChunk *string, int end_ch)
+{
+    BOOL result = psrc_view;
+
+    if (psrc_view) {
+	if (attr_is_name) {
+	    HTStartAnchor(context->target, string->data, NULL);
+	    (*context->actions->end_element) (context->target,
+					      HTML_A,
+					      &context->include);
+	} else if (attr_is_href) {
+	    PSRCSTART(href);
+	    HTStartAnchor(context->target, NULL, string->data);
+	}
+	PUTS_TR(string->data);
+	if (attr_is_href) {
+	    (*context->actions->end_element) (context->target,
+					      HTML_A,
+					      &context->include);
+	    PSRCSTOP(href);
+	}
+	if (end_ch)
+	    PUTC(end_ch);
+	PSRCSTOP(attrval);
+    }
+    return result;
+}
+#endif
 
 static void SGML_character(HTStream *context, char c_in)
 {
@@ -3711,25 +3741,7 @@ static void SGML_character(HTStream *context, char c_in)
 	if (WHITE(c) || (c == '>')) {	/* End of word */
 	    HTChunkTerminate(string);
 #ifdef USE_PRETTYSRC
-	    if (psrc_view) {
-		if (attr_is_name) {
-		    HTStartAnchor(context->target, string->data, NULL);
-		    (*context->actions->end_element) (context->target,
-						      HTML_A,
-						      &context->include);
-		} else if (attr_is_href) {
-		    PSRCSTART(href);
-		    HTStartAnchor(context->target, NULL, string->data);
-		}
-		PUTS_TR(string->data);
-		if (attr_is_href) {
-		    (*context->actions->end_element) (context->target,
-						      HTML_A,
-						      &context->include);
-		    PSRCSTOP(href);
-		}
-		PSRCSTOP(attrval);
-	    } else
+	    if (!end_if_prettysrc(context, string, 0))
 #endif
 	    {
 #ifdef CJK_EX			/* Quick hack. - JH7AYN */
@@ -3791,27 +3803,7 @@ static void SGML_character(HTStream *context, char c_in)
 	if (c == '\'') {	/* End of attribute value */
 	    HTChunkTerminate(string);
 #ifdef USE_PRETTYSRC
-	    if (psrc_view) {
-		/*PSRCSTART(attrval); */
-		if (attr_is_name) {
-		    HTStartAnchor(context->target, string->data, NULL);
-		    (*context->actions->end_element) (context->target,
-						      HTML_A,
-						      &context->include);
-		} else if (attr_is_href) {
-		    PSRCSTART(href);
-		    HTStartAnchor(context->target, NULL, string->data);
-		}
-		PUTS_TR(string->data);
-		if (attr_is_href) {
-		    (*context->actions->end_element) (context->target,
-						      HTML_A,
-						      &context->include);
-		    PSRCSTOP(href);
-		}
-		PUTC('\'');
-		PSRCSTOP(attrval);
-	    } else
+	    if (!end_if_prettysrc(context, string, '\''))
 #endif
 		handle_attribute_value(context, string->data);
 	    string->size = 0;
@@ -3853,28 +3845,8 @@ static void SGML_character(HTStream *context, char c_in)
 	     c == '>')) {	/*  as a co-terminator of dquoted and tag    */
 	    HTChunkTerminate(string);
 #ifdef USE_PRETTYSRC
-	    if (psrc_view) {
-		if (attr_is_name) {
-		    HTStartAnchor(context->target, string->data, NULL);
-		    (*context->actions->end_element) (context->target,
-						      HTML_A,
-						      &context->include);
-		} else if (attr_is_href) {
-		    PSRCSTART(href);
-		    HTStartAnchor(context->target, NULL, string->data);
-		}
-		PUTS_TR(string->data);
-		if (attr_is_href) {
-		    (*context->actions->end_element) (context->target,
-						      HTML_A,
-						      &context->include);
-		    PSRCSTOP(href);
-		}
-		PUTC(c);
-		PSRCSTOP(attrval);
-	    } else
+	    if (!end_if_prettysrc(context, string, c))
 #endif
-
 		handle_attribute_value(context, string->data);
 	    string->size = 0;
 	    context->state = S_tag_gap;

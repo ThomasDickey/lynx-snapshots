@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: lynx 2.8.5pre9\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-07-19 07:11-0400\n"
+"POT-Creation-Date: 2008-09-21 16:20-0400\n"
 "PO-Revision-Date: 2003-04-19 20:40+0900\n"
 "Last-Translator: Masayuki Hatta <mhatta@po.airs.net>\n"
 "Language-Team: Japanese <translation-team-ja@lists.sourceforge.net>\n"
@@ -2554,7 +2554,7 @@ msgstr "プロキシ認証情報付きで再試行しています。"
 #: LYMessages.c:799
 #, fuzzy, c-format
 msgid "SSL error:%s-Continue?"
-msgstr "SSLエラー: %s と一致しません 続けますか?"
+msgstr "SSLエラー: ホスト(%s) が cert(%s) と一致しません 続けますか?"
 
 #. HTWAIS.c
 #: LYMessages.c:802
@@ -2794,33 +2794,33 @@ msgstr "プロキシ認証が必要です -- 再試行しています"
 msgid "Access without authorization denied -- retrying"
 msgstr "認証無しのアクセスは拒否されました -- 再試行しています"
 
-#: WWW/Library/Implementation/HTAccess.c:684
+#: WWW/Library/Implementation/HTAccess.c:688
 msgid "Access forbidden by rule"
 msgstr "規則によりアクセスは禁止されています。"
 
-#: WWW/Library/Implementation/HTAccess.c:781
+#: WWW/Library/Implementation/HTAccess.c:783
 msgid "Document with POST content not found in cache.  Resubmit?"
 msgstr "POST コンテンツを含むドキュメントはキャッシュの中にありませんでした。再送信しますか?"
 
-#: WWW/Library/Implementation/HTAccess.c:935
+#: WWW/Library/Implementation/HTAccess.c:938
 msgid "Loading failed, use a previous copy."
 msgstr ""
 
-#: WWW/Library/Implementation/HTAccess.c:1044 src/GridText.c:8580
+#: WWW/Library/Implementation/HTAccess.c:1047 src/GridText.c:8587
 msgid "Loading incomplete."
 msgstr "読み込みが中断されました。"
 
-#: WWW/Library/Implementation/HTAccess.c:1075
+#: WWW/Library/Implementation/HTAccess.c:1078
 #, c-format
 msgid "**** HTAccess: socket or file number returned by obsolete load routine!\n"
 msgstr "*** HTAccess: ソケットかファイルの番号が、旧式の読み込みルーチンから返されています!\n"
 
-#: WWW/Library/Implementation/HTAccess.c:1077
-#, c-format
+#: WWW/Library/Implementation/HTAccess.c:1080
+#, fuzzy, c-format
 msgid "**** HTAccess: Internal software error.  Please mail lynx-dev@nongnu.org!\n"
-msgstr "**** HTAccess: ソフトウェア内部のエラーです。lynx-dev@nongnu.org にメールで報告してください!\n"
+msgstr "**** HTAccess: ソフトウェア内部のエラーです。lynx-dev@sig.net にメールで報告してください!\n"
 
-#: WWW/Library/Implementation/HTAccess.c:1078
+#: WWW/Library/Implementation/HTAccess.c:1081
 #, c-format
 msgid "**** HTAccess: Status returned was: %d\n"
 msgstr "**** HTAccess: 返ってきたステータスは: %d\n"
@@ -2829,11 +2829,11 @@ msgstr "**** HTAccess: 返ってきたステータスは: %d\n"
 #. * hack: if we fail in HTAccess.c
 #. * avoid duplicating URL, oh.
 #.
-#: WWW/Library/Implementation/HTAccess.c:1084 src/LYMainLoop.c:7800
+#: WWW/Library/Implementation/HTAccess.c:1087 src/LYMainLoop.c:7783
 msgid "Can't Access"
 msgstr "アクセスできません。"
 
-#: WWW/Library/Implementation/HTAccess.c:1092
+#: WWW/Library/Implementation/HTAccess.c:1095
 msgid "Unable to access document."
 msgstr "文書にアクセスできません。"
 
@@ -3237,48 +3237,48 @@ msgstr "サーバからの不明なステータスリプライです!"
 msgid "remote %s session:"
 msgstr "リモート %s セッション:"
 
-#: WWW/Library/Implementation/HTWAIS.c:159
+#: WWW/Library/Implementation/HTWAIS.c:162
 msgid "Could not connect to WAIS server."
 msgstr "WAIS サーバに接続できません。"
 
-#: WWW/Library/Implementation/HTWAIS.c:167
+#: WWW/Library/Implementation/HTWAIS.c:170
 msgid "Could not open WAIS connection for reading."
 msgstr "読み込みのための WAIS 接続を開けませんでした。"
 
-#: WWW/Library/Implementation/HTWAIS.c:189
+#: WWW/Library/Implementation/HTWAIS.c:192
 msgid "Diagnostic code is "
 msgstr "診断コードは "
 
-#: WWW/Library/Implementation/HTWAIS.c:461
+#: WWW/Library/Implementation/HTWAIS.c:464
 msgid "Index "
 msgstr "インデックス "
 
-#: WWW/Library/Implementation/HTWAIS.c:465
+#: WWW/Library/Implementation/HTWAIS.c:468
 #, c-format
 msgid " contains the following %d item%s relevant to \""
 msgstr " は以下の %d アイテム%sを含んでいます。これが関連するのは\""
 
-#: WWW/Library/Implementation/HTWAIS.c:473
+#: WWW/Library/Implementation/HTWAIS.c:476
 msgid "The first figure after each entry is its relative score, "
 msgstr "各エントリの後の最初の数字はその相対スコアである "
 
-#: WWW/Library/Implementation/HTWAIS.c:474
+#: WWW/Library/Implementation/HTWAIS.c:477
 msgid "the second is the number of lines in the item."
 msgstr "第二の数字はアイテム内における行番号です。"
 
-#: WWW/Library/Implementation/HTWAIS.c:516
+#: WWW/Library/Implementation/HTWAIS.c:519
 msgid " (bad file name)"
 msgstr " (不正なファイル名)"
 
-#: WWW/Library/Implementation/HTWAIS.c:542
+#: WWW/Library/Implementation/HTWAIS.c:545
 msgid "(bad doc id)"
 msgstr "(不正なドキュメント ID)"
 
-#: WWW/Library/Implementation/HTWAIS.c:558
+#: WWW/Library/Implementation/HTWAIS.c:561
 msgid "(Short Header record, can't display)"
 msgstr "(短いヘッダレコード、表示不能)"
 
-#: WWW/Library/Implementation/HTWAIS.c:565
+#: WWW/Library/Implementation/HTWAIS.c:568
 msgid ""
 "\n"
 "Long Header record, can't display\n"
@@ -3286,7 +3286,7 @@ msgstr ""
 "\n"
 "長いヘッダレコード、表示不能\n"
 
-#: WWW/Library/Implementation/HTWAIS.c:572
+#: WWW/Library/Implementation/HTWAIS.c:575
 msgid ""
 "\n"
 "Text record\n"
@@ -3294,7 +3294,7 @@ msgstr ""
 "\n"
 "テキストレコード\n"
 
-#: WWW/Library/Implementation/HTWAIS.c:581
+#: WWW/Library/Implementation/HTWAIS.c:584
 msgid ""
 "\n"
 "Headline record, can't display\n"
@@ -3302,7 +3302,7 @@ msgstr ""
 "\n"
 "ヘッドラインレコード、表示不能\n"
 
-#: WWW/Library/Implementation/HTWAIS.c:589
+#: WWW/Library/Implementation/HTWAIS.c:592
 msgid ""
 "\n"
 "Code record, can't display\n"
@@ -3310,27 +3310,27 @@ msgstr ""
 "\n"
 "コードレコード、表示不能\n"
 
-#: WWW/Library/Implementation/HTWAIS.c:693
+#: WWW/Library/Implementation/HTWAIS.c:696
 msgid "Syntax error in WAIS URL"
 msgstr "WAIS URL の構文エラーです。"
 
-#: WWW/Library/Implementation/HTWAIS.c:765
+#: WWW/Library/Implementation/HTWAIS.c:768
 msgid " (WAIS Index)"
 msgstr "(WAIS インデックス)"
 
-#: WWW/Library/Implementation/HTWAIS.c:772
+#: WWW/Library/Implementation/HTWAIS.c:775
 msgid "WAIS Index: "
 msgstr "WAIS インデックス: "
 
-#: WWW/Library/Implementation/HTWAIS.c:778
+#: WWW/Library/Implementation/HTWAIS.c:781
 msgid "This is a link for searching the "
 msgstr "これは以下を検索するためのリンクです: "
 
-#: WWW/Library/Implementation/HTWAIS.c:782
+#: WWW/Library/Implementation/HTWAIS.c:785
 msgid " WAIS Index.\n"
 msgstr " WAIS インデックス。\n"
 
-#: WWW/Library/Implementation/HTWAIS.c:811
+#: WWW/Library/Implementation/HTWAIS.c:814
 msgid ""
 "\n"
 "Enter the 's'earch command and then specify search words.\n"
@@ -3338,48 +3338,48 @@ msgstr ""
 "\n"
 "検索コマンド 's' を入力し、検索する言葉を指定してください。\n"
 
-#: WWW/Library/Implementation/HTWAIS.c:833
+#: WWW/Library/Implementation/HTWAIS.c:836
 msgid " (in "
 msgstr " (含まれているのは "
 
-#: WWW/Library/Implementation/HTWAIS.c:842
+#: WWW/Library/Implementation/HTWAIS.c:845
 msgid "WAIS Search of \""
 msgstr "WAIS サーチ 対象: \""
 
-#: WWW/Library/Implementation/HTWAIS.c:846
+#: WWW/Library/Implementation/HTWAIS.c:849
 msgid "\" in: "
 msgstr "\" 含まれるのは: "
 
-#: WWW/Library/Implementation/HTWAIS.c:861
+#: WWW/Library/Implementation/HTWAIS.c:864
 msgid "HTWAIS: Request too large."
 msgstr "HTWAIS: リクエストが大きすぎます。"
 
-#: WWW/Library/Implementation/HTWAIS.c:870
+#: WWW/Library/Implementation/HTWAIS.c:873
 msgid "Searching WAIS database..."
 msgstr "WAIS データベースを検索しています..."
 
-#: WWW/Library/Implementation/HTWAIS.c:880
+#: WWW/Library/Implementation/HTWAIS.c:883
 msgid "Search interrupted."
 msgstr "検索が中断されました。"
 
-#: WWW/Library/Implementation/HTWAIS.c:931
+#: WWW/Library/Implementation/HTWAIS.c:934
 msgid "Can't convert format of WAIS document"
 msgstr "WAIS ドキュメントの形式に変換できません。"
 
-#: WWW/Library/Implementation/HTWAIS.c:975
+#: WWW/Library/Implementation/HTWAIS.c:978
 msgid "HTWAIS: Request too long."
 msgstr "HTWAIS: リクエストが長すぎます。"
 
 #.
 #. * Actually do the transaction given by request_message.
 #.
-#: WWW/Library/Implementation/HTWAIS.c:989
+#: WWW/Library/Implementation/HTWAIS.c:992
 msgid "Fetching WAIS document..."
 msgstr "WAIS ドキュメントを取得中..."
 
 #. display_search_response(target, retrieval_response,
 #. wais_database, keywords);
-#: WWW/Library/Implementation/HTWAIS.c:1028
+#: WWW/Library/Implementation/HTWAIS.c:1031
 msgid "No text was returned!\n"
 msgstr "返ってきたテキストはありません!\n"
 
@@ -3424,98 +3424,98 @@ msgstr "メモリを使いきりました。表示を中断します!"
 msgid "Memory exhausted, will interrupt transfer!"
 msgstr "メモリを使いきりました。転送を中断します!"
 
-#: src/GridText.c:3650
+#: src/GridText.c:3654
 msgid " *** MEMORY EXHAUSTED ***"
 msgstr "*** メモリを使いきりました ***"
 
-#: src/GridText.c:6085 src/GridText.c:6092 src/LYList.c:239
+#: src/GridText.c:6089 src/GridText.c:6096 src/LYList.c:239
 msgid "unknown field or link"
 msgstr "未知のフィールドまたはリンクです"
 
-#: src/GridText.c:6101
+#: src/GridText.c:6105
 msgid "text entry field"
 msgstr "テキスト入力フィールド"
 
-#: src/GridText.c:6104
+#: src/GridText.c:6108
 msgid "password entry field"
 msgstr "パスワード入力フィールド"
 
-#: src/GridText.c:6107
+#: src/GridText.c:6111
 msgid "checkbox"
 msgstr "チェックボックス"
 
-#: src/GridText.c:6110
+#: src/GridText.c:6114
 msgid "radio button"
 msgstr "ラジオボタン"
 
-#: src/GridText.c:6113
+#: src/GridText.c:6117
 msgid "submit button"
 msgstr "送信ボタン"
 
-#: src/GridText.c:6116
+#: src/GridText.c:6120
 msgid "reset button"
 msgstr "リセットボタン"
 
-#: src/GridText.c:6119
+#: src/GridText.c:6123
 msgid "popup menu"
 msgstr "ポップアップメニュー"
 
-#: src/GridText.c:6122
+#: src/GridText.c:6126
 msgid "hidden form field"
 msgstr "隠されたフォームフィールド"
 
-#: src/GridText.c:6125
+#: src/GridText.c:6129
 msgid "text entry area"
 msgstr "テキスト入力エリア"
 
-#: src/GridText.c:6128
+#: src/GridText.c:6132
 msgid "range entry field"
 msgstr "範囲入力フィールド"
 
-#: src/GridText.c:6131
+#: src/GridText.c:6135
 msgid "file entry field"
 msgstr "ファイル入力フィールド"
 
-#: src/GridText.c:6134
+#: src/GridText.c:6138
 msgid "text-submit field"
 msgstr "テキスト送信フィールド"
 
-#: src/GridText.c:6137
+#: src/GridText.c:6141
 msgid "image-submit button"
 msgstr "画像送信ボタン"
 
-#: src/GridText.c:6140
+#: src/GridText.c:6144
 msgid "keygen field"
 msgstr "keygen フィールド"
 
-#: src/GridText.c:6143
+#: src/GridText.c:6147
 msgid "unknown form field"
 msgstr "未知のフォームフィールド"
 
-#: src/GridText.c:10313
+#: src/GridText.c:10320
 msgid "Can't open file for uploading"
 msgstr "アップロードするファイルが開けません。"
 
-#: src/GridText.c:11472
+#: src/GridText.c:11479
 #, c-format
 msgid "Submitting %s"
 msgstr "%s を送信中"
 
 #. ugliness has happened; inform user and do the best we can
-#: src/GridText.c:12621
+#: src/GridText.c:12532
 msgid "Hang Detect: TextAnchor struct corrupted - suggest aborting!"
 msgstr "ハング検出: TextAnchor 構造体が壊れました - 終了をお勧めします!"
 
 #. don't show previous state
-#: src/GridText.c:12826
+#: src/GridText.c:12669
 msgid "Wrap lines to fit displayed area?"
 msgstr "表示領域に収まるよう行を折り返しますか?"
 
-#: src/GridText.c:12878
+#: src/GridText.c:12721
 msgid "Very long lines have been wrapped!"
 msgstr "長すぎる行は折り返されます!"
 
-#: src/GridText.c:13320
+#: src/GridText.c:13226
 msgid "Very long lines have been truncated!"
 msgstr "長すぎる行は切り詰められます!"
 
@@ -3609,31 +3609,31 @@ msgstr "no"
 msgid "Y/N/A/V"
 msgstr ""
 
-#: src/HTML.c:5921
+#: src/HTML.c:5911
 msgid "Description:"
 msgstr "説明:"
 
-#: src/HTML.c:5926
+#: src/HTML.c:5916
 msgid "(none)"
 msgstr "(なし)"
 
-#: src/HTML.c:5930
+#: src/HTML.c:5920
 msgid "Filepath:"
 msgstr "ファイルへのパス:"
 
-#: src/HTML.c:5936
+#: src/HTML.c:5926
 msgid "(unknown)"
 msgstr "(不明)"
 
-#: src/HTML.c:7381
+#: src/HTML.c:7353
 msgid "Document has only hidden links.  Use the 'l'ist command."
 msgstr "文書には隠しリンクしかありません。[l]から辿ってください。"
 
-#: src/HTML.c:7880
+#: src/HTML.c:7852
 msgid "Source cache error - disk full?"
 msgstr "ソースキャッシュエラーです - ディスクが一杯かも?"
 
-#: src/HTML.c:7893
+#: src/HTML.c:7865
 msgid "Source cache error - not enough memory!"
 msgstr "ソースキャッシュエラーです - メモリが足りません!"
 
@@ -3766,7 +3766,7 @@ msgstr "端末タイプを入力:"
 msgid "TERMINAL TYPE IS SET TO"
 msgstr "設定される端末タイプは"
 
-#: src/LYCurses.c:2119
+#: src/LYCurses.c:2127
 #, c-format
 msgid ""
 "\n"
@@ -3775,7 +3775,7 @@ msgstr ""
 "\n"
 "致命的なエラーが %s バージョン %s で発生しました\n"
 
-#: src/LYCurses.c:2122
+#: src/LYCurses.c:2130
 #, c-format
 msgid ""
 "\n"
@@ -3794,7 +3794,7 @@ msgstr ""
 #: src/LYEdit.c:266
 #, fuzzy, c-format
 msgid "Error starting editor, %s"
-msgstr "?? 行目(%s 中)の処理でエラー"
+msgstr "%d 行目(%s 中)の処理でエラー\n"
 
 #: src/LYEdit.c:269
 msgid "Editor killed by signal"
@@ -3842,31 +3842,31 @@ msgstr "ローカルでの追加:"
 msgid "No Name Given"
 msgstr "名前が指定されていません"
 
-#: src/LYHistory.c:671
+#: src/LYHistory.c:672
 msgid "You selected:"
 msgstr "選択したページ: "
 
-#: src/LYHistory.c:695 src/LYHistory.c:924
+#: src/LYHistory.c:696 src/LYHistory.c:925
 msgid "(no address)"
 msgstr "(アドレスなし)"
 
-#: src/LYHistory.c:699
+#: src/LYHistory.c:700
 msgid " (internal)"
 msgstr " (内部)"
 
-#: src/LYHistory.c:701
+#: src/LYHistory.c:702
 msgid " (was internal)"
 msgstr "(かつて内部)"
 
-#: src/LYHistory.c:799
+#: src/LYHistory.c:800
 msgid " (From History)"
 msgstr " (履歴より)"
 
-#: src/LYHistory.c:844
+#: src/LYHistory.c:845
 msgid "You visited (POSTs, bookmark, menu and list files excluded):"
 msgstr "あなたが訪れたリンク(POST、ブックマーク、メニュー、リストファイルは除く):"
 
-#: src/LYHistory.c:1137
+#: src/LYHistory.c:1138
 msgid "(No messages yet)"
 msgstr "(まだメッセージは無い)"
 
@@ -4199,6 +4199,7 @@ msgid "Just a moment, ..."
 msgstr "お待ちください ..."
 
 #: src/LYLocal.c:2326
+#, fuzzy
 msgid "Error building install args"
 msgstr "インストール引数を生成するのに失敗しました"
 
@@ -4255,20 +4256,21 @@ msgstr "このメッセージは以下によって自動的に生成されました: "
 msgid "No system mailer configured"
 msgstr ""
 
-#: src/LYMain.c:1019
+#: src/LYMain.c:1022
 msgid "No Winsock found, sorry."
 msgstr "Winsock が見つかりません。"
 
-#: src/LYMain.c:1200
+#: src/LYMain.c:1225
+#, fuzzy
 msgid "You MUST define a valid TMP or TEMP area!"
-msgstr "TMP ないし TEMP 領域を正しく定義しなければ*なりません*!"
+msgstr "TMP ないし TEMP 領域を正しく定義しなければ*なりません*!\n"
 
-#: src/LYMain.c:1253 src/LYMainLoop.c:5085
+#: src/LYMain.c:1278 src/LYMainLoop.c:5074
 msgid "No such directory"
 msgstr "そんなディレクトリはありません"
 
-#: src/LYMain.c:1461
-#, c-format
+#: src/LYMain.c:1463
+#, fuzzy, c-format
 msgid ""
 "\n"
 "Configuration file \"%s\" is not available.\n"
@@ -4278,7 +4280,7 @@ msgstr ""
 "定義ファイル %s が利用できません。\n"
 "\n"
 
-#: src/LYMain.c:1471
+#: src/LYMain.c:1473
 #, c-format
 msgid ""
 "\n"
@@ -4289,7 +4291,7 @@ msgstr ""
 "Lynx キャラクタセットが宣言されていません。\n"
 "\n"
 
-#: src/LYMain.c:1500
+#: src/LYMain.c:1502
 #, c-format
 msgid ""
 "\n"
@@ -4300,8 +4302,8 @@ msgstr ""
 "Lynx 編集マップが宣言されていません。\n"
 "\n"
 
-#: src/LYMain.c:1576
-#, c-format
+#: src/LYMain.c:1578
+#, fuzzy, c-format
 msgid ""
 "\n"
 "Lynx file \"%s\" is not available.\n"
@@ -4311,175 +4313,178 @@ msgstr ""
 "Lynx ファイル %s は利用できません。\n"
 "\n"
 
-#: src/LYMain.c:1651
+#: src/LYMain.c:1653
 #, c-format
 msgid "Ignored %d characters from standard input.\n"
 msgstr ""
 
-#: src/LYMain.c:1653
+#: src/LYMain.c:1655
 #, c-format
 msgid "Use \"-stdin\" or \"-\" to tell how to handle piped input.\n"
 msgstr ""
 
-#: src/LYMain.c:1801
+#: src/LYMain.c:1803
 msgid "Warning:"
 msgstr "注意: "
 
-#: src/LYMain.c:2369
+#: src/LYMain.c:2371
 msgid "persistent cookies state will be changed in next session only."
 msgstr "永続的クッキーの状態は次のセッションにならないと変更されません。"
 
-#: src/LYMain.c:2614 src/LYMain.c:2659
+#: src/LYMain.c:2616 src/LYMain.c:2661
 #, c-format
 msgid "Lynx: ignoring unrecognized charset=%s\n"
 msgstr "Lynx: 不明なキャラクタセット %s を無視します。\n"
 
-#: src/LYMain.c:3178
+#: src/LYMain.c:3180
 #, fuzzy, c-format
 msgid "%s Version %s (%s)"
-msgstr "%s バージョン %s (%s)"
+msgstr "%s バージョン %s (%s)\n"
 
-#: src/LYMain.c:3216
+#: src/LYMain.c:3218
 #, c-format
 msgid "Built on %s %s %s\n"
 msgstr "%s 上で %s %s にビルドされました。\n"
 
-#: src/LYMain.c:3238
+#: src/LYMain.c:3240
 msgid "Copyrights held by the Lynx Developers Group,"
 msgstr ""
 
-#: src/LYMain.c:3239
+#: src/LYMain.c:3241
 #, fuzzy
 msgid "the University of Kansas, CERN, and other contributors."
-msgstr "カンザス大学、CERN とその他の貢献者が著作権を保有し、"
+msgstr "カンザス大学、CERN とその他の貢献者が著作権を保有し、\n"
 
-#: src/LYMain.c:3240
+#: src/LYMain.c:3242
 #, fuzzy
 msgid "Distributed under the GNU General Public License (Version 2)."
-msgstr "GNU 一般公有使用許諾契約書の下で配布されています。"
+msgstr "GNU 一般公有使用許諾契約書の下で配布されています。\n"
 
-#: src/LYMain.c:3241
+#: src/LYMain.c:3243
+#, fuzzy
 msgid "See http://lynx.isc.org/ and the online help for more information."
-msgstr "詳しくは http://lynx.isc.org/ とオンラインヘルプをご覧ください。"
+msgstr ""
+"詳しくは http://lynx.browser.org/ とオンラインヘルプをご覧ください。\n"
+"\n"
 
-#: src/LYMain.c:4054
+#: src/LYMain.c:4060
 #, c-format
 msgid "USAGE: %s [options] [file]\n"
 msgstr "使い方: %s [オプション] [ファイル]\n"
 
-#: src/LYMain.c:4055
+#: src/LYMain.c:4061
 #, c-format
 msgid "Options are:\n"
 msgstr "オプション:\n"
 
-#: src/LYMain.c:4354
+#: src/LYMain.c:4360
 #, c-format
 msgid "%s: Invalid Option: %s\n"
 msgstr "%s: 不正なオプションです: %s\n"
 
-#: src/LYMainLoop.c:588
+#: src/LYMainLoop.c:594
 #, c-format
 msgid "Internal error: Invalid mouse link %d!"
 msgstr "内部エラー: %d は不正なマウスリンクです!"
 
-#: src/LYMainLoop.c:708 src/LYMainLoop.c:5107
+#: src/LYMainLoop.c:714 src/LYMainLoop.c:5096
 msgid "A URL specified by the user"
 msgstr "ユーザによって指定された URL"
 
-#: src/LYMainLoop.c:1167
+#: src/LYMainLoop.c:1173
 msgid "Enctype multipart/form-data not yet supported!  Cannot submit."
 msgstr "Enctype multipart/form-data はまだサポートされていません! 送信できません。"
 
 #.
 #. * Make a name for this help file.
 #.
-#: src/LYMainLoop.c:3113
+#: src/LYMainLoop.c:3105
 msgid "Help Screen"
 msgstr "ヘルプ画面"
 
-#: src/LYMainLoop.c:3234
+#: src/LYMainLoop.c:3226
 msgid "System Index"
 msgstr "システムインデックス"
 
-#: src/LYMainLoop.c:3594 src/LYMainLoop.c:5335
+#: src/LYMainLoop.c:3585 src/LYMainLoop.c:5324
 msgid "Entry into main screen"
 msgstr "メイン画面への入力"
 
-#: src/LYMainLoop.c:3852
+#: src/LYMainLoop.c:3843
 msgid "No next document present"
 msgstr "次のドキュメントが存在しません"
 
-#: src/LYMainLoop.c:4150
+#: src/LYMainLoop.c:4139
 msgid "charset for this document specified explicitly, sorry..."
 msgstr "この文書のキャラクタセットは明示的に指定されています..."
 
-#: src/LYMainLoop.c:5063
+#: src/LYMainLoop.c:5052
 msgid "cd to:"
 msgstr "以下へ移動:"
 
-#: src/LYMainLoop.c:5088
+#: src/LYMainLoop.c:5077
 msgid "A component of path is not a directory"
 msgstr "パスの一部がディレクトリではありません"
 
-#: src/LYMainLoop.c:5091
+#: src/LYMainLoop.c:5080
 msgid "failed to change directory"
 msgstr "ディレクトリを変更できません"
 
-#: src/LYMainLoop.c:6267
+#: src/LYMainLoop.c:6256
 msgid "Reparsing document under current settings..."
 msgstr "現在の設定の下で文書を再解釈中..."
 
-#: src/LYMainLoop.c:6558
+#: src/LYMainLoop.c:6547
 #, c-format
 msgid "Fatal error - could not open output file %s\n"
 msgstr "致命的エラー - 出力ファイル %s が開けません\n"
 
-#: src/LYMainLoop.c:6901
+#: src/LYMainLoop.c:6884
 msgid "TABLE center enable."
 msgstr ""
 
-#: src/LYMainLoop.c:6904
+#: src/LYMainLoop.c:6887
 msgid "TABLE center disable."
 msgstr ""
 
-#: src/LYMainLoop.c:6981
+#: src/LYMainLoop.c:6964
 #, fuzzy
 msgid "Current URL is empty."
 msgstr "現在のディレクトリ:"
 
-#: src/LYMainLoop.c:6983 src/LYUtils.c:1810
+#: src/LYMainLoop.c:6966 src/LYUtils.c:1817
 msgid "Copy to clipboard failed."
 msgstr ""
 
-#: src/LYMainLoop.c:6985
+#: src/LYMainLoop.c:6968
 msgid "Document URL put to clipboard."
 msgstr ""
 
-#: src/LYMainLoop.c:6987
+#: src/LYMainLoop.c:6970
 msgid "Link URL put to clipboard."
 msgstr ""
 
-#: src/LYMainLoop.c:7014
+#: src/LYMainLoop.c:6997
 msgid "No URL in the clipboard."
 msgstr ""
 
-#: src/LYMainLoop.c:7685 src/LYMainLoop.c:7855
+#: src/LYMainLoop.c:7668 src/LYMainLoop.c:7838
 msgid "-index-"
 msgstr "-インデックス-"
 
-#: src/LYMainLoop.c:7795
+#: src/LYMainLoop.c:7778
 msgid "lynx: Can't access startfile"
 msgstr "lynx: スタートファイルにアクセスできません"
 
-#: src/LYMainLoop.c:7807
+#: src/LYMainLoop.c:7790
 msgid "lynx: Start file could not be found or is not text/html or text/plain"
 msgstr "lynx: スタートファイルが見つからないか、text/html ないし text/plain ではありません"
 
-#: src/LYMainLoop.c:7808
+#: src/LYMainLoop.c:7791
 msgid "      Exiting..."
 msgstr "      終了します..."
 
-#: src/LYMainLoop.c:7849
+#: src/LYMainLoop.c:7832
 msgid "-more-"
 msgstr "-続きあり-"
 
@@ -4891,7 +4896,7 @@ msgstr "表示とキャラクタセット"
 #: src/LYOptions.c:3590
 #, fuzzy
 msgid "Use locale-based character set"
-msgstr "仮定するキャラクタセット"
+msgstr "表示するキャラクタセット"
 
 #. Display Character Set: SELECT
 #: src/LYOptions.c:3599
@@ -5154,7 +5159,7 @@ msgstr "画面に表示"
 msgid "Print out on a printer attached to your vt100 terminal"
 msgstr "あなたの vt100 端末に接続されたプリンタに印刷"
 
-#: src/LYReadCFG.c:369
+#: src/LYReadCFG.c:371
 #, c-format
 msgid ""
 "Syntax Error parsing COLOR in configuration file:\n"
@@ -5171,76 +5176,76 @@ msgstr ""
 "FOREGROUND と BACKGROUND は以下のうち一つを取ります:\n"
 "特別文字列の「nocolor」、「default」、あるいは\n"
 
-#: src/LYReadCFG.c:382
+#: src/LYReadCFG.c:384
 msgid "Offending line:"
 msgstr "問題の行:"
 
-#: src/LYReadCFG.c:679
+#: src/LYReadCFG.c:681
 #, c-format
 msgid "key remapping of %s to %s for %s failed\n"
 msgstr "キー %s を %s へ (動作は %s) 再定義するのに失敗しました\n"
 
-#: src/LYReadCFG.c:686
+#: src/LYReadCFG.c:688
 #, c-format
 msgid "key remapping of %s to %s failed\n"
 msgstr "キー %s を %s へ再定義するのに失敗しました\n"
 
-#: src/LYReadCFG.c:707
+#: src/LYReadCFG.c:709
 #, c-format
 msgid "invalid line-editor selection %s for key %s, selecting all\n"
 msgstr "キー %s の行エディタ選択 %s が不正です、全体を選択します\n"
 
-#: src/LYReadCFG.c:732 src/LYReadCFG.c:744
+#: src/LYReadCFG.c:734 src/LYReadCFG.c:746
 #, c-format
 msgid "setting of line-editor binding for key %s (0x%x) to 0x%x for %s failed\n"
 msgstr "行エディタバインディングでキー %s (0x%x) を 0x%x (動作 は %s)に設定するのに失敗しました\n"
 
-#: src/LYReadCFG.c:748
+#: src/LYReadCFG.c:750
 #, c-format
 msgid "setting of line-editor binding for key %s (0x%x) for %s failed\n"
 msgstr "行エディタバインディングでキー %s (0x%x) を動作 %sに設定するのに失敗しました\n"
 
-#: src/LYReadCFG.c:844
+#: src/LYReadCFG.c:846
 #, c-format
 msgid "Lynx: cannot start, CERN rules file %s is not available\n"
 msgstr "Lynx: 開始できません。CERN ルールファイル %s が利用できません\n"
 
-#: src/LYReadCFG.c:845
+#: src/LYReadCFG.c:847
 msgid "(no name)"
 msgstr "(名前無し)"
 
-#: src/LYReadCFG.c:1877
+#: src/LYReadCFG.c:1880
 #, c-format
 msgid "More than %d nested lynx.cfg includes -- perhaps there is a loop?!?\n"
 msgstr "lynx.cfg インクルードが %d 回以上の入れ子になっています -- おそらくループがあるのでは!?\n"
 
-#: src/LYReadCFG.c:1879
+#: src/LYReadCFG.c:1882
 #, c-format
 msgid "Last attempted include was '%s',\n"
 msgstr "最後に試みたインクルードは '%s' で、\n"
 
-#: src/LYReadCFG.c:1880
+#: src/LYReadCFG.c:1883
 #, c-format
 msgid "included from '%s'.\n"
 msgstr "'%s' からインクルードされています。\n"
 
-#: src/LYReadCFG.c:2288 src/LYReadCFG.c:2301 src/LYReadCFG.c:2359
+#: src/LYReadCFG.c:2291 src/LYReadCFG.c:2304 src/LYReadCFG.c:2362
 msgid "The following is read from your lynx.cfg file."
 msgstr "以下はあなたの lynx.cfg ファイルから読み込まれた情報です。"
 
-#: src/LYReadCFG.c:2289 src/LYReadCFG.c:2302
+#: src/LYReadCFG.c:2292 src/LYReadCFG.c:2305
 msgid "Please read the distribution"
 msgstr "配布の"
 
-#: src/LYReadCFG.c:2295 src/LYReadCFG.c:2305
+#: src/LYReadCFG.c:2298 src/LYReadCFG.c:2308
 msgid "for more comments."
 msgstr "には詳細な注が付いていますので参照してください。"
 
-#: src/LYReadCFG.c:2341
+#: src/LYReadCFG.c:2344
 msgid "RELOAD THE CHANGES"
 msgstr "変更を再読み込み"
 
-#: src/LYReadCFG.c:2349
+#: src/LYReadCFG.c:2352
 msgid "Your primary configuration"
 msgstr "最初に参照される設定ファイルは"
 
@@ -5360,7 +5365,7 @@ msgstr "最終更新:"
 #: src/LYShowInfo.c:351
 #, fuzzy
 msgid "Expires:"
-msgstr "有効期限:"
+msgstr "&nbsp;有効期限:"
 
 #: src/LYShowInfo.c:354
 msgid "Cache-Control:"
@@ -5514,33 +5519,33 @@ msgstr "以下にアップロード:"
 msgid "Upload options:"
 msgstr "アップロードオプション:"
 
-#: src/LYUtils.c:1812
+#: src/LYUtils.c:1819
 msgid "Download document URL put to clipboard."
 msgstr ""
 
-#: src/LYUtils.c:2597
+#: src/LYUtils.c:2604
 msgid "Unexpected access protocol for this URL scheme."
 msgstr "この URL スキームでは想定されていないアクセスプロトコルです。"
 
-#: src/LYUtils.c:3401
+#: src/LYUtils.c:3408
 msgid "Too many tempfiles"
 msgstr "一時ファイルが多すぎます"
 
-#: src/LYUtils.c:3701
+#: src/LYUtils.c:3708
 msgid "unknown restriction"
 msgstr "不明な制限"
 
-#: src/LYUtils.c:3732
+#: src/LYUtils.c:3739
 #, c-format
 msgid "No restrictions set.\n"
 msgstr "制限は設定されていません。\n"
 
-#: src/LYUtils.c:3735
+#: src/LYUtils.c:3742
 #, c-format
 msgid "Restrictions set:\n"
 msgstr "制限を以下に設定:\n"
 
-#: src/LYUtils.c:5113
+#: src/LYUtils.c:5120
 msgid "Cannot find HOME directory"
 msgstr "HOME ディレクトリが見つかりません"
 
@@ -5623,7 +5628,7 @@ msgid ""
 "The default is ~/"
 msgstr ""
 "cookie_file specifies the file from which to read persistent cookies.\n"
-"The default is ~/.lynx_cookies."
+"The default is ~/.lynx_cookies.\n"
 
 #: src/LYrcFile.c:362
 msgid ""
@@ -6006,7 +6011,7 @@ msgstr ""
 "The visited_links setting controls how Lynx organizes the information\n"
 "in the Visited Links Page.\n"
 
-#: src/LYrcFile.c:820
+#: src/LYrcFile.c:819
 msgid ""
 "If keypad_mode is set to \"NUMBERS_AS_ARROWS\", then the numbers on\n"
 "your keypad when the numlock is on will act as arrow keys:\n"
@@ -6024,7 +6029,7 @@ msgstr ""
 "and the corresponding keyboard numbers will act as arrow keys,\n"
 "regardless of whether numlock is on.\n"
 
-#: src/LYrcFile.c:829
+#: src/LYrcFile.c:828
 msgid ""
 "If keypad_mode is set to \"LINKS_ARE_NUMBERED\", then numbers will\n"
 "appear next to each link and numbers are used to select links.\n"
@@ -6032,7 +6037,7 @@ msgstr ""
 "If keypad_mode is set to \"LINKS_ARE_NUMBERED\", then numbers will\n"
 "appear next to each link and numbers are used to select links.\n"
 
-#: src/LYrcFile.c:833
+#: src/LYrcFile.c:832
 msgid ""
 "If keypad_mode is set to \"LINKS_AND_FORM_FIELDS_ARE_NUMBERED\", then\n"
 "numbers will appear next to each link and visible form input field.\n"
@@ -6050,7 +6055,7 @@ msgstr ""
 "a popup menu, even if the option isn't visible on the screen.  Reference\n"
 "lists and output from the list command also enumerate form inputs.\n"
 
-#: src/LYrcFile.c:842
+#: src/LYrcFile.c:841
 msgid ""
 "NOTE: Some fixed format documents may look disfigured when\n"
 "\"LINKS_ARE_NUMBERED\" or \"LINKS_AND_FORM_FIELDS_ARE_NUMBERED\" are\n"
@@ -6060,17 +6065,49 @@ msgstr ""
 "\"LINKS_ARE_NUMBERED\" or \"LINKS_AND_FORM_FIELDS_ARE_NUMBERED\" are\n"
 "enabled.\n"
 
-#: src/LYrcFile.c:874
+#: src/LYrcFile.c:873
 msgid ""
 "Lynx User Defaults File\n"
 "\n"
+msgstr ""
+
+#: src/LYrcFile.c:882
+msgid ""
 "This file contains options saved from the Lynx Options Screen (normally\n"
-"with the '>' key).  There is normally no need to edit this file manually,\n"
-"since the defaults here can be controlled from the Options Screen, and the\n"
-"next time options are saved from the Options Screen this file will be\n"
-"completely rewritten.  You have been warned...\n"
+"with the 'o' key).  To save options with that screen, you must select the\n"
+"checkbox:\n"
+msgstr ""
+
+#: src/LYrcFile.c:889
+msgid ""
+"You must then save the settings using the link on the line above the\n"
+"checkbox:\n"
+msgstr ""
+
+#: src/LYrcFile.c:896
+msgid ""
+"You may also use the command-line option \"-forms_options\", which displays\n"
+"the simpler Options Menu instead.  Save options with that using the '>' key.\n"
+"\n"
+msgstr ""
+
+#: src/LYrcFile.c:903
+msgid ""
+"This file contains options saved from the Lynx Options Screen (normally\n"
+"with the '>' key).\n"
+"\n"
+msgstr ""
+
+#: src/LYrcFile.c:910
+#, fuzzy
+msgid ""
+"There is normally no need to edit this file manually, since the defaults\n"
+"here can be controlled from the Options Screen, and the next time options\n"
+"are saved from the Options Screen this file will be completely rewritten.\n"
+"You have been warned...\n"
+"\n"
 "If you are looking for the general configuration file - it is normally\n"
-"called lynx.cfg, and it has different content and a different format.\n"
+"called \"lynx.cfg\".  It has different content and a different format.\n"
 "It is not this file.\n"
 msgstr ""
 "Lynx User Defaults File\n"
@@ -6084,20 +6121,23 @@ msgstr ""
 "called lynx.cfg, and it has different content and a different format.\n"
 "It is not this file.\n"
 
-#~ msgid "reason unknown."
-#~ msgstr "(不明)"
+#~ msgid "History List maximum reached!  Document not pushed."
+#~ msgstr "履歴リストが最大数を超えました! ドキュメントはプッシュされません。"
+
+#~ msgid "Short read from file, problem?"
+#~ msgstr "ファイルからの読み込みが中断しました 問題発生かも?"
 
 #~ msgid "KB"
 #~ msgstr "KB"
+
+#~ msgid "reason unknown."
+#~ msgstr "(不明)"
 
 #~ msgid "Remove '%s' and all of its contents?"
 #~ msgstr "'%s' とその全ての内容を削除しますか?"
 
 #~ msgid "Remove directory and all of its contents?"
 #~ msgstr "ディレクトリとその全ての内容を削除しますか?"
-
-#~ msgid "Short read from file, problem?"
-#~ msgstr "ファイルからの読み込みが中断しました 問題発生かも?"
 
 #~ msgid "Unable to open file management menu file."
 #~ msgstr "ファイル管理メニューファイルを開けません。"

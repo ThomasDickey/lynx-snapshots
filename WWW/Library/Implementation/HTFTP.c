@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFTP.c,v 1.80 2007/08/02 19:55:46 tom Exp $
+ * $LynxId: HTFTP.c,v 1.81 2008/09/18 21:34:25 tom Exp $
  *
  *			File Transfer Protocol (FTP) Client
  *			for a WorldWideWeb browser
@@ -882,7 +882,7 @@ static int get_connection(const char *arg,
     }
 
     CTRACE((tfp, "FTP connected, socket %d  control %p\n",
-	    con->socket, con));
+	    con->socket, (void *) con));
     control = con;		/* Current control connection */
 
     /* Initialise buffering for control connection */

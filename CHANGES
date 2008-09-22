@@ -1,9 +1,16 @@
--- $LynxId: CHANGES,v 1.303 2008/09/17 00:46:51 tom Exp $
+-- $LynxId: CHANGES,v 1.308 2008/09/21 21:12:42 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2008-0?-?? (2.8.7dev.10)
+2008-09-21 (2.8.7dev.10)
+* remove rw.po, since the translation project no longer supplies it -TD
+* implement "readonly" attribute for TEXTAREA and TEXT fields -TD
+* update Lynx's tables of HTML attributes to cover (except for events) the
+  keywords from HTML 4.01 -TD
+* modify initial active link in download-page to be the first download
+  action rather than the "help" link which is provided in Novice mode
+  (Debian #376259) -PBM, TD
 * implement "chunked" transfer-encoding to work with servers that ignore the
   version number in HTTP get's -TD
 * change initialization of trace file, handing this during the first part of

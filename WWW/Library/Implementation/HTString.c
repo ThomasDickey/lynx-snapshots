@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTString.c,v 1.52 2008/02/18 00:04:16 tom Exp $
+ * $LynxId: HTString.c,v 1.54 2008/09/20 14:32:29 tom Exp $
  *
  *	Case-independent string comparison		HTString.c
  *
@@ -1165,7 +1165,9 @@ void HTSABCopy(bstring **dest, const char *src,
     bstring *t;
     unsigned need = len + 1;
 
-    CTRACE2(TRACE_BSTRING, (tfp, "HTSABCopy(%p, %p, %d)\n", dest, src, len));
+    CTRACE2(TRACE_BSTRING,
+	    (tfp, "HTSABCopy(%p, %p, %d)\n",
+	     (void *) dest, (const void *) src, len));
     HTSABFree(dest);
     if (src) {
 	if (TRACE_BSTRING) {
@@ -1206,7 +1208,9 @@ void HTSABCat(bstring **dest, const char *src,
 {
     bstring *t = *dest;
 
-    CTRACE2(TRACE_BSTRING, (tfp, "HTSABCat(%p, %p, %d)\n", dest, src, len));
+    CTRACE2(TRACE_BSTRING,
+	    (tfp, "HTSABCat(%p, %p, %d)\n",
+	     (void *) dest, (const void *) src, len));
     if (src) {
 	unsigned need = len + 1;
 

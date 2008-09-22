@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: lynx 2.8.5pre15\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-07-19 07:11-0400\n"
+"POT-Creation-Date: 2008-09-21 16:20-0400\n"
 "PO-Revision-Date: 2003-06-03 17:40+0400\n"
 "Last-Translator: Dmitry S. Sivachenko <mitya@cavia.pp.ru>\n"
 "Language-Team: Russian <ru@li.org>\n"
@@ -2555,7 +2555,7 @@ msgstr "Повтор с информацией проверки полномочий для прокси."
 #: LYMessages.c:799
 #, fuzzy, c-format
 msgid "SSL error:%s-Continue?"
-msgstr "Ошибка SSL:%s-Продолжить?"
+msgstr "Ошибка SSL:host(%s)!=cert(%s)-Продолжить?"
 
 #. HTWAIS.c
 #: LYMessages.c:802
@@ -2795,33 +2795,33 @@ msgstr "Требуется проверка прав для прокси -- повтор"
 msgid "Access without authorization denied -- retrying"
 msgstr "Доступ без проверки прав запрещен -- повтор"
 
-#: WWW/Library/Implementation/HTAccess.c:684
+#: WWW/Library/Implementation/HTAccess.c:688
 msgid "Access forbidden by rule"
 msgstr "Доступ запрещен правилом"
 
-#: WWW/Library/Implementation/HTAccess.c:781
+#: WWW/Library/Implementation/HTAccess.c:783
 msgid "Document with POST content not found in cache.  Resubmit?"
 msgstr "Документ с содержимым POST не найден в кэше.  Послать снова?"
 
-#: WWW/Library/Implementation/HTAccess.c:935
+#: WWW/Library/Implementation/HTAccess.c:938
 msgid "Loading failed, use a previous copy."
 msgstr ""
 
-#: WWW/Library/Implementation/HTAccess.c:1044 src/GridText.c:8580
+#: WWW/Library/Implementation/HTAccess.c:1047 src/GridText.c:8587
 msgid "Loading incomplete."
 msgstr "Загрузка завершена не полностью."
 
-#: WWW/Library/Implementation/HTAccess.c:1075
+#: WWW/Library/Implementation/HTAccess.c:1078
 #, c-format
 msgid "**** HTAccess: socket or file number returned by obsolete load routine!\n"
 msgstr "**** HTAccess: номер сокета или файла возвращен устаревшей программой загрузки!\n"
 
-#: WWW/Library/Implementation/HTAccess.c:1077
-#, c-format
+#: WWW/Library/Implementation/HTAccess.c:1080
+#, fuzzy, c-format
 msgid "**** HTAccess: Internal software error.  Please mail lynx-dev@nongnu.org!\n"
-msgstr "**** HTAccess: Внутренняя программная ошибка. Пожалуйста, напишите в lynx-dev@nongnu.org!\n"
+msgstr "**** HTAccess: Внутренняя программная ошибка. Пожалуйста, напишите в lynx-dev@sig.net!\n"
 
-#: WWW/Library/Implementation/HTAccess.c:1078
+#: WWW/Library/Implementation/HTAccess.c:1081
 #, c-format
 msgid "**** HTAccess: Status returned was: %d\n"
 msgstr "**** HTAccess: Возвращенный статус: %d\n"
@@ -2830,11 +2830,11 @@ msgstr "**** HTAccess: Возвращенный статус: %d\n"
 #. * hack: if we fail in HTAccess.c
 #. * avoid duplicating URL, oh.
 #.
-#: WWW/Library/Implementation/HTAccess.c:1084 src/LYMainLoop.c:7800
+#: WWW/Library/Implementation/HTAccess.c:1087 src/LYMainLoop.c:7783
 msgid "Can't Access"
 msgstr "Нет доступа"
 
-#: WWW/Library/Implementation/HTAccess.c:1092
+#: WWW/Library/Implementation/HTAccess.c:1095
 msgid "Unable to access document."
 msgstr "Ошибка доступа к документу."
 
@@ -3238,48 +3238,48 @@ msgstr "Неизвестный статус ответа от сервера!"
 msgid "remote %s session:"
 msgstr "удаленный %s сеанс:"
 
-#: WWW/Library/Implementation/HTWAIS.c:159
+#: WWW/Library/Implementation/HTWAIS.c:162
 msgid "Could not connect to WAIS server."
 msgstr "Не удается установить соединение с сервером WAIS."
 
-#: WWW/Library/Implementation/HTWAIS.c:167
+#: WWW/Library/Implementation/HTWAIS.c:170
 msgid "Could not open WAIS connection for reading."
 msgstr "Не удается открыть WAIS-соединение для чтения."
 
-#: WWW/Library/Implementation/HTWAIS.c:189
+#: WWW/Library/Implementation/HTWAIS.c:192
 msgid "Diagnostic code is "
 msgstr "Код диагностики "
 
-#: WWW/Library/Implementation/HTWAIS.c:461
+#: WWW/Library/Implementation/HTWAIS.c:464
 msgid "Index "
 msgstr "Индекс "
 
-#: WWW/Library/Implementation/HTWAIS.c:465
+#: WWW/Library/Implementation/HTWAIS.c:468
 #, c-format
 msgid " contains the following %d item%s relevant to \""
 msgstr " содержит следующие %d элементов%s, относящихся к \""
 
-#: WWW/Library/Implementation/HTWAIS.c:473
+#: WWW/Library/Implementation/HTWAIS.c:476
 msgid "The first figure after each entry is its relative score, "
 msgstr "Первая фигура после каждого элемента является ее относительным счетом, "
 
-#: WWW/Library/Implementation/HTWAIS.c:474
+#: WWW/Library/Implementation/HTWAIS.c:477
 msgid "the second is the number of lines in the item."
 msgstr "вторая является числом строк в элементе."
 
-#: WWW/Library/Implementation/HTWAIS.c:516
+#: WWW/Library/Implementation/HTWAIS.c:519
 msgid " (bad file name)"
 msgstr " (неверное имя файла)"
 
-#: WWW/Library/Implementation/HTWAIS.c:542
+#: WWW/Library/Implementation/HTWAIS.c:545
 msgid "(bad doc id)"
 msgstr "(неверных идентификатор документа)"
 
-#: WWW/Library/Implementation/HTWAIS.c:558
+#: WWW/Library/Implementation/HTWAIS.c:561
 msgid "(Short Header record, can't display)"
 msgstr "(Запись Короткого Заголовка, не удается отобразить)"
 
-#: WWW/Library/Implementation/HTWAIS.c:565
+#: WWW/Library/Implementation/HTWAIS.c:568
 msgid ""
 "\n"
 "Long Header record, can't display\n"
@@ -3287,7 +3287,7 @@ msgstr ""
 "\n"
 "Запись Длинного Заголовка, не удается отобразить\n"
 
-#: WWW/Library/Implementation/HTWAIS.c:572
+#: WWW/Library/Implementation/HTWAIS.c:575
 msgid ""
 "\n"
 "Text record\n"
@@ -3295,7 +3295,7 @@ msgstr ""
 "\n"
 "Текстовая запись\n"
 
-#: WWW/Library/Implementation/HTWAIS.c:581
+#: WWW/Library/Implementation/HTWAIS.c:584
 msgid ""
 "\n"
 "Headline record, can't display\n"
@@ -3303,7 +3303,7 @@ msgstr ""
 "\n"
 "Запись Заголовка, не удается отобразить\n"
 
-#: WWW/Library/Implementation/HTWAIS.c:589
+#: WWW/Library/Implementation/HTWAIS.c:592
 msgid ""
 "\n"
 "Code record, can't display\n"
@@ -3311,27 +3311,27 @@ msgstr ""
 "\n"
 "Запись Кода, не удается отобразить\n"
 
-#: WWW/Library/Implementation/HTWAIS.c:693
+#: WWW/Library/Implementation/HTWAIS.c:696
 msgid "Syntax error in WAIS URL"
 msgstr "Синтаксическая ошибка в WAIS URL"
 
-#: WWW/Library/Implementation/HTWAIS.c:765
+#: WWW/Library/Implementation/HTWAIS.c:768
 msgid " (WAIS Index)"
 msgstr " (Индекс WAIS)"
 
-#: WWW/Library/Implementation/HTWAIS.c:772
+#: WWW/Library/Implementation/HTWAIS.c:775
 msgid "WAIS Index: "
 msgstr "Индекс WAIS: "
 
-#: WWW/Library/Implementation/HTWAIS.c:778
+#: WWW/Library/Implementation/HTWAIS.c:781
 msgid "This is a link for searching the "
 msgstr "Это ссылка для поиска в "
 
-#: WWW/Library/Implementation/HTWAIS.c:782
+#: WWW/Library/Implementation/HTWAIS.c:785
 msgid " WAIS Index.\n"
 msgstr " индексе WAIS.\n"
 
-#: WWW/Library/Implementation/HTWAIS.c:811
+#: WWW/Library/Implementation/HTWAIS.c:814
 msgid ""
 "\n"
 "Enter the 's'earch command and then specify search words.\n"
@@ -3339,48 +3339,48 @@ msgstr ""
 "\n"
 "Введите команду поиска (s), и затем задайте поисковые слова.\n"
 
-#: WWW/Library/Implementation/HTWAIS.c:833
+#: WWW/Library/Implementation/HTWAIS.c:836
 msgid " (in "
 msgstr " (в "
 
-#: WWW/Library/Implementation/HTWAIS.c:842
+#: WWW/Library/Implementation/HTWAIS.c:845
 msgid "WAIS Search of \""
 msgstr "Поиск WAIS \""
 
-#: WWW/Library/Implementation/HTWAIS.c:846
+#: WWW/Library/Implementation/HTWAIS.c:849
 msgid "\" in: "
 msgstr "\" в: "
 
-#: WWW/Library/Implementation/HTWAIS.c:861
+#: WWW/Library/Implementation/HTWAIS.c:864
 msgid "HTWAIS: Request too large."
 msgstr "HTWAIS: Запрос слишком большой."
 
-#: WWW/Library/Implementation/HTWAIS.c:870
+#: WWW/Library/Implementation/HTWAIS.c:873
 msgid "Searching WAIS database..."
 msgstr "Поиск в базе данных WAIS..."
 
-#: WWW/Library/Implementation/HTWAIS.c:880
+#: WWW/Library/Implementation/HTWAIS.c:883
 msgid "Search interrupted."
 msgstr "Поиск прерван."
 
-#: WWW/Library/Implementation/HTWAIS.c:931
+#: WWW/Library/Implementation/HTWAIS.c:934
 msgid "Can't convert format of WAIS document"
 msgstr "Не удается преобразовать формат документа WAIS"
 
-#: WWW/Library/Implementation/HTWAIS.c:975
+#: WWW/Library/Implementation/HTWAIS.c:978
 msgid "HTWAIS: Request too long."
 msgstr "HTWAIS: Запрос слишком длинный."
 
 #.
 #. * Actually do the transaction given by request_message.
 #.
-#: WWW/Library/Implementation/HTWAIS.c:989
+#: WWW/Library/Implementation/HTWAIS.c:992
 msgid "Fetching WAIS document..."
 msgstr "Получение документа WAIS..."
 
 #. display_search_response(target, retrieval_response,
 #. wais_database, keywords);
-#: WWW/Library/Implementation/HTWAIS.c:1028
+#: WWW/Library/Implementation/HTWAIS.c:1031
 msgid "No text was returned!\n"
 msgstr "Текст не был возвращен!\n"
 
@@ -3425,98 +3425,98 @@ msgstr "Память исчерпана, отображение прервано!"
 msgid "Memory exhausted, will interrupt transfer!"
 msgstr "Память исчерпана, передача данных будет прервана!"
 
-#: src/GridText.c:3650
+#: src/GridText.c:3654
 msgid " *** MEMORY EXHAUSTED ***"
 msgstr " *** ПАМЯТЬ ИСЧЕРПАНА ***"
 
-#: src/GridText.c:6085 src/GridText.c:6092 src/LYList.c:239
+#: src/GridText.c:6089 src/GridText.c:6096 src/LYList.c:239
 msgid "unknown field or link"
 msgstr "неизвестное поле или ссылка"
 
-#: src/GridText.c:6101
+#: src/GridText.c:6105
 msgid "text entry field"
 msgstr "поле ввода текста"
 
-#: src/GridText.c:6104
+#: src/GridText.c:6108
 msgid "password entry field"
 msgstr "поле ввода пароля"
 
-#: src/GridText.c:6107
+#: src/GridText.c:6111
 msgid "checkbox"
 msgstr "независимая кнопка"
 
-#: src/GridText.c:6110
+#: src/GridText.c:6114
 msgid "radio button"
 msgstr "зависимая кнопка"
 
-#: src/GridText.c:6113
+#: src/GridText.c:6117
 msgid "submit button"
 msgstr "кнопка посылки"
 
-#: src/GridText.c:6116
+#: src/GridText.c:6120
 msgid "reset button"
 msgstr "кнопка очистки"
 
-#: src/GridText.c:6119
+#: src/GridText.c:6123
 msgid "popup menu"
 msgstr "всплывающее меню"
 
-#: src/GridText.c:6122
+#: src/GridText.c:6126
 msgid "hidden form field"
 msgstr "скрытое поле формы"
 
-#: src/GridText.c:6125
+#: src/GridText.c:6129
 msgid "text entry area"
 msgstr "область ввода текста"
 
-#: src/GridText.c:6128
+#: src/GridText.c:6132
 msgid "range entry field"
 msgstr "поле ввода диапазона"
 
-#: src/GridText.c:6131
+#: src/GridText.c:6135
 msgid "file entry field"
 msgstr "поле ввода файла"
 
-#: src/GridText.c:6134
+#: src/GridText.c:6138
 msgid "text-submit field"
 msgstr "текстовое поле посылки"
 
-#: src/GridText.c:6137
+#: src/GridText.c:6141
 msgid "image-submit button"
 msgstr "графическая кнопка посылки"
 
-#: src/GridText.c:6140
+#: src/GridText.c:6144
 msgid "keygen field"
 msgstr "поле keygen"
 
-#: src/GridText.c:6143
+#: src/GridText.c:6147
 msgid "unknown form field"
 msgstr "неизвестное поле формы"
 
-#: src/GridText.c:10313
+#: src/GridText.c:10320
 msgid "Can't open file for uploading"
 msgstr "Не удается открыть файл для загрузки!"
 
-#: src/GridText.c:11472
+#: src/GridText.c:11479
 #, c-format
 msgid "Submitting %s"
 msgstr "Посылка %s"
 
 #. ugliness has happened; inform user and do the best we can
-#: src/GridText.c:12621
+#: src/GridText.c:12532
 msgid "Hang Detect: TextAnchor struct corrupted - suggest aborting!"
 msgstr ""
 
 #. don't show previous state
-#: src/GridText.c:12826
+#: src/GridText.c:12669
 msgid "Wrap lines to fit displayed area?"
 msgstr "Перенести строки, чтобы попасть в область отображения?"
 
-#: src/GridText.c:12878
+#: src/GridText.c:12721
 msgid "Very long lines have been wrapped!"
 msgstr "Очень длинные строки были перенесены!"
 
-#: src/GridText.c:13320
+#: src/GridText.c:13226
 msgid "Very long lines have been truncated!"
 msgstr "Очень длинные строки были усечены!"
 
@@ -3610,31 +3610,31 @@ msgstr "no"
 msgid "Y/N/A/V"
 msgstr ""
 
-#: src/HTML.c:5921
+#: src/HTML.c:5911
 msgid "Description:"
 msgstr "Описание:"
 
-#: src/HTML.c:5926
+#: src/HTML.c:5916
 msgid "(none)"
 msgstr "(нет)"
 
-#: src/HTML.c:5930
+#: src/HTML.c:5920
 msgid "Filepath:"
 msgstr "Путь к файлу:"
 
-#: src/HTML.c:5936
+#: src/HTML.c:5926
 msgid "(unknown)"
 msgstr "(неизвестный)"
 
-#: src/HTML.c:7381
+#: src/HTML.c:7353
 msgid "Document has only hidden links.  Use the 'l'ist command."
 msgstr "Документ имеет только скрытые ссылки.  Используйте команду 'l'ist."
 
-#: src/HTML.c:7880
+#: src/HTML.c:7852
 msgid "Source cache error - disk full?"
 msgstr "Ошибка кэширования исходных файлов - переполнение диска?"
 
-#: src/HTML.c:7893
+#: src/HTML.c:7865
 msgid "Source cache error - not enough memory!"
 msgstr "Ошибка кэширования исходных файлов - не хватает памяти!"
 
@@ -3768,7 +3768,7 @@ msgstr "Введите тип терминала:"
 msgid "TERMINAL TYPE IS SET TO"
 msgstr "ТИП ТЕРМИНАЛА УСТАНОВЛЕН В"
 
-#: src/LYCurses.c:2119
+#: src/LYCurses.c:2127
 #, c-format
 msgid ""
 "\n"
@@ -3777,7 +3777,7 @@ msgstr ""
 "\n"
 " В %s Вер. %s произошла фатальная ошибка.\n"
 
-#: src/LYCurses.c:2122
+#: src/LYCurses.c:2130
 #, c-format
 msgid ""
 "\n"
@@ -3798,7 +3798,7 @@ msgstr ""
 #: src/LYEdit.c:266
 #, fuzzy, c-format
 msgid "Error starting editor, %s"
-msgstr "Ошибка при обработке строки ?? из %s"
+msgstr "Ошибка при обработке строки %d из %s\n"
 
 #: src/LYEdit.c:269
 msgid "Editor killed by signal"
@@ -3846,31 +3846,31 @@ msgstr "Локальные дополнения:"
 msgid "No Name Given"
 msgstr "Имя не задано"
 
-#: src/LYHistory.c:671
+#: src/LYHistory.c:672
 msgid "You selected:"
 msgstr "Вы выбрали:"
 
-#: src/LYHistory.c:695 src/LYHistory.c:924
+#: src/LYHistory.c:696 src/LYHistory.c:925
 msgid "(no address)"
 msgstr "(нет адреса)"
 
-#: src/LYHistory.c:699
+#: src/LYHistory.c:700
 msgid " (internal)"
 msgstr " (внутренний)"
 
-#: src/LYHistory.c:701
+#: src/LYHistory.c:702
 msgid " (was internal)"
 msgstr " (был внутренний)"
 
-#: src/LYHistory.c:799
+#: src/LYHistory.c:800
 msgid " (From History)"
 msgstr " (Из Истории)"
 
-#: src/LYHistory.c:844
+#: src/LYHistory.c:845
 msgid "You visited (POSTs, bookmark, menu and list files excluded):"
 msgstr "Вы посетили (POST, закладки, меню и списки файлов исключаются):"
 
-#: src/LYHistory.c:1137
+#: src/LYHistory.c:1138
 msgid "(No messages yet)"
 msgstr "(Пока сообщений нет)"
 
@@ -4258,20 +4258,21 @@ msgstr "Это сообщение было автоматически сгенерировано"
 msgid "No system mailer configured"
 msgstr ""
 
-#: src/LYMain.c:1019
+#: src/LYMain.c:1022
 msgid "No Winsock found, sorry."
 msgstr "К сожалению Winsock не найден."
 
-#: src/LYMain.c:1200
+#: src/LYMain.c:1225
+#, fuzzy
 msgid "You MUST define a valid TMP or TEMP area!"
-msgstr "Вы ДОЛЖНЫ определить правильную область TMP или TEMP!"
+msgstr "Вы ДОЛЖНЫ определить правильную область TMP или TEMP!\n"
 
-#: src/LYMain.c:1253 src/LYMainLoop.c:5085
+#: src/LYMain.c:1278 src/LYMainLoop.c:5074
 msgid "No such directory"
 msgstr "Нет каталога"
 
-#: src/LYMain.c:1461
-#, c-format
+#: src/LYMain.c:1463
+#, fuzzy, c-format
 msgid ""
 "\n"
 "Configuration file \"%s\" is not available.\n"
@@ -4281,7 +4282,7 @@ msgstr ""
 "Конфигурационный файл %s не доступен.\n"
 "\n"
 
-#: src/LYMain.c:1471
+#: src/LYMain.c:1473
 #, c-format
 msgid ""
 "\n"
@@ -4292,7 +4293,7 @@ msgstr ""
 "Кодировки Lynx не определены.\n"
 "\n"
 
-#: src/LYMain.c:1500
+#: src/LYMain.c:1502
 #, c-format
 msgid ""
 "\n"
@@ -4300,8 +4301,8 @@ msgid ""
 "\n"
 msgstr ""
 
-#: src/LYMain.c:1576
-#, c-format
+#: src/LYMain.c:1578
+#, fuzzy, c-format
 msgid ""
 "\n"
 "Lynx file \"%s\" is not available.\n"
@@ -4311,174 +4312,177 @@ msgstr ""
 "Файл Lynx %s не доступен.\n"
 "\n"
 
-#: src/LYMain.c:1651
+#: src/LYMain.c:1653
 #, c-format
 msgid "Ignored %d characters from standard input.\n"
 msgstr ""
 
-#: src/LYMain.c:1653
+#: src/LYMain.c:1655
 #, c-format
 msgid "Use \"-stdin\" or \"-\" to tell how to handle piped input.\n"
 msgstr ""
 
-#: src/LYMain.c:1801
+#: src/LYMain.c:1803
 msgid "Warning:"
 msgstr "Предупреждение:"
 
-#: src/LYMain.c:2369
+#: src/LYMain.c:2371
 msgid "persistent cookies state will be changed in next session only."
 msgstr "состояние постоянных cookie будет изменено только в следующем сеансе."
 
-#: src/LYMain.c:2614 src/LYMain.c:2659
+#: src/LYMain.c:2616 src/LYMain.c:2661
 #, c-format
 msgid "Lynx: ignoring unrecognized charset=%s\n"
 msgstr "Lynx: нераспознанная кодировка=%s игнорируется\n"
 
-#: src/LYMain.c:3178
+#: src/LYMain.c:3180
 #, fuzzy, c-format
 msgid "%s Version %s (%s)"
-msgstr "%s Версия %s (%s)"
+msgstr "%s Версия %s (%s)\n"
 
-#: src/LYMain.c:3216
+#: src/LYMain.c:3218
 #, c-format
 msgid "Built on %s %s %s\n"
 msgstr "Собрано %s %s %s\n"
 
-#: src/LYMain.c:3238
+#: src/LYMain.c:3240
 msgid "Copyrights held by the Lynx Developers Group,"
 msgstr ""
 
-#: src/LYMain.c:3239
+#: src/LYMain.c:3241
 #, fuzzy
 msgid "the University of Kansas, CERN, and other contributors."
-msgstr "Авторские права принадлежат университету Канзаса, CERN, и другим участникам."
+msgstr "Авторские права принадлежат университету Канзаса, CERN, и другим участникам.\n"
 
-#: src/LYMain.c:3240
+#: src/LYMain.c:3242
 #, fuzzy
 msgid "Distributed under the GNU General Public License (Version 2)."
-msgstr "Распространяется в рамках Универсальной Общественной Лицензии GNU."
+msgstr "Распространяется в рамках Универсальной Общественной Лицензии GNU.\n"
 
-#: src/LYMain.c:3241
+#: src/LYMain.c:3243
+#, fuzzy
 msgid "See http://lynx.isc.org/ and the online help for more information."
-msgstr "См. http://lynx.isc.org/ и помощь для дополнительной информации."
+msgstr ""
+"См. http://lynx.browser.org/ и помощь для дополнительной информации.\n"
+"\n"
 
-#: src/LYMain.c:4054
+#: src/LYMain.c:4060
 #, c-format
 msgid "USAGE: %s [options] [file]\n"
 msgstr "ИСПОЛЬЗОВАНИЕ: %s [ключи] [файл]\n"
 
-#: src/LYMain.c:4055
+#: src/LYMain.c:4061
 #, c-format
 msgid "Options are:\n"
 msgstr "Ключи:\n"
 
-#: src/LYMain.c:4354
+#: src/LYMain.c:4360
 #, c-format
 msgid "%s: Invalid Option: %s\n"
 msgstr "%s: Неверная опция: %s\n"
 
-#: src/LYMainLoop.c:588
+#: src/LYMainLoop.c:594
 #, c-format
 msgid "Internal error: Invalid mouse link %d!"
 msgstr "Внутренняя ошибка: Неверная ссылка мыши %d!"
 
-#: src/LYMainLoop.c:708 src/LYMainLoop.c:5107
+#: src/LYMainLoop.c:714 src/LYMainLoop.c:5096
 msgid "A URL specified by the user"
 msgstr "URL, указанный пользователем"
 
-#: src/LYMainLoop.c:1167
+#: src/LYMainLoop.c:1173
 msgid "Enctype multipart/form-data not yet supported!  Cannot submit."
 msgstr "Enctype multipart/form-data еще не поддерживается!  Не удается послать."
 
 #.
 #. * Make a name for this help file.
 #.
-#: src/LYMainLoop.c:3113
+#: src/LYMainLoop.c:3105
 msgid "Help Screen"
 msgstr "Экран Помощи"
 
-#: src/LYMainLoop.c:3234
+#: src/LYMainLoop.c:3226
 msgid "System Index"
 msgstr "Системный Индекс"
 
-#: src/LYMainLoop.c:3594 src/LYMainLoop.c:5335
+#: src/LYMainLoop.c:3585 src/LYMainLoop.c:5324
 msgid "Entry into main screen"
 msgstr "Вход на главный экран"
 
-#: src/LYMainLoop.c:3852
+#: src/LYMainLoop.c:3843
 msgid "No next document present"
 msgstr "Следующий документ отсутствует"
 
-#: src/LYMainLoop.c:4150
+#: src/LYMainLoop.c:4139
 msgid "charset for this document specified explicitly, sorry..."
 msgstr "извините, кодировка для этого документа указана явно..."
 
-#: src/LYMainLoop.c:5063
+#: src/LYMainLoop.c:5052
 msgid "cd to:"
 msgstr "перейти в:"
 
-#: src/LYMainLoop.c:5088
+#: src/LYMainLoop.c:5077
 msgid "A component of path is not a directory"
 msgstr "Компонента пути не является каталогом"
 
-#: src/LYMainLoop.c:5091
+#: src/LYMainLoop.c:5080
 msgid "failed to change directory"
 msgstr "не удалось изменить каталог"
 
-#: src/LYMainLoop.c:6267
+#: src/LYMainLoop.c:6256
 msgid "Reparsing document under current settings..."
 msgstr "Документ разбирается заново с учетом текущих установок..."
 
-#: src/LYMainLoop.c:6558
+#: src/LYMainLoop.c:6547
 #, c-format
 msgid "Fatal error - could not open output file %s\n"
 msgstr "Фатальная ошибка - не удается открыть выходной файл %s\n"
 
-#: src/LYMainLoop.c:6901
+#: src/LYMainLoop.c:6884
 msgid "TABLE center enable."
 msgstr ""
 
-#: src/LYMainLoop.c:6904
+#: src/LYMainLoop.c:6887
 msgid "TABLE center disable."
 msgstr ""
 
-#: src/LYMainLoop.c:6981
+#: src/LYMainLoop.c:6964
 msgid "Current URL is empty."
 msgstr "Текущий URL пуст."
 
-#: src/LYMainLoop.c:6983 src/LYUtils.c:1810
+#: src/LYMainLoop.c:6966 src/LYUtils.c:1817
 msgid "Copy to clipboard failed."
 msgstr "Ощибка при копировании в буфер обмена."
 
-#: src/LYMainLoop.c:6985
+#: src/LYMainLoop.c:6968
 msgid "Document URL put to clipboard."
 msgstr "URL документа помещен в буфер обмена."
 
-#: src/LYMainLoop.c:6987
+#: src/LYMainLoop.c:6970
 msgid "Link URL put to clipboard."
 msgstr "URL ссылки помещен в буфер обмена."
 
-#: src/LYMainLoop.c:7014
+#: src/LYMainLoop.c:6997
 msgid "No URL in the clipboard."
 msgstr "URL в буфере обмена отсутствует."
 
-#: src/LYMainLoop.c:7685 src/LYMainLoop.c:7855
+#: src/LYMainLoop.c:7668 src/LYMainLoop.c:7838
 msgid "-index-"
 msgstr "-индекс-"
 
-#: src/LYMainLoop.c:7795
+#: src/LYMainLoop.c:7778
 msgid "lynx: Can't access startfile"
 msgstr "lynx: Нет доступа к начальному файлу"
 
-#: src/LYMainLoop.c:7807
+#: src/LYMainLoop.c:7790
 msgid "lynx: Start file could not be found or is not text/html or text/plain"
 msgstr "lynx: Начальный файл либо не удается найти, либо он не text/html или text/plain"
 
-#: src/LYMainLoop.c:7808
+#: src/LYMainLoop.c:7791
 msgid "      Exiting..."
 msgstr "      Выход..."
 
-#: src/LYMainLoop.c:7849
+#: src/LYMainLoop.c:7832
 msgid "-more-"
 msgstr "-далее-"
 
@@ -4890,7 +4894,7 @@ msgstr "Отображение и Набор Символов"
 #: src/LYOptions.c:3590
 #, fuzzy
 msgid "Use locale-based character set"
-msgstr "Подразумеваемая кодировка документа"
+msgstr "Кодировка отображения"
 
 #. Display Character Set: SELECT
 #: src/LYOptions.c:3599
@@ -5153,7 +5157,7 @@ msgstr "Напечатать на экран"
 msgid "Print out on a printer attached to your vt100 terminal"
 msgstr "Напечатать на принтер, подсоединенный к вашему терминалу vt100"
 
-#: src/LYReadCFG.c:369
+#: src/LYReadCFG.c:371
 #, c-format
 msgid ""
 "Syntax Error parsing COLOR in configuration file:\n"
@@ -5170,76 +5174,76 @@ msgstr ""
 "Здесь ЦВЕТ и ЦВЕТ_ФОНА должны быть специальной строкой:\n"
 "'nocolor' или 'default', или\n"
 
-#: src/LYReadCFG.c:382
+#: src/LYReadCFG.c:384
 msgid "Offending line:"
 msgstr "Поврежденная строка:"
 
-#: src/LYReadCFG.c:679
+#: src/LYReadCFG.c:681
 #, c-format
 msgid "key remapping of %s to %s for %s failed\n"
 msgstr "ошибка при переназначении клавиши %s в %s для %s\n"
 
-#: src/LYReadCFG.c:686
+#: src/LYReadCFG.c:688
 #, c-format
 msgid "key remapping of %s to %s failed\n"
 msgstr "переназначение клавиши %s в %s закончилось неудачей\n"
 
-#: src/LYReadCFG.c:707
+#: src/LYReadCFG.c:709
 #, c-format
 msgid "invalid line-editor selection %s for key %s, selecting all\n"
 msgstr "неверный выбор в редакторе строки %s для клавиши %s, выбрано все\n"
 
-#: src/LYReadCFG.c:732 src/LYReadCFG.c:744
+#: src/LYReadCFG.c:734 src/LYReadCFG.c:746
 #, c-format
 msgid "setting of line-editor binding for key %s (0x%x) to 0x%x for %s failed\n"
 msgstr "ошибка при установке привязки клавиши редактора строки %s (0x%x) в 0x%x для %s\n"
 
-#: src/LYReadCFG.c:748
+#: src/LYReadCFG.c:750
 #, c-format
 msgid "setting of line-editor binding for key %s (0x%x) for %s failed\n"
 msgstr "ошибка при установке привязки клавиши редактора строки %s (0x%x) для %s\n"
 
-#: src/LYReadCFG.c:844
+#: src/LYReadCFG.c:846
 #, c-format
 msgid "Lynx: cannot start, CERN rules file %s is not available\n"
 msgstr "Lynx: ошибка старта, файл с правилами CERN %s не доступен\n"
 
-#: src/LYReadCFG.c:845
+#: src/LYReadCFG.c:847
 msgid "(no name)"
 msgstr "(нет имени)"
 
-#: src/LYReadCFG.c:1877
+#: src/LYReadCFG.c:1880
 #, c-format
 msgid "More than %d nested lynx.cfg includes -- perhaps there is a loop?!?\n"
 msgstr "Больше чем %d вложенных включений lynx.cfg -- возможно цикл?!?\n"
 
-#: src/LYReadCFG.c:1879
+#: src/LYReadCFG.c:1882
 #, c-format
 msgid "Last attempted include was '%s',\n"
 msgstr "Последняя попытка включения была '%s',\n"
 
-#: src/LYReadCFG.c:1880
+#: src/LYReadCFG.c:1883
 #, c-format
 msgid "included from '%s'.\n"
 msgstr "включено из '%s'.\n"
 
-#: src/LYReadCFG.c:2288 src/LYReadCFG.c:2301 src/LYReadCFG.c:2359
+#: src/LYReadCFG.c:2291 src/LYReadCFG.c:2304 src/LYReadCFG.c:2362
 msgid "The following is read from your lynx.cfg file."
 msgstr "Следующее читается из вашего файла lynx.cfg."
 
-#: src/LYReadCFG.c:2289 src/LYReadCFG.c:2302
+#: src/LYReadCFG.c:2292 src/LYReadCFG.c:2305
 msgid "Please read the distribution"
 msgstr "Пожалуйста, прочитайте исходный"
 
-#: src/LYReadCFG.c:2295 src/LYReadCFG.c:2305
+#: src/LYReadCFG.c:2298 src/LYReadCFG.c:2308
 msgid "for more comments."
 msgstr "для получения дополнительных комментариев."
 
-#: src/LYReadCFG.c:2341
+#: src/LYReadCFG.c:2344
 msgid "RELOAD THE CHANGES"
 msgstr "ОБНОВИТЬ ИЗМЕНЕНИЯ"
 
-#: src/LYReadCFG.c:2349
+#: src/LYReadCFG.c:2352
 msgid "Your primary configuration"
 msgstr "Ваша основная конфигурация"
 
@@ -5359,7 +5363,7 @@ msgstr "Посл мод:"
 #: src/LYShowInfo.c:351
 #, fuzzy
 msgid "Expires:"
-msgstr "Устаревает:"
+msgstr "&nbsp;Устаревает:"
 
 #: src/LYShowInfo.c:354
 msgid "Cache-Control:"
@@ -5513,33 +5517,33 @@ msgstr "Загрузить в:"
 msgid "Upload options:"
 msgstr "Опции загрузки:"
 
-#: src/LYUtils.c:1812
+#: src/LYUtils.c:1819
 msgid "Download document URL put to clipboard."
 msgstr ""
 
-#: src/LYUtils.c:2597
+#: src/LYUtils.c:2604
 msgid "Unexpected access protocol for this URL scheme."
 msgstr "Неожиданный протокол доступа для этой схемы URL."
 
-#: src/LYUtils.c:3401
+#: src/LYUtils.c:3408
 msgid "Too many tempfiles"
 msgstr "Слишком много временных файлов"
 
-#: src/LYUtils.c:3701
+#: src/LYUtils.c:3708
 msgid "unknown restriction"
 msgstr "неизвестное ограничение"
 
-#: src/LYUtils.c:3732
+#: src/LYUtils.c:3739
 #, c-format
 msgid "No restrictions set.\n"
 msgstr "Ограничений не установлены.\n"
 
-#: src/LYUtils.c:3735
+#: src/LYUtils.c:3742
 #, c-format
 msgid "Restrictions set:\n"
 msgstr "Установленные ограничения:\n"
 
-#: src/LYUtils.c:5113
+#: src/LYUtils.c:5120
 msgid "Cannot find HOME directory"
 msgstr "Домашний каталог не найден"
 
@@ -5623,7 +5627,7 @@ msgid ""
 "The default is ~/"
 msgstr ""
 "cookie_file определяет файл, из которого будут считываться постоянные cookie.\n"
-"По умолчанию используется ~/.lynx_cookies."
+"По умолчанию используется ~/.lynx_cookies.\n"
 
 #: src/LYrcFile.c:362
 msgid ""
@@ -6014,7 +6018,7 @@ msgstr ""
 "Установка visited_links контролирует, как Lynx организует информацию\n"
 "на Странице Посещенных Ссылок.\n"
 
-#: src/LYrcFile.c:820
+#: src/LYrcFile.c:819
 msgid ""
 "If keypad_mode is set to \"NUMBERS_AS_ARROWS\", then the numbers on\n"
 "your keypad when the numlock is on will act as arrow keys:\n"
@@ -6033,7 +6037,7 @@ msgstr ""
 "и соответствующие цифры на основной клавиатуре будут действовать как\n"
 "клавиши стрелок, вне зависимости от состояния numlock.\n"
 
-#: src/LYrcFile.c:829
+#: src/LYrcFile.c:828
 msgid ""
 "If keypad_mode is set to \"LINKS_ARE_NUMBERED\", then numbers will\n"
 "appear next to each link and numbers are used to select links.\n"
@@ -6042,7 +6046,7 @@ msgstr ""
 "будут появляться следом за каждой ссылкой и они могут быть использованы для\n"
 "выбора ссылки.\n"
 
-#: src/LYrcFile.c:833
+#: src/LYrcFile.c:832
 msgid ""
 "If keypad_mode is set to \"LINKS_AND_FORM_FIELDS_ARE_NUMBERED\", then\n"
 "numbers will appear next to each link and visible form input field.\n"
@@ -6060,7 +6064,7 @@ msgstr ""
 "номер опции, даже если опция не видна на экране.  Списки ссылок и результат\n"
 "команды вывода списка также нумеруют поля ввода формы.\n"
 
-#: src/LYrcFile.c:842
+#: src/LYrcFile.c:841
 msgid ""
 "NOTE: Some fixed format documents may look disfigured when\n"
 "\"LINKS_ARE_NUMBERED\" or \"LINKS_AND_FORM_FIELDS_ARE_NUMBERED\" are\n"
@@ -6070,17 +6074,49 @@ msgstr ""
 "отображаться неправильно, если включены опции \"LINKS_ARE_NUMBERED\"\n"
 "или \"LINKS_AND_FORM_FIELDS_ARE_NUMBERED\".\n"
 
-#: src/LYrcFile.c:874
+#: src/LYrcFile.c:873
 msgid ""
 "Lynx User Defaults File\n"
 "\n"
+msgstr ""
+
+#: src/LYrcFile.c:882
+msgid ""
 "This file contains options saved from the Lynx Options Screen (normally\n"
-"with the '>' key).  There is normally no need to edit this file manually,\n"
-"since the defaults here can be controlled from the Options Screen, and the\n"
-"next time options are saved from the Options Screen this file will be\n"
-"completely rewritten.  You have been warned...\n"
+"with the 'o' key).  To save options with that screen, you must select the\n"
+"checkbox:\n"
+msgstr ""
+
+#: src/LYrcFile.c:889
+msgid ""
+"You must then save the settings using the link on the line above the\n"
+"checkbox:\n"
+msgstr ""
+
+#: src/LYrcFile.c:896
+msgid ""
+"You may also use the command-line option \"-forms_options\", which displays\n"
+"the simpler Options Menu instead.  Save options with that using the '>' key.\n"
+"\n"
+msgstr ""
+
+#: src/LYrcFile.c:903
+msgid ""
+"This file contains options saved from the Lynx Options Screen (normally\n"
+"with the '>' key).\n"
+"\n"
+msgstr ""
+
+#: src/LYrcFile.c:910
+#, fuzzy
+msgid ""
+"There is normally no need to edit this file manually, since the defaults\n"
+"here can be controlled from the Options Screen, and the next time options\n"
+"are saved from the Options Screen this file will be completely rewritten.\n"
+"You have been warned...\n"
+"\n"
 "If you are looking for the general configuration file - it is normally\n"
-"called lynx.cfg, and it has different content and a different format.\n"
+"called \"lynx.cfg\".  It has different content and a different format.\n"
 "It is not this file.\n"
 msgstr ""
 "Файл Lynx пользовательских опций по умолчанию\n"
@@ -6094,11 +6130,14 @@ msgstr ""
 "и имеет другое содержание и другой формат.\n"
 "Это не тот файл.\n"
 
-#~ msgid "reason unknown."
-#~ msgstr "причина неизвестна."
+#~ msgid "History List maximum reached!  Document not pushed."
+#~ msgstr "Достигнут максимум Списка Истории!  Документ не помещен."
 
 #~ msgid "KB"
 #~ msgstr "КБ"
+
+#~ msgid "reason unknown."
+#~ msgstr "причина неизвестна."
 
 #~ msgid "Remove '%s' and all of its contents?"
 #~ msgstr "Удалить '%s' и все его содержимое?"

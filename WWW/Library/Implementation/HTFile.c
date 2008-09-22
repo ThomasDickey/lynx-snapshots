@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFile.c,v 1.104 2007/08/02 19:46:01 tom Exp $
+ * $LynxId: HTFile.c,v 1.105 2008/09/18 21:34:25 tom Exp $
  *
  *			File Access				HTFile.c
  *			===========
@@ -2234,7 +2234,7 @@ static int decompressAndParse(HTParentAnchor *anchor,
 	FREE(ultrixname);
     }
 #endif /* VMS */
-    CTRACE((tfp, "HTLoadFile: Opening `%s' gives %p\n", localname, fp));
+    CTRACE((tfp, "HTLoadFile: Opening `%s' gives %p\n", localname, (void *) fp));
     if (fp) {			/* Good! */
 	if (HTEditable(localname)) {
 	    HTAtom *put = HTAtom_for("PUT");
@@ -2271,7 +2271,7 @@ static int decompressAndParse(HTParentAnchor *anchor,
 		fp = 0;
 
 		CTRACE((tfp, "HTLoadFile: zzopen of `%s' gives %p\n",
-			localname, zzfp));
+			localname, (void *) zzfp));
 		internal_decompress = cftDeflate;
 	    } else
 #endif /* USE_ZLIB */
@@ -2318,7 +2318,7 @@ static int decompressAndParse(HTParentAnchor *anchor,
 		    fp = 0;
 
 		    CTRACE((tfp, "HTLoadFile: zzopen of `%s' gives %p\n",
-			    localname, zzfp));
+			    localname, (void *) zzfp));
 		    internal_decompress = cftDeflate;
 		}
 #else /* USE_ZLIB */

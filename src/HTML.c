@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTML.c,v 1.114 2008/09/06 14:33:02 tom Exp $
+ * $LynxId: HTML.c,v 1.115 2008/09/21 17:46:32 tom Exp $
  *
  *		Structured stream to Rich hypertext converter
  *		============================================
@@ -4478,26 +4478,7 @@ static int HTML_start_element(HTStructured * me, int element_number,
 	    HTkcode specified_kcode = NOKANJI;
 
 	    /* init */
-	    I.align = NULL;
-	    I.accept = NULL;
-	    I.checked = NO;
-	    I.iclass = NULL;
-	    I.disabled = NO;
-	    I.error = NULL;
-	    I.height = NULL;
-	    I.id = NULL;
-	    I.lang = NULL;
-	    I.max = NULL;
-	    I.maxlength = NULL;
-	    I.md = NULL;
-	    I.min = NULL;
-	    I.name = NULL;
-	    I.size = 0;
-	    I.src = NULL;
-	    I.type = NULL;
-	    I.value = NULL;
-	    I.width = NULL;
-	    I.accept_cs = NULL;
+	    memset(&I, 0, sizeof(I));
 	    I.name_cs = ATTR_CS_IN;
 	    I.value_cs = ATTR_CS_IN;
 
@@ -4780,6 +4761,8 @@ static int HTML_start_element(HTStructured * me, int element_number,
 		 */
 		I.value = ImageSrc;
 	    }
+	    if (present && present[HTML_INPUT_READONLY])
+		I.disabled = YES;
 	    if (present && present[HTML_INPUT_CHECKED])
 		I.checked = YES;
 	    if (present && present[HTML_INPUT_SIZE] &&
@@ -5015,9 +4998,9 @@ static int HTML_start_element(HTStructured * me, int element_number,
 
 	if (present && present[HTML_TEXTAREA_COLS] &&
 	    value[HTML_TEXTAREA_COLS] &&
-	    isdigit(UCH(*value[HTML_TEXTAREA_COLS])))
+	    isdigit(UCH(*value[HTML_TEXTAREA_COLS]))) {
 	    me->textarea_cols = atoi(value[HTML_TEXTAREA_COLS]);
-	else {
+	} else {
 	    int width;
 
 	    width = LYcolLimit -
@@ -5034,16 +5017,23 @@ static int HTML_start_element(HTStructured * me, int element_number,
 
 	if (present && present[HTML_TEXTAREA_ROWS] &&
 	    value[HTML_TEXTAREA_ROWS] &&
-	    isdigit(UCH(*value[HTML_TEXTAREA_ROWS])))
+	    isdigit(UCH(*value[HTML_TEXTAREA_ROWS]))) {
 	    me->textarea_rows = atoi(value[HTML_TEXTAREA_ROWS]);
-	else
+	} else {
 	    me->textarea_rows = DFT_TEXTAREA_ROWS;
+	}
 	LimitValue(me->textarea_rows, MAX_TEXTAREA_ROWS);
+
+	/*
+	 * Lynx treats disabled and readonly textarea's the same -
+	 * unmodifiable in either case.
+	 */
+	me->textarea_disabled = NO;
+	if (present && present[HTML_TEXTAREA_READONLY])
+	    me->textarea_disabled = YES;
 
 	if (present && present[HTML_TEXTAREA_DISABLED])
 	    me->textarea_disabled = YES;
-	else
-	    me->textarea_disabled = NO;
 
 	if (present && present[HTML_TEXTAREA_ID]
 	    && non_empty(value[HTML_TEXTAREA_ID])) {
@@ -6800,25 +6790,7 @@ static int HTML_end_element(HTStructured * me, int element_number,
 	    /*
 	     * Initialize.
 	     */
-	    I.align = NULL;
-	    I.accept = NULL;
-	    I.checked = NO;
-	    I.iclass = NULL;
-	    I.disabled = NO;
-	    I.error = NULL;
-	    I.height = NULL;
-	    I.id = NULL;
-	    I.lang = NULL;
-	    I.max = NULL;
-	    I.maxlength = NULL;
-	    I.md = NULL;
-	    I.min = NULL;
-	    I.name = NULL;
-	    I.size = 0;
-	    I.src = NULL;
-	    I.type = NULL;
-	    I.value = NULL;
-	    I.width = NULL;
+	    memset(&I, 0, sizeof(I));
 	    I.value_cs = current_char_set;
 
 	    UPDATE_STYLE;

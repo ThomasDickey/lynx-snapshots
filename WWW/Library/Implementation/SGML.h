@@ -1,18 +1,20 @@
-/*						  SGML parse and stream definition for libwww
-			       SGML AND STRUCTURED STREAMS
-
-   The SGML parser is a state machine.	It is called for every character
-   of the input stream.	 The DTD data structure contains pointers
-   to functions which are called to implement the actual effect of the
-   text read. When these functions are called, the attribute structures pointed to by the
-   DTD are valid, and the function is passed a pointer to the current tag structure, and an
-   "element stack" which represents the state of nesting within SGML elements.
-
-   The following aspects are from Dan Connolly's suggestions:  Binary search,
-   Structured object scheme basically, SGML content enum type.
-
-   (c) Copyright CERN 1991 - See Copyright.html
-
+/*
+ * $LynxId: SGML.h,v 1.40 2008/09/18 23:36:15 tom Exp $
+ *			       SGML parse and stream definition for libwww
+ *                             SGML AND STRUCTURED STREAMS
+ *
+ * The SGML parser is a state machine.	It is called for every character
+ * of the input stream.	 The DTD data structure contains pointers
+ * to functions which are called to implement the actual effect of the
+ * text read. When these functions are called, the attribute structures pointed to by the
+ * DTD are valid, and the function is passed a pointer to the current tag structure, and an
+ * "element stack" which represents the state of nesting within SGML elements.
+ *
+ * The following aspects are from Dan Connolly's suggestions:  Binary search,
+ * Structured object scheme basically, SGML content enum type.
+ *
+ * (c) Copyright CERN 1991 - See Copyright.html
+ *
  */
 #ifndef SGML_H
 #define SGML_H
@@ -54,6 +56,13 @@ extern "C" {
 				   values are in HTMLDTD.h */
 #endif
     } attr;
+
+    typedef const attr *AttrList;
+
+    typedef struct {
+	const char *name;
+	AttrList list;
+    } AttrType;
 
     typedef int TagClass;
 
@@ -135,8 +144,9 @@ extern "C" {
 #ifdef EXP_JUSTIFY_ELTS
 	BOOL can_justify;	/* justification allowed? */
 #endif
-	const attr *attributes;	/* The list of acceptable attributes */
+	AttrList attributes;	/* The list of acceptable attributes */
 	int number_of_attributes;	/* Number of possible attributes */
+	const AttrType *attr_types;
 	SGMLContent contents;	/* End only on end tag @@ */
 	TagClass tagclass;
 	TagClass contains;	/* which classes of elements this one can contain directly */
