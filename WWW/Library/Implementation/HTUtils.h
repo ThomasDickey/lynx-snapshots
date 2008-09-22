@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTUtils.h,v 1.86 2008/09/17 00:52:06 tom Exp $
+ * $LynxId: HTUtils.h,v 1.87 2008/09/17 16:31:34 tom Exp $
  *
  * Utility macros for the W3 code library
  * MACROS FOR GENERAL USE
@@ -558,9 +558,15 @@ extern int WWW_TraceMask;
 #endif
 
 #ifndef PRI_off_t
+#if (SIZEOF_OFF_T == 8)
+#define PRI_off_t	"lld"
+#define SCN_off_t	"lld"
+#define CAST_off_t(n)	(long long)(n)
+#else
 #define PRI_off_t	"ld"
 #define SCN_off_t	"ld"
 #define CAST_off_t(n)	(long)(n)
+#endif
 #endif
 
 /*
@@ -579,9 +585,15 @@ extern int WWW_TraceMask;
 #endif
 
 #ifndef PRI_time_t
+#if (SIZEOF_TIME_T == 8)
+#define PRI_time_t	"lld"
+#define SCN_time_t	"lld"
+#define CAST_time_t(n)	(long long)(n)
+#else
 #define PRI_time_t	"ld"
 #define SCN_time_t	"ld"
 #define CAST_time_t(n)	(long)(n)
+#endif
 #endif
 
 /*

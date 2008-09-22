@@ -1,5 +1,5 @@
 /*
- * $LynxId: dtd_util.c,v 1.31 2008/09/16 23:43:49 tom Exp $
+ * $LynxId: dtd_util.c,v 1.53 2008/09/20 13:45:30 tom Exp $
  *
  * Given a SGML_dtd structure, write a corresponding flat file, or "C" source.
  * Given the flat-file, write the "C" source.
@@ -28,6 +28,68 @@ FILE *TraceFP(void)
 #define GETOPT "chlo:ts"
 
 #define NOTE(message) fprintf(output, message "\n");
+/* *INDENT-OFF* */
+#ifdef USE_PRETTYSRC
+# define N HTMLA_NORMAL
+# define i HTMLA_ANAME
+# define h HTMLA_HREF
+# define c HTMLA_CLASS
+# define x HTMLA_AUXCLASS
+# define T(t) , t
+#else
+# define T(t)			/*nothing */
+#endif
+
+#define ATTR_TYPE(name) { #name, name##_attr_list }
+
+static const attr core_attr_list[] = {
+	{ "CLASS"         T(c) },
+	{ "ID"            T(i) },
+	{ "STYLE"         T(N) },
+	{ "TITLE"         T(N) },
+	{ 0               T(N) }	/* Terminate list */
+};
+
+static const attr i18n_attr_list[] = {
+	{ "DIR"           T(N) },
+	{ "LANG"          T(N) },
+	{ 0               T(N) }	/* Terminate list */
+};
+
+static const attr events_attr_list[] = {
+	{ "ONCLICK"       T(N) },
+	{ "ONDBLCLICK"    T(N) },
+	{ "ONKEYDOWN"     T(N) },
+	{ "ONKEYPRESS"    T(N) },
+	{ "ONKEYUP"       T(N) },
+	{ "ONMOUSEDOWN"   T(N) },
+	{ "ONMOUSEMOVE"   T(N) },
+	{ "ONMOUSEOUT"    T(N) },
+	{ "ONMOUSEOVER"   T(N) },
+	{ "ONMOUSEUP"     T(N) },
+	{ 0               T(N) }	/* Terminate list */
+};
+
+static const attr align_attr_list[] = {
+	{ "ALIGN"         T(N) },
+	{ 0               T(N) }	/* Terminate list */
+};
+
+static const attr cellalign_attr_list[] = {
+	{ "ALIGN"         T(N) },
+	{ "CHAR"          T(N) },
+	{ "CHAROFF"       T(N) },
+	{ "VALIGN"        T(N) },
+	{ 0               T(N) }	/* Terminate list */
+};
+
+static const attr bgcolor_attr_list[] = {
+	{ "BGCOLOR"       T(N) },
+	{ 0               T(N) }	/* Terminate list */
+};
+
+#undef T
+/* *INDENT-ON* */
 
 static void failed(const char *s)
 {
@@ -170,17 +232,6 @@ static const char *NameOfAttrs(const SGML_dtd * dtd, int which)
     return result;
 }
 
-static const char *XXX_attr(const SGML_dtd * dtd, int which)
-{
-    static char result[80];
-    int i;
-
-    strcpy(result, NameOfAttrs(dtd, which));
-    for (i = 0; result[i]; ++i)
-	result[i] = tolower(result[i]);
-    return result;
-}
-
 static const char *DEF_name(const SGML_dtd * dtd, int which)
 {
     const char *result = dtd->tags[which].name;
@@ -205,7 +256,109 @@ static int compare_attr(const void *a, const void *b)
     return strcmp(p->name, q->name);
 }
 
-static AttrInfo *sorted_attrs(const SGML_dtd * dtd, unsigned *countp, int lower)
+static int len_AttrList(AttrList data)
+{
+    int result = 0;
+
+    for (result = 0; data[result].name != 0; ++result) {
+	;
+    }
+    return result;
+}
+
+static void sort_uniq_AttrList(attr *data)
+{
+    unsigned have = len_AttrList(data);
+    unsigned j, k;
+
+    qsort(data, have, sizeof(*data), compare_attr);
+    /*
+     * Eliminate duplicates
+     */
+    for (j = k = 0; j < have; ++j) {
+	for (k = j; data[k].name; ++k) {
+	    if (data[k + 1].name == 0)
+		break;
+	    if (strcmp(data[j].name, data[k + 1].name)) {
+		break;
+	    }
+	}
+	data[j] = data[k];
+    }
+    memset(data + j, 0, sizeof(data[0]));
+}
+
+static attr *copy_AttrList(AttrList data)
+{
+    unsigned need = len_AttrList(data);
+    unsigned n;
+
+    attr *result = (attr *) calloc(need + 1, sizeof(attr));
+
+    for (n = 0; n < need; ++n)
+	result[n] = data[n];
+    sort_uniq_AttrList(result);
+    return result;
+}
+
+static attr *merge_AttrLists(const AttrType * data)
+{
+    const AttrType *at;
+    attr *result = 0;
+    unsigned need = 1;
+    unsigned have = 0;
+    unsigned j;
+
+    for (at = data; at->name; ++at) {
+	need += len_AttrList(at->list);
+    }
+    result = (attr *) calloc(need + 1, sizeof(attr));
+    for (at = data; at->name; ++at) {
+	if (!strcmp(at->name, "events")) {
+	    ;			/* lynx does not use events */
+	} else {
+	    for (j = 0; at->list[j].name; ++j) {
+		result[have++] = at->list[j];
+	    }
+	}
+    }
+    sort_uniq_AttrList(result);
+    return result;
+}
+
+static int clean_AttrList(attr * target, AttrList source)
+{
+    int result = 0;
+    int j, k;
+
+    for (j = 0; target[j].name != 0; ++j) {
+	for (k = 0; source[k].name != 0; ++k) {
+	    if (!strcmp(target[j].name, source[k].name)) {
+		k = j--;
+		for (;;) {
+		    target[k] = target[k + 1];
+		    if (target[k++].name == 0)
+			break;
+		}
+		++result;
+		break;
+	    }
+	}
+    }
+    return result;
+}
+
+/*
+ * Actually COUNT the number of attributes, to make it possible to edit a
+ * attribute-table in src0_HTMLDTD.h and have all of the files updated by
+ * just doing a "make sources".
+ */
+static int AttrCount(HTTag * tag)
+{
+    return len_AttrList(tag->attributes);
+}
+
+static AttrInfo *sorted_attrs(const SGML_dtd * dtd, unsigned *countp)
 {
     int j;
 
@@ -215,12 +368,9 @@ static AttrInfo *sorted_attrs(const SGML_dtd * dtd, unsigned *countp, int lower)
     /* get the attribute-data */
     for (j = 0; j < dtd->number_of_tags; ++j) {
 	if (first_attrs(dtd, j)) {
-	    if (lower)
-		data[count].name = strdup(XXX_attr(dtd, j));
-	    else
-		data[count].name = NameOfAttrs(dtd, j);
+	    data[count].name = NameOfAttrs(dtd, j);
 	    data[count].attrs = dtd->tags[j].attributes;
-	    data[count].count = dtd->tags[j].number_of_attributes;
+	    data[count].count = AttrCount(&(dtd->tags[j]));
 	    data[count].which = j;
 	    ++count;
 	}
@@ -250,42 +400,84 @@ static void dump_src_HTTag_Defines(FILE *output, const SGML_dtd * dtd, int which
 	    tag->flags);
 }
 
+static void dump_AttrItem(FILE *output, const attr * data)
+{
+    char buffer[BUFSIZ];
+    char pretty = 'N';
+
+    sprintf(buffer, "\"%s\"", data->name);
+#ifdef USE_PRETTYSRC
+    switch (data->type) {
+    case HTMLA_NORMAL:
+	pretty = 'N';
+	break;
+    case HTMLA_ANAME:
+	pretty = 'i';
+	break;
+    case HTMLA_HREF:
+	pretty = 'h';
+	break;
+    case HTMLA_CLASS:
+	pretty = 'c';
+	break;
+    case HTMLA_AUXCLASS:
+	pretty = 'x';
+	break;
+    }
+#endif
+    fprintf(output, "\t{ %-15s T(%c) },\n", buffer, pretty);
+}
+
+static void dump_AttrItem0(FILE *output)
+{
+    fprintf(output, "\t{ 0               T(N) }\t/* Terminate list */\n");
+}
+
+static void dump_src_AttrType(FILE *output, const char *name, AttrList data, const char **from)
+{
+    int n;
+
+    fprintf(output, "static const attr %s_attr_list[] = {\n", name);
+    if (data != 0) {
+	for (n = 0; data[n].name != 0; ++n) {
+	    dump_AttrItem(output, data + n);
+	}
+    }
+    fprintf(output, "\t{ 0               T(N) }	/* Terminate list */\n");
+    fprintf(output, "};\n");
+    NOTE("");
+    fprintf(output, "static const AttrType %s_attr_type[] = {\n", name);
+    if (from != 0) {
+	while (*from != 0) {
+	    fprintf(output, "\t{ ATTR_TYPE(%s) },\n", *from);
+	    ++from;
+	}
+    } else {
+	fprintf(output, "\t{ ATTR_TYPE(%s) },\n", name);
+    }
+    fprintf(output, "\t{ 0, 0 },\n");
+    fprintf(output, "};\n");
+    NOTE("");
+}
+
 static void dump_src_HTTag_Attrs(FILE *output, const SGML_dtd * dtd, int which)
 {
     HTTag *tag = &(dtd->tags[which]);
+    attr *list = merge_AttrLists(tag->attr_types);
     char buffer[BUFSIZ];
-    char pretty = 'N';
     int n;
+    int limit = len_AttrList(list);
 
-    sprintf(buffer, "static const attr %s_attr[] = {", XXX_attr(dtd, which));
+    sprintf(buffer, "static const attr %s_attr[] = {", NameOfAttrs(dtd, which));
     fprintf(output,
 	    "%-40s/* %s attributes */\n", buffer, tag->name);
-    for (n = 0; n < tag->number_of_attributes; ++n) {
-	sprintf(buffer, "\"%s\"", tag->attributes[n].name);
-#ifdef USE_PRETTYSRC
-	switch (tag->attributes[n].type) {
-	case HTMLA_NORMAL:
-	    pretty = 'N';
-	    break;
-	case HTMLA_ANAME:
-	    pretty = 'i';
-	    break;
-	case HTMLA_HREF:
-	    pretty = 'h';
-	    break;
-	case HTMLA_CLASS:
-	    pretty = 'c';
-	    break;
-	case HTMLA_AUXCLASS:
-	    pretty = 'x';
-	    break;
-	}
-#endif
-	fprintf(output, "\t{ %-15s T(%c) },\n", buffer, pretty);
+    for (n = 0; n < limit; ++n) {
+	dump_AttrItem(output, list + n);
     }
-    fprintf(output, "\t{ 0               T(N) }\t/* Terminate list */\n");
+    dump_AttrItem0(output);
     fprintf(output, "};\n");
     NOTE("");
+    free(list);
 }
 
 static void dump_src_HTTag(FILE *output, const SGML_dtd * dtd, int which)
@@ -298,8 +490,7 @@ static void dump_src_HTTag(FILE *output, const SGML_dtd * dtd, int which)
 	P_macro = "P0";
 #endif
     PrintF(output, 19, " { %s(%s),", P_macro, tag->name);
-    PrintF(output, 16, "%s_attr,", XXX_attr(dtd, which));
-    PrintF(output, 28, "HTML_%s_ATTRIBUTES,", NameOfAttrs(dtd, which));
+    PrintF(output, 24, "ATTR_DATA(%s), ", NameOfAttrs(dtd, which));
     PrintF(output, 14, "%s,", SGMLContent2s(tag->contents));
     fprintf(output, "T_%s", DEF_name(dtd, which));
     fprintf(output, "},\n");
@@ -307,11 +498,23 @@ static void dump_src_HTTag(FILE *output, const SGML_dtd * dtd, int which)
 
 static void dump_source(FILE *output, const SGML_dtd * dtd, int dtd_version)
 {
+    static AttrType generic_types[] =
+    {
+	ATTR_TYPE(core),
+	ATTR_TYPE(i18n),
+	ATTR_TYPE(events),
+	ATTR_TYPE(align),
+	ATTR_TYPE(cellalign),
+	ATTR_TYPE(bgcolor),
+	{0, 0}
+    };
+    AttrType *gt;
+
     const char *marker = "src_HTMLDTD_H";
     int j;
 
     unsigned count = 0;
-    AttrInfo *data = sorted_attrs(dtd, &count, 1);
+    AttrInfo *data = sorted_attrs(dtd, &count);
 
     fprintf(output, "/* %cLynxId%c */\n", '$', '$');
     fprintf(output, "#ifndef %s%d\n", marker, dtd_version);
@@ -344,6 +547,58 @@ static void dump_source(FILE *output, const SGML_dtd * dtd, int dtd_version)
     NOTE("#endif");
     NOTE("/* *INDENT-OFF* */");
     NOTE("");
+    NOTE("#define ATTR_TYPE(name) #name, name##_attr_list");
+    NOTE("");
+    NOTE("/* generic attributes, used in different tags */");
+    for (gt = generic_types; gt->name != 0; ++gt) {
+	dump_src_AttrType(output, gt->name, gt->list, 0);
+    }
+    NOTE("");
+    NOTE("/* tables defining attributes per-tag in terms of generic attributes (editable) */");
+    for (j = 0; j < (int) count; ++j) {
+	int which = data[j].which;
+
+	if (first_attrs(dtd, which)) {
+	    HTTag *tag = &(dtd->tags[which]);
+	    const AttrType *types = tag->attr_types;
+	    const char *name = NameOfAttrs(dtd, which);
+	    attr *list = 0;
+	    const char *from_attr[10];
+	    int from_size = 0;
+
+	    while (types->name != 0) {
+		from_attr[from_size++] = types->name;
+		if (!strcmp(types->name, name)) {
+		    list = copy_AttrList(types->list);
+		    for (gt = generic_types; gt->name != 0; ++gt) {
+			if (clean_AttrList(list, gt->list)) {
+			    int k;
+			    int found = 0;
+
+			    for (k = 0; k < from_size; ++k) {
+				if (!strcmp(from_attr[k], gt->name)) {
+				    found = 1;
+				    break;
+				}
+			    }
+			    if (!found)
+				from_attr[from_size++] = gt->name;
+			    break;
+			}
+		    }
+		}
+		++types;
+	    }
+	    from_attr[from_size] = 0;
+
+	    if (list != 0) {
+		dump_src_AttrType(output, name, list, from_attr);
+		free(list);
+	    }
+	}
+    }
+    NOTE("");
+    NOTE("/* attribute lists for the runtime (generated by dtd_util) */");
     for (j = 0; j < (int) count; ++j) {
 	dump_src_HTTag_Attrs(output, dtd, data[j].which);
     }
@@ -383,6 +638,8 @@ static void dump_source(FILE *output, const SGML_dtd * dtd, int dtd_version)
     NOTE("#define P0(x) P_(x)");
     NOTE("#define NULL_HTTag NULL_HTTag_");
     NOTE("#endif");
+    NOTE("");
+    NOTE("#define ATTR_DATA(name) name##_attr, HTML_##name##_ATTRIBUTES, name##_attr_type");
     NOTE("");
     NOTE("#endif /* once_HTMLDTD */");
     NOTE("/* *INDENT-OFF* */");
@@ -430,7 +687,7 @@ static void dump_header(FILE *output, const SGML_dtd * dtd)
     int j;
 
     unsigned count = 0;
-    AttrInfo *data = sorted_attrs(dtd, &count, 0);
+    AttrInfo *data = sorted_attrs(dtd, &count);
 
     fprintf(output, "/* %cLynxId%c */\n", '$', '$');
     fprintf(output, "#ifndef %s\n", marker);
@@ -495,7 +752,10 @@ static void dump_header(FILE *output, const SGML_dtd * dtd)
     fprintf(output, "#endif\t\t\t\t/* %s */\n", marker);
 }
 
-static void dump_flat_attrs(FILE *output, const char *name, const attr * attributes, int number_of_attributes)
+static void dump_flat_attrs(FILE *output,
+			    const char *name,
+			    const attr * attributes,
+			    int number_of_attributes)
 {
     int n;
 
@@ -575,7 +835,7 @@ static void dump_flat_HTTag(FILE *output, unsigned n, HTTag * tag)
 #ifdef EXP_JUSTIFY_ELTS
     fprintf(output, "\t\t%s\n", tag->can_justify ? "justify" : "nojustify");
 #endif
-    dump_flat_attrs(output, "attributes", tag->attributes, tag->number_of_attributes);
+    dump_flat_attrs(output, "attributes", tag->attributes, AttrCount(tag));
     dump_flat_SGMLContent(output, "contents", tag->contents);
     dump_flat_TagClass(output, "tagclass", tag->tagclass);
     dump_flat_TagClass(output, "contains", tag->contains);

@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: lynx 2.8.5pre9\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-07-19 07:11-0400\n"
+"POT-Creation-Date: 2008-09-21 16:20-0400\n"
 "PO-Revision-Date: 2003-02-11 19:44+0800\n"
 "Last-Translator: Abel Cheung <maddog@linux.org.hk>\n"
 "Language-Team: Chinese (traditional) <zh-l10n@linux.org.tw>\n"
@@ -2534,7 +2534,7 @@ msgstr "以代理伺服程式的認證資訊重新嘗試。"
 #: LYMessages.c:799
 #, fuzzy, c-format
 msgid "SSL error:%s-Continue?"
-msgstr ""
+msgstr "SSL 錯誤：主機(%s)不符合證書(%s)。是否繼續？"
 
 #. HTWAIS.c
 #: LYMessages.c:802
@@ -2768,33 +2768,33 @@ msgstr "使用代理伺服器前需要認證 ─ 重新嘗試"
 msgid "Access without authorization denied -- retrying"
 msgstr "仍未認證，無法存取內容 ─ 重新嘗試"
 
-#: WWW/Library/Implementation/HTAccess.c:684
+#: WWW/Library/Implementation/HTAccess.c:688
 msgid "Access forbidden by rule"
 msgstr ""
 
-#: WWW/Library/Implementation/HTAccess.c:781
+#: WWW/Library/Implementation/HTAccess.c:783
 msgid "Document with POST content not found in cache.  Resubmit?"
 msgstr ""
 
-#: WWW/Library/Implementation/HTAccess.c:935
+#: WWW/Library/Implementation/HTAccess.c:938
 msgid "Loading failed, use a previous copy."
 msgstr ""
 
-#: WWW/Library/Implementation/HTAccess.c:1044 src/GridText.c:8580
+#: WWW/Library/Implementation/HTAccess.c:1047 src/GridText.c:8587
 msgid "Loading incomplete."
 msgstr "未完成載入內容。"
 
-#: WWW/Library/Implementation/HTAccess.c:1075
+#: WWW/Library/Implementation/HTAccess.c:1078
 #, c-format
 msgid "**** HTAccess: socket or file number returned by obsolete load routine!\n"
 msgstr ""
 
-#: WWW/Library/Implementation/HTAccess.c:1077
+#: WWW/Library/Implementation/HTAccess.c:1080
 #, c-format
 msgid "**** HTAccess: Internal software error.  Please mail lynx-dev@nongnu.org!\n"
 msgstr "**** HTAccess：內部程式錯誤。請寄電郵至 lynx-dev@nongnu.org！\n"
 
-#: WWW/Library/Implementation/HTAccess.c:1078
+#: WWW/Library/Implementation/HTAccess.c:1081
 #, c-format
 msgid "**** HTAccess: Status returned was: %d\n"
 msgstr "**** HTAccess：回傳的狀態為：%d\n"
@@ -2803,11 +2803,11 @@ msgstr "**** HTAccess：回傳的狀態為：%d\n"
 #. * hack: if we fail in HTAccess.c
 #. * avoid duplicating URL, oh.
 #.
-#: WWW/Library/Implementation/HTAccess.c:1084 src/LYMainLoop.c:7800
+#: WWW/Library/Implementation/HTAccess.c:1087 src/LYMainLoop.c:7783
 msgid "Can't Access"
 msgstr "無法存取"
 
-#: WWW/Library/Implementation/HTAccess.c:1092
+#: WWW/Library/Implementation/HTAccess.c:1095
 msgid "Unable to access document."
 msgstr "無法存取文件。"
 
@@ -3206,139 +3206,139 @@ msgstr "伺服器發出不明的狀態回應訊息！"
 msgid "remote %s session:"
 msgstr ""
 
-#: WWW/Library/Implementation/HTWAIS.c:159
+#: WWW/Library/Implementation/HTWAIS.c:162
 msgid "Could not connect to WAIS server."
 msgstr "無法聯絡 WAIS 伺服器。"
 
-#: WWW/Library/Implementation/HTWAIS.c:167
+#: WWW/Library/Implementation/HTWAIS.c:170
 msgid "Could not open WAIS connection for reading."
 msgstr "無法開啟 WAIS 連線來讀取資料。"
 
-#: WWW/Library/Implementation/HTWAIS.c:189
+#: WWW/Library/Implementation/HTWAIS.c:192
 msgid "Diagnostic code is "
 msgstr ""
 
-#: WWW/Library/Implementation/HTWAIS.c:461
+#: WWW/Library/Implementation/HTWAIS.c:464
 msgid "Index "
 msgstr ""
 
-#: WWW/Library/Implementation/HTWAIS.c:465
+#: WWW/Library/Implementation/HTWAIS.c:468
 #, c-format
 msgid " contains the following %d item%s relevant to \""
 msgstr ""
 
-#: WWW/Library/Implementation/HTWAIS.c:473
+#: WWW/Library/Implementation/HTWAIS.c:476
 msgid "The first figure after each entry is its relative score, "
 msgstr ""
 
-#: WWW/Library/Implementation/HTWAIS.c:474
+#: WWW/Library/Implementation/HTWAIS.c:477
 msgid "the second is the number of lines in the item."
 msgstr ""
 
-#: WWW/Library/Implementation/HTWAIS.c:516
+#: WWW/Library/Implementation/HTWAIS.c:519
 msgid " (bad file name)"
 msgstr ""
 
-#: WWW/Library/Implementation/HTWAIS.c:542
+#: WWW/Library/Implementation/HTWAIS.c:545
 msgid "(bad doc id)"
 msgstr ""
 
-#: WWW/Library/Implementation/HTWAIS.c:558
+#: WWW/Library/Implementation/HTWAIS.c:561
 msgid "(Short Header record, can't display)"
 msgstr ""
 
-#: WWW/Library/Implementation/HTWAIS.c:565
+#: WWW/Library/Implementation/HTWAIS.c:568
 msgid ""
 "\n"
 "Long Header record, can't display\n"
 msgstr ""
 
-#: WWW/Library/Implementation/HTWAIS.c:572
+#: WWW/Library/Implementation/HTWAIS.c:575
 msgid ""
 "\n"
 "Text record\n"
 msgstr ""
 
-#: WWW/Library/Implementation/HTWAIS.c:581
+#: WWW/Library/Implementation/HTWAIS.c:584
 msgid ""
 "\n"
 "Headline record, can't display\n"
 msgstr ""
 
-#: WWW/Library/Implementation/HTWAIS.c:589
+#: WWW/Library/Implementation/HTWAIS.c:592
 msgid ""
 "\n"
 "Code record, can't display\n"
 msgstr ""
 
-#: WWW/Library/Implementation/HTWAIS.c:693
+#: WWW/Library/Implementation/HTWAIS.c:696
 msgid "Syntax error in WAIS URL"
 msgstr "WAIS URL 中出現語法錯誤"
 
-#: WWW/Library/Implementation/HTWAIS.c:765
+#: WWW/Library/Implementation/HTWAIS.c:768
 msgid " (WAIS Index)"
 msgstr " (WAIS 索引)"
 
-#: WWW/Library/Implementation/HTWAIS.c:772
+#: WWW/Library/Implementation/HTWAIS.c:775
 msgid "WAIS Index: "
 msgstr "WAIS 索引："
 
-#: WWW/Library/Implementation/HTWAIS.c:778
+#: WWW/Library/Implementation/HTWAIS.c:781
 msgid "This is a link for searching the "
 msgstr ""
 
-#: WWW/Library/Implementation/HTWAIS.c:782
+#: WWW/Library/Implementation/HTWAIS.c:785
 msgid " WAIS Index.\n"
 msgstr " WAIS 索引。\n"
 
-#: WWW/Library/Implementation/HTWAIS.c:811
+#: WWW/Library/Implementation/HTWAIS.c:814
 msgid ""
 "\n"
 "Enter the 's'earch command and then specify search words.\n"
 msgstr ""
 
-#: WWW/Library/Implementation/HTWAIS.c:833
+#: WWW/Library/Implementation/HTWAIS.c:836
 msgid " (in "
 msgstr ""
 
-#: WWW/Library/Implementation/HTWAIS.c:842
+#: WWW/Library/Implementation/HTWAIS.c:845
 msgid "WAIS Search of \""
 msgstr ""
 
-#: WWW/Library/Implementation/HTWAIS.c:846
+#: WWW/Library/Implementation/HTWAIS.c:849
 msgid "\" in: "
 msgstr ""
 
-#: WWW/Library/Implementation/HTWAIS.c:861
+#: WWW/Library/Implementation/HTWAIS.c:864
 msgid "HTWAIS: Request too large."
 msgstr ""
 
-#: WWW/Library/Implementation/HTWAIS.c:870
+#: WWW/Library/Implementation/HTWAIS.c:873
 msgid "Searching WAIS database..."
 msgstr "正在搜尋 WAIS 資料庫..."
 
-#: WWW/Library/Implementation/HTWAIS.c:880
+#: WWW/Library/Implementation/HTWAIS.c:883
 msgid "Search interrupted."
 msgstr ""
 
-#: WWW/Library/Implementation/HTWAIS.c:931
+#: WWW/Library/Implementation/HTWAIS.c:934
 msgid "Can't convert format of WAIS document"
 msgstr ""
 
-#: WWW/Library/Implementation/HTWAIS.c:975
+#: WWW/Library/Implementation/HTWAIS.c:978
 msgid "HTWAIS: Request too long."
 msgstr ""
 
 #.
 #. * Actually do the transaction given by request_message.
 #.
-#: WWW/Library/Implementation/HTWAIS.c:989
+#: WWW/Library/Implementation/HTWAIS.c:992
 msgid "Fetching WAIS document..."
 msgstr ""
 
 #. display_search_response(target, retrieval_response,
 #. wais_database, keywords);
-#: WWW/Library/Implementation/HTWAIS.c:1028
+#: WWW/Library/Implementation/HTWAIS.c:1031
 msgid "No text was returned!\n"
 msgstr ""
 
@@ -3383,98 +3383,98 @@ msgstr "記憶體耗盡，必須中斷顯示！"
 msgid "Memory exhausted, will interrupt transfer!"
 msgstr "記憶體耗盡，必須中斷傳輸！"
 
-#: src/GridText.c:3650
+#: src/GridText.c:3654
 msgid " *** MEMORY EXHAUSTED ***"
 msgstr "*** 記憶體耗盡 ***"
 
-#: src/GridText.c:6085 src/GridText.c:6092 src/LYList.c:239
+#: src/GridText.c:6089 src/GridText.c:6096 src/LYList.c:239
 msgid "unknown field or link"
 msgstr "不明的欄位或鏈結"
 
-#: src/GridText.c:6101
+#: src/GridText.c:6105
 msgid "text entry field"
 msgstr "文字輸入欄位"
 
-#: src/GridText.c:6104
+#: src/GridText.c:6108
 msgid "password entry field"
 msgstr "密碼輸入欄位"
 
-#: src/GridText.c:6107
+#: src/GridText.c:6111
 msgid "checkbox"
 msgstr ""
 
-#: src/GridText.c:6110
+#: src/GridText.c:6114
 msgid "radio button"
 msgstr ""
 
-#: src/GridText.c:6113
+#: src/GridText.c:6117
 msgid "submit button"
 msgstr ""
 
-#: src/GridText.c:6116
+#: src/GridText.c:6120
 msgid "reset button"
 msgstr ""
 
-#: src/GridText.c:6119
+#: src/GridText.c:6123
 msgid "popup menu"
 msgstr ""
 
-#: src/GridText.c:6122
+#: src/GridText.c:6126
 msgid "hidden form field"
 msgstr ""
 
-#: src/GridText.c:6125
+#: src/GridText.c:6129
 msgid "text entry area"
 msgstr "文字輸入區域"
 
-#: src/GridText.c:6128
+#: src/GridText.c:6132
 msgid "range entry field"
 msgstr ""
 
-#: src/GridText.c:6131
+#: src/GridText.c:6135
 msgid "file entry field"
 msgstr "檔案名稱輸入欄位"
 
-#: src/GridText.c:6134
+#: src/GridText.c:6138
 msgid "text-submit field"
 msgstr ""
 
-#: src/GridText.c:6137
+#: src/GridText.c:6141
 msgid "image-submit button"
 msgstr ""
 
-#: src/GridText.c:6140
+#: src/GridText.c:6144
 msgid "keygen field"
 msgstr ""
 
-#: src/GridText.c:6143
+#: src/GridText.c:6147
 msgid "unknown form field"
 msgstr ""
 
-#: src/GridText.c:10313
+#: src/GridText.c:10320
 msgid "Can't open file for uploading"
 msgstr "無法開啟準備上傳的檔案"
 
-#: src/GridText.c:11472
+#: src/GridText.c:11479
 #, c-format
 msgid "Submitting %s"
 msgstr ""
 
 #. ugliness has happened; inform user and do the best we can
-#: src/GridText.c:12621
+#: src/GridText.c:12532
 msgid "Hang Detect: TextAnchor struct corrupted - suggest aborting!"
 msgstr ""
 
 #. don't show previous state
-#: src/GridText.c:12826
+#: src/GridText.c:12669
 msgid "Wrap lines to fit displayed area?"
 msgstr "是否進行自動換行來符合畫面尺寸？"
 
-#: src/GridText.c:12878
+#: src/GridText.c:12721
 msgid "Very long lines have been wrapped!"
 msgstr ""
 
-#: src/GridText.c:13320
+#: src/GridText.c:13226
 msgid "Very long lines have been truncated!"
 msgstr ""
 
@@ -3568,31 +3568,31 @@ msgstr "no"
 msgid "Y/N/A/V"
 msgstr ""
 
-#: src/HTML.c:5921
+#: src/HTML.c:5911
 msgid "Description:"
 msgstr "描述："
 
-#: src/HTML.c:5926
+#: src/HTML.c:5916
 msgid "(none)"
 msgstr "(無)"
 
-#: src/HTML.c:5930
+#: src/HTML.c:5920
 msgid "Filepath:"
 msgstr "檔案路徑："
 
-#: src/HTML.c:5936
+#: src/HTML.c:5926
 msgid "(unknown)"
 msgstr "(不明)"
 
-#: src/HTML.c:7381
+#: src/HTML.c:7353
 msgid "Document has only hidden links.  Use the 'l'ist command."
 msgstr ""
 
-#: src/HTML.c:7880
+#: src/HTML.c:7852
 msgid "Source cache error - disk full?"
 msgstr ""
 
-#: src/HTML.c:7893
+#: src/HTML.c:7865
 msgid "Source cache error - not enough memory!"
 msgstr ""
 
@@ -3716,7 +3716,7 @@ msgstr "請輸入終端機類型："
 msgid "TERMINAL TYPE IS SET TO"
 msgstr "終端機類型已設定為"
 
-#: src/LYCurses.c:2119
+#: src/LYCurses.c:2127
 #, c-format
 msgid ""
 "\n"
@@ -3725,7 +3725,7 @@ msgstr ""
 "\n"
 "在 %s 版本 %s 出現嚴重錯誤\n"
 
-#: src/LYCurses.c:2122
+#: src/LYCurses.c:2130
 #, c-format
 msgid ""
 "\n"
@@ -3792,31 +3792,31 @@ msgstr "額外的處理方式："
 msgid "No Name Given"
 msgstr "未指定名稱"
 
-#: src/LYHistory.c:671
+#: src/LYHistory.c:672
 msgid "You selected:"
 msgstr "請選擇："
 
-#: src/LYHistory.c:695 src/LYHistory.c:924
+#: src/LYHistory.c:696 src/LYHistory.c:925
 msgid "(no address)"
 msgstr ""
 
-#: src/LYHistory.c:699
+#: src/LYHistory.c:700
 msgid " (internal)"
 msgstr ""
 
-#: src/LYHistory.c:701
+#: src/LYHistory.c:702
 msgid " (was internal)"
 msgstr ""
 
-#: src/LYHistory.c:799
+#: src/LYHistory.c:800
 msgid " (From History)"
 msgstr ""
 
-#: src/LYHistory.c:844
+#: src/LYHistory.c:845
 msgid "You visited (POSTs, bookmark, menu and list files excluded):"
 msgstr ""
 
-#: src/LYHistory.c:1137
+#: src/LYHistory.c:1138
 msgid "(No messages yet)"
 msgstr ""
 
@@ -4204,19 +4204,19 @@ msgstr ""
 msgid "No system mailer configured"
 msgstr ""
 
-#: src/LYMain.c:1019
+#: src/LYMain.c:1022
 msgid "No Winsock found, sorry."
 msgstr "找不到 Winsock，抱歉。"
 
-#: src/LYMain.c:1200
+#: src/LYMain.c:1225
 msgid "You MUST define a valid TMP or TEMP area!"
 msgstr "閣下 *必須* 指定有效的 TMP 或 TEMP 位置！"
 
-#: src/LYMain.c:1253 src/LYMainLoop.c:5085
+#: src/LYMain.c:1278 src/LYMainLoop.c:5074
 msgid "No such directory"
 msgstr "該目錄不存在"
 
-#: src/LYMain.c:1461
+#: src/LYMain.c:1463
 #, c-format
 msgid ""
 "\n"
@@ -4227,7 +4227,7 @@ msgstr ""
 "設定檔 %s 不存在。\n"
 "\n"
 
-#: src/LYMain.c:1471
+#: src/LYMain.c:1473
 #, c-format
 msgid ""
 "\n"
@@ -4238,7 +4238,7 @@ msgstr ""
 "未宣告 Lynx 所用的字元集。\n"
 "\n"
 
-#: src/LYMain.c:1500
+#: src/LYMain.c:1502
 #, c-format
 msgid ""
 "\n"
@@ -4246,7 +4246,7 @@ msgid ""
 "\n"
 msgstr ""
 
-#: src/LYMain.c:1576
+#: src/LYMain.c:1578
 #, c-format
 msgid ""
 "\n"
@@ -4257,175 +4257,175 @@ msgstr ""
 "Lynx 檔案 %s 不存在。\n"
 "\n"
 
-#: src/LYMain.c:1651
+#: src/LYMain.c:1653
 #, c-format
 msgid "Ignored %d characters from standard input.\n"
 msgstr ""
 
-#: src/LYMain.c:1653
+#: src/LYMain.c:1655
 #, c-format
 msgid "Use \"-stdin\" or \"-\" to tell how to handle piped input.\n"
 msgstr ""
 
-#: src/LYMain.c:1801
+#: src/LYMain.c:1803
 msgid "Warning:"
 msgstr "警告："
 
-#: src/LYMain.c:2369
+#: src/LYMain.c:2371
 msgid "persistent cookies state will be changed in next session only."
 msgstr ""
 
-#: src/LYMain.c:2614 src/LYMain.c:2659
+#: src/LYMain.c:2616 src/LYMain.c:2661
 #, c-format
 msgid "Lynx: ignoring unrecognized charset=%s\n"
 msgstr "Lynx：忽略無法識別的字元集 %s\n"
 
-#: src/LYMain.c:3178
+#: src/LYMain.c:3180
 #, fuzzy, c-format
 msgid "%s Version %s (%s)"
-msgstr "%s 版本 %s (%s)"
+msgstr "%s 版本 %s (%s)\n"
 
-#: src/LYMain.c:3216
+#: src/LYMain.c:3218
 #, c-format
 msgid "Built on %s %s %s\n"
 msgstr "編譯於 %s %s %s\n"
 
-#: src/LYMain.c:3238
+#: src/LYMain.c:3240
 msgid "Copyrights held by the Lynx Developers Group,"
 msgstr ""
 
-#: src/LYMain.c:3239
+#: src/LYMain.c:3241
 #, fuzzy
 msgid "the University of Kansas, CERN, and other contributors."
 msgstr "版權所有：University of Kansas、CERN 及其它有貢獻者。"
 
-#: src/LYMain.c:3240
+#: src/LYMain.c:3242
 #, fuzzy
 msgid "Distributed under the GNU General Public License (Version 2)."
 msgstr "使用 GNU General Public License 發佈。"
 
-#: src/LYMain.c:3241
+#: src/LYMain.c:3243
 msgid "See http://lynx.isc.org/ and the online help for more information."
 msgstr "若需要更多資料，請瀏覽 http://lynx.isc.org/ 及網上的說明文件。"
 
-#: src/LYMain.c:4054
+#: src/LYMain.c:4060
 #, c-format
 msgid "USAGE: %s [options] [file]\n"
 msgstr "用法：%s [選項] [檔案]\n"
 
-#: src/LYMain.c:4055
+#: src/LYMain.c:4061
 #, c-format
 msgid "Options are:\n"
 msgstr "選項包括：\n"
 
-#: src/LYMain.c:4354
+#: src/LYMain.c:4360
 #, c-format
 msgid "%s: Invalid Option: %s\n"
 msgstr "%s：無效的選項：%s\n"
 
-#: src/LYMainLoop.c:588
+#: src/LYMainLoop.c:594
 #, c-format
 msgid "Internal error: Invalid mouse link %d!"
 msgstr ""
 
-#: src/LYMainLoop.c:708 src/LYMainLoop.c:5107
+#: src/LYMainLoop.c:714 src/LYMainLoop.c:5096
 msgid "A URL specified by the user"
 msgstr "由使用者指定的 URL"
 
-#: src/LYMainLoop.c:1167
+#: src/LYMainLoop.c:1173
 msgid "Enctype multipart/form-data not yet supported!  Cannot submit."
 msgstr ""
 
 #.
 #. * Make a name for this help file.
 #.
-#: src/LYMainLoop.c:3113
+#: src/LYMainLoop.c:3105
 msgid "Help Screen"
 msgstr "求助說明畫面"
 
-#: src/LYMainLoop.c:3234
+#: src/LYMainLoop.c:3226
 msgid "System Index"
 msgstr ""
 
-#: src/LYMainLoop.c:3594 src/LYMainLoop.c:5335
+#: src/LYMainLoop.c:3585 src/LYMainLoop.c:5324
 msgid "Entry into main screen"
 msgstr ""
 
-#: src/LYMainLoop.c:3852
+#: src/LYMainLoop.c:3843
 msgid "No next document present"
 msgstr ""
 
-#: src/LYMainLoop.c:4150
+#: src/LYMainLoop.c:4139
 msgid "charset for this document specified explicitly, sorry..."
 msgstr "抱歉，該文件已經特地指定了字元集..."
 
-#: src/LYMainLoop.c:5063
+#: src/LYMainLoop.c:5052
 msgid "cd to:"
 msgstr "準備進入的目錄："
 
-#: src/LYMainLoop.c:5088
+#: src/LYMainLoop.c:5077
 msgid "A component of path is not a directory"
 msgstr "路徑中的一部份不是目錄"
 
-#: src/LYMainLoop.c:5091
+#: src/LYMainLoop.c:5080
 msgid "failed to change directory"
 msgstr "無法進入目錄"
 
-#: src/LYMainLoop.c:6267
+#: src/LYMainLoop.c:6256
 msgid "Reparsing document under current settings..."
 msgstr "根據目前的設定重新分析文件..."
 
-#: src/LYMainLoop.c:6558
+#: src/LYMainLoop.c:6547
 #, c-format
 msgid "Fatal error - could not open output file %s\n"
 msgstr "嚴重錯誤 ─ 無法開啟輸出檔 %s\n"
 
-#: src/LYMainLoop.c:6901
+#: src/LYMainLoop.c:6884
 msgid "TABLE center enable."
 msgstr ""
 
-#: src/LYMainLoop.c:6904
+#: src/LYMainLoop.c:6887
 msgid "TABLE center disable."
 msgstr ""
 
-#: src/LYMainLoop.c:6981
+#: src/LYMainLoop.c:6964
 #, fuzzy
 msgid "Current URL is empty."
 msgstr "目前的目錄："
 
-#: src/LYMainLoop.c:6983 src/LYUtils.c:1810
+#: src/LYMainLoop.c:6966 src/LYUtils.c:1817
 msgid "Copy to clipboard failed."
 msgstr ""
 
-#: src/LYMainLoop.c:6985
+#: src/LYMainLoop.c:6968
 msgid "Document URL put to clipboard."
 msgstr ""
 
-#: src/LYMainLoop.c:6987
+#: src/LYMainLoop.c:6970
 msgid "Link URL put to clipboard."
 msgstr ""
 
-#: src/LYMainLoop.c:7014
+#: src/LYMainLoop.c:6997
 msgid "No URL in the clipboard."
 msgstr ""
 
-#: src/LYMainLoop.c:7685 src/LYMainLoop.c:7855
+#: src/LYMainLoop.c:7668 src/LYMainLoop.c:7838
 msgid "-index-"
 msgstr "─索引─"
 
-#: src/LYMainLoop.c:7795
+#: src/LYMainLoop.c:7778
 msgid "lynx: Can't access startfile"
 msgstr "lynx：無法存取開始的網頁"
 
-#: src/LYMainLoop.c:7807
+#: src/LYMainLoop.c:7790
 msgid "lynx: Start file could not be found or is not text/html or text/plain"
 msgstr ""
 
-#: src/LYMainLoop.c:7808
+#: src/LYMainLoop.c:7791
 msgid "      Exiting..."
 msgstr "      準備離開..."
 
-#: src/LYMainLoop.c:7849
+#: src/LYMainLoop.c:7832
 msgid "-more-"
 msgstr "─還有內容─"
 
@@ -5098,7 +5098,7 @@ msgstr "在畫面印出資料"
 msgid "Print out on a printer attached to your vt100 terminal"
 msgstr "在連接 vt100 終端機的印表機列印資料"
 
-#: src/LYReadCFG.c:369
+#: src/LYReadCFG.c:371
 #, c-format
 msgid ""
 "Syntax Error parsing COLOR in configuration file:\n"
@@ -5109,76 +5109,76 @@ msgid ""
 "The special strings 'nocolor' or 'default', or\n"
 msgstr ""
 
-#: src/LYReadCFG.c:382
+#: src/LYReadCFG.c:384
 msgid "Offending line:"
 msgstr ""
 
-#: src/LYReadCFG.c:679
+#: src/LYReadCFG.c:681
 #, c-format
 msgid "key remapping of %s to %s for %s failed\n"
 msgstr ""
 
-#: src/LYReadCFG.c:686
+#: src/LYReadCFG.c:688
 #, c-format
 msgid "key remapping of %s to %s failed\n"
 msgstr ""
 
-#: src/LYReadCFG.c:707
+#: src/LYReadCFG.c:709
 #, c-format
 msgid "invalid line-editor selection %s for key %s, selecting all\n"
 msgstr ""
 
-#: src/LYReadCFG.c:732 src/LYReadCFG.c:744
+#: src/LYReadCFG.c:734 src/LYReadCFG.c:746
 #, c-format
 msgid "setting of line-editor binding for key %s (0x%x) to 0x%x for %s failed\n"
 msgstr ""
 
-#: src/LYReadCFG.c:748
+#: src/LYReadCFG.c:750
 #, c-format
 msgid "setting of line-editor binding for key %s (0x%x) for %s failed\n"
 msgstr ""
 
-#: src/LYReadCFG.c:844
+#: src/LYReadCFG.c:846
 #, c-format
 msgid "Lynx: cannot start, CERN rules file %s is not available\n"
 msgstr ""
 
-#: src/LYReadCFG.c:845
+#: src/LYReadCFG.c:847
 msgid "(no name)"
-msgstr ""
-
-#: src/LYReadCFG.c:1877
-#, c-format
-msgid "More than %d nested lynx.cfg includes -- perhaps there is a loop?!?\n"
-msgstr ""
-
-#: src/LYReadCFG.c:1879
-#, c-format
-msgid "Last attempted include was '%s',\n"
 msgstr ""
 
 #: src/LYReadCFG.c:1880
 #, c-format
+msgid "More than %d nested lynx.cfg includes -- perhaps there is a loop?!?\n"
+msgstr ""
+
+#: src/LYReadCFG.c:1882
+#, c-format
+msgid "Last attempted include was '%s',\n"
+msgstr ""
+
+#: src/LYReadCFG.c:1883
+#, c-format
 msgid "included from '%s'.\n"
 msgstr ""
 
-#: src/LYReadCFG.c:2288 src/LYReadCFG.c:2301 src/LYReadCFG.c:2359
+#: src/LYReadCFG.c:2291 src/LYReadCFG.c:2304 src/LYReadCFG.c:2362
 msgid "The following is read from your lynx.cfg file."
 msgstr "以下是從閣下的 lynx.cfg 檔案讀取的設定。"
 
-#: src/LYReadCFG.c:2289 src/LYReadCFG.c:2302
+#: src/LYReadCFG.c:2292 src/LYReadCFG.c:2305
 msgid "Please read the distribution"
 msgstr ""
 
-#: src/LYReadCFG.c:2295 src/LYReadCFG.c:2305
+#: src/LYReadCFG.c:2298 src/LYReadCFG.c:2308
 msgid "for more comments."
 msgstr ""
 
-#: src/LYReadCFG.c:2341
+#: src/LYReadCFG.c:2344
 msgid "RELOAD THE CHANGES"
 msgstr "重新載入更改後的設定"
 
-#: src/LYReadCFG.c:2349
+#: src/LYReadCFG.c:2352
 msgid "Your primary configuration"
 msgstr "主要組態"
 
@@ -5444,33 +5444,33 @@ msgstr "上傳至："
 msgid "Upload options:"
 msgstr "上傳選項："
 
-#: src/LYUtils.c:1812
+#: src/LYUtils.c:1819
 msgid "Download document URL put to clipboard."
 msgstr ""
 
-#: src/LYUtils.c:2597
+#: src/LYUtils.c:2604
 msgid "Unexpected access protocol for this URL scheme."
 msgstr ""
 
-#: src/LYUtils.c:3401
+#: src/LYUtils.c:3408
 msgid "Too many tempfiles"
 msgstr "太多暫存檔"
 
-#: src/LYUtils.c:3701
+#: src/LYUtils.c:3708
 msgid "unknown restriction"
 msgstr ""
 
-#: src/LYUtils.c:3732
+#: src/LYUtils.c:3739
 #, c-format
 msgid "No restrictions set.\n"
 msgstr ""
 
-#: src/LYUtils.c:3735
+#: src/LYUtils.c:3742
 #, c-format
 msgid "Restrictions set:\n"
 msgstr ""
 
-#: src/LYUtils.c:5113
+#: src/LYUtils.c:5120
 msgid "Cannot find HOME directory"
 msgstr "找不到個人目錄"
 
@@ -5772,7 +5772,7 @@ msgid ""
 "in the Visited Links Page.\n"
 msgstr ""
 
-#: src/LYrcFile.c:820
+#: src/LYrcFile.c:819
 msgid ""
 "If keypad_mode is set to \"NUMBERS_AS_ARROWS\", then the numbers on\n"
 "your keypad when the numlock is on will act as arrow keys:\n"
@@ -5783,13 +5783,13 @@ msgid ""
 "regardless of whether numlock is on.\n"
 msgstr ""
 
-#: src/LYrcFile.c:829
+#: src/LYrcFile.c:828
 msgid ""
 "If keypad_mode is set to \"LINKS_ARE_NUMBERED\", then numbers will\n"
 "appear next to each link and numbers are used to select links.\n"
 msgstr ""
 
-#: src/LYrcFile.c:833
+#: src/LYrcFile.c:832
 msgid ""
 "If keypad_mode is set to \"LINKS_AND_FORM_FIELDS_ARE_NUMBERED\", then\n"
 "numbers will appear next to each link and visible form input field.\n"
@@ -5800,24 +5800,55 @@ msgid ""
 "lists and output from the list command also enumerate form inputs.\n"
 msgstr ""
 
-#: src/LYrcFile.c:842
+#: src/LYrcFile.c:841
 msgid ""
 "NOTE: Some fixed format documents may look disfigured when\n"
 "\"LINKS_ARE_NUMBERED\" or \"LINKS_AND_FORM_FIELDS_ARE_NUMBERED\" are\n"
 "enabled.\n"
 msgstr ""
 
-#: src/LYrcFile.c:874
+#: src/LYrcFile.c:873
 msgid ""
 "Lynx User Defaults File\n"
 "\n"
+msgstr ""
+
+#: src/LYrcFile.c:882
+msgid ""
 "This file contains options saved from the Lynx Options Screen (normally\n"
-"with the '>' key).  There is normally no need to edit this file manually,\n"
-"since the defaults here can be controlled from the Options Screen, and the\n"
-"next time options are saved from the Options Screen this file will be\n"
-"completely rewritten.  You have been warned...\n"
+"with the 'o' key).  To save options with that screen, you must select the\n"
+"checkbox:\n"
+msgstr ""
+
+#: src/LYrcFile.c:889
+msgid ""
+"You must then save the settings using the link on the line above the\n"
+"checkbox:\n"
+msgstr ""
+
+#: src/LYrcFile.c:896
+msgid ""
+"You may also use the command-line option \"-forms_options\", which displays\n"
+"the simpler Options Menu instead.  Save options with that using the '>' key.\n"
+"\n"
+msgstr ""
+
+#: src/LYrcFile.c:903
+msgid ""
+"This file contains options saved from the Lynx Options Screen (normally\n"
+"with the '>' key).\n"
+"\n"
+msgstr ""
+
+#: src/LYrcFile.c:910
+msgid ""
+"There is normally no need to edit this file manually, since the defaults\n"
+"here can be controlled from the Options Screen, and the next time options\n"
+"are saved from the Options Screen this file will be completely rewritten.\n"
+"You have been warned...\n"
+"\n"
 "If you are looking for the general configuration file - it is normally\n"
-"called lynx.cfg, and it has different content and a different format.\n"
+"called \"lynx.cfg\".  It has different content and a different format.\n"
 "It is not this file.\n"
 msgstr ""
 

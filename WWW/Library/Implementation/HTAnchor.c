@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTAnchor.c,v 1.59 2007/07/02 23:42:54 tom Exp $
+ * $LynxId: HTAnchor.c,v 1.60 2008/09/18 21:35:24 tom Exp $
  *
  *	Hypertext "Anchor" Object				HTAnchor.c
  *	==========================
@@ -362,11 +362,11 @@ HTChildAnchor *HTAnchor_findChildAndLink(HTParentAnchor *parent,	/* May not be 0
 	    if (child->dest) {	/* DUPLICATE_ANCHOR_NAME_WORKAROUND  - kw */
 		CTRACE((tfp,
 			"*** Duplicate ChildAnchor %p named `%s'",
-			child, tag));
+			(void *) child, tag));
 		if ((HTAnchor *) dest != child->dest || ltype != child->type) {
 		    CTRACE((tfp,
 			    ", different dest %p or type, creating unnamed child\n",
-			    child->dest));
+			    (void *) child->dest));
 		    child = HTAnchor_addChild(parent);
 		}
 	    }
@@ -515,7 +515,7 @@ static BOOL HTAnchor_link(HTChildAnchor *child,
     if (!(child && destination))
 	return (NO);		/* Can't link to/from non-existing anchor */
 
-    CTRACE((tfp, "Linking child %p to anchor %p\n", child, destination));
+    CTRACE((tfp, "Linking child %p to anchor %p\n", (void *) child, (void *) destination));
     if (child->dest) {
 	CTRACE((tfp, "*** child anchor already has destination, exiting!\n"));
 	return (NO);

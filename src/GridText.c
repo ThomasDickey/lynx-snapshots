@@ -1,5 +1,5 @@
 /*
- * $LynxId: GridText.c,v 1.153 2008/09/07 22:38:54 tom Exp $
+ * $LynxId: GridText.c,v 1.156 2008/09/21 19:48:41 tom Exp $
  *
  *		Character grid hypertext object
  *		===============================
@@ -9706,7 +9706,7 @@ int HText_beginInput(HText *text, BOOL underline,
     int MaximumSize;
     char marker[16];
 
-    CTRACE((tfp, "GridText: Entering HText_beginInput\n"));
+    CTRACE((tfp, "GridText: Entering HText_beginInput type=%s\n", NonNull(I->type)));
 
     POOLtypecalloc(TextAnchor, a);
 
@@ -9770,7 +9770,7 @@ int HText_beginInput(HText *text, BOOL underline,
 
     f->select_list = 0;
     f->number = HTFormNumber;
-    f->disabled = HTFormDisabled;
+    f->disabled = HTFormDisabled || I->disabled;
     f->no_cache = NO;
 
     HTFormFields++;
@@ -12555,40 +12555,22 @@ static BOOLEAN IsFormsTextarea(FormInfo * form, TextAnchor *anchor_ptr)
 	    !strcmp(anchor_ptr->input_field->name, form->name));
 }
 
-/*
- * Transfer the initial contents of a TEXTAREA to a temp file, invoke the
- * user's editor on that file, then transfer the contents of the resultant
- * edited file back into the TEXTAREA (expanding the size of the area, if
- * required).
- *
- * Returns the number of lines that the cursor should be moved so that it
- * will end up on the 1st blank line of whatever number of trailing blank
- * lines there are in the TEXTAREA (there will *always* be at least one).
- *
- * --KED 02/01/99
- */
-int HText_ExtEditForm(LinkInfo * form_link)
+static int finish_ExtEditForm(LinkInfo * form_link, TextAnchor *start_anchor,
+			      char *ed_temp,
+			      int orig_cnt)
 {
     struct stat stat_info;
     size_t size;
 
-    char *ed_temp;
     FILE *fp;
 
     TextAnchor *anchor_ptr;
-    TextAnchor *start_anchor = NULL;
     TextAnchor *end_anchor = NULL;
-    BOOLEAN firstanchor = TRUE;
     BOOLEAN wrapalert = FALSE;
 
-    char ed_offset[10];
-    int start_line = 0;
     int entry_line = form_link->anchor_line_num;
     int exit_line = 0;
-    int orig_cnt = 0;
     int line_cnt = 1;
-
-    FormInfo *form = form_link->l_form;
 
     HTLine *htline = NULL;
 
@@ -12604,60 +12586,6 @@ int HText_ExtEditForm(LinkInfo * form_link)
     int skip_num = 0, i;
 
     CTRACE((tfp, "GridText: entered HText_ExtEditForm()\n"));
-
-    ed_temp = (char *) malloc(LY_MAXPATH);
-    if ((fp = LYOpenTemp(ed_temp, "", "w")) == 0) {
-	FREE(ed_temp);
-	return (0);
-    }
-
-    /*
-     * Begin at the beginning, to find 1st anchor in the TEXTAREA, then
-     * write all of its lines (anchors) out to the edit temp file.
-     */
-    anchor_ptr = HTMainText->first_anchor;
-
-    while (anchor_ptr) {
-
-	if (IsFormsTextarea(form, anchor_ptr)) {
-
-	    if (firstanchor) {
-		firstanchor = FALSE;
-		start_anchor = anchor_ptr;
-		start_line = anchor_ptr->line_num;
-	    }
-	    orig_cnt++;
-
-	    /*
-	     * Write the anchors' text to the temp edit file.
-	     */
-	    fputs(anchor_ptr->input_field->value, fp);
-	    fputc('\n', fp);
-
-	} else {
-
-	    if (!firstanchor)
-		break;
-	}
-	anchor_ptr = anchor_ptr->next;
-    }
-    LYCloseTempFP(fp);
-
-    CTRACE((tfp, "GridText: TEXTAREA name=|%s| dumped to tempfile\n", form->name));
-    CTRACE((tfp, "GridText: invoking editor (%s) on tempfile\n", editor));
-
-    /*
-     * Go edit the TEXTAREA temp file, with the initial editor line
-     * corresponding to the TEXTAREA line the cursor is on (if such
-     * positioning is supported by the editor [as lynx knows it]).
-     */
-    ed_offset[0] = 0;		/* pre-ANSI compilers don't initialize aggregates - TD */
-    if (((entry_line - start_line) > 0) && editor_can_position())
-	sprintf(ed_offset, "%d", ((entry_line - start_line) + 1));
-
-    edit_temporary_file(ed_temp, ed_offset, NULL);
-
-    CTRACE((tfp, "GridText: returned from editor (%s)\n", editor));
 
     /*
      * Read back the edited temp file into our buffer.
@@ -12680,7 +12608,6 @@ int HText_ExtEditForm(LinkInfo * form_link)
 	     * to recover the file manually from the temp space while
 	     * the lynx session is not over.  - kw
 	     */
-	    free(ed_temp);
 	    HTAlwaysAlert(NULL, MEMORY_EXHAUSTED_FILE);
 	    return 0;
 	}
@@ -12866,6 +12793,106 @@ int HText_ExtEditForm(LinkInfo * form_link)
      */
     FREE(line);
     FREE(ebuf);
+
+    /*
+     * Return the offset needed to move the cursor from its current
+     * (on entry) line number, to the 1st blank line of the trailing
+     * (group of) blank line(s), which is where we want to be.  Let
+     * the caller deal with moving us there, however ...  :-) ...
+     */
+    return (exit_line - entry_line);
+}
+
+/*
+ * Transfer the initial contents of a TEXTAREA to a temp file, invoke the
+ * user's editor on that file, then transfer the contents of the resultant
+ * edited file back into the TEXTAREA (expanding the size of the area, if
+ * required).
+ *
+ * Returns the number of lines that the cursor should be moved so that it
+ * will end up on the 1st blank line of whatever number of trailing blank
+ * lines there are in the TEXTAREA (there will *always* be at least one).
+ *
+ * --KED 02/01/99
+ */
+int HText_ExtEditForm(LinkInfo * form_link)
+{
+    char *ed_temp;
+    FILE *fp;
+
+    TextAnchor *anchor_ptr;
+    TextAnchor *start_anchor = NULL;
+    BOOLEAN firstanchor = TRUE;
+
+    char ed_offset[10];
+    int start_line = 0;
+    int entry_line = form_link->anchor_line_num;
+    int orig_cnt = 0;
+    int offset;
+
+    FormInfo *form = form_link->l_form;
+
+    CTRACE((tfp, "GridText: entered HText_ExtEditForm()\n"));
+
+    ed_temp = (char *) malloc(LY_MAXPATH);
+    if ((fp = LYOpenTemp(ed_temp, "", "w")) == 0) {
+	FREE(ed_temp);
+	return (0);
+    }
+
+    /*
+     * Begin at the beginning, to find 1st anchor in the TEXTAREA, then
+     * write all of its lines (anchors) out to the edit temp file.
+     */
+    anchor_ptr = HTMainText->first_anchor;
+
+    while (anchor_ptr) {
+
+	if (IsFormsTextarea(form, anchor_ptr)) {
+
+	    if (firstanchor) {
+		firstanchor = FALSE;
+		start_anchor = anchor_ptr;
+		start_line = anchor_ptr->line_num;
+	    }
+	    orig_cnt++;
+
+	    /*
+	     * Write the anchors' text to the temp edit file.
+	     */
+	    fputs(anchor_ptr->input_field->value, fp);
+	    fputc('\n', fp);
+
+	} else {
+
+	    if (!firstanchor)
+		break;
+	}
+	anchor_ptr = anchor_ptr->next;
+    }
+    LYCloseTempFP(fp);
+
+    CTRACE((tfp, "GridText: TEXTAREA name=|%s| dumped to tempfile\n", form->name));
+    CTRACE((tfp, "GridText: invoking editor (%s) on tempfile\n", editor));
+
+    /*
+     * Go edit the TEXTAREA temp file, with the initial editor line
+     * corresponding to the TEXTAREA line the cursor is on (if such
+     * positioning is supported by the editor [as lynx knows it]).
+     */
+    ed_offset[0] = 0;		/* pre-ANSI compilers don't initialize aggregates - TD */
+    if (((entry_line - start_line) > 0) && editor_can_position())
+	sprintf(ed_offset, "%d", ((entry_line - start_line) + 1));
+
+    edit_temporary_file(ed_temp, ed_offset, NULL);
+
+    CTRACE((tfp, "GridText: returned from editor (%s)\n", editor));
+
+    if (form->disabled)
+	offset = 0;
+    else
+	offset = finish_ExtEditForm(form_link, start_anchor, ed_temp, orig_cnt);
+
     LYRemoveTemp(ed_temp);
     FREE(ed_temp);
 
@@ -12877,7 +12904,7 @@ int HText_ExtEditForm(LinkInfo * form_link)
      * (group of) blank line(s), which is where we want to be.  Let
      * the caller deal with moving us there, however ...  :-) ...
      */
-    return (exit_line - entry_line);
+    return offset;
 }
 
 /*

@@ -1,4 +1,6 @@
-/* $LynxId: LYMainLoop.c,v 1.152 2008/09/07 16:28:33 tom Exp $ */
+/*
+ * $LynxId: LYMainLoop.c,v 1.153 2008/09/17 22:52:58 tom Exp $
+ */
 #include <HTUtils.h>
 #include <HTAccess.h>
 #include <HTParse.h>
@@ -2182,7 +2184,7 @@ static int handle_LYK_DOWNLOAD(int *cmd,
 	    newdoc.isHEAD = HDOC(number).isHEAD;
 	    newdoc.safe = HDOC(number).safe;
 	    newdoc.internal_link = FALSE;
-	    newdoc.link = 0;
+	    newdoc.link = (user_mode == NOVICE_MODE) ? 1 : 0;
 	    HTOutputFormat = HTAtom_for("www/download");
 	    LYUserSpecifiedURL = TRUE;
 	    /*
@@ -2256,7 +2258,7 @@ static int handle_LYK_DOWNLOAD(int *cmd,
 		newdoc.safe = FALSE;
 	    }
 	    newdoc.internal_link = FALSE;
-	    newdoc.link = 0;
+	    newdoc.link = (user_mode == NOVICE_MODE) ? 1 : 0;
 	    HTOutputFormat = HTAtom_for("www/download");
 	    /*
 	     * Force the document to be reloaded.
