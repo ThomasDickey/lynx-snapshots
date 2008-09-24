@@ -33,7 +33,7 @@ static int yygrowstack(void);
 #define YYPREFIX "yy"
 #line 2 "parsdate.y"
 /*
- *  $LynxId: parsdate.c,v 1.3 2008/08/31 16:04:04 tom Exp $
+ *  $LynxId: parsdate.c,v 1.4 2008/09/23 23:13:34 tom Exp $
  *
  *  This module is adapted and extended from tin, to use for LYmktime().
  *
@@ -75,7 +75,7 @@ static int yygrowstack(void);
 
 #define CTYPE(isXXXXX, c)	(((unsigned char)(c) < 128) && isXXXXX(((int)c)))
 
-typedef char	*STRING;
+typedef char	*PD_STRING;
 
 extern int date_parse(void);
 
@@ -727,7 +727,7 @@ LookupWord(
     length++;
 
     /* Drop out any periods. */
-    for (p = buff, q = (STRING)buff; *q; q++)
+    for (p = buff, q = (PD_STRING)buff; *q; q++)
 	if (*q != '.')
 	    *p++ = *q;
     *p = '\0';

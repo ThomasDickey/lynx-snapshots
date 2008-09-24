@@ -1,6 +1,6 @@
 %{
 /*
- *  $LynxId: parsdate.y,v 1.5 2008/07/01 20:14:24 tom Exp $
+ *  $LynxId: parsdate.y,v 1.6 2008/09/23 23:13:34 tom Exp $
  *
  *  This module is adapted and extended from tin, to use for LYmktime().
  *
@@ -42,7 +42,7 @@
 
 #define CTYPE(isXXXXX, c)	(((unsigned char)(c) < 128) && isXXXXX(((int)c)))
 
-typedef char	*STRING;
+typedef char	*PD_STRING;
 
 extern int date_parse(void);
 
@@ -702,7 +702,7 @@ LookupWord(
     length++;
 
     /* Drop out any periods. */
-    for (p = buff, q = (STRING)buff; *q; q++)
+    for (p = buff, q = (PD_STRING)buff; *q; q++)
 	if (*q != '.')
 	    *p++ = *q;
     *p = '\0';

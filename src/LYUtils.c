@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYUtils.c,v 1.175 2008/09/07 17:58:37 tom Exp $
+ * $LynxId: LYUtils.c,v 1.177 2008/09/22 22:48:31 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTCP.h>
@@ -16,7 +16,16 @@ extern int kbhit(void);		/* FIXME: use conio.h */
 
 #elif defined(_WINDOWS)
 
+#ifdef DONT_USE_GETTEXT
+#undef gettext
+#endif
+
 #include <conio.h>
+
+#ifdef DONT_USE_GETTEXT
+#define gettext(s) s
+#endif
+
 #if !defined(kbhit) && defined(_WCONIO_DEFINED)
 #define kbhit() _kbhit()	/* reasonably recent conio.h */
 #endif
@@ -91,7 +100,9 @@ extern int kbhit(void);		/* FIXME: use conio.h */
 #ifdef __UTMPX_FILE
 #define UTMP_FILE __UTMPX_FILE	/* at least in OS/390  S/390 -- gil -- 2100 */
 #else
+#ifndef UTMP_FILE
 #define UTMP_FILE "/var/adm/utmpx"	/* Digital Unix 4.0 */
+#endif
 #endif
 #endif /* UTMPX_FILE */
 #else

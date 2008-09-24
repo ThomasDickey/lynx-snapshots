@@ -1,4 +1,4 @@
-/* $LynxId: LYStrings.c,v 1.157 2008/09/07 22:09:02 tom Exp $ */
+/* $LynxId: LYStrings.c,v 1.158 2008/09/21 23:26:30 tom Exp $ */
 #include <HTUtils.h>
 #include <HTCJK.h>
 #include <UCAux.h>
@@ -3193,14 +3193,14 @@ int LYEdit1(EDREC * edit, int ch,
 	 * Definition of word is very naive:  1 or more a/n characters.
 	 */
 #ifndef SUPPORT_MULTIBYTE_EDIT
-	while (Pos && !isalnum(Buf[Pos - 1]))
+	while (Pos && !isalnum(UCH(Buf[Pos - 1])))
 	    Pos--;
-	while (Pos && isalnum(Buf[Pos - 1]))
+	while (Pos && isalnum(UCH(Buf[Pos - 1])))
 	    Pos--;
 #else
-	while (Pos && !(isalnum(Buf[Pos - 1]) || is8bits(Buf[Pos - 1])))
+	while (Pos && !(isalnum(UCH(Buf[Pos - 1])) || is8bits(Buf[Pos - 1])))
 	    Pos--;
-	while (Pos && (isalnum(Buf[Pos - 1]) || is8bits(Buf[Pos - 1])))
+	while (Pos && (isalnum(UCH(Buf[Pos - 1])) || is8bits(Buf[Pos - 1])))
 	    Pos--;
 #endif
 	break;
@@ -3210,14 +3210,14 @@ int LYEdit1(EDREC * edit, int ch,
 	 * Word forward.
 	 */
 #ifndef SUPPORT_MULTIBYTE_EDIT
-	while (isalnum(Buf[Pos]))
+	while (isalnum(UCH(Buf[Pos])))
 	    Pos++;		/* '\0' is not a/n */
-	while (!isalnum(Buf[Pos]) && Buf[Pos])
+	while (!isalnum(UCH(Buf[Pos])) && Buf[Pos])
 	    Pos++;
 #else
-	while (isalnum(Buf[Pos]) || is8bits(Buf[Pos]))
+	while (isalnum(UCH(Buf[Pos])) || is8bits(Buf[Pos]))
 	    Pos++;		/* '\0' is not a/n */
-	while (!(isalnum(Buf[Pos]) || is8bits(Buf[Pos])) && Buf[Pos])
+	while (!(isalnum(UCH(Buf[Pos])) || is8bits(Buf[Pos])) && Buf[Pos])
 	    Pos++;
 #endif
 	break;
