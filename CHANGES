@@ -1,7 +1,13 @@
--- $LynxId: CHANGES,v 1.308 2008/09/21 21:12:42 tom Exp $
+-- $LynxId: CHANGES,v 1.311 2008/09/23 23:15:38 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
+
+2008-??-?? (2.8.7dev.11)
+* workaround for STRING redefinition in parsdate.c on DJGPP -GV
+* improve configure-check to determine proper fallback when no long-long
+  printing format is available -TD
+* update win32 makefiles/build scripts to add LYmktime, parsdate modules -TD
 
 2008-09-21 (2.8.7dev.10)
 * remove rw.po, since the translation project no longer supplies it -TD

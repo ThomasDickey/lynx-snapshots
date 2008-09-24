@@ -41,7 +41,7 @@ RSC=rc.exe
 # PROP Intermediate_Dir "Release"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /c
-# ADD CPP /nologo /W3 /GX /O2 /I "..\..\..\..\src" /I "..\..\..\..\src\chrtrans" /I "..\..\..\..\WWW\Library\Implementation" /I "..\..\..\..\lib" /I "..\..\..\.." /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /D "_WINDOWS" /D "DOSPATH" /D "NO_UNISTD_H" /D "__WIN32__" /D "WIN_EX" /D "NOUSERS" /D "DIRED_SUPPORT" /D "DISP_PARTIAL" /D "HAVE_KEYPAD" /D "NOSIGHUP" /D "NO_TTYTYPE" /D "NO_UTMP" /D "SH_EX" /D "USE_EXTERNALS" /D "USE_FILE_UPLOAD" /D "USE_MULTIBYTE_CURSES" /D "USE_PERSISTENT_COOKIES" /D "USE_PRETTYSRC" /D "USE_READPROGRESS" /D "USE_SCROLLBAR" /D "USE_SOURCE_CACHE" /D "USE_ZLIB" /D "PDCURSES" /D "COLOR_CURSES" /D "FANCY_CURSES" /D "USE_COLOR_STYLE" /D "USE_WINSOCK2_H" /D _WIN32_WINNT=0x0400 /YX /FD /c
+# ADD CPP /nologo /W3 /GX /O2 /I "..\..\..\..\src" /I "..\..\..\..\src\chrtrans" /I "..\..\..\..\WWW\Library\Implementation" /I "..\..\..\..\lib" /I "..\..\..\.." /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /D "_WINDOWS" /D "DOSPATH" /D "NO_UNISTD_H" /D "__WIN32__" /D "WIN_EX" /D "NOUSERS" /D "DIRED_SUPPORT" /D "DISP_PARTIAL" /D "DONT_HAVE_TM_GMTOFF" /D "HAVE_KEYPAD" /D "NOSIGHUP" /D "NO_TTYTYPE" /D "NO_UTMP" /D "SH_EX" /D "USE_EXTERNALS" /D "USE_FILE_UPLOAD" /D "USE_MULTIBYTE_CURSES" /D "USE_PERSISTENT_COOKIES" /D "USE_PRETTYSRC" /D "USE_READPROGRESS" /D "USE_SCROLLBAR" /D "USE_SOURCE_CACHE" /D "USE_ZLIB" /D "PDCURSES" /D "COLOR_CURSES" /D "FANCY_CURSES" /D "USE_COLOR_STYLE" /D "USE_WINSOCK2_H" /D _WIN32_WINNT=0x0400 /YX /FD /c
 # ADD BASE RSC /l 0x409 /d "NDEBUG"
 # ADD RSC /l 0x409 /d "NDEBUG"
 BSC32=bscmake.exe
@@ -65,7 +65,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /GZ /c
-# ADD CPP /nologo /W3 /Gm /GX /ZI /Od /I "..\..\..\..\src" /I "..\..\..\..\src\chrtrans" /I "..\..\..\..\WWW\Library\Implementation" /I "..\..\..\..\lib" /I "..\..\..\.." /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /D "_WINDOWS" /D "DOSPATH" /D "NO_UNISTD_H" /D "__WIN32__" /D "WIN_EX" /D "NOUSERS" /D "DIRED_SUPPORT" /D "DISP_PARTIAL" /D "HAVE_KEYPAD" /D "NOSIGHUP" /D "NO_TTYTYPE" /D "NO_UTMP" /D "SH_EX" /D "USE_EXTERNALS" /D "USE_FILE_UPLOAD" /D "USE_MULTIBYTE_CURSES" /D "USE_PERSISTENT_COOKIES" /D "USE_PRETTYSRC" /D "USE_READPROGRESS" /D "USE_SCROLLBAR" /D "USE_SOURCE_CACHE" /D "USE_ZLIB" /D "PDCURSES" /D "COLOR_CURSES" /D "FANCY_CURSES" /D "USE_COLOR_STYLE" /D "USE_WINSOCK2_H" /D _WIN32_WINNT=0x0400 /YX /FD /GZ /c
+# ADD CPP /nologo /W3 /Gm /GX /ZI /Od /I "..\..\..\..\src" /I "..\..\..\..\src\chrtrans" /I "..\..\..\..\WWW\Library\Implementation" /I "..\..\..\..\lib" /I "..\..\..\.." /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /D "_WINDOWS" /D "DOSPATH" /D "NO_UNISTD_H" /D "__WIN32__" /D "WIN_EX" /D "NOUSERS" /D "DIRED_SUPPORT" /D "DISP_PARTIAL" /D "DONT_HAVE_TM_GMTOFF" /D "HAVE_KEYPAD" /D "NOSIGHUP" /D "NO_TTYTYPE" /D "NO_UTMP" /D "SH_EX" /D "USE_EXTERNALS" /D "USE_FILE_UPLOAD" /D "USE_MULTIBYTE_CURSES" /D "USE_PERSISTENT_COOKIES" /D "USE_PRETTYSRC" /D "USE_READPROGRESS" /D "USE_SCROLLBAR" /D "USE_SOURCE_CACHE" /D "USE_ZLIB" /D "PDCURSES" /D "COLOR_CURSES" /D "FANCY_CURSES" /D "USE_COLOR_STYLE" /D "USE_WINSOCK2_H" /D _WIN32_WINNT=0x0400 /YX /FD /GZ /c
 # ADD BASE RSC /l 0x409 /d "_DEBUG"
 # ADD RSC /l 0x409 /d "_DEBUG"
 BSC32=bscmake.exe
@@ -342,6 +342,10 @@ SOURCE=..\..\..\..\src\LYMap.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\..\src\LYmktime.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\..\src\LYNews.c
 # End Source File
 # Begin Source File
@@ -395,6 +399,10 @@ SOURCE=..\..\..\..\src\LYUtils.c
 # Begin Source File
 
 SOURCE=..\..\..\..\src\mktime.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\src\parsdate.c
 # End Source File
 # Begin Source File
 

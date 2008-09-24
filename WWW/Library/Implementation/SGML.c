@@ -1,5 +1,5 @@
 /*
- * $LynxId: SGML.c,v 1.117 2008/09/21 18:34:39 tom Exp $
+ * $LynxId: SGML.c,v 1.118 2008/09/22 23:21:46 tom Exp $
  *
  *			General SGML Parser code		SGML.c
  *			========================
@@ -1564,7 +1564,7 @@ static void discard_empty(HTStream *context)
 }
 
 #ifdef USE_PRETTYSRC
-static BOOL end_if_prettysrc(HTStream *context, HTChunk *string, int end_ch)
+static BOOL end_if_prettysrc(HTStream *context, HTChunk *string, char end_ch)
 {
     BOOL result = psrc_view;
 

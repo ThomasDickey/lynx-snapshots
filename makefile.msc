@@ -1,4 +1,4 @@
-# $LynxId: makefile.msc,v 1.17 2008/01/08 00:53:14 tom Exp $
+# $LynxId: makefile.msc,v 1.18 2008/09/22 21:44:21 tom Exp $
 #
 # Makefile for `Lynx' browser for Microsoft Visual C++ 4.2 or later
 #
@@ -71,6 +71,7 @@ DEFS = $(CS_DEFS) $(SOCK_DEFS) $(SSL_DEFS) $(SCREEN_DEFS) \
  /D "CJK_EX" \
  /D "DIRED_SUPPORT" \
  /D "DISP_PARTIAL" \
+ /D "DONT_HAVE_TM_GMTOFF" \
  /D "DOSPATH" \
  /D "EXP_ALT_BINDINGS" \
  /D "EXP_CMD_LOGGING" \
@@ -196,7 +197,9 @@ OBJS = $(CS_OBJS) \
 	"LYTraversal.obj" \
 	"LYUpload.obj" \
 	"LYUtils.obj" \
+	"parsdate.obj" \
 	"LYexit.obj" \
+	"LYmktime.obj" \
 	"LYrcFile.obj" \
 	"SGML.obj" \
 	"TRSTable.obj" \
@@ -331,6 +334,9 @@ LYPrettySrc.obj : $(SRC_DIR)\LYPrettySrc.c
 LYPrint.obj : $(SRC_DIR)\LYPrint.c
 	$(COMPILE) $(SRC_DIR)\LYPrint.c
 
+LYmktime.obj : $(SRC_DIR)\LYmktime.c
+	$(COMPILE) $(SRC_DIR)\LYmktime.c
+
 LYrcFile.obj : $(SRC_DIR)\LYrcFile.c
 	$(COMPILE) $(SRC_DIR)\LYrcFile.c
 
@@ -360,6 +366,9 @@ LYUpload.obj : $(SRC_DIR)\LYUpload.c
 
 LYUtils.obj : $(SRC_DIR)\LYUtils.c
 	$(COMPILE) $(SRC_DIR)\LYUtils.c
+
+parsdate.obj : $(SRC_DIR)\parsdate.c
+	$(COMPILE) $(SRC_DIR)\parsdate.c
 
 TRSTable.obj : $(SRC_DIR)\TRSTable.c
 	$(COMPILE) $(SRC_DIR)\TRSTable.c

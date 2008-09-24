@@ -1,4 +1,4 @@
-; $LynxId: lynx-curses.iss,v 1.2 2007/08/02 00:09:46 tom Exp $
+; $LynxId: lynx-curses.iss,v 1.3 2008/09/22 22:08:26 tom Exp $
 ;
 ; This script assumes environment variables have been set, e.g., to point to
 ; data which is used by the installer:
@@ -7,7 +7,7 @@
 ; LYNX_HELPDIR - files and subdirectories installed from Unix with "make install-help"
 
 #define MyAppName "Lynx"
-#define MyAppVerName "Lynx 2.8.7dev.5"
+#define MyAppVerName "Lynx 2.8.7dev.10"
 #define MyAppPublisher "Thomas E Dickey"
 #define MyAppURL "http://lynx.isc.org"
 #define MyAppExeName "lynx.exe"
