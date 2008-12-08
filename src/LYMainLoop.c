@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMainLoop.c,v 1.153 2008/09/17 22:52:58 tom Exp $
+ * $LynxId: LYMainLoop.c,v 1.154 2008/12/07 22:10:34 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTAccess.h>
@@ -201,7 +201,7 @@ HTList *Goto_URLs = NULL;	/* List of Goto URLs */
 char *LYRequestTitle = NULL;	/* newdoc.title in calls to getfile() */
 char *LYRequestReferer = NULL;	/* Referer, may be set in getfile() */
 
-static char prev_target[512];
+static char prev_target[MAX_LINE];
 
 #ifdef DISP_PARTIAL
 BOOLEAN display_partial = FALSE;	/* could be enabled in HText_new() */
@@ -5228,12 +5228,8 @@ static BOOLEAN handle_LYK_LINEWRAP_TOGGLE(int *cmd,
 int mainloop(void)
 {
 #if defined(WIN_EX)		/* 1997/10/08 (Wed) 14:52:06 */
-#undef	STRING_MAX
-#define	STRING_MAX	4096
-    char temp_buff[STRING_MAX];
-
-#define	BUFF_MAX	1024
-    char sjis_buff[BUFF_MAX];
+    char sjis_buff[MAX_LINE];
+    char temp_buff[sizeof(sjis_buffer) * 4];
 #endif
     int c = 0;
     int real_c = 0;
@@ -6465,7 +6461,7 @@ int mainloop(void)
 		    p = links[curdoc.link].lname;
 		}
 
-		if (strlen(p) < 500) {
+		if (strlen(p) < (sizeof(sjis_buff) / 10)) {
 		    strcpy(temp_buff, p);
 		    if (strchr(temp_buff, '%')) {
 			HTUnEscape(temp_buff);

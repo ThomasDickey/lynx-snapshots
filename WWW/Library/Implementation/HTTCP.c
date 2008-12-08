@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTCP.c,v 1.97 2008/09/20 14:32:29 tom Exp $
+ * $LynxId: HTTCP.c,v 1.98 2008/12/07 21:10:36 tom Exp $
  *
  *			Generic Communication Code		HTTCP.c
  *			==========================
@@ -1548,6 +1548,17 @@ static BOOL HTWasInterrupted(int *status)
     return result;
 }
 
+#define TRIES_PER_SECOND 10
+
+/*
+ * Set the select-timeout to 0.1 seconds.
+ */
+static void set_timeout(struct timeval *timeoutp)
+{
+    timeoutp->tv_sec = 0;
+    timeoutp->tv_usec = 100000;
+}
+
 #ifndef MULTINET		/* SOCKET_ERRNO != errno ? */
 #if !defined(UCX) || !defined(VAXC)	/* errno not modifiable ? */
 #define SOCKET_DEBUG_TRACE	/* show errno status after some system calls */
@@ -1748,7 +1759,7 @@ int HTDoConnect(const char *url,
 		/*
 		 * Protect against an infinite loop.
 		 */
-		if ((tries++ / 10) >= connect_timeout) {
+		if ((tries++ / TRIES_PER_SECOND) >= connect_timeout) {
 		    HTAlert(gettext("Connection failed (too many retries)."));
 #ifdef INET6
 		    FREE(line);
@@ -1757,13 +1768,7 @@ int HTDoConnect(const char *url,
 #endif /* INET6 */
 		    return HT_NO_DATA;
 		}
-#ifdef _WINDOWS_NSL
-		select_timeout.tv_sec = connect_timeout;
-		select_timeout.tv_usec = 0;
-#else
-		select_timeout.tv_sec = 0;
-		select_timeout.tv_usec = 100000;
-#endif /* _WINDOWS_NSL */
+		set_timeout(&select_timeout);
 		FD_ZERO(&writefds);
 		FD_SET((unsigned) *s, &writefds);
 #ifdef SOCKS
@@ -2007,14 +2012,14 @@ int HTDoRead(int fildes,
 	/*
 	 * Protect against an infinite loop.
 	 */
-	if (tries++ >= 180000) {
-	    HTAlert(gettext("Socket read failed for 180,000 tries."));
+	if ((tries++ / TRIES_PER_SECOND) >= reading_timeout) {
+	    HTAlert(gettext("Socket read failed (too many tries)."));
 	    SET_EINTR;
 	    result = HT_INTERRUPTED;
 	    break;
 	}
 #ifdef USE_READPROGRESS
-	if (tries - otries > 10) {
+	if (tries - otries > TRIES_PER_SECOND) {
 	    time_t t = time((time_t *) 0);
 
 	    otries = tries;
@@ -2030,8 +2035,7 @@ int HTDoRead(int fildes,
 	 * Allow for this possibility.  - JED
 	 */
 	do {
-	    select_timeout.tv_sec = 0;
-	    select_timeout.tv_usec = 100000;
+	    set_timeout(&select_timeout);
 	    FD_ZERO(&readfds);
 	    FD_SET((unsigned) fildes, &readfds);
 #ifdef SOCKS

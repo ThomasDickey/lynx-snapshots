@@ -1,4 +1,6 @@
-/*                   Lynx CGI support                              LYCgi.c
+/*
+ * $LynxId: LYCgi.c,v 1.53 2008/12/07 22:13:52 tom Exp $
+ *                   Lynx CGI support                              LYCgi.c
  *                   ================
  *
  * Authors
@@ -358,7 +360,7 @@ static int LYLoadCGI(const char *arg,
 	HTFormat format_in;
 	HTStream *target = NULL;	/* Unconverted data */
 	int fd1[2], fd2[2];
-	char buf[1024];
+	char buf[MAX_LINE];
 	int pid;
 
 #ifdef HAVE_TYPE_UNIONWAIT

@@ -1,4 +1,6 @@
 /*
+ * $LynxId: LYLocal.c,v 1.84 2008/12/07 22:13:37 tom Exp $
+ *
  *  Routines to manipulate the local filesystem.
  *  Written by: Rick Mallett, Carleton University
  *  Report problems to rmallett@ccs.carleton.ca
@@ -660,7 +662,7 @@ static int modify_tagged(char *testpath)
     dev_t dev;
     ino_t inode;
     int owner;
-    char tmpbuf[1024];
+    char tmpbuf[MAX_LINE];
     char *savepath;
     char *srcpath = NULL;
     struct stat dir_info;
@@ -873,7 +875,7 @@ static int modify_location(char *testpath)
     dev_t dev;
     ino_t inode;
     int owner;
-    char tmpbuf[1024];
+    char tmpbuf[MAX_LINE];
     char *newpath = NULL;
     char *savepath = NULL;
     struct stat dir_info;

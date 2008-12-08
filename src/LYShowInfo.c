@@ -1,4 +1,4 @@
-/* $LynxId: LYShowInfo.c,v 1.65 2007/05/06 19:08:31 tom Exp $ */
+/* $LynxId: LYShowInfo.c,v 1.66 2008/12/07 22:14:05 tom Exp $ */
 #include <HTUtils.h>
 #include <HTFile.h>
 #include <HTParse.h>
@@ -203,13 +203,14 @@ int LYShowInfo(DocInfo *doc,
 	    ADD_SS(gettext("Full name:"), temp);
 #ifdef S_IFLNK
 	    if (S_ISLNK(dir_info.st_mode)) {
-		char buf[1025];
+		char buf[MAX_LINE];
 		int buf_size;
 
 		if ((buf_size = readlink(temp, buf, sizeof(buf) - 1)) != -1) {
 		    buf[buf_size] = '\0';
 		} else {
-		    sprintf(buf, "%.1024s", gettext("Unable to follow link"));
+		    sprintf(buf, "%.*s", (int) sizeof(buf) - 1,
+									gettext("Unable to follow link"));
 		}
 		ADD_SS(gettext("Points to file:"), buf);
 	    }

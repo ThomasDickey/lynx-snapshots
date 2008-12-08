@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTMIME.c,v 1.64 2008/09/17 00:04:44 tom Exp $
+ * $LynxId: HTMIME.c,v 1.66 2008/12/07 20:23:52 tom Exp $
  *
  *			MIME Message Parse			HTMIME.c
  *			==================
@@ -215,8 +215,66 @@ static void dequote(char *url)
     }
 }
 
+/*
+ * Strip off any compression-suffix from the address and check if the result
+ * looks like one of the presentable suffixes.  If so, return the corresponding
+ * MIME type.
+ */
+static const char *UncompressedContentType(HTStream *me, CompressFileType method)
+{
+    const char *result = 0;
+    char *address = me->anchor->address;
+    const char *expected = HTCompressTypeToSuffix(method);
+    const char *actual = strrchr(address, '.');
+
+    /*
+     * We have to ensure the suffix is consistent, to use HTFileFormat().
+     */
+    if (actual != 0 && !strcasecomp(actual, expected)) {
+	HTFormat format;
+	HTAtom *pencoding = 0;
+	const char *description = 0;
+
+	format = HTFileFormat(address, &pencoding, &description);
+	result = HTAtom_name(format);
+    }
+
+    return result;
+}
+
 static int pumpData(HTStream *me)
 {
+    CompressFileType method;
+    const char *new_encoding;
+    const char *new_content;
+
+    CTRACE((tfp, "Begin pumpData\n"));
+    /*
+     * If the content-type says it is compressed, and there is no
+     * content-encoding, check further and see if the address (omitting the
+     * suffix for a compressed type) looks like a type we can present.  If so,
+     * rearrange things so we'll present the StreamStack code with the
+     * presentable type, already marked as compressed.
+     */
+    CTRACE((tfp, "...address{%s}\n", me->anchor->address));
+    method = HTContentTypeToCompressType(me->anchor->content_type_params);
+    if ((method != cftNone)
+	&& isEmpty(me->anchor->content_encoding)
+	&& (new_content = UncompressedContentType(me, method)) != 0) {
+
+	new_encoding = HTCompressTypeToEncoding(method);
+	CTRACE((tfp, "reinterpreting as content-type:%s, encoding:%s\n",
+		new_content, new_encoding));
+
+	StrAllocCopy(me->anchor->content_encoding, new_encoding);
+	FREE(me->compression_encoding);
+	StrAllocCopy(me->compression_encoding, new_encoding);
+
+	strcpy(me->value, new_content);
+	StrAllocCopy(me->anchor->content_type_params, me->value);
+	me->format = HTAtom_for(me->value);
+    }
+
     if (strchr(HTAtom_name(me->format), ';') != NULL) {
 	char *cp = NULL, *cp1, *cp2, *cp3 = NULL, *cp4;
 
@@ -451,68 +509,72 @@ static int pumpData(HTStream *me)
 	    }
 	}
     }
+    CTRACE((tfp, "...pumpData finished reading header\n"));
     if (me->head_only) {
 	/* We are done! - kw */
 	me->state = MIME_IGNORE;
-	return HT_OK;
-    }
-
-    if (me->no_streamstack) {
-	me->target = me->sink;
     } else {
-	if (!me->compression_encoding) {
-	    CTRACE((tfp,
-		    "HTMIME: MIME Content-Type is '%s', converting to '%s'\n",
-		    HTAtom_name(me->format), HTAtom_name(me->targetRep)));
+
+	if (me->no_streamstack) {
+	    me->target = me->sink;
 	} else {
+	    if (!me->compression_encoding) {
+		CTRACE((tfp,
+			"HTMIME: MIME Content-Type is '%s', converting to '%s'\n",
+			HTAtom_name(me->format), HTAtom_name(me->targetRep)));
+	    } else {
+		/*
+		 * Change the format to that for "www/compressed" and set up a
+		 * stream to deal with it.  - FM
+		 */
+		CTRACE((tfp, "HTMIME: MIME Content-Type is '%s',\n",
+			HTAtom_name(me->format)));
+		me->format = HTAtom_for("www/compressed");
+		CTRACE((tfp, "        Treating as '%s'.  Converting to '%s'\n",
+			HTAtom_name(me->format), HTAtom_name(me->targetRep)));
+		FREE(me->compression_encoding);
+	    }
+	    me->target = HTStreamStack(me->format, me->targetRep,
+				       me->sink, me->anchor);
+	    if (!me->target) {
+		CTRACE((tfp, "HTMIME: Can't translate! ** \n"));
+		me->target = me->sink;	/* Cheat */
+	    }
+	}
+	if (me->target) {
+	    me->targetClass = *me->target->isa;
 	    /*
-	     * Change the format to that for "www/compressed" and set up a
-	     * stream to deal with it.  - FM
+	     * Pump rest of data right through, according to the transfer encoding.
 	     */
-	    CTRACE((tfp, "HTMIME: MIME Content-Type is '%s',\n", HTAtom_name(me->format)));
-	    me->format = HTAtom_for("www/compressed");
-	    CTRACE((tfp, "        Treating as '%s'.  Converting to '%s'\n",
-		    HTAtom_name(me->format), HTAtom_name(me->targetRep)));
-	    FREE(me->compression_encoding);
+	    me->state = (me->chunked_encoding
+			 ? MIME_CHUNKED
+			 : MIME_TRANSPARENT);
+	} else {
+	    me->state = MIME_IGNORE;	/* What else to do? */
 	}
-	me->target = HTStreamStack(me->format, me->targetRep,
-				   me->sink, me->anchor);
-	if (!me->target) {
-	    CTRACE((tfp, "HTMIME: Can't translate! ** \n"));
-	    me->target = me->sink;	/* Cheat */
-	}
-    }
-    if (me->target) {
-	me->targetClass = *me->target->isa;
-	/*
-	 * Pump rest of data right through, according to the transfer encoding.
-	 */
-	me->state = (me->chunked_encoding
-		     ? MIME_CHUNKED
-		     : MIME_TRANSPARENT);
-    } else {
-	me->state = MIME_IGNORE;	/* What else to do? */
-    }
-    if (me->refresh_url != NULL && !content_is_compressed(me)) {
-	char *url = NULL;
-	char *num = NULL;
-	char *txt = NULL;
-	const char *base = "";	/* FIXME: refresh_url may be relative to doc */
+	if (me->refresh_url != NULL && !content_is_compressed(me)) {
+	    char *url = NULL;
+	    char *num = NULL;
+	    char *txt = NULL;
+	    const char *base = "";	/* FIXME: refresh_url may be relative to doc */
 
-	LYParseRefreshURL(me->refresh_url, &num, &url);
-	if (url != NULL && me->format == WWW_HTML) {
-	    CTRACE((tfp, "Formatting refresh-url as first line of result\n"));
-	    HTSprintf0(&txt, gettext("Refresh: "));
-	    HTSprintf(&txt, gettext("%s seconds "), num);
-	    dequote(url);
-	    HTSprintf(&txt, "<a href=\"%s%s\">%s</a><br>", base, url, url);
-	    CTRACE((tfp, "URL %s%s\n", base, url));
-	    (me->isa->put_string) (me, txt);
-	    free(txt);
+	    LYParseRefreshURL(me->refresh_url, &num, &url);
+	    if (url != NULL && me->format == WWW_HTML) {
+		CTRACE((tfp,
+			"Formatting refresh-url as first line of result\n"));
+		HTSprintf0(&txt, gettext("Refresh: "));
+		HTSprintf(&txt, gettext("%s seconds "), num);
+		dequote(url);
+		HTSprintf(&txt, "<a href=\"%s%s\">%s</a><br>", base, url, url);
+		CTRACE((tfp, "URL %s%s\n", base, url));
+		(me->isa->put_string) (me, txt);
+		free(txt);
+	    }
+	    FREE(num);
+	    FREE(url);
 	}
-	FREE(num);
-	FREE(url);
     }
+    CTRACE((tfp, "...end of pumpData\n"));
     return HT_OK;
 }
 

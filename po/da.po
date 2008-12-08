@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: lynx 2.8.6-dev19\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-09-21 16:20-0400\n"
+"POT-Creation-Date: 2008-12-07 20:02-0500\n"
 "PO-Revision-Date: 2006-09-17 14:07+0200\n"
 "Last-Translator: Morten Bo Johansen <mojo@mbjnet.dk>\n"
 "Language-Team: Danish <dansk@dansk-gruppen.dk>\n"
@@ -2161,7 +2161,7 @@ msgstr ""
 " Skriv venligst dit brev nedenfor."
 
 #. #define ENTER_PERIOD_WHEN_DONE_A
-#: LYMessages.c:691 src/LYNews.c:357
+#: LYMessages.c:691 src/LYNews.c:360
 msgid ""
 "\n"
 " When you are done, press enter and put a single period (.)"
@@ -2170,7 +2170,7 @@ msgstr ""
 " Når du er færdig, så tast <retur> og sæt et enkelt punktum (.)"
 
 #. #define ENTER_PERIOD_WHEN_DONE_B
-#: LYMessages.c:693 src/LYNews.c:358
+#: LYMessages.c:693 src/LYNews.c:361
 msgid ""
 "\n"
 " on a line and press enter again."
@@ -2807,7 +2807,7 @@ msgstr "Dokument med 'POST'-indhold ikke fundet i cache. Genindsend?"
 msgid "Loading failed, use a previous copy."
 msgstr "Indlæsning slog fejl, brug en foregående kopi."
 
-#: WWW/Library/Implementation/HTAccess.c:1047 src/GridText.c:8587
+#: WWW/Library/Implementation/HTAccess.c:1047 src/GridText.c:8546
 msgid "Loading incomplete."
 msgstr "Indlæsning ikke fuldført."
 
@@ -2830,7 +2830,7 @@ msgstr "**** HTAccess: Statustilbagemelding var: %d\n"
 #. * hack: if we fail in HTAccess.c
 #. * avoid duplicating URL, oh.
 #.
-#: WWW/Library/Implementation/HTAccess.c:1087 src/LYMainLoop.c:7783
+#: WWW/Library/Implementation/HTAccess.c:1087 src/LYMainLoop.c:7779
 msgid "Can't Access"
 msgstr "Kan ikke tilgå"
 
@@ -3034,7 +3034,7 @@ msgstr "Adresse har en ugyldig port"
 msgid "Address length looks invalid"
 msgstr "Adresselængde forekommer ugyldig"
 
-#: WWW/Library/Implementation/HTTCP.c:1607 WWW/Library/Implementation/HTTCP.c:1625
+#: WWW/Library/Implementation/HTTCP.c:1618 WWW/Library/Implementation/HTTCP.c:1636
 #, c-format
 msgid "Unable to locate remote host %s."
 msgstr "Ude af stand til at finde fremmed vært %s."
@@ -3043,40 +3043,41 @@ msgstr "Ude af stand til at finde fremmed vært %s."
 #. * but not HTAlert, because typically there will be other
 #. * alerts from the callers.  - kw
 #.
-#: WWW/Library/Implementation/HTTCP.c:1622 WWW/Library/Implementation/HTTelnet.c:115
+#: WWW/Library/Implementation/HTTCP.c:1633 WWW/Library/Implementation/HTTelnet.c:115
 #, c-format
 msgid "Invalid hostname %s"
 msgstr "Ugyldigt værtsnavn %s"
 
-#: WWW/Library/Implementation/HTTCP.c:1636
+#: WWW/Library/Implementation/HTTCP.c:1647
 #, c-format
 msgid "Making %s connection to %s"
 msgstr "Opretter %s-forbindelse til %s"
 
-#: WWW/Library/Implementation/HTTCP.c:1647
+#: WWW/Library/Implementation/HTTCP.c:1658
 msgid "socket failed."
 msgstr "sokkel fejlede."
 
-#: WWW/Library/Implementation/HTTCP.c:1660
+#: WWW/Library/Implementation/HTTCP.c:1671
 #, c-format
 msgid "socket failed: family %d addr %s port %s."
 msgstr "sokkel fejlede: familie %d adr. %s port %s."
 
-#: WWW/Library/Implementation/HTTCP.c:1684
+#: WWW/Library/Implementation/HTTCP.c:1695
 msgid "Could not make connection non-blocking."
 msgstr "Kunne ikke oprette en ikke-blokerende forbindelse."
 
-#: WWW/Library/Implementation/HTTCP.c:1752
+#: WWW/Library/Implementation/HTTCP.c:1763
 msgid "Connection failed (too many retries)."
 msgstr "Forbindelse opgivet (for mange forsøg)."
 
-#: WWW/Library/Implementation/HTTCP.c:1945
+#: WWW/Library/Implementation/HTTCP.c:1950
 msgid "Could not restore socket to blocking."
 msgstr "Kunne ikke få sokkel til at blokere."
 
-#: WWW/Library/Implementation/HTTCP.c:2011
-msgid "Socket read failed for 180,000 tries."
-msgstr "Læsning af sokkel slog fejl i 180.000 forsøg."
+#: WWW/Library/Implementation/HTTCP.c:2016
+#, fuzzy
+msgid "Socket read failed (too many tries)."
+msgstr "Forbindelse opgivet (for mange forsøg)."
 
 #: WWW/Library/Implementation/HTTP.c:84
 #, c-format
@@ -3492,34 +3493,34 @@ msgstr "nøglegen-felt"
 msgid "unknown form field"
 msgstr "ukendt formularfelt"
 
-#: src/GridText.c:10320
+#: src/GridText.c:10279
 msgid "Can't open file for uploading"
 msgstr "Kan ikke åbne fil til upload"
 
-#: src/GridText.c:11479
+#: src/GridText.c:11438
 #, c-format
 msgid "Submitting %s"
 msgstr "Indsender %s"
 
 #. ugliness has happened; inform user and do the best we can
-#: src/GridText.c:12532
+#: src/GridText.c:12491
 msgid "Hang Detect: TextAnchor struct corrupted - suggest aborting!"
 msgstr "Program hænger: TextAnchor-struktur ødelagt - det er bedst at afbryde!"
 
 #. don't show previous state
-#: src/GridText.c:12669
+#: src/GridText.c:12628
 msgid "Wrap lines to fit displayed area?"
 msgstr "Ombryd linjer så de passer til det viste område?"
 
-#: src/GridText.c:12721
+#: src/GridText.c:12680
 msgid "Very long lines have been wrapped!"
 msgstr "Meget lange linjer er blevet ombrudt!"
 
-#: src/GridText.c:13226
+#: src/GridText.c:13185
 msgid "Very long lines have been truncated!"
 msgstr "Meget lange linjer er blevet afkortet!"
 
-#: src/HTAlert.c:164 src/LYShowInfo.c:359 src/LYShowInfo.c:363
+#: src/HTAlert.c:164 src/LYShowInfo.c:360 src/LYShowInfo.c:364
 msgid "bytes"
 msgstr "bytes"
 
@@ -3694,7 +3695,7 @@ msgstr ""
 msgid "File may be recoverable from %s during this session"
 msgstr "Fil kan måske genskabes fra %s under denne session"
 
-#: src/LYCgi.c:159
+#: src/LYCgi.c:161
 #, c-format
 msgid "Do you want to execute \"%s\"?"
 msgstr "Vil du udføre \"%s\"?"
@@ -3703,23 +3704,23 @@ msgstr "Vil du udføre \"%s\"?"
 #. * Neither the path as given nor any components examined by backing up
 #. * were stat()able.  - kw
 #.
-#: src/LYCgi.c:274
+#: src/LYCgi.c:276
 msgid "Unable to access cgi script"
 msgstr "Kan ikke få adgang til cgi-program"
 
-#: src/LYCgi.c:699 src/LYCgi.c:702
+#: src/LYCgi.c:701 src/LYCgi.c:704
 msgid "Good Advice"
 msgstr "Godt råd"
 
-#: src/LYCgi.c:706
+#: src/LYCgi.c:708
 msgid "An excellent http server for VMS is available via"
 msgstr "En fortrinlig HTTP-server for VMS kan findes via"
 
-#: src/LYCgi.c:713
+#: src/LYCgi.c:715
 msgid "this link"
 msgstr "dette link"
 
-#: src/LYCgi.c:717
+#: src/LYCgi.c:719
 msgid "It provides state of the art CGI script support.\n"
 msgstr "Den tilbyder upåklagelig understøttelse af CGI-programmer\n"
 
@@ -3953,271 +3954,271 @@ msgstr "Henvisninger"
 msgid "Visible links"
 msgstr "Synlige links"
 
-#: src/LYLocal.c:269
+#: src/LYLocal.c:271
 #, c-format
 msgid "Unable to get status of '%s'."
 msgstr "Kan ikke indhente status på '%s'."
 
-#: src/LYLocal.c:303
+#: src/LYLocal.c:305
 msgid "The selected item is not a file or a directory!  Request ignored."
 msgstr "Valgte enhed er ikke en fil eller et filkatalog!  Anmodning ignoreret."
 
-#: src/LYLocal.c:371
+#: src/LYLocal.c:373
 #, c-format
 msgid "Unable to %s due to system error!"
 msgstr "Kan ikke %s pga. systemfejl!"
 
-#: src/LYLocal.c:405
+#: src/LYLocal.c:407
 #, c-format
 msgid "Probable failure to %s due to system error!"
 msgstr "Sandsynlig fejl for %s skyldes en systemfejl!"
 
-#: src/LYLocal.c:467 src/LYLocal.c:488
+#: src/LYLocal.c:469 src/LYLocal.c:490
 #, c-format
 msgid "remove %s"
 msgstr "slet %s"
 
-#: src/LYLocal.c:506
+#: src/LYLocal.c:508
 #, c-format
 msgid "touch %s"
 msgstr "opret %s"
 
-#: src/LYLocal.c:534
+#: src/LYLocal.c:536
 #, c-format
 msgid "move %s to %s"
 msgstr "flyt %s til %s"
 
-#: src/LYLocal.c:575
+#: src/LYLocal.c:577
 msgid "There is already a directory with that name!  Request ignored."
 msgstr "Der er allerede et filkatalog med dette navn! Anmodning ignoreret."
 
-#: src/LYLocal.c:577
+#: src/LYLocal.c:579
 msgid "There is already a file with that name!  Request ignored."
 msgstr "Der er allerede en fil med dette navn! Anmodning ignoreret."
 
-#: src/LYLocal.c:579
+#: src/LYLocal.c:581
 msgid "The specified name is already in use!  Request ignored."
 msgstr "Det anførte navn er allerede i brug! Anmodning ignoreret."
 
-#: src/LYLocal.c:590
+#: src/LYLocal.c:592
 msgid "Destination has different owner!  Request denied."
 msgstr "Mål har en anden ejer! Nægtet."
 
-#: src/LYLocal.c:593
+#: src/LYLocal.c:595
 msgid "Destination is not a valid directory!  Request denied."
 msgstr "Mål er ikke et gyldigt filkatalog! Nægtet."
 
-#: src/LYLocal.c:615
+#: src/LYLocal.c:617
 msgid "Remove all tagged files and directories?"
 msgstr "Slet alle markerede filer og filkataloger?"
 
-#: src/LYLocal.c:673
+#: src/LYLocal.c:675
 msgid "Enter new location for tagged items: "
 msgstr "Angiv en ny placering for de markerede filer: "
 
-#: src/LYLocal.c:743
+#: src/LYLocal.c:745
 msgid "Path too long"
 msgstr "Sti for lang"
 
-#: src/LYLocal.c:774
+#: src/LYLocal.c:776
 msgid "Source and destination are the same location - request ignored!"
 msgstr "Samme placering af kilde og mål - anmodning ignoreret!"
 
-#: src/LYLocal.c:831
+#: src/LYLocal.c:833
 msgid "Enter new name for directory: "
 msgstr "Indtast nyt navn på filkatalog: "
 
-#: src/LYLocal.c:833
+#: src/LYLocal.c:835
 msgid "Enter new name for file: "
 msgstr "Indtast et nyt navn på fil: "
 
-#: src/LYLocal.c:845
+#: src/LYLocal.c:847
 msgid "Illegal character (path-separator) found! Request ignored."
 msgstr "Ugyldigt tegn (sti-separator) fundet! Anmodning ignoreret."
 
-#: src/LYLocal.c:895
+#: src/LYLocal.c:897
 msgid "Enter new location for directory: "
 msgstr "Anfør ny placering af filkatalog: "
 
-#: src/LYLocal.c:901
+#: src/LYLocal.c:903
 msgid "Enter new location for file: "
 msgstr "Anfør ny placering af fil: "
 
-#: src/LYLocal.c:928
+#: src/LYLocal.c:930
 msgid "Unexpected failure - unable to find trailing path separator"
 msgstr "Uventet fejl - kan ikke finde afsluttende sti-separator"
 
-#: src/LYLocal.c:948
+#: src/LYLocal.c:950
 msgid "Source and destination are the same location!  Request ignored!"
 msgstr "Samme placering af kilde og mål! Anmodning ignoreret!"
 
-#: src/LYLocal.c:995
+#: src/LYLocal.c:997
 msgid "Modify name, location, or permission (n, l, or p): "
 msgstr "Ret n=navn, l=placering eller p=rettighed: "
 
-#: src/LYLocal.c:997
+#: src/LYLocal.c:999
 msgid "Modify name or location (n or l): "
 msgstr "Ret n=navn eller l=placering: "
 
 #.
 #. * Code for changing ownership needed here.
 #.
-#: src/LYLocal.c:1026
+#: src/LYLocal.c:1028
 msgid "This feature not yet implemented!"
 msgstr "Denne programfunktion er endnu ikke indarbejdet!"
 
-#: src/LYLocal.c:1046
+#: src/LYLocal.c:1048
 msgid "Enter name of file to create: "
 msgstr "Anfør navn på den fil som skal oprettes: "
 
-#: src/LYLocal.c:1050 src/LYLocal.c:1086
+#: src/LYLocal.c:1052 src/LYLocal.c:1088
 msgid "Illegal redirection \"//\" found! Request ignored."
 msgstr "Ugyldig omdirigering \"//\" opdaget! Anmodning ignoreret."
 
-#: src/LYLocal.c:1082
+#: src/LYLocal.c:1084
 msgid "Enter name for new directory: "
 msgstr "Anfør navn på nyt filkatalog: "
 
-#: src/LYLocal.c:1122
+#: src/LYLocal.c:1124
 msgid "Create file or directory (f or d): "
 msgstr "Opret f=fil eller d=filkatalog: "
 
-#: src/LYLocal.c:1164
+#: src/LYLocal.c:1166
 #, c-format
 msgid "Remove directory '%s'?"
 msgstr "Slet filkatalog '%s'?"
 
-#: src/LYLocal.c:1167
+#: src/LYLocal.c:1169
 msgid "Remove directory?"
 msgstr "Slet filkatalog?"
 
-#: src/LYLocal.c:1172
+#: src/LYLocal.c:1174
 #, c-format
 msgid "Remove file '%s'?"
 msgstr "Slet fil '%s'?"
 
-#: src/LYLocal.c:1174
+#: src/LYLocal.c:1176
 msgid "Remove file?"
 msgstr "Slet fil?"
 
-#: src/LYLocal.c:1179
+#: src/LYLocal.c:1181
 #, c-format
 msgid "Remove symbolic link '%s'?"
 msgstr "Slet symbolsk link '%s'?"
 
-#: src/LYLocal.c:1181
+#: src/LYLocal.c:1183
 msgid "Remove symbolic link?"
 msgstr "Slet symbolsk link"
 
-#: src/LYLocal.c:1276
+#: src/LYLocal.c:1278
 msgid "Sorry, don't know how to permit non-UNIX files yet."
 msgstr "Beklager, kun UNIX-filer kan gives rettigheder indtil videre."
 
-#: src/LYLocal.c:1306
+#: src/LYLocal.c:1308
 msgid "Unable to open permit options file"
 msgstr "Ude af stand til at åbne fil med rettighedstilvalg."
 
-#: src/LYLocal.c:1336
+#: src/LYLocal.c:1338
 msgid "Specify permissions below:"
 msgstr "Anfør rettigheder nedenfor:"
 
-#: src/LYLocal.c:1337 src/LYShowInfo.c:260
+#: src/LYLocal.c:1339 src/LYShowInfo.c:261
 msgid "Owner:"
 msgstr "Ejer:"
 
-#: src/LYLocal.c:1353
+#: src/LYLocal.c:1355
 msgid "Group"
 msgstr "Gruppe"
 
-#: src/LYLocal.c:1369
+#: src/LYLocal.c:1371
 msgid "Others:"
 msgstr "Andre:"
 
-#: src/LYLocal.c:1387
+#: src/LYLocal.c:1389
 msgid "form to permit"
 msgstr "formular som skal tillades"
 
-#: src/LYLocal.c:1482
+#: src/LYLocal.c:1484
 msgid "Invalid mode format."
 msgstr "Ugyldigt tilstandsformat."
 
-#: src/LYLocal.c:1486
+#: src/LYLocal.c:1488
 msgid "Invalid syntax format."
 msgstr "Ugyldigt syntaksformat."
 
-#: src/LYLocal.c:1668
+#: src/LYLocal.c:1670
 msgid "Warning!  UUDecoded file will exist in the directory you started Lynx."
 msgstr "Advarsel!  UUDecodet fil lægges i filkatalog hvor du startede Lynx."
 
-#: src/LYLocal.c:1858
+#: src/LYLocal.c:1860
 msgid "NULL URL pointer"
 msgstr "NULL adressepeger"
 
-#: src/LYLocal.c:1940
+#: src/LYLocal.c:1942
 #, c-format
 msgid "Executing %s "
 msgstr "Udfører %s "
 
-#: src/LYLocal.c:1943
+#: src/LYLocal.c:1945
 msgid "Executing system command. This might take a while."
 msgstr "Udfører systemkommando. Dette kan tage et øjeblik."
 
-#: src/LYLocal.c:2015
+#: src/LYLocal.c:2017
 msgid "Current directory:"
 msgstr "Aktuelle filkatalog:"
 
-#: src/LYLocal.c:2018 src/LYLocal.c:2036
+#: src/LYLocal.c:2020 src/LYLocal.c:2038
 msgid "Current selection:"
 msgstr "Aktuelle udvalg:"
 
-#: src/LYLocal.c:2022
+#: src/LYLocal.c:2024
 msgid "Nothing currently selected."
 msgstr "Intet er aktuelt udvalgt."
 
-#: src/LYLocal.c:2038
+#: src/LYLocal.c:2040
 msgid "tagged item:"
 msgstr "markeret enhed:"
 
-#: src/LYLocal.c:2039
+#: src/LYLocal.c:2041
 msgid "tagged items:"
 msgstr "markerede enheder:"
 
-#: src/LYLocal.c:2136 src/LYLocal.c:2147
+#: src/LYLocal.c:2138 src/LYLocal.c:2149
 msgid "Illegal filename; request ignored."
 msgstr "Ugyldigt filnavn: anmodning ignoreret."
 
 #. directory not writable
-#: src/LYLocal.c:2245 src/LYLocal.c:2304
+#: src/LYLocal.c:2247 src/LYLocal.c:2306
 msgid "Install in the selected directory not permitted."
 msgstr "Installering i det valgte filkatalog er ikke tilladt."
 
-#: src/LYLocal.c:2300
+#: src/LYLocal.c:2302
 msgid "The selected item is not a directory!  Request ignored."
 msgstr "Den markerede enhed er ikke et filkatalog! Anmodning ignoreret."
 
-#: src/LYLocal.c:2309
+#: src/LYLocal.c:2311
 msgid "Just a moment, ..."
 msgstr "Vent et øjeblik, ..."
 
-#: src/LYLocal.c:2326
+#: src/LYLocal.c:2328
 msgid "Error building install args"
 msgstr "Kunne ikke danne installeringsparametre"
 
-#: src/LYLocal.c:2341 src/LYLocal.c:2372
+#: src/LYLocal.c:2343 src/LYLocal.c:2374
 #, c-format
 msgid "Source and target are the same: %s"
 msgstr "Kilde og mål er det samme: %s"
 
-#: src/LYLocal.c:2348 src/LYLocal.c:2379
+#: src/LYLocal.c:2350 src/LYLocal.c:2381
 #, c-format
 msgid "Already in target directory: %s"
 msgstr "Står allerede i målkataloget: %s"
 
-#: src/LYLocal.c:2397
+#: src/LYLocal.c:2399
 msgid "Installation complete"
 msgstr "Installering fuldført"
 
-#: src/LYLocal.c:2584
+#: src/LYLocal.c:2586
 msgid "Temporary URL or list would be too long."
 msgstr "Midlertidig adresse eller listen ville blive for lang."
 
@@ -4256,19 +4257,19 @@ msgstr "Denne meddelelse blev automatisk lavet af"
 msgid "No system mailer configured"
 msgstr "Systemets postprogram er ikke sat op"
 
-#: src/LYMain.c:1022
+#: src/LYMain.c:1023
 msgid "No Winsock found, sorry."
 msgstr "Ingen \"Winsock\" fundet, beklager."
 
-#: src/LYMain.c:1225
+#: src/LYMain.c:1226
 msgid "You MUST define a valid TMP or TEMP area!"
 msgstr "Du SKAL definere et gyldigt TMP- eller TEMP-område!"
 
-#: src/LYMain.c:1278 src/LYMainLoop.c:5074
+#: src/LYMain.c:1279 src/LYMainLoop.c:5074
 msgid "No such directory"
 msgstr "Intet sådant filkatalog"
 
-#: src/LYMain.c:1463
+#: src/LYMain.c:1464
 #, c-format
 msgid ""
 "\n"
@@ -4279,7 +4280,7 @@ msgstr ""
 "Opsætningsfil \"%s\" er ikke tilgængelig.\n"
 "\n"
 
-#: src/LYMain.c:1473
+#: src/LYMain.c:1474
 #, c-format
 msgid ""
 "\n"
@@ -4290,7 +4291,7 @@ msgstr ""
 "Lynx' tegnsæt er ikke angivet.\n"
 "\n"
 
-#: src/LYMain.c:1502
+#: src/LYMain.c:1503
 #, c-format
 msgid ""
 "\n"
@@ -4301,7 +4302,7 @@ msgstr ""
 "Lynx \"edit map\" er ikke angivet.\n"
 "\n"
 
-#: src/LYMain.c:1578
+#: src/LYMain.c:1579
 #, c-format
 msgid ""
 "\n"
@@ -4312,68 +4313,68 @@ msgstr ""
 "Lynx-fil \"%s\" er ikke tilgængelig.\n"
 "\n"
 
-#: src/LYMain.c:1653
+#: src/LYMain.c:1654
 #, c-format
 msgid "Ignored %d characters from standard input.\n"
 msgstr ""
 
-#: src/LYMain.c:1655
+#: src/LYMain.c:1656
 #, c-format
 msgid "Use \"-stdin\" or \"-\" to tell how to handle piped input.\n"
 msgstr ""
 
-#: src/LYMain.c:1803
+#: src/LYMain.c:1804
 msgid "Warning:"
 msgstr "Advarsel:"
 
-#: src/LYMain.c:2371
+#: src/LYMain.c:2372
 msgid "persistent cookies state will be changed in next session only."
 msgstr "Ændring for varige cookier vil kun gælde næste session."
 
-#: src/LYMain.c:2616 src/LYMain.c:2661
+#: src/LYMain.c:2617 src/LYMain.c:2662
 #, c-format
 msgid "Lynx: ignoring unrecognized charset=%s\n"
 msgstr "Lynx: Ignorerer ukendt tegnsæt=%s\n"
 
-#: src/LYMain.c:3180
+#: src/LYMain.c:3181
 #, c-format
 msgid "%s Version %s (%s)"
 msgstr "%s Version %s (%s)"
 
-#: src/LYMain.c:3218
+#: src/LYMain.c:3219
 #, c-format
 msgid "Built on %s %s %s\n"
 msgstr "Bygget på %s %s %s\n"
 
-#: src/LYMain.c:3240
+#: src/LYMain.c:3241
 msgid "Copyrights held by the Lynx Developers Group,"
 msgstr ""
 
-#: src/LYMain.c:3241
+#: src/LYMain.c:3242
 #, fuzzy
 msgid "the University of Kansas, CERN, and other contributors."
 msgstr "Ophavsret indehaves af University of Kansas, CERN og andre bidragydere."
 
-#: src/LYMain.c:3242
+#: src/LYMain.c:3243
 #, fuzzy
 msgid "Distributed under the GNU General Public License (Version 2)."
 msgstr "Distribueret under GNU General Public License."
 
-#: src/LYMain.c:3243
+#: src/LYMain.c:3244
 msgid "See http://lynx.isc.org/ and the online help for more information."
 msgstr "Se http://lynx.isc.org/ og online-hjælpen for flere oplysninger."
 
-#: src/LYMain.c:4060
+#: src/LYMain.c:4065
 #, c-format
 msgid "USAGE: %s [options] [file]\n"
 msgstr "BRUG: %s [valgmuligheder] [fil]\n"
 
-#: src/LYMain.c:4061
+#: src/LYMain.c:4066
 #, c-format
 msgid "Options are:\n"
 msgstr "Valgmuligheder er:\n"
 
-#: src/LYMain.c:4360
+#: src/LYMain.c:4365
 #, c-format
 msgid "%s: Invalid Option: %s\n"
 msgstr "%s: Ugyldig indstilling: %s\n"
@@ -4402,7 +4403,7 @@ msgstr "Hjælpeskærm"
 msgid "System Index"
 msgstr "Systemfortegnelse"
 
-#: src/LYMainLoop.c:3585 src/LYMainLoop.c:5324
+#: src/LYMainLoop.c:3585 src/LYMainLoop.c:5320
 msgid "Entry into main screen"
 msgstr "Indgang til hovedskærm"
 
@@ -4426,65 +4427,65 @@ msgstr "En del af stien er ikke et filkatalog"
 msgid "failed to change directory"
 msgstr "kunne ikke skifte filkatalog."
 
-#: src/LYMainLoop.c:6256
+#: src/LYMainLoop.c:6252
 msgid "Reparsing document under current settings..."
 msgstr "Genfortolker dokument under nuværende indstillinger ..."
 
-#: src/LYMainLoop.c:6547
+#: src/LYMainLoop.c:6543
 #, c-format
 msgid "Fatal error - could not open output file %s\n"
 msgstr "Kritisk fejl - kunne ikke åbne uddatafil %s\n"
 
-#: src/LYMainLoop.c:6884
+#: src/LYMainLoop.c:6880
 msgid "TABLE center enable."
 msgstr "TABEL-centrering slået til."
 
-#: src/LYMainLoop.c:6887
+#: src/LYMainLoop.c:6883
 msgid "TABLE center disable."
 msgstr "TABEL-centrering slået fra."
 
-#: src/LYMainLoop.c:6964
+#: src/LYMainLoop.c:6960
 msgid "Current URL is empty."
 msgstr "Aktuelle adresse er tom."
 
-#: src/LYMainLoop.c:6966 src/LYUtils.c:1817
+#: src/LYMainLoop.c:6962 src/LYUtils.c:1828
 msgid "Copy to clipboard failed."
 msgstr "Kopiering til klippebord slog fejl."
 
-#: src/LYMainLoop.c:6968
+#: src/LYMainLoop.c:6964
 msgid "Document URL put to clipboard."
 msgstr "Dokumentets adresse overført til klippebord."
 
-#: src/LYMainLoop.c:6970
+#: src/LYMainLoop.c:6966
 msgid "Link URL put to clipboard."
 msgstr "Linkets adresse overført til klippebord."
 
-#: src/LYMainLoop.c:6997
+#: src/LYMainLoop.c:6993
 msgid "No URL in the clipboard."
 msgstr "Ingen adresse ligger på klippebord."
 
-#: src/LYMainLoop.c:7668 src/LYMainLoop.c:7838
+#: src/LYMainLoop.c:7664 src/LYMainLoop.c:7834
 msgid "-index-"
 msgstr "-indeks-"
 
-#: src/LYMainLoop.c:7778
+#: src/LYMainLoop.c:7774
 msgid "lynx: Can't access startfile"
 msgstr "lynx: Kan ikke få adgang til startfil"
 
-#: src/LYMainLoop.c:7790
+#: src/LYMainLoop.c:7786
 msgid "lynx: Start file could not be found or is not text/html or text/plain"
 msgstr "lynx: startfil fandtes ikke eller er ikke i text/html, text/plain format"
 
-#: src/LYMainLoop.c:7791
+#: src/LYMainLoop.c:7787
 msgid "      Exiting..."
 msgstr "      Afslutter ..."
 
-#: src/LYMainLoop.c:7832
+#: src/LYMainLoop.c:7828
 msgid "-more-"
 msgstr "-mere-"
 
 #. Enable scrolling.
-#: src/LYNews.c:183
+#: src/LYNews.c:186
 msgid "You will be posting to:"
 msgstr "Du vil sende til:"
 
@@ -4492,7 +4493,7 @@ msgstr "Du vil sende til:"
 #. * Get the mail address for the From header, offering personal_mail_address
 #. * as default.
 #.
-#: src/LYNews.c:192
+#: src/LYNews.c:195
 msgid ""
 "\n"
 "\n"
@@ -4506,7 +4507,7 @@ msgstr ""
 #. * Get the Subject header, offering the current document's title as the
 #. * default if this is a followup rather than a new post.  - FM
 #.
-#: src/LYNews.c:209
+#: src/LYNews.c:212
 msgid ""
 "\n"
 "\n"
@@ -4516,7 +4517,7 @@ msgstr ""
 "\n"
 " Indtast eller ret venligst emnelinjen\n"
 
-#: src/LYNews.c:299
+#: src/LYNews.c:302
 msgid ""
 "\n"
 "\n"
@@ -4529,7 +4530,7 @@ msgstr ""
 #.
 #. * Use the built in line editior.
 #.
-#: src/LYNews.c:356
+#: src/LYNews.c:359
 msgid ""
 "\n"
 "\n"
@@ -4539,7 +4540,7 @@ msgstr ""
 "\n"
 " Skriv dit indlæg nedenfor."
 
-#: src/LYNews.c:402
+#: src/LYNews.c:405
 msgid "Message has no original text!"
 msgstr "Indlæg har ingen oprindelig tekst!"
 
@@ -5194,38 +5195,38 @@ msgstr "Lynx: Kan ikke starte op, CERN-regelfil %s findes ikke\n"
 msgid "(no name)"
 msgstr "(intet navn)"
 
-#: src/LYReadCFG.c:1880
+#: src/LYReadCFG.c:1881
 #, c-format
 msgid "More than %d nested lynx.cfg includes -- perhaps there is a loop?!?\n"
 msgstr "Flere end %d inkluderingsfiler i lynx.cfg - måske en sløjfe!?\n"
 
-#: src/LYReadCFG.c:1882
+#: src/LYReadCFG.c:1883
 #, c-format
 msgid "Last attempted include was '%s',\n"
 msgstr "Sidste inkluderingsfil der forsøgtes indlæst var '%s',\n"
 
-#: src/LYReadCFG.c:1883
+#: src/LYReadCFG.c:1884
 #, c-format
 msgid "included from '%s'.\n"
 msgstr "inkluderet fra '%s'.\n"
 
-#: src/LYReadCFG.c:2291 src/LYReadCFG.c:2304 src/LYReadCFG.c:2362
+#: src/LYReadCFG.c:2292 src/LYReadCFG.c:2305 src/LYReadCFG.c:2363
 msgid "The following is read from your lynx.cfg file."
 msgstr "Følgende er læst fra din lynx.cfg-fil."
 
-#: src/LYReadCFG.c:2292 src/LYReadCFG.c:2305
+#: src/LYReadCFG.c:2293 src/LYReadCFG.c:2306
 msgid "Please read the distribution"
 msgstr "Læs venligst distributionen"
 
-#: src/LYReadCFG.c:2298 src/LYReadCFG.c:2308
+#: src/LYReadCFG.c:2299 src/LYReadCFG.c:2309
 msgid "for more comments."
 msgstr "for flere kommentarer."
 
-#: src/LYReadCFG.c:2344
+#: src/LYReadCFG.c:2345
 msgid "RELOAD THE CHANGES"
 msgstr "GENINDLÆS ÆNDRINGERNE"
 
-#: src/LYReadCFG.c:2352
+#: src/LYReadCFG.c:2353
 msgid "Your primary configuration"
 msgstr "Din primære opsætning"
 
@@ -5261,186 +5262,186 @@ msgstr "Aktuelt valgte enhed"
 msgid "Full name:"
 msgstr "Fulde navn:"
 
-#: src/LYShowInfo.c:212
+#: src/LYShowInfo.c:213
 msgid "Unable to follow link"
 msgstr "Ude af stand til at følge link"
 
-#: src/LYShowInfo.c:214
+#: src/LYShowInfo.c:215
 msgid "Points to file:"
 msgstr "Peger til fil:"
 
-#: src/LYShowInfo.c:219
+#: src/LYShowInfo.c:220
 msgid "Name of owner:"
 msgstr "Ejers navn:"
 
-#: src/LYShowInfo.c:222
+#: src/LYShowInfo.c:223
 msgid "Group name:"
 msgstr "Gruppes navn:"
 
-#: src/LYShowInfo.c:224
+#: src/LYShowInfo.c:225
 msgid "File size:"
 msgstr "Filstr.:"
 
-#: src/LYShowInfo.c:226
+#: src/LYShowInfo.c:227
 msgid "(bytes)"
 msgstr "(bytes)"
 
 #.
 #. * Include date and time information.
 #.
-#: src/LYShowInfo.c:231
+#: src/LYShowInfo.c:232
 msgid "Creation date:"
 msgstr "Oprettelsesdato:"
 
-#: src/LYShowInfo.c:234
+#: src/LYShowInfo.c:235
 msgid "Last modified:"
 msgstr "Sidst rettet:"
 
-#: src/LYShowInfo.c:237
+#: src/LYShowInfo.c:238
 msgid "Last accessed:"
 msgstr "Sidst tilgået:"
 
-#: src/LYShowInfo.c:243
+#: src/LYShowInfo.c:244
 msgid "Access Permissions"
 msgstr "Adgangsrettigheder"
 
-#: src/LYShowInfo.c:278
+#: src/LYShowInfo.c:279
 msgid "Group:"
 msgstr "Gruppe:"
 
-#: src/LYShowInfo.c:298
+#: src/LYShowInfo.c:299
 msgid "World:"
 msgstr "Alle:"
 
-#: src/LYShowInfo.c:305
+#: src/LYShowInfo.c:306
 msgid "File that you are currently viewing"
 msgstr "Oplysninger om det aktuelle dokument:"
 
-#: src/LYShowInfo.c:313 src/LYShowInfo.c:417
+#: src/LYShowInfo.c:314 src/LYShowInfo.c:418
 msgid "Linkname:"
 msgstr "Linknavn:"
 
-#: src/LYShowInfo.c:319 src/LYShowInfo.c:334
+#: src/LYShowInfo.c:320 src/LYShowInfo.c:335
 msgid "Charset:"
 msgstr "Tegnsæt:"
 
-#: src/LYShowInfo.c:333
+#: src/LYShowInfo.c:334
 msgid "(assumed)"
 msgstr "(formodet)"
 
-#: src/LYShowInfo.c:340
+#: src/LYShowInfo.c:341
 msgid "Server:"
 msgstr "Server:"
 
-#: src/LYShowInfo.c:343
+#: src/LYShowInfo.c:344
 msgid "Date:"
 msgstr "Dato:"
 
-#: src/LYShowInfo.c:346
+#: src/LYShowInfo.c:347
 msgid "Last Mod:"
 msgstr "Sidst ret:"
 
-#: src/LYShowInfo.c:351
+#: src/LYShowInfo.c:352
 msgid "Expires:"
 msgstr "Udløber:"
 
-#: src/LYShowInfo.c:354
+#: src/LYShowInfo.c:355
 msgid "Cache-Control:"
 msgstr "Cachestyring:"
 
-#: src/LYShowInfo.c:357
+#: src/LYShowInfo.c:358
 msgid "Content-Length:"
 msgstr "'Content-Length':"
 
-#: src/LYShowInfo.c:361
+#: src/LYShowInfo.c:362
 msgid "Length:"
 msgstr "Længde:"
 
-#: src/LYShowInfo.c:366
+#: src/LYShowInfo.c:367
 msgid "Language:"
 msgstr "Sprog:"
 
-#: src/LYShowInfo.c:373
+#: src/LYShowInfo.c:374
 msgid "Post Data:"
 msgstr "POST-data:"
 
-#: src/LYShowInfo.c:376
+#: src/LYShowInfo.c:377
 msgid "Post Content Type:"
 msgstr "POST-indholdstype:"
 
-#: src/LYShowInfo.c:379
+#: src/LYShowInfo.c:380
 msgid "Owner(s):"
 msgstr "Ejer(e):"
 
-#: src/LYShowInfo.c:384
+#: src/LYShowInfo.c:385
 msgid "size:"
 msgstr "Str:"
 
-#: src/LYShowInfo.c:386
+#: src/LYShowInfo.c:387
 msgid "lines"
 msgstr "linjer"
 
-#: src/LYShowInfo.c:390
+#: src/LYShowInfo.c:391
 msgid "forms mode"
 msgstr "formulartilstand"
 
-#: src/LYShowInfo.c:392
+#: src/LYShowInfo.c:393
 msgid "source"
 msgstr "kilde"
 
-#: src/LYShowInfo.c:393
+#: src/LYShowInfo.c:394
 msgid "normal"
 msgstr "normal"
 
-#: src/LYShowInfo.c:395
+#: src/LYShowInfo.c:396
 msgid ", safe"
 msgstr ", sikker"
 
-#: src/LYShowInfo.c:397
+#: src/LYShowInfo.c:398
 msgid ", via internal link"
 msgstr ", via internt link"
 
-#: src/LYShowInfo.c:402
+#: src/LYShowInfo.c:403
 msgid ", no-cache"
 msgstr ", no-cache"
 
-#: src/LYShowInfo.c:404
+#: src/LYShowInfo.c:405
 msgid ", ISMAP script"
 msgstr ", ISMAP-script"
 
-#: src/LYShowInfo.c:406
+#: src/LYShowInfo.c:407
 msgid ", bookmark file"
 msgstr ", bogmærkefil"
 
-#: src/LYShowInfo.c:410
+#: src/LYShowInfo.c:411
 msgid "mode:"
 msgstr "Tilstand:"
 
-#: src/LYShowInfo.c:416
+#: src/LYShowInfo.c:417
 msgid "Link that you currently have selected"
 msgstr "Aktuelt valgte link"
 
-#: src/LYShowInfo.c:425
+#: src/LYShowInfo.c:426
 msgid "Method:"
 msgstr "Metode:"
 
-#: src/LYShowInfo.c:429
+#: src/LYShowInfo.c:430
 msgid "Enctype:"
 msgstr "Kod.type:"
 
-#: src/LYShowInfo.c:435
+#: src/LYShowInfo.c:436
 msgid "Action:"
 msgstr "Handling:"
 
-#: src/LYShowInfo.c:440
+#: src/LYShowInfo.c:441
 msgid "(Form field)"
 msgstr "(Formularfelt)"
 
-#: src/LYShowInfo.c:449
+#: src/LYShowInfo.c:450
 msgid "No Links on the current page"
 msgstr "Ingen links på denne side"
 
-#: src/LYShowInfo.c:454
+#: src/LYShowInfo.c:455
 msgid "Server Headers:"
 msgstr "Server-info:"
 
@@ -5493,33 +5494,33 @@ msgstr "Upload til:"
 msgid "Upload options:"
 msgstr "Valgmuligheder for uploads:"
 
-#: src/LYUtils.c:1819
+#: src/LYUtils.c:1830
 msgid "Download document URL put to clipboard."
 msgstr "Hjemtag dokument fra adressen på klippebord."
 
-#: src/LYUtils.c:2604
+#: src/LYUtils.c:2615
 msgid "Unexpected access protocol for this URL scheme."
 msgstr "Uventet adgangsprotokol for denne adressetype."
 
-#: src/LYUtils.c:3408
+#: src/LYUtils.c:3419
 msgid "Too many tempfiles"
 msgstr "For mange midlertidige filer"
 
-#: src/LYUtils.c:3708
+#: src/LYUtils.c:3719
 msgid "unknown restriction"
 msgstr "ukendt begrænsning"
 
-#: src/LYUtils.c:3739
+#: src/LYUtils.c:3750
 #, c-format
 msgid "No restrictions set.\n"
 msgstr "Ingen begrænsninger sat.\n"
 
-#: src/LYUtils.c:3742
+#: src/LYUtils.c:3753
 #, c-format
 msgid "Restrictions set:\n"
 msgstr "Begrænsninger sat:\n"
 
-#: src/LYUtils.c:5120
+#: src/LYUtils.c:5131
 msgid "Cannot find HOME directory"
 msgstr "Kan ikke finde HOME-katalog"
 
@@ -6115,6 +6116,9 @@ msgstr ""
 
 #~ msgid "History List maximum reached!  Document not pushed."
 #~ msgstr "Antal linjer i historikliste udtømt! Dokument ikke skubbet ud."
+
+#~ msgid "Socket read failed for 180,000 tries."
+#~ msgstr "Læsning af sokkel slog fejl i 180.000 forsøg."
 
 #~ msgid "reason unknown."
 #~ msgstr "ukendt årsag."
