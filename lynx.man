@@ -1,4 +1,4 @@
-.\" $LynxId: lynx.man,v 1.81 2008/09/10 13:09:54 tom Exp $
+.\" $LynxId: lynx.man,v 1.83 2008/12/07 22:41:13 tom Exp $
 .nr N -1
 .nr D 5
 .TH LYNX 1
@@ -87,8 +87,8 @@ e.g.,
 Other option-values are ignored.
 .PP
 The default boolean, number and string option values that are compiled
-into lynx are displayed in the help-message provided by \fBlynx -help\fP.
-Some of those may differ according to how lynx was built;
+into \fILynx\fP are displayed in the help-message provided by \fBlynx -help\fP.
+Some of those may differ according to how \fILynx\fP was built;
 see the help message itself for these values.
 The \fB-help\fP option is processed before any option, including those
 that control reading from the lynx.cfg file.
@@ -115,7 +115,7 @@ charset for documents that don't specify it.
 .TP
 .B \-assume_local_charset\fR=\fIMIMEname
 charset assumed for local files,
-i.e., files which lynx creates such as internal pages for the options menu.
+i.e., files which \fILynx\fP creates such as internal pages for the options menu.
 .TP
 .B \-assume_unrec_charset\fR=\fIMIMEname
 use this instead of unrecognized charsets.
@@ -512,6 +512,9 @@ or CJK mode for the startup character set.
 .B \-realm
 restricts access to URLs in the starting realm.
 .TP
+.B \-read_timeout\fR=\fIN
+Sets the read-timeout, where N is given in seconds.
+.TP
 .B \-reload
 flushes the cache on a proxy server
 (only the first document affected).
@@ -839,12 +842,14 @@ This applies only to DOS versions compiled with WATTCP or WATT-32.
 .TP
 .B \-width\fR=\fINUMBER
 number of columns for formatting of dumps, default is 80.
+This is limited by the number of columns that \fILynx\fP could display,
+typically 1024 (the \fIMAX_LINE\fP symbol).
 .TP
 .B \-with_backspaces
 emit backspaces in output if \fB\-dump\fR'ing or \fB\-crawl\fR'ing (like 'man' does)
 .TP
 .B \-xhtml_parsing
-tells lynx that it can ignore certain tags which have no content
+tells \fILynx\fP that it can ignore certain tags which have no content
 in an XHTML 1.0 document.
 For example "<p/>" will be discarded.
 .SH COMMANDS
@@ -897,7 +902,7 @@ See the userdefs.h file for more information.
 .TP
 .B LYNX_HELPFILE
 If set, this variable overrides the compiled-in URL and configuration
-file URL for the lynx help file.
+file URL for the \fILynx\fP help file.
 .TP
 .B LYNX_LOCALEDIR
 If set, this variable overrides the compiled-in location of the

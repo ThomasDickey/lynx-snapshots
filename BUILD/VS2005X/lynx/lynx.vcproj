@@ -41,7 +41,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\lynx;&quot;$(SolutionDir)..\..\..&quot;;&quot;$(SolutionDir)..\..\..\lib&quot;;&quot;$(SolutionDir)..\..\..\WWW\Library\Implementation&quot;;&quot;$(SolutionDir)..\..\..\src&quot;;&quot;$(SolutionDir)..\..\..\src\chrtrans&quot;"
-				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;_MBCS;HAVE_CONFIG_H;$(NOINHERIT)"
+				PreprocessorDefinitions="WIN32;_CONSOLE;HAVE_CONFIG_H;DONT_HAVE_TM_GMTOFF"
 				GeneratePreprocessedFile="0"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -121,7 +121,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalIncludeDirectories="..\lynx;&quot;$(SolutionDir)..\..\..&quot;;&quot;$(SolutionDir)..\..\..\lib&quot;;&quot;$(SolutionDir)..\..\..\WWW\Library\Implementation&quot;;&quot;$(SolutionDir)..\..\..\src&quot;;&quot;$(SolutionDir)..\..\..\src\chrtrans&quot;"
-				PreprocessorDefinitions="WIN32;_CONSOLE;_MBCS;HAVE_CONFIG_H;$(NOINHERIT)"
+				PreprocessorDefinitions="WIN32;_CONSOLE;_MBCS;HAVE_CONFIG_H;DONT_HAVE_TM_GMTOFF"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
@@ -440,6 +440,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\src\LYmktime.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\src\LYNews.c"
 				>
 			</File>
@@ -493,6 +497,10 @@
 			</File>
 			<File
 				RelativePath="..\..\..\src\LYUtils.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\parsdate.c"
 				>
 			</File>
 			<File

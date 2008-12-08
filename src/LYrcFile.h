@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYrcFile.h,v 1.27 2008/09/10 20:28:59 tom Exp $
+ * $LynxId: LYrcFile.h,v 1.28 2008/12/07 20:52:27 tom Exp $
  */
 #ifndef LYRCFILE_H
 #define LYRCFILE_H
@@ -69,7 +69,6 @@
 #define RC_DISPLAY                      "display"
 #define RC_DISPLAY_CHARSET_CHOICE       "display_charset_choice"
 #define RC_DOWNLOADER                   "downloader"
-#define RC_POSITIONABLE_EDITOR		"positionable_editor"
 #define RC_EMACS_KEYS                   "emacs_keys"
 #define RC_EMACS_KEYS_ALWAYS_ON         "emacs_keys_always_on"
 #define RC_ENABLE_LYNXRC                "enable_lynxrc"
@@ -169,6 +168,7 @@
 #define RC_PERSONAL_EXTENSION_MAP       "personal_extension_map"
 #define RC_PERSONAL_MAILCAP             "personal_mailcap"
 #define RC_PERSONAL_MAIL_ADDRESS        "personal_mail_address"
+#define RC_POSITIONABLE_EDITOR		"positionable_editor"
 #define RC_PREFERRED_CHARSET            "preferred_charset"
 #define RC_PREFERRED_ENCODING           "preferred_encoding"
 #define RC_PREFERRED_LANGUAGE           "preferred_language"
@@ -181,6 +181,7 @@
 #define RC_PRINTER                      "printer"
 #define RC_QUIT_DEFAULT_YES             "quit_default_yes"
 #define RC_RAW_MODE                     "raw_mode"
+#define RC_READ_TIMEOUT                 "read_timeout"
 #define RC_REFERER_WITH_QUERY           "referer_with_query"
 #define RC_REPLAYSECS                   "replaysecs"
 #define RC_REUSE_TEMPFILES              "reuse_tempfiles"
@@ -252,8 +253,8 @@
 #define RC_VI_KEYS                      "vi_keys"
 #define RC_VI_KEYS_ALWAYS_ON            "vi_keys_always_on"
 #define RC_WAIS_PROXY                   "wais_proxy"
-#define RC_XLOADIMAGE_COMMAND           "xloadimage_command"
 #define RC_XHTML_PARSING                "xhtml_parsing"
+#define RC_XLOADIMAGE_COMMAND           "xloadimage_command"
 #define RC_ZCAT_PATH                    "zcat_path"
 #define RC_ZIP_PATH                     "zip_path"
 

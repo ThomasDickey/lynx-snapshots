@@ -1,3 +1,6 @@
+/*
+ * $LynxId: LYNews.c,v 1.53 2008/12/07 22:13:37 tom Exp $
+ */
 #include <HTUtils.h>
 #ifndef DISABLE_NEWS
 #include <HTParse.h>
@@ -82,8 +85,8 @@ static BOOLEAN message_has_content(const char *filename,
 char *LYNewsPost(char *newsgroups,
 		 BOOLEAN followup)
 {
-    char user_input[1024];
-    char CJKinput[1024];
+    char user_input[MAX_LINE];
+    char CJKinput[MAX_LINE];
     char *cp = NULL;
     const char *kp = NULL;
     int c = 0;			/* user input */

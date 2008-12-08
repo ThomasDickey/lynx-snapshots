@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMain.c,v 1.186 2008/09/10 23:05:36 tom Exp $
+ * $LynxId: LYMain.c,v 1.187 2008/12/07 20:52:27 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTP.h>
@@ -555,6 +555,7 @@ int ssl_noprompt = FORCE_PROMPT_DFT;
 #endif
 
 int connect_timeout = 18000; /*=180000*0.1 - used in HTDoConnect.*/
+int reading_timeout = 18000; /*=180000*0.1 - used in HTDoConnect.*/
 
 #ifdef EXP_JUSTIFY_ELTS
 BOOL ok_justify = FALSE;
@@ -3781,6 +3782,10 @@ or CJK mode for the startup character set"
    PARSE_SET(
       "realm",		4|SET_ARG,		check_realm,
       "restricts access to URLs in the starting realm"
+   ),
+   PARSE_INT(
+      "read_timeout",	4|NEED_INT_ARG,		reading_timeout,
+      "=N\nset the N-second read-timeout"
    ),
    PARSE_SET(
       "reload",		4|SET_ARG,		reloading,

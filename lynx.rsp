@@ -71,7 +71,9 @@
 ../obj/LYStrings.obj
 ../obj/LYTraversal.obj
 ../obj/LYUpload.obj
+../obj/LYmktime.obj
 ../obj/LYrcFile.obj
+../obj/parsdate.obj
 ../obj/SGML.obj
 ../obj/TRSTable.obj
 ../obj/UCAuto.obj

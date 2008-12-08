@@ -1,4 +1,4 @@
-dnl $LynxId: aclocal.m4,v 1.126 2008/06/30 23:59:52 tom Exp $
+dnl $LynxId: aclocal.m4,v 1.127 2008/12/08 00:40:44 tom Exp $
 dnl Macros for auto-configure script.
 dnl by T.E.Dickey <dickey@invisible-island.net>
 dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
@@ -1268,13 +1268,14 @@ AC_TRY_LINK([#include <stdio.h>],[printf("Hello world");],,
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_CHECK_ERRNO version: 9 updated: 2001/12/30 18:03:23
+dnl CF_CHECK_ERRNO version: 10 updated: 2008/08/22 16:33:22
 dnl --------------
 dnl Check for data that is usually declared in <stdio.h> or <errno.h>, e.g.,
 dnl the 'errno' variable.  Define a DECL_xxx symbol if we must declare it
 dnl ourselves.
 dnl
 dnl $1 = the name to check
+dnl $2 = the assumed type
 AC_DEFUN([CF_CHECK_ERRNO],
 [
 AC_CACHE_CHECK(if external $1 is declared, cf_cv_dcl_$1,[
@@ -1285,7 +1286,7 @@ AC_CACHE_CHECK(if external $1 is declared, cf_cv_dcl_$1,[
 #include <stdio.h>
 #include <sys/types.h>
 #include <errno.h> ],
-    [long x = (long) $1],
+    ifelse($2,,int,$2) x = (ifelse($2,,int,$2)) $1,
     [cf_cv_dcl_$1=yes],
     [cf_cv_dcl_$1=no])
 ])
@@ -1296,7 +1297,7 @@ if test "$cf_cv_dcl_$1" = no ; then
 fi
 
 # It's possible (for near-UNIX clones) that the data doesn't exist
-CF_CHECK_EXTERN_DATA($1,int)
+CF_CHECK_EXTERN_DATA($1,ifelse($2,,int,$2))
 ])dnl
 dnl ---------------------------------------------------------------------------
 dnl CF_CHECK_EXTERN_DATA version: 3 updated: 2001/12/30 18:03:23
@@ -1600,7 +1601,7 @@ fi
 AC_CHECK_HEADERS($cf_cv_ncurses_header)
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_CURSES_LIBS version: 27 updated: 2008/03/23 14:48:54
+dnl CF_CURSES_LIBS version: 28 updated: 2008/10/30 20:16:05
 dnl --------------
 dnl Look for the curses libraries.  Older curses implementations may require
 dnl termcap/termlib to be linked as well.  Call CF_CURSES_CPPFLAGS first.
@@ -1666,7 +1667,7 @@ if test ".$ac_cv_func_initscr" != .yes ; then
 
     # Check for library containing initscr
     test "$cf_term_lib" != predefined && test "$cf_term_lib" != unknown && LIBS="-l$cf_term_lib $cf_save_LIBS"
-    for cf_curs_lib in $cf_check_list xcurses jcurses unknown
+ 	for cf_curs_lib in $cf_check_list xcurses jcurses pdcurses unknown
     do
         AC_CHECK_LIB($cf_curs_lib,initscr,[break])
     done
@@ -2531,7 +2532,7 @@ if test "$GCC" = yes ; then
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_GCC_WARNINGS version: 22 updated: 2007/07/29 09:55:12
+dnl CF_GCC_WARNINGS version: 23 updated: 2008/07/26 17:54:02
 dnl ---------------
 dnl Check if the compiler supports useful warning options.  There's a few that
 dnl we don't use, simply because they're too noisy:
@@ -2626,7 +2627,7 @@ then
 				;;
 			Winline) #(vi
 				case $GCC_VERSION in
-				3.3*)
+				[[34]].*)
 					CF_VERBOSE(feature is broken in gcc $GCC_VERSION)
 					continue;;
 				esac
@@ -2720,11 +2721,31 @@ make an error
 test "$cf_cv_gnu_source" = yes && CPPFLAGS="$CPPFLAGS -D_GNU_SOURCE"
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_HEADER_PATH version: 8 updated: 2002/11/10 14:46:59
+dnl CF_HEADER_PATH version: 9 updated: 2008/12/07 19:38:31
 dnl --------------
-dnl Construct a search-list for a nonstandard header-file
+dnl Construct a search-list of directories for a nonstandard header-file
+dnl
+dnl Parameters
+dnl	$1 = the variable to return as result
+dnl	$2 = the package name
 AC_DEFUN([CF_HEADER_PATH],
-[CF_SUBDIR_PATH($1,$2,include)
+[
+cf_header_path_list=""
+if test -n "${CFLAGS}${CPPFLAGS}" ; then
+	for cf_header_path in $CPPFLAGS $CFLAGS
+	do
+		case $cf_header_path in #(vi
+		-I*)
+			cf_header_path=`echo ".$cf_header_path" |sed -e 's/^...//' -e 's,/include$,,'`
+			CF_ADD_SUBDIR_PATH($1,$2,include,$cf_header_path,NONE)
+			cf_header_path_list="$cf_header_path_list [$]$1"
+			;;
+		esac
+	done
+fi
+
+CF_SUBDIR_PATH($1,$2,include)
+
 test "$includedir" != NONE && \
 test "$includedir" != "/usr/include" && \
 test -d "$includedir" && {
@@ -2739,6 +2760,7 @@ test -d "$oldincludedir" && {
 	test -d $oldincludedir/$2 && $1="[$]$1 $oldincludedir/$2"
 }
 
+$1="$cf_header_path_list [$]$1"
 ])dnl
 dnl ---------------------------------------------------------------------------
 dnl CF_HELP_MESSAGE version: 3 updated: 1998/01/14 10:56:23
@@ -2905,11 +2927,33 @@ AC_TRY_COMPILE([
 test $cf_cv_path_lastlog != no && AC_DEFINE(USE_LASTLOG)
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_LIBRARY_PATH version: 7 updated: 2002/11/10 14:46:59
+dnl CF_LIBRARY_PATH version: 8 updated: 2008/12/07 19:38:31
 dnl ---------------
-dnl Construct a search-list for a nonstandard library-file
+dnl Construct a search-list of directories for a nonstandard library-file
+dnl
+dnl Parameters
+dnl	$1 = the variable to return as result
+dnl	$2 = the package name
 AC_DEFUN([CF_LIBRARY_PATH],
-[CF_SUBDIR_PATH($1,$2,lib)])dnl
+[
+cf_library_path_list=""
+if test -n "${LDFLAGS}${LIBS}" ; then
+	for cf_library_path in $LDFLAGS $LIBS
+	do
+		case $cf_library_path in #(vi
+		-L*)
+			cf_library_path=`echo ".$cf_library_path" |sed -e 's/^...//' -e 's,/lib$,,'`
+			CF_ADD_SUBDIR_PATH($1,$2,lib,$cf_library_path,NONE)
+			cf_library_path_list="$cf_library_path_list [$]$1"
+			;;
+		esac
+	done
+fi
+
+CF_SUBDIR_PATH($1,$2,lib)
+
+$1="$cf_library_path_list [$]$1"
+])dnl
 dnl ---------------------------------------------------------------------------
 dnl CF_LOCALE version: 4 updated: 2003/02/16 08:16:04
 dnl ---------
@@ -4783,7 +4827,7 @@ AC_DEFUN([CF_UPPER],
 $1=`echo "$2" | sed y%abcdefghijklmnopqrstuvwxyz./-%ABCDEFGHIJKLMNOPQRSTUVWXYZ___%`
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_UTF8_LIB version: 4 updated: 2003/03/01 18:36:42
+dnl CF_UTF8_LIB version: 5 updated: 2008/10/17 19:37:52
 dnl -----------
 dnl Check for multibyte support, and if not found, utf8 compatibility library
 AC_DEFUN([CF_UTF8_LIB],
@@ -4793,18 +4837,18 @@ AC_CACHE_CHECK(for multibyte character support,cf_cv_utf8_lib,[
 	AC_TRY_LINK([
 #include <stdlib.h>],[putwc(0,0);],
 	[cf_cv_utf8_lib=yes],
-	[LIBS="-lutf8 $LIBS"
-	 AC_TRY_LINK([
-#include <libutf8.h>],[putwc(0,0);],
+	[CF_FIND_LINKAGE([
+#include <libutf8.h>],[putwc(0,0);],utf8,
 		[cf_cv_utf8_lib=add-on],
 		[cf_cv_utf8_lib=no])
-	LIBS="$cf_save_LIBS"
 ])])
 
 # HAVE_LIBUTF8_H is used by ncurses if curses.h is shared between
 # ncurses/ncursesw:
 if test "$cf_cv_utf8_lib" = "add-on" ; then
 	AC_DEFINE(HAVE_LIBUTF8_H)
+	CF_ADD_INCDIR($cf_cv_header_path_utf8)
+	CF_ADD_LIBDIR($cf_cv_library_path_utf8)
 	LIBS="-lutf8 $LIBS"
 fi
 ])dnl
@@ -5255,7 +5299,7 @@ AC_TRY_LINK([
 test $cf_cv_need_xopen_extension = yes && CPPFLAGS="$CPPFLAGS -D_XOPEN_SOURCE_EXTENDED"
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_XOPEN_SOURCE version: 25 updated: 2007/01/29 18:36:38
+dnl CF_XOPEN_SOURCE version: 26 updated: 2008/07/27 11:26:57
 dnl ---------------
 dnl Try to get _XOPEN_SOURCE defined properly that we can use POSIX functions,
 dnl or adapt to the vendor's definitions to get equivalent functionality,
@@ -5275,7 +5319,7 @@ case $host_os in #(vi
 aix[[45]]*) #(vi
 	CPPFLAGS="$CPPFLAGS -D_ALL_SOURCE"
 	;;
-freebsd*) #(vi
+freebsd*|dragonfly*) #(vi
 	# 5.x headers associate
 	#	_XOPEN_SOURCE=600 with _POSIX_C_SOURCE=200112L
 	#	_XOPEN_SOURCE=500 with _POSIX_C_SOURCE=199506L

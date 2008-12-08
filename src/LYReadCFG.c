@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYReadCFG.c,v 1.129 2008/09/10 12:06:23 tom Exp $
+ * $LynxId: LYReadCFG.c,v 1.130 2008/12/07 20:52:27 tom Exp $
  */
 #ifndef NO_RULES
 #include <HTRules.h>
@@ -1512,6 +1512,7 @@ static Config_Type Config_Table [] =
 #endif
      PARSE_ADD(RC_PRINTER,              printers),
      PARSE_SET(RC_QUIT_DEFAULT_YES,     LYQuitDefaultYes),
+     PARSE_INT(RC_READ_TIMEOUT,         reading_timeout),
      PARSE_FUN(RC_REFERER_WITH_QUERY,   referer_with_query_fun),
 #ifdef EXP_CMD_LOGGING
      PARSE_TIM(RC_REPLAYSECS,           ReplaySecs),

@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFormat.c,v 1.63 2008/09/10 23:22:59 tom Exp $
+ * $LynxId: HTFormat.c,v 1.64 2008/12/07 15:53:54 tom Exp $
  *
  *		Manage different file formats			HTFormat.c
  *		=============================
@@ -396,8 +396,9 @@ static HTPresentation *HTFindPresentation(HTFormat rep_in,
 	    if (pres->rep_out == rep_out) {
 		if (failsMailcap(pres, anchor))
 		    continue;
-		CTRACE((tfp, "FindPresentation: found exact match: %s\n",
-			HTAtom_name(pres->rep)));
+		CTRACE((tfp, "FindPresentation: found exact match: %s -> %s\n",
+			HTAtom_name(pres->rep),
+			HTAtom_name(pres->rep_out)));
 		return pres;
 
 	    } else if (!fill_in) {
@@ -412,8 +413,9 @@ static HTPresentation *HTFindPresentation(HTFormat rep_in,
 			strong_wildcard_match = pres;
 		    /* otherwise use the first one */
 		    CTRACE((tfp,
-			    "StreamStack: found strong wildcard match: %s\n",
-			    HTAtom_name(pres->rep)));
+			    "StreamStack: found strong wildcard match: %s -> %s\n",
+			    HTAtom_name(pres->rep),
+			    HTAtom_name(pres->rep_out)));
 		}
 	    }
 
@@ -429,8 +431,9 @@ static HTPresentation *HTFindPresentation(HTFormat rep_in,
 		    strong_subtype_wildcard_match = pres;
 		/* otherwise use the first one */
 		CTRACE((tfp,
-			"StreamStack: found strong subtype wildcard match: %s\n",
-			HTAtom_name(pres->rep)));
+			"StreamStack: found strong subtype wildcard match: %s -> %s\n",
+			HTAtom_name(pres->rep),
+			HTAtom_name(pres->rep_out)));
 	    }
 	}
 
@@ -515,8 +518,9 @@ HTStream *HTStreamStack(HTFormat rep_in,
 	if (match == &temp) {
 	    CTRACE((tfp, "StreamStack: Using %s\n", HTAtom_name(temp.rep_out)));
 	} else {
-	    CTRACE((tfp, "StreamStack: found exact match: %s\n",
-		    HTAtom_name(match->rep)));
+	    CTRACE((tfp, "StreamStack: found exact match: %s -> %s\n",
+		    HTAtom_name(match->rep),
+		    HTAtom_name(match->rep_out)));
 	}
 	result = (*match->converter) (match, anchor, sink);
     } else {

@@ -1,3 +1,6 @@
+/*
+ * $LynxId: LYJump.c,v 1.33 2008/12/07 22:13:37 tom Exp $
+ */
 #include <HTUtils.h>
 #include <HTAlert.h>
 #include <LYUtils.h>
@@ -363,6 +366,7 @@ static unsigned LYRead_Jumpfile(struct JumpTable *jtp)
     int fd;
 
 #ifdef VMS
+    int blocksize = 1024;
     FILE *fp;
     BOOL IsStream_LF = TRUE;
 #endif /* VMS */
@@ -415,12 +419,12 @@ static unsigned LYRead_Jumpfile(struct JumpTable *jtp)
 #ifdef VMS
     } else {
 	/** Handle as a series of records. **/
-	if (fgets(mp, 1024, fp) == NULL) {
+	if (fgets(mp, blocksize, fp) == NULL) {
 	    HTAlert(ERROR_READING_JUMP_FILE);
 	    FREE(mp);
 	    return 0;
 	} else
-	    while (fgets(mp + strlen(mp), 1024, fp) != NULL) {
+	    while (fgets(mp + strlen(mp), blocksize, fp) != NULL) {
 		;
 	    }
 	LYCloseInput(fp);

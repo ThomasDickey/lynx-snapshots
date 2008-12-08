@@ -1,5 +1,5 @@
 /*
- * $LynxId: GridText.c,v 1.156 2008/09/21 19:48:41 tom Exp $
+ * $LynxId: GridText.c,v 1.158 2008/12/07 18:50:31 tom Exp $
  *
  *		Character grid hypertext object
  *		===============================
@@ -6848,9 +6848,7 @@ void HTCheckFnameForCompression(char **fname,
     char *dot = NULL;
     char *cp = NULL;
     const char *suffix = "";
-    const char *ct = NULL;
-    const char *ce = NULL;
-    CompressFileType method = cftNone;
+    CompressFileType method;
     CompressFileType second;
 
     /*
@@ -6865,30 +6863,7 @@ void HTCheckFnameForCompression(char **fname,
     if (*(fn = LYPathLeaf(fn)) == '\0')
 	return;
 
-    /*
-     * Check the anchor's content_type and content_encoding
-     * elements for a gzip or Unix compressed file.  -FM
-     */
-    ct = HTAnchor_content_type(anchor);
-    ce = HTAnchor_content_encoding(anchor);
-    if (ce == NULL && ct != 0) {
-	/*
-	 * No Content-Encoding, so check
-	 * the Content-Type.  -FM
-	 */
-	if (!strncasecomp(ct, "application/gzip", 16) ||
-	    !strncasecomp(ct, "application/x-gzip", 18)) {
-	    method = cftGzip;
-	} else if (!strncasecomp(ct, "application/compress", 20) ||
-		   !strncasecomp(ct, "application/x-compress", 22)) {
-	    method = cftCompress;
-	} else if (!strncasecomp(ct, "application/bzip2", 17) ||
-		   !strncasecomp(ct, "application/x-bzip2", 19)) {
-	    method = cftBzip2;
-	}
-    } else if (ce != 0) {
-	method = HTEncodingToCompressType(ce);
-    }
+    method = HTContentToCompressType(anchor);
 
     /*
      * If no Content-Encoding has been detected via the anchor
@@ -6958,23 +6933,7 @@ void HTCheckFnameForCompression(char **fname,
 	}
     }
 
-    switch (method) {
-    case cftNone:
-	suffix = "";
-	break;
-    case cftCompress:
-	suffix = ".Z";
-	break;
-    case cftDeflate:
-	suffix = ".zz";
-	break;
-    case cftGzip:
-	suffix = ".gz";
-	break;
-    case cftBzip2:
-	suffix = ".bz2";
-	break;
-    }
+    suffix = HTCompressTypeToSuffix(method);
 
     /*
      * Add the appropriate suffix.  -FM

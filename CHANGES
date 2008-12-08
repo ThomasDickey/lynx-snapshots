@@ -1,7 +1,41 @@
--- $LynxId: CHANGES,v 1.308 2008/09/21 21:12:42 tom Exp $
+-- $LynxId: CHANGES,v 1.318 2008/12/08 01:31:28 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
+
+2008-??-?? (2.8.7dev.11)
+* add fi.po from
+    http://translationproject.org/latest/lynx/
+* update fr.po from
+    http://translationproject.org/latest/lynx/
+* correct handling of the option value from configure "--with-ssl", which was
+  not being used in the search-list (report by PGNet) -TD
+* update configure script macros -TD
+  CF_UTF8_LIB - use CF_FIND_LINKAGE to better work with BSD ports.
+  CF_XOPEN_SOURCE - add case for dragonfly
+* document width-limitation in manpage, fix a few stray 1024's still in the
+  source (report by Barry Haddow) -TD
+* add "read_timeout" to lynx.cfg, and -read_timeout option to command-line
+  (prompted by Dries De Moor report on mailing list) -TD
+* modify to handle a special case where the content-type is given as one of the
+  compressed types, to check if the address (after stripping the file suffix
+  for that compression) has a suffix that lynx could present -TD
+  For example:
+	http://foo/bar.html.gz
+  would display the uncompressed "bar.html" rather than offering to download
+  the file.  This also allows one to add SUFFIX commands to lynx.cfg to display
+  the corresponding plain files.
+  For example:
+	SUFFIX:CHANGES.*:text/plain:8bit
+	SUFFIX:CHANGES:text/plain:8bit
+  for
+	http://foo/CHANGES.tmp.gz
+	http://foo/CHANGES.gz
+* workaround for STRING redefinition in parsdate.c on DJGPP -GV
+* improve configure-check to determine proper fallback when no long-long
+  printing format is available -TD
+* update win32 makefiles/build scripts to add LYmktime, parsdate modules -TD
+* update config.guess (2008-04-14), config.sub (2008-06-16)
 
 2008-09-21 (2.8.7dev.10)
 * remove rw.po, since the translation project no longer supplies it -TD

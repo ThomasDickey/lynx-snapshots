@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFile.c,v 1.105 2008/09/18 21:34:25 tom Exp $
+ * $LynxId: HTFile.c,v 1.110 2008/12/07 18:49:34 tom Exp $
  *
  *			File Access				HTFile.c
  *			===========
@@ -1247,6 +1247,62 @@ CompressFileType HTCompressFileType(const char *filename,
 }
 
 /*
+ *  Determine expected file-suffix from the compression method.
+ */
+const char *HTCompressTypeToSuffix(CompressFileType method)
+{
+    const char *result = "";
+
+    switch (method) {
+    default:
+    case cftNone:
+	result = "";
+	break;
+    case cftGzip:
+	result = ".gz";
+	break;
+    case cftCompress:
+	result = ".Z";
+	break;
+    case cftBzip2:
+	result = ".bz2";
+	break;
+    case cftDeflate:
+	result = ".zz";
+	break;
+    }
+    return result;
+}
+
+/*
+ *  Determine compression encoding from the compression method.
+ */
+const char *HTCompressTypeToEncoding(CompressFileType method)
+{
+    const char *result = NULL;
+
+    switch (method) {
+    default:
+    case cftNone:
+	result = NULL;
+	break;
+    case cftGzip:
+	result = "gzip";
+	break;
+    case cftCompress:
+	result = "compress";
+	break;
+    case cftBzip2:
+	result = "bzip2";
+	break;
+    case cftDeflate:
+	result = "deflate";
+	break;
+    }
+    return result;
+}
+
+/*
  * Check if the token from "Content-Encoding" corresponds to a compression
  * type.  RFC 2068 (and cut/paste into RFC 2616) lists these:
  *	gzip
@@ -1274,6 +1330,41 @@ CompressFileType HTEncodingToCompressType(const char *coding)
 	result = cftDeflate;
     }
     return result;
+}
+
+CompressFileType HTContentTypeToCompressType(const char *ct)
+{
+    CompressFileType method = cftNone;
+
+    if (!strncasecomp(ct, "application/gzip", 16) ||
+	!strncasecomp(ct, "application/x-gzip", 18)) {
+	method = cftGzip;
+    } else if (!strncasecomp(ct, "application/compress", 20) ||
+	       !strncasecomp(ct, "application/x-compress", 22)) {
+	method = cftCompress;
+    } else if (!strncasecomp(ct, "application/bzip2", 17) ||
+	       !strncasecomp(ct, "application/x-bzip2", 19)) {
+	method = cftBzip2;
+    }
+    return method;
+}
+
+/*
+ * Check the anchor's content_type and content_encoding elements for a gzip or
+ * Unix compressed file -FM, TD
+ */
+CompressFileType HTContentToCompressType(HTParentAnchor *anchor)
+{
+    CompressFileType method = cftNone;
+    const char *ct = HTAnchor_content_type(anchor);
+    const char *ce = HTAnchor_content_encoding(anchor);
+
+    if (ce == NULL && ct != 0) {
+	method = HTContentTypeToCompressType(ct);
+    } else if (ce != 0) {
+	method = HTEncodingToCompressType(ce);
+    }
+    return method;
 }
 
 /*	Determine write access to a file.

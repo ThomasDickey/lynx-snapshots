@@ -54,8 +54,8 @@
        ignored.
 
        The  default boolean, number and string option values that are compiled
-       into lynx are displayed in the help-message  provided  by  lynx  -help.
-       Some  of those may differ according to how lynx was built; see the help
+       into Lynx are displayed in the help-message  provided  by  lynx  -help.
+       Some  of those may differ according to how Lynx was built; see the help
        message itself for these values.  The -help option is processed  before
        any  option,  including  those  that  control reading from the lynx.cfg
        file.  Therefore runtime configuration values are not reflected in  the
@@ -80,7 +80,7 @@
               charset for documents that don't specify it.
 
        -assume_local_charset=MIMEname
-              charset  assumed for local files, i.e., files which lynx creates
+              charset  assumed for local files, i.e., files which Lynx creates
               such as internal pages for the options menu.
 
        -assume_unrec_charset=MIMEname
@@ -446,6 +446,9 @@
 
        -realm restricts access to URLs in the starting realm.
 
+       -read_timeout=N
+              Sets the read-timeout, where N is given in seconds.
+
        -reload
               flushes the cache on a proxy server  (only  the  first  document
               affected).
@@ -717,14 +720,16 @@
               WATT-32.
 
        -width=NUMBER
-              number of columns for formatting of dumps, default is 80.
+              number  of columns for formatting of dumps, default is 80.  This
+              is limited by the number of columns  that  Lynx  could  display,
+              typically 1024 (the MAX_LINE symbol).
 
        -with_backspaces
               emit backspaces in output if -dump'ing or -crawl'ing (like `man'
               does)
 
        -xhtml_parsing
-              tells lynx that it can ignore certain tags which have no content
+              tells Lynx that it can ignore certain tags which have no content
               in an XHTML 1.0 document.  For example "<p/>" will be discarded.
 
 2 Commands
@@ -771,7 +776,7 @@
                            more information.
 
        LYNX_HELPFILE       If set, this variable overrides the compiled-in URL
-                           and configuration file URL for the lynx help  file.
+                           and configuration file URL for the Lynx help  file.
 
        LYNX_LOCALEDIR      If  set,  this  variable  overrides the compiled-in
                            location of the  locale  directory  which  contains
