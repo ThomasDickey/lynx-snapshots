@@ -1,9 +1,12 @@
--- $LynxId: CHANGES,v 1.318 2008/12/08 01:31:28 tom Exp $
+-- $LynxId: CHANGES,v 1.320 2008/12/10 01:01:37 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
 2008-??-?? (2.8.7dev.11)
+* extend configure macros CF_SSL and CF_GNUTLS to check for pkg-config, using
+  that for the default if the corresponding openssl or gnutls packages are
+  installed (suggested by PGNet) -TD
 * add fi.po from
     http://translationproject.org/latest/lynx/
 * update fr.po from
@@ -11,6 +14,7 @@ Changes since Lynx 2.8 release
 * correct handling of the option value from configure "--with-ssl", which was
   not being used in the search-list (report by PGNet) -TD
 * update configure script macros -TD
+  CF_CURSES_LIBS - add "pdcurses", e.g., to link with mingw
   CF_UTF8_LIB - use CF_FIND_LINKAGE to better work with BSD ports.
   CF_XOPEN_SOURCE - add case for dragonfly
 * document width-limitation in manpage, fix a few stray 1024's still in the

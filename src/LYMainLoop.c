@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMainLoop.c,v 1.154 2008/12/07 22:10:34 tom Exp $
+ * $LynxId: LYMainLoop.c,v 1.155 2008/12/09 00:14:47 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTAccess.h>
@@ -5229,7 +5229,7 @@ int mainloop(void)
 {
 #if defined(WIN_EX)		/* 1997/10/08 (Wed) 14:52:06 */
     char sjis_buff[MAX_LINE];
-    char temp_buff[sizeof(sjis_buffer) * 4];
+    char temp_buff[sizeof(sjis_buff) * 4];
 #endif
     int c = 0;
     int real_c = 0;

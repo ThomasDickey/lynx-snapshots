@@ -1,4 +1,4 @@
-# $LynxId: makefile.msc,v 1.18 2008/09/22 21:44:21 tom Exp $
+# $LynxId: makefile.msc,v 1.19 2008/09/25 00:25:16 tom Exp $
 #
 # Makefile for `Lynx' browser for Microsoft Visual C++ 4.2 or later
 #
@@ -117,7 +117,7 @@ CFLAGS   = /nologo /MT /W3 /GX /Zi /c
 LDFLAGS  = /debug /nologo /subsystem:console /incremental:no /machine:I386
 !endif
 
-LIBS     = kernel32.lib user32.lib wsock32.lib /NODEFAULTLIB:libc\
+LIBS     = kernel32.lib user32.lib wsock32.lib advapi32.lib /NODEFAULTLIB:libc\
  $(ETC_LIB)\$(SCREEN_LIB).lib $(ETC_LIB)\zlib.lib dirent.obj $(SSL_LIBS)
 
 COMPILE = $(CC) $(CFLAGS) $(INCLUDES) $(DEFS)
