@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYReadCFG.c,v 1.130 2008/12/07 20:52:27 tom Exp $
+ * $LynxId: LYReadCFG.c,v 1.131 2008/12/09 01:01:34 tom Exp $
  */
 #ifndef NO_RULES
 #include <HTRules.h>
@@ -381,7 +381,7 @@ The special strings 'nocolor' or 'default', or\n")
 		Color_Strings[i], Color_Strings[i + 1],
 		Color_Strings[i + 2], Color_Strings[i + 3]);
     }
-    fprintf(stderr, "%s\n%s\n", gettext("Offending line:"), error_line);
+    fprintf(stderr, "%s\nCOLOR:%s\n", gettext("Offending line:"), error_line);
     exit_immediately(EXIT_FAILURE);
 }
 #endif /* defined(USE_COLOR_TABLE) || defined(EXP_ASSUMED_COLOR) */

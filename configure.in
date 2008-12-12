@@ -1,4 +1,4 @@
-dnl $LynxId: configure.in,v 1.171 2008/09/23 22:39:58 tom Exp $
+dnl $LynxId: configure.in,v 1.172 2008/12/10 01:50:54 tom Exp $
 dnl
 dnl Process this file with autoconf to produce a configure script.
 dnl
@@ -445,6 +445,8 @@ else
 fi
 
 CF_INET_ADDR
+
+CF_PKG_CONFIG
 
 if test "x$cf_cv_use_libssl"  != xno ; then
 	CF_SSL($cf_cv_use_libssl)

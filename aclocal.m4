@@ -1,4 +1,4 @@
-dnl $LynxId: aclocal.m4,v 1.127 2008/12/08 00:40:44 tom Exp $
+dnl $LynxId: aclocal.m4,v 1.128 2008/12/12 01:03:21 tom Exp $
 dnl Macros for auto-configure script.
 dnl by T.E.Dickey <dickey@invisible-island.net>
 dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
@@ -1401,10 +1401,10 @@ fi
 
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_CHECK_SSL_X509 version: 3 updated: 2008/01/06 14:56:47
+dnl CF_CHECK_SSL_X509 version: 4 updated: 2008/12/11 19:00:39
 dnl -----------------
 dnl Check for X509 support in the SSL library.
-AC_DEFUN([CF_CHECK_SSL_X509],[
+define([CF_CHECK_SSL_X509],[
 AC_MSG_CHECKING(for X509 support)
 AC_TRY_LINK(CF__SSL_HEAD [
 #include <openssl/x509.h>],
@@ -2643,52 +2643,109 @@ rm -f conftest*
 AC_SUBST(EXTRA_CFLAGS)
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_GNUTLS version: 10 updated: 2008/04/13 10:56:06
+dnl CF_GNUTLS version: 14 updated: 2008/12/11 20:01:57
 dnl ---------
 dnl Check for gnutls library (TLS "is" SSL)
 dnl $1 = the [optional] directory in which the library may be found
 dnl $2 = the [optional] stub file to provide OpenSSL compatibility
 AC_DEFUN([CF_GNUTLS],[
-  CF_ADD_OPTIONAL_PATH($1, [ssl library])
+	AC_REQUIRE([CF_PKG_CONFIG])
+	cf_cv_have_gnutls=no
 
-  ifelse($2,,[AC_DEFINE(USE_GNUTLS_INCL)],[AC_DEFINE(USE_GNUTLS_FUNCS)])
-  cf_gnutls_CPPFLAGS=$CPPFLAGS
+	CF_ADD_OPTIONAL_PATH($1, [ssl library])
 
-  CF_FIND_LINKAGE(CF__SSL_HEAD,
-      CF__SSL_BODY,
-      gnutls,
-      cf_cv_have_gnutls=yes,
-      cf_cv_have_gnutls=no,
-      ,
-      ifelse($2,,[-lgnutls-openssl -lgnutls-extra -lgnutls -lcrypt],[-lgnutls -lcrypt]))
+	cf_pkg_gnutls=none
+	if test "x$PKG_CONFIG" != xnone; then
+		cf_pkg_gnutls=ifelse($2,,gnutls-openssl,gnutls)
+		case $1 in #(vi
+		no) #(vi
+			;;
+		yes)
+			CF_VERBOSE(checking pkg-config for $cf_pkg_gnutls)
+			if "$PKG_CONFIG" --exists $cf_pkg_gnutls ; then
+				CF_VERBOSE(... found $cf_pkg_gnutls in pkg-config)
+				cf_cv_have_gnutls=yes
 
-  CPPFLAGS=$cf_gnutls_CPPFLAGS
+				cf_cflags_ssl=`$PKG_CONFIG --cflags $cf_pkg_gnutls`
+				cf_libs_ssl=`$PKG_CONFIG --libs $cf_pkg_gnutls`
 
-  if test "$cf_cv_have_gnutls" = yes ; then
-    if test -n "$cf_cv_header_path_gnutls" ; then
-      AC_DEFINE(USE_SSL)
-      case $cf_cv_header_path_gnutls in
-      /usr/include/gnutls)
-          ;;
-      *)
-          CF_ADD_INCDIR($cf_cv_header_path_gnutls)
-          ;;
-      esac
-    fi
-    if test -n "$cf_cv_library_path_gnutls" ; then
-      CF_ADD_LIBDIR($cf_cv_library_path_gnutls)
-    fi
-    LIBS="-lgnutls -lcrypt $LIBS"
-  fi
+				if test -n "$cf_cflags_ssl" ; then
+					case "$cf_cflags_ssl" in #(vi
+					*-I*) #(vi
+						cf_cv_header_path_ssl=`echo "$cf_cflags_ssl" | sed -e 's/^.*-I//' -e 's/ .*//'`
+						;;
+					*)
+						cf_cv_header_path_ssl=/usr/include
+						;;
+					esac
+					if test -d $cf_cv_header_path_ssl/gnutls ; then
+						cf_cv_header_path_ssl=$cf_cv_header_path_ssl/gnutls
+					fi
+					CF_ADD_CFLAGS($cf_cflags_ssl)
+				fi
 
-  ifelse($2,,[
-  AC_CHECK_LIB(gnutls-openssl,SSL_connect,
-      [LIBS="-lgnutls-openssl $LIBS"],
-      [AC_CHECK_LIB(gnutls-extra,SSL_connect,
-          [LIBS="-lgnutls-extra $LIBS"],
-          [AC_MSG_ERROR(cannot find gnutls openssl functions)])])],[EXTRA_OBJS="$EXTRA_OBJS $2"])
+				if test -n "$cf_libs_ssl" ; then
+					case "x$cf_libs_ssl" in #(vi
+					*-L*) #(vi
+						cf_cv_library_path_ssl=`echo "$cf_libs_ssl" | sed -e 's/^.*-L//' -e 's/ .*//'`
+						;;
+					*)
+						cf_cv_library_path_ssl=/usr/lib
+						;;
+					esac
+					CF_VERBOSE(adding $cf_libs_ssl to LIBS)
+					LIBS="$cf_libs_ssl $LIBS"
+				fi
+			else
+				CF_VERBOSE(... did not find $cf_pkg_gnutls in pkg-config)
+				cf_pkg_gnutls=none
+			fi
+			;;
+		esac
+	fi
 
-  CF_CHECK_SSL_X509
+	if test "$cf_cv_have_gnutls" = no ; then
+		ifelse($2,,[AC_DEFINE(USE_GNUTLS_INCL)],[AC_DEFINE(USE_GNUTLS_FUNCS)])
+		cf_gnutls_CPPFLAGS=$CPPFLAGS
+
+		CF_FIND_LINKAGE(CF__SSL_HEAD,
+			CF__SSL_BODY,
+			gnutls,
+			cf_cv_have_gnutls=yes,
+			cf_cv_have_gnutls=no,
+			,
+			ifelse($2,,[-lgnutls-openssl -lgnutls-extra -lgnutls -lcrypt],[-lgnutls -lcrypt]))
+
+		CPPFLAGS=$cf_gnutls_CPPFLAGS
+	fi
+
+	if test "$cf_cv_have_gnutls" = yes ; then
+		if test -n "$cf_cv_header_path_gnutls" ; then
+			AC_DEFINE(USE_SSL)
+            case $cf_cv_header_path_gnutls in
+				/usr/include/gnutls)
+				;;
+			*)
+				CF_ADD_INCDIR($cf_cv_header_path_gnutls)
+				;;
+			esac
+		fi
+		if test -n "$cf_cv_library_path_gnutls" ; then
+			CF_ADD_LIBDIR($cf_cv_library_path_gnutls)
+		fi
+		LIBS="-lgnutls -lcrypt $LIBS"
+
+		ifelse($2,,
+			[if test "$cf_pkg_gnutls" = none ; then
+				AC_CHECK_LIB(gnutls-openssl,SSL_connect,
+					[LIBS="-lgnutls-openssl $LIBS"],
+					[AC_CHECK_LIB(gnutls-extra,SSL_connect,
+					[LIBS="-lgnutls-extra $LIBS"],
+					[AC_MSG_ERROR(cannot find gnutls openssl functions)])])
+			fi],[EXTRA_OBJS="$EXTRA_OBJS $2"])
+
+		CF_CHECK_SSL_X509
+	fi
 ])dnl
 dnl ---------------------------------------------------------------------------
 dnl CF_GNU_SOURCE version: 6 updated: 2005/07/09 13:23:07
@@ -4352,46 +4409,99 @@ define([CF_SRAND_PARSE],[
 	esac
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_SSL version: 12 updated: 2008/01/06 14:56:47
+dnl CF_SSL version: 14 updated: 2008/12/09 19:45:44
 dnl ------
 dnl Check for ssl library
-dnl $1 = the [optional] directory in which the library may be found
+dnl $1 = [optional] directory in which the library may be found, set by AC_ARG_WITH
 AC_DEFUN([CF_SSL],[
-  CF_ADD_OPTIONAL_PATH([$1], [ssl library])
+	AC_REQUIRE([CF_PKG_CONFIG])
+	cf_cv_have_ssl=no
 
-  CF_FIND_LINKAGE(CF__SSL_HEAD,
-      CF__SSL_BODY,
-      ssl,
-      cf_cv_have_ssl=yes,
-      cf_cv_have_ssl=no,
-      openssl,
-      [-lcrypto])
+	# command-line option, etc., override default behavior
+	CF_ADD_OPTIONAL_PATH($1, [ssl library])
 
-  if test "$cf_cv_have_ssl" = yes ; then
-    if test -n "$cf_cv_header_path_ssl" ; then
-      AC_DEFINE(USE_SSL)
+	if test "x$PKG_CONFIG" != xnone; then
+		case $1 in #(vi
+		no) #(vi
+			;;
+		yes)
+			if "$PKG_CONFIG" --exists openssl ; then
+				cf_cv_have_ssl=yes
 
-      case $cf_cv_header_path_ssl in
-      */openssl)
-          AC_DEFINE(USE_OPENSSL_INCL)
-          ;;
-      esac
+				cf_cflags_ssl=`$PKG_CONFIG --cflags openssl`
+				cf_libs_ssl=`$PKG_CONFIG --libs openssl`
 
-      case $cf_cv_header_path_ssl in
-      /usr/include/openssl)
-          ;;
-      *)
-          CF_ADD_INCDIR($cf_cv_header_path_ssl)
-          ;;
-      esac
+				if test -n "$cf_cflags_ssl" ; then
+					case "$cf_cflags_ssl" in #(vi
+					*-I*) #(vi
+						cf_cv_header_path_ssl=`echo "$cf_cflags_ssl" | sed -e 's/^.*-I//' -e 's/ .*//'`
+						;;
+					*)
+						cf_cv_header_path_ssl=/usr/include
+						;;
+					esac
+					if test -d $cf_cv_header_path_ssl/openssl ; then
+						cf_cv_header_path_ssl=$cf_cv_header_path_ssl/openssl
+					fi
+					CF_ADD_CFLAGS($cf_cflags_ssl)
+				fi
 
-    fi
-    if test -n "$cf_cv_library_path_ssl" ; then
-      CF_ADD_LIBDIR($cf_cv_library_path_ssl)
-    fi
-    LIBS="-lssl -lcrypto $LIBS"
-    CF_CHECK_SSL_X509
-  fi
+				if test -n "$cf_libs_ssl" ; then
+					case "x$cf_libs_ssl" in #(vi
+					*-L*) #(vi
+						cf_cv_library_path_ssl=`echo "$cf_libs_ssl" | sed -e 's/^.*-L//' -e 's/ .*//'`
+						;;
+					*)
+						cf_cv_library_path_ssl=/usr/lib
+						;;
+					esac
+					CF_VERBOSE(adding $cf_libs_ssl to LIBS)
+					LIBS="$cf_libs_ssl $LIBS"
+				fi
+			fi
+			;;
+		esac
+	fi
+
+	if test "$cf_cv_have_ssl" != yes; then
+		case $1 in #(vi
+		no)
+			CF_FIND_LINKAGE(CF__SSL_HEAD,
+				CF__SSL_BODY,
+				ssl,
+				cf_cv_have_ssl=yes,
+				cf_cv_have_ssl=no,
+				openssl,
+				[-lcrypto])
+			;;
+		esac
+	fi
+
+	if test "$cf_cv_have_ssl" = yes ; then
+		if test -n "$cf_cv_header_path_ssl" ; then
+			AC_DEFINE(USE_SSL)
+
+			case $cf_cv_header_path_ssl in
+			*/openssl)
+				AC_DEFINE(USE_OPENSSL_INCL)
+				;;
+			esac
+
+			case $cf_cv_header_path_ssl in
+			/usr/include/openssl)
+				;;
+			*)
+				CF_ADD_INCDIR($cf_cv_header_path_ssl)
+				;;
+			esac
+
+		fi
+		if test -n "$cf_cv_library_path_ssl" ; then
+			CF_ADD_LIBDIR($cf_cv_library_path_ssl)
+		fi
+		LIBS="-lssl -lcrypto $LIBS"
+		CF_CHECK_SSL_X509
+	fi
 ])dnl
 dnl ---------------------------------------------------------------------------
 dnl CF_STRIP_G_OPT version: 3 updated: 2002/12/21 19:25:52
@@ -5667,3 +5777,11 @@ AC_DEFUN([jm_GLIBC21],
     GLIBC21="$ac_cv_gnu_library_2_1"
   ]
 )
+dnl ---------------------------------------------------------------------------
+dnl CF_PKG_CONFIG version: 1 updated: 2006/08/20 13:51:03
+dnl -------------
+dnl Check for the package-config program.
+AC_DEFUN([CF_PKG_CONFIG],
+[
+AC_PATH_PROG(PKG_CONFIG, pkg-config, none)
+])dnl
