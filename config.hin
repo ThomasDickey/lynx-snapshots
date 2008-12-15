@@ -1,5 +1,5 @@
 /*
- * $LynxId: config.hin,v 1.105 2008/09/23 22:40:50 tom Exp $
+ * $LynxId: config.hin,v 1.106 2008/12/14 19:32:33 tom Exp $
  * vile:cmode
  *
  * The configure script translates "config.hin" into "lynx_cfg.h"
@@ -216,6 +216,7 @@
 #undef RLOGIN_PATH		/* CF_PATH_PROG(rlogin) */
 #undef RM_PATH			/* CF_PATH_PROG(rm) */
 #undef SETFONT_PATH		/* CF_PATH_PROG(setfont) */
+#undef SIZEOF_INT		/* AC_CHECK_SIZEOF(int) */
 #undef SIZEOF_LONG		/* AC_CHECK_SIZEOF(long) */
 #undef SIZEOF_OFF_T		/* AC_CHECK_SIZEOF(off_t) */
 #undef SIZEOF_TIME_T		/* AC_CHECK_SIZEOF(time_t) */

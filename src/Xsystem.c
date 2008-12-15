@@ -1,4 +1,4 @@
-/* $LynxId: Xsystem.c,v 1.16 2004/12/30 12:20:28 tom Exp $
+/* $LynxId: Xsystem.c,v 1.18 2008/12/14 18:44:52 tom Exp $
  *	like system("cmd") but return with exit code of "cmd"
  *	for Turbo-C/MS-C/LSI-C
  *  This code is in the public domain.
@@ -82,7 +82,7 @@ static char *NEAR xmalloc(size_t n)
 
     if ((bp = typecallocn(char, n)) == 0) {
 	write(2, "xsystem: Out of memory.!\n", 25);
-	exit_immediately(1);
+	exit_immediately(EXIT_FAILURE);
     }
     return bp;
 }
@@ -93,7 +93,7 @@ static char *NEAR xrealloc(void *p, size_t n)
 
     if ((bp = realloc(p, n)) == (char *) 0) {
 	write(2, "xsystem: Out of memory!.\n", 25);
-	exit_immediately(1);
+	exit_immediately(EXIT_FAILURE);
     }
     return bp;
 }
@@ -134,15 +134,18 @@ static int NEAR is_builtin_command(char *s)
 
 static int NEAR getswchar(void)
 {
+    int result;
+
 #ifdef __WIN32__
-    return '/';
+    result = '/';
 #else
     union REGS reg;
 
     reg.x.ax = 0x3700;
     intdos(&reg, &reg);
-    return reg.h.dl;
+    result = reg.h.dl;
 #endif
+    return result;
 }
 
 static int NEAR csystem(PRO * p, int flag)
@@ -527,8 +530,10 @@ int xsystem(char *cmd)
 
 int exec_command(char *cmd, int wait_flag)
 {
+    int rc;
+
 #if defined(__MINGW32__)
-    return system(cmd);
+    rc = system(cmd);
 #else
     PRO *p;
     char *pif;
@@ -564,8 +569,8 @@ int exec_command(char *cmd, int wait_flag)
     else
 	rc = prog_go(p, P_NOWAIT);
 
-    return rc;
 #endif
+    return rc;
 }
 
 #ifdef TEST

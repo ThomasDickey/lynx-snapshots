@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTMIME.c,v 1.66 2008/12/07 20:23:52 tom Exp $
+ * $LynxId: HTMIME.c,v 1.67 2008/12/14 18:46:52 tom Exp $
  *
  *			MIME Message Parse			HTMIME.c
  *			==================
@@ -1089,6 +1089,7 @@ static void HTMIME_put_character(HTStream *me,
 	if (c == CR) {
 	    return;
 	}
+	/* FALLTHRU */
 
     case mcCHUNKED_DATA_LF:
 	me->state = MIME_CHUNKED;

@@ -1,4 +1,4 @@
-/* $LynxId: LYDownload.c,v 1.58 2007/07/01 23:39:32 Andrew.Belov Exp $ */
+/* $LynxId: LYDownload.c,v 1.59 2008/12/14 18:26:03 tom Exp $ */
 #include <HTUtils.h>
 #include <HTParse.h>
 #include <HTList.h>
@@ -299,10 +299,12 @@ void LYDownload(char *line)
 	     */
 	    if (HTCountCommandArgs(download_command->command) >= 2) {
 		_statusline(FILENAME_PROMPT);
-	      again:if (sug_file)
+	      again:
+		if (sug_file) {
 		    strncpy(buffer, sug_file, (sizeof(buffer) / 2) - 1);
-		else
+		} else {
 		    *buffer = '\0';
+		}
 	      check_again:
 		if ((ch = LYgetstr(buffer, VISIBLE,
 				   sizeof(buffer), recall)) < 0 ||

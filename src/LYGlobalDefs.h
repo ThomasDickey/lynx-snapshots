@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYGlobalDefs.h,v 1.112 2008/12/07 22:39:32 tom Exp $
+ * $LynxId: LYGlobalDefs.h,v 1.113 2008/12/14 18:07:20 tom Exp $
  *
  * global variable definitions
  */
@@ -289,6 +289,7 @@ extern "C" {
     extern int LYTransferRate;	/* see enum TransferRate */
     extern int display_lines;	/* number of lines in the display */
     extern int dump_output_width;
+    extern int dump_server_status;
     extern int keypad_mode;	/* NUMBERS_AS_ARROWS or LINKS_ARE_NUMBERED */
     extern int lynx_temp_subspace;
     extern int max_cookies_buffer;

@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTML.c,v 1.115 2008/09/21 17:46:32 tom Exp $
+ * $LynxId: HTML.c,v 1.116 2008/12/14 20:03:28 tom Exp $
  *
  *		Structured stream to Rich hypertext converter
  *		============================================
@@ -1279,38 +1279,40 @@ static int HTML_start_element(HTStructured * me, int element_number,
 
 	    /*
 	     * Handle links with a REV attribute.  - FM
+	     * Handle REV="made" or REV="owner".  - LM & FM
+	     * Handle REL="author" -TD
 	     */
 	    if (present &&
-		present[HTML_LINK_REV] && value[HTML_LINK_REV]) {
+		((present[HTML_LINK_REV] &&
+		  value[HTML_LINK_REV] &&
+		  (!strcasecomp("made", value[HTML_LINK_REV]) ||
+		   !strcasecomp("owner", value[HTML_LINK_REV]))) ||
+		 (present[HTML_LINK_REL] &&
+		  value[HTML_LINK_REL] &&
+		  (!strcasecomp("author", value[HTML_LINK_REL]))))) {
 		/*
-		 * Handle REV="made" or REV="owner".  - LM & FM
+		 * Load the owner element.  - FM
 		 */
-		if (!strcasecomp("made", value[HTML_LINK_REV]) ||
-		    !strcasecomp("owner", value[HTML_LINK_REV])) {
-		    /*
-		     * Load the owner element.  - FM
-		     */
-		    HTAnchor_setOwner(me->node_anchor, href);
-		    CTRACE((tfp, "HTML: DOC OWNER '%s' found\n", href));
-		    FREE(href);
+		HTAnchor_setOwner(me->node_anchor, href);
+		CTRACE((tfp, "HTML: DOC OWNER '%s' found\n", href));
+		FREE(href);
 
-		    /*
-		     * Load the RevTitle element if a TITLE attribute and value
-		     * are present.  - FM
-		     */
-		    if (present && present[HTML_LINK_TITLE] &&
-			value[HTML_LINK_TITLE] &&
-			*value[HTML_LINK_TITLE] != '\0') {
-			StrAllocCopy(title, value[HTML_LINK_TITLE]);
-			TRANSLATE_AND_UNESCAPE_ENTITIES(&title, TRUE, FALSE);
-			LYTrimHead(title);
-			LYTrimTail(title);
-			if (*title != '\0')
-			    HTAnchor_setRevTitle(me->node_anchor, title);
-			FREE(title);
-		    }
-		    break;
+		/*
+		 * Load the RevTitle element if a TITLE attribute and value
+		 * are present.  - FM
+		 */
+		if (present && present[HTML_LINK_TITLE] &&
+		    value[HTML_LINK_TITLE] &&
+		    *value[HTML_LINK_TITLE] != '\0') {
+		    StrAllocCopy(title, value[HTML_LINK_TITLE]);
+		    TRANSLATE_AND_UNESCAPE_ENTITIES(&title, TRUE, FALSE);
+		    LYTrimHead(title);
+		    LYTrimTail(title);
+		    if (*title != '\0')
+			HTAnchor_setRevTitle(me->node_anchor, title);
+		    FREE(title);
 		}
+		break;
 	    }
 
 	    /*

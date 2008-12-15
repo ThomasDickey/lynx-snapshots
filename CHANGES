@@ -1,9 +1,20 @@
--- $LynxId: CHANGES,v 1.320 2008/12/10 01:01:37 tom Exp $
+-- $LynxId: CHANGES,v 1.325 2008/12/14 20:04:30 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
 2008-??-?? (2.8.7dev.11)
+* add support for HTML5 rel=author in link (mailing list comments) -TD
+* modify cookie-writing to not write if no cookies were read from the file
+  and none are available (Debian #354282) -TD
+* fix src/tidy_tls.c X509_get_issuer_name to actually take the issuer DN of the
+  present certificate and not hope that it is the same as taking the subject DN
+  of the "next" certificate which may or may not exist (Debian #499945, patch
+  by Thomas Viehmann)
+* modify exit code when doing a "-dump" to exit with error if the server
+  returned an error status for the page (Debian #299711) -TD
+* fix ipv6 literal command-line parsing (Debian #180654, analysis by Fabio
+  Massimo Di Nitto) -TD
 * extend configure macros CF_SSL and CF_GNUTLS to check for pkg-config, using
   that for the default if the corresponding openssl or gnutls packages are
   installed (suggested by PGNet) -TD
