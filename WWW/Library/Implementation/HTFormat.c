@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFormat.c,v 1.64 2008/12/07 15:53:54 tom Exp $
+ * $LynxId: HTFormat.c,v 1.65 2008/12/14 17:11:58 tom Exp $
  *
  *		Manage different file formats			HTFormat.c
  *		=============================
@@ -1157,7 +1157,7 @@ static int HTZzFileCopy(FILE *zzfp, HTStream *sink)
     status = inflateInit(&s);
     if (status != Z_OK) {
 	CTRACE((tfp, "HTZzFileCopy inflateInit() %s\n", zError(status)));
-	exit_immediately(1);
+	exit_immediately(EXIT_FAILURE);
     }
     s.avail_in = 0;
     s.next_out = (Bytef *) output_buffer;

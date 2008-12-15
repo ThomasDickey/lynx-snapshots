@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTP.c,v 1.96 2008/07/06 12:55:40 tom Exp $
+ * $LynxId: HTTP.c,v 1.99 2008/12/14 18:05:36 tom Exp $
  *
  * HyperText Tranfer Protocol	- Client implementation		HTTP.c
  * ==========================
@@ -530,6 +530,7 @@ static int HTLoadHTTP(const char *arg,
     char ssl_dn[1024];
     char *cert_host;
     char *ssl_host;
+    int port_number;
     char *p;
     char *msg = NULL;
     int status_sslcertcheck;
@@ -566,10 +567,12 @@ static int HTLoadHTTP(const char *arg,
     }
 #ifdef USE_SSL
     if (using_proxy && !strncmp(url, "http://", 7)) {
+	int portnumber;
+
 	if ((connect_url = strstr((url + 7), "https://"))) {
 	    do_connect = TRUE;
 	    connect_host = HTParse(connect_url, "https", PARSE_HOST);
-	    if (!strchr(connect_host, ':')) {
+	    if (!HTParsePort(connect_host, &portnumber)) {
 		sprintf(temp, ":%d", HTTPS_PORT);
 		StrAllocCat(connect_host, temp);
 	    }
@@ -578,7 +581,7 @@ static int HTLoadHTTP(const char *arg,
 	} else if ((connect_url = strstr((url + 7), "snews://"))) {
 	    do_connect = TRUE;
 	    connect_host = HTParse(connect_url, "snews", PARSE_HOST);
-	    if (!strchr(connect_host, ':')) {
+	    if (!HTParsePort(connect_host, &portnumber)) {
 		sprintf(temp, ":%d", SNEWS_PORT);
 		StrAllocCat(connect_host, temp);
 	    }
@@ -773,10 +776,8 @@ static int HTLoadHTTP(const char *arg,
 	/* get host we're connecting to */
 	ssl_host = HTParse(url, "", PARSE_HOST);
 	/* strip port number or extract hostname component */
-	if ((p = strchr(ssl_host, (ssl_host[0] == '[') ? ']' : ':')) != NULL)
+	if ((p = HTParsePort(ssl_host, &port_number)) != 0)
 	    *p = '\0';
-	if (ssl_host[0] == '[')
-	    ssl_host++;
 
 	/* validate all CNs found in DN */
 	CTRACE((tfp, "Validating CNs in '%s'\n", ssl_dn_start));
@@ -791,11 +792,8 @@ static int HTLoadHTTP(const char *arg,
 	    } else
 		ssl_dn_start = NULL;
 	    /* strip port number (XXX [ip]:port encap here too? -TG) */
-	    if ((p = strchr(cert_host,
-			    (cert_host[0] == '[') ? ']' : ':')) != NULL)
+	    if ((p = HTParsePort(cert_host, &port_number)) != 0)
 		*p = '\0';
-	    if (cert_host[0] == '[')
-		cert_host++;
 
 	    /* verify this CN */
 	    CTRACE((tfp, "Matching\n\tssl_host  '%s'\n\tcert_host '%s'\n",
@@ -889,11 +887,8 @@ static int HTLoadHTTP(const char *arg,
 			continue;
 		    status_sslcertcheck = 1;	/* got at least one */
 		    /* verify this SubjectAltName (see above) */
-		    if ((p = strchr(cert_host,
-				    (cert_host[0] == '[') ? ']' : ':')) != NULL)
+		    if ((p = HTParsePort(cert_host, &port_number)) != 0)
 			*p = '\0';
-		    if (cert_host[0] == '[')
-			cert_host++;
 		    if (!(gn->type == GEN_IPADD ? strcasecomp :
 			  strcasecomp_asterisk) (ssl_host, cert_host)) {
 			status_sslcertcheck = 2;
@@ -1208,9 +1203,8 @@ static int HTLoadHTTP(const char *arg,
 	    docname = HTParse(arg, "", PARSE_PATH);
 	    hostname = HTParse(arg, "", PARSE_HOST);
 	    if (hostname &&
-		NULL != (colon = strchr(hostname, ':'))) {
-		*(colon++) = '\0';	/* Chop off port number */
-		portnumber = atoi(colon);
+		NULL != (colon = HTParsePort(hostname, &portnumber))) {
+		*colon = '\0';	/* Chop off port number */
 	    } else if (!strncmp(arg, "https", 5)) {
 		portnumber = HTTPS_PORT;
 	    } else {
@@ -1234,11 +1228,9 @@ static int HTLoadHTTP(const char *arg,
 		host2 = HTParse(docname, "", PARSE_HOST);
 		path2 = HTParse(docname, "", PARSE_PATH | PARSE_PUNCTUATION);
 		if (host2) {
-		    if ((colon = strchr(host2, ':')) != NULL) {
+		    if ((colon = HTParsePort(host2, &port2)) != NULL) {
 			/* Use non-default port number */
 			*colon = '\0';
-			colon++;
-			port2 = atoi(colon);
 		    }
 		}
 		/*
@@ -2441,6 +2433,7 @@ static int HTLoadHTTP(const char *arg,
 	SSL_handle = handle = NULL;
     }
 #endif /* USE_SSL */
+    dump_server_status = server_status;
     return status;
 }
 

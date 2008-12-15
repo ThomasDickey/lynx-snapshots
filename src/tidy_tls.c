@@ -1,6 +1,7 @@
 /*
- * $LynxId: tidy_tls.c,v 1.1 2008/04/27 22:49:52 tom Exp $
+ * $LynxId: tidy_tls.c,v 1.3 2008/12/14 18:25:25 tom Exp $
  * Copyright 2008, Thomas E. Dickey
+ * with fix Copyright 2008 by Thomas Viehmann
  *
  * Required libraries:
  *	libgnutls
@@ -17,11 +18,16 @@
 
 static int last_error = 0;
 
-#define GetDnByOID(target, oid) \
+/* ugly, but hey, we could just use a more sane api, too */
+#define GetDnByOID(target, oid, thewhat) \
 		len = sizeof(target); \
-		gnutls_x509_crt_get_dn_by_oid(xcert, oid, 0, 0, target, &len)
+                if (! thewhat) \
+		  gnutls_x509_crt_get_dn_by_oid(xcert, oid, 0, 0, target, &len); \
+                else \
+                  gnutls_x509_crt_get_issuer_dn_by_oid(xcert, oid, 0, 0, target, &len)
 
-static int ExtractCertificate(const gnutls_datum_t * cert, X509_NAME * result)
+/* thewhat: which DN to get 0 = subject, 1 = issuer */
+static int ExtractCertificate(const gnutls_datum_t * cert, X509_NAME * result, int thewhat)
 {
     gnutls_x509_crt_t xcert;
     int rc;
@@ -30,19 +36,19 @@ static int ExtractCertificate(const gnutls_datum_t * cert, X509_NAME * result)
     if ((rc = gnutls_x509_crt_init(&xcert)) >= 0) {
 	if ((rc = gnutls_x509_crt_import(xcert, cert, GNUTLS_X509_FMT_DER)) >= 0) {
 	    GetDnByOID(result->country,
-		       GNUTLS_OID_X520_COUNTRY_NAME);
+		       GNUTLS_OID_X520_COUNTRY_NAME, thewhat);
 	    GetDnByOID(result->organization,
-		       GNUTLS_OID_X520_ORGANIZATION_NAME);
+		       GNUTLS_OID_X520_ORGANIZATION_NAME, thewhat);
 	    GetDnByOID(result->organizational_unit_name,
-		       GNUTLS_OID_X520_ORGANIZATIONAL_UNIT_NAME);
+		       GNUTLS_OID_X520_ORGANIZATIONAL_UNIT_NAME, thewhat);
 	    GetDnByOID(result->common_name,
-		       GNUTLS_OID_X520_COMMON_NAME);
+		       GNUTLS_OID_X520_COMMON_NAME, thewhat);
 	    GetDnByOID(result->locality_name,
-		       GNUTLS_OID_X520_LOCALITY_NAME);
+		       GNUTLS_OID_X520_LOCALITY_NAME, thewhat);
 	    GetDnByOID(result->state_or_province_name,
-		       GNUTLS_OID_X520_STATE_OR_PROVINCE_NAME);
+		       GNUTLS_OID_X520_STATE_OR_PROVINCE_NAME, thewhat);
 	    GetDnByOID(result->email,
-		       GNUTLS_OID_PKCS9_EMAIL);
+		       GNUTLS_OID_PKCS9_EMAIL, thewhat);
 	    rc = 0;
 	}
 	gnutls_x509_crt_deinit(xcert);
@@ -570,7 +576,7 @@ X509_NAME *X509_get_issuer_name(const X509 * cert)
     X509_NAME *result;
 
     if ((result = typeCalloc(X509_NAME)) != 0) {
-	if (ExtractCertificate(&cert[1], result) < 0) {
+	if (ExtractCertificate(cert, result, 1) < 0) {
 	    free(result);
 	    result = 0;
 	}
@@ -586,7 +592,7 @@ X509_NAME *X509_get_subject_name(const X509 * cert)
     X509_NAME *result;
 
     if ((result = typeCalloc(X509_NAME)) != 0) {
-	if (ExtractCertificate(&cert[0], result) < 0) {
+	if (ExtractCertificate(cert, result, 0) < 0) {
 	    free(result);
 	    result = 0;
 	}

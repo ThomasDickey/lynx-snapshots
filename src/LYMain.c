@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMain.c,v 1.187 2008/12/07 20:52:27 tom Exp $
+ * $LynxId: LYMain.c,v 1.188 2008/12/14 18:07:56 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTP.h>
@@ -485,6 +485,7 @@ int MessageSecs;		/* time-delay for important Messages   */
 int ReplaySecs;			/* time-delay for command-scripts */
 int crawl_count = 0;		/* Starting number for lnk#.dat files in crawls */
 int dump_output_width = 0;
+int dump_server_status = 0;
 int lynx_temp_subspace = 0;	/* > 0 if we made temp-directory */
 int max_cookies_domain = 50;
 int max_cookies_global = 500;
@@ -1031,13 +1032,6 @@ int main(int argc,
     InitializeCriticalSection(&critSec_READ);
 
 #endif /* _WINDOWS */
-
-#if 0				/* defined(__CYGWIN__) - does not work with screen */
-    if (strcmp(ttyname(fileno(stdout)), "/dev/conout") != 0) {
-	printf("please \"$CYGWIN=notty\"\n");
-	exit_immediately(EXIT_SUCCESS);
-    }
-#endif
 
 #if defined(WIN_EX)
     /* 1997/10/19 (Sun) 21:40:54 */
@@ -4470,7 +4464,7 @@ Lynx now exiting with signal:  %d\r\n\r\n", sig);
 	/*
 	 * Exit without dumping core.
 	 */
-	exit_immediately(EXIT_SUCCESS);
+	exit_immediately(EXIT_FAILURE);
     }
 }
 #endif /* !VMS */

@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTParse.c,v 1.48 2008/01/10 00:57:31 tom Exp $
+ * $LynxId: HTParse.c,v 1.50 2008/12/14 15:38:54 tom Exp $
  *
  *		Parse HyperText Document Address		HTParse.c
  *		================================
@@ -194,6 +194,46 @@ static char *strchr_or_end(char *string, int ch)
     return result;
 }
 
+/*
+ * Given a host specification that may end with a port number, e.g.,
+ *	foobar:123
+ * point to the ':' which begins the ":port" to make it simple to handle the
+ * substring.
+ *
+ * If no port is found (or a syntax error), return null.
+ */
+char *HTParsePort(char *host, int *portp)
+{
+    int brackets = 0;
+    char *result = NULL;
+
+    *portp = 0;
+    if (host != NULL) {
+	while (*host != '\0' && result == 0) {
+	    switch (*host++) {
+	    case ':':
+		if (brackets == 0 && isdigit(UCH(*host))) {
+		    char *next = NULL;
+
+		    *portp = strtol(host, &next, 10);
+		    if (next != 0 && next != host && *next == '\0') {
+			result = (host - 1);
+			CTRACE((tfp, "HTParsePort %d\n", *portp));
+		    }
+		}
+		break;
+	    case '[':		/* for ipv6 */
+		++brackets;
+		break;
+	    case ']':		/* for ipv6 */
+		--brackets;
+		break;
+	    }
+	}
+    }
+    return result;
+}
+
 /*	Parse a Name relative to another name.			HTParse()
  *	--------------------------------------
  *
@@ -356,37 +396,33 @@ char *HTParse(const char *aName,
 	     */
 	    {
 		char *p2, *h;
+		int portnumber;
 
 		if ((p2 = strchr(result, '@')) != NULL)
 		    tail = (p2 + 1);
-		p2 = strchr(tail, ':');
-		if (p2 != NULL && !isdigit(UCH(p2[1])))
-		    /*
-		     * Colon not followed by a port number.
-		     */
-		    *p2 = '\0';
-		if (p2 != NULL && *p2 != '\0' && acc_method != NULL) {
+		p2 = HTParsePort(result, &portnumber);
+		if (p2 != NULL && acc_method != NULL) {
 		    /*
 		     * Port specified.
 		     */
-#define ACC_METHOD(a,b) (!strcmp(acc_method, a) && !strcmp(p2, b))
-		    if (ACC_METHOD("http", ":80") ||
-			ACC_METHOD("https", ":443") ||
-			ACC_METHOD("gopher", ":70") ||
-			ACC_METHOD("ftp", ":21") ||
-			ACC_METHOD("wais", ":210") ||
-			ACC_METHOD("nntp", ":119") ||
-			ACC_METHOD("news", ":119") ||
-			ACC_METHOD("newspost", ":119") ||
-			ACC_METHOD("newsreply", ":119") ||
-			ACC_METHOD("snews", ":563") ||
-			ACC_METHOD("snewspost", ":563") ||
-			ACC_METHOD("snewsreply", ":563") ||
-			ACC_METHOD("finger", ":79") ||
-			ACC_METHOD("telnet", ":23") ||
-			ACC_METHOD("tn3270", ":23") ||
-			ACC_METHOD("rlogin", ":513") ||
-			ACC_METHOD("cso", ":105"))
+#define ACC_METHOD(a,b) (!strcmp(acc_method, a) && (portnumber == b))
+		    if (ACC_METHOD("http", 80) ||
+			ACC_METHOD("https", 443) ||
+			ACC_METHOD("gopher", 70) ||
+			ACC_METHOD("ftp", 21) ||
+			ACC_METHOD("wais", 210) ||
+			ACC_METHOD("nntp", 119) ||
+			ACC_METHOD("news", 119) ||
+			ACC_METHOD("newspost", 119) ||
+			ACC_METHOD("newsreply", 119) ||
+			ACC_METHOD("snews", 563) ||
+			ACC_METHOD("snewspost", 563) ||
+			ACC_METHOD("snewsreply", 563) ||
+			ACC_METHOD("finger", 79) ||
+			ACC_METHOD("telnet", 23) ||
+			ACC_METHOD("tn3270", 23) ||
+			ACC_METHOD("rlogin", 513) ||
+			ACC_METHOD("cso", 105))
 			*p2 = '\0';	/* It is the default: ignore it */
 		}
 		if (p2 == NULL) {
