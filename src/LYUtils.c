@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYUtils.c,v 1.178 2008/12/14 18:42:42 tom Exp $
+ * $LynxId: LYUtils.c,v 1.179 2008/12/14 20:52:02 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTCP.h>
@@ -2818,8 +2818,8 @@ BOOLEAN inlocaldomain(void)
 	    else if (strlen(me.ut_host) == 0) {
 		result = TRUE;
 	    }
-	}
 #endif /* LINUX */
+	}
 
     } else {
 	CTRACE((tfp,
