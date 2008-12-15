@@ -1,9 +1,9 @@
--- $LynxId: CHANGES,v 1.325 2008/12/14 20:04:30 tom Exp $
+-- $LynxId: CHANGES,v 1.326 2008/12/15 00:24:56 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2008-??-?? (2.8.7dev.11)
+2008-12-14 (2.8.7dev.11)
 * add support for HTML5 rel=author in link (mailing list comments) -TD
 * modify cookie-writing to not write if no cookies were read from the file
   and none are available (Debian #354282) -TD

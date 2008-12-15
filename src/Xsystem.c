@@ -1,4 +1,4 @@
-/* $LynxId: Xsystem.c,v 1.18 2008/12/14 18:44:52 tom Exp $
+/* $LynxId: Xsystem.c,v 1.19 2008/12/15 00:21:16 tom Exp $
  *	like system("cmd") but return with exit code of "cmd"
  *	for Turbo-C/MS-C/LSI-C
  *  This code is in the public domain.
@@ -537,7 +537,6 @@ int exec_command(char *cmd, int wait_flag)
 #else
     PRO *p;
     char *pif;
-    int rc = 0;
     int cmd_str;
 
     pif = cmd;
