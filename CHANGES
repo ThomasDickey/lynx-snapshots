@@ -1,7 +1,10 @@
--- $LynxId: CHANGES,v 1.326 2008/12/15 00:24:56 tom Exp $
+-- $LynxId: CHANGES,v 1.327 2008/12/16 01:14:20 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
+
+2008-12-?? (2.8.7dev.12)
+* correct handling of --with-ssl option when pkg-config is not found -TD
 
 2008-12-14 (2.8.7dev.11)
 * add support for HTML5 rel=author in link (mailing list comments) -TD

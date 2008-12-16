@@ -1,4 +1,4 @@
-dnl $LynxId: aclocal.m4,v 1.128 2008/12/12 01:03:21 tom Exp $
+dnl $LynxId: aclocal.m4,v 1.129 2008/12/16 01:20:12 tom Exp $
 dnl Macros for auto-configure script.
 dnl by T.E.Dickey <dickey@invisible-island.net>
 dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
@@ -4409,7 +4409,7 @@ define([CF_SRAND_PARSE],[
 	esac
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_SSL version: 14 updated: 2008/12/09 19:45:44
+dnl CF_SSL version: 15 updated: 2008/12/15 20:14:33
 dnl ------
 dnl Check for ssl library
 dnl $1 = [optional] directory in which the library may be found, set by AC_ARG_WITH
@@ -4465,7 +4465,7 @@ AC_DEFUN([CF_SSL],[
 
 	if test "$cf_cv_have_ssl" != yes; then
 		case $1 in #(vi
-		no)
+		yes)
 			CF_FIND_LINKAGE(CF__SSL_HEAD,
 				CF__SSL_BODY,
 				ssl,
