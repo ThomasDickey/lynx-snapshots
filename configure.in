@@ -1,4 +1,4 @@
-dnl $LynxId: configure.in,v 1.174 2008/12/15 00:24:56 tom Exp $
+dnl $LynxId: configure.in,v 1.176 2008/12/24 14:35:01 tom Exp $
 dnl
 dnl Process this file with autoconf to produce a configure script.
 dnl
@@ -95,6 +95,7 @@ AC_PROG_CPP
 AC_PROG_LN_S
 AC_PROG_MAKE_SET
 AC_PROG_INSTALL
+AC_PROG_YACC
 AC_CHECK_PROGS(LINT, lint alint lclint tdlint, [])
 
 AC_AIX
@@ -885,14 +886,6 @@ CF_ARG_ENABLE(kbd-layout,
 AC_MSG_RESULT($use_kbd_layout)
 test $use_kbd_layout != no && AC_DEFINE(EXP_KEYBOARD_LAYOUT)
 
-dnl AC_MSG_CHECKING(if experimental JavaScript support should be used)
-dnl CF_ARG_ENABLE(libjs,
-dnl [  --enable-libjs          use experimental JavaScript support (Mozilla libjs)],
-dnl 	[use_libjs=$enableval],
-dnl 	[use_libjs=no])
-dnl AC_MSG_RESULT($use_libjs)
-dnl test $use_libjs != no && AC_DEFINE(EXP_LIBJS)
-
 dnl --------------------------------------------------------------------------
 AC_MSG_CHECKING(if experimental nested-table logic should be used)
 CF_ARG_ENABLE(nested-tables,
@@ -979,7 +972,7 @@ test $use_file_upload != no && AC_DEFINE(USE_FILE_UPLOAD)
 dnl --------------------------------------------------------------------------
 AC_MSG_CHECKING(if element-justification logic should be used)
 CF_ARG_DISABLE(justify-elts,
-[  --enable-justify-elts   use element-justification logic],
+[  --disable-justify-elts  use element-justification logic],
 	[use_justify_elts=$enableval],
 	[use_justify_elts=yes])
 AC_MSG_RESULT($use_justify_elts)

@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFile.c,v 1.110 2008/12/07 18:49:34 tom Exp $
+ * $LynxId: HTFile.c,v 1.114 2008/12/24 13:18:35 tom Exp $
  *
  *			File Access				HTFile.c
  *			===========
@@ -147,14 +147,23 @@ static const char *HTCacheRoot = "/WWW$SCRATCH";	/* Where to cache things */
 static const char *HTCacheRoot = "/tmp/W3_Cache_";	/* Where to cache things */
 #endif /* VMS */
 
+#define NO_SUFFIX      "*"
+#define UNKNOWN_SUFFIX "*.*"
+
 /*
  *  Suffix registration.
  */
 static HTList *HTSuffixes = 0;
+
 static HTSuffix no_suffix =
-{"*", NULL, NULL, NULL, 1.0};
+{
+    NO_SUFFIX, NULL, NULL, NULL, 1.0
+};
+
 static HTSuffix unknown_suffix =
-{"*.*", NULL, NULL, NULL, 1.0};
+{
+    UNKNOWN_SUFFIX, NULL, NULL, NULL, 1.0
+};
 
 /*	To free up the suffixes at program exit.
  *	----------------------------------------
@@ -499,9 +508,9 @@ void HTSetSuffix5(const char *suffix,
     HTSuffix *suff;
     BOOL trivial_enc = (BOOL) IsUnityEncStr(encoding);
 
-    if (strcmp(suffix, "*") == 0)
+    if (strcmp(suffix, NO_SUFFIX) == 0)
 	suff = &no_suffix;
-    else if (strcmp(suffix, "*.*") == 0)
+    else if (strcmp(suffix, UNKNOWN_SUFFIX) == 0)
 	suff = &unknown_suffix;
     else {
 	HTList *cur = HTSuffixes;
@@ -697,7 +706,7 @@ char *HTnameOfFile_WWW(const char *name,
 	}
     } else if (WWW_prefix) {	/* other access */
 #ifdef VMS
-	if ((home = LYGetEnv("HOME")) == 0)
+	if ((home = LYGetEnv("HOME")) == NULL)
 	    home = HTCacheRoot;
 	else
 	    home = HTVMS_wwwName(home);
@@ -707,7 +716,7 @@ char *HTnameOfFile_WWW(const char *name,
 #else
 	home = LYGetEnv("HOME");
 #endif
-	if (home == 0)
+	if (home == NULL)
 	    home = "/tmp";
 #endif /* VMS */
 	HTSprintf0(&result, "%s/WWW/%s/%s%s", home, acc_method, host, path);
@@ -1314,7 +1323,7 @@ CompressFileType HTEncodingToCompressType(const char *coding)
 {
     CompressFileType result = cftNone;
 
-    if (coding == 0) {
+    if (coding == NULL) {
 	result = cftNone;
     } else if (!strcasecomp(coding, "gzip") ||
 	       !strcasecomp(coding, "x-gzip")) {
@@ -1336,8 +1345,10 @@ CompressFileType HTContentTypeToCompressType(const char *ct)
 {
     CompressFileType method = cftNone;
 
-    if (!strncasecomp(ct, "application/gzip", 16) ||
-	!strncasecomp(ct, "application/x-gzip", 18)) {
+    if (ct == NULL) {
+	method = cftNone;
+    } else if (!strncasecomp(ct, "application/gzip", 16) ||
+	       !strncasecomp(ct, "application/x-gzip", 18)) {
 	method = cftGzip;
     } else if (!strncasecomp(ct, "application/compress", 20) ||
 	       !strncasecomp(ct, "application/x-compress", 22)) {
@@ -1889,7 +1900,7 @@ static int print_local_dir(DIR *dp, char *localname,
     pathname = HTParse(anchor->address, "",
 		       PARSE_PATH + PARSE_PUNCTUATION);
 
-    if ((p = strrchr(pathname, '/')) == 0)
+    if ((p = strrchr(pathname, '/')) == NULL)
 	p = "/";
     StrAllocCopy(tail, (p + 1));
     FREE(pathname);
@@ -2019,8 +2030,7 @@ static int print_local_dir(DIR *dp, char *localname,
 #ifdef DISP_PARTIAL
 	/* optimize for expensive operation: */
 	if (num_of_entries % (partial_threshold > 0 ?
-			      partial_threshold : display_lines)
-	    == 0) {
+			      partial_threshold : display_lines) == 0) {
 	    if (HTCheckForInterrupt()) {
 		status = HT_PARTIAL_CONTENT;
 		break;
@@ -2179,8 +2189,9 @@ static int print_local_dir(DIR *dp, char *localname,
 	    /* optimize for expensive operation: */
 #ifdef DISP_PARTIAL
 	    if (num_of_entries_output %
-		(partial_threshold > 0 ? partial_threshold : display_lines)
-		== 0) {
+		((partial_threshold > 0)
+		 ? partial_threshold
+		 : display_lines) == 0) {
 		/* num_of_entries, num_of_entries_output... */
 		/* HTReadProgress...(bytes, 0); */
 		HTDisplayPartial();
@@ -2455,16 +2466,16 @@ static int decompressAndParse(HTParentAnchor *anchor,
 	    switch (internal_decompress) {
 #ifdef USE_ZLIB
 	    case cftDeflate:
-		failed_decompress = (zzfp == 0);
+		failed_decompress = (zzfp == NULL);
 		break;
 	    case cftCompress:
 	    case cftGzip:
-		failed_decompress = (gzfp == 0);
+		failed_decompress = (gzfp == NULL);
 		break;
 #endif
 #ifdef USE_BZLIB
 	    case cftBzip2:
-		failed_decompress = (bzfp == 0);
+		failed_decompress = (bzfp == NULL);
 		break;
 #endif
 	    default:

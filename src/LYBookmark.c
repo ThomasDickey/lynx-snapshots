@@ -975,28 +975,38 @@ void LYMBM_statusline(const char *text)
  */
 static BOOLEAN havevisible(const char *Title)
 {
+    BOOLEAN result = FALSE;
     const char *p = Title;
     unsigned char c;
     long unicode;
 
     for (; *p; p++) {
 	c = UCH(TOASCII(*p));
-	if (c > 32 && c < 127)
-	    return (TRUE);
+	if (c > 32 && c < 127) {
+	    result = TRUE;
+	    break;
+	}
 	if (c <= 32 || c == 127)
 	    continue;
-	if (LYHaveCJKCharacterSet || !UCCanUniTranslateFrom(current_char_set))
-	    return (TRUE);
+	if (LYHaveCJKCharacterSet || !UCCanUniTranslateFrom(current_char_set)) {
+	    result = TRUE;
+	    break;
+	}
 	unicode = UCTransToUni(*p, current_char_set);
-	if (unicode > 32 && unicode < 127)
-	    return (TRUE);
+	if (unicode == ucNeedMore)
+	    continue;
+	if (unicode > 32 && unicode < 127) {
+	    result = TRUE;
+	    break;
+	}
 	if (unicode <= 32 || unicode == 0xa0 || unicode == 0xad)
 	    continue;
-	if (unicode >= 0x2000 && unicode < 0x200f)
-	    continue;
-	return (TRUE);
+	if (unicode < 0x2000 || unicode >= 0x200f) {
+	    result = TRUE;
+	    break;
+	}
     }
-    return (FALSE);		/* if we came here */
+    return (result);
 }
 
 /*
