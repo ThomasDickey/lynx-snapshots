@@ -1,4 +1,4 @@
-/* $LynxId: LYShowInfo.c,v 1.66 2008/12/07 22:14:05 tom Exp $ */
+/* $LynxId: LYShowInfo.c,v 1.67 2008/12/25 14:35:50 tom Exp $ */
 #include <HTUtils.h>
 #include <HTFile.h>
 #include <HTParse.h>
@@ -210,7 +210,7 @@ int LYShowInfo(DocInfo *doc,
 		    buf[buf_size] = '\0';
 		} else {
 		    sprintf(buf, "%.*s", (int) sizeof(buf) - 1,
-									gettext("Unable to follow link"));
+			    gettext("Unable to follow link"));
 		}
 		ADD_SS(gettext("Points to file:"), buf);
 	    }

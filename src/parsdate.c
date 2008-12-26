@@ -8,7 +8,7 @@ static const char yysccsid[] = "@(#)yaccpar	1.9 (Berkeley) 02/21/93";
 #define YYBYACC 1
 #define YYMAJOR 1
 #define YYMINOR 9
-#define YYPATCH 20080827
+#define YYPATCH 20081224
 
 #define YYEMPTY        (-1)
 #define yyclearin      (yychar = YYEMPTY)
@@ -31,9 +31,9 @@ extern int YYPARSE_DECL();
 
 static int yygrowstack(void);
 #define YYPREFIX "yy"
-#line 2 "parsdate.y"
+#line 2 "./parsdate.y"
 /*
- *  $LynxId: parsdate.c,v 1.4 2008/09/23 23:13:34 tom Exp $
+ *  $LynxId: parsdate.c,v 1.6 2008/12/24 21:13:01 tom Exp $
  *
  *  This module is adapted and extended from tin, to use for LYmktime().
  *
@@ -73,7 +73,16 @@ static int yygrowstack(void);
 */
 #define ENDOF(array)	(&array[ARRAY_SIZE(array)])
 
-#define CTYPE(isXXXXX, c)	(((unsigned char)(c) < 128) && isXXXXX(((int)c)))
+#ifdef EBCDIC
+#define TO_ASCII(c)	TOASCII(c)
+#define TO_LOCAL(c)	FROMASCII(c)
+#else
+#define TO_ASCII(c)	(c)
+#define TO_LOCAL(c)	(c)
+#endif
+
+#define IS7BIT(x)		((unsigned) TO_ASCII(x) < 128)
+#define CTYPE(isXXXXX, c)	(IS7BIT(c) && isXXXXX(((unsigned char)c)))
 
 typedef char	*PD_STRING;
 
@@ -96,7 +105,6 @@ extern int date_parse(void);
 
 #define LPAREN		'('
 #define RPAREN		')'
-#define IS7BIT(x)	((unsigned int)(x) < 0200)
 
 
 /*
@@ -156,12 +164,12 @@ date_error(const char GCC_UNUSED *s)
     /*NOTREACHED*/
 }
 
-#line 128 "parsdate.y"
+#line 136 "./parsdate.y"
 typedef union {
     time_t		Number;
     enum _MERIDIAN	Meridian;
 } YYSTYPE;
-#line 164 "y.tab.c"
+#line 172 "y.tab.c"
 #define tDAY 257
 #define tDAYZONE 258
 #define tMERIDIAN 259
@@ -371,7 +379,7 @@ static short   *yyss;
 static short   *yysslim;
 static YYSTYPE *yyvs;
 static unsigned yystacksize;
-#line 350 "parsdate.y"
+#line 358 "./parsdate.y"
 
 /*
 **  An entry in the lexical lookup table.
@@ -553,8 +561,7 @@ ToSeconds(
     if (Meridian == MER24) {
 	if (Hours < 0 || Hours > 23)
 	    return -1;
-    }
-    else {
+    } else {
 	if (Hours < 1 || Hours > 12)
 		return -1;
 	if (Hours == 12)
@@ -614,9 +621,10 @@ Convert(
     }
 
     Julian = Day - 1 + (Year - EPOCH) * 365;
-    for (yp = LeapYears; yp < ENDOF(LeapYears); yp++, Julian++)
+    for (yp = LeapYears; yp < ENDOF(LeapYears); yp++, Julian++) {
 	if (Year <= *yp)
 	    break;
+    }
     for (i = 1; i < Month; i++)
 	Julian += *++mp;
     Julian *= SECSPERDAY;
@@ -680,7 +688,7 @@ LookupWord(
     c = p[0];
 
     /* See if we have an abbreviation for a month. */
-    if (length == 3 || (length == 4 && p[3] == '.'))
+    if (length == 3 || (length == 4 && p[3] == '.')) {
 	for (tp = MonthDayTable; tp < ENDOF(MonthDayTable); tp++) {
 	    q = tp->name;
 	    if (c == q[0] && p[1] == q[1] && p[2] == q[2]) {
@@ -688,48 +696,54 @@ LookupWord(
 		return tp->type;
 	    }
 	}
-    else
-	for (tp = MonthDayTable; tp < ENDOF(MonthDayTable); tp++)
+    } else {
+	for (tp = MonthDayTable; tp < ENDOF(MonthDayTable); tp++) {
 	    if (c == tp->name[0] && strcmp(p, tp->name) == 0) {
 		yylval.Number = tp->value;
 		return tp->type;
 	    }
+	}
+    }
 
     /* Try for a timezone. */
-    for (tp = TimezoneTable; tp < ENDOF(TimezoneTable); tp++)
+    for (tp = TimezoneTable; tp < ENDOF(TimezoneTable); tp++) {
 	if (c == tp->name[0] && p[1] == tp->name[1]
 	 && strcmp(p, tp->name) == 0) {
 	    yylval.Number = tp->value;
 	    return tp->type;
 	}
+    }
 
     if (strcmp(buff, "dst") == 0)
       return tDST;
 
     /* Try the units table. */
-    for (tp = UnitsTable; tp < ENDOF(UnitsTable); tp++)
+    for (tp = UnitsTable; tp < ENDOF(UnitsTable); tp++) {
 	if (c == tp->name[0] && strcmp(p, tp->name) == 0) {
 	    yylval.Number = tp->value;
 	    return tp->type;
 	}
+    }
 
     /* Strip off any plural and try the units table again. */
     if (--length > 0 && p[length] == 's') {
 	p[length] = '\0';
-	for (tp = UnitsTable; tp < ENDOF(UnitsTable); tp++)
+	for (tp = UnitsTable; tp < ENDOF(UnitsTable); tp++) {
 	    if (c == tp->name[0] && strcmp(p, tp->name) == 0) {
 		p[length] = 's';
 		yylval.Number = tp->value;
 		return tp->type;
 	    }
+	}
 	p[length] = 's';
     }
     length++;
 
     /* Drop out any periods. */
-    for (p = buff, q = (PD_STRING)buff; *q; q++)
+    for (p = buff, q = (PD_STRING)buff; *q; q++) {
 	if (*q != '.')
 	    *p++ = *q;
+    }
     *p = '\0';
 
     /* Try the meridians. */
@@ -747,12 +761,13 @@ LookupWord(
     /* If we saw any periods, try the timezones again. */
     if (p - buff != length) {
 	c = buff[0];
-	for (p = buff, tp = TimezoneTable; tp < ENDOF(TimezoneTable); tp++)
+	for (p = buff, tp = TimezoneTable; tp < ENDOF(TimezoneTable); tp++) {
 	    if (c == tp->name[0] && p[1] == tp->name[1]
 	    && strcmp(p, tp->name) == 0) {
 		yylval.Number = tp->value;
 		return tp->type;
 	    }
+	}
     }
 
     /* Unknown word -- assume GMT timezone. */
@@ -761,34 +776,52 @@ LookupWord(
 }
 
 
+/*
+ * This returns characters as-is (the ones that are not part of some token),
+ * and codes greater than 256 (the token values).
+ *
+ * yacc generates tables that may use the character value.  In particular,
+ * byacc's yycheck[] table contains integer values for the expected codes from
+ * this function, which (unless byacc is run locally) are ASCII codes.
+ *
+ * The TO_LOCAL() function assumes its input is in ASCII, and the output is
+ * whatever native encoding is used on the machine, e.g., EBCDIC.
+ *
+ * The TO_ASCII() function is the inverse of TO_LOCAL().
+ */
 static int
 date_lex(void)
 {
-    int	c;
+    int		c;
     char	*p;
-    char		buff[20];
-    int	sign;
-    int	i;
-    int	nesting;
+    char	buff[20];
+    int		sign;
+    int		i;
+    int		nesting;
 
     for(;;) {
 	/* Get first character after the whitespace. */
 	for(;;) {
-	    while (CTYPE(isspace, *yyInput))
+	    while (CTYPE(isspace, TO_LOCAL(*yyInput)))
 		yyInput++;
-	    c = *yyInput;
+	    c = TO_LOCAL(*yyInput);
 
 	    /* Ignore RFC 822 comments, typically time zone names. */
 	    if (c != LPAREN)
 		break;
-	    for (nesting = 1; (c = *++yyInput) != RPAREN || --nesting; )
-		if (c == LPAREN)
+	    for (nesting = 1;
+		 (c = TO_LOCAL(*++yyInput)) != RPAREN || --nesting;
+		 ) {
+		if (c == LPAREN) {
 		    nesting++;
-		else if (!IS7BIT(c) || c == '\0' || c == '\r'
-		     || (c == '\\' && ((c = *++yyInput) == '\0' || !IS7BIT(c)))) {
+		} else if (!IS7BIT(c) || c == '\0' || c == '\r'
+		        || (c == '\\'
+			 && ((c = TO_LOCAL(*++yyInput)) == '\0'
+			  || !IS7BIT(c)))) {
 		    /* Lexical error: bad comment. */
-		    return '?';
+		    return TO_ASCII('?');
 		}
+	    }
 	    yyInput++;
 	}
 
@@ -797,16 +830,23 @@ date_lex(void)
 	    if (c == '-' || c == '+') {
 		sign = c == '-' ? -1 : 1;
 		yyInput++;
-		if (!CTYPE(isdigit, *yyInput)) {
+		if (!CTYPE(isdigit, TO_LOCAL(*yyInput))) {
 		    /* Return the isolated plus or minus sign. */
 		    --yyInput;
 		    return *yyInput++;
 		}
-	    }
-	    else
+	    } else {
 		sign = 0;
-	    for (i = 0; (c = *yyInput++) != '\0' && CTYPE(isdigit, c); )
-		i = 10 * i + c - '0';
+	    }
+	    for (p = buff;
+		 (c = TO_LOCAL(*yyInput++)) != '\0' && CTYPE(isdigit, c);
+		 ) {
+		if (p < &buff[sizeof buff - 1])
+		    *p++ = c;
+	    }
+	    *p = '\0';
+	    i = atoi(buff);
+
 	    yyInput--;
 	    yylval.Number = sign < 0 ? -i : i;
 	    return sign ? tSNUMBER : tUNUMBER;
@@ -814,9 +854,12 @@ date_lex(void)
 
 	/* A word? */
 	if (CTYPE(isalpha, c)) {
-	    for (p = buff; (c = *yyInput++) == '.' || CTYPE(isalpha, c); )
+	    for (p = buff;
+		 (c = TO_LOCAL(*yyInput++)) == '.' || CTYPE(isalpha, c);
+		 ) {
 		if (p < &buff[sizeof buff - 1])
 		    *p++ = CTYPE(isupper, c) ? tolower(c) : c;
+	    }
 	    *p = '\0';
 	    yyInput--;
 	    return LookupWord(buff, p - buff);
@@ -943,7 +986,7 @@ parsedate(
      * from the error return value.  (Alternately could set errno on error.) */
     return Start == -1 ? 0 : Start;
 }
-#line 946 "y.tab.c"
+#line 989 "y.tab.c"
 /* allocate initial stack or double stack size, up to YYMAXDEPTH */
 static int yygrowstack(void)
 {
@@ -1129,7 +1172,7 @@ yyreduce:
     switch (yyn)
     {
 case 3:
-#line 146 "parsdate.y"
+#line 154 "./parsdate.y"
 	{
 	    yyHaveTime++;
 #if	defined(lint)
@@ -1141,27 +1184,27 @@ case 3:
 	}
 break;
 case 4:
-#line 155 "parsdate.y"
+#line 163 "./parsdate.y"
 	{
 	    yyHaveTime++;
 	    yyTimezone = yyvsp[0].Number;
 	}
 break;
 case 5:
-#line 159 "parsdate.y"
+#line 167 "./parsdate.y"
 	{
 	    yyHaveDate++;
 	}
 break;
 case 6:
-#line 162 "parsdate.y"
+#line 170 "./parsdate.y"
 	{
 	    yyHaveDate++;
 	    yyHaveTime++;
 	}
 break;
 case 7:
-#line 166 "parsdate.y"
+#line 174 "./parsdate.y"
 	{
 	    yyHaveDate++;
 	    yyHaveTime++;
@@ -1169,13 +1212,13 @@ case 7:
 	}
 break;
 case 8:
-#line 171 "parsdate.y"
+#line 179 "./parsdate.y"
 	{
 	    yyHaveRel = 1;
 	}
 break;
 case 9:
-#line 176 "parsdate.y"
+#line 184 "./parsdate.y"
 	{
 	    if (yyvsp[-1].Number < 100) {
 		yyHour = yyvsp[-1].Number;
@@ -1190,7 +1233,7 @@ case 9:
 	}
 break;
 case 10:
-#line 188 "parsdate.y"
+#line 196 "./parsdate.y"
 	{
 	    yyHour = yyvsp[-3].Number;
 	    yyMinutes = yyvsp[-1].Number;
@@ -1199,7 +1242,7 @@ case 10:
 	}
 break;
 case 11:
-#line 194 "parsdate.y"
+#line 202 "./parsdate.y"
 	{
 	    yyHour = yyvsp[-3].Number;
 	    yyMinutes = yyvsp[-1].Number;
@@ -1209,7 +1252,7 @@ case 11:
 	}
 break;
 case 12:
-#line 201 "parsdate.y"
+#line 209 "./parsdate.y"
 	{
 	    yyHour = yyvsp[-5].Number;
 	    yyMinutes = yyvsp[-3].Number;
@@ -1218,7 +1261,7 @@ case 12:
 	}
 break;
 case 13:
-#line 207 "parsdate.y"
+#line 215 "./parsdate.y"
 	{
 	    yyHour = yyvsp[-5].Number;
 	    yyMinutes = yyvsp[-3].Number;
@@ -1229,28 +1272,28 @@ case 13:
 	}
 break;
 case 14:
-#line 217 "parsdate.y"
+#line 225 "./parsdate.y"
 	{
 	    yyval.Number = yyvsp[0].Number;
 	    yyDSTmode = DSToff;
 	}
 break;
 case 15:
-#line 221 "parsdate.y"
+#line 229 "./parsdate.y"
 	{
 	    yyval.Number = yyvsp[0].Number;
 	    yyDSTmode = DSTon;
 	}
 break;
 case 16:
-#line 225 "parsdate.y"
+#line 233 "./parsdate.y"
 	{
 	    yyTimezone = yyvsp[-1].Number;
 	    yyDSTmode = DSTon;
 	}
 break;
 case 17:
-#line 229 "parsdate.y"
+#line 237 "./parsdate.y"
 	{
 	    /* Only allow "GMT+300" and "GMT-0800" */
 	    if (yyvsp[-1].Number != 0) {
@@ -1261,14 +1304,14 @@ case 17:
 	}
 break;
 case 18:
-#line 237 "parsdate.y"
+#line 245 "./parsdate.y"
 	{
 	    yyval.Number = yyvsp[0].Number;
 	    yyDSTmode = DSToff;
 	}
 break;
 case 19:
-#line 243 "parsdate.y"
+#line 251 "./parsdate.y"
 	{
 	    int	i;
 
@@ -1290,14 +1333,14 @@ case 19:
 	}
 break;
 case 20:
-#line 264 "parsdate.y"
+#line 272 "./parsdate.y"
 	{
 	    yyMonth = yyvsp[-2].Number;
 	    yyDay = yyvsp[0].Number;
 	}
 break;
 case 21:
-#line 268 "parsdate.y"
+#line 276 "./parsdate.y"
 	{
 	    if (yyvsp[-4].Number > 100) {
 		yyYear = yyvsp[-4].Number;
@@ -1312,14 +1355,14 @@ case 21:
 	}
 break;
 case 22:
-#line 280 "parsdate.y"
+#line 288 "./parsdate.y"
 	{
 	    yyMonth = yyvsp[-1].Number;
 	    yyDay = yyvsp[0].Number;
 	}
 break;
 case 23:
-#line 284 "parsdate.y"
+#line 292 "./parsdate.y"
 	{
 	    yyMonth = yyvsp[-3].Number;
 	    yyDay = yyvsp[-2].Number;
@@ -1327,14 +1370,14 @@ case 23:
 	}
 break;
 case 24:
-#line 289 "parsdate.y"
+#line 297 "./parsdate.y"
 	{
 	    yyDay = yyvsp[-1].Number;
 	    yyMonth = yyvsp[0].Number;
 	}
 break;
 case 25:
-#line 293 "parsdate.y"
+#line 301 "./parsdate.y"
 	{
 	    yyDay = yyvsp[-2].Number;
 	    yyMonth = yyvsp[-1].Number;
@@ -1342,7 +1385,7 @@ case 25:
 	}
 break;
 case 26:
-#line 298 "parsdate.y"
+#line 306 "./parsdate.y"
 	{
 	    yyDay = yyvsp[-2].Number;
 	    yyMonth = yyvsp[-1].Number;
@@ -1350,7 +1393,7 @@ case 26:
 	}
 break;
 case 27:
-#line 303 "parsdate.y"
+#line 311 "./parsdate.y"
 	{
 	    yyDay = yyvsp[-3].Number;
 	    yyMonth = yyvsp[-1].Number;
@@ -1358,7 +1401,7 @@ case 27:
 	}
 break;
 case 28:
-#line 308 "parsdate.y"
+#line 316 "./parsdate.y"
 	{
 	    yyDay = yyvsp[-2].Number;
 	    yyMonth = -yyvsp[-1].Number;
@@ -1368,7 +1411,7 @@ case 28:
 	}
 break;
 case 29:
-#line 317 "parsdate.y"
+#line 325 "./parsdate.y"
 	{
 	    yyMonth = yyvsp[-7].Number;
 	    yyDay = yyvsp[-6].Number;
@@ -1379,42 +1422,42 @@ case 29:
 	}
 break;
 case 30:
-#line 327 "parsdate.y"
+#line 335 "./parsdate.y"
 	{
 	    yyRelSeconds += yyvsp[-1].Number * yyvsp[0].Number;
 	}
 break;
 case 31:
-#line 330 "parsdate.y"
+#line 338 "./parsdate.y"
 	{
 	    yyRelSeconds += yyvsp[-1].Number * yyvsp[0].Number;
 	}
 break;
 case 32:
-#line 333 "parsdate.y"
+#line 341 "./parsdate.y"
 	{
 	    yyRelMonth += yyvsp[-1].Number * yyvsp[0].Number;
 	}
 break;
 case 33:
-#line 336 "parsdate.y"
+#line 344 "./parsdate.y"
 	{
 	    yyRelMonth += yyvsp[-1].Number * yyvsp[0].Number;
 	}
 break;
 case 34:
-#line 341 "parsdate.y"
+#line 349 "./parsdate.y"
 	{
 	    yyval.Meridian = MER24;
 	}
 break;
 case 35:
-#line 344 "parsdate.y"
+#line 352 "./parsdate.y"
 	{
 	    yyval.Meridian = yyvsp[0].Meridian;
 	}
 break;
-#line 1419 "y.tab.c"
+#line 1460 "y.tab.c"
     }
     yyssp -= yym;
     yystate = *yyssp;

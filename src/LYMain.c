@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMain.c,v 1.188 2008/12/14 18:07:56 tom Exp $
+ * $LynxId: LYMain.c,v 1.190 2008/12/26 01:18:43 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTP.h>
@@ -1106,7 +1106,7 @@ int main(int argc,
     LYAddPathToHome(LYTraceLogPath, LY_MAXPATH, cp);
 
     /*
-     * Act on -help NOW, so we only output the help and exit.  - FM
+     * Act on -version, -trace and -trace-mask NOW.
      */
     for (i = 1; i < argc; i++) {
 	parse_arg(&argv[i], 1, &i);
@@ -3308,11 +3308,11 @@ static Config_Type Arg_Table [] =
       "=MIMEname\ncharset for documents that don't specify it"
    ),
    PARSE_FUN(
-      "assume_local_charset",	4|NEED_FUNCTION_ARG,assume_local_charset_fun,
+      "assume_local_charset", 4|NEED_FUNCTION_ARG, assume_local_charset_fun,
       "=MIMEname\ncharset assumed for local files"
    ),
    PARSE_FUN(
-      "assume_unrec_charset",	4|NEED_FUNCTION_ARG,assume_unrec_charset_fun,
+      "assume_unrec_charset", 4|NEED_FUNCTION_ARG, assume_unrec_charset_fun,
       "=MIMEname\nuse this instead of unrecognized charsets"
    ),
    PARSE_FUN(
@@ -3370,12 +3370,12 @@ outputs for -source dumps"
    ),
 #ifdef EXP_CMD_LOGGING
    PARSE_STR(
-       "cmd_log",	2|NEED_LYSTRING_ARG,	lynx_cmd_logfile,
-       "=FILENAME\nlog keystroke commands to the given file"
+      "cmd_log",	2|NEED_LYSTRING_ARG,	lynx_cmd_logfile,
+      "=FILENAME\nlog keystroke commands to the given file"
    ),
    PARSE_STR(
-       "cmd_script",	2|NEED_LYSTRING_ARG,	lynx_cmd_script,
-       "=FILENAME\nread keystroke commands from the given file\n(see -cmd_log)"
+      "cmd_script",	2|NEED_LYSTRING_ARG,	lynx_cmd_script,
+      "=FILENAME\nread keystroke commands from the given file\n(see -cmd_log)"
    ),
 #endif
 #ifdef USE_SLANG
@@ -3400,7 +3400,7 @@ outputs for -source dumps"
       "=FILENAME\nspecifies a file to use to read cookies"
    ),
    PARSE_STR(
-      "cookie_save_file",	4|LYSTRING_ARG,	LYCookieSaveFile,
+      "cookie_save_file", 4|LYSTRING_ARG,	LYCookieSaveFile,
       "=FILENAME\nspecifies a file to use to store cookies"
    ),
 #endif /* USE_PERSISTENT_COOKIES */
@@ -3527,7 +3527,7 @@ soon as they are seen)"
       "send a HEAD request"
    ),
    PARSE_FUN(
-      "help",		1|FUNCTION_ARG,		help_fun,
+      "help",		4|FUNCTION_ARG,		help_fun,
       "print this usage message"
    ),
    PARSE_FUN(

@@ -1,4 +1,4 @@
-.\" $LynxId: lynx.man,v 1.83 2008/12/07 22:41:13 tom Exp $
+.\" $LynxId: lynx.man,v 1.84 2008/12/26 01:19:10 tom Exp $
 .nr N -1
 .nr D 5
 .TH LYNX 1
@@ -90,9 +90,9 @@ The default boolean, number and string option values that are compiled
 into \fILynx\fP are displayed in the help-message provided by \fBlynx -help\fP.
 Some of those may differ according to how \fILynx\fP was built;
 see the help message itself for these values.
-The \fB-help\fP option is processed before any option, including those
-that control reading from the lynx.cfg file.
-Therefore runtime configuration values are not reflected in the help-message.
+The \fB-help\fP option is processed in the third pass of options-processing,
+so any option which sets a value,
+as well as runtime configuration values are reflected in the help-message.
 .TP
 .B \-
 If the argument is only '-', then Lynx expects to receive
@@ -317,7 +317,7 @@ Input is terminated by a line that starts with '---'.
 send a HEAD request for the mime headers.
 .TP
 .B \-help
-print the Lynx command syntax usage message.
+print the Lynx command syntax usage message, and exit.
 .TP
 .B \-hiddenlinks=[option]
 control the display of hidden links.
@@ -831,7 +831,7 @@ restrictions also are implemented.
 toggle [LINK], [IMAGE] and [INLINE] comments with filenames of these images.
 .TP
 .B \-version
-print version information.
+print version information, and exit.
 .TP
 .B \-vikeys
 enable vi-like key movement.

@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTP.c,v 1.99 2008/12/14 18:05:36 tom Exp $
+ * $LynxId: HTTP.c,v 1.100 2008/12/25 14:15:28 tom Exp $
  *
  * HyperText Tranfer Protocol	- Client implementation		HTTP.c
  * ==========================
@@ -466,6 +466,27 @@ static void show_cert_issuer(X509 * peer_cert GCC_UNUSED)
 }
 #endif
 
+/*
+ * Remove IPv6 brackets (and any port-number) from the given host-string.
+ */
+static char *StripIpv6Brackets(char *host)
+{
+    int port_number;
+    char *p;
+
+    if ((p = HTParsePort(host, &port_number)) != 0)
+	*p = '\0';
+
+    if (*host == '[') {
+	p = host + strlen(host) - 1;
+	if (*p == ']') {
+	    *p = '\0';
+	    ++host;
+	}
+    }
+    return host;
+}
+
 /*		Load Document from HTTP Server			HTLoadHTTP()
  *		==============================
  *
@@ -530,7 +551,6 @@ static int HTLoadHTTP(const char *arg,
     char ssl_dn[1024];
     char *cert_host;
     char *ssl_host;
-    int port_number;
     char *p;
     char *msg = NULL;
     int status_sslcertcheck;
@@ -775,9 +795,7 @@ static int HTLoadHTTP(const char *arg,
 	ssl_dn_start = ssl_dn;
 	/* get host we're connecting to */
 	ssl_host = HTParse(url, "", PARSE_HOST);
-	/* strip port number or extract hostname component */
-	if ((p = HTParsePort(ssl_host, &port_number)) != 0)
-	    *p = '\0';
+	ssl_host = StripIpv6Brackets(ssl_host);
 
 	/* validate all CNs found in DN */
 	CTRACE((tfp, "Validating CNs in '%s'\n", ssl_dn_start));
@@ -791,9 +809,7 @@ static int HTLoadHTTP(const char *arg,
 		ssl_dn_start = p;	/* yes this points to the NUL byte */
 	    } else
 		ssl_dn_start = NULL;
-	    /* strip port number (XXX [ip]:port encap here too? -TG) */
-	    if ((p = HTParsePort(cert_host, &port_number)) != 0)
-		*p = '\0';
+	    cert_host = StripIpv6Brackets(cert_host);
 
 	    /* verify this CN */
 	    CTRACE((tfp, "Matching\n\tssl_host  '%s'\n\tcert_host '%s'\n",
@@ -887,8 +903,7 @@ static int HTLoadHTTP(const char *arg,
 			continue;
 		    status_sslcertcheck = 1;	/* got at least one */
 		    /* verify this SubjectAltName (see above) */
-		    if ((p = HTParsePort(cert_host, &port_number)) != 0)
-			*p = '\0';
+		    cert_host = StripIpv6Brackets(cert_host);
 		    if (!(gn->type == GEN_IPADD ? strcasecomp :
 			  strcasecomp_asterisk) (ssl_host, cert_host)) {
 			status_sslcertcheck = 2;

@@ -1,5 +1,5 @@
 /*
- * $LynxId: UCdomap.c,v 1.67 2007/07/30 19:43:05 tom Exp $
+ * $LynxId: UCdomap.c,v 1.70 2008/12/26 00:10:51 tom Exp $
  *
  *  UCdomap.c
  *  =========
@@ -24,8 +24,11 @@
 #include <LYGlobalDefs.h>
 #include <UCdomap.h>
 #include <UCMap.h>
+#include <UCAux.h>
 #include <UCDefs.h>
 #include <LYCharSets.h>
+#include <LYStrings.h>
+#include <LYUtils.h>
 
 #if defined(USE_LOCALE_CHARSET) && defined(HAVE_LANGINFO_CODESET)
 #include <langinfo.h>
@@ -89,10 +92,14 @@ int auto_display_charset = -1;
 #endif
 
 static const char *UC_GNsetMIMEnames[4] =
-{"iso-8859-1", "x-dec-graphics", "cp437", "x-transparent"};
+{
+    "iso-8859-1", "x-dec-graphics", "cp437", "x-transparent"
+};
 
 static int UC_GNhandles[4] =
-{-1, -1, -1, -1};
+{
+    -1, -1, -1, -1
+};
 
 /*
  * Some of the code below, and some of the comments, are left in for
@@ -453,7 +460,7 @@ static int con_insert_unipair(u16 unicode, u16 fontpos, int fordefault)
 	else
 	    uni_pagedir[n] = p1;
 	if (!p1)
-	    return -1;
+	    return ucError;
 
 	for (i = 0; i < 32; i++) {
 	    p1[i] = NULL;
@@ -463,7 +470,7 @@ static int con_insert_unipair(u16 unicode, u16 fontpos, int fordefault)
     if (!(p2 = p1[n = (unicode >> 6) & 0x1f])) {
 	p2 = p1[n] = (u16 *) malloc(64 * sizeof(u16));
 	if (!p2)
-	    return -1;
+	    return ucError;
 
 	for (i = 0; i < 64; i++) {
 	    p2[i] = 0xffff;	/* No glyph for this character (yet) */
@@ -494,7 +501,7 @@ static int con_insert_unipair_str(u16 unicode, const char *replace_str,
 	else
 	    uni_pagedir_str[n] = p1;
 	if (!p1)
-	    return -1;
+	    return ucError;
 
 	for (i = 0; i < 32; i++) {
 	    p1[i] = NULL;
@@ -506,7 +513,7 @@ static int con_insert_unipair_str(u16 unicode, const char *replace_str,
 	p1[n] = (char **) malloc(64 * sizeof(char *));
 
 	if (!p1[n])
-	    return -1;
+	    return ucError;
 
 	p2 = (const char **) p1[n];
 	for (i = 0; i < 64; i++) {
@@ -639,7 +646,7 @@ static int UC_con_set_unimap(int UC_charset_out_hndl,
     if (!UC_valid_UC_charset(UC_charset_out_hndl)) {
 	CTRACE((tfp, "UC_con_set_unimap: Invalid charset handle %d.\n",
 		UC_charset_out_hndl));
-	return -1;
+	return ucError;
     }
 
     p = UCInfo[UC_charset_out_hndl].unitable;
@@ -713,12 +720,12 @@ static int conv_uni_to_pc(long ucs,
 	/*
 	 * Not a printable character.
 	 */
-	return -1;
+	return ucError;
     } else if (ucs == 0xfeff || (ucs >= 0x200b && ucs <= 0x200f)) {
 	/*
 	 * Zero-width space.
 	 */
-	return -2;
+	return ucZeroWidth;
     } else if ((ucs & ~UNI_DIRECT_MASK) == UNI_DIRECT_BASE) {
 	/*
 	 * UNI_DIRECT_BASE indicates the start of the region in the
@@ -731,11 +738,11 @@ static int conv_uni_to_pc(long ucs,
 
     if (usedefault) {
 	if (!unidefault_contents_valid)
-	    return -3;
+	    return ucInvalidHash;
 	p1 = unidefault_pagedir[ucs >> 11];
     } else {
 	if (!hashtable_contents_valid)
-	    return -3;
+	    return ucInvalidHash;
 	p1 = uni_pagedir[ucs >> 11];
     }
 
@@ -748,7 +755,7 @@ static int conv_uni_to_pc(long ucs,
     /*
      * Not found.
      */
-    return -4;
+    return ucNotFound;
 }
 
 /*
@@ -777,21 +784,21 @@ static int conv_uni_to_str(char *outbuf,
 	/*
 	 * Not a printable character.
 	 */
-	return -1;
+	return ucError;
     } else if (ucs == 0xfeff || (ucs >= 0x200b && ucs <= 0x200f)) {
 	/*
 	 * Zero-width space.
 	 */
-	return -2;
+	return ucZeroWidth;
     }
 
     if (usedefault) {
 	if (!unidefault_str_contents_valid)
-	    return -3;
+	    return ucInvalidHash;
 	p1 = unidefault_pagedir_str[ucs >> 11];
     } else {
 	if (!hashtable_str_contents_valid)
-	    return -3;
+	    return ucInvalidHash;
 	p1 = uni_pagedir_str[ucs >> 11];
     }
 
@@ -805,7 +812,7 @@ static int conv_uni_to_str(char *outbuf,
     /*
      * Not found.
      */
-    return -4;
+    return ucNotFound;
 }
 
 int UCInitialized = 0;
@@ -837,7 +844,7 @@ int UCTransUniChar(long unicode,
 	if (LYCharSet_UC[charset_out].codepage < 0)
 	    return (unicode < 128) ? (int) unicode : LYCharSet_UC[charset_out].codepage;
 	if ((UChndl_out = default_UChndl) < 0)
-	    return -12;
+	    return ucCannotOutput;
 	isdefault = 1;
     } else {
 	isdefault = UCInfo[UChndl_out].replacedesc.isdefault;
@@ -886,13 +893,13 @@ int UCTransUniCharStr(char *outbuf,
     const u16 *ut;
 
     if (buflen < 2)
-	return -13;
+	return ucBufferTooSmall;
 
     if ((UChndl_out = LYCharSet_UC[charset_out].UChndl) < 0) {
 	if (LYCharSet_UC[charset_out].codepage < 0)
 	    return LYCharSet_UC[charset_out].codepage;
 	if ((UChndl_out = default_UChndl) < 0)
-	    return -12;
+	    return ucCannotOutput;
 	isdefault = 1;
     } else {
 	isdefault = UCInfo[UChndl_out].replacedesc.isdefault;
@@ -938,8 +945,8 @@ int UCTransUniCharStr(char *outbuf,
     }
     if (isdefault || trydefault) {
 #ifdef EXP_JAPANESEUTF8_SUPPORT
-	if ((strcmp(LYCharSet_UC[charset_out].MIMEname, "shift_jis") == 0) ||
-	    (strcmp(LYCharSet_UC[charset_out].MIMEname, "euc-jp") == 0)) {
+	if (LYCharSet_UC[charset_out].codepage == 0 &&
+	    LYCharSet_UC[charset_out].codepoints == 0) {
 	    iconv_t cd;
 	    char str[3], *pin, *pout;
 	    size_t inleft, outleft;
@@ -951,22 +958,41 @@ int UCTransUniCharStr(char *outbuf,
 	    pin = str;
 	    inleft = 2;
 	    pout = outbuf, outleft = buflen;
+	    /*
+	     * Try TRANSLIT first, since it is an extension which can provide
+	     * translations when there is no available exact translation to
+	     * the target character set.
+	     */
 	    HTSprintf0(&tocode, "%s//TRANSLIT", LYCharSet_UC[charset_out].MIMEname);
 	    cd = iconv_open(tocode, "UTF-16BE");
+	    if (cd == (iconv_t) - 1) {
+		/*
+		 * Try again, without TRANSLIT
+		 */
+		HTSprintf0(&tocode, "%s", LYCharSet_UC[charset_out].MIMEname);
+		cd = iconv_open(tocode, "UTF-16BE");
+
+		if (cd == (iconv_t) - 1) {
+		    CTRACE((tfp,
+			    "Warning: Cannot transcode form charset %s to %s!\n",
+			    "UTF-16BE", tocode));
+		}
+	    }
 	    FREE(tocode);
-	    if (cd == (iconv_t) (-1))
-		cd = iconv_open(LYCharSet_UC[charset_out].MIMEname, "UTF-16BE");
-	    rc = iconv(cd, (ICONV_CONST char **) &pin, &inleft, &pout, &outleft);
-	    iconv_close(cd);
-	    if ((pout - outbuf) == 3) {
-		CTRACE((tfp,
-			"It seems to be a JIS X 0201 code(%ld). Not supported.\n", unicode));
-		pin = str;
-		inleft = 2;
-		pout = outbuf, outleft = buflen;
-	    } else if (rc >= 0) {
-		*pout = '\0';
-		return (strlen(outbuf));
+
+	    if (cd != (iconv_t) - 1) {
+		rc = iconv(cd, (ICONV_CONST char **) &pin, &inleft, &pout, &outleft);
+		iconv_close(cd);
+		if ((pout - outbuf) == 3) {
+		    CTRACE((tfp,
+			    "It seems to be a JIS X 0201 code(%ld). Not supported.\n", unicode));
+		    pin = str;
+		    inleft = 2;
+		    pout = outbuf, outleft = buflen;
+		} else if (rc >= 0) {
+		    *pout = '\0';
+		    return (strlen(outbuf));
+		}
 	    }
 	}
 #endif
@@ -994,7 +1020,7 @@ int UCTransUniCharStr(char *outbuf,
 	}
 	return rc;
     }
-    return -4;
+    return ucNotFound;
 }
 
 static int UC_lastautoGN = 0;
@@ -1042,32 +1068,30 @@ int UCTransChar(char ch_in,
 		int charset_out)
 {
     int unicode, Gn;
-    int rc = -4;
+    int rc = ucNotFound;
     int UChndl_in, UChndl_out;
     int isdefault, trydefault = 0;
     const u16 *ut;
     int upd = 0;
 
-#ifndef UC_NO_SHORTCUTS
     if (charset_in == charset_out)
 	return UCH(ch_in);
-#endif /* UC_NO_SHORTCUTS */
     if (charset_in < 0)
-	return -11;
+	return ucCannotConvert;
     if ((UChndl_in = LYCharSet_UC[charset_in].UChndl) < 0)
-	return -11;
+	return ucCannotConvert;
     if ((UChndl_out = LYCharSet_UC[charset_out].UChndl) < 0) {
 	if (LYCharSet_UC[charset_out].codepage < 0)
 	    return LYCharSet_UC[charset_out].codepage;
 	if ((UChndl_out = default_UChndl) < 0)
-	    return -12;
+	    return ucCannotOutput;
 	isdefault = 1;
     } else {
 	isdefault = UCInfo[UChndl_out].replacedesc.isdefault;
 	trydefault = UCInfo[UChndl_out].replacedesc.trydefault;
     }
     if (!UCInfo[UChndl_in].num_uni)
-	return -11;
+	return ucCannotConvert;
     if ((Gn = UCInfo[UChndl_in].GN) < 0) {
 	Gn = UC_MapGN(UChndl_in, 0);
 	upd = 1;
@@ -1127,27 +1151,58 @@ long int UCTransJPToUni(char *inbuf,
     if ((ilen == 0) && (olen == 0)) {
 	return (((unsigned char) outbuf[0]) << 8) + (unsigned char) outbuf[1];
     }
-    return -11;
+    return ucCannotConvert;
 }
 #endif
 
+/*
+ * Translate a character to Unicode.  If additional bytes are needed, this
+ * returns ucNeedMore, based on its internal state.  To reset the state,
+ * call this with charset_in < 0.
+ */
 long int UCTransToUni(char ch_in,
 		      int charset_in)
 {
+    static char buffer[10];
+    static unsigned inx = 0;
+
     int unicode, Gn;
-    unsigned char ch_iu;
+    unsigned char ch_iu = UCH(ch_in);
     int UChndl_in;
 
-    ch_iu = UCH(ch_in);
-#ifndef UC_NO_SHORTCUTS
-    if (charset_in == LATIN1)
+    /*
+     * Reset saved-state.
+     */
+    if (charset_in < 0) {
+	inx = 0;
+	return ucCannotConvert;
+    } else if (charset_in == LATIN1) {
 	return ch_iu;
+    } else if (charset_in == UTF8_handle) {
+	if (is8bits(ch_in)) {
+	    unsigned need;
+	    char *ptr;
+
+	    buffer[inx++] = ch_iu;
+	    buffer[inx] = '\0';
+	    need = utf8_length(TRUE, buffer);
+	    if (need && (need + 1) == inx) {
+		inx = 0;
+		ptr = buffer;
+		return UCGetUniFromUtf8String(&ptr);
+	    } else if (inx < sizeof(buffer) - 1) {
+		return ucNeedMore;
+	    } else {
+		inx = 0;
+	    }
+	} else {
+	    inx = 0;
+	}
+    }
 #ifdef EXP_JAPANESEUTF8_SUPPORT
     if ((strcmp(LYCharSet_UC[charset_in].MIMEname, "shift_jis") == 0) ||
 	(strcmp(LYCharSet_UC[charset_in].MIMEname, "euc-jp") == 0)) {
-	static char buffer[3];
 	char obuffer[3], *pin, *pout;
-	static int inx = 0;
 	size_t rc, ilen, olen;
 	iconv_t cd;
 
@@ -1156,14 +1211,14 @@ long int UCTransToUni(char ch_in,
 	ilen = olen = 2;
 	if (strcmp(LYCharSet_UC[charset_in].MIMEname, "shift_jis") == 0) {
 	    if (inx == 0) {
-		if (IS_SJIS_HI1((unsigned char) ch_in) ||
-		    IS_SJIS_HI2((unsigned char) ch_in)) {
+		if (IS_SJIS_HI1(ch_iu) ||
+		    IS_SJIS_HI2(ch_iu)) {
 		    buffer[0] = ch_in;
 		    inx = 1;
-		    return -11;
+		    return ucNeedMore;
 		}
 	    } else {
-		if (IS_SJIS_LO((unsigned char) ch_in)) {
+		if (IS_SJIS_LO(ch_iu)) {
 		    buffer[1] = ch_in;
 		    buffer[2] = 0;
 
@@ -1172,21 +1227,20 @@ long int UCTransToUni(char ch_in,
 		    iconv_close(cd);
 		    inx = 0;
 		    if ((ilen == 0) && (olen == 0)) {
-			return (((unsigned char) obuffer[0]) << 8)
-			    + (unsigned char) obuffer[1];
+			return (UCH(obuffer[0]) << 8) + UCH(obuffer[1]);
 		    }
 		}
 	    }
 	}
 	if (strcmp(LYCharSet_UC[charset_in].MIMEname, "euc-jp") == 0) {
 	    if (inx == 0) {
-		if (IS_EUC_HI((unsigned char) ch_in)) {
+		if (IS_EUC_HI(ch_iu)) {
 		    buffer[0] = ch_in;
 		    inx = 1;
-		    return -11;
+		    return ucNeedMore;
 		}
 	    } else {
-		if (IS_EUC_LOX((unsigned char) ch_in)) {
+		if (IS_EUC_LOX(ch_iu)) {
 		    buffer[1] = ch_in;
 		    buffer[2] = 0;
 
@@ -1195,8 +1249,7 @@ long int UCTransToUni(char ch_in,
 		    iconv_close(cd);
 		    inx = 0;
 		    if ((ilen == 0) && (olen == 0)) {
-			return (((unsigned char) obuffer[0]) << 8)
-			    + (unsigned char) obuffer[1];
+			return (UCH(obuffer[0]) << 8) + UCH(obuffer[1]);
 		    }
 		}
 	    }
@@ -1204,27 +1257,27 @@ long int UCTransToUni(char ch_in,
 	inx = 0;
     }
 #endif
-    if (UCH(ch_in) < 128 && UCH(ch_in) >= 32)
+    if (ch_iu < 128 && ch_iu >= 32)
 	return ch_iu;
-#endif /* UC_NO_SHORTCUTS */
-    if (charset_in < 0)
-	return -11;
-    if (UCH(ch_in) < 32 &&
-	LYCharSet_UC[charset_in].enc != UCT_ENC_8BIT_C0)
+
+    if (ch_iu < 32 &&
+	LYCharSet_UC[charset_in].enc != UCT_ENC_8BIT_C0) {
 	/*
 	 * Don't translate C0 chars except for specific charsets.
 	 */
 	return ch_iu;
-    if ((UChndl_in = LYCharSet_UC[charset_in].UChndl) < 0)
-	return -11;
-    if (!UCInfo[UChndl_in].num_uni)
-	return -11;
+    } else if ((UChndl_in = LYCharSet_UC[charset_in].UChndl) < 0) {
+	return ucCannotConvert;
+    } else if (!UCInfo[UChndl_in].num_uni) {
+	return ucCannotConvert;
+    }
+
     if ((Gn = UCInfo[UChndl_in].GN) < 0) {
 	Gn = UC_MapGN(UChndl_in, 1);
     }
 
     UC_translate = set_translate(Gn);
-    unicode = UC_translate[UCH(ch_in)];
+    unicode = UC_translate[ch_iu];
 
     return unicode;
 }
@@ -1234,29 +1287,27 @@ int UCReverseTransChar(char ch_out,
 		       int charset_out)
 {
     int Gn;
-    int rc = -1;
+    int rc = ucError;
     int UChndl_in, UChndl_out;
     int isdefault;
     int i_ch = UCH(ch_out);
     const u16 *ut;
 
-#ifndef UC_NO_SHORTCUTS
     if (charset_in == charset_out)
 	return UCH(ch_out);
-#endif /* UC_NO_SHORTCUTS */
     if (charset_in < 0)
-	return -11;
+	return ucCannotConvert;
     if ((UChndl_in = LYCharSet_UC[charset_in].UChndl) < 0)
-	return -11;
+	return ucCannotConvert;
     if (!UCInfo[UChndl_in].num_uni)
-	return -11;
+	return ucCannotConvert;
     if (charset_out < 0)
-	return -12;
+	return ucCannotOutput;
     if ((UChndl_out = LYCharSet_UC[charset_out].UChndl) < 0) {
 	if (LYCharSet_UC[charset_out].codepage < 0)
 	    return LYCharSet_UC[charset_out].codepage;
 	if ((UChndl_out = default_UChndl) < 0)
-	    return -12;
+	    return ucCannotOutput;
 	isdefault = 1;
     } else {
 	isdefault = UCInfo[UChndl_out].replacedesc.isdefault;
@@ -1304,25 +1355,23 @@ int UCTransCharStr(char *outbuf,
     int upd = 0;
 
     if (buflen < 2)
-	return -13;
-#ifndef UC_NO_SHORTCUTS
+	return ucBufferTooSmall;
     if (chk_single_flag && charset_in == charset_out) {
 	outbuf[0] = ch_in;
 	outbuf[1] = '\0';
 	return 1;
     }
-#endif /* UC_NO_SHORTCUTS */
     if (charset_in < 0)
-	return -11;
+	return ucCannotConvert;
     if ((UChndl_in = LYCharSet_UC[charset_in].UChndl) < 0)
-	return -11;
+	return ucCannotConvert;
     if (!UCInfo[UChndl_in].num_uni)
-	return -11;
+	return ucCannotConvert;
     if ((UChndl_out = LYCharSet_UC[charset_out].UChndl) < 0) {
 	if (LYCharSet_UC[charset_out].codepage < 0)
 	    return LYCharSet_UC[charset_out].codepage;
 	if ((UChndl_out = default_UChndl) < 0)
-	    return -12;
+	    return ucCannotOutput;
 	isdefault = 1;
     } else {
 	isdefault = UCInfo[UChndl_out].replacedesc.isdefault;
@@ -1406,7 +1455,7 @@ int UCTransCharStr(char *outbuf,
 	}
 	return rc;
     }
-    return -4;
+    return ucNotFound;
 }
 
 static int UC_FindGN_byMIME(const char *UC_MIMEcharset)
@@ -1418,7 +1467,7 @@ static int UC_FindGN_byMIME(const char *UC_MIMEcharset)
 	    return i;
 	}
     }
-    return -1;
+    return ucError;
 }
 
 int UCGetRawUniMode_byLYhndl(int i)
@@ -1437,7 +1486,7 @@ static int getLYhndl_byCP(const char *prefix,
 			  const char *codepage)
 {
     static int nested;
-    int result = -1;
+    int result = ucError;
 
     if (!nested++) {
 	char *cptmp = NULL;
@@ -1464,7 +1513,7 @@ int UCGetLYhndl_byMIME(const char *value)
     if (!value || !(*value)) {
 	CTRACE((tfp,
 		"UCGetLYhndl_byMIME: NULL argument instead of MIME name.\n"));
-	return -1;
+	return ucError;
     }
 
     for (i = 0;
@@ -1488,14 +1537,19 @@ int UCGetLYhndl_byMIME(const char *value)
 	return UCGetLYhndl_byMIME("utf-8");
     }
 #endif
+    if (!strncasecomp(value, "iso", 3) && !strncmp(value + 3, "8859", 4)) {
+	return getLYhndl_byCP("iso-", value + 3);
+    }
 #if !NO_CHARSET_euc_jp
-    if (!strcasecomp(value, "x-euc-jp")) {
+    if (!strcasecomp(value, "x-euc-jp") ||
+	!strcasecomp(value, "eucjp")) {
 	return UCGetLYhndl_byMIME("euc-jp");
     }
 #endif
 #if !NO_CHARSET_shift_jis
     if ((!strcasecomp(value, "x-shift-jis")) ||
-	(!strcasecomp(value, "x-sjis"))) {
+	(!strcasecomp(value, "x-sjis")) ||
+	(!strcasecomp(value, "pck"))) {
 	return UCGetLYhndl_byMIME("shift_jis");
     }
 #endif
@@ -1540,6 +1594,11 @@ int UCGetLYhndl_byMIME(const char *value)
 	 * commonly used than the IANA registered name.  - FM
 	 */
 	return UCGetLYhndl_byMIME("windows-1252");
+    }
+#endif
+#if !NO_CHARSET_windows_1251
+    if (!strcasecomp(value, "ansi-1251")) {
+	return UCGetLYhndl_byMIME("windows-1251");
     }
 #endif
 #if !NO_CHARSET_windows_1250
@@ -1589,7 +1648,7 @@ int UCGetLYhndl_byMIME(const char *value)
     /* no more synonyms if come here... */
 
     CTRACE((tfp, "UCGetLYhndl_byMIME: unrecognized MIME name \"%s\"\n", value));
-    return -1;			/* returns -1 if no charset found by that MIME name */
+    return ucError;		/* returns -1 if no charset found by that MIME name */
 }
 
 /*
@@ -1642,7 +1701,7 @@ static const char **UC_setup_LYCharSets_repl(int UC_charset_in_hndl,
     const char **p;
     char **prepl;
     const u16 *pp;
-    char **tp;
+    const char **tp;
     const char *s7;
     const char *s8;
     size_t i;
@@ -1653,7 +1712,7 @@ static const char **UC_setup_LYCharSets_repl(int UC_charset_in_hndl,
     /*
      * Create a temporary table for reverse lookup of latin1 codes:
      */
-    tp = (char **) malloc(96 * sizeof(char *));
+    tp = (const char **) malloc(96 * sizeof(char *));
 
     if (!tp)
 	return NULL;
@@ -1698,7 +1757,7 @@ static const char **UC_setup_LYCharSets_repl(int UC_charset_in_hndl,
 	list = UCInfo[UC_charset_in_hndl].replacedesc.entries;
 	while (ct--) {
 	    if ((k = list->unicode) >= 160 && k < 256) {
-		tp[k - 160] = (char *) list->replace_str;
+		tp[k - 160] = list->replace_str;
 	    }
 	    list++;
 	}
@@ -1813,7 +1872,7 @@ static int UC_Register_with_LYCharSets(int s,
 	    CTRACE((tfp,
 		    "UC_Register_with_LYCharSets: Too many.  Ignoring %s/%s.",
 		    UC_MIMEcharset, UC_LYNXcharset));
-	    return -1;
+	    return ucError;
 	}
 	/*
 	 * Add to LYCharSets.c lists.
@@ -1962,7 +2021,7 @@ static int UC_NoUctb_Register_with_LYCharSets(const char *UC_MIMEcharset,
     for (i = 0; i < MAXCHARSETS && LYchar_set_names[i] && LYhndl < 0; i++) {
 	if (LYCharSet_UC[i].MIMEname &&
 	    !strcmp(UC_MIMEcharset, LYCharSet_UC[i].MIMEname)) {
-	    return -1;
+	    return ucError;
 	}
     }
 
@@ -1971,7 +2030,7 @@ static int UC_NoUctb_Register_with_LYCharSets(const char *UC_MIMEcharset,
 	CTRACE((tfp,
 		"UC_NoUctb_Register_with_LYCharSets: Too many.  Ignoring %s/%s.",
 		UC_MIMEcharset, UC_LYNXcharset));
-	return -1;
+	return ucError;
     }
     /*
      * Add to LYCharSets.c lists.
@@ -2027,7 +2086,7 @@ static void UC_Charset_NoUctb_Setup(const char *UC_MIMEcharset,
      * be returned immediately by UCTrans* functions.
      */
     if (!trydefault && codepage == 0)
-	codepage = -12;		/* if not already set; any negative should do. */
+	codepage = ucCannotOutput;	/* if not already set; any negative should do. */
     UC_NoUctb_Register_with_LYCharSets(UC_MIMEcharset,
 				       UC_LYNXcharset,
 				       lowest_eight,
@@ -2076,7 +2135,7 @@ static int CpOrdinal(const unsigned long cp, const int other)
 	    s = i;
     }
     if (s < 0)
-	return -1;
+	return ucError;
     /* Store the "real" charset info */
     real_charsets[other != 0] = UCGetLYhndl_byMIME(mimeName);
     /* Duplicate the record. */

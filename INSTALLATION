@@ -137,10 +137,11 @@ II. Compile instructions -- UNIX
     Use the "--with-screen=ncurses" or "--with-screen=slang" option.
 
     Note that while lynx will build with a variety of versions of curses and
-    ncurses, some will be less satisfactory.  Versions of ncurses before 1.9.9g
-    will not render color properly.  Some other versions of curses do not
-    display color at all.  Likewise, lynx may not build with old versions of
-    slang, e.g., before 0.99-38, because slang's interfaces change periodically.
+    ncurses, some will be less satisfactory.  Versions of ncurses before
+    1.9.9g will not render color properly.  Some other versions of curses do
+    not display color at all.  Likewise, lynx may not build with old versions
+    of slang, e.g., before 0.99-38, because slang's interfaces change
+    periodically.
 
     Note compiler/system specific problems below.  See also:
 	http://invisible-island.net/ncurses/ncurses.faq.html
@@ -304,7 +305,7 @@ II. Compile instructions -- UNIX
   --disable-justify-elts		(define EXP_JUSTIFY_ELTS)
 	Do not use element-justification logic.
 
-  --disable-largefiles			(prevent defining LONG_LIST)
+  --disable-largefile			(prevent defining LONG_LIST)
 
 	Use this option to disable the compiler and linker options that
 	provide largefile interfaces.
@@ -344,10 +345,6 @@ II. Compile instructions -- UNIX
 	Enhance the read-progress message to show ETA (estimated time to
 	completion), as well as the amount of time stalled without any data
 	transferred.
-
-  --disable-session-cache		(define USE_CACHE_JAR)
-	Use this option to compile-in support for saving/restoring session
-	information in files.  Configurable from lynx.cfg
 
   --disable-source-cache		(define USE_SOURCE_CACHE)
 	Use this option to compile-in support for caching HTML pages locally,
@@ -449,10 +446,6 @@ II. Compile instructions -- UNIX
 		JCUKEN Cyrillic, for AT 101-key kbd
 		YAWERTY Cyrillic, for DEC LK201 kbd
 
-  --enable-libjs			(define EXP_LIBJS)
-  	Disabled by default; used for ifdef'ing JavaScript interface.
-	Currently dummy: no JavaScript support implemented in Lynx yet.
-
   --enable-local-docs
 	On install, modify link from help-page to point to the local
 	doc-directory, e.g., with README files.  Normally this points
@@ -473,9 +466,25 @@ II. Compile instructions -- UNIX
 	Disabled by default, this allows interruption of NSL requests,
 	so that `z' will stop the `look-up' phase of a connection.
 
+  --enable-progressbar			(define USE_PROGRESSBAR)
+	Compile-in support for a "progress bar" which displays at the bottom
+	of the screen when doing downloads and other time-consuming (but
+	interruptible) processes.  This feature can be selected in the
+	options menu.
+
   --enable-scrollbar			(define USE_SCROLLBAR)
-	Compile-in support for scrollbar on the right-margin of the screen.  If
-	you configure with ncurses, this works with the mouse on xterm, etc.
+	Compile-in support for scrollbar on the right-margin of the screen. 
+	If you configure with ncurses, this works with the mouse on xterm,
+	etc.
+
+  --enable-session-cache		(define USE_CACHE_JAR)
+	Use this option to compile-in experimental support for
+	saving/restoring session information in files.  Configurable from
+	lynx.cfg
+
+  --enable-sessions			(define USE_SESSIONS)
+	Compile-in experimental support for sessions, which allow the user
+	to automatically save and restore history information.
 
   --enable-syslog			(define SYSLOG_REQUESTED_URLS)
 	Use this option to log NSL requests via syslog().
@@ -511,6 +520,42 @@ II. Compile instructions -- UNIX
   --with-XawPlus
 	This option allows you to specify the X libraries used if you
 	are configuring lynx to use PDCurses on a Unix platform.
+
+  --with-build-cc=XXX
+	If cross-compiling, specify a host C compiler, which is needed to
+	compile a utility which generates tables for lynx.
+	If you do not give this option, the configure script checks if the
+	$BUILD_CC variable is set, and otherwise defaults to gcc or cc.
+
+  --with-build-cpp=XXX
+	This is unused by lynx.
+
+  --with-build-cflags=XXX
+	If cross-compiling, specify the host C compiler-flags.  You might need
+	to do this if the target compiler has unusual flags which confuse the
+	host compiler.
+
+  --with-build-cppflags=XXX
+	If cross-compiling, specify the host C preprocessor-flags.  You might
+	need to do this if the target compiler has unusual flags which confuse
+	the host compiler.
+
+  --with-build-ldflags=XXX
+	If cross-compiling, specify the host linker-flags.  You might need to
+	do this if the target linker has unusual flags which confuse the host
+	compiler.
+
+  --with-build-libs=XXX
+	If cross-compiling, the host libraries.  You might need to do this if
+	the target environment requires unusual libraries.
+
+  --with-bzlib[=XXX]			(define USE_BZLIB)
+	Use libbz2 for decompression of some bzip2 files.
+
+	The optional value XXX specifies the directory in which the library
+	can be found, and may be either the path of the "lib" directory,
+	or one level above.  In either case, the corresponding header files
+	are assumed to be in the parallel "include" directory.
 
   --with-charsets=list			(define ALL_CHARSETS)
  	Limit the number of charsets that are compiled-in to the specified
@@ -588,6 +633,19 @@ II. Compile instructions -- UNIX
 	or one level above.  In either case, the corresponding header files
 	are assumed to be in the parallel "include" directory.
 
+  --with-pkg-config[=XXX]
+	Use pkg-config, if available, to tell how to build with certain
+	libraries, e.g., openssl and gnutls.  If pkg-config is not used,
+	or if those libraries are not known to pkg-config, then the configure
+	script will search for the libraries as described in the --with-ssl
+	and --with-gnutls options.
+
+	The optional value XXX specifies the pathname for pkg-config, e.g.,
+	"/usr/local/bin/pkg-config".
+
+	Note: The pkg-config program is used only if no explicit directory
+	parameter is provided for the --with-ssl or --with-gnutls options.
+
   --with-screen=XXX
 	Use this option to select the screen type.  The option value, XXX
 	must be one of curses (the default), ncurses, ncursesw, pdcurses or
@@ -643,41 +701,11 @@ II. Compile instructions -- UNIX
 	or one level above.  In either case, the corresponding header files
 	are assumed to be in the parallel "include" directory.
 
-    --with-build-cc=XXX
-	If cross-compiling, specify a host C compiler, which is needed to
-	compile a utility which generates tables for lynx.
-	If you do not give this option, the configure script checks if the
-	$BUILD_CC variable is set, and otherwise defaults to gcc or cc.
-
-    --with-build-cpp=XXX
-	This is unused by lynx.
-
-    --with-build-cflags=XXX
-	If cross-compiling, specify the host C compiler-flags.  You might need
-	to do this if the target compiler has unusual flags which confuse the
-	host compiler.
-
-    --with-build-cppflags=XXX
-	If cross-compiling, specify the host C preprocessor-flags.  You might
-	need to do this if the target compiler has unusual flags which confuse
-	the host compiler.
-
-    --with-build-ldflags=XXX
-	If cross-compiling, specify the host linker-flags.  You might need to
-	do this if the target linker has unusual flags which confuse the host
-	compiler.
-
-    --with-build-libs=XXX
-	If cross-compiling, the host libraries.  You might need to do this if
-	the target environment requires unusual libraries.
-
-  --with-bzlib[=XXX]			(define USE_BZLIB)
-	Use libbz2 for decompression of some bzip2 files.
-
-	The optional value XXX specifies the directory in which the library
-	can be found, and may be either the path of the "lib" directory,
-	or one level above.  In either case, the corresponding header files
-	are assumed to be in the parallel "include" directory.
+  --with-system-type=XXX
+	For testing, override the derived host system-type which is used to
+	decide things such as special compiler options.  This is normally
+	chosen automatically based on the type of system which you are
+	building on.  We use it for testing the configure script.
 
   --with-zlib[=XXX]			(define USE_ZLIB)
 	Use zlib for decompression of some gzip files.
@@ -744,24 +772,26 @@ II. Compile instructions -- UNIX
 		--mandir=$HOME/.usr/man --sysconfdir=$HOME/.usr/lib \
 		--with-screen=slang --with-zlib
 
-    CPPFLAGS in this example defines the full path to the slang and zlib header
-    files, which are not kept in standard directories.  Likewise, LIBS defines
-    the nonstandard locations of libslang.a and libz.a.  Setting the option
-    --bindir tells the configure script where I want to install the lynx
-    binary; setting --mandir tells it where to put the lynx.1 man page, and
-    setting --sysconfdir tells it (while at the same time defining LYNX_CFG_FILE)
-    where to put the configuration file "lynx.cfg", when I type "make install".
-    The --with-screen=slang and --with-zlib options are explained above.
+    CPPFLAGS in this example defines the full path to the slang and zlib
+    header files, which are not kept in standard directories.  Likewise, LIBS
+    defines the nonstandard locations of libslang.a and libz.a.  Setting the
+    option --bindir tells the configure script where I want to install the
+    lynx binary; setting --mandir tells it where to put the lynx.1 man page,
+    and setting --sysconfdir tells it (while at the same time defining
+    LYNX_CFG_FILE) where to put the configuration file "lynx.cfg", when I type
+    "make install".  The --with-screen=slang and --with-zlib options are
+    explained above.
 
 2. Wais support (optional)
     To add direct WAIS support, get the freeWAIS distribution from
-    "ftp://ftp.cnidr.org/pub/NIDR.tools/freewais", and compile it.  The compile
-    process will create the libraries you will need, wais.a and client.a.  Edit
-    the Makefile in the top level directory and add the library locations under
-    the DIRECT WAIS ACCESS heading.  Edit the Makefile for the WWW Library in
-    "WWW/Library/Implementation/makefile" to point to the include
-    directory for the freewais distribution.  Precompiled libraries are
-    available for many platforms if you don't wish to compile one yourself.
+    "ftp://ftp.cnidr.org/pub/NIDR.tools/freewais", and compile it.  The
+    compile process will create the libraries you will need, wais.a and
+    client.a.  Edit the Makefile in the top level directory and add the
+    library locations under the DIRECT WAIS ACCESS heading.  Edit the Makefile
+    for the WWW Library in "WWW/Library/Implementation/makefile" to point to
+    the include directory for the freewais distribution.  Precompiled
+    libraries are available for many platforms if you don't wish to compile
+    one yourself.
 
 
 III. Compile instructions -- VMS
@@ -1326,7 +1356,8 @@ VII. Setting environment variables before running Lynx (optional)
     for IP number, Gateway, Netmask, and Domain Name Server.  This can also be
     automated in the batch file.
 
-    Adapted from "readme.txt" by Wayne Buttles and "readme.dos" by Doug Kaufman.
+    Adapted from "readme.txt" by Wayne Buttles and "readme.dos" by Doug
+    Kaufman.
 
 VIII. Acknowledgment
 
@@ -1335,4 +1366,4 @@ VIII. Acknowledgment
 
 -- 1999/04/24 - H. Nelson <lynx-admin@irm.nara.kindai.ac.jp>
 -- vile:txtmode
--- $LynxId: INSTALLATION,v 1.103 2008/04/13 16:22:59 tom Exp $
+-- $LynxId: INSTALLATION,v 1.105 2008/12/25 01:09:57 tom Exp $

@@ -1,4 +1,4 @@
-# $LynxId: makefile.in,v 1.53 2008/07/06 13:28:03 tom Exp $
+# $LynxId: makefile.in,v 1.54 2008/12/24 18:11:29 tom Exp $
 # template-makefile for Lynx src directory
 
 SHELL		= @CONFIG_SHELL@
@@ -34,6 +34,8 @@ BUILD_CFLAGS	= @BUILD_CFLAGS@
 BUILD_CPPFLAGS	= @BUILD_CPPFLAGS@ @DEFS@
 BUILD_EXEEXT	= @BUILD_EXEEXT@
 
+YACC		= @YACC@
+
 LIBS		= @LIBS@ $(RESOLVLIB) $(WAISLIB) $(SITE_LIBS)
 LDFLAGS		= @LDFLAGS@
 
@@ -68,7 +70,7 @@ COMPRESS_PROG	=@COMPRESS_PROG@
 COMPRESS_EXT	=@COMPRESS_EXT@
 
 CHARTRANS_OBJS	= UCdomap$o UCAux$o UCAuto$o
-OBJS	= \
+OBJS		= \
 	LYClean$o LYShowInfo$o LYEdit$o LYStrings$o LYMail$o \
 	HTAlert$o GridText$o LYGetFile$o LYMain$o LYMainLoop$o \
 	LYCurses$o LYBookmark$o LYmktime$o LYUtils$o LYOptions$o \
@@ -78,9 +80,12 @@ OBJS	= \
 	LYLeaks$o LYexit$o LYJump$o LYList$o LYCgi$o \
 	LYTraversal$o LYEditmap$o LYCharSets$o LYCharUtils$o \
 	LYMap$o LYCookie$o LYStyle$o LYHash$o LYPrettySrc$o \
-	TRSTable$o parsdate$o $(CHARTRANS_OBJS) @EXTRA_OBJS@ @LIBOBJS@
+	TRSTable$o $(CHARTRANS_OBJS) @EXTRA_OBJS@ @LIBOBJS@
 
-C_SRC	= $(OBJS:$o=.c)
+GEN_OBJS	= parsdate$o 
+
+C_SRC		= $(OBJS:$o=.c)
+GEN_SRC		= $(GEN_OBJS:$o=.c)
 
 all: lynx$x
 
@@ -94,9 +99,9 @@ all: lynx$x
 @RULE_CC@
 	@ECHO_CC@$(CPP) -C $(CPP_OPTS) $(srcdir)/$*.c >$@
 
-lynx$x:   message do_chartrans_stuff $(top_builddir)/LYHelp.h $(OBJS) $(WWWLIB)
+lynx$x:   message do_chartrans_stuff $(top_builddir)/LYHelp.h $(OBJS) $(GEN_OBJS) $(WWWLIB)
 	@echo "Linking and creating Lynx executable"
-	$(CC) $(CC_OPTS) $(LDFLAGS) -o $@  $(OBJS) $(WWWLIB) $(INTLLIB) $(LDFLAGS) $(LIBS)
+	$(CC) $(CC_OPTS) $(LDFLAGS) -o $@  $(OBJS) $(GEN_OBJS) $(WWWLIB) $(INTLLIB) $(LDFLAGS) $(LIBS)
 	@echo "Copying Lynx executable into top-level directory"
 	rm -f $(top_builddir)/$@
 	cp $@ $(top_builddir)/
@@ -119,6 +124,7 @@ lint:
 
 clean:
 	rm -f lynx$x core *.core *.leaks *.i *$o *.bak tags TAGS test_*
+	test -f parsdate.y || rm -f parsdate.c
 	cd chrtrans && $(MAKE) clean
 
 tags:
@@ -207,11 +213,19 @@ test_mktime: LYmktime.c parsdate.o
 	$(CC) -o $@ $(CC_OPTS) -DTEST_DRIVER LYmktime.c parsdate.o
 
 # update generated source
-parsdate.c : parsdate.y
-	yacc  parsdate.y 
+parsdate.c : $(srcdir)/parsdate.y
+	$(YACC)  $(srcdir)/parsdate.y 
 	mv y.tab.c $@
 
+# allow for regenerating parsdate.c, e.g., for non-ASCII systems, while
+# handling configure --srcdir option.
+parsdate$o: parsdate.c
+	@-rm -f $@
+	-test -f parsdate.c && $(CC) $(CC_OPTS) -c parsdate.c
+	-test -f parsdate.c || $(CC) $(CC_OPTS) -c $(srcdir)/parsdate.c
+	test -f $@
+
 depend : $(TABLES)
-	makedepend -fmakefile -- $(CC_OPTS) -- $(C_SRC)
+	makedepend -fmakefile -- $(CC_OPTS) -- $(C_SRC) $(GEN_SRC)
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.

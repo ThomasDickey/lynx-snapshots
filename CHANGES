@@ -1,9 +1,41 @@
--- $LynxId: CHANGES,v 1.327 2008/12/16 01:14:20 tom Exp $
+-- $LynxId: CHANGES,v 1.340 2008/12/26 01:23:02 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
 2008-12-?? (2.8.7dev.12)
+* change the phase during which "-help" option is processed, to allow it to
+  reflect the configured values of the options in the help-message (prompted
+  by discussion with Dan Jacobson regarding Debian #507083) -TD
+* modify havevisible() and UCTransToUni() functions to process UTF-8 input,
+  fixing a problem saving bookmarks whose title is UTF-8 (prompted by patch by
+  Takao Fujiwara) -TD
+* restore logic in HTLoadHTTP() to strip matching square brackets from host
+  name and certificate host (comments by TG) -TD
+* modify UCdomap.c to work with Solaris iconv and handle additional encodings:
+  + if "TRANSLIT" feature (an extension of glibc) does not succeed, retry
+    the call to iconv_open without "TRANSLIT"
+  + add check for any MIME name beginning "iso8859", mapping to "iso-8859"
+  + recognize "eucjp" MIME name as alias for "euc-jp"
+  + recognize "pck" MIME name as alias for "shift_jis"
+  + recognize "ansi-1251" MIME name as alias for "windows-1251"
+  (patch by Takao Fujiwara)
+* add "*.dbg" to suffixes to ignore in autoconf script when checking for
+  executables and objects produced by C compile (report by PG, for z/OS) -TD
+* modify LYmktime.c and parsdate.y to convert between EBCDIC/ASCII as needed
+  to work on z/OS (report/analysis by PG) -TD
+* modify src/makefile.in to make it simple for a build script running in a
+  separate directory to regenerate parsdate.c (prompted by discussion with PG
+  regarding building on z/OS which uses EBCDIC) -TD
+* add configure check for yacc (report by PG) -TD
+* fixes to make configure --help agree with INSTALLATION (report by PW) -TD
+* add id.po from
+    http://translationproject.org/latest/lynx/
+* add a null-pointer check for content type, fix for dev.11 changes (Debian
+  #509321) -TD
+* improve configurability with regard to pkg-config by adding --with-pkg-config
+  option, which can be used to enable/disable use of the program as well as
+  specify the pathname used (prompted by comments by TG) -TD
 * correct handling of --with-ssl option when pkg-config is not found -TD
 
 2008-12-14 (2.8.7dev.11)

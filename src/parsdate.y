@@ -1,6 +1,6 @@
 %{
 /*
- *  $LynxId: parsdate.y,v 1.6 2008/09/23 23:13:34 tom Exp $
+ *  $LynxId: parsdate.y,v 1.10 2008/12/24 21:12:49 tom Exp $
  *
  *  This module is adapted and extended from tin, to use for LYmktime().
  *
@@ -40,7 +40,16 @@
 */
 #define ENDOF(array)	(&array[ARRAY_SIZE(array)])
 
-#define CTYPE(isXXXXX, c)	(((unsigned char)(c) < 128) && isXXXXX(((int)c)))
+#ifdef EBCDIC
+#define TO_ASCII(c)	TOASCII(c)
+#define TO_LOCAL(c)	FROMASCII(c)
+#else
+#define TO_ASCII(c)	(c)
+#define TO_LOCAL(c)	(c)
+#endif
+
+#define IS7BIT(x)		((unsigned) TO_ASCII(x) < 128)
+#define CTYPE(isXXXXX, c)	(IS7BIT(c) && isXXXXX(((unsigned char)c)))
 
 typedef char	*PD_STRING;
 
@@ -63,7 +72,6 @@ extern int date_parse(void);
 
 #define LPAREN		'('
 #define RPAREN		')'
-#define IS7BIT(x)	((unsigned int)(x) < 0200)
 
 
 /*
@@ -528,8 +536,7 @@ ToSeconds(
     if (Meridian == MER24) {
 	if (Hours < 0 || Hours > 23)
 	    return -1;
-    }
-    else {
+    } else {
 	if (Hours < 1 || Hours > 12)
 		return -1;
 	if (Hours == 12)
@@ -589,9 +596,10 @@ Convert(
     }
 
     Julian = Day - 1 + (Year - EPOCH) * 365;
-    for (yp = LeapYears; yp < ENDOF(LeapYears); yp++, Julian++)
+    for (yp = LeapYears; yp < ENDOF(LeapYears); yp++, Julian++) {
 	if (Year <= *yp)
 	    break;
+    }
     for (i = 1; i < Month; i++)
 	Julian += *++mp;
     Julian *= SECSPERDAY;
@@ -655,7 +663,7 @@ LookupWord(
     c = p[0];
 
     /* See if we have an abbreviation for a month. */
-    if (length == 3 || (length == 4 && p[3] == '.'))
+    if (length == 3 || (length == 4 && p[3] == '.')) {
 	for (tp = MonthDayTable; tp < ENDOF(MonthDayTable); tp++) {
 	    q = tp->name;
 	    if (c == q[0] && p[1] == q[1] && p[2] == q[2]) {
@@ -663,48 +671,54 @@ LookupWord(
 		return tp->type;
 	    }
 	}
-    else
-	for (tp = MonthDayTable; tp < ENDOF(MonthDayTable); tp++)
+    } else {
+	for (tp = MonthDayTable; tp < ENDOF(MonthDayTable); tp++) {
 	    if (c == tp->name[0] && strcmp(p, tp->name) == 0) {
 		yylval.Number = tp->value;
 		return tp->type;
 	    }
+	}
+    }
 
     /* Try for a timezone. */
-    for (tp = TimezoneTable; tp < ENDOF(TimezoneTable); tp++)
+    for (tp = TimezoneTable; tp < ENDOF(TimezoneTable); tp++) {
 	if (c == tp->name[0] && p[1] == tp->name[1]
 	 && strcmp(p, tp->name) == 0) {
 	    yylval.Number = tp->value;
 	    return tp->type;
 	}
+    }
 
     if (strcmp(buff, "dst") == 0)
       return tDST;
 
     /* Try the units table. */
-    for (tp = UnitsTable; tp < ENDOF(UnitsTable); tp++)
+    for (tp = UnitsTable; tp < ENDOF(UnitsTable); tp++) {
 	if (c == tp->name[0] && strcmp(p, tp->name) == 0) {
 	    yylval.Number = tp->value;
 	    return tp->type;
 	}
+    }
 
     /* Strip off any plural and try the units table again. */
     if (--length > 0 && p[length] == 's') {
 	p[length] = '\0';
-	for (tp = UnitsTable; tp < ENDOF(UnitsTable); tp++)
+	for (tp = UnitsTable; tp < ENDOF(UnitsTable); tp++) {
 	    if (c == tp->name[0] && strcmp(p, tp->name) == 0) {
 		p[length] = 's';
 		yylval.Number = tp->value;
 		return tp->type;
 	    }
+	}
 	p[length] = 's';
     }
     length++;
 
     /* Drop out any periods. */
-    for (p = buff, q = (PD_STRING)buff; *q; q++)
+    for (p = buff, q = (PD_STRING)buff; *q; q++) {
 	if (*q != '.')
 	    *p++ = *q;
+    }
     *p = '\0';
 
     /* Try the meridians. */
@@ -722,12 +736,13 @@ LookupWord(
     /* If we saw any periods, try the timezones again. */
     if (p - buff != length) {
 	c = buff[0];
-	for (p = buff, tp = TimezoneTable; tp < ENDOF(TimezoneTable); tp++)
+	for (p = buff, tp = TimezoneTable; tp < ENDOF(TimezoneTable); tp++) {
 	    if (c == tp->name[0] && p[1] == tp->name[1]
 	    && strcmp(p, tp->name) == 0) {
 		yylval.Number = tp->value;
 		return tp->type;
 	    }
+	}
     }
 
     /* Unknown word -- assume GMT timezone. */
@@ -736,34 +751,52 @@ LookupWord(
 }
 
 
+/*
+ * This returns characters as-is (the ones that are not part of some token),
+ * and codes greater than 256 (the token values).
+ *
+ * yacc generates tables that may use the character value.  In particular,
+ * byacc's yycheck[] table contains integer values for the expected codes from
+ * this function, which (unless byacc is run locally) are ASCII codes.
+ *
+ * The TO_LOCAL() function assumes its input is in ASCII, and the output is
+ * whatever native encoding is used on the machine, e.g., EBCDIC.
+ *
+ * The TO_ASCII() function is the inverse of TO_LOCAL().
+ */
 static int
 date_lex(void)
 {
-    int	c;
+    int		c;
     char	*p;
-    char		buff[20];
-    int	sign;
-    int	i;
-    int	nesting;
+    char	buff[20];
+    int		sign;
+    int		i;
+    int		nesting;
 
     for(;;) {
 	/* Get first character after the whitespace. */
 	for(;;) {
-	    while (CTYPE(isspace, *yyInput))
+	    while (CTYPE(isspace, TO_LOCAL(*yyInput)))
 		yyInput++;
-	    c = *yyInput;
+	    c = TO_LOCAL(*yyInput);
 
 	    /* Ignore RFC 822 comments, typically time zone names. */
 	    if (c != LPAREN)
 		break;
-	    for (nesting = 1; (c = *++yyInput) != RPAREN || --nesting; )
-		if (c == LPAREN)
+	    for (nesting = 1;
+		 (c = TO_LOCAL(*++yyInput)) != RPAREN || --nesting;
+		 ) {
+		if (c == LPAREN) {
 		    nesting++;
-		else if (!IS7BIT(c) || c == '\0' || c == '\r'
-		     || (c == '\\' && ((c = *++yyInput) == '\0' || !IS7BIT(c)))) {
+		} else if (!IS7BIT(c) || c == '\0' || c == '\r'
+		        || (c == '\\'
+			 && ((c = TO_LOCAL(*++yyInput)) == '\0'
+			  || !IS7BIT(c)))) {
 		    /* Lexical error: bad comment. */
-		    return '?';
+		    return TO_ASCII('?');
 		}
+	    }
 	    yyInput++;
 	}
 
@@ -772,16 +805,23 @@ date_lex(void)
 	    if (c == '-' || c == '+') {
 		sign = c == '-' ? -1 : 1;
 		yyInput++;
-		if (!CTYPE(isdigit, *yyInput)) {
+		if (!CTYPE(isdigit, TO_LOCAL(*yyInput))) {
 		    /* Return the isolated plus or minus sign. */
 		    --yyInput;
 		    return *yyInput++;
 		}
-	    }
-	    else
+	    } else {
 		sign = 0;
-	    for (i = 0; (c = *yyInput++) != '\0' && CTYPE(isdigit, c); )
-		i = 10 * i + c - '0';
+	    }
+	    for (p = buff;
+		 (c = TO_LOCAL(*yyInput++)) != '\0' && CTYPE(isdigit, c);
+		 ) {
+		if (p < &buff[sizeof buff - 1])
+		    *p++ = c;
+	    }
+	    *p = '\0';
+	    i = atoi(buff);
+
 	    yyInput--;
 	    yylval.Number = sign < 0 ? -i : i;
 	    return sign ? tSNUMBER : tUNUMBER;
@@ -789,9 +829,12 @@ date_lex(void)
 
 	/* A word? */
 	if (CTYPE(isalpha, c)) {
-	    for (p = buff; (c = *yyInput++) == '.' || CTYPE(isalpha, c); )
+	    for (p = buff;
+		 (c = TO_LOCAL(*yyInput++)) == '.' || CTYPE(isalpha, c);
+		 ) {
 		if (p < &buff[sizeof buff - 1])
 		    *p++ = CTYPE(isupper, c) ? tolower(c) : c;
+	    }
 	    *p = '\0';
 	    yyInput--;
 	    return LookupWord(buff, p - buff);

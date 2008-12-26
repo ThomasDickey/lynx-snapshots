@@ -1,3 +1,6 @@
+/*
+ * $LynxId: UCMap.h,v 1.21 2008/12/25 22:36:50 tom Exp $
+ */
 #ifndef UCMAP_H
 #define UCMAP_H
 
@@ -8,6 +11,17 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+    typedef enum {
+	ucError = -1,
+	ucZeroWidth = -2,
+	ucInvalidHash = -3,
+	ucNotFound = -4,
+	ucNeedMore = -10,
+	ucCannotConvert = -11,
+	ucCannotOutput = -12,
+	ucBufferTooSmall = -13,
+    } UCStatus;
+
     typedef long UCode_t;
 
     extern int UCTransUniChar(UCode_t unicode,

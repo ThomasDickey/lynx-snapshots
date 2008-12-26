@@ -56,10 +56,9 @@
        The  default boolean, number and string option values that are compiled
        into Lynx are displayed in the help-message  provided  by  lynx  -help.
        Some  of those may differ according to how Lynx was built; see the help
-       message itself for these values.  The -help option is processed  before
-       any  option,  including  those  that  control reading from the lynx.cfg
-       file.  Therefore runtime configuration values are not reflected in  the
-       help-message.
+       message itself for these values.  The -help option is processed in  the
+       third  pass of options-processing, so any option which sets a value, as
+       well as runtime configuration values are reflected in the help-message.
 
        -      If  the  argument  is only `-', then Lynx expects to receive the
               arguments from the standard input.  This is  to  allow  for  the
@@ -262,7 +261,7 @@
 
        -head  send a HEAD request for the mime headers.
 
-       -help  print the Lynx command syntax usage message.
+       -help  print the Lynx command syntax usage message, and exit.
 
        -hiddenlinks=[option]
               control the display of hidden links.
@@ -709,7 +708,7 @@
               these images.
 
        -version
-              print version information.
+              print version information, and exit.
 
        -vikeys
               enable vi-like key movement.
