@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMainLoop.c,v 1.157 2008/12/14 18:42:42 tom Exp $
+ * $LynxId: LYMainLoop.c,v 1.158 2008/12/26 17:41:19 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTAccess.h>
@@ -123,29 +123,6 @@ static void set_ws_title(char *str)
 }
 
 #endif /* WIN_EX */
-
-#ifdef SH_EX			/* 1998/10/30 (Fri) 10:06:47 */
-
-#define NOT_EQU	1
-
-static int str_n_cmp(const char *p, const char *q, int n)
-{
-    if (n == 0)
-	return 0;
-
-    if (p == NULL)
-	return NOT_EQU;
-
-    if (q == NULL)
-	return NOT_EQU;
-
-    return strncmp(p, q, n);
-}
-
-#undef strncmp
-#define	strncmp(p, q, r)	str_n_cmp(p, q, r)
-
-#endif /* SH_EX */
 
 #if defined(USE_EXTERNALS) || defined(WIN_EX)
 #include <LYExtern.h>

@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYExtern.c,v 1.40 2008/07/04 15:06:14 tom Exp $
+ * $LynxId: LYExtern.c,v 1.41 2008/12/29 01:34:31 tom Exp $
  *
  External application support.
  This feature allows lynx to pass a given URL to an external program.
@@ -66,19 +66,6 @@ static char *decode_string(char *s)
 #endif /* WIN_EX */
 
 #ifdef WIN_EX
-/*
- * Quote the path to make it safe for shell command processing.
- *  We always quote it not only includes spaces in it.
- *  At least we should quote paths which include "&".
- */
-char *quote_pathname(char *pathname)
-{
-    char *result = NULL;
-
-    HTSprintf0(&result, "\"%s\"", pathname);
-    return result;
-}
-
 /*
  *  Delete dangerous characters as local path.
  *  We delete '<>|' and also '%"'.

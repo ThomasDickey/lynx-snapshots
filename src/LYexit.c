@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYexit.c,v 1.33 2007/05/06 21:41:43 tom Exp $
+ * $LynxId: LYexit.c,v 1.34 2008/12/29 01:03:20 tom Exp $
  *
  *	Copyright (c) 1994, University of Kansas, All Rights Reserved
  *	(most of this file was rewritten in 1996 and 2004).
@@ -105,9 +105,9 @@ void LYexit(int status)
 	(void) signal(SIGTERM, SIG_IGN);
 	(void) signal(SIGINT, SIG_IGN);
 #ifndef __linux__
-#ifndef DOSPATH
+#ifdef SIGBUS
 	(void) signal(SIGBUS, SIG_IGN);
-#endif /* DOSPATH */
+#endif /* SIGBUS */
 #endif /* !__linux__ */
 	(void) signal(SIGSEGV, SIG_IGN);
 	(void) signal(SIGILL, SIG_IGN);
@@ -126,9 +126,9 @@ void LYexit(int status)
 	}
 	cleanup_sig(0);
 #ifndef __linux__
-#ifndef DOSPATH
+#ifdef SIGBUS
 	signal(SIGBUS, SIG_DFL);
-#endif /* DOSPATH */
+#endif /* SIGBUS */
 #endif /* !__linux__ */
 	signal(SIGSEGV, SIG_DFL);
 	signal(SIGILL, SIG_DFL);

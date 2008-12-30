@@ -1,5 +1,5 @@
 /*
- * $LynxId: userdefs.h,v 1.236 2008/12/15 00:24:56 tom Exp $
+ * $LynxId: userdefs.h,v 1.239 2008/12/26 21:02:32 tom Exp $
  *
  * Lynx - Hypertext navigation system
  *
@@ -413,6 +413,12 @@
 #else
 #define LIST_FORMAT "    %p %4l %-8.8o %-8.8g %7s %-12.12d %a"
 #endif
+
+/*
+ * FTP_FORMAT uses the same codes as LIST_FORMAT, but applies to files shown
+ * in an ftp listing.
+ */
+#define FTP_FORMAT "%d  %-16.16t %a  %K"
 
 /*
  *  If NO_FORCED_CORE_DUMP is set to TRUE, Lynx will not force

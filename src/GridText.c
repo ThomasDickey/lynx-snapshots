@@ -1,5 +1,5 @@
 /*
- * $LynxId: GridText.c,v 1.158 2008/12/07 18:50:31 tom Exp $
+ * $LynxId: GridText.c,v 1.162 2008/12/30 00:53:29 tom Exp $
  *
  *		Character grid hypertext object
  *		===============================
@@ -439,7 +439,6 @@ struct _HText {
     int hiddenlinkflag;		/*  ... and how to treat them */
     BOOL no_cache;		/* Always refresh? */
     char LastChar;		/* For absorbing white space */
-    BOOL IgnoreExcess;		/* Ignore chars at wrap point */
 
 /* For Internal use: */
     HTStyle *style;		/* Current style */
@@ -1116,7 +1115,6 @@ HText *HText_new(HTParentAnchor *anchor)
 		      ? YES
 		      : NO);
     self->LastChar = '\0';
-    self->IgnoreExcess = FALSE;
 
 #ifndef USE_PRETTYSRC
     if (HTOutputFormat == WWW_SOURCE)
@@ -2539,9 +2537,8 @@ void HText_beginAppend(HText *text)
  *		If display_on_the_fly is set, then it is decremented and
  *		the finished line is displayed.
  */
-#define new_line(text) split_line(text, 0)
 
-#define DEBUG_SPLITLINE
+/* #define DEBUG_SPLITLINE */
 
 #ifdef DEBUG_SPLITLINE
 #define CTRACE_SPLITLINE(p)	CTRACE(p)
@@ -3483,6 +3480,18 @@ static void split_line(HText *text, unsigned split)
     return;
 }				/* split_line */
 
+#ifdef DEBUG_SPLITLINE
+static void do_new_line(HText *text, const char *fn, int ln)
+{
+    CTRACE_SPLITLINE((tfp, "new_line %s@%d\n", fn, ln));
+    split_line(text, 0);
+}
+
+#define new_line(text) do_new_line(text, __FILE__, __LINE__)
+#else
+#define new_line(text) split_line(text, 0)
+#endif
+
 /*	Allow vertical blank space
  *	--------------------------
  */
@@ -3560,7 +3569,6 @@ void HText_appendCharacter(HText *text, int ch)
     HTLine *line;
     HTStyle *style;
     int indent;
-    int limit = 0;
     int actual;
 
 #ifdef DEBUG_APPCH
@@ -4266,36 +4274,6 @@ void HText_appendCharacter(HText *text, int ch)
     }
 
     /*
-     * Check if we should ignore characters at the wrap point.
-     */
-    if (text->IgnoreExcess) {
-	int nominal = (indent + (int) (line->offset + line->size) - ctrl_chars_on_this_line);
-	int number;
-
-	limit = WRAP_COLS(text);
-	if (fields_are_numbered()
-	    && !number_fields_on_left
-	    && text->last_anchor != 0
-	    && (number = text->last_anchor->number) > 0) {
-	    limit -= (number > 99999
-		      ? 6
-		      : (number > 9999
-			 ? 5
-			 : (number > 999
-			    ? 4
-			    : (number > 99
-			       ? 3
-			       : (number > 9
-				  ? 2
-				  : 1))))) + 2;
-	}
-	if ((nominal + (int) style->rightIndent) >= limit
-	    || (nominal + UTFXTRA_ON_THIS_LINE) >= LYcols_cu(text)) {
-	    return;
-	}
-    }
-
-    /*
      * Check for end of line.
      */
     actual = ((indent + (int) line->offset + (int) line->size) +
@@ -4312,7 +4290,7 @@ void HText_appendCharacter(HText *text, int ch)
 		 + UTFXTRA_ON_THIS_LINE
 		 - ctrl_chars_on_this_line
 		 + UTF_XLEN(ch)
-		) >= (LYcols_cu(text) - 1)))) {
+		) > (LYcols_cu(text) - 1)))) {
 
 	if (style->wordWrap && HTOutputFormat != WWW_SOURCE) {
 #ifdef EXP_JUSTIFY_ELTS
@@ -4567,17 +4545,6 @@ char HText_getLastChar(HText *text)
 	return ('\0');
 
     return ((char) text->LastChar);
-}
-
-/*	Set IgnoreExcess element in the text object.
- *	--------------------------------------------
- */
-void HText_setIgnoreExcess(HText *text, BOOL ignore)
-{
-    if (!text)
-	return;
-
-    text->IgnoreExcess = ignore;
 }
 
 /*		Simple table handling - private
@@ -8486,10 +8453,7 @@ BOOLEAN HTreparse_document(void)
 
     if (!HTMainAnchor || LYCacheSource == SOURCE_CACHE_NONE) {
 	CTRACE((tfp, "HTreparse_document returns FALSE\n"));
-	return FALSE;
-    }
-
-    if (useSourceCache()) {
+    } else if (useSourceCache()) {
 	FILE *fp;
 	HTFormat format;
 	int ret;
@@ -8526,32 +8490,31 @@ BOOLEAN HTreparse_document(void)
 	    CTRACE((tfp, "  Cannot read file %s\n", HTMainAnchor->source_cache_file));
 	    LYRemoveTemp(HTMainAnchor->source_cache_file);
 	    FREE(HTMainAnchor->source_cache_file);
-	    return FALSE;
-	}
+	} else {
 
-	if (HText_HaveUserChangedForms(HTMainText)) {
-	    /*
-	     * Issue a warning.  Will not restore changed forms, currently.
+	    if (HText_HaveUserChangedForms(HTMainText)) {
+		/*
+		 * Issue a warning.  Will not restore changed forms, currently.
+		 */
+		HTAlert(RELOADING_FORM);
+	    }
+	    /* Set HTMainAnchor->protocol or HTMainAnchor->physical to convince
+	     * the SourceCacheWriter to not regenerate the cache file (which
+	     * would be an unnecessary "loop"). - kw
 	     */
-	    HTAlert(RELOADING_FORM);
-	}
-	/* Set HTMainAnchor->protocol or HTMainAnchor->physical to convince
-	 * the SourceCacheWriter to not regenerate the cache file (which
-	 * would be an unnecessary "loop"). - kw
-	 */
-	HTAnchor_setProtocol(HTMainAnchor, &HTFile);
-	ret = HTParseFile(format, HTOutputFormat, HTMainAnchor, fp, NULL);
-	LYCloseInput(fp);
-	if (ret == HT_PARTIAL_CONTENT) {
-	    HTInfoMsg(gettext("Loading incomplete."));
-	    CTRACE((tfp,
-		    "SourceCache: `%s' has been accessed, partial content.\n",
-		    HTLoadedDocumentURL()));
-	}
-	ok = (BOOL) (ret == HT_LOADED || ret == HT_PARTIAL_CONTENT);
+	    HTAnchor_setProtocol(HTMainAnchor, &HTFile);
+	    ret = HTParseFile(format, HTOutputFormat, HTMainAnchor, fp, NULL);
+	    LYCloseInput(fp);
+	    if (ret == HT_PARTIAL_CONTENT) {
+		HTInfoMsg(gettext("Loading incomplete."));
+		CTRACE((tfp,
+			"SourceCache: `%s' has been accessed, partial content.\n",
+			HTLoadedDocumentURL()));
+	    }
+	    ok = (BOOL) (ret == HT_LOADED || ret == HT_PARTIAL_CONTENT);
 
-	CTRACE((tfp, "Reparse file %s\n", (ok ? "succeeded" : "failed")));
-
+	    CTRACE((tfp, "Reparse file %s\n", (ok ? "succeeded" : "failed")));
+	}
     } else if (useMemoryCache()) {
 	HTFormat format = WWW_HTML;
 	int ret;
@@ -10157,7 +10120,6 @@ void HText_endInput(HText *text)
 	&& text->last_anchor->number > 0) {
 	char marker[20];
 
-	HText_setIgnoreExcess(text, FALSE);
 	sprintf(marker, "[%d]", text->last_anchor->number);
 	HText_appendText(text, marker);
     }

@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFormat.c,v 1.65 2008/12/14 17:11:58 tom Exp $
+ * $LynxId: HTFormat.c,v 1.66 2008/12/26 18:08:32 tom Exp $
  *
  *		Manage different file formats			HTFormat.c
  *		=============================
@@ -1441,10 +1441,8 @@ int HTParseFile(HTFormat rep_in,
     HTStreamClass targetClass;
     int rv;
 
-#ifdef SH_EX			/* 1998/01/04 (Sun) 16:04:09 */
     if (fp == NULL)
 	return HT_LOADED;
-#endif
 
     stream = HTStreamStack(rep_in, format_out, sink, anchor);
 

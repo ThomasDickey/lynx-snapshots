@@ -1,5 +1,8 @@
-/*	Specialities of GridText as subclass of HText
-*/
+/*
+ * $LynxId: GridText.h,v 1.60 2008/12/29 21:36:00 tom Exp $
+ *
+ * Specialities of GridText as subclass of HText
+ */
 #ifndef LYGRIDTEXT_H
 #define LYGRIDTEXT_H
 
@@ -89,7 +92,6 @@ US-ASCII control characters <32 which are not defined in Unicode standard
 
     extern void HText_setLastChar(HText *text, char ch);
     extern char HText_getLastChar(HText *text);
-    extern void HText_setIgnoreExcess(HText *text, BOOL ignore);
 
     extern int HText_sourceAnchors(HText *text);
     extern void HText_setStale(HText *text);

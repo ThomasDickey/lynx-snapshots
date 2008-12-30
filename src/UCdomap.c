@@ -1,5 +1,5 @@
 /*
- * $LynxId: UCdomap.c,v 1.70 2008/12/26 00:10:51 tom Exp $
+ * $LynxId: UCdomap.c,v 1.71 2008/12/26 16:36:57 tom Exp $
  *
  *  UCdomap.c
  *  =========
@@ -1982,6 +1982,8 @@ void UC_Charset_Setup(const char *UC_MIMEcharset,
 						   UC_MIMEcharset,
 						   UC_LYNXcharset,
 						   lowest_eight);
+    CTRACE2(TRACE_CFG, (tfp, "registered charset %d mime \"%s\" lynx \"%s\"\n",
+			s, UC_MIMEcharset, UC_LYNXcharset));
     UCInfo[s].uc_status = status;
     if (found < 0)
 	UCNumCharsets++;

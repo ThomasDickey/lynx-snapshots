@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFile.c,v 1.114 2008/12/24 13:18:35 tom Exp $
+ * $LynxId: HTFile.c,v 1.115 2008/12/26 22:13:13 tom Exp $
  *
  *			File Access				HTFile.c
  *			===========
@@ -112,13 +112,13 @@ typedef struct {
 
 #include <HTML.h>		/* For directory object building */
 
-#define PUTC(c) (*target->isa->put_character)(target, c)
-#define PUTS(s) (*target->isa->put_string)(target, s)
-#define START(e) (*target->isa->start_element)(target, e, 0, 0, -1, 0)
-#define END(e) (*target->isa->end_element)(target, e, 0)
+#define PUTC(c)      (*target->isa->put_character)(target, c)
+#define PUTS(s)      (*target->isa->put_string)(target, s)
+#define START(e)     (*target->isa->start_element)(target, e, 0, 0, -1, 0)
+#define END(e)       (*target->isa->end_element)(target, e, 0)
 #define MAYBE_END(e) if (HTML_dtd.tags[e].contents != SGML_EMPTY) \
 			(*target->isa->end_element)(target, e, 0)
-#define FREE_TARGET (*target->isa->_free)(target)
+#define FREE_TARGET  (*target->isa->_free)(target)
 #define ABORT_TARGET (*targetClass._abort)(target, NULL);
 
 struct _HTStructured {
@@ -927,9 +927,11 @@ HTFormat HTFileFormat(const char *filename,
 
     /* defaults tree */
 
-    suff = strchr(filename, '.') ?	/* Unknown suffix */
-	(unknown_suffix.rep ? &unknown_suffix : &no_suffix)
-	: &no_suffix;
+    suff = (strchr(filename, '.')
+	    ? (unknown_suffix.rep
+	       ? &unknown_suffix
+	       : &no_suffix)
+	    : &no_suffix);
 
     /*
      * Set default encoding unless found with suffix already.
