@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMessages_en.h,v 1.68 2008/01/08 00:50:53 tom Exp $
+ * $LynxId: LYMessages_en.h,v 1.69 2008/12/26 22:20:58 tom Exp $
  *
  * Lynx - Hypertext navigation system
  *
@@ -760,6 +760,9 @@
 #define SEGMENT_DIRECTORY       gettext(" directory")
 #define SEGMENT_UP_TO           gettext("Up to ")
 #define SEGMENT_CURRENT_DIR     gettext("Current directory is ")
+
+/* HTFTP.c */
+#define ENTRY_IS_SYMBOLIC_LINK  gettext("Symbolic Link")
 
 /* HTGopher.c */
 #define FAILED_NO_RESPONSE      gettext("No response from server!")

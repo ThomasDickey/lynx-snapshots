@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTUtils.h,v 1.90 2008/12/14 19:34:34 tom Exp $
+ * $LynxId: HTUtils.h,v 1.92 2008/12/29 18:35:59 tom Exp $
  *
  * Utility macros for the W3 code library
  * MACROS FOR GENERAL USE
@@ -73,11 +73,6 @@ char *alloca();
 #define NOUSERS
 #define DISP_PARTIAL		/* experimental */
 #endif
-
-/* since 2.8.6dev.1, Lynx requires an ANSI C (c89) compiler */
-#define ANSI_VARARGS 1
-#undef HAVE_STDARG_H
-#define HAVE_STDARG_H 1
 
 #if defined(VMS) || defined(_WINDOWS)
 #define HAVE_STDLIB_H 1
@@ -426,20 +421,10 @@ are generally not the response status from any specific protocol.
 #define HT_NOT_LOADED         -29999
 
 #ifndef va_arg
-# if defined(HAVE_STDARG_H) && defined(ANSI_VARARGS)
 #  include <stdarg.h>
-# else
-#  if HAVE_VARARGS_H
-#   include <varargs.h>
-#  endif
-# endif
 #endif
 
-#if defined(ANSI_VARARGS)
 #define LYva_start(ap,format) va_start(ap,format)
-#else
-#define LYva_start(ap,format) va_start(ap)
-#endif
 
 /*
  * GCC can be told that some functions are like printf (and do type-checking on

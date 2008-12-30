@@ -1,4 +1,4 @@
-/* $LynxId: LYOptions.c,v 1.124 2008/07/04 15:06:56 tom Exp $ */
+/* $LynxId: LYOptions.c,v 1.125 2008/12/29 19:37:13 tom Exp $ */
 #include <HTUtils.h>
 #include <HTFTP.h>
 #include <HTTP.h>		/* 'reloading' flag */
@@ -530,13 +530,13 @@ void LYoptions(void)
 
     LYmove(L_Keypad, 5);
     addlbl("(K)eypad mode                : ");
-    LYaddstr(fields_are_numbered() && links_are_numbered()
+    LYaddstr((fields_are_numbered() && links_are_numbered())
 	     ? "Links and form fields are numbered"
-	     : links_are_numbered()
-	     ? "Links are numbered                "
-	     : fields_are_numbered()
-	     ? "Form fields are numbered          "
-	     : "Numbers act as arrows             ");
+	     : (links_are_numbered()
+		? "Links are numbered                "
+		: (fields_are_numbered()
+		   ? "Form fields are numbered          "
+		   : "Numbers act as arrows             ")));
 
     LYmove(L_Lineed, 5);
     addlbl("li(N)e edit style            : ");

@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTML.c,v 1.116 2008/12/14 20:03:28 tom Exp $
+ * $LynxId: HTML.c,v 1.117 2008/12/29 21:22:28 tom Exp $
  *
  *		Structured stream to Rich hypertext converter
  *		============================================
@@ -4881,7 +4881,6 @@ static int HTML_start_element(HTStructured * me, int element_number,
 		    HTML_put_character(me, '_');
 		    chars--;
 		}
-		HText_setIgnoreExcess(me->text, TRUE);
 	    }
 	    CTRACE((tfp, "I.%s, %d\n", NONNULL(I.type), IsSubmitOrReset));
 	    if (IsSubmitOrReset == FALSE) {
@@ -4946,7 +4945,6 @@ static int HTML_start_element(HTStructured * me, int element_number,
 	    if (chars != 0) {
 		HText_endInput(me->text);
 	    }
-	    HText_setIgnoreExcess(me->text, FALSE);
 	    FREE(ImageSrc);
 	    FREE(I_value);
 	    FREE(I_name);
@@ -7047,7 +7045,6 @@ static int HTML_end_element(HTStructured * me, int element_number,
 			    HText_appendCharacter(me->text, *ptr);
 			ptr++;
 		    }
-		    HText_setIgnoreExcess(me->text, TRUE);
 		}
 		for (; non_empty(ptr); ptr++) {
 		    if (*ptr == ' ')
@@ -7078,7 +7075,6 @@ static int HTML_end_element(HTStructured * me, int element_number,
 		    HText_setLastChar(me->text, ']');
 		    me->in_word = YES;
 		}
-		HText_setIgnoreExcess(me->text, FALSE);
 	    }
 	    HTChunkClear(&me->option);
 

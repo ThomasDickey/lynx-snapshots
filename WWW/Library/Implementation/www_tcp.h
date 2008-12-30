@@ -1,5 +1,5 @@
 /*                System dependencies in the W3 library
- * $LynxId: www_tcp.h,v 1.37 2007/08/02 20:06:10 tom Exp $
+ * $LynxId: www_tcp.h,v 1.38 2008/12/30 01:01:34 Paul.Gilmartin Exp $
  *
                                    SYSTEM DEPENDENCIES
 
@@ -149,8 +149,8 @@ Default values
 #ifndef TOASCII
 #ifdef EBCDIC			/* S/390 -- gil -- 1327 */
 
-extern char un_IBM1047[];
-extern unsigned char IBM1047[];
+extern const char un_IBM1047[];
+extern const unsigned char IBM1047[];
 
 /* For debugging
 #include <assert.h>

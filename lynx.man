@@ -1,4 +1,4 @@
-.\" $LynxId: lynx.man,v 1.84 2008/12/26 01:19:10 tom Exp $
+.\" $LynxId: lynx.man,v 1.85 2008/12/26 17:40:02 tom Exp $
 .nr N -1
 .nr D 5
 .TH LYNX 1
@@ -686,6 +686,9 @@ saves session to specified file.
 show very long URLs in the status line with "..." to represent the
 portion which cannot be displayed.
 The beginning and end of the URL are displayed, rather than suppressing the end.
+.TP
+.B \-show_cfg
+Print the configuration settings, e.g., as read from "lynx.cfg", and exit.
 .TP
 .B \-show_cursor
 If enabled the cursor will not be hidden in the right hand

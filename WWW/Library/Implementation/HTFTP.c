@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFTP.c,v 1.81 2008/09/18 21:34:25 tom Exp $
+ * $LynxId: HTFTP.c,v 1.86 2008/12/26 22:19:03 tom Exp $
  *
  *			File Transfer Protocol (FTP) Client
  *			for a WorldWideWeb browser
@@ -148,12 +148,12 @@ typedef struct _connection {
 #  define LY_SOCKLEN socklen_t
 #endif
 
-#define PUTC(c)      (*targetClass.put_character) (target, c)
-#define PUTS(s)      (*targetClass.put_string)    (target, s)
-#define START(e)     (*targetClass.start_element) (target, e, 0, 0, -1, 0)
-#define END(e)       (*targetClass.end_element)   (target, e, 0)
-#define FREE_TARGET  (*targetClass._free)         (target)
-#define ABORT_TARGET (*targetClass._free)         (target)
+#define PUTC(c)      (*target->isa->put_character) (target, c)
+#define PUTS(s)      (*target->isa->put_string)    (target, s)
+#define START(e)     (*target->isa->start_element) (target, e, 0, 0, -1, 0)
+#define END(e)       (*target->isa->end_element)   (target, e, 0)
+#define FREE_TARGET  (*target->isa->_free)         (target)
+#define ABORT_TARGET (*target->isa->_free)         (target)
 
 struct _HTStructured {
     const HTStructuredClass *isa;
@@ -1469,11 +1469,17 @@ static void set_years_and_date(void)
 
 typedef struct _EntryInfo {
     char *filename;
-    char *linkname;
+    char *linkname;		/* symbolic link, if any */
     char *type;
     char *date;
-    unsigned int size;
+    unsigned long size;
     BOOLEAN display;		/* show this entry? */
+#ifdef LONG_LIST
+    unsigned long file_links;
+    char *file_mode;
+    char *file_user;
+    char *file_group;
+#endif
 } EntryInfo;
 
 static void free_entryinfo_struct_contents(EntryInfo *entry_info)
@@ -1623,25 +1629,29 @@ static void parse_eplf_line(char *line,
  * Extract the name, size, and date from an ls -l line.
  */
 static void parse_ls_line(char *line,
-			  EntryInfo *entry_info)
+			  EntryInfo *entry)
 {
+    char *next;
+    char *cp;
     int i, j;
-    int base = 1;
-    int size_num = 0;
+    unsigned long base = 1;
+    unsigned long size_num = 0;
 
     for (i = strlen(line) - 1;
 	 (i > 13) && (!isspace(UCH(line[i])) || !is_ls_date(&line[i - 12]));
-	 i--) ;			/* null body */
+	 i--) {
+	;			/* null body */
+    }
     line[i] = '\0';
     if (i > 13) {
-	StrAllocCopy(entry_info->date, &line[i - 12]);
+	StrAllocCopy(entry->date, &line[i - 12]);
 	/* replace the 4th location with nbsp if it is a space or zero */
-	if (entry_info->date[4] == ' ' || entry_info->date[4] == '0')
-	    entry_info->date[4] = HT_NON_BREAK_SPACE;
+	if (entry->date[4] == ' ' || entry->date[4] == '0')
+	    entry->date[4] = HT_NON_BREAK_SPACE;
 	/* make sure year or time is flush right */
-	if (entry_info->date[11] == ' ') {
+	if (entry->date[11] == ' ') {
 	    for (j = 11; j > 6; j--) {
-		entry_info->date[j] = entry_info->date[j - 1];
+		entry->date[j] = entry->date[j - 1];
 	    }
 	}
     }
@@ -1651,9 +1661,56 @@ static void parse_ls_line(char *line,
 	base *= 10;
 	j--;
     }
-    entry_info->size = size_num;
-    StrAllocCopy(entry_info->filename, &line[i + 1]);
-}				/* parse_ls_line() */
+    entry->size = size_num;
+    StrAllocCopy(entry->filename, &line[i + 1]);
+
+#ifdef LONG_LIST
+    line[j] = '\0';
+
+    /*
+     * Extract the file-permissions, as a string.
+     */
+    if ((cp = strchr(line, ' ')) != 0
+	&& (cp - line) == 10) {
+	*cp = '\0';
+	StrAllocCopy(entry->file_mode, line);
+	*cp = ' ';
+    }
+
+    /*
+     * Next is the link-count.
+     */
+    next = 0;
+    entry->file_links = strtol(cp, &next, 10);
+    if (next == 0 || *next != ' ') {
+	entry->file_links = 0;
+	next = cp;
+    } else {
+	cp = next;
+    }
+    /*
+     * Next is the user-name.
+     */
+    while (isspace(UCH(*cp)))
+	++cp;
+    if ((next = strchr(cp, ' ')) != 0)
+	*next = '\0';
+    if (*cp != '\0')
+	StrAllocCopy(entry->file_user, cp);
+    /*
+     * Next is the group-name (perhaps).
+     */
+    if (next != NULL) {
+	cp = (next + 1);
+	while (isspace(UCH(*cp)))
+	    ++cp;
+	if ((next = strchr(cp, ' ')) != 0)
+	    *next = '\0';
+	if (*cp != '\0')
+	    StrAllocCopy(entry->file_group, cp);
+    }
+#endif
+}
 
 /*
  * Extract the name and size info and whether it refers to a directory from a
@@ -1730,7 +1787,7 @@ static void parse_dls_line(char *line,
 
     cps = LYSkipBlanks(&line[23]);
     if (!strncmp(cps, "-> ", 3) && cps[3] != '\0' && cps[3] != ' ') {
-	StrAllocCopy(entry_info->type, gettext("Symbolic Link"));
+	StrAllocCopy(entry_info->type, ENTRY_IS_SYMBOLIC_LINK);
 	StrAllocCopy(entry_info->linkname, LYSkipBlanks(cps + 3));
 	entry_info->size = 0;	/* don't display size */
     }
@@ -1893,7 +1950,7 @@ static void parse_vms_dir_entry(char *line,
     }
 
     /* Wrap it up */
-    CTRACE((tfp, "HTFTP: VMS filename: %s  date: %s  size: %u\n",
+    CTRACE((tfp, "HTFTP: VMS filename: %s  date: %s  size: %lu\n",
 	    entry_info->filename,
 	    NonNull(entry_info->date),
 	    entry_info->size));
@@ -1965,7 +2022,7 @@ static void parse_ms_windows_dir_entry(char *line,
     }
 
     /* Wrap it up */
-    CTRACE((tfp, "HTFTP: MS Windows filename: %s  date: %s  size: %u\n",
+    CTRACE((tfp, "HTFTP: MS Windows filename: %s  date: %s  size: %lu\n",
 	    entry_info->filename,
 	    NonNull(entry_info->date),
 	    entry_info->size));
@@ -2213,7 +2270,7 @@ static void parse_cms_dir_entry(char *line,
     }
 
     /* Wrap it up. */
-    CTRACE((tfp, "HTFTP: VM/CMS filename: %s  date: %s  size: %u\n",
+    CTRACE((tfp, "HTFTP: VM/CMS filename: %s  date: %s  size: %lu\n",
 	    entry_info->filename,
 	    NonNull(entry_info->date),
 	    entry_info->size));
@@ -2236,15 +2293,10 @@ static EntryInfo *parse_dir_entry(char *entry,
     BOOLEAN remove_size = FALSE;
     char *cp;
 
-    entry_info = (EntryInfo *) malloc(sizeof(EntryInfo));
+    entry_info = typecalloc(EntryInfo);
 
     if (entry_info == NULL)
 	outofmem(__FILE__, "parse_dir_entry");
-    entry_info->filename = NULL;
-    entry_info->linkname = NULL;
-    entry_info->type = NULL;
-    entry_info->date = NULL;
-    entry_info->size = 0;
     entry_info->display = TRUE;
 
     switch (server_type) {
@@ -2347,7 +2399,7 @@ static EntryInfo *parse_dir_entry(char *entry,
 	     * It's a symbolic link, does the user care about knowing if it is
 	     * symbolic?  I think so since it might be a directory.
 	     */
-	    StrAllocCopy(entry_info->type, gettext("Symbolic Link"));
+	    StrAllocCopy(entry_info->type, ENTRY_IS_SYMBOLIC_LINK);
 	    remove_size = TRUE;	/* size is not useful */
 
 	    /*
@@ -2499,9 +2551,11 @@ static EntryInfo *parse_dir_entry(char *entry,
 
     }				/* switch (server_type) */
 
+#ifndef LONG_LIST
     if (remove_size && entry_info->size) {
 	entry_info->size = 0;
     }
+#endif
 
     if (entry_info->filename && strlen(entry_info->filename) > 3) {
 	if (((cp = strrchr(entry_info->filename, '.')) != NULL &&
@@ -2544,7 +2598,7 @@ static EntryInfo *parse_dir_entry(char *entry,
     }
 
     return (entry_info);
-}				/* parse_dir_entry */
+}
 
 static int compare_EntryInfo_structs(EntryInfo *entry1, EntryInfo *entry2)
 {
@@ -2675,6 +2729,219 @@ static int compare_EntryInfo_structs(EntryInfo *entry1, EntryInfo *entry2)
     }
 }
 
+#ifdef LONG_LIST
+static char *FormatStr(char **bufp,
+		       char *start,
+		       const char *value)
+{
+    char fmt[512];
+
+    if (*start) {
+	sprintf(fmt, "%%%.*ss", (int) sizeof(fmt) - 3, start);
+	HTSprintf(bufp, fmt, value);
+    } else if (*bufp && !(value && *value)) {
+	;
+    } else if (value) {
+	StrAllocCat(*bufp, value);
+    }
+    return *bufp;
+}
+
+static char *FormatNum(char **bufp,
+		       char *start,
+		       long value)
+{
+    char fmt[512];
+
+    if (*start) {
+	sprintf(fmt, "%%%.*sld", (int) sizeof(fmt) - 3, start);
+	HTSprintf(bufp, fmt, value);
+    } else {
+	sprintf(fmt, "%ld", value);
+	StrAllocCat(*bufp, fmt);
+    }
+    return *bufp;
+}
+
+static void FlushParse(HTStructured * target, char **buf)
+{
+    if (*buf && **buf) {
+	PUTS(*buf);
+	**buf = '\0';
+    }
+}
+
+static void LYListFmtParse(const char *fmtstr,
+			   EntryInfo *data,
+			   HTStructured * target,
+			   char *tail)
+{
+    char c;
+    char *s;
+    char *end;
+    char *start;
+    char *str = NULL;
+    char *buf = NULL;
+    BOOL is_directory = (data->file_mode != 0 &&
+			 (TOUPPER(data->file_mode[0]) == 'D'));
+    BOOL is_symlinked = (data->file_mode != 0 &&
+			 (TOUPPER(data->file_mode[0]) == 'L'));
+    BOOL remove_size = (is_directory || is_symlinked);
+
+    StrAllocCopy(str, fmtstr);
+    s = str;
+    end = str + strlen(str);
+    while (*s) {
+	start = s;
+	while (*s) {
+	    if (*s == '%') {
+		if (*(s + 1) == '%')	/* literal % */
+		    s++;
+		else
+		    break;
+	    }
+	    s++;
+	}
+	/* s is positioned either at a % or at \0 */
+	*s = '\0';
+	if (s > start) {	/* some literal chars. */
+	    StrAllocCat(buf, start);
+	}
+	if (s == end)
+	    break;
+	start = ++s;
+	while (isdigit(UCH(*s)) || *s == '.' || *s == '-' || *s == ' ' ||
+	       *s == '#' || *s == '+' || *s == '\'')
+	    s++;
+	c = *s;			/* the format char. or \0 */
+	*s = '\0';
+
+	switch (c) {
+	case '\0':
+	    StrAllocCat(buf, start);
+	    continue;
+
+	case 'A':
+	case 'a':		/* anchor */
+	    FlushParse(target, &buf);
+	    HTDirEntry(target, tail, data->filename);
+	    FormatStr(&buf, start, data->filename);
+	    PUTS(buf);
+	    END(HTML_A);
+	    *buf = '\0';
+	    if (c != 'A' && data->linkname != 0) {
+		PUTS(" -> ");
+		PUTS(data->linkname);
+	    }
+	    break;
+
+	case 'T':		/* MIME type */
+	case 't':		/* MIME type description */
+	    if (is_directory) {
+		if (c != 'T') {
+		    FormatStr(&buf, start, ENTRY_IS_DIRECTORY);
+		} else {
+		    FormatStr(&buf, start, "");
+		}
+	    } else if (is_symlinked) {
+		if (c != 'T') {
+		    FormatStr(&buf, start, ENTRY_IS_SYMBOLIC_LINK);
+		} else {
+		    FormatStr(&buf, start, "");
+		}
+	    } else {
+		const char *cp2;
+		HTFormat format;
+
+		format = HTFileFormat(data->filename, NULL, &cp2);
+
+		if (c != 'T') {
+		    if (cp2 == NULL) {
+			if (!strncmp(HTAtom_name(format),
+				     "application", 11)) {
+			    cp2 = HTAtom_name(format) + 12;
+			    if (!strncmp(cp2, "x-", 2))
+				cp2 += 2;
+			} else {
+			    cp2 = HTAtom_name(format);
+			}
+		    }
+		    FormatStr(&buf, start, cp2);
+		} else {
+		    FormatStr(&buf, start, HTAtom_name(format));
+		}
+	    }
+	    break;
+
+	case 'd':		/* date */
+	    if (data->date) {
+		FormatStr(&buf, start, data->date);
+	    } else {
+		FormatStr(&buf, start, " * ");
+	    }
+	    break;
+
+	case 's':		/* size in bytes */
+	    FormatNum(&buf, start, data->size);
+	    break;
+
+	case 'K':		/* size in Kilobytes but not for directories */
+	    if (remove_size) {
+		FormatStr(&buf, start, "");
+		StrAllocCat(buf, " ");
+		break;
+	    }
+	    /* FALL THROUGH */
+	case 'k':		/* size in Kilobytes */
+	    /* FIXME - this is inconsistent with HTFile.c, but historical */
+	    if (data->size < 1024) {
+		FormatNum(&buf, start, data->size);
+		StrAllocCat(buf, " bytes");
+	    } else {
+		FormatNum(&buf, start, data->size / 1024);
+		StrAllocCat(buf, "Kb");
+	    }
+	    break;
+
+#ifdef LONG_LIST
+	case 'p':		/* unix-style permission bits */
+	    FormatStr(&buf, start, NonNull(data->file_mode));
+	    break;
+
+	case 'o':		/* owner */
+	    FormatStr(&buf, start, NonNull(data->file_user));
+	    break;
+
+	case 'g':		/* group */
+	    FormatStr(&buf, start, NonNull(data->file_group));
+	    break;
+
+	case 'l':		/* link count */
+	    FormatNum(&buf, start, data->file_links);
+	    break;
+#endif
+
+	case '%':		/* literal % with flags/width */
+	    FormatStr(&buf, start, "%");
+	    break;
+
+	default:
+	    fprintf(stderr,
+		    "Unknown format character `%c' in list format\n", c);
+	    break;
+	}
+
+	s++;
+    }
+    if (buf) {
+	LYTrimTrailing(buf);
+	FlushParse(target, &buf);
+	FREE(buf);
+    }
+    PUTC('\n');
+    FREE(str);
+}
+#endif /* LONG_LIST */
 /*	Read a directory into an hypertext object from the data socket
  *	--------------------------------------------------------------
  *
@@ -2697,10 +2964,13 @@ static int read_directory(HTParentAnchor *parent,
     char *filename = HTParse(address, "", PARSE_PATH + PARSE_PUNCTUATION);
     EntryInfo *entry_info;
     BOOLEAN first = TRUE;
-    char string_buffer[64];
     char *lastpath = NULL;	/* prefix for link, either "" (for root) or xxx  */
     BOOL need_parent_link = FALSE;
     BOOL tildeIsTop = FALSE;
+
+#ifndef LONG_LIST
+    char string_buffer[64];
+#endif
 
     targetClass = *(target->isa);
 
@@ -2887,14 +3157,10 @@ static int read_directory(HTParentAnchor *parent,
 	    PUTC('\n');
 	}
 
-	/* Put up header
-	 */
-	/* PUTS("    Date        Type             Size     Filename\n");
-	 */
-
 	/* Run through tree printing out in order
 	 */
 	{
+#ifndef LONG_LIST
 #ifdef SH_EX			/* 1997/10/18 (Sat) 14:14:28 */
 	    char *p, name_buff[256];
 	    int name_len, dot_len;
@@ -2903,14 +3169,21 @@ static int read_directory(HTParentAnchor *parent,
 #define	FILE_GAP	1
 
 #endif
-	    HTBTElement *ele;
 	    int i;
+#endif
+	    HTBTElement *ele;
 
 	    for (ele = HTBTree_next(bt, NULL);
 		 ele != NULL;
 		 ele = HTBTree_next(bt, ele)) {
 		entry_info = (EntryInfo *) HTBTree_object(ele);
 
+#ifdef LONG_LIST
+		LYListFmtParse(ftp_format,
+			       entry_info,
+			       target,
+			       lastpath);
+#else
 		if (entry_info->date) {
 		    PUTS(entry_info->date);
 		    PUTS("  ");
@@ -2924,7 +3197,6 @@ static int read_directory(HTParentAnchor *parent,
 		    for (; i < 17; i++)
 			PUTC(' ');
 		}
-
 		/* start the anchor */
 		HTDirEntry(target, lastpath, entry_info->filename);
 #ifdef SH_EX			/* 1997/10/18 (Sat) 16:00 */
@@ -2952,17 +3224,17 @@ static int read_directory(HTParentAnchor *parent,
 		if (entry_info->size) {
 #ifdef SH_EX			/* 1998/02/02 (Mon) 16:34:52 */
 		    if (entry_info->size < 1024)
-			sprintf(string_buffer, "%6d bytes",
+			sprintf(string_buffer, "%6ld bytes",
 				entry_info->size);
 		    else
-			sprintf(string_buffer, "%6d Kb",
+			sprintf(string_buffer, "%6ld Kb",
 				entry_info->size / 1024);
 #else
 		    if (entry_info->size < 1024)
-			sprintf(string_buffer, "  %u bytes",
+			sprintf(string_buffer, "  %lu bytes",
 				entry_info->size);
 		    else
-			sprintf(string_buffer, "  %uKb",
+			sprintf(string_buffer, "  %luKb",
 				entry_info->size / 1024);
 #endif
 		    PUTS(string_buffer);
@@ -2972,6 +3244,7 @@ static int read_directory(HTParentAnchor *parent,
 		}
 
 		PUTC('\n');	/* end of this entry */
+#endif
 
 		free_entryinfo_struct_contents(entry_info);
 	    }

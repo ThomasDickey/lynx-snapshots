@@ -1,4 +1,4 @@
-dnl $LynxId: aclocal.m4,v 1.131 2008/12/25 14:30:43 tom Exp $
+dnl $LynxId: aclocal.m4,v 1.133 2008/12/29 14:29:10 tom Exp $
 dnl Macros for auto-configure script.
 dnl by T.E.Dickey <dickey@invisible-island.net>
 dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
@@ -698,7 +698,7 @@ AC_SUBST(EXTRA_CPPFLAGS)
 
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_ADD_INCDIR version: 9 updated: 2008/02/09 13:15:34
+dnl CF_ADD_INCDIR version: 10 updated: 2008/12/27 12:30:03
 dnl -------------
 dnl Add an include-directory to $CPPFLAGS.  Don't add /usr/include, since it's
 dnl redundant.  We don't normally need to add -I/usr/local/include for gcc,
@@ -725,7 +725,7 @@ if test -n "$1" ; then
 		fi
 
 		if test "$cf_have_incdir" = no ; then
-          if test "$cf_add_incdir" = /usr/local/include ; then
+		  if test "$cf_add_incdir" = /usr/local/include ; then
 			if test "$GCC" = yes
 			then
 			  cf_save_CPPFLAGS=$CPPFLAGS
@@ -743,9 +743,9 @@ if test -n "$1" ; then
 		  CF_VERBOSE(adding $cf_add_incdir to include-path)
 		  ifelse($2,,CPPFLAGS,$2)="-I$cf_add_incdir $ifelse($2,,CPPFLAGS,[$]$2)"
 
-          cf_top_incdir=`echo $cf_add_incdir | sed -e 's%/include/.*$%/include%'`
-          test "$cf_top_incdir" = "$cf_add_incdir" && break
-          cf_add_incdir="$cf_top_incdir"
+		  cf_top_incdir=`echo $cf_add_incdir | sed -e 's%/include/.*$%/include%'`
+		  test "$cf_top_incdir" = "$cf_add_incdir" && break
+		  cf_add_incdir="$cf_top_incdir"
 		else
 		  break
 		fi
@@ -3387,7 +3387,7 @@ EOF
 test "$cf_cv_ncurses_version" = no || AC_DEFINE(NCURSES)
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_NETLIBS version: 4 updated: 1999/12/23 15:20:39
+dnl CF_NETLIBS version: 5 updated: 2008/12/29 08:43:47
 dnl ----------
 dnl After checking for functions in the default $LIBS, make a further check
 dnl for the functions that are netlib-related (these aren't always in the
@@ -3400,32 +3400,77 @@ dnl	-lsocket
 dnl	-lbsd
 AC_DEFUN([CF_NETLIBS],[
 cf_test_netlibs=no
+
 AC_MSG_CHECKING(for network libraries)
+
 AC_CACHE_VAL(cf_cv_netlibs,[
 AC_MSG_RESULT(working...)
+
 cf_cv_netlibs=""
 cf_test_netlibs=yes
-AC_CHECK_FUNCS(gethostname,,[
-	CF_RECHECK_FUNC(gethostname,nsl,cf_cv_netlibs,[
-		CF_RECHECK_FUNC(gethostname,socket,cf_cv_netlibs)])])
-#
-# FIXME:  sequent needs this library (i.e., -lsocket -linet -lnsl), but
-# I don't know the entrypoints - 97/7/22 TD
-# AC_HAVE_LIBRARY(inet,cf_cv_netlibs="-linet $cf_cv_netlibs")
-AC_CHECK_LIB(inet, main, cf_cv_netlibs="-linet $cf_cv_netlibs")
-#
-if test "$ac_cv_func_lsocket" != no ; then
-AC_CHECK_FUNCS(socket,,[
-	CF_RECHECK_FUNC(socket,socket,cf_cv_netlibs,[
-		CF_RECHECK_FUNC(socket,bsd,cf_cv_netlibs)])])
-fi
-#
-AC_CHECK_FUNCS(gethostbyname,,[
-	CF_RECHECK_FUNC(gethostbyname,nsl,cf_cv_netlibs)])
-#
-AC_CHECK_FUNCS(strcasecmp,,[
-	CF_RECHECK_FUNC(strcasecmp,resolv,cf_cv_netlibs)])
+
+case $host_os in #(vi
+mingw32) # (vi
+	AC_CHECK_HEADERS( windows.h winsock.h winsock2.h )
+
+	if test "$ac_cv_header_winsock2_h" = "yes" ; then
+		cf_winsock_lib="-lws2_32"
+	elif test "$ac_cv_header_winsock_h" = "yes" ; then
+		cf_winsock_lib="-lwsock32"
+	fi
+
+	cf_save_LIBS="$LIBS"
+	LIBS="$cf_winsock_lib $LIBS"
+
+	AC_TRY_LINK([
+#ifdef HAVE_WINDOWS_H
+#undef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#ifdef HAVE_WINSOCK2_H
+#include <winsock2.h>
+#else
+#ifdef HAVE_WINSOCK_H
+#include <winsock.h>
+#endif
+#endif
+#endif
+],[
+	char buffer[1024];
+	gethostname(buffer, sizeof(buffer));],
+	[cf_cv_netlibs="$cf_winsock_lib $cf_cv_netlibs"],
+	[AC_MSG_ERROR(Cannot link against winsock library)])
+
+	LIBS="$cf_save_LIBS"
+	;;
+*)
+	AC_CHECK_FUNCS(gethostname,,[
+		CF_RECHECK_FUNC(gethostname,nsl,cf_cv_netlibs,[
+			CF_RECHECK_FUNC(gethostname,socket,cf_cv_netlibs)])])
+
+	AC_CHECK_LIB(inet, main, cf_cv_netlibs="-linet $cf_cv_netlibs")
+
+	if test "$ac_cv_func_lsocket" != no ; then
+	AC_CHECK_FUNCS(socket,,[
+		CF_RECHECK_FUNC(socket,socket,cf_cv_netlibs,[
+			CF_RECHECK_FUNC(socket,bsd,cf_cv_netlibs)])])
+	fi
+
+	AC_CHECK_FUNCS(gethostbyname,,[
+		CF_RECHECK_FUNC(gethostbyname,nsl,cf_cv_netlibs)])
+
+	AC_CHECK_FUNCS(strcasecmp,,[
+		CF_RECHECK_FUNC(strcasecmp,resolv,cf_cv_netlibs)])
+	;;
+esac
 ])
+
+case $cf_cv_netlibs in #(vi
+*ws2_32*)
+	AC_DEFINE(USE_WINSOCK2_H)
+	;;
+esac
+
 LIBS="$LIBS $cf_cv_netlibs"
 test $cf_test_netlibs = no && echo "$cf_cv_netlibs" >&AC_FD_MSG
 ])dnl
@@ -5208,32 +5253,6 @@ fi
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_VARARGS version: 3 updated: 1998/12/10 20:06:29
-dnl ----------
-dnl Check for ANSI stdarg.h vs varargs.h.  Note that some systems include
-dnl <varargs.h> within <stdarg.h>.
-AC_DEFUN([CF_VARARGS],
-[
-AC_CHECK_HEADERS(stdarg.h varargs.h)
-AC_MSG_CHECKING(for standard varargs)
-AC_CACHE_VAL(cf_cv_ansi_varargs,[
-	AC_TRY_COMPILE([
-#if HAVE_STDARG_H
-#include <stdarg.h>
-#else
-#if HAVE_VARARGS_H
-#include <varargs.h>
-#endif
-#endif
-		],
-		[return 0;} int foo(char *fmt,...){va_list args;va_start(args,fmt);va_end(args)],
-		[cf_cv_ansi_varargs=yes],
-		[cf_cv_ansi_varargs=no])
-	])
-AC_MSG_RESULT($cf_cv_ansi_varargs)
-test $cf_cv_ansi_varargs = yes && AC_DEFINE(ANSI_VARARGS)
-])dnl
-dnl ---------------------------------------------------------------------------
 dnl CF_VERBOSE version: 3 updated: 2007/07/29 09:55:12
 dnl ----------
 dnl Use AC_VERBOSE w/o the warnings
@@ -5442,7 +5461,7 @@ AC_TRY_LINK([
 test $cf_cv_need_xopen_extension = yes && CPPFLAGS="$CPPFLAGS -D_XOPEN_SOURCE_EXTENDED"
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_XOPEN_SOURCE version: 27 updated: 2008/12/13 14:08:40
+dnl CF_XOPEN_SOURCE version: 28 updated: 2008/12/27 12:30:03
 dnl ---------------
 dnl Try to get _XOPEN_SOURCE defined properly that we can use POSIX functions,
 dnl or adapt to the vendor's definitions to get equivalent functionality,
@@ -5459,7 +5478,7 @@ cf_XOPEN_SOURCE=ifelse($1,,500,$1)
 cf_POSIX_C_SOURCE=ifelse($2,,199506L,$2)
 
 case $host_os in #(vi
-aix[[45]]*) #(vi
+aix[[456]]*) #(vi
 	CPPFLAGS="$CPPFLAGS -D_ALL_SOURCE"
 	;;
 freebsd*|dragonfly*) #(vi

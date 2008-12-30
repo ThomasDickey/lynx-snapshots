@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYGlobalDefs.h,v 1.113 2008/12/14 18:07:20 tom Exp $
+ * $LynxId: LYGlobalDefs.h,v 1.115 2008/12/26 18:25:27 tom Exp $
  *
  * global variable definitions
  */
@@ -65,6 +65,7 @@ extern "C" {
 #ifndef VMS
     extern char *list_format;
 #endif				/* !VMS */
+    extern char *ftp_format;
 
 #ifdef DIRED_SUPPORT
 
@@ -630,10 +631,7 @@ extern "C" {
     extern int lynx_timeout;
 #endif				/* _WINDOWS */
 
-#ifdef SH_EX
     extern BOOLEAN show_cfg;
-#endif
-
     extern BOOLEAN no_table_center;
 
 #if USE_BLAT_MAILER

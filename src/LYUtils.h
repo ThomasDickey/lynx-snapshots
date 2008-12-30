@@ -1,4 +1,4 @@
-/* $LynxId: LYUtils.h,v 1.77 2008/02/10 21:45:40 tom Exp $ */
+/* $LynxId: LYUtils.h,v 1.78 2008/12/29 01:33:26 tom Exp $ */
 #ifndef LYUTILS_H
 #define LYUTILS_H
 
@@ -218,6 +218,7 @@ extern "C" {
 
 #if defined(_WIN_CC) || defined(WIN_EX)
     extern int exec_command(char *cmd, int wait_flag);	/* xsystem.c */
+    extern char *quote_pathname(char *pathname);
     extern int xsystem(char *cmd);
 #endif
 

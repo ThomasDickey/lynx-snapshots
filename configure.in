@@ -1,4 +1,4 @@
-dnl $LynxId: configure.in,v 1.176 2008/12/24 14:35:01 tom Exp $
+dnl $LynxId: configure.in,v 1.178 2008/12/29 14:29:28 tom Exp $
 dnl
 dnl Process this file with autoconf to produce a configure script.
 dnl
@@ -258,6 +258,21 @@ irix*)
 	;;
 linux*)
 	TRY_CFLAGS="$TRY_CFLAGS -DLINUX"
+	;;
+mingw*)
+	# put these directlyin CPPFLAGS since they will not work in lynx_cfg.h
+	CF_ADD_CFLAGS(\
+		-DDOSPATH \
+		-DNOSIGHUP \
+		-DNOUSERS \
+		-DWIN_EX \
+		-D_CONSOLE \
+		-D_MBCS \
+		-D_WINDOWS \
+		-D_WIN_CC \
+		-D__WIN32__ \
+	)
+	EXTRA_OBJS="$EXTRA_OBJS Xsystem\$o"
 	;;
 msdosdjgpp*)
 	LIBS="$LIBS -lwatt"
@@ -711,7 +726,6 @@ AC_CHECK_HEADERS( \
 CF_TERMIO_AND_TERMIOS
 CF_FUNC_SIGACTION
 CF_FUNC_WAIT
-CF_VARARGS
 AC_TYPE_GETGROUPS
 AC_TYPE_OFF_T
 AC_TYPE_PID_T
@@ -920,7 +934,7 @@ CF_ARG_ENABLE(sessions,
 	[use_sessions=no])
 AC_MSG_RESULT($use_sessions)
 if test $use_sessions != no ; then
-    AC_DEFINE(USE_SESSIONS)
+	AC_DEFINE(USE_SESSIONS)
 	EXTRA_OBJS="$EXTRA_OBJS LYSession\$o"
 fi
 

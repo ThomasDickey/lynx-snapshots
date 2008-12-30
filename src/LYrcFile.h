@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYrcFile.h,v 1.28 2008/12/07 20:52:27 tom Exp $
+ * $LynxId: LYrcFile.h,v 1.29 2008/12/26 18:34:05 tom Exp $
  */
 #ifndef LYRCFILE_H
 #define LYRCFILE_H
@@ -84,6 +84,7 @@
 #define RC_FORCE_SSL_COOKIES_SECURE     "force_ssl_cookies_secure"
 #define RC_FORCE_SSL_PROMPT             "force_ssl_prompt"
 #define RC_FORMS_OPTIONS                "forms_options"
+#define RC_FTP_FORMAT                   "ftp_format"
 #define RC_FTP_PASSIVE                  "ftp_passive"
 #define RC_FTP_PROXY                    "ftp_proxy"
 #define RC_GLOBAL_EXTENSION_MAP         "global_extension_map"

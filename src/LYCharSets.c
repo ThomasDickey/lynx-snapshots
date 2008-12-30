@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYCharSets.c,v 1.58 2008/09/06 15:45:56 tom Exp $
+ * $LynxId: LYCharSets.c,v 1.59 2008/12/26 16:15:27 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTCJK.h>
@@ -419,9 +419,8 @@ void HTMLSetCharacterHandling(int i)
 	else
 	    LYRawMode = (BOOL) (!LYUseDefaultRawMode);
 
-	HTPassEightBitNum = (BOOL) (
-				       ((LYCharSet_UC[i].codepoints & UCT_CP_SUPERSETOF_LAT1)
-					|| (LYCharSet_UC[i].like8859 & UCT_R_HIGH8BIT)));
+	HTPassEightBitNum = (BOOL) ((LYCharSet_UC[i].codepoints & UCT_CP_SUPERSETOF_LAT1)
+				    || (LYCharSet_UC[i].like8859 & UCT_R_HIGH8BIT));
 
 	if (LYRawMode) {
 	    HTPassEightBitRaw = (BOOL) (LYlowest_eightbit[i] <= 160);

@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYCharUtils.c,v 1.92 2008/09/06 14:40:45 tom Exp $
+ * $LynxId: LYCharUtils.c,v 1.93 2008/12/29 21:22:28 tom Exp $
  *
  *  Functions associated with LYCharSets.c and the Lynx version of HTML.c - FM
  *  ==========================================================================
@@ -2963,7 +2963,6 @@ void LYHandleSELECT(HTStructured * me, const BOOL *present,
 			HText_appendCharacter(me->text, *ptr);
 		    ptr++;
 		}
-		HText_setIgnoreExcess(me->text, TRUE);
 	    }
 	    for (; non_empty(ptr); ptr++) {
 		if (*ptr == ' ')
@@ -2979,7 +2978,6 @@ void LYHandleSELECT(HTStructured * me, const BOOL *present,
 		HText_setLastChar(me->text, ']');
 		me->in_word = YES;
 	    }
-	    HText_setIgnoreExcess(me->text, FALSE);
 	}
 	HTChunkClear(&me->option);
 

@@ -1,4 +1,4 @@
-/* $LynxId: LYStrings.c,v 1.158 2008/09/21 23:26:30 tom Exp $ */
+/* $LynxId: LYStrings.c,v 1.159 2008/12/26 16:46:43 tom Exp $ */
 #include <HTUtils.h>
 #include <HTCJK.h>
 #include <UCAux.h>
@@ -2038,7 +2038,7 @@ static int LYgetch_for(int code)
 	case KEY_RIGHT:	/* ... */
 	    c = RTARROW;
 	    break;
-#if defined(SH_EX) && defined(DOSPATH)	/* for NEC PC-9800 1998/08/30 (Sun) 21:50:35 */
+#if defined(PDCURSES)		/* for NEC PC-9800 1998/08/30 (Sun) 21:50:35 */
 	case KEY_C2:
 	    c = DNARROW;
 	    break;
@@ -2057,7 +2057,7 @@ static int LYgetch_for(int code)
 	case PADSTOP:		/* PC-9800 DEL */
 	    c = REMOVE_KEY;
 	    break;
-#endif /* SH_EX */
+#endif /* PDCURSES */
 	case KEY_HOME:		/* Home key (upward+left arrow) */
 	    c = HOME;
 	    break;

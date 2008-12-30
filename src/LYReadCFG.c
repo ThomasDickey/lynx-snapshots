@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYReadCFG.c,v 1.131 2008/12/09 01:01:34 tom Exp $
+ * $LynxId: LYReadCFG.c,v 1.133 2008/12/26 18:26:52 tom Exp $
  */
 #ifndef NO_RULES
 #include <HTRules.h>
@@ -1385,6 +1385,7 @@ static Config_Type Config_Table [] =
 #if !defined(NO_OPTION_FORMS) && !defined(NO_OPTION_MENU)
      PARSE_SET(RC_FORMS_OPTIONS,        LYUseFormsOptions),
 #endif
+     PARSE_STR(RC_FTP_FORMAT,           ftp_format),
 #ifndef DISABLE_FTP
      PARSE_SET(RC_FTP_PASSIVE,          ftp_passive),
 #endif
@@ -1900,14 +1901,12 @@ static void do_read_cfg(const char *cfg_filename,
     /*
      * Process each line in the file.
      */
-#ifdef SH_EX
     if (show_cfg) {
 	time_t t;
 
 	time(&t);
 	printf("### %s %s, at %s", LYNX_NAME, LYNX_VERSION, ctime(&t));
     }
-#endif
     while (LYSafeGets(&buffer, fp) != 0) {
 	char *name, *value;
 	char *cp;
@@ -1959,10 +1958,8 @@ static void do_read_cfg(const char *cfg_filename,
 	    CTRACE((tfp, "LYReadCFG: ignored %s:%s\n", name, value));
 	    continue;
 	}
-#ifdef SH_EX
 	if (show_cfg)
 	    printf("%s:%s\n", name, value);
-#endif
 
 	if (allowed && (*allowed)[tbl - Config_Table]) {
 	    if (fp0 == NULL)

@@ -1,6 +1,6 @@
 %{
 /*
- *  $LynxId: parsdate.y,v 1.10 2008/12/24 21:12:49 tom Exp $
+ *  $LynxId: parsdate.y,v 1.11 2008/12/27 00:45:40 tom Exp $
  *
  *  This module is adapted and extended from tin, to use for LYmktime().
  *
@@ -777,24 +777,24 @@ date_lex(void)
     for(;;) {
 	/* Get first character after the whitespace. */
 	for(;;) {
-	    while (CTYPE(isspace, TO_LOCAL(*yyInput)))
+	    while (CTYPE(isspace, *yyInput))
 		yyInput++;
-	    c = TO_LOCAL(*yyInput);
+	    c = *yyInput;
 
 	    /* Ignore RFC 822 comments, typically time zone names. */
 	    if (c != LPAREN)
 		break;
 	    for (nesting = 1;
-		 (c = TO_LOCAL(*++yyInput)) != RPAREN || --nesting;
+		 (c = *++yyInput) != RPAREN || --nesting;
 		 ) {
 		if (c == LPAREN) {
 		    nesting++;
 		} else if (!IS7BIT(c) || c == '\0' || c == '\r'
 		        || (c == '\\'
-			 && ((c = TO_LOCAL(*++yyInput)) == '\0'
+			 && ((c = *++yyInput) == '\0'
 			  || !IS7BIT(c)))) {
 		    /* Lexical error: bad comment. */
-		    return TO_ASCII('?');
+		    return '?';
 		}
 	    }
 	    yyInput++;
@@ -805,7 +805,7 @@ date_lex(void)
 	    if (c == '-' || c == '+') {
 		sign = c == '-' ? -1 : 1;
 		yyInput++;
-		if (!CTYPE(isdigit, TO_LOCAL(*yyInput))) {
+		if (!CTYPE(isdigit, *yyInput)) {
 		    /* Return the isolated plus or minus sign. */
 		    --yyInput;
 		    return *yyInput++;
@@ -814,7 +814,7 @@ date_lex(void)
 		sign = 0;
 	    }
 	    for (p = buff;
-		 (c = TO_LOCAL(*yyInput++)) != '\0' && CTYPE(isdigit, c);
+		 (c = *yyInput++) != '\0' && CTYPE(isdigit, c);
 		 ) {
 		if (p < &buff[sizeof buff - 1])
 		    *p++ = c;
@@ -830,7 +830,7 @@ date_lex(void)
 	/* A word? */
 	if (CTYPE(isalpha, c)) {
 	    for (p = buff;
-		 (c = TO_LOCAL(*yyInput++)) == '.' || CTYPE(isalpha, c);
+		 (c = *yyInput++) == '.' || CTYPE(isalpha, c);
 		 ) {
 		if (p < &buff[sizeof buff - 1])
 		    *p++ = CTYPE(isupper, c) ? tolower(c) : c;

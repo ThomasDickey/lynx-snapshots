@@ -1,4 +1,4 @@
-# $LynxId: makefile.in,v 1.54 2008/12/24 18:11:29 tom Exp $
+# $LynxId: makefile.in,v 1.58 2008/12/30 01:18:43 tom Exp $
 # template-makefile for Lynx src directory
 
 SHELL		= @CONFIG_SHELL@
@@ -9,7 +9,7 @@ prefix		= @prefix@
 exec_prefix	= @exec_prefix@
 top_srcdir	= @top_srcdir@
 srcdir		= @srcdir@
-VPATH		= $(srcdir)
+VPATH		= .:$(srcdir)
 
 top_builddir	= ..
 
@@ -71,6 +71,7 @@ COMPRESS_EXT	=@COMPRESS_EXT@
 
 CHARTRANS_OBJS	= UCdomap$o UCAux$o UCAuto$o
 OBJS		= \
+	LYebcdic$o \
 	LYClean$o LYShowInfo$o LYEdit$o LYStrings$o LYMail$o \
 	HTAlert$o GridText$o LYGetFile$o LYMain$o LYMainLoop$o \
 	LYCurses$o LYBookmark$o LYmktime$o LYUtils$o LYOptions$o \
@@ -80,28 +81,26 @@ OBJS		= \
 	LYLeaks$o LYexit$o LYJump$o LYList$o LYCgi$o \
 	LYTraversal$o LYEditmap$o LYCharSets$o LYCharUtils$o \
 	LYMap$o LYCookie$o LYStyle$o LYHash$o LYPrettySrc$o \
-	TRSTable$o $(CHARTRANS_OBJS) @EXTRA_OBJS@ @LIBOBJS@
-
-GEN_OBJS	= parsdate$o 
+	TRSTable$o parsdate$o $(CHARTRANS_OBJS) @EXTRA_OBJS@ @LIBOBJS@
 
 C_SRC		= $(OBJS:$o=.c)
-GEN_SRC		= $(GEN_OBJS:$o=.c)
 
 all: lynx$x
 
 .SUFFIXES : $o .i
 
+# yacc builds .c in target directory, not $(srcdir)
 .c$o:
 @RULE_CC@
-	@ECHO_CC@$(CC) $(CC_OPTS) -c $(srcdir)/$*.c
+	@ECHO_CC@$(CC) $(CC_OPTS) -c $<
 
 .c.i:
 @RULE_CC@
-	@ECHO_CC@$(CPP) -C $(CPP_OPTS) $(srcdir)/$*.c >$@
+	@ECHO_CC@$(CPP) -C $(CPP_OPTS) $< >$@
 
-lynx$x:   message do_chartrans_stuff $(top_builddir)/LYHelp.h $(OBJS) $(GEN_OBJS) $(WWWLIB)
+lynx$x:   message do_chartrans_stuff $(top_builddir)/LYHelp.h $(OBJS) $(WWWLIB)
 	@echo "Linking and creating Lynx executable"
-	$(CC) $(CC_OPTS) $(LDFLAGS) -o $@  $(OBJS) $(GEN_OBJS) $(WWWLIB) $(INTLLIB) $(LDFLAGS) $(LIBS)
+	$(CC) $(CC_OPTS) $(LDFLAGS) -o $@  $(OBJS) $(WWWLIB) $(INTLLIB) $(LDFLAGS) $(LIBS)
 	@echo "Copying Lynx executable into top-level directory"
 	rm -f $(top_builddir)/$@
 	cp $@ $(top_builddir)/
@@ -124,7 +123,6 @@ lint:
 
 clean:
 	rm -f lynx$x core *.core *.leaks *.i *$o *.bak tags TAGS test_*
-	test -f parsdate.y || rm -f parsdate.c
 	cd chrtrans && $(MAKE) clean
 
 tags:
@@ -208,24 +206,20 @@ chrtrans/makeuctb$(BUILD_EXEEXT):
 UCAux$o : UCAux.c $(CMN)UCAux.h $(CMN)UCDefs.h
 LYCookie$o : $(top_srcdir)/userdefs.h
 
-# test-driver for LYmktime
-test_mktime: LYmktime.c parsdate.o
-	$(CC) -o $@ $(CC_OPTS) -DTEST_DRIVER LYmktime.c parsdate.o
+test_mktime.o: $(srcdir)/LYmktime.c
+	$(CC) -o $@ $(CC_OPTS) -DTEST_DRIVER -c $(srcdir)/LYmktime.c
 
-# update generated source
+# test-driver for LYmktime
+test_mktime: test_mktime.o parsdate.o LYebcdic.o
+	$(CC) -o $@ $(CC_OPTS) test_mktime.o parsdate.o LYebcdic.o
+
+# update generated source (may be in ".", or srcdir)
 parsdate.c : $(srcdir)/parsdate.y
 	$(YACC)  $(srcdir)/parsdate.y 
+	-rm -f $@
 	mv y.tab.c $@
 
-# allow for regenerating parsdate.c, e.g., for non-ASCII systems, while
-# handling configure --srcdir option.
-parsdate$o: parsdate.c
-	@-rm -f $@
-	-test -f parsdate.c && $(CC) $(CC_OPTS) -c parsdate.c
-	-test -f parsdate.c || $(CC) $(CC_OPTS) -c $(srcdir)/parsdate.c
-	test -f $@
-
 depend : $(TABLES)
-	makedepend -fmakefile -- $(CC_OPTS) -- $(C_SRC) $(GEN_SRC)
+	makedepend -fmakefile -- $(CC_OPTS) -- $(C_SRC)
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.

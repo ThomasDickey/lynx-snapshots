@@ -1,4 +1,4 @@
-/* $LynxId: LYEdit.c,v 1.37 2008/03/18 00:39:05 Paul.B.Mahol Exp $ */
+/* $LynxId: LYEdit.c,v 1.38 2008/12/29 01:00:53 tom Exp $ */
 #include <HTUtils.h>
 #include <HTParse.h>
 #include <HTAlert.h>
@@ -253,7 +253,7 @@ void edit_temporary_file(char *filename,
 	 * we don't, but at least put out a message.  - kw
 	 */
 	{
-#ifdef UNIX
+#if defined(UNIX) && defined(WIFEXITED)
 	    int save_err = errno;
 
 	    CTRACE((tfp, "ExtEditForm: system() returned %d (0x%x), %s\n",

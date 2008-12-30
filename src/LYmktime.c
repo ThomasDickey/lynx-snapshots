@@ -1,4 +1,4 @@
-/* $LynxId: LYmktime.c,v 1.8 2008/12/25 00:42:09 tom Exp $ */
+/* $LynxId: LYmktime.c,v 1.9 2008/12/27 00:46:30 tom Exp $ */
 
 #include <LYStrings.h>
 #include <LYUtils.h>
@@ -60,33 +60,18 @@ time_t LYmktime(char *string,
     time_t result = 0;
 
     if (non_empty(string)) {
-#ifdef EBCDIC
-	int n;
-	char *copied = NULL;
+	CTRACE((tfp, "LYmktime: Parsing '%s'\n", string));
+	result = parsedate(string, 0);
 
-	StrAllocCopy(copied, string);
-	if (copied != NULL) {
-	    /* parsedate() expects ASCII input */
-	    for (n = 0; copied[n] != '\0'; ++n)
-		copied[n] = TOASCII(copied[n]);
-	    string = copied;
-#endif
-	    CTRACE((tfp, "LYmktime: Parsing '%s'\n", string));
-	    result = parsedate(string, 0);
-
-	    if (!absolute) {
-		if ((time((time_t *) 0) - result) >= 0)
-		    result = 0;
-	    }
-	    if (result != 0) {
-		CTRACE((tfp, "LYmktime: clock=%" PRI_time_t ", ctime=%s",
-			CAST_time_t(result),
-			ctime(&result)));
-	    }
-#ifdef EBCDIC
-	    free(copied);
+	if (!absolute) {
+	    if ((time((time_t *) 0) - result) >= 0)
+		result = 0;
 	}
-#endif
+	if (result != 0) {
+	    CTRACE((tfp, "LYmktime: clock=%" PRI_time_t ", ctime=%s",
+		    CAST_time_t(result),
+		    ctime(&result)));
+	}
     }
     return result;
 #else
