@@ -1,5 +1,5 @@
 /*
- * $LynxId: UCAux.c,v 1.37 2008/09/06 15:46:17 tom Exp $
+ * $LynxId: UCAux.c,v 1.38 2009/01/01 00:42:23 tom Exp $
  */
 #include <HTUtils.h>
 
@@ -401,6 +401,9 @@ void UCSetBoxChars(int cset,
 
 	    if (cset == last_cset) {
 		fix_lines = last_result;
+	    } else if (cset == UTF8_handle) {
+		last_result = FALSE;
+		last_cset = cset;
 	    } else {
 		CTRACE((tfp, "check terminal line-drawing map\n"));
 		for (n = 0; n < TABLESIZE(table); ++n) {

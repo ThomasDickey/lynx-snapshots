@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYUtils.c,v 1.179 2008/12/14 20:52:02 tom Exp $
+ * $LynxId: LYUtils.c,v 1.180 2008/12/31 16:35:14 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTCP.h>
@@ -7188,6 +7188,21 @@ int Cygwin_Shell(void)
     }
 
     return code;
+}
+#endif
+
+#ifdef WIN_EX
+/*
+ * Quote the path to make it safe for shell command processing.
+ *  We always quote it not only includes spaces in it.
+ *  At least we should quote paths which include "&".
+ */
+char *quote_pathname(char *pathname)
+{
+    char *result = NULL;
+
+    HTSprintf0(&result, "\"%s\"", pathname);
+    return result;
 }
 #endif
 

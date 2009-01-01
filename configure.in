@@ -1,4 +1,4 @@
-dnl $LynxId: configure.in,v 1.178 2008/12/29 14:29:28 tom Exp $
+dnl $LynxId: configure.in,v 1.181 2008/12/31 20:58:39 tom Exp $
 dnl
 dnl Process this file with autoconf to produce a configure script.
 dnl
@@ -262,6 +262,7 @@ linux*)
 mingw*)
 	# put these directlyin CPPFLAGS since they will not work in lynx_cfg.h
 	CF_ADD_CFLAGS(\
+		-DWIN32_LEAN_AND_MEAN \
 		-DDOSPATH \
 		-DNOSIGHUP \
 		-DNOUSERS \
@@ -844,6 +845,14 @@ CF_ARG_ENABLE(addrlist-page,
 AC_MSG_RESULT($use_addrlist_page)
 test $use_addrlist_page != no && AC_DEFINE(EXP_ADDRLIST_PAGE)
 
+AC_MSG_CHECKING(if experimental ascii case-conversion)
+CF_ARG_ENABLE(ascii-ctypes,
+[  --enable-ascii-ctypes   use experimental ascii case-conversion],
+	[use_ascii_ctypes=$enableval],
+	[use_ascii_ctypes=no])
+AC_MSG_RESULT($use_ascii_ctypes)
+test $use_ascii_ctypes != no && AC_DEFINE(EXP_ASCII_CTYPES)
+
 AC_MSG_CHECKING(if experimental charset-selection logic should be used)
 CF_ARG_ENABLE(charset-choice,
 [  --enable-charset-choice use experimental charset-selection logic],
@@ -1129,7 +1138,16 @@ CF_ARG_ENABLE(nsl-fork,
 	[use_nsl_fork=yes],
 	[use_nsl_fork=no])
 AC_MSG_RESULT($use_nsl_fork)
-test $use_nsl_fork = yes && AC_DEFINE(NSL_FORK)
+if test $use_nsl_fork = yes ; then
+	case $host_os in
+	mingw*)
+		AC_DEFINE(_WINDOWS_NSL)
+		;;
+	*)
+		AC_DEFINE(NSL_FORK)
+		;;
+	esac
+fi
 
 dnl --------------------------------------------------------------------------
 AC_MSG_CHECKING(if you want to log URL requests via syslog)

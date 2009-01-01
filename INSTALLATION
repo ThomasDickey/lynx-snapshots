@@ -360,6 +360,11 @@ II. Compile instructions -- UNIX
 	Compiles-in an alternative list-page, bound to 'A' rather than 'l',
 	which always lists URLs rather than titles.
 
+  --enable-ascii-ctypes			(define EXP_ASCII_CTYPES)
+	Compiles-in alternative case-conversion functions which ensure that
+	configuration names, etc., are compared in POSIX locale.  This is
+	important for operating in some locale such as Turkish.
+
   --enable-cgi-links			(define LYNXCGI_LINKS)
 	Allows lynx to access a cgi script directly without the need for
 	a http daemon.
@@ -1366,4 +1371,4 @@ VIII. Acknowledgment
 
 -- 1999/04/24 - H. Nelson <lynx-admin@irm.nara.kindai.ac.jp>
 -- vile:txtmode
--- $LynxId: INSTALLATION,v 1.105 2008/12/25 01:09:57 tom Exp $
+-- $LynxId: INSTALLATION,v 1.106 2008/12/31 21:37:07 tom Exp $

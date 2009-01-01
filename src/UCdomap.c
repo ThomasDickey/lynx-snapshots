@@ -1,5 +1,5 @@
 /*
- * $LynxId: UCdomap.c,v 1.71 2008/12/26 16:36:57 tom Exp $
+ * $LynxId: UCdomap.c,v 1.72 2009/01/01 00:46:30 tom Exp $
  *
  *  UCdomap.c
  *  =========
@@ -841,10 +841,17 @@ int UCTransUniChar(long unicode,
     const u16 *ut;
 
     if ((UChndl_out = LYCharSet_UC[charset_out].UChndl) < 0) {
-	if (LYCharSet_UC[charset_out].codepage < 0)
-	    return (unicode < 128) ? (int) unicode : LYCharSet_UC[charset_out].codepage;
-	if ((UChndl_out = default_UChndl) < 0)
+	if (LYCharSet_UC[charset_out].codepage < 0) {
+	    if (unicode < 128 || charset_out == UTF8_handle) {
+		rc = (int) unicode;
+	    } else {
+		rc = LYCharSet_UC[charset_out].codepage;
+	    }
+	    return rc;
+	}
+	if ((UChndl_out = default_UChndl) < 0) {
 	    return ucCannotOutput;
+	}
 	isdefault = 1;
     } else {
 	isdefault = UCInfo[UChndl_out].replacedesc.isdefault;
@@ -860,18 +867,20 @@ int UCTransUniChar(long unicode,
 	    }
 	}
 	rc = conv_uni_to_pc(unicode, 0);
-	if (rc >= 0)
+	if (rc >= 0) {
 	    return rc;
+	}
     }
     if (isdefault || trydefault) {
 	rc = conv_uni_to_pc(unicode, 1);
-	if (rc >= 0)
+	if (rc >= 0) {
 	    return rc;
+	}
     }
-    if (!isdefault && (rc == -4)) {
+    if (!isdefault && (rc == ucNotFound)) {
 	rc = conv_uni_to_pc(0xfffd, 0);
     }
-    if ((isdefault || trydefault) && (rc == -4)) {
+    if ((isdefault || trydefault) && (rc == ucNotFound)) {
 	rc = conv_uni_to_pc(0xfffd, 1);
     }
     return rc;
@@ -886,7 +895,7 @@ int UCTransUniCharStr(char *outbuf,
 		      int charset_out,
 		      int chk_single_flag)
 {
-    int rc = -14, src = 0, ignore_err;
+    int rc = ucUnknown, src = 0, ignore_err;
     int UChndl_out;
     int isdefault, trydefault = 0;
     struct unimapdesc_str *repl;
@@ -1000,18 +1009,18 @@ int UCTransUniCharStr(char *outbuf,
 	if (rc >= 0)
 	    return (strlen(outbuf));
     }
-    if (rc == -4) {
+    if (rc == ucNotFound) {
 	if (!isdefault)
 	    rc = conv_uni_to_str(outbuf, buflen, 0xfffd, 0);
-	if ((rc == -4) && (isdefault || trydefault))
+	if ((rc == ucNotFound) && (isdefault || trydefault))
 	    rc = conv_uni_to_str(outbuf, buflen, 0xfffd, 1);
 	if (rc >= 0)
 	    return (strlen(outbuf));
     }
-    if (chk_single_flag && src == -4) {
+    if (chk_single_flag && src == ucNotFound) {
 	if (!isdefault)
 	    rc = conv_uni_to_pc(0xfffd, 0);
-	if ((rc == -4) && (isdefault || trydefault))
+	if ((rc == ucNotFound) && (isdefault || trydefault))
 	    rc = conv_uni_to_pc(0xfffd, 1);
 	if (rc >= 32) {
 	    outbuf[0] = (char) rc;
@@ -1119,13 +1128,13 @@ int UCTransChar(char ch_in,
 	if (rc >= 0)
 	    return rc;
     }
-    if ((rc == -4) && (isdefault || trydefault)) {
+    if ((rc == ucNotFound) && (isdefault || trydefault)) {
 	rc = conv_uni_to_pc(unicode, 1);
     }
-    if ((rc == -4) && !isdefault) {
+    if ((rc == ucNotFound) && !isdefault) {
 	rc = conv_uni_to_pc(0xfffd, 0);
     }
-    if ((rc == -4) && (isdefault || trydefault)) {
+    if ((rc == ucNotFound) && (isdefault || trydefault)) {
 	rc = conv_uni_to_pc(0xfffd, 1);
     }
     return rc;
@@ -1347,7 +1356,7 @@ int UCTransCharStr(char *outbuf,
 		   int chk_single_flag)
 {
     int unicode, Gn;
-    int rc = -14, src = 0, ignore_err;
+    int rc = ucUnknown, src = 0, ignore_err;
     int UChndl_in, UChndl_out;
     int isdefault, trydefault = 0;
     struct unimapdesc_str *repl;
