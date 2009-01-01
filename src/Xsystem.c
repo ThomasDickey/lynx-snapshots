@@ -1,4 +1,4 @@
-/* $LynxId: Xsystem.c,v 1.20 2008/12/29 01:34:31 tom Exp $
+/* $LynxId: Xsystem.c,v 1.21 2008/12/31 16:35:14 tom Exp $
  *	like system("cmd") but return with exit code of "cmd"
  *	for Turbo-C/MS-C/LSI-C
  *  This code is in the public domain.
@@ -448,19 +448,6 @@ static void NEAR redunswitch(PRO * p)
 	    close(p->sred[d]);
 	}
     }
-}
-
-/*
- * Quote the path to make it safe for shell command processing.
- *  We always quote it not only includes spaces in it.
- *  At least we should quote paths which include "&".
- */
-char *quote_pathname(char *pathname)
-{
-    char *result = NULL;
-
-    HTSprintf0(&result, "\"%s\"", pathname);
-    return result;
 }
 
 int xsystem(char *cmd)

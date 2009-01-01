@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTString.c,v 1.54 2008/09/20 14:32:29 tom Exp $
+ * $LynxId: HTString.c,v 1.55 2008/12/31 22:03:25 tom Exp $
  *
  *	Case-independent string comparison		HTString.c
  *
@@ -14,6 +14,7 @@
 #include <HTUtils.h>
 
 #include <LYLeaks.h>
+#include <LYUtils.h>
 #include <LYStrings.h>
 
 #ifndef NO_LYNX_TRACE

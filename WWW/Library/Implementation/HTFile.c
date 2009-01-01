@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFile.c,v 1.115 2008/12/26 22:13:13 tom Exp $
+ * $LynxId: HTFile.c,v 1.116 2008/12/31 01:47:53 tom Exp $
  *
  *			File Access				HTFile.c
  *			===========
@@ -2195,7 +2195,6 @@ static int print_local_dir(DIR *dp, char *localname,
 		 ? partial_threshold
 		 : display_lines) == 0) {
 		/* num_of_entries, num_of_entries_output... */
-		/* HTReadProgress...(bytes, 0); */
 		HTDisplayPartial();
 
 		if (HTCheckForInterrupt()) {

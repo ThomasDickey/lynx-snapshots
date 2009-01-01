@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTAnchor.c,v 1.60 2008/09/18 21:35:24 tom Exp $
+ * $LynxId: HTAnchor.c,v 1.61 2008/12/31 22:02:20 tom Exp $
  *
  *	Hypertext "Anchor" Object				HTAnchor.c
  *	==========================
@@ -28,6 +28,7 @@
 #include <GridText.h>
 #include <LYUtils.h>
 #include <LYCharSets.h>
+#include <LYUtils.h>
 #include <LYLeaks.h>
 
 #define HASH_TYPE unsigned short

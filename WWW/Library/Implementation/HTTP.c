@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTP.c,v 1.100 2008/12/25 14:15:28 tom Exp $
+ * $LynxId: HTTP.c,v 1.101 2008/12/31 02:03:20 tom Exp $
  *
  * HyperText Tranfer Protocol	- Client implementation		HTTP.c
  * ==========================
@@ -2276,7 +2276,6 @@ static int HTLoadHTTP(const char *arg,
 	/*
 	 * Intentional interrupt before data were received, not an error
 	 */
-/* (*target->isa->_abort)(target, NULL); *//* already done in HTCopy */
 	if (doing_redirect && traversal)
 	    status = -1;
 	else

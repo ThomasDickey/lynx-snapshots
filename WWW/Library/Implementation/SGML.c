@@ -1,5 +1,5 @@
 /*
- * $LynxId: SGML.c,v 1.118 2008/09/22 23:21:46 tom Exp $
+ * $LynxId: SGML.c,v 1.119 2008/12/31 20:19:38 tom Exp $
  *
  *			General SGML Parser code		SGML.c
  *			========================
@@ -3129,7 +3129,7 @@ static void SGML_character(HTStream *context, char c_in)
 		context->state = (c == '>') ? S_text : S_junk_tag;
 		break;
 	    } else if (t == context->unknown_tag) {
-		CTRACE((tfp, "SGML: *** Unknown element %s\n",
+		CTRACE((tfp, "SGML: *** Unknown element \"%s\"\n",
 			string->data));
 		/*
 		 * Fall through and treat like valid tag for attribute parsing. 

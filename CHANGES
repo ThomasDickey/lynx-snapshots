@@ -1,9 +1,10 @@
--- $LynxId: CHANGES,v 1.349 2008/12/30 01:09:07 tom Exp $
+-- $LynxId: CHANGES,v 1.352 2008/12/31 23:27:54 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2008-12-?? (2.8.7dev.12)
+2008-12-31 (2.8.7dev.12)
+* add configure option --enable-ascii-ctypes to enable EXP_ASCII_CTYPES -TD
 * move EBCDIC tables to separate file LYebcdic.c to simplify building test
   driver for parsdate.c on z/OS -PG
 * fix an off-by-one difference between UTF-8/non-UTF-8 comparisons in

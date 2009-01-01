@@ -1,5 +1,5 @@
 /*
- * $LynxId: config.hin,v 1.108 2008/12/29 14:28:33 tom Exp $
+ * $LynxId: config.hin,v 1.110 2008/12/31 21:02:35 tom Exp $
  * vile:cmode
  *
  * The configure script translates "config.hin" into "lynx_cfg.h"
@@ -40,6 +40,7 @@
 #undef EXEC_SCRIPTS		/* CF_ARG_ENABLE(exec-scripts) */
 #undef EXP_ADDRLIST_PAGE	/* CF_ARG_ENABLE(addrlist-page) */
 #undef EXP_ALT_BINDINGS		/* CF_ARG_ENABLE(alt-bindings) */
+#undef EXP_ASCII_CTYPES		/* CF_ARG_ENABLE(ascii-ctypes) */
 #undef EXP_CHARSET_CHOICE	/* CF_ARG_ENABLE(charset-choice) */
 #undef EXP_CHARTRANS_AUTOSWITCH	/* CF_ARG_ENABLE(font-switch) */
 #undef EXP_JAPANESEUTF8_SUPPORT	/* CF_ARG_ENABLE(japanese-utf8) */
@@ -277,6 +278,7 @@
 #undef XCURSES			/* CF_PDCURSES_X11 */
 #undef ZCAT_PATH		/* CF_PATH_PROG(zcat) */
 #undef ZIP_PATH			/* CF_PATH_PROG(zip) */
+#undef _WINDOWS_NSL		/* CF_ARG_ENABLE(nsl-fork) */
 #undef inline			/* AC_C_INLINE */
 #undef lynx_rand		/* CF_SRAND */
 #undef lynx_srand		/* CF_SRAND */

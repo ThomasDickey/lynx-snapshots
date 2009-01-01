@@ -1,5 +1,5 @@
 /*
- * $LynxId: makeuctb.c,v 1.37 2008/01/09 23:29:20 tom Exp $
+ * $LynxId: makeuctb.c,v 1.38 2008/12/31 22:04:03 tom Exp $
  *
  *  makeuctb.c, derived from conmakehash.c   - kw
  *
@@ -30,6 +30,7 @@
 #define DONT_USE_SOCKS5
 #include <UCDefs.h>
 #include <UCkd.h>
+#include <LYUtils.h>
 
 /*
  *  Don't try to use LYexit() since this is a standalone file.
