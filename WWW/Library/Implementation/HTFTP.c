@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFTP.c,v 1.86 2008/12/26 22:19:03 tom Exp $
+ * $LynxId: HTFTP.c,v 1.87 2009/01/01 16:53:31 tom Exp $
  *
  *			File Transfer Protocol (FTP) Client
  *			for a WorldWideWeb browser
@@ -2551,7 +2551,9 @@ static EntryInfo *parse_dir_entry(char *entry,
 
     }				/* switch (server_type) */
 
-#ifndef LONG_LIST
+#ifdef LONG_LIST
+    (void) remove_size;
+#else
     if (remove_size && entry_info->size) {
 	entry_info->size = 0;
     }
@@ -2960,7 +2962,6 @@ static int read_directory(HTParentAnchor *parent,
     int status;
     BOOLEAN WasInterrupted = FALSE;
     HTStructured *target = HTML_new(parent, format_out, sink);
-    HTStructuredClass targetClass;
     char *filename = HTParse(address, "", PARSE_PATH + PARSE_PUNCTUATION);
     EntryInfo *entry_info;
     BOOLEAN first = TRUE;
@@ -2971,8 +2972,6 @@ static int read_directory(HTParentAnchor *parent,
 #ifndef LONG_LIST
     char string_buffer[64];
 #endif
-
-    targetClass = *(target->isa);
 
     _HTProgress(gettext("Receiving FTP directory."));
 

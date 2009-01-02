@@ -1,5 +1,5 @@
 /*
- * $LynxId: GridText.h,v 1.60 2008/12/29 21:36:00 tom Exp $
+ * $LynxId: GridText.h,v 1.61 2009/01/01 23:02:02 tom Exp $
  *
  * Specialities of GridText as subclass of HText
  */
@@ -181,7 +181,7 @@ US-ASCII control characters <32 which are not defined in Unicode standard
     extern void *HText_pool_calloc(HText *text, unsigned size);
 
 /* "simple table" stuff */
-    extern int HText_endStblTABLE(HText *);
+    extern BOOLEAN HText_endStblTABLE(HText *);
     extern int HText_trimCellLines(HText *text);
     extern void HText_cancelStbl(HText *);
     extern void HText_endStblCOLGROUP(HText *);

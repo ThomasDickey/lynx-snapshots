@@ -33,7 +33,7 @@ static int yygrowstack(void);
 #define YYPREFIX "yy"
 #line 2 "./parsdate.y"
 /*
- *  $LynxId: parsdate.c,v 1.7 2008/12/27 01:03:28 tom Exp $
+ *  $LynxId: parsdate.c,v 1.8 2009/01/01 22:12:42 tom Exp $
  *
  *  This module is adapted and extended from tin, to use for LYmktime().
  *
@@ -842,7 +842,7 @@ date_lex(void)
 		 (c = *yyInput++) != '\0' && CTYPE(isdigit, c);
 		 ) {
 		if (p < &buff[sizeof buff - 1])
-		    *p++ = c;
+		    *p++ = (char) c;
 	    }
 	    *p = '\0';
 	    i = atoi(buff);
@@ -858,7 +858,7 @@ date_lex(void)
 		 (c = *yyInput++) == '.' || CTYPE(isalpha, c);
 		 ) {
 		if (p < &buff[sizeof buff - 1])
-		    *p++ = CTYPE(isupper, c) ? tolower(c) : c;
+		    *p++ = (char) (CTYPE(isupper, c) ? tolower(c) : c);
 	    }
 	    *p = '\0';
 	    yyInput--;

@@ -1,4 +1,4 @@
-/* $LynxId: LYKeymap.c,v 1.65 2008/01/08 00:19:25 tom Exp $ */
+/* $LynxId: LYKeymap.c,v 1.66 2009/01/01 23:09:11 tom Exp $ */
 #include <HTUtils.h>
 #include <LYUtils.h>
 #include <LYGlobalDefs.h>
@@ -17,7 +17,7 @@
 #include <rot13_kb.h>
 #endif
 
-#define PUTS(buf)    (*target->isa->put_block)(target, buf, strlen(buf))
+#define PUTS(buf)    (*target->isa->put_block)(target, buf, (int) strlen(buf))
 
 #ifdef EXP_KEYBOARD_LAYOUT
 int current_layout = 0;		/* Index into LYKbLayouts[]   */
@@ -1139,7 +1139,7 @@ Kcmd *LYStringToKcmd(const char *name)
 		result = revmap + j;
 		break;
 	    } else if (!exact
-		       && !strncasecomp(revmap[j].name, name, need)) {
+		       && !strncasecomp(revmap[j].name, name, (int) need)) {
 		if (maybe == 0) {
 		    maybe = revmap + j;
 		} else {
@@ -1193,7 +1193,7 @@ int LYStringToKeycode(char *src)
 {
     unsigned n;
     int key = -1;
-    int len = strlen(src);
+    int len = (int) strlen(src);
 
     if (len == 1) {
 	key = *src;
@@ -1254,8 +1254,8 @@ static char *pretty_html(int c)
 		if (c == table[n].code) {
 		    found = TRUE;
 		    strcpy(dst, table[n].name);
-		    adj += strlen(dst) - 1;
-		    dst += strlen(dst);
+		    adj += (int) strlen(dst) - 1;
+		    dst += (int) strlen(dst);
 		    break;
 		}
 	    }

@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTAnchor.c,v 1.61 2008/12/31 22:02:20 tom Exp $
+ * $LynxId: HTAnchor.c,v 1.62 2009/01/01 16:56:15 tom Exp $
  *
  *	Hypertext "Anchor" Object				HTAnchor.c
  *	==========================
@@ -1365,6 +1365,8 @@ LYUCcharset *HTAnchor_resetUCInfoStage(HTParentAnchor *me,
     /* Allow a switch to a more suitable display charset */
     if (LYhndl >= 0 && LYhndl != ohandle && which_stage == UCT_STAGE_PARSER)
 	setup_switch_display_charset(me, LYhndl);
+#else
+    (void) ohandle;
 #endif
     return (&me->UCStages->s[which_stage].C);
 }

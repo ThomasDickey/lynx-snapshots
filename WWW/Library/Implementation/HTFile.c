@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFile.c,v 1.116 2008/12/31 01:47:53 tom Exp $
+ * $LynxId: HTFile.c,v 1.117 2009/01/01 16:47:58 tom Exp $
  *
  *			File Access				HTFile.c
  *			===========
@@ -1791,9 +1791,6 @@ static void do_readme(HTStructured * target, const char *localname)
     fp = fopen(readme_file_name, "r");
 
     if (fp) {
-	HTStructuredClass targetClass;
-
-	targetClass = *target->isa;	/* (Can't init agregate in K&R) */
 	START(HTML_PRE);
 	while ((ch = fgetc(fp)) != EOF) {
 	    PUTC((char) ch);
@@ -1881,7 +1878,6 @@ static int print_local_dir(DIR *dp, char *localname,
     char *pathname = NULL;
     char *tail = NULL;
     char *p;
-    BOOL present[HTML_A_ATTRIBUTES];
     char *tmpfilename = NULL;
     BOOL need_parent_link = FALSE;
     BOOL preformatted = FALSE;
@@ -1916,9 +1912,6 @@ static int print_local_dir(DIR *dp, char *localname,
 
     target = HTML_new(anchor, format_out, sink);
     targetClass = *target->isa;	/* Copy routine entry points */
-
-    for (i = 0; i < HTML_A_ATTRIBUTES; i++)
-	present[i] = (BOOL) (i == HTML_A_HREF);
 
     /*
      * The need_parent_link flag will be set if an "Up to <parent>" link was
@@ -2918,10 +2911,10 @@ int HTLoadFile(const char *addr,
 	    }
 	    /* end if localname is a directory */
 	    if (S_ISREG(dir_info.st_mode)) {
-#ifdef INT_MAX
-		if (dir_info.st_size <= INT_MAX)
+#ifdef LONG_MAX
+		if (dir_info.st_size <= LONG_MAX)
 #endif
-		    anchor->content_length = dir_info.st_size;
+		    anchor->content_length = (long) dir_info.st_size;
 	    }
 
 	}			/* end if file stat worked */

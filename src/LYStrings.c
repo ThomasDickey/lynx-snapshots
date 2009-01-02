@@ -1,4 +1,4 @@
-/* $LynxId: LYStrings.c,v 1.159 2008/12/26 16:46:43 tom Exp $ */
+/* $LynxId: LYStrings.c,v 1.160 2009/01/01 21:50:59 tom Exp $ */
 #include <HTUtils.h>
 #include <HTCJK.h>
 #include <UCAux.h>
@@ -479,7 +479,7 @@ static int set_clicked_link(int x,
 		if (is_text)
 		    len = links[i].l_form->size;
 		else
-		    len = strlen(text);
+		    len = (int) strlen(text);
 		cur_err = XYdist(x, y, links[i].lx, links[i].ly, len);
 		/* Check the second line */
 		while (cur_err > 0
@@ -488,7 +488,7 @@ static int set_clicked_link(int x,
 		    int cur_err_2 = XYdist(x, y,
 					   LYGetHilitePos(i, count),
 					   links[i].ly + count,
-					   strlen(text));
+					   (int) strlen(text));
 
 		    cur_err = HTMIN(cur_err, cur_err_2);
 		}
@@ -578,12 +578,12 @@ char *LYstrncpy(char *dst,
 
     if (src == 0)
 	src = "";
-    len = strlen(src);
+    len = (int) strlen(src);
 
     if (n < 0)
 	n = 0;
 
-    val = strncpy(dst, src, n);
+    val = strncpy(dst, src, (unsigned) n);
     if (len < n)
 	*(dst + len) = '\0';
     else
@@ -1060,14 +1060,17 @@ static const char *expand_tichar(const char *first, char **result, char *final)
     if (name != 0) {
 	(void) expand_tiname(name, strlen(name), result, final);
     } else {
-	**result = value;
+	**result = (char) value;
 	(*result) += 1;
     }
 
     return first;
 }
 
-static int expand_substring(char *dst, const char *first, const char *last, char *final)
+static BOOLEAN expand_substring(char *dst,
+				const char *first,
+				const char *last,
+				char *final)
 {
     int ch;
 
@@ -1084,15 +1087,15 @@ static int expand_substring(char *dst, const char *first, const char *last, char
 
 		if (s == 0)
 		    s = first + strlen(first);
-		first = expand_tiname(first, s - first, &dst, final);
+		first = expand_tiname(first, (unsigned) (s - first), &dst, final);
 		if (dst == was)
-		    return 0;
+		    return FALSE;
 		if (*first)
 		    first++;
 	    } else if (ch == '?') {	/* ASCII delete? */
 		*dst++ = 127;
 	    } else if ((ch & 0x3f) < 0x20) {	/* ASCII control char? */
-		*dst++ = (ch & 0x1f);
+		*dst++ = (char) (ch & 0x1f);
 	    } else {
 		*dst++ = '^';
 		first--;	/* not legal... */
@@ -1102,12 +1105,12 @@ static int expand_substring(char *dst, const char *first, const char *last, char
 	    ch = 0200;
 	    /* FALLTHRU */
 	default:
-	    *dst++ = ch;
+	    *dst++ = (char) ch;
 	    break;
 	}
     }
     *dst = '\0';
-    return 1;
+    return TRUE;
 }
 #endif
 
@@ -1132,7 +1135,7 @@ static BOOLEAN unescape_string(char *src, char *dst, char *final)
 
 	unescaped_char(src, &keysym);
 	if (keysym >= 0) {
-	    dst[0] = keysym;
+	    dst[0] = (char) keysym;
 	    dst[1] = '\0';
 	    ok = TRUE;
 	}
@@ -1157,7 +1160,7 @@ int map_string_to_keysym(const char *str, int *keysym)
 	    char buf[BUFSIZ];
 
 	    if (othersym >= 0 && other - str - 4 < BUFSIZ) {
-		strncpy(buf, str + 4, other - str - 4);
+		strncpy(buf, str + 4, (unsigned) (other - str - 4));
 		buf[other - str - 4] = '\0';
 		*keysym = lacname_to_lac(buf);
 		if (*keysym >= 0) {
@@ -2766,7 +2769,7 @@ char *LYElideString(char *str,
     int len;
 
     LYstrncpy(buff, str, sizeof(buff) - 1);
-    len = strlen(buff);
+    len = (int) strlen(buff);
     if (len > (LYcolLimit - 9)) {
 	buff[cut_pos] = '.';
 	buff[cut_pos + 1] = '.';
@@ -2873,7 +2876,7 @@ void LYSetupEdit(EDREC * edit, char *old,
     MaxLen = maxstr;
     DspWdth = maxdsp;
     Margin = 0;
-    Pos = strlen(old);
+    Pos = (int) strlen(old);
 #ifdef ENHANCED_LINEEDIT
     Mark = -1;			/* pos=0, but do not show it yet */
 #endif
@@ -2894,7 +2897,7 @@ void LYSetupEdit(EDREC * edit, char *old,
     }
 
     LYstrncpy(Buf, old, maxstr);
-    StrLen = strlen(Buf);
+    StrLen = (int) strlen(Buf);
 }
 
 #ifdef SUPPORT_MULTIBYTE_EDIT
@@ -2968,7 +2971,7 @@ static int mbcs_skip(char *s, int pos)
 static int cell2char(char *s, int cells)
 {
     int result = 0;
-    int len = strlen(s);
+    int len = (int) strlen(s);
     int pos;
     int have;
 
@@ -3002,7 +3005,7 @@ int LYEditInsert(EDREC * edit, unsigned const char *s,
 		 int map GCC_UNUSED,
 		 BOOL maxMessage)
 {
-    int length = strlen(Buf);
+    int length = (int) strlen(Buf);
     int remains = MaxLen - (length + len);
     int edited = 0, overflow = 0;
 
@@ -3032,13 +3035,13 @@ int LYEditInsert(EDREC * edit, unsigned const char *s,
 	    char utfbuf[8];
 	    int l = 1;
 
-	    utfbuf[0] = *s;
+	    utfbuf[0] = (char) *s;
 	    if (*s < 128 && LYKbLayouts[current_layout][*s]) {
 		UCode_t ucode = LYKbLayouts[current_layout][*s];
 
 		if (ucode > 127) {
 		    if (UCConvertUniToUtf8(ucode, utfbuf)) {
-			l = strlen(utfbuf);
+			l = (int) strlen(utfbuf);
 			remains -= l - 1;
 			if (remains < 0) {
 			    if (tail)
@@ -3053,9 +3056,9 @@ int LYEditInsert(EDREC * edit, unsigned const char *s,
 		    } else
 			utfbuf[0] = '?';
 		} else
-		    utfbuf[0] = UCH(ucode);
+		    utfbuf[0] = (char) ucode;
 	    }
-	    strncpy(Buf + off, utfbuf, l);
+	    strncpy(Buf + off, utfbuf, (unsigned) l);
 	    edited = 1;
 	    off += l;
 	    s++;
@@ -3085,7 +3088,7 @@ int LYEditInsert(EDREC * edit, unsigned const char *s,
     } else
 #endif /* defined EXP_KEYBOARD_LAYOUT */
     {
-	strncpy(Buf + Pos, (const char *) s, len);
+	strncpy(Buf + Pos, (const char *) s, (unsigned) len);
 	edited = 1;
     }
 
@@ -3123,7 +3126,7 @@ int LYEdit1(EDREC * edit, int ch,
     if (MaxLen <= 0)
 	return (0);		/* Be defensive */
 
-    length = strlen(&Buf[0]);
+    length = (int) strlen(&Buf[0]);
     StrLen = length;
 
     switch (action) {
@@ -3177,7 +3180,7 @@ int LYEdit1(EDREC * edit, int ch,
 	    for (i = length; i >= Pos; i--)	/* Make room */
 		Buf[i + 1] = Buf[i];
 	    Buf[length + 1] = '\0';
-	    Buf[Pos] = UCH(ch);
+	    Buf[Pos] = (char) ch;
 	    Pos++;
 	} else {
 	    if (maxMessage) {
@@ -3473,7 +3476,7 @@ int LYEdit1(EDREC * edit, int ch,
 	    Mark = -1 - Pos;
 	    return (0);
 	} {
-	    int yanklen = strlen(killbuffer);
+	    int yanklen = (int) strlen(killbuffer);
 
 	    if (Pos + yanklen <= (MaxLen) && StrLen + yanklen <= (MaxLen)) {
 		Mark = -1 - Pos;
@@ -3481,7 +3484,7 @@ int LYEdit1(EDREC * edit, int ch,
 		for (i = length; i >= Pos; i--)		/* Make room */
 		    Buf[i + yanklen] = Buf[i];
 		for (i = 0; i < yanklen; i++)
-		    Buf[Pos++] = UCH(killbuffer[i]);
+		    Buf[Pos++] = killbuffer[i];
 
 	    } else if (maxMessage) {
 		_statusline(MAXLEN_REACHED_DEL_OR_MOV);
@@ -3503,7 +3506,7 @@ int LYEdit1(EDREC * edit, int ch,
 	return (ch);
     }
     IsDirty = TRUE;
-    StrLen = strlen(&Buf[0]);
+    StrLen = (int) strlen(&Buf[0]);
     return (0);
 }
 
@@ -3656,7 +3659,7 @@ void LYRefreshEdit(EDREC * edit)
 
     IsDirty = FALSE;
 
-    all_bytes = strlen(&Buf[0]);
+    all_bytes = (int) strlen(&Buf[0]);
     StrLen = all_bytes;
 
     all_cells = LYstrCells(Buf);
@@ -3914,7 +3917,7 @@ static int normalCmpList(const void *a,
 
 static char **sortedList(HTList *list, BOOL ignorecase)
 {
-    unsigned count = HTList_count(list);
+    unsigned count = (unsigned) HTList_count(list);
     unsigned j = 0;
     unsigned k, jk;
     char **result = typecallocn(char *, count + 1);
@@ -3965,7 +3968,7 @@ int LYarrayWidth(const char **list)
     int check;
 
     while (*list != 0) {
-	check = strlen(*list++);
+	check = (int) strlen(*list++);
 	if (check > result)
 	    result = check;
     }
@@ -4064,7 +4067,7 @@ int LYhandlePopupList(int cur_choice,
 		      int disabled,
 		      BOOLEAN for_mouse)
 {
-    BOOLEAN numbered = (keypad_mode != NUMBERS_AS_ARROWS);
+    BOOLEAN numbered = (BOOLEAN) (keypad_mode != NUMBERS_AS_ARROWS);
     int c = 0, cmd = 0, i = 0, j = 0, rel = 0;
     int orig_choice;
     WINDOW *form_window;
@@ -4121,10 +4124,10 @@ int LYhandlePopupList(int cur_choice,
      */
     num_choices = LYarrayLength(choices) - 1;
     if (width <= 0)
-	width = options_width(choices);
+	width = (int) options_width(choices);
     if (numbered) {
 	sprintf(Cnum, "%d: ", num_choices);
-	Lnum = strlen(Cnum);
+	Lnum = (int) strlen(Cnum);
 	max_choices = num_choices;
     } else {
 	Lnum = 0;
@@ -5004,8 +5007,9 @@ int LYgetstr(char *inputline,
 #endif /* SUPPORT_MULTIBYTE_EDIT */
 
     LYGetYX(y, x);		/* Use screen from cursor position to eol */
-    MaxStringSize = (bufsize < sizeof(MyEdit.buffer)) ?
-	(bufsize - 1) : (sizeof(MyEdit.buffer) - 1);
+    MaxStringSize = (int) ((bufsize < sizeof(MyEdit.buffer))
+			   ? (bufsize - 1)
+			   : (sizeof(MyEdit.buffer) - 1));
     LYSetupEdit(&MyEdit, inputline, MaxStringSize, LYcolLimit - x);
     MyEdit.hidden = (BOOL) hidden;
 
@@ -5156,7 +5160,7 @@ int LYgetstr(char *inputline,
 
 		if (!s)
 		    break;
-		len = strlen((const char *) s);
+		len = (int) strlen((const char *) s);
 		e = s + len;
 
 		if (len > 0) {
@@ -5267,9 +5271,9 @@ const char *LYLineeditHelpURL(void)
     if (LYLineeditHelpURLs[current_lineedit] &&
 	strlen(LYLineeditHelpURLs[current_lineedit]) &&
 	(strlen(LYLineeditHelpURLs[current_lineedit]) <=
-	 sizeof(helpbuf) - (phelp - helpbuf))) {
+	 sizeof(helpbuf) - (unsigned) (phelp - helpbuf))) {
 	LYstrncpy(phelp, LYLineeditHelpURLs[current_lineedit],
-		  sizeof(helpbuf) - (phelp - helpbuf) - 1);
+		  (int) (sizeof(helpbuf) - (unsigned) (phelp - helpbuf) - 1));
 	lasthelp_lineedit = current_lineedit;
 	return (&helpbuf[0]);
     }
@@ -5306,7 +5310,7 @@ char *LYstrsep(char **stringp,
 char *LYstrstr(char *chptr,
 	       const char *tarptr)
 {
-    int len = strlen(tarptr);
+    int len = (int) strlen(tarptr);
 
     for (; *chptr != '\0'; chptr++) {
 	if (0 == UPPER8(*chptr, *tarptr)) {
@@ -5752,13 +5756,13 @@ char *SNACopy(char **dest,
 {
     FREE(*dest);
     if (src) {
-	*dest = typeMallocn(char, n + 1);
+	*dest = typeMallocn(char, (unsigned) n + 1);
 
 	if (*dest == NULL) {
 	    CTRACE((tfp, "Tried to malloc %d bytes\n", n));
 	    outofmem(__FILE__, "SNACopy");
 	}
-	strncpy(*dest, src, n);
+	strncpy(*dest, src, (unsigned) n);
 	*(*dest + n) = '\0';	/* terminate */
     }
     return *dest;
@@ -5773,19 +5777,19 @@ char *SNACat(char **dest,
 {
     if (non_empty(src)) {
 	if (*dest) {
-	    int length = strlen(*dest);
+	    int length = (int) strlen(*dest);
 
-	    *dest = (char *) realloc(*dest, length + n + 1);
+	    *dest = (char *) realloc(*dest, (unsigned) (length + n + 1));
 	    if (*dest == NULL)
 		outofmem(__FILE__, "SNACat");
-	    strncpy(*dest + length, src, n);
+	    strncpy(*dest + length, src, (unsigned) n);
 	    *(*dest + length + n) = '\0';	/* terminate */
 	} else {
-	    *dest = typeMallocn(char, n + 1);
+	    *dest = typeMallocn(char, (unsigned) n + 1);
 
 	    if (*dest == NULL)
 		outofmem(__FILE__, "SNACat");
-	    memcpy(*dest, src, n);
+	    memcpy(*dest, src, (unsigned) n);
 	    (*dest)[n] = '\0';	/* terminate */
 	}
     }
@@ -5963,7 +5967,7 @@ int LYReadCmdKey(int mode)
 	    LYTrimTrailing(buffer);
 	    src = LYSkipBlanks(buffer);
 	    tmp = LYSkipNonBlanks(src);
-	    switch (len = (tmp - src)) {
+	    switch (len = (unsigned) (tmp - src)) {
 	    case 4:
 		if (!strncasecomp(src, "exit", 4))
 		    exit_immediately(0);

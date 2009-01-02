@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTNews.c,v 1.57 2007/07/03 00:13:21 tom Exp $
+ * $LynxId: HTNews.c,v 1.58 2009/01/01 17:00:01 tom Exp $
  *
  *			NEWS ACCESS				HTNews.c
  *			===========
@@ -99,7 +99,6 @@ static HTStructured *target;	/* The output sink */
 static HTStructuredClass targetClass;	/* Copy of fn addresses */
 static HTStream *rawtarget = NULL;	/* The output sink for rawtext */
 static HTStreamClass rawtargetClass;	/* Copy of fn addresses */
-static HTParentAnchor *node_anchor;	/* Its anchor */
 static int diagnostic;		/* level: 0=none 2=source */
 static BOOL rawtext = NO;	/* Flag: HEAD or -mime_headers */
 static HTList *NNTP_AuthInfo = NULL;	/* AUTHINFO database */
@@ -2537,7 +2536,6 @@ static int HTLoadNews(const char *arg,
 	rawtext = (BOOL) (head_wanted || keep_mime_headers);
     }
     if (rawtext) {
-	node_anchor = anAnchor;
 	rawtarget = HTStreamStack(WWW_PLAINTEXT,
 				  format_out,
 				  stream, anAnchor);
@@ -2556,7 +2554,6 @@ static int HTLoadNews(const char *arg,
 	 * Make a hypertext object with an anchor list.
 	 */
     if (!(post_wanted || reply_wanted || spost_wanted || sreply_wanted)) {
-	node_anchor = anAnchor;
 	target = HTML_new(anAnchor, format_out, stream);
 	targetClass = *target->isa;	/* Copy routine entry points */
     }

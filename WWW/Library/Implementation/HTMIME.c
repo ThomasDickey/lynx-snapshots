@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTMIME.c,v 1.67 2008/12/14 18:46:52 tom Exp $
+ * $LynxId: HTMIME.c,v 1.68 2009/01/01 16:50:17 tom Exp $
  *
  *			MIME Message Parse			HTMIME.c
  *			==================
@@ -2501,7 +2501,6 @@ int HTrjis(char **t,
  */
 /*
  * RJIS ( Recover JIS code from broken file )
- * @Header: rjis.c,v 0.2 92/09/04 takahasi Exp @
  * Copyright (C) 1992 1994
  * Hironobu Takahashi (takahasi@tiny.or.jp)
  *

@@ -1,4 +1,4 @@
-/* $LynxId: LYrcFile.c,v 1.74 2008/08/31 23:28:15 tom Exp $ */
+/* $LynxId: LYrcFile.c,v 1.75 2009/01/01 23:10:59 tom Exp $ */
 #include <HTUtils.h>
 #include <HTFTP.h>
 #include <LYUtils.h>
@@ -179,7 +179,7 @@ BOOL LYgetEnum(Config_Enum * table, char *name,
 
     if (len != 0) {
 	while (table->name != 0) {
-	    if (!strncasecomp(table->name, name, len)) {
+	    if (!strncasecomp(table->name, name, (int) len)) {
 		found = table;
 		if (!strcasecomp(table->name, name)) {
 		    match = 1;
@@ -683,7 +683,7 @@ void read_rc(FILE *fp)
 	if (tbl->name == 0) {
 	    const char *special = RC_MULTI_BOOKMARK;
 
-	    if (!strncasecomp(name, special, strlen(special))) {
+	    if (!strncasecomp(name, special, (int) strlen(special))) {
 		tbl = lookup_config(special);
 	    }
 	    /* lynx ignores unknown keywords */
@@ -1006,7 +1006,7 @@ BOOL will_save_rc(const char *name)
 {
     Config_Type *tbl = lookup_config(name);
 
-    return tbl->name != 0;
+    return (BOOL) (tbl->name != 0);
 }
 
 int enable_lynxrc(char *value)

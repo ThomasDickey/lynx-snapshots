@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYNews.c,v 1.53 2008/12/07 22:13:37 tom Exp $
+ * $LynxId: LYNews.c,v 1.54 2009/01/01 23:09:57 tom Exp $
  */
 #include <HTUtils.h>
 #ifndef DISABLE_NEWS
@@ -237,8 +237,8 @@ char *LYNewsPost(char *newsgroups,
 	if (strncasecomp(kp, "Re:", 3)) {
 	    strcat(user_input, "Re: ");
 	}
-	len = strlen(user_input);
-	LYstrncpy(user_input + len, kp, sizeof(user_input) - len - 1);
+	len = (int) strlen(user_input);
+	LYstrncpy(user_input + len, kp, (int) sizeof(user_input) - len - 1);
     }
     cp = NULL;
     if (LYgetstr(user_input, VISIBLE,

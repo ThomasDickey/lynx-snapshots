@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTInit.c,v 1.69 2008/09/10 23:17:45 tom Exp $
+ * $LynxId: HTInit.c,v 1.70 2009/01/01 22:58:06 tom Exp $
  *
  *		Configuration-specific Initialization		HTInit.c
  *		----------------------------------------
@@ -327,7 +327,7 @@ static void TrimCommand(char *command)
 			continue;
 		}
 	    }
-	    *d++ = ch;
+	    *d++ = (char) ch;
 	    c0 = ch;
 	}
 	*d = '\0';
@@ -608,7 +608,7 @@ static char *LYGetContentType(const char *name,
  */
 BOOL LYMailcapUsesPctS(const char *controlstring)
 {
-    int result = FALSE;
+    BOOL result = FALSE;
     const char *from;
     const char *next;
     int prefixed = 0;

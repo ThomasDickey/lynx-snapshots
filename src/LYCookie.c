@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYCookie.c,v 1.94 2008/12/14 19:38:59 tom Exp $
+ * $LynxId: LYCookie.c,v 1.95 2009/01/01 22:28:57 tom Exp $
  *
  *			       Lynx Cookie Support		   LYCookie.c
  *			       ===================
@@ -131,7 +131,7 @@ static void MemAllocCopy(char **dest,
 	return;
     }
 
-    temp = typecallocn(char, (end - start) + 1);
+    temp = typecallocn(char, (unsigned)(end - start) + 1);
     if (temp == NULL)
 	outofmem(__FILE__, "MemAllocCopy");
     LYstrncpy(temp, start, (end - start));
@@ -220,7 +220,7 @@ static BOOLEAN host_matches(const char *A,
      * in Section 2 of draft-ietf-http-state-man-mec-10.txt.
      */
     if (*B == '.' && B[1] != '\0' && B[1] != '.' && *A != '.') {
-	int diff = (strlen(A) - strlen(B));
+	int diff = (int) (strlen(A) - strlen(B));
 
 	if (diff > 0) {
 	    if (!strcasecomp((A + diff), B))
@@ -263,7 +263,7 @@ static BOOLEAN port_matches(int port,
  */
 static int ignore_trailing_slash(const char *a)
 {
-    int len = strlen(a);
+    int len = (int) strlen(a);
 
     while (len > 1 && a[len - 1] == '/')
 	--len;
@@ -282,7 +282,7 @@ static BOOL is_prefix(const char *a, const char *b)
     if (len_a > len_b) {
 	return FALSE;
     } else {
-	if (strncmp(a, b, len_a) != 0) {
+	if (strncmp(a, b, (unsigned) len_a) != 0) {
 	    return FALSE;
 	}
 	if (len_a < len_b && (len_a > 1 || a[0] != '/')) {
@@ -741,7 +741,7 @@ static char *scan_cookie_sublist(char *hostname,
 		     * goes before the first cookie.
 		     */
 		    HTSprintf0(&header, "$Version=\"%d\"; ", co->version);
-		    len += strlen(header);
+		    len += (int) strlen(header);
 		}
 	    } else {
 		/*
@@ -787,7 +787,7 @@ static char *scan_cookie_sublist(char *hostname,
 		StrAllocCat(header, "\"");
 		len++;
 	    }
-	    len += (strlen(co->name) + strlen(co->value) + 1);
+	    len += (int) (strlen(co->name) + strlen(co->value) + 1);
 	    /*
 	     * For Version 1 (or greater) cookies, add $PATH, $PORT and/or
 	     * $DOMAIN attributes for the cookie if they were specified via a
@@ -801,7 +801,7 @@ static char *scan_cookie_sublist(char *hostname,
 		    StrAllocCat(header, "; $Path=\"");
 		    StrAllocCat(header, co->path);
 		    StrAllocCat(header, "\"");
-		    len += (strlen(co->path) + 10);
+		    len += (int) (strlen(co->path) + 10);
 		}
 		if (co->PortList && isdigit(UCH(*co->PortList))) {
 		    /*
@@ -810,7 +810,7 @@ static char *scan_cookie_sublist(char *hostname,
 		    StrAllocCat(header, "; $Port=\"");
 		    StrAllocCat(header, co->PortList);
 		    StrAllocCat(header, "\"");
-		    len += (strlen(co->PortList) + 10);
+		    len += (int) (strlen(co->PortList) + 10);
 		}
 		if (co->domain && (co->flags & COOKIE_FLAG_DOMAIN_SET)) {
 		    /*
@@ -819,7 +819,7 @@ static char *scan_cookie_sublist(char *hostname,
 		    StrAllocCat(header, "; $Domain=\"");
 		    StrAllocCat(header, co->domain);
 		    StrAllocCat(header, "\"");
-		    len += (strlen(co->domain) + 12);
+		    len += (int) (strlen(co->domain) + 12);
 		}
 	    }
 	}
@@ -844,7 +844,7 @@ static char *alloc_attr_value(const char *value_start,
 	if (value_len > max_cookies_buffer) {
 	    value_len = max_cookies_buffer;
 	}
-	value = typecallocn(char, value_len + 1);
+	value = typecallocn(char, (unsigned) value_len + 1);
 
 	if (value == NULL)
 	    outofmem(__FILE__, "LYProcessSetCookies");
@@ -907,7 +907,7 @@ static unsigned parse_attribute(unsigned flags,
 	 */
 	    cur_cookie->comment == NULL) {
 	    StrAllocCopy(cur_cookie->comment, value);
-	    *cookie_len += strlen(cur_cookie->comment);
+	    *cookie_len += (int) strlen(cur_cookie->comment);
 	}
     } else if (is_attr("commentURL", 10)) {
 	known_attr = YES;
@@ -929,7 +929,7 @@ static unsigned parse_attribute(unsigned flags,
 	    if ((url_type = is_url(cur_cookie->commentURL)) &&
 		(url_type == HTTP_URL_TYPE ||
 		 url_type == HTTPS_URL_TYPE)) {
-		*cookie_len += strlen(cur_cookie->commentURL);
+		*cookie_len += (int) strlen(cur_cookie->commentURL);
 	    } else {
 		CTrace((tfp,
 			"LYProcessSetCookies: Rejecting commentURL value '%s'\n",
@@ -944,7 +944,7 @@ static unsigned parse_attribute(unsigned flags,
 	 * Don't process a repeat domain.  - FM
 	 */
 	    !(cur_cookie->flags & COOKIE_FLAG_DOMAIN_SET)) {
-	    *cookie_len -= strlen(cur_cookie->domain);
+	    *cookie_len -= (int) strlen(cur_cookie->domain);
 	    /*
 	     * If the value does not have a lead dot, but does have an embedded
 	     * dot, and is not an exact match to the hostname, nor is a numeric
@@ -975,7 +975,7 @@ static unsigned parse_attribute(unsigned flags,
 	    } else {
 		StrAllocCopy(cur_cookie->domain, value);
 	    }
-	    *cookie_len += strlen(cur_cookie->domain);
+	    *cookie_len += (int) strlen(cur_cookie->domain);
 	    cur_cookie->flags |= COOKIE_FLAG_DOMAIN_SET;
 	}
     } else if (is_attr("path", 4)) {
@@ -985,9 +985,9 @@ static unsigned parse_attribute(unsigned flags,
 	 * Don't process a repeat path.  - FM
 	 */
 	    !(cur_cookie->flags & COOKIE_FLAG_PATH_SET)) {
-	    *cookie_len -= strlen(cur_cookie->path);
+	    *cookie_len -= (int) strlen(cur_cookie->path);
 	    StrAllocCopy(cur_cookie->path, value);
-	    *cookie_len += (cur_cookie->pathlen = strlen(cur_cookie->path));
+	    *cookie_len += (cur_cookie->pathlen = (int) strlen(cur_cookie->path));
 	    cur_cookie->flags |= COOKIE_FLAG_PATH_SET;
 	}
     } else if (is_attr("port", 4)) {
@@ -1008,7 +1008,7 @@ static unsigned parse_attribute(unsigned flags,
 		    flags |= FLAGS_INVALID_PORT;
 		} else {
 		    StrAllocCopy(cur_cookie->PortList, value);
-		    *cookie_len += strlen(cur_cookie->PortList);
+		    *cookie_len += (int) strlen(cur_cookie->PortList);
 		}
 		known_attr = YES;
 	    } else {
@@ -1020,7 +1020,7 @@ static unsigned parse_attribute(unsigned flags,
 	     */
 	    if (cur_cookie->PortList == NULL) {
 		HTSprintf0(&(cur_cookie->PortList), "%d", port);
-		*cookie_len += strlen(cur_cookie->PortList);
+		*cookie_len += (int) strlen(cur_cookie->PortList);
 	    }
 	    known_attr = YES;
 	}
@@ -1368,13 +1368,13 @@ static void LYProcessSetCookies(const char *SetCookie,
 		cookie_len = 0;
 		NumCookies++;
 		MemAllocCopy(&(cur_cookie->name), attr_start, attr_end);
-		cookie_len += strlen(cur_cookie->name);
+		cookie_len += (int) strlen(cur_cookie->name);
 		MemAllocCopy(&(cur_cookie->value), value_start, value_end);
-		cookie_len += strlen(cur_cookie->value);
+		cookie_len += (int) strlen(cur_cookie->value);
 		StrAllocCopy(cur_cookie->domain, hostname);
-		cookie_len += strlen(cur_cookie->domain);
+		cookie_len += (int) strlen(cur_cookie->domain);
 		StrAllocCopy(cur_cookie->path, path);
-		cookie_len += (cur_cookie->pathlen = strlen(cur_cookie->path));
+		cookie_len += (cur_cookie->pathlen = (int) strlen(cur_cookie->path));
 		cur_cookie->port = port;
 		parse_flags = 0;
 		cur_cookie->quoted = TRUE;
@@ -1660,13 +1660,13 @@ static void LYProcessSetCookies(const char *SetCookie,
 		NumCookies++;
 		cookie_len = 0;
 		MemAllocCopy(&(cur_cookie->name), attr_start, attr_end);
-		cookie_len += strlen(cur_cookie->name);
+		cookie_len += (int) strlen(cur_cookie->name);
 		MemAllocCopy(&(cur_cookie->value), value_start, value_end);
-		cookie_len += strlen(cur_cookie->value);
+		cookie_len += (int) strlen(cur_cookie->value);
 		StrAllocCopy(cur_cookie->domain, hostname);
-		cookie_len += strlen(cur_cookie->domain);
+		cookie_len += (int) strlen(cur_cookie->domain);
 		StrAllocCopy(cur_cookie->path, path);
-		cookie_len += (cur_cookie->pathlen = strlen(cur_cookie->path));
+		cookie_len += (cur_cookie->pathlen = (int) strlen(cur_cookie->path));
 		cur_cookie->port = port;
 		parse_flags = 0;
 		cur_cookie->quoted = Quoted;
@@ -1935,7 +1935,7 @@ void LYLoadCookies(char *cookie_file)
 		    tok_loop, (int) (tok_out - buf), tok_out));
 	    LYstrncpy(tok_values[tok_loop].s,
 		      tok_out,
-		      tok_values[tok_loop].n);
+		      (int) tok_values[tok_loop].n);
 	    /*
 	     * It looks like strtok ignores a leading delimiter,
 	     * which makes things a bit more interesting.  Something
@@ -1967,7 +1967,7 @@ void LYLoadCookies(char *cookie_file)
 	} else {
 	    StrAllocCopy(moo->value, value);
 	}
-	moo->pathlen = strlen(moo->path);
+	moo->pathlen = (int) strlen(moo->path);
 	/*
 	 *  Justification for following flags:
 	 *  COOKIE_FLAG_FROM_FILE    So we know were it comes from.
@@ -2393,7 +2393,7 @@ static int LYHandleCookies(const char *arg,
      * Load HTML strings into buf and pass buf to the target for parsing and
      * rendering.  - FM
      */
-#define PUTS(buf)    (*target->isa->put_block)(target, buf, strlen(buf))
+#define PUTS(buf)    (*target->isa->put_block)(target, buf, (int) strlen(buf))
 
     HTSprintf0(&buf,
 	       "<html>\n<head>\n<title>%s</title>\n</head>\n<body>\n",

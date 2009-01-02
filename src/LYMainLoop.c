@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMainLoop.c,v 1.158 2008/12/26 17:41:19 tom Exp $
+ * $LynxId: LYMainLoop.c,v 1.159 2009/01/01 17:49:53 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTAccess.h>
@@ -364,7 +364,7 @@ void LYCloseTracelog(void)
 void handle_LYK_TRACE_TOGGLE(void)
 {
 #ifndef NO_LYNX_TRACE
-    WWW_TraceFlag = !WWW_TraceFlag;
+    WWW_TraceFlag = (BOOLEAN) !WWW_TraceFlag;
     if (LYOpenTraceLog())
 	HTUserMsg(WWW_TraceFlag ? TRACE_ON : TRACE_OFF);
 #else
@@ -882,7 +882,7 @@ static int find_link_near_col(int col,
 		const char *text = LYGetHiliteStr(i, 0);
 
 		if (text != NULL)
-		    cx += strlen(text) / 2;
+		    cx += (int) strlen(text) / 2;
 		cx -= col;
 		if (cx < 0)
 		    cx = -cx;
@@ -1698,7 +1698,7 @@ static void handle_LYK_CLEAR_AUTH(int *old_c,
 
 static int handle_LYK_COMMAND(char *user_input_buffer)
 {
-    int ch;
+    LYKeymapCode ch;
     Kcmd *mp;
     char *src, *tmp;
 
@@ -2288,7 +2288,7 @@ static void handle_LYK_DOWN_LINK(int *follow_col,
 	    *follow_col = links[curdoc.link].lx;
 
 	    if (text != NULL)
-		*follow_col += strlen(text) / 2;
+		*follow_col += (int) strlen(text) / 2;
 	}
 
 	newlink = find_link_near_col(*follow_col, 1);
@@ -2695,7 +2695,7 @@ static BOOLEAN handle_LYK_FASTBACKW_LINK(int *cmd,
 {
     int samepage = 0, nextlink = curdoc.link;
     int res;
-    int code = FALSE;
+    BOOLEAN code = FALSE;
 
     if (nlinks > 1) {
 
@@ -3112,7 +3112,7 @@ static void handle_LYK_HISTORICAL(void)
 #ifdef USE_SOURCE_CACHE
     }				/* end if no bypass */
 #endif
-    historical_comments = !historical_comments;
+    historical_comments = (BOOLEAN) !historical_comments;
     if (minimal_comments) {
 	HTAlert(historical_comments ?
 		HISTORICAL_ON_MINIMAL_OFF : HISTORICAL_OFF_MINIMAL_ON);
@@ -3172,7 +3172,7 @@ static BOOLEAN handle_LYK_HISTORY(BOOLEAN ForcePush)
 
 static BOOLEAN handle_LYK_IMAGE_TOGGLE(int *cmd)
 {
-    clickable_images = !clickable_images;
+    clickable_images = (BOOLEAN) !clickable_images;
 
     HTUserMsg(clickable_images ?
 	      CLICKABLE_IMAGES_ON : CLICKABLE_IMAGES_OFF);
@@ -3320,7 +3320,7 @@ static BOOLEAN handle_LYK_INFO(int *cmd)
 
 static BOOLEAN handle_LYK_INLINE_TOGGLE(int *cmd)
 {
-    pseudo_inline_alts = !pseudo_inline_alts;
+    pseudo_inline_alts = (BOOLEAN) !pseudo_inline_alts;
 
     HTUserMsg(pseudo_inline_alts ?
 	      PSEUDO_INLINE_ALTS_ON : PSEUDO_INLINE_ALTS_OFF);
@@ -3604,7 +3604,7 @@ static void handle_LYK_MINIMAL(void)
 	}			/* end if no bypass */
 #endif
     }
-    minimal_comments = !minimal_comments;
+    minimal_comments = (BOOLEAN) !minimal_comments;
     if (!historical_comments) {
 	HTAlert(minimal_comments ?
 		MINIMAL_ON_IN_EFFECT : MINIMAL_OFF_VALID_ON);
@@ -3646,7 +3646,7 @@ static void handle_LYK_MODIFY(BOOLEAN *refresh_screen)
 #ifdef EXP_NESTED_TABLES
 static BOOLEAN handle_LYK_NESTED_TABLES(int *cmd)
 {
-    nested_tables = !nested_tables;
+    nested_tables = (BOOLEAN) !nested_tables;
     HTUserMsg(nested_tables ? NESTED_TABLES_ON : NESTED_TABLES_OFF);
     return reparse_or_reload(cmd);
 }
@@ -4249,7 +4249,7 @@ static void handle_LYK_SOFT_DQUOTES(void)
 #ifdef USE_SOURCE_CACHE
     }				/* end if no bypass */
 #endif
-    soft_dquotes = !soft_dquotes;
+    soft_dquotes = (BOOLEAN) !soft_dquotes;
     HTUserMsg(soft_dquotes ?
 	      SOFT_DOUBLE_QUOTE_ON : SOFT_DOUBLE_QUOTE_OFF);
 #ifdef USE_SOURCE_CACHE
@@ -4647,7 +4647,7 @@ static void handle_LYK_UP_LINK(int *follow_col,
 	    *follow_col = links[curdoc.link].lx;
 
 	    if (text != NULL)
-		*follow_col += strlen(text) / 2;
+		*follow_col += (int) strlen(text) / 2;
 	}
 
 	newlink = find_link_near_col(*follow_col, -1);
@@ -6376,14 +6376,15 @@ int mainloop(void)
 
 	}
 
-	curlink_is_editable =
+	curlink_is_editable = (BOOLEAN)
 	    (nlinks > 0 &&
-	     links[curdoc.link].type == WWW_FORM_LINK_TYPE &&
+	     (links[curdoc.link].type == WWW_FORM_LINK_TYPE) &&
 	     F_TEXTLIKE(links[curdoc.link].l_form->type));
 
-	use_last_tfpos = (curlink_is_editable &&
-			  (real_cmd == LYK_LPOS_PREV_LINK ||
-			   real_cmd == LYK_LPOS_NEXT_LINK));
+	use_last_tfpos = (BOOLEAN)
+	    (curlink_is_editable &&
+	     (real_cmd == LYK_LPOS_PREV_LINK ||
+	      real_cmd == LYK_LPOS_NEXT_LINK));
 
 #ifdef TEXTFIELDS_MAY_NEED_ACTIVATION
 	if (!textfields_need_activation)
@@ -6954,7 +6955,7 @@ int mainloop(void)
 
 		if (!s)
 		    break;
-		len2 = strlen((const char *) s);
+		len2 = (int) strlen((const char *) s);
 		e = s + len2;
 		while (s < e && strchr(" \t\n\r", *s))
 		    s++;
@@ -6970,11 +6971,11 @@ int mainloop(void)
 		    HTInfoMsg(gettext("No URL in the clipboard."));
 		    break;
 		}
-		len = e - s + 1;
+		len = (unsigned) (e - s + 1);
 		if (len < MAX_LINE)
 		    len = MAX_LINE;	/* Required for do_check_goto_URL() */
 		buf = (char *) malloc(len);
-		strncpy(buf, (const char *) s, e - s);
+		strncpy(buf, (const char *) s, (unsigned) (e - s));
 		buf[e - s] = '\0';
 		t = (unsigned char *) buf;
 
@@ -7640,7 +7641,7 @@ static void show_main_statusline(const LinkInfo curlink,
 	if (is_www_index) {
 	    const char *indx = gettext("-index-");
 
-	    LYmove(LYlines - 1, LYcolLimit - strlen(indx));
+	    LYmove(LYlines - 1, LYcolLimit - (int) strlen(indx));
 	    lynx_start_reverse();
 	    LYaddstr(indx);
 	    lynx_stop_reverse();
@@ -7803,15 +7804,15 @@ static void status_link(char *curlink_name,
 	sprintf(format, "%.*s ",
 		(int) (sizeof(format) - 2),
 		gettext("-more-"));
-	prefix = strlen(format);
+	prefix = (int) strlen(format);
     }
     if (show_indx) {
 	sprintf(format + prefix, "%.*s ",
-		(int) (sizeof(format) - prefix - 2),
+		((int) sizeof(format) - prefix - 2),
 		gettext("-index-"));
     }
-    prefix = strlen(format);
-    length = strlen(curlink_name);
+    prefix = (int) strlen(format);
+    length = (int) strlen(curlink_name);
 
     if (prefix > MAX_STATUS || prefix >= MAX_LINE - 1) {
 	_user_message("%s", format);	/* no room for url */

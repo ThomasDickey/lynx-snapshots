@@ -1,5 +1,5 @@
 /*
- * $LynxId: makeuctb.c,v 1.38 2008/12/31 22:04:03 tom Exp $
+ * $LynxId: makeuctb.c,v 1.39 2009/01/01 17:01:15 tom Exp $
  *
  *  makeuctb.c, derived from conmakehash.c   - kw
  *
@@ -153,7 +153,6 @@ static const char *hdrname;
 static int RawOrEnc = 0;
 static int Raw_found = 0;	/* whether explicit R directive found */
 static int CodePage = 0;
-static int CodePage_found = 0;	/* whether explicit C directive found */
 
 #define MAX_UNIPAIRS 4500
 
@@ -503,7 +502,6 @@ int main(int argc, char **argv)
 		p++;
 	    }
 	    CodePage = strtol(p, 0, 10);
-	    CodePage_found = 1;
 	    continue;
 	}
 

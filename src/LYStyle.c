@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYStyle.c,v 1.62 2008/08/31 16:00:10 tom Exp $
+ * $LynxId: LYStyle.c,v 1.64 2009/01/01 23:06:42 tom Exp $
  *
  * character level styles for Lynx
  * (c) 1996 Rob Partington -- donated to the Lyncei (if they want it :-)
@@ -138,7 +138,7 @@ static void parse_either(char *attrs,
 
     while (*attrs != '\0') {
 	char *next = strchr(attrs, '+');
-	char save = (next != NULL) ? *next : '\0';
+	char save = (char) ((next != NULL) ? *next : '\0');
 
 	if (next == NULL)
 	    next = attrs + strlen(attrs);
@@ -232,7 +232,7 @@ static void parse_attributes(char *mono,
 	    } else {
 		curPair = ++colorPairs;
 		init_pair((short) curPair, (short) fA, (short) bA);
-		our_pairs[iBold][iBlink][iFg][iBg] = curPair;
+		our_pairs[iBold][iBlink][iFg][iBg] = UCH(curPair);
 	    }
 	}
 	CTRACE2(TRACE_STYLE, (tfp, "CSS(CURPAIR):%d\n", curPair));
@@ -637,7 +637,7 @@ static int style_readFromFileREC(char *lss_filename,
 	LYTrimHead(buffer);
 	if (!strncasecomp(buffer, "include:", 8))
 	    style_readFromFileREC(LYSkipBlanks(buffer + 8), lss_filename);
-	else if (buffer[0] != '#' && (len = strlen(buffer)) > 0)
+	else if (buffer[0] != '#' && (len = (int) strlen(buffer)) > 0)
 	    HStyle_addStyle(buffer);
     }
 
@@ -685,7 +685,7 @@ void TrimColorClass(const char *tagname,
  * It assumes that tag_name is present in stylename! -HV
  */
 void FastTrimColorClass(const char *tag_name,
-			int name_len,
+			unsigned name_len,
 			char *stylename,
 			char **pstylename_end,	/*will be modified */
 			int *phcode)	/*will be modified */
@@ -698,7 +698,7 @@ void FastTrimColorClass(const char *tag_name,
 	     tag_name, stylename));
     while (tag_start >= stylename) {
 	for (; (tag_start >= stylename) && (*tag_start != ';'); --tag_start) ;
-	if (!strncasecomp(tag_start + 1, tag_name, name_len)) {
+	if (!strncasecomp(tag_start + 1, tag_name, (int) name_len)) {
 	    found = TRUE;
 	    break;
 	}
@@ -727,7 +727,7 @@ void cache_tag_styles(void)
     }
 }
 
-#define SIZEOF_CACHED_STYLES (cached_styles_rows * cached_styles_cols)
+#define SIZEOF_CACHED_STYLES (unsigned) (cached_styles_rows * cached_styles_cols)
 
 static unsigned *RefCachedStyle(int y, int x)
 {
@@ -749,7 +749,7 @@ static unsigned *RefCachedStyle(int y, int x)
 
 BOOL ValidCachedStyle(int y, int x)
 {
-    return (RefCachedStyle(y, x) != 0);
+    return (BOOL) (RefCachedStyle(y, x) != 0);
 }
 
 unsigned GetCachedStyle(int y, int x)

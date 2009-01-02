@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYLocal.c,v 1.84 2008/12/07 22:13:37 tom Exp $
+ * $LynxId: LYLocal.c,v 1.86 2009/01/01 21:52:45 tom Exp $
  *
  *  Routines to manipulate the local filesystem.
  *  Written by: Rick Mallett, Carleton University
@@ -731,7 +731,7 @@ static int modify_tagged(char *testpath)
 	 */
 	dev = dir_info.st_dev;
 	inode = dir_info.st_ino;
-	owner = dir_info.st_uid;
+	owner = (int) dir_info.st_uid;
 
 	/*
 	 * Replace ~/ references to the home directory.
@@ -938,7 +938,7 @@ static int modify_location(char *testpath)
 	 */
 	dev = dir_info.st_dev;
 	inode = dir_info.st_ino;
-	owner = dir_info.st_uid;
+	owner = (int) dir_info.st_uid;
 	if (!ok_stat(newpath, &dir_info)) {
 	    code = 0;
 	}
@@ -1227,7 +1227,7 @@ int local_remove(DocInfo *doc)
 	strcpy(testpath, tp);
 	FREE(tp);
 
-	if ((i = strlen(testpath)) && testpath[i - 1] == '/')
+	if ((i = (int) strlen(testpath)) && testpath[i - 1] == '/')
 	    testpath[(i - 1)] = '\0';
 
 	if (remove_single(testpath)) {
@@ -1315,7 +1315,7 @@ static int permit_location(char *destpath,
 	LYLocalFileToURL(newpath, tempfile);
 	LYRegisterUIPage(*newpath, UIP_PERMIT_OPTIONS);
 
-	group_name = HTAA_GidToName(dir_info.st_gid);
+	group_name = HTAA_GidToName((int) dir_info.st_gid);
 	LYstrncpy(LYValidPermitFile,
 		  srcpath,
 		  (sizeof(LYValidPermitFile) - 1));
@@ -1624,7 +1624,7 @@ static char *LYonedot(char *line)
 static char *match_op(const char *prefix,
 		      char *data)
 {
-    int len = strlen(prefix);
+    int len = (int) strlen(prefix);
 
     if (!strncmp("LYNXDIRED://", data, 12)
 	&& !strncmp(prefix, data + 12, (unsigned) len)) {
@@ -1644,7 +1644,7 @@ static char *match_op(const char *prefix,
  * references to avoid spoofing the shell.
  */
 static char *build_command(char *line,
-			   char *dirname,
+			   char *dirName,
 			   char *arg)
 {
     char *buffer = NULL;
@@ -1680,8 +1680,8 @@ static char *build_command(char *line,
 	if ((arg = match_op("UNTAR_GZ", line)) != 0) {
 #define FMT_UNTAR_GZ "cd %s; %s -qdc %s |  %s %s %s"
 	    if ((program = HTGetProgramPath(ppGZIP)) != NULL) {
-		dirname = DirectoryOf(arg);
-		HTAddParam(&buffer, FMT_UNTAR_GZ, 1, dirname);
+		dirName = DirectoryOf(arg);
+		HTAddParam(&buffer, FMT_UNTAR_GZ, 1, dirName);
 		HTAddParam(&buffer, FMT_UNTAR_GZ, 2, program);
 		HTAddParam(&buffer, FMT_UNTAR_GZ, 3, arg);
 		HTAddParam(&buffer, FMT_UNTAR_GZ, 4, tar_path);
@@ -1695,8 +1695,8 @@ static char *build_command(char *line,
 	if ((arg = match_op("UNTAR_Z", line)) != 0) {
 #define FMT_UNTAR_Z "cd %s; %s %s |  %s %s %s"
 	    if ((program = HTGetProgramPath(ppZCAT)) != NULL) {
-		dirname = DirectoryOf(arg);
-		HTAddParam(&buffer, FMT_UNTAR_Z, 1, dirname);
+		dirName = DirectoryOf(arg);
+		HTAddParam(&buffer, FMT_UNTAR_Z, 1, dirName);
 		HTAddParam(&buffer, FMT_UNTAR_Z, 2, program);
 		HTAddParam(&buffer, FMT_UNTAR_Z, 3, arg);
 		HTAddParam(&buffer, FMT_UNTAR_Z, 4, tar_path);
@@ -1708,8 +1708,8 @@ static char *build_command(char *line,
 	}
 	if ((arg = match_op("UNTAR", line)) != 0) {
 #define FMT_UNTAR "cd %s; %s %s %s"
-	    dirname = DirectoryOf(arg);
-	    HTAddParam(&buffer, FMT_UNTAR, 1, dirname);
+	    dirName = DirectoryOf(arg);
+	    HTAddParam(&buffer, FMT_UNTAR, 1, dirName);
 	    HTAddParam(&buffer, FMT_UNTAR, 2, tar_path);
 	    HTAddToCmd(&buffer, FMT_UNTAR, 3, TAR_DOWN_OPTIONS);
 	    HTAddParam(&buffer, FMT_UNTAR, 4, arg);
@@ -1722,8 +1722,8 @@ static char *build_command(char *line,
 	if ((arg = match_op("TAR_GZ", line)) != 0) {
 #define FMT_TAR_GZ "cd %s; %s %s %s %s | %s -qc >%s%s"
 	    if ((program = HTGetProgramPath(ppGZIP)) != NULL) {
-		dirname = DirectoryOf(arg);
-		HTAddParam(&buffer, FMT_TAR_GZ, 1, dirname);
+		dirName = DirectoryOf(arg);
+		HTAddParam(&buffer, FMT_TAR_GZ, 1, dirName);
 		HTAddParam(&buffer, FMT_TAR_GZ, 2, tar_path);
 		HTAddToCmd(&buffer, FMT_TAR_GZ, 3, TAR_UP_OPTIONS);
 		HTAddToCmd(&buffer, FMT_TAR_GZ, 4, TAR_PIPE_OPTIONS);
@@ -1740,8 +1740,8 @@ static char *build_command(char *line,
 	if ((arg = match_op("TAR_Z", line)) != 0) {
 #define FMT_TAR_Z "cd %s; %s %s %s %s | %s >%s%s"
 	    if ((program = HTGetProgramPath(ppCOMPRESS)) != NULL) {
-		dirname = DirectoryOf(arg);
-		HTAddParam(&buffer, FMT_TAR_Z, 1, dirname);
+		dirName = DirectoryOf(arg);
+		HTAddParam(&buffer, FMT_TAR_Z, 1, dirName);
 		HTAddParam(&buffer, FMT_TAR_Z, 2, tar_path);
 		HTAddToCmd(&buffer, FMT_TAR_Z, 3, TAR_UP_OPTIONS);
 		HTAddToCmd(&buffer, FMT_TAR_Z, 4, TAR_PIPE_OPTIONS);
@@ -1756,8 +1756,8 @@ static char *build_command(char *line,
 
 	if ((arg = match_op("TAR", line)) != 0) {
 #define FMT_TAR "cd %s; %s %s %s %s.tar %s"
-	    dirname = DirectoryOf(arg);
-	    HTAddParam(&buffer, FMT_TAR, 1, dirname);
+	    dirName = DirectoryOf(arg);
+	    HTAddParam(&buffer, FMT_TAR, 1, dirName);
 	    HTAddParam(&buffer, FMT_TAR, 2, tar_path);
 	    HTAddToCmd(&buffer, FMT_TAR, 3, TAR_UP_OPTIONS);
 	    HTAddToCmd(&buffer, FMT_TAR, 4, TAR_FILE_OPTIONS);
@@ -1796,8 +1796,8 @@ static char *build_command(char *line,
     if ((arg = match_op("ZIP", line)) != 0) {
 #define FMT_ZIP "cd %s; %s -rq %s.zip %s"
 	if ((program = HTGetProgramPath(ppZIP)) != NULL) {
-	    dirname = DirectoryOf(arg);
-	    HTAddParam(&buffer, FMT_ZIP, 1, dirname);
+	    dirName = DirectoryOf(arg);
+	    HTAddParam(&buffer, FMT_ZIP, 1, dirName);
 	    HTAddParam(&buffer, FMT_ZIP, 2, program);
 	    HTAddParam(&buffer, FMT_ZIP, 3, LYonedot(LYPathLeaf(arg)));
 	    HTAddParam(&buffer, FMT_ZIP, 4, LYPathLeaf(arg));
@@ -1809,8 +1809,8 @@ static char *build_command(char *line,
     if ((arg = match_op("UNZIP", line)) != 0) {
 #define FMT_UNZIP "cd %s; %s -q %s"
 	if ((program = HTGetProgramPath(ppUNZIP)) != NULL) {
-	    dirname = DirectoryOf(arg);
-	    HTAddParam(&buffer, FMT_UNZIP, 1, dirname);
+	    dirName = DirectoryOf(arg);
+	    HTAddParam(&buffer, FMT_UNZIP, 1, dirName);
 	    HTAddParam(&buffer, FMT_UNZIP, 2, program);
 	    HTAddParam(&buffer, FMT_UNZIP, 3, arg);
 	    HTEndParam(&buffer, FMT_UNZIP, 3);
@@ -1850,7 +1850,7 @@ int local_dired(DocInfo *doc)
     char *tp = NULL;
     char *tmpbuf = NULL;
     char *buffer = NULL;
-    char *dirname = NULL;
+    char *dirName = NULL;
     BOOL do_pop_doc = TRUE;
 
     line_url = doc->address;
@@ -1935,7 +1935,7 @@ int local_dired(DocInfo *doc)
 	    return 0;
 	}
 
-	buffer = build_command(line, dirname, arg);
+	buffer = build_command(line, dirName, arg);
 
 	if (buffer != 0) {
 	    if ((int) strlen(buffer) < LYcolLimit - 14) {
@@ -1956,7 +1956,7 @@ int local_dired(DocInfo *doc)
 	}
     }
 
-    FREE(dirname);
+    FREE(dirName);
     FREE(tmpbuf);
     FREE(buffer);
     FREE(line);

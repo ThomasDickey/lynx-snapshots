@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTRules.c,v 1.34 2008/07/06 12:53:43 tom Exp $
+ * $LynxId: HTRules.c,v 1.35 2009/01/01 16:59:24 tom Exp $
  *
  *	Configuration manager for Hypertext Daemon		HTRules.c
  *	==========================================
@@ -508,7 +508,7 @@ int HTSetConfiguration(char *config)
 			  status >= 1 ? quality : 1.0,
 			  status >= 2 ? secs : 0.0,
 			  status >= 3 ? secs_per_byte : 0.0,
-			  status >= 4 ? maxbytes : 0,
+			  status >= 4 ? (long) maxbytes : 0,
 			  mediaCFG);
 
     } else if (0 == strncasecomp(word1, "htbin", 5) ||

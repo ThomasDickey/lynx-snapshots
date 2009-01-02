@@ -1,5 +1,5 @@
 /*
- * $LynxId: UCdomap.c,v 1.72 2009/01/01 00:46:30 tom Exp $
+ * $LynxId: UCdomap.c,v 1.73 2009/01/01 22:10:53 tom Exp $
  *
  *  UCdomap.c
  *  =========
@@ -942,7 +942,7 @@ int UCTransUniCharStr(char *outbuf,
 	}
 	rc = conv_uni_to_str(outbuf, buflen, unicode, 0);
 	if (rc >= 0)
-	    return (strlen(outbuf));
+	    return (int) strlen(outbuf);
     }
     if (trydefault && chk_single_flag) {
 	src = conv_uni_to_pc(unicode, 1);
@@ -961,12 +961,13 @@ int UCTransUniCharStr(char *outbuf,
 	    size_t inleft, outleft;
 	    char *tocode = NULL;
 
-	    str[0] = unicode >> 8;
-	    str[1] = unicode & 0xFF;
+	    str[0] = (char) (unicode >> 8);
+	    str[1] = (char) (unicode & 0xFF);
 	    str[2] = 0;
 	    pin = str;
 	    inleft = 2;
-	    pout = outbuf, outleft = buflen;
+	    pout = outbuf;
+	    outleft = (size_t) buflen;
 	    /*
 	     * Try TRANSLIT first, since it is an extension which can provide
 	     * translations when there is no available exact translation to
@@ -990,24 +991,26 @@ int UCTransUniCharStr(char *outbuf,
 	    FREE(tocode);
 
 	    if (cd != (iconv_t) - 1) {
-		rc = iconv(cd, (ICONV_CONST char **) &pin, &inleft, &pout, &outleft);
+		rc = (int) iconv(cd, (ICONV_CONST char **) &pin, &inleft,
+				 &pout, &outleft);
 		iconv_close(cd);
 		if ((pout - outbuf) == 3) {
 		    CTRACE((tfp,
 			    "It seems to be a JIS X 0201 code(%ld). Not supported.\n", unicode));
 		    pin = str;
 		    inleft = 2;
-		    pout = outbuf, outleft = buflen;
+		    pout = outbuf;
+		    outleft = (size_t) buflen;
 		} else if (rc >= 0) {
 		    *pout = '\0';
-		    return (strlen(outbuf));
+		    return (int) strlen(outbuf);
 		}
 	    }
 	}
 #endif
 	rc = conv_uni_to_str(outbuf, buflen, unicode, 1);
 	if (rc >= 0)
-	    return (strlen(outbuf));
+	    return (int) strlen(outbuf);
     }
     if (rc == ucNotFound) {
 	if (!isdefault)
@@ -1015,7 +1018,7 @@ int UCTransUniCharStr(char *outbuf,
 	if ((rc == ucNotFound) && (isdefault || trydefault))
 	    rc = conv_uni_to_str(outbuf, buflen, 0xfffd, 1);
 	if (rc >= 0)
-	    return (strlen(outbuf));
+	    return (int) strlen(outbuf);
     }
     if (chk_single_flag && src == ucNotFound) {
 	if (!isdefault)
@@ -1152,7 +1155,7 @@ long int UCTransJPToUni(char *inbuf,
     pin = inbuf;
     pout = outbuf;
     ilen = 2;
-    olen = buflen;
+    olen = (size_t) buflen;
 
     cd = iconv_open("UTF-16BE", LYCharSet_UC[charset_in].MIMEname);
     rc = iconv(cd, (ICONV_CONST char **) &pin, &ilen, &pout, &olen);
@@ -1192,7 +1195,7 @@ long int UCTransToUni(char ch_in,
 	    unsigned need;
 	    char *ptr;
 
-	    buffer[inx++] = ch_iu;
+	    buffer[inx++] = (char) ch_iu;
 	    buffer[inx] = '\0';
 	    need = utf8_length(TRUE, buffer);
 	    if (need && (need + 1) == inx) {
@@ -1426,7 +1429,7 @@ int UCTransCharStr(char *outbuf,
 	}
 	rc = conv_uni_to_str(outbuf, buflen, unicode, 0);
 	if (rc >= 0)
-	    return (strlen(outbuf));
+	    return (int) strlen(outbuf);
     }
     if (trydefault && chk_single_flag) {
 	src = conv_uni_to_pc(unicode, 1);
@@ -1439,7 +1442,7 @@ int UCTransCharStr(char *outbuf,
     if (isdefault || trydefault) {
 	rc = conv_uni_to_str(outbuf, buflen, unicode, 1);
 	if (rc >= 0)
-	    return (strlen(outbuf));
+	    return (int) strlen(outbuf);
     }
     if (rc == -4) {
 	if (!isdefault)
@@ -1447,7 +1450,7 @@ int UCTransCharStr(char *outbuf,
 	if ((rc == -4) && (isdefault || trydefault))
 	    rc = conv_uni_to_str(outbuf, buflen, 0xfffd, 1);
 	if (rc >= 0)
-	    return (strlen(outbuf));
+	    return (int) strlen(outbuf);
     }
     if (chk_single_flag && src == -4) {
 	if (!isdefault)
@@ -1819,7 +1822,7 @@ static const char **UC_setup_LYCharSets_repl(int UC_charset_in_hndl,
 		     */
 		    static char dummy[2];	/* one char dummy string */
 
-		    dummy[0] = ti[UCH(*s8) - 160];
+		    dummy[0] = (char) ti[UCH(*s8) - 160];
 		    *p = HTAtom_name(HTAtom_for(dummy));
 		}
 		changed = 1;
@@ -1921,7 +1924,7 @@ static int UC_Register_with_LYCharSets(int s,
     }
 
     if (!found && LYhndl > 0) {
-	repl = UC_setup_LYCharSets_repl(s, UCInfo[s].lowest_eight);
+	repl = UC_setup_LYCharSets_repl(s, (unsigned) UCInfo[s].lowest_eight);
 	if (repl) {
 	    LYCharSets[LYhndl] = repl;
 	    /*

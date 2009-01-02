@@ -1,4 +1,4 @@
-# $LynxId: makefile.in,v 1.19 2008/09/17 01:14:02 tom Exp $
+# $LynxId: makefile.in,v 1.20 2009/01/02 00:52:08 tom Exp $
 # Make WWW under unix for a.n.other unix system (bsd)
 # Use this as a template
 
@@ -21,6 +21,11 @@ CC		= @CC@
 DEFS		= @DEFS@
 EXTRA_CPPFLAGS	= @EXTRA_CPPFLAGS@
 CPPFLAGS	= @CPPFLAGS@
+
+AR		= @AR@
+ARFLAGS		= @ARFLAGS@
+
+RANLIB		= @RANLIB@
 
 o		= .@OBJEXT@
 x		= @EXEEXT@
@@ -57,8 +62,6 @@ VC = 2.14
 
 #  If this env var is set to something else Some makes will use that instead
 SHELL = @CONFIG_SHELL@
-
-RANLIB	= @RANLIB@
 
 #	.h files are distributed but originally are made from the
 #	self-documenting hypertext files.
@@ -170,7 +173,7 @@ depend :
 #  On SGI, ranlib is unnecessary and does not exist so we ignore errors
 # for that step
 $(LOB)/libwww.a : $(COMMON)
-	@AR@ @AR_OPTS@ $(LOB)/libwww.a $(COMMON)
+	$(AR) $(ARFLAGS) $(LOB)/libwww.a $(COMMON)
 	-$(RANLIB) $(LOB)/libwww.a
 
 #	Clean up everything generatable except final products
