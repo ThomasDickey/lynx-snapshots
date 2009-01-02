@@ -1,5 +1,5 @@
 /*
- * $LynxId: SGML.h,v 1.40 2008/09/18 23:36:15 tom Exp $
+ * $LynxId: SGML.h,v 1.41 2009/01/01 23:05:07 tom Exp $
  *			       SGML parse and stream definition for libwww
  *                             SGML AND STRUCTURED STREAMS
  *
@@ -139,7 +139,7 @@ extern "C" {
     struct _tag {
 	const char *name;	/* The name of the tag */
 #ifdef USE_COLOR_STYLE
-	int name_len;		/* The length of the name */
+	unsigned name_len;	/* The length of the name */
 #endif
 #ifdef EXP_JUSTIFY_ELTS
 	BOOL can_justify;	/* justification allowed? */

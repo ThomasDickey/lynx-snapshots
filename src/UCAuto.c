@@ -1,5 +1,5 @@
 /*
- * $LynxId: UCAuto.c,v 1.38 2008/07/05 11:42:34 tom Exp $
+ * $LynxId: UCAuto.c,v 1.39 2009/01/01 22:07:18 tom Exp $
  *
  *  This file contains code for changing the Linux console mode.
  *  Currently some names for font files are hardwired in here.
@@ -104,7 +104,7 @@ static BOOL isSetFont(void)
     const char *slash = strrchr(program, '/');
     const char *leaf = (slash ? slash + 1 : program);
 
-    return !strcmp(leaf, "setfont");
+    return (BOOL) !strcmp(leaf, "setfont");
 }
 
 /*

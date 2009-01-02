@@ -1,4 +1,4 @@
-/* $LynxId: LYStyle.h,v 1.15 2007/07/23 19:21:54 tom Exp $ */
+/* $LynxId: LYStyle.h,v 1.16 2009/01/01 23:06:08 tom Exp $ */
 #ifndef LYSTYLE_H
 #define LYSTYLE_H
 
@@ -59,7 +59,7 @@ extern "C" {
  * during last invokation of TrimColorClass.
  */
     extern void FastTrimColorClass(const char *tag_name,
-				   int name_len,
+				   unsigned name_len,
 				   char *stylename,
 				   char **pstylename_end,
 				   int *hcode);

@@ -1,4 +1,4 @@
-/* $LynxId: LYForms.c,v 1.79 2008/09/06 14:40:45 tom Exp $ */
+/* $LynxId: LYForms.c,v 1.80 2009/01/01 23:21:07 tom Exp $ */
 #include <HTUtils.h>
 #include <HTCJK.h>
 #include <HTTP.h>
@@ -372,7 +372,7 @@ static int form_getstr(int cur,
     char *value = form->value;
     int ch;
     int far_col;
-    int max_length;
+    unsigned max_length;
     int startcol, startline;
     BOOL HaveMaxlength = FALSE;
     int action, repeat;
@@ -398,10 +398,10 @@ static int form_getstr(int cur,
      * Make sure the form field value does not exceed our buffer.  - FM
      */
     max_length = ((form->maxlength > 0 &&
-		   form->maxlength < sizeof(MyEdit.buffer)) ?
-		  form->maxlength :
-		  (sizeof(MyEdit.buffer) - 1));
-    if (strlen(form->value) > (size_t) max_length) {
+		   form->maxlength < sizeof(MyEdit.buffer))
+		  ? form->maxlength
+		  : (sizeof(MyEdit.buffer) - 1));
+    if (strlen(form->value) > max_length) {
 	/*
 	 * We can't fit the entire value into the editing buffer, so enter as
 	 * much of the tail as fits.  - FM
@@ -421,7 +421,7 @@ static int form_getstr(int cur,
     /*
      * Print panned line
      */
-    LYSetupEdit(&MyEdit, value, max_length, (far_col - startcol));
+    LYSetupEdit(&MyEdit, value, (int) max_length, (far_col - startcol));
     MyEdit.pad = '_';
     MyEdit.hidden = (BOOL) (form->type == F_PASSWORD_TYPE);
     if (use_last_tfpos && LastTFPos >= 0 && LastTFPos < MyEdit.strlen) {
@@ -603,7 +603,7 @@ static int form_getstr(int cur,
 
 	    if (!s)
 		break;
-	    len = strlen((const char *) s);
+	    len = (int) strlen((const char *) s);
 	    e = s + len;
 
 	    if (len > 0) {
@@ -630,10 +630,10 @@ static int form_getstr(int cur,
 		if (e1 + 1 < e && *e1 == '\n')
 		    StrAllocCopy(buf, (char *) e1 + 1);		/* Survive _release() */
 		get_clip_release();
-		if (MyEdit.strlen >= max_length) {
+		if (MyEdit.strlen >= (int) max_length) {
 		    HaveMaxlength = TRUE;
 		} else if (HaveMaxlength &&
-			   MyEdit.strlen < max_length) {
+			   MyEdit.strlen < (int) max_length) {
 		    HaveMaxlength = FALSE;
 		    _statusline(ENTER_TEXT_ARROWS_OR_TAB);
 		}
@@ -781,10 +781,10 @@ static int form_getstr(int cur,
 		}
 #endif /* SUPPORT_MULTIBYTE_EDIT */
 	    }
-	    if (MyEdit.strlen >= max_length) {
+	    if (MyEdit.strlen >= (int) max_length) {
 		HaveMaxlength = TRUE;
 	    } else if (HaveMaxlength &&
-		       MyEdit.strlen < max_length) {
+		       MyEdit.strlen < (int) max_length) {
 		HaveMaxlength = FALSE;
 		_statusline(ENTER_TEXT_ARROWS_OR_TAB);
 	    }
@@ -811,8 +811,8 @@ static int form_getstr(int cur,
 	     */
 	    StrAllocCopy(form->value, MyEdit.buffer);
 	} else {
-	    int old_len = strlen(form->value);
-	    int new_len = strlen(value);
+	    int old_len = (int) strlen(form->value);
+	    int new_len = (int) strlen(value);
 
 	    /*
 	     * Combine the modified tail with the unmodified head.  - FM

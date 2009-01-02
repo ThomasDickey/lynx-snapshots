@@ -1,4 +1,4 @@
-dnl $LynxId: configure.in,v 1.182 2009/01/01 01:22:26 tom Exp $
+dnl $LynxId: configure.in,v 1.183 2009/01/02 01:13:02 tom Exp $
 dnl
 dnl Process this file with autoconf to produce a configure script.
 dnl
@@ -103,9 +103,8 @@ AC_ISC_POSIX
 
 CF_BUILD_CC([#],[])
 
-AC_CHECK_TOOL(RANLIB, ranlib, ':')
-AC_CHECK_TOOL(AR, ar, ar)
-CF_SUBST(archiver options,AR_OPTS,rv)
+CF_PROG_RANLIB
+CF_AR_FLAGS
 
 dnl --------------------------------------------------------------------------
 dnl Debug/development/test

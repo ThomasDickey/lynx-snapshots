@@ -1,14 +1,14 @@
-# translation of lynx-2.8.7-dev9.po to Turkish
-# lynx-2.8.7-dev9.po'nun Türkçe çevirisi
-# Copyright (C) 2002, 2004, 2006 Free Software Foundation, Inc.
+# translation of lynx-2.8.7-dev12.po to Turkish
+# lynx-2.8.7-dev12.po'nun Türkçe çevirisi
+# Copyright (C) 2002, 2004, 2006, 2009 Free Software Foundation, Inc.
 # This file is distributed under the same license as the lynx package.
-# Eyüp Hakan Duran <hakan_duran@hotmail.com>, 2008.
+# Eyüp Hakan Duran <hakan_duran@hotmail.com>, 2009.
 msgid ""
 msgstr ""
-"Project-Id-Version: lynx-2.8.7-dev9\n"
+"Project-Id-Version: lynx-2.8.7-dev12\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-12-07 20:02-0500\n"
-"PO-Revision-Date: 2008-07-11 21:15-0400\n"
+"POT-Creation-Date: 2009-01-01 20:55-0500\n"
+"PO-Revision-Date: 2009-01-01 16:30-0500\n"
 "Last-Translator: Eyüp Hakan Duran <hakan_duran@hotmail.com>\n"
 "Language-Team: Turkish <gnu-tr-u12a@lists.sourceforge.net>\n"
 "MIME-Version: 1.0\n"
@@ -2248,7 +2248,7 @@ msgstr "(Ýsim yok.)"
 msgid "(No value.)"
 msgstr "(Deðer yok.)"
 
-#: LYMessages.c:716 src/LYOptions.c:2402
+#: LYMessages.c:716 src/LYOptions.c:2406
 msgid "None"
 msgstr "Hiçbiri"
 
@@ -2414,16 +2414,21 @@ msgstr "Üst sýnýr "
 msgid "Current directory is "
 msgstr "Mevcut dizin "
 
-#. HTGopher.c
+#. HTFTP.c
 #: LYMessages.c:765
+msgid "Symbolic Link"
+msgstr "Simgesel Link"
+
+#. HTGopher.c
+#: LYMessages.c:768
 msgid "No response from server!"
 msgstr "Sunucudan yanýt yok!"
 
-#: LYMessages.c:766
+#: LYMessages.c:769
 msgid "CSO index"
 msgstr "CSO indeksi"
 
-#: LYMessages.c:767
+#: LYMessages.c:770
 msgid ""
 "\n"
 "This is a searchable index of a CSO database.\n"
@@ -2431,16 +2436,16 @@ msgstr ""
 "\n"
 "Bu, CSO veritabanýnýn aranabilir bir indeksidir.\n"
 
-#: LYMessages.c:768
+#: LYMessages.c:771
 msgid "CSO Search Results"
 msgstr "CSO Arama Sonuçlarý"
 
-#: LYMessages.c:769
+#: LYMessages.c:772
 #, c-format
 msgid "Seek fail on %s\n"
 msgstr "Arama %s'de baþarýsýz\n"
 
-#: LYMessages.c:770
+#: LYMessages.c:773
 msgid ""
 "\n"
 "Press the 's' key and enter search keywords.\n"
@@ -2448,7 +2453,7 @@ msgstr ""
 "\n"
 "'s' tuþuna basýp, anahtar sözcükleri giriniz.\n"
 
-#: LYMessages.c:771
+#: LYMessages.c:774
 msgid ""
 "\n"
 "This is a searchable Gopher index.\n"
@@ -2456,35 +2461,35 @@ msgstr ""
 "\n"
 "Bu, arama yapýlabilen bir Gopher indeksidir.\n"
 
-#: LYMessages.c:772
+#: LYMessages.c:775
 msgid "Gopher index"
 msgstr "Gopher indeksi"
 
-#: LYMessages.c:773
+#: LYMessages.c:776
 msgid "Gopher Menu"
 msgstr "Gopher Menüsü"
 
-#: LYMessages.c:774
+#: LYMessages.c:777
 msgid " Search Results"
 msgstr " Arama Sonuçlarý"
 
-#: LYMessages.c:775
+#: LYMessages.c:778
 msgid "Sending CSO/PH request."
 msgstr "CSO/PH istemi gönderiliyor."
 
-#: LYMessages.c:776
+#: LYMessages.c:779
 msgid "Sending Gopher request."
 msgstr "Gopher istemi gönderiliyor."
 
-#: LYMessages.c:777
+#: LYMessages.c:780
 msgid "CSO/PH request sent; waiting for response."
 msgstr "CSO/PH istemi gönderildi; yanýt bekleniyor."
 
-#: LYMessages.c:778
+#: LYMessages.c:781
 msgid "Gopher request sent; waiting for response."
 msgstr "Gopher istemi gönderildi; yanýt bekleniyor."
 
-#: LYMessages.c:779
+#: LYMessages.c:782
 msgid ""
 "\n"
 "Please enter search keywords.\n"
@@ -2492,7 +2497,7 @@ msgstr ""
 "\n"
 "Lütfen arama için anahtar sözcükleri giriniz.\n"
 
-#: LYMessages.c:780
+#: LYMessages.c:783
 msgid ""
 "\n"
 "The keywords that you enter will allow you to search on a"
@@ -2500,201 +2505,201 @@ msgstr ""
 "\n"
 "Girdiðiniz anahtar sözcükler, veri tabanýnda bir kiþi adýnýn"
 
-#: LYMessages.c:781
+#: LYMessages.c:784
 msgid " person's name in the database.\n"
 msgstr " aranmasýný saðlayacak.\n"
 
 #. HTNews.c
-#: LYMessages.c:784
+#: LYMessages.c:787
 msgid "Connection closed ???"
 msgstr "Baðlantý kapatýldý mý ???"
 
-#: LYMessages.c:785
+#: LYMessages.c:788
 msgid "Cannot open temporary file for news POST."
 msgstr "Haber POSTu için geçici dosya açýlamýyor."
 
-#: LYMessages.c:786
+#: LYMessages.c:789
 msgid "This client does not contain support for posting to news with SSL."
 msgstr "Bu istemci SSL'li habere postalamak için destek içermiyor."
 
 #. HTStyle.c
-#: LYMessages.c:789
+#: LYMessages.c:792
 #, c-format
 msgid "Style %d `%s' SGML:%s.  Font %s %.1f point.\n"
 msgstr "Stil %d `%s' SGML:%s.  Yazýtipi %s %.1f boyut.\n"
 
-#: LYMessages.c:791
+#: LYMessages.c:794
 #, c-format
 msgid "\tAlign=%d, %d tabs. (%.0f before, %.0f after)\n"
 msgstr "\tYaslama=%d, %d sekme. (%.0f önce, %.0f sonra)\n"
 
-#: LYMessages.c:792
+#: LYMessages.c:795
 #, c-format
 msgid "\t\tTab kind=%d at %.0f\n"
 msgstr "\t\tSekme türü=%d konum %.0f\n"
 
 #. HTTP.c
-#: LYMessages.c:795
+#: LYMessages.c:798
 msgid "Can't proceed without a username and password."
 msgstr "Kullanýcý adý ve parola olmadan devam edilemez."
 
-#: LYMessages.c:796
+#: LYMessages.c:799
 msgid "Can't retry with authorization!  Contact the server's WebMaster."
 msgstr "Yetkilendirme yeniden denenemez!  Sunucunun site yöneticisiyle temas kurun."
 
-#: LYMessages.c:797
+#: LYMessages.c:800
 msgid "Can't retry with proxy authorization!  Contact the server's WebMaster."
 msgstr "Vekil(proxy) yetkilendirmesi yeniden denenemez! Sunucunun site yöneticisiyle temas kurun."
 
-#: LYMessages.c:798
+#: LYMessages.c:801
 msgid "Retrying with proxy authorization information."
 msgstr "Vekil(proxy) yetkilendirme bilgisiyle yeniden deneniyor."
 
-#: LYMessages.c:799
+#: LYMessages.c:802
 #, c-format
 msgid "SSL error:%s-Continue?"
 msgstr "SSL hatasý:%s-Devam edilsin mi?"
 
 #. HTWAIS.c
-#: LYMessages.c:802
+#: LYMessages.c:805
 msgid "HTWAIS: Return message too large."
 msgstr "HTWAIS: Dönüþ mesajý çok büyük."
 
-#: LYMessages.c:803
+#: LYMessages.c:806
 msgid "Enter WAIS query: "
 msgstr "WAIS sorgusu giriniz: "
 
 #. Miscellaneous status
-#: LYMessages.c:806
+#: LYMessages.c:809
 msgid "Retrying as HTTP0 request."
 msgstr "HTTP0 istemi olarak yeniden deneniyor."
 
-#: LYMessages.c:807
+#: LYMessages.c:810
 #, c-format
 msgid "Transferred %d bytes"
 msgstr "%d bayt aktarýldý"
 
-#: LYMessages.c:808
+#: LYMessages.c:811
 msgid "Data transfer complete"
 msgstr "Veri aktarýmý tamamlandý"
 
-#: LYMessages.c:809
+#: LYMessages.c:812
 #, c-format
 msgid "Error processing line %d of %s\n"
 msgstr "%2$s satýrdan %1$d.'sinin iþlenmesinde hata\n"
 
 #. Lynx internal page titles
-#: LYMessages.c:812
+#: LYMessages.c:815
 msgid "Address List Page"
 msgstr "Adres Listesi Sayfasý"
 
-#: LYMessages.c:813
+#: LYMessages.c:816
 msgid "Bookmark file"
 msgstr "Yer imi dosyasý"
 
-#: LYMessages.c:814
+#: LYMessages.c:817
 msgid "Configuration Definitions"
 msgstr "Ayar Tanýmlarý"
 
-#: LYMessages.c:815
+#: LYMessages.c:818
 msgid "Cookie Jar"
 msgstr "Çerez kavanozu"
 
-#: LYMessages.c:816
+#: LYMessages.c:819
 msgid "Current Key Map"
 msgstr "Mevcut Tuþ Eþlemi"
 
-#: LYMessages.c:817
+#: LYMessages.c:820
 msgid "File Management Options"
 msgstr "Dosya Yönetim Seçenekleri"
 
-#: LYMessages.c:818
+#: LYMessages.c:821
 msgid "Download Options"
 msgstr "Ýndirme Seçenekleri"
 
-#: LYMessages.c:819
+#: LYMessages.c:822
 msgid "History Page"
 msgstr "Tarihçe Sayfasý"
 
-#: LYMessages.c:820
+#: LYMessages.c:823
 msgid "Cache Jar"
 msgstr "Önbellek Kavanozu"
 
-#: LYMessages.c:821
+#: LYMessages.c:824
 msgid "List Page"
 msgstr "Liste Sayfasý"
 
-#: LYMessages.c:822
+#: LYMessages.c:825
 msgid "Lynx.cfg Information"
 msgstr "Lynx.cfg Bilgileri"
 
-#: LYMessages.c:823
+#: LYMessages.c:826
 msgid "Converted Mosaic Hotlist"
 msgstr "Dönüþtürülmüþ Mosaic Sýcaklistesi"
 
-#: LYMessages.c:824
+#: LYMessages.c:827
 msgid "Options Menu"
 msgstr "Seçenekler Menüsü"
 
-#: LYMessages.c:825
+#: LYMessages.c:828
 msgid "File Permission Options"
 msgstr "Dosya Ýzin Seçenekleri"
 
-#: LYMessages.c:826
+#: LYMessages.c:829
 msgid "Printing Options"
 msgstr "Yazdýrma Seçenekleri"
 
-#: LYMessages.c:827
+#: LYMessages.c:830
 msgid "Information about the current document"
 msgstr "Mevcut dosya bilgileri"
 
-#: LYMessages.c:828
+#: LYMessages.c:831
 msgid "Your recent statusline messages"
 msgstr "Son durumsatýrý mesajlarýnýz"
 
-#: LYMessages.c:829
+#: LYMessages.c:832
 msgid "Upload Options"
 msgstr "Yükleme Seçenekleri"
 
-#: LYMessages.c:830
+#: LYMessages.c:833
 msgid "Visited Links Page"
 msgstr "Uðranmýþ Linkler Sayfasý"
 
 #. CONFIG_DEF_TITLE subtitles
-#: LYMessages.c:833
+#: LYMessages.c:836
 msgid "See also"
 msgstr "Ayrýca bakýnýz"
 
-#: LYMessages.c:834
+#: LYMessages.c:837
 msgid "your"
 msgstr "sizin"
 
-#: LYMessages.c:835
+#: LYMessages.c:838
 msgid "for runtime options"
 msgstr "yürütüm süresi seçenekleri için"
 
-#: LYMessages.c:836
+#: LYMessages.c:839
 msgid "compile time options"
 msgstr "derleme süresi seçenekleri"
 
-#: LYMessages.c:837
+#: LYMessages.c:840
 msgid "color-style configuration"
 msgstr "renk stili ayarlama"
 
-#: LYMessages.c:838
+#: LYMessages.c:841
 msgid "latest release"
 msgstr "son daðýtým"
 
-#: LYMessages.c:839
+#: LYMessages.c:842
 msgid "pre-release version"
 msgstr "daðýtým öncesi sürüm"
 
-#: LYMessages.c:840
+#: LYMessages.c:843
 msgid "development version"
 msgstr "geliþtirme sürümü"
 
 #. #define AUTOCONF_CONFIG_CACHE
-#: LYMessages.c:842
+#: LYMessages.c:845
 msgid ""
 "The following data were derived during the automatic configuration/build\n"
 "process of this copy of Lynx.  When reporting a bug, please include a copy\n"
@@ -2705,7 +2710,7 @@ msgstr ""
 "kopyasýný da dahil ediniz."
 
 #. #define AUTOCONF_LYNXCFG_H
-#: LYMessages.c:846
+#: LYMessages.c:849
 msgid ""
 "The following data were used as automatically-configured compile-time\n"
 "definitions when this copy of Lynx was built."
@@ -2714,53 +2719,53 @@ msgstr ""
 "derleme süresi tanýmlarý olarak kullanýlmýþtýr."
 
 #. #define DIRED_NOVICELINE
-#: LYMessages.c:851
+#: LYMessages.c:854
 msgid "  C)reate  D)ownload  E)dit  F)ull menu  M)odify  R)emove  T)ag  U)pload     \n"
 msgstr "..Oluþtur(C)  Ýndir(D)  Düzenle(E)  Tam menü(F)  Deðiþtir(M)  Çýkart(R)  Ýþaretle(T)  Yükle(U)     \n"
 
-#: LYMessages.c:852
+#: LYMessages.c:855
 msgid "Failed to obtain status of current link!"
 msgstr "Mevcut linkin durumu elde edilemedi!"
 
 #. #define INVALID_PERMIT_URL
-#: LYMessages.c:855
+#: LYMessages.c:858
 msgid "Special URL only valid from current File Permission menu!"
 msgstr "Özel URL yalnýzca güncel Dosya Ýzin menüsünden geçerlidir!"
 
-#: LYMessages.c:859
+#: LYMessages.c:862
 msgid "External support is currently disabled."
 msgstr "Harici destek halen devre dýþý..."
 
 #. new with 2.8.4dev.21
-#: LYMessages.c:863
+#: LYMessages.c:866
 msgid "Changing working-directory is currently disabled."
 msgstr "Çalýþma dizinini deðiþtirme þu an devre dýþý."
 
-#: LYMessages.c:864
+#: LYMessages.c:867
 msgid "Linewrap OFF!"
 msgstr "Satýrsarma KAPALI!"
 
-#: LYMessages.c:865
+#: LYMessages.c:868
 msgid "Linewrap ON!"
 msgstr "Satýrsarma AÇIK!"
 
-#: LYMessages.c:866
+#: LYMessages.c:869
 msgid "Parsing nested-tables toggled OFF!  Reloading..."
 msgstr "Ýçice geçmiþ-tablo ayrýþtýrma KAPATILDI!  Yeniden yükleniyor..."
 
-#: LYMessages.c:867
+#: LYMessages.c:870
 msgid "Parsing nested-tables toggled ON!  Reloading..."
 msgstr "Ýçice geçmiþ-tablo ayrýþtýrma AÇILDI!  Yeniden yükleniyor..."
 
-#: LYMessages.c:868
+#: LYMessages.c:871
 msgid "Shifting is disabled while line-wrap is in effect"
 msgstr "Satýr-sarma etkinken kaydýrma (shifting) devre dýþýdýr"
 
-#: LYMessages.c:869
+#: LYMessages.c:872
 msgid "Trace not supported"
 msgstr "Ýz(leme) desteklenmiyor"
 
-#: LYMessages.c:790
+#: LYMessages.c:793
 #, c-format
 msgid "\tIndents: first=%.0f others=%.0f, Height=%.1f Desc=%.1f\n"
 msgstr "\tGirinti: ilk satýr=%.0f diðerleri=%.0f, Yükseklik=%.1f Alt çýkýntý=%.1f\n"
@@ -2803,7 +2808,7 @@ msgstr "Önbellekte POST içerikli belge bulunmadý.  Yeniden gönderilsin mi?"
 msgid "Loading failed, use a previous copy."
 msgstr "Yükleme baþarýsýz, önceki bir kopyayý kullanýn."
 
-#: WWW/Library/Implementation/HTAccess.c:1047 src/GridText.c:8546
+#: WWW/Library/Implementation/HTAccess.c:1047 src/GridText.c:8513
 msgid "Loading incomplete."
 msgstr "Yükleme tamamlanmadý."
 
@@ -2826,7 +2831,7 @@ msgstr "**** HTAccess: Dönen durum: %d\n"
 #. * hack: if we fail in HTAccess.c
 #. * avoid duplicating URL, oh.
 #.
-#: WWW/Library/Implementation/HTAccess.c:1087 src/LYMainLoop.c:7779
+#: WWW/Library/Implementation/HTAccess.c:1087 src/LYMainLoop.c:7757
 msgid "Can't Access"
 msgstr "Eriþilemiyor"
 
@@ -2851,28 +2856,20 @@ msgstr "ana soketi kapatýnýz"
 msgid "socket for master socket"
 msgstr "ana soket için soket"
 
-#.
-#. * It's a symbolic link, does the user care about knowing if it is
-#. * symbolic?  I think so since it might be a directory.
-#.
-#: WWW/Library/Implementation/HTFTP.c:1733 WWW/Library/Implementation/HTFTP.c:2350
-msgid "Symbolic Link"
-msgstr "Simgesel Link"
-
-#: WWW/Library/Implementation/HTFTP.c:2707
+#: WWW/Library/Implementation/HTFTP.c:2976
 msgid "Receiving FTP directory."
 msgstr "FTP dizini alýnýyor."
 
-#: WWW/Library/Implementation/HTFTP.c:2843
+#: WWW/Library/Implementation/HTFTP.c:3112
 #, c-format
 msgid "Transferred %d bytes (%5d)"
 msgstr "%d bayt aktarýldý (%5d)"
 
-#: WWW/Library/Implementation/HTFTP.c:3194
+#: WWW/Library/Implementation/HTFTP.c:3466
 msgid "connect for data"
 msgstr "veri için baðlan"
 
-#: WWW/Library/Implementation/HTFTP.c:3855
+#: WWW/Library/Implementation/HTFTP.c:4127
 msgid "Receiving FTP file."
 msgstr "FTP dosyasý alýnýyor"
 
@@ -2896,34 +2893,34 @@ msgstr "Finger makinasýna eriþilemedi."
 msgid "No response from finger server."
 msgstr "Finger sunucusundan yanýt yok."
 
-#: WWW/Library/Implementation/HTNews.c:426
+#: WWW/Library/Implementation/HTNews.c:425
 #, c-format
 msgid "Username for news host '%s':"
 msgstr "'%s' adlý haber makinasý için kullanýcý adý:"
 
-#: WWW/Library/Implementation/HTNews.c:479
+#: WWW/Library/Implementation/HTNews.c:478
 msgid "Change username?"
 msgstr "Kullanýcý adý deðiþtirilsin mi?"
 
-#: WWW/Library/Implementation/HTNews.c:483
+#: WWW/Library/Implementation/HTNews.c:482
 msgid "Username:"
 msgstr "Kullanýcý adý:"
 
-#: WWW/Library/Implementation/HTNews.c:508
+#: WWW/Library/Implementation/HTNews.c:507
 #, c-format
 msgid "Password for news host '%s':"
 msgstr "'%s' adlý haber makinasý için parola:"
 
-#: WWW/Library/Implementation/HTNews.c:591
+#: WWW/Library/Implementation/HTNews.c:590
 msgid "Change password?"
 msgstr "Parola deðiþtirilsin mi?"
 
-#: WWW/Library/Implementation/HTNews.c:1711
+#: WWW/Library/Implementation/HTNews.c:1710
 #, c-format
 msgid "No matches for: %s"
 msgstr "%s için eþleþme yok..."
 
-#: WWW/Library/Implementation/HTNews.c:1761
+#: WWW/Library/Implementation/HTNews.c:1760
 msgid ""
 "\n"
 "No articles in this group.\n"
@@ -2931,7 +2928,7 @@ msgstr ""
 "\n"
 "Bu grupta hiç mesaj yok.\n"
 
-#: WWW/Library/Implementation/HTNews.c:1773
+#: WWW/Library/Implementation/HTNews.c:1772
 msgid ""
 "\n"
 "No articles in this range.\n"
@@ -2942,16 +2939,16 @@ msgstr ""
 #.
 #. * Set window title.
 #.
-#: WWW/Library/Implementation/HTNews.c:1786
+#: WWW/Library/Implementation/HTNews.c:1785
 #, c-format
 msgid "%s,  Articles %d-%d"
 msgstr "%s,  %d-%d mesaj"
 
-#: WWW/Library/Implementation/HTNews.c:1809
+#: WWW/Library/Implementation/HTNews.c:1808
 msgid "Earlier articles"
 msgstr "Önceki mesajlar"
 
-#: WWW/Library/Implementation/HTNews.c:1822
+#: WWW/Library/Implementation/HTNews.c:1821
 #, c-format
 msgid ""
 "\n"
@@ -2962,41 +2959,41 @@ msgstr ""
 "Halen %2$s'de yaklaþýk %1$d mesaj mevcut, kimlikler þu þekilde:\n"
 "\n"
 
-#: WWW/Library/Implementation/HTNews.c:1884
+#: WWW/Library/Implementation/HTNews.c:1883
 msgid "All available articles in "
 msgstr "Tüm mevcut mesajlar "
 
-#: WWW/Library/Implementation/HTNews.c:2098
+#: WWW/Library/Implementation/HTNews.c:2097
 msgid "Later articles"
 msgstr "Sonraki mesajlar"
 
-#: WWW/Library/Implementation/HTNews.c:2121
+#: WWW/Library/Implementation/HTNews.c:2120
 msgid "Post to "
 msgstr "Kime Gönderilecek "
 
-#: WWW/Library/Implementation/HTNews.c:2342
+#: WWW/Library/Implementation/HTNews.c:2341
 msgid "This client does not contain support for SNEWS URLs."
 msgstr "Bu istemci SNEWS URL'ler için destek içermiyor."
 
-#: WWW/Library/Implementation/HTNews.c:2550
+#: WWW/Library/Implementation/HTNews.c:2548
 msgid "No target for raw text!"
 msgstr "Ham metin için hiç hedef yok!"
 
-#: WWW/Library/Implementation/HTNews.c:2581
+#: WWW/Library/Implementation/HTNews.c:2578
 msgid "Connecting to NewsHost ..."
 msgstr "Haber makinasýna baðlanýlýyor ..."
 
-#: WWW/Library/Implementation/HTNews.c:2633
+#: WWW/Library/Implementation/HTNews.c:2630
 #, c-format
 msgid "Could not access %s."
 msgstr "%s'e eriþilemiyor."
 
-#: WWW/Library/Implementation/HTNews.c:2739
+#: WWW/Library/Implementation/HTNews.c:2736
 #, c-format
 msgid "Can't read news info.  News host %.20s responded: %.200s"
 msgstr "Haber bilgisi okunamýyor.  %.20s adlý haber makinasýnýn yanýtý: %.200s"
 
-#: WWW/Library/Implementation/HTNews.c:2743
+#: WWW/Library/Implementation/HTNews.c:2740
 #, c-format
 msgid "Can't read news info, empty response from host %s"
 msgstr "Haber bilgisi okunamýyor, %s makinasýndan boþ yanýt"
@@ -3004,22 +3001,22 @@ msgstr "Haber bilgisi okunamýyor, %s makinasýndan boþ yanýt"
 #.
 #. * List available newsgroups.  - FM
 #.
-#: WWW/Library/Implementation/HTNews.c:2947
+#: WWW/Library/Implementation/HTNews.c:2944
 msgid "Reading list of available newsgroups."
 msgstr "Mevcut haber gruplarýnýn listesi okunuyor."
 
-#: WWW/Library/Implementation/HTNews.c:2968
+#: WWW/Library/Implementation/HTNews.c:2965
 msgid "Reading list of articles in newsgroup."
 msgstr "Haber grubundaki mesaj listesi okunuyor."
 
 #.
 #. * Get an article from a news group.  - FM
 #.
-#: WWW/Library/Implementation/HTNews.c:2974
+#: WWW/Library/Implementation/HTNews.c:2971
 msgid "Reading news article."
 msgstr "Haber mesajý okunuyor."
 
-#: WWW/Library/Implementation/HTNews.c:3004
+#: WWW/Library/Implementation/HTNews.c:3001
 msgid "Sorry, could not load requested news."
 msgstr "Üzgünüm, istenen haber yüklenemedi."
 
@@ -3072,9 +3069,8 @@ msgid "Could not restore socket to blocking."
 msgstr "Soket engellemeye (blocking) geri yüklenemedi."
 
 #: WWW/Library/Implementation/HTTCP.c:2016
-#, fuzzy
 msgid "Socket read failed (too many tries)."
-msgstr "Baðlantý baþarýsýz (çok sayýda yeniden deneme)."
+msgstr "Soket okuma baþarýsýz (çok sayýda deneme)."
 
 #: WWW/Library/Implementation/HTTP.c:84
 #, c-format
@@ -3091,80 +3087,80 @@ msgstr "Adres bir kullanýcý adý içeriyor: %s"
 msgid "Certificate issued by: %s"
 msgstr "Sertifikayý veren:%s"
 
-#: WWW/Library/Implementation/HTTP.c:620
+#: WWW/Library/Implementation/HTTP.c:643
 msgid "This client does not contain support for HTTPS URLs."
 msgstr "Bu istemci HTTPS URL'ler için destek içermiyor."
 
-#: WWW/Library/Implementation/HTTP.c:645
+#: WWW/Library/Implementation/HTTP.c:668
 msgid "Unable to connect to remote host."
 msgstr "Karþý makinaya baðlanýlamadý."
 
-#: WWW/Library/Implementation/HTTP.c:669
+#: WWW/Library/Implementation/HTTP.c:692
 msgid "Retrying connection without TLS."
 msgstr "Baðlantý, TLS'siz tekrar deneniyor."
 
-#: WWW/Library/Implementation/HTTP.c:714
+#: WWW/Library/Implementation/HTTP.c:737
 msgid "no issuer was found"
 msgstr "yayýnlayýcý bulunamadý"
 
-#: WWW/Library/Implementation/HTTP.c:716
+#: WWW/Library/Implementation/HTTP.c:739
 msgid "issuer is not a CA"
 msgstr "yayýnlayýcý bir CA deðil"
 
-#: WWW/Library/Implementation/HTTP.c:718
+#: WWW/Library/Implementation/HTTP.c:741
 msgid "the certificate has no known issuer"
 msgstr "sertifikanýn bilinen bir yayýnlayýcýsý yok"
 
-#: WWW/Library/Implementation/HTTP.c:720
+#: WWW/Library/Implementation/HTTP.c:743
 msgid "the certificate has been revoked"
 msgstr "sertifika hükümsüz kýlýnmýþ"
 
-#: WWW/Library/Implementation/HTTP.c:722
+#: WWW/Library/Implementation/HTTP.c:745
 msgid "the certificate is not trusted"
 msgstr "sertifikaya güvenilmiyor"
 
-#: WWW/Library/Implementation/HTTP.c:807
+#: WWW/Library/Implementation/HTTP.c:821
 #, c-format
 msgid "Verified connection to %s (cert=%s)"
 msgstr "%1$s'e doðrulanmýþ baðlantý (cert=%2$s)"
 
-#: WWW/Library/Implementation/HTTP.c:855 WWW/Library/Implementation/HTTP.c:901
+#: WWW/Library/Implementation/HTTP.c:869 WWW/Library/Implementation/HTTP.c:911
 #, c-format
 msgid "Verified connection to %s (subj=%s)"
 msgstr "%s'e baðlantý doðrulandý (konu=%s)"
 
-#: WWW/Library/Implementation/HTTP.c:931
+#: WWW/Library/Implementation/HTTP.c:941
 msgid "Can't find common name in certificate"
 msgstr "Sertifikada ortak ad bulunamadý"
 
-#: WWW/Library/Implementation/HTTP.c:934
+#: WWW/Library/Implementation/HTTP.c:944
 #, c-format
 msgid "SSL error:host(%s)!=cert(%s)-Continue?"
 msgstr "SSL hatasý:makina(%s)!=sert(%s)-Devam edilsin mi?"
 
-#: WWW/Library/Implementation/HTTP.c:947
+#: WWW/Library/Implementation/HTTP.c:957
 #, c-format
 msgid "UNVERIFIED connection to %s (cert=%s)"
 msgstr "%s'e DOÐRULANMAMIÞ baðlantý (cert=%s)"
 
-#: WWW/Library/Implementation/HTTP.c:956
+#: WWW/Library/Implementation/HTTP.c:966
 #, c-format
 msgid "Secure %d-bit %s (%s) HTTP connection"
 msgstr "Güvenli %d-bit %s (%s) HTTP baðlantýsý"
 
-#: WWW/Library/Implementation/HTTP.c:1426
+#: WWW/Library/Implementation/HTTP.c:1433
 msgid "Sending HTTP request."
 msgstr "HTTP istemi gönderiliyor."
 
-#: WWW/Library/Implementation/HTTP.c:1465
+#: WWW/Library/Implementation/HTTP.c:1472
 msgid "Unexpected network write error; connection aborted."
 msgstr "Umulmadýk aða yazma hatasý; baðlantý yarýda kesildi."
 
-#: WWW/Library/Implementation/HTTP.c:1471
+#: WWW/Library/Implementation/HTTP.c:1478
 msgid "HTTP request sent; waiting for response."
 msgstr "HTTP istemi gönderildi; yanýt bekleniyor."
 
-#: WWW/Library/Implementation/HTTP.c:1539
+#: WWW/Library/Implementation/HTTP.c:1546
 msgid "Unexpected network read error; connection aborted."
 msgstr "Umulmadýk aða yazma hatasý; baðlantý yarýda kesildi."
 
@@ -3177,7 +3173,7 @@ msgstr "Umulmadýk aða yazma hatasý; baðlantý yarýda kesildi."
 #. * line and possibly other headers, so we'll deal with them by
 #. * showing the full header to the user as text/plain.  - FM
 #.
-#: WWW/Library/Implementation/HTTP.c:1733
+#: WWW/Library/Implementation/HTTP.c:1740
 msgid "Got unexpected Informational Status."
 msgstr "Umulmadýk Bilgisel Durum alýndý."
 
@@ -3187,7 +3183,7 @@ msgstr "Umulmadýk Bilgisel Durum alýndý."
 #. * content.  We'll instruct the user to do that, and
 #. * restore the current document.  - FM
 #.
-#: WWW/Library/Implementation/HTTP.c:1767
+#: WWW/Library/Implementation/HTTP.c:1774
 msgid "Request fulfilled.  Reset Content."
 msgstr "Ýstem karþýlandý.  Ýçeriði temizle."
 
@@ -3197,27 +3193,27 @@ msgstr "Ýstem karþýlandý.  Ýçeriði temizle."
 #. * status is inappropriate.  We'll deal with it by showing
 #. * the full header to the user as text/plain.  - FM
 #.
-#: WWW/Library/Implementation/HTTP.c:1884
+#: WWW/Library/Implementation/HTTP.c:1890
 msgid "Got unexpected 304 Not Modified status."
 msgstr "Umulmadýk 304 Deðiþtirilmedi durumu alýndý."
 
-#: WWW/Library/Implementation/HTTP.c:1947
+#: WWW/Library/Implementation/HTTP.c:1953
 msgid "Redirection of POST content requires user approval."
 msgstr "POST içeriðinin yeniden yönlendirilmesi kullanýcý onayý gerektirir."
 
-#: WWW/Library/Implementation/HTTP.c:1962
+#: WWW/Library/Implementation/HTTP.c:1968
 msgid "Have POST content.  Treating Permanent Redirection as Temporary.\n"
 msgstr "POST içeriði mevcut.  Kalýcý Yeniden Yönlendirmeye Geçici muamelesi yapýlýyor.\n"
 
-#: WWW/Library/Implementation/HTTP.c:2004
+#: WWW/Library/Implementation/HTTP.c:2010
 msgid "Retrying with access authorization information."
 msgstr "Eriþim yetkilendirme bilgisiyle yeniden deneniyor."
 
-#: WWW/Library/Implementation/HTTP.c:2016
+#: WWW/Library/Implementation/HTTP.c:2022
 msgid "Show the 401 message body?"
 msgstr "401 mesaj gövdesi gösterilsin mi?"
 
-#: WWW/Library/Implementation/HTTP.c:2059
+#: WWW/Library/Implementation/HTTP.c:2065
 msgid "Show the 407 message body?"
 msgstr "407 mesaj gövdesi gösterilsin mi?"
 
@@ -3225,7 +3221,7 @@ msgstr "407 mesaj gövdesi gösterilsin mi?"
 #. * Bad or unknown server_status number.  Take a chance and hope
 #. * there is something to display.  - FM
 #.
-#: WWW/Library/Implementation/HTTP.c:2159
+#: WWW/Library/Implementation/HTTP.c:2165
 msgid "Unknown status reply from server!"
 msgstr "Sunucudan bilinmeyen durum yanýtý!"
 
@@ -3413,106 +3409,106 @@ msgstr "Yönetici"
 msgid "Host"
 msgstr "Bilgisayar"
 
-#: src/GridText.c:705
+#: src/GridText.c:704
 msgid "Memory exhausted, display interrupted!"
 msgstr "Bellek tükendi, görüntü kesildi!"
 
-#: src/GridText.c:710
+#: src/GridText.c:709
 msgid "Memory exhausted, will interrupt transfer!"
 msgstr "Bellek tükendi, aktarým kesilecek!"
 
-#: src/GridText.c:3654
+#: src/GridText.c:3663
 msgid " *** MEMORY EXHAUSTED ***"
 msgstr " *** BELLEK TÜKENDÝ ***"
 
-#: src/GridText.c:6089 src/GridText.c:6096 src/LYList.c:239
+#: src/GridText.c:6057 src/GridText.c:6064 src/LYList.c:239
 msgid "unknown field or link"
 msgstr "bilinmeyen alan ya da link"
 
-#: src/GridText.c:6105
+#: src/GridText.c:6073
 msgid "text entry field"
 msgstr "metin giriþ alaný"
 
-#: src/GridText.c:6108
+#: src/GridText.c:6076
 msgid "password entry field"
 msgstr "parola giriþ alaný"
 
-#: src/GridText.c:6111
+#: src/GridText.c:6079
 msgid "checkbox"
 msgstr "onay kutusu"
 
-#: src/GridText.c:6114
+#: src/GridText.c:6082
 msgid "radio button"
 msgstr "radyo düðmesi"
 
-#: src/GridText.c:6117
+#: src/GridText.c:6085
 msgid "submit button"
 msgstr "gönderme düðmesi"
 
-#: src/GridText.c:6120
+#: src/GridText.c:6088
 msgid "reset button"
 msgstr "temizleme düðmesi"
 
-#: src/GridText.c:6123
+#: src/GridText.c:6091
 msgid "popup menu"
 msgstr "açýlýr menü"
 
-#: src/GridText.c:6126
+#: src/GridText.c:6094
 msgid "hidden form field"
 msgstr "gizli form alaný"
 
-#: src/GridText.c:6129
+#: src/GridText.c:6097
 msgid "text entry area"
 msgstr "metin giriþ alaný"
 
-#: src/GridText.c:6132
+#: src/GridText.c:6100
 msgid "range entry field"
 msgstr "erim giriþ alaný"
 
-#: src/GridText.c:6135
+#: src/GridText.c:6103
 msgid "file entry field"
 msgstr "dosya giriþ alaný"
 
-#: src/GridText.c:6138
+#: src/GridText.c:6106
 msgid "text-submit field"
 msgstr "metin-gönderme alaný"
 
-#: src/GridText.c:6141
+#: src/GridText.c:6109
 msgid "image-submit button"
 msgstr "resim-gönderme alaný"
 
-#: src/GridText.c:6144
+#: src/GridText.c:6112
 msgid "keygen field"
 msgstr "keygen alaný"
 
-#: src/GridText.c:6147
+#: src/GridText.c:6115
 msgid "unknown form field"
 msgstr "bilinmeyen form alaný"
 
-#: src/GridText.c:10279
+#: src/GridText.c:10245
 msgid "Can't open file for uploading"
 msgstr "Yüklemek için dosya açýlamýyor."
 
-#: src/GridText.c:11438
+#: src/GridText.c:11404
 #, c-format
 msgid "Submitting %s"
 msgstr "%s gönderiliyor"
 
 #. ugliness has happened; inform user and do the best we can
-#: src/GridText.c:12491
+#: src/GridText.c:12457
 msgid "Hang Detect: TextAnchor struct corrupted - suggest aborting!"
 msgstr "Takýlma Saptandý: TextAnchor struct bozuk - sonlandýrmanýz önerilir!"
 
 #. don't show previous state
-#: src/GridText.c:12628
+#: src/GridText.c:12594
 msgid "Wrap lines to fit displayed area?"
 msgstr "Görüntülenen alana sýðmak üzere satýrlar sarmalansýn mý?"
 
-#: src/GridText.c:12680
+#: src/GridText.c:12646
 msgid "Very long lines have been wrapped!"
 msgstr "Çok uzun satýrlar sarmalandý!"
 
-#: src/GridText.c:13185
+#: src/GridText.c:13151
 msgid "Very long lines have been truncated!"
 msgstr "Çok uzun satýrlarýn sonundan kýrpýldý!"
 
@@ -3606,35 +3602,35 @@ msgstr "hayýr"
 msgid "Y/N/A/V"
 msgstr "(E/H/Daima/Asla)"
 
-#: src/HTML.c:5911
+#: src/HTML.c:5912
 msgid "Description:"
 msgstr "Açýklama:"
 
-#: src/HTML.c:5916
+#: src/HTML.c:5917
 msgid "(none)"
 msgstr "(hiçbiri)"
 
-#: src/HTML.c:5920
+#: src/HTML.c:5921
 msgid "Filepath:"
 msgstr "Dosya yolu:"
 
-#: src/HTML.c:5926
+#: src/HTML.c:5927
 msgid "(unknown)"
 msgstr "(bilinmiyor)"
 
-#: src/HTML.c:7353
+#: src/HTML.c:7352
 msgid "Document has only hidden links.  Use the 'l'ist command."
 msgstr "Belgede yalnýzca gizli linkler var.  Listele(l) komutunu kullanýnýz."
 
-#: src/HTML.c:7852
+#: src/HTML.c:7851
 msgid "Source cache error - disk full?"
 msgstr "Kaynak önbellek hatasý - disk tamamen dolu mu?"
 
-#: src/HTML.c:7865
+#: src/HTML.c:7864
 msgid "Source cache error - not enough memory!"
 msgstr "Kaynak önbellek hatasý - bellek yetersiz!"
 
-#: src/LYBookmark.c:164
+#: src/LYBookmark.c:167
 msgid ""
 "     This file is an HTML representation of the X Mosaic hotlist file.\n"
 "     Outdated or invalid links may be removed by using the\n"
@@ -3646,7 +3642,7 @@ msgstr ""
 "     komutu kullanýlarak çýkartýlabilir, bu genellikle 'R' tuþudur, ancak\n"
 "     siz ya da sistem yöneticiniz tarafýndan yeniden eþlemlenmiþ olabilir."
 
-#: src/LYBookmark.c:371
+#: src/LYBookmark.c:374
 #, c-format
 msgid ""
 "     You can delete links by the 'R' key<br>\n"
@@ -3655,7 +3651,7 @@ msgstr ""
 "     Linkleri 'R' tuþuyla silebilirsiniz<br>\n"
 "<ol>\n"
 
-#: src/LYBookmark.c:374
+#: src/LYBookmark.c:377
 msgid ""
 "     You can delete links using the remove bookmark command.  It is usually\n"
 "     the 'R' key but may have been remapped by you or your system\n"
@@ -3665,7 +3661,7 @@ msgstr ""
 "     'R' tuþudur, ancak siz ya da sistem yöneticiniz tarafýndan yeniden\n"
 "    .eþlemlenmiþ olabilir."
 
-#: src/LYBookmark.c:378
+#: src/LYBookmark.c:381
 msgid ""
 "     This file also may be edited with a standard text editor to delete\n"
 "     outdated or invalid links, or to change their order."
@@ -3673,7 +3669,7 @@ msgstr ""
 "     Bu dosya, kullanýmdan kalkmýþ, geçersiz linkleri silmek ya da sýralarýný\n"
 "     deðiþtirmek üzere standart bir metin düzenleyiciyle de düzenlenebilir."
 
-#: src/LYBookmark.c:381
+#: src/LYBookmark.c:384
 msgid ""
 "Note: if you edit this file manually\n"
 "      you should not change the format within the lines\n"
@@ -3685,7 +3681,7 @@ msgstr ""
 "      baþka HTML belirteci eklememelisiniz.\n"
 "      Herbir linkin tek satýr olarak kaydedildiðine emin olun."
 
-#: src/LYBookmark.c:677
+#: src/LYBookmark.c:680
 #, c-format
 msgid "File may be recoverable from %s during this session"
 msgstr "Dosya, bu oturum boyunca %s'den kurtarýlabilir"
@@ -3723,19 +3719,19 @@ msgstr "Güncel CGI betik desteðini saðlar.\n"
 msgid "Exiting via interrupt:"
 msgstr "Ýþkesmesi aracýlýðýyla kapanýyor:"
 
-#: src/LYCookie.c:2461
+#: src/LYCookie.c:2477
 msgid "(from a previous session)"
 msgstr "(önceki bir oturumdan)"
 
-#: src/LYCookie.c:2522
+#: src/LYCookie.c:2538
 msgid "Maximum Gobble Date:"
 msgstr "Maksimum Silip Süpürme Tarihi:"
 
-#: src/LYCookie.c:2562
+#: src/LYCookie.c:2577
 msgid "Internal"
 msgstr "Dahili"
 
-#: src/LYCookie.c:2563
+#: src/LYCookie.c:2578
 msgid "cookie_domain_flag_set error, aborting program"
 msgstr "cookie_domain_flag_set hatasý, program yarýda kesiliyor"
 
@@ -3803,39 +3799,39 @@ msgstr "Düzenleyici sinyalle öldürüldü"
 msgid "Editor returned with error status %s"
 msgstr "Düzenleyici %s hata durumuyla döndü."
 
-#: src/LYDownload.c:504
+#: src/LYDownload.c:506
 msgid "Downloaded link:"
 msgstr "Ýndirilmiþ link:"
 
-#: src/LYDownload.c:509
+#: src/LYDownload.c:511
 msgid "Suggested file name:"
 msgstr "Önerilen dosya adý:"
 
-#: src/LYDownload.c:514
+#: src/LYDownload.c:516
 msgid "Standard download options:"
 msgstr "Standart indirme seçenekleri:"
 
-#: src/LYDownload.c:515
+#: src/LYDownload.c:517
 msgid "Download options:"
 msgstr "Ýndirme seçenekleri:"
 
-#: src/LYDownload.c:531
+#: src/LYDownload.c:533
 msgid "Save to disk"
 msgstr "Diske kaydet"
 
-#: src/LYDownload.c:545
+#: src/LYDownload.c:547
 msgid "View temporary file"
 msgstr "Geçici dosyayý görüntüle"
 
-#: src/LYDownload.c:552
+#: src/LYDownload.c:554
 msgid "Save to disk disabled."
 msgstr "Diske kaydetme devre dýþý..."
 
-#: src/LYDownload.c:556 src/LYPrint.c:1310
+#: src/LYDownload.c:558 src/LYPrint.c:1310
 msgid "Local additions:"
 msgstr "Yerel eklentiler:"
 
-#: src/LYDownload.c:567 src/LYUpload.c:211
+#: src/LYDownload.c:569 src/LYUpload.c:211
 msgid "No Name Given"
 msgstr "Ýsim Verilmemiþ"
 
@@ -4250,19 +4246,19 @@ msgstr "Bu mesajý otomatik olarak oluþturan"
 msgid "No system mailer configured"
 msgstr "Ayarlanmýþ sistem postacýsý yok"
 
-#: src/LYMain.c:1023
+#: src/LYMain.c:1001
 msgid "No Winsock found, sorry."
 msgstr "Winsock bulunamadý, üzgünüm."
 
-#: src/LYMain.c:1226
+#: src/LYMain.c:1198
 msgid "You MUST define a valid TMP or TEMP area!"
 msgstr "Geçerli bir TMP ya da TEMP alaný tanýmlamalýsýnýz!"
 
-#: src/LYMain.c:1279 src/LYMainLoop.c:5074
+#: src/LYMain.c:1251 src/LYMainLoop.c:5051
 msgid "No such directory"
 msgstr "Böyle bir dizin yok"
 
-#: src/LYMain.c:1464
+#: src/LYMain.c:1436
 #, c-format
 msgid ""
 "\n"
@@ -4273,7 +4269,7 @@ msgstr ""
 "Ayarlama dosyasý \"%s\" temin edilemiyor.\n"
 "\n"
 
-#: src/LYMain.c:1474
+#: src/LYMain.c:1446
 #, c-format
 msgid ""
 "\n"
@@ -4284,7 +4280,7 @@ msgstr ""
 "Lynx karakter kümeleri bildirilmemiþ.\n"
 "\n"
 
-#: src/LYMain.c:1503
+#: src/LYMain.c:1475
 #, c-format
 msgid ""
 "\n"
@@ -4295,7 +4291,7 @@ msgstr ""
 "Lynx düzenleme eþlemi bildirilmemiþ.\n"
 "\n"
 
-#: src/LYMain.c:1579
+#: src/LYMain.c:1551
 #, c-format
 msgid ""
 "\n"
@@ -4306,172 +4302,172 @@ msgstr ""
 "Lynx dosyasý \"%s\" temin edilemiyor.\n"
 "\n"
 
-#: src/LYMain.c:1654
+#: src/LYMain.c:1626
 #, c-format
 msgid "Ignored %d characters from standard input.\n"
 msgstr "Standart girdiden %d karakter yok sayýldý.\n"
 
-#: src/LYMain.c:1656
+#: src/LYMain.c:1628
 #, c-format
 msgid "Use \"-stdin\" or \"-\" to tell how to handle piped input.\n"
 msgstr "Veriyolu girdisinin nasýl halledileceðini belirtmek için \"-stdin\" ya da \"-\" kullanýn.\n"
 
-#: src/LYMain.c:1804
+#: src/LYMain.c:1776
 msgid "Warning:"
 msgstr "Uyarý:"
 
-#: src/LYMain.c:2372
+#: src/LYMain.c:2341
 msgid "persistent cookies state will be changed in next session only."
 msgstr "kalýcý çerezler durumu, yalnýzca gelecek oturumda deðiþecek."
 
-#: src/LYMain.c:2617 src/LYMain.c:2662
+#: src/LYMain.c:2586 src/LYMain.c:2631
 #, c-format
 msgid "Lynx: ignoring unrecognized charset=%s\n"
 msgstr "Lynx: tanýnmayan karakterkümesi=%s yoksayýlýyor\n"
 
-#: src/LYMain.c:3181
+#: src/LYMain.c:3150
 #, c-format
 msgid "%s Version %s (%s)"
 msgstr "%s Sürüm %s (%s)"
 
-#: src/LYMain.c:3219
+#: src/LYMain.c:3188
 #, c-format
 msgid "Built on %s %s %s\n"
 msgstr "%s %s %s üzerine yapýlandýrýldý\n"
 
-#: src/LYMain.c:3241
+#: src/LYMain.c:3210
 msgid "Copyrights held by the Lynx Developers Group,"
 msgstr "Telif haklarý Lynx Geliþtirme Grubu,"
 
-#: src/LYMain.c:3242
+#: src/LYMain.c:3211
 msgid "the University of Kansas, CERN, and other contributors."
 msgstr "Kansas Üniversitesi, CERN ve diðer katýlýmcýlar tarafýndan (saklý) tutulmaktadýr."
 
-#: src/LYMain.c:3243
+#: src/LYMain.c:3212
 msgid "Distributed under the GNU General Public License (Version 2)."
 msgstr "GNU Genel Kamu Lisansý (Sürüm 2) altýnda daðýtýlmaktadýr."
 
-#: src/LYMain.c:3244
+#: src/LYMain.c:3213
 msgid "See http://lynx.isc.org/ and the online help for more information."
 msgstr "Daha fazla bilgi için http://lynx.isc.org/ ve çevrim içi yardýma bakýnýz."
 
-#: src/LYMain.c:4065
+#: src/LYMain.c:4032
 #, c-format
 msgid "USAGE: %s [options] [file]\n"
 msgstr "KULLANIM: %s [seçenekler] [dosya]\n"
 
-#: src/LYMain.c:4066
+#: src/LYMain.c:4033
 #, c-format
 msgid "Options are:\n"
 msgstr "Seçenekler:\n"
 
-#: src/LYMain.c:4365
+#: src/LYMain.c:4332
 #, c-format
 msgid "%s: Invalid Option: %s\n"
 msgstr "%s: Geçersiz Seçenek: %s\n"
 
-#: src/LYMainLoop.c:594
+#: src/LYMainLoop.c:571
 #, c-format
 msgid "Internal error: Invalid mouse link %d!"
 msgstr "Dahili hata: Geçersiz fare linki %d!"
 
-#: src/LYMainLoop.c:714 src/LYMainLoop.c:5096
+#: src/LYMainLoop.c:691 src/LYMainLoop.c:5073
 msgid "A URL specified by the user"
 msgstr "Kullanýcý tarafýndan belirtilmiþ bir URL"
 
-#: src/LYMainLoop.c:1173
+#: src/LYMainLoop.c:1150
 msgid "Enctype multipart/form-data not yet supported!  Cannot submit."
 msgstr "Enctip çok parçalý/form verisi henüz desteklenmiyor!  Gönderilemez."
 
 #.
 #. * Make a name for this help file.
 #.
-#: src/LYMainLoop.c:3105
+#: src/LYMainLoop.c:3082
 msgid "Help Screen"
 msgstr "Yardým Ekraný"
 
-#: src/LYMainLoop.c:3226
+#: src/LYMainLoop.c:3203
 msgid "System Index"
 msgstr "Sistem Ýndeksi"
 
-#: src/LYMainLoop.c:3585 src/LYMainLoop.c:5320
+#: src/LYMainLoop.c:3562 src/LYMainLoop.c:5297
 msgid "Entry into main screen"
 msgstr "Ana ekrana giriþ"
 
-#: src/LYMainLoop.c:3843
+#: src/LYMainLoop.c:3820
 msgid "No next document present"
 msgstr "Sonrasýnda baþka belge yok"
 
-#: src/LYMainLoop.c:4139
+#: src/LYMainLoop.c:4116
 msgid "charset for this document specified explicitly, sorry..."
 msgstr "bu belge için karakterkümesi özgün þekilde belirtilmiþtir, üzgünüm..."
 
-#: src/LYMainLoop.c:5052
+#: src/LYMainLoop.c:5029
 msgid "cd to:"
 msgstr "hangi dizine cd:"
 
-#: src/LYMainLoop.c:5077
+#: src/LYMainLoop.c:5054
 msgid "A component of path is not a directory"
 msgstr "Yolun bileþenlerinden biri dizin deðildir"
 
-#: src/LYMainLoop.c:5080
+#: src/LYMainLoop.c:5057
 msgid "failed to change directory"
 msgstr "dizin deðiþtirme baþarýsýz"
 
-#: src/LYMainLoop.c:6252
+#: src/LYMainLoop.c:6229
 msgid "Reparsing document under current settings..."
 msgstr "Mevcut ayarlarla belge yeniden ayrýþtýrýlýyor..."
 
-#: src/LYMainLoop.c:6543
+#: src/LYMainLoop.c:6521
 #, c-format
 msgid "Fatal error - could not open output file %s\n"
 msgstr "Ölümcül hata - çýktý dosyasý %s açýlamýyor\n"
 
-#: src/LYMainLoop.c:6880
+#: src/LYMainLoop.c:6858
 msgid "TABLE center enable."
 msgstr "TABLO ortala(mayý) etkinleþtir."
 
-#: src/LYMainLoop.c:6883
+#: src/LYMainLoop.c:6861
 msgid "TABLE center disable."
 msgstr "TABLO ortala(mayý) devre dýþý býrak."
 
-#: src/LYMainLoop.c:6960
+#: src/LYMainLoop.c:6938
 msgid "Current URL is empty."
 msgstr "Mevcut URL boþ."
 
-#: src/LYMainLoop.c:6962 src/LYUtils.c:1828
+#: src/LYMainLoop.c:6940 src/LYUtils.c:1828
 msgid "Copy to clipboard failed."
 msgstr "Panoya kopyalama baþarýsýz."
 
-#: src/LYMainLoop.c:6964
+#: src/LYMainLoop.c:6942
 msgid "Document URL put to clipboard."
 msgstr "Belge URL'sini panoya koy."
 
-#: src/LYMainLoop.c:6966
+#: src/LYMainLoop.c:6944
 msgid "Link URL put to clipboard."
 msgstr "Link URL'sini panoya koy."
 
-#: src/LYMainLoop.c:6993
+#: src/LYMainLoop.c:6971
 msgid "No URL in the clipboard."
 msgstr "Panoda URL yok."
 
-#: src/LYMainLoop.c:7664 src/LYMainLoop.c:7834
+#: src/LYMainLoop.c:7642 src/LYMainLoop.c:7812
 msgid "-index-"
 msgstr "-indeks-"
 
-#: src/LYMainLoop.c:7774
+#: src/LYMainLoop.c:7752
 msgid "lynx: Can't access startfile"
 msgstr "lynx: baþlat dosyasýna (startfile) eriþilemiyor"
 
-#: src/LYMainLoop.c:7786
+#: src/LYMainLoop.c:7764
 msgid "lynx: Start file could not be found or is not text/html or text/plain"
 msgstr "lynx: Baþlat dosyasý bulunamýyor ya da html-metin ya da salt-metin deðil"
 
-#: src/LYMainLoop.c:7787
+#: src/LYMainLoop.c:7765
 msgid "      Exiting..."
 msgstr "      Kapanýyor..."
 
-#: src/LYMainLoop.c:7828
+#: src/LYMainLoop.c:7806
 msgid "-more-"
 msgstr "-devam-"
 
@@ -4535,348 +4531,348 @@ msgstr ""
 msgid "Message has no original text!"
 msgstr "Mesajda orijinal metin yok!"
 
-#: src/LYOptions.c:765
+#: src/LYOptions.c:768
 msgid "review/edit B)ookmarks files"
 msgstr "Yer imi(B) dosyalarýný gözden geçir/düzenle"
 
-#: src/LYOptions.c:767
+#: src/LYOptions.c:770
 msgid "B)ookmark file: "
 msgstr "Yer imi(B) dosyasý: "
 
-#: src/LYOptions.c:2127 src/LYOptions.c:2134
+#: src/LYOptions.c:2131 src/LYOptions.c:2138
 msgid "ON"
 msgstr "AÇIK"
 
 #. verbose_img variable
-#: src/LYOptions.c:2128 src/LYOptions.c:2133 src/LYOptions.c:2285 src/LYOptions.c:2296
+#: src/LYOptions.c:2132 src/LYOptions.c:2137 src/LYOptions.c:2289 src/LYOptions.c:2300
 msgid "OFF"
 msgstr "KAPALI"
 
-#: src/LYOptions.c:2129
+#: src/LYOptions.c:2133
 msgid "NEVER"
 msgstr "ASLA"
 
-#: src/LYOptions.c:2130
+#: src/LYOptions.c:2134
 msgid "ALWAYS"
 msgstr "HER ZAMAN"
 
-#: src/LYOptions.c:2146 src/LYOptions.c:2277
+#: src/LYOptions.c:2150 src/LYOptions.c:2281
 msgid "ignore"
 msgstr "yoksay"
 
-#: src/LYOptions.c:2147
+#: src/LYOptions.c:2151
 msgid "ask user"
 msgstr "kullanýcýya sor"
 
-#: src/LYOptions.c:2148
+#: src/LYOptions.c:2152
 msgid "accept all"
 msgstr "tümünü kabul et"
 
-#: src/LYOptions.c:2160
+#: src/LYOptions.c:2164
 msgid "ALWAYS OFF"
 msgstr "HER ZAMAN KAPALI"
 
-#: src/LYOptions.c:2161
+#: src/LYOptions.c:2165
 msgid "FOR LOCAL FILES ONLY"
 msgstr "YALNIZCA YEREL DOSYALAR ÝÇÝN"
 
-#: src/LYOptions.c:2163
+#: src/LYOptions.c:2167
 msgid "ALWAYS ON"
 msgstr "HER ZAMAN AÇIK"
 
-#: src/LYOptions.c:2175
+#: src/LYOptions.c:2179
 msgid "Numbers act as arrows"
 msgstr "Rakamlar oklar gibi davranýrlar"
 
-#: src/LYOptions.c:2177
+#: src/LYOptions.c:2181
 msgid "Links are numbered"
 msgstr "Linkler numaralandý"
 
-#: src/LYOptions.c:2180
+#: src/LYOptions.c:2184
 msgid "Links and form fields are numbered"
 msgstr "Linkler ve form alanlarý numaralandý"
 
-#: src/LYOptions.c:2183
+#: src/LYOptions.c:2187
 msgid "Form fields are numbered"
 msgstr "Form alanlarý numaralandý"
 
-#: src/LYOptions.c:2197
+#: src/LYOptions.c:2201
 msgid "Case insensitive"
 msgstr "Büyük/küçük harf duyarsýz"
 
-#: src/LYOptions.c:2198
+#: src/LYOptions.c:2202
 msgid "Case sensitive"
 msgstr "Büyük/küçük harf duyarlý"
 
-#: src/LYOptions.c:2222
+#: src/LYOptions.c:2226
 msgid "prompt normally"
 msgstr "normal bilgi istemi"
 
-#: src/LYOptions.c:2223
+#: src/LYOptions.c:2227
 msgid "force yes-response"
 msgstr "evet-yanýtýna zorla"
 
-#: src/LYOptions.c:2224
+#: src/LYOptions.c:2228
 msgid "force no-response"
 msgstr "hayýr-yanýtýna zorla"
 
-#: src/LYOptions.c:2242
+#: src/LYOptions.c:2246
 msgid "Novice"
 msgstr "Acemi"
 
-#: src/LYOptions.c:2243
+#: src/LYOptions.c:2247
 msgid "Intermediate"
 msgstr "Orta düzey"
 
-#: src/LYOptions.c:2244
+#: src/LYOptions.c:2248
 msgid "Advanced"
 msgstr "Ýleri düzey"
 
-#: src/LYOptions.c:2253
+#: src/LYOptions.c:2257
 msgid "By First Visit"
 msgstr "Ýlk Ziyaretle"
 
-#: src/LYOptions.c:2255
+#: src/LYOptions.c:2259
 msgid "By First Visit Reversed"
 msgstr "Ýlk Ziyaretle-Tersten"
 
-#: src/LYOptions.c:2256
+#: src/LYOptions.c:2260
 msgid "As Visit Tree"
 msgstr "Ziyaret Aðacý Gibi"
 
-#: src/LYOptions.c:2257
+#: src/LYOptions.c:2261
 msgid "By Last Visit"
 msgstr "Son Ziyaretle"
 
-#: src/LYOptions.c:2259
+#: src/LYOptions.c:2263
 msgid "By Last Visit Reversed"
 msgstr "Son Ziyaretle-Tersten"
 
 #. Old_DTD variable
-#: src/LYOptions.c:2270
+#: src/LYOptions.c:2274
 msgid "relaxed (TagSoup mode)"
 msgstr "gevþek (TagSoup kipi)"
 
-#: src/LYOptions.c:2271
+#: src/LYOptions.c:2275
 msgid "strict (SortaSGML mode)"
 msgstr "katý (SortaSGML kipi)"
 
-#: src/LYOptions.c:2278
+#: src/LYOptions.c:2282
 msgid "as labels"
 msgstr "etiket gibi"
 
-#: src/LYOptions.c:2279
+#: src/LYOptions.c:2283
 msgid "as links"
 msgstr "link gibi"
 
-#: src/LYOptions.c:2286
+#: src/LYOptions.c:2290
 msgid "show filename"
 msgstr "dosya adýný göster"
 
-#: src/LYOptions.c:2297
+#: src/LYOptions.c:2301
 msgid "STANDARD"
 msgstr "STANDART"
 
-#: src/LYOptions.c:2298
+#: src/LYOptions.c:2302
 msgid "ADVANCED"
 msgstr "ÝLERÝ DÜZEY"
 
-#: src/LYOptions.c:2329
+#: src/LYOptions.c:2333
 msgid "Directories first"
 msgstr "Önce dizinler"
 
-#: src/LYOptions.c:2330
+#: src/LYOptions.c:2334
 msgid "Files first"
 msgstr "Önce dosyalar"
 
-#: src/LYOptions.c:2331
+#: src/LYOptions.c:2335
 msgid "Mixed style"
 msgstr "Karýþýk stil"
 
-#: src/LYOptions.c:2339 src/LYOptions.c:2359
+#: src/LYOptions.c:2343 src/LYOptions.c:2363
 msgid "By Name"
 msgstr "Ýsimle"
 
-#: src/LYOptions.c:2340 src/LYOptions.c:2360
+#: src/LYOptions.c:2344 src/LYOptions.c:2364
 msgid "By Type"
 msgstr "Türle"
 
-#: src/LYOptions.c:2341 src/LYOptions.c:2361
+#: src/LYOptions.c:2345 src/LYOptions.c:2365
 msgid "By Size"
 msgstr "Boyutla"
 
-#: src/LYOptions.c:2342 src/LYOptions.c:2362
+#: src/LYOptions.c:2346 src/LYOptions.c:2366
 msgid "By Date"
 msgstr "Tarihle"
 
-#: src/LYOptions.c:2343
+#: src/LYOptions.c:2347
 msgid "By Mode"
 msgstr "Kiple"
 
-#: src/LYOptions.c:2345
+#: src/LYOptions.c:2349
 msgid "By User"
 msgstr "Kullanýcýyla"
 
-#: src/LYOptions.c:2346
+#: src/LYOptions.c:2350
 msgid "By Group"
 msgstr "Grupla"
 
-#: src/LYOptions.c:2371
+#: src/LYOptions.c:2375
 msgid "Do not show rate"
 msgstr "Hýzý gösterme"
 
-#: src/LYOptions.c:2372 src/LYOptions.c:2373
+#: src/LYOptions.c:2376 src/LYOptions.c:2377
 #, c-format
 msgid "Show %s/sec rate"
 msgstr "%s/sn hýzýný göster"
 
-#: src/LYOptions.c:2375 src/LYOptions.c:2376
+#: src/LYOptions.c:2379 src/LYOptions.c:2380
 #, c-format
 msgid "Show %s/sec, ETA"
 msgstr "%s/sn'yi göster, ETA"
 
-#: src/LYOptions.c:2379
+#: src/LYOptions.c:2383
 msgid "Show progressbar"
 msgstr "Geliþim çubuðunu göster"
 
-#: src/LYOptions.c:2391
+#: src/LYOptions.c:2395
 msgid "Accept lynx's internal types"
 msgstr "Lynx'in dahili türlerini kabul et"
 
-#: src/LYOptions.c:2392
+#: src/LYOptions.c:2396
 msgid "Also accept lynx.cfg's types"
 msgstr "Lynx cfg'nin türlerini de kabul et"
 
-#: src/LYOptions.c:2393
+#: src/LYOptions.c:2397
 msgid "Also accept user's types"
 msgstr "Kullanýcýnýn türlerini de kabul et"
 
-#: src/LYOptions.c:2394
+#: src/LYOptions.c:2398
 msgid "Also accept system's types"
 msgstr "Sistemin türlerini de kabul et"
 
-#: src/LYOptions.c:2395
+#: src/LYOptions.c:2399
 msgid "Accept all types"
 msgstr "Tüm türleri kabul et"
 
-#: src/LYOptions.c:2404
+#: src/LYOptions.c:2408
 msgid "gzip"
 msgstr "gzip"
 
-#: src/LYOptions.c:2405
+#: src/LYOptions.c:2409
 msgid "deflate"
 msgstr "söndür"
 
-#: src/LYOptions.c:2408
+#: src/LYOptions.c:2412
 msgid "compress"
 msgstr "sýkýþtýr"
 
-#: src/LYOptions.c:2411
+#: src/LYOptions.c:2415
 msgid "bzip2"
 msgstr "bzip2"
 
-#: src/LYOptions.c:2413
+#: src/LYOptions.c:2417
 msgid "All"
 msgstr "Tümü"
 
-#: src/LYOptions.c:2681 src/LYOptions.c:2705
+#: src/LYOptions.c:2685 src/LYOptions.c:2709
 #, c-format
 msgid "Use %s to invoke the Options menu!"
 msgstr "Seçenekler menüsünü çaðýrmak için %s kullanýnýz!"
 
-#: src/LYOptions.c:3477
+#: src/LYOptions.c:3481
 msgid "(options marked with (!) will not be saved)"
 msgstr "((!) ile iþaretlenmiþ seçenekler kaydedilmeyecek)"
 
-#: src/LYOptions.c:3485
+#: src/LYOptions.c:3489
 msgid "General Preferences"
 msgstr "Genel Tercihler"
 
 #. ***************************************************************
 #. User Mode: SELECT
-#: src/LYOptions.c:3489
+#: src/LYOptions.c:3493
 msgid "User mode"
 msgstr "Kullanýcý kipi"
 
 #. Editor: INPUT
-#: src/LYOptions.c:3495
+#: src/LYOptions.c:3499
 msgid "Editor"
 msgstr "Düzenleyici"
 
 #. Search Type: SELECT
-#: src/LYOptions.c:3500
+#: src/LYOptions.c:3504
 msgid "Type of Search"
 msgstr "Arama Tipi"
 
-#: src/LYOptions.c:3505
+#: src/LYOptions.c:3509
 msgid "Security and Privacy"
 msgstr "Güvenlik ve Mahremiyet"
 
 #. ***************************************************************
 #. Cookies: SELECT
-#: src/LYOptions.c:3509
+#: src/LYOptions.c:3513
 msgid "Cookies"
 msgstr "Çerezler"
 
 #. Cookie Prompting: SELECT
-#: src/LYOptions.c:3523
+#: src/LYOptions.c:3527
 msgid "Invalid-Cookie Prompting"
 msgstr "Geçersiz Çerez Bilgi Ýstemi"
 
 #. SSL Prompting: SELECT
-#: src/LYOptions.c:3530
+#: src/LYOptions.c:3534
 msgid "SSL Prompting"
 msgstr "SSL Bilgi Ýstemi"
 
-#: src/LYOptions.c:3536
+#: src/LYOptions.c:3540
 msgid "Keyboard Input"
 msgstr "Klavye Girdisi"
 
 #. ***************************************************************
 #. Keypad Mode: SELECT
-#: src/LYOptions.c:3540
+#: src/LYOptions.c:3544
 msgid "Keypad mode"
 msgstr "Mini klavye(keypad) kipi"
 
 #. Emacs keys: ON/OFF
-#: src/LYOptions.c:3546
+#: src/LYOptions.c:3550
 msgid "Emacs keys"
 msgstr "Emacs tuþlarý"
 
 #. VI Keys: ON/OFF
-#: src/LYOptions.c:3552
+#: src/LYOptions.c:3556
 msgid "VI keys"
 msgstr "VI tuþlarý"
 
 #. Line edit style: SELECT
 #. well, at least 2 line edit styles available
-#: src/LYOptions.c:3559
+#: src/LYOptions.c:3563
 msgid "Line edit style"
 msgstr "Satýr düzenleme stili"
 
 #. Keyboard layout: SELECT
-#: src/LYOptions.c:3571
+#: src/LYOptions.c:3575
 msgid "Keyboard layout"
 msgstr "Klavye yerleþimi"
 
 #.
 #. * Display and Character Set
 #.
-#: src/LYOptions.c:3585
+#: src/LYOptions.c:3589
 msgid "Display and Character Set"
 msgstr "Görüntüleme ve Karakter Kümesi"
 
 #. Use locale-based character set: ON/OFF
-#: src/LYOptions.c:3590
+#: src/LYOptions.c:3594
 msgid "Use locale-based character set"
 msgstr "Yerel tabanlý karakter kümesini kullan"
 
 #. Display Character Set: SELECT
-#: src/LYOptions.c:3599
+#: src/LYOptions.c:3603
 msgid "Display character set"
 msgstr "Karakter kümesini görüntüle"
 
-#: src/LYOptions.c:3630
+#: src/LYOptions.c:3634
 msgid "Assumed document character set"
 msgstr "Varsayýlan belge karakter kümesi"
 
@@ -4885,185 +4881,185 @@ msgstr "Varsayýlan belge karakter kümesi"
 #. * we split the header to make it more readable:
 #. * "CJK mode" for CJK display charsets, and "Raw 8-bit" for others.
 #.
-#: src/LYOptions.c:3650
+#: src/LYOptions.c:3654
 msgid "CJK mode"
 msgstr "CJK kipi"
 
-#: src/LYOptions.c:3652
+#: src/LYOptions.c:3656
 msgid "Raw 8-bit"
 msgstr "Ham 8-bit"
 
 #. X Display: INPUT
-#: src/LYOptions.c:3660
+#: src/LYOptions.c:3664
 msgid "X Display"
 msgstr "X Görüntüleme"
 
 #.
 #. * Document Appearance
 #.
-#: src/LYOptions.c:3666
+#: src/LYOptions.c:3670
 msgid "Document Appearance"
 msgstr "Belge Görünümü"
 
-#: src/LYOptions.c:3672
+#: src/LYOptions.c:3676
 msgid "Show color"
 msgstr "Renkleri göster"
 
 #. Show cursor: ON/OFF
-#: src/LYOptions.c:3696
+#: src/LYOptions.c:3700
 msgid "Show cursor"
 msgstr "Ýmleci göster"
 
 #. Underline links: ON/OFF
-#: src/LYOptions.c:3702
+#: src/LYOptions.c:3706
 msgid "Underline links"
 msgstr "Linklerin altý çizili"
 
 #. Show scrollbar: ON/OFF
-#: src/LYOptions.c:3709
+#: src/LYOptions.c:3713
 msgid "Show scrollbar"
 msgstr "Kaydýrma çubuðunu göster"
 
 #. Select Popups: ON/OFF
-#: src/LYOptions.c:3716
+#: src/LYOptions.c:3720
 msgid "Popups for select fields"
 msgstr "Seçme alanlar için açýlýrlar(popups)"
 
 #. HTML error recovery: SELECT
-#: src/LYOptions.c:3722
+#: src/LYOptions.c:3726
 msgid "HTML error recovery"
 msgstr "HTML hata kurtarma"
 
 #. Show Images: SELECT
-#: src/LYOptions.c:3728
+#: src/LYOptions.c:3732
 msgid "Show images"
 msgstr "Resimleri göster"
 
 #. Verbose Images: ON/OFF
-#: src/LYOptions.c:3742
+#: src/LYOptions.c:3746
 msgid "Verbose images"
 msgstr "Resimleri dillendir"
 
 #.
 #. * Headers Transferred to Remote Servers
 #.
-#: src/LYOptions.c:3750
+#: src/LYOptions.c:3754
 msgid "Headers Transferred to Remote Servers"
 msgstr "Baþlýklar Karþý Sunuculara Aktarýldý"
 
 #. ***************************************************************
 #. Mail Address: INPUT
-#: src/LYOptions.c:3754
+#: src/LYOptions.c:3758
 msgid "Personal mail address"
 msgstr "Kiþisel mektup adresi"
 
-#: src/LYOptions.c:3760
+#: src/LYOptions.c:3764
 msgid "Password for anonymous ftp"
 msgstr "Anonim ftp için parola"
 
 #. Preferred media type: SELECT
-#: src/LYOptions.c:3766
+#: src/LYOptions.c:3770
 msgid "Preferred media type"
 msgstr "Tercih edilen ortam türü"
 
 #. Preferred encoding: SELECT
-#: src/LYOptions.c:3772
+#: src/LYOptions.c:3776
 msgid "Preferred encoding"
 msgstr "Tercih edilen kodlama"
 
 #. Preferred Document Character Set: INPUT
-#: src/LYOptions.c:3778
+#: src/LYOptions.c:3782
 msgid "Preferred document character set"
 msgstr "Tercih edilen belge karakter kümesi"
 
 #. Preferred Document Language: INPUT
-#: src/LYOptions.c:3783
+#: src/LYOptions.c:3787
 msgid "Preferred document language"
 msgstr "Tercih edilen belge dili"
 
-#: src/LYOptions.c:3789
+#: src/LYOptions.c:3793
 msgid "User-Agent header"
 msgstr "Kullanýcý-Ajaný baþlýðý"
 
 #.
 #. * Listing and Accessing Files
 #.
-#: src/LYOptions.c:3797
+#: src/LYOptions.c:3801
 msgid "Listing and Accessing Files"
 msgstr "Dosya Listeleme ve Eriþim"
 
 #. FTP sort: SELECT
-#: src/LYOptions.c:3802
+#: src/LYOptions.c:3806
 msgid "Use Passive FTP"
 msgstr "Edilgen FTP Kullan"
 
 #. FTP sort: SELECT
-#: src/LYOptions.c:3808
+#: src/LYOptions.c:3812
 msgid "FTP sort criteria"
 msgstr "FTP sýralama ölçütleri"
 
 #. Local Directory Sort: SELECT
-#: src/LYOptions.c:3816
+#: src/LYOptions.c:3820
 msgid "Local directory sort criteria"
 msgstr "Yerel dizin sýralama ölçütleri"
 
 #. Local Directory Order: SELECT
-#: src/LYOptions.c:3822
+#: src/LYOptions.c:3826
 msgid "Local directory sort order"
 msgstr "Yerel dizin sýralama ölçütleri"
 
-#: src/LYOptions.c:3831
+#: src/LYOptions.c:3835
 msgid "Show dot files"
 msgstr "Nokta dosyalarý göster"
 
-#: src/LYOptions.c:3839
+#: src/LYOptions.c:3843
 msgid "Execution links"
 msgstr "Ýcra linkleri"
 
 #. Show transfer rate: SELECT
-#: src/LYOptions.c:3859
+#: src/LYOptions.c:3863
 msgid "Show transfer rate"
 msgstr "Aktarým hýzýný göster"
 
 #.
 #. * Special Files and Screens
 #.
-#: src/LYOptions.c:3879
+#: src/LYOptions.c:3883
 msgid "Special Files and Screens"
 msgstr "Özel Dosyalar ve Ekranlar"
 
-#: src/LYOptions.c:3884
+#: src/LYOptions.c:3888
 msgid "Multi-bookmarks"
 msgstr "Çoklu-yer imleri"
 
-#: src/LYOptions.c:3892
+#: src/LYOptions.c:3896
 msgid "Review/edit Bookmarks files"
 msgstr "Yer Ými dosyalarýný gözden geçir/düzenle"
 
-#: src/LYOptions.c:3894
+#: src/LYOptions.c:3898
 msgid "Goto multi-bookmark menu"
 msgstr "Çoklu-yer imi menüsüne git"
 
-#: src/LYOptions.c:3896
+#: src/LYOptions.c:3900
 msgid "Bookmarks file"
 msgstr "Yer Ýmleri dosyasý"
 
 #. Auto Session: ON/OFF
-#: src/LYOptions.c:3903
+#: src/LYOptions.c:3907
 msgid "Auto Session"
 msgstr "Otomatik Oturum"
 
 #. Session File Menu: INPUT
-#: src/LYOptions.c:3909
+#: src/LYOptions.c:3913
 msgid "Session file"
 msgstr "Oturum dosyasý"
 
 #. Visited Pages: SELECT
-#: src/LYOptions.c:3915
+#: src/LYOptions.c:3919
 msgid "Visited Pages"
 msgstr "Uðranan Sayfalar"
 
-#: src/LYOptions.c:3920
+#: src/LYOptions.c:3924
 msgid "View the file "
 msgstr "Dosyayý görüntüle"
 
@@ -5183,38 +5179,38 @@ msgstr "Lynx: baþlayamýyor, CERN kurallarý dosyasý %s temin edilemiyor\n"
 msgid "(no name)"
 msgstr "(isimsiz)"
 
-#: src/LYReadCFG.c:1881
+#: src/LYReadCFG.c:1882
 #, c-format
 msgid "More than %d nested lynx.cfg includes -- perhaps there is a loop?!?\n"
 msgstr "lynx.cfg içermeleri, %d'den çok içiçe geçmiþ -- belki bir döngü olmasýn?\n"
 
-#: src/LYReadCFG.c:1883
+#: src/LYReadCFG.c:1884
 #, c-format
 msgid "Last attempted include was '%s',\n"
 msgstr "Son kalkýþýlan içerme '%s' idi,\n"
 
-#: src/LYReadCFG.c:1884
+#: src/LYReadCFG.c:1885
 #, c-format
 msgid "included from '%s'.\n"
 msgstr "'%s'den içerilmiþti.\n"
 
-#: src/LYReadCFG.c:2292 src/LYReadCFG.c:2305 src/LYReadCFG.c:2363
+#: src/LYReadCFG.c:2289 src/LYReadCFG.c:2302 src/LYReadCFG.c:2360
 msgid "The following is read from your lynx.cfg file."
 msgstr "Aþaðýdaki, lynx.cfg dosyanýzdan okunmuþtur."
 
-#: src/LYReadCFG.c:2293 src/LYReadCFG.c:2306
+#: src/LYReadCFG.c:2290 src/LYReadCFG.c:2303
 msgid "Please read the distribution"
 msgstr "Lütfen daha fazla yorum için"
 
-#: src/LYReadCFG.c:2299 src/LYReadCFG.c:2309
+#: src/LYReadCFG.c:2296 src/LYReadCFG.c:2306
 msgid "for more comments."
 msgstr "daðýtýmý okuyunuz."
 
-#: src/LYReadCFG.c:2345
+#: src/LYReadCFG.c:2342
 msgid "RELOAD THE CHANGES"
 msgstr "DEÐÝÞÝKLÝKLERÝ YENÝDEN YÜKLE"
 
-#: src/LYReadCFG.c:2353
+#: src/LYReadCFG.c:2350
 msgid "Your primary configuration"
 msgstr "Birincil ayarlarýnýz"
 
@@ -5450,7 +5446,7 @@ msgstr ""
 "burada NESNE EM,STRONG,B,I,U,BLINK vs'den biri olmalýdýr.\n"
 "\n"
 
-#: src/LYTraversal.c:108
+#: src/LYTraversal.c:111
 msgid "here is a list of the history stack so that you may rebuild"
 msgstr "yeniden yapýlandýrabilmeniz için iþte bir tarihçe yýðýný listesi"
 
@@ -5486,29 +5482,29 @@ msgstr "Yükleme seçenekleri:"
 msgid "Download document URL put to clipboard."
 msgstr "Belge indirme URL'sini panoya koy."
 
-#: src/LYUtils.c:2615
+#: src/LYUtils.c:2614
 msgid "Unexpected access protocol for this URL scheme."
 msgstr "Bu URL þemasý için umulmadýk eriþim protokolü."
 
-#: src/LYUtils.c:3419
+#: src/LYUtils.c:3422
 msgid "Too many tempfiles"
 msgstr "Çok sayýda geçici dosya"
 
-#: src/LYUtils.c:3719
+#: src/LYUtils.c:3722
 msgid "unknown restriction"
 msgstr "bilinmeyen kýsýtlama"
 
-#: src/LYUtils.c:3750
+#: src/LYUtils.c:3753
 #, c-format
 msgid "No restrictions set.\n"
 msgstr "Hiçbir kýsýtlama kurulmamýþ.\n"
 
-#: src/LYUtils.c:3753
+#: src/LYUtils.c:3756
 #, c-format
 msgid "Restrictions set:\n"
 msgstr "Kurulmuþ kýsýtlamalar:\n"
 
-#: src/LYUtils.c:5131
+#: src/LYUtils.c:5134
 msgid "Cannot find HOME directory"
 msgstr "EV dizini bulunamýyor"
 
@@ -6040,6 +6036,8 @@ msgid ""
 "Lynx User Defaults File\n"
 "\n"
 msgstr ""
+"Lynx Kullanýcý Öntanýmlýlarý Dosyasý\n"
+"\n"
 
 #: src/LYrcFile.c:882
 msgid ""
@@ -6047,12 +6045,17 @@ msgid ""
 "with the 'o' key).  To save options with that screen, you must select the\n"
 "checkbox:\n"
 msgstr ""
+"Bu dosya Lynx Seçenekleri Ekraný'ndan kaydedilen seçenekleri içerir (normalde\n"
+"'o' tuþuyla birlikte).  O ekranla seçenekleri kaydetmek için onay\n"
+"kutusunu seçmelisiniz:\n"
 
 #: src/LYrcFile.c:889
 msgid ""
 "You must then save the settings using the link on the line above the\n"
 "checkbox:\n"
 msgstr ""
+"Daha sonra da onay kutusunun üstünde bulunan satýrdaki linki kullanarak\n"
+"ayarlarý kaydetmelisiniz:\n"
 
 #: src/LYrcFile.c:896
 msgid ""
@@ -6060,6 +6063,9 @@ msgid ""
 "the simpler Options Menu instead.  Save options with that using the '>' key.\n"
 "\n"
 msgstr ""
+"\"-forms_options\" komut satýrý seçeneðini de kullanabilirsiniz, bu, daha basit\n"
+"Seçenekler Menüsünü gösterecektir.  Seçenekleri buradan '>' tuþunu kullanarak kaydedebilirsiniz.\n"
+"\n"
 
 #: src/LYrcFile.c:903
 msgid ""
@@ -6067,9 +6073,11 @@ msgid ""
 "with the '>' key).\n"
 "\n"
 msgstr ""
+"Bu dosya Lynx Seçenekler Ekraný'ndan kaydedilmiþ seçenekleri içerir (normalde\n"
+"'>' tuþuyla).\n"
+"\n"
 
 #: src/LYrcFile.c:910
-#, fuzzy
 msgid ""
 "There is normally no need to edit this file manually, since the defaults\n"
 "here can be controlled from the Options Screen, and the next time options\n"
@@ -6080,16 +6088,11 @@ msgid ""
 "called \"lynx.cfg\".  It has different content and a different format.\n"
 "It is not this file.\n"
 msgstr ""
-"Lynx Kullanýcý Öntanýmlýlarý Dosyasý\n"
+"Buradaki öntanýmlýlar Seçenekler Ekraný'ndan kontrol edilebildiði ve seçenekler,\n"
+" Seçenekler Ekraný'ndan bir sonraki sefer kaydedildiðinde bu dosya\n"
+" tümüyle yeniden yazýlacaðýndan, normalde bu dosyayý elle düzenlemek gerekmez.\n"
+"Uyarýlmýþ oldunuz...\n"
 "\n"
-"Bu dosya, Lynx Seçenekler Ekraný'ndan (normalde '>' tuþuyla) kaydedilmiþ\n"
-"seçenekler içerir.  Buradaki öntanýmlýlar Seçenekler Ekraný'ndan kontrol\n"
-"edilebildiði ve seçenekler, Seçenekler Ekraný'ndan bir sonraki sefer\n"
-"kaydedildiðinde bu dosya tümüyle yeniden yazýlacaðýndan, normalde\n"
-"bu dosyayý elle düzenlemek gerekmez.  Uyarýlmýþ oldunuz...\n"
-"Eðer genel ayarlama dosyasýný arýyorsanýz - normalde lynx.cfg olarak\n"
-"anýlýr, onun farklý bir içeriði ve biçemi vardýr.\n"
+"Eðer genel ayarlama dosyasýný arýyorsanýz - normalde \"lynx.cfg\"\n"
+"olarak anýlýr.  Onun farklý bir içeriði ve biçemi vardýr.\n"
 "O, bu dosya deðildir.\n"
-
-#~ msgid "Socket read failed for 180,000 tries."
-#~ msgstr "Soket okunmasý 180,000 kez baþarýsýz."

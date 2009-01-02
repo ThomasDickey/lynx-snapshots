@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYCgi.c,v 1.53 2008/12/07 22:13:52 tom Exp $
+ * $LynxId: LYCgi.c,v 1.54 2009/01/01 22:39:06 tom Exp $
  *                   Lynx CGI support                              LYCgi.c
  *                   ================
  *
@@ -54,8 +54,8 @@ struct _HTStream {
 };
 
 static char **env = NULL;	/* Environment variables */
-static int envc_size = 0;	/* Slots in environment array */
-static int envc = 0;		/* Slots used so far */
+static unsigned envc_size = 0;	/* Slots in environment array */
+static unsigned envc = 0;	/* Slots used so far */
 static HTList *alloced = NULL;
 
 #ifdef LYNXCGI_LINKS
@@ -449,7 +449,7 @@ static int LYLoadCGI(const char *arg,
 		    remaining = BStrLen(anAnchor->post_data);
 		    while ((written = write(fd1[1],
 					    BStrData(anAnchor->post_data) + total_written,
-					    remaining)) != 0) {
+					    (unsigned) remaining)) != 0) {
 			if (written < 0) {
 #ifdef EINTR
 			    if (errno == EINTR)
@@ -585,7 +585,7 @@ static int LYLoadCGI(const char *arg,
 		    }
 		}
 
-		argv = (char **) malloc(argv_cnt * sizeof(char *));
+		argv = (char **) malloc((unsigned) argv_cnt * sizeof(char *));
 
 		if (argv == NULL) {
 		    outofmem(__FILE__, "LYCgi");

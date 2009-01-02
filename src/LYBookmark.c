@@ -1,3 +1,6 @@
+/*
+ * $LynxId: LYBookmark.c,v 1.62 2009/01/02 00:01:00 tom Exp $
+ */
 #include <HTUtils.h>
 #include <HTAlert.h>
 #include <HTFile.h>
@@ -492,7 +495,7 @@ void remove_bookmark_link(int cur,
      * Explicitly preserve bookmark file mode on Unix.  - DSL
      */
     if (stat(filename_buffer, &stat_buf) == 0) {
-	regular = (S_ISREG(stat_buf.st_mode) && stat_buf.st_nlink == 1);
+	regular = (BOOLEAN) (S_ISREG(stat_buf.st_mode) && stat_buf.st_nlink == 1);
 	mode = ((stat_buf.st_mode & 0777) | 0600);	/* make it writable */
 	(void) chmod(newfile, mode);
 	if ((nfp = LYReopenTemp(newfile)) == NULL) {
@@ -845,7 +848,7 @@ int select_menu_multi_bookmarks(void)
 	MBM_tmp_count = 0;
 	for (c = MBM_from; c <= MBM_to; c++) {
 	    LYmove(3 + MBM_tmp_count, 5);
-	    LYaddch(LYindex2MBM(c));
+	    LYaddch((chtype) LYindex2MBM(c));
 	    LYaddstr(" : ");
 	    if (MBM_A_subdescript[c])
 		LYaddstr(MBM_A_subdescript[c]);

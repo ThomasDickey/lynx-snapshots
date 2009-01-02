@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYHistory.c,v 1.72 2008/09/10 23:09:21 tom Exp $
+ * $LynxId: LYHistory.c,v 1.73 2009/01/01 23:22:12 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTP.h>
@@ -344,7 +344,7 @@ void LYAllocHistory(int entries)
 	int save = size_history;
 
 	size_history = (entries + 2) * 2;
-	want = size_history * sizeof(*history);
+	want = (unsigned) size_history * sizeof(*history);
 	if (history == 0) {
 	    history = (HistInfo *) malloc(want);
 	} else {
@@ -1092,7 +1092,7 @@ static int LYLoadMESSAGES(const char *arg GCC_UNUSED,
     }
     anAnchor->no_cache = TRUE;
 
-#define PUTS(buf)    (*target->isa->put_block)(target, buf, strlen(buf))
+#define PUTS(buf)    (*target->isa->put_block)(target, buf, (int) strlen(buf))
 
     HTSprintf0(&buf, "<html>\n<head>\n");
     PUTS(buf);

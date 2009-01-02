@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYJump.c,v 1.33 2008/12/07 22:13:37 tom Exp $
+ * $LynxId: LYJump.c,v 1.34 2009/01/01 22:41:04 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTAlert.h>
@@ -383,7 +383,7 @@ static unsigned LYRead_Jumpfile(struct JumpTable *jtp)
     }
 
     /* allocate storage to read entire file */
-    if ((mp = typecallocn(char, st.st_size + 1)) == NULL) {
+    if ((mp = typecallocn(char, (size_t) st.st_size + 1)) == NULL) {
 	HTAlert(OUTOF_MEM_FOR_JUMP_FILE);
 	return 0;
     }
@@ -409,7 +409,7 @@ static unsigned LYRead_Jumpfile(struct JumpTable *jtp)
     if (IsStream_LF) {
     /** Handle as a stream. **/
 #endif /* VMS */
-	if (read(fd, mp, st.st_size) < st.st_size) {
+	if (read(fd, mp, (size_t) st.st_size) < st.st_size) {
 	    HTAlert(ERROR_READING_JUMP_FILE);
 	    FREE(mp);
 	    return 0;

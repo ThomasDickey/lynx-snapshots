@@ -1,4 +1,4 @@
-/* $LynxId: LYOptions.c,v 1.125 2008/12/29 19:37:13 tom Exp $ */
+/* $LynxId: LYOptions.c,v 1.126 2009/01/01 22:02:02 tom Exp $ */
 #include <HTUtils.h>
 #include <HTFTP.h>
 #include <HTTP.h>		/* 'reloading' flag */
@@ -131,6 +131,9 @@ static int boolean_choice(int status,
 			  const char **choices);
 
 #define LYChooseBoolean(status, line, column, choices) \
+	(BOOLEAN) boolean_choice(status, line, column, (const char **)choices)
+
+#define LYChooseEnum(status, line, column, choices) \
 	boolean_choice(status, line, column, (const char **)choices)
 
 #define MAXCHOICES 10
@@ -739,9 +742,9 @@ void LYoptions(void)
 		break;
 	    }
 	    if (!LYSelectPopups) {
-		LYMultiBookmarks = LYChooseBoolean(LYMultiBookmarks,
-						   L_HOME, C_MULTI,
-						   mbm_choices);
+		LYMultiBookmarks = LYChooseEnum(LYMultiBookmarks,
+						L_HOME, C_MULTI,
+						mbm_choices);
 	    } else {
 		LYMultiBookmarks = LYChoosePopup(LYMultiBookmarks,
 						 L_HOME, (C_MULTI - 1),
@@ -834,9 +837,9 @@ void LYoptions(void)
 
 	case 'F':		/* Change ftp directory sorting. */
 	    if (!LYSelectPopups) {
-		HTfileSortMethod = LYChooseBoolean(HTfileSortMethod,
-						   L_FTPSTYPE, -1,
-						   fileSort_choices);
+		HTfileSortMethod = LYChooseEnum(HTfileSortMethod,
+						L_FTPSTYPE, -1,
+						fileSort_choices);
 	    } else {
 		HTfileSortMethod = LYChoosePopup(HTfileSortMethod,
 						 L_FTPSTYPE, -1,
@@ -903,7 +906,8 @@ void LYoptions(void)
 	    if (use_assume_charset) {
 		int i, curval;
 		const char **assume_list;
-		assume_list = typecallocn(const char *, (LYNumCharsets + 1));
+		assume_list = typecallocn(const char *, (unsigned)
+					  (LYNumCharsets + 1));
 
 		if (!assume_list) {
 		    outofmem(__FILE__, "options");
@@ -920,16 +924,16 @@ void LYoptions(void)
 		if (!LYSelectPopups) {
 #ifndef ALL_CHARSETS_IN_O_MENU_SCREEN
 		    UCLYhndl_for_unspec =
-			assumed_doc_charset_map[(LYChooseBoolean(charset_subsets[curval].assumed_idx,
-								 L_ASSUME_CHARSET, -1,
-								 assumed_charset_choices)
+			assumed_doc_charset_map[(LYChooseEnum(charset_subsets[curval].assumed_idx,
+							      L_ASSUME_CHARSET, -1,
+							      assumed_charset_choices)
 						 ? 1
 						 : 0)];
 #else
 		    UCLYhndl_for_unspec =
-			LYChooseBoolean(curval,
-					L_ASSUME_CHARSET, -1,
-					assume_list);
+			LYChooseEnum(curval,
+				     L_ASSUME_CHARSET, -1,
+				     assume_list);
 #endif
 		} else {
 #ifndef ALL_CHARSETS_IN_O_MENU_SCREEN
@@ -996,14 +1000,14 @@ void LYoptions(void)
 	case 'C':		/* Change display charset setting. */
 	    if (!LYSelectPopups) {
 #ifndef ALL_CHARSETS_IN_O_MENU_SCREEN
-		displayed_display_charset_idx = LYChooseBoolean(displayed_display_charset_idx,
-								L_Charset, -1,
-								display_charset_choices);
+		displayed_display_charset_idx = LYChooseEnum(displayed_display_charset_idx,
+							     L_Charset, -1,
+							     display_charset_choices);
 		current_char_set = display_charset_map[displayed_display_charset_idx];
 #else
-		current_char_set = LYChooseBoolean(current_char_set,
-						   L_Charset, -1,
-						   LYchar_set_names);
+		current_char_set = LYChooseEnum(current_char_set,
+						L_Charset, -1,
+						LYchar_set_names);
 #endif
 	    } else {
 #ifndef ALL_CHARSETS_IN_O_MENU_SCREEN
@@ -1200,10 +1204,10 @@ void LYoptions(void)
 		    break;
 		}
 #endif
-		LYShowColor = LYChooseBoolean((LYShowColor - 1),
-					      L_Color,
-					      C_COLOR,
-					      bool_choices);
+		LYShowColor = LYChooseEnum((LYShowColor - 1),
+					   L_Color,
+					   C_COLOR,
+					   bool_choices);
 		if (LYShowColor == 0) {
 		    LYShowColor = SHOW_COLOR_OFF;
 		} else {
@@ -1232,10 +1236,10 @@ void LYoptions(void)
 		choices[4] = NULL;
 		do {
 		    if (!LYSelectPopups) {
-			chosen = LYChooseBoolean(LYChosenShowColor,
-						 L_Color,
-						 C_COLOR,
-						 choices);
+			chosen = LYChooseEnum(LYChosenShowColor,
+					      L_Color,
+					      C_COLOR,
+					      choices);
 		    } else {
 			chosen = LYChoosePopup(LYChosenShowColor,
 					       L_Color,
@@ -1296,9 +1300,9 @@ void LYoptions(void)
 
 	case 'K':		/* Change keypad mode. */
 	    if (!LYSelectPopups) {
-		keypad_mode = LYChooseBoolean(keypad_mode,
-					      L_Keypad, -1,
-					      keypad_choices);
+		keypad_mode = LYChooseEnum(keypad_mode,
+					   L_Keypad, -1,
+					   keypad_choices);
 	    } else {
 		keypad_mode = LYChoosePopup(keypad_mode,
 					    L_Keypad, -1,
@@ -1323,9 +1327,9 @@ void LYoptions(void)
 
 	case 'N':		/* Change line editor key bindings. */
 	    if (!LYSelectPopups) {
-		current_lineedit = LYChooseBoolean(current_lineedit,
-						   L_Lineed, -1,
-						   LYLineeditNames);
+		current_lineedit = LYChooseEnum(current_lineedit,
+						L_Lineed, -1,
+						LYLineeditNames);
 	    } else {
 		current_lineedit = LYChoosePopup(current_lineedit,
 						 L_Lineed, -1,
@@ -1346,9 +1350,9 @@ void LYoptions(void)
 #ifdef EXP_KEYBOARD_LAYOUT
 	case 'Y':		/* Change keyboard layout */
 	    if (!LYSelectPopups) {
-		current_layout = LYChooseBoolean(current_layout,
-						 L_Layout, -1,
-						 LYKbLayoutNames);
+		current_layout = LYChooseEnum(current_layout,
+					      L_Layout, -1,
+					      LYKbLayoutNames);
 	    } else {
 		current_layout = LYChoosePopup(current_layout,
 					       L_Layout, -1,
@@ -1370,9 +1374,9 @@ void LYoptions(void)
 #ifdef DIRED_SUPPORT
 	case 'I':		/* Change local directory sorting. */
 	    if (!LYSelectPopups) {
-		dir_list_style = LYChooseBoolean(dir_list_style,
-						 L_Dired, -1,
-						 dirList_choices);
+		dir_list_style = LYChooseEnum(dir_list_style,
+					      L_Dired, -1,
+					      dirList_choices);
 	    } else {
 		dir_list_style = LYChoosePopup(dir_list_style,
 					       L_Dired, -1,
@@ -1393,9 +1397,9 @@ void LYoptions(void)
 
 	case 'U':		/* Change user mode. */
 	    if (!LYSelectPopups) {
-		user_mode = LYChooseBoolean(user_mode,
-					    L_User_Mode, -1,
-					    userMode_choices);
+		user_mode = LYChooseEnum(user_mode,
+					 L_User_Mode, -1,
+					 userMode_choices);
 		use_assume_charset = (BOOL) (user_mode >= 2);
 	    } else {
 		user_mode = LYChoosePopup(user_mode,
@@ -1425,11 +1429,11 @@ void LYoptions(void)
 					      C_VERBOSE_IMAGES,
 					      bool_choices);
 	    } else {
-		verbose_img = LYChoosePopup(verbose_img,
-					    L_VERBOSE_IMAGES,
-					    C_VERBOSE_IMAGES,
-					    bool_choices,
-					    2, FALSE, FALSE);
+		verbose_img = (BOOLEAN) LYChoosePopup(verbose_img,
+						      L_VERBOSE_IMAGES,
+						      C_VERBOSE_IMAGES,
+						      bool_choices,
+						      2, FALSE, FALSE);
 	    }
 	    response = ' ';
 	    if (LYSelectPopups) {
@@ -1503,9 +1507,9 @@ void LYoptions(void)
 		}
 	    }
 	    if (!LYSelectPopups) {
-		itmp = LYChooseBoolean(itmp,
-				       L_Exec, -1,
-				       exec_choices);
+		itmp = LYChooseEnum(itmp,
+				    L_Exec, -1,
+				    exec_choices);
 	    } else {
 		itmp = LYChoosePopup(itmp,
 				     L_Exec, -1,
@@ -1583,7 +1587,7 @@ static int widest_choice(const char **choices)
     int n, width = 0;
 
     for (n = 0; choices[n] != NULL; ++n) {
-	int len = strlen(choices[n]);
+	int len = (int) strlen(choices[n]);
 
 	if (width < len)
 	    width = len;
@@ -1594,7 +1598,7 @@ static int widest_choice(const char **choices)
 static void show_choice(const char *choice,
 			int width)
 {
-    int len = strlen(choice);
+    int len = (int) strlen(choice);
 
     LYaddstr(choice);
     while (len++ < width)
@@ -2543,7 +2547,7 @@ static PostPair *break_data(bstring *data)
 	 * Like I said, screw efficiency.  Sides, realloc is fast on
 	 * Linux ;->
 	 */
-	q = typeRealloc(PostPair, q, count + 1);
+	q = typeRealloc(PostPair, q, (unsigned) (count + 1));
 	if (q == NULL)
 	    outofmem(__FILE__, "break_data(realloc)");
 	q[count].tag = NULL;
@@ -2559,7 +2563,7 @@ static BOOL isLynxOptionsPage(const char *address, const char *portion)
 	unsigned len = strlen(portion);
 
 	address += LEN_LYNXOPTIONS;
-	if (!strncasecomp(address, portion, len)
+	if (!strncasecomp(address, portion, (int) len)
 	    && (address[len] == '\0' || LYIsHtmlSep(address[len]))) {
 	    result = TRUE;
 	}
@@ -2757,9 +2761,9 @@ int postoptions(DocInfo *newdoc)
 	if (!strcmp(data[i].tag, exec_links_string)
 	    && GetOptValues(exec_links_values, data[i].value, &code)) {
 #ifndef NEVER_ALLOW_REMOTE_EXEC
-	    local_exec = (code == EXEC_ALWAYS);
+	    local_exec = (BOOLEAN) (code == EXEC_ALWAYS);
 #endif /* !NEVER_ALLOW_REMOTE_EXEC */
-	    local_exec_on_local_files = (code == EXEC_LOCAL);
+	    local_exec_on_local_files = (BOOLEAN) (code == EXEC_LOCAL);
 	}
 #endif /* ENABLE_OPTS_CHANGE_EXEC */
 
@@ -3302,7 +3306,7 @@ static char *NewSecureValue(void)
 static void PutLabel(FILE *fp, const char *name,
 		     const char *value)
 {
-    int have = strlen(name);
+    int have = (int) strlen(name);
     int want = LABEL_LEN;
     int need = LYstrExtent(name, have, want);
 
@@ -3407,9 +3411,9 @@ static int gen_options(char **newfile)
     BOOLEAN disable_all = FALSE;
     FILE *fp0;
     size_t cset_len = 0;
-    size_t text_len = ((LYcolLimit > 45)
-		       ? LYcolLimit - (LABEL_LEN + 2 + MARGIN_LEN)
-		       : 7);	/* cf: PutLabel */
+    size_t text_len = (size_t) ((LYcolLimit > 45)
+				? LYcolLimit - (LABEL_LEN + 2 + MARGIN_LEN)
+				: 7);	/* cf: PutLabel */
 
     if ((fp0 = InternalPageFP(tempfile, TRUE)) == 0)
 	return (NOT_FOUND);

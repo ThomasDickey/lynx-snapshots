@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTML.c,v 1.117 2008/12/29 21:22:28 tom Exp $
+ * $LynxId: HTML.c,v 1.118 2009/01/01 23:08:07 tom Exp $
  *
  *		Structured stream to Rich hypertext converter
  *		============================================
@@ -672,7 +672,8 @@ void HTML_write(HTStructured * me, const char *s, int l)
    string (resolution of relative URLs etc.).  This variable only used
    locally here, don't confuse with LYinternal_flag which is for
    overriding non-caching similar to LYoverride_no_cache. - kw */
-#define CHECK_FOR_INTERN(flag,s) flag = (s && (*s=='#' || *s=='\0')) ? TRUE : FALSE
+#define CHECK_FOR_INTERN(flag,s) \
+   	flag = (BOOLEAN) ((s && (*s=='#' || *s=='\0')) ? TRUE : FALSE)
 
 /* Last argument to pass to HTAnchor_findChildAndLink() calls,
    just an abbreviation. - kw */
@@ -693,10 +694,10 @@ static void free_Style_className(void)
 
 static void addClassName(const char *prefix,
 			 const char *actual,
-			 int length)
+			 unsigned length)
 {
-    int offset = strlen(prefix);
-    unsigned have = (Style_className_end - Style_className);
+    unsigned offset = strlen(prefix);
+    unsigned have = (unsigned) (Style_className_end - Style_className);
     unsigned need = (offset + length + 1);
 
     if ((have + need) >= Style_className_len) {
@@ -1064,9 +1065,9 @@ static int HTML_start_element(HTStructured * me, int element_number,
     force_classname = FALSE;
 
     if (force_current_tag_style == FALSE) {
-	current_tag_style = class_name[0]
-	    ? -1
-	    : cached_tag_styles[element_number];
+	current_tag_style = (class_name[0]
+			     ? -1
+			     : cached_tag_styles[element_number]);
     } else {
 	force_current_tag_style = FALSE;
     }
@@ -5279,7 +5280,7 @@ static int HTML_start_element(HTStructured * me, int element_number,
 		if (opnum > 0 && opnum < 100000) {
 		    sprintf(marker, "(%d)", opnum);
 		    HTML_put_string(me, marker);
-		    for (i = strlen(marker); i < 5; ++i) {
+		    for (i = (int) strlen(marker); i < 5; ++i) {
 			HTML_put_character(me, '_');
 		    }
 		}
@@ -7223,7 +7224,7 @@ static int HTML_end_element(HTStructured * me, int element_number,
 */
 int HTML_put_entity(HTStructured * me, int entity_number)
 {
-    int nent = HTML_dtd.number_of_entities;
+    int nent = (int) HTML_dtd.number_of_entities;
 
     if (entity_number < nent) {
 	HTML_put_string(me, p_entity_values[entity_number]);
@@ -7944,7 +7945,7 @@ static void CacheThru_write(HTStream *me, const char *str, int l)
 {
     if (me->status == HT_OK && l != 0) {
 	if (me->fp) {
-	    fwrite(str, 1, l, me->fp);
+	    fwrite(str, 1, (unsigned) l, me->fp);
 	    if (ferror(me->fp))
 		me->status = HT_ERROR;
 	} else if (me->chunk) {

@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYReadCFG.c,v 1.133 2008/12/26 18:26:52 tom Exp $
+ * $LynxId: LYReadCFG.c,v 1.135 2009/01/01 23:29:54 tom Exp $
  */
 #ifndef NO_RULES
 #include <HTRules.h>
@@ -191,7 +191,7 @@ static void add_item_to_list(char *buffer,
 	/*
 	 * Process name field
 	 */
-	cur_item->name = typecallocn(char, colon - buffer + 1);
+	cur_item->name = typecallocn(char, (unsigned) (colon - buffer + 1));
 
 	if (cur_item->name == NULL)
 	    outofmem(__FILE__, "read_cfg");
@@ -208,7 +208,7 @@ static void add_item_to_list(char *buffer,
 	    next_colon = colon + strlen(colon);
 	}
 	if (next_colon - (colon + 1) > 0) {
-	    cur_item->command = typecallocn(char, next_colon - colon);
+	    cur_item->command = typecallocn(char, (unsigned) (next_colon - colon));
 
 	    if (cur_item->command == NULL)
 		outofmem(__FILE__, "read_cfg");
@@ -249,7 +249,7 @@ int match_item_by_name(lynx_list_item_type *ptr, char *name,
 {
     return
 	(ptr->command != 0
-	 && !strncasecomp(ptr->name, name, strlen(ptr->name))
+	 && !strncasecomp(ptr->name, name, (int) strlen(ptr->name))
 	 && (only_overriders ? ptr->override_primary_action : 1));
 }
 
@@ -1060,7 +1060,7 @@ static int parse_charset_choice(char *p,
     LYTrimTail(p);
     CTRACE((tfp, "parsing charset choice for %s:\"%s\"",
 	    (display_charset ? "display charset" : "assumed doc charset"), p));
-    len = strlen(p);
+    len = (int) strlen(p);
     if (!len) {
 	CTRACE((tfp, " - EMPTY STRING\n"));
 	return 1;
@@ -1640,11 +1640,11 @@ void free_lynx_cfg(void)
 #ifdef VMS
 		    Define_VMSLogical(name, NULL);
 #else
-# ifdef HAVE_UNSETENV
-		    unsetenv(name);
-# else
+# ifdef HAVE_UNPUTENV
 		    if (putenv(name))
 			break;
+# else
+		    unsetenv(name);
 # endif
 #endif
 		}
@@ -1748,7 +1748,7 @@ typedef BOOL (optidx_set_t)[NOPTS_];
     {\
 	unsigned i1;\
 	for (i1 = 0; i1 < NOPTS_; ++i1) \
-	    (r)[i1]= (a)[i1] || (b)[i1]; \
+	    (r)[i1]= (BOOLEAN) ((a)[i1] || (b)[i1]); \
     }
 
 /*

@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTP.c,v 1.101 2008/12/31 02:03:20 tom Exp $
+ * $LynxId: HTTP.c,v 1.103 2009/01/01 16:40:54 tom Exp $
  *
  * HyperText Tranfer Protocol	- Client implementation		HTTP.c
  * ==========================
@@ -469,6 +469,7 @@ static void show_cert_issuer(X509 * peer_cert GCC_UNUSED)
 /*
  * Remove IPv6 brackets (and any port-number) from the given host-string.
  */
+#ifdef USE_SSL
 static char *StripIpv6Brackets(char *host)
 {
     int port_number;
@@ -486,6 +487,7 @@ static char *StripIpv6Brackets(char *host)
     }
     return host;
 }
+#endif
 
 /*		Load Document from HTTP Server			HTLoadHTTP()
  *		==============================
@@ -524,7 +526,6 @@ static int HTLoadHTTP(const char *arg,
     BOOL do_post = FALSE;	/* ARE WE posting ? */
     const char *METHOD;
 
-    BOOL had_header;		/* Have we had at least one header? */
     char *line_buffer;
     char *line_kept_clean;
     int real_length_of_line = 0;
@@ -624,7 +625,6 @@ static int HTLoadHTTP(const char *arg,
      * over here...
      */
     eol = 0;
-    had_header = NO;
     length = 0;
     doing_redirect = FALSE;
     permanent_redirection = FALSE;
@@ -1816,7 +1816,6 @@ static int HTLoadHTTP(const char *arg,
 			already_retrying = TRUE;
 			eol = 0;
 			bytes_already_read = 0;
-			had_header = NO;
 			length = 0;
 			doing_redirect = FALSE;
 			permanent_redirection = FALSE;

@@ -1,7 +1,10 @@
-/* HTML source syntax highlighting
-   by Vlad Harchev <hvv@hippo.ru>
-   March 1999
-*/
+/*
+ * $LynxId: LYPrettySrc.c,v 1.19 2009/01/01 22:20:25 tom Exp $
+ *
+ * HTML source syntax highlighting
+ * by Vlad Harchev <hvv@hippo.ru>
+ * March 1999
+ */
 #include <HTUtils.h>
 #include <LYHash.h>
 #include <LYPrettySrc.h>
@@ -107,8 +110,8 @@ static void append_close_tag(char *tagname,
 
     subj = typecalloc(HT_tagspec);
     subj->element = (HTMLElement) idx;
-    subj->present = typecallocn(BOOL, nattr);
-    subj->value = typecallocn(char *, nattr);
+    subj->present = typecallocn(BOOL, (unsigned) nattr);
+    subj->value = typecallocn(char *, (unsigned) nattr);
 
     subj->start = FALSE;
 #ifdef USE_COLOR_STYLE

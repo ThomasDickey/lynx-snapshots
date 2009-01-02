@@ -1,14 +1,14 @@
 # Pesan bahasa indonesia untuk lynx
 # Copyright (C) 2008 Arif E. Nugroho <arif_endro@yahoo.com>
 # This file is distributed under the same license as the lynx package.
-# Arif E. Nugroho <arif_endro@yahoo.com>, 2008.
+# Arif E. Nugroho <arif_endro@yahoo.com>, 2008, 2009.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: lynx 2.8.7-dev9\n"
+"Project-Id-Version: lynx 2.8.7-dev12\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-12-26 20:04-0500\n"
-"PO-Revision-Date: 2008-12-26 10:50+0700\n"
+"POT-Creation-Date: 2009-01-01 20:55-0500\n"
+"PO-Revision-Date: 2009-01-01 18:53+0700\n"
 "Last-Translator: Arif E. Nugroho <arif_endro@yahoo.com>\n"
 "Language-Team: Indonesian <translation-team-id@lists.sourceforge.net>\n"
 "MIME-Version: 1.0\n"
@@ -2247,7 +2247,7 @@ msgstr "(Tidak ada nama.)"
 msgid "(No value.)"
 msgstr "(Tidak ada nilai.)"
 
-#: LYMessages.c:716 src/LYOptions.c:2402
+#: LYMessages.c:716 src/LYOptions.c:2406
 msgid "None"
 msgstr "Kosong"
 
@@ -2807,7 +2807,7 @@ msgstr "Dokumen dengan isi POST tidak ditemukan dalam cache. Kirim kembali?"
 msgid "Loading failed, use a previous copy."
 msgstr "Pemuatan gagal, gunakan salinan sebelumnya."
 
-#: WWW/Library/Implementation/HTAccess.c:1047 src/GridText.c:8542
+#: WWW/Library/Implementation/HTAccess.c:1047 src/GridText.c:8513
 msgid "Loading incomplete."
 msgstr "Pemuatan tidak lengkap."
 
@@ -2830,7 +2830,7 @@ msgstr "**** HTAccess: Status yang dikembalikan: %d\n"
 #. * hack: if we fail in HTAccess.c
 #. * avoid duplicating URL, oh.
 #.
-#: WWW/Library/Implementation/HTAccess.c:1087 src/LYMainLoop.c:7756
+#: WWW/Library/Implementation/HTAccess.c:1087 src/LYMainLoop.c:7757
 msgid "Can't Access"
 msgstr "Tidak dapat mengakses"
 
@@ -2855,20 +2855,20 @@ msgstr "tutup master socket"
 msgid "socket for master socket"
 msgstr "socket untuk master socket"
 
-#: WWW/Library/Implementation/HTFTP.c:2977
+#: WWW/Library/Implementation/HTFTP.c:2976
 msgid "Receiving FTP directory."
 msgstr "Menerima direktori FTP."
 
-#: WWW/Library/Implementation/HTFTP.c:3113
+#: WWW/Library/Implementation/HTFTP.c:3112
 #, c-format
 msgid "Transferred %d bytes (%5d)"
 msgstr "Ditransfer %d bytes (%5d)"
 
-#: WWW/Library/Implementation/HTFTP.c:3467
+#: WWW/Library/Implementation/HTFTP.c:3466
 msgid "connect for data"
 msgstr "hubungi untuk data"
 
-#: WWW/Library/Implementation/HTFTP.c:4128
+#: WWW/Library/Implementation/HTFTP.c:4127
 msgid "Receiving FTP file."
 msgstr "Menerima berkas FTP."
 
@@ -2892,34 +2892,34 @@ msgstr "Tidak dapat mengakses host finger."
 msgid "No response from finger server."
 msgstr "Tidak ada balasan dari server finger."
 
-#: WWW/Library/Implementation/HTNews.c:426
+#: WWW/Library/Implementation/HTNews.c:425
 #, c-format
 msgid "Username for news host '%s':"
 msgstr "Nama pengguna untuk news host '%s':"
 
-#: WWW/Library/Implementation/HTNews.c:479
+#: WWW/Library/Implementation/HTNews.c:478
 msgid "Change username?"
 msgstr "Ubah nama pengguna?"
 
-#: WWW/Library/Implementation/HTNews.c:483
+#: WWW/Library/Implementation/HTNews.c:482
 msgid "Username:"
 msgstr "Nama pengguna:"
 
-#: WWW/Library/Implementation/HTNews.c:508
+#: WWW/Library/Implementation/HTNews.c:507
 #, c-format
 msgid "Password for news host '%s':"
 msgstr "Kata sandi untuk news host '%s':"
 
-#: WWW/Library/Implementation/HTNews.c:591
+#: WWW/Library/Implementation/HTNews.c:590
 msgid "Change password?"
 msgstr "Ubah kata sandi?"
 
-#: WWW/Library/Implementation/HTNews.c:1711
+#: WWW/Library/Implementation/HTNews.c:1710
 #, c-format
 msgid "No matches for: %s"
 msgstr "Tidak cocok untuk: %s"
 
-#: WWW/Library/Implementation/HTNews.c:1761
+#: WWW/Library/Implementation/HTNews.c:1760
 msgid ""
 "\n"
 "No articles in this group.\n"
@@ -2927,7 +2927,7 @@ msgstr ""
 "\n"
 "Tidak ada artikel dalam grup ini.\n"
 
-#: WWW/Library/Implementation/HTNews.c:1773
+#: WWW/Library/Implementation/HTNews.c:1772
 msgid ""
 "\n"
 "No articles in this range.\n"
@@ -2938,16 +2938,16 @@ msgstr ""
 #.
 #. * Set window title.
 #.
-#: WWW/Library/Implementation/HTNews.c:1786
+#: WWW/Library/Implementation/HTNews.c:1785
 #, c-format
 msgid "%s,  Articles %d-%d"
 msgstr "%s, Artikel %d-%d"
 
-#: WWW/Library/Implementation/HTNews.c:1809
+#: WWW/Library/Implementation/HTNews.c:1808
 msgid "Earlier articles"
 msgstr "Artikel sebelumnya"
 
-#: WWW/Library/Implementation/HTNews.c:1822
+#: WWW/Library/Implementation/HTNews.c:1821
 #, c-format
 msgid ""
 "\n"
@@ -2958,41 +2958,41 @@ msgstr ""
 "Disana ada sekitar %d artikel yang saat ini tersedia dalam %s, ID sebagai berikut:\n"
 "\n"
 
-#: WWW/Library/Implementation/HTNews.c:1884
+#: WWW/Library/Implementation/HTNews.c:1883
 msgid "All available articles in "
 msgstr "Semua artikel yang tersedia dalam "
 
-#: WWW/Library/Implementation/HTNews.c:2098
+#: WWW/Library/Implementation/HTNews.c:2097
 msgid "Later articles"
 msgstr "Artikel selanjutnya"
 
-#: WWW/Library/Implementation/HTNews.c:2121
+#: WWW/Library/Implementation/HTNews.c:2120
 msgid "Post to "
 msgstr "Post ke "
 
-#: WWW/Library/Implementation/HTNews.c:2342
+#: WWW/Library/Implementation/HTNews.c:2341
 msgid "This client does not contain support for SNEWS URLs."
 msgstr "Klien ini tidak memiliki dukungan untuk URL SNEWS."
 
-#: WWW/Library/Implementation/HTNews.c:2550
+#: WWW/Library/Implementation/HTNews.c:2548
 msgid "No target for raw text!"
 msgstr "Tidak ada target untuk teks mentah!"
 
-#: WWW/Library/Implementation/HTNews.c:2581
+#: WWW/Library/Implementation/HTNews.c:2578
 msgid "Connecting to NewsHost ..."
 msgstr "Menghubungi ke NewsHost ..."
 
-#: WWW/Library/Implementation/HTNews.c:2633
+#: WWW/Library/Implementation/HTNews.c:2630
 #, c-format
 msgid "Could not access %s."
 msgstr "Tidak dapat mengakses %s."
 
-#: WWW/Library/Implementation/HTNews.c:2739
+#: WWW/Library/Implementation/HTNews.c:2736
 #, c-format
 msgid "Can't read news info.  News host %.20s responded: %.200s"
 msgstr "Tidak dapat membaca informasi news. News host %.20s dibalas: %.200s"
 
-#: WWW/Library/Implementation/HTNews.c:2743
+#: WWW/Library/Implementation/HTNews.c:2740
 #, c-format
 msgid "Can't read news info, empty response from host %s"
 msgstr "Tidak dapat membaca informasi news, balasan kosong dari host %s"
@@ -3000,22 +3000,22 @@ msgstr "Tidak dapat membaca informasi news, balasan kosong dari host %s"
 #.
 #. * List available newsgroups.  - FM
 #.
-#: WWW/Library/Implementation/HTNews.c:2947
+#: WWW/Library/Implementation/HTNews.c:2944
 msgid "Reading list of available newsgroups."
 msgstr "Membaca daftar dari newsgroups yang tersedia."
 
-#: WWW/Library/Implementation/HTNews.c:2968
+#: WWW/Library/Implementation/HTNews.c:2965
 msgid "Reading list of articles in newsgroup."
 msgstr "Membaca daftar dari artikel dalam newsgrup."
 
 #.
 #. * Get an article from a news group.  - FM
 #.
-#: WWW/Library/Implementation/HTNews.c:2974
+#: WWW/Library/Implementation/HTNews.c:2971
 msgid "Reading news article."
 msgstr "Membaca news artikel."
 
-#: WWW/Library/Implementation/HTNews.c:3004
+#: WWW/Library/Implementation/HTNews.c:3001
 msgid "Sorry, could not load requested news."
 msgstr "Maaf, tidak dapat memuat berita yang diminta."
 
@@ -3068,9 +3068,8 @@ msgid "Could not restore socket to blocking."
 msgstr "Tidak dapat mengembalikan socket ke bloking."
 
 #: WWW/Library/Implementation/HTTCP.c:2016
-#, fuzzy
 msgid "Socket read failed (too many tries)."
-msgstr "Koneksi gagal (terlalu banyak percobaan)."
+msgstr "Pembacaan socket gagal (terlalu banyak percobaan)."
 
 #: WWW/Library/Implementation/HTTP.c:84
 #, c-format
@@ -3193,27 +3192,27 @@ msgstr "Permintaan dipenuhi. Reset Isi."
 #. * status is inappropriate.  We'll deal with it by showing
 #. * the full header to the user as text/plain.  - FM
 #.
-#: WWW/Library/Implementation/HTTP.c:1891
+#: WWW/Library/Implementation/HTTP.c:1890
 msgid "Got unexpected 304 Not Modified status."
 msgstr "Diperoleh tidak terduga 304 status Tidak Termodifikasi."
 
-#: WWW/Library/Implementation/HTTP.c:1954
+#: WWW/Library/Implementation/HTTP.c:1953
 msgid "Redirection of POST content requires user approval."
 msgstr "Redireksi dari isi POST membutuhkan persetujuan pengguna."
 
-#: WWW/Library/Implementation/HTTP.c:1969
+#: WWW/Library/Implementation/HTTP.c:1968
 msgid "Have POST content.  Treating Permanent Redirection as Temporary.\n"
 msgstr "Memiliki isi POST. Memperlakukan Redireksi Permanen sebagai Sementara.\n"
 
-#: WWW/Library/Implementation/HTTP.c:2011
+#: WWW/Library/Implementation/HTTP.c:2010
 msgid "Retrying with access authorization information."
 msgstr "Mencoba kembali dengan informasi otorisasi akses."
 
-#: WWW/Library/Implementation/HTTP.c:2023
+#: WWW/Library/Implementation/HTTP.c:2022
 msgid "Show the 401 message body?"
 msgstr "Tampilkan tubuh pesan 401?"
 
-#: WWW/Library/Implementation/HTTP.c:2066
+#: WWW/Library/Implementation/HTTP.c:2065
 msgid "Show the 407 message body?"
 msgstr "Tampilkan tubuh pesan 407?"
 
@@ -3221,7 +3220,7 @@ msgstr "Tampilkan tubuh pesan 407?"
 #. * Bad or unknown server_status number.  Take a chance and hope
 #. * there is something to display.  - FM
 #.
-#: WWW/Library/Implementation/HTTP.c:2166
+#: WWW/Library/Implementation/HTTP.c:2165
 msgid "Unknown status reply from server!"
 msgstr "Balasan status dari server tidak diketahui!"
 
@@ -3409,106 +3408,106 @@ msgstr "Pengelola"
 msgid "Host"
 msgstr "Host"
 
-#: src/GridText.c:705
+#: src/GridText.c:704
 msgid "Memory exhausted, display interrupted!"
 msgstr "Kehabisan memori, penampilan terinterupsi!"
 
-#: src/GridText.c:710
+#: src/GridText.c:709
 msgid "Memory exhausted, will interrupt transfer!"
 msgstr "Kehabisan memori, akan menginterupsi transfer!"
 
-#: src/GridText.c:3654
+#: src/GridText.c:3663
 msgid " *** MEMORY EXHAUSTED ***"
 msgstr " *** KEHABISAN MEMORI ***"
 
-#: src/GridText.c:6089 src/GridText.c:6096 src/LYList.c:239
+#: src/GridText.c:6057 src/GridText.c:6064 src/LYList.c:239
 msgid "unknown field or link"
 msgstr "field atau link tidak diketahui"
 
-#: src/GridText.c:6105
+#: src/GridText.c:6073
 msgid "text entry field"
 msgstr "daerah masukan teks"
 
-#: src/GridText.c:6108
+#: src/GridText.c:6076
 msgid "password entry field"
 msgstr "daerah masukan kata sandi"
 
-#: src/GridText.c:6111
+#: src/GridText.c:6079
 msgid "checkbox"
 msgstr "checkbox"
 
-#: src/GridText.c:6114
+#: src/GridText.c:6082
 msgid "radio button"
 msgstr "tombol radio"
 
-#: src/GridText.c:6117
+#: src/GridText.c:6085
 msgid "submit button"
 msgstr "tombol kirim"
 
-#: src/GridText.c:6120
+#: src/GridText.c:6088
 msgid "reset button"
 msgstr "tombol reset"
 
-#: src/GridText.c:6123
+#: src/GridText.c:6091
 msgid "popup menu"
 msgstr "menu popup"
 
-#: src/GridText.c:6126
+#: src/GridText.c:6094
 msgid "hidden form field"
 msgstr "daerah formulir tersembunyi"
 
-#: src/GridText.c:6129
+#: src/GridText.c:6097
 msgid "text entry area"
 msgstr "daerah masukan teks"
 
-#: src/GridText.c:6132
+#: src/GridText.c:6100
 msgid "range entry field"
 msgstr "daerah masukan jangkauan"
 
-#: src/GridText.c:6135
+#: src/GridText.c:6103
 msgid "file entry field"
 msgstr "daerah masukan berkas"
 
-#: src/GridText.c:6138
+#: src/GridText.c:6106
 msgid "text-submit field"
 msgstr "daerah teks-kirim"
 
-#: src/GridText.c:6141
+#: src/GridText.c:6109
 msgid "image-submit button"
 msgstr "tombol gambar-kirim"
 
-#: src/GridText.c:6144
+#: src/GridText.c:6112
 msgid "keygen field"
 msgstr "daerah keygen"
 
-#: src/GridText.c:6147
+#: src/GridText.c:6115
 msgid "unknown form field"
 msgstr "daerah formulir tidak diketahui"
 
-#: src/GridText.c:10275
+#: src/GridText.c:10245
 msgid "Can't open file for uploading"
 msgstr "Tidak dapat membuka berkas untuk upload"
 
-#: src/GridText.c:11434
+#: src/GridText.c:11404
 #, c-format
 msgid "Submitting %s"
 msgstr "Mengirimkan %s"
 
 #. ugliness has happened; inform user and do the best we can
-#: src/GridText.c:12487
+#: src/GridText.c:12457
 msgid "Hang Detect: TextAnchor struct corrupted - suggest aborting!"
 msgstr "Hang Deteksi: TextAnchor struct terkorupsi - disarankan untuk dibatalkan!"
 
 #. don't show previous state
-#: src/GridText.c:12624
+#: src/GridText.c:12594
 msgid "Wrap lines to fit displayed area?"
 msgstr "Potong baris untuk menyesuaikan daerah penampilan?"
 
-#: src/GridText.c:12676
+#: src/GridText.c:12646
 msgid "Very long lines have been wrapped!"
 msgstr "Baris sangat panjang telah dipotong!"
 
-#: src/GridText.c:13181
+#: src/GridText.c:13151
 msgid "Very long lines have been truncated!"
 msgstr "Baris sangat panjang telah dipotong!"
 
@@ -3602,35 +3601,35 @@ msgstr "tidak"
 msgid "Y/N/A/V"
 msgstr "Y/N/A/V"
 
-#: src/HTML.c:5913
+#: src/HTML.c:5912
 msgid "Description:"
 msgstr "Deskripsi:"
 
-#: src/HTML.c:5918
+#: src/HTML.c:5917
 msgid "(none)"
 msgstr "(kosong)"
 
-#: src/HTML.c:5922
+#: src/HTML.c:5921
 msgid "Filepath:"
 msgstr "Jalur berkas:"
 
-#: src/HTML.c:5928
+#: src/HTML.c:5927
 msgid "(unknown)"
 msgstr "(tidak diketahui)"
 
-#: src/HTML.c:7355
+#: src/HTML.c:7352
 msgid "Document has only hidden links.  Use the 'l'ist command."
 msgstr "Dokumen hanya memiliki link tersembunyi. Gunakan perintah l."
 
-#: src/HTML.c:7854
+#: src/HTML.c:7851
 msgid "Source cache error - disk full?"
 msgstr "Cache sumber error - disk penuh?"
 
-#: src/HTML.c:7867
+#: src/HTML.c:7864
 msgid "Source cache error - not enough memory!"
 msgstr "Cache sumber error - tidak cukup memori!"
 
-#: src/LYBookmark.c:164
+#: src/LYBookmark.c:167
 msgid ""
 "     This file is an HTML representation of the X Mosaic hotlist file.\n"
 "     Outdated or invalid links may be removed by using the\n"
@@ -3642,7 +3641,7 @@ msgstr ""
 "     bookmark, ini biasanya dengan tombol 'R' tetapi mungkin telah dipetakan\n"
 "     oleh anda atau sistem administrasi anda."
 
-#: src/LYBookmark.c:371
+#: src/LYBookmark.c:374
 #, c-format
 msgid ""
 "     You can delete links by the 'R' key<br>\n"
@@ -3651,7 +3650,7 @@ msgstr ""
 "     Anda dapat menghapus link dengan tombol 'R'<br>\n"
 "<ol>\n"
 
-#: src/LYBookmark.c:374
+#: src/LYBookmark.c:377
 msgid ""
 "     You can delete links using the remove bookmark command.  It is usually\n"
 "     the 'R' key but may have been remapped by you or your system\n"
@@ -3661,7 +3660,7 @@ msgstr ""
 "     biasanya tombol 'R' tetapi mungkin telah dipetakan oleh anda atau\n"
 "     sistem administrator anda."
 
-#: src/LYBookmark.c:378
+#: src/LYBookmark.c:381
 msgid ""
 "     This file also may be edited with a standard text editor to delete\n"
 "     outdated or invalid links, or to change their order."
@@ -3669,7 +3668,7 @@ msgstr ""
 "     Berkas ini juga mungkin telah diubah dengan pengubah teks standar\n"
 "     untuk menghapus outdated atau links tidak valid, atau mengubah urutannya."
 
-#: src/LYBookmark.c:381
+#: src/LYBookmark.c:384
 msgid ""
 "Note: if you edit this file manually\n"
 "      you should not change the format within the lines\n"
@@ -3681,7 +3680,7 @@ msgstr ""
 "       atau menambahkan markup HTML.\n"
 "       Pastikan link bookmark disimpan sebagai sebuah baris tunggal."
 
-#: src/LYBookmark.c:677
+#: src/LYBookmark.c:680
 #, c-format
 msgid "File may be recoverable from %s during this session"
 msgstr "Berkas mungkin dapat direkover dari %s selama sesi ini"
@@ -4246,19 +4245,19 @@ msgstr "Pesan ini secara otomatis dibuat oleh"
 msgid "No system mailer configured"
 msgstr "Tidak ada pengirim surat sistem yang dikonfigurasikan"
 
-#: src/LYMain.c:1025
+#: src/LYMain.c:1001
 msgid "No Winsock found, sorry."
 msgstr "Tidak ada Winsock ditemukan, maaf."
 
-#: src/LYMain.c:1222
+#: src/LYMain.c:1198
 msgid "You MUST define a valid TMP or TEMP area!"
 msgstr "Anda HARUS mendefinisikan sebuah daerah valid TMP atau TEMP!"
 
-#: src/LYMain.c:1275 src/LYMainLoop.c:5051
+#: src/LYMain.c:1251 src/LYMainLoop.c:5051
 msgid "No such directory"
 msgstr "Tidak ada direktori seperti itu"
 
-#: src/LYMain.c:1460
+#: src/LYMain.c:1436
 #, c-format
 msgid ""
 "\n"
@@ -4269,7 +4268,7 @@ msgstr ""
 "Berkas konfigurasi \"%s\" tidak tersedia.\n"
 "\n"
 
-#: src/LYMain.c:1470
+#: src/LYMain.c:1446
 #, c-format
 msgid ""
 "\n"
@@ -4280,7 +4279,7 @@ msgstr ""
 "Karakter set Lynx tidak dideklarasikan.\n"
 "\n"
 
-#: src/LYMain.c:1499
+#: src/LYMain.c:1475
 #, c-format
 msgid ""
 "\n"
@@ -4291,7 +4290,7 @@ msgstr ""
 "Lunx peta pengubahan tidak dideklarasikan.\n"
 "\n"
 
-#: src/LYMain.c:1575
+#: src/LYMain.c:1551
 #, c-format
 msgid ""
 "\n"
@@ -4302,66 +4301,66 @@ msgstr ""
 "Berkas Lynx \"%s\" tidak tersedia.\n"
 "\n"
 
-#: src/LYMain.c:1650
+#: src/LYMain.c:1626
 #, c-format
 msgid "Ignored %d characters from standard input.\n"
 msgstr "Diabaikan %d karakter dari standar masukan.\n"
 
-#: src/LYMain.c:1652
+#: src/LYMain.c:1628
 #, c-format
 msgid "Use \"-stdin\" or \"-\" to tell how to handle piped input.\n"
 msgstr "Gunakan \"-stdin\" atatu \"-\" untuk mengetahui bagaimana menangani masukan piped.\n"
 
-#: src/LYMain.c:1800
+#: src/LYMain.c:1776
 msgid "Warning:"
 msgstr "Peringatan:"
 
-#: src/LYMain.c:2365
+#: src/LYMain.c:2341
 msgid "persistent cookies state will be changed in next session only."
 msgstr "persisten keadaan cookies hanya akan berubah di sesi selanjutnya saja."
 
-#: src/LYMain.c:2610 src/LYMain.c:2655
+#: src/LYMain.c:2586 src/LYMain.c:2631
 #, c-format
 msgid "Lynx: ignoring unrecognized charset=%s\n"
 msgstr "Lynx: mengabaikan charset=%s tidak diketahui\n"
 
-#: src/LYMain.c:3174
+#: src/LYMain.c:3150
 #, c-format
 msgid "%s Version %s (%s)"
 msgstr "%s Versi %s (%s)"
 
-#: src/LYMain.c:3212
+#: src/LYMain.c:3188
 #, c-format
 msgid "Built on %s %s %s\n"
 msgstr "Dibuat di %s %s %s\n"
 
-#: src/LYMain.c:3234
+#: src/LYMain.c:3210
 msgid "Copyrights held by the Lynx Developers Group,"
 msgstr "Hak Cipta dipegang oleh Lynx Developers Group,"
 
-#: src/LYMain.c:3235
+#: src/LYMain.c:3211
 msgid "the University of Kansas, CERN, and other contributors."
 msgstr "the University of Kansas, CERN, dan kontributor lain."
 
-#: src/LYMain.c:3236
+#: src/LYMain.c:3212
 msgid "Distributed under the GNU General Public License (Version 2)."
 msgstr "Didistribusikan dibawah GNU General Public License (Version 2)."
 
-#: src/LYMain.c:3237
+#: src/LYMain.c:3213
 msgid "See http://lynx.isc.org/ and the online help for more information."
 msgstr "Lihat http://lynx.isc.org/ dan bantuan online untuk informasi lebih lanjut."
 
-#: src/LYMain.c:4056
+#: src/LYMain.c:4032
 #, c-format
 msgid "USAGE: %s [options] [file]\n"
 msgstr "PENGGUNAAN: %s [opsi] [berkas]\n"
 
-#: src/LYMain.c:4057
+#: src/LYMain.c:4033
 #, c-format
 msgid "Options are:\n"
 msgstr "Opsi adalah:\n"
 
-#: src/LYMain.c:4356
+#: src/LYMain.c:4332
 #, c-format
 msgid "%s: Invalid Option: %s\n"
 msgstr "%s: Opsi tidak valid: %s\n"
@@ -4418,56 +4417,56 @@ msgstr "gagal untuk berpindah direktori"
 msgid "Reparsing document under current settings..."
 msgstr "Reparsing dokumen dibawah konfigurasi saat ini..."
 
-#: src/LYMainLoop.c:6520
+#: src/LYMainLoop.c:6521
 #, c-format
 msgid "Fatal error - could not open output file %s\n"
 msgstr "Fatal error - tidak dapat membuka berkas keluaran %s\n"
 
-#: src/LYMainLoop.c:6857
+#: src/LYMainLoop.c:6858
 msgid "TABLE center enable."
 msgstr "pusat TABEL aktif."
 
-#: src/LYMainLoop.c:6860
+#: src/LYMainLoop.c:6861
 msgid "TABLE center disable."
 msgstr "pusat TABEL tidak aktif."
 
-#: src/LYMainLoop.c:6937
+#: src/LYMainLoop.c:6938
 msgid "Current URL is empty."
 msgstr "URL sekarang kosong."
 
-#: src/LYMainLoop.c:6939 src/LYUtils.c:1828
+#: src/LYMainLoop.c:6940 src/LYUtils.c:1828
 msgid "Copy to clipboard failed."
 msgstr "Salin ke clipboard gagal."
 
-#: src/LYMainLoop.c:6941
+#: src/LYMainLoop.c:6942
 msgid "Document URL put to clipboard."
 msgstr "URL dokumen diletakan ke clipboard."
 
-#: src/LYMainLoop.c:6943
+#: src/LYMainLoop.c:6944
 msgid "Link URL put to clipboard."
 msgstr "Sambungan URL diletakan ke clipboard."
 
-#: src/LYMainLoop.c:6970
+#: src/LYMainLoop.c:6971
 msgid "No URL in the clipboard."
 msgstr "Tidak ada URL dalam clipboard."
 
-#: src/LYMainLoop.c:7641 src/LYMainLoop.c:7811
+#: src/LYMainLoop.c:7642 src/LYMainLoop.c:7812
 msgid "-index-"
 msgstr "-index-"
 
-#: src/LYMainLoop.c:7751
+#: src/LYMainLoop.c:7752
 msgid "lynx: Can't access startfile"
 msgstr "lynx: Tidak dapat mengakses startfile"
 
-#: src/LYMainLoop.c:7763
+#: src/LYMainLoop.c:7764
 msgid "lynx: Start file could not be found or is not text/html or text/plain"
 msgstr "lynx: Start file tidak dapat ditemukana atau bukan teks/html atau teks/plain"
 
-#: src/LYMainLoop.c:7764
+#: src/LYMainLoop.c:7765
 msgid "      Exiting..."
 msgstr "      Keluar..."
 
-#: src/LYMainLoop.c:7805
+#: src/LYMainLoop.c:7806
 msgid "-more-"
 msgstr "-lebih-"
 
@@ -4531,348 +4530,348 @@ msgstr ""
 msgid "Message has no original text!"
 msgstr "Pesan tidak memiliki teks asli!"
 
-#: src/LYOptions.c:765
+#: src/LYOptions.c:768
 msgid "review/edit B)ookmarks files"
 msgstr "ulas/ubah berkas B)ookmarks"
 
-#: src/LYOptions.c:767
+#: src/LYOptions.c:770
 msgid "B)ookmark file: "
 msgstr "berkas B)ookmark: "
 
-#: src/LYOptions.c:2127 src/LYOptions.c:2134
+#: src/LYOptions.c:2131 src/LYOptions.c:2138
 msgid "ON"
 msgstr "ON"
 
 #. verbose_img variable
-#: src/LYOptions.c:2128 src/LYOptions.c:2133 src/LYOptions.c:2285 src/LYOptions.c:2296
+#: src/LYOptions.c:2132 src/LYOptions.c:2137 src/LYOptions.c:2289 src/LYOptions.c:2300
 msgid "OFF"
 msgstr "OFF"
 
-#: src/LYOptions.c:2129
+#: src/LYOptions.c:2133
 msgid "NEVER"
 msgstr "NEVER"
 
-#: src/LYOptions.c:2130
+#: src/LYOptions.c:2134
 msgid "ALWAYS"
 msgstr "SELALU"
 
-#: src/LYOptions.c:2146 src/LYOptions.c:2277
+#: src/LYOptions.c:2150 src/LYOptions.c:2281
 msgid "ignore"
 msgstr "abaikan"
 
-#: src/LYOptions.c:2147
+#: src/LYOptions.c:2151
 msgid "ask user"
 msgstr "tanya pengguna"
 
-#: src/LYOptions.c:2148
+#: src/LYOptions.c:2152
 msgid "accept all"
 msgstr "terima semua"
 
-#: src/LYOptions.c:2160
+#: src/LYOptions.c:2164
 msgid "ALWAYS OFF"
 msgstr "SELALU OFF"
 
-#: src/LYOptions.c:2161
+#: src/LYOptions.c:2165
 msgid "FOR LOCAL FILES ONLY"
 msgstr "UNTUK BERKAS LOKAL SAJA"
 
-#: src/LYOptions.c:2163
+#: src/LYOptions.c:2167
 msgid "ALWAYS ON"
 msgstr "SELALU ON"
 
-#: src/LYOptions.c:2175
+#: src/LYOptions.c:2179
 msgid "Numbers act as arrows"
 msgstr "Angka berlaku sebagai panah"
 
-#: src/LYOptions.c:2177
+#: src/LYOptions.c:2181
 msgid "Links are numbered"
 msgstr "Sambungan dinomori"
 
-#: src/LYOptions.c:2180
+#: src/LYOptions.c:2184
 msgid "Links and form fields are numbered"
 msgstr "Sambungan dan daerah formulir dinomori"
 
-#: src/LYOptions.c:2183
+#: src/LYOptions.c:2187
 msgid "Form fields are numbered"
 msgstr "Daerah formulir dinomori"
 
-#: src/LYOptions.c:2197
+#: src/LYOptions.c:2201
 msgid "Case insensitive"
 msgstr "Tidak memperhatikan besar huruf"
 
-#: src/LYOptions.c:2198
+#: src/LYOptions.c:2202
 msgid "Case sensitive"
 msgstr "Memperhatikan besar huruf"
 
-#: src/LYOptions.c:2222
+#: src/LYOptions.c:2226
 msgid "prompt normally"
 msgstr "tanya secara manual"
 
-#: src/LYOptions.c:2223
+#: src/LYOptions.c:2227
 msgid "force yes-response"
 msgstr "paksa balasan ya"
 
-#: src/LYOptions.c:2224
+#: src/LYOptions.c:2228
 msgid "force no-response"
 msgstr "paksa balasan tidak"
 
-#: src/LYOptions.c:2242
+#: src/LYOptions.c:2246
 msgid "Novice"
 msgstr "Pemula"
 
-#: src/LYOptions.c:2243
+#: src/LYOptions.c:2247
 msgid "Intermediate"
 msgstr "Menengah"
 
-#: src/LYOptions.c:2244
+#: src/LYOptions.c:2248
 msgid "Advanced"
 msgstr "Ahli"
 
-#: src/LYOptions.c:2253
+#: src/LYOptions.c:2257
 msgid "By First Visit"
 msgstr "Dengan Kunjungan Pertama"
 
-#: src/LYOptions.c:2255
+#: src/LYOptions.c:2259
 msgid "By First Visit Reversed"
 msgstr "Dengan Kunjungan Pertama dibalik"
 
-#: src/LYOptions.c:2256
+#: src/LYOptions.c:2260
 msgid "As Visit Tree"
 msgstr "Sebagai Pohon Pengunjung"
 
-#: src/LYOptions.c:2257
+#: src/LYOptions.c:2261
 msgid "By Last Visit"
 msgstr "Dengan Kunjungan Terakhir"
 
-#: src/LYOptions.c:2259
+#: src/LYOptions.c:2263
 msgid "By Last Visit Reversed"
 msgstr "Dengan Kunjungan Terakhir Dibalik"
 
 #. Old_DTD variable
-#: src/LYOptions.c:2270
+#: src/LYOptions.c:2274
 msgid "relaxed (TagSoup mode)"
 msgstr "relaxed (mode TagSoup)"
 
-#: src/LYOptions.c:2271
+#: src/LYOptions.c:2275
 msgid "strict (SortaSGML mode)"
 msgstr "strict (mode SortaSGML)"
 
-#: src/LYOptions.c:2278
+#: src/LYOptions.c:2282
 msgid "as labels"
 msgstr "sebagai labels"
 
-#: src/LYOptions.c:2279
+#: src/LYOptions.c:2283
 msgid "as links"
 msgstr "sebagai links"
 
-#: src/LYOptions.c:2286
+#: src/LYOptions.c:2290
 msgid "show filename"
 msgstr "tampilkan nama berkas"
 
-#: src/LYOptions.c:2297
+#: src/LYOptions.c:2301
 msgid "STANDARD"
 msgstr "STANDAR"
 
-#: src/LYOptions.c:2298
+#: src/LYOptions.c:2302
 msgid "ADVANCED"
 msgstr "ADVANCED"
 
-#: src/LYOptions.c:2329
+#: src/LYOptions.c:2333
 msgid "Directories first"
 msgstr "Direktori dahulu"
 
-#: src/LYOptions.c:2330
+#: src/LYOptions.c:2334
 msgid "Files first"
 msgstr "Berkas dahulu"
 
-#: src/LYOptions.c:2331
+#: src/LYOptions.c:2335
 msgid "Mixed style"
 msgstr "Gaya campur"
 
-#: src/LYOptions.c:2339 src/LYOptions.c:2359
+#: src/LYOptions.c:2343 src/LYOptions.c:2363
 msgid "By Name"
 msgstr "Dengan Nama"
 
-#: src/LYOptions.c:2340 src/LYOptions.c:2360
+#: src/LYOptions.c:2344 src/LYOptions.c:2364
 msgid "By Type"
 msgstr "Dengan Tipe"
 
-#: src/LYOptions.c:2341 src/LYOptions.c:2361
+#: src/LYOptions.c:2345 src/LYOptions.c:2365
 msgid "By Size"
 msgstr "Dengan Ukuran"
 
-#: src/LYOptions.c:2342 src/LYOptions.c:2362
+#: src/LYOptions.c:2346 src/LYOptions.c:2366
 msgid "By Date"
 msgstr "Dengan Tanggal"
 
-#: src/LYOptions.c:2343
+#: src/LYOptions.c:2347
 msgid "By Mode"
 msgstr "Dengan Mode"
 
-#: src/LYOptions.c:2345
+#: src/LYOptions.c:2349
 msgid "By User"
 msgstr "Dengan Pengguna"
 
-#: src/LYOptions.c:2346
+#: src/LYOptions.c:2350
 msgid "By Group"
 msgstr "Dengan Grup"
 
-#: src/LYOptions.c:2371
+#: src/LYOptions.c:2375
 msgid "Do not show rate"
 msgstr "Jangan tampilkan kecepatan"
 
-#: src/LYOptions.c:2372 src/LYOptions.c:2373
+#: src/LYOptions.c:2376 src/LYOptions.c:2377
 #, c-format
 msgid "Show %s/sec rate"
 msgstr "Tampilkan kecepatan %s/detik"
 
-#: src/LYOptions.c:2375 src/LYOptions.c:2376
+#: src/LYOptions.c:2379 src/LYOptions.c:2380
 #, c-format
 msgid "Show %s/sec, ETA"
 msgstr "Tampilkan ETA %s/detik"
 
-#: src/LYOptions.c:2379
+#: src/LYOptions.c:2383
 msgid "Show progressbar"
 msgstr "Tampilkan bar perkembangan"
 
-#: src/LYOptions.c:2391
+#: src/LYOptions.c:2395
 msgid "Accept lynx's internal types"
 msgstr "Terima tipe internal lynx"
 
-#: src/LYOptions.c:2392
+#: src/LYOptions.c:2396
 msgid "Also accept lynx.cfg's types"
 msgstr "Juga terima tipe lynx.cfg"
 
-#: src/LYOptions.c:2393
+#: src/LYOptions.c:2397
 msgid "Also accept user's types"
 msgstr "Juga terima tipe pengguna"
 
-#: src/LYOptions.c:2394
+#: src/LYOptions.c:2398
 msgid "Also accept system's types"
 msgstr "Juga terima tipe sistem"
 
-#: src/LYOptions.c:2395
+#: src/LYOptions.c:2399
 msgid "Accept all types"
 msgstr "Terima semua tipe"
 
-#: src/LYOptions.c:2404
+#: src/LYOptions.c:2408
 msgid "gzip"
 msgstr "gzip"
 
-#: src/LYOptions.c:2405
+#: src/LYOptions.c:2409
 msgid "deflate"
 msgstr "deflate"
 
-#: src/LYOptions.c:2408
+#: src/LYOptions.c:2412
 msgid "compress"
 msgstr "compress"
 
-#: src/LYOptions.c:2411
+#: src/LYOptions.c:2415
 msgid "bzip2"
 msgstr "bzip2"
 
-#: src/LYOptions.c:2413
+#: src/LYOptions.c:2417
 msgid "All"
 msgstr "Semua"
 
-#: src/LYOptions.c:2681 src/LYOptions.c:2705
+#: src/LYOptions.c:2685 src/LYOptions.c:2709
 #, c-format
 msgid "Use %s to invoke the Options menu!"
 msgstr "Gunakan %s untuk menjalankan Opsi menu!"
 
-#: src/LYOptions.c:3477
+#: src/LYOptions.c:3481
 msgid "(options marked with (!) will not be saved)"
 msgstr "(opsi ditandai dengan (!) tidak akan disimpan)"
 
-#: src/LYOptions.c:3485
+#: src/LYOptions.c:3489
 msgid "General Preferences"
 msgstr "Kesukaan Umum"
 
 #. ***************************************************************
 #. User Mode: SELECT
-#: src/LYOptions.c:3489
+#: src/LYOptions.c:3493
 msgid "User mode"
 msgstr "Mode pengguna"
 
 #. Editor: INPUT
-#: src/LYOptions.c:3495
+#: src/LYOptions.c:3499
 msgid "Editor"
 msgstr "Pengubah"
 
 #. Search Type: SELECT
-#: src/LYOptions.c:3500
+#: src/LYOptions.c:3504
 msgid "Type of Search"
 msgstr "Tipe Pencarian"
 
-#: src/LYOptions.c:3505
+#: src/LYOptions.c:3509
 msgid "Security and Privacy"
 msgstr "Keamanan dan Privasi"
 
 #. ***************************************************************
 #. Cookies: SELECT
-#: src/LYOptions.c:3509
+#: src/LYOptions.c:3513
 msgid "Cookies"
 msgstr "Cookies"
 
 #. Cookie Prompting: SELECT
-#: src/LYOptions.c:3523
+#: src/LYOptions.c:3527
 msgid "Invalid-Cookie Prompting"
 msgstr "Tanya Cookie Tidak valid"
 
 #. SSL Prompting: SELECT
-#: src/LYOptions.c:3530
+#: src/LYOptions.c:3534
 msgid "SSL Prompting"
 msgstr "Tanya SSL"
 
-#: src/LYOptions.c:3536
+#: src/LYOptions.c:3540
 msgid "Keyboard Input"
 msgstr "Masukan Keyboard"
 
 #. ***************************************************************
 #. Keypad Mode: SELECT
-#: src/LYOptions.c:3540
+#: src/LYOptions.c:3544
 msgid "Keypad mode"
 msgstr "Mode Keypad"
 
 #. Emacs keys: ON/OFF
-#: src/LYOptions.c:3546
+#: src/LYOptions.c:3550
 msgid "Emacs keys"
 msgstr "Tombol Emacs"
 
 #. VI Keys: ON/OFF
-#: src/LYOptions.c:3552
+#: src/LYOptions.c:3556
 msgid "VI keys"
 msgstr "Tombol VI"
 
 #. Line edit style: SELECT
 #. well, at least 2 line edit styles available
-#: src/LYOptions.c:3559
+#: src/LYOptions.c:3563
 msgid "Line edit style"
 msgstr "Gaya pengubahan baris"
 
 #. Keyboard layout: SELECT
-#: src/LYOptions.c:3571
+#: src/LYOptions.c:3575
 msgid "Keyboard layout"
 msgstr "Layout keyboard"
 
 #.
 #. * Display and Character Set
 #.
-#: src/LYOptions.c:3585
+#: src/LYOptions.c:3589
 msgid "Display and Character Set"
 msgstr "Layar dan Set Karakter"
 
 #. Use locale-based character set: ON/OFF
-#: src/LYOptions.c:3590
+#: src/LYOptions.c:3594
 msgid "Use locale-based character set"
 msgstr "Gunakan Set Karakter berbasis lokal"
 
 #. Display Character Set: SELECT
-#: src/LYOptions.c:3599
+#: src/LYOptions.c:3603
 msgid "Display character set"
 msgstr "Karakter Set Penampilan"
 
-#: src/LYOptions.c:3630
+#: src/LYOptions.c:3634
 msgid "Assumed document character set"
 msgstr "Asumsikan karakter set dokumen"
 
@@ -4881,185 +4880,185 @@ msgstr "Asumsikan karakter set dokumen"
 #. * we split the header to make it more readable:
 #. * "CJK mode" for CJK display charsets, and "Raw 8-bit" for others.
 #.
-#: src/LYOptions.c:3650
+#: src/LYOptions.c:3654
 msgid "CJK mode"
 msgstr "mode CJK"
 
-#: src/LYOptions.c:3652
+#: src/LYOptions.c:3656
 msgid "Raw 8-bit"
 msgstr "Raw 8-bit"
 
 #. X Display: INPUT
-#: src/LYOptions.c:3660
+#: src/LYOptions.c:3664
 msgid "X Display"
 msgstr "Tampilan X"
 
 #.
 #. * Document Appearance
 #.
-#: src/LYOptions.c:3666
+#: src/LYOptions.c:3670
 msgid "Document Appearance"
 msgstr "Tampilan Dokumen"
 
-#: src/LYOptions.c:3672
+#: src/LYOptions.c:3676
 msgid "Show color"
 msgstr "Tampilkan warna"
 
 #. Show cursor: ON/OFF
-#: src/LYOptions.c:3696
+#: src/LYOptions.c:3700
 msgid "Show cursor"
 msgstr "Tampilkan cursor"
 
 #. Underline links: ON/OFF
-#: src/LYOptions.c:3702
+#: src/LYOptions.c:3706
 msgid "Underline links"
 msgstr "Garis bawah sambungan"
 
 #. Show scrollbar: ON/OFF
-#: src/LYOptions.c:3709
+#: src/LYOptions.c:3713
 msgid "Show scrollbar"
 msgstr "Tampilkan scrollbar"
 
 #. Select Popups: ON/OFF
-#: src/LYOptions.c:3716
+#: src/LYOptions.c:3720
 msgid "Popups for select fields"
 msgstr "Popups untuk daerah yang dipilih"
 
 #. HTML error recovery: SELECT
-#: src/LYOptions.c:3722
+#: src/LYOptions.c:3726
 msgid "HTML error recovery"
 msgstr "HTML error rekoveri"
 
 #. Show Images: SELECT
-#: src/LYOptions.c:3728
+#: src/LYOptions.c:3732
 msgid "Show images"
 msgstr "Tampilkan gambar"
 
 #. Verbose Images: ON/OFF
-#: src/LYOptions.c:3742
+#: src/LYOptions.c:3746
 msgid "Verbose images"
 msgstr "Verbose gambar"
 
 #.
 #. * Headers Transferred to Remote Servers
 #.
-#: src/LYOptions.c:3750
+#: src/LYOptions.c:3754
 msgid "Headers Transferred to Remote Servers"
 msgstr "Headers ditransfer ke Server Remote"
 
 #. ***************************************************************
 #. Mail Address: INPUT
-#: src/LYOptions.c:3754
+#: src/LYOptions.c:3758
 msgid "Personal mail address"
 msgstr "Alamat surat pribadi"
 
-#: src/LYOptions.c:3760
+#: src/LYOptions.c:3764
 msgid "Password for anonymous ftp"
 msgstr "Kata sandi untuk ftp anonim"
 
 #. Preferred media type: SELECT
-#: src/LYOptions.c:3766
+#: src/LYOptions.c:3770
 msgid "Preferred media type"
 msgstr "Tipe media yang disukai"
 
 #. Preferred encoding: SELECT
-#: src/LYOptions.c:3772
+#: src/LYOptions.c:3776
 msgid "Preferred encoding"
 msgstr "Pengkodean yang disukai"
 
 #. Preferred Document Character Set: INPUT
-#: src/LYOptions.c:3778
+#: src/LYOptions.c:3782
 msgid "Preferred document character set"
 msgstr "Set Karakter dokumen yang disukai"
 
 #. Preferred Document Language: INPUT
-#: src/LYOptions.c:3783
+#: src/LYOptions.c:3787
 msgid "Preferred document language"
 msgstr "Bahasa dokumen yang disukai"
 
-#: src/LYOptions.c:3789
+#: src/LYOptions.c:3793
 msgid "User-Agent header"
 msgstr "Header User-Agent"
 
 #.
 #. * Listing and Accessing Files
 #.
-#: src/LYOptions.c:3797
+#: src/LYOptions.c:3801
 msgid "Listing and Accessing Files"
 msgstr "Mendaftar dan Mengakses Berkas"
 
 #. FTP sort: SELECT
-#: src/LYOptions.c:3802
+#: src/LYOptions.c:3806
 msgid "Use Passive FTP"
 msgstr "Gunakan Passive FTP"
 
 #. FTP sort: SELECT
-#: src/LYOptions.c:3808
+#: src/LYOptions.c:3812
 msgid "FTP sort criteria"
 msgstr "Kriteria pengurutan FTP"
 
 #. Local Directory Sort: SELECT
-#: src/LYOptions.c:3816
+#: src/LYOptions.c:3820
 msgid "Local directory sort criteria"
 msgstr "Kriteria pengurutan direktori lokal"
 
 #. Local Directory Order: SELECT
-#: src/LYOptions.c:3822
+#: src/LYOptions.c:3826
 msgid "Local directory sort order"
 msgstr "Pengurutan direktori lokal"
 
-#: src/LYOptions.c:3831
+#: src/LYOptions.c:3835
 msgid "Show dot files"
 msgstr "Tampilkan berkas titik"
 
-#: src/LYOptions.c:3839
+#: src/LYOptions.c:3843
 msgid "Execution links"
 msgstr "Eksekusi sambungan"
 
 #. Show transfer rate: SELECT
-#: src/LYOptions.c:3859
+#: src/LYOptions.c:3863
 msgid "Show transfer rate"
 msgstr "Tampilkan kecepatan transfer"
 
 #.
 #. * Special Files and Screens
 #.
-#: src/LYOptions.c:3879
+#: src/LYOptions.c:3883
 msgid "Special Files and Screens"
 msgstr "Berkas Spesial dan Layar"
 
-#: src/LYOptions.c:3884
+#: src/LYOptions.c:3888
 msgid "Multi-bookmarks"
 msgstr "Multi-bookmarks"
 
-#: src/LYOptions.c:3892
+#: src/LYOptions.c:3896
 msgid "Review/edit Bookmarks files"
 msgstr "Ulas/ubah berkas Bookmarks"
 
-#: src/LYOptions.c:3894
+#: src/LYOptions.c:3898
 msgid "Goto multi-bookmark menu"
 msgstr "Goto menu multi-bookmark"
 
-#: src/LYOptions.c:3896
+#: src/LYOptions.c:3900
 msgid "Bookmarks file"
 msgstr "Berkas bookmarks"
 
 #. Auto Session: ON/OFF
-#: src/LYOptions.c:3903
+#: src/LYOptions.c:3907
 msgid "Auto Session"
 msgstr "Sesi otomatis"
 
 #. Session File Menu: INPUT
-#: src/LYOptions.c:3909
+#: src/LYOptions.c:3913
 msgid "Session file"
 msgstr "Berkas sesi"
 
 #. Visited Pages: SELECT
-#: src/LYOptions.c:3915
+#: src/LYOptions.c:3919
 msgid "Visited Pages"
 msgstr "Halaman Dikunjungi"
 
-#: src/LYOptions.c:3920
+#: src/LYOptions.c:3924
 msgid "View the file "
 msgstr "Lihat berkas "
 
@@ -5446,7 +5445,7 @@ msgstr ""
 "dimana OBJECT adalah salah satu dari EM,STRONG,B,I,U,BLINK etc.\n"
 "\n"
 
-#: src/LYTraversal.c:108
+#: src/LYTraversal.c:111
 msgid "here is a list of the history stack so that you may rebuild"
 msgstr "disini adalah daftar dari sejarah stack yang dapat anda buat kembali"
 
@@ -5482,29 +5481,29 @@ msgstr "Opsi Upload:"
 msgid "Download document URL put to clipboard."
 msgstr "URL unduh dokumen diletakan ke clipboard."
 
-#: src/LYUtils.c:2615
+#: src/LYUtils.c:2614
 msgid "Unexpected access protocol for this URL scheme."
 msgstr "Protokol akses tidak terduga untuk skema URL ini."
 
-#: src/LYUtils.c:3423
+#: src/LYUtils.c:3422
 msgid "Too many tempfiles"
 msgstr "Terlalu banyak berkas tempfiles"
 
-#: src/LYUtils.c:3723
+#: src/LYUtils.c:3722
 msgid "unknown restriction"
 msgstr "restriksi tidak diketahui"
 
-#: src/LYUtils.c:3754
+#: src/LYUtils.c:3753
 #, c-format
 msgid "No restrictions set.\n"
 msgstr "Tidak ada set restriksi.\n"
 
-#: src/LYUtils.c:3757
+#: src/LYUtils.c:3756
 #, c-format
 msgid "Restrictions set:\n"
 msgstr "Set restriksi:\n"
 
-#: src/LYUtils.c:5135
+#: src/LYUtils.c:5134
 msgid "Cannot find HOME directory"
 msgstr "Tidak dapat menemukan direktori HOME"
 
@@ -6035,6 +6034,8 @@ msgid ""
 "Lynx User Defaults File\n"
 "\n"
 msgstr ""
+"Berkas Baku Pengguna Lynx\n"
+"\n"
 
 #: src/LYrcFile.c:882
 msgid ""
@@ -6042,12 +6043,17 @@ msgid ""
 "with the 'o' key).  To save options with that screen, you must select the\n"
 "checkbox:\n"
 msgstr ""
+"Berkas ini berisi opsi disimpan dari Opsi Layar Lynx (secara normal\n"
+"dengan tombol 'o'). Untuk menyimpan opsi di layar itu, anda harus\n"
+"memilih checkbox:\n"
 
 #: src/LYrcFile.c:889
 msgid ""
 "You must then save the settings using the link on the line above the\n"
 "checkbox:\n"
 msgstr ""
+"Anda harus menyimpan konfigurasi menggunakan sambungan di baris\n"
+"diatas checkbox:\n"
 
 #: src/LYrcFile.c:896
 msgid ""
@@ -6055,6 +6061,9 @@ msgid ""
 "the simpler Options Menu instead.  Save options with that using the '>' key.\n"
 "\n"
 msgstr ""
+"Anda juga boleh menggunakan opsi baris-perintah \" -forms_options\", yang\n"
+"menampilkan Opsi Menu lebih sederhana. Simpan opsi dengan itu menggunakan\n"
+"tombol '>'.\n"
 
 #: src/LYrcFile.c:903
 msgid ""
@@ -6062,9 +6071,11 @@ msgid ""
 "with the '>' key).\n"
 "\n"
 msgstr ""
+"Berkas ini berisi opsi disimpan dari Layar Opsi Lynx (secara normal\n"
+"dengan tombol '>').\n"
+"\n"
 
 #: src/LYrcFile.c:910
-#, fuzzy
 msgid ""
 "There is normally no need to edit this file manually, since the defaults\n"
 "here can be controlled from the Options Screen, and the next time options\n"
@@ -6075,16 +6086,14 @@ msgid ""
 "called \"lynx.cfg\".  It has different content and a different format.\n"
 "It is not this file.\n"
 msgstr ""
-"Berkas Pengguna Baku Lynx\n"
-"\n"
-"Berkas ini berisi opsi disimpan dari Layar Opsi Lynx (secara normal dengan\n"
-"tombol '>'). Disana secara normal tidak dibutuhkan untuk mengubah berkas ini\n"
+"Disana secara normal tidak dibutuhkan untuk mengubah berkas ini\n"
 "secara manual, karena disini baku dapat dikontrol dari Layar Opsi, dan opsi\n"
 "selanjutnya disimpan dari Layar Opsi berkas ini akan ditulis ulang.\n"
 "Anda telah diperingatkan...\n"
+"\n"
 "Jika anda mencari untuk berkas konfigurasi umum - ini secara normal dipanggil\n"
 "lynx.cfg, dan ini memiliki isi berbeda dan sebuah format berbeda.\n"
-"Ini bukan berkas ini.\n"
+"Tapi bukan berkas ini.\n"
 
 #~ msgid "Socket read failed for 180,000 tries."
 #~ msgstr "Pembacaan socket gagal untuk pencobaan 180,000 kali."

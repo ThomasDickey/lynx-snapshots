@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFWriter.c,v 1.90 2007/08/02 19:40:50 tom Exp $
+ * $LynxId: HTFWriter.c,v 1.91 2009/01/01 22:58:59 tom Exp $
  *
  *		FILE WRITER				HTFWrite.h
  *		===========
@@ -134,7 +134,7 @@ static void HTFWriter_write(HTStream *me, const char *s, int l)
     size_t result;
 
     if (me->fp) {
-	result = fwrite(s, 1, l, me->fp);
+	result = fwrite(s, 1, (unsigned) l, me->fp);
 	if (result != (size_t) l) {
 	    HTFWriter_error(me, "HTFWriter_write");
 	}
@@ -199,7 +199,7 @@ static void HTFWriter_free(HTStream *me)
 		 * and remove any previous uncompressed copy.  - FM
 		 */
 		StrAllocCopy(path, me->anchor->FileCache);
-		if ((len = strlen(path)) > 3 &&
+		if ((len = (int) strlen(path)) > 3 &&
 		    (!strcasecomp(&path[len - 2], "gz") ||
 		     !strcasecomp(&path[len - 2], "zz"))) {
 #ifdef USE_ZLIB

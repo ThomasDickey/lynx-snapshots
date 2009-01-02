@@ -1,11 +1,11 @@
-dnl $LynxId: aclocal.m4,v 1.133 2008/12/29 14:29:10 tom Exp $
+dnl $LynxId: aclocal.m4,v 1.134 2009/01/02 01:46:18 tom Exp $
 dnl Macros for auto-configure script.
 dnl by T.E.Dickey <dickey@invisible-island.net>
 dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
 dnl and Philippe De Muyter <phdm@macqel.be>
 dnl
 dnl Created: 1997/1/28
-dnl Updated: 2008/12/24
+dnl Updated: 2009/1/1
 dnl
 dnl The autoconf used in Lynx development is GNU autoconf 2.13 or 2.52, patched
 dnl by Thomas Dickey.  See your local GNU archives, and this URL:
@@ -13,7 +13,7 @@ dnl http://invisible-island.net/autoconf/autoconf.html
 dnl
 dnl ---------------------------------------------------------------------------
 dnl
-dnl Copyright 1997-2007,2008 by Thomas E. Dickey
+dnl Copyright 1997-2008,2009 by Thomas E. Dickey
 dnl
 dnl Permission to use, copy, modify, and distribute this software and its
 dnl documentation for any purpose and without fee is hereby granted,
@@ -988,6 +988,40 @@ ifelse($3,,[    :]dnl
   $4
 ])dnl
   ])])dnl
+dnl ---------------------------------------------------------------------------
+dnl CF_AR_FLAGS version: 2 updated: 2009/01/01 20:45:18
+dnl -----------
+dnl Check for suitable "ar" (archiver) options for updating an archive.
+AC_DEFUN([CF_AR_FLAGS],[
+AC_REQUIRE([CF_PROG_AR])
+
+AC_CACHE_CHECK(for options to update archives, cf_cv_ar_flags,[
+	cf_cv_ar_flags=unknown
+	for cf_ar_flags in -curv curv -crv crv -cqv cqv -rv rv
+	do
+		rm -f conftest.$ac_cv_objext
+		rm -f conftest.a
+
+		cat >conftest.$ac_ext <<EOF
+#line __oline__ "configure"
+int	testdata[[3]] = { 123, 456, 789 };
+EOF
+		if AC_TRY_EVAL(ac_compile) ; then
+			$AR $cf_ar_flags conftest.a conftest.$ac_cv_objext 2>&AC_FD_CC 1>/dev/null
+			if test -f conftest.a ; then
+				cf_cv_ar_flags=$cf_ar_flags
+				break
+			fi
+		else
+			CF_VERBOSE(cannot compile test-program)
+			break
+		fi
+	done
+	rm -f conftest.a conftest.$ac_ext conftest.$ac_cv_objext
+])
+
+AC_SUBST(ARFLAGS,$cf_cv_ar_flags)
+])
 dnl ---------------------------------------------------------------------------
 dnl CF_BOOL_DEFS version: 3 updated: 1998/04/27 20:32:33
 dnl ------------
@@ -3923,6 +3957,13 @@ fi
 
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl CF_PROG_AR version: 1 updated: 2009/01/01 20:15:22
+dnl ----------
+dnl Check for archiver "ar".
+AC_DEFUN([CF_PROG_AR],[
+AC_CHECK_TOOL(AR, ar, ar)
+])
+dnl ---------------------------------------------------------------------------
 dnl CF_PROG_CC_U_D version: 1 updated: 2005/07/14 16:59:30
 dnl --------------
 dnl Check if C (preprocessor) -U and -D options are processed in the order
@@ -3972,6 +4013,16 @@ PROG_EXT="$EXEEXT"
 AC_SUBST(PROG_EXT)
 test -n "$PROG_EXT" && AC_DEFINE_UNQUOTED(PROG_EXT,"$PROG_EXT")
 ])dnl
+dnl ---------------------------------------------------------------------------
+dnl CF_PROG_RANLIB version: 1 updated: 2009/01/01 20:15:22
+dnl --------------
+dnl Check for ranlib.
+dnl
+dnl TODO: make this conditionally depend on autoconf version, since the later
+dnl versions of autoconf use check-tool.
+AC_DEFUN([CF_PROG_RANLIB],[
+AC_CHECK_TOOL(RANLIB, ranlib, ':')
+])
 dnl ---------------------------------------------------------------------------
 dnl CF_RECHECK_FUNC version: 3 updated: 2000/10/18 19:29:13
 dnl ---------------

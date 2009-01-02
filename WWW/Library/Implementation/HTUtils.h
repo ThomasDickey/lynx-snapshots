@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTUtils.h,v 1.92 2008/12/29 18:35:59 tom Exp $
+ * $LynxId: HTUtils.h,v 1.93 2009/01/01 21:49:29 tom Exp $
  *
  * Utility macros for the W3 code library
  * MACROS FOR GENERAL USE
@@ -624,7 +624,7 @@ extern int WWW_TraceMask;
 #define CTRACE(p)         ((void)((TRACE) && ( LY_SHOWWHERE fprintf p )))
 #define CTRACE2(m,p)      ((void)((m)     && ( LY_SHOWWHERE fprintf p )))
 #define tfp TraceFP()
-#define CTRACE_SLEEP(secs) if (TRACE && LYTraceLogFP == 0) sleep(secs)
+#define CTRACE_SLEEP(secs) if (TRACE && LYTraceLogFP == 0) sleep((unsigned)secs)
 #define CTRACE_FLUSH(fp)   if (TRACE) fflush(fp)
 
 #include <www_tcp.h>

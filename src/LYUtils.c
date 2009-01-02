@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYUtils.c,v 1.180 2008/12/31 16:35:14 tom Exp $
+ * $LynxId: LYUtils.c,v 1.182 2009/01/01 23:59:34 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTCP.h>
@@ -314,7 +314,7 @@ void LYSetHilite(int cur,
 		 const char *text)
 {
     links[cur].list.hl_base.hl_text = (char *) text;
-    links[cur].list.hl_len = (text != NULL) ? 1 : 0;
+    links[cur].list.hl_len = (short) ((text != NULL) ? 1 : 0);
     FREE(links[cur].list.hl_info);
 }
 
@@ -327,8 +327,8 @@ void LYAddHilite(int cur,
 {
     HiliteList *list = &(links[cur].list);
     HiliteInfo *have = list->hl_info;
-    unsigned need = (list->hl_len - 1);
-    unsigned want = (list->hl_len += 1);
+    unsigned need = (unsigned) (list->hl_len - 1);
+    unsigned want = (unsigned) (list->hl_len += 1);
 
     if (have != NULL) {
 	have = typeRealloc(HiliteInfo, have, want);
@@ -337,7 +337,7 @@ void LYAddHilite(int cur,
     }
     list->hl_info = have;
     have[need].hl_text = text;
-    have[need].hl_x = x;
+    have[need].hl_x = (short) x;
 }
 
 /*
@@ -425,7 +425,7 @@ static BOOL show_whereis_targets(int flag,
 				      target)) {
 	int itmp, written, len, y, offset;
 	const char *data;
-	int tlen = strlen(target);
+	int tlen = (int) strlen(target);
 	int hlen, hLen;
 	int hLine = LYP + count;
 	int hoffset = LYGetHilitePos(cur, count);
@@ -440,7 +440,7 @@ static BOOL show_whereis_targets(int flag,
 		      (sizeof(buffer) - 1),
 		      (LYcolLimit - LYGetHilitePos(cur, count)),
 		      utf_flag);
-	hlen = strlen(buffer);
+	hlen = (int) strlen(buffer);
 	hLen = ((IS_CJK_TTY || utf_flag) ?
 		LYmbcsstrlen(buffer, utf_flag, YES) : hlen);
 
@@ -492,8 +492,8 @@ static BOOL show_whereis_targets(int flag,
 		tmp[0] = data[itmp];
 		utf_extra = utf8_length(utf_flag, data + itmp);
 		if (utf_extra) {
-		    LYstrncpy(&tmp[1], &data[itmp + 1], utf_extra);
-		    itmp += utf_extra;
+		    LYstrncpy(&tmp[1], &data[itmp + 1], (int) utf_extra);
+		    itmp += (int) utf_extra;
 		    /*
 		     * Start emphasis immediately if we are making the link
 		     * non-current.  -FM
@@ -506,7 +506,7 @@ static BOOL show_whereis_targets(int flag,
 			LYmove(hLine, (offset + 1));
 		    }
 		    tmp[1] = '\0';
-		    written += (utf_extra + 1);
+		    written += (int) (utf_extra + 1);
 		    utf_extra = 0;
 		} else if (IS_CJK_TTY && is8bits(tmp[0])) {
 		    /*
@@ -564,8 +564,8 @@ static BOOL show_whereis_targets(int flag,
 		     */
 		    utf_extra = utf8_length(utf_flag, data + itmp);
 		    if (utf_extra) {
-			LYstrncpy(&tmp[1], &data[itmp + 1], utf_extra);
-			itmp += utf_extra;
+			LYstrncpy(&tmp[1], &data[itmp + 1], (int) utf_extra);
+			itmp += (int) utf_extra;
 			/*
 			 * Make sure we don't restore emphasis to the last
 			 * character of hightext if we are making the link
@@ -580,7 +580,7 @@ static BOOL show_whereis_targets(int flag,
 			    LYaddstr(tmp);
 			}
 			tmp[1] = '\0';
-			written += (utf_extra + 1);
+			written += (int) (utf_extra + 1);
 			utf_extra = 0;
 		    } else if (IS_CJK_TTY && is8bits(tmp[0])) {
 			/*
@@ -691,8 +691,8 @@ static BOOL show_whereis_targets(int flag,
 		tmp[0] = data[itmp];
 		utf_extra = utf8_length(utf_flag, data + itmp);
 		if (utf_extra) {
-		    LYstrncpy(&tmp[1], &data[itmp + 1], utf_extra);
-		    itmp += utf_extra;
+		    LYstrncpy(&tmp[1], &data[itmp + 1], (int) utf_extra);
+		    itmp += (int) utf_extra;
 		    /*
 		     * Start emphasis immediately if we are making the link
 		     * non-current, or we are making it current but this is not
@@ -707,7 +707,7 @@ static BOOL show_whereis_targets(int flag,
 			LYmove(hLine, (offset + 1));
 		    }
 		    tmp[1] = '\0';
-		    written += (utf_extra + 1);
+		    written += (int) (utf_extra + 1);
 		    utf_extra = 0;
 		} else if (IS_CJK_TTY && is8bits(tmp[0])) {
 		    /*
@@ -766,8 +766,8 @@ static BOOL show_whereis_targets(int flag,
 		     */
 		    utf_extra = utf8_length(utf_flag, data + itmp);
 		    if (utf_extra) {
-			LYstrncpy(&tmp[1], &data[itmp + 1], utf_extra);
-			itmp += utf_extra;
+			LYstrncpy(&tmp[1], &data[itmp + 1], (int) utf_extra);
+			itmp += (int) utf_extra;
 			/*
 			 * Make sure we don't restore emphasis to the last
 			 * character of hightext if we are making the link
@@ -782,7 +782,7 @@ static BOOL show_whereis_targets(int flag,
 			    LYaddstr(tmp);
 			}
 			tmp[1] = '\0';
-			written += (utf_extra + 1);
+			written += (int) (utf_extra + 1);
 			utf_extra = 0;
 		    } else if (IS_CJK_TTY && is8bits(tmp[0])) {
 			/*
@@ -869,7 +869,7 @@ static BOOL show_whereis_targets(int flag,
 			LYmove(hLine, offset);
 			itmp = 0;
 			written = 0;
-			len = strlen(data);
+			len = (int) strlen(data);
 
 			/*
 			 * Turn the emphasis back on.  -FM
@@ -887,8 +887,8 @@ static BOOL show_whereis_targets(int flag,
 			     */
 			    utf_extra = utf8_length(utf_flag, data + itmp);
 			    if (utf_extra) {
-				LYstrncpy(&tmp[1], &data[itmp + 1], utf_extra);
-				itmp += utf_extra;
+				LYstrncpy(&tmp[1], &data[itmp + 1], (int) utf_extra);
+				itmp += (int) utf_extra;
 				/*
 				 * Make sure we don't restore emphasis to the
 				 * last character of hightext if we are making
@@ -903,7 +903,7 @@ static BOOL show_whereis_targets(int flag,
 				    LYaddstr(tmp);
 				}
 				tmp[1] = '\0';
-				written += (utf_extra + 1);
+				written += (int) (utf_extra + 1);
 				utf_extra = 0;
 			    } else if (IS_CJK_TTY && is8bits(tmp[0])) {
 				/*
@@ -989,12 +989,12 @@ static int find_cached_style(int cur,
 	    CTRACE2(TRACE_STYLE,
 		    (tfp, "STYLE.highlight.off: cached style @(%d,%d): ",
 		     LYP, LXP));
-	    s = GetCachedStyle(LYP, LXP);
+	    s = (int) GetCachedStyle(LYP, LXP);
 	    if (s == 0) {
 		for (x = LXP - 1; x >= 0; x--) {
-		    s = GetCachedStyle(LYP, x);
+		    s = (int) GetCachedStyle(LYP, x);
 		    if (s != 0) {
-			SetCachedStyle(LYP, LXP, s);
+			SetCachedStyle(LYP, LXP, (unsigned) s);
 			CTRACE2(TRACE_STYLE,
 				(tfp, "found %d, x_offset=%d.\n", s, x - LXP));
 			break;
@@ -1108,7 +1108,7 @@ void LYhighlight(int flag,
 
 	    gllen = LYmbcsstrlen(text, utf_flag, YES);
 	    len = LYmbcs_skip_cells(text, avail_space, utf_flag) - text;
-	    LYwaddnstr(LYwin, text, len);
+	    LYwaddnstr(LYwin, text, (unsigned) len);
 	    while (gllen++ < avail_space)
 		LYaddch('_');
 
@@ -1276,7 +1276,7 @@ char *strip_trailing_slash(char *dirname)
 {
     int i;
 
-    i = strlen(dirname) - 1;
+    i = (int) strlen(dirname) - 1;
     while (i >= 0 && dirname[i] == '/')
 	dirname[i--] = '\0';
     return (dirname);
@@ -1287,8 +1287,8 @@ char *strip_trailing_slash(char *dirname)
  */
 static void remove_most_blanks(char *buffer)
 {
-    int length = strlen(buffer);
-    BOOL trailing = (length != 0) && (buffer[length - 1] == ' ');
+    int length = (int) strlen(buffer);
+    BOOL trailing = (BOOL) ((length != 0) && (buffer[length - 1] == ' '));
 
     LYReduceBlanks(buffer);
     if (trailing)
@@ -1365,7 +1365,7 @@ void statusline(const char *text)
 	} else {
 	    for (i = 0, j = 0; text_buff[i]; i++) {
 		if (text_buff[i] != CH_ESC) {	/* S/390 -- gil -- 2119 */
-		    temp[j++] = text_buff[i];
+		    temp[j++] = UCH(text_buff[i]);
 		}
 	    }
 	    temp[j] = '\0';
@@ -1383,14 +1383,14 @@ void statusline(const char *text)
 	for (i = 0, j = 0, len = 0, k = '\0';
 	     temp[i] != '\0' && len < max_length; i++) {
 	    if (k != '\0') {
-		buffer[j++] = k;
-		buffer[j++] = temp[i];
+		buffer[j++] = (char) k;
+		buffer[j++] = (char) temp[i];
 		k = '\0';
 		len += 2;
 	    } else if ((temp[i] & 0200) != 0) {
 		k = temp[i];
 	    } else {
-		buffer[j++] = temp[i];
+		buffer[j++] = (char) temp[i];
 		len++;
 	    }
 	}
@@ -1490,9 +1490,9 @@ void statusline(const char *text)
 	    if (!(lynx_has_color && LYShowColor >= SHOW_COLOR_ON))
 		wbkgdset(LYwin, A_NORMAL | ' ');
 	    else if (s_normal != NOSTYLE)
-		wbkgdset(LYwin, hashStyles[s_normal].color | ' ');
+		wbkgdset(LYwin, (chtype) (hashStyles[s_normal].color | ' '));
 	    else
-		wbkgdset(LYwin, displayStyles[DSTYLE_NORMAL].color | ' ');
+		wbkgdset(LYwin, (chtype) (displayStyles[DSTYLE_NORMAL].color | ' '));
 	    LynxChangeStyle(a, STACK_OFF);
 	}
 #endif
@@ -1940,11 +1940,11 @@ BOOLEAN LYisAbsPath(const char *path)
 	result = TRUE;
 #else
 #if defined(USE_DOS_DRIVES)
-	result = (BOOL) (LYIsPathSep(path[0])
-			 || (LYIsDosDrive(path)
-			     && LYIsPathSep(path[2])));
+	result = (BOOLEAN) (LYIsPathSep(path[0])
+			    || (LYIsDosDrive(path)
+				&& LYIsPathSep(path[2])));
 #else
-	result = (LYIsPathSep(path[0]));
+	result = (BOOLEAN) (LYIsPathSep(path[0]));
 #endif /* USE_DOS_DRIVES */
 #endif
     }
@@ -2187,7 +2187,7 @@ static BOOLEAN compare_type(char *tst,
 			    const char *cmp,
 			    size_t len)
 {
-    if (!strncasecomp(tst, cmp, len)) {
+    if (!strncasecomp(tst, cmp, (int) len)) {
 	if (strncmp(tst, cmp, len)) {
 	    size_t i;
 
@@ -2222,7 +2222,6 @@ UrlTypes is_url(char *filename)
     char *cp = filename;
     char *cp1;
     UrlTypes result = NOT_A_URL_TYPE;
-    int len;
     int limit;
 
     /*
@@ -2252,7 +2251,7 @@ UrlTypes is_url(char *filename)
 	result = NOT_A_URL_TYPE;
 
     } else {
-	limit = strlen(cp);
+	limit = (int) strlen(cp);
 	switch (*cp) {
 	case 'L':
 	case 'l':
@@ -2416,10 +2415,10 @@ UrlTypes is_url(char *filename)
 
 	case 'F':
 	case 'f':
-	    if (compare_type(cp, STR_FILE_URL, len = LEN_FILE_URL)) {
+	    if (compare_type(cp, STR_FILE_URL, LEN_FILE_URL)) {
 		if (LYisLocalFile(cp)) {
 		    result = FILE_URL_TYPE;
-		} else if (DoubleHtmlSep(cp + len)) {
+		} else if (DoubleHtmlSep(cp + LEN_FILE_URL)) {
 		    result = FTP_URL_TYPE;
 		}
 	    }
@@ -2788,7 +2787,7 @@ void remove_backslashes(char *buf)
  */
 BOOLEAN inlocaldomain(void)
 {
-    int result = TRUE;
+    BOOLEAN result = TRUE;
 
 #ifdef HAVE_UTMP
     int n;
@@ -2803,7 +2802,7 @@ BOOLEAN inlocaldomain(void)
     if (mytty && (fp = fopen(UTMP_FILE, "r")) != NULL) {
 	mytty++;
 	do {
-	    n = fread((char *) &me, sizeof(struct utmp), 1, fp);
+	    n = (int) fread((char *) &me, sizeof(struct utmp), 1, fp);
 	} while (n > 0 && !STREQ(me.ut_line, mytty));
 	(void) LYCloseInput(fp);
 
@@ -3411,10 +3410,10 @@ static int fmt_tempname(char *result,
 	do {
 	    counter %= MAX_TEMPNAME;
 	    offset = counter / BITS_PER_CHAR;
-	    mask = 1 << (counter % BITS_PER_CHAR);
+	    mask = (unsigned) (1 << (counter % BITS_PER_CHAR));
 	    if ((used_tempname[offset] & mask) == 0) {
 		names_used++;
-		used_tempname[offset] |= mask;
+		used_tempname[offset] |= UCH(mask);
 		break;
 	    }
 	} while ((used_tempname[offset] & mask) == 0);
@@ -3655,9 +3654,9 @@ BOOL strn_dash_equ(const char *p1,
  * Returns the inx'th name from the restrictions table, or null if inx is
  * out of range.
  */
-const char *index_to_restriction(int inx)
+const char *index_to_restriction(unsigned inx)
 {
-    if (inx >= 0 && inx < (int) TABLESIZE(restrictions))
+    if (inx < TABLESIZE(restrictions))
 	return restrictions[inx].name;
     return NULL;
 }
@@ -3672,7 +3671,7 @@ int find_restriction(const char *name,
     unsigned i;
 
     if (len < 0)
-	len = strlen(name);
+	len = (int) strlen(name);
     for (i = 0; i < TABLESIZE(restrictions); i++) {
 	if (RESTRICT_NM_EQU(name, restrictions[i].name, len)) {
 	    return (*restrictions[i].flag);
@@ -3709,7 +3708,7 @@ void parse_restrictions(const char *s)
 	    for (i = N_SPECIAL_RESTRICT_OPTIONS;
 		 i < TABLESIZE(restrictions);
 		 i++)
-		*(restrictions[i].flag) = !restrictions[i].can;
+		*(restrictions[i].flag) = (BOOLEAN) !restrictions[i].can;
 	} else {
 	    for (i = 0; i < TABLESIZE(restrictions); i++) {
 		if (RESTRICT_NM_EQU(word, restrictions[i].name, p - word)) {
@@ -3895,7 +3894,7 @@ void LYCheckMail(void)
 	else if (lastsize == 0)
 	    HTUserMsg(HAVE_MAIL_MSG);
     }
-    lastsize = st.st_size;
+    lastsize = (long) st.st_size;
     lasttime = st.st_mtime;
     return;
 }
@@ -5472,14 +5471,14 @@ void LYAddPathToHome(char *fbuffer,
 	 */
 	StrAllocCopy(home, NO_HOMEPATH);
 
-    len = fbuffer_size - (strlen(home) + 1);
+    len = (int) fbuffer_size - ((int) strlen(home) + 1);
     if (len <= 0) {
 	/*
 	 * Buffer is smaller than or only big enough for the home path.  Load
 	 * what fits of the home path and return.  This will fail, but we need
 	 * something in the buffer.  - FM
 	 */
-	LYstrncpy(fbuffer, home, (fbuffer_size - 1));
+	LYstrncpy(fbuffer, home, (int) (fbuffer_size - 1));
 	FREE(home);
 	return;
     }
@@ -5654,11 +5653,12 @@ static BOOL IsOurSymlink(const char *name)
     BOOL result = FALSE;
     int size = LY_MAXPATH;
     int used;
-    char *buffer = typeMallocn(char, size);
+    char *buffer = typeMallocn(char, (unsigned) size);
 
     if (buffer != 0) {
-	while ((used = readlink(name, buffer, size - 1)) == size - 1) {
-	    buffer = typeRealloc(char, buffer, size *= 2);
+	while ((used = readlink(name, buffer, (unsigned) (size - 1))) == size
+	       - 1) {
+	    buffer = typeRealloc(char, buffer, (unsigned) (size *= 2));
 
 	    if (buffer == 0)
 		break;
@@ -5757,7 +5757,7 @@ BOOL IsOurFile(const char *name)
 	} while (leaf != path);
 	FREE(path);
 #endif
-	result = !linked;
+	result = (BOOLEAN) !linked;
     }
     CTRACE2(TRACE_CFG, (tfp, "IsOurFile(%s) %d\n", name, result));
     return result;
@@ -5770,7 +5770,7 @@ static FILE *OpenHiddenFile(const char *name, const char *mode)
 {
     FILE *fp = 0;
     struct stat data;
-    BOOLEAN binary = strchr(mode, 'b') != 0;
+    BOOLEAN binary = (BOOLEAN) (strchr(mode, 'b') != 0);
 
 #if defined(O_CREAT) && defined(O_EXCL)		/* we have fcntl.h or kindred? */
     /*
@@ -5979,7 +5979,7 @@ FILE *LYOpenTemp(char *result,
 	    CTRACE((tfp, "lynx_temp_space is not a directory %s\n", lynx_temp_space));
 	}
 	if (make_it) {
-	    int old_mask = umask(HIDE_UMASK);
+	    mode_t old_mask = umask(HIDE_UMASK);
 
 	    StrAllocCat(lynx_temp_space, "lynxXXXXXXXXXX");
 	    if (mkdtemp(lynx_temp_space) == 0) {
@@ -6029,7 +6029,7 @@ FILE *LYOpenTemp(char *result,
 	p->next = ly_temp;
 	StrAllocCopy((p->name), result);
 	p->file = fp;
-	p->outs = (wrt != 'r');
+	p->outs = (BOOLEAN) (wrt != 'r');
 	ly_temp = p;
     } else {
 	outofmem(__FILE__, "LYOpenTemp");
@@ -6368,7 +6368,7 @@ void LYCheckBibHost(void)
     bibhostIcon.safe = FALSE;
     saveFlag = traversal;
     traversal = TRUE;		/* Hack to force error response. */
-    BibP_bibhost_available = HTLoadAbsolute(&bibhostIcon) == YES;
+    BibP_bibhost_available = (BOOLEAN) (HTLoadAbsolute(&bibhostIcon) == YES);
     traversal = saveFlag;
     BibP_bibhost_checked = TRUE;
 }
@@ -6925,13 +6925,13 @@ int LYCopyFile(char *src,
     } else {
 	FILE *fin, *fout;
 	unsigned char buff[BUFSIZ];
-	int len;
+	unsigned len;
 
 	code = EOF;
 	if ((fin = fopen(src, BIN_R)) != 0) {
 	    if ((fout = fopen(dst, BIN_W)) != 0) {
 		code = 0;
-		while ((len = fread(buff, 1, sizeof(buff), fin)) > 0) {
+		while ((len = fread(buff, 1, sizeof(buff), fin)) != 0) {
 		    fwrite(buff, 1, len, fout);
 		    if (ferror(fout)) {
 			code = EOF;
@@ -7448,7 +7448,7 @@ static int clip_grab(void)
 char *get_clip_grab(void)
 {
     int len;
-    int size = PASTE_BUFFER;
+    unsigned size = PASTE_BUFFER;
     int off = 0;
 
     if (!clip_grab())
@@ -7459,7 +7459,7 @@ char *get_clip_grab(void)
 	FREE(paste_buf);
     paste_buf = (char *) malloc(PASTE_BUFFER);
     while (1) {
-	len = fread(paste_buf + off, 1, PASTE_BUFFER - 1, paste_handle);
+	len = (int) fread(paste_buf + off, 1, PASTE_BUFFER - 1, paste_handle);
 	paste_buf[off + len] = '\0';
 	if (len < PASTE_BUFFER - 1)
 	    break;
@@ -7477,7 +7477,7 @@ int put_clip(const char *s)
 {
     char *cmd = LYGetEnv("RL_CLCOPY_CMD");
     FILE *fh;
-    int l = strlen(s), res;
+    unsigned l = strlen(s), res;
 
     if (!cmd)
 	return -1;
@@ -7504,7 +7504,7 @@ void LYmsec_delay(unsigned msec)
     Sleep(msec);
 
 #elif defined(HAVE_NAPMS)
-    napms(msec);
+    napms((int) msec);
 
 #elif defined(DJGPP) || defined(HAVE_USLEEP)
     usleep(1000 * msec);
