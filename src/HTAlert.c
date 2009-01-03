@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTAlert.c,v 1.82 2008/09/06 14:35:56 tom Exp $
+ * $LynxId: HTAlert.c,v 1.83 2009/01/03 00:43:04 tom Exp $
  *
  *	Displaying messages and getting input for Lynx Browser
  *	==========================================================
@@ -551,7 +551,7 @@ BOOL confirm_post_resub(const char *address,
     char buf[240];
     char *temp = NULL;
     BOOL res;
-    size_t maxlen = LYcolLimit - 5;
+    size_t maxlen = (size_t) (LYcolLimit - 5);
 
     if (!address) {
 	return (NO);
@@ -864,11 +864,11 @@ BOOL HTConfirmCookie(domain_entry * de, const char *server,
 	space_free = (LYcolLimit
 		      - (LYstrCells(prompt)
 			 - 10)	/* %s and %.*s and %.*s chars */
-		      -strlen(server));
+		      - (int) strlen(server));
 	if (space_free < 0)
 	    space_free = 0;
-	namelen = strlen(name);
-	valuelen = strlen(value);
+	namelen =  (int) strlen(name);
+	valuelen =  (int) strlen(value);
 	if ((namelen + valuelen) > space_free) {
 	    /*
 	     * Argh...  there isn't enough space on our single line for

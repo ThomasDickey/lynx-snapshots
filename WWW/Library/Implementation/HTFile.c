@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFile.c,v 1.117 2009/01/01 16:47:58 tom Exp $
+ * $LynxId: HTFile.c,v 1.118 2009/01/02 23:03:34 tom Exp $
  *
  *			File Access				HTFile.c
  *			===========
@@ -1882,7 +1882,6 @@ static int print_local_dir(DIR *dp, char *localname,
     BOOL need_parent_link = FALSE;
     BOOL preformatted = FALSE;
     int status;
-    int i;
     struct stat *actual_info;
 
 #ifdef DISP_PARTIAL

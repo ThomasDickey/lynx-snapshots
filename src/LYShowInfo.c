@@ -1,4 +1,4 @@
-/* $LynxId: LYShowInfo.c,v 1.67 2008/12/25 14:35:50 tom Exp $ */
+/* $LynxId: LYShowInfo.c,v 1.68 2009/01/03 00:37:51 tom Exp $ */
 #include <HTUtils.h>
 #include <HTFile.h>
 #include <HTParse.h>
@@ -77,7 +77,7 @@ static void dt_String(FILE *fp,
     StrAllocCopy(the_label, label);
     StrAllocCopy(the_value, value);
 
-    have = strlen(the_label);
+    have = (int) strlen(the_label);
     need = LYstrExtent(the_label, have, label_columns);
 
     LYEntify(&the_label, TRUE);
@@ -148,7 +148,7 @@ int LYShowInfo(DocInfo *doc,
 	(url_type == LYNXEXEC_URL_TYPE ||
 	 url_type == LYNXPROG_URL_TYPE)) {
 	char *last_slash = strrchr(links[doc->link].lname, '/');
-	int next_to_last = strlen(links[doc->link].lname) - 1;
+	int next_to_last = (int) strlen(links[doc->link].lname) - 1;
 
 	if ((last_slash - links[doc->link].lname) == next_to_last) {
 	    links[doc->link].lname[next_to_last] = '\0';
@@ -215,10 +215,10 @@ int LYShowInfo(DocInfo *doc,
 		ADD_SS(gettext("Points to file:"), buf);
 	    }
 #endif
-	    name = HTAA_UidToName(dir_info.st_uid);
+	    name = HTAA_UidToName((int) dir_info.st_uid);
 	    if (*name)
 		ADD_SS(gettext("Name of owner:"), name);
-	    name = HTAA_GidToName(dir_info.st_gid);
+	    name = HTAA_GidToName((int) dir_info.st_gid);
 	    if (*name)
 		ADD_SS(gettext("Group name:"), name);
 	    if (S_ISREG(dir_info.st_mode)) {

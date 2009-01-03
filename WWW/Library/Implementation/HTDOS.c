@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTDOS.c,v 1.35 2008/12/26 18:07:02 tom Exp $
+ * $LynxId: HTDOS.c,v 1.36 2009/01/03 01:58:39 tom Exp $
  *							DOS specific routines
  */
 
@@ -20,7 +20,7 @@
  */
 static char *copy_plus(char **result, const char *source)
 {
-    int length = strlen(source);
+    int length = (int) strlen(source);
     int extra = 10;
     int n;
 
@@ -69,7 +69,7 @@ const char *HTDOS_wwwName(const char *dosname)
     }
     *cp_url = '\0';
 
-    wwwname_len = strlen(wwwname);
+    wwwname_len = (int) strlen(wwwname);
     if (wwwname_len > 1)
 	cp_url--;		/* point last char */
 

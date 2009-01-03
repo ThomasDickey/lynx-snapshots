@@ -1,4 +1,4 @@
-/* $LynxId: LYKeymap.c,v 1.66 2009/01/01 23:09:11 tom Exp $ */
+/* $LynxId: LYKeymap.c,v 1.67 2009/01/03 02:06:45 Paul.Gilmartin Exp $ */
 #include <HTUtils.h>
 #include <LYUtils.h>
 #include <LYGlobalDefs.h>
@@ -1171,16 +1171,17 @@ char *LYKeycodeToString(int c,
     }
 
     if (!named) {
-	if (c > ' '
-	    && c < 0177)
+	if (c <= 0377
+	    && TOASCII(c) > TOASCII(' ')
+	    && TOASCII(c) < 0177)
 	    sprintf(buf, "%c", c);
 	else if (upper8
-		 && c > ' '
+		 && TOASCII(c) > TOASCII(' ')
 		 && c <= 0377
 		 && c <= LYlowest_eightbit[current_char_set])
 	    sprintf(buf, "%c", c);
-	else if (c < ' ')
-	    sprintf(buf, "^%c", c | 0100);
+	else if (TOASCII(c) < TOASCII(' '))
+	    sprintf(buf, "^%c", FROMASCII(TOASCII(c) | 0100));
 	else if (c >= 0400)
 	    sprintf(buf, "key-0x%x", c);
 	else

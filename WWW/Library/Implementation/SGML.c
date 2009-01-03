@@ -1,5 +1,5 @@
 /*
- * $LynxId: SGML.c,v 1.119 2008/12/31 20:19:38 tom Exp $
+ * $LynxId: SGML.c,v 1.120 2009/01/03 01:12:28 tom Exp $
  *
  *			General SGML Parser code		SGML.c
  *			========================
@@ -80,7 +80,7 @@ static void fake_put_character(void *p GCC_UNUSED,
     }
 
 #define PUTS(str) ((*context->actions->put_string)(context->target, str))
-#define PUTC(ch)  ((*context->actions->put_character)(context->target, ch))
+#define PUTC(ch)  ((*context->actions->put_character)(context->target, (char) ch))
 #define PUTUTF8(code) (UCPutUtf8_charstring((HTStream *)context->target, \
 		      (putc_func_t*)(context->actions->put_character), code))
 

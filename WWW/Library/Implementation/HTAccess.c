@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTAccess.c,v 1.67 2008/09/06 14:44:37 tom Exp $
+ * $LynxId: HTAccess.c,v 1.68 2009/01/03 01:31:41 tom Exp $
  *
  *		Access Manager					HTAccess.c
  *		==============
@@ -322,7 +322,7 @@ BOOL override_proxy(const char *addr)
     }
     if (!port)
 	port = 80;		/* Default */
-    h_len = strlen(Host);
+    h_len = (int) strlen(Host);
 
     while (*no_proxy) {
 	const char *end;
@@ -356,7 +356,8 @@ BOOL override_proxy(const char *addr)
 #ifdef CJK_EX			/* ASATAKU PROXY HACK */
 	if ((!templ_port || templ_port == port) &&
 	    (t_len > 0 && t_len <= h_len &&
-	     isdigit(UCH(*no_proxy)) && !strncmp(host, no_proxy, t_len))) {
+	     isdigit(UCH(*no_proxy)) &&
+	     !strncmp(host, no_proxy, (unsigned) t_len))) {
 	    FREE(host);
 	    return YES;
 	}

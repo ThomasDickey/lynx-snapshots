@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFTP.c,v 1.87 2009/01/01 16:53:31 tom Exp $
+ * $LynxId: HTFTP.c,v 1.88 2009/01/03 01:57:47 tom Exp $
  *
  *			File Transfer Protocol (FTP) Client
  *			for a WorldWideWeb browser
@@ -462,7 +462,7 @@ static int write_cmd(const char *cmd)
 	    }
 	}
 #endif /* NOT_ASCII */
-	status = NETWRITE(control->socket, cmd, (int) strlen(cmd));
+	status = NETWRITE(control->socket, cmd, (unsigned) strlen(cmd));
 	if (status < 0) {
 	    CTRACE((tfp,
 		    "HTFTP: Error %d sending command: closing socket %d\n",
@@ -1126,9 +1126,9 @@ static void reset_master_socket(void)
 
 static void set_master_socket(int value)
 {
-    have_socket = (value >= 0);
+    have_socket = (BOOLEAN) (value >= 0);
     if (have_socket)
-	master_socket = value;
+	master_socket = (unsigned) value;
 }
 
 /*	Close Master (listening) socket
@@ -1143,7 +1143,7 @@ static int close_master_socket(void)
     if (have_socket)
 	FD_CLR(master_socket, &open_sockets);
 
-    status = NETCLOSE(master_socket);
+    status = NETCLOSE((int) master_socket);
     CTRACE((tfp, "HTFTP: Closed master socket %u\n", master_socket));
 
     reset_master_socket();
@@ -1405,10 +1405,10 @@ static int get_listen_socket(void)
 
 #ifdef SOCKS
 	if (socks_flag)
-	    status = Rlisten(master_socket, 1);
+	    status = Rlisten((int) master_socket, 1);
 	else
 #endif /* SOCKS */
-	    status = listen(master_socket, 1);
+	    status = listen((int) master_socket, 1);
 	if (status < 0) {
 	    reset_master_socket();
 	    return HTInetStatus("listen");
@@ -1419,7 +1419,7 @@ static int get_listen_socket(void)
     if ((master_socket + 1) > num_sockets)
 	num_sockets = master_socket + 1;
 
-    return master_socket;	/* Good */
+    return (int) master_socket;	/* Good */
 
 }				/* get_listen_socket */
 
@@ -1600,7 +1600,7 @@ static void parse_eplf_line(char *line,
 	case 's':
 	    size = 0;
 	    while (*(++cp) && (*cp != ','))
-		size = (size * 10) + (*cp - '0');
+		size = (size * 10) + (unsigned long) (*cp - '0');
 	    info->size = size;
 	    break;
 	case 'm':
@@ -1637,7 +1637,7 @@ static void parse_ls_line(char *line,
     unsigned long base = 1;
     unsigned long size_num = 0;
 
-    for (i = strlen(line) - 1;
+    for (i = (int) strlen(line) - 1;
 	 (i > 13) && (!isspace(UCH(line[i])) || !is_ls_date(&line[i - 12]));
 	 i--) {
 	;			/* null body */
@@ -1657,7 +1657,7 @@ static void parse_ls_line(char *line,
     }
     j = i - 14;
     while (isdigit(UCH(line[j]))) {
-	size_num += (line[j] - '0') * base;
+	size_num += ((unsigned long) (line[j] - '0') * base);
 	base *= 10;
 	j--;
     }
@@ -1681,7 +1681,7 @@ static void parse_ls_line(char *line,
      * Next is the link-count.
      */
     next = 0;
-    entry->file_links = strtol(cp, &next, 10);
+    entry->file_links = (unsigned long) strtol(cp, &next, 10);
     if (next == 0 || *next != ' ') {
 	entry->file_links = 0;
 	next = cp;
@@ -1738,7 +1738,7 @@ static void parse_dls_line(char *line,
        79215    \0
      */
 
-    len = strlen(line);
+    len = (int) strlen(line);
     if (len == 0) {
 	FREE(*pspilledname);
 	entry_info->display = FALSE;
@@ -1783,7 +1783,7 @@ static void parse_dls_line(char *line,
 	    j--;
 	}
     }
-    entry_info->size = size_num;
+    entry_info->size = (unsigned long) size_num;
 
     cps = LYSkipBlanks(&line[23]);
     if (!strncmp(cps, "-> ", 3) && cps[3] != '\0' && cps[3] != ' ') {
@@ -1797,10 +1797,10 @@ static void parse_dls_line(char *line,
 
     LYTrimTrailing(line);
 
-    len = strlen(line);
+    len = (int) strlen(line);
     if (len == 0 && *pspilledname && **pspilledname) {
 	line = *pspilledname;
-	len = strlen(*pspilledname);
+	len = (int) strlen(*pspilledname);
     }
     if (len > 0 && line[len - 1] == '/') {
 	/*
@@ -1844,7 +1844,7 @@ static void parse_vms_dir_entry(char *line,
     /* Cast VMS non-README file and directory names to lowercase. */
     if (strstr(entry_info->filename, "READ") == NULL) {
 	LYLowerCase(entry_info->filename);
-	i = strlen(entry_info->filename);
+	i = (int) strlen(entry_info->filename);
     } else {
 	i = ((strstr(entry_info->filename, "READ") - entry_info->filename) + 4);
 	if (!strncmp(&entry_info->filename[i], "ME", 2)) {
@@ -1853,7 +1853,7 @@ static void parse_vms_dir_entry(char *line,
 		i++;
 	    }
 	} else if (!strncmp(&entry_info->filename[i], ".ME", 3)) {
-	    i = strlen(entry_info->filename);
+	    i = (int) strlen(entry_info->filename);
 	} else {
 	    i = 0;
 	}
@@ -1924,12 +1924,12 @@ static void parse_vms_dir_entry(char *line,
 	    cps--;
 	if (cps < cpd)
 	    *cpd = '\0';
-	entry_info->size = atoi(cps);
+	entry_info->size = (unsigned long) atol(cps);
 	cps = cpd + 1;
 	while (isdigit(UCH(*cps)))
 	    cps++;
 	*cps = '\0';
-	ialloc = atoi(cpd + 1);
+	ialloc = (unsigned) atoi(cpd + 1);
 	/* Check if used is in blocks or bytes */
 	if (entry_info->size <= ialloc)
 	    entry_info->size *= 512;
@@ -1943,7 +1943,7 @@ static void parse_vms_dir_entry(char *line,
 		cpd++;
 	    if (*cpd == '\0') {
 		/* Assume it's blocks */
-		entry_info->size = atoi(cps) * 512;
+		entry_info->size = ((unsigned long) atol(cps) * 512);
 		break;
 	    }
 	}
@@ -1988,7 +1988,7 @@ static void parse_ms_windows_dir_entry(char *line,
 	cpd = LYSkipNonBlanks(cps);
 	*cpd++ = '\0';
 	if (isdigit(UCH(*cps))) {
-	    entry_info->size = atoi(cps);
+	    entry_info->size = (unsigned long) atol(cps);
 	} else {
 	    StrAllocCopy(entry_info->type, ENTRY_IS_DIRECTORY);
 	}
@@ -2121,7 +2121,7 @@ static void parse_windows_nt_dir_entry(char *line,
 	cpd = LYSkipNonBlanks(cps);
 	*cpd = '\0';
 	if (isdigit(*cps)) {
-	    entry_info->size = atoi(cps);
+	    entry_info->size = atol(cps);
 	} else {
 	    StrAllocCopy(entry_info->type, ENTRY_IS_DIRECTORY);
 	}
@@ -2219,7 +2219,7 @@ static void parse_cms_dir_entry(char *line,
 	}
 	if (Records > 0 && RecordLength > 0) {
 	    /* Compute an approximate size. */
-	    entry_info->size = (Records * RecordLength);
+	    entry_info->size = ((unsigned long) Records * (unsigned long) RecordLength);
 	}
     }
 
@@ -2310,7 +2310,7 @@ static EntryInfo *parse_dir_entry(char *entry,
 	 */
 
 	if (*first) {
-	    len = strlen(entry);
+	    len = (int) strlen(entry);
 	    if (!len || entry[0] == ' ' ||
 		(len >= 24 && entry[23] != ' ') ||
 		(len < 24 && strchr(entry, ' '))) {
@@ -2362,7 +2362,7 @@ static EntryInfo *parse_dir_entry(char *entry,
 	/*
 	 * Interpret and edit LIST output from Unix server.
 	 */
-	len = strlen(entry);
+	len = (int) strlen(entry);
 	if (*first) {
 	    /* don't gettext() this -- incoming text: */
 	    if (!strcmp(entry, "can not access directory .")) {
@@ -2443,7 +2443,7 @@ static EntryInfo *parse_dir_entry(char *entry,
 	/*
 	 * Trim off VMS directory extensions.
 	 */
-	len = strlen(entry_info->filename);
+	len = (int) strlen(entry_info->filename);
 	if ((len > 4) && !strcmp(&entry_info->filename[len - 4], ".dir")) {
 	    entry_info->filename[len - 4] = '\0';
 	    StrAllocCopy(entry_info->type, ENTRY_IS_DIRECTORY);
@@ -2527,7 +2527,7 @@ static EntryInfo *parse_dir_entry(char *entry,
 	 * Directories identified by trailing "/" characters.
 	 */
 	StrAllocCopy(entry_info->filename, entry);
-	len = strlen(entry);
+	len = (int) strlen(entry);
 	if (entry[len - 1] == '/') {
 	    /*
 	     * It's a dir, remove / and mark it as such.
@@ -2751,7 +2751,7 @@ static char *FormatStr(char **bufp,
 
 static char *FormatNum(char **bufp,
 		       char *start,
-		       long value)
+		       unsigned long value)
 {
     char fmt[512];
 
@@ -2784,11 +2784,11 @@ static void LYListFmtParse(const char *fmtstr,
     char *start;
     char *str = NULL;
     char *buf = NULL;
-    BOOL is_directory = (data->file_mode != 0 &&
-			 (TOUPPER(data->file_mode[0]) == 'D'));
-    BOOL is_symlinked = (data->file_mode != 0 &&
-			 (TOUPPER(data->file_mode[0]) == 'L'));
-    BOOL remove_size = (is_directory || is_symlinked);
+    BOOL is_directory = (BOOL) (data->file_mode != 0 &&
+				(TOUPPER(data->file_mode[0]) == 'D'));
+    BOOL is_symlinked = (BOOL) (data->file_mode != 0 &&
+				(TOUPPER(data->file_mode[0]) == 'L'));
+    BOOL remove_size = (BOOL) (is_directory || is_symlinked);
 
     StrAllocCopy(str, fmtstr);
     s = str;
@@ -3384,7 +3384,7 @@ static int setup_connection(const char *name,
 		    status = HT_NO_CONNECTION;
 		    break;
 		}
-		passive_port = (p0 << 8) + p1;
+		passive_port = (PortNumber) ((p0 << 8) + p1);
 		sprintf(dst, "%d.%d.%d.%d", h0, h1, h2, h3);
 	    } else if (strcmp(p, "EPSV") == 0) {
 		char c0, c1, c2, c3;
@@ -3399,15 +3399,16 @@ static int setup_connection(const char *name,
 		}
 		for ( /*nothing */ ;
 		     *p && *p && *p != '(';
-		     p++)	/*) */
+		     p++) {	/*) */
 		    ;		/* null body */
+		}
 		status = sscanf(p, "(%c%c%c%d%c)", &c0, &c1, &c2, &p0, &c3);
 		if (status != 5) {
 		    fprintf(tfp, "HTFTP: EPSV reply has invalid format!\n");
 		    status = HT_NO_CONNECTION;
 		    break;
 		}
-		passive_port = p0;
+		passive_port = (PortNumber) p0;
 
 		sslen = sizeof(ss);
 		if (getpeername(control->socket, (struct sockaddr *) &ss,
@@ -4024,12 +4025,12 @@ int HTFTPLoad(const char *name,
 
 #ifdef SOCKS
 	if (socks_flag)
-	    status = Raccept(master_socket,
+	    status = Raccept((int) master_socket,
 			     (struct sockaddr *) &soc_address,
 			     &soc_addrlen);
 	else
 #endif /* SOCKS */
-	    status = accept(master_socket,
+	    status = accept((int) master_socket,
 			    (struct sockaddr *) &soc_address,
 			    &soc_addrlen);
 	if (status < 0) {

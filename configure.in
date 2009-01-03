@@ -1,4 +1,4 @@
-dnl $LynxId: configure.in,v 1.183 2009/01/02 01:13:02 tom Exp $
+dnl $LynxId: configure.in,v 1.184 2009/01/03 16:01:26 tom Exp $
 dnl
 dnl Process this file with autoconf to produce a configure script.
 dnl
@@ -535,6 +535,8 @@ slang)
 	dft_color_style=no
 	;;
 esac
+
+CF_CURSES_CHTYPE
 
 AC_MSG_CHECKING(if you want the wide-curses features)
 CF_ARG_ENABLE(widec, 
