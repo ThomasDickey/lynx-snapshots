@@ -1,5 +1,5 @@
 /*
- * $LynxId: config.hin,v 1.110 2008/12/31 21:02:35 tom Exp $
+ * $LynxId: config.hin,v 1.111 2009/01/03 16:02:07 tom Exp $
  * vile:cmode
  *
  * The configure script translates "config.hin" into "lynx_cfg.h"
@@ -151,6 +151,7 @@
 #undef HAVE_TRUNCATE
 #undef HAVE_TTYNAME
 #undef HAVE_TTYTYPE
+#undef HAVE_TYPE_CHTYPE		/* CF_CURSES_CHTYPE */
 #undef HAVE_TYPE_UNIONWAIT	/* CF_UNION_WAIT */
 #undef HAVE_UNISTD_H		/* have <unistd.h> */
 #undef HAVE_UNSETENV

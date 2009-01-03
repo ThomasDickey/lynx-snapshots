@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTParse.c,v 1.50 2008/12/14 15:38:54 tom Exp $
+ * $LynxId: HTParse.c,v 1.51 2009/01/03 01:11:14 tom Exp $
  *
  *		Parse HyperText Document Address		HTParse.c
  *		================================
@@ -426,7 +426,7 @@ char *HTParse(const char *aName,
 			*p2 = '\0';	/* It is the default: ignore it */
 		}
 		if (p2 == NULL) {
-		    int len3 = strlen(tail);
+		    int len3 = (int) strlen(tail);
 
 		    if (len3 > 0) {
 			h = tail + len3 - 1;	/* last char of hostname */
@@ -666,14 +666,17 @@ const char *HTParseAnchor(const char *aName)
 {
     const char *p = aName;
 
-    for (; *p && *p != '#'; p++) ;
+    for (; *p && *p != '#'; p++) {
+	;
+    }
     if (*p == '#') {
 	/* the safe way based on HTParse() -
 	 * keeping in mind scan() peculiarities on schemes:
 	 */
 	struct struct_parts given;
 
-	char *name = (char *) LYalloca((p - aName) + strlen(p) + 1);
+	char *name = (char *) LYalloca((unsigned) ((p - aName)
+						   + (int) strlen(p) + 1));
 
 	if (name == NULL) {
 	    outofmem(__FILE__, "HTParseAnchor");
@@ -887,7 +890,7 @@ char *HTRelative(const char *aName,
     } else if (slashes == 3) {	/* Same node, different path */
 	StrAllocCopy(result, path);
     } else {			/* Some path in common */
-	int levels = 0;
+	unsigned levels = 0;
 
 	for (; *q && (*q != '#'); q++)
 	    if (*q == '/')
@@ -906,6 +909,9 @@ char *HTRelative(const char *aName,
 	    aName, relatedName, result));
     return result;
 }
+
+#define AlloCopy(next,base,extra) \
+	typecallocn(char, (unsigned) ((next - base) + ((int) extra)))
 
 /*	Escape undesirable characters using %			HTEscape()
  *	-------------------------------------
@@ -948,12 +954,12 @@ char *HTEscape(const char *str,
     for (p = str; *p; p++)
 	if (!ACCEPTABLE(UCH(TOASCII(*p))))
 	    unacceptable++;
-    result = typecallocn(char, (p - str) + (unacceptable * 2) + 1);
+    result = AlloCopy(p, str, (unacceptable * 2) + 1);
 
     if (result == NULL)
 	outofmem(__FILE__, "HTEscape");
     for (q = result, p = str; *p; p++) {
-	unsigned char a = TOASCII(*p);
+	unsigned char a = UCH(TOASCII(*p));
 
 	if (!ACCEPTABLE(a)) {
 	    *q++ = HEX_ESCAPE;	/* Means hex coming */
@@ -988,12 +994,12 @@ char *HTEscapeUnsafe(const char *str)
     for (p = str; *p; p++)
 	if (UNSAFE(UCH(TOASCII(*p))))
 	    unacceptable++;
-    result = typecallocn(char, (p - str) + (unacceptable * 2) + 1);
+    result = AlloCopy(p, str, (unacceptable * 2) + 1);
 
     if (result == NULL)
 	outofmem(__FILE__, "HTEscapeUnsafe");
     for (q = result, p = str; *p; p++) {
-	unsigned char a = TOASCII(*p);
+	unsigned char a = UCH(TOASCII(*p));
 
 	if (UNSAFE(a)) {
 	    *q++ = HEX_ESCAPE;	/* Means hex coming */
@@ -1028,12 +1034,12 @@ char *HTEscapeSP(const char *str,
     for (p = str; *p; p++)
 	if (!(*p == ' ' || ACCEPTABLE(UCH(TOASCII(*p)))))
 	    unacceptable++;
-    result = typecallocn(char, (p - str) + (unacceptable * 2) + 1);
+    result = AlloCopy(p, str, (unacceptable * 2) + 1);
 
     if (result == NULL)
 	outofmem(__FILE__, "HTEscape");
     for (q = result, p = str; *p; p++) {
-	unsigned char a = TOASCII(*p);
+	unsigned char a = UCH(TOASCII(*p));
 
 	if (a == 32) {
 	    *q++ = '+';
@@ -1181,7 +1187,7 @@ void HTMake822Word(char **str,
 	return;
     }
     for (p = *str; *p; p++) {
-	a = TOASCII(*p);	/* S/390 -- gil -- 0240 */
+	a = UCH(TOASCII(*p));	/* S/390 -- gil -- 0240 */
 	if (a < 32 || a >= 128 ||
 	    ((crfc[a - 32]) & 1)) {
 	    if (!added)
@@ -1196,7 +1202,7 @@ void HTMake822Word(char **str,
     }
     if (!added)
 	return;
-    result = typecallocn(char, p - (*str) + added + 1);
+    result = AlloCopy(p, *str, added + 1);
     if (result == NULL)
 	outofmem(__FILE__, "HTMake822Word");
 
@@ -1211,7 +1217,7 @@ void HTMake822Word(char **str,
      */
     /* S/390 -- gil -- 0268 */
     for (p = *str; *p; p++) {
-	a = TOASCII(*p);
+	a = UCH(TOASCII(*p));
 	if ((a != ASCII_TAB) &&
 	    ((a & 127) < ASCII_SPC ||
 	     (a < 128 && ((crfc[a - 32]) & 2))))

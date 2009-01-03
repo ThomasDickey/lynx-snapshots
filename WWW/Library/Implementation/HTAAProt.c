@@ -1,5 +1,7 @@
-
-/* MODULE							HTAAProt.c
+/*
+ * $LynxId: HTAAProt.c,v 1.29 2009/01/03 02:00:14 tom Exp $
+ *
+ * MODULE							HTAAProt.c
  *		PROTECTION FILE PARSING MODULE
  *
  * AUTHORS:
@@ -659,7 +661,7 @@ const char *HTAA_UidToName(int uid)
 	    return data->name;
     }
 
-    if ((pw = getpwuid(uid)) != 0
+    if ((pw = getpwuid((uid_t) uid)) != 0
 	&& pw->pw_name != 0) {
 	CTRACE((tfp, "%s(%d) returned (%s:%d:...)\n",
 		"HTAA_UidToName: getpwuid",
@@ -726,7 +728,7 @@ const char *HTAA_GidToName(int gid)
 	    return data->name;
     }
 
-    if ((gr = getgrgid(gid)) != 0
+    if ((gr = getgrgid((gid_t) gid)) != 0
 	&& gr->gr_name != 0) {
 	CTRACE((tfp, "%s(%d) returned (%s:%d:...)\n",
 		"HTAA_GidToName: getgrgid",

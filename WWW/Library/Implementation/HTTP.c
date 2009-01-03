@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTP.c,v 1.103 2009/01/01 16:40:54 tom Exp $
+ * $LynxId: HTTP.c,v 1.104 2009/01/03 01:41:51 tom Exp $
  *
  * HyperText Tranfer Protocol	- Client implementation		HTTP.c
  * ==========================
@@ -173,7 +173,7 @@ void HTSSLInitPRNG(void)
 	/* Initialize system's random number generator */
 	RAND_bytes((unsigned char *) &seed, sizeof(long));
 
-	lynx_srand(seed);
+	lynx_srand((unsigned) seed);
 	while (RAND_status() == 0) {
 	    /* Repeatedly seed the PRNG using the system's random number generator until it has been seeded with enough data */
 	    l = lynx_rand();
@@ -444,7 +444,7 @@ static BOOL acceptEncoding(int code)
 	 * FIXME:  if lynx did not rely upon external programs to decompress
 	 * files for external viewers, this check could be relaxed.
 	 */
-	result = (program != 0);
+	result = (BOOL) (program != 0);
     }
     return result;
 }
@@ -894,7 +894,7 @@ static int HTLoadHTTP(const char *arg,
 			cert_host = (char *) ASN1_STRING_data(gn->d.ia5);
 		    else if (gn->type == GEN_IPADD) {
 			/* XXX untested -TG */
-			size_t j = ASN1_STRING_length(gn->d.ia5);
+			size_t j = (size_t) ASN1_STRING_length(gn->d.ia5);
 
 			cert_host = (char *) malloc(j + 1);
 			memcpy(cert_host, ASN1_STRING_data(gn->d.ia5), j);
@@ -1059,13 +1059,13 @@ static int HTLoadHTTP(const char *arg,
 			    "Accept: " : ", "),
 			   HTAtom_name(pres->rep),
 			   temp);
-		len += strlen(linebuf);
+		len += (int) strlen(linebuf);
 		if (len > 252 && !first_Accept) {
 		    BStrCat0(command, crlf);
 		    HTSprintf0(&linebuf, "Accept: %s%s",
 			       HTAtom_name(pres->rep),
 			       temp);
-		    len = strlen(linebuf);
+		    len = (int) strlen(linebuf);
 		}
 		BStrCat0(command, linebuf);
 		first_Accept = FALSE;
@@ -1485,7 +1485,7 @@ static int HTLoadHTTP(const char *arg,
 	BOOL end_of_file = NO;
 	int buffer_length = INIT_LINE_SIZE;
 
-	line_buffer = typecallocn(char, buffer_length);
+	line_buffer = typecallocn(char, (unsigned) buffer_length);
 
 	if (line_buffer == NULL)
 	    outofmem(__FILE__, "HTLoadHTTP");
@@ -1498,14 +1498,17 @@ static int HTLoadHTTP(const char *arg,
 	    if (buffer_length - length < LINE_EXTEND_THRESH) {
 		buffer_length = buffer_length + buffer_length;
 		line_buffer =
-		    (char *) realloc(line_buffer, (buffer_length * sizeof(char)));
+		    (char *) realloc(line_buffer, ((unsigned) buffer_length *
+						   sizeof(char)));
 
 		if (line_buffer == NULL)
 		    outofmem(__FILE__, "HTLoadHTTP");
 	    }
 	    CTRACE((tfp, "HTTP: Trying to read %d\n", buffer_length - length - 1));
-	    status = HTTP_NETREAD(s, line_buffer + length,
-				  buffer_length - length - 1, handle);
+	    status = HTTP_NETREAD(s,
+				  line_buffer + length,
+				  (buffer_length - length - 1),
+				  handle);
 	    CTRACE((tfp, "HTTP: Read %d\n", status));
 	    if (status <= 0) {
 		/*
@@ -1576,11 +1579,12 @@ static int HTLoadHTTP(const char *arg,
 
 	    if (line_buffer) {
 		FREE(line_kept_clean);
-		line_kept_clean = (char *) malloc(buffer_length * sizeof(char));
+		line_kept_clean = (char *) malloc((unsigned) buffer_length *
+						  sizeof(char));
 
 		if (line_kept_clean == NULL)
 		    outofmem(__FILE__, "HTLoadHTTP");
-		memcpy(line_kept_clean, line_buffer, buffer_length);
+		memcpy(line_kept_clean, line_buffer, (unsigned) buffer_length);
 		real_length_of_line = length + status;
 	    }
 

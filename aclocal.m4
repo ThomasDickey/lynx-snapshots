@@ -1,11 +1,11 @@
-dnl $LynxId: aclocal.m4,v 1.134 2009/01/02 01:46:18 tom Exp $
+dnl $LynxId: aclocal.m4,v 1.135 2009/01/03 16:20:40 tom Exp $
 dnl Macros for auto-configure script.
 dnl by T.E.Dickey <dickey@invisible-island.net>
 dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
 dnl and Philippe De Muyter <phdm@macqel.be>
 dnl
 dnl Created: 1997/1/28
-dnl Updated: 2009/1/1
+dnl Updated: 2009/1/3
 dnl
 dnl The autoconf used in Lynx development is GNU autoconf 2.13 or 2.52, patched
 dnl by Thomas Dickey.  See your local GNU archives, and this URL:
@@ -1512,6 +1512,30 @@ AC_MSG_RESULT($cf_cv_color_curses)
 if test $cf_cv_color_curses = yes ; then
 	AC_DEFINE(COLOR_CURSES)
 	test ".$cf_cv_ncurses_broken" != .yes && AC_DEFINE(HAVE_GETBKGD)
+fi
+])dnl
+dnl ---------------------------------------------------------------------------
+dnl CF_CURSES_CHTYPE version: 6 updated: 2003/11/06 19:59:57
+dnl ----------------
+dnl Test if curses defines 'chtype' (usually a 'long' type for SysV curses).
+AC_DEFUN([CF_CURSES_CHTYPE],
+[
+AC_REQUIRE([CF_CURSES_CPPFLAGS])dnl
+AC_CACHE_CHECK(for chtype typedef,cf_cv_chtype_decl,[
+	AC_TRY_COMPILE([#include <${cf_cv_ncurses_header-curses.h}>],
+		[chtype foo],
+		[cf_cv_chtype_decl=yes],
+		[cf_cv_chtype_decl=no])])
+if test $cf_cv_chtype_decl = yes ; then
+	AC_DEFINE(HAVE_TYPE_CHTYPE)
+	AC_CACHE_CHECK(if chtype is scalar or struct,cf_cv_chtype_type,[
+		AC_TRY_COMPILE([#include <${cf_cv_ncurses_header-curses.h}>],
+			[chtype foo; long x = foo],
+			[cf_cv_chtype_type=scalar],
+			[cf_cv_chtype_type=struct])])
+	if test $cf_cv_chtype_type = scalar ; then
+		AC_DEFINE(TYPE_CHTYPE_IS_SCALAR)
+	fi
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
