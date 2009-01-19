@@ -1,5 +1,5 @@
 /*
- * $LynxId: UCdomap.c,v 1.73 2009/01/01 22:10:53 tom Exp $
+ * $LynxId: UCdomap.c,v 1.75 2009/01/18 23:19:37 tom Exp $
  *
  *  UCdomap.c
  *  =========
@@ -842,7 +842,7 @@ int UCTransUniChar(long unicode,
 
     if ((UChndl_out = LYCharSet_UC[charset_out].UChndl) < 0) {
 	if (LYCharSet_UC[charset_out].codepage < 0) {
-	    if (unicode < 128 || charset_out == UTF8_handle) {
+	    if (unicode < 128) {
 		rc = (int) unicode;
 	    } else {
 		rc = LYCharSet_UC[charset_out].codepage;
@@ -1444,18 +1444,18 @@ int UCTransCharStr(char *outbuf,
 	if (rc >= 0)
 	    return (int) strlen(outbuf);
     }
-    if (rc == -4) {
+    if (rc == ucNotFound) {
 	if (!isdefault)
 	    rc = conv_uni_to_str(outbuf, buflen, 0xfffd, 0);
-	if ((rc == -4) && (isdefault || trydefault))
+	if ((rc == ucNotFound) && (isdefault || trydefault))
 	    rc = conv_uni_to_str(outbuf, buflen, 0xfffd, 1);
 	if (rc >= 0)
 	    return (int) strlen(outbuf);
     }
-    if (chk_single_flag && src == -4) {
+    if (chk_single_flag && src == ucNotFound) {
 	if (!isdefault)
 	    rc = conv_uni_to_pc(0xfffd, 0);
-	if ((rc == -4) && (isdefault || trydefault))
+	if ((rc == ucNotFound) && (isdefault || trydefault))
 	    rc = conv_uni_to_pc(0xfffd, 1);
 	if (rc >= 32) {
 	    outbuf[0] = (char) rc;
