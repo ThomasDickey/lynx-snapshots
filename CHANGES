@@ -1,14 +1,24 @@
--- $LynxId: CHANGES,v 1.359 2009/01/03 18:46:11 tom Exp $
+-- $LynxId: CHANGES,v 1.366 2009/01/19 00:24:22 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
 2009-01-?? (2.8.7???.??)
+* modify AM_WITH_NLS configure macro to add the iconv library dependency for
+  intl library when checking for the latter -DK
+* fix breakage of display of UTF-8 in UCTransUniChar() from cleanup in dev.12
+  (report by TG) -TD
+* rename variable defined by CF_PATHSP to PATH_SEPARATOR, use this consistently
+  to ease use in later autoconf versions (prompted by patch by DK) -TD
+* fix a typo in CF_ADD_LIBDIR which broke check for libintl (report by
+  Jose H Espinosa) -TD
+* modify configure script to append to CFLAGS or CPPFLAGS rather than prepend,
+  to better match the user's intent -DK, TD
 * modify UCSetBoxChars() to let line-drawing work with PDCurses, as well as
   any fancy-curses implementation that is running in ASCII or Latin-1 -TD
 * add a configure check for curses type "chtype" -TD
 * fix for an ASCII dependency in LYKeymap.c -PG
-* update id.po, nl.pl, tr.po from
+* update fr.po, id.po, nl.pl, sv.po, tr.po from
     http://translationproject.org/latest/lynx/
 * change configure script to check for "ar" archiver options, from tin bug
   report for FreeBSD 8.0 which requires a "-" before the options -TD
