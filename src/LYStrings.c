@@ -1,4 +1,4 @@
-/* $LynxId: LYStrings.c,v 1.160 2009/01/01 21:50:59 tom Exp $ */
+/* $LynxId: LYStrings.c,v 1.161 2009/01/20 01:05:11 tom Exp $ */
 #include <HTUtils.h>
 #include <HTCJK.h>
 #include <UCAux.h>
@@ -479,7 +479,7 @@ static int set_clicked_link(int x,
 		if (is_text)
 		    len = links[i].l_form->size;
 		else
-		    len = (int) strlen(text);
+		    len = (int) LYstrCells(text);
 		cur_err = XYdist(x, y, links[i].lx, links[i].ly, len);
 		/* Check the second line */
 		while (cur_err > 0
@@ -488,7 +488,7 @@ static int set_clicked_link(int x,
 		    int cur_err_2 = XYdist(x, y,
 					   LYGetHilitePos(i, count),
 					   links[i].ly + count,
-					   (int) strlen(text));
+					   (int) LYstrCells(text));
 
 		    cur_err = HTMIN(cur_err, cur_err_2);
 		}
@@ -3997,8 +3997,10 @@ static unsigned options_width(const char **list)
     int count = 0;
 
     while (list[count] != 0) {
-	if (strlen(list[count]) > width) {
-	    width = strlen(list[count]);
+	unsigned ncells = LYstrCells(list[count]);
+
+	if (ncells > width) {
+	    width = ncells;
 	}
 	count++;
     }
