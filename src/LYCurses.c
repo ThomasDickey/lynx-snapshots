@@ -1,4 +1,4 @@
-/* $LynxId: LYCurses.c,v 1.137 2009/01/03 00:36:42 tom Exp $ */
+/* $LynxId: LYCurses.c,v 1.138 2009/01/20 01:03:02 tom Exp $ */
 #include <HTUtils.h>
 #include <HTAlert.h>
 
@@ -1714,16 +1714,25 @@ void LYsubAttr(int a)
 #ifndef USE_SLANG
 void LYpaddstr(WINDOW * the_window, int width, const char *the_string)
 {
-    int y, x;
-    int actual = (int) strlen(the_string);
+    int y, x1, x2;
+    int actual = (int) LYstrCells(the_string);
+    int length = (int) strlen(the_string);
 
-    getyx(the_window, y, x);
-    if (width + x > LYcolLimit)
-	width = LYcolLimit - x;
-    if (actual > width)
+    getyx(the_window, y, x1);
+    if (width + x1 > LYcolLimit)
+	width = LYcolLimit - x1;
+    if (actual > width) {
 	actual = width;
-    LYwaddnstr(the_window, the_string, (size_t) actual);
-    width -= actual;
+#ifdef WIDEC_CURSES
+	/* FIXME: a binary search might be faster */
+	while (LYstrExtent(the_string, length, length) > actual) {
+	    --length;
+	}
+#endif
+    }
+    LYwaddnstr(the_window, the_string, (size_t) length);
+    getyx(the_window, y, x2);
+    width -= (x2 - x1);
     while (width-- > 0)
 	waddstr(the_window, " ");
 }
@@ -2872,6 +2881,7 @@ static void make_blink_boldbg(void)
 long LYgetattrs(WINDOW * win)
 {
     long result;
+
 #if ( defined(HAVE_GETATTRS) && ( !defined(NCURSES_VERSION_MAJOR) || NCURSES_VERSION_MAJOR < 5 ) )
 
     result = getattrs(win);

@@ -1,9 +1,13 @@
--- $LynxId: CHANGES,v 1.366 2009/01/19 00:24:22 tom Exp $
+-- $LynxId: CHANGES,v 1.368 2009/01/20 01:07:38 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
 2009-01-?? (2.8.7???.??)
+* improve drawing of menus for multibyte characters by changing the way the
+  number of fill-characters is computed in LYpaddstr -TD
+* fix some uses of gettext in options menu and info page where a translated
+  string might contain angle-brackets or ampersand -TD
 * modify AM_WITH_NLS configure macro to add the iconv library dependency for
   intl library when checking for the latter -DK
 * fix breakage of display of UTF-8 in UCTransUniChar() from cleanup in dev.12

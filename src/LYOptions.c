@@ -1,4 +1,4 @@
-/* $LynxId: LYOptions.c,v 1.126 2009/01/01 22:02:02 tom Exp $ */
+/* $LynxId: LYOptions.c,v 1.128 2009/01/19 23:32:01 tom Exp $ */
 #include <HTUtils.h>
 #include <HTFTP.h>
 #include <HTTP.h>		/* 'reloading' flag */
@@ -23,6 +23,7 @@
 #include <LYReadCFG.h>
 #include <LYPrettySrc.h>
 #include <HTFile.h>
+#include <LYCharUtils.h>
 
 #include <LYLeaks.h>
 
@@ -907,7 +908,7 @@ void LYoptions(void)
 		int i, curval;
 		const char **assume_list;
 		assume_list = typecallocn(const char *, (unsigned)
-					  (LYNumCharsets + 1));
+					    (LYNumCharsets + 1));
 
 		if (!assume_list) {
 		    outofmem(__FILE__, "options");
@@ -2426,7 +2427,7 @@ static const char *preferred_doc_lang_string = RC_PREFERRED_LANGUAGE;
 static const char *user_agent_string = RC_USERAGENT;
 
 #define PutHeader(fp, Name) \
-	fprintf(fp, "\n%s<em>%s</em>\n", MARGIN_STR, Name);
+	fprintf(fp, "\n%s<em>%s</em>\n", MARGIN_STR, LYEntifyTitle(&buffer, Name));
 
 #define PutTextInput(fp, Name, Value, Size, disable) \
 	fprintf(fp,\
@@ -3309,8 +3310,9 @@ static void PutLabel(FILE *fp, const char *name,
     int have = (int) strlen(name);
     int want = LABEL_LEN;
     int need = LYstrExtent(name, have, want);
+    char *buffer = NULL;
 
-    fprintf(fp, "%s%s", MARGIN_STR, name);
+    fprintf(fp, "%s%s", MARGIN_STR, LYEntifyTitle(&buffer, name));
 
     if (will_save_rc(value) && !no_option_save) {
 	while (need++ < want)
@@ -3327,6 +3329,7 @@ static void PutLabel(FILE *fp, const char *name,
 	}
     }
     fprintf(fp, ": ");
+    FREE(buffer);
 }
 
 /*
@@ -3406,8 +3409,10 @@ void LYMenuVisitedLinks(FILE *fp0, int disable_all)
  */
 static int gen_options(char **newfile)
 {
-    int i;
     static char tempfile[LY_MAXPATH] = "\0";
+
+    int i;
+    char *buffer = NULL;
     BOOLEAN disable_all = FALSE;
     FILE *fp0;
     size_t cset_len = 0;
@@ -3463,22 +3468,29 @@ static int gen_options(char **newfile)
     /* Submit/Reset/Help */
     fprintf(fp0, "<p align=center>\n");
     if (!disable_all) {
-	fprintf(fp0, "<input type=\"submit\" value=\"%s\"> - \n", ACCEPT_CHANGES);
-	fprintf(fp0, "<input type=\"reset\" value=\"%s\"> - \n", RESET_CHANGES);
-	fprintf(fp0, "%s - \n", CANCEL_CHANGES);
+	fprintf(fp0,
+		"<input type=\"submit\" value=\"%s\"> - \n",
+		LYEntifyValue(&buffer, ACCEPT_CHANGES));
+	fprintf(fp0,
+		"<input type=\"reset\" value=\"%s\"> - \n",
+		LYEntifyValue(&buffer, RESET_CHANGES));
+	fprintf(fp0,
+		"%s - \n",
+		LYEntifyTitle(&buffer, CANCEL_CHANGES));
     }
     fprintf(fp0, "<a href=\"%s%s\">%s</a>\n",
-	    helpfilepath, OPTIONS_HELP, TO_HELP);
+	    helpfilepath, LYEntifyTitle(&buffer, OPTIONS_HELP), TO_HELP);
 
     /* Save options */
     if (!no_option_save) {
 	if (!disable_all) {
-	    fprintf(fp0, "<p align=center>%s: ", SAVE_OPTIONS);
+	    fprintf(fp0, "<p align=center>%s: ", LYEntifyTitle(&buffer, SAVE_OPTIONS));
 	    fprintf(fp0, "<input type=\"checkbox\" name=\"%s\">\n",
 		    save_options_string);
 	}
 	fprintf(fp0, "<br>%s\n",
-		gettext("(options marked with (!) will not be saved)"));
+		LYEntifyTitle(&buffer,
+			      gettext("(options marked with (!) will not be saved)")));
     }
 
     /*
@@ -3895,7 +3907,8 @@ static int gen_options(char **newfile)
     if (LYMultiBookmarks) {
 	PutLabel(fp0, gettext("Review/edit Bookmarks files"), mbm_string);
 	fprintf(fp0, "<a href=\"%s\">%s</a>\n",
-		LYNXOPTIONS_PAGE(MBM_LINK), gettext("Goto multi-bookmark menu"));
+		LYNXOPTIONS_PAGE(MBM_LINK),
+		LYEntifyTitle(&buffer, gettext("Goto multi-bookmark menu")));
     } else {
 	PutLabel(fp0, gettext("Bookmarks file"), single_bookmark_string);
 	PutTextInput(fp0, single_bookmark_string,
@@ -3921,7 +3934,7 @@ static int gen_options(char **newfile)
 
     if (!no_lynxcfg_info) {
 	fprintf(fp0, "\n  %s<a href=\"%s\">lynx.cfg</a>.\n",
-		gettext("View the file "),
+		LYEntifyTitle(&buffer, gettext("View the file ")),
 		STR_LYNXCFG);
     }
 
@@ -3930,9 +3943,13 @@ static int gen_options(char **newfile)
     /* Submit/Reset */
     if (!disable_all) {
 	fprintf(fp0, "<p align=center>\n");
-	fprintf(fp0, "<input type=\"submit\" value=\"%s\"> - \n", ACCEPT_CHANGES);
-	fprintf(fp0, "<input type=\"reset\" value=\"%s\"> - \n", RESET_CHANGES);
-	fprintf(fp0, "%s\n", CANCEL_CHANGES);
+	fprintf(fp0,
+		"<input type=\"submit\" value=\"%s\"> - \n",
+		LYEntifyValue(&buffer, ACCEPT_CHANGES));
+	fprintf(fp0,
+		"<input type=\"reset\" value=\"%s\"> - \n",
+		LYEntifyValue(&buffer, RESET_CHANGES));
+	fprintf(fp0, "%s\n", LYEntifyTitle(&buffer, CANCEL_CHANGES));
     }
 
     /*
@@ -3940,6 +3957,8 @@ static int gen_options(char **newfile)
      */
     fprintf(fp0, "</form>\n");
     EndInternalPage(fp0);
+
+    FREE(buffer);
 
     LYCloseTempFP(fp0);
     return (NORMAL);

@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYCharUtils.c,v 1.94 2009/01/01 22:32:39 tom Exp $
+ * $LynxId: LYCharUtils.c,v 1.96 2009/01/19 23:56:35 tom Exp $
  *
  *  Functions associated with LYCharSets.c and the Lynx version of HTML.c - FM
  *  ==========================================================================
@@ -226,6 +226,62 @@ void LYEntify(char **str,
     *q = '\0';
     FREE(*str);
     *str = cp;
+}
+
+/*
+ * Callers to LYEntifyTitle/LYEntifyValue do not look at the 'target' param.
+ * Optimize things a little by avoiding the memory allocation if not needed,
+ * as is usually the case.
+ */
+static BOOL MustEntify(const char *source)
+{
+    BOOL result;
+
+#ifdef CJK_EX
+    if (IS_CJK_TTY && strchr(source, '\033') != 0) {
+	result = TRUE;
+    } else
+#endif
+    {
+	size_t length = strlen(source);
+	size_t reject = strcspn(source, "<&>");
+
+	result = (length != reject);
+    }
+
+    return result;
+}
+
+/*
+ * Wrappers for LYEntify() which do not assume that the source was allocated,
+ * e.g., output from gettext().
+ */
+const char *LYEntifyTitle(char **target, const char *source)
+{
+    const char *result = 0;
+
+    if (MustEntify(source)) {
+	StrAllocCopy(*target, source);
+	LYEntify(target, TRUE);
+	result = *target;
+    } else {
+	result = source;
+    }
+    return result;
+}
+
+const char *LYEntifyValue(char **target, const char *source)
+{
+    const char *result = 0;
+
+    if (MustEntify(source)) {
+	StrAllocCopy(*target, source);
+	LYEntify(target, FALSE);
+	result = *target;
+    } else {
+	result = source;
+    }
+    return result;
 }
 
 /*
