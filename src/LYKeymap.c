@@ -1,4 +1,4 @@
-/* $LynxId: LYKeymap.c,v 1.67 2009/01/03 02:06:45 Paul.Gilmartin Exp $ */
+/* $LynxId: LYKeymap.c,v 1.68 2009/01/25 18:34:57 tom Exp $ */
 #include <HTUtils.h>
 #include <LYUtils.h>
 #include <LYGlobalDefs.h>
@@ -1382,7 +1382,7 @@ int lkcstring_to_lkc(const char *src)
     else if (strlen(src) == 2 && *src == '^')
 	c = src[1] & 037;
     else if (strlen(src) >= 2 && isdigit(UCH(*src))) {
-	if (sscanf(src, "%i", &c) != 1)
+	if (sscanf(src, "%d", &c) != 1)
 	    return (-1);
 #ifdef USE_KEYMAPS
     } else {

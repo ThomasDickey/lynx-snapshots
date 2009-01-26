@@ -1,4 +1,4 @@
-dnl $LynxId: configure.in,v 1.184 2009/01/03 16:01:26 tom Exp $
+dnl $LynxId: configure.in,v 1.185 2009/01/21 23:56:58 tom Exp $
 dnl
 dnl Process this file with autoconf to produce a configure script.
 dnl
@@ -7,7 +7,7 @@ dnl by T.E.Dickey <dickey@invisible-island.net>
 dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
 dnl
 dnl ---------------------------------------------------------------------------
-dnl Copyright 1997-2007,2008 by Thomas E. Dickey
+dnl Copyright 1997-2008,2009 by Thomas E. Dickey
 dnl 
 dnl Permission to use, copy, modify, and distribute this software and its
 dnl documentation for any purpose and without fee is hereby granted,
@@ -355,7 +355,12 @@ dnl --------------------------------------------------------------------------
 dnl Set of available languages (based on source distribution)
 if test -z "$ALL_LINGUAS" ; then
 	ALL_LINGUAS=`test -d $srcdir/po && cd $srcdir/po && echo *.po|sed -e 's/\.po//g' -e 's/*//'`
-	ALL_LINGUAS="$ALL_LINGUAS en"
+	AM_PATH_PROG_WITH_TEST(MSGINIT, msginit,
+		[$ac_dir/$ac_word --no-translator --version /dev/null >/dev/null 2>&1], :)
+	if test "$MSGINIT" != ":" ; then
+		CF_VERBOSE(adding en.po)
+		ALL_LINGUAS="$ALL_LINGUAS en"
+	fi
 fi
 
 CF_BUNDLED_INTL(makefile,disable)

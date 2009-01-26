@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYStrings.h,v 1.70 2009/01/01 21:36:55 tom Exp $
+ * $LynxId: LYStrings.h,v 1.72 2009/01/25 19:49:28 tom Exp $
  */
 #ifndef LYSTRINGS_H
 #define LYSTRINGS_H
@@ -47,6 +47,8 @@ extern "C" {
 			int hidden,
 			size_t bufsize,
 			RecallType recall);
+    extern int LYscanFloat(const char *source, float *result);
+    extern int LYscanFloat2(const char **source, float *result);
     extern char *LYstrsep(char **stringp,
 			  const char *delim);
     extern char *LYstrstr(char *chptr,

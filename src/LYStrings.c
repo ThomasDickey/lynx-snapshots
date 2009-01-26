@@ -1,4 +1,4 @@
-/* $LynxId: LYStrings.c,v 1.161 2009/01/20 01:05:11 tom Exp $ */
+/* $LynxId: LYStrings.c,v 1.163 2009/01/25 22:06:08 tom Exp $ */
 #include <HTUtils.h>
 #include <HTCJK.h>
 #include <UCAux.h>
@@ -5280,6 +5280,76 @@ const char *LYLineeditHelpURL(void)
 	return (&helpbuf[0]);
     }
     return NULL;
+}
+
+/*
+ * Wrapper for sscanf to ensure that lynx can "always" read a POSIX float.
+ * In some locales, the decimal point changes.
+ */
+int LYscanFloat2(const char **source, float *result)
+{
+    int count = 0;
+    char *temp;
+    const char *src = *source;
+
+    src = LYSkipCBlanks(src);
+    if (strchr(src, '.') != 0) {
+	long frc_part = 0;
+	float scale = 1.0;
+
+	if (*src != '.') {
+	    temp = NULL;
+	    *result = strtol(src, &temp, 10);
+	    src = temp;
+	}
+	if (src != 0 && *src == '.') {
+	    ++src;
+	    if (isdigit(UCH(*src))) {
+		temp = NULL;
+		frc_part = strtol(src, &temp, 10);
+		if (temp != 0) {
+		    int digits = temp - src;
+
+		    while (digits-- > 0)
+			scale *= 10.0;
+		    *result += (frc_part / scale);
+		}
+		src = temp;
+	    }
+	}
+	if (src != 0 && *src != '\0' && strchr(" \t+", *src) == 0) {
+	    char *extra = malloc(2 + strlen(src));
+
+	    if (extra != 0) {
+		extra[0] = '1';
+		strcpy(extra + 1, src);
+		if (sscanf(extra, "%f", &scale) == 1) {
+		    *result *= scale;
+		}
+		src = LYSkipCNonBlanks(src);
+	    } else {
+		src = 0;
+	    }
+	}
+	if (src != 0)
+	    count = 1;
+    } else {
+	count = sscanf(src, "%f", result);
+	src = LYSkipCNonBlanks(src);
+    }
+    CTRACE2(TRACE_CFG,
+	    (tfp, "LYscanFloat \"%s\" -> %f (%s)\n",
+	     *source, *result,
+	     count ? "ok" : "error"));
+    *source = src;
+    return count;
+}
+
+int LYscanFloat(const char *source, float *result)
+{
+    const char *temp = source;
+
+    return LYscanFloat2(&temp, result);
 }
 
 /*

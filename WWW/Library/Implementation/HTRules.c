@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTRules.c,v 1.35 2009/01/01 16:59:24 tom Exp $
+ * $LynxId: HTRules.c,v 1.37 2009/01/25 22:42:28 tom Exp $
  *
  *	Configuration manager for Hypertext Daemon		HTRules.c
  *	==========================================
@@ -46,6 +46,7 @@ typedef struct _rule {
 
 #include <HTTP.h>		/* for redirecting_url, indirectly HTPermitRedir - kw */
 #include <LYGlobalDefs.h>	/* for LYUserSpecifiedURL - kw */
+#include <LYStrings.h>		/* for LYscanFloat */
 #include <LYUtils.h>		/* for LYFixCursesOn - kw */
 #include <HTAlert.h>
 
@@ -490,20 +491,33 @@ int HTSetConfiguration(char *config)
     if (0 == strcasecomp(word1, "suffix")) {
 	char *encoding = HTNextField(&pointer);
 
+	status = 0;
 	if (pointer)
-	    status = sscanf(pointer, "%f", &quality);
-	else
-	    status = 0;
+	    status = LYscanFloat(pointer, &quality);
+
 	HTSetSuffix(word2, word3,
 		    encoding ? encoding : "binary",
 		    status >= 1 ? quality : (float) 1.0);
 
     } else if (0 == strcasecomp(word1, "presentation")) {
-	if (pointer)
-	    status = sscanf(pointer, "%f%f%f%" SCN_off_t "",
-			    &quality, &secs, &secs_per_byte, &maxbytes);
-	else
-	    status = 0;
+	status = 0;
+	if (pointer) {
+	    const char *temp = pointer;
+
+	    if (LYscanFloat2(&temp, &quality)) {
+		status = 1;
+		if (LYscanFloat2(&temp, &secs)) {
+		    status = 2;
+		    if (LYscanFloat2(&temp, &secs_per_byte)) {
+			status = 3;
+			if (sscanf(temp, "%" SCN_off_t, &maxbytes)) {
+			    status = 4;
+			}
+		    }
+		}
+	    }
+	}
+
 	HTSetPresentation(word2, word3, NULL,
 			  status >= 1 ? quality : 1.0,
 			  status >= 2 ? secs : 0.0,
