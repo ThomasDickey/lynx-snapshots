@@ -1,9 +1,14 @@
--- $LynxId: CHANGES,v 1.368 2009/01/20 01:07:38 tom Exp $
+-- $LynxId: CHANGES,v 1.370 2009/01/25 19:32:08 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
 2009-01-?? (2.8.7???.??)
+* modify scanning of floats from lynx.cfg to allow Lynx to read POSIX values
+  in non-POSIX locales -TD
+* modify configure script to check for msginit, needed to generate "en" po
+  file, and omit that target if msginit is not available, letting lynx build
+  with older gettext versions -TD
 * improve drawing of menus for multibyte characters by changing the way the
   number of fill-characters is computed in LYpaddstr -TD
 * fix some uses of gettext in options menu and info page where a translated

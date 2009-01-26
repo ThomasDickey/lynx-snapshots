@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMain.c,v 1.195 2009/01/01 17:12:48 tom Exp $
+ * $LynxId: LYMain.c,v 1.196 2009/01/25 18:46:17 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTP.h>
@@ -4310,7 +4310,7 @@ static BOOL parse_arg(char **argv,
 	    if ((q->int_value != 0) && (next_arg != 0)) {
 		float ival;
 
-		if (1 == sscanf(next_arg, "%f", &ival)) {
+		if (1 == LYscanFloat(next_arg, &ival)) {
 		    *(q->int_value) = (int) SECS2Secs(ival);
 		}
 	    }

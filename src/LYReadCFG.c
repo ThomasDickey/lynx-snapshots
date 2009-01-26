@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYReadCFG.c,v 1.135 2009/01/01 23:29:54 tom Exp $
+ * $LynxId: LYReadCFG.c,v 1.136 2009/01/25 18:46:29 tom Exp $
  */
 #ifndef NO_RULES
 #include <HTRules.h>
@@ -1777,7 +1777,7 @@ void LYSetConfigValue(char *name,
 	if (q->int_value != 0) {
 	    float ival;
 
-	    if (1 == sscanf(value, "%f", &ival)) {
+	    if (1 == LYscanFloat(value, &ival)) {
 		*(q->int_value) = (int) SECS2Secs(ival);
 	    }
 	}
