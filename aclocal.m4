@@ -1,4 +1,4 @@
-dnl $LynxId: aclocal.m4,v 1.138 2009/01/18 23:36:20 tom Exp $
+dnl $LynxId: aclocal.m4,v 1.139 2009/01/31 01:36:28 tom Exp $
 dnl Macros for auto-configure script.
 dnl by T.E.Dickey <dickey@invisible-island.net>
 dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
@@ -3867,7 +3867,7 @@ else
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_PKG_CONFIG version: 2 updated: 2008/12/24 07:57:28
+dnl CF_PKG_CONFIG version: 3 updated: 2009/01/25 10:55:09
 dnl -------------
 dnl Check for the package-config program, unless disabled by command-line.
 AC_DEFUN([CF_PKG_CONFIG],
@@ -3879,11 +3879,11 @@ AC_ARG_WITH(pkg-config,
 	[cf_pkg_config=yes])
 AC_MSG_RESULT($cf_pkg_config)
 
-case $cf_pkg_config in
-no)
+case $cf_pkg_config in #(vi
+no) #(vi
 	PKG_CONFIG=none
 	;;
-yes)
+yes) #(vi
 	AC_PATH_PROG(PKG_CONFIG, pkg-config, none)
 	;;
 *)
@@ -4558,7 +4558,7 @@ define([CF_SRAND_PARSE],[
 	esac
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_SSL version: 16 updated: 2008/12/25 09:30:14
+dnl CF_SSL version: 17 updated: 2009/01/30 20:33:12
 dnl ------
 dnl Check for ssl library
 dnl $1 = [optional] directory in which the library may be found, set by AC_ARG_WITH
@@ -4613,17 +4613,24 @@ AC_DEFUN([CF_SSL],[
 	fi
 
 	if test "$cf_cv_have_ssl" != yes; then
-		case $1 in #(vi
-		yes)
-			CF_FIND_LINKAGE(CF__SSL_HEAD,
-				CF__SSL_BODY,
-				ssl,
-				cf_cv_have_ssl=yes,
-				cf_cv_have_ssl=no,
-				openssl,
-				[-lcrypto])
+		case $host_os in
+		mingw*) #(vi
+			cf_extra_ssl_libs="-lcrypto -lgdi32"
+			;;
+		*) #(vi
+			cf_extra_ssl_libs="-lcrypto"
 			;;
 		esac
+
+		CF_FIND_LINKAGE(CF__SSL_HEAD,
+			CF__SSL_BODY,
+			ssl,
+			cf_cv_have_ssl=yes,
+			cf_cv_have_ssl=no,
+			openssl,
+			$cf_extra_ssl_libs)
+	else
+		cf_extra_ssl_libs=
 	fi
 
 	if test "$cf_cv_have_ssl" = yes ; then
@@ -4648,7 +4655,7 @@ AC_DEFUN([CF_SSL],[
 		if test -n "$cf_cv_library_path_ssl" ; then
 			CF_ADD_LIBDIR($cf_cv_library_path_ssl)
 		fi
-		LIBS="-lssl -lcrypto $LIBS"
+		LIBS="-lssl $cf_extra_ssl_libs $LIBS"
 		CF_CHECK_SSL_X509
 	fi
 ])dnl

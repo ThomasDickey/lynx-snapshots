@@ -1,9 +1,10 @@
--- $LynxId: CHANGES,v 1.370 2009/01/25 19:32:08 tom Exp $
+-- $LynxId: CHANGES,v 1.371 2009/01/31 01:37:28 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
 2009-01-?? (2.8.7???.??)
+* modify CF_SSL configure macro to build with msys for mingw configuration -TD
 * modify scanning of floats from lynx.cfg to allow Lynx to read POSIX values
   in non-POSIX locales -TD
 * modify configure script to check for msginit, needed to generate "en" po
