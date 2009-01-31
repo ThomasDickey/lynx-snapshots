@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYReadCFG.c,v 1.136 2009/01/25 18:46:29 tom Exp $
+ * $LynxId: LYReadCFG.c,v 1.137 2009/01/29 01:02:26 tom Exp $
  */
 #ifndef NO_RULES
 #include <HTRules.h>
@@ -1640,7 +1640,7 @@ void free_lynx_cfg(void)
 #ifdef VMS
 		    Define_VMSLogical(name, NULL);
 #else
-# ifdef HAVE_UNPUTENV
+# ifdef HAVE_PUTENV
 		    if (putenv(name))
 			break;
 # else
