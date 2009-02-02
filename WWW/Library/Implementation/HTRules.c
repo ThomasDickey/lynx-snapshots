@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTRules.c,v 1.37 2009/01/25 22:42:28 tom Exp $
+ * $LynxId: HTRules.c,v 1.38 2009/02/01 21:19:02 tom Exp $
  *
  *	Configuration manager for Hypertext Daemon		HTRules.c
  *	==========================================
@@ -457,7 +457,7 @@ int HTSetConfiguration(char *config)
     const char *cond_op = NULL;
     const char *cond = NULL;
     float quality, secs, secs_per_byte;
-    off_t maxbytes;
+    long maxbytes;
     int status;
 
     StrAllocCopy(line, config);
@@ -510,7 +510,7 @@ int HTSetConfiguration(char *config)
 		    status = 2;
 		    if (LYscanFloat2(&temp, &secs_per_byte)) {
 			status = 3;
-			if (sscanf(temp, "%" SCN_off_t, &maxbytes)) {
+			if (sscanf(temp, "%ld", &maxbytes)) {
 			    status = 4;
 			}
 		    }
@@ -522,7 +522,7 @@ int HTSetConfiguration(char *config)
 			  status >= 1 ? quality : 1.0,
 			  status >= 2 ? secs : 0.0,
 			  status >= 3 ? secs_per_byte : 0.0,
-			  status >= 4 ? (long) maxbytes : 0,
+			  status >= 4 ? maxbytes : 0,
 			  mediaCFG);
 
     } else if (0 == strncasecomp(word1, "htbin", 5) ||

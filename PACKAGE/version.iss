@@ -1,7 +1,7 @@
 ; version used for Inno Setup files.
 
 ; $Format: "#define LYNX_VERSION \"$ProjectVersion$\""$
-#define LYNX_VERSION "2.8.7dev.12"
+#define LYNX_VERSION "2.8.7dev.13"
 
 #define MyAppName "Lynx"
 #define MyAppPublisher "Thomas E Dickey"

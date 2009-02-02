@@ -1,4 +1,4 @@
-// $LynxId: lynx_cfg.h,v 1.1 2007/06/29 22:47:53 tom Exp $
+// $LynxId: lynx_cfg.h,v 1.2 2009/02/01 23:08:47 tom Exp $
 // definitions abstracted from makefile.msc
 
 #ifndef LYNX_CFG_H
@@ -18,6 +18,7 @@
 #define EXP_JUSTIFY_ELTS 1
 #define EXP_NESTED_TABLES 1
 #define HAVE_KEYPAD 1
+#define HAVE_PUTENV 1
 #define LONG_LIST 1
 #define NDEBUG 1
 #define NO_CONFIG_INFO 1
