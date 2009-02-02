@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFile.c,v 1.118 2009/01/02 23:03:34 tom Exp $
+ * $LynxId: HTFile.c,v 1.119 2009/02/01 21:17:39 tom Exp $
  *
  *			File Access				HTFile.c
  *			===========
@@ -252,7 +252,7 @@ static void LYListFmtParse(const char *fmtstr,
 #define PBIT(a, n, s)  (s) ? psbits[((a) >> (n)) & 0x7] : \
 	pbits[((a) >> (n)) & 0x7]
 #endif
-#ifdef S_ISVTX
+#if defined(S_ISVTX) && !defined(_WINDOWS)
     static const char *ptbits[] =
     {"--T", "--t", "-wT", "-wt",
      "r-T", "r-t", "rwT", "rwt", 0};
@@ -1390,7 +1390,7 @@ CompressFileType HTContentToCompressType(HTParentAnchor *anchor)
  *	1.	No code for non-unix systems.
  *	2.	Isn't there a quicker way?
  */
-BOOL HTEditable(const char *filename)
+BOOL HTEditable(const char *filename GCC_UNUSED)
 {
 #ifndef NO_GROUPS
     GETGROUPS_T groups[NGROUPS];

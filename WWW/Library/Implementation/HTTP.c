@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTP.c,v 1.104 2009/01/03 01:41:51 tom Exp $
+ * $LynxId: HTTP.c,v 1.105 2009/02/01 21:22:22 tom Exp $
  *
  * HyperText Tranfer Protocol	- Client implementation		HTTP.c
  * ==========================
@@ -42,6 +42,7 @@
 #include <LYGlobalDefs.h>
 #include <GridText.h>
 #include <LYStrings.h>
+#include <LYUtils.h>
 #include <LYrcFile.h>
 #include <LYLeaks.h>
 
@@ -218,19 +219,6 @@ static int ws_errno = 0;
 static DWORD g_total_times = 0;
 static DWORD g_total_bytes = 0;
 
-char *str_speed(void)
-{
-    static char buff[32];
-
-    if (ws_read_per_sec > 1000)
-	sprintf(buff, "%d.%03dkB", ws_read_per_sec / 1000,
-		(ws_read_per_sec % 1000));
-    else
-	sprintf(buff, "%3d", ws_read_per_sec);
-
-    return buff;
-}
-
 /* The same like read, but takes care of EINTR and uses select to
    timeout the stale connections.  */
 
@@ -297,7 +285,6 @@ int ws_netread(int fd, char *buf, int len)
 
     static recv_data_t para;
 
-    extern int win32_check_interrupt(void);	/* LYUtil.c */
     extern int lynx_timeout;	/* LYMain.c */
     extern CRITICAL_SECTION critSec_READ;	/* LYMain.c */
 

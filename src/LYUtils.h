@@ -1,4 +1,4 @@
-/* $LynxId: LYUtils.h,v 1.79 2009/01/01 17:10:40 tom Exp $ */
+/* $LynxId: LYUtils.h,v 1.80 2009/02/01 23:28:26 tom Exp $ */
 #ifndef LYUTILS_H
 #define LYUTILS_H
 
@@ -286,6 +286,10 @@ extern "C" {
 
 #else
 #define LYRelaxFilePermissions(name)	/* nothing */
+#endif
+
+#if defined(_WINDOWS)
+    extern int win32_check_interrupt(void);
 #endif
 
 /*

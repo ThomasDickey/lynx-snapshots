@@ -1,4 +1,4 @@
-/* $LynxId: Xsystem.c,v 1.21 2008/12/31 16:35:14 tom Exp $
+/* $LynxId: Xsystem.c,v 1.22 2009/02/01 21:22:55 tom Exp $
  *	like system("cmd") but return with exit code of "cmd"
  *	for Turbo-C/MS-C/LSI-C
  *  This code is in the public domain.
@@ -257,7 +257,7 @@ static PRO *NEAR pars(char *s)
     char *lb;
     int li, ls, q;
     int c;
-    PRO *pp;
+    PRO *pp = 0;
 
     lb = xmalloc(ls = STR_MAX);	/* about */
     li = q = 0;
@@ -321,7 +321,7 @@ static int NEAR prog_go(PRO * p, int flag)
     char *extp = 0;
     char cmdb[STR_MAX];
     char *ep;
-    int rc, lc, cmd_len;
+    int rc, lc = 0, cmd_len;
 
     cmd_len = strlen(p->cmd);
 

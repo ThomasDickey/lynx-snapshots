@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTAAProt.c,v 1.29 2009/01/03 02:00:14 tom Exp $
+ * $LynxId: HTAAProt.c,v 1.30 2009/02/01 21:19:48 tom Exp $
  *
  * MODULE							HTAAProt.c
  *		PROTECTION FILE PARSING MODULE
@@ -648,7 +648,7 @@ static void save_uid_info(const char *name, int user)
  * ON EXIT:
  *      returns the user name, or an empty string if not found.
  */
-const char *HTAA_UidToName(int uid)
+const char *HTAA_UidToName(int uid GCC_UNUSED)
 {
 #ifndef NOUSERS
     struct passwd *pw;
@@ -682,7 +682,7 @@ const char *HTAA_UidToName(int uid)
  * ON EXIT:
  *      returns the user id, or NONESUCH if not found.
  */
-int HTAA_NameToUid(const char *name)
+int HTAA_NameToUid(const char *name GCC_UNUSED)
 {
 #ifndef NOUSERS
     struct passwd *pw;
@@ -715,7 +715,7 @@ int HTAA_NameToUid(const char *name)
  * ON EXIT:
  *      returns the group name, or an empty string if not found.
  */
-const char *HTAA_GidToName(int gid)
+const char *HTAA_GidToName(int gid GCC_UNUSED)
 {
 #ifndef NOUSERS
     struct group *gr;
@@ -749,7 +749,7 @@ const char *HTAA_GidToName(int gid)
  * ON EXIT:
  *      returns the group id, or NONESUCH if not found.
  */
-int HTAA_NameToGid(const char *name)
+int HTAA_NameToGid(const char *name GCC_UNUSED)
 {
 #ifndef NOUSERS
     struct group *gr;

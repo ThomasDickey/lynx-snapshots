@@ -1,9 +1,11 @@
--- $LynxId: CHANGES,v 1.372 2009/02/01 20:27:51 tom Exp $
+-- $LynxId: CHANGES,v 1.374 2009/02/02 01:50:56 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
 2009-02-01 (2.8.7dev.13)
+* modify definitions in LYStructs.h for union to cast to a void* rather than
+  a long, to help with 64-bit ports -TD
 * modify CF_SSL configure macro to check for -ldl needed for recent OpenSSL
   versions -TD
 * modify CF_SSL configure macro to build with msys for mingw configuration -TD
@@ -30,7 +32,7 @@ Changes since Lynx 2.8 release
   any fancy-curses implementation that is running in ASCII or Latin-1 -TD
 * add a configure check for curses type "chtype" -TD
 * fix for an ASCII dependency in LYKeymap.c -PG
-* update fr.po, id.po, nl.pl, sv.po, tr.po from
+* update fr.po, id.po, nl.pl, sv.po, tr.po, vi.po from
     http://translationproject.org/latest/lynx/
 * change configure script to check for "ar" archiver options, from tin bug
   report for FreeBSD 8.0 which requires a "-" before the options -TD
