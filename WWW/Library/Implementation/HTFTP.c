@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFTP.c,v 1.88 2009/01/03 01:57:47 tom Exp $
+ * $LynxId: HTFTP.c,v 1.89 2009/02/01 12:49:00 tom Exp $
  *
  *			File Transfer Protocol (FTP) Client
  *			for a WorldWideWeb browser
@@ -2759,7 +2759,7 @@ static char *FormatNum(char **bufp,
 	sprintf(fmt, "%%%.*sld", (int) sizeof(fmt) - 3, start);
 	HTSprintf(bufp, fmt, value);
     } else {
-	sprintf(fmt, "%ld", value);
+	sprintf(fmt, "%lu", value);
 	StrAllocCat(*bufp, fmt);
     }
     return *bufp;

@@ -1,9 +1,11 @@
--- $LynxId: CHANGES,v 1.371 2009/01/31 01:37:28 tom Exp $
+-- $LynxId: CHANGES,v 1.372 2009/02/01 20:27:51 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2009-01-?? (2.8.7???.??)
+2009-02-01 (2.8.7dev.13)
+* modify CF_SSL configure macro to check for -ldl needed for recent OpenSSL
+  versions -TD
 * modify CF_SSL configure macro to build with msys for mingw configuration -TD
 * modify scanning of floats from lynx.cfg to allow Lynx to read POSIX values
   in non-POSIX locales -TD

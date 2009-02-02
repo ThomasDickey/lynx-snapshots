@@ -1,4 +1,4 @@
-dnl $LynxId: configure.in,v 1.185 2009/01/21 23:56:58 tom Exp $
+dnl $LynxId: configure.in,v 1.186 2009/02/01 16:12:31 tom Exp $
 dnl
 dnl Process this file with autoconf to produce a configure script.
 dnl
@@ -851,7 +851,7 @@ CF_ARG_ENABLE(addrlist-page,
 AC_MSG_RESULT($use_addrlist_page)
 test $use_addrlist_page != no && AC_DEFINE(EXP_ADDRLIST_PAGE)
 
-AC_MSG_CHECKING(if experimental ascii case-conversion)
+AC_MSG_CHECKING(if experimental ascii case-conversion should be used)
 CF_ARG_ENABLE(ascii-ctypes,
 [  --enable-ascii-ctypes   use experimental ascii case-conversion],
 	[use_ascii_ctypes=$enableval],
