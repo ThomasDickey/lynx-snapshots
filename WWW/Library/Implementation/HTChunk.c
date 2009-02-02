@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTChunk.c,v 1.20 2009/01/03 01:21:34 tom Exp $
+ * $LynxId: HTChunk.c,v 1.21 2009/02/01 12:49:24 tom Exp $
  *
  *		Chunk handling:	Flexible arrays
  *		===============================
@@ -67,7 +67,7 @@ HTChunk *HTChunkCreate2(int grow, size_t needed)
 	/* Round up */
 	ch->allocated = (int) (needed - 1 - ((needed - 1) % ch->growby)
 			       + (unsigned) ch->growby);
-	CTRACE((tfp, "HTChunkCreate2: requested %d, allocate %d\n",
+	CTRACE((tfp, "HTChunkCreate2: requested %d, allocate %u\n",
 		(int) needed, (unsigned) ch->allocated));
 	ch->data = typecallocn(char, (unsigned) ch->allocated);
 

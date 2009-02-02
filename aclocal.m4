@@ -1,11 +1,11 @@
-dnl $LynxId: aclocal.m4,v 1.139 2009/01/31 01:36:28 tom Exp $
+dnl $LynxId: aclocal.m4,v 1.141 2009/02/01 20:26:46 tom Exp $
 dnl Macros for auto-configure script.
 dnl by T.E.Dickey <dickey@invisible-island.net>
 dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
 dnl and Philippe De Muyter <phdm@macqel.be>
 dnl
 dnl Created: 1997/1/28
-dnl Updated: 2009/1/3
+dnl Updated: 2009/2/1
 dnl
 dnl The autoconf used in Lynx development is GNU autoconf 2.13 or 2.52, patched
 dnl by Thomas Dickey.  See your local GNU archives, and this URL:
@@ -2595,7 +2595,7 @@ if test "$GCC" = yes ; then
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_GCC_WARNINGS version: 23 updated: 2008/07/26 17:54:02
+dnl CF_GCC_WARNINGS version: 24 updated: 2009/02/01 15:21:00
 dnl ---------------
 dnl Check if the compiler supports useful warning options.  There's a few that
 dnl we don't use, simply because they're too noisy:
@@ -2628,7 +2628,6 @@ if test "$INTEL_COMPILER" = yes
 then
 # The "-wdXXX" options suppress warnings:
 # remark #1419: external declaration in primary source file
-# remark #1682: implicit conversion of a 64-bit integral type to a smaller integral type (potential portability problem)
 # remark #1683: explicit conversion of a 64-bit integral type to a smaller integral type (potential portability problem)
 # remark #1684: conversion from pointer to same-sized integral type (potential portability problem)
 # remark #193: zero used for undefined preprocessing identifier
@@ -2636,19 +2635,18 @@ then
 # remark #810: conversion from "int" to "Dimension={unsigned short}" may lose significant bits
 # remark #869: parameter "tw" was never referenced
 # remark #981: operands are evaluated in unspecified order
-# warning #269: invalid format string conversion
+# warning #279: controlling expression is constant
 
 	AC_CHECKING([for $CC warning options])
 	cf_save_CFLAGS="$CFLAGS"
 	EXTRA_CFLAGS="-Wall"
 	for cf_opt in \
 		wd1419 \
-		wd1682 \
 		wd1683 \
 		wd1684 \
 		wd193 \
-		wd279 \
 		wd593 \
+		wd279 \
 		wd810 \
 		wd869 \
 		wd981
@@ -4558,7 +4556,7 @@ define([CF_SRAND_PARSE],[
 	esac
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_SSL version: 17 updated: 2009/01/30 20:33:12
+dnl CF_SSL version: 19 updated: 2009/02/01 15:26:31
 dnl ------
 dnl Check for ssl library
 dnl $1 = [optional] directory in which the library may be found, set by AC_ARG_WITH
@@ -4613,12 +4611,21 @@ AC_DEFUN([CF_SSL],[
 	fi
 
 	if test "$cf_cv_have_ssl" != yes; then
-		case $host_os in
+		case $host_os in #(vi
 		mingw*) #(vi
 			cf_extra_ssl_libs="-lcrypto -lgdi32"
 			;;
-		*) #(vi
+		*)
+			# openssl 0.9.6 and up use dynamic loading for engines.
 			cf_extra_ssl_libs="-lcrypto"
+			case "x$LIBS" in #(vi
+			*-ldl) #(vi
+				;;
+			*)
+				AC_CHECK_LIB(dl,dlsym,
+					[cf_extra_ssl_libs="$cf_extra_ssl_libs -ldl"])
+				;;
+			esac
 			;;
 		esac
 
@@ -4629,33 +4636,33 @@ AC_DEFUN([CF_SSL],[
 			cf_cv_have_ssl=no,
 			openssl,
 			$cf_extra_ssl_libs)
-	else
-		cf_extra_ssl_libs=
+
+		if test "$cf_cv_have_ssl" = yes ; then
+			if test -n "$cf_cv_library_path_ssl" ; then
+				CF_ADD_LIBDIR($cf_cv_library_path_ssl)
+			fi
+			LIBS="-lssl $cf_extra_ssl_libs $LIBS"
+			if test -n "$cf_cv_header_path_ssl" ; then
+				case $cf_cv_header_path_ssl in #(vi
+				/usr/include/openssl) #(vi
+					;;
+				*)
+					CF_ADD_INCDIR($cf_cv_header_path_ssl)
+					;;
+				esac
+			fi
+		fi
 	fi
 
 	if test "$cf_cv_have_ssl" = yes ; then
+		AC_DEFINE(USE_SSL)
 		if test -n "$cf_cv_header_path_ssl" ; then
-			AC_DEFINE(USE_SSL)
-
-			case $cf_cv_header_path_ssl in
+			case $cf_cv_header_path_ssl in #(vi
 			*/openssl)
 				AC_DEFINE(USE_OPENSSL_INCL)
 				;;
 			esac
-
-			case $cf_cv_header_path_ssl in
-			/usr/include/openssl)
-				;;
-			*)
-				CF_ADD_INCDIR($cf_cv_header_path_ssl)
-				;;
-			esac
-
 		fi
-		if test -n "$cf_cv_library_path_ssl" ; then
-			CF_ADD_LIBDIR($cf_cv_library_path_ssl)
-		fi
-		LIBS="-lssl $cf_extra_ssl_libs $LIBS"
 		CF_CHECK_SSL_X509
 	fi
 ])dnl

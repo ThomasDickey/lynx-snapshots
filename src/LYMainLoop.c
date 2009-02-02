@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMainLoop.c,v 1.159 2009/01/01 17:49:53 tom Exp $
+ * $LynxId: LYMainLoop.c,v 1.160 2009/02/01 12:51:11 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTAccess.h>
@@ -1708,8 +1708,8 @@ static int handle_LYK_COMMAND(char *user_input_buffer)
 	src = LYSkipBlanks(user_input_buffer);
 	tmp = LYSkipNonBlanks(src);
 	*tmp = 0;
-	ch = ((mp = LYStringToKcmd(src)) != 0) ? mp->code : 0;
-	CTRACE((tfp, "LYK_COMMAND(%s.%s) = %d\n", src, tmp, ch));
+	ch = ((mp = LYStringToKcmd(src)) != 0) ? mp->code : LYK_UNKNOWN;
+	CTRACE((tfp, "LYK_COMMAND(%s.%s) = %d\n", src, tmp, (int) ch));
 	if (ch == 0) {
 	    return *src ? -1 : 0;
 	}
