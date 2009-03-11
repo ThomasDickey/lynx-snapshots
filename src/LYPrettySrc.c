@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYPrettySrc.c,v 1.19 2009/01/01 22:20:25 tom Exp $
+ * $LynxId: LYPrettySrc.c,v 1.20 2009/03/11 00:30:39 tom Exp $
  *
  * HTML source syntax highlighting
  * by Vlad Harchev <hvv@hippo.ru>
@@ -20,7 +20,7 @@ BOOL psrc_convert_string = FALSE;
 BOOL psrc_view = FALSE;		/* this is read by SGML_put_character - TRUE
 
 				   when viewing pretty source */
-BOOL LYpsrc = FALSE;		/* this tells what will be shown on '\':
+BOOLEAN LYpsrc = FALSE;		/* this tells what will be shown on '\':
 
 				   if TRUE, then pretty source, normal source view otherwise. Toggled by
 				   -prettysrc commandline option.  */
@@ -32,7 +32,7 @@ BOOL mark_htext_as_source = FALSE;
   /* tagspecs from lynx.cfg are read here. After .lss file is read (is with lss
      support), the style cache and markup are created before entering the
      mainloop. */
-BOOL psrcview_no_anchor_numbering = FALSE;
+BOOLEAN psrcview_no_anchor_numbering = FALSE;
 static const char *HTL_tagspecs_defaults[HTL_num_lexemes] =
 {
  /* these values are defaults. They are also listed in comments of distibution's

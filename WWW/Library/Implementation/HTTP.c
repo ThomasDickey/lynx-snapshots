@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTP.c,v 1.105 2009/02/01 21:22:22 tom Exp $
+ * $LynxId: HTTP.c,v 1.106 2009/03/10 15:31:22 tom Exp $
  *
  * HyperText Tranfer Protocol	- Client implementation		HTTP.c
  * ==========================
@@ -284,9 +284,6 @@ int ws_netread(int fd, char *buf, int len)
     DWORD val, process_time, now_TickCount, save_TickCount;
 
     static recv_data_t para;
-
-    extern int lynx_timeout;	/* LYMain.c */
-    extern CRITICAL_SECTION critSec_READ;	/* LYMain.c */
 
 #define TICK	5
 #define STACK_SIZE	0x2000uL
@@ -1032,12 +1029,12 @@ static int HTLoadHTTP(const char *arg,
 		if (pres->quality < 1.0) {
 		    if (pres->maxbytes > 0) {
 			sprintf(temp, ";q=%4.3f;mxb=%" PRI_off_t "",
-				pres->quality, pres->maxbytes);
+				pres->quality, CAST_off_t(pres->maxbytes));
 		    } else {
 			sprintf(temp, ";q=%4.3f", pres->quality);
 		    }
 		} else if (pres->maxbytes > 0) {
-		    sprintf(temp, ";mxb=%" PRI_off_t "", pres->maxbytes);
+		    sprintf(temp, ";mxb=%" PRI_off_t "", CAST_off_t(pres->maxbytes));
 		} else {
 		    temp[0] = '\0';
 		}

@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYGlobalDefs.h,v 1.115 2008/12/26 18:25:27 tom Exp $
+ * $LynxId: LYGlobalDefs.h,v 1.117 2009/03/11 00:29:55 tom Exp $
  *
  * global variable definitions
  */
@@ -562,7 +562,7 @@ extern "C" {
 #endif
 
 #ifdef EXP_JUSTIFY_ELTS
-    extern BOOL ok_justify;
+    extern BOOLEAN ok_justify;
     extern int justify_max_void_percent;
 #endif
 
@@ -585,13 +585,13 @@ extern "C" {
 #endif
     extern BOOLEAN LYUseTraceLog;	/* Use a TRACE log?              */
 
-    extern BOOL force_empty_hrefless_a;
+    extern BOOLEAN force_empty_hrefless_a;
     extern int connect_timeout;
     extern int reading_timeout;
 
 #ifdef TEXTFIELDS_MAY_NEED_ACTIVATION
     extern BOOL textfields_need_activation;
-    extern BOOL textfields_activation_option;
+    extern BOOLEAN textfields_activation_option;
 
 #ifdef INACTIVE_INPUT_STYLE_VH
     extern BOOL textinput_redrawn;
@@ -629,6 +629,8 @@ extern "C" {
     extern BOOLEAN system_is_NT;
     extern char windows_drive[4];
     extern int lynx_timeout;
+    CRITICAL_SECTION critSec_DNS;
+    CRITICAL_SECTION critSec_READ;
 #endif				/* _WINDOWS */
 
     extern BOOLEAN show_cfg;

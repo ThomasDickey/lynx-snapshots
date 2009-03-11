@@ -1,4 +1,4 @@
-/* $LynxId: LYCurses.c,v 1.138 2009/01/20 01:03:02 tom Exp $ */
+/* $LynxId: LYCurses.c,v 1.140 2009/03/10 15:33:34 tom Exp $ */
 #include <HTUtils.h>
 #include <HTAlert.h>
 
@@ -7,6 +7,10 @@
 #undef UNIX
 #endif /* UNIX */
 #endif /* __MINGW32__ */
+
+#ifdef __DJGPP__
+#include <pc.h>
+#endif /* __DJGPP__ */
 
 #include <LYCurses.h>
 #include <LYStyle.h>
@@ -578,14 +582,14 @@ static BOOL lynx_called_initscr = FALSE;
 static struct {
     int fg, dft_fg, bg, dft_bg;
 } lynx_color_cfg[] = {
-    /*0*/ { COLOR_CFG(DEFAULT_FG),     COLOR_CFG(DEFAULT_BG)},
-    /*1*/ { COLOR_CFG(COLOR_BLUE),     COLOR_CFG(DEFAULT_BG)},
-    /*2*/ { COLOR_CFG(COLOR_YELLOW+8), COLOR_CFG(COLOR_BLUE)},
-    /*3*/ { COLOR_CFG(COLOR_GREEN),    COLOR_CFG(DEFAULT_BG)},
-    /*4*/ { COLOR_CFG(COLOR_MAGENTA),  COLOR_CFG(DEFAULT_BG)},
-    /*5*/ { COLOR_CFG(COLOR_BLUE),     COLOR_CFG(DEFAULT_BG)},
-    /*6*/ { COLOR_CFG(COLOR_RED),      COLOR_CFG(DEFAULT_BG)},
-    /*7*/ { COLOR_CFG(COLOR_MAGENTA),  COLOR_CFG(COLOR_CYAN)}
+    /*0*/ { COLOR_CFG(DEFAULT_FG),       COLOR_CFG(DEFAULT_BG)},
+    /*1*/ { COLOR_CFG(COLOR_BLUE),       COLOR_CFG(DEFAULT_BG)},
+    /*2*/ { COLOR_CFG((COLOR_YELLOW)+8), COLOR_CFG(COLOR_BLUE)},
+    /*3*/ { COLOR_CFG(COLOR_GREEN),      COLOR_CFG(DEFAULT_BG)},
+    /*4*/ { COLOR_CFG(COLOR_MAGENTA),    COLOR_CFG(DEFAULT_BG)},
+    /*5*/ { COLOR_CFG(COLOR_BLUE),       COLOR_CFG(DEFAULT_BG)},
+    /*6*/ { COLOR_CFG(COLOR_RED),        COLOR_CFG(DEFAULT_BG)},
+    /*7*/ { COLOR_CFG(COLOR_MAGENTA),    COLOR_CFG(COLOR_CYAN)}
 };
 /* *INDENT-ON* */
 
@@ -1460,21 +1464,32 @@ void stop_curses(void)
     _eth_release();
 #endif /* __DJGPP__ */
 
-#if defined(DOSPATH) && !(defined(USE_SLANG) || defined(_WIN_CC))
+/* ifdef's for non-Unix curses or slang */
+#if defined(__MINGW32__)
+    chtype bb;
+
+    bb = getbkgd(stdscr);
+    bkgdset(0);
+    clear();
+    refresh();
+    bkgdset(bb);
 #if defined(PDCURSES)
     endwin();
-#else /* !PDCURSES */
+#endif /* PDCURSES */
+
+#elif defined(DOSPATH) && !(defined(USE_SLANG) || defined(_WIN_CC))
+
+#if defined(PDCURSES)
+    endwin();
+#endif /* PDCURSES */
+
 #ifdef __DJGPP__
     ScreenClear();
 #else /* some flavor of win32?  */
-#ifdef __MINGW32__
-    clear();
-#else
     clrscr();
-#endif
 #endif /* win32 */
-#endif /* PDCURSES */
-#else
+
+#else /* Unix, etc */
 
     if (LYCursesON == TRUE) {
 	lynx_nl2crlf(TRUE);
@@ -1494,7 +1509,7 @@ void stop_curses(void)
     }
 
     fflush(stdout);
-#endif /* defined(DOSPATH) && !(defined(USE_SLANG) || defined(_WIN_CC)) */
+#endif /* ifdef's for non-Unix curses or slang */
     fflush(stderr);
 
     LYCursesON = FALSE;

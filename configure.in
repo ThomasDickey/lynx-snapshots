@@ -1,4 +1,4 @@
-dnl $LynxId: configure.in,v 1.187 2009/02/02 01:50:56 tom Exp $
+dnl $LynxId: configure.in,v 1.189 2009/03/10 00:23:50 tom Exp $
 dnl
 dnl Process this file with autoconf to produce a configure script.
 dnl
@@ -93,6 +93,14 @@ esac
 AC_PROG_CC
 AC_PROG_CPP
 AC_PROG_LN_S
+case $host_os in
+mingw*)
+LN_S="cp -p"
+AC_MSG_RESULT(Override: No symbolic links in mingw.)
+	;;
+*)
+	;;
+esac
 AC_PROG_MAKE_SET
 AC_PROG_INSTALL
 AC_PROG_YACC
@@ -259,7 +267,7 @@ linux*)
 	TRY_CFLAGS="$TRY_CFLAGS -DLINUX"
 	;;
 mingw*)
-	# put these directlyin CPPFLAGS since they will not work in lynx_cfg.h
+	# put these directly in CPPFLAGS since they will not work in lynx_cfg.h
 	CF_ADD_CFLAGS(\
 		-DWIN32_LEAN_AND_MEAN \
 		-DDOSPATH \
@@ -335,6 +343,12 @@ ultrix*)
 	AC_CHECK_HEADERS(cursesX.h,
 		[AC_DEFINE(HAVE_CURSESX_H)
 		 cf_cv_ncurses_header=cursesX.h])
+	;;
+esac
+
+case $host_os in
+mingw*)
+	EXTRA_OBJS="$EXTRA_OBJS LYIcon\$o"
 	;;
 esac
 

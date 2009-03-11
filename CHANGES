@@ -1,14 +1,30 @@
--- $LynxId: CHANGES,v 1.374 2009/02/02 01:50:56 tom Exp $
+-- $LynxId: CHANGES,v 1.379 2009/03/11 00:39:22 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
+
+2009-03-?? (2.8.7dev.14)
+* modify SGML_write() to check for UCS-2 BOMs, to provide support for UCS-2
+  pages (prompted by comment by TG) -TD
+* modify SGML_write() to check for UTF-8 BOM, using that as a hint to set the
+  default document charset to UTF-8 (prompted by mailing list comments) -TD
+* modify stop_curses() function to fix missing DJGPP and MinGW code -DK, TD
+* modify config.hin to fix prototype for getttimeofday() with MinGW -DK
+* ifdef to avoid conflicting definition of set_timeout() in DJGPP -DK
+* modify ifdef in LYMain.c to avoid possible conflict between libintl.h and
+  locale.h -DK
+* modify configure script to avoid using symbolic links for MinGW, in case
+  the script is run in Cygwin -DK
+* modify makefile.msc to add LYIcon object -TD
+* modify configure script to add LYIcon object for MinGW -DK
+* add sample scripts for configuring MinGW version using Cygwin -DK
 
 2009-02-01 (2.8.7dev.13)
 * modify definitions in LYStructs.h for union to cast to a void* rather than
   a long, to help with 64-bit ports -TD
 * modify CF_SSL configure macro to check for -ldl needed for recent OpenSSL
   versions -TD
-* modify CF_SSL configure macro to build with msys for mingw configuration -TD
+* modify CF_SSL configure macro to build with MSYS for MinGW configuration -TD
 * modify scanning of floats from lynx.cfg to allow Lynx to read POSIX values
   in non-POSIX locales -TD
 * modify configure script to check for msginit, needed to generate "en" po
