@@ -1,5 +1,5 @@
 /*
- * $LynxId: UCAux.c,v 1.39 2009/01/03 18:46:33 tom Exp $
+ * $LynxId: UCAux.c,v 1.40 2009/03/10 21:13:12 tom Exp $
  */
 #include <HTUtils.h>
 
@@ -171,6 +171,11 @@ void UCSetTransParams(UCTransParams * pT, int cs_in,
      */
     pT->transp = (BOOL) (!strcmp(p_in->MIMEname, "x-transparent") ||
 			 !strcmp(p_out->MIMEname, "x-transparent"));
+
+    /*
+     * UCS-2 is handled as a special case in SGML_write().
+     */
+    pT->ucs_mode = 0;
 
     if (pT->transp) {
 	/*

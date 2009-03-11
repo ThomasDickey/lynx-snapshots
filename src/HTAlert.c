@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTAlert.c,v 1.83 2009/01/03 00:43:04 tom Exp $
+ * $LynxId: HTAlert.c,v 1.84 2009/03/10 15:22:07 tom Exp $
  *
  *	Displaying messages and getting input for Lynx Browser
  *	==========================================================
@@ -178,15 +178,15 @@ static const char *sprint_bytes(char *s, off_t n, const char *was_units)
 
     if (LYTransferRate == rateKB || LYTransferRate == rateEtaKB_maybe) {
 	if (n >= 10 * kb_units) {
-	    sprintf(s, "%" PRI_off_t, n / kb_units);
+	    sprintf(s, "%" PRI_off_t, CAST_off_t(n / kb_units));
 	} else if (n > 999) {	/* Avoid switching between 1016b/s and 1K/s */
 	    sprintf(s, "%.2g", ((double) n) / kb_units);
 	} else {
-	    sprintf(s, "%" PRI_off_t, n);
+	    sprintf(s, "%" PRI_off_t, CAST_off_t(n));
 	    u = HTProgressUnits(rateBYTES);
 	}
     } else {
-	sprintf(s, "%" PRI_off_t, n);
+	sprintf(s, "%" PRI_off_t, CAST_off_t(n));
     }
 
     if (!was_units || was_units != u)
@@ -864,11 +864,11 @@ BOOL HTConfirmCookie(domain_entry * de, const char *server,
 	space_free = (LYcolLimit
 		      - (LYstrCells(prompt)
 			 - 10)	/* %s and %.*s and %.*s chars */
-		      - (int) strlen(server));
+		      -(int) strlen(server));
 	if (space_free < 0)
 	    space_free = 0;
-	namelen =  (int) strlen(name);
-	valuelen =  (int) strlen(value);
+	namelen = (int) strlen(name);
+	valuelen = (int) strlen(value);
 	if ((namelen + valuelen) > space_free) {
 	    /*
 	     * Argh...  there isn't enough space on our single line for

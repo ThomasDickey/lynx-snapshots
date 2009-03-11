@@ -1,4 +1,4 @@
-/* $LynxId: Xsystem.c,v 1.22 2009/02/01 21:22:55 tom Exp $
+/* $LynxId: Xsystem.c,v 1.23 2009/03/10 15:21:42 tom Exp $
  *	like system("cmd") but return with exit code of "cmd"
  *	for Turbo-C/MS-C/LSI-C
  *  This code is in the public domain.
@@ -26,6 +26,7 @@
  */
 #include <LYUtils.h>
 #include <LYStrings.h>
+#include <LYGlobalDefs.h>
 
 #ifdef DOSPATH
 #include <io.h>
@@ -100,10 +101,6 @@ static char *NEAR xrealloc(void *p, size_t n)
 
 static int NEAR is_builtin_command(char *s)
 {
-#ifdef WIN_EX
-    extern int system_is_NT;	/* 1997/11/05 (Wed) 22:10:35 */
-#endif
-
     static char *cmdtab[] =
     {
 	"dir", "type", "rem", "ren", "rename", "erase", "del",
@@ -172,7 +169,7 @@ static PRO *NEAR pars1c(char *s)
     int q;
 
     pp = (PRO *) xmalloc(sizeof(PRO));
-    for (q = 0; q < TABLESIZE(pp->ored); q++)
+    for (q = 0; q < (int) TABLESIZE(pp->ored); q++)
 	pp->ored[q] = q;
     while (isspc(*s))
 	s++;
@@ -430,7 +427,7 @@ static void NEAR redswitch(PRO * p)
 {
     int d;
 
-    for (d = 0; d < TABLESIZE(p->ored); d++) {
+    for (d = 0; d < (int) TABLESIZE(p->ored); d++) {
 	if (d != p->ored[d]) {
 	    p->sred[d] = dup(d);
 	    dup2(p->ored[d], d);
@@ -442,7 +439,7 @@ static void NEAR redunswitch(PRO * p)
 {
     int d;
 
-    for (d = 0; d < TABLESIZE(p->ored); d++) {
+    for (d = 0; d < (int) TABLESIZE(p->ored); d++) {
 	if (d != p->ored[d]) {
 	    dup2(p->sred[d], d);
 	    close(p->sred[d]);
@@ -457,7 +454,10 @@ int xsystem(char *cmd)
     int psstdin, psstdout;
     int rdstdin, rdstdout;
     int rc = 0;
+
+#if USECMDLINE
     static char *cmdline = 0;
+#endif
 
 #ifdef SH_EX			/* 1997/11/01 (Sat) 10:04:03 add by JH7AYN */
     pif = cmd;
@@ -528,7 +528,7 @@ int xsystem(char *cmd)
     return rc < 0 ? 0xFF00 : rc;
 }
 
-int exec_command(char *cmd, int wait_flag)
+int exec_command(char *cmd, int wait_flag GCC_UNUSED)
 {
     int rc;
 

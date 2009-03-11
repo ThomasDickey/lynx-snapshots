@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTAAProt.c,v 1.30 2009/02/01 21:19:48 tom Exp $
+ * $LynxId: HTAAProt.c,v 1.31 2009/03/10 00:27:20 tom Exp $
  *
  * MODULE							HTAAProt.c
  *		PROTECTION FILE PARSING MODULE
@@ -75,44 +75,6 @@ static BOOL isNumber(const char *s)
     }
     return YES;
 }
-#endif /* !NOUSERS */
-
-#if defined (NOUSERS)
-/* PUBLIC							HTAA_getUidName()
- *		GET THE USER ID NAME (VMS ONLY)
- * ON ENTRY:
- *	No arguments.
- *
- * ON EXIT:
- *	returns	the user name
- *		Default is "" (nobody).
- */
-const char *HTAA_getUidName(void)
-{
-    if (current_prot && current_prot->uid_name
-	&& (0 != strcmp(current_prot->uid_name, "nobody")))
-	return (current_prot->uid_name);
-    else
-	return ("");
-}
-
-/* PUBLIC							HTAA_getFileName
- *		GET THE FILENAME (VMS ONLY)
- * ON ENTRY:
- *	No arguments.
- *
- * ON EXIT:
- *	returns	the filename
- */
-const char *HTAA_getFileName(void)
-{
-    if (current_prot && current_prot->filename)
-	return (current_prot->filename);
-    else
-	return ("");
-}
-
-#else /* not VMS */
 
 /* PUBLIC							HTAA_getUid()
  *		GET THE USER ID TO CHANGE THE PROCESS UID TO
@@ -187,7 +149,7 @@ int HTAA_getGid(void)
      */
     return NOBODY;		/* nogroup */
 }
-#endif /* not VMS */
+#endif /* !NOUSERS */
 
 /* static							HTAA_setIds()
  *		SET UID AND GID (AS NAMES OR NUMBERS)

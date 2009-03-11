@@ -1,4 +1,4 @@
-# $LynxId: makefile.msc,v 1.19 2008/09/25 00:25:16 tom Exp $
+# $LynxId: makefile.msc,v 1.21 2009/03/11 00:00:39 tom Exp $
 #
 # Makefile for `Lynx' browser for Microsoft Visual C++ 4.2 or later
 #
@@ -206,7 +206,8 @@ OBJS = $(CS_OBJS) \
 	"UCAuto.obj" \
 	"UCAux.obj" \
 	"UCdomap.obj" \
-	"Xsystem.obj"
+	"Xsystem.obj" \
+	"LYIcon.obj"
 
 
 # Dependencies for building
@@ -224,6 +225,7 @@ all : $(PROGNAME)
 clean :
 	-del *.map
 	-del *.obj
+	-del *.res
 	-del/f/s/q *.i
 
 $(PROGNAME) : $(OBJS) dirent.obj
@@ -390,6 +392,12 @@ UCdomap.obj : $(SRC_DIR)\UCdomap.c
 
 Xsystem.obj : $(SRC_DIR)\Xsystem.c
 	$(COMPILE) $(SRC_DIR)\Xsystem.c
+
+LYIcon.obj : $(SRC_DIR)\LYIcon.rc
+	cd $(SRC_DIR)
+	$(RC) /r /fo ..\LYIcon.res LYIcon.rc
+	cd ..
+	cvtres /verbose /machine:ix86 LYIcon.res
 
 dirent.obj : $(ETC_LIB)\dirent.c
 	$(COMPILE) $(ETC_LIB)\dirent.c

@@ -1,5 +1,5 @@
 /*
- * $LynxId: SGML.c,v 1.120 2009/01/03 01:12:28 tom Exp $
+ * $LynxId: SGML.c,v 1.122 2009/03/10 21:16:57 tom Exp $
  *
  *			General SGML Parser code		SGML.c
  *			========================
@@ -4382,12 +4382,23 @@ static void SGML_character(HTStream *context, char c_in)
     }
 }				/* SGML_character */
 
-static void SGML_string(HTStream *context, const char *str)
+static void InferUtfFromBom(HTStream *context, int chndl)
 {
-    const char *p;
+    HTAnchor_setUCInfoStage(context->node_anchor, chndl,
+			    UCT_STAGE_PARSER,
+			    UCT_SETBY_PARSER);
+    change_chartrans_handling(context);
+}
 
-    for (p = str; *p; p++)
-	SGML_character(context, *p);
+/*
+ * Avoid rewrite of SGML_character() to handle hypothetical case of UTF-16
+ * webpages, by pretending that the data is UTF-8.
+ */
+static void SGML_widechar(HTStream *context, long ch)
+{
+    if (!UCPutUtf8_charstring(context, SGML_character, ch)) {
+	SGML_character(context, UCH(ch));
+    }
 }
 
 static void SGML_write(HTStream *context, const char *str, int l)
@@ -4395,8 +4406,45 @@ static void SGML_write(HTStream *context, const char *str, int l)
     const char *p;
     const char *e = str + l;
 
-    for (p = str; p < e; p++)
-	SGML_character(context, *p);
+    if (sgml_offset == 0) {
+	if (l > 3
+	    && !memcmp(str, "\357\273\277", 3)) {
+	    CTRACE((tfp, "SGML_write found UTF-8 BOM\n"));
+	    InferUtfFromBom(context, UTF8_handle);
+	    str += 3;
+	} else if (l > 2) {
+	    if (!memcmp(str, "\377\376", 2)) {
+		CTRACE((tfp, "SGML_write found UCS-2 LE BOM\n"));
+		InferUtfFromBom(context, UTF8_handle);
+		str += 2;
+		context->T.ucs_mode = -1;
+	    } else if (!memcmp(str, "\376\377", 2)) {
+		CTRACE((tfp, "SGML_write found UCS-2 BE BOM\n"));
+		InferUtfFromBom(context, UTF8_handle);
+		str += 2;
+		context->T.ucs_mode = 1;
+	    }
+	}
+    }
+    switch (context->T.ucs_mode) {
+    case -1:
+	for (p = str; p < e; p += 2)
+	    SGML_widechar(context, (UCH(p[1]) << 8) | UCH(p[0]));
+	break;
+    case 1:
+	for (p = str; p < e; p += 2)
+	    SGML_widechar(context, (UCH(p[0]) << 8) | UCH(p[1]));
+	break;
+    default:
+	for (p = str; p < e; p++)
+	    SGML_character(context, *p);
+	break;
+    }
+}
+
+static void SGML_string(HTStream *context, const char *str)
+{
+    SGML_write(context, str, strlen(str));
 }
 
 /*_______________________________________________________________________
@@ -4507,11 +4555,12 @@ HTStream *SGML_new(const SGML_dtd * dtd,
  */
 int SGML_offset(void)
 {
+    int result = sgml_offset;
+
 #ifdef USE_PRETTYSRC
-    return sgml_offset + psrc_view;
-#else
-    return sgml_offset;
+    result += psrc_view;
 #endif
+    return result;
 }
 
 /*		Asian character conversion functions

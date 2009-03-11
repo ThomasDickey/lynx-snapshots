@@ -1,5 +1,5 @@
 /*                System dependencies in the W3 library
- * $LynxId: www_tcp.h,v 1.38 2008/12/30 01:01:34 Paul.Gilmartin Exp $
+ * $LynxId: www_tcp.h,v 1.39 2009/03/09 22:43:29 Doug.Kaufman Exp $
  *
                                    SYSTEM DEPENDENCIES
 
@@ -632,6 +632,9 @@ extern int errno;
 #ifdef word
 #undef word
 #endif /* word */
+#ifdef set_timeout
+#undef set_timeout
+#endif /* set_timeout */
 #define select select_s
 
 #undef NETWRITE

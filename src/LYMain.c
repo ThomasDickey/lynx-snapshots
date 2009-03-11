@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMain.c,v 1.196 2009/01/25 18:46:17 tom Exp $
+ * $LynxId: LYMain.c,v 1.198 2009/03/11 00:29:55 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTP.h>
@@ -57,7 +57,7 @@
 #include <io.h>
 #endif
 
-#ifdef LOCALE
+#if defined(LOCALE) && !defined(HAVE_LIBINTL_H)
 #undef gettext			/* Solaris locale.h prototypes gettext() */
 #include <locale.h>
 #ifndef HAVE_GETTEXT
@@ -530,7 +530,7 @@ int LYHiddenLinks = HIDDENLINKS_SEPARATE;	/* Show hidden links? */
 char *SSL_cert_file = NULL;	/* Default CA CERT file */
 
 int Old_DTD = NO;
-static BOOL DTD_recovery = NO;
+static BOOLEAN DTD_recovery = NO;
 
 #ifndef NO_LYNX_TRACE
 FILE *LYTraceLogFP = NULL;	/* Pointer for TRACE log  */
@@ -559,7 +559,7 @@ int connect_timeout = 18000; /*=180000*0.1 - used in HTDoConnect.*/
 int reading_timeout = 18000; /*=180000*0.1 - used in HTDoConnect.*/
 
 #ifdef EXP_JUSTIFY_ELTS
-BOOL ok_justify = FALSE;
+BOOLEAN ok_justify = FALSE;
 int justify_max_void_percent = 35;
 #endif
 
@@ -576,11 +576,11 @@ int scrsize_x = 0;
 int scrsize_y = 0;
 #endif
 
-BOOL force_empty_hrefless_a = FALSE;
+BOOLEAN force_empty_hrefless_a = FALSE;
 
 #ifdef TEXTFIELDS_MAY_NEED_ACTIVATION
 BOOL textfields_need_activation = FALSE;
-BOOL textfields_activation_option = FALSE;
+BOOLEAN textfields_activation_option = FALSE;
 #endif
 
 BOOLEAN textfield_prompt_at_left_edge = FALSE;

@@ -1,5 +1,5 @@
 /*
- * $LynxId: config.hin,v 1.111 2009/01/03 16:02:07 tom Exp $
+ * $LynxId: config.hin,v 1.112 2009/03/09 22:43:29 Doug.Kaufman Exp $
  * vile:cmode
  *
  * The configure script translates "config.hin" into "lynx_cfg.h"
@@ -141,6 +141,7 @@
 #undef HAVE_SYS_IOCTL_H		/* have <sys/ioctl.h> */
 #undef HAVE_SYS_NDIR_H		/* AC_HEADER_DIRENT */
 #undef HAVE_SYS_PARAM_H		/* AM_GNU_GETTEXT */
+#undef HAVE_SYS_TIME_H		/* have <sys/time.h> */
 #undef HAVE_SYS_TIMEB_H		/* have <sys/timeb.h> */
 #undef HAVE_SYS_WAIT_H		/* have <sys/wait.h> */
 #undef HAVE_TERMIOS_H		/* have <termios.h> */
@@ -237,6 +238,7 @@
 #undef TELNET_PATH		/* CF_PATH_PROG(telnet) */
 #undef TERMIO_AND_CURSES	/* CF_TERMIO_AND_CURSES workaround */
 #undef TERMIO_AND_TERMIOS	/* CF_TERMIO_AND_TERMIOS workaround */
+#undef TIME_WITH_SYS_TIME	/* AC_HEADER_TIME */
 #undef TN3270_PATH		/* CF_PATH_PROG(tn3270) */
 #undef TOUCH_PATH		/* CF_PATH_PROG(touch) */
 #undef ULTRIX			/* config.sub */

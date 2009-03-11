@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYCgi.c,v 1.54 2009/01/01 22:39:06 tom Exp $
+ * $LynxId: LYCgi.c,v 1.55 2009/03/10 00:05:59 tom Exp $
  *                   Lynx CGI support                              LYCgi.c
  *                   ================
  *
@@ -58,7 +58,7 @@ static unsigned envc_size = 0;	/* Slots in environment array */
 static unsigned envc = 0;	/* Slots used so far */
 static HTList *alloced = NULL;
 
-#ifdef LYNXCGI_LINKS
+#if defined(LYNXCGI_LINKS) && !defined(__MINGW32__)
 static char *user_agent = NULL;
 static char *server_software = NULL;
 static char *accept_language = NULL;
