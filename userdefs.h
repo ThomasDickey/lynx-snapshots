@@ -1,5 +1,5 @@
 /*
- * $LynxId: userdefs.h,v 1.241 2009/02/02 01:50:56 tom Exp $
+ * $LynxId: userdefs.h,v 1.242 2009/03/16 22:34:12 tom Exp $
  *
  * Lynx - Hypertext navigation system
  *
@@ -1427,6 +1427,14 @@
 #define LYNX_DATE "Sun, 01 Feb 2009 17:41:02 -0800"
 #define LYNX_DATE_OFF 5		/* truncate the automatically-generated date */
 #define LYNX_DATE_LEN 11	/* truncate the automatically-generated date */
+
+#ifdef UNICODE
+#define W32_STRING(s) L##s
+#else
+#define W32_STRING(s) s
+#endif
+
+#define LYNX_SUBKEY W32_STRING("Software\\Lynx")
 
 #define LINESIZE 1024		/* max length of line to read from file */
 #define MAXLINKS 1024		/* max links on one screen */
