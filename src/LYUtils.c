@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYUtils.c,v 1.182 2009/01/01 23:59:34 tom Exp $
+ * $LynxId: LYUtils.c,v 1.183 2009/03/17 00:40:24 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTCP.h>
@@ -214,6 +214,31 @@ static LY_TEMP *FindTempfileByFP(FILE *fp)
     return p;
 }
 
+#if defined(_WIN32)
+/*
+ * Use RegQueryValueExA() rather than RegQueryValueEx() for compatibility
+ * with non-Unicode winvile
+ */
+int w32_get_reg_sz(HKEY hkey, const char *name, char *value, unsigned length)
+{
+    int result;
+    DWORD dwSzBuffer = length;
+
+    CTRACE((tfp, "w32_get_reg_sz(%s)\n", name));
+    result = RegQueryValueExA(hkey,
+			      name,
+			      NULL,
+			      NULL,
+			      (LPBYTE) value,
+			      &dwSzBuffer);
+    if (result == ERROR_SUCCESS) {
+	value[dwSzBuffer] = 0;
+	CTRACE((tfp, "->%s\n", value));
+    }
+    return result;
+}
+#endif
+
 /*
  * Get an environment variable, rejecting empty strings
  */
@@ -221,6 +246,33 @@ char *LYGetEnv(const char *name)
 {
     char *result = getenv(name);
 
+#if defined(_WIN32)
+    if (result == 0) {
+	static HKEY rootkeys[] =
+	{HKEY_CURRENT_USER, HKEY_LOCAL_MACHINE};
+
+	int j;
+	HKEY hkey;
+	char buffer[256];
+
+	for (j = 0; j < TABLESIZE(rootkeys); ++j) {
+	    if (RegOpenKeyEx(rootkeys[j],
+			     LYNX_SUBKEY W32_STRING("\\Environment"),
+			     0,
+			     KEY_READ,
+			     &hkey) == ERROR_SUCCESS) {
+		if (w32_get_reg_sz(hkey, name, buffer, sizeof(buffer)) == ERROR_SUCCESS) {
+
+		    result = strdup(buffer);
+		    (void) RegCloseKey(hkey);
+		    break;
+		}
+
+		(void) RegCloseKey(hkey);
+	    }
+	}
+    }
+#endif
     return non_empty(result) ? result : 0;
 }
 

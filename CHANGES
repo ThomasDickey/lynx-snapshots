@@ -1,9 +1,12 @@
--- $LynxId: CHANGES,v 1.379 2009/03/11 00:39:22 tom Exp $
+-- $LynxId: CHANGES,v 1.380 2009/03/17 00:39:31 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
 2009-03-?? (2.8.7dev.14)
+* adapt features from vile's install-script to set registry variables, etc. -TD
+* modify LYgetenv() for Win32 platforms to check also in the system registry
+  for settings, adapted from vile -TD
 * modify SGML_write() to check for UCS-2 BOMs, to provide support for UCS-2
   pages (prompted by comment by TG) -TD
 * modify SGML_write() to check for UTF-8 BOM, using that as a hint to set the

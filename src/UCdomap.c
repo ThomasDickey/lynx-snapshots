@@ -1,5 +1,5 @@
 /*
- * $LynxId: UCdomap.c,v 1.75 2009/01/18 23:19:37 tom Exp $
+ * $LynxId: UCdomap.c,v 1.76 2009/03/16 22:41:41 tom Exp $
  *
  *  UCdomap.c
  *  =========
@@ -2354,9 +2354,9 @@ static char *nl_langinfo(nl_item item)
     if (item != CODESET)
 	return NULL;
 
-    if (((l = getenv("LC_ALL")) && *l) ||
-	((l = getenv("LC_CTYPE")) && *l) ||
-	((l = getenv("LANG")) && *l)) {
+    if (((l = LYgetenv("LC_ALL")) != 0) ||
+	((l = LYgetenv("LC_CTYPE")) != 0) ||
+	((l = LYgetenv("LANG")) != 0)) {
 	/* check standardized locales */
 	if (!strcmp(l, "C") || !strcmp(l, "POSIX"))
 	    return C_CODESET;

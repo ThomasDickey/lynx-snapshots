@@ -1,5 +1,5 @@
 /*
- * $LynxId: dirent.c,v 1.2 2007/06/29 23:03:08 tom Exp $
+ * $LynxId: dirent.c,v 1.3 2009/03/11 00:31:33 tom Exp $
  *
  * dir.c for MS-DOS by Samuel Lam <skl@van-bc.UUCP>, June/87 
  */
@@ -199,7 +199,7 @@ struct dirent *readdir(DIR * dirp)
     dp.d_namlen = dp.d_reclen =
 	strlen(dp.d_name);
 
-    dp.d_ino = dirp->dd_loc + 1;	/* fake the inode */
+    dp.d_ino = (ino_t) (dirp->dd_loc + 1);	/* fake the inode */
 
     dirp->dd_cp = dirp->dd_cp->_d_next;
     dirp->dd_loc++;
