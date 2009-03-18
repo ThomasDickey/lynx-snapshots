@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTString.c,v 1.56 2009/01/01 16:57:48 tom Exp $
+ * $LynxId: HTString.c,v 1.57 2009/03/17 22:27:59 tom Exp $
  *
  *	Case-independent string comparison		HTString.c
  *
@@ -962,6 +962,18 @@ char *HTQuoteParameter(const char *parameter)
 	outofmem(__FILE__, "HTQuoteParameter");
 
     n = 0;
+#if (USE_QUOTED_PARAMETER == 1)
+    /*
+     * Only double-quotes are used in Win32/DOS -TD
+     */
+    if (quoted)
+	result[n++] = D_QUOTE;
+    for (i = 0; i < last; i++) {
+	result[n++] = parameter[i];
+    }
+    if (quoted)
+	result[n++] = D_QUOTE;
+#else
     if (quoted)
 	result[n++] = S_QUOTE;
     for (i = 0; i < last; i++) {
@@ -984,6 +996,7 @@ char *HTQuoteParameter(const char *parameter)
     }
     if (quoted)
 	result[n++] = S_QUOTE;
+#endif
     result[n] = '\0';
     return result;
 }

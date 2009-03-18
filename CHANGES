@@ -1,9 +1,10 @@
--- $LynxId: CHANGES,v 1.380 2009/03/17 00:39:31 tom Exp $
+-- $LynxId: CHANGES,v 1.381 2009/03/17 22:46:38 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
 2009-03-?? (2.8.7dev.14)
+* modify command-passing for Win32/DOS to use double-quotes -TD
 * adapt features from vile's install-script to set registry variables, etc. -TD
 * modify LYgetenv() for Win32 platforms to check also in the system registry
   for settings, adapted from vile -TD
