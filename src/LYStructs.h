@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYStructs.h,v 1.28 2009/01/01 21:34:17 tom Exp $
+ * $LynxId: LYStructs.h,v 1.29 2009/02/02 19:56:38 tom Exp $
  */
 #ifndef LYSTRUCTS_H
 #define LYSTRUCTS_H
@@ -150,6 +150,7 @@ extern "C" {
 	ParseUnionMembers;
     } ParseUnion;
 
+#define	PARSE_DEBUG 1
 #ifdef	PARSE_DEBUG
 
 #define ParseUnionPtr      Config_Type *

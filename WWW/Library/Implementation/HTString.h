@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTString.h,v 1.30 2008/12/31 21:04:28 tom Exp $
+ * $LynxId: HTString.h,v 1.31 2009/03/17 22:25:50 tom Exp $
  *						String handling for libwww
  *                                         STRINGS
  *                                            
@@ -88,10 +88,14 @@ extern "C" {
 				  va_list * ap);
 #endif
 
-#if (defined(VMS) || defined(DOSPATH) || defined(__EMX__)) && !defined(__CYGWIN__)
-#define USE_QUOTED_PARAMETER 0
+#if defined(__CYGWIN__)
+#define USE_QUOTED_PARAMETER 2	/* single and double-quoting */
+#elif defined(DOSPATH)
+#define USE_QUOTED_PARAMETER 1	/* double-quoting only */
+#elif (defined(VMS) || defined(__EMX__))
+#define USE_QUOTED_PARAMETER 0	/* no quoting */
 #else
-#define USE_QUOTED_PARAMETER 1
+#define USE_QUOTED_PARAMETER 2	/* single and double-quoting */
 #endif
 
 #if USE_QUOTED_PARAMETER

@@ -1,4 +1,4 @@
-/* $LynxId: LYStrings.c,v 1.164 2009/03/11 00:31:09 tom Exp $ */
+/* $LynxId: LYStrings.c,v 1.165 2009/03/17 23:40:17 tom Exp $ */
 #include <HTUtils.h>
 #include <HTCJK.h>
 #include <UCAux.h>
@@ -5299,7 +5299,12 @@ int LYscanFloat2(const char **source, float *result)
 
 	if (*src != '.') {
 	    temp = NULL;
-	    *result = (float) strtol(src, &temp, 10);
+#ifdef _WIN32_WINNT
+#define WIN32_FIX (float)
+#else
+#define WIN32_FIX /* nothing */
+#endif
+	    *result = WIN32_FIX strtol(src, &temp, 10);
 	    src = temp;
 	}
 	if (src != 0 && *src == '.') {

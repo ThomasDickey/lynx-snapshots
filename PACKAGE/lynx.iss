@@ -1,4 +1,4 @@
-; $LynxId: lynx.iss,v 1.2 2009/03/17 00:25:56 tom Exp $
+; $LynxId: lynx.iss,v 1.3 2009/03/17 23:11:46 tom Exp $
 ; vile:ts=2 sw=2 notabinsert
 ;
 ; This is the BASE script for different flavors of the installer for Lynx.
@@ -20,6 +20,7 @@
 #endif
 
 #define MySendTo '{sendto}\' + myAppName + '.lnk'
+#define MyQuickLaunch '{userappdata}\Microsoft\Internet Explorer\Quick Launch\' + myAppName + '.lnk'
 
 #ifndef SourceExeName
 #define SourceExeName "lynx.exe"
@@ -121,17 +122,17 @@ Source: "..\samples\lynx.bat"; DestDir: "{app}"
 Source: "..\samples\jumps.htm"; DestDir: "{app}"
 Source: "..\samples\home.htm"; DestDir: "{app}"
 Source: "..\samples\lynx_bookmarks.htm"; DestDir: "{app}"
-Source: "..\samples\opaque.lss"; DestDir: "{app}"
+Source: "..\samples\*.lss"; DestDir: "{app}"
 Source: "..\samples\lynx.bat"; DestDir: "{app}"
 Source: "..\samples\lynx-demo.cfg"; DestDir: "{app}"
 Source: "..\lynx.man"; DestDir: "{app}"
-Source: "..\lynx.cfg"; DestDir: "{app}"
+Source: "..\lynx.cfg"; DestDir: "{app}" ; AfterInstall: myCustomCfg; Flags: ignoreversion
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]
-Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; IconFilename: ..\samples\lynx.ico
+Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
 Name: "{group}\{cm:UninstallProgram,{#MyAppName}}"; Filename: "{uninstallexe}"
-Name: "{commondesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon; IconFilename: ..\samples\lynx.ico
+Name: "{commondesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon
 
 [Run]
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#MyAppName}}"; Flags: nowait postinstall skipifsilent
@@ -140,6 +141,7 @@ Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#MyAppName}}
 Type: files; Name: {app}\.lynx_cookies
 Type: dirifempty; Name: {app}
 #emit 'Type: files; Name: ' + mySendTo
+#emit 'Type: files; Name: ' + myQuickLaunch
 
 [Code]
 #emit 'const MY_APP_NAME = ''{app}\' + myAppName + '.exe'';'
@@ -253,6 +255,19 @@ begin
     SW_SHOWNORMAL);
 end;
 
+procedure AddQuickLaunch();
+begin
+  CreateShellLink(
+#emit 'ExpandConstant(''' + MyQuickLaunch + '''),'
+#emit '''SendTo link for ' + myAppName + ''','
+    ExpandConstant(MY_APP_NAME),      // program
+    '',                               // option(s) will be followed by pathname
+    '',                               // no target directory
+    '',                               // no icon filename
+    -1,                               // no icon index
+    SW_SHOWNORMAL);
+end;
+
 // This is called after installing the executable.
 procedure myPostExecutable();
 var
@@ -265,13 +280,39 @@ begin
   if not RegWriteStringValue(selectedVarsRootKey(), Keypath, '', AppDir) then
     Log('Failed to set key');
 
-  addAnyVariable('LYNX_CFG', AppDir + '/lynx.cfg');
-  addAnyVariable('LYNX_LSS', AppDir + '/opaque.lss');
-  addAnyVariable('LYNX_HELPFILE', AppDir + '/help/Lynx_users_guide.html.gz');
+  if isTaskSelected('use_sendto') then
+    begin
+    AddSendTo();
+    Log('** added Send-To link');
+    end;
+
+  if isTaskSelected('quicklaunchicon') then
+    begin
+    AddQuickLaunch();
+    Log('** added Quick-launch link');
+    end;
+end;
+
+// This is called after installing the lynx.cfg file.
+procedure myCustomCfg();
+var
+  AppDir  : String;
+  CfgFile : String;
+begin
+  AppDir := ExpandConstant('{app}');
+  CfgFile := AppDir + '\lynx.cfg';
+
+  addAnyVariable('LYNX_CFG', CfgFile);
+  Log('** set LYNX_CFG=' + CfgFile);
+
+  SaveStringToFile(CfgFile, 'HELPFILE:' + AppDir + '/help/Lynx_help_main.html.gz' + #10, True);
+  SaveStringToFile(CfgFile, 'COLOR_STYLE:' + AppDir + '/opaque.lss' + #10, True);
+  Log('** customized ' + CfgFile);
 
   if isTaskSelected('use_sendto') then
     begin
     AddSendTo();
+    Log('** added Send-To link');
     end;
 end;
 
@@ -320,8 +361,6 @@ begin
     usPostUninstall:
       begin
         removeAnyVariable('LYNX_CFG');
-        removeAnyVariable('LYNX_LSS');
-        removeAnyVariable('LYNX_HELPFILE');
 
       {
         If we don't find the settings in the current user, try the local machine.
