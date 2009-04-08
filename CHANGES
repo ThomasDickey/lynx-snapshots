@@ -1,7 +1,14 @@
--- $LynxId: CHANGES,v 1.382 2009/03/18 00:35:40 tom Exp $
+-- $LynxId: CHANGES,v 1.385 2009/04/07 22:43:52 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
+
+2009-04-07 (2.8.7pre.2)
+* add TNS SNI support for the OpenSSL configuration -Phil Pennock
+* add docs/README.cookies and docs/README.options -Stefan Caunter
+* update docs/README.sslcerts -Stefan Caunter
+* add NO_PAUSE setting to lynx.cfg, .lynxrc and Options menu (request by
+  Stefan Caunter) -TD
 
 2009-03-17 (2.8.7pre.1)
 2009-03-17 (2.8.7dev.14)

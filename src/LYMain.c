@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMain.c,v 1.198 2009/03/11 00:29:55 tom Exp $
+ * $LynxId: LYMain.c,v 1.199 2009/04/07 00:10:20 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTP.h>
@@ -388,6 +388,7 @@ BOOLEAN more_text = FALSE;	/* is there more text to display? */
 BOOLEAN more_links = FALSE;	/* Links beyond a displayed page with no links? */
 BOOLEAN no_list = FALSE;
 BOOLEAN no_margins = FALSE;
+BOOLEAN no_pause = FALSE;
 BOOLEAN no_title = FALSE;
 BOOLEAN no_url_redirection = FALSE;	/* Don't follow URL redirections */
 BOOLEAN pseudo_inline_alts = MAKE_PSEUDO_ALTS_FOR_INLINES;
@@ -2360,19 +2361,10 @@ void reload_read_cfg(void)
 }
 #endif /* !NO_CONFIG_INFO */
 
-static void disable_pausing(void)
-{
-    AlertSecs = 0;
-    DebugSecs = 0;
-    InfoSecs = 0;
-    MessageSecs = 0;
-    ReplaySecs = 0;
-}
-
 static void force_dump_mode(void)
 {
     dump_output_immediately = TRUE;
-    disable_pausing();
+    no_pause = TRUE;
     LYcols = DFT_COLS;
 }
 
@@ -2823,7 +2815,7 @@ static int nocolor_fun(char *next_arg GCC_UNUSED)
 /* -nopause */
 static int nopause_fun(char *next_arg GCC_UNUSED)
 {
-    disable_pausing();
+    no_pause = TRUE;
     return 0;
 }
 

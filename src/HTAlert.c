@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTAlert.c,v 1.84 2009/03/10 15:22:07 tom Exp $
+ * $LynxId: HTAlert.c,v 1.85 2009/04/07 00:09:34 tom Exp $
  *
  *	Displaying messages and getting input for Lynx Browser
  *	==========================================================
@@ -1123,7 +1123,7 @@ int HTConfirmPostRedirect(const char *Redirecting_url, int server_status)
     return (result);
 }
 
-#define okToSleep() (!crawl && !traversal && LYCursesON)
+#define okToSleep() (!crawl && !traversal && LYCursesON && !no_pause)
 
 /*
  * Sleep for the given message class's time.

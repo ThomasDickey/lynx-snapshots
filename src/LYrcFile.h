@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYrcFile.h,v 1.29 2008/12/26 18:34:05 tom Exp $
+ * $LynxId: LYrcFile.h,v 1.30 2009/04/06 23:07:40 tom Exp $
  */
 #ifndef LYRCFILE_H
 #define LYRCFILE_H
@@ -156,6 +156,7 @@
 #define RC_NO_FROM_HEADER               "no_from_header"
 #define RC_NO_ISMAP_IF_USEMAP           "no_ismap_if_usemap"
 #define RC_NO_MARGINS                   "no_margins"
+#define RC_NO_PAUSE                     "no_pause"
 #define RC_NO_PROXY                     "no_proxy"
 #define RC_NO_REFERER_HEADER            "no_referer_header"
 #define RC_NO_TABLE_CENTER              "no_table_center"

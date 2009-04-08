@@ -1,4 +1,4 @@
-/* $LynxId: LYOptions.c,v 1.128 2009/01/19 23:32:01 tom Exp $ */
+/* $LynxId: LYOptions.c,v 1.129 2009/04/07 00:35:49 tom Exp $ */
 #include <HTUtils.h>
 #include <HTFTP.h>
 #include <HTTP.h>		/* 'reloading' flag */
@@ -396,7 +396,7 @@ void LYoptions(void)
     }
 
     old_use_assume_charset =
-	use_assume_charset = (BOOL) (user_mode == ADVANCED_MODE);
+	use_assume_charset = (BOOLEAN) (user_mode == ADVANCED_MODE);
 
   draw_options:
 
@@ -973,7 +973,7 @@ void LYoptions(void)
 				     LYCharSet_UC[UCLYhndl_for_unspec].MIMEname);
 		    }
 		    if (HTCJK != JAPANESE)
-			LYRawMode = (BOOL) (UCLYhndl_for_unspec == current_char_set);
+			LYRawMode = (BOOLEAN) (UCLYhndl_for_unspec == current_char_set);
 		    HTMLSetUseDefaultRawMode(current_char_set, LYRawMode);
 		    HTMLSetCharacterHandling(current_char_set);
 		    CurrentAssumeCharSet = UCLYhndl_for_unspec;
@@ -1248,7 +1248,7 @@ void LYoptions(void)
 					       choices, 4, FALSE, FALSE);
 		    }
 #if defined(COLOR_CURSES)
-		    again = (BOOL) (chosen == SHOW_COLOR_ON && !has_colors());
+		    again = (BOOLEAN) (chosen == SHOW_COLOR_ON && !has_colors());
 		    if (again) {
 			char *terminal = LYGetEnv("TERM");
 
@@ -1401,13 +1401,13 @@ void LYoptions(void)
 		user_mode = LYChooseEnum(user_mode,
 					 L_User_Mode, -1,
 					 userMode_choices);
-		use_assume_charset = (BOOL) (user_mode >= 2);
+		use_assume_charset = (BOOLEAN) (user_mode >= 2);
 	    } else {
 		user_mode = LYChoosePopup(user_mode,
 					  L_User_Mode, -1,
 					  userMode_choices,
 					  3, FALSE, FALSE);
-		use_assume_charset = (BOOL) (user_mode >= 2);
+		use_assume_charset = (BOOLEAN) (user_mode >= 2);
 #if defined(VMS) || defined(USE_SLANG)
 		if (use_assume_charset == old_use_assume_charset) {
 		    LYmove(L_User_Mode, COL_OPTION_VALUES);
@@ -2326,6 +2326,7 @@ static const char *locale_charset_string = RC_LOCALE_CHARSET;
  * File Management Options
  */
 static const char *show_dotfiles_string = RC_SHOW_DOTFILES;
+static const char *no_pause_string = RC_NO_PAUSE;
 
 #ifdef DIRED_SUPPORT
 static const char *dired_list_string = RC_DIR_LIST_STYLE;
@@ -2750,7 +2751,7 @@ int postoptions(DocInfo *newdoc)
 	/* Emacs keys: ON/OFF */
 	if (!strcmp(data[i].tag, emacs_keys_string)
 	    && GetOptValues(bool_values, data[i].value, &code)) {
-	    if ((emacs_keys = (BOOL) code) != FALSE) {
+	    if ((emacs_keys = (BOOLEAN) code) != FALSE) {
 		set_emacs_keys();
 	    } else {
 		reset_emacs_keys();
@@ -2826,7 +2827,7 @@ int postoptions(DocInfo *newdoc)
 	/* Search Type: SELECT */
 	if (!strcmp(data[i].tag, search_type_string)
 	    && GetOptValues(search_type_values, data[i].value, &code)) {
-	    case_sensitive = (BOOL) code;
+	    case_sensitive = (BOOLEAN) code;
 	}
 
 	/* HTML error tolerance: SELECT */
@@ -2842,7 +2843,7 @@ int postoptions(DocInfo *newdoc)
 	/* Select Popups: ON/OFF */
 	if (!strcmp(data[i].tag, select_popups_string)
 	    && GetOptValues(bool_values, data[i].value, &code)) {
-	    LYSelectPopups = (BOOL) code;
+	    LYSelectPopups = (BOOLEAN) code;
 	}
 #if defined(USE_SLANG) || defined(COLOR_CURSES)
 	/* Show Color: SELECT */
@@ -2864,19 +2865,19 @@ int postoptions(DocInfo *newdoc)
 	/* Show Cursor: ON/OFF */
 	if (!strcmp(data[i].tag, show_cursor_string)
 	    && GetOptValues(bool_values, data[i].value, &code)) {
-	    LYShowCursor = (BOOL) code;
+	    LYShowCursor = (BOOLEAN) code;
 	}
 
 	/* Underline links: ON/OFF */
 	if (!strcmp(data[i].tag, underline_links_string)
 	    && GetOptValues(bool_values, data[i].value, &code)) {
-	    LYUnderlineLinks = (BOOL) code;
+	    LYUnderlineLinks = (BOOLEAN) code;
 	}
 #ifdef USE_SCROLLBAR
 	/* Show Scrollbar: ON/OFF */
 	if (!strcmp(data[i].tag, show_scrollbar_string)
 	    && GetOptValues(bool_values, data[i].value, &code)) {
-	    LYShowScrollbar = (BOOL) code;
+	    LYShowScrollbar = (BOOLEAN) code;
 	    need_reload = TRUE;
 	}
 #endif
@@ -2924,7 +2925,7 @@ int postoptions(DocInfo *newdoc)
 	if (!strcmp(data[i].tag, verbose_images_string)
 	    && GetOptValues(verbose_images_type_values, data[i].value, &code)) {
 	    if (verbose_img != code) {
-		verbose_img = (BOOL) code;
+		verbose_img = (BOOLEAN) code;
 		need_reload = TRUE;
 	    }
 	}
@@ -2932,7 +2933,7 @@ int postoptions(DocInfo *newdoc)
 	/* VI Keys: ON/OFF */
 	if (!strcmp(data[i].tag, vi_keys_string)
 	    && GetOptValues(bool_values, data[i].value, &code)) {
-	    if ((vi_keys = (BOOL) code) != FALSE) {
+	    if ((vi_keys = (BOOLEAN) code) != FALSE) {
 		set_vi_keys();
 	    } else {
 		reset_vi_keys();
@@ -2955,7 +2956,7 @@ int postoptions(DocInfo *newdoc)
 	/* Auto Session: ON/OFF */
 	if (!strcmp(data[i].tag, auto_session_string)
 	    && GetOptValues(bool_values, data[i].value, &code)) {
-	    LYAutoSession = (BOOL) code;
+	    LYAutoSession = (BOOLEAN) code;
 	}
 
 	/* Default Session filename: INPUT */
@@ -2987,7 +2988,7 @@ int postoptions(DocInfo *newdoc)
 	/* Use locale-based character set: ON/OFF */
 	if (!strcmp(data[i].tag, locale_charset_string)
 	    && GetOptValues(bool_values, data[i].value, &code)) {
-	    LYLocaleCharset = (BOOL) code;
+	    LYLocaleCharset = (BOOLEAN) code;
 	}
 #endif
 
@@ -3006,14 +3007,14 @@ int postoptions(DocInfo *newdoc)
 	/* Raw Mode: ON/OFF */
 	if (!strcmp(data[i].tag, raw_mode_string)
 	    && GetOptValues(bool_values, data[i].value, &code)) {
-	    LYRawMode = (BOOL) code;
+	    LYRawMode = (BOOLEAN) code;
 	}
 #ifndef DISABLE_FTP
 	/*
 	 * passive ftp: ON/OFF
 	 */
 	if (!strcmp(data[i].tag, passive_ftp_string)) {
-	    ftp_passive = (BOOL) code;
+	    ftp_passive = (BOOLEAN) code;
 	}
 
 	/*
@@ -3040,7 +3041,13 @@ int postoptions(DocInfo *newdoc)
 	/* Show dot files: ON/OFF */
 	if (!strcmp(data[i].tag, show_dotfiles_string) && (!no_dotfiles)
 	    && GetOptValues(bool_values, data[i].value, &code)) {
-	    show_dotfiles = (BOOL) code;
+	    show_dotfiles = (BOOLEAN) code;
+	}
+
+	/* Pause when showing messages: ON/OFF */
+	if (!strcmp(data[i].tag, no_pause_string)
+	    && GetOptValues(bool_values, data[i].value, &code)) {
+	    no_pause = (BOOLEAN) !code;
 	}
 #ifdef USE_READPROGRESS
 	/* Show Transfer Rate: enumerated value */
@@ -3126,7 +3133,7 @@ int postoptions(DocInfo *newdoc)
 #endif
 	}
 	if (assume_char_set_changed && HTCJK != JAPANESE) {
-	    LYRawMode = (BOOL) (UCLYhndl_for_unspec == current_char_set);
+	    LYRawMode = (BOOLEAN) (UCLYhndl_for_unspec == current_char_set);
 	}
 	if (raw_mode_old != LYRawMode || assume_char_set_changed) {
 	    /*
@@ -3869,6 +3876,11 @@ static int gen_options(char **newfile)
 #endif /* !NEVER_ALLOW_REMOTE_EXEC */
     EndSelect(fp0);
 #endif /* ENABLE_OPTS_CHANGE_EXEC */
+
+    PutLabel(fp0, gettext("Pause when showing message"), no_pause_string);
+    BeginSelect(fp0, no_pause_string);
+    PutOptValues(fp0, !no_pause, bool_values);
+    EndSelect(fp0);
 
 #ifdef USE_READPROGRESS
     /* Show transfer rate: SELECT */
