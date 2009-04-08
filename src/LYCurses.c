@@ -1,4 +1,4 @@
-/* $LynxId: LYCurses.c,v 1.140 2009/03/10 15:33:34 tom Exp $ */
+/* $LynxId: LYCurses.c,v 1.141 2009/04/07 00:00:40 tom Exp $ */
 #include <HTUtils.h>
 #include <HTAlert.h>
 
@@ -69,7 +69,7 @@ WINDOW *LYwin = 0;
 int LYshiftWin = 0;
 int LYwideLines = FALSE;
 int LYtableCols = 0;		/* in 1/12 of screen width */
-BOOL LYuseCursesPads = TRUE;	/* use pads for left/right shifting */
+BOOLEAN LYuseCursesPads = TRUE;	/* use pads for left/right shifting */
 #endif
 
 /*

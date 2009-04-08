@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYGlobalDefs.h,v 1.117 2009/03/11 00:29:55 tom Exp $
+ * $LynxId: LYGlobalDefs.h,v 1.118 2009/04/07 00:11:01 tom Exp $
  *
  * global variable definitions
  */
@@ -383,6 +383,7 @@ extern "C" {
     extern BOOLEAN use_underscore;
     extern BOOLEAN no_list;
     extern BOOLEAN no_margins;
+    extern BOOLEAN no_pause;
     extern BOOLEAN no_title;
     extern BOOLEAN historical_comments;
     extern BOOLEAN minimal_comments;

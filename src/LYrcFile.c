@@ -1,4 +1,4 @@
-/* $LynxId: LYrcFile.c,v 1.75 2009/01/01 23:10:59 tom Exp $ */
+/* $LynxId: LYrcFile.c,v 1.76 2009/04/07 00:20:14 tom Exp $ */
 #include <HTUtils.h>
 #include <HTFTP.h>
 #include <LYUtils.h>
@@ -603,6 +603,7 @@ in the Visited Links Page.\n\
     MAYBE_SET(RC_AUTO_SESSION,		LYAutoSession,	MSG_ENABLE_LYNXRC),
     MAYBE_STR(RC_SESSION_FILE,		LYSessionFile,	MSG_ENABLE_LYNXRC),
 #endif
+    MAYBE_SET(RC_NO_PAUSE,		no_pause,	MSG_ENABLE_LYNXRC),
 
     PARSE_NIL
 };

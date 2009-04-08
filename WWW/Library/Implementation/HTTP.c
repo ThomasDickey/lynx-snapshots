@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTP.c,v 1.106 2009/03/10 15:31:22 tom Exp $
+ * $LynxId: HTTP.c,v 1.107 2009/04/07 22:45:42 tom Exp $
  *
  * HyperText Tranfer Protocol	- Client implementation		HTTP.c
  * ==========================
@@ -59,7 +59,7 @@ struct _HTStream {
     HTStreamClass *isa;
 };
 
-BOOL reloading = FALSE;		/* Reloading => send no-cache pragma to proxy */
+BOOLEAN reloading = FALSE;	/* Reloading => send no-cache pragma to proxy */
 char *redirecting_url = NULL;	/* Location: value. */
 BOOL permanent_redirection = FALSE;	/* Got 301 status? */
 BOOL redirect_post_content = FALSE;	/* Don't convert to GET? */
@@ -661,10 +661,18 @@ static int HTLoadHTTP(const char *arg,
     if (did_connect || !strncmp(url, "https", 5)) {
 	SSL_handle = handle = HTGetSSLHandle();
 	SSL_set_fd(handle, s);
+	/* get host we're connecting to */
+	ssl_host = HTParse(url, "", PARSE_HOST);
+	ssl_host = StripIpv6Brackets(ssl_host);
 #if SSLEAY_VERSION_NUMBER >= 0x0900
 #ifndef USE_NSS_COMPAT_INCL
-	if (!try_tls)
+	if (!try_tls) {
 	    handle->options |= SSL_OP_NO_TLSv1;
+#if OPENSSL_VERSION_NUMBER >= 0x0090806fL && !defined(OPENSSL_NO_TLSEXT)
+	} else {
+	    SSL_set_tlsext_host_name(handle, ssl_host);
+#endif
+	}
 #endif
 #endif /* SSLEAY_VERSION_NUMBER >= 0x0900 */
 	HTSSLInitPRNG();
@@ -777,9 +785,6 @@ static int HTLoadHTTP(const char *arg,
 	/* initialise status information */
 	status_sslcertcheck = 0;	/* 0 = no CN found in DN */
 	ssl_dn_start = ssl_dn;
-	/* get host we're connecting to */
-	ssl_host = HTParse(url, "", PARSE_HOST);
-	ssl_host = StripIpv6Brackets(ssl_host);
 
 	/* validate all CNs found in DN */
 	CTRACE((tfp, "Validating CNs in '%s'\n", ssl_dn_start));

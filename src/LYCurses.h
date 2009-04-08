@@ -1,4 +1,4 @@
-/* $LynxId: LYCurses.h,v 1.79 2009/01/03 16:55:08 tom Exp $ */
+/* $LynxId: LYCurses.h,v 1.80 2009/04/07 00:03:47 tom Exp $ */
 #ifndef LYCURSES_H
 #define LYCURSES_H
 
@@ -443,7 +443,7 @@ extern "C" {
     extern int LYshiftWin;
     extern int LYwideLines;
     extern int LYtableCols;
-    extern BOOL LYuseCursesPads;
+    extern BOOLEAN LYuseCursesPads;
 
 #else
 #define LYwin stdscr

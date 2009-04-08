@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYReadCFG.c,v 1.137 2009/01/29 01:02:26 tom Exp $
+ * $LynxId: LYReadCFG.c,v 1.138 2009/04/07 00:13:11 tom Exp $
  */
 #ifndef NO_RULES
 #include <HTRules.h>
@@ -1484,6 +1484,7 @@ static Config_Type Config_Table [] =
      PARSE_SET(RC_NO_FROM_HEADER,       LYNoFromHeader),
      PARSE_SET(RC_NO_ISMAP_IF_USEMAP,   LYNoISMAPifUSEMAP),
      PARSE_SET(RC_NO_MARGINS,           no_margins),
+     PARSE_SET(RC_NO_PAUSE,             no_pause),
      PARSE_Env(RC_NO_PROXY,             0),
      PARSE_SET(RC_NO_REFERER_HEADER,    LYNoRefererHeader),
      PARSE_SET(RC_NO_TABLE_CENTER,      no_table_center),
