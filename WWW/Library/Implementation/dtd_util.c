@@ -1,10 +1,10 @@
 /*
- * $LynxId: dtd_util.c,v 1.53 2008/09/20 13:45:30 tom Exp $
+ * $LynxId: dtd_util.c,v 1.72 2009/04/16 22:59:33 tom Exp $
  *
  * Given a SGML_dtd structure, write a corresponding flat file, or "C" source.
  * Given the flat-file, write the "C" source.
  *
- * TODO: read flat-file
+ * TODO: use symbols for HTMLA_NORMAL, etc.
  */
 
 #include <HTUtils.h>
@@ -25,7 +25,7 @@ FILE *TraceFP(void)
 /*
  * Begin the actual utility.
  */
-#define GETOPT "chlo:ts"
+#define GETOPT "chl:o:ts"
 
 #define NOTE(message) fprintf(output, message "\n");
 /* *INDENT-OFF* */
@@ -152,6 +152,31 @@ static const char *SGMLContent2s(SGMLContent contents)
     return value;
 }
 
+static SGMLContent s2SGMLContent(const char *value)
+{
+    static SGMLContent table[] =
+    {
+	SGML_EMPTY,
+	SGML_LITTERAL,
+	SGML_CDATA,
+	SGML_SCRIPT,
+	SGML_RCDATA,
+	SGML_MIXED,
+	SGML_ELEMENT,
+	SGML_PCDATA
+    };
+    unsigned n;
+    SGMLContent result = SGML_EMPTY;
+
+    for (n = 0; n < TABLESIZE(table); ++n) {
+	if (!strcmp(SGMLContent2s(table[n]), value)) {
+	    result = table[n];
+	    break;
+	}
+    }
+    return result;
+}
+
 static void PrintF(FILE *, int, const char *,...) GCC_PRINTFLIKE(3, 4);
 
 static void PrintF(FILE *output, int width, const char *fmt,...)
@@ -166,6 +191,26 @@ static void PrintF(FILE *output, int width, const char *fmt,...)
     fprintf(output, "%-*s", width, buffer);
 }
 
+static int same_AttrList(AttrList a, AttrList b)
+{
+    int result = 1;
+
+    if (a && b) {
+	while (a->name && b->name) {
+	    if (strcmp(a->name, b->name)) {
+		result = 0;
+		break;
+	    }
+	    ++a, ++b;
+	}
+	if (a->name || b->name)
+	    result = 0;
+    } else {
+	result = 0;
+    }
+    return result;
+}
+
 static int first_attrs(const SGML_dtd * dtd, int which)
 {
     int check;
@@ -174,6 +219,11 @@ static int first_attrs(const SGML_dtd * dtd, int which)
     for (check = 0; check < which; ++check) {
 	if (dtd->tags[check].attributes == dtd->tags[which].attributes) {
 	    result = FALSE;
+	    break;
+	} else if (same_AttrList(dtd->tags[check].attributes,
+				 dtd->tags[which].attributes)) {
+	    result = FALSE;
+	    dtd->tags[which].attributes = dtd->tags[check].attributes;
 	    break;
 	}
     }
@@ -248,6 +298,51 @@ typedef struct {
     int which;
 } AttrInfo;
 
+static int compare_attr_types(const void *a, const void *b)
+{
+    const AttrType *p = (const AttrType *) a;
+    const AttrType *q = (const AttrType *) b;
+    int result = 0;
+
+    /* keep lowercase AttrType lists before uppercase, since latter are derived */
+    if (isupper(p->name[0]) ^ isupper(q->name[0])) {
+	if (isupper(p->name[0])) {
+	    result = 1;
+	} else {
+	    result = -1;
+	}
+    } else {
+	result = strcmp(p->name, q->name);
+    }
+    return result;
+}
+
+static int len_AttrTypes(const AttrType * data)
+{
+    int result = 0;
+
+    for (result = 0; data[result].name != 0; ++result) {
+	;
+    }
+    return result;
+}
+
+static AttrType *sorted_AttrTypes(const AttrType * source)
+{
+    AttrType *result = 0;
+    unsigned number = len_AttrTypes(source);
+
+    if (number != 0) {
+	result = typecallocn(AttrType, number + 1);
+	if (result != 0) {
+	    memcpy(result, source, number * sizeof(*result));
+	    qsort(result, number, sizeof(*result), compare_attr_types);
+	}
+    }
+
+    return result;
+}
+
 static int compare_attr(const void *a, const void *b)
 {
     const AttrInfo *p = (const AttrInfo *) a;
@@ -266,7 +361,7 @@ static int len_AttrList(AttrList data)
     return result;
 }
 
-static void sort_uniq_AttrList(attr *data)
+static void sort_uniq_AttrList(attr * data)
 {
     unsigned have = len_AttrList(data);
     unsigned j, k;
@@ -752,16 +847,41 @@ static void dump_header(FILE *output, const SGML_dtd * dtd)
     fprintf(output, "#endif\t\t\t\t/* %s */\n", marker);
 }
 
+#define FMT_NUM_ATTRS "%d attributes:\n"
+#define FMT_ONE_ATTR  "%d:%d:%s\n"
+#define NUM_ONE_ATTR  3
+
 static void dump_flat_attrs(FILE *output,
-			    const char *name,
 			    const attr * attributes,
 			    int number_of_attributes)
 {
     int n;
 
-    fprintf(output, "\t\t%d %s:\n", number_of_attributes, name);
+    fprintf(output, "\t\t" FMT_NUM_ATTRS, number_of_attributes);
     for (n = 0; n < number_of_attributes; ++n) {
-	fprintf(output, "\t\t\t%d:%s\n", n, attributes[n].name);
+	fprintf(output, "\t\t\t" FMT_ONE_ATTR, n,
+#ifdef USE_PRETTYSRC
+		attributes[n].type,
+#else
+		0,		/* need placeholder for source-compat */
+#endif
+		attributes[n].name
+	    );
+    }
+}
+
+static void dump_flat_attr_types(FILE *output, const AttrType * attr_types)
+{
+    const AttrType *p = sorted_AttrTypes(attr_types);
+    int number = len_AttrTypes(attr_types);
+
+    fprintf(output, "\t\t%d attr_types\n", number);
+
+    if (p != 0) {
+	while (p->name != 0) {
+	    fprintf(output, "\t\t\t%s\n", p->name);
+	    ++p;
+	}
     }
 }
 
@@ -835,7 +955,8 @@ static void dump_flat_HTTag(FILE *output, unsigned n, HTTag * tag)
 #ifdef EXP_JUSTIFY_ELTS
     fprintf(output, "\t\t%s\n", tag->can_justify ? "justify" : "nojustify");
 #endif
-    dump_flat_attrs(output, "attributes", tag->attributes, AttrCount(tag));
+    dump_flat_attrs(output, tag->attributes, AttrCount(tag));
+    dump_flat_attr_types(output, tag->attr_types);
     dump_flat_SGMLContent(output, "contents", tag->contents);
     dump_flat_TagClass(output, "tagclass", tag->tagclass);
     dump_flat_TagClass(output, "contains", tag->contains);
@@ -846,9 +967,57 @@ static void dump_flat_HTTag(FILE *output, unsigned n, HTTag * tag)
     dump_flat_TagFlags(output, "flags", tag->flags);
 }
 
+static int count_attr_types(AttrType * attr_types, HTTag * tag)
+{
+    int count = 0;
+    const AttrType *p;
+    AttrType *q;
+
+    if ((p = tag->attr_types) != 0) {
+	while (p->name != 0) {
+	    if ((q = attr_types) != 0) {
+		while (q->name != 0) {
+		    if (!strcmp(q->name, p->name)) {
+			--count;
+			break;
+		    }
+		    ++q;
+		}
+		*q = *p;
+	    }
+	    ++count;
+	    ++p;
+	}
+    }
+    return count;
+}
+
 static void dump_flatfile(FILE *output, const SGML_dtd * dtd)
 {
+    AttrType *attr_types = 0;
+    int pass;
+    unsigned count = 0;
     unsigned n;
+
+    /* merge all of the attr_types data */
+    for (pass = 0; pass < 2; ++pass) {
+	for (n = 0; (int) n < dtd->number_of_tags; ++n) {
+	    count += count_attr_types(attr_types, &(dtd->tags[n]));
+	}
+	if (pass == 0) {
+	    attr_types = typecallocn(AttrType, count + 1);
+	    count = 0;
+	} else {
+	    count = len_AttrTypes(attr_types);
+	    qsort(attr_types, count, sizeof(*attr_types), compare_attr_types);
+	    fprintf(output, "%d attr_types\n", count);
+	    for (n = 0; n < count; ++n) {
+		fprintf(output, "\t%d:%s\n", n, attr_types[n].name);
+		dump_flat_attrs(output, attr_types[n].list,
+				len_AttrList(attr_types[n].list));
+	    }
+	}
+    }
 
     fprintf(output, "%d tags\n", dtd->number_of_tags);
     for (n = 0; (int) n < dtd->number_of_tags; ++n) {
@@ -861,10 +1030,321 @@ static void dump_flatfile(FILE *output, const SGML_dtd * dtd)
 #endif
 }
 
-static void load_flatfile(FILE *input, const SGML_dtd * dtd)
+static char *get_line(FILE *input)
 {
-    (void) input;
-    (void) dtd;
+    char temp[1024];
+    char *result = 0;
+
+    if (fgets(temp, sizeof(temp), input) != 0) {
+	result = strdup(temp);
+    }
+    return result;
+}
+
+#define LOAD(name) \
+	if (!strcmp(data, #name)) {\
+	    *theClass |= Tgc_##name; \
+	    continue; \
+	}
+
+static int load_flat_TagClass(FILE *input, const char *name, TagClass * theClass)
+{
+    char prefix[80];
+    char *next = get_line(input);
+    char *data;
+    int result = 0;
+
+    *theClass = 0;
+    if (next != 0) {
+	sprintf(prefix, "\t\t%s:", name);
+	data = strtok(next, "\n ");
+
+	if (data != 0 && !strcmp(data, prefix)) {
+	    result = 1;
+
+	    while ((data = strtok(NULL, "\n ")) != 0) {
+
+		LOAD(FONTlike);
+		LOAD(EMlike);
+		LOAD(MATHlike);
+		LOAD(Alike);
+		LOAD(formula);
+		LOAD(TRlike);
+		LOAD(SELECTlike);
+		LOAD(FORMlike);
+		LOAD(Plike);
+		LOAD(DIVlike);
+		LOAD(LIlike);
+		LOAD(ULlike);
+		LOAD(BRlike);
+		LOAD(APPLETlike);
+		LOAD(HRlike);
+		LOAD(MAPlike);
+		LOAD(outer);
+		LOAD(BODYlike);
+		LOAD(HEADstuff);
+		LOAD(same);
+
+		fprintf(stderr, "Unexpected TagClass '%s'\n", data);
+		result = 0;
+		break;
+	    }
+	} else if (data) {
+	    fprintf(stderr, "load_flat_TagClass: '%s' vs '%s'\n", data, prefix);
+	}
+	free(next);
+    } else {
+	fprintf(stderr, "Did not find contents\n");
+    }
+    return result;
+}
+
+#undef LOAD
+
+#define LOAD(name) \
+	if (!strcmp(data, #name)) {\
+	    *flags |= Tgf_##name; \
+	    continue; \
+	}
+
+static int load_flat_TagFlags(FILE *input, const char *name, TagFlags * flags)
+{
+    char prefix[80];
+    char *next = get_line(input);
+    char *data;
+    int result = 0;
+
+    *flags = 0;
+    if (next != 0) {
+	sprintf(prefix, "\t\t%s:", name);
+	data = strtok(next, "\n ");
+
+	if (data != 0 && !strcmp(data, prefix)) {
+	    result = 1;
+
+	    while ((data = strtok(NULL, "\n ")) != 0) {
+
+		LOAD(endO);
+		LOAD(startO);
+		LOAD(mafse);
+		LOAD(strict);
+		LOAD(nreie);
+		LOAD(frecyc);
+		LOAD(nolyspcl);
+
+		fprintf(stderr, "Unexpected TagFlag '%s'\n", data);
+		result = 0;
+		break;
+	    }
+	} else if (data) {
+	    fprintf(stderr, "load_flat_TagFlags: '%s' vs '%s'\n", data, prefix);
+	}
+	free(next);
+    }
+    return result;
+}
+
+#undef LOAD
+
+static int load_flat_AttrList(FILE *input, AttrList * attrs, int *length)
+{
+    attr *attributes;
+    int j, jcmp, code;
+    int result = 1;
+    char name[1024];
+
+#ifdef USE_PRETTYSRC
+    int atype;
+#endif
+
+    if (fscanf(input, FMT_NUM_ATTRS, length) == 1
+	&& *length > 0
+	&& (attributes = typecallocn(attr, (size_t) (*length + 1))) != 0) {
+	*attrs = attributes;
+	for (j = 0; j < *length; ++j) {
+	    code = fscanf(input, FMT_ONE_ATTR,
+			  &jcmp,
+			  &atype,
+			  name
+		);
+	    if (code == NUM_ONE_ATTR && (j == jcmp)) {
+		attributes[j].name = strdup(name);
+#ifdef USE_PRETTYSRC
+		attributes[j].type = atype;
+#endif
+	    } else {
+		fprintf(stderr, "Did not find attributes\n");
+		result = 0;
+		break;
+	    }
+	}
+	if (*length > 1)
+	    qsort(attributes, *length, sizeof(attributes[0]), compare_attr);
+    }
+    return result;
+}
+
+static int load_flat_HTTag(FILE *input, unsigned nref, HTTag * tag, AttrType * allTypes)
+{
+    int result = 0;
+    unsigned ncmp = 0;
+    char name[1024];
+    int code;
+    int j;
+
+    code = fscanf(input, "%d:%s\n", &ncmp, name);
+    if (code == 2 && (nref == ncmp)) {
+	result = 1;
+	tag->name = strdup(name);
+#ifdef USE_COLOR_STYLE
+	tag->name_len = strlen(tag->name);
+#endif
+#ifdef EXP_JUSTIFY_ELTS
+	if (fscanf(input, "%s\n", name) == 1) {
+	    tag->can_justify = !strcmp(name, "justify");
+	} else {
+	    fprintf(stderr, "Did not find can_justify\n");
+	    result = 0;
+	}
+#endif
+	if (result) {
+	    result = load_flat_AttrList(input, &(tag->attributes), &(tag->number_of_attributes));
+	}
+	if (result) {
+	    AttrType *myTypes;
+	    int k, count;
+	    char *next = get_line(input);
+
+	    if (next != 0
+		&& sscanf(next, "%d attr_types\n", &count)
+		&& (myTypes = typecallocn(AttrType, (size_t) (count + 1)))
+		!= 0) {
+		tag->attr_types = myTypes;
+		for (k = 0; k < count; ++k) {
+		    next = get_line(input);
+		    if (next != 0
+			&& sscanf(next, "%s\n", name)) {
+			for (j = 0; allTypes[j].name != 0; ++j) {
+			    if (!strcmp(allTypes[j].name, name)) {
+				myTypes[k].name = strdup(name);
+				myTypes[k].list = allTypes[j].list;
+				break;
+			    }
+			}
+		    } else {
+			result = 0;
+			break;
+		    }
+		}
+		if (result && count > 1)
+		    qsort(myTypes, count, sizeof(myTypes[0]), compare_attr_types);
+	    }
+	}
+	if (result) {
+	    char *next = get_line(input);
+
+	    if (next != 0
+		&& sscanf(next, "\t\tcontents: %s\n", name)) {
+		tag->contents = s2SGMLContent(name);
+		free(next);
+	    } else {
+		fprintf(stderr, "Did not find contents\n");
+		result = 0;
+	    }
+	}
+	if (result) {
+	    result = load_flat_TagClass(input, "tagclass", &(tag->tagclass));
+	}
+	if (result) {
+	    result = load_flat_TagClass(input, "contains", &(tag->contains));
+	}
+	if (result) {
+	    result = load_flat_TagClass(input, "icontains", &(tag->icontains));
+	}
+	if (result) {
+	    result = load_flat_TagClass(input, "contained", &(tag->contained));
+	}
+	if (result) {
+	    result = load_flat_TagClass(input, "icontained", &(tag->icontained));
+	}
+	if (result) {
+	    result = load_flat_TagClass(input, "canclose", &(tag->canclose));
+	}
+	if (result) {
+	    result = load_flat_TagFlags(input, "flags", &(tag->flags));
+	}
+    } else {
+	fprintf(stderr, "load_flat_HTTag error\n");
+    }
+    return result;
+}
+
+static int load_flat_AttrType(FILE *input, AttrType * types, size_t ncmp)
+{
+    int result = 0;
+    int ntst;
+    char name[1024];
+
+    if (fscanf(input, "%d:%s\n", &ntst, name) == 2
+	&& (ntst == (int) ncmp)) {
+	result = 1;
+	types->name = strdup(name);
+	if (!load_flat_AttrList(input, &(types->list), &ntst))
+	    result = 0;
+    }
+    return result;
+}
+
+static SGML_dtd *load_flatfile(FILE *input)
+{
+    AttrType *attr_types = 0;
+    SGML_dtd *result = 0;
+    size_t n;
+    size_t number_of_attrs = 0;
+    size_t number_of_tags = 0;
+    HTTag *tag;
+    int code;
+
+    code = fscanf(input, "%d attr_types\n", &number_of_attrs);
+    if (code
+	&& number_of_attrs
+	&& (attr_types = typecallocn(AttrType, number_of_attrs + 1)) != 0) {
+	for (n = 0; n < number_of_attrs; ++n) {
+	    if (!load_flat_AttrType(input, attr_types + n, n)) {
+		break;
+	    }
+	}
+    }
+
+    code = fscanf(input, "%d tags\n", &number_of_tags);
+    if (code == 1) {
+	if ((result = typecalloc(SGML_dtd)) != 0
+	    && (result->tags = typecallocn(HTTag, (number_of_tags + 2))) != 0) {
+	    for (n = 0; n < number_of_tags; ++n) {
+		if (load_flat_HTTag(input, n, &(result->tags[n]), attr_types)) {
+		    result->number_of_tags = (n + 1);
+		} else {
+		    break;
+		}
+	    }
+	    tag = 0;
+	    for (n = 0; n < number_of_tags; ++n) {
+		if (result->tags[n].name != 0
+		    && !strcmp(result->tags[n].name, "OBJECT")) {
+		    tag = result->tags + number_of_tags;
+		    *tag = result->tags[n];
+		    tag->contents = SGML_MIXED;
+		    tag->flags = Tgf_strict;
+		    break;
+		}
+	    }
+	    if (tag == 0) {
+		fprintf(stderr, "Did not find OBJECT tag\n");
+		result = 0;
+	    }
+	}
+    }
+    return result;
 }
 
 int main(int argc, char *argv[])
@@ -888,6 +1368,9 @@ int main(int argc, char *argv[])
 	    break;
 	case 'l':
 	    l_option = TRUE;
+	    input = fopen(optarg, "r");
+	    if (input == 0)
+		failed(optarg);
 	    break;
 	case 'o':
 	    output = fopen(optarg, "w");
@@ -907,14 +1390,16 @@ int main(int argc, char *argv[])
 
     HTSwitchDTD(dtd_version);
     if (l_option)
-	load_flatfile(input, the_dtd);
+	the_dtd = load_flatfile(input);
 
-    if (c_option)
-	dump_source(output, the_dtd, dtd_version);
-    if (h_option)
-	dump_header(output, the_dtd);
-    if (!c_option && !h_option)
-	dump_flatfile(output, the_dtd);
+    if (the_dtd != 0) {
+	if (c_option)
+	    dump_source(output, the_dtd, dtd_version);
+	if (h_option)
+	    dump_header(output, the_dtd);
+	if (!c_option && !h_option)
+	    dump_flatfile(output, the_dtd);
+    }
 
     return EXIT_SUCCESS;
 }

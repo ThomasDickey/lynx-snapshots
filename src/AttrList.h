@@ -1,5 +1,5 @@
 /*
- * $LynxId: AttrList.h,v 1.15 2008/09/06 15:47:47 tom Exp $
+ * $LynxId: AttrList.h,v 1.16 2009/04/16 23:42:58 tom Exp $
  */
 #if !defined(__ATTRLIST_H)
 #define __ATTRLIST_H
@@ -37,10 +37,11 @@ extern "C" {
 	int cattr;		/* attributes to go with the color */
     } HTCharStyle;
 
+#if 0
 #define HText_characterStyle CTRACE((tfp,"HTC called from %s/%d\n",__FILE__,__LINE__));_internal_HTC
-
-#undef HText_characterStyle
+#else
 #define HText_characterStyle _internal_HTC
+#endif
 
 #if defined(USE_COLOR_STYLE)
     extern void _internal_HTC(HText *text, int style, int dir);

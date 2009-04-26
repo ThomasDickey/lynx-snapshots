@@ -1,5 +1,5 @@
 /*
- * $LynxId: GridText.c,v 1.163 2009/01/02 00:18:17 tom Exp $
+ * $LynxId: GridText.c,v 1.167 2009/04/26 13:05:17 tom Exp $
  *
  *		Character grid hypertext object
  *		===============================
@@ -46,6 +46,13 @@
 #include <LYLeaks.h>
 
 /*#define DEBUG_APPCH 1*/
+/*#define DEBUG_STYLE 1*/
+
+#ifdef DEBUG_STYLE
+#define CTRACE_STYLE(p) CTRACE2(TRACE_STYLE, p)
+#else
+#define CTRACE_STYLE(p)		/* nothing */
+#endif
 
 #ifdef USE_COLOR_STYLE
 #include <AttrList.h>
@@ -170,9 +177,9 @@ static void *LY_check_calloc(size_t nmemb, size_t size);
 #endif
 
 typedef struct {
-    unsigned int direction:2;	/* on or off */
-    unsigned int horizpos:14;	/* horizontal position of this change */
-    unsigned int style:16;	/* which style to change to */
+    unsigned int sc_direction:2;	/* on or off */
+    unsigned int sc_horizpos:14;	/* horizontal position of this change */
+    unsigned int sc_style:16;	/* which style to change to */
 } HTStyleChange;
 
 #if defined(USE_COLOR_STYLE)
@@ -731,7 +738,7 @@ static void *LY_check_calloc(size_t nmemb, size_t size)
 static int StyleToCols(HText *text, HTLine *line, int nstyle)
 {
     int result = line->offset;	/* this much is spaces one byte/cell */
-    int nchars = line->styles[nstyle].horizpos;
+    int nchars = line->styles[nstyle].sc_horizpos;
     char *data = line->data;
     char *last = line->size + data;
     int utf_extra;
@@ -1465,8 +1472,8 @@ static int display_line(HTLine *line,
 #define CStyle line->styles[current_style]
 
 	while (current_style < line->numstyles &&
-	       i >= (int) (CStyle.horizpos + line->offset + 1)) {
-	    LynxChangeStyle(CStyle.style, CStyle.direction);
+	       i >= (int) (CStyle.sc_horizpos + line->offset + 1)) {
+	    LynxChangeStyle(CStyle.sc_style, CStyle.sc_direction);
 	    current_style++;
 	}
 #endif
@@ -1540,7 +1547,7 @@ static int display_line(HTLine *line,
 		LastDisplayChar == '-') {
 		/*
 		 * Ignore the soft hyphen if it is not the last character in
-		 * the line.  Also ignore it if it first character following
+		 * the line.  Also ignore it if is first character following
 		 * the margin, or if it is preceded by a white character (we
 		 * loaded 'M' into LastDisplayChar if it was a multibyte
 		 * character) or hyphen, though it should have been excluded by
@@ -1643,7 +1650,7 @@ static int display_line(HTLine *line,
     lynx_stop_bold();
 #else
     while (current_style < line->numstyles) {
-	LynxChangeStyle(CStyle.style, CStyle.direction);
+	LynxChangeStyle(CStyle.sc_style, CStyle.sc_direction);
 	current_style++;
     }
 #undef CStyle
@@ -2719,10 +2726,10 @@ static HTLine *insert_blanks_in_line(HTLine *line, int line_number,
 #if defined(USE_COLOR_STYLE)	/* Move styles too */
 #define NStyle mod_line->styles[istyle]
 	for (;
-	     istyle < line->numstyles && (int) NStyle.horizpos < curlim;
+	     istyle < line->numstyles && (int) NStyle.sc_horizpos < curlim;
 	     istyle++)
 	    /* Should not we include OFF-styles at curlim? */
-	    NStyle.horizpos += shift;
+	    NStyle.sc_horizpos += shift;
 #endif
 	while (copied < pre)	/* Copy verbatim to byte == pre */
 	    *t++ = *copied++;
@@ -2764,24 +2771,36 @@ static HTStyleChange *skip_matched_and_correct_offsets(HTStyleChange *end,
 						       HTStyleChange *start,
 						       unsigned split_pos)
 {
+    HTStyleChange *result = 0;
     int level = 0;
     HTStyleChange *tmp = end;
 
+    CTRACE_STYLE((tfp, "SKIP Style %d %d (%d)\n",
+		  tmp->sc_horizpos,
+		  tmp->sc_style,
+		  tmp->sc_direction));
     for (; tmp >= start; tmp--) {
-	if (tmp->style == end->style) {
-	    if (tmp->direction == STACK_OFF)
+	CTRACE_STYLE((tfp, "... %d %d (%d)\n",
+		      tmp->sc_horizpos,
+		      tmp->sc_style,
+		      tmp->sc_direction));
+	if (tmp->sc_style == end->sc_style) {
+	    if (tmp->sc_direction == STACK_OFF) {
 		level--;
-	    else if (tmp->direction == STACK_ON) {
-		if (++level == 0)
-		    return tmp;
-	    } else
-		return 0;
+	    } else if (tmp->sc_direction == STACK_ON) {
+		if (++level == 0) {
+		    result = tmp;
+		    break;
+		}
+	    } else {
+		break;
+	    }
 	}
-	if (tmp->horizpos > split_pos) {
-	    tmp->horizpos = split_pos;
+	if (tmp->sc_horizpos > split_pos) {
+	    tmp->sc_horizpos = split_pos;
 	}
     }
-    return 0;
+    return result;
 }
 #endif /* USE_COLOR_STYLE */
 
@@ -3030,12 +3049,12 @@ static void split_line(HText *text, unsigned split)
 	 * The second loop below may then handle remaining changes.  - kw */
 	while (from >= previous->styles && to >= line->styles) {
 	    *to = *from;
-	    if ((int) to->horizpos > s_post) {
-		to->horizpos += -s_post + SpecialAttrChars;
-	    } else if ((int) to->horizpos > s_pre &&
-		       (to->direction == STACK_ON ||
-			to->direction == ABS_ON)) {
-		to->horizpos = ((int) to->horizpos < s) ? 0 : SpecialAttrChars;
+	    if ((int) to->sc_horizpos > s_post) {
+		to->sc_horizpos += -s_post + SpecialAttrChars;
+	    } else if ((int) to->sc_horizpos > s_pre &&
+		       (to->sc_direction == STACK_ON ||
+			to->sc_direction == ABS_ON)) {
+		to->sc_horizpos = ((int) to->sc_horizpos < s) ? 0 : SpecialAttrChars;
 	    } else {
 		break;
 	    }
@@ -3059,43 +3078,49 @@ static void split_line(HText *text, unsigned split)
 	       and the corresponding OFF at to;
 	       If not, put the corresponding OFF at at_end, and copy to to;
 	     */
-	    if (scan->direction == STACK_OFF) {
+	    if (scan->sc_direction == STACK_OFF) {
 		scan = skip_matched_and_correct_offsets(scan, previous->styles,
 							s_pre);
 		if (!scan) {
 		    CTRACE((tfp, "BUG: styles improperly nested.\n"));
 		    break;
 		}
-	    } else if (scan->direction == STACK_ON) {
-		if (at_end->direction == STACK_ON
-		    && at_end->style == scan->style
-		    && (int) at_end->horizpos >= s_pre)
+	    } else if (scan->sc_direction == STACK_ON) {
+		if (at_end->sc_direction == STACK_ON
+		    && at_end->sc_style == scan->sc_style
+		    && (int) at_end->sc_horizpos >= s_pre)
 		    at_end--;
 		else if (at_end >= previous->styles + MAX_STYLES_ON_LINE - 1) {
 		    CTRACE((tfp, "BUG: style overflow before split_line.\n"));
 		    break;
 		} else {
 		    at_end++;
-		    at_end->direction = STACK_OFF;
-		    at_end->style = scan->style;
-		    at_end->horizpos = s_pre;
+		    at_end->sc_direction = STACK_OFF;
+		    at_end->sc_style = scan->sc_style;
+		    at_end->sc_horizpos = s_pre;
+		    CTRACE_STYLE((tfp,
+				  "split_line, %d:style[%d] %d (dir=%d)\n",
+				  s_pre,
+				  at_end - from,
+				  scan->sc_style,
+				  at_end->sc_direction));
 		}
 		if (to < line->styles + MAX_STYLES_ON_LINE - 1
-		    && to[1].direction == STACK_OFF
-		    && to[1].horizpos <= (unsigned) SpecialAttrChars
-		    && to[1].style == scan->style)
+		    && to[1].sc_direction == STACK_OFF
+		    && to[1].sc_horizpos <= (unsigned) SpecialAttrChars
+		    && to[1].sc_style == scan->sc_style)
 		    to++;
 		else if (to >= line->styles) {
 		    *to = *scan;
-		    to->horizpos = SpecialAttrChars;
+		    to->sc_horizpos = SpecialAttrChars;
 		    to--;
 		} else {
 		    CTRACE((tfp, "BUG: style overflow after split_line.\n"));
 		    break;
 		}
 	    }
-	    if ((int) scan->horizpos > s_pre) {
-		scan->horizpos = s_pre;
+	    if ((int) scan->sc_horizpos > s_pre) {
+		scan->sc_horizpos = s_pre;
 	    }
 	    scan--;
 	}
@@ -3106,11 +3131,11 @@ static void split_line(HText *text, unsigned split)
 	    for (n = 0; n < line->numstyles; n++)
 		line->styles[n] = to[n + 1];
 	} else if (line->numstyles == 0) {
-	    line->styles[0].horizpos = ~0;	/* ?!!! */
+	    line->styles[0].sc_horizpos = ~0;	/* ?!!! */
 	}
 	previous->numstyles = at_end - previous->styles + 1;
 	if (previous->numstyles == 0) {
-	    previous->styles[0].horizpos = ~0;	/* ?!!! */
+	    previous->styles[0].sc_horizpos = ~0;	/* ?!!! */
 	}
     }
 #endif /*USE_COLOR_STYLE */
@@ -4498,9 +4523,9 @@ void _internal_HTC(HText *text, int style, int dir)
 	line = text->last_line;
 
 	if (line->numstyles > 0 && dir == 0 &&
-	    line->styles[line->numstyles - 1].direction &&
-	    line->styles[line->numstyles - 1].style == (unsigned) style &&
-	    (int) line->styles[line->numstyles - 1].horizpos
+	    line->styles[line->numstyles - 1].sc_direction &&
+	    line->styles[line->numstyles - 1].sc_style == (unsigned) style &&
+	    (int) line->styles[line->numstyles - 1].sc_horizpos
 	    == (int) line->size - ctrl_chars_on_this_line) {
 	    /*
 	     * If this is an OFF change directly preceded by an
@@ -4508,18 +4533,23 @@ void _internal_HTC(HText *text, int style, int dir)
 	     */
 	    line->numstyles--;
 	} else if (line->numstyles < MAX_STYLES_ON_LINE) {
-	    line->styles[line->numstyles].horizpos = line->size;
+	    line->styles[line->numstyles].sc_horizpos = line->size;
 	    /*
 	     * Special chars for bold and underlining usually don't
 	     * occur with color style, but soft hyphen can.
 	     * And in UTF-8 display mode all non-initial bytes are
 	     * counted as ctrl_chars.  - kw
 	     */
-	    if ((int) line->styles[line->numstyles].horizpos >= ctrl_chars_on_this_line) {
-		line->styles[line->numstyles].horizpos -= ctrl_chars_on_this_line;
+	    if ((int) line->styles[line->numstyles].sc_horizpos >= ctrl_chars_on_this_line) {
+		line->styles[line->numstyles].sc_horizpos -= ctrl_chars_on_this_line;
 	    }
-	    line->styles[line->numstyles].style = style;
-	    line->styles[line->numstyles].direction = dir;
+	    line->styles[line->numstyles].sc_style = style;
+	    line->styles[line->numstyles].sc_direction = dir;
+	    CTRACE_STYLE((tfp, "internal_HTC %d:style[%d] %d (dir=%d)\n",
+			  line->size,
+			  line->numstyles,
+			  style,
+			  dir));
 	    line->numstyles++;
 	}
     }
@@ -6403,13 +6433,13 @@ static BOOLEAN same_anchor_or_field(int numberA,
     return (BOOL) (strcmp(formA->name, formB->name) == 0);
 }
 
-#define same_anchor_as_link(i,a,ta_same) (i >= 0 && a &&\
+#define same_anchor_as_link(i,a,ta_same) (BOOL) (i >= 0 && a && \
 		same_anchor_or_field(links[i].anchor_number,\
 		(links[i].type == WWW_FORM_LINK_TYPE) ? links[i].l_form : NULL,\
 		a->number,\
 		(a->link_type == INPUT_ANCHOR) ? a->input_field : NULL,\
 		ta_same))
-#define same_anchors(a1,a2,ta_same) (a1 && a2 &&\
+#define same_anchors(a1,a2,ta_same) (BOOL) (a1 && a2 && \
 		same_anchor_or_field(a1->number,\
 		(a1->link_type == INPUT_ANCHOR) ? a1->input_field : NULL,\
 		a2->number,\
@@ -13296,7 +13326,7 @@ static void redraw_part_of_line(HTLine *line, const char *str,
 
 	while (current_style < line->numstyles &&
 	       tcols >= scols) {
-	    LynxChangeStyle(CStyle.style, CStyle.direction);
+	    LynxChangeStyle(CStyle.sc_style, CStyle.sc_direction);
 	    current_style++;
 	    scols = StyleToCols(text, line, current_style);
 	}
@@ -13410,7 +13440,7 @@ static void redraw_part_of_line(HTLine *line, const char *str,
 #else
 
     while (current_style < line->numstyles) {
-	LynxChangeStyle(CStyle.style, CStyle.direction);
+	LynxChangeStyle(CStyle.sc_style, CStyle.sc_direction);
 	current_style++;
     }
 

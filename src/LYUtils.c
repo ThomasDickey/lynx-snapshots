@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYUtils.c,v 1.183 2009/03/17 00:40:24 tom Exp $
+ * $LynxId: LYUtils.c,v 1.184 2009/04/09 20:33:31 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTCP.h>
@@ -1161,7 +1161,7 @@ void LYhighlight(int flag,
 	    gllen = LYmbcsstrlen(text, utf_flag, YES);
 	    len = LYmbcs_skip_cells(text, avail_space, utf_flag) - text;
 	    LYwaddnstr(LYwin, text, (unsigned) len);
-	    while (gllen++ < avail_space)
+	    while (len++ < avail_space)
 		LYaddch('_');
 
 #ifdef USE_COLOR_STYLE

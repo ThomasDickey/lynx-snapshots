@@ -1,4 +1,4 @@
-/* $LynxId: LYGetFile.c,v 1.78 2008/01/08 00:19:25 tom Exp $ */
+/* $LynxId: LYGetFile.c,v 1.79 2009/04/12 17:24:06 tom Exp $ */
 #include <HTUtils.h>
 #include <HTTP.h>
 #include <HTAnchor.h>		/* Anchor class */
@@ -1265,7 +1265,7 @@ static struct trust always_trusted_exec_default =
 };
 static struct trust trusted_cgi_default =
 {
-    "", "", CGI_PATH, NULL
+    "none", "", CGI_PATH, NULL
 };
 
 static struct trust *trusted_exec = &trusted_exec_default;

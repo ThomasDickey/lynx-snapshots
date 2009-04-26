@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTMIME.c,v 1.69 2009/01/02 23:04:02 tom Exp $
+ * $LynxId: HTMIME.c,v 1.70 2009/04/08 19:55:32 tom Exp $
  *
  *			MIME Message Parse			HTMIME.c
  *			==================
@@ -193,7 +193,7 @@ void HTMIME_TrimDoubleQuotes(char *value)
 static BOOL content_is_compressed(HTStream *me)
 {
     char *encoding = me->anchor->content_encoding;
-    BOOL result = (HTEncodingToCompressType(encoding) != cftNone);
+    BOOL result = (BOOL) (HTEncodingToCompressType(encoding) != cftNone);
 
     CTRACE((tfp, "content is%s compressed\n", result ? "" : " NOT"));
     return result;

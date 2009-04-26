@@ -1,5 +1,5 @@
 /*
- * $LynxId: SGML.h,v 1.41 2009/01/01 23:05:07 tom Exp $
+ * $LynxId: SGML.h,v 1.43 2009/04/16 00:50:16 tom Exp $
  *			       SGML parse and stream definition for libwww
  *                             SGML AND STRUCTURED STREAMS
  *
@@ -99,6 +99,13 @@ extern "C" {
 #define Tgc_HEADstuff	0x40000	/* HEAD,BASE,STYLE,TITLE; */
     /* special relations */
 #define Tgc_same	0x80000
+
+/*
+ * Groups for contains-data.
+ */
+#define Tgc_INLINElike	(Tgc_Alike | Tgc_APPLETlike | Tgc_BRlike | Tgc_EMlike | Tgc_FONTlike | Tgc_SELECTlike)
+#define Tgc_LISTlike	(Tgc_LIlike | Tgc_ULlike)
+#define Tgc_BLOCKlike	(Tgc_DIVlike | Tgc_LISTlike)
 
 /* Some more properties of tags (or rather, elements) and rules how
    to deal with them. - kw */

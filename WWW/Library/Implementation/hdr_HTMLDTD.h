@@ -1,4 +1,4 @@
-/* $LynxId: hdr_HTMLDTD.h,v 1.19 2008/09/20 14:25:27 tom Exp $ */
+/* $LynxId: hdr_HTMLDTD.h,v 1.20 2009/04/12 01:15:23 tom Exp $ */
 #ifndef hdr_HTMLDTD_H
 #define hdr_HTMLDTD_H 1
 
@@ -343,15 +343,6 @@ extern "C" {
 #define HTML_COL_WIDTH           12
 #define HTML_COL_ATTRIBUTES      13
 
-#define HTML_CREDIT_CLASS         0
-#define HTML_CREDIT_CLEAR         1
-#define HTML_CREDIT_DIR           2
-#define HTML_CREDIT_ID            3
-#define HTML_CREDIT_LANG          4
-#define HTML_CREDIT_STYLE         5
-#define HTML_CREDIT_TITLE         6
-#define HTML_CREDIT_ATTRIBUTES    7
-
 #define HTML_DEL_CITE             0
 #define HTML_DEL_CLASS            1
 #define HTML_DEL_DATETIME         2
@@ -405,15 +396,6 @@ extern "C" {
 #define HTML_EMBED_WIDTH         20
 #define HTML_EMBED_ATTRIBUTES    21
 
-#define HTML_FIELDSET_CLASS       0
-#define HTML_FIELDSET_CLEAR       1
-#define HTML_FIELDSET_DIR         2
-#define HTML_FIELDSET_ID          3
-#define HTML_FIELDSET_LANG        4
-#define HTML_FIELDSET_STYLE       5
-#define HTML_FIELDSET_TITLE       6
-#define HTML_FIELDSET_ATTRIBUTES  7
-
 #define HTML_FIG_ALIGN            0
 #define HTML_FIG_BORDER           1
 #define HTML_FIG_CLASS            2
@@ -432,15 +414,6 @@ extern "C" {
 #define HTML_FIG_UNITS           15
 #define HTML_FIG_WIDTH           16
 #define HTML_FIG_ATTRIBUTES      17
-
-#define HTML_FN_CLASS             0
-#define HTML_FN_CLEAR             1
-#define HTML_FN_DIR               2
-#define HTML_FN_ID                3
-#define HTML_FN_LANG              4
-#define HTML_FN_STYLE             5
-#define HTML_FN_TITLE             6
-#define HTML_FN_ATTRIBUTES        7
 
 #define HTML_FONT_CLASS           0
 #define HTML_FONT_CLEAR           1
@@ -644,17 +617,6 @@ extern "C" {
 #define HTML_LABEL_STYLE          9
 #define HTML_LABEL_TITLE         10
 #define HTML_LABEL_ATTRIBUTES    11
-
-#define HTML_LEGEND_ACCESSKEY     0
-#define HTML_LEGEND_ALIGN         1
-#define HTML_LEGEND_CLASS         2
-#define HTML_LEGEND_CLEAR         3
-#define HTML_LEGEND_DIR           4
-#define HTML_LEGEND_ID            5
-#define HTML_LEGEND_LANG          6
-#define HTML_LEGEND_STYLE         7
-#define HTML_LEGEND_TITLE         8
-#define HTML_LEGEND_ATTRIBUTES    9
 
 #define HTML_LI_CLASS             0
 #define HTML_LI_CLEAR             1

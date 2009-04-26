@@ -1,9 +1,31 @@
--- $LynxId: CHANGES,v 1.385 2009/04/07 22:43:52 tom Exp $
+-- $LynxId: CHANGES,v 1.395 2009/04/26 15:48:40 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2009-04-07 (2.8.7pre.2)
+2009-04-26 (2.8.7pre.2)
+* update it.po from
+    http://translationproject.org/latest/lynx/
+* update lynx user's guide section on Options Menu -TD
+* modify prompt in LYLoadCGI() from 2.8.6dev.15 to always prompt user (from
+  FEDORA-2008-9597), and modify compiled-in configuration default for
+  consistency with other lynx.cfg settings to require that lynx.cfg be set to
+  permit use of lynxcgi scripts -TD
+* correct parsing of "--" command-line parameter (Redhat #311031)
+* check for malformed select before adding last-option (Redhat #152146)
+* change default for --enable-ascii-ctypes to true -TD
+* modify Lynx's DTD information to allow it to display form-related tags that
+  are inline, even without being in a form as indicated in
+    http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd
+  for %inline.forms and %misc.inline (Debian #398986) -TD
+* finish dtd_util, making it able to load and save data from a flat file that
+  can be edited -TD
+* correct length of padding with underscores in LYhighlight, which used the
+  wrong variable based on glyph count rather than cells (Debian #519199) -TD
+* fix a few cases where PUTC's intended for pretty-src would display in the
+  HTML view (Debian #521489) -TD
+* fix some mismatched BOOL vs BOOLEAN from compiler warnings due to dev.13
+  change to LYStructs.h -TD
 * add TNS SNI support for the OpenSSL configuration -Phil Pennock
 * add docs/README.cookies and docs/README.options -Stefan Caunter
 * update docs/README.sslcerts -Stefan Caunter
