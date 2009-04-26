@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTML.c,v 1.118 2009/01/01 23:08:07 tom Exp $
+ * $LynxId: HTML.c,v 1.121 2009/04/16 23:38:37 tom Exp $
  *
  *		Structured stream to Rich hypertext converter
  *		============================================
@@ -1136,7 +1136,7 @@ static int HTML_start_element(HTStructured * me, int element_number,
     }
 #endif /* !OMIT_SCN_KEEPING */
 
-    HText_characterStyle(me->text, hcode, 1);
+    HText_characterStyle(me->text, hcode, STACK_ON);
 #endif /* USE_COLOR_STYLE */
 
     /*
@@ -1533,12 +1533,12 @@ static int HTML_start_element(HTStructured * me, int element_number,
 		CTRACE2(TRACE_STYLE,
 			(tfp, "STYLE.link: using style <%s>\n", tmp));
 
-		HText_characterStyle(me->text, hash_code(tmp), 1);
+		HText_characterStyle(me->text, hash_code(tmp), STACK_ON);
 		HTML_put_string(me, title);
 		HTML_put_string(me, " (");
 		HTML_put_string(me, value[HTML_LINK_CLASS]);
 		HTML_put_string(me, ")");
-		HText_characterStyle(me->text, hash_code(tmp), 0);
+		HText_characterStyle(me->text, hash_code(tmp), STACK_OFF);
 		FREE(tmp);
 	    } else
 #endif
@@ -2785,7 +2785,7 @@ static int HTML_start_element(HTStructured * me, int element_number,
 	UPDATE_STYLE;
 	if (me->sp->tag_number == (int) ElementNumber)
 	    LYEnsureDoubleSpace(me);
-	CHECK_ID(HTML_FN_ID);
+	CHECK_ID(HTML_GEN_ID);
 	if (me->inUnderline == FALSE)
 	    HText_appendCharacter(me->text, LY_UNDERLINE_START_CHAR);
 	HTML_put_string(me, "FOOTNOTE:");
@@ -4089,7 +4089,7 @@ static int HTML_start_element(HTStructured * me, int element_number,
 	LYEnsureDoubleSpace(me);
 	LYResetParagraphAlignment(me);
 	me->inCREDIT = TRUE;
-	CHECK_ID(HTML_CREDIT_ID);
+	CHECK_ID(HTML_GEN_ID);
 	if (me->inUnderline == FALSE)
 	    HText_appendCharacter(me->text, LY_UNDERLINE_START_CHAR);
 	HTML_put_string(me, "CREDIT:");
@@ -4269,13 +4269,13 @@ static int HTML_start_element(HTStructured * me, int element_number,
     case HTML_FIELDSET:
 	LYEnsureDoubleSpace(me);
 	LYResetParagraphAlignment(me);
-	CHECK_ID(HTML_FIELDSET_ID);
+	CHECK_ID(HTML_GEN_ID);
 	break;
 
     case HTML_LEGEND:
 	LYEnsureDoubleSpace(me);
 	LYResetParagraphAlignment(me);
-	CHECK_ID(HTML_LEGEND_ID);
+	CHECK_ID(HTML_CAPTION_ID);
 	break;
 
     case HTML_LABEL:
@@ -4953,19 +4953,6 @@ static int HTML_start_element(HTStructured * me, int element_number,
 	break;
 
     case HTML_TEXTAREA:
-	/*
-	 * Make sure we're in a form.
-	 */
-	if (!me->inFORM) {
-	    if (LYBadHTML(me))
-		CTRACE((tfp,
-			"Bad HTML: TEXTAREA start tag not within FORM tag\n"));
-	    /*
-	     * Too likely to cause a crash, so we'll ignore it.  - FM
-	     */
-	    break;
-	}
-
 	/*
 	 * Set to know we are in a textarea.
 	 */
@@ -6968,7 +6955,7 @@ static int HTML_end_element(HTStructured * me, int element_number,
 
     case HTML_SELECT:
 	{
-	    char *ptr;
+	    char *ptr = NULL;
 
 	    /*
 	     * Make sure we had a select start tag.
@@ -7008,13 +6995,14 @@ static int HTML_end_element(HTStructured * me, int element_number,
 	    /*
 	     * Finish the previous option.
 	     */
-	    ptr = HText_setLastOptionValue(me->text,
-					   me->option.data,
-					   me->LastOptionValue,
-					   LAST_ORDER,
-					   me->LastOptionChecked,
-					   me->UCLYhndl,
-					   ATTR_CS_IN);
+	    if (!me->first_option)
+		ptr = HText_setLastOptionValue(me->text,
+					       me->option.data,
+					       me->LastOptionValue,
+					       LAST_ORDER,
+					       me->LastOptionChecked,
+					       me->UCLYhndl,
+					       ATTR_CS_IN);
 	    FREE(me->LastOptionValue);
 
 	    me->LastOptionChecked = FALSE;

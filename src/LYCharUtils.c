@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYCharUtils.c,v 1.96 2009/01/19 23:56:35 tom Exp $
+ * $LynxId: LYCharUtils.c,v 1.98 2009/04/09 20:38:13 tom Exp $
  *
  *  Functions associated with LYCharSets.c and the Lynx version of HTML.c - FM
  *  ==========================================================================
@@ -246,7 +246,7 @@ static BOOL MustEntify(const char *source)
 	size_t length = strlen(source);
 	size_t reject = strcspn(source, "<&>");
 
-	result = (length != reject);
+	result = (BOOL) (length != reject);
     }
 
     return result;
@@ -2864,26 +2864,6 @@ void LYHandleSELECT(HTStructured * me, const BOOL *present,
 	 * Initialize the disable attribute.
 	 */
 	me->select_disabled = FALSE;
-
-	/*
-	 * Make sure we're in a form.
-	 */
-	if (!me->inFORM) {
-	    if (LYBadHTML(me))
-		CTRACE((tfp,
-			"Bad HTML: SELECT start tag not within FORM tag\n"));
-
-	    /*
-	     * We should have covered all crash possibilities with the current
-	     * TagSoup parser, so we'll allow it because some people with other
-	     * browsers use SELECT for "information" popups, outside of FORM
-	     * blocks, though no Lynx user would do anything that awful, right? 
-	     * - FM
-	     */
-	       /***
-	    return;
-		***/
-	}
 
 	/*
 	 * Check for unclosed TEXTAREA.

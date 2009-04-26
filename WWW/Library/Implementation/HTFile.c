@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFile.c,v 1.119 2009/02/01 21:17:39 tom Exp $
+ * $LynxId: HTFile.c,v 1.120 2009/04/08 19:44:19 tom Exp $
  *
  *			File Access				HTFile.c
  *			===========
@@ -2459,16 +2459,16 @@ static int decompressAndParse(HTParentAnchor *anchor,
 	    switch (internal_decompress) {
 #ifdef USE_ZLIB
 	    case cftDeflate:
-		failed_decompress = (zzfp == NULL);
+		failed_decompress = (BOOLEAN) (zzfp == NULL);
 		break;
 	    case cftCompress:
 	    case cftGzip:
-		failed_decompress = (gzfp == NULL);
+		failed_decompress = (BOOLEAN) (gzfp == NULL);
 		break;
 #endif
 #ifdef USE_BZLIB
 	    case cftBzip2:
-		failed_decompress = (bzfp == NULL);
+		failed_decompress = (BOOLEAN) (bzfp == NULL);
 		break;
 #endif
 	    default:
@@ -2591,7 +2591,7 @@ int HTLoadFile(const char *addr,
 
 	if (ftp_passive == ftp_local_passive) {
 	    if ((status >= 400) || (status < 0)) {
-		ftp_local_passive = !ftp_passive;
+		ftp_local_passive = (BOOLEAN) !ftp_passive;
 		status = HTFTPLoad(addr, anchor, format_out, sink);
 	    }
 	}

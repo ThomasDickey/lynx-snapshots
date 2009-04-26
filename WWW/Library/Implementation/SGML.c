@@ -1,5 +1,5 @@
 /*
- * $LynxId: SGML.c,v 1.122 2009/03/10 21:16:57 tom Exp $
+ * $LynxId: SGML.c,v 1.127 2009/04/16 00:21:21 tom Exp $
  *
  *			General SGML Parser code		SGML.c
  *			========================
@@ -83,6 +83,12 @@ static void fake_put_character(void *p GCC_UNUSED,
 #define PUTC(ch)  ((*context->actions->put_character)(context->target, (char) ch))
 #define PUTUTF8(code) (UCPutUtf8_charstring((HTStream *)context->target, \
 		      (putc_func_t*)(context->actions->put_character), code))
+
+#ifdef USE_PRETTYSRC
+#define PRETTYSRC_PUTC(c) if (psrc_view) PUTC(c)
+#else
+#define PRETTYSRC_PUTC(c)	/* nothing */
+#endif
 
 /*the following macros are used for pretty source view. */
 #define IS_C(attr) (attr.type == HTMLA_CLASS)
@@ -335,7 +341,7 @@ static void HTMLSRC_apply_markup(HTStream *context,
     }
 }
 
-#define PSRCSTART(x)  HTMLSRC_apply_markup(context,HTL_##x,START)
+#define PSRCSTART(x)	HTMLSRC_apply_markup(context,HTL_##x,START)
 #define PSRCSTOP(x)   HTMLSRC_apply_markup(context,HTL_##x,STOP)
 
 #define attr_is_href context->cur_attr_is_href
@@ -968,18 +974,21 @@ static void handle_sgmlatt(HTStream *context)
 
 static BOOL element_valid_within(HTTag * new_tag, HTTag * stacked_tag, BOOL direct)
 {
+    BOOL result = YES;
     TagClass usecontains, usecontained;
 
-    if (!stacked_tag || !new_tag)
-	return YES;
-    usecontains = (direct ? stacked_tag->contains : stacked_tag->icontains);
-    usecontained = (direct ? new_tag->contained : new_tag->icontained);
-    if (new_tag == stacked_tag)
-	return (BOOL) ((Tgc_same & usecontains) &&
-		       (Tgc_same & usecontained));
-    else
-	return (BOOL) ((new_tag->tagclass & usecontains) &&
-		       (stacked_tag->tagclass & usecontained));
+    if (stacked_tag && new_tag) {
+	usecontains = (direct ? stacked_tag->contains : stacked_tag->icontains);
+	usecontained = (direct ? new_tag->contained : new_tag->icontained);
+	if (new_tag == stacked_tag) {
+	    result = (BOOL) ((Tgc_same & usecontains) &&
+			     (Tgc_same & usecontained));
+	} else {
+	    result = (BOOL) ((new_tag->tagclass & usecontains) &&
+			     (stacked_tag->tagclass & usecontained));
+	}
+    }
+    return result;
 }
 
 typedef enum {
@@ -990,15 +999,22 @@ typedef enum {
 
 static canclose_t can_close(HTTag * new_tag, HTTag * stacked_tag)
 {
-    if (!stacked_tag)
-	return close_NO;
-    if (stacked_tag->flags & Tgf_endO)
-	return close_valid;
-    else if (new_tag == stacked_tag)
-	return ((Tgc_same & new_tag->canclose) ? close_error : close_NO);
-    else
-	return ((stacked_tag->tagclass & new_tag->canclose) ?
-		close_error : close_NO);
+    canclose_t result;
+
+    if (!stacked_tag) {
+	result = close_NO;
+    } else if (stacked_tag->flags & Tgf_endO) {
+	result = close_valid;
+    } else if (new_tag == stacked_tag) {
+	result = ((Tgc_same & new_tag->canclose)
+		  ? close_error
+		  : close_NO);
+    } else {
+	result = ((stacked_tag->tagclass & new_tag->canclose)
+		  ? close_error
+		  : close_NO);
+    }
+    return result;
 }
 
 static void do_close_stacked(HTStream *context)
@@ -1020,8 +1036,10 @@ static void do_close_stacked(HTStream *context)
 					  &context->include);
     context->element_stack = stacked->next;
     pool_free(stacked);
-    context->no_lynx_specialcodes = context->element_stack ?
-	(context->element_stack->tag->flags & Tgf_nolyspcl) : NO;
+    context->no_lynx_specialcodes =
+	(BOOL) (context->element_stack
+		? (context->element_stack->tag->flags & Tgf_nolyspcl)
+		: NO);
 }
 
 static int is_on_stack(HTStream *context, HTTag * old_tag)
@@ -1161,8 +1179,10 @@ static void end_element(HTStream *context, HTTag * old_tag)
 	    context->element_stack = N->next;	/* Remove from stack */
 	    pool_free(N);
 	}
-	context->no_lynx_specialcodes = context->element_stack ?
-	    (context->element_stack->tag->flags & Tgf_nolyspcl) : NO;
+	context->no_lynx_specialcodes =
+	    (BOOL) (context->element_stack
+		    ? (context->element_stack->tag->flags & Tgf_nolyspcl)
+		    : NO);
 #ifdef WIND_DOWN_STACK
 	if (old_tag == t)
 	    return;		/* Correct sequence */
@@ -1196,7 +1216,8 @@ static void start_element(HTStream *context)
 	       (canclose_check == close_valid ||
 		(canclose_check == close_error &&
 		 new_tag == context->element_stack->tag)) &&
-	       !(valid = element_valid_within(new_tag, context->element_stack->tag,
+	       !(valid = element_valid_within(new_tag,
+					      context->element_stack->tag,
 					      direct_container))) {
 	    canclose_check = can_close(new_tag, context->element_stack->tag);
 	    if (canclose_check != close_NO) {
@@ -1219,7 +1240,8 @@ static void start_element(HTStream *context)
 	}
 	if (context->element_stack && !valid &&
 	    (context->element_stack->tag->flags & Tgf_strict) &&
-	    !(valid = element_valid_within(new_tag, context->element_stack->tag,
+	    !(valid = element_valid_within(new_tag,
+					   context->element_stack->tag,
 					   direct_container))) {
 	    CTRACE((tfp, "SGML: Still open %s \t<- ***ignoring start <%s>\n",
 		    context->element_stack->tag->name,
@@ -1339,7 +1361,7 @@ static void start_element(HTStream *context)
 	N->next = context->element_stack;
 	N->tag = new_tag;
 	context->element_stack = N;
-	context->no_lynx_specialcodes = (new_tag->flags & Tgf_nolyspcl);
+	context->no_lynx_specialcodes = (BOOLEAN) (new_tag->flags & Tgf_nolyspcl);
 
     } else if (e == HTML_META) {
 	/*
@@ -3629,11 +3651,12 @@ static void SGML_character(HTStream *context, char c_in)
 		PUTS(string->data);
 		if (c == '=' || WHITE(c))
 		    PUTC(c);
-		if (c == '=' || c == '>' || WHITE(c)) {
-		    if (context->current_attribute_number == INVALID)
+		if (c == '=' || c == '>') {
+		    if (context->current_attribute_number == INVALID) {
 			PSRCSTOP(badattr);
-		    else
+		    } else {
 			PSRCSTOP(attrib);
+		    }
 		}
 		if (c == '>') {
 		    PSRCSTART(abracket);
@@ -3653,7 +3676,7 @@ static void SGML_character(HTStream *context, char c_in)
 
     case S_attr_gap:		/* Expecting attribute or '=' or '>' */
 	if (WHITE(c)) {
-	    PUTC(c);
+	    PRETTYSRC_PUTC(c);
 	    break;		/* Gap after attribute */
 	}
 	if (c == '>') {		/* End of tag */
@@ -3693,7 +3716,7 @@ static void SGML_character(HTStream *context, char c_in)
 
     case S_equals:		/* After attr = */
 	if (WHITE(c)) {
-	    PUTC(c);
+	    PRETTYSRC_PUTC(c);
 	    break;		/* Before attribute value */
 	}
 	if (c == '>') {		/* End of tag */

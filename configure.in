@@ -1,4 +1,4 @@
-dnl $LynxId: configure.in,v 1.190 2009/03/18 00:33:22 tom Exp $
+dnl $LynxId: configure.in,v 1.191 2009/04/12 12:45:06 tom Exp $
 dnl
 dnl Process this file with autoconf to produce a configure script.
 dnl
@@ -869,7 +869,7 @@ AC_MSG_CHECKING(if experimental ascii case-conversion should be used)
 CF_ARG_ENABLE(ascii-ctypes,
 [  --enable-ascii-ctypes   use experimental ascii case-conversion],
 	[use_ascii_ctypes=$enableval],
-	[use_ascii_ctypes=no])
+	[use_ascii_ctypes=yes])
 AC_MSG_RESULT($use_ascii_ctypes)
 test $use_ascii_ctypes != no && AC_DEFINE(EXP_ASCII_CTYPES)
 

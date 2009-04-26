@@ -1,4 +1,4 @@
-/* $LynxId: src1_HTMLDTD.h,v 1.39 2008/09/20 14:25:27 tom Exp $ */
+/* $LynxId: src1_HTMLDTD.h,v 1.42 2009/04/16 22:55:54 tom Exp $ */
 #ifndef src_HTMLDTD_H1
 #define src_HTMLDTD_H1 1
 
@@ -26,7 +26,7 @@
 #define T_BODYTEXT      0x20000,0x0FB8F,0xAFFFF,0x30200,0xB7FAF,0x8F17F,0x00003
 #define T_BQ            0x00200,0xAFBCF,0xAFFFF,0xB6680,0xB6FAF,0x8031F,0x00000
 #define T_BR            0x01000,0x00000,0x00000,0x377BF,0x77FBF,0x8101F,0x00001
-#define T_BUTTON        0x02000,0x0BB07,0x0FF37,0x0378F,0x37FBF,0x8135F,0x00000
+#define T_BUTTON        0x02000,0x0BB07,0x0FF37,0x0378F,0x37FBF,0x8115F,0x00000
 #define T_CAPTION       0x00100,0x0B04F,0x8FFFF,0x06A00,0xB6FA7,0x8035F,0x00000
 #define T_CENTER        0x00200,0x8FBCF,0x8FFFF,0xB6680,0xB6FA7,0x8071F,0x00000
 #define T_CITE          0x00002,0x8B04F,0x8FFFF,0xA778F,0xF7FBF,0x00002,0x00010
@@ -39,7 +39,7 @@
 #define T_DEL           0x00002,0x8BBCF,0x8FFFF,0xA7F8F,0xF7FBF,0x00003,0x00000
 #define T_DFN           0x00002,0x8B0CF,0x8FFFF,0x8778F,0xF7FBF,0x00003,0x00000
 #define T_DIR           0x00800,0x0B400,0x0F75F,0x37680,0x36FB7,0x84F7F,0x00000
-#define T_DIV           0x00200,0x8FB8F,0x8FFFF,0xB66A0,0xB7FFF,0x8031F,0x00004
+#define T_DIV           0x00200,0x8FBCF,0x8FFFF,0xB66A0,0xB7FFF,0x8031F,0x00004
 #define T_DL            0x00800,0x0C480,0x8FFFF,0x36680,0xB7FB7,0x0075F,0x00000
 #define T_DLC           0x00800,0x0C480,0x8FFFF,0x36680,0xB7FB7,0x0075F,0x00000
 #define T_DT            0x00400,0x0B04F,0x0B1FF,0x00800,0x17FFF,0x8071F,0x00001
@@ -63,7 +63,7 @@
 #define T_HTML          0x10000,0x7FB8F,0x7FFFF,0x00000,0x00000,0x1FFFF,0x00003
 #define T_HY            0x01000,0x00000,0x00000,0x3779F,0x77FBF,0x8101F,0x00001
 #define T_I             0x00001,0x8B04F,0x8FFFF,0xA778F,0xF7FBF,0x00001,0x00014
-#define T_IFRAME        0x02000,0x8FBCF,0x8FFFF,0xB679F,0xB6FBF,0xD335F,0x00000
+#define T_IFRAME        0x02000,0x8FBCF,0x8FFFF,0xB679F,0xB6FBF,0xD315F,0x00000
 #define T_IMG           0x01000,0x00000,0x00000,0x3779F,0x37FBF,0x80000,0x00001
 #define T_INPUT         0x00040,0x00000,0x00000,0x03F87,0x37F87,0x8904F,0x00001
 #define T_INS           0x00002,0x8BBCF,0x8FFFF,0xA7F8F,0xF7FBF,0x00003,0x00000
@@ -76,7 +76,7 @@
 #define T_LI            0x00400,0x0BBFF,0x8FFFF,0x00800,0x97FFF,0x8071F,0x00001
 #define T_LINK          0x08000,0x00000,0x00000,0x50000,0x50000,0x0FF7F,0x00001
 #define T_LISTING       0x00800,0x00000,0x00000,0x36600,0x36F00,0x80F1F,0x00000
-#define T_MAP           0x08000,0x08000,0x08000,0x37FCF,0x37FBF,0x0071F,0x00000
+#define T_MAP           0x08000,0x08000,0x08000,0x37FCF,0x37FBF,0x0051F,0x00000
 #define T_MARQUEE       0x04000,0x0000F,0x8F01F,0x37787,0xB7FA7,0x8301C,0x00000
 #define T_MATH          0x00004,0x0B05F,0x8FFFF,0x2778F,0xF7FBF,0x0001F,0x00000
 #define T_MENU          0x00800,0x0B400,0x0F75F,0x17680,0x36FB7,0x88F7F,0x00000
@@ -84,7 +84,7 @@
 #define T_NEXTID        0x01000,0x00000,0x00000,0x50000,0x1FFF7,0x00001,0x00001
 #define T_NOFRAMES      0x20000,0x2FB8F,0x0FFFF,0x17000,0x17000,0x0CF5F,0x00000
 #define T_NOTE          0x00200,0x0BBAF,0x8FFFF,0x376B0,0xB7FFF,0x8031F,0x00000
-#define T_OBJECT        0x02000,0x8FBCF,0x8FFFF,0xB679F,0xB6FBF,0x83F5F,0x00020
+#define T_OBJECT        0x02000,0x8FBCF,0x8FFFF,0xB679F,0xB6FBF,0x83D5F,0x00020
 #define T_OL            0x00800,0x0C400,0x8FFFF,0x37680,0xB7FB7,0x88F7F,0x00000
 #define T_OPTION        0x08000,0x00000,0x00000,0x00040,0x37FFF,0x8031F,0x00001
 #define T_OVERLAY       0x04000,0x00000,0x00000,0x00200,0x37FBF,0x83F7F,0x00001
@@ -95,8 +95,8 @@
 #define T_Q             0x00002,0x8B04F,0x8FFFF,0xA778F,0xF7FAF,0x00003,0x00000
 #define T_S             0x00001,0x8B04F,0x8FFFF,0xA778F,0xF7FBF,0x00001,0x00000
 #define T_SAMP          0x00002,0x8B04F,0x8FFFF,0xA778F,0xF7FBF,0x00002,0x00010
-#define T_SCRIPT        0x02000,0x00000,0x00000,0x77F9F,0x77FFF,0x87F5F,0x00000
-#define T_SELECT        0x00040,0x08000,0x08000,0x03FAF,0x33FBF,0x80F5F,0x00008
+#define T_SCRIPT        0x02000,0x00000,0x00000,0x77F9F,0x77FFF,0x87D5F,0x00000
+#define T_SELECT        0x00040,0x08000,0x08000,0x03FAF,0x33FBF,0x80D5F,0x00008
 #define T_SHY           0x01000,0x00000,0x00000,0x3779F,0x77FBF,0x8101F,0x00001
 #define T_SMALL         0x00001,0x8B04F,0x8FFFF,0xA778F,0xF7FBF,0x00001,0x00014
 #define T_SPAN          0x00002,0x8B04F,0x8FFFF,0xA778F,0xF7FBF,0x80003,0x00000
@@ -110,7 +110,7 @@
 #define T_TABLE         0x00800,0x0F1E0,0x8FFFF,0x36680,0xB6FA7,0x8C57F,0x00000
 #define T_TBODY         0x00020,0x00020,0x8FFFF,0x00880,0xB7FB7,0x8C75F,0x00003
 #define T_TD            0x00400,0x0FBCF,0x8FFFF,0x00020,0xB7FB7,0x8C75F,0x00001
-#define T_TEXTAREA      0x00040,0x00000,0x00000,0x07F8F,0x33FBF,0x80F5F,0x00040
+#define T_TEXTAREA      0x00040,0x00000,0x00000,0x07F8F,0x33FBF,0x80D5F,0x00040
 #define T_TEXTFLOW      0x20000,0x8FBFF,0x9FFFF,0x977B0,0xB7FB7,0x9B00F,0x00003
 #define T_TFOOT         0x00020,0x00020,0x8FFFF,0x00800,0xB7FB7,0x8CF5F,0x00001
 #define T_TH            0x00400,0x0FBCF,0x0FFFF,0x00020,0xB7FB7,0x8CF5F,0x00001
@@ -123,7 +123,7 @@
 #define T_VAR           0x00002,0x8B04F,0x8FFFF,0xA778F,0xF7FBF,0x00001,0x00000
 #define T_WBR           0x00001,0x00000,0x00000,0x3778F,0x77FBF,0x8101F,0x00001
 #define T_XMP           0x00800,0x00000,0x00000,0x367E0,0x36FFF,0x0875F,0x00001
-#define T_OBJECT_PCDATA 0x02000,0x8FBCF,0x8FFFF,0xB679F,0xB6FBF,0x83F5F,0x00008
+#define T_OBJECT_PCDATA 0x02000,0x8FBCF,0x8FFFF,0xB679F,0xB6FBF,0x83D5F,0x00008
 #define T__UNREC_	0x00000,0x00000,0x00000,0x00000,0x00000,0x00000,0x00000
 #ifdef USE_PRETTYSRC
 # define N HTMLA_NORMAL
@@ -243,8 +243,8 @@ static const attr A_attr_list[] = {
 
 static const AttrType A_attr_type[] = {
 	{ ATTR_TYPE(core) },
-	{ ATTR_TYPE(i18n) },
 	{ ATTR_TYPE(events) },
+	{ ATTR_TYPE(i18n) },
 	{ ATTR_TYPE(A) },
 	{ 0, 0 },
 };
@@ -277,9 +277,9 @@ static const attr APPLET_attr_list[] = {
 };
 
 static const AttrType APPLET_attr_type[] = {
+	{ ATTR_TYPE(align) },
 	{ ATTR_TYPE(core) },
 	{ ATTR_TYPE(i18n) },
-	{ ATTR_TYPE(align) },
 	{ ATTR_TYPE(APPLET) },
 	{ 0, 0 },
 };
@@ -302,8 +302,8 @@ static const attr AREA_attr_list[] = {
 
 static const AttrType AREA_attr_type[] = {
 	{ ATTR_TYPE(core) },
-	{ ATTR_TYPE(i18n) },
 	{ ATTR_TYPE(events) },
+	{ ATTR_TYPE(i18n) },
 	{ ATTR_TYPE(AREA) },
 	{ 0, 0 },
 };
@@ -347,10 +347,10 @@ static const attr BODY_attr_list[] = {
 };
 
 static const AttrType BODY_attr_type[] = {
+	{ ATTR_TYPE(bgcolor) },
 	{ ATTR_TYPE(core) },
 	{ ATTR_TYPE(i18n) },
 	{ ATTR_TYPE(BODY) },
-	{ ATTR_TYPE(bgcolor) },
 	{ 0, 0 },
 };
 
@@ -402,8 +402,8 @@ static const attr BUTTON_attr_list[] = {
 
 static const AttrType BUTTON_attr_type[] = {
 	{ ATTR_TYPE(core) },
-	{ ATTR_TYPE(i18n) },
 	{ ATTR_TYPE(events) },
+	{ ATTR_TYPE(i18n) },
 	{ ATTR_TYPE(BUTTON) },
 	{ 0, 0 },
 };
@@ -415,10 +415,10 @@ static const attr CAPTION_attr_list[] = {
 };
 
 static const AttrType CAPTION_attr_type[] = {
-	{ ATTR_TYPE(core) },
-	{ ATTR_TYPE(i18n) },
-	{ ATTR_TYPE(events) },
 	{ ATTR_TYPE(align) },
+	{ ATTR_TYPE(core) },
+	{ ATTR_TYPE(events) },
+	{ ATTR_TYPE(i18n) },
 	{ ATTR_TYPE(CAPTION) },
 	{ 0, 0 },
 };
@@ -431,23 +431,11 @@ static const attr COL_attr_list[] = {
 };
 
 static const AttrType COL_attr_type[] = {
-	{ ATTR_TYPE(core) },
-	{ ATTR_TYPE(i18n) },
-	{ ATTR_TYPE(events) },
-	{ ATTR_TYPE(COL) },
 	{ ATTR_TYPE(cellalign) },
-	{ 0, 0 },
-};
-
-static const attr CREDIT_attr_list[] = {
-	{ "CLEAR"         T(N) },
-	{ 0               T(N) }	/* Terminate list */
-};
-
-static const AttrType CREDIT_attr_type[] = {
 	{ ATTR_TYPE(core) },
+	{ ATTR_TYPE(events) },
 	{ ATTR_TYPE(i18n) },
-	{ ATTR_TYPE(CREDIT) },
+	{ ATTR_TYPE(COL) },
 	{ 0, 0 },
 };
 
@@ -459,8 +447,8 @@ static const attr DEL_attr_list[] = {
 
 static const AttrType DEL_attr_type[] = {
 	{ ATTR_TYPE(core) },
-	{ ATTR_TYPE(i18n) },
 	{ ATTR_TYPE(events) },
+	{ ATTR_TYPE(i18n) },
 	{ ATTR_TYPE(DEL) },
 	{ 0, 0 },
 };
@@ -471,9 +459,9 @@ static const attr DIV_attr_list[] = {
 };
 
 static const AttrType DIV_attr_type[] = {
+	{ ATTR_TYPE(align) },
 	{ ATTR_TYPE(core) },
 	{ ATTR_TYPE(i18n) },
-	{ ATTR_TYPE(align) },
 	{ ATTR_TYPE(DIV) },
 	{ 0, 0 },
 };
@@ -510,22 +498,10 @@ static const attr EMBED_attr_list[] = {
 };
 
 static const AttrType EMBED_attr_type[] = {
-	{ ATTR_TYPE(core) },
-	{ ATTR_TYPE(i18n) },
 	{ ATTR_TYPE(align) },
-	{ ATTR_TYPE(EMBED) },
-	{ 0, 0 },
-};
-
-static const attr FIELDSET_attr_list[] = {
-	{ "CLEAR"         T(N) },
-	{ 0               T(N) }	/* Terminate list */
-};
-
-static const AttrType FIELDSET_attr_type[] = {
 	{ ATTR_TYPE(core) },
 	{ ATTR_TYPE(i18n) },
-	{ ATTR_TYPE(FIELDSET) },
+	{ ATTR_TYPE(EMBED) },
 	{ 0, 0 },
 };
 
@@ -544,22 +520,10 @@ static const attr FIG_attr_list[] = {
 };
 
 static const AttrType FIG_attr_type[] = {
-	{ ATTR_TYPE(core) },
-	{ ATTR_TYPE(i18n) },
 	{ ATTR_TYPE(align) },
-	{ ATTR_TYPE(FIG) },
-	{ 0, 0 },
-};
-
-static const attr FN_attr_list[] = {
-	{ "CLEAR"         T(N) },
-	{ 0               T(N) }	/* Terminate list */
-};
-
-static const AttrType FN_attr_type[] = {
 	{ ATTR_TYPE(core) },
 	{ ATTR_TYPE(i18n) },
-	{ ATTR_TYPE(FN) },
+	{ ATTR_TYPE(FIG) },
 	{ 0, 0 },
 };
 
@@ -639,8 +603,8 @@ static const attr GEN_attr_list[] = {
 
 static const AttrType GEN_attr_type[] = {
 	{ ATTR_TYPE(core) },
-	{ ATTR_TYPE(i18n) },
 	{ ATTR_TYPE(events) },
+	{ ATTR_TYPE(i18n) },
 	{ ATTR_TYPE(GEN) },
 	{ 0, 0 },
 };
@@ -657,10 +621,10 @@ static const attr H_attr_list[] = {
 };
 
 static const AttrType H_attr_type[] = {
-	{ ATTR_TYPE(core) },
-	{ ATTR_TYPE(i18n) },
-	{ ATTR_TYPE(events) },
 	{ ATTR_TYPE(align) },
+	{ ATTR_TYPE(core) },
+	{ ATTR_TYPE(events) },
+	{ ATTR_TYPE(i18n) },
 	{ ATTR_TYPE(H) },
 	{ 0, 0 },
 };
@@ -676,9 +640,9 @@ static const attr HR_attr_list[] = {
 };
 
 static const AttrType HR_attr_type[] = {
+	{ ATTR_TYPE(align) },
 	{ ATTR_TYPE(core) },
 	{ ATTR_TYPE(i18n) },
-	{ ATTR_TYPE(align) },
 	{ ATTR_TYPE(HR) },
 	{ 0, 0 },
 };
@@ -697,8 +661,8 @@ static const attr IFRAME_attr_list[] = {
 };
 
 static const AttrType IFRAME_attr_type[] = {
-	{ ATTR_TYPE(core) },
 	{ ATTR_TYPE(align) },
+	{ ATTR_TYPE(core) },
 	{ ATTR_TYPE(IFRAME) },
 	{ 0, 0 },
 };
@@ -723,10 +687,10 @@ static const attr IMG_attr_list[] = {
 };
 
 static const AttrType IMG_attr_type[] = {
-	{ ATTR_TYPE(core) },
-	{ ATTR_TYPE(i18n) },
-	{ ATTR_TYPE(events) },
 	{ ATTR_TYPE(align) },
+	{ ATTR_TYPE(core) },
+	{ ATTR_TYPE(events) },
+	{ ATTR_TYPE(i18n) },
 	{ ATTR_TYPE(IMG) },
 	{ 0, 0 },
 };
@@ -764,10 +728,10 @@ static const attr INPUT_attr_list[] = {
 };
 
 static const AttrType INPUT_attr_type[] = {
-	{ ATTR_TYPE(core) },
-	{ ATTR_TYPE(i18n) },
-	{ ATTR_TYPE(events) },
 	{ ATTR_TYPE(align) },
+	{ ATTR_TYPE(core) },
+	{ ATTR_TYPE(events) },
+	{ ATTR_TYPE(i18n) },
 	{ ATTR_TYPE(INPUT) },
 	{ 0, 0 },
 };
@@ -810,24 +774,9 @@ static const attr LABEL_attr_list[] = {
 
 static const AttrType LABEL_attr_type[] = {
 	{ ATTR_TYPE(core) },
-	{ ATTR_TYPE(i18n) },
 	{ ATTR_TYPE(events) },
+	{ ATTR_TYPE(i18n) },
 	{ ATTR_TYPE(LABEL) },
-	{ 0, 0 },
-};
-
-static const attr LEGEND_attr_list[] = {
-	{ "ACCESSKEY"     T(N) },
-	{ "CLEAR"         T(N) },
-	{ 0               T(N) }	/* Terminate list */
-};
-
-static const AttrType LEGEND_attr_type[] = {
-	{ ATTR_TYPE(core) },
-	{ ATTR_TYPE(i18n) },
-	{ ATTR_TYPE(events) },
-	{ ATTR_TYPE(align) },
-	{ ATTR_TYPE(LEGEND) },
 	{ 0, 0 },
 };
 
@@ -844,8 +793,8 @@ static const attr LI_attr_list[] = {
 
 static const AttrType LI_attr_type[] = {
 	{ ATTR_TYPE(core) },
-	{ ATTR_TYPE(i18n) },
 	{ ATTR_TYPE(events) },
+	{ ATTR_TYPE(i18n) },
 	{ ATTR_TYPE(LI) },
 	{ 0, 0 },
 };
@@ -864,8 +813,8 @@ static const attr LINK_attr_list[] = {
 
 static const AttrType LINK_attr_type[] = {
 	{ ATTR_TYPE(core) },
-	{ ATTR_TYPE(i18n) },
 	{ ATTR_TYPE(events) },
+	{ ATTR_TYPE(i18n) },
 	{ ATTR_TYPE(LINK) },
 	{ 0, 0 },
 };
@@ -958,10 +907,10 @@ static const attr OBJECT_attr_list[] = {
 };
 
 static const AttrType OBJECT_attr_type[] = {
-	{ ATTR_TYPE(core) },
-	{ ATTR_TYPE(i18n) },
-	{ ATTR_TYPE(events) },
 	{ ATTR_TYPE(align) },
+	{ ATTR_TYPE(core) },
+	{ ATTR_TYPE(events) },
+	{ ATTR_TYPE(i18n) },
 	{ ATTR_TYPE(OBJECT) },
 	{ 0, 0 },
 };
@@ -1027,9 +976,9 @@ static const attr P_attr_list[] = {
 };
 
 static const AttrType P_attr_type[] = {
+	{ ATTR_TYPE(align) },
 	{ ATTR_TYPE(core) },
 	{ ATTR_TYPE(i18n) },
-	{ ATTR_TYPE(align) },
 	{ ATTR_TYPE(P) },
 	{ 0, 0 },
 };
@@ -1111,9 +1060,9 @@ static const attr SELECT_attr_list[] = {
 };
 
 static const AttrType SELECT_attr_type[] = {
+	{ ATTR_TYPE(align) },
 	{ ATTR_TYPE(core) },
 	{ ATTR_TYPE(i18n) },
-	{ ATTR_TYPE(align) },
 	{ ATTR_TYPE(SELECT) },
 	{ 0, 0 },
 };
@@ -1141,9 +1090,9 @@ static const attr TAB_attr_list[] = {
 };
 
 static const AttrType TAB_attr_type[] = {
+	{ ATTR_TYPE(align) },
 	{ ATTR_TYPE(core) },
 	{ ATTR_TYPE(i18n) },
-	{ ATTR_TYPE(align) },
 	{ ATTR_TYPE(TAB) },
 	{ 0, 0 },
 };
@@ -1168,10 +1117,10 @@ static const attr TABLE_attr_list[] = {
 };
 
 static const AttrType TABLE_attr_type[] = {
-	{ ATTR_TYPE(core) },
-	{ ATTR_TYPE(i18n) },
-	{ ATTR_TYPE(events) },
 	{ ATTR_TYPE(align) },
+	{ ATTR_TYPE(core) },
+	{ ATTR_TYPE(events) },
+	{ ATTR_TYPE(i18n) },
 	{ ATTR_TYPE(TABLE) },
 	{ 0, 0 },
 };
@@ -1194,10 +1143,10 @@ static const attr TD_attr_list[] = {
 };
 
 static const AttrType TD_attr_type[] = {
+	{ ATTR_TYPE(cellalign) },
 	{ ATTR_TYPE(core) },
 	{ ATTR_TYPE(i18n) },
 	{ ATTR_TYPE(TD) },
-	{ ATTR_TYPE(cellalign) },
 	{ 0, 0 },
 };
 
@@ -1221,10 +1170,10 @@ static const attr TEXTAREA_attr_list[] = {
 };
 
 static const AttrType TEXTAREA_attr_type[] = {
+	{ ATTR_TYPE(align) },
 	{ ATTR_TYPE(core) },
 	{ ATTR_TYPE(events) },
 	{ ATTR_TYPE(i18n) },
-	{ ATTR_TYPE(align) },
 	{ ATTR_TYPE(TEXTAREA) },
 	{ 0, 0 },
 };
@@ -1237,10 +1186,10 @@ static const attr TR_attr_list[] = {
 };
 
 static const AttrType TR_attr_type[] = {
-	{ ATTR_TYPE(core) },
-	{ ATTR_TYPE(i18n) },
-	{ ATTR_TYPE(events) },
 	{ ATTR_TYPE(cellalign) },
+	{ ATTR_TYPE(core) },
+	{ ATTR_TYPE(events) },
+	{ ATTR_TYPE(i18n) },
 	{ ATTR_TYPE(TR) },
 	{ 0, 0 },
 };
@@ -1472,17 +1421,6 @@ static const attr COL_attr[] = {        /* COL attributes */
 	{ 0               T(N) }	/* Terminate list */
 };
 
-static const attr CREDIT_attr[] = {     /* CREDIT attributes */
-	{ "CLASS"         T(c) },
-	{ "CLEAR"         T(N) },
-	{ "DIR"           T(N) },
-	{ "ID"            T(i) },
-	{ "LANG"          T(N) },
-	{ "STYLE"         T(N) },
-	{ "TITLE"         T(N) },
-	{ 0               T(N) }	/* Terminate list */
-};
-
 static const attr DEL_attr[] = {        /* DEL attributes */
 	{ "CITE"          T(N) },
 	{ "CLASS"         T(c) },
@@ -1544,17 +1482,6 @@ static const attr EMBED_attr[] = {      /* EMBED attributes */
 	{ 0               T(N) }	/* Terminate list */
 };
 
-static const attr FIELDSET_attr[] = {   /* FIELDSET attributes */
-	{ "CLASS"         T(c) },
-	{ "CLEAR"         T(N) },
-	{ "DIR"           T(N) },
-	{ "ID"            T(i) },
-	{ "LANG"          T(N) },
-	{ "STYLE"         T(N) },
-	{ "TITLE"         T(N) },
-	{ 0               T(N) }	/* Terminate list */
-};
-
 static const attr FIG_attr[] = {        /* FIG attributes */
 	{ "ALIGN"         T(N) },
 	{ "BORDER"        T(N) },
@@ -1573,17 +1500,6 @@ static const attr FIG_attr[] = {        /* FIG attributes */
 	{ "TITLE"         T(N) },
 	{ "UNITS"         T(N) },
 	{ "WIDTH"         T(N) },
-	{ 0               T(N) }	/* Terminate list */
-};
-
-static const attr FN_attr[] = {         /* FN attributes */
-	{ "CLASS"         T(c) },
-	{ "CLEAR"         T(N) },
-	{ "DIR"           T(N) },
-	{ "ID"            T(i) },
-	{ "LANG"          T(N) },
-	{ "STYLE"         T(N) },
-	{ "TITLE"         T(N) },
 	{ 0               T(N) }	/* Terminate list */
 };
 
@@ -1811,19 +1727,6 @@ static const attr LABEL_attr[] = {      /* LABEL attributes */
 	{ "LANG"          T(N) },
 	{ "ONBLUR"        T(N) },
 	{ "ONFOCUS"       T(N) },
-	{ "STYLE"         T(N) },
-	{ "TITLE"         T(N) },
-	{ 0               T(N) }	/* Terminate list */
-};
-
-static const attr LEGEND_attr[] = {     /* LEGEND attributes */
-	{ "ACCESSKEY"     T(N) },
-	{ "ALIGN"         T(N) },
-	{ "CLASS"         T(c) },
-	{ "CLEAR"         T(N) },
-	{ "DIR"           T(N) },
-	{ "ID"            T(i) },
-	{ "LANG"          T(N) },
 	{ "STYLE"         T(N) },
 	{ "TITLE"         T(N) },
 	{ 0               T(N) }	/* Terminate list */
@@ -2416,7 +2319,7 @@ static const HTTag tags_table1[HTML_ALL_ELEMENTS] = {
  { P(COL),         ATTR_DATA(COL),         SGML_EMPTY,   T_COL},
  { P(COLGROUP),    ATTR_DATA(COL),         SGML_ELEMENT, T_COLGROUP},
  { P(COMMENT),     ATTR_DATA(GEN),         SGML_PCDATA,  T_COMMENT},
- { P(CREDIT),      ATTR_DATA(CREDIT),      SGML_MIXED,   T_CREDIT},
+ { P(CREDIT),      ATTR_DATA(GEN),         SGML_MIXED,   T_CREDIT},
  { P(DD),          ATTR_DATA(GEN),         SGML_MIXED,   T_DD},
  { P(DEL),         ATTR_DATA(DEL),         SGML_MIXED,   T_DEL},
  { P(DFN),         ATTR_DATA(GEN),         SGML_MIXED,   T_DFN},
@@ -2427,9 +2330,9 @@ static const HTTag tags_table1[HTML_ALL_ELEMENTS] = {
  { P(DT),          ATTR_DATA(GEN),         SGML_MIXED,   T_DT},
  { P(EM),          ATTR_DATA(GEN),         SGML_MIXED,   T_EM},
  { P(EMBED),       ATTR_DATA(EMBED),       SGML_EMPTY,   T_EMBED},
- { P(FIELDSET),    ATTR_DATA(FIELDSET),    SGML_MIXED,   T_FIELDSET},
+ { P(FIELDSET),    ATTR_DATA(GEN),         SGML_MIXED,   T_FIELDSET},
  { P(FIG),         ATTR_DATA(FIG),         SGML_MIXED,   T_FIG},
- { P(FN),          ATTR_DATA(FN),          SGML_MIXED,   T_FN},
+ { P(FN),          ATTR_DATA(GEN),         SGML_MIXED,   T_FN},
  { P(FONT),        ATTR_DATA(FONT),        SGML_MIXED,   T_FONT},
  { P(FORM),        ATTR_DATA(FORM),        SGML_MIXED,   T_FORM},
  { P(FRAME),       ATTR_DATA(FRAME),       SGML_EMPTY,   T_FRAME},
@@ -2453,7 +2356,7 @@ static const HTTag tags_table1[HTML_ALL_ELEMENTS] = {
  { P(KBD),         ATTR_DATA(GEN),         SGML_MIXED,   T_KBD},
  { P(KEYGEN),      ATTR_DATA(KEYGEN),      SGML_EMPTY,   T_KEYGEN},
  { P(LABEL),       ATTR_DATA(LABEL),       SGML_MIXED,   T_LABEL},
- { P(LEGEND),      ATTR_DATA(LEGEND),      SGML_MIXED,   T_LEGEND},
+ { P(LEGEND),      ATTR_DATA(CAPTION),     SGML_MIXED,   T_LEGEND},
  { P(LH),          ATTR_DATA(GEN),         SGML_MIXED,   T_LH},
  { P(LI),          ATTR_DATA(LI),          SGML_MIXED,   T_LI},
  { P(LINK),        ATTR_DATA(LINK),        SGML_EMPTY,   T_LINK},

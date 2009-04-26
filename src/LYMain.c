@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMain.c,v 1.199 2009/04/07 00:10:20 tom Exp $
+ * $LynxId: LYMain.c,v 1.200 2009/04/12 16:57:48 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTP.h>
@@ -4149,6 +4149,7 @@ static BOOL parse_arg(char **argv,
 
 #if EXTENDED_STARTFILE_RECALL
     static BOOLEAN no_options_further = FALSE;	/* set to TRUE after '--' argument */
+    static int nof_index = 0;	/* set the index of -- argument */
 #endif
 
     arg_name = argv[0];
@@ -4170,7 +4171,7 @@ static BOOL parse_arg(char **argv,
      */
     if (*arg_name != '-'
 #if EXTENDED_OPTION_LOGIC
-	|| no_options_further == TRUE
+	|| (no_options_further == TRUE && nof_index < (*countp))
 #endif
 	) {
 #if EXTENDED_STARTFILE_RECALL
@@ -4206,6 +4207,7 @@ static BOOL parse_arg(char **argv,
 #if EXTENDED_OPTION_LOGIC
     if (strcmp(arg_name, "--") == 0) {
 	no_options_further = TRUE;
+	nof_index = *countp;
 	return TRUE;
     }
 #endif

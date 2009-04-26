@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTAnchor.c,v 1.62 2009/01/01 16:56:15 tom Exp $
+ * $LynxId: HTAnchor.c,v 1.63 2009/04/08 19:55:12 tom Exp $
  *
  *	Hypertext "Anchor" Object				HTAnchor.c
  *	==========================
@@ -164,7 +164,7 @@ static BOOL HTSEquivalent(const char *s,
 	}
 	return (HT_EQUIV(*s, *t));
     } else {
-	return (s == t);	/* Two NULLs are equivalent, aren't they ? */
+	return (BOOL) (s == t);	/* Two NULLs are equivalent, aren't they ? */
     }
 }
 
@@ -191,7 +191,7 @@ static BOOL HTBEquivalent(const bstring *s,
 	}
 	return (YES);
     } else {
-	return (s == t);	/* Two NULLs are equivalent, aren't they ? */
+	return (BOOL) (s == t);	/* Two NULLs are equivalent, aren't they ? */
     }
 }
 
@@ -428,8 +428,11 @@ static HTParentAnchor0 *HTAnchor_findAddress_in_adult_table(const DocAddress *ne
     HTList *adults;
     HTList *grownups;
     HTParentAnchor0 *foundAnchor;
-    BOOL need_extra_info = (newdoc->post_data || newdoc->post_content_type ||
-			    newdoc->bookmark || newdoc->isHEAD || newdoc->safe);
+    BOOL need_extra_info = (BOOL) (newdoc->post_data ||
+				   newdoc->post_content_type ||
+				   newdoc->bookmark ||
+				   newdoc->isHEAD ||
+				   newdoc->safe);
 
     /*
      * We need not free adult_table[] atexit - it should be perfectly empty
@@ -898,7 +901,9 @@ void HTAnchor_setPrompt(HTParentAnchor *me,
 
 BOOL HTAnchor_isIndex(HTParentAnchor *me)
 {
-    return (me ? me->isIndex : NO);
+    return (me
+	    ? (BOOL) me->isIndex
+	    : NO);
 }
 
 /*	Whether Anchor has been designated as an ISMAP link
@@ -906,7 +911,9 @@ BOOL HTAnchor_isIndex(HTParentAnchor *me)
  */
 BOOL HTAnchor_isISMAPScript(HTAnchor * me)
 {
-    return ((me && me->parent->info) ? me->parent->info->isISMAPScript : NO);
+    return ((me && me->parent->info)
+	    ? (BOOL) me->parent->info->isISMAPScript
+	    : NO);
 }
 
 #if defined(USE_COLOR_STYLE)
