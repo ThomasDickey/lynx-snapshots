@@ -1,7 +1,11 @@
--- $LynxId: CHANGES,v 1.395 2009/04/26 15:48:40 tom Exp $
+-- $LynxId: CHANGES,v 1.396 2009/05/10 22:59:22 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
+
+2009-05-?? (2.8.7pre.3)
+* correct type for HTNewsGetCharacter() in HTNews.c, which could return a
+  sign-extended character mistaken for EOF (report by Dallas E. Legan II) -TD
 
 2009-04-26 (2.8.7pre.2)
 * update it.po from

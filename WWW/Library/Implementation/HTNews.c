@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTNews.c,v 1.58 2009/01/01 17:00:01 tom Exp $
+ * $LynxId: HTNews.c,v 1.59 2009/05/10 22:53:23 tom Exp $
  *
  *			NEWS ACCESS				HTNews.c
  *			===========
@@ -51,7 +51,7 @@ static int channel_s = 1;
 	(Handle ? SSL_write(Handle, buff, size) : NETWRITE(sock, buff, size))
 #define NEWS_NETCLOSE(sock) \
 	{ (void)NETCLOSE(sock); if (Handle) { SSL_free(Handle); Handle = NULL; } }
-static char HTNewsGetCharacter(void);
+static int HTNewsGetCharacter(void);
 
 #define NEXT_CHAR HTNewsGetCharacter()
 #else
@@ -3044,7 +3044,7 @@ void HTClearNNTPAuthInfo(void)
 }
 
 #ifdef USE_SSL
-static char HTNewsGetCharacter(void)
+static int HTNewsGetCharacter(void)
 {
     if (!Handle)
 	return HTGetCharacter();
