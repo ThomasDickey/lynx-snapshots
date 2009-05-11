@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTUtils.h,v 1.93 2009/01/01 21:49:29 tom Exp $
+ * $LynxId: HTUtils.h,v 1.94 2009/05/10 23:06:31 tom Exp $
  *
  * Utility macros for the W3 code library
  * MACROS FOR GENERAL USE
@@ -750,7 +750,7 @@ extern "C" {
 #ifdef USE_SSL
     extern SSL *HTGetSSLHandle(void);
     extern void HTSSLInitPRNG(void);
-    extern char HTGetSSLCharacter(void *handle);
+    extern int HTGetSSLCharacter(void *handle);
 #endif				/* USE_SSL */
 
 #ifdef __cplusplus

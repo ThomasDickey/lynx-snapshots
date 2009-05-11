@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFormat.c,v 1.67 2009/04/08 20:08:01 tom Exp $
+ * $LynxId: HTFormat.c,v 1.68 2009/05/10 23:07:26 tom Exp $
  *
  *		Manage different file formats			HTFormat.c
  *		=============================
@@ -288,7 +288,7 @@ int HTGetCharacter(void)
 }
 
 #ifdef USE_SSL
-char HTGetSSLCharacter(void *handle)
+int HTGetSSLCharacter(void *handle)
 {
     char ch;
 
