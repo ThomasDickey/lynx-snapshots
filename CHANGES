@@ -1,9 +1,13 @@
--- $LynxId: CHANGES,v 1.396 2009/05/10 22:59:22 tom Exp $
+-- $LynxId: CHANGES,v 1.398 2009/05/22 00:29:53 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
 2009-05-?? (2.8.7pre.3)
+* add an Options menu checkbox to tell if Lynx should send a user-agent string. 
+  Unless the useragent restriction is set, the default for this checkbox is
+  off, so that Lynx will not send the string.  The corresponding setting,
+  send_useragent, may be saved to ~/.lynxrc, but normally is not -TD
 * correct type for HTNewsGetCharacter() in HTNews.c, which could return a
   sign-extended character mistaken for EOF (report by Dallas E. Legan II) -TD
 

@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTP.c,v 1.107 2009/04/07 22:45:42 tom Exp $
+ * $LynxId: HTTP.c,v 1.108 2009/05/22 00:47:41 tom Exp $
  *
  * HyperText Tranfer Protocol	- Client implementation		HTTP.c
  * ==========================
@@ -1158,18 +1158,20 @@ static int HTLoadHTTP(const char *arg,
 	    HTBprintf(&command, "Cache-Control: no-cache%c%c", CR, LF);
 	}
 
-	if (LYUserAgent && *LYUserAgent) {
-	    char *cp = LYSkipBlanks(LYUserAgent);
+	if (LYSendUserAgent || no_useragent) {
+	    if (!isEmpty(LYUserAgent)) {
+		char *cp = LYSkipBlanks(LYUserAgent);
 
-	    /* Won't send it at all if all blank - kw */
-	    if (*cp != '\0')
-		HTBprintf(&command, "User-Agent: %.*s%c%c",
-			  INIT_LINE_SIZE - 15, LYUserAgent, CR, LF);
-	} else {
-	    HTBprintf(&command, "User-Agent: %s/%s  libwww-FM/%s%c%c",
-		      HTAppName ? HTAppName : "unknown",
-		      HTAppVersion ? HTAppVersion : "0.0",
-		      HTLibraryVersion, CR, LF);
+		/* Won't send it at all if all blank - kw */
+		if (*cp != '\0')
+		    HTBprintf(&command, "User-Agent: %.*s%c%c",
+			      INIT_LINE_SIZE - 15, LYUserAgent, CR, LF);
+	    } else {
+		HTBprintf(&command, "User-Agent: %s/%s  libwww-FM/%s%c%c",
+			  HTAppName ? HTAppName : "unknown",
+			  HTAppVersion ? HTAppVersion : "0.0",
+			  HTLibraryVersion, CR, LF);
+	    }
 	}
 
 	if (personal_mail_address && !LYNoFromHeader) {

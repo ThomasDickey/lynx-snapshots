@@ -1,4 +1,4 @@
-/* $LynxId: LYOptions.c,v 1.129 2009/04/07 00:35:49 tom Exp $ */
+/* $LynxId: LYOptions.c,v 1.130 2009/05/22 00:47:15 tom Exp $ */
 #include <HTUtils.h>
 #include <HTFTP.h>
 #include <HTTP.h>		/* 'reloading' flag */
@@ -2425,10 +2425,16 @@ static OptValues encoding_values[] =
  */
 static const char *preferred_doc_char_string = RC_PREFERRED_CHARSET;
 static const char *preferred_doc_lang_string = RC_PREFERRED_LANGUAGE;
+static const char *send_user_agent_string = RC_SEND_USERAGENT;
 static const char *user_agent_string = RC_USERAGENT;
 
 #define PutHeader(fp, Name) \
 	fprintf(fp, "\n%s<em>%s</em>\n", MARGIN_STR, LYEntifyTitle(&buffer, Name));
+
+#define PutCheckBox(fp, Name, Value, disable) \
+	fprintf(fp,\
+	"<input type=\"checkbox\" name=\"%s\" value=\"%s\" %s>\n",\
+		Name, Value ? "true" : "false", disable_all?disabled_string:disable)
 
 #define PutTextInput(fp, Name, Value, Size, disable) \
 	fprintf(fp,\
@@ -3809,6 +3815,8 @@ static int gen_options(char **newfile)
 
     /* User Agent: INPUT */
     if (!no_useragent) {
+	PutLabel(fp0, gettext("Send User-Agent header"), send_user_agent_string);
+	PutCheckBox(fp0, send_user_agent_string, LYSendUserAgent, "");
 	PutLabel(fp0, gettext("User-Agent header"), user_agent_string);
 	PutTextInput(fp0, user_agent_string,
 		     NonNull(LYUserAgent), text_len, "");
