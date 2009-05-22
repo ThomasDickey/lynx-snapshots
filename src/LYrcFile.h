@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYrcFile.h,v 1.30 2009/04/06 23:07:40 tom Exp $
+ * $LynxId: LYrcFile.h,v 1.31 2009/05/22 00:19:45 tom Exp $
  */
 #ifndef LYRCFILE_H
 #define LYRCFILE_H
@@ -201,6 +201,7 @@
 #define RC_SEEK_FRAG_AREA_IN_CUR        "seek_frag_area_in_cur"
 #define RC_SEEK_FRAG_MAP_IN_CUR         "seek_frag_map_in_cur"
 #define RC_SELECT_POPUPS                "select_popups"
+#define RC_SEND_USERAGENT               "send_useragent"
 #define RC_SESSION_FILE                 "session_file"
 #define RC_SESSION_LIMIT                "session_limit"
 #define RC_SET_COOKIES                  "set_cookies"

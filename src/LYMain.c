@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMain.c,v 1.200 2009/04/12 16:57:48 tom Exp $
+ * $LynxId: LYMain.c,v 1.201 2009/05/22 00:18:53 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTP.h>
@@ -372,6 +372,7 @@ BOOLEAN LYNoRefererForThis = FALSE;	/* No Referer header for this URL? */
 BOOLEAN LYNoRefererHeader = FALSE;	/* Never send Referer header?     */
 BOOLEAN LYRawMode;
 BOOLEAN LYSelectPopups = USE_SELECT_POPUPS;
+BOOLEAN LYSendUserAgent = FALSE;	/* send Lynx User-Agent header? */
 BOOLEAN LYSetCookies = SET_COOKIES;	/* Process Set-Cookie headers? */
 BOOLEAN LYUseDefSelPop = TRUE;	/* Command line -popup toggle */
 BOOLEAN LYUseDefaultRawMode = TRUE;

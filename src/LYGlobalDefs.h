@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYGlobalDefs.h,v 1.118 2009/04/07 00:11:01 tom Exp $
+ * $LynxId: LYGlobalDefs.h,v 1.119 2009/05/22 00:18:05 tom Exp $
  *
  * global variable definitions
  */
@@ -452,6 +452,7 @@ extern "C" {
     extern BOOLEAN LYNoRefererHeader;	/* Never send Referer header? */
     extern BOOLEAN LYNoRefererForThis;	/* No Referer header for this URL? */
     extern BOOLEAN LYNoFromHeader;	/* Never send From header?    */
+    extern BOOLEAN LYSendUserAgent;	/* send Lynx User-Agent header? */
     extern BOOLEAN LYListNewsNumbers;
     extern BOOLEAN LYUseMouse;
     extern BOOLEAN LYListNewsDates;

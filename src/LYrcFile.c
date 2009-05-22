@@ -1,4 +1,4 @@
-/* $LynxId: LYrcFile.c,v 1.76 2009/04/07 00:20:14 tom Exp $ */
+/* $LynxId: LYrcFile.c,v 1.77 2009/05/22 00:26:25 tom Exp $ */
 #include <HTUtils.h>
 #include <HTFTP.h>
 #include <LYUtils.h>
@@ -519,6 +519,7 @@ of checkboxes for the OPTIONs.  A value of \"on\" will set popup menus\n\
 as the default while a value of \"off\" will set use of radio boxes.\n\
 The default can be overridden via the -popup command line toggle.\n\
 ")),
+    MAYBE_SET(RC_SEND_USERAGENT,        LYSendUserAgent,   MSG_ENABLE_LYNXRC),
     MAYBE_SET(RC_SET_COOKIES,           LYSetCookies,      MSG_ENABLE_LYNXRC),
     PARSE_ENU(RC_SHOW_COLOR,            LYrcShowColor,     tbl_show_colors, N_("\
 show_color specifies how to set the color mode at startup.  A value of\n\
