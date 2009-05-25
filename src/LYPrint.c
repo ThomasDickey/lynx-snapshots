@@ -1,4 +1,6 @@
-/* $LynxId: LYPrint.c,v 1.84 2007/07/01 23:39:36 Andrew.Belov Exp $ */
+/*
+ * $LynxId: LYPrint.c,v 1.85 2009/05/24 22:28:27 tom Exp $
+ */
 #include <HTUtils.h>
 #include <HTAccess.h>
 #include <HTList.h>
@@ -288,7 +290,8 @@ static BOOLEAN confirm_by_pages(const char *prompt,
     return TRUE;
 }
 
-static void send_file_to_file(DocInfo *newdoc, char *content_base,
+static void send_file_to_file(DocInfo *newdoc,
+			      char *content_base,
 			      char *sug_filename)
 {
     BOOLEAN FirstRecall = TRUE;
@@ -458,7 +461,8 @@ static void send_file_to_file(DocInfo *newdoc, char *content_base,
     return;
 }
 
-static void send_file_to_mail(DocInfo *newdoc, char *content_base,
+static void send_file_to_mail(DocInfo *newdoc,
+			      char *content_base,
 			      char *content_location)
 {
     static BOOLEAN first_mail_preparsed = TRUE;
@@ -783,7 +787,8 @@ static void send_file_to_mail(DocInfo *newdoc, char *content_base,
     return;
 }
 
-static void send_file_to_printer(DocInfo *newdoc, char *content_base,
+static void send_file_to_printer(DocInfo *newdoc,
+				 char *content_base,
 				 char *sug_filename,
 				 int printer_number)
 {
@@ -945,7 +950,8 @@ static void send_file_to_printer(DocInfo *newdoc, char *content_base,
     return;
 }
 
-static void send_file_to_screen(DocInfo *newdoc, char *content_base,
+static void send_file_to_screen(DocInfo *newdoc,
+				char *content_base,
 				BOOLEAN Lpansi)
 {
     FILE *outfile_fp;

@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYUtils.c,v 1.184 2009/04/09 20:33:31 tom Exp $
+ * $LynxId: LYUtils.c,v 1.185 2009/05/24 22:17:03 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTCP.h>
@@ -6602,8 +6602,9 @@ const char *wwwName(const char *pathname)
 BOOLEAN LYValidateFilename(char *result,
 			   char *given)
 {
-    char *cp;
-    const char *cp2;
+    BOOLEAN code = TRUE;
+    char *cp = NULL;
+    const char *cp2 = NULL;
 
     /*
      * Cancel if the user entered "/dev/null" on Unix, or an "nl:" path on VMS. 
@@ -6611,78 +6612,84 @@ BOOLEAN LYValidateFilename(char *result,
      */
     if (LYIsNullDevice(given)) {
 	/* just ignore it */
-	return FALSE;
-    }
+	code = FALSE;
 #ifdef HAVE_POPEN
-    if (LYIsPipeCommand(given)) {
+    } else if (LYIsPipeCommand(given)) {
 	if (no_shell) {
 	    HTUserMsg(SPAWNING_DISABLED);
-	    return FALSE;
+	    code = FALSE;
+	} else {
+	    LYstrncpy(result, given, LY_MAXPATH);
 	}
-	LYstrncpy(result, given, LY_MAXPATH);
-	return TRUE;
-    }
 #endif
-    if ((cp = FindLeadingTilde(given, TRUE)) != given
-	&& (cp2 = wwwName(Home_Dir())) != 0
-	&& strlen(cp2) + strlen(given) < LY_MAXPATH) {
-	*(cp++) = '\0';
-	strcpy(result, given);
-	LYTrimPathSep(result);
-	strcat(result, cp2);
-	strcat(result, cp);
-	strcpy(given, result);
-    }
-#ifdef VMS
-    if (strchr(given, '/') != NULL) {
-	strcpy(result, HTVMS_name("", given));
-	strcpy(given, result);
-    }
-    if (given[0] != '/'
-	&& strchr(given, ':') == NULL
-	&& strlen(given) < LY_MAXPATH - 13) {
-	strcpy(result, "sys$disk:");
-	if (strchr(given, ']') == NULL)
-	    strcat(result, "[]");
-	strcat(result, given);
     } else {
-	strcpy(result, given);
-    }
+	if ((cp = FindLeadingTilde(given, TRUE)) != 0
+	    && (cp2 = wwwName(Home_Dir())) != 0
+	    && strlen(cp2) + strlen(given) < LY_MAXPATH) {
+	    *(cp++) = '\0';
+	    strcpy(result, given);
+	    LYTrimPathSep(result);
+	    strcat(result, cp2);
+	    strcat(result, cp);
+	    strcpy(given, result);
+	}
+#ifdef VMS
+	if (strchr(given, '/') != NULL) {
+	    strcpy(result, HTVMS_name("", given));
+	    strcpy(given, result);
+	}
+	if (given[0] != '/'
+	    && strchr(given, ':') == NULL
+	    && strlen(given) < LY_MAXPATH - 13) {
+	    strcpy(result, "sys$disk:");
+	    if (strchr(given, ']') == NULL)
+		strcat(result, "[]");
+	    strcat(result, given);
+	} else {
+	    strcpy(result, given);
+	}
 #else
 
 #ifndef __EMX__
-    if (!LYisAbsPath(given)) {
+	if (!LYisAbsPath(given)) {
 #if defined(__DJGPP__) || defined(_WINDOWS)
-	if (strchr(result, ':') != NULL)
-	    cp = NULL;
-	else
+	    if (strchr(result, ':') != NULL)
+		cp = NULL;
+	    else
 #endif /*  __DJGPP__ || _WINDOWS */
-	{
+	    {
 #ifdef SUPPORT_CHDIR
-	    static char buf[LY_MAXPATH];
+		static char buf[LY_MAXPATH];
 
-	    cp = Current_Dir(buf);
+		cp = Current_Dir(buf);
 #else
-	    cp = original_dir;
+		cp = original_dir;
 #endif
-	}
-    } else
+	    }
+	} else
 #endif /* __EMX__ */
-	cp = NULL;
+	    cp = NULL;
 
-    *result = 0;
-    if (cp) {
-	LYTrimPathSep(cp);
-	if (strlen(cp) >= LY_MAXPATH - 2)
-	    return FALSE;
-	sprintf(result, "%s/", cp);
-    }
-    cp = HTSYS_name(given);
-    if (strlen(result) + strlen(cp) >= LY_MAXPATH - 1)
-	return FALSE;
-    strcat(result, cp);
+	*result = 0;
+	if (cp) {
+	    LYTrimPathSep(cp);
+	    if (strlen(cp) >= LY_MAXPATH - 2) {
+		code = FALSE;
+	    } else {
+		sprintf(result, "%s/", cp);
+	    }
+	}
+	if (code) {
+	    cp = HTSYS_name(given);
+	    if (strlen(result) + strlen(cp) >= LY_MAXPATH - 1) {
+		code = FALSE;
+	    } else {
+		strcat(result, cp);
+	    }
+	}
 #endif /* VMS */
-    return TRUE;
+    }
+    return code;
 }
 
 /*

@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTNews.c,v 1.59 2009/05/10 22:53:23 tom Exp $
+ * $LynxId: HTNews.c,v 1.60 2009/05/24 23:11:26 tom Exp $
  *
  *			NEWS ACCESS				HTNews.c
  *			===========
@@ -389,9 +389,9 @@ static NNTPAuthResult HTHandleAuthInfo(char *host)
     int status, tries;
 
     /*
-     * Make sure we have an interactive user and a host.  - FM
+     * Make sure we have a host.  - FM
      */
-    if (dump_output_immediately || !(host && *host))
+    if (isEmpty(host))
 	return NNTPAUTH_ERROR;
 
     /*
