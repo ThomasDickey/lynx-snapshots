@@ -1,9 +1,13 @@
--- $LynxId: CHANGES,v 1.398 2009/05/22 00:29:53 tom Exp $
+-- $LynxId: CHANGES,v 1.400 2009/05/24 23:15:43 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
 2009-05-?? (2.8.7pre.3)
+* remove check for -dump option from HTHandleAuthInfo(), allowing Lynx to -dump
+  or -source NNTP urls (report by Dallas E.  Legan II) -TD
+* amend fix for Debian #388622 to allow the user to save names to the home
+  directory, e.g., ~/foo -TD
 * add an Options menu checkbox to tell if Lynx should send a user-agent string. 
   Unless the useragent restriction is set, the default for this checkbox is
   off, so that Lynx will not send the string.  The corresponding setting,
