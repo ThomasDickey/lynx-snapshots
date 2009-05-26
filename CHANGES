@@ -1,7 +1,11 @@
--- $LynxId: CHANGES,v 1.406 2009/05/25 20:09:04 tom Exp $
+-- $LynxId: CHANGES,v 1.407 2009/05/25 21:24:24 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
+
+2009-05-25 (2.8.7pre.4)
+* update lynx.pot file -TD
+* fix a typo in change for Debian #388622 -TD
 
 2009-05-25 (2.8.7pre.3)
 * suppress check for "disabled" attribute in a select, as a workaround
