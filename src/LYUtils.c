@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYUtils.c,v 1.185 2009/05/24 22:17:03 tom Exp $
+ * $LynxId: LYUtils.c,v 1.187 2009/05/25 21:46:24 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTCP.h>
@@ -6626,12 +6626,14 @@ BOOLEAN LYValidateFilename(char *result,
 	if ((cp = FindLeadingTilde(given, TRUE)) != 0
 	    && (cp2 = wwwName(Home_Dir())) != 0
 	    && strlen(cp2) + strlen(given) < LY_MAXPATH) {
-	    *(cp++) = '\0';
-	    strcpy(result, given);
-	    LYTrimPathSep(result);
-	    strcat(result, cp2);
-	    strcat(result, cp);
-	    strcpy(given, result);
+	    if (LYIsTilde(cp[0]) && LYIsPathSep(cp[1])) {
+		*(cp++) = '\0';
+		strcpy(result, given);
+		LYTrimPathSep(result);
+		strcat(result, cp2);
+		strcat(result, cp);
+		strcpy(given, result);
+	    }
 	}
 #ifdef VMS
 	if (strchr(given, '/') != NULL) {
