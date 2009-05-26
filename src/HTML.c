@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTML.c,v 1.121 2009/04/16 23:38:37 tom Exp $
+ * $LynxId: HTML.c,v 1.122 2009/05/25 19:53:35 tom Exp $
  *
  *		Structured stream to Rich hypertext converter
  *		============================================
@@ -5180,8 +5180,12 @@ static int HTML_start_element(HTStructured * me, int element_number,
 		}
 
 		if (me->select_disabled ||
-		    (present && present[HTML_OPTION_DISABLED]))
+		    (0 && present && present[HTML_OPTION_DISABLED])) {
+		    /* 2009/5/25 - suppress check for "disabled" attribute
+		     * for Debian #525934 -TD
+		     */
 		    I.disabled = YES;
+		}
 
 		if (present && present[HTML_OPTION_ID]
 		    && non_empty(value[HTML_OPTION_ID])) {

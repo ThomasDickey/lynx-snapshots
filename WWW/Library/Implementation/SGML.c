@@ -1,5 +1,5 @@
 /*
- * $LynxId: SGML.c,v 1.127 2009/04/16 00:21:21 tom Exp $
+ * $LynxId: SGML.c,v 1.130 2009/05/25 18:17:36 tom Exp $
  *
  *			General SGML Parser code		SGML.c
  *			========================
@@ -1898,8 +1898,21 @@ static void SGML_character(HTStream *context, char c_in)
      * nor HTCJK is set.  - FM
      */
     if (TOASCII(unsign_c) > 127 && TOASCII(unsign_c) < 160 &&	/* S/390 -- gil -- 0847 */
-	!(PASSHICTRL || IS_CJK_TTY))
+	!(PASSHICTRL || IS_CJK_TTY)) {
+	/*
+	 * If we happen to be reading from an "ISO-8859-1" or "US-ASCII"
+	 * document, allow the cp-1252 codes, to accommodate the HTML5 draft
+	 * recommendation for replacement encoding:
+	 *
+	 * http://www.whatwg.org/specs/web-apps/current-work/multipage/infrastructure.html#character-encodings-0
+	 */
+	if (context->inUCLYhndl == LATIN1
+	    || context->inUCLYhndl == US_ASCII) {
+	    clong = LYcp1252ToUnicode(c);
+	    goto top1;
+	}
 	goto after_switch;
+    }
 
     /* Almost all CJK characters are double byte but only Japanese
      * JIS X0201 Kana is single byte. To prevent to fail SGML parsing
@@ -2565,8 +2578,9 @@ static void SGML_character(HTStream *context, char c_in)
     case S_incro:
 	/* S/390 -- gil -- 1075 */
 	if ((TOASCII(unsign_c) < 127) &&
-	    (context->isHex ? isxdigit(UCH(c)) :
-	     isdigit(UCH(c)))) {
+	    (context->isHex
+	     ? isxdigit(UCH(c))
+	     : isdigit(UCH(c)))) {
 	    /*
 	     * Accept only valid hex or ASCII digits.  - FM
 	     */
@@ -2602,138 +2616,7 @@ static void SGML_character(HTStream *context, char c_in)
 	    if ((context->isHex ? sscanf(string->data, "%lx", &code) :
 		 sscanf(string->data, "%lu", &code)) == 1) {
 /* =============== work in ASCII below here ===============  S/390 -- gil -- 1092 */
-		if ((code == 1) ||
-		    (code > 127 && code < 156)) {
-		    /*
-		     * Assume these are Microsoft code points, inflicted on us
-		     * by FrontPage.  - FM
-		     *
-		     * MS FrontPage uses syntax like &#153; in 128-159 range
-		     * and doesn't follow Unicode standards for this area. 
-		     * Windows-1252 codepoints are assumed here.
-		     */
-		    switch (code) {
-		    case 1:
-			/*
-			 * WHITE SMILING FACE
-			 */
-			code = 0x263a;
-			break;
-		    case 128:
-			/*
-			 * EURO currency sign
-			 */
-			code = 0x20ac;
-			break;
-		    case 130:
-			/*
-			 * SINGLE LOW-9 QUOTATION MARK (sbquo)
-			 */
-			code = 0x201a;
-			break;
-		    case 132:
-			/*
-			 * DOUBLE LOW-9 QUOTATION MARK (bdquo)
-			 */
-			code = 0x201e;
-			break;
-		    case 133:
-			/*
-			 * HORIZONTAL ELLIPSIS (hellip)
-			 */
-			code = 0x2026;
-			break;
-		    case 134:
-			/*
-			 * DAGGER (dagger)
-			 */
-			code = 0x2020;
-			break;
-		    case 135:
-			/*
-			 * DOUBLE DAGGER (Dagger)
-			 */
-			code = 0x2021;
-			break;
-		    case 137:
-			/*
-			 * PER MILLE SIGN (permil)
-			 */
-			code = 0x2030;
-			break;
-		    case 139:
-			/*
-			 * SINGLE LEFT-POINTING ANGLE QUOTATION MARK (lsaquo)
-			 */
-			code = 0x2039;
-			break;
-		    case 145:
-			/*
-			 * LEFT SINGLE QUOTATION MARK (lsquo)
-			 */
-			code = 0x2018;
-			break;
-		    case 146:
-			/*
-			 * RIGHT SINGLE QUOTATION MARK (rsquo)
-			 */
-			code = 0x2019;
-			break;
-		    case 147:
-			/*
-			 * LEFT DOUBLE QUOTATION MARK (ldquo)
-			 */
-			code = 0x201c;
-			break;
-		    case 148:
-			/*
-			 * RIGHT DOUBLE QUOTATION MARK (rdquo)
-			 */
-			code = 0x201d;
-			break;
-		    case 149:
-			/*
-			 * BULLET (bull)
-			 */
-			code = 0x2022;
-			break;
-		    case 150:
-			/*
-			 * EN DASH (ndash)
-			 */
-			code = 0x2013;
-			break;
-		    case 151:
-			/*
-			 * EM DASH (mdash)
-			 */
-			code = 0x2014;
-			break;
-		    case 152:
-			/*
-			 * SMALL TILDE (tilde)
-			 */
-			code = 0x02dc;
-			break;
-		    case 153:
-			/*
-			 * TRADE MARK SIGN (trade)
-			 */
-			code = 0x2122;
-			break;
-		    case 155:
-			/*
-			 * SINGLE RIGHT-POINTING ANGLE QUOTATION MARK (rsaquo)
-			 */
-			code = 0x203a;
-			break;
-		    default:
-			/*
-			 * Do not attempt a conversion to valid Unicode values.
-			 */
-			break;
-		    }
-		}
+		code = LYcp1252ToUnicode(code);
 		/*
 		 * Check for special values.  - FM
 		 */
