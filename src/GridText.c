@@ -1,5 +1,5 @@
 /*
- * $LynxId: GridText.c,v 1.167 2009/04/26 13:05:17 tom Exp $
+ * $LynxId: GridText.c,v 1.170 2009/05/29 00:04:24 tom Exp $
  *
  *		Character grid hypertext object
  *		===============================
@@ -6117,6 +6117,9 @@ void HText_FormDescNumber(int number,
     case F_RESET_TYPE:
 	*desc = gettext("reset button");
 	return;
+    case F_BUTTON_TYPE:
+	*desc = gettext("script button");
+	return;
     case F_OPTION_LIST_TYPE:
 	*desc = gettext("popup menu");
 	return;
@@ -9854,6 +9857,8 @@ int HText_beginInput(HText *text, BOOL underline,
 	    CTRACE((tfp, "ok, got a file uploader\n"));
 	} else if (!strcasecomp(I->type, "keygen")) {
 	    f->type = F_KEYGEN_TYPE;
+	} else if (!strcasecomp(I->type, "button")) {
+	    f->type = F_BUTTON_TYPE;
 	} else {
 	    /*
 	     * Note that TYPE="scribble" defaults to TYPE="text".  -FM
@@ -9938,6 +9943,13 @@ int HText_beginInput(HText *text, BOOL underline,
 	    StrAllocCopy(f->value, "Reset");
 	    f->size = 5;
 	}
+    } else if (f->type == F_BUTTON_TYPE) {
+	if (non_empty(f->value)) {
+	    f->size = strlen(f->value);
+	} else {
+	    StrAllocCopy(f->value, "BUTTON");
+	    f->size = 5;
+	}
     } else if (f->type == F_IMAGE_SUBMIT_TYPE ||
 	       f->type == F_SUBMIT_TYPE) {
 	if (non_empty(f->value)) {
@@ -10003,6 +10015,7 @@ int HText_beginInput(HText *text, BOOL underline,
 #endif
     case F_RANGE_TYPE:
     case F_KEYGEN_TYPE:
+    case F_BUTTON_TYPE:
 	a->number = 0;
 	break;
 
@@ -11410,6 +11423,7 @@ int HText_SubmitForm(FormInfo * submit_item, DocInfo *doc, char *link_name,
 		break;
 #endif /* USE_FILE_UPLOAD */
 	    case F_KEYGEN_TYPE:
+	    case F_BUTTON_TYPE:
 		/* not implemented */
 		break;
 	    }

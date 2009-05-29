@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMessages_en.h,v 1.69 2008/12/26 22:20:58 tom Exp $
+ * $LynxId: LYMessages_en.h,v 1.70 2009/05/28 23:11:50 tom Exp $
  *
  * Lynx - Hypertext navigation system
  *
@@ -130,6 +130,10 @@
  gettext("(Form reset button)   Use right-arrow or <return> to reset form to defaults.")
 #define FORM_LINK_RESET_DIS_MSG \
  gettext("DISABLED form reset button.  Use UP or DOWN arrows or tab to move off.")
+#define FORM_LINK_BUTTON_MESSAGE \
+ gettext("(Script button)   Use UP or DOWN arrows or tab to move off.")
+#define FORM_LINK_BUTTON_DIS_MSG \
+ gettext("DISABLED Script button.  Use UP or DOWN arrows or tab to move off.")
 #define FORM_LINK_OPTION_LIST_MESSAGE \
  gettext("(Option list) Hit return and use arrow keys and return to select option.")
 #define CHOICE_LIST_MESSAGE \

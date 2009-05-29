@@ -1,4 +1,4 @@
-/* $LynxId: LYForms.c,v 1.80 2009/01/01 23:21:07 tom Exp $ */
+/* $LynxId: LYForms.c,v 1.81 2009/05/28 23:10:06 tom Exp $ */
 #include <HTUtils.h>
 #include <HTCJK.h>
 #include <HTTP.h>
@@ -981,6 +981,12 @@ void show_formlink_statusline(const FormInfo * form,
 	    statusline(FORM_LINK_RESET_DIS_MSG);
 	else
 	    statusline(FORM_LINK_RESET_MESSAGE);
+	break;
+    case F_BUTTON_TYPE:
+	if (form->disabled == YES)
+	    statusline(FORM_LINK_BUTTON_DIS_MSG);
+	else
+	    statusline(FORM_LINK_BUTTON_MESSAGE);
 	break;
     case F_FILE_TYPE:
 	if (form->disabled == YES)

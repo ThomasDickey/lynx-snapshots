@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTML.c,v 1.122 2009/05/25 19:53:35 tom Exp $
+ * $LynxId: HTML.c,v 1.126 2009/05/29 00:24:15 tom Exp $
  *
  *		Structured stream to Rich hypertext converter
  *		============================================
@@ -4316,35 +4316,24 @@ static int HTML_start_element(HTStructured * me, int element_number,
 	    I.value_cs = ATTR_CS_IN;
 
 	    UPDATE_STYLE;
-	    if ((present && present[HTML_BUTTON_TYPE] &&
-		 value[HTML_BUTTON_TYPE]) &&
-		(!strcasecomp(value[HTML_BUTTON_TYPE], "submit") ||
-		 !strcasecomp(value[HTML_BUTTON_TYPE], "reset"))) {
-		/*
-		 * It's a button for submitting or resetting a form.  - FM
-		 */
-		I.type = value[HTML_BUTTON_TYPE];
+	    if (present &&
+		present[HTML_BUTTON_TYPE] &&
+		value[HTML_BUTTON_TYPE]) {
+		if (!strcasecomp(value[HTML_BUTTON_TYPE], "submit") ||
+		    !strcasecomp(value[HTML_BUTTON_TYPE], "reset")) {
+		    /*
+		     * It's a button for submitting or resetting a form.  - FM
+		     */
+		    I.type = value[HTML_BUTTON_TYPE];
+		} else {
+		    /*
+		     * Ugh, it's a button for a script.  - FM
+		     */
+		    I.type = value[HTML_BUTTON_TYPE];
+		}
 	    } else {
-		/*
-		 * Ugh, it's a button for a script.  - FM
-		 */
-		HTML_put_string(me, " [BUTTON] ");
-		break;
-	    }
-
-	    /*
-	     * Make sure we're in a form.
-	     */
-	    if (!me->inFORM) {
-		if (LYBadHTML(me))
-		    CTRACE((tfp,
-			    "Bad HTML: BUTTON tag not within FORM tag\n"));
-		/*
-		 * We'll process it, since the chances of a crash are small,
-		 * and we probably do have a form started.  - FM
-		 *
-		 break;
-		 */
+		/* default, if no type given, is a submit button */
+		I.type = "submit";
 	    }
 
 	    /*
@@ -4391,6 +4380,12 @@ static int HTML_start_element(HTStructured * me, int element_number,
 		 * trailing spaces.  - FM
 		 */
 		LYReduceBlanks(I.value);
+	    } else if (!strcasecomp(I.type, "button")) {
+		if (!isEmpty(I.name)) {
+		    StrAllocCopy(I.value, I.name);
+		} else {
+		    StrAllocCopy(I.value, "BUTTON");
+		}
 	    }
 
 	    if (present && present[HTML_BUTTON_DISABLED])
@@ -4550,8 +4545,7 @@ static int HTML_start_element(HTStructured * me, int element_number,
 		    /*
 		     * Ugh, a button for a script.
 		     */
-		    HTML_put_string(me, "[BUTTON] ");
-		    break;
+		    not_impl = "[BUTTON Input]";
 		}
 		if (not_impl != NULL) {
 		    if (me->inUnderline == FALSE) {
@@ -4570,21 +4564,6 @@ static int HTML_start_element(HTStructured * me, int element_number,
 					      LY_UNDERLINE_END_CHAR);
 		    }
 		}
-	    }
-
-	    /*
-	     * Check if we're in a form.  - FM
-	     */
-	    if (!me->inFORM) {
-		if (LYBadHTML(me))
-		    CTRACE((tfp,
-			    "Bad HTML: INPUT tag not within FORM tag\n"));
-		/*
-		 * We'll process it, since the chances of a crash are small,
-		 * and we probably do have a form started.  - FM
-		 *
-		 break;
-		 */
 	    }
 
 	    CTRACE((tfp, "Ok, we're trying type=[%s]\n", NONNULL(I.type)));
