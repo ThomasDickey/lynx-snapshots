@@ -1,7 +1,17 @@
--- $LynxId: CHANGES,v 1.407 2009/05/25 21:24:24 tom Exp $
+-- $LynxId: CHANGES,v 1.410 2009/05/29 00:20:08 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
+
+2009-05-25 (2.8.7pre.5)
+* remove "Bad HTML" warning for buttons outside a form, since those can be
+  inline, according to the HTML 4 DTD -TD
+* provide navigation to script-buttons, to make them more visible, showing
+  their name -TD
+* change default for send_useragent option to true (prompted by discussion on
+  lynx-dev) -TD
+* correct check for default type of HTML BUTTON, which is "submit".  The code
+  treated this as "button" (prompted by discussion on lynx-dev) -TD
 
 2009-05-25 (2.8.7pre.4)
 * update lynx.pot file -TD

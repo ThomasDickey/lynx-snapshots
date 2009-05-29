@@ -1,5 +1,5 @@
 /*
- * $LynxId: userdefs.h,v 1.245 2009/05/26 00:36:19 tom Exp $
+ * $LynxId: userdefs.h,v 1.246 2009/05/28 21:37:22 tom Exp $
  *
  * Lynx - Hypertext navigation system
  *
@@ -891,6 +891,12 @@
  * via the -cookies command line switch.
  */
 #define SET_COOKIES TRUE
+
+/********************************
+ * If SEND_USERAGENT is set FALSE, Lynx will not send a user-agent string.
+ * You can override this in the 'O'ptions menu.
+ */
+#define SEND_USERAGENT TRUE
 
 /*******************************
  * If ACCEPT_ALL_COOKIES is set TRUE, and SET_COOKIES is TRUE, Lynx will
