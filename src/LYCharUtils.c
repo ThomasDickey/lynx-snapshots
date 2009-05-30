@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYCharUtils.c,v 1.99 2009/05/25 13:45:35 tom Exp $
+ * $LynxId: LYCharUtils.c,v 1.100 2009/05/30 11:56:03 tom Exp $
  *
  *  Functions associated with LYCharSets.c and the Lynx version of HTML.c - FM
  *  ==========================================================================
@@ -2113,9 +2113,9 @@ void LYHandleMETA(HTStructured * me, const BOOL *present,
     }
     CTRACE((tfp,
 	    "LYHandleMETA: HTTP-EQUIV=\"%s\" NAME=\"%s\" CONTENT=\"%s\"\n",
-	    (http_equiv ? http_equiv : "NULL"),
-	    (name ? name : "NULL"),
-	    (content ? content : "NULL")));
+	    NONNULL(http_equiv),
+	    NONNULL(name),
+	    NONNULL(content)));
 
     /*
      * Make sure we have META name/value pairs to handle.  - FM

@@ -1,5 +1,5 @@
 /*
- * $LynxId: GridText.c,v 1.170 2009/05/29 00:04:24 tom Exp $
+ * $LynxId: GridText.c,v 1.171 2009/05/30 12:54:35 tom Exp $
  *
  *		Character grid hypertext object
  *		===============================
@@ -2695,7 +2695,6 @@ static HTLine *insert_blanks_in_line(HTLine *line, int line_number,
 	/* line->size is in bytes, so it may be larger than needed... */
 	int curlim = (ip < ninserts
 		      ? oldpos[ip]
-	/* Include'em all! */
 		      : ((int) line->size <= MAX_LINE
 			 ? MAX_LINE + 1
 			 : (int) line->size + 1));
@@ -3196,13 +3195,16 @@ static void split_line(HText *text, unsigned split)
 	spare = WRAP_COLS(text)
 	    - (int) style->rightIndent
 	    - indent
+	    + ctrl_chars_on_previous_line
 	    - LYstrExtent2(previous->data, previous->size);
 	if (spare < 0 && LYwideLines)	/* Can be wider than screen */
 	    spare = 0;
 #else
-	spare = WRAP_COLS(text) -
-	    (int) style->rightIndent - indent +
-	    ctrl_chars_on_previous_line - previous->size;
+	spare = WRAP_COLS(text)
+	    - (int) style->rightIndent
+	    - indent
+	    + ctrl_chars_on_previous_line
+	    - previous->size;
 	if (spare < 0 && LYwideLines)	/* Can be wider than screen */
 	    spare = 0;
 
