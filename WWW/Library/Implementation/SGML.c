@@ -1,5 +1,5 @@
 /*
- * $LynxId: SGML.c,v 1.130 2009/05/25 18:17:36 tom Exp $
+ * $LynxId: SGML.c,v 1.131 2009/05/30 11:21:28 tom Exp $
  *
  *			General SGML Parser code		SGML.c
  *			========================
@@ -2359,13 +2359,31 @@ static void SGML_character(HTStream *context, char c_in)
 		testlast >= 0 && !testtag->name[testlast]) {
 #ifdef USE_PRETTYSRC
 		if (psrc_view) {
+		    char *trailing = NULL;
+
+		    if (context->trailing_spaces) {
+			StrAllocCopy(trailing,
+				     string->data
+				     + string->size
+				     - 1
+				     - context->trailing_spaces);
+			trailing[context->trailing_spaces] = '\0';
+		    }
+
 		    PSRCSTART(abracket);
 		    PUTS("</");
 		    PSRCSTOP(abracket);
 		    PSRCSTART(tag);
+
 		    strcpy(string->data, context->current_tag->name);
 		    transform_tag(context, string);
 		    PUTS(string->data);
+
+		    if (trailing) {
+			PUTS(trailing);
+			FREE(trailing);
+		    }
+
 		    PSRCSTOP(tag);
 		    PSRCSTART(abracket);
 		    PUTC('>');

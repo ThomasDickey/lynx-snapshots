@@ -1,9 +1,14 @@
--- $LynxId: CHANGES,v 1.410 2009/05/29 00:20:08 tom Exp $
+-- $LynxId: CHANGES,v 1.412 2009/05/30 12:57:46 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
 2009-05-25 (2.8.7pre.5)
+* add missing ctrl_chars_on_previous_line when computing 'spare' value in
+  split_line() for the wide-curses configuration.  The justified line was
+  shorter than expected when justifying text -TD
+* fix a special case of trailing whitespace not shown in pretty source, at the
+  end of a closing tag -TD
 * remove "Bad HTML" warning for buttons outside a form, since those can be
   inline, according to the HTML 4 DTD -TD
 * provide navigation to script-buttons, to make them more visible, showing
