@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYrcFile.h,v 1.31 2009/05/22 00:19:45 tom Exp $
+ * $LynxId: LYrcFile.h,v 1.33 2009/06/07 16:56:00 tom Exp $
  */
 #ifndef LYRCFILE_H
 #define LYRCFILE_H
@@ -21,6 +21,7 @@
 #define RC_ASSUME_UNREC_CHARSET         "assume_unrec_charset"
 #define RC_AUTO_SESSION                 "auto_session"
 #define RC_AUTO_UNCACHE_DIRLISTS        "auto_uncache_dirlists"
+#define RC_BAD_HTML                     "bad_html"
 #define RC_BIBP_BIBHOST                 "bibp_bibhost"
 #define RC_BIBP_GLOBALSERVER            "bibp_globalserver"
 #define RC_BLOCK_MULTI_BOOKMARKS        "block_multi_bookmarks"
@@ -218,6 +219,7 @@
 #define RC_SOURCE_CACHE_FOR_ABORTED     "source_cache_for_aborted"
 #define RC_SSL_CERT_FILE                "ssl_cert_file"
 #define RC_STARTFILE                    "startfile"
+#define RC_STATUS_BUFFER_SIZE           "status_buffer_size"
 #define RC_STRIP_DOTDOT_URLS            "strip_dotdot_urls"
 #define RC_SUBSTITUTE_UNDERSCORES       "substitute_underscores"
 #define RC_SUB_BOOKMARKS                "sub_bookmarks"

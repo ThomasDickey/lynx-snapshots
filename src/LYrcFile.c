@@ -1,4 +1,4 @@
-/* $LynxId: LYrcFile.c,v 1.77 2009/05/22 00:26:25 tom Exp $ */
+/* $LynxId: LYrcFile.c,v 1.81 2009/06/07 17:11:00 tom Exp $ */
 #include <HTUtils.h>
 #include <HTFTP.h>
 #include <LYUtils.h>
@@ -24,6 +24,14 @@ static Config_Enum tbl_DTD_recovery[] = {
     { "sortasgml",	TRUE },
     { "tagsoup",	FALSE },
     { NULL,		-1 },
+};
+
+static Config_Enum tbl_bad_html[] = {
+    { "ignore",		BAD_HTML_IGNORE	 },
+    { "trace",		BAD_HTML_TRACE	 },
+    { "message",	BAD_HTML_MESSAGE },
+    { "warn",		BAD_HTML_WARN	 },
+    { NULL,		-1		 }
 };
 
 #ifdef DIRED_SUPPORT
@@ -329,6 +337,8 @@ Lynx will use the personal email address.  Set anonftp_password\n\
 to a different value if you choose.\n\
 ")),
 #endif
+    MAYBE_ENU(RC_BAD_HTML,              cfg_bad_html,      tbl_bad_html,
+	      MSG_ENABLE_LYNXRC),
     PARSE_STR(RC_BOOKMARK_FILE,         bookmark_page,     N_("\
 bookmark_file specifies the name and location of the default bookmark\n\
 file into which the user can paste links for easy access at a later\n\

@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYReadCFG.c,v 1.138 2009/04/07 00:13:11 tom Exp $
+ * $LynxId: LYReadCFG.c,v 1.139 2009/06/07 16:57:29 tom Exp $
  */
 #ifndef NO_RULES
 #include <HTRules.h>
@@ -861,6 +861,14 @@ static int referer_with_query_fun(char *value)
     return 0;
 }
 
+static int status_buffer_size_fun(char *value)
+{
+    status_buf_size = atoi(value);
+    if (status_buf_size < 2)
+	status_buf_size = 2;
+    return 0;
+}
+
 static int suffix_fun(char *value)
 {
     char *mime_type, *p;
@@ -1556,6 +1564,7 @@ static Config_Type Config_Table [] =
 #endif
      PARSE_STR(RC_SSL_CERT_FILE,        SSL_cert_file),
      PARSE_STR(RC_STARTFILE,            startfile),
+     PARSE_FUN(RC_STATUS_BUFFER_SIZE,   status_buffer_size_fun),
      PARSE_SET(RC_STRIP_DOTDOT_URLS,    LYStripDotDotURLs),
      PARSE_SET(RC_SUBSTITUTE_UNDERSCORES, use_underscore),
      PARSE_FUN(RC_SUFFIX,               suffix_fun),

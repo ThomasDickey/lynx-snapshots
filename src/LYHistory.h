@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYHistory.h,v 1.19 2008/02/11 01:05:04 tom Exp $
+ * $LynxId: LYHistory.h,v 1.20 2009/06/07 16:57:13 tom Exp $
  */
 #ifndef LYHISTORY_H
 #define LYHISTORY_H
@@ -31,6 +31,7 @@ extern "C" {
 
     extern HTList *Visited_Links;
     extern int nhist_extra;
+    extern int status_buf_size;
 
 #ifdef __cplusplus
 }

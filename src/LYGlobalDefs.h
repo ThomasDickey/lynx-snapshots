@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYGlobalDefs.h,v 1.119 2009/05/22 00:18:05 tom Exp $
+ * $LynxId: LYGlobalDefs.h,v 1.120 2009/06/07 16:01:08 tom Exp $
  *
  * global variable definitions
  */
@@ -67,6 +67,13 @@ extern "C" {
 #endif				/* !VMS */
     extern char *ftp_format;
 
+    typedef enum {
+	BAD_HTML_IGNORE = 0
+	,BAD_HTML_TRACE
+	,BAD_HTML_MESSAGE
+	,BAD_HTML_WARN
+    } enumBadHtml;
+
 #ifdef DIRED_SUPPORT
 
     typedef enum {
@@ -89,6 +96,7 @@ extern "C" {
     extern BOOLEAN no_dired_support;
     extern HTList *tagged;
     extern int LYAutoUncacheDirLists;
+    extern int cfg_bad_html;	/* enumBadHtml */
     extern int dir_list_style;	/* enumDirListStyle */
     extern int dir_list_order;	/* enumDirListOrder */
 
