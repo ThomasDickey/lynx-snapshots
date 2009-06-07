@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMain.c,v 1.202 2009/05/28 21:37:03 tom Exp $
+ * $LynxId: LYMain.c,v 1.203 2009/06/07 16:01:30 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTP.h>
@@ -107,6 +107,7 @@ BOOLEAN lynx_edit_mode = FALSE;
 BOOLEAN no_dired_support = FALSE;
 HTList *tagged = NULL;
 int LYAutoUncacheDirLists = 2;	/* default dired uncaching behavior */
+int cfg_bad_html = BAD_HTML_WARN;
 int dir_list_order = ORDER_BY_NAME;
 int dir_list_style = MIXED_STYLE;
 

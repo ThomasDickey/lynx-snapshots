@@ -1,4 +1,4 @@
-/* $LynxId: LYOptions.c,v 1.130 2009/05/22 00:47:15 tom Exp $ */
+/* $LynxId: LYOptions.c,v 1.133 2009/06/07 18:24:50 tom Exp $ */
 #include <HTUtils.h>
 #include <HTFTP.h>
 #include <HTTP.h>		/* 'reloading' flag */
@@ -2277,6 +2277,16 @@ static OptValues DTD_type_values[] =
     {0, 0, 0}
 };
 
+static const char *bad_html_string = RC_BAD_HTML;
+static OptValues bad_html_values[] =
+{
+    {BAD_HTML_IGNORE, N_("Ignore"), "ignore"},
+    {BAD_HTML_TRACE, N_("Add to trace-file"), "trace"},
+    {BAD_HTML_MESSAGE, N_("Add to LYNXMESSAGES"), "message"},
+    {BAD_HTML_WARN, N_("Warn, point to trace-file"), "warn"},
+    {0, 0, 0}
+};
+
 static const char *select_popups_string = RC_SELECT_POPUPS;
 static const char *images_string = "images";
 static const char *images_ignore_all_string = N_("ignore");
@@ -2433,8 +2443,8 @@ static const char *user_agent_string = RC_USERAGENT;
 
 #define PutCheckBox(fp, Name, Value, disable) \
 	fprintf(fp,\
-	"<input type=\"checkbox\" name=\"%s\" value=\"%s\" %s>\n",\
-		Name, Value ? "true" : "false", disable_all?disabled_string:disable)
+	"<input type=\"checkbox\" name=\"%s\" %s %s>\n",\
+		Name, Value ? "checked" : "", disable_all?disabled_string:disable)
 
 #define PutTextInput(fp, Name, Value, Size, disable) \
 	fprintf(fp,\
@@ -2698,6 +2708,11 @@ int postoptions(DocInfo *newdoc)
 	return (NOT_FOUND);
     }
 
+    /*
+     * Checkbox will be missing from data if unchecked.
+     */
+    LYSendUserAgent = FALSE;
+
     for (i = 0; data[i].tag != NULL; i++) {
 	/*
 	 * This isn't really for security, but rather for avoiding that the
@@ -2844,6 +2859,12 @@ int postoptions(DocInfo *newdoc)
 		HTSwitchDTD(!Old_DTD);
 		need_reload = TRUE;
 	    }
+	}
+
+	/* Bad HTML warnings: SELECT */
+	if (!strcmp(data[i].tag, bad_html_string)
+	    && GetOptValues(bad_html_values, data[i].value, &code)) {
+	    cfg_bad_html = code;
 	}
 
 	/* Select Popups: ON/OFF */
@@ -3089,6 +3110,11 @@ int postoptions(DocInfo *newdoc)
 		StrAllocCopy(language, data[i].value);
 		need_end_reload = TRUE;
 	    }
+	}
+
+	/* Send User Agent: INPUT */
+	if (!strcmp(data[i].tag, send_user_agent_string)) {
+	    LYSendUserAgent = !strcasecomp(data[i].value, "ON");
 	}
 
 	/* User Agent: INPUT */
@@ -3751,6 +3777,12 @@ static int gen_options(char **newfile)
     PutLabel(fp0, gettext("HTML error recovery"), DTD_recovery_string);
     BeginSelect(fp0, DTD_recovery_string);
     PutOptValues(fp0, Old_DTD, DTD_type_values);
+    EndSelect(fp0);
+
+    /* Bad HTML messages: SELECT */
+    PutLabel(fp0, gettext("Bad HTML messages"), bad_html_string);
+    BeginSelect(fp0, bad_html_string);
+    PutOptValues(fp0, cfg_bad_html, bad_html_values);
     EndSelect(fp0);
 
     /* Show Images: SELECT */

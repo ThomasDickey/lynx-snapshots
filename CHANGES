@@ -1,7 +1,16 @@
--- $LynxId: CHANGES,v 1.413 2009/06/07 00:36:40 tom Exp $
+-- $LynxId: CHANGES,v 1.417 2009/06/07 18:35:23 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
+
+2009-06-?? (2.8.7pre.6)
+* update lynx.pot file -TD
+* add "Bad HTML messages" to Options menu, letting the user disable the
+  warning message, write the detailed messages to the LYNXMESSAGES: status
+  buffer (suggested by BL) -TD
+* finish checkbox for send-useragent from pre.3 changes -TD
+* make the size of LYNXMESSAGES configurable in lynx.cfg with
+  STATUS_BUFFER_SIZE -TD
 
 2009-06-06 (2.8.7pre.5)
 * add missing ctrl_chars_on_previous_line when computing 'spare' value in

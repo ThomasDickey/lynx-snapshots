@@ -1,4 +1,4 @@
-/* $LynxId: LYStrings.c,v 1.165 2009/03/17 23:40:17 tom Exp $ */
+/* $LynxId: LYStrings.c,v 1.166 2009/06/07 19:32:16 tom Exp $ */
 #include <HTUtils.h>
 #include <HTCJK.h>
 #include <UCAux.h>
@@ -5323,7 +5323,7 @@ int LYscanFloat2(const char **source, float *result)
 	    }
 	}
 	if (src != 0 && *src != '\0' && strchr(" \t+", *src) == 0) {
-	    char *extra = malloc(2 + strlen(src));
+	    char *extra = (char *) malloc(2 + strlen(src));
 
 	    if (extra != 0) {
 		extra[0] = '1';
