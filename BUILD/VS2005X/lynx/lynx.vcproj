@@ -41,7 +41,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\lynx;&quot;$(SolutionDir)..\..\..&quot;;&quot;$(SolutionDir)..\..\..\lib&quot;;&quot;$(SolutionDir)..\..\..\WWW\Library\Implementation&quot;;&quot;$(SolutionDir)..\..\..\src&quot;;&quot;$(SolutionDir)..\..\..\src\chrtrans&quot;"
-				PreprocessorDefinitions="WIN32;_CONSOLE;HAVE_CONFIG_H;DONT_HAVE_TM_GMTOFF"
+				PreprocessorDefinitions="WIN32;_CONSOLE;HAVE_CONFIG_H;DONT_HAVE_TM_GMTOFF;_WIN_CC"
 				GeneratePreprocessedFile="0"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -62,9 +62,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="pdcurses.lib zlib.lib wsock32.lib user32.lib"
+				AdditionalDependencies="pdcurses.lib zlib.lib wsock32.lib user32.lib advapi32.lib"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="&quot;$(VcInstallDir)lib&quot;;&quot;$(SolutionDir)..\..\..\lib&quot;"
+				AdditionalLibraryDirectories="&quot;$(VcInstallDir)lib&quot;;&quot;$(SolutionDir)\lib&quot;;&quot;$(SolutionDir)..\..\..\lib&quot;"
 				IgnoreDefaultLibraryNames="libc;libcmt"
 				GenerateDebugInformation="true"
 				SubSystem="1"
@@ -121,7 +121,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalIncludeDirectories="..\lynx;&quot;$(SolutionDir)..\..\..&quot;;&quot;$(SolutionDir)..\..\..\lib&quot;;&quot;$(SolutionDir)..\..\..\WWW\Library\Implementation&quot;;&quot;$(SolutionDir)..\..\..\src&quot;;&quot;$(SolutionDir)..\..\..\src\chrtrans&quot;"
-				PreprocessorDefinitions="WIN32;_CONSOLE;_MBCS;HAVE_CONFIG_H;DONT_HAVE_TM_GMTOFF"
+				PreprocessorDefinitions="WIN32;_CONSOLE;_MBCS;HAVE_CONFIG_H;DONT_HAVE_TM_GMTOFF;_WIN_CC"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
@@ -139,9 +139,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="pdcurses.lib zlib.lib wsock32.lib user32.lib"
+				AdditionalDependencies="pdcurses.lib zlib.lib wsock32.lib user32.lib advapi32.lib"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="&quot;$(VcInstallDir)lib&quot;;&quot;$(SolutionDir)..\..\..\lib&quot;"
+				AdditionalLibraryDirectories="&quot;$(VcInstallDir)lib&quot;;&quot;$(SolutionDir)\lib&quot;;&quot;$(SolutionDir)..\..\..\lib&quot;"
 				IgnoreDefaultLibraryNames="libc;libcmt"
 				GenerateDebugInformation="true"
 				SubSystem="1"

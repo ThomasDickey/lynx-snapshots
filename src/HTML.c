@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTML.c,v 1.128 2009/06/07 19:05:55 tom Exp $
+ * $LynxId: HTML.c,v 1.129 2009/06/23 19:47:33 tom Exp $
  *
  *		Structured stream to Rich hypertext converter
  *		============================================
@@ -4616,11 +4616,7 @@ static int HTML_start_element(HTStructured * me, int element_number,
 	     */
 	    if (me->inTEXTAREA) {
 		if (LYBadHTML(me)) {
-		    char *msg = NULL;
-
-		    HTSprintf0(&msg, "Bad HTML: Missing TEXTAREA end tag.\n");
-		    LYShowBadHTML(msg);
-		    FREE(msg);
+		    LYShowBadHTML("Bad HTML: Missing TEXTAREA end tag.\n");
 		}
 	    }
 
@@ -5077,12 +5073,7 @@ static int HTML_start_element(HTStructured * me, int element_number,
 	 */
 	if (me->inSELECT) {
 	    if (LYBadHTML(me)) {
-		char *msg = NULL;
-
-		HTSprintf0(&msg,
-			   "Bad HTML: SELECT start tag in SELECT element.  Faking SELECT end tag. *****\n");
-		LYShowBadHTML(msg);
-		FREE(msg);
+		LYShowBadHTML("Bad HTML: SELECT start tag in SELECT element.  Faking SELECT end tag. *****\n");
 	    }
 	    if (me->sp->tag_number != HTML_SELECT) {
 		SET_SKIP_STACK(HTML_SELECT);
@@ -5111,12 +5102,7 @@ static int HTML_start_element(HTStructured * me, int element_number,
 	     */
 	    if (!me->inSELECT) {
 		if (LYBadHTML(me)) {
-		    char *msg = NULL;
-
-		    HTSprintf0(&msg,
-			       "Bad HTML: OPTION tag not within SELECT tag\n");
-		    LYShowBadHTML(msg);
-		    FREE(msg);
+		    LYShowBadHTML("Bad HTML: OPTION tag not within SELECT tag\n");
 		}
 
 		/*
@@ -5870,11 +5856,7 @@ static int HTML_end_element(HTStructured * me, int element_number,
      */
     if (me->inTEXTAREA && element_number != HTML_TEXTAREA) {
 	if (LYBadHTML(me)) {
-	    char *msg = NULL;
-
-	    HTSprintf0(&msg, "Bad HTML: Missing TEXTAREA end tag\n");
-	    LYShowBadHTML(msg);
-	    FREE(msg);
+	    LYShowBadHTML("Bad HTML: Missing TEXTAREA end tag\n");
 	}
     }
 
@@ -6520,12 +6502,7 @@ static int HTML_end_element(HTStructured * me, int element_number,
 		    }
 		} else {
 		    if (LYBadHTML(me)) {
-			char *msg = NULL;
-
-			HTSprintf0(&msg,
-				   "Bad HTML: Unmatched OBJECT start and end tags.  Discarding content.\n");
-			LYShowBadHTML(msg);
-			FREE(msg);
+			LYShowBadHTML("Bad HTML: Unmatched OBJECT start and end tags.  Discarding content.\n");
 		    }
 		    goto End_Object;
 		}
@@ -6764,11 +6741,7 @@ static int HTML_end_element(HTStructured * me, int element_number,
 	 */
 	if (!me->inFORM) {
 	    if (LYBadHTML(me)) {
-		char *msg = NULL;
-
-		HTSprintf0(&msg, "Bad HTML: Unmatched FORM end tag\n");
-		LYShowBadHTML(msg);
-		FREE(msg);
+		LYShowBadHTML("Bad HTML: Unmatched FORM end tag\n");
 	    }
 	}
 	EMIT_IFDEF_EXP_JUSTIFY_ELTS(form_in_htext = FALSE);
@@ -6784,12 +6757,7 @@ static int HTML_end_element(HTStructured * me, int element_number,
 	 */
 	if (me->inSELECT) {
 	    if (LYBadHTML(me)) {
-		char *msg = NULL;
-
-		HTSprintf0(&msg,
-			   "Bad HTML: Open SELECT at FORM end. Faking SELECT end tag. *****\n");
-		LYShowBadHTML(msg);
-		FREE(msg);
+		LYShowBadHTML("Bad HTML: Open SELECT at FORM end. Faking SELECT end tag. *****\n");
 	    }
 	    if (me->sp->tag_number != HTML_SELECT) {
 		SET_SKIP_STACK(HTML_SELECT);
@@ -6842,11 +6810,7 @@ static int HTML_end_element(HTStructured * me, int element_number,
 	     */
 	    if (!me->inTEXTAREA) {
 		if (LYBadHTML(me)) {
-		    char *msg = NULL;
-
-		    HTSprintf0(&msg, "Bad HTML: Unmatched TEXTAREA end tag\n");
-		    LYShowBadHTML(msg);
-		    FREE(msg);
+		    LYShowBadHTML("Bad HTML: Unmatched TEXTAREA end tag\n");
 		}
 		break;
 	    }
@@ -7043,12 +7007,7 @@ static int HTML_end_element(HTStructured * me, int element_number,
 	     */
 	    if (!me->inSELECT) {
 		if (LYBadHTML(me)) {
-		    char *msg = NULL;
-
-		    HTSprintf0(&msg,
-			       "Bad HTML: Unmatched SELECT end tag *****\n");
-		    LYShowBadHTML(msg);
-		    FREE(msg);
+		    LYShowBadHTML("Bad HTML: Unmatched SELECT end tag *****\n");
 		}
 		break;
 	    }
@@ -7068,12 +7027,7 @@ static int HTML_end_element(HTStructured * me, int element_number,
 	     */
 	    if (!me->inFORM) {
 		if (LYBadHTML(me)) {
-		    char *msg = NULL;
-
-		    HTSprintf0(&msg,
-			       "Bad HTML: SELECT end tag not within FORM element *****\n");
-		    LYShowBadHTML(msg);
-		    FREE(msg);
+		    LYShowBadHTML("Bad HTML: SELECT end tag not within FORM element *****\n");
 		}
 		/*
 		 * Hopefully won't crash, so we'll ignore it.  - kw
@@ -7386,12 +7340,7 @@ static void HTML_free(HTStructured * me)
 	     * - kw
 	     */
 	    if (LYBadHTML(me)) {
-		char *msg = NULL;
-
-		HTSprintf0(&msg,
-			   "Bad HTML: SELECT or OPTION not ended properly *****\n");
-		LYShowBadHTML(msg);
-		FREE(msg);
+		LYShowBadHTML("Bad HTML: SELECT or OPTION not ended properly *****\n");
 	    }
 	    HTChunkTerminate(&me->option);
 	    /*
@@ -7410,12 +7359,7 @@ static void HTML_free(HTStructured * me)
 	     * - kw
 	     */
 	    if (LYBadHTML(me)) {
-		char *msg = NULL;
-
-		HTSprintf0(&msg,
-			   "Bad HTML: TEXTAREA not used properly *****\n");
-		LYShowBadHTML(msg);
-		FREE(msg);
+		LYShowBadHTML("Bad HTML: TEXTAREA not used properly *****\n");
 	    }
 	    HTChunkTerminate(&me->textarea);
 	    /*
@@ -7461,12 +7405,7 @@ static void HTML_free(HTStructured * me)
 	 * of a still-open form, something must have gone very wrong.  - kw
 	 */
 	if (LYBadHTML(me)) {
-	    char *msg = NULL;
-
-	    HTSprintf0(&msg,
-		       "Bad HTML: SELECT or OPTION not ended properly *****\n");
-	    LYShowBadHTML(msg);
-	    FREE(msg);
+	    LYShowBadHTML("Bad HTML: SELECT or OPTION not ended properly *****\n");
 	}
 	if (TRACE) {
 	    HTChunkTerminate(&me->option);
@@ -7482,12 +7421,7 @@ static void HTML_free(HTStructured * me)
 	 * kw
 	 */
 	if (LYBadHTML(me)) {
-	    char *msg = NULL;
-
-	    HTSprintf0(&msg,
-		       "Bad HTML: TEXTAREA not used properly *****\n");
-	    LYShowBadHTML(msg);
-	    FREE(msg);
+	    LYShowBadHTML("Bad HTML: TEXTAREA not used properly *****\n");
 	}
 	if (TRACE) {
 	    HTChunkTerminate(&me->textarea);
