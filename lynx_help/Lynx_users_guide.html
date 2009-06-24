@@ -1,5 +1,5 @@
 <!DOCTYPE html PUBLIC "-//IETF//DTD HTML 3.0//EN">
-<!-- $LynxId: Lynx_users_guide.html,v 1.104 2009/05/25 21:23:26 tom Exp $ -->
+<!-- $LynxId: Lynx_users_guide.html,v 1.105 2009/06/23 19:42:12 tom Exp $ -->
 <html>
 <head>
 <title>Lynx Users Guide v2.8.6</title>
@@ -533,6 +533,7 @@ HREF="keystrokes/option_help.html">HELP!</A>
   Show scrollbar                   : [OFF]
   Popups for select fields         : [ON.]
   HTML error recovery (!)          : [strict (SortaSGML mode)]
+  Bad HTML messages (!)            : [Warn, point to trace-file]
   Show images (!)                  : [as labels]
   Verbose images                   : [OFF..........]
 
@@ -642,6 +643,21 @@ return to Lynx or the '<em>&gt;</em>' command to save the options to a
         <dt>Lynx can save and restore useful information about
             your browsing history.
             Use this setting to enable or disable the feature.
+
+   <dt>Bad HTML messages
+        <dd>Suppress or redirect Lynx's messages about "Bad HTML":
+        <dl>
+        <dt>Ignore
+            <dd>do not warn; no details are written to the trace-file.
+        <dt>Add to trace-file
+            <dd>add the detailed warning message to the trace-file.
+        <dt>Add to LYNXMESSAGES
+            <dd>add the detailed warning message to the message page at
+                "LYNXMESSAGES:".
+        <dt>Warn, point to trace-file
+            <dd>show a warning message on the status line; the complete
+                message is written to the trace-file.
+        </dl>
 
    <dt>Bookmark file
         <dd>When multi-bookmarks is OFF, this is the filename and location
@@ -782,7 +798,7 @@ return to Lynx or the '<em>&gt;</em>' command to save the options to a
           </dl>
 
    <dt>Local directory sort order<dd>
-          The Options Form also allows you to sort by the file attributes.
+          <dd>The Options Form also allows you to sort by the file attributes.
           <dl>
              <dt>By name
                 <dd>by filename (the default)
