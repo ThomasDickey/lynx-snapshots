@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYUtils.c,v 1.187 2009/05/25 21:46:24 tom Exp $
+ * $LynxId: LYUtils.c,v 1.188 2009/08/25 22:36:48 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTCP.h>
@@ -3212,7 +3212,7 @@ void change_sug_filename(char *fname)
 	    *(cp--) = '\0';
 	}
     }
-
+#ifdef VMS
     /*
      * Trim off VMS device and/or directory specs, if present.
      */
@@ -3224,7 +3224,6 @@ void change_sug_filename(char *fname)
 	}
 	*cp = '\0';
     }
-#ifdef VMS
     /*
      * Replace illegal or problem characters.
      */

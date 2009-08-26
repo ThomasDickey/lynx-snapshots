@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYLocal.c,v 1.86 2009/01/01 21:52:45 tom Exp $
+ * $LynxId: LYLocal.c,v 1.95 2009/08/26 10:47:37 tom Exp $
  *
  *  Routines to manipulate the local filesystem.
  *  Written by: Rick Mallett, Carleton University
@@ -583,10 +583,11 @@ static BOOLEAN not_already_exists(char *name)
     return FALSE;
 }
 
-static BOOLEAN dir_has_same_owner(struct stat *info, int owner)
+static BOOLEAN dir_has_same_owner(struct stat *dst_info,
+				  struct stat *src_info)
 {
-    if (S_ISDIR(info->st_mode)) {
-	if ((int) info->st_uid == owner) {
+    if (S_ISDIR(dst_info->st_mode)) {
+	if (dst_info->st_uid == src_info->st_uid) {
 	    return TRUE;
 	} else {
 	    HTAlert(gettext("Destination has different owner!  Request denied."));
@@ -595,6 +596,24 @@ static BOOLEAN dir_has_same_owner(struct stat *info, int owner)
 	HTAlert(gettext("Destination is not a valid directory!  Request denied."));
     }
     return FALSE;
+}
+
+/*
+ * Make sure the source and target are not the same location.
+ */
+static BOOLEAN same_location(struct stat *dst_info,
+			     struct stat *src_info)
+{
+    BOOLEAN result = FALSE;
+
+#ifdef UNIX
+    if (src_info->st_dev == dst_info->st_dev &&
+	src_info->st_ino == dst_info->st_ino) {
+	HTAlert(gettext("Source and destination are the same location!  Request ignored!"));
+	result = TRUE;
+    }
+#endif
+    return result;
 }
 
 /*
@@ -649,164 +668,120 @@ static int remove_tagged(void)
     return count;
 }
 
+static char *parse_directory(char *path)
+{
+    char *result;
+
+    if (path) {
+	path = strip_trailing_slash(path);
+	path = HTParse(".", path, PARSE_PATH + PARSE_PUNCTUATION);
+	result = HTURLPath_toFile(path, TRUE, FALSE);
+	FREE(path);
+    } else {			/* Last resort, should never happen. */
+	result = HTURLPath_toFile(".", TRUE, FALSE);
+    }
+    return result;
+}
+
 /*
- * Move all tagged files and directories to a new location.  Input is current
- * directory.  The tests in this function can, at best, prevent some user
- * mistakes - anybody who relies on them for security is seriously misguided. 
- * If a user has enough permissions to move a file somewhere, the same uid with
- * Lynx & dired can do the same thing.
+ * Move all tagged files and directories to a new location.
+ *
+ * The 'testpath' parameter is the current location, used for resolving
+ * relative target specifications.
  */
 static int modify_tagged(char *testpath)
 {
     char *cp;
-    dev_t dev;
-    ino_t inode;
-    int owner;
-    char tmpbuf[MAX_LINE];
-    char *savepath;
-    char *srcpath = NULL;
-    struct stat dir_info;
+    char given_target[MAX_LINE];
+    char *dst_path = NULL;
+    char *src_path = NULL;
+    char *old_path = NULL;
+    struct stat src_info;
+    struct stat dst_info;
     int count = 0;
     HTList *tag;
+
+    CTRACE((tfp, "modify_tagged(%s)\n", testpath));
 
     if (HTList_isEmpty(tagged))	/* should never happen */
 	return 0;
 
     _statusline(gettext("Enter new location for tagged items: "));
 
-    tmpbuf[0] = '\0';
-    LYgetstr(tmpbuf, VISIBLE, sizeof(tmpbuf), NORECALL);
-    if (strlen(tmpbuf)) {
-	/*
-	 * Determine the ownership of the current location.
-	 */
-	/*
-	 * This test used to always fail from the dired menu...  changed to
-	 * something that hopefully makes more sense - KW
-	 */
-	if (non_empty(testpath) && 0 != strcmp(testpath, "/")) {
-	    /*
-	     * testpath passed in and is not empty and not a single "/" (which
-	     * would probably be bogus) - use it.
-	     */
-	    cp = testpath;
-	} else {
-	    /*
-	     * Prepare to get directory path from one of the tagged files.
-	     */
-	    cp = (char *) HTList_lastObject(tagged);
-	    testpath = NULL;	/* Won't be needed any more in this function,
-				   set to NULL as a flag. */
-	}
-
-	if (testpath == NULL) {
-	    /*
-	     * Get the directory containing the file or subdir.
-	     */
-	    if (cp) {
-		cp = strip_trailing_slash(cp);
-		cp = HTParse(".", cp, PARSE_PATH + PARSE_PUNCTUATION);
-		savepath = HTURLPath_toFile(cp, TRUE, FALSE);
-		FREE(cp);
-	    } else {		/* Last resort, should never happen. */
-		savepath = HTURLPath_toFile(".", TRUE, FALSE);
-	    }
-	} else {
-	    if (!strncmp(cp, "file://localhost", 16)) {
-		cp += 16;
-	    } else if (isFILE_URL(cp)) {
-		cp += LEN_FILE_URL;
-	    }
-	    savepath = HTURLPath_toFile(cp, TRUE, FALSE);
-	}
-
-	if (!ok_stat(savepath, &dir_info)) {
-	    FREE(savepath);
-	    return 0;
-	}
-
-	/*
-	 * Save the owner of the current location for later use.  Also save the
-	 * device and inode for location checking/
-	 */
-	dev = dir_info.st_dev;
-	inode = dir_info.st_ino;
-	owner = (int) dir_info.st_uid;
-
+    given_target[0] = '\0';
+    LYgetstr(given_target, VISIBLE, sizeof(given_target), NORECALL);
+    if (strlen(given_target)) {
 	/*
 	 * Replace ~/ references to the home directory.
 	 */
-	if (LYIsTilde(tmpbuf[0]) && LYIsPathSep(tmpbuf[1])) {
+	if (LYIsTilde(given_target[0]) && LYIsPathSep(given_target[1])) {
 	    char *cp1 = NULL;
 
 	    StrAllocCopy(cp1, Home_Dir());
-	    StrAllocCat(cp1, (tmpbuf + 1));
-	    if (strlen(cp1) > (sizeof(tmpbuf) - 1)) {
+	    StrAllocCat(cp1, (given_target + 1));
+	    if (strlen(cp1) > (sizeof(given_target) - 1)) {
 		HTAlert(gettext("Path too long"));
-		FREE(savepath);
 		FREE(cp1);
 		return 0;
 	    }
-	    LYstrncpy(tmpbuf, cp1, sizeof(tmpbuf) - 1);
+	    LYstrncpy(given_target, cp1, sizeof(given_target) - 1);
 	    FREE(cp1);
 	}
 
 	/*
 	 * If path is relative, prefix it with current location.
 	 */
-	if (!LYIsPathSep(tmpbuf[0])) {
-	    LYAddPathSep(&savepath);
-	    StrAllocCat(savepath, tmpbuf);
+	if (!LYIsPathSep(given_target[0])) {
+	    StrAllocCopy(dst_path, testpath);
+	    LYAddPathSep(&dst_path);
+	    StrAllocCat(dst_path, given_target);
 	} else {
-	    StrAllocCopy(savepath, tmpbuf);
+	    StrAllocCopy(dst_path, given_target);
 	}
 
-	/*
-	 * stat() the target location to determine type and ownership.
-	 */
-	if (!ok_stat(savepath, &dir_info)) {
-	    FREE(savepath);
+	if (!ok_stat(dst_path, &dst_info)) {
+	    FREE(dst_path);
 	    return 0;
 	}
 
 	/*
-	 * Make sure the source and target locations are not the same place.
+	 * Determine the ownership of the current location, using the directory
+	 * containing the file or subdir from each of the tagged files.
 	 */
-	if (dev == dir_info.st_dev && inode == dir_info.st_ino) {
-	    HTAlert(gettext("Source and destination are the same location - request ignored!"));
-	    FREE(savepath);
-	    return 0;
-	}
+	for (tag = tagged; (cp = (char *) HTList_nextObject(tag)) != NULL;) {
+	    src_path = parse_directory(cp);
 
-	/*
-	 * Make sure the target location is a directory which is owned by the
-	 * same uid as the owner of the current location.
-	 */
-	if (dir_has_same_owner(&dir_info, owner)) {
-	    count = 0;
-	    tag = tagged;
-
-	    /*
-	     * Move all tagged items to the target location.
-	     */
-	    while ((cp = (char *) HTList_nextObject(tag)) != NULL) {
-		srcpath = HTfullURL_toFile(cp);
-
-		if (move_file(srcpath, savepath) < 0) {
-		    if (count == 0)
-			count = -1;
-		    break;
+	    if (isEmpty(old_path) || strcmp(old_path, src_path)) {
+		if (!ok_stat(src_path, &src_info)
+		    || same_location(&src_info, &dst_info)
+		    || !dir_has_same_owner(&dst_info, &src_info)) {
+		    FREE(src_path);
+		    return 0;
 		}
-		FREE(srcpath);
-		++count;
 	    }
-	    clear_tags();
-	    FREE(srcpath);
+	    StrAllocCopy(old_path, src_path);
+	    FREE(src_path);
 	}
-	FREE(savepath);
-	return count;
+
+	/*
+	 * Move all tagged items to the target location.
+	 */
+	for (tag = tagged; (cp = (char *) HTList_nextObject(tag)) != NULL;) {
+	    src_path = HTfullURL_toFile(cp);
+
+	    if (move_file(src_path, dst_path) < 0) {
+		if (count == 0)
+		    count = -1;
+		break;
+	    }
+	    FREE(src_path);
+	    ++count;
+	}
+	clear_tags();
+	FREE(src_path);
+	FREE(dst_path);
     }
-    return 0;
+    return count;
 }
 
 /*
@@ -872,12 +847,10 @@ static int modify_location(char *testpath)
 {
     const char *cp;
     char *sp;
-    dev_t dev;
-    ino_t inode;
-    int owner;
     char tmpbuf[MAX_LINE];
     char *newpath = NULL;
     char *savepath = NULL;
+    struct stat old_info;
     struct stat dir_info;
     int code = 0;
 
@@ -936,22 +909,12 @@ static int modify_location(char *testpath)
 	/*
 	 * Make sure the source and target have the same owner (uid).
 	 */
-	dev = dir_info.st_dev;
-	inode = dir_info.st_ino;
-	owner = (int) dir_info.st_uid;
+	old_info = dir_info;
 	if (!ok_stat(newpath, &dir_info)) {
 	    code = 0;
-	}
-#ifdef UNIX
-	/*
-	 * Make sure the source and target are not the same location.
-	 */
-	else if (dev == dir_info.st_dev && inode == dir_info.st_ino) {
-	    HTAlert(gettext("Source and destination are the same location!  Request ignored!"));
+	} else if (same_location(&old_info, &dir_info)) {
 	    code = 0;
-	}
-#endif
-	else if (dir_has_same_owner(&dir_info, owner)) {
+	} else if (dir_has_same_owner(&dir_info, &old_info)) {
 	    code = move_file(savepath, newpath);
 	}
 	FREE(newpath);
@@ -978,8 +941,9 @@ int local_modify(DocInfo *doc, char **newpath)
 
 	if (doc->link > (nlinks - count - 1))
 	    doc->link = (nlinks - count - 1);
-	doc->link = (doc->link < 0) ?
-	    0 : doc->link;
+	doc->link = ((doc->link < 0)
+		     ? 0
+		     : doc->link);
 
 	return count;
     } else if (doc->link < 0 || doc->link > nlinks) {
@@ -1010,7 +974,7 @@ int local_modify(DocInfo *doc, char **newpath)
 	FREE(cp);
 
 	if (ans == 'N') {
-	    return (modify_name(testpath));
+	    return modify_name(testpath);
 	} else if (ans == 'L') {
 	    if (modify_location(testpath)) {
 		if (doc->link == (nlinks - 1))
@@ -1211,8 +1175,9 @@ int local_remove(DocInfo *doc)
 	count = remove_tagged();
 	if (doc->link > (nlinks - count - 1))
 	    doc->link = (nlinks - count - 1);
-	doc->link = (doc->link < 0) ?
-	    0 : doc->link;
+	doc->link = ((doc->link < 0)
+		     ? 0
+		     : doc->link);
 	return count;
     } else if (doc->link < 0 || doc->link > nlinks) {
 	return 0;

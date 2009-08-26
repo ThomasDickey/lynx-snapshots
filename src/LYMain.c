@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMain.c,v 1.204 2009/06/30 08:35:34 tom Exp $
+ * $LynxId: LYMain.c,v 1.206 2009/08/25 23:07:22 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTP.h>
@@ -57,7 +57,7 @@
 #include <io.h>
 #endif
 
-#if defined(LOCALE) && !defined(HAVE_LIBINTL_H)
+#if defined(LOCALE) && (!defined(HAVE_LIBINTL_H) || !defined(LC_ALL))
 #undef gettext			/* Solaris locale.h prototypes gettext() */
 #include <locale.h>
 #ifndef HAVE_GETTEXT
@@ -99,7 +99,7 @@ char *ftp_format = NULL;	/* LONG_LIST formatting mask */
 
 #ifdef SYSLOG_REQUESTED_URLS
 char *syslog_txt = NULL;	/* syslog arb text for session */
-BOOLEAN syslog_requested_urls = TRUE;
+BOOLEAN syslog_requested_urls = FALSE;
 #endif
 
 int cfg_bad_html = BAD_HTML_WARN;
