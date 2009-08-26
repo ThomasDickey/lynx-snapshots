@@ -1,7 +1,22 @@
--- $LynxId: CHANGES,v 1.422 2009/07/05 23:24:39 tom Exp $
+-- $LynxId: CHANGES,v 1.428 2009/08/26 10:50:19 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
+
+2009-08-?? (2.8.8dev.1)
+* revise modify_tagged, correcting and extending the source-paths to validate
+  against the target path (report by Jasper) -TD
+* change compiled-in default for SYSLOG_REQUESTED_URLS to false (prompted by
+  Debian #537907) -TD
+* adjust ifdef in change_sug_filename() so that paths containing square
+  brackets are trimmed on VMS only (report by Gaute Strokkenes) -TD
+* amend change to ifdef in LYMain.c (from 2.8.7dev.14), since it prevents build
+  on NetBSD, whose libintl.h does not include locale.h (report by Thomas
+  Klausner) -TD
+* modify configure macro CF_GCC_ATTRIBUTES to make it more self-contained -TD
+* improve configure check for _XOPEN_SOURCE for HPUX 11 to ensure mbstate_t is
+  declared -TD
+* update config.guess (2009-08-19), config.sub (2009-08-19)
 
 2009-07-05 (2.8.7rel.1)
 * update metrics for 2.8.7 release.

@@ -1,4 +1,4 @@
-# $LynxId: makefile.in,v 1.101 2008/09/10 17:22:01 tom Exp $
+# $LynxId: makefile.in,v 1.102 2009/08/25 08:36:27 tom Exp $
 ##makefile for lynx
 
 SHELL		= @CONFIG_SHELL@
@@ -38,7 +38,7 @@ TAR_DOWN	= $(TAR) @TAR_DOWN_OPTIONS@ @TAR_PIPE_OPTIONS@
 
 ## This is the version which we are developing (or, upon release, make this
 ## the same).  Use no dots in the name, since it must work on VMS and MS-DOS.
-VERSION		= 2-8-7
+VERSION		= 2-8-8
 
 ##this is the name of the directory the lynx source code is in.
 ##(e.g., lynx2-8-7, not the full path)
