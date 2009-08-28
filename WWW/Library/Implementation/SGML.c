@@ -1,5 +1,5 @@
 /*
- * $LynxId: SGML.c,v 1.131 2009/05/30 11:21:28 tom Exp $
+ * $LynxId: SGML.c,v 1.132 2009/08/27 10:29:27 tom Exp $
  *
  *			General SGML Parser code		SGML.c
  *			========================
@@ -1668,6 +1668,9 @@ static void SGML_character(HTStream *context, char c_in)
 		    if (clong < 256) {
 			c = ((char) (clong & 0xff));
 		    }
+		    /* lynx does not use left-to-right */
+		    if (clong == 0x200e)
+			return;
 		    goto top1;
 		} else {
 		    /*

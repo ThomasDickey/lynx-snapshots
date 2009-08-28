@@ -1,11 +1,25 @@
--- $LynxId: CHANGES,v 1.428 2009/08/26 10:50:19 tom Exp $
+-- $LynxId: CHANGES,v 1.437 2009/08/27 23:02:56 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
 2009-08-?? (2.8.8dev.1)
-* revise modify_tagged, correcting and extending the source-paths to validate
-  against the target path (report by Jasper) -TD
+* add <sys/types.h> include in socklen_t configure check, from OpenBSD CVS
+* eliminate UCPutUtf8ToBuffer() - redundant -TD
+* use memset's to simplify some initialization in HTML.c, extending a change
+  made in 2.8.7dev.10 (prompted by issue in OpenBSD) -TD 
+* add optional support for IDNA using GNU libidn (Debian #352596) -TD
+* ignore LEFT-TO-RIGHT-MARK (U+200E) in HTML files (Debian #408835) -TD
+* correct check for return-value from gnutls_certificate_verify_peers2(), which
+  in conjunction with unclean internals of gnutls caused caused some sites to
+  be treated as if they were version-1 X.509 CAs (Debian #231609,
+  Ubuntu 293708) -TD
+* revise dired-mode's modify_tagged() function, correcting and extending the
+  source-paths to validate against the target path.  Before, lynx's current
+  working directory was used to validate against target path, i.e., when moving
+  all tagged files to a new location.  Lynx's check to ensure that
+  source/target paths are distinct prevented users from moving tagged files to
+  the current directory (report by Jasper) -TD
 * change compiled-in default for SYSLOG_REQUESTED_URLS to false (prompted by
   Debian #537907) -TD
 * adjust ifdef in change_sug_filename() so that paths containing square

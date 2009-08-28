@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTML.c,v 1.129 2009/06/23 19:47:33 tom Exp $
+ * $LynxId: HTML.c,v 1.130 2009/08/27 21:17:55 tom Exp $
  *
  *		Structured stream to Rich hypertext converter
  *		============================================
@@ -4335,26 +4335,7 @@ static int HTML_start_element(HTStructured * me, int element_number,
 	    int chars;
 
 	    /* init */
-	    I.align = NULL;
-	    I.accept = NULL;
-	    I.checked = NO;
-	    I.iclass = NULL;
-	    I.disabled = NO;
-	    I.error = NULL;
-	    I.height = NULL;
-	    I.id = NULL;
-	    I.lang = NULL;
-	    I.max = NULL;
-	    I.maxlength = NULL;
-	    I.md = NULL;
-	    I.min = NULL;
-	    I.name = NULL;
-	    I.size = 0;
-	    I.src = NULL;
-	    I.type = NULL;
-	    I.value = NULL;
-	    I.width = NULL;
-	    I.accept_cs = NULL;
+	    memset(&I, 0, sizeof(I));
 	    I.name_cs = ATTR_CS_IN;
 	    I.value_cs = ATTR_CS_IN;
 
@@ -5154,26 +5135,7 @@ static int HTML_start_element(HTStructured * me, int element_number,
 		/*
 		 * Inititialize.
 		 */
-		I.align = NULL;
-		I.accept = NULL;
-		I.checked = NO;
-		I.iclass = NULL;
-		I.disabled = NO;
-		I.error = NULL;
-		I.height = NULL;
-		I.id = NULL;
-		I.lang = NULL;
-		I.max = NULL;
-		I.maxlength = NULL;
-		I.md = NULL;
-		I.min = NULL;
-		I.name = NULL;
-		I.size = 0;
-		I.src = NULL;
-		I.type = NULL;
-		I.value = NULL;
-		I.width = NULL;
-		I.accept_cs = NULL;
+		memset(&I, 0, sizeof(I));
 		I.name_cs = -1;
 		I.value_cs = current_char_set;
 

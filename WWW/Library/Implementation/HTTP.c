@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTP.c,v 1.108 2009/05/22 00:47:41 tom Exp $
+ * $LynxId: HTTP.c,v 1.110 2009/08/27 00:56:00 tom Exp $
  *
  * HyperText Tranfer Protocol	- Client implementation		HTTP.c
  * ==========================
@@ -721,7 +721,7 @@ static int HTLoadHTTP(const char *arg,
 	}
 #ifdef USE_GNUTLS_INCL
 	ret = gnutls_certificate_verify_peers2(handle->gnutls_state, &tls_status);
-	if ((ret < 0) || tls_status) {
+	if (ret < 0) {
 	    int flag_continue = 1;
 	    char *msg2;
 
