@@ -297,6 +297,12 @@ II. Compile instructions -- UNIX
   --disable-gopher			(define DISABLE_GOPHER)
 	Do not compile-in code used to connect to GOPHER servers.
 
+  --disable-idna
+	By default, the configure script searches for the GNU idn library,
+	which lets lynx translated URLs which are in UTF-8 to ASCII.  The
+	latter is needed for most network accesses.  Use this option to
+	suppress the feature, e.g., to reduce size.
+
   --disable-included-msgs
 	Do not use included messages, for i18n support.  If NLS support is
 	requested, the configure script will otherwise use the messages in the
@@ -1371,4 +1377,4 @@ VIII. Acknowledgment
 
 -- 1999/04/24 - H. Nelson <lynx-admin@irm.nara.kindai.ac.jp>
 -- vile:txtmode
--- $LynxId: INSTALLATION,v 1.106 2008/12/31 21:37:07 tom Exp $
+-- $LynxId: INSTALLATION,v 1.107 2009/08/27 21:00:43 tom Exp $

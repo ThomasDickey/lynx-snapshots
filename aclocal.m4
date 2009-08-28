@@ -1,4 +1,4 @@
-dnl $LynxId: aclocal.m4,v 1.142 2009/08/25 10:51:47 tom Exp $
+dnl $LynxId: aclocal.m4,v 1.143 2009/08/27 20:25:03 tom Exp $
 dnl Macros for auto-configure script.
 dnl by T.E.Dickey <dickey@invisible-island.net>
 dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
@@ -5497,6 +5497,26 @@ if test "$with_dmalloc" = yes ; then
 	AC_CHECK_HEADER(dmalloc.h,
 		[AC_CHECK_LIB(dmalloc,[dmalloc_debug]ifelse($1,,[],[,$1]))])
 fi
+])dnl
+dnl ---------------------------------------------------------------------------
+dnl CF_WITH_IDNA version: 2 updated: 2009/08/27 16:24:24
+dnl ------------
+dnl Check for libidn, use it if found.
+dnl
+dnl $1 = optional path for headers/library
+AC_DEFUN([CF_WITH_IDNA],[
+  CF_ADD_OPTIONAL_PATH($1)
+
+  CF_FIND_LINKAGE([
+#include <stdio.h>
+#include <idna.h>
+],[
+	char *output = 0;
+    int code = idna_to_ascii_8z("name", &output, IDNA_USE_STD3_ASCII_RULES);
+],idn,[
+	AC_DEFINE(USE_IDNA)
+	LIBS="-lidn $LIBS"
+])
 ])dnl
 dnl ---------------------------------------------------------------------------
 dnl CF_WITH_PATH version: 8 updated: 2007/05/13 13:16:35

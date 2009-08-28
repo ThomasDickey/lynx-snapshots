@@ -1,4 +1,4 @@
-dnl $LynxId: configure.in,v 1.197 2009/06/24 00:01:08 tom Exp $
+dnl $LynxId: configure.in,v 1.200 2009/08/27 22:37:02 tom Exp $
 dnl
 dnl Process this file with autoconf to produce a configure script.
 dnl
@@ -752,7 +752,10 @@ AC_TYPE_OFF_T
 AC_TYPE_PID_T
 AC_TYPE_UID_T
 AC_TYPE_MODE_T
-CF_CHECK_TYPE(socklen_t, int, [#include <sys/socket.h>])
+CF_CHECK_TYPE(socklen_t, int, [
+#include <sys/types.h>
+#include <sys/socket.h>
+])
 CF_TM_GMTOFF
 
 AC_CHECK_SIZEOF(int,4)
@@ -1011,6 +1014,18 @@ CF_ARG_DISABLE(file-upload,
 	[use_file_upload=yes])
 AC_MSG_RESULT($use_file_upload)
 test $use_file_upload != no && AC_DEFINE(USE_FILE_UPLOAD)
+
+dnl --------------------------------------------------------------------------
+AC_MSG_CHECKING(if IDNA support should be used)
+CF_ARG_DISABLE(idna,
+[  --disable-idna          provide IDNA support],
+	[use_idna=$enableval],
+	[use_idna=yes])
+AC_MSG_RESULT($use_idna)
+
+if test "$use_idna" = yes ; then
+	CF_WITH_IDNA($use_idna)
+fi
 
 dnl --------------------------------------------------------------------------
 AC_MSG_CHECKING(if element-justification logic should be used)

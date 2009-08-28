@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYCharUtils.c,v 1.102 2009/06/23 19:44:06 tom Exp $
+ * $LynxId: LYCharUtils.c,v 1.103 2009/08/27 22:07:54 tom Exp $
  *
  *  Functions associated with LYCharSets.c and the Lynx version of HTML.c - FM
  *  ==========================================================================
@@ -983,59 +983,6 @@ void LYGetChartransInfo(HTStructured * me)
 				      UCT_STAGE_STRUCTURED);
 }
 
-/*
- * Given an UCS character code, will fill buffer passed in as q with the code's
- * UTF-8 encoding.
- * If terminate = YES, terminates string on success and returns pointer
- *		       to beginning.
- * If terminate = NO,	does not terminate string, and returns pointer
- *		       next char after the UTF-8 put into buffer.
- * On failure, including invalid code or 7-bit code, returns NULL.
- */
-static char *UCPutUtf8ToBuffer(char *q, UCode_t code, BOOL terminate)
-{
-    char *q_in = q;
-
-    if (!q)
-	return NULL;
-    if (code > 127 && code < 0x7fffffffL) {
-	if (code < 0x800L) {
-	    *q++ = (char) (0xc0 | (code >> 6));
-	    *q++ = (char) (0x80 | (0x3f & (code)));
-	} else if (code < 0x10000L) {
-	    *q++ = (char) (0xe0 | (code >> 12));
-	    *q++ = (char) (0x80 | (0x3f & (code >> 6)));
-	    *q++ = (char) (0x80 | (0x3f & (code)));
-	} else if (code < 0x200000L) {
-	    *q++ = (char) (0xf0 | (code >> 18));
-	    *q++ = (char) (0x80 | (0x3f & (code >> 12)));
-	    *q++ = (char) (0x80 | (0x3f & (code >> 6)));
-	    *q++ = (char) (0x80 | (0x3f & (code)));
-	} else if (code < 0x4000000L) {
-	    *q++ = (char) (0xf8 | (code >> 24));
-	    *q++ = (char) (0x80 | (0x3f & (code >> 18)));
-	    *q++ = (char) (0x80 | (0x3f & (code >> 12)));
-	    *q++ = (char) (0x80 | (0x3f & (code >> 6)));
-	    *q++ = (char) (0x80 | (0x3f & (code)));
-	} else {
-	    *q++ = (char) (0xfc | (code >> 30));
-	    *q++ = (char) (0x80 | (0x3f & (code >> 24)));
-	    *q++ = (char) (0x80 | (0x3f & (code >> 18)));
-	    *q++ = (char) (0x80 | (0x3f & (code >> 12)));
-	    *q++ = (char) (0x80 | (0x3f & (code >> 6)));
-	    *q++ = (char) (0x80 | (0x3f & (code)));
-	}
-    } else {
-	return NULL;
-    }
-    if (terminate) {
-	*q = '\0';
-	return q_in;
-    } else {
-	return q;
-    }
-}
-
 	/* as in HTParse.c, saves some calls - kw */
 static const char *hex = "0123456789ABCDEF";
 
@@ -1847,7 +1794,7 @@ char **LYUCFullyTranslateString(char **str,
 	case S_got_oututf8:
 	    if (code > 255 ||
 		(code >= 128 && LYCharSet_UC[cs_to].enc == UCT_ENC_UTF8)) {
-		UCPutUtf8ToBuffer(replace_buf, code, YES);
+		UCConvertUniToUtf8(code, replace_buf);
 		state = S_got_outstring;
 	    } else {
 		state = S_got_outchar;
