@@ -1,4 +1,4 @@
-dnl $LynxId: configure.in,v 1.201 2009/08/28 21:48:17 tom Exp $
+dnl $LynxId: configure.in,v 1.202 2009/09/06 18:47:55 tom Exp $
 dnl
 dnl Process this file with autoconf to produce a configure script.
 dnl
@@ -1221,7 +1221,7 @@ AC_MSG_RESULT($use_bzlib)
 
 if test ".$use_bzlib" != ".no" ; then
 	CF_WITH_BZLIB($use_bzlib)
-	AC_DEFINE(USE_BZLIB)
+	test "x$cf_cv_find_linkage_bz2" = "xyes" && AC_DEFINE(USE_BZLIB)
 fi
 
 dnl --------------------------------------------------------------------------
@@ -1234,7 +1234,7 @@ AC_MSG_RESULT($use_zlib)
 
 if test ".$use_zlib" != ".no" ; then
 	CF_WITH_ZLIB($use_zlib)
-	AC_DEFINE(USE_ZLIB)
+	test "x$cf_cv_find_linkage_z" = "xyes" && AC_DEFINE(USE_ZLIB)
 fi
 
 dnl --------------------------------------------------------------------------
