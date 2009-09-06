@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTParse.c,v 1.52 2009/08/27 18:43:30 tom Exp $
+ * $LynxId: HTParse.c,v 1.53 2009/09/06 18:18:06 tom Exp $
  *
  *		Parse HyperText Document Address		HTParse.c
  *		================================
@@ -280,8 +280,8 @@ static void convert_to_idna(char *host)
 	code = idna_to_ascii_8z(buffer, &output, IDNA_USE_STD3_ASCII_RULES);
 	if (code == IDNA_SUCCESS) {
 	    strcpy(host, output);
-	    free(output);
 	}
+	FREE(output);
 	free(buffer);
     }
 }
