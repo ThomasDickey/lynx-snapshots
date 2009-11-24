@@ -1,4 +1,4 @@
-# $LynxId: makefile.in,v 1.103 2009/09/06 11:08:16 tom Exp $
+# $LynxId: makefile.in,v 1.107 2009/11/24 09:54:56 tom Exp $
 ##makefile for lynx
 
 SHELL		= @CONFIG_SHELL@
@@ -98,6 +98,8 @@ scripts_dir=$(srcdir)/scripts
 
 MAKE_RECUR = $(MAKE) DESTDIR="$(DESTDIR)" CC="$(CC)"
 
+@LYNXCFG_MAKE@CFG2HTML = alphatoc.html body.html cattoc.html
+
 # !!!!!!!!!!! SUN resolv LIBRARY !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 # To include resolv in the LIBS="" list for SUN 3, 4 or Solaris OS,
 # point RESOLVLIB to that library.  You need this if you get the message
@@ -141,7 +143,6 @@ SITE_LYDEFS = # Your defines here
 SITE_DEFS = # Your defines here
 
 # defines for which there are no configure options:
-# -DEXP_ASCII_CTYPES use POSIX locale for toupper/tolower/isupper
 # -DHP_TERMINAL    For DIM workaround to REVERSE problems on HP terminals.
 # -DIGNORE_CTRL_C  Define if Control-C shouldn't exit lynx.
 # -DNO_RULES       Disables CERN-style access rules (see lynx.cfg).
@@ -217,7 +218,7 @@ clean:
 @MSG_DIR_MAKE@	rm -f LYMessages.c
 @MSG_DIR_MAKE@	cd $(PO_DIR) && $(MAKE_RECUR) $@
 	rm -f *.b $(SRC_DIR)/lynx$x *.leaks cfg_defs.h LYHelp.h lint.*
-@LYNXCFG_MAKE@	-rm -f alphatoc.html body.html cattoc.html tmp007
+@LYNXCFG_MAKE@	-rm -f $(CFG2HTML)
 	rm -f help_files.sed
 	rm -f core *.core
 
@@ -333,6 +334,15 @@ LYNX_URL='http://lynx.isc.org/release/lynx2-8-7'
 LYNXDOCS_URL='$(LYNX_URL)/docs/'
 LYNXHELP_URL='$(LYNX_URL)/lynx_help/'
 
+@LYNXCFG_MAKE@$(CFG2HTML) :
+@LYNXCFG_MAKE@	@echo 'Making htmlized lynx.cfg'
+@LYNXCFG_MAKE@	cd $(SRC_DIR) && $(MAKE_RECUR) LYReadCFG.i
+@LYNXCFG_MAKE@	@-rm -f $(CFG2HTML)
+@LYNXCFG_MAKE@	sed -n -e '/Config_Type  *Config_Table/,/{0, *0, *0}/ p' $(SRC_DIR)/LYReadCFG.i | \
+@LYNXCFG_MAKE@	sed  -e 's/ *{ *"\([^"]*\)".*/\1/' | \
+@LYNXCFG_MAKE@	perl $(scripts_dir)/cfg2html.pl -ms $(srcdir)/lynx.cfg
+@LYNXCFG_MAKE@	-rm -f $(SRC_DIR)/LYReadCFG.i
+
 help_files.sed : makefile $(srcdir)/lynx_help/help_files.txt
 	@echo Constructing sed-script $@
 	@-rm -f $@ help_files.tmp
@@ -357,20 +367,13 @@ help_files.sed : makefile $(srcdir)/lynx_help/help_files.txt
 	@ECHO_CC@if test -n "$(COMPRESS_EXT)"; then echo 's%\$(COMPRESS_EXT)\$(COMPRESS_EXT)%$(COMPRESS_EXT)%g' >> $@; fi
 	@-rm -f help_files.tmp
 
-install-help : help_files.sed $(HELPDIR)
+install-help : $(CFG2HTML) help_files.sed $(HELPDIR)
 	- (cd $(HELPDIR) && WD=`pwd` && HEAD=`echo $$WD|sed -e 's!/lynx_help$$!!'` && test $$WD != $$HEAD && rm -fr *)
 	test -d $(HELPDIR)/keystrokes || mkdir $(HELPDIR)/keystrokes
-@LYNXCFG_MAKE@	@echo 'Making htmlized lynx.cfg'
-@LYNXCFG_MAKE@	cd $(SRC_DIR) && $(MAKE_RECUR) LYReadCFG.i
-@LYNXCFG_MAKE@	@-rm -f alphatoc.html body.html cattoc.html
-@LYNXCFG_MAKE@	sed -n -e '/Config_Type  *Config_Table/,/{0, *0, *0}/ p' $(SRC_DIR)/LYReadCFG.i | \
-@LYNXCFG_MAKE@	sed  -e 's/ *{ *"\([^"]*\)".*/\1/' | \
-@LYNXCFG_MAKE@	perl $(scripts_dir)/cfg2html.pl -ms $(srcdir)/lynx.cfg
 	@echo Translating/copying html files
-@LYNXCFG_MAKE@	@$(SHELL) -c 'for f in alphatoc.html body.html cattoc.html ; do \
+@LYNXCFG_MAKE@	@$(SHELL) -c 'for f in $(CFG2HTML) ; do \
 @LYNXCFG_MAKE@		sed -f help_files.sed $$f > $(HELPDIR)/$$f ; \
 @LYNXCFG_MAKE@		done'
-@LYNXCFG_MAKE@	-rm -f $(SRC_DIR)/LYReadCFG.i
 	@ECHO_CC@$(SHELL) -c 'sed_prog=`pwd`/help_files.sed && \
 		cd $(srcdir)/lynx_help && \
 		dirs=keystrokes && \

@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTString.c,v 1.57 2009/03/17 22:27:59 tom Exp $
+ * $LynxId: HTString.c,v 1.58 2009/11/21 17:05:33 Bela.Lubkin Exp $
  *
  *	Case-independent string comparison		HTString.c
  *
@@ -1307,7 +1307,7 @@ bstring *HTBprintf(bstring **pstr, const char *fmt,...)
     LYva_start(ap, fmt);
     {
 	temp = StrAllocVsprintf(&temp, 0, fmt, &ap);
-	if (!isEmpty(temp)) {
+	if (non_empty(temp)) {
 	    HTSABCat(pstr, temp, strlen(temp));
 	}
 	FREE(temp);

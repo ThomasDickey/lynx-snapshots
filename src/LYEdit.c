@@ -1,10 +1,11 @@
-/* $LynxId: LYEdit.c,v 1.38 2008/12/29 01:00:53 tom Exp $ */
+/* $LynxId: LYEdit.c,v 1.40 2009/11/22 17:25:19 tom Exp $ */
 #include <HTUtils.h>
 #include <HTParse.h>
 #include <HTAlert.h>
 #include <LYCurses.h>
 #include <LYUtils.h>
 #include <LYGlobalDefs.h>
+#include <LYStrings.h>
 #include <LYEdit.h>
 #ifdef VMS
 #include <unixio.h>
@@ -21,28 +22,29 @@ BOOLEAN editor_can_position(void)
     {
 #ifdef VMS
 	"sedt",
-	"SEDT"
 #else
-	"emacs",
+	"emacs",		/* + xemacs */
 	"jed",
 	"jmacs",
-	"joe",
+	"joe",			/* + rjoe */
 	"jove",
-	"jpico",
 	"jstar",
 	"nano",
-	"pico",
-	"rjoe",
-	"vi"
+	"pico",			/* + jpico */
+	"vi"			/* + vim, xvi, vile, elvis, view... + likely false matches */
 #endif
     };
     unsigned n;
 
     for (n = 0; n < TABLESIZE(table); n++) {
-	if (strstr(editor, table[n]) != 0) {
+	if (LYstrstr(editor, table[n]) != 0) {
 	    return TRUE;
 	}
     }
+    /*
+     * This really isn't right.  LYstrstr() might be too lax,
+     * but this should at least match basename to basename...
+     */
     if (positionable_editor != NULL) {
 	while ((value = (char *) HTList_nextObject(p)) != NULL) {
 	    if (strcmp(editor, value) == 0) {
@@ -152,13 +154,17 @@ int edit_current_file(char *newfile,
     /*
      * Set up the command for the editor.  - FM
      */
-    *position = 0;
+    if (lineno >= 0) {
+	*position = 0;
 #ifdef VMS
-    lineno--;
+	lineno--;
 #endif
-    lineno += (nlinks ? links[cur].ly : 0);
-    if (lineno > 0)
-	sprintf(position, "%d", lineno);
+	lineno += (nlinks ? links[cur].ly : 0);
+	if (lineno > 0)
+	    sprintf(position, "%d", lineno);
+    } else {
+	*position = '\0';
+    }
 
     edit_temporary_file(filename, position, NULL);
     result = TRUE;
@@ -187,7 +193,7 @@ void edit_temporary_file(char *filename,
     int params = 1;
     int rv;
 
-    if (strstr(editor, "pico")) {
+    if (LYstrstr(editor, "pico")) {
 	editor_arg = " -t";	/* No prompt for filename to use */
     }
     if (editor_can_position() && *position) {

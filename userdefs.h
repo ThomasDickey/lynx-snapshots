@@ -1,5 +1,5 @@
 /*
- * $LynxId: userdefs.h,v 1.251 2009/09/06 11:08:26 tom Exp $
+ * $LynxId: userdefs.h,v 1.253 2009/11/21 16:35:19 tom Exp $
  *
  * Lynx - Hypertext navigation system
  *
@@ -360,13 +360,13 @@
  * Comment this line out to disable code that implements command logging
  * and scripting.
  */
-#define EXP_CMD_LOGGING 1
+#define USE_CMD_LOGGING 1
 
 /********************************
  * Comment this line out to disable code that randomizes the names given to
  * temporary files.
  */
-#define EXP_RAND_TEMPNAME 1
+#define USE_RAND_TEMPNAME 1
 
 /********************************
  * Comment this line out to let the user enter his/her email address

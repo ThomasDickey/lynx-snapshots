@@ -1,4 +1,4 @@
-// $LynxId: lynx_cfg.h,v 1.2 2009/02/01 23:08:47 tom Exp $
+// $LynxId: lynx_cfg.h,v 1.4 2009/11/21 16:33:41 tom Exp $
 // definitions abstracted from makefile.msc
 
 #ifndef LYNX_CFG_H
@@ -14,25 +14,25 @@
 #define DISP_PARTIAL 1
 #define DOSPATH 1
 #define EXP_ALT_BINDINGS 1
-#define EXP_CMD_LOGGING 1
-#define EXP_JUSTIFY_ELTS 1
 #define EXP_NESTED_TABLES 1
 #define HAVE_KEYPAD 1
 #define HAVE_PUTENV 1
 #define LONG_LIST 1
 #define NDEBUG 1
+#define NOSIGHUP 1
+#define NOUSERS 1
 #define NO_CONFIG_INFO 1
 #define NO_CUSERID 1
 #define NO_FILIO_H 1
 #define NO_TTYTYPE 1
 #define NO_UNISTD_H 1
 #define NO_UTMP 1
-#define NOSIGHUP 1
-#define NOUSERS 1
 #define OK_OVERRIDE 1
 #define SH_EX 1
+#define USE_CMD_LOGGING 1
 #define USE_EXTERNALS 1
 #define USE_FILE_UPLOAD 1
+#define USE_JUSTIFY_ELTS 1
 #define USE_MULTIBYTE_CURSES 1
 #define USE_PERSISTENT_COOKIES 1
 #define USE_PRETTYSRC 1

@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYLocal.c,v 1.95 2009/08/26 10:47:37 tom Exp $
+ * $LynxId: LYLocal.c,v 1.104 2009/11/22 16:23:43 tom Exp $
  *
  *  Routines to manipulate the local filesystem.
  *  Written by: Rick Mallett, Carleton University
@@ -103,11 +103,29 @@ struct dired_menu {
 #define DE_FILE    3
 #define DE_SYMLINK 4
     char *sfx;
+    const char *c_sfx;
     char *link;
+    const char *c_link;
     char *rest;
+    const char *c_rest;
     char *href;
+    const char *c_href;
     struct dired_menu *next;
 };
+
+#define GetDiredSuffix(p) ((p)->sfx  ? (p)->sfx  : (p)->c_sfx)
+#define GetDiredLink(p)   ((p)->link ? (p)->link : (p)->c_link)
+#define GetDiredRest(p)   ((p)->rest ? (p)->rest : (p)->c_rest)
+#define GetDiredHref(p)   ((p)->href ? (p)->href : (p)->c_href)
+
+#undef DATA
+#define DATA(cond, sfx, link, rest, href) { \
+	cond, \
+	NULL, sfx, \
+	NULL, link, \
+	NULL, rest, \
+	NULL, href, \
+	NULL }
 
 static struct dired_menu *menu_head = NULL;
 static struct dired_menu defmenu[] = {
@@ -119,149 +137,150 @@ static struct dired_menu defmenu[] = {
  * discarded entirely.
  */
 #ifdef SUPPORT_CHDIR
-{ 0,		      "", "Change directory",
-		      "", "LYNXDIRED://CHDIR",			NULL },
+DATA( 0,              "", "Change directory",
+                      "", "LYNXDIRED://CHDIR"),
 #endif
-{ 0,		      "", "New File",
-"(in current directory)", "LYNXDIRED://NEW_FILE%d",		NULL },
+DATA( 0,              "", "New File",
+"(in current directory)", "LYNXDIRED://NEW_FILE%d"),
 
-{ 0,		      "", "New Directory",
-"(in current directory)", "LYNXDIRED://NEW_FOLDER%d",		NULL },
+DATA( 0,              "", "New Directory",
+"(in current directory)", "LYNXDIRED://NEW_FOLDER%d"),
 
 #ifdef OK_INSTALL
-{ DE_FILE,	      "", "Install",
-"selected file to new location", "LYNXDIRED://INSTALL_SRC%p",	NULL },
+DATA( DE_FILE,        "", "Install",
+"selected file to new location", "LYNXDIRED://INSTALL_SRC%p"),
 /* The following (installing a directory) doesn't work for me, at least
    with the "install" from GNU fileutils 4.0.  I leave it in anyway, in
    case one compiles with INSTALL_PATH / INSTALL_ARGS defined to some
    other command for which it works (like a script, or maybe "cp -a"). - kw
 */
-{ DE_DIR,	      "", "Install",
-"selected directory to new location", "LYNXDIRED://INSTALL_SRC%p",	NULL },
+DATA( DE_DIR,         "", "Install",
+"selected directory to new location", "LYNXDIRED://INSTALL_SRC%p"),
 #endif /* OK_INSTALL */
 
-{ DE_FILE,	      "", "Modify File Name",
-"(of current selection)", "LYNXDIRED://MODIFY_NAME%p",		NULL },
-{ DE_DIR,	      "", "Modify Directory Name",
-"(of current selection)", "LYNXDIRED://MODIFY_NAME%p",		NULL },
+DATA( DE_FILE,        "", "Modify File Name",
+"(of current selection)", "LYNXDIRED://MODIFY_NAME%p"),
+DATA( DE_DIR,         "", "Modify Directory Name",
+"(of current selection)", "LYNXDIRED://MODIFY_NAME%p"),
 #ifdef S_IFLNK
-{ DE_SYMLINK,	      "", "Modify Name",
-"(of selected symbolic link)", "LYNXDIRED://MODIFY_NAME%p",	NULL },
+DATA( DE_SYMLINK,     "", "Modify Name",
+"(of selected symbolic link)", "LYNXDIRED://MODIFY_NAME%p"),
 #endif  /* S_IFLNK */
 
 #ifdef OK_PERMIT
-{ DE_FILE,	      "", "Modify File Permissions",
-"(of current selection)", "LYNXDIRED://PERMIT_SRC%p",		NULL },
-{ DE_DIR,	      "", "Modify Directory Permissions",
-"(of current selection)", "LYNXDIRED://PERMIT_SRC%p",		NULL },
+DATA( DE_FILE,        "", "Modify File Permissions",
+"(of current selection)", "LYNXDIRED://PERMIT_SRC%p"),
+DATA( DE_DIR,         "", "Modify Directory Permissions",
+"(of current selection)", "LYNXDIRED://PERMIT_SRC%p"),
 #endif /* OK_PERMIT */
 
-{ DE_FILE,	      "", "Change Location",
-"(of selected file)"	, "LYNXDIRED://MODIFY_LOCATION%p",	NULL },
-{ DE_DIR,	      "", "Change Location",
-"(of selected directory)", "LYNXDIRED://MODIFY_LOCATION%p",	NULL },
+DATA( DE_FILE,        "", "Change Location",
+"(of selected file)"    , "LYNXDIRED://MODIFY_LOCATION%p"),
+DATA( DE_DIR,         "", "Change Location",
+"(of selected directory)", "LYNXDIRED://MODIFY_LOCATION%p"),
 #ifdef S_IFLNK
-{ DE_SYMLINK,	      "", "Change Location",
-"(of selected symbolic link)", "LYNXDIRED://MODIFY_LOCATION%p", NULL },
+DATA( DE_SYMLINK,     "", "Change Location",
+"(of selected symbolic link)", "LYNXDIRED://MODIFY_LOCATION%p"),
 #endif /* S_IFLNK */
 
-{ DE_FILE,	      "", "Remove File",
-   "(current selection)", "LYNXDIRED://REMOVE_SINGLE%p",	NULL },
-{ DE_DIR,	      "", "Remove Directory",
-   "(current selection)", "LYNXDIRED://REMOVE_SINGLE%p",	NULL },
+DATA( DE_FILE,        "", "Remove File",
+   "(current selection)", "LYNXDIRED://REMOVE_SINGLE%p"),
+DATA( DE_DIR,         "", "Remove Directory",
+   "(current selection)", "LYNXDIRED://REMOVE_SINGLE%p"),
 #ifdef S_IFLNK
-{ DE_SYMLINK,	      "", "Remove Symbolic Link",
-   "(current selection)", "LYNXDIRED://REMOVE_SINGLE%p",	NULL },
+DATA( DE_SYMLINK,     "", "Remove Symbolic Link",
+   "(current selection)", "LYNXDIRED://REMOVE_SINGLE%p"),
 #endif /* S_IFLNK */
 
 #if defined(OK_UUDECODE) && !defined(ARCHIVE_ONLY)
-{ DE_FILE,	      "", "UUDecode",
-   "(current selection)", "LYNXDIRED://UUDECODE%p",		NULL },
+DATA( DE_FILE,        "", "UUDecode",
+   "(current selection)", "LYNXDIRED://UUDECODE%p"),
 #endif /* OK_UUDECODE && !ARCHIVE_ONLY */
 
 #if defined(OK_TAR) && !defined(ARCHIVE_ONLY)
-{ DE_FILE,	EXT_TAR_Z, "Expand",
-   "(current selection)", "LYNXDIRED://UNTAR_Z%p",		NULL },
+DATA( DE_FILE,        EXT_TAR_Z, "Expand",
+   "(current selection)", "LYNXDIRED://UNTAR_Z%p"),
 #endif /* OK_TAR && !ARCHIVE_ONLY */
 
 #if defined(OK_TAR) && defined(OK_GZIP) && !defined(ARCHIVE_ONLY)
-{ DE_FILE,     ".tar.gz", "Expand",
-   "(current selection)", "LYNXDIRED://UNTAR_GZ%p",		NULL },
+DATA( DE_FILE,        ".tar.gz", "Expand",
+   "(current selection)", "LYNXDIRED://UNTAR_GZ%p"),
 
-{ DE_FILE,	  ".tgz", "Expand",
-   "(current selection)", "LYNXDIRED://UNTAR_GZ%p",		NULL },
+DATA( DE_FILE,        ".tgz", "Expand",
+   "(current selection)", "LYNXDIRED://UNTAR_GZ%p"),
 #endif /* OK_TAR && OK_GZIP && !ARCHIVE_ONLY */
 
 #ifndef ARCHIVE_ONLY
-{ DE_FILE,	   EXT_Z, "Uncompress",
-   "(current selection)", "LYNXDIRED://DECOMPRESS%p",		NULL },
+DATA( DE_FILE,        EXT_Z, "Uncompress",
+   "(current selection)", "LYNXDIRED://DECOMPRESS%p"),
 #endif /* ARCHIVE_ONLY */
 
 #if defined(OK_GZIP) && !defined(ARCHIVE_ONLY)
-{ DE_FILE,	   ".gz", "Uncompress",
-   "(current selection)", "LYNXDIRED://UNGZIP%p",		NULL },
+DATA( DE_FILE,        ".gz", "Uncompress",
+   "(current selection)", "LYNXDIRED://UNGZIP%p"),
 #endif /* OK_GZIP && !ARCHIVE_ONLY */
 
 #if defined(OK_ZIP) && !defined(ARCHIVE_ONLY)
-{ DE_FILE,	  ".zip", "Uncompress",
-   "(current selection)", "LYNXDIRED://UNZIP%p",		NULL },
+DATA( DE_FILE,        ".zip", "Uncompress",
+   "(current selection)", "LYNXDIRED://UNZIP%p"),
 #endif /* OK_ZIP && !ARCHIVE_ONLY */
 
 #if defined(OK_TAR) && !defined(ARCHIVE_ONLY)
-{ DE_FILE,	  ".tar", "UnTar",
-   "(current selection)", "LYNXDIRED://UNTAR%p",		NULL },
+DATA( DE_FILE,        ".tar", "UnTar",
+   "(current selection)", "LYNXDIRED://UNTAR%p"),
 #endif /* OK_TAR && !ARCHIVE_ONLY */
 
 #ifdef OK_TAR
-{ DE_DIR,	      "", "Tar",
-   "(current selection)", "LYNXDIRED://TAR%p",			NULL },
+DATA( DE_DIR,         "", "Tar",
+   "(current selection)", "LYNXDIRED://TAR%p"),
 #endif /* OK_TAR */
 
 #if defined(OK_TAR) && defined(OK_GZIP)
-{ DE_DIR,	      "", "Tar and compress",
-      "(using GNU gzip)", "LYNXDIRED://TAR_GZ%p",		NULL },
+DATA( DE_DIR,         "", "Tar and compress",
+      "(using GNU gzip)", "LYNXDIRED://TAR_GZ%p"),
 #endif /* OK_TAR && OK_GZIP */
 
 #if defined(OK_TAR) && defined(USE_COMPRESS)
-{ DE_DIR,	      "", "Tar and compress",
-      "(using compress)", "LYNXDIRED://TAR_Z%p",		NULL },
+DATA( DE_DIR,         "", "Tar and compress",
+      "(using compress)", "LYNXDIRED://TAR_Z%p"),
 #endif /* OK_TAR && USE_COMPRESS */
 
 #ifdef OK_ZIP
-{ DE_DIR,	      "", "Package and compress",
-	   "(using zip)", "LYNXDIRED://ZIP%p",			NULL },
+DATA( DE_DIR,         "", "Package and compress",
+           "(using zip)", "LYNXDIRED://ZIP%p"),
 #endif /* OK_ZIP */
 
-{ DE_FILE,	      "", "Compress",
- "(using Unix compress)", "LYNXDIRED://COMPRESS%p",		NULL },
+DATA( DE_FILE,        "", "Compress",
+ "(using Unix compress)", "LYNXDIRED://COMPRESS%p"),
 
 #ifdef OK_GZIP
-{ DE_FILE,	      "", "Compress",
-	  "(using gzip)", "LYNXDIRED://GZIP%p",			NULL },
+DATA( DE_FILE,        "", "Compress",
+          "(using gzip)", "LYNXDIRED://GZIP%p"),
 #endif /* OK_GZIP */
 
 #ifdef OK_ZIP
-{ DE_FILE,	      "", "Compress",
-	   "(using zip)", "LYNXDIRED://ZIP%p",			NULL },
+DATA( DE_FILE,        "", "Compress",
+           "(using zip)", "LYNXDIRED://ZIP%p"),
 #endif /* OK_ZIP */
 
-{ DE_TAG,	      "", "Move all tagged items to another location.",
-		      "", "LYNXDIRED://MOVE_TAGGED%d",		NULL },
+DATA( DE_TAG,         "", "Move all tagged items to another location.",
+                      "", "LYNXDIRED://MOVE_TAGGED%d"),
 
 #ifdef OK_INSTALL
-{ DE_TAG,	      "", "Install tagged files into another directory.",
-		      "", "LYNXDIRED://INSTALL_SRC%00",		NULL },
+DATA( DE_TAG,         "", "Install tagged files into another directory.",
+                      "", "LYNXDIRED://INSTALL_SRC%00"),
 #endif
 
-{ DE_TAG,	      "", "Remove all tagged files and directories.",
-		      "", "LYNXDIRED://REMOVE_TAGGED",		NULL },
+DATA( DE_TAG,         "", "Remove all tagged files and directories.",
+                      "", "LYNXDIRED://REMOVE_TAGGED"),
 
-{ DE_TAG,	      "", "Untag all tagged files and directories.",
-		      "", "LYNXDIRED://CLEAR_TAGGED",		NULL },
+DATA( DE_TAG,         "", "Untag all tagged files and directories.",
+                      "", "LYNXDIRED://CLEAR_TAGGED"),
 
-{ 0,		    NULL, NULL,
-		    NULL, NULL,					NULL }
+DATA( 0,              NULL, NULL,
+                      NULL, NULL),
 };
+#undef DATA
 /* *INDENT-ON* */
 
 static BOOLEAN cannot_stat(const char *name)
@@ -278,11 +297,42 @@ static BOOLEAN cannot_stat(const char *name)
 
 static BOOLEAN ok_stat(const char *name, struct stat *sb)
 {
+    BOOLEAN rc = TRUE;
+
     CTRACE((tfp, "testing ok_stat(%s)\n", name));
     if (!OK_STAT(name, sb)) {
-	return cannot_stat(name);
+#ifdef DOSPATH
+	size_t len = strlen(name);
+
+	/*
+	 * If a path ends with '\' or ':', we can guess that it may be
+	 * a directory name.  Adding a '.' (after a '\') will produce a
+	 * pathname that stat() will accept as a directory name.
+	 */
+	if (len != 0 && (name[len - 1] == '\\' || name[len - 1] == ':')) {
+	    char *temp = malloc(len + 3);
+
+	    if (temp != 0) {
+		strcpy(temp, name);
+		if (temp[len - 1] == '\\') {
+		    strcpy(temp + len, ".");
+		} else {
+		    strcpy(temp + len, "\\.");
+		}
+		rc = OK_STAT(temp, sb);
+		free(temp);
+	    } else {
+		rc = FALSE;
+	    }
+	} else
+#endif
+	    rc = FALSE;
     }
-    return TRUE;
+
+    if (rc == FALSE)
+	rc = cannot_stat(name);
+
+    return rc;
 }
 
 #ifdef HAVE_LSTAT
@@ -335,13 +385,13 @@ static int LYExecv(const char *path,
 {
     int rc = 0;
 
-#if defined(VMS) || defined(_WINDOWS)
+#if defined(VMS)
     CTRACE((tfp, "LYExecv:  Called inappropriately! (path=%s)\n", path));
 #else
     int n;
     char *tmpbuf = 0;
 
-#ifdef __DJGPP__
+#if defined(__DJGPP__) || defined(_WINDOWS)
     stop_curses();
     HTSprintf0(&tmpbuf, "%s", path);
     for (n = 1; argv[n] != 0; n++)
@@ -425,6 +475,7 @@ static int LYExecv(const char *path,
 	FREE(tmpbuf);
     }
 #endif /* VMS || _WINDOWS */
+    CTRACE((tfp, "LYexecv ->%d\n", rc));
     return (rc);
 }
 
@@ -449,6 +500,7 @@ static int make_directory(char *path)
 #else
 	code = mkdir(path, 0777) ? -1 : 1;
 #endif
+	CTRACE((tfp, "builtin mkdir ->%d\n\t%s\n", code, path));
     }
     return (code);
 }
@@ -471,6 +523,7 @@ static int remove_file(char *path)
 	FREE(tmpbuf);
     } else {
 	code = remove(path) ? -1 : 1;
+	CTRACE((tfp, "builtin remove ->%d\n\t%s\n", code, path));
     }
     return (code);
 }
@@ -492,6 +545,7 @@ static int remove_directory(char *path)
 	FREE(tmpbuf);
     } else {
 	code = rmdir(path) ? -1 : 1;
+	CTRACE((tfp, "builtin rmdir ->%d\n\t%s\n", code, path));
     }
     return (code);
 }
@@ -514,12 +568,13 @@ static int touch_file(char *path)
     } else {
 	FILE *fp;
 
-	if ((fp = fopen(path, "w")) != 0) {
+	if ((fp = fopen(path, BIN_W)) != 0) {
 	    fclose(fp);
 	    code = 1;
 	} else {
 	    code = -1;
 	}
+	CTRACE((tfp, "builtin touch ->%d\n\t%s\n", code, path));
     }
     return (code);
 }
@@ -551,9 +606,15 @@ static int move_file(char *source, char *target)
 	    CTRACE((tfp, "move_file source=%s, target=%s\n", source, target));
 	    target = actual;
 	}
-	if ((code = rename(source, target)) != 0)
-	    if ((code = LYCopyFile(source, target)) >= 0)
+	code = rename(source, target);
+	CTRACE((tfp, "builtin move ->%d\n\tsource=%s\n\ttarget=%s\n",
+		code, source, target));
+	if (code != 0) {	/* it failed */
+	    if ((code = LYCopyFile(source, target)) >= 0) {
 		code = remove(source);
+		CTRACE((tfp, "...remove source after copying ->%d\n", code));
+	    }
+	}
 	if (code == 0)
 	    code = 1;
 	if (actual != target) {
@@ -732,11 +793,11 @@ static int modify_tagged(char *testpath)
 	 * If path is relative, prefix it with current location.
 	 */
 	if (!LYIsPathSep(given_target[0])) {
-	    StrAllocCopy(dst_path, testpath);
+	    dst_path = HTLocalName(testpath);
 	    LYAddPathSep(&dst_path);
 	    StrAllocCat(dst_path, given_target);
 	} else {
-	    StrAllocCopy(dst_path, given_target);
+	    dst_path = HTLocalName(given_target);
 	}
 
 	if (!ok_stat(dst_path, &dst_info)) {
@@ -866,12 +927,7 @@ static int modify_location(char *testpath)
      * Change the location of the file or directory.
      */
     if (S_ISDIR(dir_info.st_mode)) {
-	if (HTGetProgramPath(ppMV) != NULL) {
-	    cp = gettext("Enter new location for directory: ");
-	} else {
-	    HTAlert(COULD_NOT_ACCESS_DIR);
-	    return 0;
-	}
+	cp = gettext("Enter new location for directory: ");
     } else if (S_ISREG(dir_info.st_mode)) {
 	cp = gettext("Enter new location for file: ");
     } else {
@@ -1239,9 +1295,10 @@ static int permit_location(char *destpath,
 			   char *srcpath,
 			   char **newpath)
 {
+    int code = 0;
+
 #ifndef UNIX
     HTAlert(gettext("Sorry, don't know how to permit non-UNIX files yet."));
-    return (0);
 #else
     static char tempfile[LY_MAXPATH] = "\0";
     char *cp;
@@ -1264,14 +1321,14 @@ static int permit_location(char *destpath,
 	 */
 	if (!ok_lstat(srcpath, &dir_info)
 	    || !ok_file_or_dir(&dir_info))
-	    return 0;
+	    return code;
 
 	user_filename = LYPathLeaf(srcpath);
 
 	LYRemoveTemp(tempfile);
 	if ((fp0 = LYOpenTemp(tempfile, HTML_SUFFIX, "w")) == NULL) {
 	    HTAlert(gettext("Unable to open permit options file"));
-	    return (0);
+	    return (code);
 	}
 
 	/*
@@ -1358,7 +1415,7 @@ static int permit_location(char *destpath,
 	LYCloseTempFP(fp0);
 
 	LYforce_no_cache = TRUE;
-	return (PERMIT_FORM_RESULT);	/* Special flag for LYMainLoop */
+	code = PERMIT_FORM_RESULT;	/* Special flag for LYMainLoop */
 
     } else {			/* The form being activated. */
 	mode_t new_mode = 0;
@@ -1375,24 +1432,24 @@ static int permit_location(char *destpath,
 	    CTRACE((tfp, "permit_location: called for <%s>.\n",
 		    (destpath ?
 		     destpath : "NULL URL pointer")));
-	    return 0;
+	    return code;
 	}
 	cp = destpath;
 	while (*cp != '\0' && *cp != '?') {	/* Find filename */
 	    cp++;
 	}
 	if (*cp == '\0') {
-	    return (0);		/* Nothing to permit. */
+	    return (code);	/* Nothing to permit. */
 	}
 	*cp++ = '\0';		/* Null terminate file name and
 				   start working on the masks. */
 
 	/* Will now operate only on filename part. */
 	if ((destpath = HTURLPath_toFile(destpath, TRUE, FALSE)) == 0)
-	    return (0);
+	    return (code);
 	if (strlen(destpath) >= LY_MAXPATH) {
 	    FREE(destpath);
-	    return (0);
+	    return (code);
 	}
 	strcpy(tmpdst, destpath);
 	FREE(destpath);
@@ -1409,7 +1466,7 @@ static int permit_location(char *destpath,
 		fprintf(stderr, "%s\n", INVALID_PERMIT_URL);
 	    CTRACE((tfp, "permit_location: called for file '%s'.\n",
 		    destpath));
-	    return 0;
+	    return code;
 	}
 
 	/*
@@ -1418,7 +1475,7 @@ static int permit_location(char *destpath,
 	destpath = strip_trailing_slash(destpath);
 	if (!ok_stat(destpath, &dir_info)
 	    || !ok_file_or_dir(&dir_info)) {
-	    return 0;
+	    return code;
 	}
 
 	/*
@@ -1447,11 +1504,11 @@ static int permit_location(char *destpath,
 			new_mode |= mask;
 		} else {
 		    HTAlert(gettext("Invalid mode format."));
-		    return 0;
+		    return code;
 		}
 	    } else {
 		HTAlert(gettext("Invalid syntax format."));
-		return 0;
+		return code;
 	    }
 
 	    cp = cr;
@@ -1460,6 +1517,7 @@ static int permit_location(char *destpath,
 	/*
 	 * Call chmod().
 	 */
+	code = 1;
 	if ((program = HTGetProgramPath(ppCHMOD)) != NULL) {
 	    char *args[5];
 	    char amode[10];
@@ -1472,18 +1530,21 @@ static int permit_location(char *destpath,
 	    args[2] = destpath;
 	    args[3] = (char *) 0;
 	    if (LYExecv(program, args, tmpbuf) <= 0) {
-		FREE(tmpbuf);
-		return (-1);
+		code = -1;
 	    }
 	    FREE(tmpbuf);
 	} else {
-	    if (chmod(destpath, new_mode) < 0)
-		return (-1);
+	    if (chmod(destpath, new_mode) < 0) {
+		code = -1;
+	    }
+	    CTRACE((tfp, "builtin chmod %.4o ->%d\n\t%s\n",
+		    new_mode, code, destpath));
 	}
-	LYforce_no_cache = TRUE;	/* Force update of dired listing. */
-	return 1;
+	if (code == 1)
+	    LYforce_no_cache = TRUE;	/* Force update of dired listing. */
     }
 #endif /* !UNIX */
+    return code;
 }
 #endif /* OK_PERMIT */
 
@@ -1833,7 +1894,7 @@ int local_dired(DocInfo *doc)
 	handle_LYK_CHDIR();
 	do_pop_doc = FALSE;
 #endif
-	arg = "blah";		/* do something to avoid cc's complaints */
+	arg = 0;		/* do something to avoid cc's complaints */
     } else if ((arg = match_op("NEW_FILE", line)) != 0) {
 	if (create_file(arg) > 0)
 	    LYforce_no_cache = TRUE;
@@ -1937,6 +1998,7 @@ int local_dired(DocInfo *doc)
 int dired_options(DocInfo *doc, char **newfile)
 {
     static char tempfile[LY_MAXPATH];
+    const char *my_suffix;
     char *path;
     char *dir;
     lynx_list_item_type *nxt;
@@ -2028,7 +2090,7 @@ int dired_options(DocInfo *doc, char **newfile)
      * If menu_head is NULL then use defaults and link them together now.
      */
     if (menu_head == NULL) {
-	for (mp = defmenu; mp->href != NULL; mp++)
+	for (mp = defmenu; GetDiredHref(mp) != NULL; mp++)
 	    mp->next = (mp + 1);
 	(--mp)->next = NULL;
 	menu_head = defmenu;
@@ -2050,18 +2112,22 @@ int dired_options(DocInfo *doc, char **newfile)
 	    (!*path || !S_ISLNK(dir_info.st_mode)))
 	    continue;
 #endif
-	if (*mp->sfx &&
-	    (strlen(path) < strlen(mp->sfx) ||
-	     strcmp(mp->sfx, &path[(strlen(path) - strlen(mp->sfx))]) != 0))
+	my_suffix = GetDiredSuffix(mp);
+	if (non_empty(my_suffix) &&
+	    (strlen(path) < strlen(my_suffix) ||
+	     strcmp(my_suffix, &path[(strlen(path) - strlen(my_suffix))]) != 0))
 	    continue;
 	dir_url = HTEscape(dir, URL_PATH);
 	path_url = HTEscape(path, URL_PATH);
 	fprintf(fp0, "<a href=\"%s",
-		render_item(mp->href, path_url, dir_url, buf, sizeof(buf), YES));
+		render_item(GetDiredHref(mp),
+			    path_url, dir_url, buf, sizeof(buf), YES));
 	fprintf(fp0, "\">%s</a> ",
-		render_item(mp->link, path, dir, buf, sizeof(buf), NO));
+		render_item(GetDiredLink(mp),
+			    path, dir, buf, sizeof(buf), NO));
 	fprintf(fp0, "%s<br>\n",
-		render_item(mp->rest, path, dir, buf, sizeof(buf), NO));
+		render_item(GetDiredRest(mp),
+			    path, dir, buf, sizeof(buf), NO));
 	FREE(dir_url);
 	FREE(path_url);
     }

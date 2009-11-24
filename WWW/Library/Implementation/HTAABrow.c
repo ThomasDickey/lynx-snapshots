@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTAABrow.c,v 1.29 2009/01/03 00:55:16 tom Exp $
+ * $LynxId: HTAABrow.c,v 1.30 2009/11/21 17:05:33 Bela.Lubkin Exp $
  *
  * MODULE							HTAABrow.c
  *		BROWSER SIDE ACCESS AUTHORIZATION MODULE
@@ -1078,12 +1078,12 @@ BOOL HTAA_shouldRetryWithAuth(char *start_of_headers,
 		 0 == strcasecomp(fieldname, "Proxy-Authenticate:")) ||
 		(!IsProxy &&
 		 0 == strcasecomp(fieldname, "WWW-Authenticate:"))) {
-		if (!(arg1 && *arg1 && args && *args)) {
+		if (isEmpty(arg1) || isEmpty(args)) {
 		    HTSprintf0(&temp, gettext("Invalid header '%s%s%s%s%s'"), line,
-			       (!isEmpty(arg1) ? " " : ""),
-			       (!isEmpty(arg1) ? arg1 : ""),
-			       (!isEmpty(args) ? " " : ""),
-			       (!isEmpty(args) ? args : ""));
+			       (non_empty(arg1) ? " " : ""),
+			       NonNull(arg1),
+			       (non_empty(args) ? " " : ""),
+			       NonNull(args));
 		    HTAlert(temp);
 		    FREE(temp);
 		} else if (HTAA_UNKNOWN != (scheme = HTAAScheme_enum(arg1))) {

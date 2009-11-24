@@ -1,4 +1,4 @@
-/* $LynxId: LYOptions.c,v 1.133 2009/06/07 18:24:50 tom Exp $ */
+/* $LynxId: LYOptions.c,v 1.134 2009/11/21 15:52:05 tom Exp $ */
 #include <HTUtils.h>
 #include <HTFTP.h>
 #include <HTTP.h>		/* 'reloading' flag */
@@ -3660,7 +3660,7 @@ static int gen_options(char **newfile)
 	if (len > cset_len)
 	    cset_len = len;
 	sprintf(temp, "%d", i);
-#ifdef EXP_CHARSET_CHOICE
+#ifdef USE_CHARSET_CHOICE
 	if (!charset_subsets[i].hide_display)
 #endif
 	    PutOption(fp0, i == current_char_set, temp, LYchar_set_names[i]);
@@ -3685,7 +3685,7 @@ static int gen_options(char **newfile)
 	PutLabel(fp0, gettext("Assumed document character set"), assume_char_set_string);
 	BeginSelect(fp0, assume_char_set_string);
 	for (i = 0; i < LYNumCharsets; i++) {
-#ifdef EXP_CHARSET_CHOICE
+#ifdef USE_CHARSET_CHOICE
 	    if (!charset_subsets[i].hide_assumed)
 #endif
 		PutOption(fp0, i == curval,

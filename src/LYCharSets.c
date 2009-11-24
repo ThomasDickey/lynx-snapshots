@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYCharSets.c,v 1.63 2009/05/25 17:57:41 tom Exp $
+ * $LynxId: LYCharSets.c,v 1.64 2009/11/21 15:52:05 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTCJK.h>
@@ -28,7 +28,7 @@ const char **p_entity_values = NULL;	/* Pointer, for HTML_put_entity() */
 
 			      /* obsolete and probably not used(???)        */
 			      /* will be initialized in HTMLUseCharacterSet */
-#ifdef EXP_CHARSET_CHOICE
+#ifdef USE_CHARSET_CHOICE
 charset_subset_t charset_subsets[MAXCHARSETS];
 BOOL custom_display_charset = FALSE;
 BOOL custom_assumed_doc_charset = FALSE;
@@ -41,7 +41,7 @@ const char *display_charset_choices[MAXCHARSETS + 1];
 const char *assumed_charset_choices[MAXCHARSETS + 1];
 int displayed_display_charset_idx;
 #endif
-#endif /* EXP_CHARSET_CHOICE */
+#endif /* USE_CHARSET_CHOICE */
 
 /*
  * New character sets now declared with UCInit() in UCdomap.c
@@ -1122,7 +1122,7 @@ int LYCharSetsDeclared(void)
     return UCInitialized;
 }
 
-#ifdef EXP_CHARSET_CHOICE
+#ifdef USE_CHARSET_CHOICE
 void init_charset_subsets(void)
 {
     int i, n;
@@ -1154,4 +1154,4 @@ void init_charset_subsets(void)
     }
 #endif
 }
-#endif /* EXP_CHARSET_CHOICE */
+#endif /* USE_CHARSET_CHOICE */

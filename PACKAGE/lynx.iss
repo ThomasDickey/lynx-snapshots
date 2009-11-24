@@ -1,4 +1,4 @@
-; $LynxId: lynx.iss,v 1.3 2009/03/17 23:11:46 tom Exp $
+; $LynxId: lynx.iss,v 1.4 2009/11/22 23:59:04 tom Exp $
 ; vile:ts=2 sw=2 notabinsert
 ;
 ; This is the BASE script for different flavors of the installer for Lynx.
@@ -307,6 +307,15 @@ begin
 
   SaveStringToFile(CfgFile, 'HELPFILE:' + AppDir + '/help/Lynx_help_main.html.gz' + #10, True);
   SaveStringToFile(CfgFile, 'COLOR_STYLE:' + AppDir + '/opaque.lss' + #10, True);
+
+  SaveStringToFile(CfgFile, 'CHMOD_PATH:' + #10, True);
+  SaveStringToFile(CfgFile, 'COPY_PATH:' + #10, True);
+  SaveStringToFile(CfgFile, 'MKDIR_PATH:' + #10, True);
+  SaveStringToFile(CfgFile, 'MV_PATH:' + #10, True);
+  SaveStringToFile(CfgFile, 'RMDIR_PATH:' + #10, True);
+  SaveStringToFile(CfgFile, 'RM_PATH:' + #10, True);
+  SaveStringToFile(CfgFile, 'TOUCH_PATH:' + #10, True);
+
   Log('** customized ' + CfgFile);
 
   if isTaskSelected('use_sendto') then

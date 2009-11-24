@@ -1,5 +1,5 @@
 /*
- * $LynxId: config.hin,v 1.113 2009/08/27 19:24:45 tom Exp $
+ * $LynxId: config.hin,v 1.116 2009/11/21 15:52:17 tom Exp $
  * vile:cmode
  *
  * The configure script translates "config.hin" into "lynx_cfg.h"
@@ -40,11 +40,8 @@
 #undef EXEC_SCRIPTS		/* CF_ARG_ENABLE(exec-scripts) */
 #undef EXP_ADDRLIST_PAGE	/* CF_ARG_ENABLE(addrlist-page) */
 #undef EXP_ALT_BINDINGS		/* CF_ARG_ENABLE(alt-bindings) */
-#undef EXP_ASCII_CTYPES		/* CF_ARG_ENABLE(ascii-ctypes) */
-#undef EXP_CHARSET_CHOICE	/* CF_ARG_ENABLE(charset-choice) */
 #undef EXP_CHARTRANS_AUTOSWITCH	/* CF_ARG_ENABLE(font-switch) */
 #undef EXP_JAPANESEUTF8_SUPPORT	/* CF_ARG_ENABLE(japanese-utf8) */
-#undef EXP_JUSTIFY_ELTS		/* CF_ARG_ENABLE(justify-elts) */
 #undef EXP_KEYBOARD_LAYOUT	/* CF_ARG_ENABLE(kbd-layout) */
 #undef EXP_LIBJS		/* CF_ARG_ENABLE(libjs) */
 #undef EXP_NESTED_TABLES	/* CF_ARG_ENABLE(nested-tables) */
@@ -141,8 +138,8 @@
 #undef HAVE_SYS_IOCTL_H		/* have <sys/ioctl.h> */
 #undef HAVE_SYS_NDIR_H		/* AC_HEADER_DIRENT */
 #undef HAVE_SYS_PARAM_H		/* AM_GNU_GETTEXT */
-#undef HAVE_SYS_TIME_H		/* have <sys/time.h> */
 #undef HAVE_SYS_TIMEB_H		/* have <sys/timeb.h> */
+#undef HAVE_SYS_TIME_H		/* have <sys/time.h> */
 #undef HAVE_SYS_WAIT_H		/* have <sys/wait.h> */
 #undef HAVE_TERMIOS_H		/* have <termios.h> */
 #undef HAVE_TERMIO_H		/* have <termio.h> */
@@ -246,8 +243,10 @@
 #undef UNDERLINE_LINKS		/* CF_ARG_ENABLE(underlines) */
 #undef UNIX
 #undef UNZIP_PATH		/* CF_PATH_PROG(unzip) */
+#undef USE_ASCII_CTYPES		/* CF_ARG_ENABLE(ascii-ctypes) */
 #undef USE_BZLIB		/* AC_ARG_WITH(bzlib) */
 #undef USE_CACHEJAR		/* CF_ARG_ENABLE(session-cache) */
+#undef USE_CHARSET_CHOICE	/* CF_ARG_ENABLE(charset-choice) */
 #undef USE_COLOR_STYLE		/* CF_ARG_ENABLE(color-style) */
 #undef USE_DEFAULT_COLORS	/* CF_ARG_ENABLE(default-colors) */
 #undef USE_EXECVP		/* CF_ARG_DISABLE(full-paths) */
@@ -257,6 +256,7 @@
 #undef USE_GNUTLS_FUNCS		/* CF_GNUTLS */
 #undef USE_GNUTLS_INCL		/* CF_GNUTLS */
 #undef USE_IDNA			/* CF_ARG_DISABLE(idna) */
+#undef USE_JUSTIFY_ELTS		/* CF_ARG_ENABLE(justify-elts) */
 #undef USE_LOCALE_CHARSET	/* CF_ARG_ENABLE(locale-charset) */
 #undef USE_OPENSSL_INCL		/* CF_SSL */
 #undef USE_PERSISTENT_COOKIES	/* CF_ARG_ENABLE(persistent-cookies) */

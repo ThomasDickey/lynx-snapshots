@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTelnet.c,v 1.38 2007/07/01 23:13:22 Daniel.Dickman Exp $
+ * $LynxId: HTTelnet.c,v 1.39 2009/11/21 17:05:33 Bela.Lubkin Exp $
  *
  *		Telnet Access, Rlogin, etc			HTTelnet.c
  *		==========================
@@ -44,11 +44,11 @@ static void do_system(char *) GCC_UNUSED;
 
 static void do_system(char *command)
 {
-    if (!isEmpty(command)) {
+    if (non_empty(command)) {
 	CTRACE((tfp, "HTTelnet: Command is: %s\n\n", command));
 	LYSystem(command);
-	FREE(command);
     }
+    FREE(command);
 }
 
 /*	Telnet or "rlogin" access

@@ -1,4 +1,5 @@
 #!/usr/bin/perl -w
+# $LynxId: cfg2html.pl,v 1.13 2009/11/24 09:41:47 tom Exp $
 #
 # This script uses embedded formatting directives in the lynx.cfg file to
 # guide it in extracting comments and related information to construct a
@@ -110,11 +111,12 @@ sub gen_alphatoc {
 		return;
 	};
 	print FP <<'EOF';
-<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
 <head>
 <link rev="made" href="mailto:lynx-dev@nongnu.org">
 <title>Settings by name</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
 </head>
 <body>
 <h1>Alphabetical table of settings</h1>
@@ -180,11 +182,12 @@ sub gen_body {
 		return;
 	};
 	print FP <<'EOF';
-<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
 <head>
 <link rev="made" href="mailto:lynx-dev@nongnu.org">
 <title>Description of settings in lynx configuration file</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
 </head>
 <body>
 EOF
@@ -265,7 +268,7 @@ EOF
 					printf FP "<hr>\n";
 					printf FP "<h2><kbd><a name=\"%s\">%s</a></kbd>\n", $h2[$j], $h2[$j];
 					if ( $h1 ne "" ) {
-						printf FP " - <a href=\"cattoc.html#%s\">%s</a>", $cats{$h1}, $h1;
+						printf FP " &ndash; <a href=\"cattoc.html#%s\">%s</a>", $cats{$h1}, $h1;
 					}
 					printf FP "</h2>\n";
 					printf FP "<h3><em>Description</em></h3>\n";
@@ -290,7 +293,7 @@ EOF
 				}
 				printf FP "<h2><kbd><a name=\"%s\">%s</a></kbd>\n", $h2[0], $h2[0];
 				if ( $h1 ne "" ) {
-					printf FP " - <a href=\"cattoc.html#%s\">%s</a>", $cats{$h1}, $h1;
+					printf FP " &ndash; <a href=\"cattoc.html#%s\">%s</a>", $cats{$h1}, $h1;
 				}
 				printf FP "</h2>\n";
 				printf FP "<h3><em>Description</em></h3>\n";
@@ -313,20 +316,6 @@ EOF
 			$c =~ s/</&lt;/g;
 			#hvv - something wrong was with next statement
 			$c =~ s/'([^ ])'/"<strong>$1<\/strong>"/g;
-
-			# Do a line-break each time the margin changes.  We 
-			# could get fancier, but HTML doesn't really support
-			# text-formatting, and we'll use what it does have to
-			# do wrapping.
-			if ( ! $nf ) {
-				$t = $c;
-				$t =~ s/(\s*).*/$1/;
-				$t = length $t;
-				if ( $t != $left ) {
-					$left = $t;
-					printf FP "<br>\n";
-				}
-			}
 
 			my $k = 0;
 			if ( $c =~ /^[a-zA-Z_]+:/ ) {
@@ -424,7 +413,7 @@ sub gen_cattoc {
 	my @major;
 	my %descs;
 	my %index;
-	my ($n, $m, $c, $d, $found, $h1);
+	my ($n, $m, $c, $d, $found, $h1, $nf, $ex, $count, $once);
 	my $output = "cattoc.html";
 
 	open(FP,">$output") || do {
@@ -432,11 +421,12 @@ sub gen_cattoc {
 		return;
 	};
 	print FP <<'EOF';
-<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
 <head>
 <link rev="made" href="mailto:lynx-dev@nongnu.org">
 <title>Settings by category</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
 </head>
 <body>
 <h1>Settings by category</h1>
@@ -445,10 +435,13 @@ These are the major categories of configuration settings in Lynx:
 EOF
 	$m = -1;
 	$h1 = 0;
+	$nf = 0;
 	for $n (0..$#input) {
+		my $count = $#input;
+		my $once = 1;
+		$c = $input[$n];
 		if ( $input[$n] =~ /^\.h1\s/ ) {
 			$h1 = 1;
-			$c = $input[$n];
 			$c =~ s/^.h1\s*//;
 			$m = $#major + 1;
 			$d = 0;
@@ -465,9 +458,33 @@ EOF
 				$descs{$major[$m]} = "";
 				$index{$major[$m]} = "";
 			}
+			next;
 		} elsif ( $h1 != 0 ) {
+			if ( $c =~ /^\.(nf|ex)/ ) {
+				my $s = $c;
+				$s =~ s/^\.[a-z]+\s//;
+				if ( $s =~ /^[0-9]+$/ ) {
+					$count = $s;
+					$once = $s;
+				}
+			}
 			if ( $input[$n] =~ /^$/ ) {
 				$h1 = 0;
+			} elsif ( $input[$n] =~ /^\.nf/ ) {
+				$descs{$major[$m]} .= "<pre>" . "\n";
+				$nf = $count;
+			} elsif ( $input[$n] =~ /^\.fi/ ) {
+				$descs{$major[$m]} .= "</pre>" . "\n";
+				$nf = 0;
+			} elsif ( $input[$n] =~ /^\.ex/ ) {
+				$ex = $once;
+				$descs{$major[$m]} .= 
+					"<h3><em>Example"
+					.
+					($ex > 1 ? "s" : "")
+					.
+					":</em></h3>\n"
+					. "\n";
 			} elsif ( $input[$n] =~ /^\s*#/ ) {
 				$c = $input[$n];
 				$c =~ s/^\s*#\s*//;
@@ -479,6 +496,10 @@ EOF
 			$c =~ s/^.h2\s*//;
 			$index{$major[$m]} .= $c . "\n"
 			    if (defined $opt_a || ok($c));
+			$h1 = 0;
+		}
+		if ( $nf != 0 && $nf-- == 0 ) {
+			$descs{$major[$m]} .= "</pre>\n";
 		}
 	}
 	@major = sort @major;

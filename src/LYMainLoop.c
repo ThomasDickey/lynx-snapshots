@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMainLoop.c,v 1.160 2009/02/01 12:51:11 tom Exp $
+ * $LynxId: LYMainLoop.c,v 1.162 2009/11/22 17:27:48 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTAccess.h>
@@ -2460,7 +2460,7 @@ static void handle_LYK_EDIT(int *old_c,
 		    if (S_ISREG(dir_info.st_mode)) {
 			StrAllocCopy(tp, links[curdoc.link].lname);
 			HTUnEscapeSome(tp, "/");
-			if (edit_current_file(tp, curdoc.link, LYGetNewline())) {
+			if (edit_current_file(tp, curdoc.link, -1)) {
 			    DIRED_UNCACHE_1;
 			    move_address(&newdoc, &curdoc);
 #ifdef NO_SEEK_OLD_POSITION
@@ -2539,7 +2539,7 @@ static void handle_LYK_EDIT_TEXTAREA(BOOLEAN *refresh_screen,
 	    *old_c = real_c;
 	    HTUserMsg(ANYEDIT_DISABLED);
 	}
-    } else if (!editor || *editor == '\0') {
+    } else if (isEmpty(editor)) {
 	if (*old_c != real_c) {
 	    *old_c = real_c;
 	    HTUserMsg(NO_EDITOR);
@@ -6123,7 +6123,7 @@ int mainloop(void)
 	     */
 	    temp = HTParse(curdoc.address, "",
 			   PARSE_ACCESS + PARSE_HOST + PARSE_PUNCTUATION);
-	    if (!temp || *temp == '\0') {
+	    if (isEmpty(temp)) {
 		StrAllocCopy(startrealm, NO_NOTHING);
 	    } else {
 		StrAllocCopy(startrealm, temp);
@@ -6183,7 +6183,7 @@ int mainloop(void)
 		} else {
 		    temp = HTParse(curdoc.address, "",
 				   PARSE_ACCESS + PARSE_HOST + PARSE_PUNCTUATION);
-		    if (!temp || *temp == '\0') {
+		    if (isEmpty(temp)) {
 			StrAllocCopy(traversal_host, NO_NOTHING);
 		    } else {
 			StrAllocCopy(traversal_host, temp);

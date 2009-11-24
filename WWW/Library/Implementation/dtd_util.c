@@ -1,5 +1,5 @@
 /*
- * $LynxId: dtd_util.c,v 1.72 2009/04/16 22:59:33 tom Exp $
+ * $LynxId: dtd_util.c,v 1.73 2009/11/21 15:24:48 tom Exp $
  *
  * Given a SGML_dtd structure, write a corresponding flat file, or "C" source.
  * Given the flat-file, write the "C" source.
@@ -580,7 +580,7 @@ static void dump_src_HTTag(FILE *output, const SGML_dtd * dtd, int which)
     HTTag *tag = &(dtd->tags[which]);
     char *P_macro = "P";
 
-#ifdef EXP_JUSTIFY_ELTS
+#ifdef USE_JUSTIFY_ELTS
     if (!tag->can_justify)
 	P_macro = "P0";
 #endif
@@ -724,7 +724,7 @@ static void dump_source(FILE *output, const SGML_dtd * dtd, int dtd_version)
     NOTE("#define NULL_HTTag_ NULL");
     NOTE("#endif");
     NOTE("");
-    NOTE("#ifdef EXP_JUSTIFY_ELTS");
+    NOTE("#ifdef USE_JUSTIFY_ELTS");
     NOTE("#define P(x) P_(x), 1");
     NOTE("#define P0(x) P_(x), 0");
     NOTE("#define NULL_HTTag NULL_HTTag_,0");
@@ -952,7 +952,7 @@ static void dump_flat_TagFlags(FILE *output, const char *name, TagFlags theFlags
 static void dump_flat_HTTag(FILE *output, unsigned n, HTTag * tag)
 {
     fprintf(output, "\t%u:%s\n", n, tag->name);
-#ifdef EXP_JUSTIFY_ELTS
+#ifdef USE_JUSTIFY_ELTS
     fprintf(output, "\t\t%s\n", tag->can_justify ? "justify" : "nojustify");
 #endif
     dump_flat_attrs(output, tag->attributes, AttrCount(tag));
@@ -1199,7 +1199,7 @@ static int load_flat_HTTag(FILE *input, unsigned nref, HTTag * tag, AttrType * a
 #ifdef USE_COLOR_STYLE
 	tag->name_len = strlen(tag->name);
 #endif
-#ifdef EXP_JUSTIFY_ELTS
+#ifdef USE_JUSTIFY_ELTS
 	if (fscanf(input, "%s\n", name) == 1) {
 	    tag->can_justify = !strcmp(name, "justify");
 	} else {

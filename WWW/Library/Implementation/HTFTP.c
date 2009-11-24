@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFTP.c,v 1.89 2009/02/01 12:49:00 tom Exp $
+ * $LynxId: HTFTP.c,v 1.90 2009/09/07 23:36:28 tom Exp $
  *
  *			File Transfer Protocol (FTP) Client
  *			for a WorldWideWeb browser
@@ -1631,8 +1631,10 @@ static void parse_eplf_line(char *line,
 static void parse_ls_line(char *line,
 			  EntryInfo *entry)
 {
+#ifdef LONG_LIST
     char *next;
     char *cp;
+#endif
     int i, j;
     unsigned long base = 1;
     unsigned long size_num = 0;

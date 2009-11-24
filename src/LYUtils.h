@@ -1,4 +1,4 @@
-/* $LynxId: LYUtils.h,v 1.80 2009/02/01 23:28:26 tom Exp $ */
+/* $LynxId: LYUtils.h,v 1.82 2009/11/21 15:46:24 tom Exp $ */
 #ifndef LYUTILS_H
 #define LYUTILS_H
 
@@ -206,7 +206,7 @@ extern "C" {
 #define IsOurFile(name) TRUE
 #endif
 
-#ifdef EXP_ASCII_CTYPES
+#ifdef USE_ASCII_CTYPES
     extern int ascii_tolower(int i);
     extern int ascii_toupper(int i);
     extern int ascii_isupper(int i);
@@ -269,7 +269,7 @@ extern "C" {
 #endif
 
 #if defined(WIN_EX)		/* 1997/10/16 (Thu) 20:13:28 */
-    extern char *HTDOS_short_name(char *path);
+    extern char *HTDOS_short_name(const char *path);
     extern char *w32_strerror(DWORD ercode);
 #endif
 

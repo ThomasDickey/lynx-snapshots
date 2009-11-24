@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTUtils.h,v 1.94 2009/05/10 23:06:31 tom Exp $
+ * $LynxId: HTUtils.h,v 1.96 2009/11/21 17:05:33 Bela.Lubkin Exp $
  *
  * Utility macros for the W3 code library
  * MACROS FOR GENERAL USE
@@ -310,6 +310,7 @@ Standard C library for malloc() etc
 #endif
 
 #define isEmpty(s)   ((s) == 0 || *(s) == 0)
+#define non_empty(s) !isEmpty(s)
 
 #define NonNull(s) (((s) != 0) ? s : "")
 #define NONNULL(s) (((s) != 0) ? s : "(null)")
@@ -466,7 +467,7 @@ Out Of Memory checking for malloc() return:
 
 #ifndef TOLOWER
 
-#ifdef EXP_ASCII_CTYPES
+#ifdef USE_ASCII_CTYPES
 
 #define TOLOWER(c) ascii_tolower(UCH(c))
 #define TOUPPER(c) ascii_toupper(UCH(c))
@@ -738,7 +739,7 @@ extern int WWW_TraceMask;
 extern "C" {
 #endif
 #ifndef TOLOWER
-#ifdef EXP_ASCII_CTYPES
+#ifdef USE_ASCII_CTYPES
     extern int ascii_toupper(int);
     extern int ascii_tolower(int);
     extern int ascii_isupper(int);

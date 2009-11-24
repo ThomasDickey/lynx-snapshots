@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTP.c,v 1.110 2009/08/27 00:56:00 tom Exp $
+ * $LynxId: HTTP.c,v 1.112 2009/11/21 17:05:33 Bela.Lubkin Exp $
  *
  * HyperText Tranfer Protocol	- Client implementation		HTTP.c
  * ==========================
@@ -1159,7 +1159,7 @@ static int HTLoadHTTP(const char *arg,
 	}
 
 	if (LYSendUserAgent || no_useragent) {
-	    if (!isEmpty(LYUserAgent)) {
+	    if (non_empty(LYUserAgent)) {
 		char *cp = LYSkipBlanks(LYUserAgent);
 
 		/* Won't send it at all if all blank - kw */
@@ -1977,12 +1977,13 @@ static int HTLoadHTTP(const char *arg,
 		switch (server_status) {
 		case 401:	/* Unauthorized */
 		    /*
-		     * Authorization for orgin server required.  If show_401 is
-		     * set, proceed to showing the 401 body.  Otherwise, if we
-		     * can set up authorization based on the WWW-Authenticate
-		     * header, and the user provides a username and password,
-		     * try again.  Otherwise, check whether to show the 401
-		     * body or restore the current document.  - FM
+		     * Authorization for origin server required.  If show_401
+		     * is set, proceed to showing the 401 body.  Otherwise, if
+		     * we can set up authorization based on the
+		     * WWW-Authenticate header, and the user provides a
+		     * username and password, try again.  Otherwise, check
+		     * whether to show the 401 body or restore the current
+		     * document - FM
 		     */
 		    if (show_401)
 			break;

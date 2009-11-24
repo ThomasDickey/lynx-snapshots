@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYUtils.c,v 1.188 2009/08/25 22:36:48 tom Exp $
+ * $LynxId: LYUtils.c,v 1.193 2009/11/22 22:30:06 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTCP.h>
@@ -160,9 +160,9 @@ extern int BSDselect(int nfds, fd_set * readfds, fd_set * writefds,
  * 'O'ption page, for which Lynx will store a temporary filename even when
  * it no longer applies, since it will reuse that filename at a later time.
  */
-#ifdef EXP_RAND_TEMPNAME
+#ifdef USE_RAND_TEMPNAME
 #if defined(LYNX_RAND_MAX)
-#define USE_RAND_TEMPNAME 1
+#define HAVE_RAND_TEMPNAME 1
 #define MAX_TEMPNAME 10000
 #ifndef BITS_PER_CHAR
 #define BITS_PER_CHAR 8
@@ -281,7 +281,7 @@ char *LYGetEnv(const char *name)
  * Turkish locales tolower("I") is not "i". That's fatal for case
  * sensitive operations with charset names, HTML tags etc.
  */
-#ifdef EXP_ASCII_CTYPES
+#ifdef USE_ASCII_CTYPES
 int ascii_tolower(int i)
 {
     if (91 > i && i > 64)
@@ -305,7 +305,7 @@ int ascii_isupper(int i)
     else
 	return 0;
 }
-#endif /* EXP_ASCII_CTYPES */
+#endif /* USE_ASCII_CTYPES */
 
 /*
  * Check for UTF-8 data, returning the length past the first character.
@@ -2803,7 +2803,7 @@ BOOLEAN LYCanReadFile(const char *filename)
 {
     FILE *fp;
 
-    if (!isEmpty(filename)) {
+    if (non_empty(filename)) {
 	if ((fp = fopen(filename, "r")) != 0) {
 	    return LYCloseInput(fp);
 	}
@@ -3421,7 +3421,7 @@ static int fmt_tempname(char *result,
 {
     int code;
 
-#ifdef USE_RAND_TEMPNAME
+#ifdef HAVE_RAND_TEMPNAME
 #define SIZE_TEMPNAME ((MAX_TEMPNAME / BITS_PER_CHAR) + 1)
     static BOOL first = TRUE;
     static int names_used = 0;
@@ -3438,7 +3438,7 @@ static int fmt_tempname(char *result,
     /*
      * Prefer a random value rather than a counter.
      */
-#ifdef USE_RAND_TEMPNAME
+#ifdef HAVE_RAND_TEMPNAME
     if (first) {
 	lynx_srand((unsigned) ((long) time((time_t *) 0) + (long) result));
 	first = FALSE;
@@ -4014,7 +4014,7 @@ void LYConvertToURL(char **AllocatedString,
     struct stat st;
 #endif /* !VMS */
 
-    if (!old_string || *old_string == '\0')
+    if (isEmpty(old_string))
 	return;
 
 #if defined(USE_DOS_DRIVES)
@@ -5039,13 +5039,13 @@ void Define_VMSLogical(char *LogicalName,
     $DESCRIPTOR(lvalue, "");
     $DESCRIPTOR(ltable, "LNM$PROCESS");
 
-    if (!LogicalName || *LogicalName == '\0')
+    if (isEmpty(LogicalName))
 	return;
 
     lname.dsc$w_length = strlen(LogicalName);
     lname.dsc$a_pointer = LogicalName;
 
-    if (!LogicalValue || *LogicalValue == '\0') {
+    if (isEmpty(LogicalValue)) {
 	lib$delete_logical(&lname, &ltable);
 	return;
     }
@@ -5239,7 +5239,7 @@ BOOLEAN LYPathOffHomeOK(char *fbuffer,
     /*
      * Make sure we have an fbuffer and a string in it.  - FM
      */
-    if (!fbuffer || fbuffer_size < 2 || fbuffer[0] == '\0') {
+    if (fbuffer_size < 2 || isEmpty(fbuffer)) {
 	return (FALSE);
     }
     StrAllocCopy(file, fbuffer);
@@ -7002,6 +7002,8 @@ int LYCopyFile(char *src,
 	    }
 	    LYCloseInput(fin);
 	}
+	CTRACE((tfp, "builtin copy ->%d\n\tsource=%s\n\ttarget=%s\n",
+		code, src, dst));
     }
 
     if (code) {

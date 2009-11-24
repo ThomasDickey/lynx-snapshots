@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYGlobalDefs.h,v 1.121 2009/06/30 08:35:47 tom Exp $
+ * $LynxId: LYGlobalDefs.h,v 1.122 2009/11/21 15:24:48 tom Exp $
  *
  * global variable definitions
  */
@@ -572,7 +572,7 @@ extern "C" {
     extern int LYNoZapKey;	/* 0: off (do 'z' checking), 1: full, 2: initially */
 #endif
 
-#ifdef EXP_JUSTIFY_ELTS
+#ifdef USE_JUSTIFY_ELTS
     extern BOOLEAN ok_justify;
     extern int justify_max_void_percent;
 #endif

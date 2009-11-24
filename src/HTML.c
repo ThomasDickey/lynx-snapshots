@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTML.c,v 1.130 2009/08/27 21:17:55 tom Exp $
+ * $LynxId: HTML.c,v 1.132 2009/11/21 17:05:33 Bela.Lubkin Exp $
  *
  *		Structured stream to Rich hypertext converter
  *		============================================
@@ -4219,7 +4219,7 @@ static int HTML_start_element(HTStructured * me, int element_number,
 	     * Set to know we are in a new form.
 	     */
 	    me->inFORM = TRUE;
-	    EMIT_IFDEF_EXP_JUSTIFY_ELTS(form_in_htext = TRUE);
+	    EMIT_IFDEF_USE_JUSTIFY_ELTS(form_in_htext = TRUE);
 
 	    if (present && present[HTML_FORM_ACCEPT_CHARSET]) {
 		accept_cs = (value[HTML_FORM_ACCEPT_CHARSET]
@@ -4405,7 +4405,7 @@ static int HTML_start_element(HTStructured * me, int element_number,
 		 */
 		LYReduceBlanks(I.value);
 	    } else if (!strcasecomp(I.type, "button")) {
-		if (!isEmpty(I.name)) {
+		if (non_empty(I.name)) {
 		    StrAllocCopy(I.value, I.name);
 		} else {
 		    StrAllocCopy(I.value, "BUTTON");
@@ -5565,13 +5565,13 @@ static int HTML_start_element(HTStructured * me, int element_number,
 	(me->sp)--;
 	me->sp[0].style = me->new_style;	/* Stack new style */
 	me->sp[0].tag_number = ElementNumber;
-#ifdef EXP_JUSTIFY_ELTS
+#ifdef USE_JUSTIFY_ELTS
 	if (wait_for_this_stacked_elt < 0 &&
 	    HTML_dtd.tags[ElementNumber].can_justify == FALSE)
 	    wait_for_this_stacked_elt = me->stack - me->sp + MAX_NESTING;
 #endif
     }
-#ifdef EXP_JUSTIFY_ELTS
+#ifdef USE_JUSTIFY_ELTS
     if (in_DT && ElementNumber == HTML_DD)
 	in_DT = FALSE;
     else if (ElementNumber == HTML_DT)
@@ -5620,7 +5620,7 @@ static int HTML_end_element(HTStructured * me, int element_number,
     BOOL BreakFlag = FALSE;
     BOOL intern_flag = FALSE;
     BOOL skip_stack_requested = FALSE;
-    EMIT_IFDEF_EXP_JUSTIFY_ELTS(BOOL reached_awaited_stacked_elt = FALSE);
+    EMIT_IFDEF_USE_JUSTIFY_ELTS(BOOL reached_awaited_stacked_elt = FALSE);
 
 #ifdef USE_PRETTYSRC
     if (psrc_view && !sgml_in_psrc_was_initialized) {
@@ -5770,7 +5770,7 @@ static int HTML_end_element(HTStructured * me, int element_number,
 	     */
 	    return HT_OK;
 	} else if (me->sp < (me->stack + MAX_NESTING - 1)) {
-#ifdef EXP_JUSTIFY_ELTS
+#ifdef USE_JUSTIFY_ELTS
 	    if (wait_for_this_stacked_elt == me->stack - me->sp + MAX_NESTING)
 		reached_awaited_stacked_elt = TRUE;
 #endif
@@ -5806,7 +5806,7 @@ static int HTML_end_element(HTStructured * me, int element_number,
 	}
     }
     if (BreakFlag == TRUE) {
-#ifdef EXP_JUSTIFY_ELTS
+#ifdef USE_JUSTIFY_ELTS
 	if (reached_awaited_stacked_elt)
 	    wait_for_this_stacked_elt = -1;
 #endif
@@ -6189,7 +6189,7 @@ static int HTML_end_element(HTStructured * me, int element_number,
 	me->List_Nesting_Level--;
 	CTRACE((tfp, "HTML_end_element: Reducing List Nesting Level to %d\n",
 		me->List_Nesting_Level));
-#ifdef EXP_JUSTIFY_ELTS
+#ifdef USE_JUSTIFY_ELTS
 	if (element_number == HTML_DL)
 	    in_DT = FALSE;	/*close the term that was without definition. */
 #endif
@@ -6706,7 +6706,7 @@ static int HTML_end_element(HTStructured * me, int element_number,
 		LYShowBadHTML("Bad HTML: Unmatched FORM end tag\n");
 	    }
 	}
-	EMIT_IFDEF_EXP_JUSTIFY_ELTS(form_in_htext = FALSE);
+	EMIT_IFDEF_USE_JUSTIFY_ELTS(form_in_htext = FALSE);
 
 	/*
 	 * Check if we still have a SELECT element open.  FORM may have been
@@ -7182,7 +7182,7 @@ static int HTML_end_element(HTStructured * me, int element_number,
 
     }				/* switch */
 
-#ifdef EXP_JUSTIFY_ELTS
+#ifdef USE_JUSTIFY_ELTS
     if (reached_awaited_stacked_elt)
 	wait_for_this_stacked_elt = -1;
 #endif

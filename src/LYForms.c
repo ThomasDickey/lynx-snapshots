@@ -1,4 +1,4 @@
-/* $LynxId: LYForms.c,v 1.81 2009/05/28 23:10:06 tom Exp $ */
+/* $LynxId: LYForms.c,v 1.82 2009/11/21 17:05:33 Bela.Lubkin Exp $ */
 #include <HTUtils.h>
 #include <HTCJK.h>
 #include <HTTP.h>
@@ -266,7 +266,7 @@ int change_form_link_ex(int cur,
 		break;
 	    }
 #endif
-	    if (!form->submit_action || *form->submit_action == '\0') {
+	    if (isEmpty(form->submit_action)) {
 		HTUserMsg(NO_FORM_ACTION);
 		c = DO_NOTHING;
 		break;
@@ -1012,7 +1012,7 @@ void show_formlink_statusline(const FormInfo * form,
 	    char *submit_str = NULL;
 	    char *xkey_info = NULL;
 
-	    if (!no_editor && editor && editor) {
+	    if (!no_editor && non_empty(editor)) {
 		xkey_info = key_for_func_ext(LYK_EDIT_TEXTAREA, for_what);
 #ifdef TEXTAREA_AUTOEXTEDIT
 		if (!xkey_info)

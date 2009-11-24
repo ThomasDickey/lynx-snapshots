@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYCookie.c,v 1.95 2009/01/01 22:28:57 tom Exp $
+ * $LynxId: LYCookie.c,v 1.96 2009/11/24 10:48:33 tom Exp $
  *
  *			       Lynx Cookie Support		   LYCookie.c
  *			       ===================
@@ -1764,8 +1764,10 @@ void LYSetCookie(const char *SetCookie,
 			 PARSE_PATH | PARSE_PUNCTUATION)) != NULL) &&
 	(ptr = strrchr(path, '/')) != NULL) {
 	if (ptr == path) {
-	    *(ptr + 1) = '\0';	/* Leave a single '/' alone */
-	} else {
+	    ++ptr;		/* Leave a single '/' alone */
+	}
+	if (*ptr != '\0') {
+	    CTrace((tfp, "discarding \"%s\" in cookie-path\n", ptr));
 	    *ptr = '\0';
 	}
     }

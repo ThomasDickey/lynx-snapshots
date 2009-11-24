@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTDOS.c,v 1.36 2009/01/03 01:58:39 tom Exp $
+ * $LynxId: HTDOS.c,v 1.37 2009/09/09 00:40:55 tom Exp $
  *							DOS specific routines
  */
 
@@ -103,7 +103,7 @@ char *HTDOS_slashes(char *path)
  * ON EXIT:
  *	returns		DOS file specification
  */
-char *HTDOS_name(char *wwwname)
+char *HTDOS_name(const char *wwwname)
 {
     static char *result = NULL;
     int joe;
@@ -150,7 +150,7 @@ char *HTDOS_name(char *wwwname)
 }
 
 #ifdef WIN_EX
-char *HTDOS_short_name(char *path)
+char *HTDOS_short_name(const char *path)
 {
     static char sbuf[LY_MAXPATH];
     char *ret;

@@ -1,4 +1,4 @@
-/* $LynxId: LYCurses.c,v 1.141 2009/04/07 00:00:40 tom Exp $ */
+/* $LynxId: LYCurses.c,v 1.145 2009/11/21 17:05:33 Bela.Lubkin Exp $ */
 #include <HTUtils.h>
 #include <HTAlert.h>
 
@@ -1228,7 +1228,7 @@ void start_curses(void)
 
 #ifdef USE_COLOR_STYLE
 	/* Curses forgets color settings when we call delscreen() */
-	if (!isEmpty(lynx_lss_file) && LYCanReadFile(lynx_lss_file)) {
+	if (non_empty(lynx_lss_file) && LYCanReadFile(lynx_lss_file)) {
 	    style_readFromFile(lynx_lss_file);
 	}
 	parse_userstyles();
@@ -1485,7 +1485,7 @@ void stop_curses(void)
 
 #ifdef __DJGPP__
     ScreenClear();
-#else /* some flavor of win32?  */
+#elif !defined(PDCURSES)	/* some flavor of win32?  */
     clrscr();
 #endif /* win32 */
 
@@ -1973,28 +1973,25 @@ void LYwaddnstr(WINDOW * w GCC_UNUSED,
 
 /*
  * Determine the number of cells the given string would take up on the screen,
- * limited by the maxCells parameter.  This is used for constructing aligned
- * text in the options and similar forms.
+ * limited (in the case of wide characters) by the maxCells parameter.
  *
- * FIXME: make this account for wrapping, too.
- * FIXME: make this useful for "lynx -dump", which hasn't initialized curses.
+ * If the returnCellNum parameter is TRUE, return the number of cells;
+ * otherwise, return the length (limited by the len parameter) of the prefix of
+ * the string that fits in maxCells cells.
  */
-int LYstrExtent(const char *string, int len, int maxCells)
+static
+int LYstrExtent0(const char *string,
+		 int len,
+		 int maxCells GCC_UNUSED,
+		 BOOL retCellNum GCC_UNUSED)
 {
-    int result = 0;
-    int used;
+    int used = (len < 0 ? (int) strlen(string) : len);
+    int result = used;
 
-    if (len < 0)
-	used = (int) strlen(string);
-    else
-	used = len;
-
-    result = used;
 #ifdef WIDEC_CURSES
     if (used > 0 && lynx_called_initscr) {
 	static WINDOW *fake_win;
 	static int fake_max;
-	int n;
 
 	if (fake_max < maxCells) {
 	    fake_max = (maxCells + 1) * 2;
@@ -2009,8 +2006,9 @@ int LYstrExtent(const char *string, int len, int maxCells)
 	if (fake_win != 0) {
 	    int new_x = 0;
 	    int new_y = 0;
+	    int x = 0;
+	    int n;
 
-	    result = 0;
 	    wmove(fake_win, 0, 0);
 	    for (n = 0; n < used; ++n) {
 		if (IsNormalChar(string[n])) {
@@ -2018,15 +2016,29 @@ int LYstrExtent(const char *string, int len, int maxCells)
 		    getyx(fake_win, new_y, new_x);
 		    if (new_y > 0 || new_x > maxCells)
 			break;
-		    result = new_x;
+		    x = new_x;
 		}
 	    }
+	    result = (retCellNum ? x : n);
 	}
     }
 #endif
-    if (result > maxCells)
-	result = maxCells;
     return result;
+}
+
+/*
+ * Determine the number of cells the given string would take up on the screen,
+ * limited by the maxCells parameter.  This is used for constructing aligned
+ * text in the options and similar forms.
+ *
+ * FIXME: make this account for wrapping, too.
+ * FIXME: make this useful for "lynx -dump", which hasn't initialized curses.
+ */
+int LYstrExtent(const char *string, int len, int maxCells)
+{
+    int result = LYstrExtent0(string, len, maxCells, TRUE);
+
+    return (result > maxCells ? maxCells : result);
 }
 
 /*
@@ -2039,6 +2051,15 @@ int LYstrExtent(const char *string, int len, int maxCells)
 int LYstrExtent2(const char *string, int len)
 {
     return LYstrExtent(string, len, 8 * len);
+}
+
+/*
+ * Determine the longest prefix of a string that fits in a given number of
+ * cells and return its length.
+ */
+int LYstrFittable(const char *string, int maxCells)
+{
+    return LYstrExtent0(string, -1, maxCells, FALSE);
 }
 
 /*
