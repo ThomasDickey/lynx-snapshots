@@ -1,4 +1,4 @@
-/* $LynxId: src0_HTMLDTD.h,v 1.42 2009/04/16 22:55:54 tom Exp $ */
+/* $LynxId: src0_HTMLDTD.h,v 1.43 2009/11/21 15:24:48 tom Exp $ */
 #ifndef src_HTMLDTD_H0
 #define src_HTMLDTD_H0 1
 
@@ -2275,7 +2275,7 @@ static const attr UL_attr[] = {         /* DIR attributes */
 #define NULL_HTTag_ NULL
 #endif
 
-#ifdef EXP_JUSTIFY_ELTS
+#ifdef USE_JUSTIFY_ELTS
 #define P(x) P_(x), 1
 #define P0(x) P_(x), 0
 #define NULL_HTTag NULL_HTTag_,0

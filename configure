@@ -732,20 +732,17 @@ Experimental Options:
   --disable-config-info   disable browsable configuration-info
   --disable-forms-options disable forms-based options
   --disable-menu-options  disable old-style option menu
+  --disable-sessions      use experimental sessions code
+  --disable-session-cache use experimental session-caching code
   --enable-addrlist-page  use experimental address-list page
-  --enable-ascii-ctypes   use experimental ascii case-conversion
-  --enable-charset-choice use experimental charset-selection logic
   --enable-cjk            use experimental CJK logic
   --enable-japanese-utf8  use experimental Japanese UTF-8 logic
   --enable-default-colors enable use of default-colors (ncurses/slang)
   --enable-kbd-layout     use experimental keyboard-layout support
   --enable-nested-tables  use experimental nested-table support
-  --enable-progressbar    use experimental progress-bar
-  --enable-scrollbar      use experimental scrollbar, with mouse
-  --enable-sessions       use experimental sessions code
-  --enable-session-cache  use experimental session-caching code
 Miscellaneous Options:
   --disable-alt-bindings  disable alternative line-edit bindings
+  --disable-ascii-ctypes  use ascii case-conversion
   --disable-extended-dtd  disable extended HTML DTD logic
   --disable-file-upload   use file-upload support
   --disable-idna          provide IDNA support
@@ -753,8 +750,11 @@ Miscellaneous Options:
   --disable-partial       use partial-display logic
   --disable-persistent-cookies  disable persistent-cookie support
   --disable-prettysrc     colorize HTML source
+  --disable-progressbar   use progress-bar
   --disable-read-eta      read-progress message shows ETA
   --disable-source-cache  cache HTML source for parse mode changes
+  --disable-scrollbar     use scrollbar, with mouse
+  --enable-charset-choice use charset-selection logic
   --enable-externs        use external commands
   --enable-font-switch    use Linux setfont for character-translation
   --enable-cgi-links      support cgi links w/o a http daemon
@@ -13346,7 +13346,7 @@ cf_search="$cf_library_path_list $cf_search"
 echo "${as_me-configure}:13346: testing ... testing $cf_cv_library_path_gnutls ..." 1>&5
 
             CPPFLAGS="$cf_test_CPPFLAGS"
-            LIBS="-lgnutls -lgnutls -lcrypt $cf_save_LIBS"
+            LIBS="-lgnutls -lgnutls -lgcrypt $cf_save_LIBS"
             LDFLAGS="$cf_save_LDFLAGS -L$cf_cv_library_path_gnutls"
             cat >conftest.$ac_ext <<_ACEOF
 #line 13352 "configure"
@@ -13551,7 +13551,7 @@ echo "${as_me-configure}:13545: testing adding $cf_add_libdir to library-path ..
 fi
 
 		fi
-		LIBS="-lgnutls -lcrypt $LIBS"
+		LIBS="-lgnutls -lgcrypt $LIBS"
 
 		EXTRA_OBJS="$EXTRA_OBJS tidy_tls\$o"
 
@@ -14323,7 +14323,7 @@ cf_search="$cf_library_path_list $cf_search"
 echo "${as_me-configure}:14323: testing ... testing $cf_cv_library_path_gnutls ..." 1>&5
 
             CPPFLAGS="$cf_test_CPPFLAGS"
-            LIBS="-lgnutls -lgnutls-openssl -lgnutls-extra -lgnutls -lcrypt $cf_save_LIBS"
+            LIBS="-lgnutls -lgnutls-openssl -lgnutls-extra -lgnutls -lgcrypt $cf_save_LIBS"
             LDFLAGS="$cf_save_LDFLAGS -L$cf_cv_library_path_gnutls"
             cat >conftest.$ac_ext <<_ACEOF
 #line 14329 "configure"
@@ -14528,7 +14528,7 @@ echo "${as_me-configure}:14522: testing adding $cf_add_libdir to library-path ..
 fi
 
 		fi
-		LIBS="-lgnutls -lcrypt $LIBS"
+		LIBS="-lgnutls -lgcrypt $LIBS"
 
 		if test "$cf_pkg_gnutls" = none ; then
 				echo "$as_me:14534: checking for SSL_connect in -lgnutls-openssl" >&5
@@ -25225,8 +25225,8 @@ else
 int
 main ()
 {
-#ifndef ${ac_func}
-extern	int	${ac_func}();
+#ifndef $ac_func
+extern	int	$ac_func();
 #endif
   ;
   return 0;
@@ -25252,8 +25252,8 @@ cat >conftest.$ac_ext <<_ACEOF
 int
 main ()
 {
-#ifndef ${ac_func}
-int	(*p)() = ${ac_func};
+#ifndef $ac_func
+int	(*p)() = $ac_func;
 #endif
   ;
   return 0;
@@ -25323,8 +25323,8 @@ else
 int
 main ()
 {
-#ifndef ${ac_func}
-extern	int	${ac_func}();
+#ifndef $ac_func
+extern	int	$ac_func();
 #endif
   ;
   return 0;
@@ -25352,8 +25352,8 @@ cat >conftest.$ac_ext <<_ACEOF
 int
 main ()
 {
-#ifndef ${ac_func}
-int	(*p)() = ${ac_func};
+#ifndef $ac_func
+int	(*p)() = $ac_func;
 #endif
   ;
   return 0;
@@ -26815,7 +26815,60 @@ test $use_menu_options = no && cat >>confdefs.h <<\EOF
 #define NO_OPTION_MENU 1
 EOF
 
-echo "$as_me:26818: checking if experimental address-list page should be used" >&5
+echo "$as_me:26818: checking if sessions code should be used" >&5
+echo $ECHO_N "checking if sessions code should be used... $ECHO_C" >&6
+
+# Check whether --enable-sessions or --disable-sessions was given.
+if test "${enable_sessions+set}" = set; then
+  enableval="$enable_sessions"
+  test "$enableval" != no && enableval=yes
+  if test "$enableval" != "yes" ; then
+    use_sessions=$enableval
+  else
+    use_sessions=yes
+  fi
+else
+  enableval=yes
+  use_sessions=yes
+
+fi;
+echo "$as_me:26835: result: $use_sessions" >&5
+echo "${ECHO_T}$use_sessions" >&6
+if test $use_sessions != no ; then
+	cat >>confdefs.h <<\EOF
+#define USE_SESSIONS 1
+EOF
+
+	EXTRA_OBJS="$EXTRA_OBJS LYSession\$o"
+fi
+
+echo "$as_me:26845: checking if session-caching code should be used" >&5
+echo $ECHO_N "checking if session-caching code should be used... $ECHO_C" >&6
+
+# Check whether --enable-session-cache or --disable-session-cache was given.
+if test "${enable_session_cache+set}" = set; then
+  enableval="$enable_session_cache"
+  test "$enableval" != no && enableval=yes
+  if test "$enableval" != "yes" ; then
+    use_session_cache=$enableval
+  else
+    use_session_cache=yes
+  fi
+else
+  enableval=yes
+  use_session_cache=yes
+
+fi;
+echo "$as_me:26862: result: $use_session_cache" >&5
+echo "${ECHO_T}$use_session_cache" >&6
+if test $use_session_cache != no ; then
+    cat >>confdefs.h <<\EOF
+#define USE_CACHEJAR 1
+EOF
+
+fi
+
+echo "$as_me:26871: checking if experimental address-list page should be used" >&5
 echo $ECHO_N "checking if experimental address-list page should be used... $ECHO_C" >&6
 
 # Check whether --enable-addrlist-page or --disable-addrlist-page was given.
@@ -26832,59 +26885,13 @@ else
   use_addrlist_page=no
 
 fi;
-echo "$as_me:26835: result: $use_addrlist_page" >&5
+echo "$as_me:26888: result: $use_addrlist_page" >&5
 echo "${ECHO_T}$use_addrlist_page" >&6
 test $use_addrlist_page != no && cat >>confdefs.h <<\EOF
 #define EXP_ADDRLIST_PAGE 1
 EOF
 
-echo "$as_me:26841: checking if experimental ascii case-conversion should be used" >&5
-echo $ECHO_N "checking if experimental ascii case-conversion should be used... $ECHO_C" >&6
-
-# Check whether --enable-ascii-ctypes or --disable-ascii-ctypes was given.
-if test "${enable_ascii_ctypes+set}" = set; then
-  enableval="$enable_ascii_ctypes"
-  test "$enableval" != yes && enableval=no
-  if test "$enableval" != "no" ; then
-    use_ascii_ctypes=$enableval
-  else
-    use_ascii_ctypes=yes
-  fi
-else
-  enableval=no
-  use_ascii_ctypes=yes
-
-fi;
-echo "$as_me:26858: result: $use_ascii_ctypes" >&5
-echo "${ECHO_T}$use_ascii_ctypes" >&6
-test $use_ascii_ctypes != no && cat >>confdefs.h <<\EOF
-#define EXP_ASCII_CTYPES 1
-EOF
-
-echo "$as_me:26864: checking if experimental charset-selection logic should be used" >&5
-echo $ECHO_N "checking if experimental charset-selection logic should be used... $ECHO_C" >&6
-
-# Check whether --enable-charset-choice or --disable-charset-choice was given.
-if test "${enable_charset_choice+set}" = set; then
-  enableval="$enable_charset_choice"
-  test "$enableval" != yes && enableval=no
-  if test "$enableval" != "no" ; then
-    use_charset_choice=$enableval
-  else
-    use_charset_choice=no
-  fi
-else
-  enableval=no
-  use_charset_choice=no
-
-fi;
-echo "$as_me:26881: result: $use_charset_choice" >&5
-echo "${ECHO_T}$use_charset_choice" >&6
-test $use_charset_choice != no && cat >>confdefs.h <<\EOF
-#define EXP_CHARSET_CHOICE 1
-EOF
-
-echo "$as_me:26887: checking if experimental CJK logic should be used" >&5
+echo "$as_me:26894: checking if experimental CJK logic should be used" >&5
 echo $ECHO_N "checking if experimental CJK logic should be used... $ECHO_C" >&6
 
 # Check whether --enable-cjk or --disable-cjk was given.
@@ -26901,13 +26908,13 @@ else
   use_cjk=no
 
 fi;
-echo "$as_me:26904: result: $use_cjk" >&5
+echo "$as_me:26911: result: $use_cjk" >&5
 echo "${ECHO_T}$use_cjk" >&6
 test $use_cjk != no && cat >>confdefs.h <<\EOF
 #define CJK_EX 1
 EOF
 
-echo "$as_me:26910: checking if experimental Japanese UTF-8 logic should be used" >&5
+echo "$as_me:26917: checking if experimental Japanese UTF-8 logic should be used" >&5
 echo $ECHO_N "checking if experimental Japanese UTF-8 logic should be used... $ECHO_C" >&6
 
 # Check whether --enable-japanese-utf8 or --disable-japanese-utf8 was given.
@@ -26924,7 +26931,7 @@ else
   use_ja_utf8=no
 
 fi;
-echo "$as_me:26927: result: $use_ja_utf8" >&5
+echo "$as_me:26934: result: $use_ja_utf8" >&5
 echo "${ECHO_T}$use_ja_utf8" >&6
 if test $use_ja_utf8 != no ; then
 	cat >>confdefs.h <<\EOF
@@ -26969,7 +26976,7 @@ if test -n "$cf_searchpath/include" ; then
 			  cf_save_CPPFLAGS=$CPPFLAGS
 			  CPPFLAGS="$CPPFLAGS -I$cf_add_incdir"
 			  cat >conftest.$ac_ext <<_ACEOF
-#line 26972 "configure"
+#line 26979 "configure"
 #include "confdefs.h"
 #include <stdio.h>
 int
@@ -26981,16 +26988,16 @@ printf("Hello")
 }
 _ACEOF
 rm -f conftest.$ac_objext
-if { (eval echo "$as_me:26984: \"$ac_compile\"") >&5
+if { (eval echo "$as_me:26991: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
-  echo "$as_me:26987: \$? = $ac_status" >&5
+  echo "$as_me:26994: \$? = $ac_status" >&5
   (exit $ac_status); } &&
          { ac_try='test -s conftest.$ac_objext'
-  { (eval echo "$as_me:26990: \"$ac_try\"") >&5
+  { (eval echo "$as_me:26997: \"$ac_try\"") >&5
   (eval $ac_try) 2>&5
   ac_status=$?
-  echo "$as_me:26993: \$? = $ac_status" >&5
+  echo "$as_me:27000: \$? = $ac_status" >&5
   (exit $ac_status); }; }; then
   :
 else
@@ -27007,7 +27014,7 @@ rm -f conftest.$ac_objext conftest.$ac_ext
 		if test "$cf_have_incdir" = no ; then
 		  test -n "$verbose" && echo "	adding $cf_add_incdir to include-path" 1>&6
 
-echo "${as_me-configure}:27010: testing adding $cf_add_incdir to include-path ..." 1>&5
+echo "${as_me-configure}:27017: testing adding $cf_add_incdir to include-path ..." 1>&5
 
 		  CPPFLAGS="$CPPFLAGS -I$cf_add_incdir"
 
@@ -27048,7 +27055,7 @@ if test -n "$cf_searchpath/../include" ; then
 			  cf_save_CPPFLAGS=$CPPFLAGS
 			  CPPFLAGS="$CPPFLAGS -I$cf_add_incdir"
 			  cat >conftest.$ac_ext <<_ACEOF
-#line 27051 "configure"
+#line 27058 "configure"
 #include "confdefs.h"
 #include <stdio.h>
 int
@@ -27060,16 +27067,16 @@ printf("Hello")
 }
 _ACEOF
 rm -f conftest.$ac_objext
-if { (eval echo "$as_me:27063: \"$ac_compile\"") >&5
+if { (eval echo "$as_me:27070: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
-  echo "$as_me:27066: \$? = $ac_status" >&5
+  echo "$as_me:27073: \$? = $ac_status" >&5
   (exit $ac_status); } &&
          { ac_try='test -s conftest.$ac_objext'
-  { (eval echo "$as_me:27069: \"$ac_try\"") >&5
+  { (eval echo "$as_me:27076: \"$ac_try\"") >&5
   (eval $ac_try) 2>&5
   ac_status=$?
-  echo "$as_me:27072: \$? = $ac_status" >&5
+  echo "$as_me:27079: \$? = $ac_status" >&5
   (exit $ac_status); }; }; then
   :
 else
@@ -27086,7 +27093,7 @@ rm -f conftest.$ac_objext conftest.$ac_ext
 		if test "$cf_have_incdir" = no ; then
 		  test -n "$verbose" && echo "	adding $cf_add_incdir to include-path" 1>&6
 
-echo "${as_me-configure}:27089: testing adding $cf_add_incdir to include-path ..." 1>&5
+echo "${as_me-configure}:27096: testing adding $cf_add_incdir to include-path ..." 1>&5
 
 		  CPPFLAGS="$CPPFLAGS -I$cf_add_incdir"
 
@@ -27102,7 +27109,7 @@ echo "${as_me-configure}:27089: testing adding $cf_add_incdir to include-path ..
 fi
 
 	else
-{ { echo "$as_me:27105: error: cannot find libiconv under $withval" >&5
+{ { echo "$as_me:27112: error: cannot find libiconv under $withval" >&5
 echo "$as_me: error: cannot find libiconv under $withval" >&2;}
    { (exit 1); exit 1; }; }
 	fi
@@ -27127,7 +27134,7 @@ if test -n "$cf_searchpath/lib" ; then
       if test "$cf_have_libdir" = no ; then
         test -n "$verbose" && echo "	adding $cf_add_libdir to library-path" 1>&6
 
-echo "${as_me-configure}:27130: testing adding $cf_add_libdir to library-path ..." 1>&5
+echo "${as_me-configure}:27137: testing adding $cf_add_libdir to library-path ..." 1>&5
 
         LDFLAGS="-L$cf_add_libdir $LDFLAGS"
       fi
@@ -27156,7 +27163,7 @@ if test -n "$cf_searchpath" ; then
       if test "$cf_have_libdir" = no ; then
         test -n "$verbose" && echo "	adding $cf_add_libdir to library-path" 1>&6
 
-echo "${as_me-configure}:27159: testing adding $cf_add_libdir to library-path ..." 1>&5
+echo "${as_me-configure}:27166: testing adding $cf_add_libdir to library-path ..." 1>&5
 
         LDFLAGS="-L$cf_add_libdir $LDFLAGS"
       fi
@@ -27165,7 +27172,7 @@ echo "${as_me-configure}:27159: testing adding $cf_add_libdir to library-path ..
 fi
 
 	else
-{ { echo "$as_me:27168: error: cannot find libiconv under $withval" >&5
+{ { echo "$as_me:27175: error: cannot find libiconv under $withval" >&5
 echo "$as_me: error: cannot find libiconv under $withval" >&2;}
    { (exit 1); exit 1; }; }
 	fi
@@ -27176,7 +27183,7 @@ done
 
 fi;
 
-  echo "$as_me:27179: checking for iconv" >&5
+  echo "$as_me:27186: checking for iconv" >&5
 echo $ECHO_N "checking for iconv... $ECHO_C" >&6
 if test "${am_cv_func_iconv+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
@@ -27187,10 +27194,10 @@ else
 cf_cv_header_path_iconv=
 cf_cv_library_path_iconv=
 
-echo "${as_me-configure}:27190: testing Starting FIND_LINKAGE(iconv,) ..." 1>&5
+echo "${as_me-configure}:27197: testing Starting FIND_LINKAGE(iconv,) ..." 1>&5
 
 cat >conftest.$ac_ext <<_ACEOF
-#line 27193 "configure"
+#line 27200 "configure"
 #include "confdefs.h"
 
 #include <stdlib.h>
@@ -27209,16 +27216,16 @@ main ()
 }
 _ACEOF
 rm -f conftest.$ac_objext conftest$ac_exeext
-if { (eval echo "$as_me:27212: \"$ac_link\"") >&5
+if { (eval echo "$as_me:27219: \"$ac_link\"") >&5
   (eval $ac_link) 2>&5
   ac_status=$?
-  echo "$as_me:27215: \$? = $ac_status" >&5
+  echo "$as_me:27222: \$? = $ac_status" >&5
   (exit $ac_status); } &&
          { ac_try='test -s conftest$ac_exeext'
-  { (eval echo "$as_me:27218: \"$ac_try\"") >&5
+  { (eval echo "$as_me:27225: \"$ac_try\"") >&5
   (eval $ac_try) 2>&5
   ac_status=$?
-  echo "$as_me:27221: \$? = $ac_status" >&5
+  echo "$as_me:27228: \$? = $ac_status" >&5
   (exit $ac_status); }; }; then
   cf_cv_find_linkage_iconv=yes
 else
@@ -27229,9 +27236,9 @@ cat conftest.$ac_ext >&5
 
     test -n "$verbose" && echo "	find linkage for iconv library" 1>&6
 
-echo "${as_me-configure}:27232: testing find linkage for iconv library ..." 1>&5
+echo "${as_me-configure}:27239: testing find linkage for iconv library ..." 1>&5
 
-echo "${as_me-configure}:27234: testing Searching for headers in FIND_LINKAGE(iconv,) ..." 1>&5
+echo "${as_me-configure}:27241: testing Searching for headers in FIND_LINKAGE(iconv,) ..." 1>&5
 
     cf_save_CPPFLAGS="$CPPFLAGS"
     cf_test_CPPFLAGS="$CPPFLAGS"
@@ -27339,11 +27346,11 @@ cf_search="$cf_header_path_list $cf_search"
       if test -d $cf_cv_header_path_iconv ; then
         test -n "$verbose" && echo "	... testing $cf_cv_header_path_iconv" 1>&6
 
-echo "${as_me-configure}:27342: testing ... testing $cf_cv_header_path_iconv ..." 1>&5
+echo "${as_me-configure}:27349: testing ... testing $cf_cv_header_path_iconv ..." 1>&5
 
         CPPFLAGS="$cf_save_CPPFLAGS -I$cf_cv_header_path_iconv"
         cat >conftest.$ac_ext <<_ACEOF
-#line 27346 "configure"
+#line 27353 "configure"
 #include "confdefs.h"
 
 #include <stdlib.h>
@@ -27362,21 +27369,21 @@ main ()
 }
 _ACEOF
 rm -f conftest.$ac_objext
-if { (eval echo "$as_me:27365: \"$ac_compile\"") >&5
+if { (eval echo "$as_me:27372: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
-  echo "$as_me:27368: \$? = $ac_status" >&5
+  echo "$as_me:27375: \$? = $ac_status" >&5
   (exit $ac_status); } &&
          { ac_try='test -s conftest.$ac_objext'
-  { (eval echo "$as_me:27371: \"$ac_try\"") >&5
+  { (eval echo "$as_me:27378: \"$ac_try\"") >&5
   (eval $ac_try) 2>&5
   ac_status=$?
-  echo "$as_me:27374: \$? = $ac_status" >&5
+  echo "$as_me:27381: \$? = $ac_status" >&5
   (exit $ac_status); }; }; then
 
             test -n "$verbose" && echo "	... found iconv headers in $cf_cv_header_path_iconv" 1>&6
 
-echo "${as_me-configure}:27379: testing ... found iconv headers in $cf_cv_header_path_iconv ..." 1>&5
+echo "${as_me-configure}:27386: testing ... found iconv headers in $cf_cv_header_path_iconv ..." 1>&5
 
             cf_cv_find_linkage_iconv=maybe
             cf_test_CPPFLAGS="$CPPFLAGS"
@@ -27394,7 +27401,7 @@ rm -f conftest.$ac_objext conftest.$ac_ext
 
     if test "$cf_cv_find_linkage_iconv" = maybe ; then
 
-echo "${as_me-configure}:27397: testing Searching for iconv library in FIND_LINKAGE(iconv,) ..." 1>&5
+echo "${as_me-configure}:27404: testing Searching for iconv library in FIND_LINKAGE(iconv,) ..." 1>&5
 
       cf_save_LIBS="$LIBS"
       cf_save_LDFLAGS="$LDFLAGS"
@@ -27490,13 +27497,13 @@ cf_search="$cf_library_path_list $cf_search"
           if test -d $cf_cv_library_path_iconv ; then
             test -n "$verbose" && echo "	... testing $cf_cv_library_path_iconv" 1>&6
 
-echo "${as_me-configure}:27493: testing ... testing $cf_cv_library_path_iconv ..." 1>&5
+echo "${as_me-configure}:27500: testing ... testing $cf_cv_library_path_iconv ..." 1>&5
 
             CPPFLAGS="$cf_test_CPPFLAGS"
             LIBS="-liconv  $cf_save_LIBS"
             LDFLAGS="$cf_save_LDFLAGS -L$cf_cv_library_path_iconv"
             cat >conftest.$ac_ext <<_ACEOF
-#line 27499 "configure"
+#line 27506 "configure"
 #include "confdefs.h"
 
 #include <stdlib.h>
@@ -27515,21 +27522,21 @@ main ()
 }
 _ACEOF
 rm -f conftest.$ac_objext conftest$ac_exeext
-if { (eval echo "$as_me:27518: \"$ac_link\"") >&5
+if { (eval echo "$as_me:27525: \"$ac_link\"") >&5
   (eval $ac_link) 2>&5
   ac_status=$?
-  echo "$as_me:27521: \$? = $ac_status" >&5
+  echo "$as_me:27528: \$? = $ac_status" >&5
   (exit $ac_status); } &&
          { ac_try='test -s conftest$ac_exeext'
-  { (eval echo "$as_me:27524: \"$ac_try\"") >&5
+  { (eval echo "$as_me:27531: \"$ac_try\"") >&5
   (eval $ac_try) 2>&5
   ac_status=$?
-  echo "$as_me:27527: \$? = $ac_status" >&5
+  echo "$as_me:27534: \$? = $ac_status" >&5
   (exit $ac_status); }; }; then
 
                 test -n "$verbose" && echo "	... found iconv library in $cf_cv_library_path_iconv" 1>&6
 
-echo "${as_me-configure}:27532: testing ... found iconv library in $cf_cv_library_path_iconv ..." 1>&5
+echo "${as_me-configure}:27539: testing ... found iconv library in $cf_cv_library_path_iconv ..." 1>&5
 
                 cf_cv_find_linkage_iconv=yes
                 cf_cv_library_file_iconv="-liconv"
@@ -27565,7 +27572,7 @@ am_cv_func_iconv="no, consider installing GNU libiconv"
 fi
 
 fi
-echo "$as_me:27568: result: $am_cv_func_iconv" >&5
+echo "$as_me:27575: result: $am_cv_func_iconv" >&5
 echo "${ECHO_T}$am_cv_func_iconv" >&6
 
   if test "$am_cv_func_iconv" = yes; then
@@ -27574,14 +27581,14 @@ cat >>confdefs.h <<\EOF
 #define HAVE_ICONV 1
 EOF
 
-    echo "$as_me:27577: checking if the declaration of iconv() needs const." >&5
+    echo "$as_me:27584: checking if the declaration of iconv() needs const." >&5
 echo $ECHO_N "checking if the declaration of iconv() needs const.... $ECHO_C" >&6
 if test "${am_cv_proto_iconv_const+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
 
       cat >conftest.$ac_ext <<_ACEOF
-#line 27584 "configure"
+#line 27591 "configure"
 #include "confdefs.h"
 
 #include <stdlib.h>
@@ -27606,16 +27613,16 @@ main ()
 }
 _ACEOF
 rm -f conftest.$ac_objext
-if { (eval echo "$as_me:27609: \"$ac_compile\"") >&5
+if { (eval echo "$as_me:27616: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
-  echo "$as_me:27612: \$? = $ac_status" >&5
+  echo "$as_me:27619: \$? = $ac_status" >&5
   (exit $ac_status); } &&
          { ac_try='test -s conftest.$ac_objext'
-  { (eval echo "$as_me:27615: \"$ac_try\"") >&5
+  { (eval echo "$as_me:27622: \"$ac_try\"") >&5
   (eval $ac_try) 2>&5
   ac_status=$?
-  echo "$as_me:27618: \$? = $ac_status" >&5
+  echo "$as_me:27625: \$? = $ac_status" >&5
   (exit $ac_status); }; }; then
   am_cv_proto_iconv_const=no
 else
@@ -27625,7 +27632,7 @@ am_cv_proto_iconv_const=yes
 fi
 rm -f conftest.$ac_objext conftest.$ac_ext
 fi
-echo "$as_me:27628: result: $am_cv_proto_iconv_const" >&5
+echo "$as_me:27635: result: $am_cv_proto_iconv_const" >&5
 echo "${ECHO_T}$am_cv_proto_iconv_const" >&6
 
     if test "$am_cv_proto_iconv_const" = yes ; then
@@ -27667,7 +27674,7 @@ if test -n "$cf_cv_header_path_iconv" ; then
 			  cf_save_CPPFLAGS=$CPPFLAGS
 			  CPPFLAGS="$CPPFLAGS -I$cf_add_incdir"
 			  cat >conftest.$ac_ext <<_ACEOF
-#line 27670 "configure"
+#line 27677 "configure"
 #include "confdefs.h"
 #include <stdio.h>
 int
@@ -27679,16 +27686,16 @@ printf("Hello")
 }
 _ACEOF
 rm -f conftest.$ac_objext
-if { (eval echo "$as_me:27682: \"$ac_compile\"") >&5
+if { (eval echo "$as_me:27689: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
-  echo "$as_me:27685: \$? = $ac_status" >&5
+  echo "$as_me:27692: \$? = $ac_status" >&5
   (exit $ac_status); } &&
          { ac_try='test -s conftest.$ac_objext'
-  { (eval echo "$as_me:27688: \"$ac_try\"") >&5
+  { (eval echo "$as_me:27695: \"$ac_try\"") >&5
   (eval $ac_try) 2>&5
   ac_status=$?
-  echo "$as_me:27691: \$? = $ac_status" >&5
+  echo "$as_me:27698: \$? = $ac_status" >&5
   (exit $ac_status); }; }; then
   :
 else
@@ -27705,7 +27712,7 @@ rm -f conftest.$ac_objext conftest.$ac_ext
 		if test "$cf_have_incdir" = no ; then
 		  test -n "$verbose" && echo "	adding $cf_add_incdir to include-path" 1>&6
 
-echo "${as_me-configure}:27708: testing adding $cf_add_incdir to include-path ..." 1>&5
+echo "${as_me-configure}:27715: testing adding $cf_add_incdir to include-path ..." 1>&5
 
 		  CPPFLAGS="$CPPFLAGS -I$cf_add_incdir"
 
@@ -27742,7 +27749,7 @@ if test -n "$cf_cv_library_path_iconv" ; then
       if test "$cf_have_libdir" = no ; then
         test -n "$verbose" && echo "	adding $cf_add_libdir to library-path" 1>&6
 
-echo "${as_me-configure}:27745: testing adding $cf_add_libdir to library-path ..." 1>&5
+echo "${as_me-configure}:27752: testing adding $cf_add_libdir to library-path ..." 1>&5
 
         LDFLAGS="-L$cf_add_libdir $LDFLAGS"
       fi
@@ -27766,7 +27773,7 @@ curses|slang|ncurses*)
 esac
 
 if test "$use_dft_colors" != no ; then
-echo "$as_me:27769: checking if you want to use default-colors" >&5
+echo "$as_me:27776: checking if you want to use default-colors" >&5
 echo $ECHO_N "checking if you want to use default-colors... $ECHO_C" >&6
 
 # Check whether --enable-default-colors or --disable-default-colors was given.
@@ -27783,7 +27790,7 @@ else
   use_dft_colors=no
 
 fi;
-echo "$as_me:27786: result: $use_dft_colors" >&5
+echo "$as_me:27793: result: $use_dft_colors" >&5
 echo "${ECHO_T}$use_dft_colors" >&6
 test $use_dft_colors = "yes" && cat >>confdefs.h <<\EOF
 #define USE_DEFAULT_COLORS 1
@@ -27791,7 +27798,7 @@ EOF
 
 fi
 
-echo "$as_me:27794: checking if experimental keyboard-layout logic should be used" >&5
+echo "$as_me:27801: checking if experimental keyboard-layout logic should be used" >&5
 echo $ECHO_N "checking if experimental keyboard-layout logic should be used... $ECHO_C" >&6
 
 # Check whether --enable-kbd-layout or --disable-kbd-layout was given.
@@ -27808,13 +27815,13 @@ else
   use_kbd_layout=no
 
 fi;
-echo "$as_me:27811: result: $use_kbd_layout" >&5
+echo "$as_me:27818: result: $use_kbd_layout" >&5
 echo "${ECHO_T}$use_kbd_layout" >&6
 test $use_kbd_layout != no && cat >>confdefs.h <<\EOF
 #define EXP_KEYBOARD_LAYOUT 1
 EOF
 
-echo "$as_me:27817: checking if experimental nested-table logic should be used" >&5
+echo "$as_me:27824: checking if experimental nested-table logic should be used" >&5
 echo $ECHO_N "checking if experimental nested-table logic should be used... $ECHO_C" >&6
 
 # Check whether --enable-nested-tables or --disable-nested-tables was given.
@@ -27831,109 +27838,13 @@ else
   use_nested_tables=no
 
 fi;
-echo "$as_me:27834: result: $use_nested_tables" >&5
+echo "$as_me:27841: result: $use_nested_tables" >&5
 echo "${ECHO_T}$use_nested_tables" >&6
 test $use_nested_tables != no && cat >>confdefs.h <<\EOF
 #define EXP_NESTED_TABLES 1
 EOF
 
-echo "$as_me:27840: checking if progress-bar code should be used" >&5
-echo $ECHO_N "checking if progress-bar code should be used... $ECHO_C" >&6
-
-# Check whether --enable-progressbar or --disable-progressbar was given.
-if test "${enable_progressbar+set}" = set; then
-  enableval="$enable_progressbar"
-  test "$enableval" != yes && enableval=no
-  if test "$enableval" != "no" ; then
-    use_progressbar=$enableval
-  else
-    use_progressbar=no
-  fi
-else
-  enableval=no
-  use_progressbar=no
-
-fi;
-echo "$as_me:27857: result: $use_progressbar" >&5
-echo "${ECHO_T}$use_progressbar" >&6
-test $use_progressbar != no && cat >>confdefs.h <<\EOF
-#define USE_PROGRESSBAR 1
-EOF
-
-echo "$as_me:27863: checking if scrollbar code should be used" >&5
-echo $ECHO_N "checking if scrollbar code should be used... $ECHO_C" >&6
-
-# Check whether --enable-scrollbar or --disable-scrollbar was given.
-if test "${enable_scrollbar+set}" = set; then
-  enableval="$enable_scrollbar"
-  test "$enableval" != yes && enableval=no
-  if test "$enableval" != "no" ; then
-    use_scrollbar=$enableval
-  else
-    use_scrollbar=no
-  fi
-else
-  enableval=no
-  use_scrollbar=no
-
-fi;
-echo "$as_me:27880: result: $use_scrollbar" >&5
-echo "${ECHO_T}$use_scrollbar" >&6
-
-echo "$as_me:27883: checking if sessions code should be used" >&5
-echo $ECHO_N "checking if sessions code should be used... $ECHO_C" >&6
-
-# Check whether --enable-sessions or --disable-sessions was given.
-if test "${enable_sessions+set}" = set; then
-  enableval="$enable_sessions"
-  test "$enableval" != yes && enableval=no
-  if test "$enableval" != "no" ; then
-    use_sessions=$enableval
-  else
-    use_sessions=no
-  fi
-else
-  enableval=no
-  use_sessions=no
-
-fi;
-echo "$as_me:27900: result: $use_sessions" >&5
-echo "${ECHO_T}$use_sessions" >&6
-if test $use_sessions != no ; then
-	cat >>confdefs.h <<\EOF
-#define USE_SESSIONS 1
-EOF
-
-	EXTRA_OBJS="$EXTRA_OBJS LYSession\$o"
-fi
-
-echo "$as_me:27910: checking if session-caching code should be used" >&5
-echo $ECHO_N "checking if session-caching code should be used... $ECHO_C" >&6
-
-# Check whether --enable-session-cache or --disable-session-cache was given.
-if test "${enable_session_cache+set}" = set; then
-  enableval="$enable_session_cache"
-  test "$enableval" != yes && enableval=no
-  if test "$enableval" != "no" ; then
-    use_session_cache=$enableval
-  else
-    use_session_cache=no
-  fi
-else
-  enableval=no
-  use_session_cache=no
-
-fi;
-echo "$as_me:27927: result: $use_session_cache" >&5
-echo "${ECHO_T}$use_session_cache" >&6
-if test $use_session_cache != no ; then
-    cat >>confdefs.h <<\EOF
-#define USE_CACHEJAR 1
-EOF
-
-fi
-
-echo "$as_me:27936: checking if alternative line-edit bindings should be used" >&5
+echo "$as_me:27847: checking if alternative line-edit bindings should be used" >&5
 echo $ECHO_N "checking if alternative line-edit bindings should be used... $ECHO_C" >&6
 
 # Check whether --enable-alt-bindings or --disable-alt-bindings was given.
@@ -27950,13 +27861,36 @@ else
   use_alt_bindings=yes
 
 fi;
-echo "$as_me:27953: result: $use_alt_bindings" >&5
+echo "$as_me:27864: result: $use_alt_bindings" >&5
 echo "${ECHO_T}$use_alt_bindings" >&6
 test $use_alt_bindings != no && cat >>confdefs.h <<\EOF
 #define EXP_ALT_BINDINGS 1
 EOF
 
-echo "$as_me:27959: checking if you want to use extended HTML DTD logic" >&5
+echo "$as_me:27870: checking if ascii case-conversion should be used" >&5
+echo $ECHO_N "checking if ascii case-conversion should be used... $ECHO_C" >&6
+
+# Check whether --enable-ascii-ctypes or --disable-ascii-ctypes was given.
+if test "${enable_ascii_ctypes+set}" = set; then
+  enableval="$enable_ascii_ctypes"
+  test "$enableval" != no && enableval=yes
+  if test "$enableval" != "yes" ; then
+    use_ascii_ctypes=$enableval
+  else
+    use_ascii_ctypes=yes
+  fi
+else
+  enableval=yes
+  use_ascii_ctypes=yes
+
+fi;
+echo "$as_me:27887: result: $use_ascii_ctypes" >&5
+echo "${ECHO_T}$use_ascii_ctypes" >&6
+test $use_ascii_ctypes != no && cat >>confdefs.h <<\EOF
+#define USE_ASCII_CTYPES 1
+EOF
+
+echo "$as_me:27893: checking if you want to use extended HTML DTD logic" >&5
 echo $ECHO_N "checking if you want to use extended HTML DTD logic... $ECHO_C" >&6
 
 # Check whether --enable-extended-dtd or --disable-extended-dtd was given.
@@ -27973,13 +27907,13 @@ else
   use_ext_htmldtd=yes
 
 fi;
-echo "$as_me:27976: result: $use_ext_htmldtd" >&5
+echo "$as_me:27910: result: $use_ext_htmldtd" >&5
 echo "${ECHO_T}$use_ext_htmldtd" >&6
 test $use_ext_htmldtd = "no" && cat >>confdefs.h <<\EOF
 #define NO_EXTENDED_HTMLDTD 1
 EOF
 
-echo "$as_me:27982: checking if file-upload logic should be used" >&5
+echo "$as_me:27916: checking if file-upload logic should be used" >&5
 echo $ECHO_N "checking if file-upload logic should be used... $ECHO_C" >&6
 
 # Check whether --enable-file-upload or --disable-file-upload was given.
@@ -27996,13 +27930,13 @@ else
   use_file_upload=yes
 
 fi;
-echo "$as_me:27999: result: $use_file_upload" >&5
+echo "$as_me:27933: result: $use_file_upload" >&5
 echo "${ECHO_T}$use_file_upload" >&6
 test $use_file_upload != no && cat >>confdefs.h <<\EOF
 #define USE_FILE_UPLOAD 1
 EOF
 
-echo "$as_me:28005: checking if IDNA support should be used" >&5
+echo "$as_me:27939: checking if IDNA support should be used" >&5
 echo $ECHO_N "checking if IDNA support should be used... $ECHO_C" >&6
 
 # Check whether --enable-idna or --disable-idna was given.
@@ -28019,7 +27953,7 @@ else
   use_idna=yes
 
 fi;
-echo "$as_me:28022: result: $use_idna" >&5
+echo "$as_me:27956: result: $use_idna" >&5
 echo "${ECHO_T}$use_idna" >&6
 
 if test "$use_idna" = yes ; then
@@ -28058,7 +27992,7 @@ if test -n "$cf_searchpath/include" ; then
 			  cf_save_CPPFLAGS=$CPPFLAGS
 			  CPPFLAGS="$CPPFLAGS -I$cf_add_incdir"
 			  cat >conftest.$ac_ext <<_ACEOF
-#line 28061 "configure"
+#line 27995 "configure"
 #include "confdefs.h"
 #include <stdio.h>
 int
@@ -28070,16 +28004,16 @@ printf("Hello")
 }
 _ACEOF
 rm -f conftest.$ac_objext
-if { (eval echo "$as_me:28073: \"$ac_compile\"") >&5
+if { (eval echo "$as_me:28007: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
-  echo "$as_me:28076: \$? = $ac_status" >&5
+  echo "$as_me:28010: \$? = $ac_status" >&5
   (exit $ac_status); } &&
          { ac_try='test -s conftest.$ac_objext'
-  { (eval echo "$as_me:28079: \"$ac_try\"") >&5
+  { (eval echo "$as_me:28013: \"$ac_try\"") >&5
   (eval $ac_try) 2>&5
   ac_status=$?
-  echo "$as_me:28082: \$? = $ac_status" >&5
+  echo "$as_me:28016: \$? = $ac_status" >&5
   (exit $ac_status); }; }; then
   :
 else
@@ -28096,7 +28030,7 @@ rm -f conftest.$ac_objext conftest.$ac_ext
 		if test "$cf_have_incdir" = no ; then
 		  test -n "$verbose" && echo "	adding $cf_add_incdir to include-path" 1>&6
 
-echo "${as_me-configure}:28099: testing adding $cf_add_incdir to include-path ..." 1>&5
+echo "${as_me-configure}:28033: testing adding $cf_add_incdir to include-path ..." 1>&5
 
 		  CPPFLAGS="$CPPFLAGS -I$cf_add_incdir"
 
@@ -28137,7 +28071,7 @@ if test -n "$cf_searchpath/../include" ; then
 			  cf_save_CPPFLAGS=$CPPFLAGS
 			  CPPFLAGS="$CPPFLAGS -I$cf_add_incdir"
 			  cat >conftest.$ac_ext <<_ACEOF
-#line 28140 "configure"
+#line 28074 "configure"
 #include "confdefs.h"
 #include <stdio.h>
 int
@@ -28149,16 +28083,16 @@ printf("Hello")
 }
 _ACEOF
 rm -f conftest.$ac_objext
-if { (eval echo "$as_me:28152: \"$ac_compile\"") >&5
+if { (eval echo "$as_me:28086: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
-  echo "$as_me:28155: \$? = $ac_status" >&5
+  echo "$as_me:28089: \$? = $ac_status" >&5
   (exit $ac_status); } &&
          { ac_try='test -s conftest.$ac_objext'
-  { (eval echo "$as_me:28158: \"$ac_try\"") >&5
+  { (eval echo "$as_me:28092: \"$ac_try\"") >&5
   (eval $ac_try) 2>&5
   ac_status=$?
-  echo "$as_me:28161: \$? = $ac_status" >&5
+  echo "$as_me:28095: \$? = $ac_status" >&5
   (exit $ac_status); }; }; then
   :
 else
@@ -28175,7 +28109,7 @@ rm -f conftest.$ac_objext conftest.$ac_ext
 		if test "$cf_have_incdir" = no ; then
 		  test -n "$verbose" && echo "	adding $cf_add_incdir to include-path" 1>&6
 
-echo "${as_me-configure}:28178: testing adding $cf_add_incdir to include-path ..." 1>&5
+echo "${as_me-configure}:28112: testing adding $cf_add_incdir to include-path ..." 1>&5
 
 		  CPPFLAGS="$CPPFLAGS -I$cf_add_incdir"
 
@@ -28191,7 +28125,7 @@ echo "${as_me-configure}:28178: testing adding $cf_add_incdir to include-path ..
 fi
 
 	else
-{ { echo "$as_me:28194: error: cannot find  under $use_idna" >&5
+{ { echo "$as_me:28128: error: cannot find  under $use_idna" >&5
 echo "$as_me: error: cannot find  under $use_idna" >&2;}
    { (exit 1); exit 1; }; }
 	fi
@@ -28216,7 +28150,7 @@ if test -n "$cf_searchpath/lib" ; then
       if test "$cf_have_libdir" = no ; then
         test -n "$verbose" && echo "	adding $cf_add_libdir to library-path" 1>&6
 
-echo "${as_me-configure}:28219: testing adding $cf_add_libdir to library-path ..." 1>&5
+echo "${as_me-configure}:28153: testing adding $cf_add_libdir to library-path ..." 1>&5
 
         LDFLAGS="-L$cf_add_libdir $LDFLAGS"
       fi
@@ -28245,7 +28179,7 @@ if test -n "$cf_searchpath" ; then
       if test "$cf_have_libdir" = no ; then
         test -n "$verbose" && echo "	adding $cf_add_libdir to library-path" 1>&6
 
-echo "${as_me-configure}:28248: testing adding $cf_add_libdir to library-path ..." 1>&5
+echo "${as_me-configure}:28182: testing adding $cf_add_libdir to library-path ..." 1>&5
 
         LDFLAGS="-L$cf_add_libdir $LDFLAGS"
       fi
@@ -28254,7 +28188,7 @@ echo "${as_me-configure}:28248: testing adding $cf_add_libdir to library-path ..
 fi
 
 	else
-{ { echo "$as_me:28257: error: cannot find  under $use_idna" >&5
+{ { echo "$as_me:28191: error: cannot find  under $use_idna" >&5
 echo "$as_me: error: cannot find  under $use_idna" >&2;}
    { (exit 1); exit 1; }; }
 	fi
@@ -28268,10 +28202,10 @@ done
 cf_cv_header_path_idn=
 cf_cv_library_path_idn=
 
-echo "${as_me-configure}:28271: testing Starting FIND_LINKAGE(idn,) ..." 1>&5
+echo "${as_me-configure}:28205: testing Starting FIND_LINKAGE(idn,) ..." 1>&5
 
 cat >conftest.$ac_ext <<_ACEOF
-#line 28274 "configure"
+#line 28208 "configure"
 #include "confdefs.h"
 
 #include <stdio.h>
@@ -28289,16 +28223,16 @@ main ()
 }
 _ACEOF
 rm -f conftest.$ac_objext conftest$ac_exeext
-if { (eval echo "$as_me:28292: \"$ac_link\"") >&5
+if { (eval echo "$as_me:28226: \"$ac_link\"") >&5
   (eval $ac_link) 2>&5
   ac_status=$?
-  echo "$as_me:28295: \$? = $ac_status" >&5
+  echo "$as_me:28229: \$? = $ac_status" >&5
   (exit $ac_status); } &&
          { ac_try='test -s conftest$ac_exeext'
-  { (eval echo "$as_me:28298: \"$ac_try\"") >&5
+  { (eval echo "$as_me:28232: \"$ac_try\"") >&5
   (eval $ac_try) 2>&5
   ac_status=$?
-  echo "$as_me:28301: \$? = $ac_status" >&5
+  echo "$as_me:28235: \$? = $ac_status" >&5
   (exit $ac_status); }; }; then
   cf_cv_find_linkage_idn=yes
 else
@@ -28309,9 +28243,9 @@ cat conftest.$ac_ext >&5
 
     test -n "$verbose" && echo "	find linkage for idn library" 1>&6
 
-echo "${as_me-configure}:28312: testing find linkage for idn library ..." 1>&5
+echo "${as_me-configure}:28246: testing find linkage for idn library ..." 1>&5
 
-echo "${as_me-configure}:28314: testing Searching for headers in FIND_LINKAGE(idn,) ..." 1>&5
+echo "${as_me-configure}:28248: testing Searching for headers in FIND_LINKAGE(idn,) ..." 1>&5
 
     cf_save_CPPFLAGS="$CPPFLAGS"
     cf_test_CPPFLAGS="$CPPFLAGS"
@@ -28419,11 +28353,11 @@ cf_search="$cf_header_path_list $cf_search"
       if test -d $cf_cv_header_path_idn ; then
         test -n "$verbose" && echo "	... testing $cf_cv_header_path_idn" 1>&6
 
-echo "${as_me-configure}:28422: testing ... testing $cf_cv_header_path_idn ..." 1>&5
+echo "${as_me-configure}:28356: testing ... testing $cf_cv_header_path_idn ..." 1>&5
 
         CPPFLAGS="$cf_save_CPPFLAGS -I$cf_cv_header_path_idn"
         cat >conftest.$ac_ext <<_ACEOF
-#line 28426 "configure"
+#line 28360 "configure"
 #include "confdefs.h"
 
 #include <stdio.h>
@@ -28441,21 +28375,21 @@ main ()
 }
 _ACEOF
 rm -f conftest.$ac_objext
-if { (eval echo "$as_me:28444: \"$ac_compile\"") >&5
+if { (eval echo "$as_me:28378: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
-  echo "$as_me:28447: \$? = $ac_status" >&5
+  echo "$as_me:28381: \$? = $ac_status" >&5
   (exit $ac_status); } &&
          { ac_try='test -s conftest.$ac_objext'
-  { (eval echo "$as_me:28450: \"$ac_try\"") >&5
+  { (eval echo "$as_me:28384: \"$ac_try\"") >&5
   (eval $ac_try) 2>&5
   ac_status=$?
-  echo "$as_me:28453: \$? = $ac_status" >&5
+  echo "$as_me:28387: \$? = $ac_status" >&5
   (exit $ac_status); }; }; then
 
             test -n "$verbose" && echo "	... found idn headers in $cf_cv_header_path_idn" 1>&6
 
-echo "${as_me-configure}:28458: testing ... found idn headers in $cf_cv_header_path_idn ..." 1>&5
+echo "${as_me-configure}:28392: testing ... found idn headers in $cf_cv_header_path_idn ..." 1>&5
 
             cf_cv_find_linkage_idn=maybe
             cf_test_CPPFLAGS="$CPPFLAGS"
@@ -28473,7 +28407,7 @@ rm -f conftest.$ac_objext conftest.$ac_ext
 
     if test "$cf_cv_find_linkage_idn" = maybe ; then
 
-echo "${as_me-configure}:28476: testing Searching for idn library in FIND_LINKAGE(idn,) ..." 1>&5
+echo "${as_me-configure}:28410: testing Searching for idn library in FIND_LINKAGE(idn,) ..." 1>&5
 
       cf_save_LIBS="$LIBS"
       cf_save_LDFLAGS="$LDFLAGS"
@@ -28569,13 +28503,13 @@ cf_search="$cf_library_path_list $cf_search"
           if test -d $cf_cv_library_path_idn ; then
             test -n "$verbose" && echo "	... testing $cf_cv_library_path_idn" 1>&6
 
-echo "${as_me-configure}:28572: testing ... testing $cf_cv_library_path_idn ..." 1>&5
+echo "${as_me-configure}:28506: testing ... testing $cf_cv_library_path_idn ..." 1>&5
 
             CPPFLAGS="$cf_test_CPPFLAGS"
             LIBS="-lidn  $cf_save_LIBS"
             LDFLAGS="$cf_save_LDFLAGS -L$cf_cv_library_path_idn"
             cat >conftest.$ac_ext <<_ACEOF
-#line 28578 "configure"
+#line 28512 "configure"
 #include "confdefs.h"
 
 #include <stdio.h>
@@ -28593,21 +28527,21 @@ main ()
 }
 _ACEOF
 rm -f conftest.$ac_objext conftest$ac_exeext
-if { (eval echo "$as_me:28596: \"$ac_link\"") >&5
+if { (eval echo "$as_me:28530: \"$ac_link\"") >&5
   (eval $ac_link) 2>&5
   ac_status=$?
-  echo "$as_me:28599: \$? = $ac_status" >&5
+  echo "$as_me:28533: \$? = $ac_status" >&5
   (exit $ac_status); } &&
          { ac_try='test -s conftest$ac_exeext'
-  { (eval echo "$as_me:28602: \"$ac_try\"") >&5
+  { (eval echo "$as_me:28536: \"$ac_try\"") >&5
   (eval $ac_try) 2>&5
   ac_status=$?
-  echo "$as_me:28605: \$? = $ac_status" >&5
+  echo "$as_me:28539: \$? = $ac_status" >&5
   (exit $ac_status); }; }; then
 
                 test -n "$verbose" && echo "	... found idn library in $cf_cv_library_path_idn" 1>&6
 
-echo "${as_me-configure}:28610: testing ... found idn library in $cf_cv_library_path_idn ..." 1>&5
+echo "${as_me-configure}:28544: testing ... found idn library in $cf_cv_library_path_idn ..." 1>&5
 
                 cf_cv_find_linkage_idn=yes
                 cf_cv_library_file_idn="-lidn"
@@ -28645,13 +28579,13 @@ EOF
 	LIBS="-lidn $LIBS"
 
 else
-{ echo "$as_me:28648: WARNING: Cannot find idn library" >&5
+{ echo "$as_me:28582: WARNING: Cannot find idn library" >&5
 echo "$as_me: WARNING: Cannot find idn library" >&2;}
 fi
 
 fi
 
-echo "$as_me:28654: checking if element-justification logic should be used" >&5
+echo "$as_me:28588: checking if element-justification logic should be used" >&5
 echo $ECHO_N "checking if element-justification logic should be used... $ECHO_C" >&6
 
 # Check whether --enable-justify-elts or --disable-justify-elts was given.
@@ -28668,13 +28602,13 @@ else
   use_justify_elts=yes
 
 fi;
-echo "$as_me:28671: result: $use_justify_elts" >&5
+echo "$as_me:28605: result: $use_justify_elts" >&5
 echo "${ECHO_T}$use_justify_elts" >&6
 test $use_justify_elts != no && cat >>confdefs.h <<\EOF
-#define EXP_JUSTIFY_ELTS 1
+#define USE_JUSTIFY_ELTS 1
 EOF
 
-echo "$as_me:28677: checking if partial-display should be used" >&5
+echo "$as_me:28611: checking if partial-display should be used" >&5
 echo $ECHO_N "checking if partial-display should be used... $ECHO_C" >&6
 
 # Check whether --enable-partial or --disable-partial was given.
@@ -28691,13 +28625,13 @@ else
   use_partial_display=yes
 
 fi;
-echo "$as_me:28694: result: $use_partial_display" >&5
+echo "$as_me:28628: result: $use_partial_display" >&5
 echo "${ECHO_T}$use_partial_display" >&6
 test $use_partial_display != no && cat >>confdefs.h <<\EOF
 #define DISP_PARTIAL 1
 EOF
 
-echo "$as_me:28700: checking if persistent-cookie logic should be used" >&5
+echo "$as_me:28634: checking if persistent-cookie logic should be used" >&5
 echo $ECHO_N "checking if persistent-cookie logic should be used... $ECHO_C" >&6
 
 # Check whether --enable-persistent-cookies or --disable-persistent-cookies was given.
@@ -28714,13 +28648,13 @@ else
   use_filed_cookies=yes
 
 fi;
-echo "$as_me:28717: result: $use_filed_cookies" >&5
+echo "$as_me:28651: result: $use_filed_cookies" >&5
 echo "${ECHO_T}$use_filed_cookies" >&6
 test $use_filed_cookies != no && cat >>confdefs.h <<\EOF
 #define USE_PERSISTENT_COOKIES 1
 EOF
 
-echo "$as_me:28723: checking if html source should be colorized" >&5
+echo "$as_me:28657: checking if html source should be colorized" >&5
 echo $ECHO_N "checking if html source should be colorized... $ECHO_C" >&6
 
 # Check whether --enable-prettysrc or --disable-prettysrc was given.
@@ -28737,13 +28671,36 @@ else
   use_prettysrc=yes
 
 fi;
-echo "$as_me:28740: result: $use_prettysrc" >&5
+echo "$as_me:28674: result: $use_prettysrc" >&5
 echo "${ECHO_T}$use_prettysrc" >&6
 test $use_prettysrc != no && cat >>confdefs.h <<\EOF
 #define USE_PRETTYSRC 1
 EOF
 
-echo "$as_me:28746: checking if read-progress message should show ETA" >&5
+echo "$as_me:28680: checking if progress-bar code should be used" >&5
+echo $ECHO_N "checking if progress-bar code should be used... $ECHO_C" >&6
+
+# Check whether --enable-progressbar or --disable-progressbar was given.
+if test "${enable_progressbar+set}" = set; then
+  enableval="$enable_progressbar"
+  test "$enableval" != no && enableval=yes
+  if test "$enableval" != "yes" ; then
+    use_progressbar=$enableval
+  else
+    use_progressbar=yes
+  fi
+else
+  enableval=yes
+  use_progressbar=yes
+
+fi;
+echo "$as_me:28697: result: $use_progressbar" >&5
+echo "${ECHO_T}$use_progressbar" >&6
+test $use_progressbar != no && cat >>confdefs.h <<\EOF
+#define USE_PROGRESSBAR 1
+EOF
+
+echo "$as_me:28703: checking if read-progress message should show ETA" >&5
 echo $ECHO_N "checking if read-progress message should show ETA... $ECHO_C" >&6
 
 # Check whether --enable-read-eta or --disable-read-eta was given.
@@ -28760,13 +28717,13 @@ else
   use_read_eta=yes
 
 fi;
-echo "$as_me:28763: result: $use_read_eta" >&5
+echo "$as_me:28720: result: $use_read_eta" >&5
 echo "${ECHO_T}$use_read_eta" >&6
 test $use_read_eta != no && cat >>confdefs.h <<\EOF
 #define USE_READPROGRESS 1
 EOF
 
-echo "$as_me:28769: checking if source caching should be used" >&5
+echo "$as_me:28726: checking if source caching should be used" >&5
 echo $ECHO_N "checking if source caching should be used... $ECHO_C" >&6
 
 # Check whether --enable-source-cache or --disable-source-cache was given.
@@ -28783,10 +28740,53 @@ else
   use_source_cache=yes
 
 fi;
-echo "$as_me:28786: result: $use_source_cache" >&5
+echo "$as_me:28743: result: $use_source_cache" >&5
 echo "${ECHO_T}$use_source_cache" >&6
 test $use_source_cache != no && cat >>confdefs.h <<\EOF
 #define USE_SOURCE_CACHE 1
+EOF
+
+echo "$as_me:28749: checking if scrollbar code should be used" >&5
+echo $ECHO_N "checking if scrollbar code should be used... $ECHO_C" >&6
+
+# Check whether --enable-scrollbar or --disable-scrollbar was given.
+if test "${enable_scrollbar+set}" = set; then
+  enableval="$enable_scrollbar"
+  test "$enableval" != no && enableval=yes
+  if test "$enableval" != "yes" ; then
+    use_scrollbar=$enableval
+  else
+    use_scrollbar=yes
+  fi
+else
+  enableval=yes
+  use_scrollbar=yes
+
+fi;
+echo "$as_me:28766: result: $use_scrollbar" >&5
+echo "${ECHO_T}$use_scrollbar" >&6
+
+echo "$as_me:28769: checking if charset-selection logic should be used" >&5
+echo $ECHO_N "checking if charset-selection logic should be used... $ECHO_C" >&6
+
+# Check whether --enable-charset-choice or --disable-charset-choice was given.
+if test "${enable_charset_choice+set}" = set; then
+  enableval="$enable_charset_choice"
+  test "$enableval" != yes && enableval=no
+  if test "$enableval" != "no" ; then
+    use_charset_choice=$enableval
+  else
+    use_charset_choice=no
+  fi
+else
+  enableval=no
+  use_charset_choice=no
+
+fi;
+echo "$as_me:28786: result: $use_charset_choice" >&5
+echo "${ECHO_T}$use_charset_choice" >&6
+test $use_charset_choice != no && cat >>confdefs.h <<\EOF
+#define USE_CHARSET_CHOICE 1
 EOF
 
 echo "$as_me:28792: checking if you want to use external commands" >&5

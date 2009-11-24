@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMain.c,v 1.206 2009/08/25 23:07:22 tom Exp $
+ * $LynxId: LYMain.c,v 1.210 2009/11/21 17:05:33 Bela.Lubkin Exp $
  */
 #include <HTUtils.h>
 #include <HTTP.h>
@@ -562,7 +562,7 @@ int ssl_noprompt = FORCE_PROMPT_DFT;
 int connect_timeout = 18000; /*=180000*0.1 - used in HTDoConnect.*/
 int reading_timeout = 18000; /*=180000*0.1 - used in HTDoConnect.*/
 
-#ifdef EXP_JUSTIFY_ELTS
+#ifdef USE_JUSTIFY_ELTS
 BOOLEAN ok_justify = FALSE;
 int justify_max_void_percent = 35;
 #endif
@@ -989,7 +989,7 @@ int main(int argc,
     ftp_lasthost = typecalloc(char);
 #endif
 
-#ifdef EXP_CHARSET_CHOICE
+#ifdef USE_CHARSET_CHOICE
     memset((char *) charset_subsets, 0, sizeof(charset_subset_t) * MAXCHARSETS);
 #endif
 
@@ -1378,7 +1378,7 @@ int main(int argc,
 	LYRestricted = TRUE;
 	LYUseTraceLog = FALSE;
     }
-#ifdef EXP_CMD_LOGGING
+#ifdef USE_CMD_LOGGING
     /*
      * Open command-script, if specified
      */
@@ -1551,7 +1551,7 @@ int main(int argc,
     /*
      * If the lynx-style file is not available, inform the user and exit.
      */
-    if (!isEmpty(lynx_lss_file) && !LYCanReadFile(lynx_lss_file)) {
+    if (non_empty(lynx_lss_file) && !LYCanReadFile(lynx_lss_file)) {
 	fprintf(stderr, gettext("\nLynx file \"%s\" is not available.\n\n"),
 		lynx_lss_file);
 	exit_immediately(EXIT_FAILURE);
@@ -2067,13 +2067,13 @@ int main(int argc,
      * Make sure our bookmark default strings are all allocated and
      * synchronized.  - FM
      */
-    if (!bookmark_page || *bookmark_page == '\0') {
+    if (isEmpty(bookmark_page)) {
 	temp = NULL;
 	HTSprintf0(&temp, "lynx_bookmarks%s", HTML_SUFFIX);
 	set_default_bookmark_page(temp);
 	FREE(temp);
     }
-    if (!BookmarkPage || *BookmarkPage == '\0') {
+    if (isEmpty(BookmarkPage)) {
 	set_default_bookmark_page(bookmark_page);
     }
 #if defined(SYSLOG_REQUESTED_URLS)
@@ -2298,7 +2298,7 @@ void reload_read_cfg(void)
 	}
 #endif
 
-#ifdef EXP_CHARSET_CHOICE
+#ifdef USE_CHARSET_CHOICE
 	custom_assumed_doc_charset = FALSE;
 	custom_display_charset = FALSE;
 	memset((char *) charset_subsets, 0, sizeof(charset_subset_t) * MAXCHARSETS);
@@ -2326,7 +2326,7 @@ void reload_read_cfg(void)
 	LYRemoveTemp(tempfile);
 	FREE(tempfile);		/* done with it - kw */
 
-#ifdef EXP_CHARSET_CHOICE
+#ifdef USE_CHARSET_CHOICE
 	init_charset_subsets();
 #endif
 
@@ -3338,7 +3338,7 @@ outputs for -source dumps"
       "child_relaxed",	4|FUNCTION_ARG,		child_relaxed_fun,
       "exit on left-arrow in startfile (allows save to disk)"
    ),
-#ifdef EXP_CMD_LOGGING
+#ifdef USE_CMD_LOGGING
    PARSE_STR(
       "cmd_log",	2|NEED_LYSTRING_ARG,	lynx_cmd_logfile,
       "=FILENAME\nlog keystroke commands to the given file"
@@ -3524,7 +3524,7 @@ soon as they are seen)"
       "ismap",		4|TOGGLE_ARG,		LYNoISMAPifUSEMAP,
       "toggles inclusion of ISMAP links when client-side\nMAPs are present"
    ),
-#ifdef EXP_JUSTIFY_ELTS
+#ifdef USE_JUSTIFY_ELTS
    PARSE_SET(
       "justify",	4|SET_ARG,		ok_justify,
       "do justification of text"

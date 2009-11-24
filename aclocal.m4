@@ -1,11 +1,11 @@
-dnl $LynxId: aclocal.m4,v 1.143 2009/08/27 20:25:03 tom Exp $
+dnl $LynxId: aclocal.m4,v 1.144 2009/11/20 10:41:22 tom Exp $
 dnl Macros for auto-configure script.
 dnl by T.E.Dickey <dickey@invisible-island.net>
 dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
 dnl and Philippe De Muyter <phdm@macqel.be>
 dnl
 dnl Created: 1997/1/28
-dnl Updated: 2009/8/25
+dnl Updated: 2009/11/20
 dnl
 dnl The autoconf used in Lynx development is GNU autoconf 2.13 or 2.52, patched
 dnl by Thomas Dickey.  See your local GNU archives, and this URL:
@@ -1362,7 +1362,7 @@ fi
 
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_CHECK_FUNCDECL version: 6 updated: 1999/03/30 12:24:31
+dnl CF_CHECK_FUNCDECL version: 7 updated: 2009/10/15 19:39:18
 dnl -----------------
 dnl Check if a function is declared by including a set of include files.
 dnl Invoke the corresponding actions according to whether it is found or not.
@@ -1377,12 +1377,12 @@ AC_DEFUN([CF_CHECK_FUNCDECL],
 AC_MSG_CHECKING([for $2 declaration])
 AC_CACHE_VAL(ac_cv_func_decl_$2,
 [AC_TRY_COMPILE([$1],
-[#ifndef ${ac_func}
-extern	int	${ac_func}();
+[#ifndef $2
+extern	int	$2();
 #endif],[
 AC_TRY_COMPILE([$1],
-[#ifndef ${ac_func}
-int	(*p)() = ${ac_func};
+[#ifndef $2
+int	(*p)() = $2;
 #endif],[
 eval "ac_cv_func_decl_$2=yes"],[
 eval "ac_cv_func_decl_$2=no"])],[
@@ -2721,7 +2721,7 @@ rm -f conftest*
 AC_SUBST(EXTRA_CFLAGS)
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_GNUTLS version: 15 updated: 2008/12/25 09:30:14
+dnl CF_GNUTLS version: 16 updated: 2009/11/20 05:36:52
 dnl ---------
 dnl Check for gnutls library (TLS "is" SSL)
 dnl $1 = the [optional] directory in which the library may be found
@@ -2792,7 +2792,7 @@ AC_DEFUN([CF_GNUTLS],[
 			cf_cv_have_gnutls=yes,
 			cf_cv_have_gnutls=no,
 			,
-			ifelse($2,,[-lgnutls-openssl -lgnutls-extra -lgnutls -lcrypt],[-lgnutls -lcrypt]))
+			ifelse($2,,[-lgnutls-openssl -lgnutls-extra -lgnutls -lgcrypt],[-lgnutls -lgcrypt]))
 
 		CPPFLAGS=$cf_gnutls_CPPFLAGS
 	fi
@@ -2811,7 +2811,7 @@ AC_DEFUN([CF_GNUTLS],[
 		if test -n "$cf_cv_library_path_gnutls" ; then
 			CF_ADD_LIBDIR($cf_cv_library_path_gnutls)
 		fi
-		LIBS="-lgnutls -lcrypt $LIBS"
+		LIBS="-lgnutls -lgcrypt $LIBS"
 
 		ifelse($2,,
 			[if test "$cf_pkg_gnutls" = none ; then

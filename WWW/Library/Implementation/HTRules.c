@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTRules.c,v 1.38 2009/02/01 21:19:02 tom Exp $
+ * $LynxId: HTRules.c,v 1.39 2009/11/21 15:01:20 Kihara.Hideto Exp $
  *
  *	Configuration manager for Hypertext Daemon		HTRules.c
  *	==========================================
@@ -462,10 +462,17 @@ int HTSetConfiguration(char *config)
 
     StrAllocCopy(line, config);
     {
-	char *p = strchr(line, '#');	/* Chop off comments */
+	char *p = line;
 
-	if (p)
-	    *p = 0;
+	/* Chop off comments */
+	while ((p = strchr(p, '#'))) {
+	    if (p == line || isspace(UCH(*(p - 1)))) {
+		*p = 0;
+		break;
+	    } else {
+		p++;
+	    }
+	}
     }
     pointer = line;
     word1 = HTNextField(&pointer);

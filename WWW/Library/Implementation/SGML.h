@@ -1,5 +1,5 @@
 /*
- * $LynxId: SGML.h,v 1.43 2009/04/16 00:50:16 tom Exp $
+ * $LynxId: SGML.h,v 1.44 2009/11/21 15:24:48 tom Exp $
  *			       SGML parse and stream definition for libwww
  *                             SGML AND STRUCTURED STREAMS
  *
@@ -148,7 +148,7 @@ extern "C" {
 #ifdef USE_COLOR_STYLE
 	unsigned name_len;	/* The length of the name */
 #endif
-#ifdef EXP_JUSTIFY_ELTS
+#ifdef USE_JUSTIFY_ELTS
 	BOOL can_justify;	/* justification allowed? */
 #endif
 	AttrList attributes;	/* The list of acceptable attributes */

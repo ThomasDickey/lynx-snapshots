@@ -1,5 +1,5 @@
 /*
- * $LynxId: GridText.c,v 1.171 2009/05/30 12:54:35 tom Exp $
+ * $LynxId: GridText.c,v 1.174 2009/11/21 17:05:33 Bela.Lubkin Exp $
  *
  *		Character grid hypertext object
  *		===============================
@@ -514,7 +514,7 @@ void *HText_pool_calloc(HText *text, unsigned size)
 
 static void HText_AddHiddenLink(HText *text, TextAnchor *textanchor);
 
-#ifdef EXP_JUSTIFY_ELTS
+#ifdef USE_JUSTIFY_ELTS
 BOOL can_justify_here;
 BOOL can_justify_here_saved;
 
@@ -578,7 +578,7 @@ void mark_justify_start_position(void *text)
 	!IS_CJK_TTY && !in_DT && \
 	can_justify_here && can_justify_this_line && !form_in_htext )
 
-#endif /* EXP_JUSTIFY_ELTS */
+#endif /* USE_JUSTIFY_ELTS */
 
 /*
  * Boring static variable used for moving cursor across
@@ -1211,7 +1211,7 @@ HText *HText_new(HTParentAnchor *anchor)
     ResetPartialLinenos(self);
 #endif
 
-#ifdef EXP_JUSTIFY_ELTS
+#ifdef USE_JUSTIFY_ELTS
     ht_justify_cleanup();
 #endif
     return self;
@@ -1779,7 +1779,7 @@ static void display_title(HText *text)
 	if (i <= 0) {		/* no room at all */
 	    title[0] = '\0';
 	} else {
-	    strcpy(title + LYstrExtent2(title, i), "...");
+	    strcpy(title + LYstrFittable(title, i), "...");
 	}
 	i = 0;
     }
@@ -2939,7 +2939,7 @@ static void split_line(HText *text, unsigned split)
 	 */
 	p = prevdata + split;
 	while (((*p == ' '
-#ifdef EXP_JUSTIFY_ELTS
+#ifdef USE_JUSTIFY_ELTS
 	/* if justification is allowed for prev line, then raw
 	 * HT_NON_BREAK_SPACE are still present in data[] (they'll be
 	 * substituted at the end of this function with ' ') - VH
@@ -2987,7 +2987,7 @@ static void split_line(HText *text, unsigned split)
     p = previous->data + previous->size - 1;
     while (p >= previous->data
 	   && (*p == ' '
-#ifdef EXP_JUSTIFY_ELTS
+#ifdef USE_JUSTIFY_ELTS
     /* if justification is allowed for prev line, then raw
      * HT_NON_BREAK_SPACE are still present in data[] (they'll be
      * substituted at the end of this function with ' ') - VH
@@ -3168,7 +3168,7 @@ static void split_line(HText *text, unsigned split)
      */
     spare = 0;
     if (
-#ifdef EXP_JUSTIFY_ELTS
+#ifdef USE_JUSTIFY_ELTS
 	   this_line_was_split ||
 #endif
 	   (alignment == HT_CENTER ||
@@ -3371,7 +3371,7 @@ static void split_line(HText *text, unsigned split)
 		break;
 	}
     }
-#ifdef EXP_JUSTIFY_ELTS
+#ifdef USE_JUSTIFY_ELTS
     /* now perform justification - by VH */
 
     if (this_line_was_split
@@ -3504,7 +3504,7 @@ static void split_line(HText *text, unsigned split)
     justify_start_position = 0;
     this_line_was_split = FALSE;
     have_raw_nbsps = FALSE;
-#endif /* EXP_JUSTIFY_ELTS */
+#endif /* USE_JUSTIFY_ELTS */
     return;
 }				/* split_line */
 
@@ -4321,7 +4321,7 @@ void HText_appendCharacter(HText *text, int ch)
 		) > (LYcols_cu(text) - 1)))) {
 
 	if (style->wordWrap && HTOutputFormat != WWW_SOURCE) {
-#ifdef EXP_JUSTIFY_ELTS
+#ifdef USE_JUSTIFY_ELTS
 	    if (REALLY_CAN_JUSTIFY(text))
 		this_line_was_split = TRUE;
 #endif
@@ -4366,12 +4366,12 @@ void HText_appendCharacter(HText *text, int ch)
      * Insert normal characters.
      */
     if (ch == HT_NON_BREAK_SPACE
-#ifdef EXP_JUSTIFY_ELTS
+#ifdef USE_JUSTIFY_ELTS
 	&& !REALLY_CAN_JUSTIFY(text)
 #endif
 	)
 	ch = ' ';
-#ifdef EXP_JUSTIFY_ELTS
+#ifdef USE_JUSTIFY_ELTS
     else
 	have_raw_nbsps = TRUE;
 #endif
@@ -11762,13 +11762,13 @@ void HText_setKcode(HText *text, const char *charset,
     /*
      * If no explicit charset string, use the implied one.  - kw
      */
-    if (!charset || *charset == '\0') {
+    if (isEmpty(charset)) {
 	charset = p_in->MIMEname;
     }
     /*
      * Check whether we have a specified charset.  -FM
      */
-    if (!charset || *charset == '\0') {
+    if (isEmpty(charset)) {
 	return;
     }
 

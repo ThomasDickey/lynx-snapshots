@@ -1,5 +1,5 @@
-<!DOCTYPE html PUBLIC "-//IETF//DTD HTML 3.0//EN">
-<!-- $LynxId: Lynx_users_guide.html,v 1.106 2009/07/05 21:00:18 tom Exp $ -->
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<!-- $LynxId: Lynx_users_guide.html,v 1.109 2009/11/18 09:30:13 tom Exp $ -->
 <html>
 <head>
 <title>Lynx Users Guide v2.8.7</title>
@@ -73,7 +73,7 @@ within a single LAN.
 <li><A HREF="#Hist" NAME="ToC-Hist">Lynx development history</A>
 </ul>
 
-<h2 ID="Help"><A NAME="Help"><em>Lynx online help</em></A></h2>
+<h2 ID="id-Help"><A NAME="Help"><em>Lynx online help</em></A></h2>
 
 Online help is available while viewing any document.  Press the
 '<em>?</em>' or '<em>H</em>' key (or the '<em>h</em>' key if
@@ -90,7 +90,7 @@ the '<em>k</em>' key if vi-like key movement is not on).
 If you want to recall recent status-line messages, you can do so
 by entering the `g' command, followed by `LYNXMESSAGES:'.
 
-<h2 ID="Local"><A NAME="Local"><em>Viewing local files with Lynx</em></A></h2>
+<h2 ID="id-Local"><A NAME="Local"><em>Viewing local files with Lynx</em></A></h2>
 
 Lynx can be started by entering the Lynx command along with
 the name of a file to display.  For example these commands could
@@ -168,14 +168,14 @@ mode.  Additional download methods may be defined in the
 <A HREF="#lynx.cfg">lynx.cfg</A> file.  Programs like kermit, zmodem
 and FTP are some possible options. [<A HREF="#ToC-Local">ToC</A>]
 
-<h2 ID="Leaving"><A NAME="Leaving"><em>Leaving Lynx</em></A></h2>
+<h2 ID="id-Leaving"><A NAME="Leaving"><em>Leaving Lynx</em></A></h2>
 
 To exit Lynx use the '<em>q</em>' command.  You will be asked whether
 you really want to quit.  Answering '<em>y</em>' will exit and '<em>n</em>'
 will return you to the current document.  Use '<em>Q</em>' or
 <em>Control-D</em> to quit without verification. [<A HREF="#ToC-Leaving">ToC</A>]
 
-<h2 ID="Remote"><A NAME="Remote"><em>Starting Lynx with a Remote File</em></A></h2>
+<h2 ID="id-Remote"><A NAME="Remote"><em>Starting Lynx with a Remote File</em></A></h2>
 
 If you wish to view a remote file (that is, a file residing on
 some computer system other than the one upon which you are running
@@ -234,7 +234,7 @@ portions of it in the startfile argument.  For example:<br>
 See <a href="lynx_url_support.html">URL Schemes Supported by Lynx</a> for
 more detailed information.  [<A HREF="#ToC-Remote">ToC</A>]
 
-<h2 ID="EnVar"><A NAME="EnVar"><em>Starting Lynx with the WWW_HOME environment variable.</em></A></h2>
+<h2 ID="id-EnVar"><A NAME="EnVar"><em>Starting Lynx with the WWW_HOME environment variable.</em></A></h2>
 
 You may also specify a starting file for Lynx using the WWW_HOME
 environment variable,
@@ -256,7 +256,7 @@ environment variable,
 Note that on VMS the double-quoting <em>must</em> be included to preserve
 casing.  [<A HREF="#ToC-EnVar">ToC</A>]
 
-<h2 ID="IntraDocNav"><A NAME="IntraDocNav"><em>Navigating hypertext documents with Lynx</em></A></h2>
+<h2 ID="id-IntraDocNav"><A NAME="IntraDocNav"><em>Navigating hypertext documents with Lynx</em></A></h2>
 
 The process of moving within a hypertext web, selecting and displaying
 links is known as "navigation." With Lynx almost all navigation can be
@@ -309,7 +309,7 @@ correct information, you will then be served the requested information.
 Lynx will automatically send your username and password to the same server
 if it is needed again. [<A HREF="#ToC-IntraDocNav">ToC</A>]
 
-<h2 ID="Disposing"><A NAME="Disposing"
+<h2 ID="id-Disposing"><A NAME="Disposing"
 ><em>Printing, Mailing, and Saving rendered files to disk.</em></A></h2>
 
 Rendered HTML documents, and plain text files, may be printed using the
@@ -340,7 +340,7 @@ of TAB characters to spaces you should use the
 <a href="#RemoteSource">Download</a> options.
 [<A HREF="#ToC-Disposing">ToC</A>]
 
-<h2 ID="LocalSource"><A NAME="LocalSource"
+<h2 ID="id-LocalSource"><A NAME="LocalSource"
 ><em>Viewing the HTML document source and editing documents</em></A></h2>
 
 When viewing HTML documents it is possible to retrieve and display the
@@ -380,7 +380,7 @@ After changes are completed, exit your editor and you will return to Lynx.
 Lynx will reload and render the file so that changes can be immediately
 examined. [<A HREF="#ToC-LocalSource">ToC</A>]
 
-<h2 ID="RemoteSource"><A NAME="RemoteSource"><em>Downloading and Saving source files.</em></A></h2>
+<h2 ID="id-RemoteSource"><A NAME="RemoteSource"><em>Downloading and Saving source files.</em></A></h2>
 
 If the DOWNLOAD keystroke command ('<em>d</em>' or <em>D</em>) is
 used when positioned on a link for an HTML, plain text, or binary
@@ -416,7 +416,7 @@ and any previous entries can be retrieved for re-use by pressing the
 <em>up-arrow</em> or <em>down-arrow</em> keys at the prompt.
 [<A HREF="#ToC-RemoteSource">ToC</A>]
 
-<h2 ID="ReDo"><A NAME="ReDo"
+<h2 ID="id-ReDo"><A NAME="ReDo"
 ><em>Reloading files and refreshing the display</em></A></h2>
 
 The RELOAD (<em>Control-R</em>) command will reload and re-render the file
@@ -434,7 +434,7 @@ regardless of whether the NOCACHE or ACTIVATE command is used (see <A
 HREF="#Forms"><em>Lynx and HTML Forms</em></A>).
 [<A HREF="#ToC-ReDo">ToC</A>]
 
-<h2 ID="Search"><A NAME="Search"><em>Lynx searching commands</em></A></h2>
+<h2 ID="id-Search"><A NAME="Search"><em>Lynx searching commands</em></A></h2>
 
 Two commands activate searching in Lynx: '<em>/</em>' and '<em>s</em>'.
 
@@ -481,7 +481,7 @@ strings for searching it, and include an element such as:<BR>
 for submitting a search of the Biologist's Addresses database directly
 to the net.bio.net WAIS server. [<A HREF="#ToC-Search">ToC</A>]
 
-<h2 ID="InteractiveOptions"><A NAME="InteractiveOptions"><em>Lynx Options Menu</em></A></h2>
+<h2 ID="id-InteractiveOptions"><A NAME="InteractiveOptions"><em>Lynx Options Menu</em></A></h2>
 
 The Lynx <em>Options Menu</em> may be accessed by pressing the '<em>o</em>'
 key. It allows you to change options at runtime, if you need to.
@@ -797,7 +797,7 @@ return to Lynx or the '<em>&gt;</em>' command to save the options to a
                     lists.  Files are listed first.
           </dl>
 
-   <dt>Local directory sort order<dd>
+   <dt>Local directory sort order
           <dd>The Options Form also allows you to sort by the file attributes.
           <dl>
              <dt>By name
@@ -1121,7 +1121,7 @@ return to Lynx or the '<em>&gt;</em>' command to save the options to a
             from the environment if it has been previously set.
 </dl>
 
-<h2 ID="Mail"><A NAME="Mail"><em>Comments and mailto: links</em></A></h2>
+<h2 ID="id-Mail"><A NAME="Mail"><em>Comments and mailto: links</em></A></h2>
 
 At any time while viewing documents within Lynx, you may use the
 '<em>c</em>' command to send a mail message to the owner of the current
@@ -1138,7 +1138,7 @@ insensitive).  For example, <pre>
 </pre>
 You may also add a TITLE attribute with, for example, the name of your page) If
 no ownership is specified then comments are disabled.  Certain links called
-<a href="lynx_url_support.html#mailto">mailto:</a> links will also allow
+<a href="lynx_url_support.html#mailto_url">mailto:</a> links will also allow
 you to send mail to other people.  Using the mail features within Lynx is
 straightforward.
 
@@ -1164,7 +1164,7 @@ and then the message will be sent, whereas if you press '<em>n</em>' the
 message will be deleted.  Entering Control-G in response to any prompts
 also will cancel the mailing.[<A HREF="#ToC-Mail">ToC</A>]
 
-<h2 ID="News"><A NAME="News"><em>USENET News posting</em></A></h2>
+<h2 ID="id-News"><A NAME="News"><em>USENET News posting</em></A></h2>
 
 While reading <a
 href="http://www.w3.org/LineMode/User/AboutNewsServers.html"
@@ -1198,7 +1198,7 @@ received the article supports posting from your site, a link that says
 See also <a
 href="http://www.w3.org/Protocols/rfc977/rfc977">RFC 977</a>.
 
-<h2 ID="Bookmarks"><A NAME="Bookmarks"><em>Lynx bookmarks</em></A></h2>
+<h2 ID="id-Bookmarks"><A NAME="Bookmarks"><em>Lynx bookmarks</em></A></h2>
 
 Bookmarks are entries in your <em>bookmark file</em>, which record
 the URL of a document you may want to return to easily, with a name
@@ -1258,7 +1258,7 @@ token, but can enter '<em>=</em>' to invoke the STANDARD
 selection menu, or <em>RETURN</em> for the default bookmark file.
 [<A HREF="#ToC-Bookmarks">ToC</A>]
 
-<h2 ID="Jumps"><A NAME="Jumps"><em>Jump Command</em></a></h2>
+<h2 ID="id-Jumps"><A NAME="Jumps"><em>Jump Command</em></a></h2>
 
 Similar to the bookmarks file is the jumps file: for an example,
 look in the <em>samples</em> subdirectory in the distribution package.
@@ -1285,7 +1285,7 @@ For more advice how to set up the jumps command on your system
 and how to define short-cut names, read  <A HREF="#lynx.cfg">lynx.cfg</A> .
 [<A HREF="#ToC-Jumps">ToC</A>]
 
-<h2 ID="DirEd"><A NAME="DirEd"><em>Directory Editing</em></a></h2>
+<h2 ID="id-DirEd"><A NAME="DirEd"><em>Directory Editing</em></a></h2>
 
 Lynx offers extended DIRED support on Unix (on VMS the more powerful
 CSwing program is recommended for character cell terminals, and can be
@@ -1331,14 +1331,14 @@ on your local system.  The commands available in DIRED mode are
 </dl>
 [<A HREF="#ToC-DirEd">ToC</A>]
 
-<h2 ID="ColorMouse"><A NAME="ColorMouse"><em>Using Color &amp; the Mouse</em></A></h2>
+<h2 ID="id-ColorMouse"><A NAME="ColorMouse"><em>Using Color &amp; the Mouse</em></A></h2>
 
 A limited range of colors &amp; mouse commands are available, if the user chooses:
 see <em>lynx.cfg</em> for details.
 
 [<A HREF="#ToC-ColorMouse">ToC</A>]
 
-<h2 ID="MiscKeys"><A NAME="MiscKeys"><em>Scrolling and Other useful commands</em></A></h2>
+<h2 ID="id-MiscKeys"><A NAME="MiscKeys"><em>Scrolling and Other useful commands</em></A></h2>
 
 A summary of all the keystroke commands and their key bindings can
 be invoked via the KEYMAP command, normally mapped to '<em>k</em>' and
@@ -1522,7 +1522,7 @@ commands.
             [<A HREF="#ToC-MiscKeys">ToC</A>]
 </dl>
 
-<h2 ID="Forms"><A NAME="Forms"><em>Lynx and HTML Forms</em></a></h2>
+<h2 ID="id-Forms"><A NAME="Forms"><em>Lynx and HTML Forms</em></a></h2>
 
 This section describes the Lynx Forms Interface.  HTML gives document
 providers the ability to create on-line forms which may be filled out
@@ -1743,7 +1743,7 @@ positioned on a form submit button if you wish to download the server's
 reply to the submission instead of having Lynx render and display it.
 
 <p>Forms which have <em>POST</em> as the METHOD, or a <a
-href="lynx_url_support.html#mailto">mailto:</a> URL as the ACTION, are always
+href="lynx_url_support.html#mailto_url">mailto:</a> URL as the ACTION, are always
 resubmitted, even if the content has not changed, when you activate the
 <em>submit</em> button.  Lynx normally will not resubmit a form which has
 <em>POST</em> as the METHOD if the document returned by the form has links
@@ -1819,7 +1819,7 @@ be included in the submission.
 as <em>ENCTYPE="application/x-www-form-urlencoded"</em> for analysis by a
 script, and Lynx treats that as the default if no ENCTYPE is specified in the
 FORM start tag.  However, you can specify a <a
-href="lynx_url_support.html#mailto">mailto</a> URL as the form's ACTION to
+href="lynx_url_support.html#mailto_url">mailto</a> URL as the form's ACTION to
 have the form content sent, instead, to an email address.  In such cases, you
 may wish to specify <em>ENCTYPE="text/plain"</em> in the form markup, so that
 the content will not be encoded, but remain readable as plain text.
@@ -1868,7 +1868,7 @@ any document:
 </pre>
 [<A HREF="#ToC-Forms">ToC</A>]
 
-<h2 ID="Images"><A NAME="Images"><em>Lynx and HTML Images</em></a></h2>
+<h2 ID="id-Images"><A NAME="Images"><em>Lynx and HTML Images</em></a></h2>
 
 As a text browser, Lynx does not display images as such
 -- you need to define a viewer in <em>lynx.cfg</em>: see there -- ,
@@ -1900,7 +1900,7 @@ combines the effects of the `*' &amp; `[' keys, as follows:
      As links    clickable_images = TRUE,  pseudo_inline_alts = unchanged
 </pre>
 
-<h2 ID="Tables"><A NAME="Tables"><em>Lynx and HTML Tables</em></a></h2>
+<h2 ID="id-Tables"><A NAME="Tables"><em>Lynx and HTML Tables</em></a></h2>
 
 HTML includes markup for creating <em>tables</em> structured as arrays of
 cells aligned by columns and rows on the displayed page.
@@ -1961,13 +1961,13 @@ not provide such scripts, but they can be written locally or downloaded
 from several sources.  It is suggested to use one of Lynx's facilities for
 invoking external programs (see <kbd>DOWNLOADER</kbd>, <kbd>PRINTER</kbd>,
 <kbd>EXTERNAL</kbd>, <kbd>TRUSTED_LYNXCGI</kbd> in <A
-HREF="#lynx.cfg">lynx.cfg</A> and <A HREF="lynx_url_support.html#cgi"><code
+HREF="#lynx.cfg">lynx.cfg</A> and <A HREF="lynx_url_support.html#cgi_url"><code
 >lynxcgi:</code></A> in <em>Supported URLs</em> for information on various
 ways for setting this up).
 
 [<A HREF="#ToC-Tables">ToC</A>]
 
-<h2 ID="Tabs"><A NAME="Tabs"><em>Lynx and HTML Tabs</em></a></h2>
+<h2 ID="id-Tabs"><A NAME="Tabs"><em>Lynx and HTML Tabs</em></a></h2>
 
 Lynx implements the <a
 href="http://www.w3.org/MarkUp/html3/Contents.html">HTML 3.0</a>
@@ -1989,7 +1989,7 @@ support it.  Toggle to display of <a href="#LocalSource">source</a> and <a
 href="#Search">search</a> for <em>&lt;tab</em> to examine the use of TAB markup
 in these documents. [<A HREF="#ToC-Tabs">ToC</A>]
 
-<h2 ID="Frames"><A NAME="Frames"><em>Lynx and HTML Frames</em></a></h2>
+<h2 ID="id-Frames"><A NAME="Frames"><em>Lynx and HTML Frames</em></a></h2>
 
 Some implementations of HTML include markup, primarily designed for graphic
 clients, that is intended to create an array of simultaneously displayed,
@@ -2014,7 +2014,7 @@ of those links to see if anything worthwhile is returned.
 You can simply ignore such warnings and access the frames
 via the Lynx-generated links as above.
 
-<h2 ID="Banners"><A NAME="Banners"><em>Lynx and HTML Banners</em></a></h2>
+<h2 ID="id-Banners"><A NAME="Banners"><em>Lynx and HTML Banners</em></a></h2>
 
 Some implementations of HTML markup include provisions for creating a
 non-scrolling window to be positioned at the top of each page, containing
@@ -2083,7 +2083,7 @@ at the top, left-hand corner of the screen when the content is not being
 displayed, to indicate it's accessibility via the TOOLBAR keystroke command.
 [<A HREF="#ToC-Banners">ToC</A>]
 
-<h2 ID="Footnotes"><A NAME="Footnotes"><em>Lynx and HTML Footnotes</em></a></h2>
+<h2 ID="id-Footnotes"><A NAME="Footnotes"><em>Lynx and HTML Footnotes</em></a></h2>
 
 Lynx implements the <a
 href="http://www.w3.org/MarkUp/html3/Contents.html">HTML 3.0</a>
@@ -2108,7 +2108,7 @@ you can return to your previous position in the document by pressing the
 markup that is valid in the BODY of the document.
 [<A HREF="#ToC-Footnotes">ToC</A>]
 
-<h2 ID="Notes"><A NAME="Notes"><em>Lynx and HTML Notes</em></a></h2>
+<h2 ID="id-Notes"><A NAME="Notes"><em>Lynx and HTML Notes</em></a></h2>
 
 Lynx implements the <a
 href="http://www.w3.org/MarkUp/html3/Contents.html">HTML 3.0</a>
@@ -2134,7 +2134,7 @@ It will <em>degrade gracefully</em> for WWW browsers which do not support
 NOTE, except for recognition of the ID attribute as a named <em>A</em>nchor.
 [<A HREF="#ToC-Notes">ToC</A>]
 
-<h2 ID="Lists"><A NAME="Lists"><em>Lynx and HTML Lists</em></a></h2>
+<h2 ID="id-Lists"><A NAME="Lists"><em>Lynx and HTML Lists</em></a></h2>
 
 Lynx implements the <a
 href="http://www.w3.org/MarkUp/html3/Contents.html">HTML 3.0</a>
@@ -2194,7 +2194,7 @@ blocks.  For DL blocks, double spacing will be used to separate the DT and
 DD elements unless the COMPACT attribute has been specified.
 [<A HREF="#ToC-Lists">ToC</A>]
 
-<h2 ID="Quotes"><A NAME="Quotes"><em>Lynx and HTML Quotes</em></a></h2>
+<h2 ID="id-Quotes"><A NAME="Quotes"><em>Lynx and HTML Quotes</em></a></h2>
 
 The <a
 href="http://www.w3.org/MarkUp/html3/Contents.html">HTML 3.0</a> and
@@ -2221,7 +2221,7 @@ its first line.
 of a hyperlink in the form URL#id.  It is treated just
 like the NAME in <em>A</em>nchors. [<A HREF="#ToC-Quotes">ToC</A>]
 
-<h2 ID="Eightbit"><A NAME="Eightbit"><em>Lynx and HTML Internationalization: 8bit, UNICODE, etc.</em></a></h2>
+<h2 ID="id-Eightbit"><A NAME="Eightbit"><em>Lynx and HTML Internationalization: 8bit, UNICODE, etc.</em></a></h2>
 
 Lynx has superior support for HTML 4.0/I18N internationalization issues.
 However, to see the characters other than 7bit properly you <em>should</em>
@@ -2230,7 +2230,7 @@ from Option Menu and save its value, this is a Frequently Asked Question.
 Fine-turning is also available from <A HREF="#lynx.cfg">lynx.cfg</A>
 [<A HREF="#ToC-Eightbit">ToC</A>]
 
-<h2 ID="USEMAP"><A NAME="USEMAP"><em>Lynx and Client-Side-Image-Maps</em></a></h2>
+<h2 ID="id-USEMAP"><A NAME="USEMAP"><em>Lynx and Client-Side-Image-Maps</em></a></h2>
 
 HTML includes markup, designed primarily for graphic clients, that treats
 inlined images as maps, such that areas of the image within which a mouse
@@ -2299,7 +2299,7 @@ equivalently to its handling of IMG elements with
 <em>client-side-image-maps</em> and/or <em>server-side-image-maps</em>.
 [<A HREF="#ToC-USEMAP">ToC</A>]
 
-<h2 ID="Refresh"><A NAME="Refresh"><em>Lynx and Client-Side-Pull</em></a></h2>
+<h2 ID="id-Refresh"><A NAME="Refresh"><em>Lynx and Client-Side-Pull</em></a></h2>
 
 HTML includes provision for passing instructions to clients via directives
 in META elements, and one such instruction, via the token <em>Refresh</em>,
@@ -2329,7 +2329,7 @@ new documents or images at that interval, and you would be wasting
 bandwidth by activating the link at a shorter interval.
 [<A HREF="#ToC-Refresh">ToC</A>]
 
-<h2 ID="Cookies"><A NAME="Cookies"><em>Lynx State Management</em></A>
+<h2 ID="id-Cookies"><A NAME="Cookies"><em>Lynx State Management</em></A>
 (Me want <em>cookie</em>!)</h2>
 
 HTTP provides a means to carry state information across successive
@@ -2402,7 +2402,7 @@ and/or change the 'allow' setting for its <em>domain</em> via the <a
 href="keystrokes/cookie_help.html">Cookie Jar Page</a>.
 [<A HREF="#ToC-Cookies">ToC</A>]
 
-<h2 ID="Cache"><A NAME="Cache"><em>Cached Documents</em></A></h2>
+<h2 ID="id-Cache"><A NAME="Cache"><em>Cached Documents</em></A></h2>
 
 A list of documents which are in lynx's internal cache is accessible through
 hypothetical <em>Cache Jar</em> which can be examined via the CACHE_JAR
@@ -2455,7 +2455,7 @@ compilation (<code>userdefs.h</code>),
 as well as enabled in lynx.cfg
 [<A HREF="#ToC-Cache">ToC</A>]
 
-<h2 ID="Sessions"><A NAME="Sessions"><em>Sessions</em></A></h2>
+<h2 ID="id-Sessions"><A NAME="Sessions"><em>Sessions</em></A></h2>
 
 Lynx's current state (all information about the user's
 current activity with lynx) is called a session.
@@ -2485,7 +2485,7 @@ You can use a text editor to modify, add
 new entries, or remove URLs you no longer want.
 [<A HREF="#ToC-Sessions">ToC</A>]
 
-<h2 ID="Invoking"><A NAME="Invoking"><em>The Lynx command line</em></A></h2>
+<h2 ID="id-Invoking"><A NAME="Invoking"><em>The Lynx command line</em></A></h2>
 
 A summary of the Lynx command line options (switches) is returned to
 stdout if Lynx is invoked with the <em>-help</em> switch.  A description
@@ -3230,7 +3230,7 @@ for this rather technical information.
 [<A HREF="#ToC-Environment">ToC</A>]
 
 
-<h2 ID="lynx.cfg"><A NAME="lynx.cfg"><em>Main configuration file lynx.cfg</em></A></h2>
+<h2 ID="id-lynx.cfg"><A NAME="lynx.cfg"><em>Main configuration file lynx.cfg</em></A></h2>
 
 Lynx has several levels of customization:
 from the Options Menu (accessible on-line,
@@ -3268,7 +3268,7 @@ your lynx.cfg.
 
 [<A HREF="#ToC-lynx.cfg">ToC</A>]
 
-<h2 ID="Hist"><A NAME="Hist"><em>Lynx development history</em></A></h2>
+<h2 ID="id-Hist"><A NAME="Hist"><em>Lynx development history</em></A></h2>
 
 Lynx grew out of efforts to build a campus-wide information system
 at The University of Kansas.  The earliest versions of Lynx provided a
@@ -3349,6 +3349,6 @@ of this distribution.
 <p>Information on obtaining the most current version of Lynx is available
 at <a href="http://lynx.isc.org/current/index.html">the current distribution page</a>.
 
-<p>[<A HREF="#TOC">ToC</A>]
+<p>[<A HREF="#Contents">ToC</A>]
 </body>
 </html>

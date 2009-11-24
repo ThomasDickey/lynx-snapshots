@@ -1,4 +1,4 @@
-# $LynxId: makefile.msc,v 1.21 2009/03/11 00:00:39 tom Exp $
+# $LynxId: makefile.msc,v 1.23 2009/11/21 16:33:41 tom Exp $
 #
 # Makefile for `Lynx' browser for Microsoft Visual C++ 4.2 or later
 #
@@ -74,8 +74,6 @@ DEFS = $(CS_DEFS) $(SOCK_DEFS) $(SSL_DEFS) $(SCREEN_DEFS) \
  /D "DONT_HAVE_TM_GMTOFF" \
  /D "DOSPATH" \
  /D "EXP_ALT_BINDINGS" \
- /D "EXP_CMD_LOGGING" \
- /D "EXP_JUSTIFY_ELTS" \
  /D "EXP_NESTED_TABLES" \
  /D "HAVE_KEYPAD" \
  /D "LONG_LIST" \
@@ -90,8 +88,10 @@ DEFS = $(CS_DEFS) $(SOCK_DEFS) $(SSL_DEFS) $(SCREEN_DEFS) \
  /D "NO_UTMP" \
  /D "OK_OVERRIDE" \
  /D "SH_EX" \
+ /D "USE_CMD_LOGGING" \
  /D "USE_EXTERNALS" \
  /D "USE_FILE_UPLOAD" \
+ /D "USE_JUSTIFY_ELTS" \
  /D "USE_MULTIBYTE_CURSES" \
  /D "USE_PERSISTENT_COOKIES" \
  /D "USE_PRETTYSRC" \

@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYStrings.h,v 1.72 2009/01/25 19:49:28 tom Exp $
+ * $LynxId: LYStrings.h,v 1.74 2009/11/21 17:05:33 Bela.Lubkin Exp $
  */
 #ifndef LYSTRINGS_H
 #define LYSTRINGS_H
@@ -81,8 +81,6 @@ extern "C" {
 						  int *nstartp,
 						  int *nendp);
 
-#define non_empty(s) !isEmpty(s)
-
 #define LYno_attr_mb_strstr(chptr, tarptr, utf_flag, count_gcells, nstartp, nendp) \
 	(case_sensitive \
 	    ? LYno_attr_mbcs_strstr(chptr, tarptr, utf_flag, count_gcells, nstartp, nendp) \
@@ -110,7 +108,7 @@ extern "C" {
 
     extern char *LYSafeGets(char **src, FILE *fp);
 
-#ifdef EXP_CMD_LOGGING
+#ifdef USE_CMD_LOGGING
     extern BOOL LYHaveCmdScript(void);
     extern int LYReadCmdKey(int mode);
     extern void LYCloseCmdLogfile(void);

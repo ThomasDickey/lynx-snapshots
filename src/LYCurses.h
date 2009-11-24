@@ -1,4 +1,4 @@
-/* $LynxId: LYCurses.h,v 1.80 2009/04/07 00:03:47 tom Exp $ */
+/* $LynxId: LYCurses.h,v 1.81 2009/11/21 14:40:20 Bake.Timmons Exp $ */
 #ifndef LYCURSES_H
 #define LYCURSES_H
 
@@ -457,6 +457,7 @@ extern "C" {
     extern int LYscreenWidth(void);
     extern int LYstrExtent(const char *string, int len, int maxCells);
     extern int LYstrExtent2(const char *string, int len);
+    extern int LYstrFittable(const char *string, int maxCells);
     extern int LYstrCells(const char *string);
     extern void LYclear(void);
     extern void LYclrtoeol(void);

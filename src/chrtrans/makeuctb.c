@@ -1,5 +1,5 @@
 /*
- * $LynxId: makeuctb.c,v 1.39 2009/01/01 17:01:15 tom Exp $
+ * $LynxId: makeuctb.c,v 1.40 2009/11/21 15:46:24 tom Exp $
  *
  *  makeuctb.c, derived from conmakehash.c   - kw
  *
@@ -87,7 +87,7 @@ static void usage(void)
     done(EX_USAGE);
 }
 
-#ifdef EXP_ASCII_CTYPES
+#ifdef USE_ASCII_CTYPES
 int ascii_tolower(int i)
 {
     if (91 > i && i > 64)

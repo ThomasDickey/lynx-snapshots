@@ -1,9 +1,9 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: lynx 2.8.7pre.5\n"
+"Project-Id-Version: lynx 2.8.8dev.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-06-07 14:38-0400\n"
+"POT-Creation-Date: 2009-11-20 04:45-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -2858,20 +2858,20 @@ msgstr ""
 msgid "socket for master socket"
 msgstr ""
 
-#: WWW/Library/Implementation/HTFTP.c:2976
+#: WWW/Library/Implementation/HTFTP.c:2978
 msgid "Receiving FTP directory."
 msgstr ""
 
-#: WWW/Library/Implementation/HTFTP.c:3112
+#: WWW/Library/Implementation/HTFTP.c:3114
 #, c-format
 msgid "Transferred %d bytes (%5d)"
 msgstr ""
 
-#: WWW/Library/Implementation/HTFTP.c:3467
+#: WWW/Library/Implementation/HTFTP.c:3469
 msgid "connect for data"
 msgstr ""
 
-#: WWW/Library/Implementation/HTFTP.c:4128
+#: WWW/Library/Implementation/HTFTP.c:4130
 msgid "Receiving FTP file."
 msgstr ""
 
@@ -3202,15 +3202,15 @@ msgstr ""
 msgid "Have POST content.  Treating Permanent Redirection as Temporary.\n"
 msgstr ""
 
-#: WWW/Library/Implementation/HTTP.c:2005
+#: WWW/Library/Implementation/HTTP.c:2006
 msgid "Retrying with access authorization information."
 msgstr ""
 
-#: WWW/Library/Implementation/HTTP.c:2017
+#: WWW/Library/Implementation/HTTP.c:2018
 msgid "Show the 401 message body?"
 msgstr ""
 
-#: WWW/Library/Implementation/HTTP.c:2060
+#: WWW/Library/Implementation/HTTP.c:2061
 msgid "Show the 407 message body?"
 msgstr ""
 
@@ -3218,7 +3218,7 @@ msgstr ""
 #. * Bad or unknown server_status number.  Take a chance and hope
 #. * there is something to display.  - FM
 #.
-#: WWW/Library/Implementation/HTTP.c:2160
+#: WWW/Library/Implementation/HTTP.c:2161
 msgid "Unknown status reply from server!"
 msgstr ""
 
@@ -3593,31 +3593,31 @@ msgstr ""
 msgid "Y/N/A/V"
 msgstr ""
 
-#: src/HTML.c:5950
+#: src/HTML.c:5894
 msgid "Description:"
 msgstr ""
 
-#: src/HTML.c:5955
+#: src/HTML.c:5899
 msgid "(none)"
 msgstr ""
 
-#: src/HTML.c:5959
+#: src/HTML.c:5903
 msgid "Filepath:"
 msgstr ""
 
-#: src/HTML.c:5965
+#: src/HTML.c:5909
 msgid "(unknown)"
 msgstr ""
 
-#: src/HTML.c:7442
+#: src/HTML.c:7348
 msgid "Document has only hidden links.  Use the 'l'ist command."
 msgstr ""
 
-#: src/HTML.c:7951
+#: src/HTML.c:7847
 msgid "Source cache error - disk full?"
 msgstr ""
 
-#: src/HTML.c:7964
+#: src/HTML.c:7860
 msgid "Source cache error - not enough memory!"
 msgstr ""
 
@@ -3957,225 +3957,221 @@ msgstr ""
 msgid "The specified name is already in use!  Request ignored."
 msgstr ""
 
-#: src/LYLocal.c:592
+#: src/LYLocal.c:593
 msgid "Destination has different owner!  Request denied."
 msgstr ""
 
-#: src/LYLocal.c:595
+#: src/LYLocal.c:596
 msgid "Destination is not a valid directory!  Request denied."
 msgstr ""
 
-#: src/LYLocal.c:617
-msgid "Remove all tagged files and directories?"
-msgstr ""
-
-#: src/LYLocal.c:675
-msgid "Enter new location for tagged items: "
-msgstr ""
-
-#: src/LYLocal.c:745
-msgid "Path too long"
-msgstr ""
-
-#: src/LYLocal.c:776
-msgid "Source and destination are the same location - request ignored!"
-msgstr ""
-
-#: src/LYLocal.c:833
-msgid "Enter new name for directory: "
-msgstr ""
-
-#: src/LYLocal.c:835
-msgid "Enter new name for file: "
-msgstr ""
-
-#: src/LYLocal.c:847
-msgid "Illegal character (path-separator) found! Request ignored."
-msgstr ""
-
-#: src/LYLocal.c:897
-msgid "Enter new location for directory: "
-msgstr ""
-
-#: src/LYLocal.c:903
-msgid "Enter new location for file: "
-msgstr ""
-
-#: src/LYLocal.c:930
-msgid "Unexpected failure - unable to find trailing path separator"
-msgstr ""
-
-#: src/LYLocal.c:950
+#: src/LYLocal.c:612
 msgid "Source and destination are the same location!  Request ignored!"
 msgstr ""
 
-#: src/LYLocal.c:997
+#: src/LYLocal.c:636
+msgid "Remove all tagged files and directories?"
+msgstr ""
+
+#: src/LYLocal.c:709
+msgid "Enter new location for tagged items: "
+msgstr ""
+
+#: src/LYLocal.c:723
+msgid "Path too long"
+msgstr ""
+
+#: src/LYLocal.c:808
+msgid "Enter new name for directory: "
+msgstr ""
+
+#: src/LYLocal.c:810
+msgid "Enter new name for file: "
+msgstr ""
+
+#: src/LYLocal.c:822
+msgid "Illegal character (path-separator) found! Request ignored."
+msgstr ""
+
+#: src/LYLocal.c:870
+msgid "Enter new location for directory: "
+msgstr ""
+
+#: src/LYLocal.c:876
+msgid "Enter new location for file: "
+msgstr ""
+
+#: src/LYLocal.c:903
+msgid "Unexpected failure - unable to find trailing path separator"
+msgstr ""
+
+#: src/LYLocal.c:961
 msgid "Modify name, location, or permission (n, l, or p): "
 msgstr ""
 
-#: src/LYLocal.c:999
+#: src/LYLocal.c:963
 msgid "Modify name or location (n or l): "
 msgstr ""
 
 #.
 #. * Code for changing ownership needed here.
 #.
-#: src/LYLocal.c:1028
+#: src/LYLocal.c:992
 msgid "This feature not yet implemented!"
 msgstr ""
 
-#: src/LYLocal.c:1048
+#: src/LYLocal.c:1012
 msgid "Enter name of file to create: "
 msgstr ""
 
-#: src/LYLocal.c:1052 src/LYLocal.c:1088
+#: src/LYLocal.c:1016 src/LYLocal.c:1052
 msgid "Illegal redirection \"//\" found! Request ignored."
 msgstr ""
 
-#: src/LYLocal.c:1084
+#: src/LYLocal.c:1048
 msgid "Enter name for new directory: "
 msgstr ""
 
-#: src/LYLocal.c:1124
+#: src/LYLocal.c:1088
 msgid "Create file or directory (f or d): "
 msgstr ""
 
-#: src/LYLocal.c:1166
+#: src/LYLocal.c:1130
 #, c-format
 msgid "Remove directory '%s'?"
 msgstr ""
 
-#: src/LYLocal.c:1169
+#: src/LYLocal.c:1133
 msgid "Remove directory?"
 msgstr ""
 
-#: src/LYLocal.c:1174
+#: src/LYLocal.c:1138
 #, c-format
 msgid "Remove file '%s'?"
 msgstr ""
 
-#: src/LYLocal.c:1176
+#: src/LYLocal.c:1140
 msgid "Remove file?"
 msgstr ""
 
-#: src/LYLocal.c:1181
+#: src/LYLocal.c:1145
 #, c-format
 msgid "Remove symbolic link '%s'?"
 msgstr ""
 
-#: src/LYLocal.c:1183
+#: src/LYLocal.c:1147
 msgid "Remove symbolic link?"
 msgstr ""
 
-#: src/LYLocal.c:1278
+#: src/LYLocal.c:1243
 msgid "Sorry, don't know how to permit non-UNIX files yet."
 msgstr ""
 
-#: src/LYLocal.c:1308
+#: src/LYLocal.c:1273
 msgid "Unable to open permit options file"
 msgstr ""
 
-#: src/LYLocal.c:1338
+#: src/LYLocal.c:1303
 msgid "Specify permissions below:"
 msgstr ""
 
-#: src/LYLocal.c:1339 src/LYShowInfo.c:265
+#: src/LYLocal.c:1304 src/LYShowInfo.c:265
 msgid "Owner:"
 msgstr ""
 
-#: src/LYLocal.c:1355
+#: src/LYLocal.c:1320
 msgid "Group"
 msgstr ""
 
-#: src/LYLocal.c:1371
+#: src/LYLocal.c:1336
 msgid "Others:"
 msgstr ""
 
-#: src/LYLocal.c:1389
+#: src/LYLocal.c:1354
 msgid "form to permit"
 msgstr ""
 
-#: src/LYLocal.c:1484
+#: src/LYLocal.c:1449
 msgid "Invalid mode format."
 msgstr ""
 
-#: src/LYLocal.c:1488
+#: src/LYLocal.c:1453
 msgid "Invalid syntax format."
 msgstr ""
 
-#: src/LYLocal.c:1670
+#: src/LYLocal.c:1635
 msgid "Warning!  UUDecoded file will exist in the directory you started Lynx."
 msgstr ""
 
-#: src/LYLocal.c:1860
+#: src/LYLocal.c:1825
 msgid "NULL URL pointer"
 msgstr ""
 
-#: src/LYLocal.c:1942
+#: src/LYLocal.c:1907
 #, c-format
 msgid "Executing %s "
 msgstr ""
 
-#: src/LYLocal.c:1945
+#: src/LYLocal.c:1910
 msgid "Executing system command. This might take a while."
 msgstr ""
 
-#: src/LYLocal.c:2017
+#: src/LYLocal.c:1982
 msgid "Current directory:"
 msgstr ""
 
-#: src/LYLocal.c:2020 src/LYLocal.c:2038
+#: src/LYLocal.c:1985 src/LYLocal.c:2003
 msgid "Current selection:"
 msgstr ""
 
-#: src/LYLocal.c:2024
+#: src/LYLocal.c:1989
 msgid "Nothing currently selected."
 msgstr ""
 
-#: src/LYLocal.c:2040
+#: src/LYLocal.c:2005
 msgid "tagged item:"
 msgstr ""
 
-#: src/LYLocal.c:2041
+#: src/LYLocal.c:2006
 msgid "tagged items:"
 msgstr ""
 
-#: src/LYLocal.c:2138 src/LYLocal.c:2149
+#: src/LYLocal.c:2103 src/LYLocal.c:2114
 msgid "Illegal filename; request ignored."
 msgstr ""
 
 #. directory not writable
-#: src/LYLocal.c:2247 src/LYLocal.c:2306
+#: src/LYLocal.c:2212 src/LYLocal.c:2271
 msgid "Install in the selected directory not permitted."
 msgstr ""
 
-#: src/LYLocal.c:2302
+#: src/LYLocal.c:2267
 msgid "The selected item is not a directory!  Request ignored."
 msgstr ""
 
-#: src/LYLocal.c:2311
+#: src/LYLocal.c:2276
 msgid "Just a moment, ..."
 msgstr ""
 
-#: src/LYLocal.c:2328
+#: src/LYLocal.c:2293
 msgid "Error building install args"
 msgstr ""
 
-#: src/LYLocal.c:2343 src/LYLocal.c:2374
+#: src/LYLocal.c:2308 src/LYLocal.c:2339
 #, c-format
 msgid "Source and target are the same: %s"
 msgstr ""
 
-#: src/LYLocal.c:2350 src/LYLocal.c:2381
+#: src/LYLocal.c:2315 src/LYLocal.c:2346
 #, c-format
 msgid "Already in target directory: %s"
 msgstr ""
 
-#: src/LYLocal.c:2399
+#: src/LYLocal.c:2364
 msgid "Installation complete"
 msgstr ""
 
-#: src/LYLocal.c:2586
+#: src/LYLocal.c:2551
 msgid "Temporary URL or list would be too long."
 msgstr ""
 
@@ -4214,19 +4210,19 @@ msgstr ""
 msgid "No system mailer configured"
 msgstr ""
 
-#: src/LYMain.c:1004
+#: src/LYMain.c:1005
 msgid "No Winsock found, sorry."
 msgstr ""
 
-#: src/LYMain.c:1201
+#: src/LYMain.c:1202
 msgid "You MUST define a valid TMP or TEMP area!"
 msgstr ""
 
-#: src/LYMain.c:1254 src/LYMainLoop.c:5051
+#: src/LYMain.c:1255 src/LYMainLoop.c:5051
 msgid "No such directory"
 msgstr ""
 
-#: src/LYMain.c:1439
+#: src/LYMain.c:1440
 #, c-format
 msgid ""
 "\n"
@@ -4234,7 +4230,7 @@ msgid ""
 "\n"
 msgstr ""
 
-#: src/LYMain.c:1449
+#: src/LYMain.c:1450
 #, c-format
 msgid ""
 "\n"
@@ -4242,7 +4238,7 @@ msgid ""
 "\n"
 msgstr ""
 
-#: src/LYMain.c:1478
+#: src/LYMain.c:1479
 #, c-format
 msgid ""
 "\n"
@@ -4250,7 +4246,7 @@ msgid ""
 "\n"
 msgstr ""
 
-#: src/LYMain.c:1554
+#: src/LYMain.c:1555
 #, c-format
 msgid ""
 "\n"
@@ -4258,66 +4254,66 @@ msgid ""
 "\n"
 msgstr ""
 
-#: src/LYMain.c:1629
+#: src/LYMain.c:1630
 #, c-format
 msgid "Ignored %d characters from standard input.\n"
 msgstr ""
 
-#: src/LYMain.c:1631
+#: src/LYMain.c:1632
 #, c-format
 msgid "Use \"-stdin\" or \"-\" to tell how to handle piped input.\n"
 msgstr ""
 
-#: src/LYMain.c:1779
+#: src/LYMain.c:1780
 msgid "Warning:"
 msgstr ""
 
-#: src/LYMain.c:2344
+#: src/LYMain.c:2345
 msgid "persistent cookies state will be changed in next session only."
 msgstr ""
 
-#: src/LYMain.c:2580 src/LYMain.c:2625
+#: src/LYMain.c:2581 src/LYMain.c:2626
 #, c-format
 msgid "Lynx: ignoring unrecognized charset=%s\n"
 msgstr ""
 
-#: src/LYMain.c:3144
+#: src/LYMain.c:3145
 #, c-format
 msgid "%s Version %s (%s)"
 msgstr ""
 
-#: src/LYMain.c:3182
+#: src/LYMain.c:3183
 #, c-format
 msgid "Built on %s %s %s\n"
 msgstr ""
 
-#: src/LYMain.c:3204
+#: src/LYMain.c:3205
 msgid "Copyrights held by the Lynx Developers Group,"
 msgstr ""
 
-#: src/LYMain.c:3205
+#: src/LYMain.c:3206
 msgid "the University of Kansas, CERN, and other contributors."
 msgstr ""
 
-#: src/LYMain.c:3206
+#: src/LYMain.c:3207
 msgid "Distributed under the GNU General Public License (Version 2)."
 msgstr ""
 
-#: src/LYMain.c:3207
+#: src/LYMain.c:3208
 msgid "See http://lynx.isc.org/ and the online help for more information."
-msgstr ""
-
-#: src/LYMain.c:4026
-#, c-format
-msgid "USAGE: %s [options] [file]\n"
 msgstr ""
 
 #: src/LYMain.c:4027
 #, c-format
+msgid "USAGE: %s [options] [file]\n"
+msgstr ""
+
+#: src/LYMain.c:4028
+#, c-format
 msgid "Options are:\n"
 msgstr ""
 
-#: src/LYMain.c:4328
+#: src/LYMain.c:4329
 #, c-format
 msgid "%s: Invalid Option: %s\n"
 msgstr ""
@@ -5449,25 +5445,25 @@ msgstr ""
 msgid "Unexpected access protocol for this URL scheme."
 msgstr ""
 
-#: src/LYUtils.c:3474
+#: src/LYUtils.c:3473
 msgid "Too many tempfiles"
 msgstr ""
 
-#: src/LYUtils.c:3774
+#: src/LYUtils.c:3773
 msgid "unknown restriction"
 msgstr ""
 
-#: src/LYUtils.c:3805
+#: src/LYUtils.c:3804
 #, c-format
 msgid "No restrictions set.\n"
 msgstr ""
 
-#: src/LYUtils.c:3808
+#: src/LYUtils.c:3807
 #, c-format
 msgid "Restrictions set:\n"
 msgstr ""
 
-#: src/LYUtils.c:5186
+#: src/LYUtils.c:5185
 msgid "Cannot find HOME directory"
 msgstr ""
 

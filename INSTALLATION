@@ -308,7 +308,7 @@ II. Compile instructions -- UNIX
 	requested, the configure script will otherwise use the messages in the
 	./po subdirectory.
 
-  --disable-justify-elts		(define EXP_JUSTIFY_ELTS)
+  --disable-justify-elts		(define USE_JUSTIFY_ELTS)
 	Do not use element-justification logic.
 
   --disable-largefile			(prevent defining LONG_LIST)
@@ -335,25 +335,43 @@ II. Compile instructions -- UNIX
 	it.
 
   --disable-persistent-cookies		(prevent defining USE_PERSISTENT_COOKIES)
-	Use this option to tell configure whether to compile-in support for
-	saving cookies to a file, for subsequent reuse.  Persistent cookie
-	support will use (or create) the file specified by the 'COOKIE_FILE'
-	option, or default to ".lynx_cookies" in the home directory.
-	(Currently there is no protection against conflict if several lynx
-	sessions are active from the same account).
+	Turn off support for saving cookies to a file, for subsequent reuse. 
+	Persistent cookie support will use (or create) the file specified by
+	the 'COOKIE_FILE' option, or default to ".lynx_cookies" in the home
+	directory.  (Currently there is no protection against conflict if
+	several lynx sessions are active from the same account).
 
   --disable-prettysrc			(define USE_PRETTYSRC)
-	Use this option to compile-in support for colorizing the source view of
-	HTML pages.  If compiled-in, new source view mode is available with
-	-prettysrc command line option.
+	Turn off support for colorizing the source view of HTML pages.  If
+	compiled-in, new source view mode is available with -prettysrc command
+	line option.
+
+  --disable-progressbar			(define USE_PROGRESSBAR)
+	Turn off support for a "progress bar" which displays at the bottom
+	of the screen when doing downloads and other time-consuming (but
+	interruptible) processes.  This feature can be selected in the
+	options menu.
 
   --disable-read-eta			(define USE_READPROGRESS)
-	Enhance the read-progress message to show ETA (estimated time to
+	Turn off enhanced read-progress message showing ETA (estimated time to
 	completion), as well as the amount of time stalled without any data
 	transferred.
 
+  --disable-scrollbar			(define USE_SCROLLBAR)
+	Turn off support for scrollbar on the right-margin of the screen. 
+	If you configure with ncurses, this works with the mouse on xterm,
+	etc.
+
+  --disable-session-cache		(define USE_CACHE_JAR)
+	Turn off support for saving/restoring session information in files. 
+	Configurable from lynx.cfg
+
+  --disable-sessions			(define USE_SESSIONS)
+	Turn off support for sessions, which allows the user to automatically
+	save and restore history information.
+
   --disable-source-cache		(define USE_SOURCE_CACHE)
-	Use this option to compile-in support for caching HTML pages locally,
+	Turn off support for caching HTML pages locally,
 	in files or in memory.	Configurable from lynx.cfg
 
   --disable-trace			(define NO_LYNX_TRACE)
@@ -366,7 +384,7 @@ II. Compile instructions -- UNIX
 	Compiles-in an alternative list-page, bound to 'A' rather than 'l',
 	which always lists URLs rather than titles.
 
-  --enable-ascii-ctypes			(define EXP_ASCII_CTYPES)
+  --enable-ascii-ctypes			(define USE_ASCII_CTYPES)
 	Compiles-in alternative case-conversion functions which ensure that
 	configuration names, etc., are compared in POSIX locale.  This is
 	important for operating in some locale such as Turkish.
@@ -379,7 +397,7 @@ II. Compile instructions -- UNIX
   	Allow users to change the execution status within the options screen.
 	See EXEC_LINKS and EXEC_SCRIPTS.
 
-  --enable-charset-choice		(define EXP_CHARSET_CHOICE)
+  --enable-charset-choice		(define USE_CHARSET_CHOICE)
 	Add logic for ASSUMED_DOC_CHARSET_CHOICE and DISPLAY_CHARSET_CHOICE in
 	lynx.cfg, allowing user to configure a subset of the compiled-in
 	charsets for normal use.
@@ -466,7 +484,7 @@ II. Compile instructions -- UNIX
   	Use nl_langinfo(CODESET) to determine initial value for display
 	charset, overrides character_set value in .lynxrc file.
 
-  --enable-nested-tables
+  --enable-nested-tables		(define EXP_NESTED_TABLES)
 	Extends TRST to format nested tables, as well as be smarter about
 	<BR> and <P> tags in table cells.
 
@@ -476,26 +494,6 @@ II. Compile instructions -- UNIX
   --enable-nsl-fork			(define NSL_FORK)
 	Disabled by default, this allows interruption of NSL requests,
 	so that `z' will stop the `look-up' phase of a connection.
-
-  --enable-progressbar			(define USE_PROGRESSBAR)
-	Compile-in support for a "progress bar" which displays at the bottom
-	of the screen when doing downloads and other time-consuming (but
-	interruptible) processes.  This feature can be selected in the
-	options menu.
-
-  --enable-scrollbar			(define USE_SCROLLBAR)
-	Compile-in support for scrollbar on the right-margin of the screen. 
-	If you configure with ncurses, this works with the mouse on xterm,
-	etc.
-
-  --enable-session-cache		(define USE_CACHE_JAR)
-	Use this option to compile-in experimental support for
-	saving/restoring session information in files.  Configurable from
-	lynx.cfg
-
-  --enable-sessions			(define USE_SESSIONS)
-	Compile-in experimental support for sessions, which allow the user
-	to automatically save and restore history information.
 
   --enable-syslog			(define SYSLOG_REQUESTED_URLS)
 	Use this option to log NSL requests via syslog().
@@ -1377,4 +1375,4 @@ VIII. Acknowledgment
 
 -- 1999/04/24 - H. Nelson <lynx-admin@irm.nara.kindai.ac.jp>
 -- vile:txtmode
--- $LynxId: INSTALLATION,v 1.107 2009/08/27 21:00:43 tom Exp $
+-- $LynxId: INSTALLATION,v 1.110 2009/11/21 16:23:25 tom Exp $

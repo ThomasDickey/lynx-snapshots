@@ -1,4 +1,4 @@
-/* $LynxId: LYKeymap.c,v 1.68 2009/01/25 18:34:57 tom Exp $ */
+/* $LynxId: LYKeymap.c,v 1.69 2009/11/21 17:05:33 Bela.Lubkin Exp $ */
 #include <HTUtils.h>
 #include <LYUtils.h>
 #include <LYGlobalDefs.h>
@@ -1204,7 +1204,7 @@ int LYStringToKeycode(char *src)
 	char *dst = 0;
 
 	key = strtol(src, &dst, 0);
-	if (!isEmpty(dst))
+	if (non_empty(dst))
 	    key = -1;
     } else if (len > 6 && !strncasecomp(src, "key-", 4)) {
 	char *dst = 0;

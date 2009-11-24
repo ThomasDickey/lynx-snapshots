@@ -1,4 +1,4 @@
-dnl $LynxId: configure.in,v 1.202 2009/09/06 18:47:55 tom Exp $
+dnl $LynxId: configure.in,v 1.206 2009/11/21 16:27:09 tom Exp $
 dnl
 dnl Process this file with autoconf to produce a configure script.
 dnl
@@ -828,6 +828,7 @@ dnl --------------------------------------------------------------------------
 CF_HELP_MESSAGE(
 Experimental Options:)
 
+dnl --------------------------------------------------------------------------
 AC_MSG_CHECKING(if bibp: URLs should be supported)
 CF_ARG_DISABLE(bibp-urls,
 [  --disable-bibp-urls     disable support for bibp: URLs],
@@ -836,6 +837,7 @@ CF_ARG_DISABLE(bibp-urls,
 AC_MSG_RESULT($use_bibp_urls)
 test $use_bibp_urls = no && AC_DEFINE(DISABLE_BIBP)
 
+dnl --------------------------------------------------------------------------
 AC_MSG_CHECKING(if configuration info should be browsable)
 CF_ARG_DISABLE(config-info,
 [  --disable-config-info   disable browsable configuration-info],
@@ -844,6 +846,7 @@ CF_ARG_DISABLE(config-info,
 AC_MSG_RESULT($use_config_info)
 test $use_config_info = no && AC_DEFINE(NO_CONFIG_INFO)
 
+dnl --------------------------------------------------------------------------
 AC_MSG_CHECKING(if new-style forms-based options screen should be used)
 CF_ARG_DISABLE(forms-options,
 [  --disable-forms-options disable forms-based options],
@@ -852,6 +855,7 @@ CF_ARG_DISABLE(forms-options,
 AC_MSG_RESULT($use_forms_options)
 test $use_forms_options = no && AC_DEFINE(NO_OPTION_FORMS)
 
+dnl --------------------------------------------------------------------------
 AC_MSG_CHECKING(if old-style options menu should be used)
 CF_ARG_DISABLE(menu-options,
 [  --disable-menu-options  disable old-style option menu],
@@ -860,6 +864,30 @@ CF_ARG_DISABLE(menu-options,
 AC_MSG_RESULT($use_menu_options)
 test $use_menu_options = no && AC_DEFINE(NO_OPTION_MENU)
 
+dnl --------------------------------------------------------------------------
+AC_MSG_CHECKING(if sessions code should be used)
+CF_ARG_DISABLE(sessions,
+[  --disable-sessions      use experimental sessions code],
+	[use_sessions=$enableval],
+	[use_sessions=yes])
+AC_MSG_RESULT($use_sessions)
+if test $use_sessions != no ; then
+	AC_DEFINE(USE_SESSIONS)
+	EXTRA_OBJS="$EXTRA_OBJS LYSession\$o"
+fi
+
+dnl --------------------------------------------------------------------------
+AC_MSG_CHECKING(if session-caching code should be used)
+CF_ARG_DISABLE(session-cache,
+[  --disable-session-cache use experimental session-caching code],
+	[use_session_cache=$enableval],
+	[use_session_cache=yes])
+AC_MSG_RESULT($use_session_cache)
+if test $use_session_cache != no ; then
+    AC_DEFINE(USE_CACHEJAR)
+fi
+
+dnl --------------------------------------------------------------------------
 AC_MSG_CHECKING(if experimental address-list page should be used)
 CF_ARG_ENABLE(addrlist-page,
 [  --enable-addrlist-page  use experimental address-list page],
@@ -868,22 +896,7 @@ CF_ARG_ENABLE(addrlist-page,
 AC_MSG_RESULT($use_addrlist_page)
 test $use_addrlist_page != no && AC_DEFINE(EXP_ADDRLIST_PAGE)
 
-AC_MSG_CHECKING(if experimental ascii case-conversion should be used)
-CF_ARG_ENABLE(ascii-ctypes,
-[  --enable-ascii-ctypes   use experimental ascii case-conversion],
-	[use_ascii_ctypes=$enableval],
-	[use_ascii_ctypes=yes])
-AC_MSG_RESULT($use_ascii_ctypes)
-test $use_ascii_ctypes != no && AC_DEFINE(EXP_ASCII_CTYPES)
-
-AC_MSG_CHECKING(if experimental charset-selection logic should be used)
-CF_ARG_ENABLE(charset-choice,
-[  --enable-charset-choice use experimental charset-selection logic],
-	[use_charset_choice=$enableval],
-	[use_charset_choice=no])
-AC_MSG_RESULT($use_charset_choice)
-test $use_charset_choice != no && AC_DEFINE(EXP_CHARSET_CHOICE)
-
+dnl --------------------------------------------------------------------------
 AC_MSG_CHECKING(if experimental CJK logic should be used)
 CF_ARG_ENABLE(cjk,
 [  --enable-cjk            use experimental CJK logic],
@@ -892,6 +905,7 @@ CF_ARG_ENABLE(cjk,
 AC_MSG_RESULT($use_cjk)
 test $use_cjk != no && AC_DEFINE(CJK_EX)
 
+dnl --------------------------------------------------------------------------
 AC_MSG_CHECKING(if experimental Japanese UTF-8 logic should be used)
 CF_ARG_ENABLE(japanese-utf8,
 [  --enable-japanese-utf8  use experimental Japanese UTF-8 logic],
@@ -913,6 +927,7 @@ curses|slang|ncurses*)
 	;;
 esac
 
+dnl --------------------------------------------------------------------------
 if test "$use_dft_colors" != no ; then
 AC_MSG_CHECKING(if you want to use default-colors)
 CF_ARG_ENABLE(default-colors,
@@ -942,46 +957,6 @@ AC_MSG_RESULT($use_nested_tables)
 test $use_nested_tables != no && AC_DEFINE(EXP_NESTED_TABLES)
 
 dnl --------------------------------------------------------------------------
-AC_MSG_CHECKING(if progress-bar code should be used)
-CF_ARG_ENABLE(progressbar,
-[  --enable-progressbar    use experimental progress-bar],
-	[use_progressbar=$enableval],
-	[use_progressbar=no])
-AC_MSG_RESULT($use_progressbar)
-test $use_progressbar != no && AC_DEFINE(USE_PROGRESSBAR)
-
-dnl --------------------------------------------------------------------------
-AC_MSG_CHECKING(if scrollbar code should be used)
-CF_ARG_ENABLE(scrollbar,
-[  --enable-scrollbar      use experimental scrollbar, with mouse],
-	[use_scrollbar=$enableval],
-	[use_scrollbar=no])
-AC_MSG_RESULT($use_scrollbar)
-
-dnl --------------------------------------------------------------------------
-AC_MSG_CHECKING(if sessions code should be used)
-CF_ARG_ENABLE(sessions,
-[  --enable-sessions       use experimental sessions code],
-	[use_sessions=$enableval],
-	[use_sessions=no])
-AC_MSG_RESULT($use_sessions)
-if test $use_sessions != no ; then
-	AC_DEFINE(USE_SESSIONS)
-	EXTRA_OBJS="$EXTRA_OBJS LYSession\$o"
-fi
-
-dnl --------------------------------------------------------------------------
-AC_MSG_CHECKING(if session-caching code should be used)
-CF_ARG_ENABLE(session-cache,
-[  --enable-session-cache  use experimental session-caching code],
-	[use_session_cache=$enableval],
-	[use_session_cache=no])
-AC_MSG_RESULT($use_session_cache)
-if test $use_session_cache != no ; then
-    AC_DEFINE(USE_CACHEJAR)
-fi
-
-dnl --------------------------------------------------------------------------
 dnl Miscellaneous options that don't need to test system features
 dnl --------------------------------------------------------------------------
 
@@ -996,6 +971,15 @@ CF_ARG_ENABLE(alt-bindings,
 	[use_alt_bindings=yes])
 AC_MSG_RESULT($use_alt_bindings)
 test $use_alt_bindings != no && AC_DEFINE(EXP_ALT_BINDINGS)
+
+dnl --------------------------------------------------------------------------
+AC_MSG_CHECKING(if ascii case-conversion should be used)
+CF_ARG_DISABLE(ascii-ctypes,
+[  --disable-ascii-ctypes  use ascii case-conversion],
+	[use_ascii_ctypes=$enableval],
+	[use_ascii_ctypes=yes])
+AC_MSG_RESULT($use_ascii_ctypes)
+test $use_ascii_ctypes != no && AC_DEFINE(USE_ASCII_CTYPES)
 
 dnl --------------------------------------------------------------------------
 AC_MSG_CHECKING(if you want to use extended HTML DTD logic)
@@ -1034,7 +1018,7 @@ CF_ARG_DISABLE(justify-elts,
 	[use_justify_elts=$enableval],
 	[use_justify_elts=yes])
 AC_MSG_RESULT($use_justify_elts)
-test $use_justify_elts != no && AC_DEFINE(EXP_JUSTIFY_ELTS)
+test $use_justify_elts != no && AC_DEFINE(USE_JUSTIFY_ELTS)
 
 dnl --------------------------------------------------------------------------
 AC_MSG_CHECKING(if partial-display should be used)
@@ -1064,6 +1048,15 @@ AC_MSG_RESULT($use_prettysrc)
 test $use_prettysrc != no && AC_DEFINE(USE_PRETTYSRC)
 
 dnl --------------------------------------------------------------------------
+AC_MSG_CHECKING(if progress-bar code should be used)
+CF_ARG_DISABLE(progressbar,
+[  --disable-progressbar   use progress-bar],
+	[use_progressbar=$enableval],
+	[use_progressbar=yes])
+AC_MSG_RESULT($use_progressbar)
+test $use_progressbar != no && AC_DEFINE(USE_PROGRESSBAR)
+
+dnl --------------------------------------------------------------------------
 AC_MSG_CHECKING(if read-progress message should show ETA)
 CF_ARG_DISABLE(read-eta,
 [  --disable-read-eta      read-progress message shows ETA],
@@ -1080,6 +1073,23 @@ CF_ARG_DISABLE(source-cache,
 	[use_source_cache=yes])
 AC_MSG_RESULT($use_source_cache)
 test $use_source_cache != no && AC_DEFINE(USE_SOURCE_CACHE)
+
+dnl --------------------------------------------------------------------------
+AC_MSG_CHECKING(if scrollbar code should be used)
+CF_ARG_DISABLE(scrollbar,
+[  --disable-scrollbar     use scrollbar, with mouse],
+	[use_scrollbar=$enableval],
+	[use_scrollbar=yes])
+AC_MSG_RESULT($use_scrollbar)
+
+dnl --------------------------------------------------------------------------
+AC_MSG_CHECKING(if charset-selection logic should be used)
+CF_ARG_ENABLE(charset-choice,
+[  --enable-charset-choice use charset-selection logic],
+	[use_charset_choice=$enableval],
+	[use_charset_choice=no])
+AC_MSG_RESULT($use_charset_choice)
+test $use_charset_choice != no && AC_DEFINE(USE_CHARSET_CHOICE)
 
 dnl --------------------------------------------------------------------------
 AC_MSG_CHECKING(if you want to use external commands)

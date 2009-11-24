@@ -1,14 +1,51 @@
--- $LynxId: CHANGES,v 1.440 2009/09/06 18:48:52 tom Exp $
+-- $LynxId: CHANGES,v 1.458 2009/11/24 00:03:22 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2009-09-?? (2.8.8dev.2)
-* modify configure script to check if linkage for bzlib and zlib succeeded -TD
+2009-11-?? (2.8.8dev.2)
+* document the various xxx_PATH settings in lynx.cfg -TD
+* modify cfg2html.pl to improve formatting of cattoc.html -TD
+* split-up top-level makefile install-html rule to allow generating the htmlized
+  cfg without doing an install -TD
+* suppress positioning for editor when using it to edit files via dired -TD
+* modify samples/lynx-demo.cfg to suppress external file-utilities, since the
+  intent is to make the installer work standalone, but allow extension -TD
+* add traces for builtin dired operations -TD
+* modify built-in "touch" for dired to use binary mode when opening file -TD
+* remove check from 2.8.5dev.11 which prevents user from moving a directory in
+  dired unless the external program "mv" is provided -TD
+* regularize use of isEmpty(), non_empty() -BL
+* match built-in "positionable" editor names more liberally -BL
+* promote some experimental options to normal, tidy up related EXP_xxx vs
+  USE_xxx symbols -TD
+  EXP_ASCII_CTYPES is now USE_ASCII_CTYPES
+  EXP_JUSTIFY_ELTS is now USE_JUSTIFY_ELTS 
+  EXP_CHARSET_CHOICE is now USE_CHARSET_CHOICE
+  The scrollbar, progressbar, sessions and session-cache options are now
+  enabled by default.
+* modify scanning in HTRules.c to only trim comments where '#' is either at
+  the beginning of a line, or follows whitespace (patch by Kihara Hideto).
+* correct a place where LYStrExtent2 was used where byte-count is needed
+  (patch by Bake Timmons).
+* modify LYExecv() in LYLocal.c to allow win32 applications to use this
+  function -TD
+* modify ok_stat() in LYLocal.c to retry with "." appended when the path syntax
+  indicates that it is probably a directory name -TD
+* fix an old typo in configure macro CF_CHECK_FUNCDECL -TD
+* change library dependency for gnutls from crypt to gcrypt, originally in
+  2.8.5dev.15 (Debian #555579) -TD
+* update de.po from
+    http://translationproject.org/latest/lynx
+* fix some tidy- and linklint-warnings in help-files -TD
+* amend change from 2.8.7dev.14 to not use clrscr() function in stop_curses()
+  if using PDCurses, since clrscr() is not in the win32 api -TD
+* modify configure script to check if linkage for bzlib and zlib succeeded,
+  before defining symbol which makes the compiler uses these libraries -TD
 * update lynx_help_main.html to point to "release/lynx2-8-7" documentation -TD
 
 2009-08-28 (2.8.8dev.1)
-* add <sys/types.h> include in socklen_t configure check, from OpenBSD CVS
+* add <sys/types.h> include in socklen_t configure check (from OpenBSD CVS)
 * eliminate UCPutUtf8ToBuffer() - redundant -TD
 * use memset's to simplify some initialization in HTML.c, extending a change
   made in 2.8.7dev.10 (prompted by issue in OpenBSD) -TD 
@@ -37,7 +74,7 @@ Changes since Lynx 2.8 release
 * update config.guess (2009-08-19), config.sub (2009-08-19)
 
 2009-07-05 (2.8.7rel.1)
-* update metrics for 2.8.7 release.
+* update metrics for 2.8.7 release -TD
 * fix ifdef'ing for cfg_bad_html (report by Gabor Z Papp) -TD
 
 2009-06-23 (2.8.7pre.6)
@@ -94,8 +131,8 @@ Changes since Lynx 2.8 release
   FEDORA-2008-9597), and modify compiled-in configuration default for
   consistency with other lynx.cfg settings to require that lynx.cfg be set to
   permit use of lynxcgi scripts -TD
-* correct parsing of "--" command-line parameter (Redhat #311031)
-* check for malformed select before adding last-option (Redhat #152146)
+* correct parsing of "--" command-line parameter (Redhat #311031) -TD
+* check for malformed select before adding last-option (Redhat #152146) -TD
 * change default for --enable-ascii-ctypes to true -TD
 * modify Lynx's DTD information to allow it to display form-related tags that
   are inline, even without being in a form as indicated in

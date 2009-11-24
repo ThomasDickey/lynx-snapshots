@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYCharUtils.c,v 1.103 2009/08/27 22:07:54 tom Exp $
+ * $LynxId: LYCharUtils.c,v 1.104 2009/11/21 17:05:33 Bela.Lubkin Exp $
  *
  *  Functions associated with LYCharSets.c and the Lynx version of HTML.c - FM
  *  ==========================================================================
@@ -1136,7 +1136,7 @@ char **LYUCFullyTranslateString(char **str,
     /*
      * Make sure we have a non-empty string.  - FM
      */
-    if (!str || isEmpty(*str))
+    if (isEmpty(*str))
 	return str;
 
     /*

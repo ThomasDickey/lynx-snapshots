@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTAlert.c,v 1.85 2009/04/07 00:09:34 tom Exp $
+ * $LynxId: HTAlert.c,v 1.86 2009/11/21 16:32:23 tom Exp $
  *
  *	Displaying messages and getting input for Lynx Browser
  *	==========================================================
@@ -1152,13 +1152,13 @@ void LYSleepMsg(void)
 	LYSleep(MessageSecs);
 }
 
-#ifdef EXP_CMD_LOGGING
+#ifdef USE_CMD_LOGGING
 void LYSleepReplay(void)
 {
     if (okToSleep())
 	LYSleep(ReplaySecs);
 }
-#endif /* EXP_CMD_LOGGING */
+#endif /* USE_CMD_LOGGING */
 
 /*
  * LYstrerror emulates the ANSI strerror() function.

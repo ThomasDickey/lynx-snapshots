@@ -1,4 +1,4 @@
-/* $LynxId: LYStrings.c,v 1.166 2009/06/07 19:32:16 tom Exp $ */
+/* $LynxId: LYStrings.c,v 1.168 2009/11/21 17:06:11 Bela.Lubkin Exp $ */
 #include <HTUtils.h>
 #include <HTCJK.h>
 #include <UCAux.h>
@@ -35,7 +35,7 @@
 #include <LYMainLoop.h>
 #endif
 
-#ifdef EXP_CMD_LOGGING
+#ifdef USE_CMD_LOGGING
 #include <LYReadCFG.h>
 #endif
 
@@ -642,7 +642,7 @@ const char *LYmbcs_skip_glyphs(const char *data,
     if (n_glyphs < 0)
 	n_glyphs = 0;
 
-    if (!isEmpty(data)) {
+    if (non_empty(data)) {
 	if (!utf_flag) {
 	    while (n_glyphs-- > 0) {
 		if (!*++data)
@@ -5302,7 +5302,7 @@ int LYscanFloat2(const char **source, float *result)
 #ifdef _WIN32_WINNT
 #define WIN32_FIX (float)
 #else
-#define WIN32_FIX /* nothing */
+#define WIN32_FIX		/* nothing */
 #endif
 	    *result = WIN32_FIX strtol(src, &temp, 10);
 	    src = temp;
@@ -5994,7 +5994,7 @@ char *LYSafeGets(char **src,
     return result;
 }
 
-#ifdef EXP_CMD_LOGGING
+#ifdef USE_CMD_LOGGING
 static FILE *cmd_logfile;
 static FILE *cmd_script;
 
@@ -6111,4 +6111,4 @@ void LYCloseCmdLogfile(void)
     FREE(lynx_cmd_logfile);
     FREE(lynx_cmd_script);
 }
-#endif /* EXP_CMD_LOGGING */
+#endif /* USE_CMD_LOGGING */

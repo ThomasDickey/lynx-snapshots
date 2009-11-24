@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYReadCFG.c,v 1.139 2009/06/07 16:57:29 tom Exp $
+ * $LynxId: LYReadCFG.c,v 1.142 2009/11/21 16:32:23 tom Exp $
  */
 #ifndef NO_RULES
 #include <HTRules.h>
@@ -1038,7 +1038,7 @@ static int nonrest_sigwinch_fun(char *value)
     return 0;
 }
 
-#ifdef EXP_CHARSET_CHOICE
+#ifdef USE_CHARSET_CHOICE
 static void matched_charset_choice(BOOL display_charset,
 				   int i)
 {
@@ -1119,7 +1119,7 @@ static int parse_assumed_doc_charset_choice(char *p)
     return parse_charset_choice(p, 0);
 }
 
-#endif /* EXP_CHARSET_CHOICE */
+#endif /* USE_CHARSET_CHOICE */
 
 #ifdef USE_PRETTYSRC
 static void html_src_bad_syntax(char *value,
@@ -1300,7 +1300,7 @@ static Config_Type Config_Table [] =
 #ifdef EXP_ASSUMED_COLOR
      PARSE_FUN(RC_ASSUMED_COLOR,        assumed_color_fun),
 #endif
-#ifdef EXP_CHARSET_CHOICE
+#ifdef USE_CHARSET_CHOICE
      PARSE_FUN(RC_ASSUMED_DOC_CHARSET_CHOICE, parse_assumed_doc_charset_choice),
 #endif
 #ifdef DIRED_SUPPORT
@@ -1369,7 +1369,7 @@ static Config_Type Config_Table [] =
 #ifdef DIRED_SUPPORT
      PARSE_FUN(RC_DIRED_MENU,           dired_menu_fun),
 #endif
-#ifdef EXP_CHARSET_CHOICE
+#ifdef USE_CHARSET_CHOICE
      PARSE_FUN(RC_DISPLAY_CHARSET_CHOICE, parse_display_charset_choice),
 #endif
      PARSE_ADD(RC_DOWNLOADER,           downloaders),
@@ -1421,7 +1421,7 @@ static Config_Type Config_Table [] =
      PARSE_STR(RC_JUMP_PROMPT,          jumpprompt),
      PARSE_SET(RC_JUMPBUFFER,           jump_buffer),
      PARSE_FUN(RC_JUMPFILE,             jumpfile_fun),
-#ifdef EXP_JUSTIFY_ELTS
+#ifdef USE_JUSTIFY_ELTS
      PARSE_SET(RC_JUSTIFY,              ok_justify),
      PARSE_INT(RC_JUSTIFY_MAX_VOID_PERCENT, justify_max_void_percent),
 #endif
@@ -1524,7 +1524,7 @@ static Config_Type Config_Table [] =
      PARSE_SET(RC_QUIT_DEFAULT_YES,     LYQuitDefaultYes),
      PARSE_INT(RC_READ_TIMEOUT,         reading_timeout),
      PARSE_FUN(RC_REFERER_WITH_QUERY,   referer_with_query_fun),
-#ifdef EXP_CMD_LOGGING
+#ifdef USE_CMD_LOGGING
      PARSE_TIM(RC_REPLAYSECS,           ReplaySecs),
 #endif
      PARSE_SET(RC_REUSE_TEMPFILES,      LYReuseTempfiles),
