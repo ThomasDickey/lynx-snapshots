@@ -1240,7 +1240,7 @@ fi;
 
 PACKAGE=lynx
 # $Format: "VERSION=$ProjectVersion$"$
-VERSION=2.8.8dev.1
+VERSION=2.8.8dev.2
 
 echo "$as_me:1245: checking for DESTDIR" >&5
 echo $ECHO_N "checking for DESTDIR... $ECHO_C" >&6
