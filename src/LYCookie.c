@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYCookie.c,v 1.96 2009/11/24 10:48:33 tom Exp $
+ * $LynxId: LYCookie.c,v 1.97 2009/11/25 01:26:49 tom Exp $
  *
  *			       Lynx Cookie Support		   LYCookie.c
  *			       ===================
@@ -1760,17 +1760,28 @@ void LYSetCookie(const char *SetCookie,
     } else if (isHTTPS_URL(address)) {
 	port = 443;
     }
-    if (((path = HTParse(address, "",
-			 PARSE_PATH | PARSE_PUNCTUATION)) != NULL) &&
-	(ptr = strrchr(path, '/')) != NULL) {
-	if (ptr == path) {
-	    ++ptr;		/* Leave a single '/' alone */
+
+    /*
+     * Get the path from the request URI.
+     */
+    if ((path = HTParse(address, "", PARSE_PATH | PARSE_PUNCTUATION)) != NULL) {
+	/*
+	 * Trim off any parameters to provide something that we can compare
+	 * against the cookie's path for verifying if it has the proper prefix.
+	 */
+	if ((ptr = strchr(path, '?')) != NULL) {
+	    CTrace((tfp, "discarding params \"%s\" in request URI\n", ptr));
+	    *ptr = '\0';
 	}
-	if (*ptr != '\0') {
-	    CTrace((tfp, "discarding \"%s\" in cookie-path\n", ptr));
+	/* trim a trailing slash, unless we have only a "/" */
+	if ((ptr = strrchr(path, '/')) != NULL &&
+	    (ptr != path) &&
+	    ptr[1] == '\0') {
+	    CTrace((tfp, "discarding trailing \"/\" in request URI\n"));
 	    *ptr = '\0';
 	}
     }
+
     if (isEmpty(SetCookie) &&
 	isEmpty(SetCookie2)) {
 	/*
