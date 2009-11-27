@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTML.c,v 1.132 2009/11/21 17:05:33 Bela.Lubkin Exp $
+ * $LynxId: HTML.c,v 1.133 2009/11/27 12:47:31 tom Exp $
  *
  *		Structured stream to Rich hypertext converter
  *		============================================
@@ -5542,7 +5542,7 @@ static int HTML_start_element(HTStructured * me, int element_number,
 	if (me->skip_stack > 0) {
 	    CTRACE((tfp,
 		    "HTML:begin_element: internal call (level %d), leaving on stack - `%s'\n",
-		    me->skip_stack, NONNULL(me->sp->style->name)));
+		    me->skip_stack, NONNULL(GetHTStyleName(me->sp->style))));
 	    me->skip_stack--;
 	    return status;
 	}
@@ -5560,7 +5560,7 @@ static int HTML_start_element(HTStructured * me, int element_number,
 	CTRACE((tfp,
 		"HTML:begin_element[%d]: adding style to stack - %s (%s)\n",
 		(int) STACKLEVEL(me),
-		NONNULL(me->new_style->name),
+		NONNULL(GetHTStyleName(me->new_style)),
 		HTML_dtd.tags[ElementNumber].name));
 	(me->sp)--;
 	me->sp[0].style = me->new_style;	/* Stack new style */
@@ -5712,7 +5712,7 @@ static int HTML_end_element(HTStructured * me, int element_number,
 	    CTRACE2(TRACE_STYLE,
 		    (tfp,
 		     "HTML:end_element: Internal call (level %d), leaving on stack - %s\n",
-		     me->skip_stack, NONNULL(me->sp->style->name)));
+		     me->skip_stack, NONNULL(GetHTStyleName(me->sp->style))));
 	    me->skip_stack--;
 	} else if (element_number == HTML_OBJECT &&
 		   me->sp[0].tag_number != HTML_OBJECT &&
@@ -5730,7 +5730,7 @@ static int HTML_end_element(HTStructured * me, int element_number,
 		     (int) STACKLEVEL(me),
 		     "Special OBJECT handling", me->objects_mixed_open,
 		     "leaving on stack",
-		     NONNULL(me->sp->style->name)));
+		     NONNULL(GetHTStyleName(me->sp->style))));
 	    me->objects_mixed_open--;
 	} else if (me->stack_overrun == TRUE &&
 		   element_number != me->sp[0].tag_number) {
@@ -5789,7 +5789,7 @@ static int HTML_end_element(HTStructured * me, int element_number,
 			     "Special OBJECT->FIG handling",
 			     me->objects_figged_open,
 			     "treating as end FIG",
-			     NONNULL(me->sp->style->name)));
+			     NONNULL(GetHTStyleName(me->sp->style))));
 		    me->objects_figged_open--;
 		    element_number = HTML_FIG;
 		}
@@ -5799,7 +5799,7 @@ static int HTML_end_element(HTStructured * me, int element_number,
 		    (tfp,
 		     "HTML:end_element[%d]: Popped style off stack - %s\n",
 		     (int) STACKLEVEL(me),
-		     NONNULL(me->sp->style->name)));
+		     NONNULL(GetHTStyleName(me->sp->style))));
 	} else {
 	    CTRACE2(TRACE_STYLE, (tfp,
 				  "Stack underflow error!  Tried to pop off more styles than exist in stack\n"));
@@ -7396,7 +7396,7 @@ static void HTML_free(HTStructured * me)
     if (me->target) {
 	(*me->targetClass._free) (me->target);
     }
-    if (me->sp && me->sp->style && me->sp->style->name) {
+    if (me->sp && me->sp->style && GetHTStyleName(me->sp->style)) {
 	if (me->sp->style->id == ST_DivCenter ||
 	    me->sp->style->id == ST_HeadingCenter ||
 	    me->sp->style->id == ST_Heading1) {
@@ -7481,7 +7481,7 @@ static void HTML_abort(HTStructured * me, HTError e)
     if (me->target) {
 	(*me->targetClass._abort) (me->target, e);
     }
-    if (me->sp && me->sp->style && me->sp->style->name) {
+    if (me->sp && me->sp->style && GetHTStyleName(me->sp->style)) {
 	if (me->sp->style->id == ST_DivCenter ||
 	    me->sp->style->id == ST_HeadingCenter ||
 	    me->sp->style->id == ST_Heading1) {

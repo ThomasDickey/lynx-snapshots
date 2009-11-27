@@ -1,4 +1,4 @@
-/* $LynxId: LYCurses.h,v 1.81 2009/11/21 14:40:20 Bake.Timmons Exp $ */
+/* $LynxId: LYCurses.h,v 1.83 2009/11/27 12:58:31 tom Exp $ */
 #ifndef LYCURSES_H
 #define LYCURSES_H
 
@@ -488,7 +488,7 @@ extern "C" {
 #if defined(USE_COLOR_STYLE)
     extern void curses_css(char *name, int dir);
     extern void curses_style(int style, int dir);
-    extern void setHashStyle(int style, int color, int cattr, int mono, char *element);
+    extern void setHashStyle(int style, int color, int cattr, int mono, const char *element);
     extern void setStyle(int style, int color, int cattr, int mono);
     extern void wcurses_css(WINDOW * win, char *name, int dir);
     extern void curses_w_style(WINDOW * win, int style, int dir);
@@ -629,7 +629,7 @@ extern "C" {
 
 #else				/* Not VMS: */
 
-    extern int string_to_attr(char *name);
+    extern int string_to_attr(const char *name);
 
 /*
  *  For Unix FANCY_FANCY curses we interpose

@@ -1,4 +1,4 @@
-/* $LynxId: LYrcFile.c,v 1.81 2009/06/07 17:11:00 tom Exp $ */
+/* $LynxId: LYrcFile.c,v 1.82 2009/11/27 11:15:54 tom Exp $ */
 #include <HTUtils.h>
 #include <HTFTP.h>
 #include <LYUtils.h>
@@ -178,7 +178,7 @@ const char *LYputEnum(Config_Enum * table, int value)
     return "?";
 }
 
-BOOL LYgetEnum(Config_Enum * table, char *name,
+BOOL LYgetEnum(Config_Enum * table, const char *name,
 	       int *result)
 {
     Config_Enum *found = 0;

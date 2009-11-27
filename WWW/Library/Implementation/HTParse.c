@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTParse.c,v 1.53 2009/09/06 18:18:06 tom Exp $
+ * $LynxId: HTParse.c,v 1.54 2009/11/27 13:11:30 tom Exp $
  *
  *		Parse HyperText Document Address		HTParse.c
  *		================================
@@ -271,9 +271,9 @@ static void convert_to_idna(char *host)
 		int hi = hex_decode(*src++);
 		int lo = hex_decode(*src++);
 
-		*dst = (hi << 4) | lo;
+		*dst = (char) ((hi << 4) | lo);
 	    } else {
-		*dst = ch;
+		*dst = (char) ch;
 	    }
 	}
 	*dst = '\0';

@@ -1,7 +1,10 @@
--- $LynxId: CHANGES,v 1.460 2009/11/25 10:31:39 tom Exp $
+-- $LynxId: CHANGES,v 1.461 2009/11/27 15:27:35 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
+
+2009-12-?? (2.8.8dev.3)
+* fix most gcc writable-strings warnings -TD
 
 2009-11-25 (2.8.8dev.2)
 * modify trimming of URI in LYSetCookie() to eliminate trimming of final leaf
