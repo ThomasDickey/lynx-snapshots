@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYReadCFG.c,v 1.142 2009/11/21 16:32:23 tom Exp $
+ * $LynxId: LYReadCFG.c,v 1.145 2009/11/27 12:52:37 tom Exp $
  */
 #ifndef NO_RULES
 #include <HTRules.h>
@@ -318,7 +318,7 @@ BOOL default_color_reset = FALSE;
 /*
  * Validator for COLOR fields.
  */
-int check_color(char *color,
+int check_color(const char *color,
 		int the_default)
 {
     int i;
@@ -871,8 +871,8 @@ static int status_buffer_size_fun(char *value)
 
 static int suffix_fun(char *value)
 {
-    char *mime_type, *p;
-    char *encoding = NULL;
+    char *mime_type, *p, *parsed;
+    const char *encoding = NULL;
     char *sq = NULL;
     char *description = NULL;
     double q = 1.0;
@@ -885,9 +885,9 @@ static int suffix_fun(char *value)
 
     *mime_type++ = '\0';
     if (*mime_type) {
-	if ((encoding = strchr(mime_type, ':')) != NULL) {
-	    *encoding++ = '\0';
-	    if ((sq = strchr(encoding, ':')) != NULL) {
+	if ((parsed = strchr(mime_type, ':')) != NULL) {
+	    *parsed++ = '\0';
+	    if ((sq = strchr(parsed, ':')) != NULL) {
 		*sq++ = '\0';
 		if ((description = strchr(sq, ':')) != NULL) {
 		    *description++ = '\0';
@@ -899,11 +899,12 @@ static int suffix_fun(char *value)
 		if (!*sq)
 		    sq = NULL;
 	    }
-	    LYRemoveBlanks(encoding);
-	    LYLowerCase(encoding);
-	    if (!*encoding)
-		encoding = NULL;
+	    LYRemoveBlanks(parsed);
+	    LYLowerCase(parsed);
+	    if (!*parsed)
+		parsed = NULL;
 	}
+	encoding = parsed;
     }
 
     LYRemoveBlanks(mime_type);
@@ -1679,7 +1680,7 @@ void free_lynx_cfg(void)
 #endif
 }
 
-static Config_Type *lookup_config(char *name)
+static Config_Type *lookup_config(const char *name)
 {
     Config_Type *tbl = Config_Table;
     char ch = (char) TOUPPER(*name);
@@ -1765,12 +1766,13 @@ typedef BOOL (optidx_set_t)[NOPTS_];
  * For simple (boolean, string, integer, time) values, set the corresponding
  * configuration variable.
  */
-void LYSetConfigValue(char *name,
+void LYSetConfigValue(const char *name,
 		      char *value)
 {
     Config_Type *tbl = lookup_config(name);
     ParseUnionPtr q = ParseUnionOf(tbl);
-    char *temp = 0;
+    char *temp_name = 0;
+    char *temp_value = 0;
 
     switch (tbl->type) {
     case CONF_BOOL:
@@ -1815,21 +1817,24 @@ void LYSetConfigValue(char *name,
     case CONF_ENV:
     case CONF_ENV2:
 
-	if (tbl->type == CONF_ENV)
-	    LYLowerCase(name);
-	else
-	    LYUpperCase(name);
+	if (StrAllocCopy(temp_name, name)) {
+	    if (tbl->type == CONF_ENV)
+		LYLowerCase(temp_name);
+	    else
+		LYUpperCase(temp_name);
 
-	if (LYGetEnv(name) == 0) {
+	    if (LYGetEnv(temp_name) == 0) {
 #ifdef VMS
-	    Define_VMSLogical(name, value);
+		Define_VMSLogical(temp_name, value);
 #else
-	    if (q->str_value == 0)
-		q->str_value = typecalloc(char *);
+		if (q->str_value == 0)
+		    q->str_value = typecalloc(char *);
 
-	    HTSprintf0(q->str_value, "%s=%s", name, value);
-	    putenv(*(q->str_value));
+		HTSprintf0(q->str_value, "%s=%s", temp_name, value);
+		putenv(*(q->str_value));
 #endif
+	    }
+	    FREE(temp_name);
 	}
 	break;
     case CONF_ADD_ITEM:
@@ -1856,8 +1861,8 @@ void LYSetConfigValue(char *name,
 #endif
 
     case CONF_PRG:
-	if (StrAllocCopy(temp, value))
-	    HTSetProgramPath((ProgramPaths) (q->def_value), temp);
+	if (StrAllocCopy(temp_value, value))
+	    HTSetProgramPath((ProgramPaths) (q->def_value), temp_value);
 	break;
 
     default:

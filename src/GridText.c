@@ -1,5 +1,5 @@
 /*
- * $LynxId: GridText.c,v 1.174 2009/11/21 17:05:33 Bela.Lubkin Exp $
+ * $LynxId: GridText.c,v 1.176 2009/11/27 13:18:18 tom Exp $
  *
  *		Character grid hypertext object
  *		===============================
@@ -605,7 +605,7 @@ static int utfxtra_on_this_line = 0;	/* num of UTF-8 extra bytes in line,
 #endif
 
 static HTStyle default_style =
-{0, "(Unstyled)", 0, "",
+{0, NULL, "(Unstyled)", 0, NULL, "",
  (HTFont) 0, 1, HT_BLACK, 0, 0,
  0, 0, 0, HT_LEFT, 1, 0, 0,
  NO, NO, 0, 0, 0};
@@ -3582,7 +3582,7 @@ void HText_setStyle(HText *text, HTStyle *style)
     after = text->style->spaceAfter;
     before = style->spaceBefore;
 
-    CTRACE((tfp, "GridText: Change to style %s\n", style->name));
+    CTRACE((tfp, "GridText: Change to style %s\n", GetHTStyleName(style)));
 
     blank_lines(text, ((after > before) ? after : before));
 

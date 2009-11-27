@@ -1,4 +1,4 @@
-/* $LynxId: LYCurses.c,v 1.145 2009/11/21 17:05:33 Bela.Lubkin Exp $ */
+/* $LynxId: LYCurses.c,v 1.147 2009/11/27 12:58:21 tom Exp $ */
 #include <HTUtils.h>
 #include <HTAlert.h>
 
@@ -242,7 +242,7 @@ static struct {
 };
 /* *INDENT-ON* */
 
-int string_to_attr(char *name)
+int string_to_attr(const char *name)
 {
     unsigned i;
 
@@ -397,7 +397,7 @@ void setHashStyle(int style,
 		  int color,
 		  int cattr,
 		  int mono,
-		  char *element)
+		  const char *element)
 {
     bucket *ds = &hashStyles[style];
 

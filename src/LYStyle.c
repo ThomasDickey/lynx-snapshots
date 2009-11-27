@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYStyle.c,v 1.64 2009/01/01 23:06:42 tom Exp $
+ * $LynxId: LYStyle.c,v 1.66 2009/11/27 14:39:27 tom Exp $
  *
  * character level styles for Lynx
  * (c) 1996 Rob Partington -- donated to the Lyncei (if they want it :-)
@@ -129,40 +129,46 @@ static char *TrimLowercase(char *buffer)
 /*
  * Parse a string containing a combination of video attributes and color.
  */
-static void parse_either(char *attrs,
+static void parse_either(const char *attrs,
 			 int dft_color,
 			 int *monop,
 			 int *colorp)
 {
     int value;
+    char *temp_attrs = NULL;
 
-    while (*attrs != '\0') {
-	char *next = strchr(attrs, '+');
-	char save = (char) ((next != NULL) ? *next : '\0');
+    if (StrAllocCopy(temp_attrs, attrs) != NULL) {
+	char *to_free = temp_attrs;
 
-	if (next == NULL)
-	    next = attrs + strlen(attrs);
+	while (*temp_attrs != '\0') {
+	    char *next = strchr(temp_attrs, '+');
+	    char save = (char) ((next != NULL) ? *next : '\0');
 
-	if (save != 0)		/* attrs might be a constant string */
-	    *next = '\0';
-	if ((value = string_to_attr(attrs)) != 0)
-	    *monop |= value;
-	else if (colorp != 0
-		 && (value = check_color(attrs, dft_color)) != ERR_COLOR)
-	    *colorp = value;
+	    if (next == NULL)
+		next = temp_attrs + strlen(temp_attrs);
 
-	attrs = next;
-	if (save != '\0')
-	    *attrs++ = save;
+	    if (save != 0)
+		*next = '\0';
+	    if ((value = string_to_attr(temp_attrs)) != 0)
+		*monop |= value;
+	    else if (colorp != 0
+		     && (value = check_color(temp_attrs, dft_color)) != ERR_COLOR)
+		*colorp = value;
+
+	    temp_attrs = next;
+	    if (save != '\0')
+		*temp_attrs++ = save;
+	}
+	FREE(to_free);
     }
 }
 
 /* icky parsing of the style options */
-static void parse_attributes(char *mono,
-			     char *fg,
-			     char *bg,
+static void parse_attributes(const char *mono,
+			     const char *fg,
+			     const char *bg,
 			     int style,
-			     char *element)
+			     const char *element)
 {
     int mA = A_NORMAL;
     int fA = default_fg;
@@ -259,7 +265,7 @@ static void parse_style(char *param)
 {
     /* *INDENT-OFF* */
     static struct {
-	char *name;
+	const char *name;
 	int style;
 	int *set_hash;
     } table[] = {
@@ -298,7 +304,8 @@ static void parse_style(char *param)
 
     char *buffer = 0;
     char *tmp = 0;
-    char *element, *mono, *fg, *bg;
+    char *element, *mono;
+    const char *fg, *bg;
 
     if (param == 0)
 	return;

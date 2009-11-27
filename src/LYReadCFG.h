@@ -1,3 +1,6 @@
+/*
+ * $LynxId: LYReadCFG.h,v 1.23 2009/11/27 12:52:34 tom Exp $
+ */
 #ifndef LYREADCFG_H
 #define LYREADCFG_H
 
@@ -41,7 +44,7 @@ extern "C" {
     extern int default_bg;
     extern BOOL default_color_reset;
 
-    extern int check_color(char *color, int the_default);
+    extern int check_color(const char *color, int the_default);
     extern const char *lookup_color(int code);
 #endif
 
@@ -61,7 +64,7 @@ extern "C" {
 						    list_ptr,
 						    char *number);
     extern void reload_read_cfg(void);	/* implemented in LYMain.c */
-    extern void LYSetConfigValue(char *name, char *value);
+    extern void LYSetConfigValue(const char *name, char *value);
 
 #ifdef __cplusplus
 }
