@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYBookmark.c,v 1.62 2009/01/02 00:01:00 tom Exp $
+ * $LynxId: LYBookmark.c,v 1.63 2010/01/13 01:35:24 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTAlert.h>
@@ -496,7 +496,7 @@ void remove_bookmark_link(int cur,
      */
     if (stat(filename_buffer, &stat_buf) == 0) {
 	regular = (BOOLEAN) (S_ISREG(stat_buf.st_mode) && stat_buf.st_nlink == 1);
-	mode = ((stat_buf.st_mode & 0777) | 0600);	/* make it writable */
+	mode = ((stat_buf.st_mode & HIDE_CHMOD) | 0600);	/* make it writable */
 	(void) chmod(newfile, mode);
 	if ((nfp = LYReopenTemp(newfile)) == NULL) {
 	    (void) LYCloseInput(fp);
