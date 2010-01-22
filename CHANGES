@@ -1,12 +1,18 @@
--- $LynxId: CHANGES,v 1.462 2010/01/13 09:23:19 tom Exp $
+-- $LynxId: CHANGES,v 1.464 2010/01/22 10:26:02 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
 2010-01-?? (2.8.8dev.3)
+* fix a possible conflict between CF_HEADER_PATH and CF_LIBRARY_PATH by setting
+  their respective target variables, not appending -TD
+* improve configure macro CF_XOPEN_SOURCE by removing rather than undefining
+  preexisting symbols as they are added to the definitions -TD
+* add configure check for -lnetwork, from tin
 * when renaming/copying a bookmark file, e.g., to delete a bookmark, modify
   its permissions for compatibility with IsOurFile() (Redhat #486070) -TD
 * fix most gcc writable-strings warnings -TD
+* update config.guess (2009-12-30), config.sub (2009-12-31)
 
 2009-11-25 (2.8.8dev.2)
 * modify trimming of URI in LYSetCookie() to eliminate trimming of final leaf
