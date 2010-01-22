@@ -1,4 +1,4 @@
-# $LynxId: makefile.in,v 1.59 2009/03/09 22:43:29 Doug.Kaufman Exp $
+# $LynxId: makefile.in,v 1.60 2010/01/22 10:28:46 tom Exp $
 # template-makefile for Lynx src directory
 
 SHELL		= @CONFIG_SHELL@
@@ -91,11 +91,11 @@ all: lynx$x
 
 # yacc builds .c in target directory, not $(srcdir)
 .c$o:
-@RULE_CC@
+	@RULE_CC@
 	@ECHO_CC@$(CC) $(CC_OPTS) -c $<
 
 .c.i:
-@RULE_CC@
+	@RULE_CC@
 	@ECHO_CC@$(CPP) -C $(CPP_OPTS) $< >$@
 
 lynx$x:   message do_chartrans_stuff $(top_builddir)/LYHelp.h $(OBJS) $(WWWLIB)

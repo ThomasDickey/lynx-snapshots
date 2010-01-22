@@ -1,4 +1,4 @@
-# $LynxId: makefile.in,v 1.33 2007/05/23 00:57:49 tom Exp $
+# $LynxId: makefile.in,v 1.34 2010/01/22 10:28:46 tom Exp $
 #
 # Makefile for the makeuctb and unicode tables.
 #
@@ -121,11 +121,11 @@ makeuctb$o : $(srcdir)/UCkd.h $(srcdir)/makeuctb.c
 .SUFFIXES : $o .tbl .i .h
 
 .c$o:
-@RULE_CC@
+	@RULE_CC@
 	@ECHO_CC@$(BUILD_CC) $(CC_OPTS) -c $(srcdir)/$*.c
 
 .c.i:
-@RULE_CC@
+	@RULE_CC@
 	@ECHO_CC@$(BUILD_CPP) -C $(CPP_OPTS) $(srcdir)/$*.c >$@
 
 .tbl.h:
