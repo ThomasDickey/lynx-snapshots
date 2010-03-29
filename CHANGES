@@ -1,9 +1,15 @@
--- $LynxId: CHANGES,v 1.464 2010/01/22 10:26:02 tom Exp $
+-- $LynxId: CHANGES,v 1.467 2010/03/28 21:02:11 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2010-01-?? (2.8.8dev.3)
+2010-03-28 (2.8.8dev.3)
+* build-fixes for OpenSolaris aka Solaris 11 -TD
+* add/use CF_RPATH_HACK, for constructing rpath references to libraries in
+  nonstandard locations -TD
+* improve configure macros CF_CURSES_TERM_H and CF_FIND_LINKAGE -TD
+* add synopsis entries for -get_data and -post_data options to lynx.man
+  (report by Dallas E. Legan II) -TD
 * fix a possible conflict between CF_HEADER_PATH and CF_LIBRARY_PATH by setting
   their respective target variables, not appending -TD
 * improve configure macro CF_XOPEN_SOURCE by removing rather than undefining

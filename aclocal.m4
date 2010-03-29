@@ -1,11 +1,11 @@
-dnl $LynxId: aclocal.m4,v 1.146 2010/01/22 10:28:00 tom Exp $
+dnl $LynxId: aclocal.m4,v 1.150 2010/03/28 20:29:47 tom Exp $
 dnl Macros for auto-configure script.
 dnl by T.E.Dickey <dickey@invisible-island.net>
 dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
 dnl and Philippe De Muyter <phdm@macqel.be>
 dnl
 dnl Created: 1997/1/28
-dnl Updated: 2010/1/22
+dnl Updated: 2010/3/27
 dnl
 dnl The autoconf used in Lynx development is GNU autoconf 2.13 or 2.52, patched
 dnl by Thomas Dickey.  See your local GNU archives, and this URL:
@@ -13,7 +13,7 @@ dnl http://invisible-island.net/autoconf/autoconf.html
 dnl
 dnl ---------------------------------------------------------------------------
 dnl
-dnl Copyright 1997-2008,2009 by Thomas E. Dickey
+dnl Copyright 1997-2009,2010 by Thomas E. Dickey
 dnl
 dnl Permission to use, copy, modify, and distribute this software and its
 dnl documentation for any purpose and without fee is hereby granted,
@@ -1755,7 +1755,7 @@ fi
 
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_CURSES_TERM_H version: 6 updated: 2003/11/06 19:59:57
+dnl CF_CURSES_TERM_H version: 7 updated: 2010/01/24 18:40:06
 dnl ----------------
 dnl SVr4 curses should have term.h as well (where it puts the definitions of
 dnl the low-level interface).  This may not be true in old/broken implementations,
@@ -1763,9 +1763,10 @@ dnl as well as in misconfigured systems (e.g., gcc configured for Solaris 2.4
 dnl running with Solaris 2.5.1).
 AC_DEFUN([CF_CURSES_TERM_H],
 [
+AC_REQUIRE([CF_CURSES_CPPFLAGS])dnl
+
 AC_CACHE_CHECK(for term.h, cf_cv_term_header,[
 
-AC_REQUIRE([CF_CURSES_CPPFLAGS])dnl
 # If we found <ncurses/curses.h>, look for <ncurses/term.h>, but always look
 # for <term.h> if we do not find the variant.
 for cf_header in \
@@ -1780,13 +1781,34 @@ do
 	 break],
 	[cf_cv_term_header=no])
 done
+
+case $cf_cv_term_header in #(vi
+no)
+	# If curses is ncurses, some packagers still mess it up by trying to make
+	# us use GNU termcap.  This handles the most common case.
+	for cf_header in ncurses/term.h ncursesw/term.h
+	do
+		AC_TRY_COMPILE([
+#include <${cf_cv_ncurses_header-curses.h}>
+#ifdef NCURSES_VERSION
+#include <${cf_header}>
+#else
+make an error
+#endif],
+			[WINDOW *x],
+			[cf_cv_term_header=$cf_header
+			 break],
+			[cf_cv_term_header=no])
+	done
+	;;
+esac
 ])
 
 case $cf_cv_term_header in #(vi
 term.h) #(vi
 	AC_DEFINE(HAVE_TERM_H)
 	;;
-ncurses/term.h)
+ncurses/term.h) #(vi
 	AC_DEFINE(HAVE_NCURSES_TERM_H)
 	;;
 ncursesw/term.h)
@@ -2155,7 +2177,7 @@ fi
 ])
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_FIND_LINKAGE version: 13 updated: 2008/12/24 07:59:55
+dnl CF_FIND_LINKAGE version: 14 updated: 2010/03/21 14:34:38
 dnl ---------------
 dnl Find a library (specifically the linkage used in the code fragment),
 dnl searching for it if it is not already in the library path.
@@ -2184,9 +2206,18 @@ cf_cv_library_path_$3=
 
 CF_MSG_LOG([Starting [FIND_LINKAGE]($3,$6)])
 
-AC_TRY_LINK([$1],[$2],
-    cf_cv_find_linkage_$3=yes,[
+AC_TRY_LINK([$1],[$2],[
+	cf_cv_find_linkage_$3=yes
+],[
+
+cf_save_LIBS="$LIBS"
+LIBS="-l$3 $7 $cf_save_LIBS"
+
+AC_TRY_LINK([$1],[$2],[
+	cf_cv_find_linkage_$3=yes
+],[
     cf_cv_find_linkage_$3=no
+	LIBS="$cf_save_LIBS"
 
     CF_VERBOSE(find linkage for $3 library)
     CF_MSG_LOG([Searching for headers in [FIND_LINKAGE]($3,$6)])
@@ -2256,6 +2287,7 @@ AC_TRY_LINK([$1],[$2],
       cf_cv_find_linkage_$3=no
     fi
     ],$7)
+])
 
 if test "$cf_cv_find_linkage_$3" = yes ; then
 ifelse([$4],,[
@@ -3071,7 +3103,61 @@ AC_TRY_COMPILE([
 test $cf_cv_path_lastlog != no && AC_DEFINE(USE_LASTLOG)
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_LIBRARY_PATH version: 8 updated: 2008/12/07 19:38:31
+dnl CF_LD_RPATH_OPT version: 2 updated: 2010/03/27 19:27:54
+dnl ---------------
+dnl For the given system and compiler, find the compiler flags to pass to the
+dnl loader to use the "rpath" feature.
+AC_DEFUN([CF_LD_RPATH_OPT],
+[
+AC_REQUIRE([CF_CHECK_CACHE])
+
+LD_RPATH_OPT=
+AC_MSG_CHECKING(for an rpath option)
+case $cf_cv_system_name in #(vi
+irix*) #(vi
+	if test "$GCC" = yes; then
+		LD_RPATH_OPT="-Wl,-rpath,"
+	else
+		LD_RPATH_OPT="-rpath "
+	fi
+	;;
+linux*|gnu*|k*bsd*-gnu) #(vi
+	LD_RPATH_OPT="-Wl,-rpath,"
+	;;
+openbsd[[2-9]].*) #(vi
+	LD_RPATH_OPT="-Wl,-rpath,"
+	;;
+freebsd*) #(vi
+	LD_RPATH_OPT="-rpath "
+	;;
+netbsd*) #(vi
+	LD_RPATH_OPT="-Wl,-rpath,"
+	;;
+osf*|mls+*) #(vi
+	LD_RPATH_OPT="-rpath "
+	;;
+solaris2*) #(vi
+	LD_RPATH_OPT="-R"
+	;;
+*)
+	;;
+esac
+AC_MSG_RESULT($LD_RPATH_OPT)
+
+case "x$LD_RPATH_OPT" in #(vi
+x-R*)
+	AC_MSG_CHECKING(if we need a space after rpath option)
+	cf_save_LIBS="$LIBS"
+	LIBS="${LD_RPATH_OPT}$libdir $LIBS"
+	AC_TRY_LINK(, , cf_rpath_space=no, cf_rpath_space=yes)
+	LIBS="$cf_save_LIBS"
+	AC_MSG_RESULT($cf_rpath_space)
+	test "$cf_rpath_space" = yes && LD_RPATH_OPT="$LD_RPATH_OPT "
+	;;
+esac
+])dnl
+dnl ---------------------------------------------------------------------------
+dnl CF_LIBRARY_PATH version: 9 updated: 2010/03/28 12:52:50
 dnl ---------------
 dnl Construct a search-list of directories for a nonstandard library-file
 dnl
@@ -3080,6 +3166,7 @@ dnl	$1 = the variable to return as result
 dnl	$2 = the package name
 AC_DEFUN([CF_LIBRARY_PATH],
 [
+$1=
 cf_library_path_list=""
 if test -n "${LDFLAGS}${LIBS}" ; then
 	for cf_library_path in $LDFLAGS $LIBS
@@ -4138,6 +4225,56 @@ define([CF_REMOVE_DEFINE],
 $1=`echo "$2" | \
 	sed	-e 's/-[[UD]]'"$3"'\(=[[^ 	]]*\)\?[[ 	]]/ /g' \
 		-e 's/-[[UD]]'"$3"'\(=[[^ 	]]*\)\?[$]//g'`
+])dnl
+dnl ---------------------------------------------------------------------------
+dnl CF_RPATH_HACK version: 6 updated: 2010/03/27 20:52:14
+dnl -------------
+AC_DEFUN([CF_RPATH_HACK],
+[
+AC_REQUIRE([CF_LD_RPATH_OPT])
+AC_MSG_CHECKING(for updated LDFLAGS)
+if test -n "$LD_RPATH_OPT" ; then
+	AC_MSG_RESULT(maybe)
+
+	CF_VERBOSE(...checking EXTRA_LDFLAGS $EXTRA_LDFLAGS)
+
+	CF_RPATH_HACK_2(LDFLAGS)
+	CF_RPATH_HACK_2(LIBS)
+
+	CF_VERBOSE(...checked EXTRA_LDFLAGS $EXTRA_LDFLAGS)
+fi
+])dnl
+dnl ---------------------------------------------------------------------------
+dnl CF_RPATH_HACK_2 version: 2 updated: 2010/03/28 10:14:24
+dnl ---------------
+dnl Do one set of substitutions for CF_RPATH_HACK, adding an rpath option to
+dnl EXTRA_LDFLAGS for each -L option found.
+dnl
+dnl $1 = variable name to update.  The LDFLAGS variable should be the only one,
+dnl      but LIBS often has misplaced -L options.
+AC_DEFUN([CF_RPATH_HACK_2],
+[
+CF_VERBOSE(...checking $1 [$]$1)
+
+cf_rpath_dst=
+for cf_rpath_src in [$]$1
+do
+	case $cf_rpath_src in #(vi
+	-L*) #(vi
+		if test "$LD_RPATH_OPT" = "-R " ; then
+			cf_rpath_tmp=`echo "$cf_rpath_src" |sed -e 's%-L%-R %'`
+		else
+			cf_rpath_tmp=`echo "$cf_rpath_src" |sed -e s%-L%$LD_RPATH_OPT%`
+		fi
+		CF_VERBOSE(...Filter $cf_rpath_src ->$cf_rpath_tmp)
+		EXTRA_LDFLAGS="$cf_rpath_tmp $EXTRA_LDFLAGS"
+		;;
+	esac
+	cf_rpath_dst="$cf_rpath_dst $cf_rpath_src"
+done
+$1=$cf_rpath_dst
+
+CF_VERBOSE(...checked $1 [$]$1)
 ])dnl
 dnl ---------------------------------------------------------------------------
 dnl CF_SET_ERRNO version: 3 updated: 2007/04/28 09:15:55
@@ -5506,7 +5643,7 @@ if test "$with_dmalloc" = yes ; then
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_WITH_IDNA version: 2 updated: 2009/08/27 16:24:24
+dnl CF_WITH_IDNA version: 3 updated: 2010/03/28 12:52:50
 dnl ------------
 dnl Check for libidn, use it if found.
 dnl
@@ -5522,6 +5659,8 @@ AC_DEFUN([CF_WITH_IDNA],[
     int code = idna_to_ascii_8z("name", &output, IDNA_USE_STD3_ASCII_RULES);
 ],idn,[
 	AC_DEFINE(USE_IDNA)
+	CF_ADD_INCDIR($cf_cv_header_path_idn)
+	CF_ADD_LIBDIR($cf_cv_library_path_idn)
 	LIBS="-lidn $LIBS"
 ])
 ])dnl
@@ -5590,7 +5729,7 @@ AC_TRY_LINK([
 test $cf_cv_need_xopen_extension = yes && CPPFLAGS="$CPPFLAGS -D_XOPEN_SOURCE_EXTENDED"
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_XOPEN_SOURCE version: 32 updated: 2010/01/09 11:05:50
+dnl CF_XOPEN_SOURCE version: 33 updated: 2010/03/28 15:35:52
 dnl ---------------
 dnl Try to get _XOPEN_SOURCE defined properly that we can use POSIX functions,
 dnl or adapt to the vendor's definitions to get equivalent functionality,
@@ -5653,7 +5792,10 @@ nto-qnx*) #(vi
 sco*) #(vi
 	# setting _XOPEN_SOURCE breaks Lynx on SCO Unix / OpenServer
 	;;
-solaris*) #(vi
+solaris2.1[[0-9]]) #(vi
+	cf_xopen_source="-D__EXTENSIONS__ -D_XOPEN_SOURCE=$cf_XOPEN_SOURCE"
+	;;
+solaris2.[[1-9]]) #(vi
 	cf_xopen_source="-D__EXTENSIONS__"
 	;;
 *)

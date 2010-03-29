@@ -1,4 +1,4 @@
-dnl $LynxId: configure.in,v 1.207 2009/11/25 11:03:24 tom Exp $
+dnl $LynxId: configure.in,v 1.209 2010/03/28 20:57:56 tom Exp $
 dnl
 dnl Process this file with autoconf to produce a configure script.
 dnl
@@ -414,7 +414,7 @@ fi
 fi
 
 dnl --------------------------------------------------------------------------
-CF_XOPEN_SOURCE(600,199506L)
+CF_XOPEN_SOURCE(500,199506L)
 CF_SIGWINCH
 
 dnl Collect tests for compiler options into one place
@@ -1481,6 +1481,9 @@ if test $use_scrollbar != no ; then
 		AC_DEFINE(USE_SCROLLBAR)
 	fi
 fi
+
+# use rpath for libraries in unusual places
+CF_RPATH_HACK
 
 ### Finally, build config.h and the makefiles
 test -z "$CONFIG_SHELL" && CONFIG_SHELL=/bin/sh
