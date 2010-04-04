@@ -1,4 +1,4 @@
-dnl $LynxId: aclocal.m4,v 1.150 2010/03/28 20:29:47 tom Exp $
+dnl $LynxId: aclocal.m4,v 1.153 2010/04/03 23:17:17 tom Exp $
 dnl Macros for auto-configure script.
 dnl by T.E.Dickey <dickey@invisible-island.net>
 dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
@@ -2177,7 +2177,7 @@ fi
 ])
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_FIND_LINKAGE version: 14 updated: 2010/03/21 14:34:38
+dnl CF_FIND_LINKAGE version: 15 updated: 2010/04/03 18:35:33
 dnl ---------------
 dnl Find a library (specifically the linkage used in the code fragment),
 dnl searching for it if it is not already in the library path.
@@ -2215,6 +2215,7 @@ LIBS="-l$3 $7 $cf_save_LIBS"
 
 AC_TRY_LINK([$1],[$2],[
 	cf_cv_find_linkage_$3=yes
+	cf_cv_library_file_$3="-l$3"
 ],[
     cf_cv_find_linkage_$3=no
 	LIBS="$cf_save_LIBS"
@@ -4227,7 +4228,7 @@ $1=`echo "$2" | \
 		-e 's/-[[UD]]'"$3"'\(=[[^ 	]]*\)\?[$]//g'`
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_RPATH_HACK version: 6 updated: 2010/03/27 20:52:14
+dnl CF_RPATH_HACK version: 7 updated: 2010/04/02 20:27:47
 dnl -------------
 AC_DEFUN([CF_RPATH_HACK],
 [
@@ -4243,9 +4244,10 @@ if test -n "$LD_RPATH_OPT" ; then
 
 	CF_VERBOSE(...checked EXTRA_LDFLAGS $EXTRA_LDFLAGS)
 fi
+AC_SUBST(EXTRA_LDFLAGS)
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_RPATH_HACK_2 version: 2 updated: 2010/03/28 10:14:24
+dnl CF_RPATH_HACK_2 version: 3 updated: 2010/04/02 20:27:47
 dnl ---------------
 dnl Do one set of substitutions for CF_RPATH_HACK, adding an rpath option to
 dnl EXTRA_LDFLAGS for each -L option found.
@@ -4275,6 +4277,7 @@ done
 $1=$cf_rpath_dst
 
 CF_VERBOSE(...checked $1 [$]$1)
+AC_SUBST(EXTRA_LDFLAGS)
 ])dnl
 dnl ---------------------------------------------------------------------------
 dnl CF_SET_ERRNO version: 3 updated: 2007/04/28 09:15:55
@@ -4430,18 +4433,20 @@ if test "$cf_cv_sizechange" != no ; then
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_SLANG_CPPFLAGS version: 8 updated: 2008/03/23 14:48:54
+dnl CF_SLANG_CPPFLAGS version: 9 updated: 2010/04/03 15:30:05
 dnl -----------------
 dnl Look for the slang header files in the standard places, adjusting the
 dnl CPPFLAGS variable.
 dnl
+dnl $1 = parameter to search for "slang2" class, e.g., for pkgsrc.
 AC_DEFUN([CF_SLANG_CPPFLAGS],
 [
-AC_CACHE_CHECK(for slang header file,cf_cv_slang_header,[
+AC_CACHE_CHECK(for $1 header file,cf_cv_$1_header,[
+	cf_cv_$1_header=no
 	AC_TRY_COMPILE([#include <slang.h>],
 	[printf("%s\n", SLANG_VERSION)],
-	[cf_cv_slang_header=predefined],[
-	CF_HEADER_PATH(cf_search,slang)
+	[cf_cv_$1_header=predefined],[
+	CF_HEADER_PATH(cf_search,$1)
 	for cf_incdir in $cf_search
 	do
 		for cf_header in \
@@ -4449,50 +4454,35 @@ AC_CACHE_CHECK(for slang header file,cf_cv_slang_header,[
 		do
 			echo trying $cf_incdir/$cf_header 1>&AC_FD_CC
 			if egrep "SLANG_VERSION" $cf_incdir/$cf_header 1>&AC_FD_CC 2>&1; then
-				cf_cv_slang_header=$cf_incdir/$cf_header
+				cf_cv_$1_header=$cf_incdir/$cf_header
 				break
 			fi
 		done
-		test -n "$cf_cv_slang_header" && break
+		test "$cf_cv_$1_header" != no && break
 	done
-	test -z "$cf_cv_slang_header" && AC_MSG_ERROR(not found)
 	])])
-AC_DEFINE(USE_SLANG)
 
-CF_DIRNAME(cf_incdir,$cf_cv_slang_header)
+if test "x$cf_cv_$1_header" != xno
+then
+	AC_DEFINE(USE_SLANG)
 
-case $cf_cv_slang_header in # (vi
-predefined) # (vi
-	;;
-*)
-	CF_ADD_INCDIR($cf_incdir)
-	;;
-esac
+	CF_DIRNAME(cf_incdir,$cf_cv_$1_header)
 
-# There's an unofficial set of patches for slang that gives it some limited
-# UTF8 capability.  Unfortunately it won't compile unless one defines UTF8.
-AC_CACHE_CHECK(if we must define UTF8,cf_cv_slang_utf8,[
-	AC_TRY_COMPILE([
-#include <slang.h>],
-	[SLtt_get_screen_size()],
-	[cf_cv_slang_utf8=no],
-	[
-	AC_TRY_COMPILE([
-#define UTF8
-#include <slang.h>],
-	[SLtt_get_screen_size()],
-	[cf_cv_slang_utf8=yes],
-	[cf_cv_slang_utf8=unknown])])
-])
-
-if test "$cf_cv_slang_utf8" = yes ; then
-	AC_DEFINE(UTF8)
+	case $cf_cv_$1_header in # (vi
+	predefined) # (vi
+		;;
+	*)
+		CF_ADD_INCDIR($cf_incdir)
+		;;
+	esac
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_SLANG_LIBS version: 7 updated: 2002/09/17 19:03:38
+dnl CF_SLANG_LIBS version: 8 updated: 2010/04/03 15:30:05
 dnl -------------
 dnl Look for the slang library.
+dnl
+dnl $1 = the actual library name, usually "slang"
 AC_DEFUN([CF_SLANG_LIBS],
 [
 cf_slang_LIBS1="$LIBS"
@@ -4507,12 +4497,12 @@ os2*)
 		v_init)
 	;;
 esac
-CF_FIND_LIBRARY(slang,slang,
+CF_FIND_LIBRARY($1,$1,
 	[#include <slang.h>],
 	[SLtt_get_screen_size()],
 	SLtt_get_screen_size)
 cf_slang_LIBS3="$LIBS"
-AC_MSG_CHECKING(if we can link slang without termcap)
+AC_MSG_CHECKING(if we can link $1 without termcap)
 if test -n "`echo $cf_slang_LIBS1 | sed -e 's/ //g'`" ; then
 	cf_exclude=`echo ".$cf_slang_LIBS2" | sed -e "s%$cf_slang_LIBS1%%" -e 's%^.%%'`
 else
@@ -4527,15 +4517,47 @@ AC_MSG_RESULT($cf_result)
 test $cf_result = no && LIBS="$cf_slang_LIBS3"
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_SLANG_UNIX_DEFS version: 3 updated: 2000/05/20 11:59:59
+dnl CF_SLANG_UNIX_DEFS version: 4 updated: 2010/04/03 15:30:05
 dnl ------------------
 dnl Slang's header files rely on some predefined symbols to declare variables
 dnl that we might find useful.  This check is needed, because those symbols
 dnl are generally not available.
 AC_DEFUN([CF_SLANG_UNIX_DEFS],
 [
-AC_REQUIRE([CF_SLANG_CPPFLAGS])
-AC_REQUIRE([CF_SLANG_LIBS])
+
+CF_SLANG_CPPFLAGS(slang)
+if test "x$cf_cv_slang_header" != xno
+then
+	CF_SLANG_LIBS(slang)
+else
+	CF_SLANG_CPPFLAGS(slang2)
+	if test "x$cf_cv_slang2_header" != xno
+	then
+		CF_SLANG_LIBS(slang2)
+	else
+		AC_MSG_ERROR(cannot find slang headers)
+	fi
+fi
+
+# There's an unofficial set of patches for slang that gives it some limited
+# UTF8 capability.  Unfortunately it won't compile unless one defines UTF8.
+AC_CACHE_CHECK(if we must define UTF8,cf_cv_slang_utf8,[
+	AC_TRY_COMPILE([#include <slang.h>],
+	[SLtt_get_screen_size()],
+	[cf_cv_slang_utf8=no],
+	[
+	AC_TRY_COMPILE([
+#define UTF8
+#include <slang.h>],
+	[SLtt_get_screen_size()],
+	[cf_cv_slang_utf8=yes],
+	[cf_cv_slang_utf8=unknown])])
+])
+
+if test "$cf_cv_slang_utf8" = yes ; then
+	AC_DEFINE(UTF8)
+fi
+
 AC_CACHE_CHECK(if we must tell slang this is UNIX,cf_cv_slang_unix,[
 AC_TRY_LINK([#include <slang.h>],
 	[
@@ -5643,7 +5665,7 @@ if test "$with_dmalloc" = yes ; then
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_WITH_IDNA version: 3 updated: 2010/03/28 12:52:50
+dnl CF_WITH_IDNA version: 4 updated: 2010/04/03 18:35:33
 dnl ------------
 dnl Check for libidn, use it if found.
 dnl
@@ -5661,7 +5683,6 @@ AC_DEFUN([CF_WITH_IDNA],[
 	AC_DEFINE(USE_IDNA)
 	CF_ADD_INCDIR($cf_cv_header_path_idn)
 	CF_ADD_LIBDIR($cf_cv_library_path_idn)
-	LIBS="-lidn $LIBS"
 ])
 ])dnl
 dnl ---------------------------------------------------------------------------
