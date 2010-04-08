@@ -1,9 +1,11 @@
--- $LynxId: CHANGES,v 1.467 2010/03/28 21:02:11 tom Exp $
+-- $LynxId: CHANGES,v 1.468 2010/04/07 22:56:00 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2010-03-28 (2.8.8dev.3)
+2010-04-07 (2.8.8dev.3)
+* allow IPv6 addresses without "http://" prefix (Redhat #425879, patch by Kamil
+  Dudka)
 * build-fixes for OpenSolaris aka Solaris 11 -TD
 * add/use CF_RPATH_HACK, for constructing rpath references to libraries in
   nonstandard locations -TD

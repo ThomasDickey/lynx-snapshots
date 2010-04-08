@@ -1,4 +1,4 @@
-# $LynxId: makefile.in,v 1.60 2010/01/22 10:28:46 tom Exp $
+# $LynxId: makefile.in,v 1.61 2010/04/04 22:56:11 tom Exp $
 # template-makefile for Lynx src directory
 
 SHELL		= @CONFIG_SHELL@
@@ -37,7 +37,7 @@ BUILD_EXEEXT	= @BUILD_EXEEXT@
 YACC		= @YACC@
 
 LIBS		= @LIBS@ $(RESOLVLIB) $(WAISLIB) $(SITE_LIBS)
-LDFLAGS		= @LDFLAGS@
+LDFLAGS		= @EXTRA_LDFLAGS@ @LDFLAGS@
 
 # Symbols inherited from the top-level makefile
 RESOLVLIB	= # FIXME: set in parent makefile

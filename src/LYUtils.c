@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYUtils.c,v 1.193 2009/11/22 22:30:06 tom Exp $
+ * $LynxId: LYUtils.c,v 1.194 2010/04/07 22:26:15 Kamil.Dudka Exp $
  */
 #include <HTUtils.h>
 #include <HTTCP.h>
@@ -2283,9 +2283,10 @@ UrlTypes is_url(char *filename)
 	return (result);
 
     /*
-     * Can't be a URL if it lacks a colon.
+     * Can't be a URL if it lacks a colon and if it starts with '[' it's
+     * probably IPv6 adress.
      */
-    if (NULL == strchr(cp, ':'))
+    if (NULL == strchr(cp, ':') || cp[0] == '[')
 	return (result);
 
     /*
@@ -4548,6 +4549,8 @@ BOOLEAN LYExpandHostForURL(char **AllocatedString,
 #ifdef INET6
     struct addrinfo hints, *res;
     int error;
+    char *begin;
+    char *end = NULL;
 #endif /* INET6 */
 
     /*
@@ -4592,7 +4595,7 @@ BOOLEAN LYExpandHostForURL(char **AllocatedString,
      * field after filling in the host field.  - FM
      */
     if ((StrColon = strrchr(Str, ':')) != NULL &&
-	isdigit(UCH(StrColon[1]))) {
+	isdigit(UCH(StrColon[1])) && strchr(StrColon, ']') == NULL) {
 	if (StrColon == Str) {
 	    goto cleanup;
 	}
@@ -4613,10 +4616,20 @@ BOOLEAN LYExpandHostForURL(char **AllocatedString,
 	fprintf(stdout, "%s '%s'%s\r\n", WWW_FIND_MESSAGE, host, FIRST_SEGMENT);
     }
 #ifdef INET6
+    begin = host;
+    if (host[0] == '[' && ((end = strrchr(host, ']')))) {
+	/*
+	 * cut '[' and ']' from the IPv6 address, e.g. [::1]
+	 */
+	begin = host + 1;
+	*end = '\0';
+    }
     memset(&hints, 0, sizeof(hints));
     hints.ai_family = PF_UNSPEC;
     hints.ai_socktype = SOCK_STREAM;
-    error = getaddrinfo(host, "80", &hints, &res);
+    error = getaddrinfo(begin, "80", &hints, &res);
+    if (end)
+	*end = ']';
 
     if (!error && res)
 #else
