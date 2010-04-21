@@ -1,5 +1,5 @@
 /*
- * $LynxId: config.hin,v 1.116 2009/11/21 15:52:17 tom Exp $
+ * $LynxId: config.hin,v 1.117 2010/04/20 22:52:37 tom Exp $
  * vile:cmode
  *
  * The configure script translates "config.hin" into "lynx_cfg.h"
@@ -95,6 +95,7 @@
 #undef HAVE_LIBUTF8_H		/* may be needed for libncursesw */
 #undef HAVE_LIMITS_H
 #undef HAVE_LOCALE_H
+#undef HAVE_LONG_LONG		/* CF_TYPE_LONG_LONG */
 #undef HAVE_LSTAT		/* CF_FUNC_LSTAT */
 #undef HAVE_MALLOC_H		/* AM_GNU_GETTEXT */
 #undef HAVE_MBSTATE_T		/* CF_WIDEC_CURSES */
