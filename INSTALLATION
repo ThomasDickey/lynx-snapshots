@@ -357,6 +357,12 @@ II. Compile instructions -- UNIX
 	completion), as well as the amount of time stalled without any data
 	transferred.
 
+  --disable-rpath-hack
+	The rpath-hack makes it simpler to build programs, particularly with
+	the *BSD ports which may have essential libraries in unusual places. 
+	But it can interfere with building an executable for the base system. 
+	Use this option in that case.
+
   --disable-scrollbar			(define USE_SCROLLBAR)
 	Turn off support for scrollbar on the right-margin of the screen. 
 	If you configure with ncurses, this works with the mouse on xterm,
@@ -1375,4 +1381,4 @@ VIII. Acknowledgment
 
 -- 1999/04/24 - H. Nelson <lynx-admin@irm.nara.kindai.ac.jp>
 -- vile:txtmode
--- $LynxId: INSTALLATION,v 1.110 2009/11/21 16:23:25 tom Exp $
+-- $LynxId: INSTALLATION,v 1.111 2010/04/20 09:44:11 tom Exp $

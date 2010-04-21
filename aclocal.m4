@@ -1,11 +1,11 @@
-dnl $LynxId: aclocal.m4,v 1.153 2010/04/03 23:17:17 tom Exp $
+dnl $LynxId: aclocal.m4,v 1.156 2010/04/20 23:06:24 tom Exp $
 dnl Macros for auto-configure script.
 dnl by T.E.Dickey <dickey@invisible-island.net>
 dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
 dnl and Philippe De Muyter <phdm@macqel.be>
 dnl
 dnl Created: 1997/1/28
-dnl Updated: 2010/3/27
+dnl Updated: 2010/4/20
 dnl
 dnl The autoconf used in Lynx development is GNU autoconf 2.13 or 2.52, patched
 dnl by Thomas Dickey.  See your local GNU archives, and this URL:
@@ -1936,6 +1936,25 @@ AC_SUBST(RULE_CC)
 AC_SUBST(SHOW_CC)
 AC_SUBST(ECHO_CC)
 ])dnl
+dnl ---------------------------------------------------------------------------
+dnl CF_DISABLE_RPATH_HACK version: 1 updated: 2010/04/11 10:54:00
+dnl ---------------------
+dnl The rpath-hack makes it simpler to build programs, particularly with the
+dnl *BSD ports which may have essential libraries in unusual places.  But it
+dnl can interfere with building an executable for the base system.  Use this
+dnl option in that case.
+AC_DEFUN([CF_DISABLE_RPATH_HACK],
+[
+AC_MSG_CHECKING(if rpath should be not be set)
+CF_ARG_DISABLE(rpath-hack,
+	[  --disable-rpath-hack    don't add rpath options for additional libraries],
+	[cf_disable_rpath_hack=yes],
+	[cf_disable_rpath_hack=no])
+AC_MSG_RESULT($cf_disable_rpath_hack)
+if test "$cf_disable_rpath_hack" = no ; then
+	CF_RPATH_HACK
+fi
+])
 dnl ---------------------------------------------------------------------------
 dnl CF_ERRNO version: 5 updated: 1997/11/30 12:44:39
 dnl --------
@@ -4228,7 +4247,7 @@ $1=`echo "$2" | \
 		-e 's/-[[UD]]'"$3"'\(=[[^ 	]]*\)\?[$]//g'`
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_RPATH_HACK version: 7 updated: 2010/04/02 20:27:47
+dnl CF_RPATH_HACK version: 8 updated: 2010/04/17 15:38:58
 dnl -------------
 AC_DEFUN([CF_RPATH_HACK],
 [
@@ -4236,6 +4255,15 @@ AC_REQUIRE([CF_LD_RPATH_OPT])
 AC_MSG_CHECKING(for updated LDFLAGS)
 if test -n "$LD_RPATH_OPT" ; then
 	AC_MSG_RESULT(maybe)
+
+	AC_CHECK_PROGS(cf_ldd_prog,ldd,no)
+	cf_rpath_list="/usr/lib /lib"
+	if test "$cf_ldd_prog" != no
+	then
+AC_TRY_LINK([#include <stdio.h>],
+		[printf("Hello");],
+		[cf_rpath_list=`$cf_ldd_prog conftest$ac_exeext | fgrep / | sed -e 's%^.*[[ 	]]/%/%' -e 's%/[[^/]][[^/]]*$%%' |sort -u`])
+	fi
 
 	CF_VERBOSE(...checking EXTRA_LDFLAGS $EXTRA_LDFLAGS)
 
@@ -4247,10 +4275,12 @@ fi
 AC_SUBST(EXTRA_LDFLAGS)
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_RPATH_HACK_2 version: 3 updated: 2010/04/02 20:27:47
+dnl CF_RPATH_HACK_2 version: 6 updated: 2010/04/17 16:31:24
 dnl ---------------
 dnl Do one set of substitutions for CF_RPATH_HACK, adding an rpath option to
 dnl EXTRA_LDFLAGS for each -L option found.
+dnl
+dnl $cf_rpath_list contains a list of directories to ignore.
 dnl
 dnl $1 = variable name to update.  The LDFLAGS variable should be the only one,
 dnl      but LIBS often has misplaced -L options.
@@ -4263,13 +4293,38 @@ for cf_rpath_src in [$]$1
 do
 	case $cf_rpath_src in #(vi
 	-L*) #(vi
-		if test "$LD_RPATH_OPT" = "-R " ; then
-			cf_rpath_tmp=`echo "$cf_rpath_src" |sed -e 's%-L%-R %'`
-		else
-			cf_rpath_tmp=`echo "$cf_rpath_src" |sed -e s%-L%$LD_RPATH_OPT%`
+
+		# check if this refers to a directory which we will ignore
+		cf_rpath_skip=no
+		if test -n "$cf_rpath_list"
+		then
+			for cf_rpath_item in $cf_rpath_list
+			do
+				if test "x$cf_rpath_src" = "x-L$cf_rpath_item"
+				then
+					cf_rpath_skip=yes
+					break
+				fi
+			done
 		fi
-		CF_VERBOSE(...Filter $cf_rpath_src ->$cf_rpath_tmp)
-		EXTRA_LDFLAGS="$cf_rpath_tmp $EXTRA_LDFLAGS"
+
+		if test "$cf_rpath_skip" = no
+		then
+			# transform the option
+			if test "$LD_RPATH_OPT" = "-R " ; then
+				cf_rpath_tmp=`echo "$cf_rpath_src" |sed -e "s%-L%-R %"`
+			else
+				cf_rpath_tmp=`echo "$cf_rpath_src" |sed -e "s%-L%$LD_RPATH_OPT%"`
+			fi
+
+			# if we have not already added this, add it now
+			cf_rpath_tst=`echo "$EXTRA_LDFLAGS" | sed -e "s%$cf_rpath_tmp %%"`
+			if test "x$cf_rpath_tst" = "x$EXTRA_LDFLAGS"
+			then
+				CF_VERBOSE(...Filter $cf_rpath_src ->$cf_rpath_tmp)
+				EXTRA_LDFLAGS="$cf_rpath_tmp $EXTRA_LDFLAGS"
+			fi
+		fi
 		;;
 	esac
 	cf_rpath_dst="$cf_rpath_dst $cf_rpath_src"
@@ -4739,7 +4794,7 @@ define([CF_SRAND_PARSE],[
 	esac
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_SSL version: 19 updated: 2009/02/01 15:26:31
+dnl CF_SSL version: 20 updated: 2010/04/20 18:27:30
 dnl ------
 dnl Check for ssl library
 dnl $1 = [optional] directory in which the library may be found, set by AC_ARG_WITH
@@ -4774,6 +4829,13 @@ AC_DEFUN([CF_SSL],[
 						cf_cv_header_path_ssl=$cf_cv_header_path_ssl/openssl
 					fi
 					CF_ADD_CFLAGS($cf_cflags_ssl)
+
+					# workaround for broken openssl package using kerberos
+					case "$cf_cflags_ssl" in #(vi
+					*kerberos*)
+						cf_cv_have_ssl=maybe
+						;;
+					esac
 				fi
 
 				if test -n "$cf_libs_ssl" ; then
@@ -5226,6 +5288,21 @@ AC_CACHE_VAL(cf_cv_have_ttytype,[
 	])
 AC_MSG_RESULT($cf_cv_have_ttytype)
 test $cf_cv_have_ttytype = yes && AC_DEFINE(HAVE_TTYTYPE)
+])dnl
+dnl ---------------------------------------------------------------------------
+dnl CF_TYPE_LONG_LONG version: 1 updated: 2010/04/20 19:05:14
+dnl -----------------
+dnl Check for long long type.
+AC_DEFUN([CF_TYPE_LONG_LONG],[
+AC_CACHE_CHECK(for long long type,cf_cv_type_long_long,[
+	AC_TRY_COMPILE([],[long long foo = 123456789123456789LL],
+	[cf_cv_type_long_long=yes],
+	[cf_cv_type_long_long=no])
+])
+
+if test "$cf_cv_type_long_long" = yes ; then
+	AC_DEFINE(HAVE_LONG_LONG)
+fi
 ])dnl
 dnl ---------------------------------------------------------------------------
 dnl CF_UNION_WAIT version: 5 updated: 1997/11/23 14:49:44

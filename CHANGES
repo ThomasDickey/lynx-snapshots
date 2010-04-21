@@ -1,9 +1,12 @@
--- $LynxId: CHANGES,v 1.468 2010/04/07 22:56:00 tom Exp $
+-- $LynxId: CHANGES,v 1.470 2010/04/20 22:30:18 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2010-04-07 (2.8.8dev.3)
+2010-04-21 (2.8.8dev.3)
+* add workaround in CF_SSL configure macro for broken openssl pkg-config script
+  on Redhat, CentOS -TD
+* add configure option --disable-rpath-hack -TD
 * allow IPv6 addresses without "http://" prefix (Redhat #425879, patch by Kamil
   Dudka)
 * build-fixes for OpenSolaris aka Solaris 11 -TD
