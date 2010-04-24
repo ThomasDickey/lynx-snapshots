@@ -1,11 +1,11 @@
-dnl $LynxId: aclocal.m4,v 1.156 2010/04/20 23:06:24 tom Exp $
+dnl $LynxId: aclocal.m4,v 1.157 2010/04/21 10:23:39 tom Exp $
 dnl Macros for auto-configure script.
 dnl by T.E.Dickey <dickey@invisible-island.net>
 dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
 dnl and Philippe De Muyter <phdm@macqel.be>
 dnl
 dnl Created: 1997/1/28
-dnl Updated: 2010/4/20
+dnl Updated: 2010/4/21
 dnl
 dnl The autoconf used in Lynx development is GNU autoconf 2.13 or 2.52, patched
 dnl by Thomas Dickey.  See your local GNU archives, and this URL:
@@ -2196,7 +2196,7 @@ fi
 ])
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_FIND_LINKAGE version: 15 updated: 2010/04/03 18:35:33
+dnl CF_FIND_LINKAGE version: 16 updated: 2010/04/21 06:20:50
 dnl ---------------
 dnl Find a library (specifically the linkage used in the code fragment),
 dnl searching for it if it is not already in the library path.
@@ -2311,9 +2311,9 @@ AC_TRY_LINK([$1],[$2],[
 
 if test "$cf_cv_find_linkage_$3" = yes ; then
 ifelse([$4],,[
-  CF_ADD_INCDIR($cf_cv_header_path_$3)
-  CF_ADD_LIBDIR($cf_cv_library_path_$3)
-  LIBS="-l$3 $LIBS"
+	CF_ADD_INCDIR($cf_cv_header_path_$3)
+	CF_ADD_LIBDIR($cf_cv_library_path_$3)
+	LIBS="-l$3 $LIBS"
 ],[$4])
 else
 ifelse([$5],,AC_MSG_WARN(Cannot find $3 library),[$5])
@@ -2916,7 +2916,7 @@ make an error
 test "$cf_cv_gnu_source" = yes && CPPFLAGS="$CPPFLAGS -D_GNU_SOURCE"
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_HEADER_PATH version: 10 updated: 2010/01/17 20:36:17
+dnl CF_HEADER_PATH version: 11 updated: 2010/04/21 06:20:50
 dnl --------------
 dnl Construct a search-list of directories for a nonstandard header-file
 dnl
@@ -2926,6 +2926,8 @@ dnl	$2 = the package name
 AC_DEFUN([CF_HEADER_PATH],
 [
 $1=
+
+# collect the current set of include-directories from compiler flags
 cf_header_path_list=""
 if test -n "${CFLAGS}${CPPFLAGS}" ; then
 	for cf_header_path in $CPPFLAGS $CFLAGS
@@ -2933,13 +2935,13 @@ if test -n "${CFLAGS}${CPPFLAGS}" ; then
 		case $cf_header_path in #(vi
 		-I*)
 			cf_header_path=`echo ".$cf_header_path" |sed -e 's/^...//' -e 's,/include$,,'`
-			CF_ADD_SUBDIR_PATH($1,$2,include,$cf_header_path,NONE)
-			cf_header_path_list="$cf_header_path_list [$]$1"
+			cf_header_path_list="$cf_header_path_list $cf_header_path"
 			;;
 		esac
 	done
 fi
 
+# add the variations for the package we are looking for
 CF_SUBDIR_PATH($1,$2,include)
 
 test "$includedir" != NONE && \
@@ -2956,7 +2958,7 @@ test -d "$oldincludedir" && {
 	test -d $oldincludedir/$2 && $1="[$]$1 $oldincludedir/$2"
 }
 
-$1="$cf_header_path_list [$]$1"
+$1="[$]$1 $cf_header_path_list"
 ])dnl
 dnl ---------------------------------------------------------------------------
 dnl CF_HELP_MESSAGE version: 3 updated: 1998/01/14 10:56:23
@@ -4629,7 +4631,7 @@ SLang_TT_Baud_Rate = 1
 test $cf_cv_slang_unix = yes && AC_DEFINE(REAL_UNIX_SYSTEM)
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_SOCKS version: 6 updated: 2008/03/23 14:48:54
+dnl CF_SOCKS version: 7 updated: 2010/04/21 06:20:50
 dnl --------
 dnl Check for socks library
 dnl $1 = the [optional] directory in which the library may be found
@@ -4658,7 +4660,7 @@ AC_DEFUN([CF_SOCKS],[
 
     CF_ADD_INCDIR($cf_cv_header_path_socks)
     CF_ADD_LIBDIR($cf_cv_library_path_socks)
-    LIBS="$LIBS -lsocks"
+	LIBS="$cf_cv_library_file_socks $LIBS"
   else
     AC_MSG_ERROR(cannot link with socks library)
   fi
@@ -4961,14 +4963,15 @@ if test "$ac_cv_header_termios_h" = yes ; then
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_SUBDIR_PATH version: 5 updated: 2007/07/29 09:55:12
+dnl CF_SUBDIR_PATH version: 6 updated: 2010/04/21 06:20:50
 dnl --------------
 dnl Construct a search-list for a nonstandard header/lib-file
 dnl	$1 = the variable to return as result
 dnl	$2 = the package name
 dnl	$3 = the subdirectory, e.g., bin, include or lib
 AC_DEFUN([CF_SUBDIR_PATH],
-[$1=""
+[
+$1=
 
 CF_ADD_SUBDIR_PATH($1,$2,$3,/usr,$prefix)
 CF_ADD_SUBDIR_PATH($1,$2,$3,$prefix,NONE)
@@ -5360,7 +5363,7 @@ AC_DEFUN([CF_UPPER],
 $1=`echo "$2" | sed y%abcdefghijklmnopqrstuvwxyz./-%ABCDEFGHIJKLMNOPQRSTUVWXYZ___%`
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_UTF8_LIB version: 5 updated: 2008/10/17 19:37:52
+dnl CF_UTF8_LIB version: 6 updated: 2010/04/21 06:20:50
 dnl -----------
 dnl Check for multibyte support, and if not found, utf8 compatibility library
 AC_DEFUN([CF_UTF8_LIB],
@@ -5382,7 +5385,7 @@ if test "$cf_cv_utf8_lib" = "add-on" ; then
 	AC_DEFINE(HAVE_LIBUTF8_H)
 	CF_ADD_INCDIR($cf_cv_header_path_utf8)
 	CF_ADD_LIBDIR($cf_cv_library_path_utf8)
-	LIBS="-lutf8 $LIBS"
+	LIBS="$cf_cv_library_file_utf8 $LIBS"
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
@@ -5742,7 +5745,7 @@ if test "$with_dmalloc" = yes ; then
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_WITH_IDNA version: 4 updated: 2010/04/03 18:35:33
+dnl CF_WITH_IDNA version: 5 updated: 2010/04/21 06:20:50
 dnl ------------
 dnl Check for libidn, use it if found.
 dnl
@@ -5760,6 +5763,7 @@ AC_DEFUN([CF_WITH_IDNA],[
 	AC_DEFINE(USE_IDNA)
 	CF_ADD_INCDIR($cf_cv_header_path_idn)
 	CF_ADD_LIBDIR($cf_cv_library_path_idn)
+	LIBS="$cf_cv_library_file_idn $LIBS"
 ])
 ])dnl
 dnl ---------------------------------------------------------------------------
