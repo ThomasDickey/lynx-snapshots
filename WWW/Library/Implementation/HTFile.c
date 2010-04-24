@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFile.c,v 1.120 2009/04/08 19:44:19 tom Exp $
+ * $LynxId: HTFile.c,v 1.121 2010/04/23 23:11:25 tom Exp $
  *
  *			File Access				HTFile.c
  *			===========
@@ -2265,6 +2265,74 @@ int HTStat(const char *filename,
 }
 #endif
 
+#if defined(USE_ZLIB) || defined(USE_BZLIB)
+static BOOL sniffStream(FILE *fp, char *buffer, size_t needed)
+{
+    long offset = ftell(fp);
+    BOOL result = FALSE;
+
+    if (fread(buffer, sizeof(char), needed, fp) == needed) {
+	result = TRUE;
+    }
+    if (fseek(fp, offset, SEEK_SET) < 0) {
+	CTRACE((tfp, "error seeking in stream\n"));
+	result = FALSE;
+    }
+    return result;
+}
+#endif
+
+#ifdef USE_ZLIB
+static BOOL isGzipStream(FILE *fp)
+{
+    char buffer[3];
+    BOOL result;
+
+    if (sniffStream(fp, buffer, sizeof(buffer))
+	&& !memcmp(buffer, "\037\213", sizeof(buffer) - 1)) {
+	result = TRUE;
+    } else {
+	CTRACE((tfp, "not a gzip-stream\n"));
+	result = FALSE;
+    }
+    return result;
+}
+
+static BOOL isDeflateStream(FILE *fp)
+{
+    char buffer[3];
+    BOOL result;
+
+    if (sniffStream(fp, buffer, sizeof(buffer))
+	&& !memcmp(buffer, "\170\234", sizeof(buffer) - 1)) {
+	result = TRUE;
+    } else {
+	CTRACE((tfp, "not a deflate-stream\n"));
+	result = FALSE;
+    }
+    return result;
+}
+#endif
+
+#ifdef USE_BZLIB
+static BOOL isBzip2Stream(FILE *fp)
+{
+    char buffer[6];
+    BOOL result;
+
+    if (sniffStream(fp, buffer, sizeof(buffer))
+	&& !memcmp(buffer, "BZh", 3)
+	&& isdigit(UCH(buffer[3]))
+	&& isdigit(UCH(buffer[4]))) {
+	result = TRUE;
+    } else {
+	CTRACE((tfp, "not a bzip2-stream\n"));
+	result = FALSE;
+    }
+    return result;
+}
+#endif
+
 #ifdef VMS
 #define FOPEN_MODE(bin) "r", "shr=put", "shr=upd"
 #define DOT_STRING "._-"	/* FIXME: should we check if suffix is after ']' or ':' ? */
@@ -2355,28 +2423,34 @@ static int decompressAndParse(HTParentAnchor *anchor,
 #define isDOWNLOAD(m) (strcmp(format_out->name, "www/download") && (method == m))
 #ifdef USE_ZLIB
 	    if (isDOWNLOAD(cftGzip)) {
-		fclose(fp);
-		gzfp = gzopen(localname, BIN_R);
+		if (isGzipStream(fp)) {
+		    fclose(fp);
+		    gzfp = gzopen(localname, BIN_R);
 
-		CTRACE((tfp, "HTLoadFile: gzopen of `%s' gives %p\n",
-			localname, gzfp));
+		    CTRACE((tfp, "HTLoadFile: gzopen of `%s' gives %p\n",
+			    localname, gzfp));
+		}
 		internal_decompress = cftGzip;
 	    } else if (isDOWNLOAD(cftDeflate)) {
-		zzfp = fp;
-		fp = 0;
+		if (isDeflateStream(fp)) {
+		    zzfp = fp;
+		    fp = 0;
 
-		CTRACE((tfp, "HTLoadFile: zzopen of `%s' gives %p\n",
-			localname, (void *) zzfp));
+		    CTRACE((tfp, "HTLoadFile: zzopen of `%s' gives %p\n",
+			    localname, (void *) zzfp));
+		}
 		internal_decompress = cftDeflate;
 	    } else
 #endif /* USE_ZLIB */
 #ifdef USE_BZLIB
 	    if (isDOWNLOAD(cftBzip2)) {
-		fclose(fp);
-		bzfp = BZ2_bzopen(localname, BIN_R);
+		if (isBzip2Stream(fp)) {
+		    fclose(fp);
+		    bzfp = BZ2_bzopen(localname, BIN_R);
 
-		CTRACE((tfp, "HTLoadFile: bzopen of `%s' gives %p\n",
-			localname, bzfp));
+		    CTRACE((tfp, "HTLoadFile: bzopen of `%s' gives %p\n",
+			    localname, bzfp));
+		}
 		internal_decompress = cftBzip2;
 	    } else
 #endif /* USE_BZLIB */
@@ -2409,11 +2483,13 @@ static int decompressAndParse(HTParentAnchor *anchor,
 		StrAllocCopy(anchor->content_encoding, "x-deflate");
 #ifdef USE_ZLIB
 		if (strcmp(format_out->name, "www/download") != 0) {
-		    zzfp = fp;
-		    fp = 0;
+		    if (isDeflateStream(fp)) {
+			zzfp = fp;
+			fp = 0;
 
-		    CTRACE((tfp, "HTLoadFile: zzopen of `%s' gives %p\n",
-			    localname, (void *) zzfp));
+			CTRACE((tfp, "HTLoadFile: zzopen of `%s' gives %p\n",
+				localname, (void *) zzfp));
+		    }
 		    internal_decompress = cftDeflate;
 		}
 #else /* USE_ZLIB */
@@ -2424,11 +2500,13 @@ static int decompressAndParse(HTParentAnchor *anchor,
 		StrAllocCopy(anchor->content_encoding, "x-gzip");
 #ifdef USE_ZLIB
 		if (strcmp(format_out->name, "www/download") != 0) {
-		    fclose(fp);
-		    gzfp = gzopen(localname, BIN_R);
+		    if (isGzipStream(fp)) {
+			fclose(fp);
+			gzfp = gzopen(localname, BIN_R);
 
-		    CTRACE((tfp, "HTLoadFile: gzopen of `%s' gives %p\n",
-			    localname, gzfp));
+			CTRACE((tfp, "HTLoadFile: gzopen of `%s' gives %p\n",
+				localname, gzfp));
+		    }
 		    internal_decompress = cftGzip;
 		}
 #else /* USE_ZLIB */
@@ -2439,11 +2517,13 @@ static int decompressAndParse(HTParentAnchor *anchor,
 		StrAllocCopy(anchor->content_encoding, "x-bzip2");
 #ifdef USE_BZLIB
 		if (strcmp(format_out->name, "www/download") != 0) {
-		    fclose(fp);
-		    bzfp = BZ2_bzopen(localname, BIN_R);
+		    if (isBzip2Stream(fp)) {
+			fclose(fp);
+			bzfp = BZ2_bzopen(localname, BIN_R);
 
-		    CTRACE((tfp, "HTLoadFile: bzopen of `%s' gives %p\n",
-			    localname, bzfp));
+			CTRACE((tfp, "HTLoadFile: bzopen of `%s' gives %p\n",
+				localname, bzfp));
+		    }
 		    internal_decompress = cftBzip2;
 		}
 #else /* USE_BZLIB */
