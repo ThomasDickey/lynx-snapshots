@@ -1,5 +1,5 @@
 /*
- * $LynxId: UCAuto.c,v 1.39 2009/01/01 22:07:18 tom Exp $
+ * $LynxId: UCAuto.c,v 1.40 2010/04/25 20:16:41 tom Exp $
  *
  *  This file contains code for changing the Linux console mode.
  *  Currently some names for font files are hardwired in here.
@@ -198,7 +198,7 @@ static void write_esc(const char *p)
     int fd = open("/dev/tty", O_WRONLY);
 
     if (fd >= 0) {
-	write(fd, p, strlen(p));
+	IGNORE_RC(write(fd, p, strlen(p)));
 	close(fd);
     }
 }

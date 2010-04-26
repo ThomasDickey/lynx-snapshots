@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTString.c,v 1.58 2009/11/21 17:05:33 Bela.Lubkin Exp $
+ * $LynxId: HTString.c,v 1.59 2010/04/25 19:42:04 tom Exp $
  *
  *	Case-independent string comparison		HTString.c
  *
@@ -16,6 +16,10 @@
 #include <LYLeaks.h>
 #include <LYUtils.h>
 #include <LYStrings.h>
+
+#ifdef USE_IGNORE_RC
+int ignore_unused;
+#endif
 
 #ifndef NO_LYNX_TRACE
 BOOLEAN WWW_TraceFlag = 0;	/* Global trace flag for ALL W3 code */

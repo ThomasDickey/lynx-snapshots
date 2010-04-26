@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTNews.c,v 1.60 2009/05/24 23:11:26 tom Exp $
+ * $LynxId: HTNews.c,v 1.61 2010/04/25 19:46:01 tom Exp $
  *
  *			NEWS ACCESS				HTNews.c
  *			===========
@@ -927,7 +927,7 @@ static void post_article(char *postfile)
 		in_header = 0;
 		if (!seen_fromline) {
 		    if (blen >= (int) sizeof(buf) - 35) {
-			NEWS_NETWRITE(s, buf, blen);
+			IGNORE_RC(NEWS_NETWRITE(s, buf, blen));
 			buf[blen = 0] = 0;
 		    }
 		    strcat(buf, "From: anonymous@nowhere.you.know");
@@ -947,7 +947,7 @@ static void post_article(char *postfile)
 	strcat(line, crlf);
 	llen += 2;
 	if ((blen + llen) >= (int) sizeof(buf) - 1) {
-	    NEWS_NETWRITE(s, buf, blen);
+	    IGNORE_RC(NEWS_NETWRITE(s, buf, blen));
 	    buf[blen = 0] = 0;
 	}
 	strcat(buf, line);
@@ -960,13 +960,13 @@ static void post_article(char *postfile)
      * Send the nntp EOF and get the server's response.  - FM
      */
     if (blen >= (int) sizeof(buf) - 4) {
-	NEWS_NETWRITE(s, buf, blen);
+	IGNORE_RC(NEWS_NETWRITE(s, buf, blen));
 	buf[blen = 0] = 0;
     }
     strcat(buf, ".");
     strcat(buf, crlf);
     blen += 3;
-    NEWS_NETWRITE(s, buf, blen);
+    IGNORE_RC(NEWS_NETWRITE(s, buf, blen));
 
     status = response(NULL);
     if (status == 240) {

@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTUtils.h,v 1.96 2009/11/21 17:05:33 Bela.Lubkin Exp $
+ * $LynxId: HTUtils.h,v 1.97 2010/04/25 20:36:13 tom Exp $
  *
  * Utility macros for the W3 code library
  * MACROS FOR GENERAL USE
@@ -162,6 +162,15 @@ char *alloca();
 #ifndef	GCC_UNUSED
 #define	GCC_UNUSED		/* nothing */
 #endif
+
+#if defined(__GNUC__) && defined(_FORTIFY_SOURCE)
+#define USE_IGNORE_RC
+extern int ignore_unused;
+
+#define IGNORE_RC(func) ignore_unused = (int) func
+#else
+#define IGNORE_RC(func) (void) func
+#endif /* gcc workarounds */
 
 #if defined(__CYGWIN32__) && ! defined(__CYGWIN__)
 #define __CYGWIN__ 1
