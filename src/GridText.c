@@ -1,5 +1,5 @@
 /*
- * $LynxId: GridText.c,v 1.176 2009/11/27 13:18:18 tom Exp $
+ * $LynxId: GridText.c,v 1.178 2010/04/25 20:22:51 tom Exp $
  *
  *		Character grid hypertext object
  *		===============================
@@ -6072,6 +6072,63 @@ HTChildAnchor *HText_childNextNumber(int number, void **prev)
     return a->anchor;
 }
 
+static const char *inputFieldDesc(FormInfo * input)
+{
+    const char *result = 0;
+
+    switch (input->type) {
+    case F_TEXT_TYPE:
+	result = gettext("text entry field");
+	break;
+    case F_PASSWORD_TYPE:
+	result = gettext("password entry field");
+	break;
+    case F_CHECKBOX_TYPE:
+	result = gettext("checkbox");
+	break;
+    case F_RADIO_TYPE:
+	result = gettext("radio button");
+	break;
+    case F_SUBMIT_TYPE:
+	result = gettext("submit button");
+	break;
+    case F_RESET_TYPE:
+	result = gettext("reset button");
+	break;
+    case F_BUTTON_TYPE:
+	result = gettext("script button");
+	break;
+    case F_OPTION_LIST_TYPE:
+	result = gettext("popup menu");
+	break;
+    case F_HIDDEN_TYPE:
+	result = gettext("hidden form field");
+	break;
+    case F_TEXTAREA_TYPE:
+	result = gettext("text entry area");
+	break;
+    case F_RANGE_TYPE:
+	result = gettext("range entry field");
+	break;
+    case F_FILE_TYPE:
+	result = gettext("file entry field");
+	break;
+    case F_TEXT_SUBMIT_TYPE:
+	result = gettext("text-submit field");
+	break;
+    case F_IMAGE_SUBMIT_TYPE:
+	result = gettext("image-submit button");
+	break;
+    case F_KEYGEN_TYPE:
+	result = gettext("keygen field");
+	break;
+    default:
+	result = gettext("unknown form field");
+	break;
+    }
+    return result;
+}
+
 /*
  * HText_FormDescNumber() returns a description of the form field
  * with index N.  The index corresponds to the [number] we print
@@ -6100,56 +6157,7 @@ void HText_FormDescNumber(int number,
 	}
     }
 
-    switch (a->input_field->type) {
-    case F_TEXT_TYPE:
-	*desc = gettext("text entry field");
-	return;
-    case F_PASSWORD_TYPE:
-	*desc = gettext("password entry field");
-	return;
-    case F_CHECKBOX_TYPE:
-	*desc = gettext("checkbox");
-	return;
-    case F_RADIO_TYPE:
-	*desc = gettext("radio button");
-	return;
-    case F_SUBMIT_TYPE:
-	*desc = gettext("submit button");
-	return;
-    case F_RESET_TYPE:
-	*desc = gettext("reset button");
-	return;
-    case F_BUTTON_TYPE:
-	*desc = gettext("script button");
-	return;
-    case F_OPTION_LIST_TYPE:
-	*desc = gettext("popup menu");
-	return;
-    case F_HIDDEN_TYPE:
-	*desc = gettext("hidden form field");
-	return;
-    case F_TEXTAREA_TYPE:
-	*desc = gettext("text entry area");
-	return;
-    case F_RANGE_TYPE:
-	*desc = gettext("range entry field");
-	return;
-    case F_FILE_TYPE:
-	*desc = gettext("file entry field");
-	return;
-    case F_TEXT_SUBMIT_TYPE:
-	*desc = gettext("text-submit field");
-	return;
-    case F_IMAGE_SUBMIT_TYPE:
-	*desc = gettext("image-submit button");
-	return;
-    case F_KEYGEN_TYPE:
-	*desc = gettext("keygen field");
-	return;
-    default:
-	*desc = gettext("unknown form field");
-	return;
-    }
+    *desc = inputFieldDesc(a->input_field);
 }
 
 /* HTGetRelLinkNum returns the anchor number to which follow_link_number()
@@ -7840,6 +7848,150 @@ static int TrimmedLength(char *string)
     return result;
 }
 
+typedef struct _AnchorIndex {
+    struct _AnchorIndex *next;
+    int type;			/* field type */
+    int size;			/* character-width of field */
+    int length;			/* byte-count for field's data */
+    int offset;			/* byte-offset in line's data */
+    int filler;			/* character to use for filler */
+    const char *value;		/* field's value */
+} AnchorIndex;
+
+static unsigned countHTLines(void)
+{
+    unsigned result = 0;
+    HTLine *line = FirstHTLine(HTMainText);
+
+    while (line != 0) {
+	++result;
+	if (line == HTMainText->last_line)
+	    break;
+	line = line->next;
+    }
+    CTRACE((tfp, "countHTLines %u\n", result));
+    return result;
+}
+
+/*
+ * The TextAnchor list is not organized to allow efficient dumping of a page.
+ * Make an array with one item per line of the page, and store (by byte-offset)
+ * pointers to the TextAnchor's we want to use.
+ */
+static AnchorIndex **allocAnchorIndex(unsigned *size)
+{
+    AnchorIndex **result = NULL;
+    AnchorIndex *p, *q;
+    TextAnchor *anchor = NULL;
+    FormInfo *input = NULL;
+
+    *size = countHTLines();
+    if (*size != 0) {
+	result = typecallocn(AnchorIndex *, *size + 1);
+
+	for (anchor = HTMainText->first_anchor;
+	     anchor != NULL;
+	     anchor = anchor->next) {
+
+	    if (anchor->link_type == INPUT_ANCHOR
+		&& anchor->show_anchor
+		&& anchor->line_num < (int) *size
+		&& (input = anchor->input_field) != NULL) {
+		CTRACE2(TRACE_GRIDTEXT,
+			(tfp, "line %d.%d %d %s->%s(%s)\n",
+			 anchor->line_num,
+			 anchor->line_pos,
+			 input->size,
+			 inputFieldDesc(input),
+			 input->value,
+			 input->orig_value));
+		switch (input->type) {
+		case F_TEXT_TYPE:
+		case F_PASSWORD_TYPE:
+		case F_CHECKBOX_TYPE:
+		case F_RADIO_TYPE:
+		case F_OPTION_LIST_TYPE:
+		case F_TEXTAREA_TYPE:
+		case F_RANGE_TYPE:
+		case F_FILE_TYPE:
+		    p = typecalloc(AnchorIndex);
+		    if (p == NULL)
+			outofmem(__FILE__, "allocAnchorIndex");
+
+		    p->type = input->type;
+		    p->size = input->size;
+		    p->offset = anchor->line_pos;
+		    p->value = input->value;
+
+		    switch (input->type) {
+		    case F_TEXT_TYPE:
+		    case F_PASSWORD_TYPE:
+			p->filler = '_';
+			break;
+		    case F_OPTION_LIST_TYPE:
+			p->filler = '_';
+			break;
+		    case F_CHECKBOX_TYPE:
+			p->value = (input->num_value
+				    ? checked_box
+				    : unchecked_box);
+			break;
+		    case F_RADIO_TYPE:
+			p->value = (input->num_value
+				    ? checked_radio
+				    : unchecked_radio);
+			break;
+		    default:
+			p->filler = ' ';
+			break;
+		    }
+		    p->length = strlen(input->value);
+
+		    if ((q = result[anchor->line_num]) != NULL) {
+			/* insert, ordering by offset */
+			if (q->offset < p->offset) {
+			    while (q->next != NULL
+				   && q->next->offset < p->offset) {
+				q = q->next;
+			    }
+			    p->next = q->next;
+			    q->next = p;
+			} else {
+			    p->next = q;
+			    result[anchor->line_num] = p;
+			}
+		    } else {
+			result[anchor->line_num] = p;
+		    }
+		    break;
+		}
+	    }
+	}
+    }
+    return result;
+}
+
+/*
+ * Free the data allocated in allocAnchorIndex().
+ */
+static void freeAnchorIndex(AnchorIndex ** inx, unsigned inx_size)
+{
+    AnchorIndex *cur;
+    unsigned num;
+
+    if (inx != 0) {
+	if (inx_size != 0) {
+	    for (num = 0; num < inx_size; ++num) {
+		while ((cur = inx[num]) != NULL) {
+		    inx[num] = cur->next;
+		    free(cur);
+		}
+	    }
+	}
+	free(inx);
+    }
+}
+
 /*
  * Print the contents of the file in HTMainText to
  * the file descriptor fp.
@@ -7851,10 +8003,12 @@ void print_wwwfile_to_fd(FILE *fp,
 			 BOOLEAN is_email,
 			 BOOLEAN is_reply)
 {
-    register int i;
+    int line_num, byte_num, byte_count;
     int first = TRUE;
-    int limit;
     HTLine *line;
+    AnchorIndex **inx;
+    AnchorIndex *cur;
+    unsigned inx_size;
 
 #ifndef NO_DUMP_WITH_BACKSPACES
     HText *text = HTMainText;
@@ -7870,8 +8024,16 @@ void print_wwwfile_to_fd(FILE *fp,
     if (!HTMainText)
 	return;
 
+    /*
+     * Build an index of anchors for each line, so we can override the
+     * static text which is stored in the list of HTLine's.
+     */
+    inx = allocAnchorIndex(&inx_size);
+
     line = FirstHTLine(HTMainText);
-    for (;; line = line->next) {
+    for (line_num = 0;; ++line_num, line = line->next) {
+	cur = inx[line_num];
+
 	if (first) {
 	    first = FALSE;
 	    if (is_reply) {
@@ -7896,9 +8058,31 @@ void print_wwwfile_to_fd(FILE *fp,
 	/*
 	 * Add data.
 	 */
-	limit = TrimmedLength(line->data);
-	for (i = 0; i < limit; i++) {
-	    int ch = UCH(line->data[i]);
+	byte_count = TrimmedLength(line->data);
+	for (byte_num = 0; byte_num < byte_count; byte_num++) {
+	    int offset = byte_num + line->offset;
+	    int ch = UCH(line->data[byte_num]);
+
+	    while (cur != 0 && (cur->offset + cur->size) < offset) {
+		cur = cur->next;
+	    }
+	    if (cur != 0
+		&& cur->offset <= offset
+		&& cur->offset + cur->size > offset) {
+		int off2 = offset - cur->offset;
+		int c2 = ((off2 < cur->length)
+			  ? cur->value[off2]
+			  : cur->filler);
+
+		if (ch != c2) {
+		    CTRACE2(TRACE_GRIDTEXT,
+			    (tfp, "line %d [%d..%d] map %d %c->%c\n",
+			     line_num,
+			     cur->offset, cur->offset + cur->size - 1,
+			     offset, ch, c2));
+		    ch = c2;
+		}
+	    }
 
 	    if (!IsSpecialAttrChar(ch)) {
 #ifndef NO_DUMP_WITH_BACKSPACES
@@ -7914,7 +8098,7 @@ void print_wwwfile_to_fd(FILE *fp,
 #endif
 		    fputc(ch, fp);
 	    } else if (ch == LY_SOFT_HYPHEN &&
-		       (i + 1) >= limit) {	/* last char on line */
+		       (byte_num + 1) >= byte_count) {
 		write_hyphen(fp);
 	    } else if (dump_output_immediately && use_underscore) {
 		switch (ch) {
@@ -7960,6 +8144,7 @@ void print_wwwfile_to_fd(FILE *fp,
     }
     fputc('\n', fp);
 
+    freeAnchorIndex(inx, inx_size);
 }
 
 /*

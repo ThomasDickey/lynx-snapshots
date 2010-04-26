@@ -1,9 +1,11 @@
--- $LynxId: CHANGES,v 1.471 2010/04/23 23:31:07 tom Exp $
+-- $LynxId: CHANGES,v 1.472 2010/04/25 22:41:14 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2010-04-23 (2.8.8dev.3)
+2010-04-25 (2.8.8dev.3)
+* modify print_wwwfile_to_fd() to add field values to the printed form (Debian
+  #574940) -TD
 * add check for magic (header bytes) before trying to decompress, since zlib
   does not provide this check (Redhat #503921) -TD
 * add workaround in CF_SSL configure macro for broken openssl pkg-config script

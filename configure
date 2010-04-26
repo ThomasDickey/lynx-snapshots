@@ -3085,7 +3085,7 @@ GCC_VERSION=none
 if test "$GCC" = yes ; then
 	echo "$as_me:3086: checking version of $CC" >&5
 echo $ECHO_N "checking version of $CC... $ECHO_C" >&6
-	GCC_VERSION="`${CC} --version| sed -e '2,$d' -e 's/^.*(GCC) //' -e 's/^[^0-9.]*//' -e 's/[^0-9.].*//'`"
+	GCC_VERSION="`${CC} --version 2>/dev/null | sed -e '2,$d' -e 's/^.*(GCC) //' -e 's/^[^0-9.]*//' -e 's/[^0-9.].*//'`"
 	test -z "$GCC_VERSION" && GCC_VERSION=unknown
 	echo "$as_me:3090: result: $GCC_VERSION" >&5
 echo "${ECHO_T}$GCC_VERSION" >&6
@@ -3195,10 +3195,10 @@ then
 	{ echo "$as_me:3195: checking for $CC warning options..." >&5
 echo "$as_me: checking for $CC warning options..." >&6;}
 	cf_save_CFLAGS="$CFLAGS"
-	EXTRA_CFLAGS="-W -Wall"
+	EXTRA_CFLAGS=
 	cf_warn_CONST=""
 	test "$with_ext_const" = yes && cf_warn_CONST="Wwrite-strings"
-	for cf_opt in \
+	for cf_opt in W Wall \
 		Wbad-function-cast \
 		Wcast-align \
 		Wcast-qual \

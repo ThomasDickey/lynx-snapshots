@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTCP.c,v 1.98 2008/12/07 21:10:36 tom Exp $
+ * $LynxId: HTTCP.c,v 1.99 2010/04/25 19:43:49 tom Exp $
  *
  *			Generic Communication Code		HTTCP.c
  *			==========================
@@ -803,7 +803,7 @@ LYNX_HOSTENT *LYGetHostByName(char *str)
 	} while (waitret > 0 || (waitret == -1 && errno == EINTR));
 	waitret = 0;
 
-	pipe(pfd);
+	IGNORE_RC(pipe(pfd));
 
 #if HAVE_SIGACTION
 	/*
@@ -919,13 +919,13 @@ LYNX_HOSTENT *LYGetHostByName(char *str)
 	    if (!statuses.child_errno)
 		statuses.child_errno = errno;
 	    statuses.rehostentlen = rehostentlen;
-	    write(pfd[1], &statuses, sizeof(statuses));
+	    IGNORE_RC(write(pfd[1], &statuses, sizeof(statuses)));
 
 	    if (rehostentlen) {
 		/*
 		 * Return our resulting rehostent through pipe...
 		 */
-		write(pfd[1], rehostent, rehostentlen);
+		IGNORE_RC(write(pfd[1], rehostent, rehostentlen));
 		close(pfd[1]);
 		_exit(0);
 	    } else {
