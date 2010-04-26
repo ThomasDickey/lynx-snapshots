@@ -1,5 +1,5 @@
 /*
- * $LynxId: GridText.c,v 1.178 2010/04/25 20:22:51 tom Exp $
+ * $LynxId: GridText.c,v 1.179 2010/04/26 10:44:14 tom Exp $
  *
  *		Character grid hypertext object
  *		===============================
@@ -7945,7 +7945,7 @@ static AnchorIndex **allocAnchorIndex(unsigned *size)
 			p->filler = ' ';
 			break;
 		    }
-		    p->length = strlen(input->value);
+		    p->length = strlen(p->value);
 
 		    if ((q = result[anchor->line_num]) != NULL) {
 			/* insert, ordering by offset */
