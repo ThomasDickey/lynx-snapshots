@@ -1,4 +1,4 @@
--- $LynxId: CHANGES,v 1.473 2010/04/26 10:45:06 tom Exp $
+-- $LynxId: CHANGES,v 1.474 2010/04/27 10:43:46 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
@@ -6,6 +6,7 @@ Changes since Lynx 2.8 release
 2010-04-26 (2.8.8dev.4)
 * further improvements to print_wwwfile_to_fd() -TD
   + corrected length used for radio/checkboxes.
+  + fill in wrapped fields.
 
 2010-04-25 (2.8.8dev.3)
 * modify print_wwwfile_to_fd() to add field values to the printed form (Debian
