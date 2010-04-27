@@ -1,5 +1,5 @@
 /*
- * $LynxId: GridText.c,v 1.179 2010/04/26 10:44:14 tom Exp $
+ * $LynxId: GridText.c,v 1.180 2010/04/27 09:54:50 tom Exp $
  *
  *		Character grid hypertext object
  *		===============================
@@ -7906,6 +7906,12 @@ static AnchorIndex **allocAnchorIndex(unsigned *size)
 			 input->value,
 			 input->orig_value));
 		switch (input->type) {
+		case F_SUBMIT_TYPE:
+		case F_RESET_TYPE:
+		case F_TEXT_SUBMIT_TYPE:
+		case F_IMAGE_SUBMIT_TYPE:
+		    CTRACE2(TRACE_GRIDTEXT, (tfp, "skipping\n"));
+		    continue;
 		case F_TEXT_TYPE:
 		case F_PASSWORD_TYPE:
 		case F_CHECKBOX_TYPE:
@@ -7924,6 +7930,7 @@ static AnchorIndex **allocAnchorIndex(unsigned *size)
 		    p->value = input->value;
 
 		    switch (input->type) {
+		    case F_TEXTAREA_TYPE:
 		    case F_TEXT_TYPE:
 		    case F_PASSWORD_TYPE:
 			p->filler = '_';
@@ -7999,6 +8006,8 @@ static void freeAnchorIndex(AnchorIndex ** inx, unsigned inx_size)
  * If is_reply is TRUE add ">" to the beginning of each
  * line to specify the file is a reply to message.
  */
+#define FieldFirst(p) (this_wrap ? 0 : (p)->offset)
+#define FieldLast(p)  (FieldFirst(p) + (p)->size - this_wrap)
 void print_wwwfile_to_fd(FILE *fp,
 			 BOOLEAN is_email,
 			 BOOLEAN is_reply)
@@ -8006,9 +8015,12 @@ void print_wwwfile_to_fd(FILE *fp,
     int line_num, byte_num, byte_count;
     int first = TRUE;
     HTLine *line;
-    AnchorIndex **inx;
-    AnchorIndex *cur;
-    unsigned inx_size;
+    AnchorIndex **inx;		/* sorted index of input-fields */
+    AnchorIndex *cur = 0;	/* current input-field */
+    unsigned inx_size;		/* number of entries in inx[] */
+    int in_field = -1;		/* if positive, is index in cur->value[] */
+    int this_wrap = 0;		/* current wrapping point of cur->value[] */
+    int next_wrap = 0;		/* next wrapping point of cur->value[] */
 
 #ifndef NO_DUMP_WITH_BACKSPACES
     HText *text = HTMainText;
@@ -8032,7 +8044,17 @@ void print_wwwfile_to_fd(FILE *fp,
 
     line = FirstHTLine(HTMainText);
     for (line_num = 0;; ++line_num, line = line->next) {
-	cur = inx[line_num];
+	if (in_field >= 0) {
+	    this_wrap = next_wrap;
+	    next_wrap = 0;	/* FIXME - allow for multiple continuations */
+	    CTRACE2(TRACE_GRIDTEXT,
+		    (tfp, "wrap %d:%d, offset %d\n",
+		     in_field, cur ? cur->length : -1, this_wrap));
+	} else {
+	    cur = inx[line_num];
+	}
+
+	CTRACE2(TRACE_GRIDTEXT, (tfp, "dump %d:%s\n", line_num, line->data));
 
 	if (first) {
 	    first = FALSE;
@@ -8060,27 +8082,73 @@ void print_wwwfile_to_fd(FILE *fp,
 	 */
 	byte_count = TrimmedLength(line->data);
 	for (byte_num = 0; byte_num < byte_count; byte_num++) {
-	    int offset = byte_num + line->offset;
+	    int byte_offset = byte_num + line->offset;
 	    int ch = UCH(line->data[byte_num]);
+	    int c2;
 
-	    while (cur != 0 && (cur->offset + cur->size) < offset) {
+	    while (cur != 0 && FieldLast(cur) < byte_offset) {
+		CTRACE2(TRACE_GRIDTEXT,
+			(tfp, "skip field since last %d < %d\n",
+			 FieldLast(cur), byte_offset));
 		cur = cur->next;
+		in_field = -1;
+	    }
+	    if (cur != 0 && in_field >= 0) {
+		CTRACE2(TRACE_GRIDTEXT,
+			(tfp, "compare %d to [%d..%d]\n",
+			 byte_offset,
+			 FieldFirst(cur),
+			 FieldLast(cur) - 1));
 	    }
 	    if (cur != 0
-		&& cur->offset <= offset
-		&& cur->offset + cur->size > offset) {
-		int off2 = offset - cur->offset;
-		int c2 = ((off2 < cur->length)
-			  ? cur->value[off2]
-			  : cur->filler);
+		&& FieldFirst(cur) <= byte_offset
+		&& FieldLast(cur) > byte_offset) {
+		int off2 = ((in_field > 0)
+			    ? in_field
+			    : (byte_offset - FieldFirst(cur)));
+
+		/*
+		 * On the first time (for each line that the field appears on),
+		 * check if this field wraps.  If it does, save the offset into
+		 * the field which will be used to adjust the beginning of the
+		 * continuation line.
+		 */
+		if (byte_offset == FieldFirst(cur)) {
+		    next_wrap = 0;
+		    if (cur->size - this_wrap + byte_num > byte_count) {
+			CTRACE((tfp, "size %d, offset %d, length %d\n",
+				cur->size,
+				cur->offset,
+				cur->length));
+			CTRACE((tfp, "byte_count %d, byte_num %d\n",
+				byte_count, byte_num));
+			next_wrap = byte_count - byte_num;
+			CTRACE2(TRACE_GRIDTEXT,
+				(tfp, "field will wrap: %d\n", next_wrap));
+		    }
+		}
+
+		c2 = ((off2 < cur->length)
+		      ? cur->value[off2]
+		      : cur->filler);
 
 		if (ch != c2) {
 		    CTRACE2(TRACE_GRIDTEXT,
-			    (tfp, "line %d [%d..%d] map %d %c->%c\n",
+			    (tfp, "line %d %d/%d [%d..%d] map %d %c->%c\n",
 			     line_num,
-			     cur->offset, cur->offset + cur->size - 1,
-			     offset, ch, c2));
+			     off2, cur->length,
+			     FieldFirst(cur), FieldLast(cur) - 1,
+			     byte_offset, ch, c2));
 		    ch = c2;
+		}
+		++off2;
+		if ((off2 >= cur->size) &&
+		    (off2 >= cur->length || F_TEXTLIKE(cur->type))) {
+		    in_field = -1;
+		    this_wrap = 0;
+		    next_wrap = 0;
+		} else {
+		    in_field = off2;
 		}
 	    }
 
