@@ -185,6 +185,9 @@ HTStream *HTFWriter_new(FILE *fp)
     me = (HTStream *) malloc(sizeof(*me));
     if (me == NULL)
 	outofmem(__FILE__, "HTML_new");
+
+    assert(me != NULL);
+
     me->isa = &HTFWriter;
 
     me->fp = fp;
@@ -237,6 +240,9 @@ HTStream *HTSaveAndExecute(HTPresentation *pres,
     me = (HTStream *) malloc(sizeof(*me));
     if (me == NULL)
 	outofmem(__FILE__, "Save and execute");
+
+    assert(me != NULL);
+
     me->isa = &HTFWriter;
 
     /* Save the file under a suitably suffixed name */
@@ -246,6 +252,9 @@ HTStream *HTSaveAndExecute(HTPresentation *pres,
     fnam = (char *) malloc(L_tmpnam + 16 + strlen(suffix));
     if (fnam == NULL)
 	outofmem(__FILE__, "HTSaveAndExecute");
+
+    assert(fnam != NULL);
+
     tmpnam(fnam);
     strcat(fnam, suffix);
 
@@ -307,6 +316,9 @@ HTStream *HTSaveLocally(HTPresentation *pres,
     me = (HTStream *) malloc(sizeof(*me));
     if (me == NULL)
 	outofmem(__FILE__, "SaveLocally");
+
+    assert(me != NULL);
+
     me->isa = &HTFWriter;
     me->end_command = NULL;
     me->remove_command = NULL;	/* If needed, put into end_command */
@@ -319,6 +331,9 @@ HTStream *HTSaveLocally(HTPresentation *pres,
     fnam = (char *) malloc(L_tmpnam + 16 + strlen(suffix));
     if (fnam == NULL)
 	outofmem(__FILE__, "HTSaveLocally");
+
+    assert(fnam != NULL);
+
     tmpnam(fnam);
     strcat(fnam, suffix);
 
