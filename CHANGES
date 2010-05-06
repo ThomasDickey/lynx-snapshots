@@ -1,9 +1,13 @@
--- $LynxId: CHANGES,v 1.477 2010/05/03 00:40:04 tom Exp $
+-- $LynxId: CHANGES,v 1.478 2010/05/05 09:42:58 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
 2010-05-02 (2.8.8dev.4)
+* remove redundant updates for CFLAGS and LIBS in configure script which are
+  now done in CF_FIND_LINKAGE macro -TD
+* fix a problem with configure script which broke "--with-gnutls=/usr" (report
+  by Atsuhito Kohda) -TD
 * resolve warnings from "clang --analyze", tested with Fedora 12 and clang
   2.6-0.5.pre1.fc12 -TD
 * further improvements to print_wwwfile_to_fd() -TD

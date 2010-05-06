@@ -1,11 +1,11 @@
-dnl $LynxId: aclocal.m4,v 1.158 2010/04/24 15:04:21 tom Exp $
+dnl $LynxId: aclocal.m4,v 1.159 2010/05/06 00:47:28 tom Exp $
 dnl Macros for auto-configure script.
 dnl by T.E.Dickey <dickey@invisible-island.net>
 dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
 dnl and Philippe De Muyter <phdm@macqel.be>
 dnl
 dnl Created: 1997/1/28
-dnl Updated: 2010/4/24
+dnl Updated: 2010/5/5
 dnl
 dnl The autoconf used in Lynx development is GNU autoconf 2.13 or 2.52, patched
 dnl by Thomas Dickey.  See your local GNU archives, and this URL:
@@ -2196,7 +2196,7 @@ fi
 ])
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_FIND_LINKAGE version: 16 updated: 2010/04/21 06:20:50
+dnl CF_FIND_LINKAGE version: 18 updated: 2010/05/05 20:27:55
 dnl ---------------
 dnl Find a library (specifically the linkage used in the code fragment),
 dnl searching for it if it is not already in the library path.
@@ -2225,18 +2225,23 @@ cf_cv_library_path_$3=
 
 CF_MSG_LOG([Starting [FIND_LINKAGE]($3,$6)])
 
+cf_save_LIBS="$LIBS"
+
 AC_TRY_LINK([$1],[$2],[
 	cf_cv_find_linkage_$3=yes
+	cf_cv_header_path_$3=/usr/include
+	cf_cv_library_path_$3=/usr/lib
 ],[
 
-cf_save_LIBS="$LIBS"
 LIBS="-l$3 $7 $cf_save_LIBS"
 
 AC_TRY_LINK([$1],[$2],[
 	cf_cv_find_linkage_$3=yes
+	cf_cv_header_path_$3=/usr/include
+	cf_cv_library_path_$3=/usr/lib
 	cf_cv_library_file_$3="-l$3"
 ],[
-    cf_cv_find_linkage_$3=no
+	cf_cv_find_linkage_$3=no
 	LIBS="$cf_save_LIBS"
 
     CF_VERBOSE(find linkage for $3 library)
@@ -2298,7 +2303,6 @@ AC_TRY_LINK([$1],[$2],[
                 ])
           fi
         done
-        LIBS="$cf_save_LIBS"
         CPPFLAGS="$cf_save_CPPFLAGS"
         LDFLAGS="$cf_save_LDFLAGS"
       fi
@@ -2308,6 +2312,8 @@ AC_TRY_LINK([$1],[$2],[
     fi
     ],$7)
 ])
+
+LIBS="$cf_save_LIBS"
 
 if test "$cf_cv_find_linkage_$3" = yes ; then
 ifelse([$4],,[
@@ -2781,7 +2787,7 @@ rm -f conftest*
 AC_SUBST(EXTRA_CFLAGS)
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_GNUTLS version: 16 updated: 2009/11/20 05:36:52
+dnl CF_GNUTLS version: 17 updated: 2010/05/05 20:27:55
 dnl ---------
 dnl Check for gnutls library (TLS "is" SSL)
 dnl $1 = the [optional] directory in which the library may be found
@@ -2789,6 +2795,7 @@ dnl $2 = the [optional] stub file to provide OpenSSL compatibility
 AC_DEFUN([CF_GNUTLS],[
 	AC_REQUIRE([CF_PKG_CONFIG])
 	cf_cv_have_gnutls=no
+	cf_cv_pkg_config_ssl=no
 
 	CF_ADD_OPTIONAL_PATH($1, [ssl library])
 
@@ -2803,6 +2810,7 @@ AC_DEFUN([CF_GNUTLS],[
 			if "$PKG_CONFIG" --exists $cf_pkg_gnutls ; then
 				CF_VERBOSE(... found $cf_pkg_gnutls in pkg-config)
 				cf_cv_have_gnutls=yes
+				cf_cv_pkg_config_ssl=yes
 
 				cf_cflags_ssl=`$PKG_CONFIG --cflags $cf_pkg_gnutls`
 				cf_libs_ssl=`$PKG_CONFIG --libs $cf_pkg_gnutls`
@@ -2858,20 +2866,24 @@ AC_DEFUN([CF_GNUTLS],[
 	fi
 
 	if test "$cf_cv_have_gnutls" = yes ; then
-		if test -n "$cf_cv_header_path_gnutls" ; then
+		if test "$cf_cv_pkg_config_ssl" != yes ; then
+			if test -n "$cf_cv_header_path_gnutls" ; then
+				AC_DEFINE(USE_SSL)
+				case $cf_cv_header_path_gnutls in
+					/usr/include/gnutls)
+					;;
+				*)
+					CF_ADD_INCDIR($cf_cv_header_path_gnutls)
+					;;
+				esac
+			fi
+			if test -n "$cf_cv_library_path_gnutls" ; then
+				CF_ADD_LIBDIR($cf_cv_library_path_gnutls)
+			fi
+			LIBS="-lgnutls -lgcrypt $LIBS"
+		else
 			AC_DEFINE(USE_SSL)
-            case $cf_cv_header_path_gnutls in
-				/usr/include/gnutls)
-				;;
-			*)
-				CF_ADD_INCDIR($cf_cv_header_path_gnutls)
-				;;
-			esac
 		fi
-		if test -n "$cf_cv_library_path_gnutls" ; then
-			CF_ADD_LIBDIR($cf_cv_library_path_gnutls)
-		fi
-		LIBS="-lgnutls -lgcrypt $LIBS"
 
 		ifelse($2,,
 			[if test "$cf_pkg_gnutls" = none ; then
@@ -2916,7 +2928,7 @@ make an error
 test "$cf_cv_gnu_source" = yes && CPPFLAGS="$CPPFLAGS -D_GNU_SOURCE"
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_HEADER_PATH version: 11 updated: 2010/04/21 06:20:50
+dnl CF_HEADER_PATH version: 12 updated: 2010/05/05 05:22:40
 dnl --------------
 dnl Construct a search-list of directories for a nonstandard header-file
 dnl
@@ -2935,7 +2947,8 @@ if test -n "${CFLAGS}${CPPFLAGS}" ; then
 		case $cf_header_path in #(vi
 		-I*)
 			cf_header_path=`echo ".$cf_header_path" |sed -e 's/^...//' -e 's,/include$,,'`
-			cf_header_path_list="$cf_header_path_list $cf_header_path"
+			CF_ADD_SUBDIR_PATH($1,$2,include,$cf_header_path,NONE)
+			cf_header_path_list="$cf_header_path_list [$]$1"
 			;;
 		esac
 	done
@@ -4631,7 +4644,7 @@ SLang_TT_Baud_Rate = 1
 test $cf_cv_slang_unix = yes && AC_DEFINE(REAL_UNIX_SYSTEM)
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_SOCKS version: 7 updated: 2010/04/21 06:20:50
+dnl CF_SOCKS version: 8 updated: 2010/05/05 20:27:55
 dnl --------
 dnl Check for socks library
 dnl $1 = the [optional] directory in which the library may be found
@@ -4642,11 +4655,9 @@ AC_DEFUN([CF_SOCKS],[
 ],[
       Raccept((char *)0)
 ],
-      socks,
-      cf_cv_have_socks=yes,
-      cf_cv_have_socks=no)
+      socks)
 
-  if test "$cf_cv_have_socks" = yes ; then
+  if test "x$cf_cv_find_linkage_socks" = "xyes" ; then
     AC_DEFINE(SOCKS)
 
     AC_DEFINE(accept,Raccept)
@@ -4657,10 +4668,6 @@ AC_DEFUN([CF_SOCKS],[
     AC_DEFINE(listen,Rlisten)
     AC_DEFINE(recvfrom,Rrecvfrom)
     AC_DEFINE(select,Rselect)
-
-    CF_ADD_INCDIR($cf_cv_header_path_socks)
-    CF_ADD_LIBDIR($cf_cv_library_path_socks)
-	LIBS="$cf_cv_library_file_socks $LIBS"
   else
     AC_MSG_ERROR(cannot link with socks library)
   fi
@@ -4796,13 +4803,14 @@ define([CF_SRAND_PARSE],[
 	esac
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_SSL version: 20 updated: 2010/04/20 18:27:30
+dnl CF_SSL version: 21 updated: 2010/05/05 20:27:55
 dnl ------
 dnl Check for ssl library
 dnl $1 = [optional] directory in which the library may be found, set by AC_ARG_WITH
 AC_DEFUN([CF_SSL],[
 	AC_REQUIRE([CF_PKG_CONFIG])
 	cf_cv_have_ssl=no
+	cf_cv_pkg_config_ssl=no
 
 	# command-line option, etc., override default behavior
 	CF_ADD_OPTIONAL_PATH($1, [ssl library])
@@ -4814,6 +4822,7 @@ AC_DEFUN([CF_SSL],[
 		yes) # if no explicit directory given, try pkg-config
 			if "$PKG_CONFIG" --exists openssl ; then
 				cf_cv_have_ssl=yes
+				cf_cv_pkg_config_ssl=yes
 
 				cf_cflags_ssl=`$PKG_CONFIG --cflags openssl`
 				cf_libs_ssl=`$PKG_CONFIG --libs openssl`
@@ -4884,19 +4893,21 @@ AC_DEFUN([CF_SSL],[
 			openssl,
 			$cf_extra_ssl_libs)
 
-		if test "$cf_cv_have_ssl" = yes ; then
-			if test -n "$cf_cv_library_path_ssl" ; then
-				CF_ADD_LIBDIR($cf_cv_library_path_ssl)
-			fi
-			LIBS="-lssl $cf_extra_ssl_libs $LIBS"
-			if test -n "$cf_cv_header_path_ssl" ; then
-				case $cf_cv_header_path_ssl in #(vi
-				/usr/include/openssl) #(vi
-					;;
-				*)
-					CF_ADD_INCDIR($cf_cv_header_path_ssl)
-					;;
-				esac
+		if test "$cf_cv_pkg_config_ssl" != yes ; then
+			if test "$cf_cv_have_ssl" = yes ; then
+				if test -n "$cf_cv_library_path_ssl" ; then
+					CF_ADD_LIBDIR($cf_cv_library_path_ssl)
+				fi
+				LIBS="-lssl $cf_extra_ssl_libs $LIBS"
+				if test -n "$cf_cv_header_path_ssl" ; then
+					case $cf_cv_header_path_ssl in #(vi
+					/usr/include/openssl) #(vi
+						;;
+					*)
+						CF_ADD_INCDIR($cf_cv_header_path_ssl)
+						;;
+					esac
+				fi
 			fi
 		fi
 	fi
@@ -5745,7 +5756,7 @@ if test "$with_dmalloc" = yes ; then
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_WITH_IDNA version: 5 updated: 2010/04/21 06:20:50
+dnl CF_WITH_IDNA version: 7 updated: 2010/05/05 20:27:55
 dnl ------------
 dnl Check for libidn, use it if found.
 dnl
@@ -5759,12 +5770,11 @@ AC_DEFUN([CF_WITH_IDNA],[
 ],[
 	char *output = 0;
     int code = idna_to_ascii_8z("name", &output, IDNA_USE_STD3_ASCII_RULES);
-],idn,[
+],idn)
+
+if test "x$cf_cv_find_linkage_idn" = xyes ; then
 	AC_DEFINE(USE_IDNA)
-	CF_ADD_INCDIR($cf_cv_header_path_idn)
-	CF_ADD_LIBDIR($cf_cv_library_path_idn)
-	LIBS="$cf_cv_library_file_idn $LIBS"
-])
+fi 
 ])dnl
 dnl ---------------------------------------------------------------------------
 dnl CF_WITH_PATH version: 8 updated: 2007/05/13 13:16:35

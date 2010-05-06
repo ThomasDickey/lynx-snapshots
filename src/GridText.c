@@ -1,5 +1,5 @@
 /*
- * $LynxId: GridText.c,v 1.185 2010/05/02 22:28:14 tom Exp $
+ * $LynxId: GridText.c,v 1.186 2010/05/05 09:19:31 tom Exp $
  *
  *		Character grid hypertext object
  *		===============================
@@ -8352,7 +8352,7 @@ static BOOL anchor_has_target(TextAnchor *a, char *target)
     int count;
 
     /*
-     * Search the hightext strings, taking the case_sensitive setting into
+     * Search the hightext strings, taking the LYcase_sensitive setting into
      * account.  -FM
      */
     for (count = 0;; ++count) {
@@ -8364,7 +8364,7 @@ static BOOL anchor_has_target(TextAnchor *a, char *target)
 
     /*
      * Search the relevant form fields, taking the
-     * case_sensitive setting into account.  -FM
+     * LYcase_sensitive setting into account.  -FM
      */
     if ((a->input_field != NULL && a->input_field->value != NULL) &&
 	a->input_field->type != F_HIDDEN_TYPE) {

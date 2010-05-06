@@ -1,4 +1,4 @@
-/* $LynxId: LYStrings.c,v 1.171 2010/05/03 00:36:05 tom Exp $ */
+/* $LynxId: LYStrings.c,v 1.172 2010/05/05 09:19:31 tom Exp $ */
 #include <HTUtils.h>
 #include <HTCJK.h>
 #include <UCAux.h>
@@ -4898,7 +4898,7 @@ int LYhandlePopupList(int cur_choice,
 	     */
 	    for (j = 1; Cptr[i + j] != NULL; j++) {
 		FormatChoiceNum(buffer, max_choices, (i + j), Cptr[i + j]);
-		if (case_sensitive) {
+		if (LYcase_sensitive) {
 		    if (strstr(buffer, prev_target_buffer) != NULL)
 			break;
 		} else {
@@ -4936,7 +4936,7 @@ int LYhandlePopupList(int cur_choice,
 	     */
 	    for (j = 0; j < cur_choice; j++) {
 		FormatChoiceNum(buffer, max_choices, (j + 1), Cptr[j]);
-		if (case_sensitive) {
+		if (LYcase_sensitive) {
 		    if (strstr(buffer, prev_target_buffer) != NULL)
 			break;
 		} else {

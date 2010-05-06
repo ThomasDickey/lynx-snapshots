@@ -1,4 +1,4 @@
-/* $LynxId: LYOptions.c,v 1.136 2010/04/30 00:01:19 tom Exp $ */
+/* $LynxId: LYOptions.c,v 1.137 2010/05/05 09:48:38 tom Exp $ */
 #include <HTUtils.h>
 #include <HTFTP.h>
 #include <HTTP.h>		/* 'reloading' flag */
@@ -461,7 +461,7 @@ void LYoptions(void)
 
     LYmove(L_SSEARCH, 5);
     addlbl("(S)earching type             : ");
-    LYaddstr(case_sensitive ? "CASE SENSITIVE  " : "CASE INSENSITIVE");
+    LYaddstr(LYcase_sensitive ? "CASE SENSITIVE  " : "CASE INSENSITIVE");
 
     LYmove(L_Charset, 5);
     addlbl("display (C)haracter set      : ");
@@ -902,9 +902,9 @@ void LYoptions(void)
 	    break;
 
 	case 'S':		/* Change case sensitivity for searches. */
-	    case_sensitive = LYChooseBoolean(case_sensitive,
-					     L_SSEARCH, -1,
-					     caseless_choices);
+	    LYcase_sensitive = LYChooseBoolean(LYcase_sensitive,
+					       L_SSEARCH, -1,
+					       caseless_choices);
 	    response = ' ';
 	    break;
 
@@ -2858,7 +2858,7 @@ int postoptions(DocInfo *newdoc)
 	/* Search Type: SELECT */
 	if (!strcmp(data[i].tag, search_type_string)
 	    && GetOptValues(search_type_values, data[i].value, &code)) {
-	    case_sensitive = (BOOLEAN) code;
+	    LYcase_sensitive = (BOOLEAN) code;
 	}
 
 	/* HTML error tolerance: SELECT */
@@ -3564,7 +3564,7 @@ static int gen_options(char **newfile)
     /* Search Type: SELECT */
     PutLabel(fp0, gettext("Type of Search"), search_type_string);
     BeginSelect(fp0, search_type_string);
-    PutOptValues(fp0, case_sensitive, search_type_values);
+    PutOptValues(fp0, LYcase_sensitive, search_type_values);
     EndSelect(fp0);
 
     PutHeader(fp0, gettext("Security and Privacy"));
