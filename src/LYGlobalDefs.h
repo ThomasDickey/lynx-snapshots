@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYGlobalDefs.h,v 1.122 2009/11/21 15:24:48 tom Exp $
+ * $LynxId: LYGlobalDefs.h,v 1.123 2010/05/05 09:19:31 tom Exp $
  *
  * global variable definitions
  */
@@ -228,7 +228,7 @@ extern "C" {
     extern BOOLEAN bold_H1;
     extern BOOLEAN bold_headers;
     extern BOOLEAN bold_name_anchors;
-    extern BOOLEAN case_sensitive;	/* TRUE to turn on case sensitive search */
+    extern BOOLEAN LYcase_sensitive;	/* TRUE to turn on case sensitive search */
     extern BOOLEAN check_mail;	/* TRUE to report unread/new mail messages */
     extern BOOLEAN child_lynx;	/* TRUE to exit with an arrow */
     extern BOOLEAN dump_links_only;

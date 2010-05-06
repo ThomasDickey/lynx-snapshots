@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYReadCFG.c,v 1.148 2010/05/02 22:22:56 tom Exp $
+ * $LynxId: LYReadCFG.c,v 1.149 2010/05/05 09:19:31 tom Exp $
  */
 #ifndef NO_RULES
 #include <HTRules.h>
@@ -1337,7 +1337,7 @@ static Config_Type Config_Table [] =
      PARSE_LST(RC_BROKEN_FTP_RETR,      broken_ftp_retr),
 #endif
      PARSE_PRG(RC_BZIP2_PATH,           ppBZIP2),
-     PARSE_SET(RC_CASE_SENSITIVE_ALWAYS_ON, case_sensitive),
+     PARSE_SET(RC_CASE_SENSITIVE_ALWAYS_ON, LYcase_sensitive),
      PARSE_FUN(RC_CHARACTER_SET,        character_set_fun),
 #ifdef CAN_SWITCH_DISPLAY_CHARSET
      PARSE_STR(RC_CHARSET_SWITCH_RULES, charset_switch_rules),

@@ -1,4 +1,4 @@
-/* $LynxId: LYrcFile.c,v 1.82 2009/11/27 11:15:54 tom Exp $ */
+/* $LynxId: LYrcFile.c,v 1.83 2010/05/05 09:19:31 tom Exp $ */
 #include <HTUtils.h>
 #include <HTFTP.h>
 #include <LYUtils.h>
@@ -344,7 +344,7 @@ bookmark_file specifies the name and location of the default bookmark\n\
 file into which the user can paste links for easy access at a later\n\
 date.\n\
 ")),
-    PARSE_SET(RC_CASE_SENSITIVE_SEARCHING, case_sensitive, N_("\
+    PARSE_SET(RC_CASE_SENSITIVE_SEARCHING, LYcase_sensitive, N_("\
 If case_sensitive_searching is \"on\" then when the user invokes a search\n\
 using the 's' or '/' keys, the search performed will be case sensitive\n\
 instead of case INsensitive.  The default is usually \"off\".\n\

@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMainLoop.c,v 1.163 2010/04/29 22:11:50 tom Exp $
+ * $LynxId: LYMainLoop.c,v 1.164 2010/05/05 09:48:38 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTAccess.h>
@@ -4818,10 +4818,10 @@ void handle_LYK_WHEREIS(int cmd,
 	       curdoc.link >= 0 && nlinks > 0 &&
 	       links[curdoc.link].ly >= (display_lines / 3)) {
 	*refresh_screen = TRUE;
-    } else if ((case_sensitive && 0 != strcmp(prev_target,
-					      remember_old_target)) ||
-	       (!case_sensitive && 0 != strcasecomp8(prev_target,
-						     remember_old_target))) {
+    } else if ((LYcase_sensitive && 0 != strcmp(prev_target,
+						remember_old_target)) ||
+	       (!LYcase_sensitive && 0 != strcasecomp8(prev_target,
+						       remember_old_target))) {
 	*refresh_screen = TRUE;
     }
     FREE(remember_old_target);

@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMain.c,v 1.212 2010/04/30 23:49:43 tom Exp $
+ * $LynxId: LYMain.c,v 1.213 2010/05/05 09:19:31 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTP.h>
@@ -201,7 +201,7 @@ BOOLEAN LYxhtml_parsing = FALSE;
 BOOLEAN bold_H1 = FALSE;
 BOOLEAN bold_headers = FALSE;
 BOOLEAN bold_name_anchors = FALSE;
-BOOLEAN case_sensitive = CASE_SENSITIVE_ALWAYS_ON;
+BOOLEAN LYcase_sensitive = CASE_SENSITIVE_ALWAYS_ON;
 BOOLEAN check_mail = CHECKMAIL;
 BOOLEAN child_lynx = FALSE;
 BOOLEAN dump_links_only = FALSE;
@@ -3318,7 +3318,7 @@ outputs for -source dumps"
       "=NUMBER\nNUMBER of documents cached in memory"
    ),
    PARSE_SET(
-      "case",		4|SET_ARG,		case_sensitive,
+      "case",		4|SET_ARG,		LYcase_sensitive,
       "enable case sensitive user searching"
    ),
    PARSE_SET(

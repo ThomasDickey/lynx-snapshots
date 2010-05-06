@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYSearch.c,v 1.23 2009/01/01 23:28:39 tom Exp $
+ * $LynxId: LYSearch.c,v 1.24 2010/05/05 09:19:31 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTAlert.h>
@@ -21,7 +21,7 @@ static BOOL link_has_target(int cur,
     int count;
 
     /*
-     * Search the hightext strings, if present, taking the case_sensitive
+     * Search the hightext strings, if present, taking the LYcase_sensitive
      * setting into account.
      */
     for (count = 0;; ++count) {
@@ -34,7 +34,7 @@ static BOOL link_has_target(int cur,
     }
 
     /*
-     * Search the relevant form fields, taking the case_sensitive setting into
+     * Search the relevant form fields, taking the LYcase_sensitive setting into
      * account.  - FM
      */
     if ((a->l_form != NULL && a->l_form->value != NULL) &&
@@ -150,7 +150,7 @@ static int check_prev_target_in_links(int *cur,
  * string is on
  *
  * This is the primary USER search engine and is case sensitive or case
- * insensitive depending on the 'case_sensitive' global variable
+ * insensitive depending on the 'LYcase_sensitive' global variable
  */
 BOOL textsearch(DocInfo *cur_doc, char *prev_target,
 		int target_size,

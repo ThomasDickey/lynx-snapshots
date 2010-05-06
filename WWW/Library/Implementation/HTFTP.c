@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFTP.c,v 1.92 2010/04/29 22:50:32 tom Exp $
+ * $LynxId: HTFTP.c,v 1.93 2010/05/05 09:27:41 tom Exp $
  *
  *			File Transfer Protocol (FTP) Client
  *			for a WorldWideWeb browser
@@ -3399,7 +3399,7 @@ static int setup_connection(const char *name,
 		/*
 		 * EPSV bla (|||port|)
 		 */
-		for (p = response_text; *p && !isspace(*p); p++) {
+		for (p = response_text; *p && !isspace(UCH(*p)); p++) {
 		    ;		/* null body */
 		}
 		for ( /*nothing */ ;
