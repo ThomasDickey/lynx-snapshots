@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTAnchor.h,v 1.33 2009/01/01 16:47:33 tom Exp $
+ * $LynxId: HTAnchor.h,v 1.34 2010/06/17 00:13:37 tom Exp $
  *
  *	Hypertext "Anchor" Object				     HTAnchor.h
  *	==========================
@@ -35,6 +35,8 @@ extern "C" {
 	HTParentAnchor0 *parent;	/* Parent of this anchor (self for adults) */
     };
 
+#define HASH_TYPE unsigned short
+
     struct _HTParentAnchor0 {	/* One for adult_table,
 				 * generally not used outside HTAnchor.c */
 	/* Common part from the generic anchor structure */
@@ -48,7 +50,7 @@ extern "C" {
 	HTList sources;		/* List of anchors pointing to this, if any */
 
 	HTList _add_adult;	/* - just a memory for list entry:) */
-	short adult_hash;	/* adult list number */
+	HASH_TYPE adult_hash;	/* adult list number */
 	BOOL underway;		/* Document about to be attached to it */
     };
 

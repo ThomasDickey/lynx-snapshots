@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTAAUtil.c,v 1.28 2010/04/29 09:32:49 tom Exp $
+ * $LynxId: HTAAUtil.c,v 1.29 2010/06/17 00:36:31 tom Exp $
  *
  * MODULE							HTAAUtil.c
  *		COMMON PARTS OF ACCESS AUTHORIZATION MODULE
@@ -234,7 +234,7 @@ BOOL HTAA_templateMatch(const char *ctemplate,
 	return YES;		/* Equally long equal strings */
     else if ('*' == *p) {	/* Wildcard */
 	p++;			/* Skip wildcard character */
-	m = strlen(q) - strlen(p);	/* Amount to match to wildcard */
+	m = (int) (strlen(q) - strlen(p));	/* Amount to match to wildcard */
 	if (m < 0)
 	    return NO;		/* No match, filename too short */
 	else {			/* Skip the matched characters and compare */
@@ -284,7 +284,7 @@ BOOL HTAA_templateCaseMatch(const char *ctemplate,
 	return YES;		/* Equally long equal strings */
     else if ('*' == *p) {	/* Wildcard */
 	p++;			/* Skip wildcard character */
-	m = strlen(q) - strlen(p);	/* Amount to match to wildcard */
+	m = (int) (strlen(q) - strlen(p));	/* Amount to match to wildcard */
 	if (m < 0)
 	    return NO;		/* No match, filename too short */
 	else {			/* Skip the matched characters and compare */
@@ -470,7 +470,7 @@ static void FreeHTAAUtil(void)
  *			proceed to read from socket.
  */
 void HTAA_setupReader(char *start_of_headers,
-		      int length,
+		      size_t length,
 		      int soc)
 {
     if (!start_of_headers)
@@ -480,7 +480,7 @@ void HTAA_setupReader(char *start_of_headers,
 	if (buffer_length < BUFFER_SIZE)	/* would fall below BUFFER_SIZE? */
 	    buffer_length = BUFFER_SIZE;
 	buffer = (char *) malloc((size_t) (sizeof(char) * (buffer_length + 1)));
-    } else if (length > (int) buffer_length) {	/* need more space? */
+    } else if (length > buffer_length) {	/* need more space? */
 	buffer_length = length;
 	buffer = (char *) realloc((char *) buffer,
 				  (size_t) (sizeof(char) * (buffer_length + 1)));

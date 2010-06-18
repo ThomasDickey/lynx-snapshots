@@ -102,7 +102,7 @@ Routines for Browser Side Recording of AA Info
  *                      NO, otherwise.
  */
     extern BOOL HTAA_shouldRetryWithAuth(char *start_of_headers,
-					 int length,
+					 size_t length,
 					 int soc,
 					 BOOL IsProxy);
 

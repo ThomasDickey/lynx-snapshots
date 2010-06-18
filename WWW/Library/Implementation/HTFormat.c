@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFormat.c,v 1.69 2010/04/29 09:55:30 tom Exp $
+ * $LynxId: HTFormat.c,v 1.70 2010/06/17 00:25:03 tom Exp $
  *
  *		Manage different file formats			HTFormat.c
  *		=============================
@@ -343,7 +343,7 @@ static int half_match(char *trial_type, char *target)
 	    trial_type, target));
 
     /* main type matches */
-    if (!strncmp(trial_type, target, (cp - trial_type) - 1))
+    if (!strncmp(trial_type, target, (size_t) ((cp - trial_type) - 1)))
 	return 1;
 
     return 0;
@@ -634,8 +634,10 @@ float HTStackValue(HTFormat rep_in,
 		float value = initial_value * pres->quality;
 
 		if (HTMaxSecs > 0.0)
-		    value = value - (length * pres->secs_per_byte + pres->secs)
-			/ HTMaxSecs;
+		    value = (value
+			     - ((float) length * pres->secs_per_byte
+				+ pres->secs)
+			     / HTMaxSecs);
 		return value;
 	    }
 	}
@@ -929,7 +931,7 @@ int HTFileCopy(FILE *fp, HTStream *sink)
      */
     HTReadProgress(bytes = 0, 0);
     for (;;) {
-	status = fread(input_buffer, 1, INPUT_BUFFER_SIZE, fp);
+	status = (int) fread(input_buffer, 1, INPUT_BUFFER_SIZE, fp);
 	if (status == 0) {	/* EOF or error */
 	    if (ferror(fp) == 0) {
 		rv = HT_LOADED;
@@ -1174,11 +1176,12 @@ static int HTZzFileCopy(FILE *zzfp, HTStream *sink)
     for (;;) {
 	if (s.avail_in == 0) {
 	    s.next_in = (Bytef *) input_buffer;
-	    len = s.avail_in = fread(input_buffer, 1, INPUT_BUFFER_SIZE, zzfp);
+	    s.avail_in = fread(input_buffer, 1, INPUT_BUFFER_SIZE, zzfp);
+	    len = (int) s.avail_in;
 	}
 	status = inflate(&s, flush);
 	if (status == Z_STREAM_END || status == Z_BUF_ERROR) {
-	    len = sizeof(output_buffer) - s.avail_out;
+	    len = (int) sizeof(output_buffer) - (int) s.avail_out;
 	    if (len > 0) {
 		(*targetClass.put_block) (sink, output_buffer, len);
 		bytes += len;
@@ -1198,7 +1201,7 @@ static int HTZzFileCopy(FILE *zzfp, HTStream *sink)
 	    s.avail_in = sizeof(dummy_head);
 	    (void) inflate(&s, flush);
 	    s.next_in = (Bytef *) input_buffer;
-	    s.avail_in = len;
+	    s.avail_in = (unsigned) len;
 	    continue;
 	} else if (status != Z_OK) {
 	    CTRACE((tfp, "HTZzFileCopy inflate() %s\n", zError(status)));
@@ -1337,7 +1340,7 @@ void HTCopyNoCR(HTParentAnchor *anchor GCC_UNUSED,
 	character = HTGetCharacter();
 	if (character == EOF)
 	    break;
-	(*targetClass.put_character) (sink, UCH(character));
+	(*targetClass.put_character) (sink, (char) character);
     }
 }
 

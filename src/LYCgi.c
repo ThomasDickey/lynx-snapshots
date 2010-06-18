@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYCgi.c,v 1.57 2010/04/29 23:42:23 tom Exp $
+ * $LynxId: LYCgi.c,v 1.58 2010/06/17 10:44:09 tom Exp $
  *                   Lynx CGI support                              LYCgi.c
  *                   ================
  *
@@ -370,6 +370,11 @@ static int LYLoadCGI(const char *arg,
 #else
 	int wstatus;
 #endif
+
+	fd1[0] = -1;
+	fd1[1] = -1;
+	fd2[0] = -1;
+	fd2[1] = -1;
 
 	if (anAnchor->isHEAD || keep_mime_headers) {
 

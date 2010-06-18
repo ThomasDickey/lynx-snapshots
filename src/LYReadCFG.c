@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYReadCFG.c,v 1.149 2010/05/05 09:19:31 tom Exp $
+ * $LynxId: LYReadCFG.c,v 1.150 2010/06/18 00:11:35 tom Exp $
  */
 #ifndef NO_RULES
 #include <HTRules.h>
@@ -1481,6 +1481,7 @@ static Config_Type Config_Table [] =
      PARSE_INT(RC_MAX_COOKIES_BUFFER,   max_cookies_buffer),
      PARSE_INT(RC_MAX_COOKIES_DOMAIN,   max_cookies_domain),
      PARSE_INT(RC_MAX_COOKIES_GLOBAL,   max_cookies_global),
+     PARSE_INT(RC_MAX_URI_SIZE,         max_uri_size),
      PARSE_TIM(RC_MESSAGESECS,          MessageSecs),
      PARSE_SET(RC_MINIMAL_COMMENTS,     minimal_comments),
      PARSE_PRG(RC_MKDIR_PATH,           ppMKDIR),

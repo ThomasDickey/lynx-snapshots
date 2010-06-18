@@ -1,4 +1,4 @@
-/* $LynxId: LYStrings.c,v 1.172 2010/05/05 09:19:31 tom Exp $ */
+/* $LynxId: LYStrings.c,v 1.173 2010/06/17 10:50:14 tom Exp $ */
 #include <HTUtils.h>
 #include <HTCJK.h>
 #include <UCAux.h>
@@ -5846,6 +5846,7 @@ char *SNACopy(char **dest,
 	if (*dest == NULL) {
 	    CTRACE((tfp, "Tried to malloc %d bytes\n", n));
 	    outofmem(__FILE__, "SNACopy");
+	    assert(*dest != NULL);
 	}
 	strncpy(*dest, src, (unsigned) n);
 	*(*dest + n) = '\0';	/* terminate */
@@ -5867,6 +5868,7 @@ char *SNACat(char **dest,
 	    *dest = (char *) realloc(*dest, (unsigned) (length + n + 1));
 	    if (*dest == NULL)
 		outofmem(__FILE__, "SNACat");
+	    assert(*dest != NULL);
 	    strncpy(*dest + length, src, (unsigned) n);
 	    *(*dest + length + n) = '\0';	/* terminate */
 	} else {
@@ -5874,6 +5876,7 @@ char *SNACat(char **dest,
 
 	    if (*dest == NULL)
 		outofmem(__FILE__, "SNACat");
+	    assert(*dest != NULL);
 	    memcpy(*dest, src, (unsigned) n);
 	    (*dest)[n] = '\0';	/* terminate */
 	}

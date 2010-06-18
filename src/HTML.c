@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTML.c,v 1.137 2010/05/02 20:30:21 tom Exp $
+ * $LynxId: HTML.c,v 1.139 2010/06/18 00:05:37 tom Exp $
  *
  *		Structured stream to Rich hypertext converter
  *		============================================
@@ -323,7 +323,7 @@ void HTML_put_character(HTStructured * me, char c)
 	if (c == LY_SOFT_HYPHEN)
 	    return;
 	if (c != '\n' && c != '\t' && c != '\r') {
-	    HTChunkPutc(&me->title, c);
+	    HTChunkPutc(&me->title, UCH(c));
 	} else if (FIX_JAPANESE_SPACES) {
 	    if (c == '\t') {
 		HTChunkPutc(&me->title, ' ');
@@ -336,28 +336,28 @@ void HTML_put_character(HTStructured * me, char c)
 	return;
 
     case HTML_STYLE:
-	HTChunkPutc(&me->style_block, c);
+	HTChunkPutc(&me->style_block, UCH(c));
 	return;
 
     case HTML_SCRIPT:
-	HTChunkPutc(&me->script, c);
+	HTChunkPutc(&me->script, UCH(c));
 	return;
 
     case HTML_OBJECT:
-	HTChunkPutc(&me->object, c);
+	HTChunkPutc(&me->object, UCH(c));
 	return;
 
     case HTML_TEXTAREA:
-	HTChunkPutc(&me->textarea, c);
+	HTChunkPutc(&me->textarea, UCH(c));
 	return;
 
     case HTML_SELECT:
     case HTML_OPTION:
-	HTChunkPutc(&me->option, c);
+	HTChunkPutc(&me->option, UCH(c));
 	return;
 
     case HTML_MATH:
-	HTChunkPutc(&me->math, c);
+	HTChunkPutc(&me->math, UCH(c));
 	return;
 
     default:
@@ -375,7 +375,7 @@ void HTML_put_character(HTStructured * me, char c)
 	     */
 	    if (me->sp[0].tag_number == HTML_A)
 		break;
-	    HTChunkPutc(&me->option, c);
+	    HTChunkPutc(&me->option, UCH(c));
 	    return;
 	}
 	break;
@@ -752,6 +752,7 @@ static void addClassName(const char *prefix,
 	}
 	if (Style_className == NULL)
 	    outofmem(__FILE__, "addClassName");
+	assert(Style_className != NULL);
 	Style_className_end = Style_className + have;
     }
     if (offset)
@@ -7639,6 +7640,7 @@ HTStructured *HTML_new(HTParentAnchor *anchor,
     me = typecalloc(HTStructured);
     if (me == NULL)
 	outofmem(__FILE__, "HTML_new");
+    assert(me != NULL);
 
     /*
      * This used to call 'get_styles()' only on the first time through this

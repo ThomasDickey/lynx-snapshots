@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTInit.c,v 1.72 2010/04/29 23:50:21 tom Exp $
+ * $LynxId: HTInit.c,v 1.73 2010/06/17 08:13:52 tom Exp $
  *
  *		Configuration-specific Initialization		HTInit.c
  *		----------------------------------------
@@ -676,14 +676,14 @@ static int BuildCommand(HTChunk *cmd,
     for (from = controlstring; *from != '\0'; from++) {
 	if (escaped) {
 	    escaped = 0;
-	    HTChunkPutc(cmd, *from);
+	    HTChunkPutc(cmd, UCH(*from));
 	} else if (*from == '\\') {
 	    escaped = 1;
 	} else if (prefixed) {
 	    prefixed = 0;
 	    switch (*from) {
 	    case '%':		/* not defined */
-		HTChunkPutc(cmd, *from);
+		HTChunkPutc(cmd, UCH(*from));
 		break;
 	    case 'n':
 		/* FALLTHRU */
@@ -736,7 +736,7 @@ static int BuildCommand(HTChunk *cmd,
 	} else if (*from == '%') {
 	    prefixed = 1;
 	} else {
-	    HTChunkPutc(cmd, *from);
+	    HTChunkPutc(cmd, UCH(*from));
 	}
     }
     HTChunkTerminate(cmd);

@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYCookie.c,v 1.99 2010/04/29 23:42:23 tom Exp $
+ * $LynxId: LYCookie.c,v 1.100 2010/06/17 21:31:03 tom Exp $
  *
  *			       Lynx Cookie Support		   LYCookie.c
  *			       ===================
@@ -672,19 +672,22 @@ static char *scan_cookie_sublist(char *hostname,
 				 char *header,
 				 BOOL secure)
 {
-    HTList *hl = sublist, *next = NULL;
+    HTList *hl;
     cookie *co;
     time_t now = time(NULL);
     int len = 0;
     char crlftab[8];
 
     sprintf(crlftab, "%c%c%c", CR, LF, '\t');
-    while (hl) {
+    for (hl = sublist; hl != NULL; hl = hl->next) {
 	co = (cookie *) hl->object;
-	next = hl->next;
 
-	if ((co) &&		/* speed-up host_matches() and limit trace output */
-	    (LYstrstr(hostname, co->domain) != NULL)) {
+	if (co == NULL) {
+	    continue;
+	}
+
+	/* speed-up host_matches() and limit trace output */
+	if (LYstrstr(hostname, co->domain) != NULL) {
 	    CTrace((tfp, "Checking cookie %p %s=%s\n",
 		    (void *) hl,
 		    (co->name ? co->name : "(no name)"),
@@ -704,7 +707,7 @@ static char *scan_cookie_sublist(char *hostname,
 	/*
 	 * Check if this cookie has expired, and if so, delete it.
 	 */
-	if (((co) && (co->flags & COOKIE_FLAG_EXPIRES_SET)) &&
+	if ((co->flags & COOKIE_FLAG_EXPIRES_SET) &&
 	    co->expires <= now) {
 	    HTList_removeObject(sublist, co);
 	    freeCookie(co);
@@ -715,8 +718,9 @@ static char *scan_cookie_sublist(char *hostname,
 	/*
 	 * Check if we have a unexpired match, and handle if we do.
 	 */
-	if (((co != NULL) &&
-	     host_matches(hostname, co->domain)) &&
+	if (co->domain != 0 &&
+	    co->name != 0 &&
+	    host_matches(hostname, co->domain) &&
 	    (co->pathlen == 0 || is_prefix(co->path, path))) {
 	    /*
 	     * Skip if the secure flag is set and we don't have a secure
@@ -724,7 +728,6 @@ static char *scan_cookie_sublist(char *hostname,
 	     * secure.  - FM
 	     */
 	    if ((co->flags & COOKIE_FLAG_SECURE) && secure == FALSE) {
-		hl = next;
 		continue;
 	    }
 
@@ -733,7 +736,6 @@ static char *scan_cookie_sublist(char *hostname,
 	     * - FM
 	     */
 	    if (co->PortList && !port_matches(port, co->PortList)) {
-		hl = next;
 		continue;
 	    }
 
@@ -829,7 +831,6 @@ static char *scan_cookie_sublist(char *hostname,
 		}
 	    }
 	}
-	hl = next;
     }
 
     return (header);

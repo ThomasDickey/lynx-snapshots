@@ -1,4 +1,7 @@
-/*						  HTChunk: Flexible array handling for libwww
+/*
+ * $LynxId: HTChunk.h,v 1.19 2010/06/16 23:24:56 tom Exp $
+ *
+ *				     HTChunk: Flexible array handling for libwww
  *					CHUNK HANDLING:
  *					FLEXIBLE ARRAYS
  *
@@ -151,7 +154,7 @@ extern "C" {
  *   *ch		Is one character bigger
  *
  */
-    extern void HTChunkPutc(HTChunk *ch, char c);
+    extern void HTChunkPutc(HTChunk *ch, unsigned char c);
 
     extern void HTChunkPutb(HTChunk *ch, const char *b, int l);
 

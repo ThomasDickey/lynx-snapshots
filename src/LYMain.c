@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMain.c,v 1.213 2010/05/05 09:19:31 tom Exp $
+ * $LynxId: LYMain.c,v 1.214 2010/06/18 00:12:27 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTP.h>
@@ -494,6 +494,7 @@ int lynx_temp_subspace = 0;	/* > 0 if we made temp-directory */
 int max_cookies_domain = 50;
 int max_cookies_global = 500;
 int max_cookies_buffer = 4096;
+int max_uri_size = 8192;
 int nlinks = 0;			/* number of links in memory */
 int outgoing_mail_charset = -1;	/* translate mail to this charset */
 

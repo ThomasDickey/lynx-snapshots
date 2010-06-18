@@ -1,5 +1,5 @@
 /*                System dependencies in the W3 library
- * $LynxId: www_tcp.h,v 1.39 2009/03/09 22:43:29 Doug.Kaufman Exp $
+ * $LynxId: www_tcp.h,v 1.40 2010/06/16 23:46:28 tom Exp $
  *
                                    SYSTEM DEPENDENCIES
 
@@ -330,8 +330,8 @@ VAX/VMS
 #undef NETWRITE
 #undef NETCLOSE
 #define SOCKET_READ(s,b,l)  ((s)>10 ? netread((s),(b),(l)) : read((s),(b),(l)))
-#define NETWRITE(s,b,l) ((s)>10 ? netwrite((s),(b),(l)) : write((s),(b),(l)))
-#define NETCLOSE(s)     ((s)>10 ? netclose(s) : close(s))
+#define NETWRITE(s,b,l)     ((s)>10 ? netwrite((s),(b),(l)) : write((s),(b),(l)))
+#define NETCLOSE(s)         ((s)>10 ? netclose(s) : close(s))
 #undef IOCTL
 #define IOCTL(a,b,c) -1		/* disables ioctl function            */
 #define NO_IOCTL		/* flag to check if ioctl is disabled */
@@ -343,9 +343,9 @@ VAX/VMS
 #undef NETWRITE
 #undef NETCLOSE
 #define SOCKET_READ(s,b,l) (cmu_get_sdc((s)) != 0 ? cmu_read((s),(b),(l)) : read((s),(b),(l)))
-#define NETREAD(s,b,l) (cmu_get_sdc((s)) != 0 ? HTDoRead((s),(b),(l)) : read((s),(b),(l)))
-#define NETWRITE(s,b,l) (cmu_get_sdc((s)) != 0 ? cmu_write((s),(b),(l)) : write((s),(b),(l)))
-#define NETCLOSE(s) (cmu_get_sdc((s)) != 0 ? cmu_close((s)) : close((s)))
+#define NETREAD(s,b,l)     (cmu_get_sdc((s)) != 0 ? HTDoRead((s),(b),(l)) : read((s),(b),(l)))
+#define NETWRITE(s,b,l)    (cmu_get_sdc((s)) != 0 ? cmu_write((s),(b),(l)) : write((s),(b),(l)))
+#define NETCLOSE(s)        (cmu_get_sdc((s)) != 0 ? cmu_close((s)) : close((s)))
 #endif /* CMU_TCP */
 
 #ifdef MULTINET
@@ -367,9 +367,9 @@ extern int socket_ioctl();
 
 #define SOCKET_READ(s,b,l)  ((s)>10 ? socket_read((s),(b),(l)) : \
 				read((s),(b),(l)))
-#define NETWRITE(s,b,l) ((s)>10 ? socket_write((s),(b),(l)) : \
+#define NETWRITE(s,b,l)     ((s)>10 ? socket_write((s),(b),(l)) : \
                                 write((s),(b),(l)))
-#define NETCLOSE(s)     ((s)>10 ? socket_close(s) : close(s))
+#define NETCLOSE(s)         ((s)>10 ? socket_close(s) : close(s))
 #define IOCTL socket_ioctl
 #define SOCKET_ERRNO socket_errno
 #endif /* MULTINET */
@@ -380,13 +380,13 @@ extern int socket_ioctl();
 #undef NETWRITE
 #undef NETCLOSE
 #undef IOCTL
-#define SOCKET_READ(s,b,l) (si_get_sdc((s)) != 0 ? si_read((s),(b),(l)) : \
+#define SOCKET_READ(s,b,l)  (si_get_sdc((s)) != 0 ? si_read((s),(b),(l)) : \
                                 read((s),(b),(l)))
-#define NETREAD(s,b,l) (si_get_sdc((s)) != 0 ? HTDoRead((s),(b),(l)) : \
+#define NETREAD(s,b,l)      (si_get_sdc((s)) != 0 ? HTDoRead((s),(b),(l)) : \
                                 read((s),(b),(l)))
-#define NETWRITE(s,b,l) (si_get_sdc((s)) != 0 ? si_write((s),(b),(l)) : \
+#define NETWRITE(s,b,l)     (si_get_sdc((s)) != 0 ? si_write((s),(b),(l)) : \
                                 write((s),(b),(l)))
-#define NETCLOSE(s) (si_get_sdc((s)) != 0 ? si_close((s)) : close((s)))
+#define NETCLOSE(s)         (si_get_sdc((s)) != 0 ? si_close((s)) : close((s)))
 #define IOCTL si_ioctl
 #endif /* SOCKETSHR_TCP */
 

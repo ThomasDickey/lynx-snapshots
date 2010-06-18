@@ -1,5 +1,5 @@
 /*
- * $LynxId: SGML.c,v 1.133 2010/04/30 08:28:32 tom Exp $
+ * $LynxId: SGML.c,v 1.134 2010/06/16 23:27:40 tom Exp $
  *
  *			General SGML Parser code		SGML.c
  *			========================
@@ -1454,9 +1454,10 @@ static void SGML_free(HTStream *context)
 #ifdef USE_PRETTYSRC
 	if (!psrc_view)		/* Don't actually call on target if viewing psrc - kw */
 #endif
-	    (*context->actions->end_element) (context->target,
-					      NORMAL_TAGNUM(TAGNUM_OF_TAGP(t)),
-					      &context->include);
+	    (*context->actions->end_element)
+		(context->target,
+		 (int) NORMAL_TAGNUM(TAGNUM_OF_TAGP(t)),
+		 &context->include);
 	FREE(context->include);
     }
 
@@ -1628,13 +1629,8 @@ static void SGML_character(HTStream *context, char c_in)
     UCode_t clong, uck = 0;	/* Enough bits for UCS4 ... */
     int testlast;
 
-#ifdef CJK_EX
     unsigned char c;
-
-#else
-    char c;
-#endif
-    char saved_char_in = '\0';
+    unsigned char saved_char_in = '\0';
 
     ++sgml_offset;
 
@@ -1644,7 +1640,7 @@ static void SGML_character(HTStream *context, char c_in)
      */
 #define unsign_c clong
 
-    c = c_in;
+    c = UCH(c_in);
     clong = UCH(c);		/* a.k.a. unsign_c */
 
     if (context->T.decode_utf8) {
@@ -1659,7 +1655,7 @@ static void SGML_character(HTStream *context, char c_in)
 	    if (context->utf_count > 0 && (TOASCII(c) & 0xc0) == 0x80) {
 		context->utf_char = (context->utf_char << 6) | (TOASCII(c) & 0x3f);
 		context->utf_count--;
-		*(context->utf_buf_p) = c;
+		*(context->utf_buf_p) = (char) c;
 		(context->utf_buf_p)++;
 		if (context->utf_count == 0) {
 		    /*
@@ -1669,7 +1665,7 @@ static void SGML_character(HTStream *context, char c_in)
 		    *(context->utf_buf_p) = '\0';
 		    clong = context->utf_char;
 		    if (clong < 256) {
-			c = ((char) (clong & 0xff));
+			c = UCH(clong & 0xff);
 		    }
 		    /* lynx does not use left-to-right */
 		    if (clong == 0x200e)
@@ -1686,7 +1682,7 @@ static void SGML_character(HTStream *context, char c_in)
 		 * Start handling a new multibyte character.  - FM
 		 */
 		context->utf_buf_p = context->utf_buf;
-		*(context->utf_buf_p) = c;
+		*(context->utf_buf_p) = (char) c;
 		(context->utf_buf_p)++;
 		if ((c & 0xe0) == 0xc0) {
 		    context->utf_count = 1;
@@ -1748,13 +1744,13 @@ static void SGML_character(HTStream *context, char c_in)
 	    if (context->utf_count == 0) {
 		if (IS_SJIS_HI1((unsigned char) c) ||
 		    IS_SJIS_HI2((unsigned char) c)) {
-		    context->utf_buf[0] = c;
+		    context->utf_buf[0] = (char) c;
 		    context->utf_count = 1;
 		    clong = -11;
 		}
 	    } else {
 		if (IS_SJIS_LO((unsigned char) c)) {
-		    context->utf_buf[1] = c;
+		    context->utf_buf[1] = (char) c;
 		    clong = UCTransJPToUni(context->utf_buf, 2, context->inUCLYhndl);
 		}
 		context->utf_count = 0;
@@ -1762,13 +1758,13 @@ static void SGML_character(HTStream *context, char c_in)
 	} else {
 	    if (context->utf_count == 0) {
 		if (IS_EUC_HI((unsigned char) c)) {
-		    context->utf_buf[0] = c;
+		    context->utf_buf[0] = (char) c;
 		    context->utf_count = 1;
 		    clong = -11;
 		}
 	    } else {
 		if (IS_EUC_LOX((unsigned char) c)) {
-		    context->utf_buf[1] = c;
+		    context->utf_buf[1] = (char) c;
 		    clong = UCTransJPToUni(context->utf_buf, 2, context->inUCLYhndl);
 		}
 		context->utf_count = 0;
@@ -1783,11 +1779,11 @@ static void SGML_character(HTStream *context, char c_in)
 	/*
 	 * Convert the octet to Unicode.  - FM
 	 */
-	clong = UCTransToUni(c, context->inUCLYhndl);
+	clong = UCTransToUni((char) c, context->inUCLYhndl);
 	if (clong > 0) {
 	    saved_char_in = c;
 	    if (clong < 256) {
-		c = FROMASCII((char) clong);
+		c = FROMASCII(UCH(clong));
 	    }
 	}
 	goto top1;
@@ -1797,23 +1793,23 @@ static void SGML_character(HTStream *context, char c_in)
 	 * This else if may be too ugly to keep.  - KW
 	 */
 	if (context->T.trans_from_uni &&
-	    (((clong = UCTransToUni(c, context->inUCLYhndl)) >= ' ') ||
+	    (((clong = UCTransToUni((char) c, context->inUCLYhndl)) >= ' ') ||
 	     (context->T.transp &&
-	      (clong = UCTransToUni(c, context->inUCLYhndl)) > 0))) {
+	      (clong = UCTransToUni((char) c, context->inUCLYhndl)) > 0))) {
 	    saved_char_in = c;
 	    if (clong < 256) {
-		c = FROMASCII((char) clong);
+		c = FROMASCII(UCH(clong));
 	    }
 	    goto top1;
 	} else {
 	    uck = -1;
 	    if (context->T.transp) {
-		uck = UCTransCharStr(replace_buf, 60, c,
+		uck = UCTransCharStr(replace_buf, 60, (char) c,
 				     context->inUCLYhndl,
 				     context->inUCLYhndl, NO);
 	    }
 	    if (!context->T.transp || uck < 0) {
-		uck = UCTransCharStr(replace_buf, 60, c,
+		uck = UCTransCharStr(replace_buf, 60, (char) c,
 				     context->inUCLYhndl,
 				     context->outUCLYhndl, YES);
 	    }
@@ -1822,7 +1818,7 @@ static void SGML_character(HTStream *context, char c_in)
 	    } else if (uck < 0) {
 		goto top0a;
 	    }
-	    c = replace_buf[0];
+	    c = UCH(replace_buf[0]);
 	    if (c && replace_buf[1]) {
 		if (context->state == S_text) {
 		    PUTS(replace_buf);
@@ -2101,9 +2097,9 @@ static void SGML_character(HTStream *context, char c_in)
 		    PUTC(c);
 		} else if (clong == 0xfffd && saved_char_in &&
 			   HTPassEightBitRaw &&
-			   UCH(saved_char_in) >=
+			   saved_char_in >=
 			   LYlowest_eightbit[context->outUCLYhndl]) {
-		    PUTUTF8((0xf000 | UCH(saved_char_in)));
+		    PUTUTF8((0xf000 | saved_char_in));
 		} else {
 		    PUTUTF8(clong);
 		}
@@ -2240,13 +2236,13 @@ static void SGML_character(HTStream *context, char c_in)
 	     * Check for a strippable koi8-r 8-bit character.  - FM
 	     */
 	} else if (context->T.strip_raw_char_in && saved_char_in &&
-		   (UCH(saved_char_in) >= 0xc0) &&
-		   (UCH(saved_char_in) < 255)) {
+		   (saved_char_in >= 0xc0) &&
+		   (saved_char_in < 255)) {
 	    /*
 	     * KOI8 special:  strip high bit, gives (somewhat) readable ASCII
 	     * or KOI7 - it was constructed that way!  - KW
 	     */
-	    PUTC(((char) (saved_char_in & 0x7f)));
+	    PUTC((saved_char_in & 0x7f));
 	    saved_char_in = '\0';
 #endif /* NOTDEFINED */
 	    /*
@@ -2629,15 +2625,18 @@ static void SGML_character(HTStream *context, char c_in)
 	    /*
 	     * Terminate the numeric entity and try to handle it.  - FM
 	     */
-	    unsigned long code;
+	    unsigned long lcode;
 	    int i;
 
 	    HTChunkTerminate(string);
 #ifdef USE_PRETTYSRC
 	    entity_string = string->data;
 #endif
-	    if ((context->isHex ? sscanf(string->data, "%lx", &code) :
-		 sscanf(string->data, "%lu", &code)) == 1) {
+	    if ((context->isHex
+		 ? sscanf(string->data, "%lx", &lcode)
+		 : sscanf(string->data, "%lu", &lcode)) == 1) {
+		UCode_t code = (UCode_t) lcode;
+
 /* =============== work in ASCII below here ===============  S/390 -- gil -- 1092 */
 		code = LYcp1252ToUnicode(code);
 		/*
@@ -3090,7 +3089,7 @@ static void SGML_character(HTStream *context, char c_in)
 		 * Clear out attributes.
 		 */
 		memset((void *) context->present, 0, sizeof(BOOL) *
-		       context->current_tag->number_of_attributes);
+		         (unsigned) (context->current_tag->number_of_attributes));
 	    }
 
 	    string->size = 0;
@@ -3304,10 +3303,10 @@ static void SGML_character(HTStream *context, char c_in)
 		    context->T.trans_from_uni)) {
 	    if (clong == 0xfffd && saved_char_in &&
 		HTPassEightBitRaw &&
-		UCH(saved_char_in) >=
+		saved_char_in >=
 		LYlowest_eightbit[context->outUCLYhndl]) {
 		HTChunkPutUtf8Char(string,
-				   (0xf000 | UCH(saved_char_in)));
+				   (0xf000 | saved_char_in));
 	    } else {
 		HTChunkPutUtf8Char(string, clong);
 	    }
@@ -3714,10 +3713,10 @@ static void SGML_character(HTStream *context, char c_in)
 		    context->T.trans_from_uni)) {
 	    if (clong == 0xfffd && saved_char_in &&
 		HTPassEightBitRaw &&
-		UCH(saved_char_in) >=
+		saved_char_in >=
 		LYlowest_eightbit[context->outUCLYhndl]) {
 		HTChunkPutUtf8Char(string,
-				   (0xf000 | UCH(saved_char_in)));
+				   (0xf000 | saved_char_in));
 	    } else {
 		HTChunkPutUtf8Char(string, clong);
 	    }
@@ -3754,10 +3753,10 @@ static void SGML_character(HTStream *context, char c_in)
 		    context->T.trans_from_uni)) {
 	    if (clong == 0xfffd && saved_char_in &&
 		HTPassEightBitRaw &&
-		UCH(saved_char_in) >=
+		saved_char_in >=
 		LYlowest_eightbit[context->outUCLYhndl]) {
 		HTChunkPutUtf8Char(string,
-				   (0xf000 | UCH(saved_char_in)));
+				   (0xf000 | saved_char_in));
 	    } else {
 		HTChunkPutUtf8Char(string, clong);
 	    }
@@ -3774,7 +3773,7 @@ static void SGML_character(HTStream *context, char c_in)
 	     c == '>')) {	/*  as a co-terminator of dquoted and tag    */
 	    HTChunkTerminate(string);
 #ifdef USE_PRETTYSRC
-	    if (!end_if_prettysrc(context, string, c))
+	    if (!end_if_prettysrc(context, string, (char) c))
 #endif
 		handle_attribute_value(context, string->data);
 	    string->size = 0;
@@ -3798,10 +3797,10 @@ static void SGML_character(HTStream *context, char c_in)
 		    context->T.trans_from_uni)) {
 	    if (clong == 0xfffd && saved_char_in &&
 		HTPassEightBitRaw &&
-		UCH(saved_char_in) >=
+		saved_char_in >=
 		LYlowest_eightbit[context->outUCLYhndl]) {
 		HTChunkPutUtf8Char(string,
-				   (0xf000 | UCH(saved_char_in)));
+				   (0xf000 | saved_char_in));
 	    } else {
 		HTChunkPutUtf8Char(string, clong);
 	    }
@@ -4250,7 +4249,7 @@ static void SGML_character(HTStream *context, char c_in)
 	    FREE(context->recover);
 	    context->recover_index = 0;
 	} else {
-	    c = context->recover[context->recover_index];
+	    c = UCH(context->recover[context->recover_index]);
 	    context->recover_index++;
 	    goto top;
 	}
@@ -4275,10 +4274,10 @@ static void SGML_character(HTStream *context, char c_in)
 		 */
 		char *puni = context->active_include + context->include_index;
 
-		c = *puni;
+		c = UCH(*puni);
 		clong = UCGetUniFromUtf8String(&puni);
 		if (clong < 256 && clong >= 0) {
-		    c = ((char) (clong & 0xff));
+		    c = UCH((clong & 0xff));
 		}
 		saved_char_in = '\0';
 		context->include_index = puni - context->active_include + 1;
@@ -4288,7 +4287,7 @@ static void SGML_character(HTStream *context, char c_in)
 		 * Otherwise assume no UTF-8 - do charset-naive processing and
 		 * hope for the best.  - kw
 		 */
-		c = context->active_include[context->include_index];
+		c = UCH(context->active_include[context->include_index]);
 		context->include_index++;
 		goto top;
 	    }
@@ -4304,7 +4303,7 @@ static void SGML_character(HTStream *context, char c_in)
 	    FREE(context->csi);
 	    context->csi_index = 0;
 	} else {
-	    c = context->csi[context->csi_index];
+	    c = UCH(context->csi[context->csi_index]);
 	    context->csi_index++;
 	    goto top;
 	}
@@ -4326,7 +4325,7 @@ static void InferUtfFromBom(HTStream *context, int chndl)
 static void SGML_widechar(HTStream *context, long ch)
 {
     if (!UCPutUtf8_charstring(context, SGML_character, ch)) {
-	SGML_character(context, UCH(ch));
+	SGML_character(context, (char) ch);
     }
 }
 
@@ -4373,7 +4372,7 @@ static void SGML_write(HTStream *context, const char *str, int l)
 
 static void SGML_string(HTStream *context, const char *str)
 {
-    SGML_write(context, str, strlen(str));
+    SGML_write(context, str, (int) strlen(str));
 }
 
 /*_______________________________________________________________________
@@ -4597,8 +4596,8 @@ void JISx0201TO0208_EUC(unsigned char IHI,
     };
 
     if ((IHI == 0x8E) && (ILO >= 0xA1) && (ILO <= 0xDF)) {
-	*OHI = table[ILO - 0xA1][0];
-	*OLO = table[ILO - 0xA1][1];
+	*OHI = UCH(table[ILO - 0xA1][0]);
+	*OLO = UCH(table[ILO - 0xA1][1]);
     } else {
 	*OHI = IHI;
 	*OLO = ILO;
@@ -4620,39 +4619,39 @@ static int IS_SJIS_STR(const unsigned char *str)
     return 0;
 }
 
-unsigned char *SJIS_TO_JIS1(register unsigned char HI,
-			    register unsigned char LO,
-			    register unsigned char *JCODE)
+unsigned char *SJIS_TO_JIS1(unsigned char HI,
+			    unsigned char LO,
+			    unsigned char *JCODE)
 {
-    HI -= UCH((HI <= 0x9F) ? 0x71 : 0xB1);
+    HI = UCH(HI - UCH((HI <= 0x9F) ? 0x71 : 0xB1));
     HI = UCH((HI << 1) + 1);
     if (0x7F < LO)
 	LO--;
     if (0x9E <= LO) {
-	LO -= UCH(0x7D);
+	LO = UCH(LO - UCH(0x7D));
 	HI++;
     } else {
-	LO -= UCH(0x1F);
+	LO = UCH(LO - UCH(0x1F));
     }
     JCODE[0] = HI;
     JCODE[1] = LO;
     return JCODE;
 }
 
-unsigned char *JIS_TO_SJIS1(register unsigned char HI,
-			    register unsigned char LO,
-			    register unsigned char *SJCODE)
+unsigned char *JIS_TO_SJIS1(unsigned char HI,
+			    unsigned char LO,
+			    unsigned char *SJCODE)
 {
     if (HI & 1)
-	LO += UCH(0x1F);
+	LO = UCH(LO + UCH(0x1F));
     else
-	LO += UCH(0x7D);
+	LO = UCH(LO + UCH(0x7D));
     if (0x7F <= LO)
 	LO++;
 
     HI = UCH(((HI - 0x21) >> 1) + 0x81);
     if (0x9F < HI)
-	HI += UCH(0x40);
+	HI = UCH(HI + UCH(0x40));
     SJCODE[0] = HI;
     SJCODE[1] = LO;
     return SJCODE;
@@ -4660,7 +4659,7 @@ unsigned char *JIS_TO_SJIS1(register unsigned char HI,
 
 unsigned char *EUC_TO_SJIS1(unsigned char HI,
 			    unsigned char LO,
-			    register unsigned char *SJCODE)
+			    unsigned char *SJCODE)
 {
     if (HI == 0x8E)
 	JISx0201TO0208_EUC(HI, LO, &HI, &LO);
@@ -4668,9 +4667,9 @@ unsigned char *EUC_TO_SJIS1(unsigned char HI,
     return SJCODE;
 }
 
-void JISx0201TO0208_SJIS(register unsigned char I,
-			 register unsigned char *OHI,
-			 register unsigned char *OLO)
+void JISx0201TO0208_SJIS(unsigned char I,
+			 unsigned char *OHI,
+			 unsigned char *OLO)
 {
     unsigned char SJCODE[2];
 
@@ -4693,8 +4692,8 @@ unsigned char *SJIS_TO_EUC1(unsigned char HI,
 unsigned char *SJIS_TO_EUC(unsigned char *src,
 			   unsigned char *dst)
 {
-    register unsigned char hi, lo, *sp, *dp;
-    register int in_sjis = 0;
+    unsigned char hi, lo, *sp, *dp;
+    int in_sjis = 0;
 
     in_sjis = IS_SJIS_STR(src);
     for (sp = src, dp = dst; (hi = sp[0]) != '\0';) {
@@ -4715,7 +4714,7 @@ unsigned char *SJIS_TO_EUC(unsigned char *src,
 unsigned char *EUC_TO_SJIS(unsigned char *src,
 			   unsigned char *dst)
 {
-    register unsigned char *sp, *dp;
+    unsigned char *sp, *dp;
 
     for (sp = src, dp = dst; *sp;) {
 	if (*sp & 0x80) {
@@ -4741,10 +4740,10 @@ unsigned char *EUC_TO_JIS(unsigned char *src,
 			  const char *toK,
 			  const char *toA)
 {
-    register unsigned char kana_mode = 0;
-    register unsigned char cch;
-    register unsigned char *sp = src;
-    register unsigned char *dp = dst;
+    unsigned char kana_mode = 0;
+    unsigned char cch;
+    unsigned char *sp = src;
+    unsigned char *dp = dst;
     int is_JIS = 0;
 
     while ((cch = *sp++) != '\0') {
@@ -4813,11 +4812,11 @@ static const unsigned char *repairJIStoEUC(const unsigned char *src,
 unsigned char *TO_EUC(const unsigned char *jis,
 		      unsigned char *euc)
 {
-    register const unsigned char *s;
-    register unsigned char c, jis_stat;
+    const unsigned char *s;
+    unsigned char c, jis_stat;
     unsigned char *d;
-    register int to1B, to2B;
-    register int in_sjis = 0;
+    int to1B, to2B;
+    int in_sjis = 0;
     static int nje;
     int n8bits;
     int is_JIS;

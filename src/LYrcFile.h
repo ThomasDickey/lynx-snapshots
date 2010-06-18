@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYrcFile.h,v 1.34 2009/11/27 11:16:04 tom Exp $
+ * $LynxId: LYrcFile.h,v 1.35 2010/06/18 00:08:05 tom Exp $
  */
 #ifndef LYRCFILE_H
 #define LYRCFILE_H
@@ -134,6 +134,7 @@
 #define RC_MAX_COOKIES_BUFFER           "max_cookies_buffer"
 #define RC_MAX_COOKIES_DOMAIN           "max_cookies_domain"
 #define RC_MAX_COOKIES_GLOBAL           "max_cookies_global"
+#define RC_MAX_URI_SIZE                 "max_uri_size"
 #define RC_MESSAGESECS                  "messagesecs"
 #define RC_MINIMAL_COMMENTS             "minimal_comments"
 #define RC_MKDIR_PATH                   "mkdir_path"

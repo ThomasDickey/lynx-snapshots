@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTParse.c,v 1.55 2010/04/29 23:28:27 tom Exp $
+ * $LynxId: HTParse.c,v 1.57 2010/06/18 00:15:07 tom Exp $
  *
  *		Parse HyperText Document Address		HTParse.c
  *		================================
@@ -12,6 +12,7 @@
 #include <LYLeaks.h>
 #include <LYStrings.h>
 #include <LYCharUtils.h>
+#include <LYGlobalDefs.h>
 
 #ifdef HAVE_ALLOCA_H
 #include <alloca.h>
@@ -313,7 +314,8 @@ char *HTParse(const char *aName,
     char *result = NULL;
     char *tail = NULL;		/* a pointer to the end of the 'result' string */
     char *return_value = NULL;
-    unsigned len, len1, len2;
+    size_t len, len1, len2;
+    size_t need;
     char *name = NULL;
     char *rel = NULL;
     char *p, *q;
@@ -348,7 +350,11 @@ char *HTParse(const char *aName,
     len2 = strlen(relatedName) + 1;
     len = len1 + len2 + MIN_PARSE;	/* Lots of space: more than enough */
 
-    result = tail = (char *) LYalloca(len * 2 + len1 + len2);
+    need = (len * 2 + len1 + len2);
+    if (need > (size_t) max_uri_size)
+	return StrAllocCopy(return_value, "");
+
+    result = tail = (char *) LYalloca(need);
     if (result == NULL) {
 	outofmem(__FILE__, "HTParse");
 
@@ -395,7 +401,6 @@ char *HTParse(const char *aName,
 	if (!strcmp(given.access, "http") ||
 	    !strcmp(given.access, "https") ||
 	    !strcmp(given.access, "ftp")) {
-	    static char empty_string[] = "";
 
 	    /*
 	     * Assume root.
@@ -743,23 +748,28 @@ const char *HTParseAnchor(const char *aName)
 	 * keeping in mind scan() peculiarities on schemes:
 	 */
 	struct struct_parts given;
+	size_t need = ((unsigned) ((p - aName) + (int) strlen(p) + 1));
+	char *name;
 
-	char *name = (char *) LYalloca((unsigned) ((p - aName)
-						   + (int) strlen(p) + 1));
+	if (need > (size_t) max_uri_size) {
+	    p += strlen(p);
+	} else {
+	    name = (char *) LYalloca(need);
 
-	if (name == NULL) {
-	    outofmem(__FILE__, "HTParseAnchor");
+	    if (name == NULL) {
+		outofmem(__FILE__, "HTParseAnchor");
 
-	    assert(name != NULL);
-	}
-	strcpy(name, aName);
-	scan(name, &given);
-	LYalloca_free(name);
+		assert(name != NULL);
+	    }
+	    strcpy(name, aName);
+	    scan(name, &given);
+	    LYalloca_free(name);
 
-	p++;			/*next to '#' */
-	if (given.anchor == NULL) {
-	    for (; *p; p++)	/*scroll to end '\0' */
-		;
+	    p++;		/*next to '#' */
+	    if (given.anchor == NULL) {
+		for (; *p; p++)	/*scroll to end '\0' */
+		    ;
+	    }
 	}
     }
     return p;

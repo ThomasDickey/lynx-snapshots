@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYGlobalDefs.h,v 1.123 2010/05/05 09:19:31 tom Exp $
+ * $LynxId: LYGlobalDefs.h,v 1.124 2010/06/18 00:12:13 tom Exp $
  *
  * global variable definitions
  */
@@ -305,6 +305,7 @@ extern "C" {
     extern int max_cookies_buffer;
     extern int max_cookies_domain;
     extern int max_cookies_global;
+    extern int max_uri_size;
 #ifdef USE_SESSIONS
     extern short session_limit;	/* maximal entries saved/restored
 				   in session file */
