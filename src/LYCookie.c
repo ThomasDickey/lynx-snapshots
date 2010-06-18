@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYCookie.c,v 1.100 2010/06/17 21:31:03 tom Exp $
+ * $LynxId: LYCookie.c,v 1.101 2010/06/18 10:54:16 tom Exp $
  *
  *			       Lynx Cookie Support		   LYCookie.c
  *			       ===================
@@ -711,8 +711,8 @@ static char *scan_cookie_sublist(char *hostname,
 	    co->expires <= now) {
 	    HTList_removeObject(sublist, co);
 	    freeCookie(co);
-	    co = NULL;
 	    total_cookies--;
+	    continue;
 	}
 
 	/*
@@ -795,7 +795,9 @@ static char *scan_cookie_sublist(char *hostname,
 		StrAllocCat(header, "\"");
 		len++;
 	    }
-	    len += (int) (strlen(co->name) + strlen(co->value) + 1);
+	    len += (int) (strlen(co->name)
+			  + (co->value ? strlen(co->value) : 0)
+			  + 1);
 	    /*
 	     * For Version 1 (or greater) cookies, add $PATH, $PORT and/or
 	     * $DOMAIN attributes for the cookie if they were specified via a

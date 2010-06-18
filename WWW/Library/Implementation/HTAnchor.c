@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTAnchor.c,v 1.66 2010/06/17 00:17:34 tom Exp $
+ * $LynxId: HTAnchor.c,v 1.67 2010/06/18 09:39:24 tom Exp $
  *
  *	Hypertext "Anchor" Object				HTAnchor.c
  *	==========================
@@ -585,7 +585,9 @@ static void deleteLinks(HTChildAnchor *me)
 	 * Recursive call.  Test here to avoid calling overhead.  Don't delete
 	 * if document is loaded or being loaded.
 	 */
-	if ((me->parent != parent) && !parent->underway &&
+	if ((me->parent != parent) &&
+	    parent != NULL &&
+	    !parent->underway &&
 	    (!parent->info || !parent->info->document)) {
 	    HTAnchor_delete(parent);
 	}

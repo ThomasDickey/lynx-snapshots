@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMainLoop.c,v 1.165 2010/06/17 10:51:11 tom Exp $
+ * $LynxId: LYMainLoop.c,v 1.166 2010/06/18 10:56:54 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTAccess.h>
@@ -1456,7 +1456,9 @@ static int handle_LYK_ACTIVATE(int *c,
 			curdoc.address &&
 			!strcmp(lynxjumpfile, curdoc.address))) {
 		LYUserSpecifiedURL = TRUE;
-	    } else if (no_filereferer == TRUE && isFILE_URL(curdoc.address)) {
+	    } else if (no_filereferer == TRUE &&
+		       curdoc.address != NULL &&
+		       isFILE_URL(curdoc.address)) {
 		LYNoRefererForThis = TRUE;
 	    }
 	    newdoc.link = 0;

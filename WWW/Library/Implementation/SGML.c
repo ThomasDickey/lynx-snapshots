@@ -1,5 +1,5 @@
 /*
- * $LynxId: SGML.c,v 1.134 2010/06/16 23:27:40 tom Exp $
+ * $LynxId: SGML.c,v 1.135 2010/06/18 09:59:35 tom Exp $
  *
  *			General SGML Parser code		SGML.c
  *			========================
@@ -1099,7 +1099,8 @@ static void end_element(HTStream *context, HTTag * old_tag)
 	    CTRACE((tfp,
 		    "SGML: Nesting <%s>...<%s> \t<- ***invalid end </%s>\n",
 		    old_tag->name,
-		    context->element_stack->tag->name,
+		    context->element_stack ?
+		    context->element_stack->tag->name : "none",
 		    old_tag->name));
 	    return;
 	}
