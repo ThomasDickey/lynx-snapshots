@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYLocal.c,v 1.106 2010/04/29 23:43:55 tom Exp $
+ * $LynxId: LYLocal.c,v 1.108 2010/06/17 21:18:00 tom Exp $
  *
  *  Routines to manipulate the local filesystem.
  *  Written by: Rick Mallett, Carleton University
@@ -1500,8 +1500,9 @@ static int permit_location(char *destpath,
 		     */
 		    if (!no_change_exec_perms
 			|| strchr(cp + 5, 'X') == NULL
-			|| S_ISDIR(dir_info.st_mode))
-			new_mode |= mask;
+			|| S_ISDIR(dir_info.st_mode)) {
+			new_mode |= (mode_t) mask;
+		    }
 		} else {
 		    HTAlert(gettext("Invalid mode format."));
 		    return code;
@@ -2032,6 +2033,7 @@ int dired_options(DocInfo *doc, char **newfile)
 
     } else {
 	StrAllocCopy(path, "");
+	memset(&dir_info, 0, sizeof(dir_info));
     }
 
     dir = HTfullURL_toFile(doc->address);

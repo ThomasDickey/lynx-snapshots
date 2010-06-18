@@ -1,5 +1,5 @@
 /*
- * $LynxId: makeuctb.c,v 1.43 2010/05/03 00:45:10 tom Exp $
+ * $LynxId: makeuctb.c,v 1.44 2010/06/17 08:06:46 tom Exp $
  *
  *  makeuctb.c, derived from conmakehash.c   - kw
  *
@@ -194,7 +194,7 @@ static void addpair_str(char *str, int un)
 		    MAX_UNIPAIRS);
 	    done(EX_DATAERR);
 	}
-	themap_str.entries[themap_str.entry_ct].unicode = un;
+	themap_str.entries[themap_str.entry_ct].unicode = (u16) un;
 	themap_str.entries[themap_str.entry_ct].replace_str = str;
 	themap_str.entry_ct++;
     }
@@ -238,7 +238,7 @@ static void addpair(int fp, int un)
 	    fprintf(stderr, "ERROR: Only 255 unicodes/glyph permitted!\n");
 	    done(EX_DATAERR);
 	}
-	unitable[fp][unicount[fp]] = un;
+	unitable[fp][unicount[fp]] = (u16) un;
 	unicount[fp]++;
     }
     /* otherwise: ignore */
@@ -751,7 +751,7 @@ int main(int argc, char **argv)
 	}
     }
     for (p = this_MIMEcharset; *p; p++) {
-	*p = TOLOWER(*p);
+	*p = (char) TOLOWER(*p);
     }
     if (argc > 4) {
 	strncpy(this_LYNXcharset, argv[4], UC_MAXLEN_LYNXCSNAME);
@@ -771,7 +771,7 @@ int main(int argc, char **argv)
 	for (i = 0, p = this_MIMEcharset;
 	     *p && (i < UC_MAXLEN_ID_APPEND - 1);
 	     p++, i++) {
-	    id_append[i + 1] = isalnum(UCH(*p)) ? *p : '_';
+	    id_append[i + 1] = (char) (isalnum(UCH(*p)) ? *p : '_');
 	}
 	id_append[i + 1] = '\0';
     }

@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFTP.c,v 1.93 2010/05/05 09:27:41 tom Exp $
+ * $LynxId: HTFTP.c,v 1.94 2010/06/17 00:44:49 tom Exp $
  *
  *			File Transfer Protocol (FTP) Client
  *			for a WorldWideWeb browser
@@ -3106,7 +3106,7 @@ static int read_directory(HTParentAnchor *parent,
 		} else if (ic == EOF) {
 		    break;	/* End of file */
 		} else {
-		    HTChunkPutc(chunk, (char) ic);
+		    HTChunkPutc(chunk, ic);
 		}
 	    }
 	    HTChunkTerminate(chunk);

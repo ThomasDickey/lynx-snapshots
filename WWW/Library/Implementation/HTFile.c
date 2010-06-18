@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFile.c,v 1.122 2010/04/29 09:38:05 tom Exp $
+ * $LynxId: HTFile.c,v 1.123 2010/06/17 00:27:47 tom Exp $
  *
  *			File Access				HTFile.c
  *			===========
@@ -441,7 +441,7 @@ static void LYListFmtParse(const char *fmtstr,
 
 	case 'o':		/* owner */
 #ifndef NOUSERS
-	    name = HTAA_UidToName(data->file_info.st_uid);
+	    name = HTAA_UidToName((int) data->file_info.st_uid);
 	    if (*name) {
 		FormatStr(&buf, start, name);
 	    } else {
@@ -452,7 +452,7 @@ static void LYListFmtParse(const char *fmtstr,
 
 	case 'g':		/* group */
 #ifndef NOUSERS
-	    name = HTAA_GidToName(data->file_info.st_gid);
+	    name = HTAA_GidToName((int) data->file_info.st_gid);
 	    if (*name) {
 		FormatStr(&buf, start, name);
 	    } else {
@@ -883,13 +883,13 @@ HTFormat HTFileFormat(const char *filename,
     if (!HTSuffixes)
 	HTFileInit();
 #endif /* !NO_INIT */
-    lf = strlen(filename);
+    lf = (int) strlen(filename);
     n = HTList_count(HTSuffixes);
     for (i = 0; i < n; i++) {
 	int ls;
 
 	suff = (HTSuffix *) HTList_objectAt(HTSuffixes, i);
-	ls = strlen(suff->suffix);
+	ls = (int) strlen(suff->suffix);
 	if ((ls <= lf) && 0 == strcasecomp(suff->suffix, filename + lf - ls)) {
 	    int j;
 
@@ -904,7 +904,7 @@ HTFormat HTFileFormat(const char *filename,
 		int ls2;
 
 		suff = (HTSuffix *) HTList_objectAt(HTSuffixes, j);
-		ls2 = strlen(suff->suffix);
+		ls2 = (int) strlen(suff->suffix);
 		if ((ls + ls2 <= lf) &&
 		    !strncasecomp(suff->suffix,
 				  filename + lf - ls - ls2, ls2)) {
@@ -1191,7 +1191,7 @@ float HTFileValue(const char *filename)
     HTSuffix *suff;
     int n;
     int i;
-    int lf = strlen(filename);
+    int lf = (int) strlen(filename);
 
 #ifndef NO_INIT
     if (!HTSuffixes)
@@ -1202,7 +1202,7 @@ float HTFileValue(const char *filename)
 	int ls;
 
 	suff = (HTSuffix *) HTList_objectAt(HTSuffixes, i);
-	ls = strlen(suff->suffix);
+	ls = (int) strlen(suff->suffix);
 	if ((ls <= lf) && 0 == strcmp(suff->suffix, filename + lf - ls)) {
 	    CTRACE((tfp, "File: Value of %s is %.3f\n",
 		    filename, suff->quality));
@@ -1472,7 +1472,7 @@ void HTDirEntry(HTStructured * target, const char *tail,
     if (strcmp(escaped, "..") != 0) {
 	stripped = escaped;
 	escaped = HTEscape(stripped, URL_XPALPHAS);
-	if (((len = strlen(escaped)) > 2) &&
+	if (((len = (int) strlen(escaped)) > 2) &&
 	    escaped[(len - 3)] == '%' &&
 	    escaped[(len - 2)] == '2' &&
 	    TOUPPER(escaped[(len - 1)]) == 'F') {

@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTP.c,v 1.113 2010/04/30 00:00:13 tom Exp $
+ * $LynxId: HTTP.c,v 1.115 2010/06/17 09:55:03 tom Exp $
  *
  * HyperText Tranfer Protocol	- Client implementation		HTTP.c
  * ==========================
@@ -525,7 +525,7 @@ static int HTLoadHTTP(const char *arg,
     BOOL auth_proxy = NO;	/* Generate a proxy authorization. - AJL */
 
     int length, rawlength, rv;
-    int server_status;
+    int server_status = 0;
     BOOL doing_redirect, already_retrying = FALSE;
     int len = 0;
 
@@ -1987,7 +1987,8 @@ static int HTLoadHTTP(const char *arg,
 		     */
 		    if (show_401)
 			break;
-		    if (HTAA_shouldRetryWithAuth(start_of_data, length, s, NO)) {
+		    if (HTAA_shouldRetryWithAuth(start_of_data, (size_t)
+						 length, s, NO)) {
 
 			HTTP_NETCLOSE(s, handle);
 			if (dump_output_immediately && !authentication_info[0]) {
@@ -2037,7 +2038,8 @@ static int HTLoadHTTP(const char *arg,
 		     */
 		    if (!using_proxy || show_407)
 			break;
-		    if (HTAA_shouldRetryWithAuth(start_of_data, length, s, YES)) {
+		    if (HTAA_shouldRetryWithAuth(start_of_data, (size_t)
+						 length, s, YES)) {
 
 			HTTP_NETCLOSE(s, handle);
 			if (dump_output_immediately && !proxyauth_info[0]) {

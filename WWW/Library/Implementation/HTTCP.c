@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTCP.c,v 1.100 2010/04/29 23:34:34 tom Exp $
+ * $LynxId: HTTCP.c,v 1.101 2010/06/17 00:32:51 tom Exp $
  *
  *			Generic Communication Code		HTTCP.c
  *			==========================
@@ -260,7 +260,7 @@ unsigned int HTCardinal(int *pstatus,
 
     n = 0;
     while ((**pp >= '0') && (**pp <= '9'))
-	n = n * 10 + *((*pp)++) - '0';
+	n = n * 10 + (unsigned) (*((*pp)++) - '0');
 
     if (n > max_value) {
 	*pstatus = -4;		/* Cardinal outside range */
@@ -466,7 +466,7 @@ static size_t fill_rehostent(char *rehostent,
 
     if (!phost)
 	return 0;
-    required_per_addr = phost->h_length + sizeof(char *);
+    required_per_addr = (size_t) phost->h_length + sizeof(char *);
 
     if (phost->h_addr_list)
 	available -= sizeof(phost->h_addr_list[0]);
@@ -517,9 +517,9 @@ static size_t fill_rehostent(char *rehostent,
     p_next_charptr = (char **) (rehostent + curlen);
     p_next_char = rehostent + curlen;
     if (phost->h_addr_list)
-	p_next_char += (num_addrs + 1) * sizeof(phost->h_addr_list[0]);
+	p_next_char += (size_t) (num_addrs + 1) * sizeof(phost->h_addr_list[0]);
     if (phost->h_aliases)
-	p_next_char += (num_aliases + 1) * sizeof(phost->h_aliases[0]);
+	p_next_char += (size_t) (num_aliases + 1) * sizeof(phost->h_aliases[0]);
 
     if (phost->h_addr_list) {
 	data->h.h_addr_list = p_next_charptr;
@@ -568,7 +568,7 @@ static size_t fill_rehostent(char *rehostent,
     } else {
 	data->h.h_aliases = NULL;
     }
-    curlen = p_next_char - (char *) rehostent;
+    curlen = (size_t) (p_next_char - (char *) rehostent);
     return curlen;
 }
 
@@ -637,7 +637,7 @@ static unsigned readit(int fd, char *buffer, unsigned length)
     unsigned result = 0;
 
     while (length != 0) {
-	unsigned got = read(fd, buffer, length);
+	unsigned got = (unsigned) read(fd, buffer, length);
 
 	if (got != 0) {
 	    result += got;
@@ -776,7 +776,8 @@ LYNX_HOSTENT *LYGetHostByName(char *str)
 	 * variables.
 	 */
 	int fpid, waitret;
-	int pfd[2], selret, readret;
+	int pfd[2], selret;
+	unsigned readret;
 
 #ifdef HAVE_TYPE_UNIONWAIT
 	union wait waitstat;
@@ -1045,7 +1046,7 @@ LYNX_HOSTENT *LYGetHostByName(char *str)
 #ifdef DEBUG_HOSTENT
 			dump_hostent("Read from pipe", (LYNX_HOSTENT *) rehostent);
 #endif
-			if (readret == (int) statuses.rehostentlen) {
+			if (readret == statuses.rehostentlen) {
 			    got_rehostent = 1;
 			    result_phost = (LYNX_HOSTENT *) rehostent;
 			    lynx_nsl_status = HT_OK;
@@ -1463,7 +1464,7 @@ static void get_host_details(void)
     LYNX_HOSTENT *phost;	/* Pointer to host -- See netdb.h */
 #endif /* INET6 */
 #endif /* NEED_HOST_ADDRESS */
-    int namelength = sizeof(name);
+    size_t namelength = sizeof(name);
 
     if (hostname)
 	return;			/* Already done */
@@ -1773,11 +1774,11 @@ int HTDoConnect(const char *url,
 		FD_SET((unsigned) *s, &writefds);
 #ifdef SOCKS
 		if (socks_flag)
-		    ret = Rselect((unsigned) *s + 1, NULL,
+		    ret = Rselect(*s + 1, NULL,
 				  &writefds, NULL, &select_timeout);
 		else
 #endif /* SOCKS */
-		    ret = select((unsigned) *s + 1,
+		    ret = select(*s + 1,
 				 NULL,
 				 &writefds,
 				 NULL,
@@ -2040,11 +2041,11 @@ int HTDoRead(int fildes,
 	    FD_SET((unsigned) fildes, &readfds);
 #ifdef SOCKS
 	    if (socks_flag)
-		ret = Rselect((unsigned) fildes + 1,
+		ret = Rselect(fildes + 1,
 			      &readfds, NULL, NULL, &select_timeout);
 	    else
 #endif /* SOCKS */
-		ret = select((unsigned) fildes + 1,
+		ret = select(fildes + 1,
 			     &readfds, NULL, NULL, &select_timeout);
 	} while ((ret == -1) && (errno == EINTR));
 

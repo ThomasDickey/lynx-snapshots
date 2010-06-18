@@ -1,5 +1,5 @@
 /*
- * $LynxId: UCdomap.c,v 1.78 2010/04/29 09:16:49 tom Exp $
+ * $LynxId: UCdomap.c,v 1.79 2010/06/17 09:44:47 tom Exp $
  *
  *  UCdomap.c
  *  =========
@@ -1804,7 +1804,7 @@ static const char **UC_setup_LYCharSets_repl(int UC_charset_in_hndl,
 	     * one valid eightbit latin1 char.
 	     */
 	    if (ti[UCH(*s8) - 160] >= UCH(lowest8) &&
-		!(s7[0] == ti[UCH(*s8) - 160] &&
+		!(UCH(s7[0]) == ti[UCH(*s8) - 160] &&
 		  s7[1] == '\0')) {
 		/*
 		 * ...which in turn is mapped, by our "new method",

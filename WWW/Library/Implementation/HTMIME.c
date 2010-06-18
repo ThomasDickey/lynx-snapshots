@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTMIME.c,v 1.72 2010/04/29 23:14:44 tom Exp $
+ * $LynxId: HTMIME.c,v 1.73 2010/06/16 23:54:20 tom Exp $
  *
  *			MIME Message Parse			HTMIME.c
  *			==================
@@ -170,10 +170,10 @@ struct _HTStream {
  */
 void HTMIME_TrimDoubleQuotes(char *value)
 {
-    int i;
+    size_t i;
     char *cp = value;
 
-    if (!(cp && *cp) || *cp != '"')
+    if (isEmpty(cp) || *cp != '"')
 	return;
 
     i = strlen(cp);
@@ -204,7 +204,7 @@ static BOOL content_is_compressed(HTStream *me)
  */
 static void dequote(char *url)
 {
-    int len;
+    size_t len;
 
     len = strlen(url);
     if (*url == '\'' && len > 1 && url[len - 1] == url[0]) {
@@ -2034,7 +2034,7 @@ static void HTMIME_put_character(HTStream *me,
     }				/* switch on state */
 
 #ifdef EXP_HTTP_HEADERS
-    HTChunkPutc(&me->anchor->http_headers, c);
+    HTChunkPutc(&me->anchor->http_headers, UCH(c));
     if (me->state == MIME_TRANSPARENT) {
 	HTChunkTerminate(&me->anchor->http_headers);
 	CTRACE((tfp, "Server Headers:\n%.*s\n",
@@ -2053,7 +2053,7 @@ static void HTMIME_put_character(HTStream *me,
     me->state = miJUNK_LINE;
 
 #ifdef EXP_HTTP_HEADERS
-    HTChunkPutc(&me->anchor->http_headers, c);
+    HTChunkPutc(&me->anchor->http_headers, UCH(c));
 #endif
 
     return;
@@ -2355,14 +2355,14 @@ static void HTmmdec_quote(char **t,
 	if (*s == '=') {
 	    cval = 0;
 	    if (s[1] && (p = strchr(HTmmquote, s[1]))) {
-		cval += (char) (p - HTmmquote);
+		cval = (char) (cval + (char) (p - HTmmquote));
 	    } else {
 		*bp++ = *s++;
 		continue;
 	    }
 	    if (s[2] && (p = strchr(HTmmquote, s[2]))) {
-		cval <<= 4;
-		cval += (char) (p - HTmmquote);
+		cval = (char) (cval << 4);
+		cval = (char) (cval + (p - HTmmquote));
 		*bp++ = cval;
 		s += 3;
 	    } else {

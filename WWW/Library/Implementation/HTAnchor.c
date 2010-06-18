@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTAnchor.c,v 1.65 2010/04/29 22:39:37 tom Exp $
+ * $LynxId: HTAnchor.c,v 1.66 2010/06/17 00:17:34 tom Exp $
  *
  *	Hypertext "Anchor" Object				HTAnchor.c
  *	==========================
@@ -53,7 +53,7 @@ static HASH_TYPE HASH_FUNCTION(const char *cp_address)
     const unsigned char *p;
 
     for (p = (const unsigned char *) cp_address, hash = 0; *p; p++)
-	hash = (int) (hash * 3 + (*(const unsigned char *) p)) % HASH_SIZE;
+	hash = (HASH_TYPE) (hash * 3 + (*(const unsigned char *) p)) % HASH_SIZE;
 
     return (hash);
 }
@@ -908,9 +908,9 @@ void HTAnchor_setPrompt(HTParentAnchor *me,
 
 BOOL HTAnchor_isIndex(HTParentAnchor *me)
 {
-    return (me
-	    ? (BOOL) me->isIndex
-	    : NO);
+    return (BOOL) (me
+		   ? me->isIndex
+		   : NO);
 }
 
 /*	Whether Anchor has been designated as an ISMAP link
@@ -918,9 +918,9 @@ BOOL HTAnchor_isIndex(HTParentAnchor *me)
  */
 BOOL HTAnchor_isISMAPScript(HTAnchor * me)
 {
-    return ((me && me->parent->info)
-	    ? (BOOL) me->parent->info->isISMAPScript
-	    : NO);
+    return (BOOL) ((me && me->parent->info)
+		   ? me->parent->info->isISMAPScript
+		   : NO);
 }
 
 #if defined(USE_COLOR_STYLE)

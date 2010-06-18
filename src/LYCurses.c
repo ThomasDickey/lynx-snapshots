@@ -1,4 +1,4 @@
-/* $LynxId: LYCurses.c,v 1.150 2010/05/03 00:09:05 tom Exp $ */
+/* $LynxId: LYCurses.c,v 1.151 2010/06/17 08:09:48 tom Exp $ */
 #include <HTUtils.h>
 #include <HTAlert.h>
 
@@ -470,7 +470,7 @@ void curses_w_style(WINDOW * win, int style,
     if (style == s_normal && dir) {
 	LYAttrset(win, ds->color, ds->mono);
 	if (win == LYwin)
-	    SetCachedStyle(YP, XP, s_normal);
+	    SetCachedStyle(YP, XP, (unsigned) s_normal);
 	return;
     }
 
@@ -516,7 +516,7 @@ void curses_w_style(WINDOW * win, int style,
 	    CTRACE2(TRACE_STYLE, (tfp, "CACHED: <%s> @(%d,%d)\n",
 				  ds->name, YP, XP));
 	    if (win == LYwin)
-		SetCachedStyle(YP, XP, style);
+		SetCachedStyle(YP, XP, (unsigned) style);
 	}
 	LYAttrset(win, ds->color, ds->mono);
 	break;

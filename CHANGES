@@ -1,15 +1,34 @@
--- $LynxId: CHANGES,v 1.478 2010/05/05 09:42:58 tom Exp $
+-- $LynxId: CHANGES,v 1.482 2010/06/18 00:48:31 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2010-05-02 (2.8.8dev.4)
+2010-06-17 (2.8.8dev.4)
+* limit parsed URIs with new config parameter MAX_URI_SIZE, default 8192, from
+  RedHat bug report forwarded by Vincent Danen.  For arbitrarily long URIs,
+  alloca() could run out of stack space -TD
+* several changes to configure script, from ongoing work on xterm, etc -TD
+  + workaround for broken ".pc" file for X Toolkit, which omits the ICE
+    library.
+  + modify CF_NCURSES_CONFIG to use CF_CURSES_HEADER to pick out the particular
+    flavor of ncurses.h, e.g., <ncursesw/curses.h>
+  + add parameter to CF_CURSES_HEADER to allow looking for specific
+    subdirectory ncurses/ncursesw/etc + restructured CF_X_ATHENA to use
+    pkg-config, if available.
+  + use CF_ADD_LIB/CF_ADD_LIBS
+  + CF_GNUTLS eliminates duplicate libraries when configuring with pkg-config
+  + modified several macros to quote params of ifelse()
+  + CF_AR_FLAGS allows $ARFLAGS to override the choice of ar-flags, in
+    particular check if a given choice is part of the current $ARFLAGS
+  + workaround CF_XOPEN_CURSES for (temporary) problem with ncurses headers,
+    which did not account for the fact that _XOPEN_SOURCE_EXTENDED may be
+    defined in a system header.
 * remove redundant updates for CFLAGS and LIBS in configure script which are
   now done in CF_FIND_LINKAGE macro -TD
 * fix a problem with configure script which broke "--with-gnutls=/usr" (report
   by Atsuhito Kohda) -TD
 * resolve warnings from "clang --analyze", tested with Fedora 12 and clang
-  2.6-0.5.pre1.fc12 -TD
+  2.6-0.5.pre1.fc12, 2.7-1.fc12 -TD
 * further improvements to print_wwwfile_to_fd() -TD
   + corrected length used for radio/checkboxes.
   + fill in wrapped fields.
@@ -45,8 +64,8 @@ Changes since Lynx 2.8 release
   (Debian #460108) -TD
 * document the various xxx_PATH settings in lynx.cfg -TD
 * modify cfg2html.pl to improve formatting of cattoc.html -TD
-* split-up top-level makefile install-html rule to allow generating the htmlized
-  cfg without doing an install -TD
+* split-up top-level makefile install-html rule to allow generating the
+  htmlized cfg without doing an install -TD
 * suppress positioning for editor when using it to edit files via dired -TD
 * modify samples/lynx-demo.cfg to suppress external file-utilities, since the
   intent is to make the installer work standalone, but allow extension -TD

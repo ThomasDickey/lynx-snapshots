@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTRules.c,v 1.40 2010/04/29 22:57:58 tom Exp $
+ * $LynxId: HTRules.c,v 1.42 2010/06/17 21:33:35 tom Exp $
  *
  *	Configuration manager for Hypertext Daemon		HTRules.c
  *	==========================================
@@ -236,7 +236,7 @@ char *HTTranslate(const char *required)
 	}
 
 	if (*p == '*') {	/* Match up to wildcard */
-	    m = strlen(q) - strlen(p + 1);	/* Amount to match to wildcard */
+	    m = (int) strlen(q) - (int) strlen(p + 1);	/* Amount to match to wildcard */
 	    if (m < 0)
 		continue;	/* tail is too short to match */
 	    if (0 != strcmp(q + m, p + 1))
@@ -250,9 +250,9 @@ char *HTTranslate(const char *required)
 
 	switch (r->op) {	/* Perform operation */
 
-#ifdef ACCESS_AUTH
 	case HT_DefProt:
 	case HT_Protect:
+#ifdef ACCESS_AUTH
 	    {
 		char *local_copy = NULL;
 		char *p2;
@@ -282,8 +282,8 @@ char *HTTranslate(const char *required)
 
 		/* continue translating rules */
 	    }
-	    break;
 #endif /* ACCESS_AUTH */
+	    break;
 
 	case HT_UserMsg:	/* Produce message immediately */
 	    LYFixCursesOn("show rule message:");
@@ -657,10 +657,10 @@ int HTSetConfiguration(char *config)
 		FREE(line);	/* syntax error, condition is a mess - kw */
 		return -2;	/* NB unrecognized cond passes here - kw */
 	    }
-	    if (cond && !strncasecomp(cond, "redirected", strlen(cond))) {
+	    if (cond && !strncasecomp(cond, "redirected", (int) strlen(cond))) {
 		cond = "redirected";	/* recognized, canonical case - kw */
 	    } else if (cond && strlen(cond) >= 8 &&
-		       !strncasecomp(cond, "userspecified", strlen(cond))) {
+		       !strncasecomp(cond, "userspecified", (int) strlen(cond))) {
 		cond = "userspec";	/* also allow abbreviation - kw */
 	    }
 	    HTAddRule(op, word2, word3, cond_op, cond);
