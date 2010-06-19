@@ -1,4 +1,4 @@
-# $LynxId: makefile.in,v 1.28 2010/04/30 08:20:28 tom Exp $
+# $LynxId: makefile.in,v 1.29 2010/06/19 17:02:35 tom Exp $
 # Make WWW under unix for a.n.other unix system (bsd)
 # Use this as a template
 
@@ -88,11 +88,11 @@ LOB = .
 # Only needed if HTWAIS.c is to be compiled. Put into your Makefile.include
 #  uncomment these and fill in WAISINC for adding direct wais access
 #  to Lynx.
-#HTWAIS_c = $(CMN)/HTWAIS.c
-#HTWAIS_o = $(LOB)/HTWAIS$o
-#WAIS = YES
+@MAKE_WAIS@HTWAIS_c = $(CMN)/HTWAIS.c
+@MAKE_WAIS@HTWAIS_o = $(LOB)/HTWAIS$o
+@MAKE_WAIS@WAIS = YES
 #WAISINC = -I../../../../freeWAIS-0.202/ir
-#WAISCFLAGS = -DDIRECT_WAIS
+@MAKE_WAIS@WAISCFLAGS = -DDIRECT_WAIS
 #
 
 # add -DNEW_GATEWAY here for the new gateway config stuff

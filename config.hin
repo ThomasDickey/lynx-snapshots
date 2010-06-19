@@ -1,5 +1,5 @@
 /*
- * $LynxId: config.hin,v 1.117 2010/04/20 22:52:37 tom Exp $
+ * $LynxId: config.hin,v 1.118 2010/06/19 17:00:06 tom Exp $
  * vile:cmode
  *
  * The configure script translates "config.hin" into "lynx_cfg.h"
@@ -166,6 +166,7 @@
 #undef HAVE_VARARGS_H		/* CF_VARARGS */
 #undef HAVE_VASPRINTF
 #undef HAVE_VFORK_H		/* have <vfork.h> */
+#undef HAVE_WAIS_H
 #undef HAVE_WAITPID
 #undef HAVE_WATTR_GET
 #undef HAVE_WBORDER

@@ -1,9 +1,19 @@
--- $LynxId: CHANGES,v 1.484 2010/06/19 11:14:10 tom Exp $
+-- $LynxId: CHANGES,v 1.486 2010/06/19 17:19:38 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
 2010-06-17 (2.8.8dev.4)
+* add configure option --enable-wais, for test-compiles with freeWAIS -TD
+* fixes to build with VMS -Christoph J Gartmann
+  + created [.src]multinet_ucx.opt with a single line
+    multinet_root:[multinet.library]ucx$ipc/LIBRARY
+  + modified build.com to have an additional option "Multinet with
+    UCX emulation"
+  + modified libmake.com for the same reason
+  + modified [.www.library.implementation]www_tcp.h for the same reason
+  + provide definition of IS_CJK_TTY for HTWAIS.c by adding include of
+    LYStrings.h
 * fix typo in users's guide -PBM
 * drop mkdirs.sh and MKINSTALLDIRS symbol from makefiles, using "mkdir -p" -TD
 * limit parsed URIs with new config parameter MAX_URI_SIZE, default 8192

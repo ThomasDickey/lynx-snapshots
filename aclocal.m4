@@ -1,4 +1,4 @@
-dnl $LynxId: aclocal.m4,v 1.161 2010/06/19 11:04:07 tom Exp $
+dnl $LynxId: aclocal.m4,v 1.162 2010/06/19 17:08:42 tom Exp $
 dnl Macros for auto-configure script.
 dnl by T.E.Dickey <dickey@invisible-island.net>
 dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
@@ -3253,6 +3253,30 @@ AC_TRY_LINK([#include <locale.h>],
 AC_MSG_RESULT($cf_cv_locale)
 test $cf_cv_locale = yes && { ifelse($1,,AC_DEFINE(LOCALE),[$1]) }
 ])dnl
+dnl ---------------------------------------------------------------------------
+dnl CF_MATH_LIB version: 6 updated: 2009/12/19 13:46:49
+dnl -----------
+dnl Checks for libraries.  At least one UNIX system, Apple Macintosh
+dnl Rhapsody 5.5, does not have -lm.  We cannot use the simpler
+dnl AC_CHECK_LIB(m,sin), because that fails for C++.
+AC_DEFUN([CF_MATH_LIB],
+[
+AC_CACHE_CHECK(if -lm needed for math functions,
+	cf_cv_need_libm,[
+	AC_TRY_LINK([
+	#include <stdio.h>
+	#include <math.h>
+	],
+	[double x = rand(); printf("result = %g\n", ]ifelse($2,,sin(x),$2)[)],
+	[cf_cv_need_libm=no],
+	[cf_cv_need_libm=yes])])
+if test "$cf_cv_need_libm" = yes
+then
+ifelse($1,,[
+	LIBS="-lm $LIBS"
+],[$1=-lm])
+fi
+])
 dnl ---------------------------------------------------------------------------
 dnl CF_MSG_LOG version: 4 updated: 2007/07/29 09:55:12
 dnl ----------
