@@ -1,4 +1,4 @@
-# $LynxId: makefile.in,v 1.108 2010/05/02 21:12:41 tom Exp $
+# $LynxId: makefile.in,v 1.109 2010/06/19 10:56:15 tom Exp $
 ##makefile for lynx
 
 SHELL		= @CONFIG_SHELL@
@@ -29,8 +29,6 @@ INSTALL_PROGRAM	= @INSTALL_PROGRAM@
 INSTALL_DATA	= @INSTALL_DATA@
 
 LN_S		= @LN_S@
-
-MKINSTALLDIRS	= @MKINSTALLDIRS@
 
 TAR		= @TAR@
 TAR_UP		= $(TAR) @TAR_UP_OPTIONS@ @TAR_PIPE_OPTIONS@
@@ -454,6 +452,6 @@ $(MANDIR) \
 $(SYSCONFDIR) \
 $(HELPDIR) \
 $(DOCDIR) :
-	$(SHELL) $(MKINSTALLDIRS) $@
+	mkdir -p $@
 etags:
 	etags -r "/\(PRIVATE\|PUBLIC\)[ \t]+\([a-zA-Z_][a-zA-Z_0-1]*[ \t*]+\)*\([a-zA-Z_][a-zA-Z_0-1]*\)[ \t]+\(ARGS[0-9]\|NOARGS\)/\3/" *.[ch] */*.[ch] */*/*.[ch] */*/*/*.[ch]

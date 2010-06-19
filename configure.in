@@ -1,4 +1,4 @@
-dnl $LynxId: configure.in,v 1.212 2010/04/25 23:44:30 tom Exp $
+dnl $LynxId: configure.in,v 1.213 2010/06/19 10:56:00 tom Exp $
 dnl
 dnl Process this file with autoconf to produce a configure script.
 dnl
@@ -1495,9 +1495,9 @@ srcdir="$srcdir"
 SRCDIR_CLEAN="#"
 if test -n "$srcdir" ; then
 	echo srcdir is $srcdir
-	$CONFIG_SHELL $MKINSTALLDIRS WWW/Library/Implementation
-	$CONFIG_SHELL $MKINSTALLDIRS src/chrtrans
-	test "$USE_INCLUDED_LIBINTL" = yes && $CONFIG_SHELL $MKINSTALLDIRS intl
+	mkdir -p WWW/Library/Implementation
+	mkdir -p src/chrtrans
+	test "$USE_INCLUDED_LIBINTL" = yes && mkdir -p intl
 	test "$srcdir" != "." && SRCDIR_CLEAN=""
 fi
 

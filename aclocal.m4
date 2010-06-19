@@ -1,11 +1,11 @@
-dnl $LynxId: aclocal.m4,v 1.160 2010/06/16 21:05:42 tom Exp $
+dnl $LynxId: aclocal.m4,v 1.161 2010/06/19 11:04:07 tom Exp $
 dnl Macros for auto-configure script.
 dnl by T.E.Dickey <dickey@invisible-island.net>
 dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
 dnl and Philippe De Muyter <phdm@macqel.be>
 dnl
 dnl Created: 1997/1/28
-dnl Updated: 2010/6/16
+dnl Updated: 2010/6/19
 dnl
 dnl The autoconf used in Lynx development is GNU autoconf 2.13 or 2.52, patched
 dnl by Thomas Dickey.  See your local GNU archives, and this URL:
@@ -38,7 +38,7 @@ dnl are modified), and are part of this file due to mechanical limitations of
 dnl autoconf.
 dnl ---------------------------------------------------------------------------
 dnl ---------------------------------------------------------------------------
-dnl AM_GNU_GETTEXT version: 11 updated: 2004/01/26 20:58:40
+dnl AM_GNU_GETTEXT version: 12 updated: 2010/06/19 07:02:11
 dnl --------------
 dnl Usage: Just like AM_WITH_NLS, which see.
 AC_DEFUN([AM_GNU_GETTEXT],
@@ -98,25 +98,6 @@ strdup strtoul tsearch __argz_count __argz_stringify __argz_next])
        for lang in $LINGUAS; do CATALOGS="$CATALOGS $lang$CATOBJEXT"; done
      fi
    fi
-
-   dnl If the AC_CONFIG_AUX_DIR macro for autoconf is used we possibly
-   dnl find the mkinstalldirs script in another subdir but ($top_srcdir).
-   dnl Try to locate it.
-   dnl changed mkinstalldirs to mkdirs.sh for Lynx /je spath 1998-Aug-21
-   dnl added check for separate locations of scripts -mirabile 2004-Jan-18
-   MKINSTALLDIRS=
-   if test -n "$ac_aux_dir"; then
-     MKINSTALLDIRS="$ac_aux_dir/mkdirs.sh"
-   fi
-   if test -z "$MKINSTALLDIRS"; then
-     MKINSTALLDIRS="\$(top_srcdir)/mkdirs.sh"
-   fi
-   if test -n "$GNUSYSTEM_AUX_DIR" ; then
-     if test -e "${GNUSYSTEM_AUX_DIR}/mkinstalldirs"; then
-       MKINSTALLDIRS="${GNUSYSTEM_AUX_DIR}/mkinstalldirs"
-     fi
-   fi
-   AC_SUBST(MKINSTALLDIRS)
 
    dnl Enable libtool support if the surrounding package wishes it.
    INTL_LIBTOOL_SUFFIX_PREFIX=ifelse([$1], use-libtool, [l], [])

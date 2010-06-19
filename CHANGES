@@ -1,11 +1,13 @@
--- $LynxId: CHANGES,v 1.482 2010/06/18 00:48:31 tom Exp $
+-- $LynxId: CHANGES,v 1.484 2010/06/19 11:14:10 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
 2010-06-17 (2.8.8dev.4)
-* limit parsed URIs with new config parameter MAX_URI_SIZE, default 8192, from
-  RedHat bug report forwarded by Vincent Danen.  For arbitrarily long URIs,
+* fix typo in users's guide -PBM
+* drop mkdirs.sh and MKINSTALLDIRS symbol from makefiles, using "mkdir -p" -TD
+* limit parsed URIs with new config parameter MAX_URI_SIZE, default 8192
+  (RedHat #605286, forwarded by Vincent Danen). For arbitrarily long URIs,
   alloca() could run out of stack space -TD
 * several changes to configure script, from ongoing work on xterm, etc -TD
   + workaround for broken ".pc" file for X Toolkit, which omits the ICE
