@@ -1,4 +1,4 @@
-/* $LynxId: LYUtils.h,v 1.82 2009/11/21 15:46:24 tom Exp $ */
+/* $LynxId: LYUtils.h,v 1.83 2010/06/19 15:36:34 tom Exp $ */
 #ifndef LYUTILS_H
 #define LYUTILS_H
 
@@ -506,6 +506,8 @@ extern "C" {
     extern void LYSyslog(char *arg);
     extern void LYCloselog(void);
 #endif				/* SYSLOG_REQUESTED_URLS */
+
+#undef STREQ			/* conflict with wais.h */
 
 /*
  *  Miscellaneous.

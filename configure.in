@@ -1,4 +1,4 @@
-dnl $LynxId: configure.in,v 1.213 2010/06/19 10:56:00 tom Exp $
+dnl $LynxId: configure.in,v 1.214 2010/06/19 17:15:27 tom Exp $
 dnl
 dnl Process this file with autoconf to produce a configure script.
 dnl
@@ -1287,6 +1287,26 @@ CF_ARG_DISABLE(ftp,
       [use_ftp=no])
 AC_MSG_RESULT($use_ftp)
 test $use_ftp != "no" && AC_DEFINE(DISABLE_FTP)
+
+dnl --------------------------------------------------------------------------
+AC_MSG_CHECKING(if you want to include WAIS code)
+CF_ARG_ENABLE(wais,
+[  --enable-wais           enable WAIS logic],
+      [use_wais=yes],
+      [use_wais=no])
+AC_MSG_RESULT($use_wais)
+
+MAKE_WAIS="#"
+if test $use_wais != "no"
+then
+	AC_CHECK_LIB(wais,fs_free,[
+		CF_MATH_LIB
+		CF_ADD_LIB(wais)
+		AC_CHECK_HEADERS(wais.h)
+		MAKE_WAIS=
+		],[AC_MSG_WARN(could not find WAIS library)])
+fi
+AC_SUBST(MAKE_WAIS)
 
 dnl --------------------------------------------------------------------------
 dnl DirEd (directory-editor) options

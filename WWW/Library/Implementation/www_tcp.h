@@ -1,5 +1,5 @@
 /*                System dependencies in the W3 library
- * $LynxId: www_tcp.h,v 1.40 2010/06/16 23:46:28 tom Exp $
+ * $LynxId: www_tcp.h,v 1.41 2010/06/19 12:41:35 Christoph.J.Gartmann Exp $
  *
                                    SYSTEM DEPENDENCIES
 
@@ -504,7 +504,11 @@ struct timeval {
 #include "tcpware_include:ucx$inetdef.h"
 #else
 #include <netdb.h>
+#ifdef MUCX
+#include <multinet_root:[multinet.include.vms]ucx$inetdef.h>
+#else
 #include <ucx$inetdef.h>
+#endif /* MUCX */
 #endif /* TCPWARE */
 #define TCP_INCLUDES_DONE
 #endif /* UCX */

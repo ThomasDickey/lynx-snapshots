@@ -514,6 +514,9 @@ II. Compile instructions -- UNIX
   --enable-warnings
 	Use this option to turn on GCC compiler warnings.
 
+  --enable-wais
+	Use this option to turn on configure check for freeWAIS library.
+
   --enable-widec
 	Use this option to allow the configure script to look for wide-curses
 	features.  If you do not specify the option, the configure script
@@ -1381,4 +1384,4 @@ VIII. Acknowledgment
 
 -- 1999/04/24 - H. Nelson <lynx-admin@irm.nara.kindai.ac.jp>
 -- vile:txtmode
--- $LynxId: INSTALLATION,v 1.111 2010/04/20 09:44:11 tom Exp $
+-- $LynxId: INSTALLATION,v 1.112 2010/06/19 17:22:59 tom Exp $

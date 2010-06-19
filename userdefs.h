@@ -1,5 +1,5 @@
 /*
- * $LynxId: userdefs.h,v 1.255 2010/04/25 23:44:30 tom Exp $
+ * $LynxId: userdefs.h,v 1.256 2010/06/19 18:23:03 tom Exp $
  *
  * Lynx - Hypertext navigation system
  *
@@ -242,6 +242,12 @@
 #ifndef LYNX_LSS_FILE
 #define LYNX_LSS_FILE "Lynx_Dir:lynx.lss"
 #endif /* LYNX_LSS_FILE */
+
+/*
+ * FTP_FORMAT uses the same codes as LIST_FORMAT, but applies to files shown
+ * in an ftp listing.
+ */
+#define FTP_FORMAT "%d  %-16.16t %a  %K"
 
 /*******************************************************************
  * Things you must change  -  non-VMS specific
