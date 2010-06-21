@@ -1,4 +1,4 @@
-/* $LynxId: LYrcFile.c,v 1.83 2010/05/05 09:19:31 tom Exp $ */
+/* $LynxId: LYrcFile.c,v 1.84 2010/06/20 16:42:27 tom Exp $ */
 #include <HTUtils.h>
 #include <HTFTP.h>
 #include <LYUtils.h>
@@ -698,7 +698,10 @@ void read_rc(FILE *fp)
 	    if (!strncasecomp(name, special, (int) strlen(special))) {
 		tbl = lookup_config(special);
 	    }
-	    /* lynx ignores unknown keywords */
+	    /*
+	     * lynx ignores unknown keywords.
+	     * This includes known keywords where there is no ENABLE_LYNXRC.
+	     */
 	    if (tbl->name == 0) {
 		CTRACE((tfp, "LYrcFile: ignored %s=%s\n", name, value));
 		continue;

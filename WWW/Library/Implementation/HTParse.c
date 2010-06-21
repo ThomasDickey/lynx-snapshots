@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTParse.c,v 1.58 2010/06/18 09:09:22 tom Exp $
+ * $LynxId: HTParse.c,v 1.59 2010/06/20 23:02:58 tom Exp $
  *
  *		Parse HyperText Document Address		HTParse.c
  *		================================
@@ -753,9 +753,7 @@ const char *HTParseAnchor(const char *aName)
 	size_t need = ((unsigned) ((p - aName) + (int) strlen(p) + 1));
 	char *name;
 
-	if (need > (size_t) max_uri_size ||
-	    (int) need < (int) (p - aName) ||
-	    (int) need < (int) strlen(p)) {
+	if (need > (size_t) max_uri_size) {
 	    p += strlen(p);
 	} else {
 	    name = (char *) LYalloca(need);
