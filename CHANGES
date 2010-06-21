@@ -1,9 +1,22 @@
--- $LynxId: CHANGES,v 1.486 2010/06/19 17:19:38 tom Exp $
+-- $LynxId: CHANGES,v 1.491 2010/06/21 08:36:29 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2010-06-17 (2.8.8dev.4)
+2010-06-20 (2.8.8dev.4)
+* check for SSL error when reading response from "GET".  This incidentally
+  exposes a longstanding bug in GNUTLS:
+    https://savannah.gnu.org/support/index.php?106987
+  (google the message "A TLS packet with unexpected length was received")
+  which prevents connection to
+    https://www.mynortonaccount.com/amsweb/default.do
+  (report by Ignac Vucko) -TD
+* fix ifdef/define's in LYMain.c to show GNUTLS version in user-agent when
+  built with tidy_tls.c -TD
+* improve format of X509_NAME_oneline() in tidy_tls.c, making it compatible
+  with the OpenSSL function so that no post-processing is needed -TD
+* correct typo in configure --enable-gnutls-compat option, which sometimes made
+  it enabled as a side-effect of setting --with-gnutls -TD
 * add configure option --enable-wais, for test-compiles with freeWAIS -TD
 * fixes to build with VMS -Christoph J Gartmann
   + created [.src]multinet_ucx.opt with a single line

@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMain.c,v 1.214 2010/06/18 00:12:27 tom Exp $
+ * $LynxId: LYMain.c,v 1.215 2010/06/20 20:03:00 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTP.h>
@@ -907,14 +907,10 @@ static void append_ssl_version(char **target,
 
 #if defined(SSLEAY_VERSION)
 #define LYNX_SSL_VERSION SSLeay_version(SSLEAY_VERSION)
-#else
-#if defined(OPENSSL_VERSION_TEXT)
+#elif defined(OPENSSL_VERSION_TEXT)
 #define LYNX_SSL_VERSION OPENSSL_VERSION_TEXT
-#else
-#if defined(GNUTLS_VERSION)
-#define LYNX_SSL_VERSION GNUTLS_VERSION
-#endif /* GNUTLS_VERSION */
-#endif /* OPENSSL_VERSION_TEXT */
+#elif defined(GNUTLS_VERSION)
+#define LYNX_SSL_VERSION "GNUTLS " GNUTLS_VERSION " "
 #endif
 
 #ifdef LYNX_SSL_VERSION

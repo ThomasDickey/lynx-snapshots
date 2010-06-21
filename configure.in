@@ -1,4 +1,4 @@
-dnl $LynxId: configure.in,v 1.214 2010/06/19 17:15:27 tom Exp $
+dnl $LynxId: configure.in,v 1.215 2010/06/20 18:09:14 tom Exp $
 dnl
 dnl Process this file with autoconf to produce a configure script.
 dnl
@@ -453,7 +453,7 @@ AC_ARG_WITH(gnutls,
 AC_CACHE_CHECK(if you want gnutls-openssl compat,cf_cv_gnutls_compat,[
 AC_ARG_ENABLE(gnutls-compat,
 	[  --enable-gnutls-compat  link with gnutls-openssl compat],
-	[cf_cv_gnutls_compat=$withval],
+	[cf_cv_gnutls_compat=$enableval],
 	[cf_cv_gnutls_compat=no])
 ])
 

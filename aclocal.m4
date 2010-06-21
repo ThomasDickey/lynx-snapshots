@@ -1,11 +1,11 @@
-dnl $LynxId: aclocal.m4,v 1.162 2010/06/19 17:08:42 tom Exp $
+dnl $LynxId: aclocal.m4,v 1.166 2010/06/20 22:22:20 tom Exp $
 dnl Macros for auto-configure script.
 dnl by T.E.Dickey <dickey@invisible-island.net>
 dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
 dnl and Philippe De Muyter <phdm@macqel.be>
 dnl
 dnl Created: 1997/1/28
-dnl Updated: 2010/6/19
+dnl Updated: 2010/6/20
 dnl
 dnl The autoconf used in Lynx development is GNU autoconf 2.13 or 2.52, patched
 dnl by Thomas Dickey.  See your local GNU archives, and this URL:
@@ -289,7 +289,7 @@ fi
 AC_SUBST($1)dnl
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl AM_WITH_NLS version: 23 updated: 2009/01/11 19:52:42
+dnl AM_WITH_NLS version: 24 updated: 2010/06/20 09:24:28
 dnl -----------
 dnl Inserted as requested by gettext 0.10.40
 dnl File from /usr/share/aclocal
@@ -381,7 +381,7 @@ AC_DEFUN([AM_WITH_NLS],
       CATOBJEXT=NONE
 
       cf_save_LIBS_1="$LIBS"
-      LIBS="$LIBICONV $LIBS"
+      CF_ADD_LIBS($LIBICONV)
       AC_CACHE_CHECK([for libintl.h and gettext()], cf_cv_func_gettext,[
         CF_FIND_LINKAGE(CF__INTL_HEAD,
         CF__INTL_BODY,
@@ -1669,7 +1669,7 @@ fi
 AC_CHECK_HEADERS($cf_cv_ncurses_header)
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_CURSES_LIBS version: 29 updated: 2009/01/06 19:34:57
+dnl CF_CURSES_LIBS version: 30 updated: 2010/06/20 09:24:28
 dnl --------------
 dnl Look for the curses libraries.  Older curses implementations may require
 dnl termcap/termlib to be linked as well.  Call CF_CURSES_CPPFLAGS first.
@@ -1686,16 +1686,16 @@ AC_MSG_RESULT($cf_result)
 if test "$cf_result" = no ; then
 case $host_os in #(vi
 freebsd*) #(vi
-    AC_CHECK_LIB(mytinfo,tgoto,[LIBS="-lmytinfo $LIBS"])
+    AC_CHECK_LIB(mytinfo,tgoto,[CF_ADD_LIBS(-lmytinfo)])
     ;;
 hpux10.*) #(vi
     AC_CHECK_LIB(cur_colr,initscr,[
-        LIBS="-lcur_colr $LIBS"
+        CF_ADD_LIBS(-lcur_colr)
         ac_cv_func_initscr=yes
         ],[
     AC_CHECK_LIB(Hcurses,initscr,[
         # HP's header uses __HP_CURSES, but user claims _HP_CURSES.
-        LIBS="-lHcurses $LIBS"
+        CF_ADD_LIBS(-lHcurses)
         CPPFLAGS="$CPPFLAGS -D__HP_CURSES -D_HP_CURSES"
         ac_cv_func_initscr=yes
         ])])
@@ -1706,7 +1706,7 @@ linux*) # Suse Linux does not follow /usr/lib convention
 sunos3*|sunos4*)
     if test -d /usr/5lib ; then
       CF_ADD_LIBDIR(/usr/5lib)
-      LIBS="$LIBS -lcurses -ltermcap"
+      CF_ADD_LIBS(-lcurses -ltermcap)
     fi
     ac_cv_func_initscr=yes
     ;;
@@ -2803,7 +2803,7 @@ rm -f conftest*
 AC_SUBST(EXTRA_CFLAGS)
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_GNUTLS version: 18 updated: 2010/05/26 16:44:57
+dnl CF_GNUTLS version: 21 updated: 2010/06/20 18:21:35
 dnl ---------
 dnl Check for gnutls library (TLS "is" SSL)
 dnl $1 = the [optional] directory in which the library may be found
@@ -2834,14 +2834,14 @@ AC_DEFUN([CF_GNUTLS],[
 				if test -n "$cf_cflags_ssl" ; then
 					case "$cf_cflags_ssl" in #(vi
 					*-I*) #(vi
-						cf_cv_header_path_ssl=`echo "$cf_cflags_ssl" | sed -e 's/^.*-I//' -e 's/ .*//'`
+						cf_cv_header_path_gnutls=`echo "$cf_cflags_ssl" | sed -e 's/^.*-I//' -e 's/ .*//'`
 						;;
 					*)
-						cf_cv_header_path_ssl=/usr/include
+						cf_cv_header_path_gnutls=/usr/include
 						;;
 					esac
-					if test -d $cf_cv_header_path_ssl/gnutls ; then
-						cf_cv_header_path_ssl=$cf_cv_header_path_ssl/gnutls
+					if test -d $cf_cv_header_path_gnutls/gnutls ; then
+						cf_cv_header_path_gnutls=$cf_cv_header_path_gnutls/gnutls
 					fi
 					CF_ADD_CFLAGS($cf_cflags_ssl)
 				fi
@@ -2849,14 +2849,14 @@ AC_DEFUN([CF_GNUTLS],[
 				if test -n "$cf_libs_ssl" ; then
 					case "x$cf_libs_ssl" in #(vi
 					*-L*) #(vi
-						cf_cv_library_path_ssl=`echo "$cf_libs_ssl" | sed -e 's/^.*-L//' -e 's/ .*//'`
+						cf_cv_library_path_gnutls=`echo "$cf_libs_ssl" | sed -e 's/^.*-L//' -e 's/ .*//'`
 						;;
 					*)
-						cf_cv_library_path_ssl=/usr/lib
+						cf_cv_library_path_gnutls=/usr/lib
 						;;
 					esac
 					CF_VERBOSE(adding $cf_libs_ssl to LIBS)
-					LIBS="$cf_libs_ssl $LIBS"
+					CF_ADD_LIBS($cf_libs_ssl)
 				fi
 			else
 				CF_VERBOSE(... did not find $cf_pkg_gnutls in pkg-config)
@@ -2866,8 +2866,9 @@ AC_DEFUN([CF_GNUTLS],[
 		esac
 	fi
 
+	ifelse([$2],,[AC_DEFINE(USE_GNUTLS_INCL)],[AC_DEFINE(USE_GNUTLS_FUNCS)])
+
 	if test "$cf_cv_have_gnutls" = no ; then
-		ifelse([$2],,[AC_DEFINE(USE_GNUTLS_INCL)],[AC_DEFINE(USE_GNUTLS_FUNCS)])
 		cf_gnutls_CPPFLAGS=$CPPFLAGS
 
 		CF_FIND_LINKAGE(CF__SSL_HEAD,
@@ -2882,31 +2883,27 @@ AC_DEFUN([CF_GNUTLS],[
 	fi
 
 	if test "$cf_cv_have_gnutls" = yes ; then
-		if test "$cf_cv_pkg_config_ssl" != yes ; then
-			if test -n "$cf_cv_header_path_gnutls" ; then
-				AC_DEFINE(USE_SSL)
-				case $cf_cv_header_path_gnutls in
-					/usr/include/gnutls)
-					;;
-				*)
-					CF_ADD_INCDIR($cf_cv_header_path_gnutls)
-					;;
-				esac
-			fi
-			if test -n "$cf_cv_library_path_gnutls" ; then
-				CF_ADD_LIBDIR($cf_cv_library_path_gnutls)
-			fi
-			LIBS="-lgnutls -lgcrypt $LIBS"
-		else
+		if test -n "$cf_cv_header_path_gnutls" ; then
 			AC_DEFINE(USE_SSL)
+			case $cf_cv_header_path_gnutls in
+				/usr/include/gnutls)
+				;;
+			*)
+				CF_ADD_INCDIR($cf_cv_header_path_gnutls)
+				;;
+			esac
 		fi
+		if test -n "$cf_cv_library_path_gnutls" ; then
+			CF_ADD_LIBDIR($cf_cv_library_path_gnutls)
+		fi
+		CF_ADD_LIBS(-lgnutls -lgcrypt)
 
 		ifelse([$2],,
 			[if test "$cf_pkg_gnutls" = none ; then
 				AC_CHECK_LIB(gnutls-openssl,SSL_connect,
-					[LIBS="-lgnutls-openssl $LIBS"],
+					[CF_ADD_LIBS(-lgnutls-openssl)],
 					[AC_CHECK_LIB(gnutls-extra,SSL_connect,
-					[LIBS="-lgnutls-extra $LIBS"],
+					[CF_ADD_LIBS(-lgnutls-extra)],
 					[AC_MSG_ERROR(cannot find gnutls openssl functions)])])
 			fi],[EXTRA_OBJS="$EXTRA_OBJS $2"])
 
@@ -2997,7 +2994,7 @@ AC_DEFUN([CF_HELP_MESSAGE],
 [AC_DIVERT_HELP([$1])dnl
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_INET_ADDR version: 4 updated: 1999/03/30 12:24:31
+dnl CF_INET_ADDR version: 5 updated: 2010/06/20 09:24:28
 dnl ------------
 dnl For Lynx, check if the libraries we have found give us inet_aton, or
 dnl inet_addr.  If not, try to find the latter function with -lbind or
@@ -3043,7 +3040,7 @@ else
 	    done
 	])
 	if test "$cf_cv_lib_inet_addr" != no ; then
-	    LIBS="$LIBS $cf_cv_lib_inet_addr"
+	    CF_ADD_LIBS($cf_cv_lib_inet_addr)
 	else
 	    AC_MSG_WARN(Unable to find library for inet_addr function)
 	fi
@@ -3254,7 +3251,7 @@ AC_MSG_RESULT($cf_cv_locale)
 test $cf_cv_locale = yes && { ifelse($1,,AC_DEFINE(LOCALE),[$1]) }
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_MATH_LIB version: 6 updated: 2009/12/19 13:46:49
+dnl CF_MATH_LIB version: 8 updated: 2010/05/29 16:31:02
 dnl -----------
 dnl Checks for libraries.  At least one UNIX system, Apple Macintosh
 dnl Rhapsody 5.5, does not have -lm.  We cannot use the simpler
@@ -3267,13 +3264,13 @@ AC_CACHE_CHECK(if -lm needed for math functions,
 	#include <stdio.h>
 	#include <math.h>
 	],
-	[double x = rand(); printf("result = %g\n", ]ifelse($2,,sin(x),$2)[)],
+	[double x = rand(); printf("result = %g\n", ]ifelse([$2],,sin(x),$2)[)],
 	[cf_cv_need_libm=no],
 	[cf_cv_need_libm=yes])])
 if test "$cf_cv_need_libm" = yes
 then
 ifelse($1,,[
-	LIBS="-lm $LIBS"
+	CF_ADD_LIB(m)
 ],[$1=-lm])
 fi
 ])
@@ -3348,7 +3345,7 @@ printf("old\n");
 	,[$1=no])
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_NCURSES_CONFIG version: 6 updated: 2010/04/28 06:02:16
+dnl CF_NCURSES_CONFIG version: 7 updated: 2010/06/20 09:24:28
 dnl -----------------
 dnl Tie together the configure-script macros for ncurses.
 dnl Prefer the "-config" script from ncurses 5.6, to simplify analysis.
@@ -3365,7 +3362,7 @@ AC_PATH_PROGS(NCURSES_CONFIG,${cf_ncuconfig_root}6-config ${cf_ncuconfig_root}5-
 if test "$NCURSES_CONFIG" != none ; then
 
 CPPFLAGS="$CPPFLAGS `$NCURSES_CONFIG --cflags`"
-LIBS="`$NCURSES_CONFIG --libs` $LIBS"
+CF_ADD_LIBS(`$NCURSES_CONFIG --libs`)
 
 # even with config script, some packages use no-override for curses.h
 CF_CURSES_HEADER(ifelse($1,,ncurses,$1))
@@ -3505,7 +3502,7 @@ esac
 
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_NCURSES_LIBS version: 13 updated: 2007/07/29 10:29:20
+dnl CF_NCURSES_LIBS version: 14 updated: 2010/06/20 09:24:28
 dnl ---------------
 dnl Look for the ncurses library.  This is a little complicated on Linux,
 dnl because it may be linked with the gpm (general purpose mouse) library.
@@ -3541,12 +3538,12 @@ freebsd*)
 	;;
 esac
 
-LIBS="$cf_ncurses_LIBS $LIBS"
+CF_ADD_LIBS($cf_ncurses_LIBS)
 
 if ( test -n "$cf_cv_curses_dir" && test "$cf_cv_curses_dir" != "no" )
 then
 	CF_ADD_LIBDIR($cf_cv_curses_dir/lib)
-	LIBS="-l$cf_nculib_root $LIBS"
+	CF_ADD_LIBS(-l$cf_nculib_root)
 else
 	CF_FIND_LIBRARY($cf_nculib_root,$cf_nculib_root,
 		[#include <${cf_cv_ncurses_header-curses.h}>],
@@ -3636,7 +3633,7 @@ EOF
 test "$cf_cv_ncurses_version" = no || AC_DEFINE(NCURSES)
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_NETLIBS version: 6 updated: 2009/12/24 04:20:51
+dnl CF_NETLIBS version: 7 updated: 2010/06/20 09:24:28
 dnl ----------
 dnl After checking for functions in the default $LIBS, make a further check
 dnl for the functions that are netlib-related (these aren't always in the
@@ -3670,7 +3667,7 @@ mingw32) # (vi
 	fi
 
 	cf_save_LIBS="$LIBS"
-	LIBS="$cf_winsock_lib $LIBS"
+	CF_ADD_LIBS($cf_winsock_lib)
 
 	AC_TRY_LINK([
 #ifdef HAVE_WINDOWS_H
@@ -3724,7 +3721,7 @@ case $cf_cv_netlibs in #(vi
 	;;
 esac
 
-LIBS="$LIBS $cf_cv_netlibs"
+CF_ADD_LIBS($cf_cv_netlibs)
 test $cf_test_netlibs = no && echo "$cf_cv_netlibs" >&AC_FD_MSG
 ])dnl
 dnl ---------------------------------------------------------------------------
@@ -3793,7 +3790,7 @@ case .$with_cflags in #(vi
 esac
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_NSS_COMPAT version: 2 updated: 2008/03/23 14:48:54
+dnl CF_NSS_COMPAT version: 3 updated: 2010/06/20 09:24:28
 dnl -------------
 dnl Check for NSS compatible SSL libraries
 dnl $1 = the [optional] directory in which the library may be found
@@ -3840,7 +3837,7 @@ yes) #(vi
 	fi
 	;;
 esac
-LIBS="$cf_ssl_library $LIBS"
+CF_ADD_LIBS($cf_ssl_library)
 
 cf_ssl_subincs=yes
 if test -n "$cf_ssl_root" ; then
@@ -4015,7 +4012,7 @@ case ".[$]$1" in #(vi
 esac
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_PDCURSES_X11 version: 9 updated: 2009/01/11 15:31:37
+dnl CF_PDCURSES_X11 version: 10 updated: 2010/06/20 09:24:28
 dnl ---------------
 dnl Configure for PDCurses' X11 library
 AC_DEFUN([CF_PDCURSES_X11],[
@@ -4026,7 +4023,7 @@ AC_PATH_PROGS(XCURSES_CONFIG,xcurses-config,none)
 if test "$XCURSES_CONFIG" != none ; then
 
 CPPFLAGS="$CPPFLAGS `$XCURSES_CONFIG --cflags`"
-LIBS="`$XCURSES_CONFIG --libs` $LIBS"
+CF_ADD_LIBS(`$XCURSES_CONFIG --libs`)
 
 cf_cv_lib_XCurses=yes
 
@@ -4035,10 +4032,10 @@ else
 LDFLAGS="$LDFLAGS $X_LIBS"
 CF_CHECK_CFLAGS($X_CFLAGS)
 AC_CHECK_LIB(X11,XOpenDisplay,
-	[LIBS="-lX11 $LIBS"],,
+	[CF_ADD_LIBS(-lX11)],,
 	[$X_PRE_LIBS $LIBS $X_EXTRA_LIBS])
 AC_CACHE_CHECK(for XCurses library,cf_cv_lib_XCurses,[
-LIBS="-lXCurses $LIBS"
+CF_ADD_LIBS(-lXCurses)
 AC_TRY_LINK([
 #include <xcurses.h>
 char *XCursesProgramName = "test";
@@ -4714,14 +4711,14 @@ AC_DEFUN([CF_SOCKS],[
   fi
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_SOCKS5 version: 10 updated: 2008/03/23 14:48:54
+dnl CF_SOCKS5 version: 11 updated: 2010/06/20 09:24:28
 dnl ---------
 dnl Check for socks5 configuration
 dnl $1 = the [optional] directory in which the library may be found
 AC_DEFUN([CF_SOCKS5],[
   CF_ADD_OPTIONAL_PATH($1, [socks5 library])
 
-LIBS="$LIBS -lsocks5"
+CF_ADD_LIBS(-lsocks5)
 
 AC_DEFINE(USE_SOCKS5)
 AC_DEFINE(SOCKS)
@@ -4844,7 +4841,7 @@ define([CF_SRAND_PARSE],[
 	esac
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_SSL version: 21 updated: 2010/05/05 20:27:55
+dnl CF_SSL version: 22 updated: 2010/06/20 09:24:28
 dnl ------
 dnl Check for ssl library
 dnl $1 = [optional] directory in which the library may be found, set by AC_ARG_WITH
@@ -4900,7 +4897,7 @@ AC_DEFUN([CF_SSL],[
 						;;
 					esac
 					CF_VERBOSE(adding $cf_libs_ssl to LIBS)
-					LIBS="$cf_libs_ssl $LIBS"
+					CF_ADD_LIBS($cf_libs_ssl)
 				fi
 			fi
 			;;
@@ -4939,7 +4936,7 @@ AC_DEFUN([CF_SSL],[
 				if test -n "$cf_cv_library_path_ssl" ; then
 					CF_ADD_LIBDIR($cf_cv_library_path_ssl)
 				fi
-				LIBS="-lssl $cf_extra_ssl_libs $LIBS"
+				CF_ADD_LIBS(-lssl $cf_extra_ssl_libs)
 				if test -n "$cf_cv_header_path_ssl" ; then
 					case $cf_cv_header_path_ssl in #(vi
 					/usr/include/openssl) #(vi
@@ -5152,7 +5149,7 @@ AC_SUBST(TAR_FILE_OPTIONS)
 AC_SUBST(TAR_PIPE_OPTIONS)
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_TERMCAP_LIBS version: 11 updated: 2006/10/28 15:15:38
+dnl CF_TERMCAP_LIBS version: 12 updated: 2010/06/20 09:24:28
 dnl ---------------
 dnl Look for termcap libraries, or the equivalent in terminfo.
 dnl
@@ -5202,8 +5199,8 @@ if test "$cf_cv_termlib" = none; then
 fi
 if test "$cf_cv_termlib" = none; then
 	# allow curses library for broken AIX system.
-	AC_CHECK_LIB(curses, initscr, [LIBS="$LIBS -lcurses" cf_cv_termlib=termcap])
-	AC_CHECK_LIB(termcap, tgoto, [LIBS="$LIBS -ltermcap" cf_cv_termlib=termcap])
+	AC_CHECK_LIB(curses, initscr, [CF_ADD_LIBS(-lcurses) cf_cv_termlib=termcap])
+	AC_CHECK_LIB(termcap, tgoto, [CF_ADD_LIBS(-ltermcap) cf_cv_termlib=termcap])
 fi
 ])
 if test "$cf_cv_termlib" = none; then
@@ -5465,7 +5462,7 @@ AC_DEFUN([CF_UPPER],
 $1=`echo "$2" | sed y%abcdefghijklmnopqrstuvwxyz./-%ABCDEFGHIJKLMNOPQRSTUVWXYZ___%`
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_UTF8_LIB version: 6 updated: 2010/04/21 06:20:50
+dnl CF_UTF8_LIB version: 7 updated: 2010/06/20 09:24:28
 dnl -----------
 dnl Check for multibyte support, and if not found, utf8 compatibility library
 AC_DEFUN([CF_UTF8_LIB],
@@ -5487,7 +5484,7 @@ if test "$cf_cv_utf8_lib" = "add-on" ; then
 	AC_DEFINE(HAVE_LIBUTF8_H)
 	CF_ADD_INCDIR($cf_cv_header_path_utf8)
 	CF_ADD_LIBDIR($cf_cv_library_path_utf8)
-	LIBS="$cf_cv_library_file_utf8 $LIBS"
+	CF_ADD_LIBS($cf_cv_library_file_utf8)
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------

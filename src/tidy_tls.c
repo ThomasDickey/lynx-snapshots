@@ -1,5 +1,5 @@
 /*
- * $LynxId: tidy_tls.c,v 1.4 2010/04/29 20:49:46 tom Exp $
+ * $LynxId: tidy_tls.c,v 1.5 2010/06/20 19:25:46 tom Exp $
  * Copyright 2008, Thomas E. Dickey
  * with fix Copyright 2008 by Thomas Viehmann
  *
@@ -20,11 +20,11 @@ static int last_error = 0;
 
 /* ugly, but hey, we could just use a more sane api, too */
 #define GetDnByOID(target, oid, thewhat) \
-		len = sizeof(target); \
-                if (! thewhat) \
-		  gnutls_x509_crt_get_dn_by_oid(xcert, oid, 0, 0, target, &len); \
-                else \
-                  gnutls_x509_crt_get_issuer_dn_by_oid(xcert, oid, 0, 0, target, &len)
+	len = sizeof(target); \
+	if (! thewhat) \
+	    gnutls_x509_crt_get_dn_by_oid(xcert, oid, 0, 0, target, &len); \
+	else \
+	    gnutls_x509_crt_get_issuer_dn_by_oid(xcert, oid, 0, 0, target, &len)
 
 /* thewhat: which DN to get 0 = subject, 1 = issuer */
 static int ExtractCertificate(const gnutls_datum_t * cert, X509_NAME * result, int thewhat)
@@ -531,18 +531,22 @@ SSL_METHOD *SSLv23_client_method(void)
 
 static int add_name(char *target, int len, const char *tag, const char *data)
 {
-    int need = strlen(tag);
+    if (*data != '\0') {
+	int need = strlen(tag) + 2;
 
-    target += strlen(target);
-    if (need < len) {
-	strcat(target, tag);
-	len -= need;
-	target += need;
+	target += strlen(target);
+	if (need < len) {
+	    strcat(target, "/");
+	    strcat(target, tag);
+	    strcat(target, "=");
+	    len -= need;
+	    target += need;
+	}
+	need = strlen(data);
+	if (need >= len - 1)
+	    need = len - 1;
+	strncat(target, data, need)[need] = '\0';
     }
-    need = strlen(data);
-    if (need >= len - 1)
-	need = len - 1;
-    strncat(target, data, need)[need] = '\0';
     return len;
 }
 #define ADD_NAME(tag, data) len = add_name(target, len, tag, data);
@@ -556,13 +560,13 @@ char *X509_NAME_oneline(X509_NAME * source, char *target, int len)
     if (target && (len > 0)) {
 	*target = '\0';
 	if (source) {
-	    ADD_NAME("C=", source->country);
-	    ADD_NAME(", ST=", source->state_or_province_name);
-	    ADD_NAME(", L=", source->locality_name);
-	    ADD_NAME(", O=", source->organization);
-	    ADD_NAME(", OU=", source->organizational_unit_name);
-	    ADD_NAME(", CN=", source->common_name);
-	    ADD_NAME("/Email=", source->email);
+	    ADD_NAME("C", source->country);
+	    ADD_NAME("ST", source->state_or_province_name);
+	    ADD_NAME("L", source->locality_name);
+	    ADD_NAME("O", source->organization);
+	    ADD_NAME("OU", source->organizational_unit_name);
+	    ADD_NAME("CN", source->common_name);
+	    ADD_NAME("Email", source->email);
 	}
     }
     return target;
