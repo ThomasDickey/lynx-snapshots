@@ -1,9 +1,9 @@
--- $LynxId: CHANGES,v 1.491 2010/06/21 08:36:29 tom Exp $
+-- $LynxId: CHANGES,v 1.492 2010/06/21 10:50:46 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2010-06-20 (2.8.8dev.4)
+2010-06-21 (2.8.8dev.4)
 * check for SSL error when reading response from "GET".  This incidentally
   exposes a longstanding bug in GNUTLS:
     https://savannah.gnu.org/support/index.php?106987
