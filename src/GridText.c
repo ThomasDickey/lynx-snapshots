@@ -1,5 +1,5 @@
 /*
- * $LynxId: GridText.c,v 1.188 2010/06/17 10:50:36 tom Exp $
+ * $LynxId: GridText.c,v 1.190 2010/06/29 00:56:31 tom Exp $
  *
  *		Character grid hypertext object
  *		===============================
@@ -1779,9 +1779,9 @@ static void display_title(HText *text)
     }
 #endif /* USE_COLOR_STYLE */
 #ifdef WIDEC_CURSES
-    i = limit - LYbarWidth - strlen(percent) - LYstrCells(title);
+    i = limit - LYbarWidth - (int) strlen(percent) - LYstrCells(title);
     if (i <= 0) {		/* title is truncated */
-	i = limit - LYbarWidth - strlen(percent) - 3;
+	i = limit - LYbarWidth - (int) strlen(percent) - 3;
 	if (i <= 0) {		/* no room at all */
 	    title[0] = '\0';
 	} else {
@@ -6007,9 +6007,9 @@ static void HText_trimHightext(HText *text,
 	     * LYstrExtent filters out the formatting characters, so we do not
 	     * have to count them here, except for soft newlines.
 	     */
-	    anchor_ptr->line_pos = LYstrExtent2(line_ptr->data, anchor_col);
+	    anchor_ptr->line_pos = (short) LYstrExtent2(line_ptr->data, anchor_col);
 	    if (line_ptr->data[0] == LY_SOFT_NEWLINE)
-		anchor_ptr->line_pos += 1;
+		anchor_ptr->line_pos = (short) (anchor_ptr->line_pos + 1);
 	}
 #else /* 8-bit curses, etc.  */
 	if (anchor_ptr->line_pos > 0) {
@@ -10632,7 +10632,7 @@ static void UpdateBoundary(char **Boundary,
     assert(want != NULL);
     assert(text != NULL);
 
-    for (j = 0; j <= (last - have); ++j) {
+    for (j = 0; (long) j <= (long) (last - have); ++j) {
 	if (want[0] == text[j]
 	    && !memcmp(want, text + j, have)) {
 	    char temp[2];
