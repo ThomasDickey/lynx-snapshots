@@ -1,7 +1,11 @@
--- $LynxId: CHANGES,v 1.492 2010/06/21 10:50:46 tom Exp $
+-- $LynxId: CHANGES,v 1.493 2010/06/29 00:41:50 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
+
+2010-06-28 (2.8.8dev.5)
+* correct a sign-extension error in UpdateBoundary(), used for MIME boundary
+  computation, broken in dev.4 compiler-warning fixes -TD
 
 2010-06-21 (2.8.8dev.4)
 * check for SSL error when reading response from "GET".  This incidentally
