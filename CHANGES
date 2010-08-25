@@ -1,9 +1,11 @@
--- $LynxId: CHANGES,v 1.495 2010/08/08 16:43:13 tom Exp $
+-- $LynxId: CHANGES,v 1.497 2010/08/25 09:51:04 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2010-08-08 (2.8.8dev.5)
+2010-08-25 (2.8.8dev.5)
+* modify convert_to_idna() to check for malformed urls (Debian #594300 reports
+  this as CVE-2010-2810) -TD
 * correct typo in po/makefile.inn from removal of mkdirs.sh in dev.4 (Debian
   #592078) -TD
 * correct a sign-extension error in UpdateBoundary(), used for MIME boundary
