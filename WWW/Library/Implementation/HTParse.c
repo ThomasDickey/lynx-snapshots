@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTParse.c,v 1.59 2010/06/20 23:02:58 tom Exp $
+ * $LynxId: HTParse.c,v 1.60 2010/08/25 09:17:08 tom Exp $
  *
  *		Parse HyperText Document Address		HTParse.c
  *		================================
@@ -244,7 +244,7 @@ char *HTParsePort(char *host, int *portp)
 #ifdef USE_IDNA
 static int hex_decode(int ch)
 {
-    int result = 0;
+    int result = -1;
 
     if (ch >= '0' && ch <= '9')
 	result = (ch - '0');
@@ -261,30 +261,47 @@ static int hex_decode(int ch)
  */
 static void convert_to_idna(char *host)
 {
-    char *buffer = malloc(strlen(host) + 1);
+    size_t length = strlen(host);
+    char *endhost = host + length;
+    char *buffer = malloc(length + 1);
     char *output = NULL;
     char *src, *dst;
     int code;
+    int hi, lo;
 
     if (buffer != 0) {
-	for (dst = buffer, src = host; *src != '\0'; ++dst) {
+	code = TRUE;
+	for (dst = buffer, src = host; src < endhost; ++dst) {
 	    int ch = *src++;
 
 	    if (ch == HEX_ESCAPE) {
-		int hi = hex_decode(*src++);
-		int lo = hex_decode(*src++);
+		if ((src + 1) < endhost
+		    && (hi = hex_decode(src[0])) >= 0
+		    && (lo = hex_decode(src[1])) >= 0) {
 
-		*dst = (char) ((hi << 4) | lo);
+		    *dst = (char) ((hi << 4) | lo);
+		    src += 2;
+		} else {
+		    CTRACE((tfp, "convert_to_idna: `%s' is malformed\n", host));
+		    code = FALSE;
+		    break;
+		}
 	    } else {
 		*dst = (char) ch;
 	    }
 	}
-	*dst = '\0';
-	code = idna_to_ascii_8z(buffer, &output, IDNA_USE_STD3_ASCII_RULES);
-	if (code == IDNA_SUCCESS) {
-	    strcpy(host, output);
+	if (code) {
+	    *dst = '\0';
+	    code = idna_to_ascii_8z(buffer, &output, IDNA_USE_STD3_ASCII_RULES);
+	    if (code == IDNA_SUCCESS) {
+		strcpy(host, output);
+	    } else {
+		CTRACE((tfp, "convert_to_idna: `%s': %s\n",
+			buffer,
+			idna_strerror(code)));
+	    }
+	    FREE(output);
 	}
-	FREE(output);
 	free(buffer);
     }
 }
