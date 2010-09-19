@@ -1,7 +1,17 @@
--- $LynxId: CHANGES,v 1.497 2010/08/25 09:51:04 tom Exp $
+-- $LynxId: CHANGES,v 1.503 2010/09/19 19:34:23 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
+
+2010-09-19 (2.8.8dev.6)
+* add configure check for ctags/etags programs, needed for some BSD ports -TD
+* add configure --with-textdomain option to allow overriding the "lynx"
+  NLS textdomain, to help ensure that Lynx's build-script does not conflict
+  with alternative packages -TD
+* use AC_ARG_PROGRAM in configure script, to support --program-suffix, etc.,
+  to help with packaging -TD
+* add Debian build script, for testing (adapted from lynx-cur package) -TD
+* add RPM build script, for testing -TD
 
 2010-08-25 (2.8.8dev.5)
 * modify convert_to_idna() to check for malformed urls (Debian #594300 reports

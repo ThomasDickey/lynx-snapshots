@@ -1,5 +1,5 @@
 /*                System dependencies in the W3 library
- * $LynxId: www_tcp.h,v 1.41 2010/06/19 12:41:35 Christoph.J.Gartmann Exp $
+ * $LynxId: www_tcp.h,v 1.42 2010/09/19 18:30:56 tom Exp $
  *
                                    SYSTEM DEPENDENCIES
 
@@ -773,6 +773,10 @@ typedef unsigned short mode_t;
 
 #ifndef HAVE_GETTEXT
 #define gettext(s) s
+#endif
+
+#ifndef NLS_TEXTDOMAIN
+#define NLS_TEXTDOMAIN "lynx"
 #endif
 
 /*

@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMain.c,v 1.215 2010/06/20 20:03:00 tom Exp $
+ * $LynxId: LYMain.c,v 1.216 2010/09/19 18:20:35 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTP.h>
@@ -944,8 +944,8 @@ static void SetLocale(void)
 
 	if ((cp = LYGetEnv("LYNX_LOCALEDIR")) == 0)
 	    cp = LOCALEDIR;
-	bindtextdomain("lynx", cp);
-	textdomain("lynx");
+	bindtextdomain(NLS_TEXTDOMAIN, cp);
+	textdomain(NLS_TEXTDOMAIN);
     }
 #endif /* HAVE_LIBINTL_H */
 }
