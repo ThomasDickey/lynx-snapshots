@@ -1,11 +1,11 @@
-dnl $LynxId: aclocal.m4,v 1.166 2010/06/20 22:22:20 tom Exp $
+dnl $LynxId: aclocal.m4,v 1.169 2010/09/19 19:20:37 tom Exp $
 dnl Macros for auto-configure script.
 dnl by T.E.Dickey <dickey@invisible-island.net>
 dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
 dnl and Philippe De Muyter <phdm@macqel.be>
 dnl
 dnl Created: 1997/1/28
-dnl Updated: 2010/6/20
+dnl Updated: 2010/9/19
 dnl
 dnl The autoconf used in Lynx development is GNU autoconf 2.13 or 2.52, patched
 dnl by Thomas Dickey.  See your local GNU archives, and this URL:
@@ -845,7 +845,7 @@ $2])
 done
 ])
 dnl ---------------------------------------------------------------------------
-dnl CF_ADD_SUBDIR_PATH version: 2 updated: 2007/07/29 10:12:59
+dnl CF_ADD_SUBDIR_PATH version: 3 updated: 2010/07/03 20:58:12
 dnl ------------------
 dnl Append to a search-list for a nonstandard header/lib-file
 dnl	$1 = the variable to return as result
@@ -857,7 +857,7 @@ AC_DEFUN([CF_ADD_SUBDIR_PATH],
 [
 test "$4" != "$5" && \
 test -d "$4" && \
-ifelse([$5],NONE,,[(test $5 = NONE || test -d $5) &&]) {
+ifelse([$5],NONE,,[(test $5 = NONE || test "$4" != "$5") &&]) {
 	test -n "$verbose" && echo "	... testing for $3-directories under $4"
 	test -d $4/$3 &&          $1="[$]$1 $4/$3"
 	test -d $4/$3/$2 &&       $1="[$]$1 $4/$3/$2"
@@ -1158,7 +1158,7 @@ AC_SUBST(BUILD_EXEEXT)
 AC_SUBST(BUILD_OBJEXT)
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_BUNDLED_INTL version: 14 updated: 2010/01/17 20:37:27
+dnl CF_BUNDLED_INTL version: 15 updated: 2010/09/19 15:09:44
 dnl ---------------
 dnl Top-level macro for configuring an application with a bundled copy of
 dnl the intl and po directories for gettext.
@@ -1172,12 +1172,15 @@ dnl	GT_NO        - "#" comment if building intl library, otherwise empty
 dnl	INTLDIR_MAKE - to make ./intl directory
 dnl	MSG_DIR_MAKE - to make ./po directory
 dnl	SUB_MAKEFILE - list of makefiles in ./intl, ./po directories
-dnl Defines
+dnl
+dnl Defines:
 dnl	HAVE_LIBGETTEXT_H if we're using ./intl
+dnl	NLS_TEXTDOMAIN
 dnl
 dnl Environment:
 dnl	ALL_LINGUAS if set, lists the root names of the ".po" files.
 dnl	CONFIG_H assumed to be "config.h"
+dnl	PACKAGE must be set, used as default for textdomain
 dnl	VERSION may be set, otherwise extract from "VERSION" file.
 dnl
 AC_DEFUN([CF_BUNDLED_INTL],[
@@ -1192,6 +1195,10 @@ test -z "$ALL_LINGUAS" && ALL_LINGUAS=`test -d $srcdir/po && cd $srcdir/po && ec
 : ${CONFIG_H=config.h}
 AC_SUBST(CONFIG_H)
 
+if test -z "$PACKAGE" ; then
+	AC_MSG_ERROR([[CF_BUNDLED_INTL] used without setting [PACKAGE] variable])
+fi
+
 if test -z "$VERSION" ; then
 if test -f $srcdir/VERSION ; then
 	VERSION=`sed -e '2,$d' $srcdir/VERSION|cut -f1`
@@ -1202,6 +1209,15 @@ fi
 AC_SUBST(VERSION)
 
 AM_GNU_GETTEXT(,,,[$2])
+
+if test "$USE_NLS" = yes ; then
+	AC_ARG_WITH(textdomain,
+		[  --with-textdomain=PKG   NLS text-domain (default is package name)],
+		[NLS_TEXTDOMAIN=$withval],
+		[NLS_TEXTDOMAIN=$PACKAGE])
+	AC_DEFINE_UNQUOTED(NLS_TEXTDOMAIN,"$NLS_TEXTDOMAIN")
+	AC_SUBST(NLS_TEXTDOMAIN)
+fi
 
 INTLDIR_MAKE=
 MSG_DIR_MAKE=
@@ -2694,7 +2710,7 @@ if test "$GCC" = yes ; then
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_GCC_WARNINGS version: 25 updated: 2010/04/24 11:03:31
+dnl CF_GCC_WARNINGS version: 26 updated: 2010/08/14 18:25:37
 dnl ---------------
 dnl Check if the compiler supports useful warning options.  There's a few that
 dnl we don't use, simply because they're too noisy:
@@ -2798,7 +2814,7 @@ then
 	done
 	CFLAGS="$cf_save_CFLAGS"
 fi
-rm -f conftest*
+rm -rf conftest*
 
 AC_SUBST(EXTRA_CFLAGS)
 ])dnl
@@ -3251,6 +3267,43 @@ AC_MSG_RESULT($cf_cv_locale)
 test $cf_cv_locale = yes && { ifelse($1,,AC_DEFINE(LOCALE),[$1]) }
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl CF_MAKE_TAGS version: 5 updated: 2010/04/03 20:07:32
+dnl ------------
+dnl Generate tags/TAGS targets for makefiles.  Do not generate TAGS if we have
+dnl a monocase filesystem.
+AC_DEFUN([CF_MAKE_TAGS],[
+AC_REQUIRE([CF_MIXEDCASE_FILENAMES])
+
+AC_CHECK_PROGS(CTAGS, exctags ctags)
+AC_CHECK_PROGS(ETAGS, exetags etags)
+
+AC_CHECK_PROG(MAKE_LOWER_TAGS, ${CTAGS-ctags}, yes, no)
+
+if test "$cf_cv_mixedcase" = yes ; then
+	AC_CHECK_PROG(MAKE_UPPER_TAGS, ${ETAGS-etags}, yes, no)
+else
+	MAKE_UPPER_TAGS=no
+fi
+
+if test "$MAKE_UPPER_TAGS" = yes ; then
+	MAKE_UPPER_TAGS=
+else
+	MAKE_UPPER_TAGS="#"
+fi
+
+if test "$MAKE_LOWER_TAGS" = yes ; then
+	MAKE_LOWER_TAGS=
+else
+	MAKE_LOWER_TAGS="#"
+fi
+
+AC_SUBST(CTAGS)
+AC_SUBST(ETAGS)
+
+AC_SUBST(MAKE_UPPER_TAGS)
+AC_SUBST(MAKE_LOWER_TAGS)
+])dnl
+dnl ---------------------------------------------------------------------------
 dnl CF_MATH_LIB version: 8 updated: 2010/05/29 16:31:02
 dnl -----------
 dnl Checks for libraries.  At least one UNIX system, Apple Macintosh
@@ -3274,6 +3327,36 @@ ifelse($1,,[
 ],[$1=-lm])
 fi
 ])
+dnl ---------------------------------------------------------------------------
+dnl CF_MIXEDCASE_FILENAMES version: 3 updated: 2003/09/20 17:07:55
+dnl ----------------------
+dnl Check if the file-system supports mixed-case filenames.  If we're able to
+dnl create a lowercase name and see it as uppercase, it doesn't support that.
+AC_DEFUN([CF_MIXEDCASE_FILENAMES],
+[
+AC_CACHE_CHECK(if filesystem supports mixed-case filenames,cf_cv_mixedcase,[
+if test "$cross_compiling" = yes ; then
+	case $target_alias in #(vi
+	*-os2-emx*|*-msdosdjgpp*|*-cygwin*|*-mingw32*|*-uwin*) #(vi
+		cf_cv_mixedcase=no
+		;;
+	*)
+		cf_cv_mixedcase=yes
+		;;
+	esac
+else
+	rm -f conftest CONFTEST
+	echo test >conftest
+	if test -f CONFTEST ; then
+		cf_cv_mixedcase=no
+	else
+		cf_cv_mixedcase=yes
+	fi
+	rm -f conftest CONFTEST
+fi
+])
+test "$cf_cv_mixedcase" = yes && AC_DEFINE(MIXEDCASE_FILENAMES)
+])dnl
 dnl ---------------------------------------------------------------------------
 dnl CF_MSG_LOG version: 4 updated: 2007/07/29 09:55:12
 dnl ----------
@@ -3345,10 +3428,10 @@ printf("old\n");
 	,[$1=no])
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_NCURSES_CONFIG version: 7 updated: 2010/06/20 09:24:28
+dnl CF_NCURSES_CONFIG version: 8 updated: 2010/07/08 05:17:30
 dnl -----------------
 dnl Tie together the configure-script macros for ncurses.
-dnl Prefer the "-config" script from ncurses 5.6, to simplify analysis.
+dnl Prefer the "-config" script from ncurses 6.x, to simplify analysis.
 dnl Allow that to be overridden using the $NCURSES_CONFIG environment variable.
 dnl
 dnl $1 is the root library name (default: "ncurses")
@@ -4215,6 +4298,14 @@ AC_OBJEXT
 PROG_EXT="$EXEEXT"
 AC_SUBST(PROG_EXT)
 test -n "$PROG_EXT" && AC_DEFINE_UNQUOTED(PROG_EXT,"$PROG_EXT")
+])dnl
+dnl ---------------------------------------------------------------------------
+dnl CF_PROG_LINT version: 2 updated: 2009/08/12 04:43:14
+dnl ------------
+AC_DEFUN([CF_PROG_LINT],
+[
+AC_CHECK_PROGS(LINT, tdlint lint alint splint lclint)
+AC_SUBST(LINT_OPTS)
 ])dnl
 dnl ---------------------------------------------------------------------------
 dnl CF_PROG_RANLIB version: 1 updated: 2009/01/01 20:15:22
@@ -5814,7 +5905,7 @@ AC_ARG_WITH(curses-dir,
 	[cf_cv_curses_dir=no])
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_WITH_DBMALLOC version: 6 updated: 2006/12/16 14:24:05
+dnl CF_WITH_DBMALLOC version: 7 updated: 2010/06/21 17:26:47
 dnl ----------------
 dnl Configure-option for dbmalloc.  The optional parameter is used to override
 dnl the updating of $LIBS, e.g., to avoid conflict with subsequent tests.
@@ -5825,11 +5916,11 @@ CF_NO_LEAKS_OPTION(dbmalloc,
 
 if test "$with_dbmalloc" = yes ; then
 	AC_CHECK_HEADER(dbmalloc.h,
-		[AC_CHECK_LIB(dbmalloc,[debug_malloc]ifelse($1,,[],[,$1]))])
+		[AC_CHECK_LIB(dbmalloc,[debug_malloc]ifelse([$1],,[],[,$1]))])
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_WITH_DMALLOC version: 6 updated: 2006/12/16 14:24:05
+dnl CF_WITH_DMALLOC version: 7 updated: 2010/06/21 17:26:47
 dnl ---------------
 dnl Configure-option for dmalloc.  The optional parameter is used to override
 dnl the updating of $LIBS, e.g., to avoid conflict with subsequent tests.
@@ -5840,7 +5931,7 @@ CF_NO_LEAKS_OPTION(dmalloc,
 
 if test "$with_dmalloc" = yes ; then
 	AC_CHECK_HEADER(dmalloc.h,
-		[AC_CHECK_LIB(dmalloc,[dmalloc_debug]ifelse($1,,[],[,$1]))])
+		[AC_CHECK_LIB(dmalloc,[dmalloc_debug]ifelse([$1],,[],[,$1]))])
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------

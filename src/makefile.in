@@ -1,4 +1,4 @@
-# $LynxId: makefile.in,v 1.62 2010/04/30 00:20:41 tom Exp $
+# $LynxId: makefile.in,v 1.63 2010/09/19 19:31:18 tom Exp $
 # template-makefile for Lynx src directory
 
 SHELL		= @CONFIG_SHELL@
@@ -66,6 +66,8 @@ CC_OPTS		= $(CPP_OPTS) $(CFLAGS)
 LINT		= @LINT@
 LINTOPTS	=
 
+CTAGS		= @CTAGS@
+
 COMPRESS_PROG	=@COMPRESS_PROG@
 COMPRESS_EXT	=@COMPRESS_EXT@
 
@@ -126,7 +128,7 @@ clean:
 	cd chrtrans && $(MAKE) clean
 
 tags:
-	ctags *.[ch]
+	$(CTAGS) *.[ch]
 
 distclean: clean
 

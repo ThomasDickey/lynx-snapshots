@@ -1,5 +1,5 @@
 /*
- * $LynxId: config.hin,v 1.118 2010/06/19 17:00:06 tom Exp $
+ * $LynxId: config.hin,v 1.119 2010/09/19 18:29:45 tom Exp $
  * vile:cmode
  *
  * The configure script translates "config.hin" into "lynx_cfg.h"
@@ -205,6 +205,7 @@
 #undef NEED_REMOVE		/* CF_REMOVE_BROKEN */
 #undef NEED_WCHAR_H		/* CF_WIDEC_CURSES */
 #undef NGROUPS			/* CF_NGROUPS */
+#undef NLS_TEXTDOMAIN		/* NLS_TEXTDOMAIN */
 #undef NO_CHANGE_EXECUTE_PERMS	/* CF_ARG_DISABLE(dired-xpermit) */
 #undef NO_CONFIG_INFO		/* CF_ARG_DISABLE(config-info) */
 #undef NO_EXTENDED_HTMLDTD	/* CF_ARG_DISABLE(extended-dtd) */

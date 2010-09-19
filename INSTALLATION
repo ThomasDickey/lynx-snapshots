@@ -725,6 +725,9 @@ II. Compile instructions -- UNIX
 	chosen automatically based on the type of system which you are
 	building on.  We use it for testing the configure script.
 
+  --with-textdomain[=XXX]		(define NLS_TEXTDOMAIN)
+	Set the NLS textdomain to the given value.  This is normally "lynx".
+
   --with-zlib[=XXX]			(define USE_ZLIB)
 	Use zlib for decompression of some gzip files.
 
@@ -1384,4 +1387,4 @@ VIII. Acknowledgment
 
 -- 1999/04/24 - H. Nelson <lynx-admin@irm.nara.kindai.ac.jp>
 -- vile:txtmode
--- $LynxId: INSTALLATION,v 1.112 2010/06/19 17:22:59 tom Exp $
+-- $LynxId: INSTALLATION,v 1.113 2010/09/19 18:40:53 tom Exp $

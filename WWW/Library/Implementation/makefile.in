@@ -1,4 +1,4 @@
-# $LynxId: makefile.in,v 1.29 2010/06/19 17:02:35 tom Exp $
+# $LynxId: makefile.in,v 1.30 2010/09/19 19:29:35 tom Exp $
 # Make WWW under unix for a.n.other unix system (bsd)
 # Use this as a template
 
@@ -45,6 +45,8 @@ CFLAGS		= $(CPPOPTS) $(LY_CFLAGS)
 
 LINT		= @LINT@
 LINTOPTS	=
+
+CTAGS		= @CTAGS@
 
 # Directory for installed binary:
 BINDIR		= @bindir@
@@ -190,7 +192,7 @@ distclean : clean
 	@echo made $@
 
 tags:
-	ctags *.[ch]
+	$(CTAGS) *.[ch]
 
 #			Common code
 #			-----------

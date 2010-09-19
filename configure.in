@@ -1,4 +1,4 @@
-dnl $LynxId: configure.in,v 1.217 2010/08/25 09:49:56 tom Exp $
+dnl $LynxId: configure.in,v 1.219 2010/09/19 19:20:01 tom Exp $
 dnl
 dnl Process this file with autoconf to produce a configure script.
 dnl
@@ -59,6 +59,8 @@ AC_ARG_WITH(system-type,
 [AC_MSG_WARN(overriding system type $host_os to $withval)
  host_os=$withval])
 
+AC_ARG_PROGRAM
+
 PACKAGE=lynx
 dnl ask PRCS to plug-in the project-version for the packages.
 # $Format: "VERSION=$ProjectVersion$"$
@@ -104,7 +106,8 @@ esac
 AC_PROG_MAKE_SET
 AC_PROG_INSTALL
 AC_PROG_YACC
-AC_CHECK_PROGS(LINT, lint alint lclint tdlint, [])
+CF_PROG_LINT
+CF_MAKE_TAGS
 
 AC_AIX
 AC_ISC_POSIX
@@ -1545,3 +1548,4 @@ AC_OUTPUT(
 	use_our_messages=$use_our_messages
 	]
 )
+${MAKE-make} preinstall

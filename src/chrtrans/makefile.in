@@ -1,4 +1,4 @@
-# $LynxId: makefile.in,v 1.36 2010/04/30 00:20:45 tom Exp $
+# $LynxId: makefile.in,v 1.37 2010/09/19 19:30:58 tom Exp $
 #
 # Makefile for the makeuctb and unicode tables.
 #
@@ -54,6 +54,8 @@ CC_OPTS		= $(CPP_OPTS) $(BUILD_CFLAGS)
 
 LINT		= @LINT@
 LINTOPTS	=
+
+CTAGS		= @CTAGS@
 
 #
 # This file contains the font map for the default (hardware) font
@@ -186,6 +188,9 @@ viscii_uni.h:		$(srcdir)/viscii_uni.tbl	$(MAKEUCTB)
 
 lint:
 	$(LINT) $(LINTOPTS) $(CPP_OPTS) $(C_SRC) 2>&1 |tee $(top_builddir)/lint.chrtrans
+
+tags:
+	$(CTAGS) *.[ch]
 
 clean:
 	rm -f $(MAKEUCTB) *$o *uni.h *uni2.h *.i

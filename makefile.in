@@ -1,4 +1,4 @@
-# $LynxId: makefile.in,v 1.109 2010/06/19 10:56:15 tom Exp $
+# $LynxId: makefile.in,v 1.112 2010/09/19 19:28:49 tom Exp $
 ##makefile for lynx
 
 SHELL		= @CONFIG_SHELL@
@@ -18,6 +18,7 @@ CFLAGS		= @CFLAGS@
 DEFS		= @DEFS@
 CPPFLAGS	= @CPPFLAGS@
 LINT		= @LINT@
+ETAGS		= @ETAGS@
 
 x		= @EXEEXT@
 o		= .@OBJEXT@
@@ -27,12 +28,16 @@ LIBS		= @LIBS@
 INSTALL		= @INSTALL@
 INSTALL_PROGRAM	= @INSTALL_PROGRAM@
 INSTALL_DATA	= @INSTALL_DATA@
+transform	= @program_transform_name@
 
 LN_S		= @LN_S@
 
 TAR		= @TAR@
 TAR_UP		= $(TAR) @TAR_UP_OPTIONS@ @TAR_PIPE_OPTIONS@
 TAR_DOWN	= $(TAR) @TAR_DOWN_OPTIONS@ @TAR_PIPE_OPTIONS@
+
+# $Format: "LYNX_VERSION	= $ProjectVersion$"$
+LYNX_VERSION	= 2.8.8dev.5
 
 ## This is the version which we are developing (or, upon release, make this
 ## the same).  Use no dots in the name, since it must work on VMS and MS-DOS.
@@ -186,6 +191,9 @@ SRC_CFLAGS = \
 	WWWINC=$(WWW_DIR) \
 	WWWLIB="../$(WWW_DIR)/libwww.a"
 
+actual_PROG  = `echo lynx|    sed '$(transform)'`
+binary_PROG  = $(actual_PROG)$x
+
 all lynx$x: cfg_defs.h LYHelp.h
 @MSG_DIR_MAKE@	$(SHELL) $(scripts_dir)/fixtext.sh $(srcdir)/LYMessages_en.h >LYMessages.c
 @MSG_DIR_MAKE@	cd $(PO_DIR) && $(MAKE_RECUR)
@@ -196,6 +204,14 @@ lint:
 	cd $(WWW_DIR) && $(MAKE_RECUR) LINT="$(LINT)" $(WWW_CFLAGS) $@
 	cd $(SRC_DIR) && $(MAKE_RECUR) LINT="$(LINT)" $(SRC_CFLAGS) $@
 	cd $(CHR_DIR) && $(MAKE_RECUR) LINT="$(LINT)" $@
+
+tags:
+	cd $(WWW_DIR) && $(MAKE_RECUR) $(WWW_CFLAGS) $@
+	cd $(SRC_DIR) && $(MAKE_RECUR) $(SRC_CFLAGS) $@
+	cd $(CHR_DIR) && $(MAKE_RECUR) $@
+
+etags:
+	$(ETAGS) *.[ch] */*.[ch] */*/*.[ch] */*/*/*.[ch]
 
 help:
 	@echo
@@ -303,12 +319,12 @@ install-full: install install-help install-doc
 install-bin: $(BINDIR) lynx$x
 @MSG_DIR_MAKE@	cd $(PO_DIR) && $(MAKE_RECUR) install
 	@ECHO_CC@$(SHELL) -c \
-	'if test -f $(BINDIR)/lynx$x ; then \
-	      mv -f $(BINDIR)/lynx$x $(BINDIR)/lynx.old; fi'
-	$(INSTALL_PROGRAM) lynx$x $(BINDIR)/lynx$x
+	'if test -f $(BINDIR)/$(binary_PROG) ; then \
+	      mv -f $(BINDIR)/$(binary_PROG) $(BINDIR)/lynx.old; fi'
+	$(INSTALL_PROGRAM) lynx$x $(BINDIR)/$(binary_PROG)
 
 install-man : $(MANDIR)
-	$(INSTALL_DATA) $(srcdir)/lynx.man $(MANDIR)/lynx.1
+	$(INSTALL_DATA) $(srcdir)/lynx.man $(MANDIR)/$(actual_PROG).1
 
 install-doc : $(DOCDIR) $(HELPDIR)
 	@echo Copying sample files
@@ -429,8 +445,8 @@ install-lss : $(SYSCONFDIR)
 
 uninstall ::
 @MSG_DIR_MAKE@	cd $(PO_DIR) && $(MAKE_RECUR) uninstall
-	-rm -f $(BINDIR)/lynx$x
-	-rm -f $(MANDIR)/lynx.1
+	-rm -f $(BINDIR)/$(binary_PROG)
+	-rm -f $(MANDIR)/$(actual_PROG).1
 	-rm -f $(SYSCONFDIR)/lynx.cfg
 	-rm -f $(SYSCONFDIR)/lynx.lss
 
@@ -447,11 +463,21 @@ update-po:
 	rsync -Lrtvz  translationproject.org::tp/latest/lynx/  $(PO_SRCDIR)
 	test -f $(PO_SRCDIR)/makefile && cd $(PO_SRCDIR) && $(MAKE_RECUR) $@
 
+preinstall :
+	@ echo ''
+	@ echo '** Configuration summary for LYNX $(LYNX_VERSION):'
+	@ echo ''
+	@ echo '       program name: '$(actual_PROG)
+	@ echo ''
+	@ echo '      bin directory: '$(BINDIR)
+	@ echo '   config directory: '$(SYSCONFDIR)
+	@ echo '      man directory: '$(MANDIR)
+	@ echo '     help directory: '$(HELPDIR)
+	@ echo '      doc directory: '$(DOCDIR)
+
 $(BINDIR) \
 $(MANDIR) \
 $(SYSCONFDIR) \
 $(HELPDIR) \
 $(DOCDIR) :
 	mkdir -p $@
-etags:
-	etags -r "/\(PRIVATE\|PUBLIC\)[ \t]+\([a-zA-Z_][a-zA-Z_0-1]*[ \t*]+\)*\([a-zA-Z_][a-zA-Z_0-1]*\)[ \t]+\(ARGS[0-9]\|NOARGS\)/\3/" *.[ch] */*.[ch] */*/*.[ch] */*/*/*.[ch]
