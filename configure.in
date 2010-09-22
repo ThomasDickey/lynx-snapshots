@@ -1,4 +1,4 @@
-dnl $LynxId: configure.in,v 1.219 2010/09/19 19:20:01 tom Exp $
+dnl $LynxId: configure.in,v 1.220 2010/09/20 23:23:35 tom Exp $
 dnl
 dnl Process this file with autoconf to produce a configure script.
 dnl
@@ -1548,4 +1548,3 @@ AC_OUTPUT(
 	use_our_messages=$use_our_messages
 	]
 )
-${MAKE-make} preinstall

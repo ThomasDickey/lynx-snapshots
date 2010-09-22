@@ -1,5 +1,5 @@
 /*
- * $LynxId: makeuctb.c,v 1.44 2010/06/17 08:06:46 tom Exp $
+ * $LynxId: makeuctb.c,v 1.45 2010/09/22 08:31:45 tom Exp $
  *
  *  makeuctb.c, derived from conmakehash.c   - kw
  *
@@ -135,7 +135,7 @@ static int getunicode(char **p0)
 	return -1;
     }
     *p0 = p + 6;
-    return strtol((p + 2), 0, 16);
+    return (int) strtol((p + 2), 0, 16);
 }
 
 /*
@@ -415,7 +415,7 @@ int main(int argc, char **argv)
 	    while (*p == ' ' || *p == '\t') {
 		p++;
 	    }
-	    RawOrEnc = strtol(p, 0, 10);
+	    RawOrEnc = (int) strtol(p, 0, 10);
 	    Raw_found = 1;
 	    continue;
 
@@ -501,7 +501,7 @@ int main(int argc, char **argv)
 	    while (*p == ' ' || *p == '\t') {
 		p++;
 	    }
-	    CodePage = strtol(p, 0, 10);
+	    CodePage = (int) strtol(p, 0, 10);
 	    continue;
 	}
 
@@ -606,7 +606,7 @@ int main(int argc, char **argv)
 	 *  of the specially recognized characters, so try to interpret
 	 *  it as starting with a fontpos.
 	 */
-	fp0 = strtol(p, &p1, 0);
+	fp0 = (int) strtol(p, &p1, 0);
 	if (p1 == p) {
 	    fprintf(stderr, "Bad input line: %s\n", buffer);
 	    done(EX_DATAERR);
@@ -618,7 +618,7 @@ int main(int argc, char **argv)
 	}
 	if (*p == '-') {
 	    p++;
-	    fp1 = strtol(p, &p1, 0);
+	    fp1 = (int) strtol(p, &p1, 0);
 	    if (p1 == p) {
 		fprintf(stderr, "Bad input line: %s\n", buffer);
 		done(EX_DATAERR);

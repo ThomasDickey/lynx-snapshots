@@ -1,5 +1,5 @@
 /*
- * $LynxId: SGML.c,v 1.135 2010/06/18 09:59:35 tom Exp $
+ * $LynxId: SGML.c,v 1.136 2010/09/22 00:53:49 tom Exp $
  *
  *			General SGML Parser code		SGML.c
  *			========================
@@ -4281,7 +4281,9 @@ static void SGML_character(HTStream *context, char c_in)
 		    c = UCH((clong & 0xff));
 		}
 		saved_char_in = '\0';
-		context->include_index = puni - context->active_include + 1;
+		context->include_index = (int) (puni
+						- context->active_include
+						+ 1);
 		goto top1;
 	    } else {
 		/*

@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYCharUtils.c,v 1.105 2010/04/29 20:53:31 tom Exp $
+ * $LynxId: LYCharUtils.c,v 1.106 2010/09/22 08:35:31 tom Exp $
  *
  *  Functions associated with LYCharSets.c and the Lynx version of HTML.c - FM
  *  ==========================================================================
@@ -1218,12 +1218,12 @@ char **LYUCFullyTranslateString(char **str,
 #define CHUNK (chunk ? chunk : (chunk = HTChunkCreate2(128, len+1)))
 
 #define REPLACE_STRING(s) \
-		if (q != qs) HTChunkPutb(CHUNK, qs, q-qs); \
+		if (q != qs) HTChunkPutb(CHUNK, qs, (int) (q - qs)); \
 		HTChunkPuts(CHUNK, s); \
 		qs = q = *str
 
 #define REPLACE_CHAR(c) if (q > p) { \
-		HTChunkPutb(CHUNK, qs, q-qs); \
+		HTChunkPutb(CHUNK, qs, (int) (q - qs)); \
 		qs = q = *str; \
 		*q++ = c; \
 	    } else \
@@ -1542,7 +1542,7 @@ char **LYUCFullyTranslateString(char **str,
 		state = S_recover;
 		break;
 	    } else {
-		code = LYcp1252ToUnicode(lcode);
+		code = LYcp1252ToUnicode((UCode_t) lcode);
 		state = S_check_uni;
 	    }
 	    break;
@@ -1882,7 +1882,7 @@ char **LYUCFullyTranslateString(char **str,
 
     *q = '\0';
     if (chunk) {
-	HTChunkPutb(CHUNK, qs, q - qs + 1);	/* also terminates */
+	HTChunkPutb(CHUNK, qs, (int) (q - qs + 1));	/* also terminates */
 	if (stype == st_URL || stype == st_other) {
 	    LYTrimHead(chunk->data);
 	    LYTrimTail(chunk->data);
@@ -1995,7 +1995,7 @@ void LYParseRefreshURL(char *content,
 	cp1 = cp;
 	while (*cp1 && isdigit(UCH(*cp1)))
 	    cp1++;
-	StrnAllocCopy(Seconds, cp, cp1 - cp);
+	StrnAllocCopy(Seconds, cp, (int) (cp1 - cp));
     }
     *p_seconds = Seconds;
     *p_address = LYParseTagParam(content, "URL");

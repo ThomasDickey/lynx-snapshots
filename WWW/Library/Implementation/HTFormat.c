@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFormat.c,v 1.70 2010/06/17 00:25:03 tom Exp $
+ * $LynxId: HTFormat.c,v 1.71 2010/09/22 00:46:54 tom Exp $
  *
  *		Manage different file formats			HTFormat.c
  *		=============================
@@ -1176,7 +1176,7 @@ static int HTZzFileCopy(FILE *zzfp, HTStream *sink)
     for (;;) {
 	if (s.avail_in == 0) {
 	    s.next_in = (Bytef *) input_buffer;
-	    s.avail_in = fread(input_buffer, 1, INPUT_BUFFER_SIZE, zzfp);
+	    s.avail_in = (uInt) fread(input_buffer, 1, INPUT_BUFFER_SIZE, zzfp);
 	    len = (int) s.avail_in;
 	}
 	status = inflate(&s, flush);

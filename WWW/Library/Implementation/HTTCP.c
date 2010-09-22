@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTCP.c,v 1.101 2010/06/17 00:32:51 tom Exp $
+ * $LynxId: HTTCP.c,v 1.102 2010/09/22 00:40:25 tom Exp $
  *
  *			Generic Communication Code		HTTCP.c
  *			==========================
@@ -632,14 +632,14 @@ extern int h_errno;
  * struct via a pipe in one read -TD
  */
 #ifdef NSL_FORK
-static unsigned readit(int fd, char *buffer, unsigned length)
+static unsigned readit(int fd, char *buffer, size_t length)
 {
     unsigned result = 0;
 
     while (length != 0) {
 	unsigned got = (unsigned) read(fd, buffer, length);
 
-	if (got != 0) {
+	if ((int) got > 0) {
 	    result += got;
 	    buffer += got;
 	    length -= got;
@@ -2080,7 +2080,7 @@ int HTDoRead(int fildes,
 	}
 #else
 #ifdef UNIX
-	while ((result = SOCKET_READ(fildes, buf, nbyte)) == -1) {
+	while ((result = (int) SOCKET_READ(fildes, buf, nbyte)) == -1) {
 	    if (errno == EINTR)
 		continue;
 #ifdef ERESTARTSYS

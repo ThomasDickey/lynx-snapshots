@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFTP.c,v 1.94 2010/06/17 00:44:49 tom Exp $
+ * $LynxId: HTFTP.c,v 1.95 2010/09/22 00:53:07 tom Exp $
  *
  *			File Transfer Protocol (FTP) Client
  *			for a WorldWideWeb browser
@@ -466,7 +466,7 @@ static int write_cmd(const char *cmd)
 	    }
 	}
 #endif /* NOT_ASCII */
-	status = NETWRITE(control->socket, cmd, (unsigned) strlen(cmd));
+	status = (int) NETWRITE(control->socket, cmd, (unsigned) strlen(cmd));
 	if (status < 0) {
 	    CTRACE((tfp,
 		    "HTFTP: Error %d sending command: closing socket %d\n",
@@ -1850,7 +1850,9 @@ static void parse_vms_dir_entry(char *line,
 	LYLowerCase(entry_info->filename);
 	i = (int) strlen(entry_info->filename);
     } else {
-	i = ((strstr(entry_info->filename, "READ") - entry_info->filename) + 4);
+	i = (int) ((strstr(entry_info->filename, "READ")
+		    - entry_info->filename)
+		   + 4);
 	if (!strncmp(&entry_info->filename[i], "ME", 2)) {
 	    i += 2;
 	    while (entry_info->filename[i] && entry_info->filename[i] != '.') {
@@ -3106,7 +3108,7 @@ static int read_directory(HTParentAnchor *parent,
 		} else if (ic == EOF) {
 		    break;	/* End of file */
 		} else {
-		    HTChunkPutc(chunk, ic);
+		    HTChunkPutc(chunk, UCH(ic));
 		}
 	    }
 	    HTChunkTerminate(chunk);

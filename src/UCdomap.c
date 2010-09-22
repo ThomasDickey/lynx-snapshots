@@ -1,5 +1,5 @@
 /*
- * $LynxId: UCdomap.c,v 1.79 2010/06/17 09:44:47 tom Exp $
+ * $LynxId: UCdomap.c,v 1.80 2010/09/22 09:41:36 tom Exp $
  *
  *  UCdomap.c
  *  =========
@@ -1197,7 +1197,7 @@ long int UCTransToUni(char ch_in,
 
 	    buffer[inx++] = (char) ch_iu;
 	    buffer[inx] = '\0';
-	    need = utf8_length(TRUE, buffer);
+	    need = (unsigned) utf8_length(TRUE, buffer);
 	    if (need && (need + 1) == inx) {
 		inx = 0;
 		ptr = buffer;

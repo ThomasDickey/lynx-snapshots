@@ -1,4 +1,4 @@
-/* $LynxId: LYStrings.c,v 1.173 2010/06/17 10:50:14 tom Exp $ */
+/* $LynxId: LYStrings.c,v 1.174 2010/09/22 10:52:38 tom Exp $ */
 #include <HTUtils.h>
 #include <HTCJK.h>
 #include <UCAux.h>
@@ -315,7 +315,7 @@ static char *LYFindInCloset(RecallType recall, char *base)
 {
     HTList *list = whichRecall(recall);
     char *data;
-    unsigned len = strlen(base);
+    size_t len = strlen(base);
 
     while (!HTList_isEmpty(list)) {
 	data = (char *) HTList_nextObject(list);
@@ -677,7 +677,7 @@ const char *LYmbcs_skip_cells(const char *data,
 
     do {
 	result = LYmbcs_skip_glyphs(data, target--, utf_flag);
-	actual = LYstrExtent2(data, result - data);
+	actual = LYstrExtent2(data, (int) (result - data));
     } while ((actual > 0) && (actual > n_cells));
     return result;
 }
@@ -987,7 +987,7 @@ static const char *expand_tiname(const char *first, size_t len, char **result, c
     if ((code = lookup_tiname(name, strnames)) >= 0
 	|| (code = lookup_tiname(name, strfnames)) >= 0) {
 	if (cur_term->type.Strings[code] != 0) {
-	    LYstrncpy(*result, cur_term->type.Strings[code], final - *result);
+	    LYstrncpy(*result, cur_term->type.Strings[code], (int) (final - *result));
 	    (*result) += strlen(*result);
 	}
     }
@@ -1052,7 +1052,7 @@ static const char *expand_tichar(const char *first, char **result, char *final)
 	char tmp[80];
 
 	LYstrncpy(tmp, first, limit);
-	value = strtol(tmp, &last, radix);
+	value = (int) strtol(tmp, &last, radix);
 	if (last != 0 && last != tmp)
 	    first += (last - tmp);
     }
@@ -1213,7 +1213,7 @@ int map_string_to_keysym(const char *str, int *keysym)
 	long value = strtol(str, &tmp, 0);
 
 	if (!isalnum(UCH(*tmp))) {
-	    *keysym = value;
+	    *keysym = (int) value;
 #ifndef USE_SLANG
 	    if (*keysym > 255)
 		*keysym |= LKC_ISLKC;	/* caller should remove this flag - kw */
@@ -1539,7 +1539,8 @@ static int LYmouse_menu(int x, int y, int atlink, int code)
     const char *choices[TOTAL_MENUENTRIES + 1];
     int actions[TOTAL_MENUENTRIES];
 
-    int c, c1, retlac, filter_out = (atlink ? ENT_ONLY_DOC : ENT_ONLY_LINK);
+    int c, c1, retlac;
+    unsigned filter_out = (atlink ? ENT_ONLY_DOC : ENT_ONLY_LINK);
 
     c = c1 = 0;
     while (c < (int) TOTAL_MENUENTRIES) {
@@ -3813,12 +3814,12 @@ void LYRefreshEdit(EDREC * edit)
 	do {
 	    const char *last = str + i;
 	    const char *next = LYmbcs_skip_glyphs(last, 1, utf_flag);
-	    int j = (next - str);
+	    int j = (int) (next - str);
 
 	    while (i < j) {
 		edit->offset2col[i++] = cell + StartX;
 	    }
-	    cell += LYstrExtent2(last, (next - last));
+	    cell += LYstrExtent2(last, (int) (next - last));
 	} while (i < dpy_bytes);
 	edit->offset2col[i] = cell + StartX;
     } else {
@@ -4005,7 +4006,7 @@ static unsigned options_width(const char **list)
     int count = 0;
 
     while (list[count] != 0) {
-	unsigned ncells = LYstrCells(list[count]);
+	unsigned ncells = (unsigned) LYstrCells(list[count]);
 
 	if (ncells > width) {
 	    width = ncells;
@@ -5179,7 +5180,8 @@ int LYgetstr(char *inputline,
 		    while (e1 < e) {
 			if (*e1 < ' ') {	/* Stop here? */
 			    if (e1 > s)
-				LYEditInsert(&MyEdit, s, e1 - s, map_active, TRUE);
+				LYEditInsert(&MyEdit, s, (int) (e1 - s),
+					     map_active, TRUE);
 			    s = e1;
 			    if (*e1 == '\t') {	/* Replace by space */
 				LYEditInsert(&MyEdit,
@@ -5194,7 +5196,7 @@ int LYgetstr(char *inputline,
 			    ++e1;
 		    }
 		    if (e1 > s)
-			LYEditInsert(&MyEdit, s, e1 - s, map_active, TRUE);
+			LYEditInsert(&MyEdit, s, (int) (e1 - s), map_active, TRUE);
 		}
 		get_clip_release();
 		break;
@@ -5307,12 +5309,8 @@ int LYscanFloat2(const char **source, float *result)
 
 	if (*src != '.') {
 	    temp = NULL;
-#ifdef _WIN32_WINNT
-#define WIN32_FIX (float)
-#else
-#define WIN32_FIX		/* nothing */
-#endif
-	    *result = WIN32_FIX strtol(src, &temp, 10);
+	    frc_part = strtol(src, &temp, 10);
+	    *result = (float) frc_part;
 	    src = temp;
 	}
 	if (src != 0 && *src == '.') {
@@ -5321,11 +5319,11 @@ int LYscanFloat2(const char **source, float *result)
 		temp = NULL;
 		frc_part = strtol(src, &temp, 10);
 		if (temp != 0) {
-		    int digits = temp - src;
+		    int digits = (int) (temp - src);
 
 		    while (digits-- > 0)
-			scale *= 10.0;
-		    *result += (frc_part / scale);
+			scale *= (float) 10.0;
+		    *result += ((float) frc_part / scale);
 		}
 		src = temp;
 	    }
@@ -5962,7 +5960,7 @@ int UPPER8(int ch1, int ch2)
 	    if (uni_ch2 < 0)
 		return UCH(ch1);
 	    uni_ch1 = UCTransToUni((char) ch1, current_char_set);
-	    return (UniToLowerCase(uni_ch1) - UniToLowerCase(uni_ch2));
+	    return (int) (UniToLowerCase(uni_ch1) - UniToLowerCase(uni_ch2));
 	}
     }
 

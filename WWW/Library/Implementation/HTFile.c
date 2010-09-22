@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFile.c,v 1.123 2010/06/17 00:27:47 tom Exp $
+ * $LynxId: HTFile.c,v 1.124 2010/09/22 00:12:36 tom Exp $
  *
  *			File Access				HTFile.c
  *			===========
@@ -307,7 +307,7 @@ static void LYListFmtParse(const char *fmtstr,
 	    *buf = '\0';
 #ifdef S_IFLNK
 	    if (c != 'A' && S_ISLNK(data->file_info.st_mode) &&
-		(len = readlink(file, tmp, sizeof(tmp) - 1)) >= 0) {
+		(len = (int) readlink(file, tmp, sizeof(tmp) - 1)) >= 0) {
 		PUTS(" -> ");
 		tmp[len] = '\0';
 		PUTS(tmp);
@@ -1248,7 +1248,7 @@ CompressFileType HTCompressFileType(const char *filename,
 	ftype -= 2;
     }
 
-    *rootlen = (ftype - filename);
+    *rootlen = (int) (ftype - filename);
 
     CTRACE((tfp, "HTCompressFileType(%s) returns %d:%s\n",
 	    filename, (int) result, filename + *rootlen));
@@ -1875,7 +1875,7 @@ static int print_local_dir(DIR *dp, char *localname,
     STRUCT_DIRENT *dirbuf;
     char *pathname = NULL;
     char *tail = NULL;
-    char *p;
+    const char *p;
     char *tmpfilename = NULL;
     BOOL need_parent_link = FALSE;
     BOOL preformatted = FALSE;
@@ -2802,7 +2802,7 @@ int HTLoadFile(const char *addr,
 	    char *best_name = NULL;	/* Best dir entry so far */
 
 	    char *base = strrchr(localname, '/');
-	    unsigned baselen = 0;
+	    size_t baselen = 0;
 
 	    if (!base || base == localname) {
 		forget_multi = YES;

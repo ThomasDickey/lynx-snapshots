@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTAccess.c,v 1.69 2010/04/29 09:30:51 tom Exp $
+ * $LynxId: HTAccess.c,v 1.70 2010/09/21 23:57:37 tom Exp $
  *
  *		Access Manager					HTAccess.c
  *		==============
@@ -342,9 +342,9 @@ BOOL override_proxy(const char *addr)
 
 	if (colon) {
 	    templ_port = atoi(colon + 1);
-	    t_len = colon - no_proxy;
+	    t_len = (int) (colon - no_proxy);
 	} else {
-	    t_len = end - no_proxy;
+	    t_len = (int) (end - no_proxy);
 	}
 
 	if ((!templ_port || templ_port == port) &&

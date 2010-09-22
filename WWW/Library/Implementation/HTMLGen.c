@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTMLGen.c,v 1.30 2010/05/02 22:26:02 tom Exp $
+ * $LynxId: HTMLGen.c,v 1.31 2010/09/22 00:43:23 tom Exp $
  *
  *		HTML Generator
  *		==============
@@ -98,7 +98,7 @@ static void HTMLGen_flush(HTStructured * me)
 {
     (*me->targetClass.put_block) (me->target,
 				  me->buffer,
-				  me->write_pointer - me->buffer);
+				  (int) (me->write_pointer - me->buffer));
     me->write_pointer = me->buffer;
     flush_breaks(me);
     me->cleanness = 0;
@@ -220,7 +220,7 @@ static void HTMLGen_put_character(HTStructured * me, char c)
 	    strcpy(delims, ",;:.");	/* @@ english bias */
 	    p = strchr(delims, me->write_pointer[-2]);
 	    if (p)
-		new_cleanness = p - delims + 6;
+		new_cleanness = (int) (p - delims + 6);
 	    if (!me->in_attrval)
 		new_cleanness += 10;
 	}
@@ -242,8 +242,8 @@ static void HTMLGen_put_character(HTStructured * me, char c)
 	    me->line_break[me->cleanness][0] = '\n';
 	    (*me->targetClass.put_block) (me->target,
 					  me->buffer,
-					  me->line_break[me->cleanness] -
-					  me->buffer + 1);
+					  (int) (me->line_break[me->cleanness] -
+						 me->buffer + 1));
 	    me->line_break[me->cleanness][0] = line_break_char;
 	    {			/* move next line in */
 		char *p = saved;

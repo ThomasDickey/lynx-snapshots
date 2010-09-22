@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYReadCFG.c,v 1.150 2010/06/18 00:11:35 tom Exp $
+ * $LynxId: LYReadCFG.c,v 1.151 2010/09/22 09:54:46 tom Exp $
  */
 #ifndef NO_RULES
 #include <HTRules.h>
@@ -717,7 +717,7 @@ static int keymap_fun(char *key)
 
 		if (sselect_edi) {
 		    if (*sselect_edi)
-			select_edi = strtol(sselect_edi, endp, 10);
+			select_edi = (int) strtol(sselect_edi, endp, 10);
 		    if (**endp != '\0') {
 			fprintf(stderr,
 				gettext("invalid line-editor selection %s for key %s, selecting all\n"),
@@ -1874,7 +1874,7 @@ void LYSetConfigValue(const char *name,
 
 #if defined(EXEC_LINKS) || defined(LYNXCGI_LINKS)
     case CONF_ADD_TRUSTED:
-	add_trusted(value, q->def_value);
+	add_trusted(value, (int) q->def_value);
 	break;
 #endif
 

@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTGopher.c,v 1.46 2010/06/16 23:45:31 tom Exp $
+ * $LynxId: HTGopher.c,v 1.47 2010/09/22 00:50:23 tom Exp $
  *
  *			GOPHER ACCESS				HTGopher.c
  *			=============
@@ -263,7 +263,7 @@ static void parse_menu(const char *arg GCC_UNUSED,
 
 	} else {
 	    *p++ = '\0';	/* Terminate line */
-	    bytes += p - line;	/* add size */
+	    bytes += (int) (p - line);	/* add size */
 	    p = line;		/* Scan it to parse it */
 	    port = 0;		/* Flag "not parsed" */
 	    CTRACE((tfp, "HTGopher: Menu item: %s\n", line));
@@ -1490,7 +1490,7 @@ static int HTLoadCSO(const char *arg,
 	CTRACE((tfp, "' to socket %d\n", s));
     }
     _HTProgress(GOPHER_SENDING_CSO_REQUEST);
-    status = NETWRITE(s, BStrData(command), BStrLen(command));
+    status = (int) NETWRITE(s, BStrData(command), BStrLen(command));
     BStrFree(command);
     if (status < 0) {
 	CTRACE((tfp, "HTLoadCSO: Unable to send command.\n"));
@@ -1674,7 +1674,7 @@ static int HTLoadCSO(const char *arg,
 	trace_bstring(command);
 	CTRACE((tfp, "' to socket %d\n", s));
     }
-    status = NETWRITE(s, BStrData(command), BStrLen(command));
+    status = (int) NETWRITE(s, BStrData(command), BStrLen(command));
     BStrFree(command);
     if (status < 0) {
 	CTRACE((tfp, "HTLoadCSO: Unable to send command.\n"));
@@ -1885,7 +1885,7 @@ static int HTLoadGopher(const char *arg,
 
     _HTProgress(GOPHER_SENDING_REQUEST);
 
-    status = NETWRITE(s, command, (int) strlen(command));
+    status = (int) NETWRITE(s, command, (int) strlen(command));
     FREE(command);
     if (status < 0) {
 	CTRACE((tfp, "HTGopher: Unable to send command.\n"));

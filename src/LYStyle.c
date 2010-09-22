@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYStyle.c,v 1.67 2010/05/02 22:23:21 tom Exp $
+ * $LynxId: LYStyle.c,v 1.68 2010/09/22 09:47:49 tom Exp $
  *
  * character level styles for Lynx
  * (c) 1996 Rob Partington -- donated to the Lyncei (if they want it :-)
@@ -222,8 +222,8 @@ static void parse_attributes(const char *mono,
 	int curPair = 0;
 	int iFg = (1 + (fA >= 0 ? fA : 0));
 	int iBg = (1 + (bA >= 0 ? bA : 0));
-	int iBold = !!(cA & A_BOLD);
-	int iBlink = !!(cA & M_BLINK);
+	int iBold = !!((unsigned) cA & A_BOLD);
+	int iBlink = !!((unsigned) cA & M_BLINK);
 
 	CTRACE2(TRACE_STYLE, (tfp, "parse_attributes %d/%d %d/%d %#x\n",
 			      fA, default_fg, bA, default_bg, cA));
@@ -376,7 +376,7 @@ where OBJECT is one of EM,STRONG,B,I,U,BLINK etc.\n\n"), buffer);
 	HTTag *t = SGMLFindTag(&HTML_dtd, element);
 
 	if (t && t->name) {
-	    element_number = t - HTML_dtd.tags;
+	    element_number = (int) (t - HTML_dtd.tags);
 	}
 	if (element_number >= HTML_A &&
 	    element_number < HTML_ELEMENTS) {

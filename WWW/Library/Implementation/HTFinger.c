@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFinger.c,v 1.25 2009/01/03 02:02:18 tom Exp $
+ * $LynxId: HTFinger.c,v 1.26 2010/09/22 00:46:26 tom Exp $
  *
  *			FINGER ACCESS				HTFinger.c
  *			=============
@@ -128,7 +128,7 @@ static int response(char *command,
     /* Send the command.
      */
     CTRACE((tfp, "HTFinger command to be sent: %s", command));
-    status = NETWRITE(finger_fd, (char *) command, (unsigned) length);
+    status = (int) NETWRITE(finger_fd, (char *) command, (unsigned) length);
     if (status < 0) {
 	CTRACE((tfp, "HTFinger: Unable to send command. Disconnecting.\n"));
 	NETCLOSE(finger_fd);

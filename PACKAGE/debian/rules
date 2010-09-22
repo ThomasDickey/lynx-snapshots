@@ -16,9 +16,11 @@ PKG_SUFFIX	= -dev
 PACKAGE		:= $(shell dpkg-parsechangelog| \
 			sed -n 's/^Source: \(.*\)$$/\1/p')
 
+docdir		:= /usr/share/doc/$(PACKAGE)
+helpdir		:= $(docdir)/help_dir
+
 DSTDIR		:= $(CURDIR)/debian/$(PACKAGE)
-BINDIR          := $(DSTDIR)/usr/bin
-DOCDIR		:= $(DSTDIR)/usr/share/doc/$(PACKAGE)
+DOCDIR		:= $(DSTDIR)$(docdir)
 
 CFLAGS =
 
@@ -37,6 +39,9 @@ ifeq (,$(findstring nostrip,$(DEB_BUILD_OPTIONS)))
         INSTALL_PROGRAM += -s
 endif
 
+# This package adds the following not in Debian lynx-cur:
+# --enable-htmlized-cfg
+# --enable-local-docs
 
 configure: configure-stamp
 configure-stamp:
@@ -67,9 +72,11 @@ configure-stamp:
 		--enable-externs \
 		--enable-forms-options \
 		--enable-gzip-help \
+		--enable-htmlized-cfg \
 		--enable-ipv6 \
 		--enable-japanese-utf8 \
 		--enable-justify-elts \
+		--enable-local-docs \
 		--enable-nested-tables \
 		--enable-nls \
 		--enable-nsl-fork \
@@ -87,13 +94,19 @@ configure-stamp:
 		--without-included-gettext \
 		${DEBOP}
 
+	$(MAKE) preinstall \
+		docdir=$(docdir) \
+		helpdir=$(helpdir)
+
 	touch configure-stamp
 
 build: build-stamp
 build-stamp: configure-stamp
 	dh_testdir
 
-	$(MAKE)
+	$(MAKE) \
+		docdir=$(docdir) \
+		helpdir=$(helpdir)
 
 	touch build-stamp
 
@@ -117,7 +130,10 @@ install-stamp: build-stamp
 	dh_clean -k
 	dh_installdirs
 
-	$(MAKE) install DESTDIR=$(CURDIR)/debian/$(PACKAGE)
+	$(MAKE) install \
+		DESTDIR=$(CURDIR)/debian/$(PACKAGE) \
+		docdir=$(docdir) \
+		helpdir=$(helpdir)
 
 	touch install-stamp
 
@@ -132,10 +148,11 @@ install-arch:
 
 	$(MAKE) install-full \
 		DESTDIR=$(DSTDIR) \
-		DOCDIR=$(DOCDIR) \
-		HELPDIR=$(DOCDIR)/lynx_help
+		docdir=$(docdir) \
+		helpdir=$(helpdir)
+
 	cd $(DOCDIR) && rm -rf samples test
-	cd $(DOCDIR) && rm -f COPY* lynx_help/COPY* CHANGES 
+	cd $(DOCDIR) && rm -f COPY*.asc CHANGES 
 
 # Build architecture-independent files here.
 binary-indep: build install

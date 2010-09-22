@@ -1,4 +1,4 @@
-# $LynxId: makefile.in,v 1.112 2010/09/19 19:28:49 tom Exp $
+# $LynxId: makefile.in,v 1.114 2010/09/21 08:17:25 tom Exp $
 ##makefile for lynx
 
 SHELL		= @CONFIG_SHELL@
@@ -335,7 +335,7 @@ install-doc : $(DOCDIR) $(HELPDIR)
 	fi'
 	$(SHELL) -c 'for name in COPYING COPYHEADER; do \
 		cd $(HELPDIR) && rm -f $$name ;\
-		cd $(HELPDIR) && ( $(LN_S) $(DOCDIR)/$$name . || cp $(DOCDIR)/$$name . );\
+		cd $(HELPDIR) && ( $(LN_S) $(docdir)/$$name . || cp $(DOCDIR)/$$name . );\
 		done'
 	-$(SHELL) -c 'case `id|sed -e "s/(.*//"` in uid=0) chown -R root $(DOCDIR);; esac'
 
@@ -362,12 +362,12 @@ help_files.sed : makefile $(srcdir)/lynx_help/help_files.txt
 	@echo Constructing sed-script $@
 	@-rm -f $@ help_files.tmp
 	@cat $(srcdir)/lynx_help/help_files.txt > help_files.tmp
-@LYNXDOC_MAKE@	@echo 's!$(LYNXDOCS_URL)!file://$(docdir)!g' >> help_files.tmp
-@LYNXCFG_MAKE@	@echo 's!$(LYNXHELP_URL)alphatoc.html!alphatoc.html!g' >> help_files.tmp
-@LYNXCFG_MAKE@	@echo 's!$(LYNXHELP_URL)cattoc.html!cattoc.html!g' >> help_files.tmp
-@LYNXCFG_MAKE@	@echo 's!alphatoc\.html!alphatoc.html$(COMPRESS_EXT)!g' >> help_files.tmp
-@LYNXCFG_MAKE@	@echo 's!cattoc\.html!cattoc.html$(COMPRESS_EXT)!g' >> help_files.tmp
-@LYNXCFG_MAKE@	@echo 's!body\.html!body.html$(COMPRESS_EXT)!g' >> help_files.tmp
+@LYNXDOC_MAKE@	@ECHO_CC@echo 's!$(LYNXDOCS_URL)!file://$(docdir)!g' >> help_files.tmp
+@LYNXCFG_MAKE@	@ECHO_CC@echo 's!$(LYNXHELP_URL)alphatoc.html!alphatoc.html!g' >> help_files.tmp
+@LYNXCFG_MAKE@	@ECHO_CC@echo 's!$(LYNXHELP_URL)cattoc.html!cattoc.html!g' >> help_files.tmp
+@LYNXCFG_MAKE@	@ECHO_CC@echo 's!alphatoc\.html!alphatoc.html$(COMPRESS_EXT)!g' >> help_files.tmp
+@LYNXCFG_MAKE@	@ECHO_CC@echo 's!cattoc\.html!cattoc.html$(COMPRESS_EXT)!g' >> help_files.tmp
+@LYNXCFG_MAKE@	@ECHO_CC@echo 's!body\.html!body.html$(COMPRESS_EXT)!g' >> help_files.tmp
 	@ECHO_CC@sed	-e '/^#/d' -e '/^$$/d' \
 		-e 's%\(.*\)=\(.*\@.*\)$$%s=@\1@=\2=g%' \
 		-e 's%\(.*\)=\(http:.*\)$$%s=@\1@=\2=g%' \
@@ -383,7 +383,12 @@ help_files.sed : makefile $(srcdir)/lynx_help/help_files.txt
 	@-rm -f help_files.tmp
 
 install-help : $(CFG2HTML) help_files.sed $(HELPDIR)
-	- (cd $(HELPDIR) && WD=`pwd` && HEAD=`echo $$WD|sed -e 's!/lynx_help$$!!'` && test $$WD != $$HEAD && rm -fr *)
+	-$(SHELL) -c 'if cd "$(HELPDIR)" ; then \
+		WD=`pwd` ; \
+		TAIL=`basename "$(helpdir)"` ; \
+		HEAD=`echo "$$WD"|sed -e "s,/$${TAIL}$$,,"` ; \
+		test "x$$WD" != "x$$HEAD" && rm -fr * ; \
+		fi'
 	test -d $(HELPDIR)/keystrokes || mkdir $(HELPDIR)/keystrokes
 	@echo Translating/copying html files
 @LYNXCFG_MAKE@	@$(SHELL) -c 'for f in $(CFG2HTML) ; do \
@@ -452,12 +457,28 @@ uninstall ::
 
 uninstall \
 uninstall-help ::
-	-test -d $(HELPDIR) && WD=`cd $(HELPDIR) && pwd` && HEAD=`echo $$WD|sed -e 's!/lynx_help$$!!'` && test $$WD != $$HEAD && rm -rf $(HELPDIR)
+	-$(SHELL) -c 'if test -d "$(HELPDIR)" ; then \
+		WD=`cd "$(HELPDIR)" && pwd` ; \
+		TAIL=`basename "$(helpdir)"` ; \
+		HEAD=`echo "$$WD"|sed -e "s,/$${TAIL}$$,,"` ; \
+		test "x$$WD" != "x$$HEAD" && rm -rf "$(HELPDIR)"; \
+		fi'
 
 uninstall \
 uninstall-doc ::
-	-test -d $(DOCDIR) && WD=`cd $(DOCDIR) && pwd` && HEAD=`echo $$WD|sed -e 's!/lynx_doc$$!!'` && test $$WD != $$HEAD && rm -rf $(DOCDIR)
-	-test -d $(HELPDIR) && WD=`cd $(HELPDIR) && pwd` && HEAD=`echo $$WD|sed -e 's!/lynx_help$$!!'` && test $$WD != $$HEAD && cd $(HELPDIR) && rm -f COPYING COPYHEADER
+	-$(SHELL) -c 'if test -d "$(DOCDIR)" ; then \
+		WD=`cd "$(DOCDIR)" && pwd` ; \
+		TAIL=`basename "$(docdir)"` ; \
+		HEAD=`echo "$$WD"|sed -e "s,/$${TAIL}$$,,"` ; \
+		test "x$$WD" != "x$$HEAD" && rm -rf "$(DOCDIR)"; \
+		fi'
+	-$(SHELL) -c 'if test -d "$(HELPDIR)" ; then \
+		WD=`cd "$(HELPDIR)" && pwd` ; \
+		TAIL=`basename "$(helpdir)"` ; \
+		HEAD=`echo "$$WD"|sed -e "s,/'$${TAIL}'$$,,"` ; \
+		test "x$$WD" != "x$$HEAD" ; \
+		cd "$(HELPDIR)" && rm -f COPYING COPYHEADER ; \
+		fi'
 
 update-po:
 	rsync -Lrtvz  translationproject.org::tp/latest/lynx/  $(PO_SRCDIR)

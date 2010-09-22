@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYTraversal.c,v 1.27 2009/01/01 22:37:06 tom Exp $
+ * $LynxId: LYTraversal.c,v 1.28 2010/09/22 09:42:40 tom Exp $
  */
 #include <HTUtils.h>
 #include <LYGlobalDefs.h>
@@ -147,7 +147,7 @@ BOOLEAN lookup_reject(char *target)
     FILE *ifp;
     char *buffer = NULL;
     char *line = NULL;
-    unsigned len;
+    size_t len;
     int result = FALSE;
 
     if ((ifp = fopen(TRAVERSE_REJECT_FILE, TXT_R)) == NULL) {

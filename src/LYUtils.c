@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYUtils.c,v 1.195 2010/04/29 20:52:32 tom Exp $
+ * $LynxId: LYUtils.c,v 1.196 2010/09/22 10:50:17 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTCP.h>
@@ -1153,7 +1153,7 @@ void LYhighlight(int flag,
 	    if (avail_space > links[cur].l_form->size)
 		avail_space = links[cur].l_form->size;
 
-	    len = LYmbcs_skip_cells(text, avail_space, utf_flag) - text;
+	    len = (int) (LYmbcs_skip_cells(text, avail_space, utf_flag) - text);
 	    LYwaddnstr(LYwin, text, (unsigned) len);
 	    while (len++ < avail_space)
 		LYaddch('_');
@@ -3744,13 +3744,13 @@ void parse_restrictions(const char *s)
 	    p++;
 
 	found = FALSE;
-	if (RESTRICT_NM_EQU(word, "all", p - word)) {
+	if (RESTRICT_NM_EQU(word, "all", (int) (p - word))) {
 	    found = TRUE;
 	    for (i = N_SPECIAL_RESTRICT_OPTIONS;
 		 i < TABLESIZE(restrictions);
 		 i++)
 		*(restrictions[i].flag) = TRUE;
-	} else if (RESTRICT_NM_EQU(word, "default", p - word)) {
+	} else if (RESTRICT_NM_EQU(word, "default", (int) (p - word))) {
 	    found = TRUE;
 	    for (i = N_SPECIAL_RESTRICT_OPTIONS;
 		 i < TABLESIZE(restrictions);
@@ -3758,7 +3758,7 @@ void parse_restrictions(const char *s)
 		*(restrictions[i].flag) = (BOOLEAN) !restrictions[i].can;
 	} else {
 	    for (i = 0; i < TABLESIZE(restrictions); i++) {
-		if (RESTRICT_NM_EQU(word, restrictions[i].name, p - word)) {
+		if (RESTRICT_NM_EQU(word, restrictions[i].name, (int) (p - word))) {
 		    *(restrictions[i].flag) = TRUE;
 		    found = TRUE;
 		    break;
@@ -4765,7 +4765,7 @@ BOOLEAN LYExpandHostForURL(char **AllocatedString,
 		while (*EndS && !WHITE(*EndS) && *EndS != ',') {
 		    EndS++;	/* Find separator */
 		}
-		LYstrncpy(DomainSuffix, StartS, (EndS - StartS));
+		LYstrncpy(DomainSuffix, StartS, (int) (EndS - StartS));
 	    }
 	} while ((GotHost == FALSE) && (*DomainSuffix != '\0'));
 
@@ -4781,7 +4781,7 @@ BOOLEAN LYExpandHostForURL(char **AllocatedString,
 	    while (*EndP && !WHITE(*EndP) && *EndP != ',') {
 		EndP++;		/* Find separator */
 	    }
-	    LYstrncpy(DomainPrefix, StartP, (EndP - StartP));
+	    LYstrncpy(DomainPrefix, StartP, (int) (EndP - StartP));
 	}
     } while ((GotHost == FALSE) && (*DomainPrefix != '\0'));
 
@@ -5715,7 +5715,7 @@ static BOOL IsOurSymlink(const char *name)
     char *buffer = typeMallocn(char, (unsigned) size);
 
     if (buffer != 0) {
-	while ((used = readlink(name, buffer, (unsigned) (size - 1))) == size
+	while ((used = (int) readlink(name, buffer, (unsigned) (size - 1))) == size
 	       - 1) {
 	    buffer = typeRealloc(char, buffer, (unsigned) (size *= 2));
 
@@ -6995,15 +6995,15 @@ int LYCopyFile(char *src,
     } else {
 	FILE *fin, *fout;
 	unsigned char buff[BUFSIZ];
-	unsigned len;
+	size_t len;
 
 	code = EOF;
 	if ((fin = fopen(src, BIN_R)) != 0) {
 	    if ((fout = fopen(dst, BIN_W)) != 0) {
 		code = 0;
 		while ((len = fread(buff, 1, sizeof(buff), fin)) != 0) {
-		    fwrite(buff, 1, len, fout);
-		    if (ferror(fout)) {
+		    if (fwrite(buff, 1, len, fout) < len
+			|| ferror(fout)) {
 			code = EOF;
 			break;
 		    }
@@ -7549,7 +7549,7 @@ int put_clip(const char *s)
 {
     char *cmd = LYGetEnv("RL_CLCOPY_CMD");
     FILE *fh;
-    unsigned l = strlen(s), res;
+    size_t l = strlen(s), res;
 
     if (!cmd)
 	return -1;

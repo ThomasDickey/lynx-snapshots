@@ -1,4 +1,4 @@
-/* $LynxId: LYOptions.c,v 1.137 2010/05/05 09:48:38 tom Exp $ */
+/* $LynxId: LYOptions.c,v 1.138 2010/09/22 09:36:44 tom Exp $ */
 #include <HTUtils.h>
 #include <HTFTP.h>
 #include <HTTP.h>		/* 'reloading' flag */
@@ -2588,7 +2588,7 @@ static BOOL isLynxOptionsPage(const char *address, const char *portion)
     BOOL result = FALSE;
 
     if (!strncasecomp(address, STR_LYNXOPTIONS, LEN_LYNXOPTIONS)) {
-	unsigned len = strlen(portion);
+	unsigned len = (unsigned) strlen(portion);
 
 	address += LEN_LYNXOPTIONS;
 	if (!strncasecomp(address, portion, (int) len)

@@ -1,5 +1,5 @@
 /*
- * $LynxId: TRSTable.c,v 1.25 2010/04/29 20:51:14 tom Exp $
+ * $LynxId: TRSTable.c,v 1.26 2010/09/22 09:42:06 tom Exp $
  *		Simple table object
  *		===================
  * Authors
@@ -1302,7 +1302,7 @@ static int Stbl_fakeFinishCellInTable(STable_info *me,
 	int need_reserved = 0;
 	int prev_reserved_last = -1;
 	STable_rowinfo *prev_row;
-	int prev_row_n2 = lastrow - me->rows;
+	int prev_row_n2 = (int) (lastrow - me->rows);
 
 	CTRACE2(TRACE_TRST,
 		(tfp,
@@ -1350,7 +1350,7 @@ static int Stbl_fakeFinishCellInTable(STable_info *me,
 	       Remember that STable_rowinfo is about logical (TR)
 	       table lines, not displayed lines.  We need to duplicate
 	       the reservation structure when we fake new logical lines.  */
-	    int prev_row_n = prev_row - me->rows;
+	    int prev_row_n = (int) (prev_row - me->rows);
 	    STable_rowinfo *rows = typeRealloc(STable_rowinfo, me->rows,
 					       (unsigned) (me->allocated_rows
 							   + 1));

@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTAABrow.c,v 1.32 2010/06/17 00:37:22 tom Exp $
+ * $LynxId: HTAABrow.c,v 1.33 2010/09/22 00:54:01 tom Exp $
  *
  * MODULE							HTAABrow.c
  *		BROWSER SIDE ACCESS AUTHORIZATION MODULE
@@ -142,9 +142,9 @@ static int proxy_portnumber = 80;
 void HTAAForwardAuth_set(const char *scheme_name,
 			 const char *scheme_specifics)
 {
-    unsigned len = (20
-		    + (scheme_name ? strlen(scheme_name) : 0)
-		    + (scheme_specifics ? strlen(scheme_specifics) : 0));
+    size_t len = (20
+		  + (scheme_name ? strlen(scheme_name) : 0)
+		  + (scheme_specifics ? strlen(scheme_specifics) : 0));
 
     FREE(HTAAForwardAuth);
     if ((HTAAForwardAuth = typecallocn(char, len)) == 0)
@@ -567,7 +567,7 @@ static char *compose_auth_string(HTAAScheme scheme, HTAASetup * setup, BOOL IsPr
 {
     char *cleartext = NULL;	/* Cleartext presentation */
     char *ciphertext = NULL;	/* Encrypted presentation */
-    unsigned len;
+    size_t len;
     char *msg = NULL;
     char *username = NULL;
     char *password = NULL;
@@ -821,7 +821,7 @@ char *HTAA_composeAuth(const char *hostname,
     char *auth_string;
     BOOL retry;
     HTAAScheme scheme;
-    unsigned len;
+    size_t len;
 
     /*
      * Setup atexit() freeing if not done already.  - FM

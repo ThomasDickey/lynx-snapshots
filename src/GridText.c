@@ -1,5 +1,5 @@
 /*
- * $LynxId: GridText.c,v 1.190 2010/06/29 00:56:31 tom Exp $
+ * $LynxId: GridText.c,v 1.191 2010/09/22 10:53:56 tom Exp $
  *
  *		Character grid hypertext object
  *		===============================
@@ -244,9 +244,9 @@ There are 3 functions - POOL_NEW, POOL_FREE, and ALLOC_IN_POOL.
 
 *************************************************************************/
 
-#define POOLallocstyles(ptr, n)     ptr = ALLOC_IN_POOL(&HTMainText->pool, n * sizeof(pool_data))
-#define POOLallocHTLine(ptr, size)  ptr = (HTLine*) ALLOC_IN_POOL(&HTMainText->pool, LINE_SIZE(size))
-#define POOLallocstring(ptr, len)   ptr = (char*) ALLOC_IN_POOL(&HTMainText->pool, len + 1)
+#define POOLallocstyles(ptr, n)     ptr = ALLOC_IN_POOL(&HTMainText->pool, (unsigned) ((n) * sizeof(pool_data)))
+#define POOLallocHTLine(ptr, size)  ptr = (HTLine*) ALLOC_IN_POOL(&HTMainText->pool, (unsigned) LINE_SIZE(size))
+#define POOLallocstring(ptr, len)   ptr = (char*) ALLOC_IN_POOL(&HTMainText->pool, (unsigned) (len + 1))
 #define POOLtypecalloc(T, ptr)      ptr = (T*) ALLOC_IN_POOL(&HTMainText->pool, sizeof(T))
 
 /**************************************************************************/
@@ -270,7 +270,7 @@ static pool_data *ALLOC_IN_POOL(HTPool ** ppoolptr, unsigned request)
 	    n = 1;
 	j = (n % ALIGN_SIZE);
 	if (j != 0)
-	    n += (ALIGN_SIZE - j);
+	    n += (unsigned) (ALIGN_SIZE - j);
 	n /= sizeof(pool_data);
 
 	if (POOL_SIZE >= (pool->used + n)) {
@@ -336,7 +336,8 @@ typedef struct _line {
     char data[1];		/* Space for terminator at least! */
 } HTLine;
 
-#define LINE_SIZE(size) (sizeof(HTLine)+(size))		/* Allow for terminator */
+    /* Allow for terminator */
+#define LINE_SIZE(size) (sizeof(HTLine) + (size_t)(size))
 
 #ifndef HTLINE_NOT_IN_POOL
 #define HTLINE_NOT_IN_POOL 0	/* debug with this set to 1 */
@@ -805,7 +806,7 @@ static void LYAddHiText(TextAnchor *a,
 {
     HiliteInfo *have = a->lites.hl_info;
     unsigned need = (unsigned) (a->lites.hl_len - 1);
-    unsigned want = (unsigned) (a->lites.hl_len += 1) * sizeof(HiliteInfo);
+    unsigned want = (unsigned) (a->lites.hl_len += 1) * (unsigned) sizeof(HiliteInfo);
 
     if (have != NULL) {
 	have = (HiliteInfo *) realloc(have, want);
@@ -835,8 +836,9 @@ static int LYAdjHiTextPos(TextAnchor *a, int count)
     else
 	result = a->lites.hl_base.hl_text;
 
-    return (result != 0) ? (LYSkipBlanks(result) - result) : 0;
+    return (result != 0) ? (int) (LYSkipBlanks(result) - result) : 0;
 }
+
 #else
 #define LYAdjHiTextPos(a,count) 0
 #endif
@@ -888,7 +890,7 @@ static void LYCopyHiText(TextAnchor *a, TextAnchor *b)
 	if ((s = LYGetHiTextStr(b, count)) == NULL)
 	    break;
 	if (count == 0) {
-	    LYSetHiText(a, s, strlen(s));
+	    LYSetHiText(a, s, (unsigned) strlen(s));
 	} else {
 	    LYAddHiText(a, s, LYGetHiTextPos(b, count));
 	}
@@ -2724,7 +2726,7 @@ static HTLine *insert_blanks_in_line(HTLine *line, int line_number,
 	if (ip)			/* Fix anchor positions */
 	    move_anchors_in_region(line, line_number, prev_anchor /*updates++ */ ,
 				   &head_processed,
-				   copied - line->data, pre - line->data,
+				   (int) (copied - line->data), (int) (pre - line->data),
 				   shift);
 #if defined(USE_COLOR_STYLE)	/* Move styles too */
 #define NStyle mod_line->styles[istyle]
@@ -2964,7 +2966,7 @@ static void split_line(HText *text, unsigned split)
 	    HeadTrim++;
 	}
 
-	plen = strlen(p);
+	plen = (unsigned) strlen(p);
 	if (plen) {		/* Count funny characters */
 	    for (i = (int) (plen - 1); i >= 0; i--) {
 		if (p[i] == LY_UNDERLINE_START_CHAR ||
@@ -3130,18 +3132,20 @@ static void split_line(HText *text, unsigned split)
 	    }
 	    scan--;
 	}
-	line->numstyles = line->styles + MAX_STYLES_ON_LINE - 1 - to;
+	line->numstyles = (unsigned short) (line->styles
+					    + MAX_STYLES_ON_LINE
+					    - 1 - to);
 	if (line->numstyles > 0 && line->numstyles < MAX_STYLES_ON_LINE) {
 	    int n;
 
 	    for (n = 0; n < line->numstyles; n++)
 		line->styles[n] = to[n + 1];
 	} else if (line->numstyles == 0) {
-	    line->styles[0].sc_horizpos = ~0;	/* ?!!! */
+	    line->styles[0].sc_horizpos = (unsigned) (~0);	/* ?!!! */
 	}
 	previous->numstyles = (unsigned short) (at_end - previous->styles + 1);
 	if (previous->numstyles == 0) {
-	    previous->styles[0].sc_horizpos = ~0;	/* ?!!! */
+	    previous->styles[0].sc_horizpos = (unsigned) (~0);	/* ?!!! */
 	}
     }
 #endif /*USE_COLOR_STYLE */
@@ -7849,7 +7853,7 @@ static int TrimmedLength(char *string)
 		if ((*dst++ = *src++) == '\0')
 		    break;
 	    }
-	    result = (dst - string - 1);
+	    result = (int) (dst - string - 1);
 	}
     }
     return result;
@@ -9620,7 +9624,7 @@ static char *HText_skipOptionNumPrefix(char *opname)
 	    while (*cp && isdigit(UCH(*cp)))
 		++cp;
 	    if (*cp && *cp++ == ')') {
-		int i = (cp - opname);
+		int i = (int) (cp - opname);
 
 		while (i < 5) {
 		    if (*cp != '_')
@@ -9700,7 +9704,7 @@ char *HText_setLastOptionValue(HText *text, char *value,
 	 * prefix and actual value.  -FM
 	 */
 	if ((cp1 = HText_skipOptionNumPrefix(cp)) > cp) {
-	    i = 0, j = (cp1 - cp);
+	    i = 0, j = (int) (cp1 - cp);
 	    while (isspace(UCH(cp1[i])) ||
 		   IsSpecialAttrChar(UCH(cp1[i]))) {
 		i++;
@@ -12909,7 +12913,7 @@ static int finish_ExtEditForm(LinkInfo * form_link, TextAnchor *start_anchor,
     while ((line_cnt <= orig_cnt) || (*lp) || ((len != 0) && (*lp == '\0'))) {
 
 	if (skip_at) {
-	    len0 = skip_at - lp;
+	    len0 = (int) (skip_at - lp);
 	    strncpy(line, lp, (size_t) len0);
 	    line[len0] = '\0';
 	    lp = skip_at + skip_num;
@@ -12923,7 +12927,7 @@ static int finish_ExtEditForm(LinkInfo * form_link, TextAnchor *start_anchor,
 	line[len0] = '\0';
 
 	if ((cp = strchr(lp, '\n')) != 0)
-	    len = cp - lp;
+	    len = (int) (cp - lp);
 	else
 	    len = (int) strlen(lp);
 
@@ -13500,7 +13504,7 @@ int HText_InsertFile(LinkInfo * form_link)
     while (*lp) {
 
 	if ((cp = strchr(lp, '\n')) != 0)
-	    len = cp - lp;
+	    len = (int) (cp - lp);
 	else
 	    len = (int) strlen(lp);
 
@@ -14455,7 +14459,7 @@ static int LYHandleCache(const char *arg,
 #ifdef USE_SOURCE_CACHE
     char *source_cache_file = NULL;
 #endif
-    int Size = 0;
+    long Size = 0;
     int x = -1;
 
     /*
@@ -14569,7 +14573,7 @@ static int LYHandleCache(const char *arg,
 		   x, STR_LYNXCACHE, x, title, address, address);
 	PUTS(buf);
 	if (Size > 0) {
-	    HTSprintf0(&buf, "Size: %d  ", Size);
+	    HTSprintf0(&buf, "Size: %ld  ", Size);
 	    PUTS(buf);
 	}
 	if (cachedoc != NULL && cachedoc->Lines > 0) {

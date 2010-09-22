@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTParse.c,v 1.62 2010/09/17 09:16:13 tom Exp $
+ * $LynxId: HTParse.c,v 1.63 2010/09/22 00:50:56 tom Exp $
  *
  *		Parse HyperText Document Address		HTParse.c
  *		================================
@@ -222,7 +222,7 @@ char *HTParsePort(char *host, int *portp)
 		if (brackets == 0 && isdigit(UCH(*host))) {
 		    char *next = NULL;
 
-		    *portp = strtol(host, &next, 10);
+		    *portp = (int) strtol(host, &next, 10);
 		    if (next != 0 && next != host && *next == '\0') {
 			result = (host - 1);
 			CTRACE((tfp, "HTParsePort %d\n", *portp));
