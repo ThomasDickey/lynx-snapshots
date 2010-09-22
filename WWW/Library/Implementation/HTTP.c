@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTP.c,v 1.117 2010/06/20 22:11:16 tom Exp $
+ * $LynxId: HTTP.c,v 1.118 2010/09/22 00:35:50 tom Exp $
  *
  * HyperText Tranfer Protocol	- Client implementation		HTTP.c
  * ==========================
@@ -190,11 +190,21 @@ void HTSSLInitPRNG(void)
 }
 
 #define HTTP_NETREAD(sock, buff, size, handle) \
-	(handle ? SSL_read(handle, buff, size) : NETREAD(sock, buff, size))
+	(handle \
+	 ? SSL_read(handle, buff, size) \
+	 : NETREAD(sock, buff, size))
+
 #define HTTP_NETWRITE(sock, buff, size, handle) \
-	(handle ? SSL_write(handle, buff, size) : NETWRITE(sock, buff, size))
+	(handle \
+	 ? SSL_write(handle, buff, size) \
+	 : NETWRITE(sock, buff, size))
+
 #define HTTP_NETCLOSE(sock, handle)  \
-	{ (void)NETCLOSE(sock); if (handle) SSL_free(handle); SSL_handle = handle = NULL; }
+	{ (void)NETCLOSE(sock); \
+	  if (handle) \
+	      SSL_free(handle); \
+	  SSL_handle = handle = NULL; \
+	}
 
 #else
 #define HTTP_NETREAD(a, b, c, d)   NETREAD(a, b, c)
@@ -495,7 +505,7 @@ static int HTLoadHTTP(const char *arg,
 		      HTFormat format_out,
 		      HTStream *sink)
 {
-    static char *empty = "";
+    static char empty[1];
     int s;			/* Socket number for returned data */
     const char *url = arg;	/* The URL which get_physical() returned */
     bstring *command = NULL;	/* The whole command */
@@ -1433,7 +1443,10 @@ static int HTLoadHTTP(const char *arg,
 	    *p2 = TOASCII(*p2);
     }
 #endif /* NOT_ASCII */
-    status = HTTP_NETWRITE(s, BStrData(command), BStrLen(command), handle);
+    status = (int) HTTP_NETWRITE(s,
+				 BStrData(command),
+				 BStrLen(command),
+				 handle);
     BStrFree(command);
     FREE(linebuf);
     if (status <= 0) {
@@ -1721,8 +1734,14 @@ static int HTLoadHTTP(const char *arg,
 	     * anything else) when !eol.  Otherwise, set the value of length to
 	     * what we have beyond eol (i.e., beyond the status line).  - FM
 	     */
-	    start_of_data = eol ? eol + 1 : empty;
-	    length = eol ? length - (start_of_data - line_buffer) : 0;
+	    if (eol != 0) {
+		start_of_data = (eol + 1);
+	    } else {
+		start_of_data = empty;
+	    }
+	    length = (eol
+		      ? length - (int) (start_of_data - line_buffer)
+		      : 0);
 
 	    /*
 	     * Trim trailing spaces in line_buffer so that we can use it in

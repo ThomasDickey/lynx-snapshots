@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYPrettySrc.c,v 1.21 2010/04/30 09:26:14 tom Exp $
+ * $LynxId: LYPrettySrc.c,v 1.22 2010/09/22 09:39:40 tom Exp $
  *
  * HTML source syntax highlighting
  * by Vlad Harchev <hvv@hippo.ru>
@@ -80,7 +80,7 @@ static int html_src_tag_index(char *tagname)
 {
     HTTag *tag = SGMLFindTag(&HTML_dtd, tagname);
 
-    return (tag && tag != &HTTag_unrecognized) ? tag - HTML_dtd.tags : -1;
+    return (tag && tag != &HTTag_unrecognized) ? (int) (tag - HTML_dtd.tags) : -1;
 }
 
 typedef enum {

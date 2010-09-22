@@ -1,5 +1,5 @@
 /*                System dependencies in the W3 library
- * $LynxId: www_tcp.h,v 1.42 2010/09/19 18:30:56 tom Exp $
+ * $LynxId: www_tcp.h,v 1.43 2010/09/22 00:35:17 tom Exp $
  *
                                    SYSTEM DEPENDENCIES
 
@@ -40,9 +40,14 @@ Default values
 
  */
 /* Default values of those: */
-#define NETCLOSE close		/* Routine to close a TCP-IP socket         */
-#define NETREAD  HTDoRead	/* Routine to read from a TCP-IP socket     */
-#define NETWRITE write		/* Routine to write to a TCP-IP socket      */
+	/* Routine to close a TCP-IP socket         */
+#define NETCLOSE close
+	/* Routine to read from a TCP-IP socket     */
+#define NETREAD(s,p,n) \
+	HTDoRead(s, p, (unsigned)(n))
+	/* Routine to write to a TCP-IP socket      */
+#define NETWRITE(s,p,n) \
+	write(s, p, (size_t)(n))
 #define SOCKET_READ read	/* normal socket read routine */
 #define IOCTL ioctl		/* normal ioctl routine for sockets */
 #define SOCKET_ERRNO errno	/* normal socket errno */

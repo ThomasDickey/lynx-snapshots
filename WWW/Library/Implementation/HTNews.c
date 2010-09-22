@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTNews.c,v 1.63 2010/06/17 00:10:46 tom Exp $
+ * $LynxId: HTNews.c,v 1.64 2010/09/22 00:51:25 tom Exp $
  *
  *			NEWS ACCESS				HTNews.c
  *			===========
@@ -312,7 +312,7 @@ static int response(char *command)
 	    status = NEWS_NETWRITE(s, ascii, length);
 	}
 #else
-	status = NEWS_NETWRITE(s, (char *) command, length);
+	status = (int) NEWS_NETWRITE(s, (char *) command, length);
 #endif /* NOT_ASCII */
 	if (status < 0) {
 	    CTRACE((tfp, "HTNews: Unable to send command. Disconnecting.\n"));
@@ -2697,7 +2697,7 @@ static int HTLoadNews(const char *arg,
 #endif /* USE_SSL */
 		HTInitInput(s);	/* set up buffering */
 		if (proxycmd[0]) {
-		    status = NEWS_NETWRITE(s, proxycmd, strlen(proxycmd));
+		    status = (int) NEWS_NETWRITE(s, proxycmd, (int) strlen(proxycmd));
 		    CTRACE((tfp,
 			    "HTNews: Proxy command returned status '%d'.\n",
 			    status));

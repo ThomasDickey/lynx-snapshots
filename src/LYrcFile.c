@@ -1,4 +1,4 @@
-/* $LynxId: LYrcFile.c,v 1.84 2010/06/20 16:42:27 tom Exp $ */
+/* $LynxId: LYrcFile.c,v 1.85 2010/09/22 09:48:18 tom Exp $ */
 #include <HTUtils.h>
 #include <HTFTP.h>
 #include <LYUtils.h>
@@ -182,7 +182,7 @@ BOOL LYgetEnum(Config_Enum * table, const char *name,
 	       int *result)
 {
     Config_Enum *found = 0;
-    unsigned len = strlen(name);
+    unsigned len = (unsigned) strlen(name);
     int match = 0;
 
     if (len != 0) {

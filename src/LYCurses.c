@@ -1,4 +1,4 @@
-/* $LynxId: LYCurses.c,v 1.151 2010/06/17 08:09:48 tom Exp $ */
+/* $LynxId: LYCurses.c,v 1.152 2010/09/22 10:51:44 tom Exp $ */
 #include <HTUtils.h>
 #include <HTAlert.h>
 
@@ -260,8 +260,8 @@ static char *attr_to_string(int code)
 {
     static char result[sizeof(Mono_Attrs) + 80];
     unsigned i;
-    int pair = PAIR_NUMBER(code);
-    int bold = (pair != 0 && (code & A_BOLD) != 0);
+    int pair = PAIR_NUMBER((unsigned) code);
+    int bold = (pair != 0 && ((unsigned) code & A_BOLD) != 0);
 
     if (bold)
 	code &= (int) ~A_BOLD;
@@ -424,11 +424,11 @@ static void LYAttrset(WINDOW * win, int color,
 	&& color >= 0) {
 	CTRACE2(TRACE_STYLE, (tfp, "CSS:LYAttrset color %#x -> (%s)\n",
 			      color, attr_to_string(color)));
-	(void) wattrset(win, color);
+	(void) wattrset(win, (unsigned) color);
     } else if (mono >= 0) {
 	CTRACE2(TRACE_STYLE, (tfp, "CSS:LYAttrset mono %#x -> (%s)\n",
 			      mono, attr_to_string(mono)));
-	(void) wattrset(win, mono);
+	(void) wattrset(win, (unsigned) mono);
     } else {
 	CTRACE2(TRACE_STYLE, (tfp, "CSS:LYAttrset (A_NORMAL)\n"));
 	(void) wattrset(win, A_NORMAL);
@@ -493,7 +493,7 @@ void curses_w_style(WINDOW * win, int style,
 				  "in LynxChangeStyle(curses_w_style)"));
 	    last_colorattr_ptr = MAX_LAST_STYLES - 1;
 	}
-	last_styles[last_colorattr_ptr++] = LYgetattrs(win);
+	last_styles[last_colorattr_ptr++] = (int) LYgetattrs(win);
 	/* don't cache style changes for active links */
 #if OMIT_SCN_KEEPING
 	/* since we don't compute the hcode to stack off in HTML.c, we
@@ -653,11 +653,11 @@ static int encode_color_attr(int color_attr)
     int code = 0;
     int offs = 1;
 
-    if (color_attr & A_BOLD)
+    if ((unsigned) color_attr & A_BOLD)
 	code |= 1;
-    if (color_attr & (A_REVERSE | A_DIM))
+    if ((unsigned) color_attr & (A_REVERSE | A_DIM))
 	code |= 2;
-    if (color_attr & A_UNDERLINE)
+    if ((unsigned) color_attr & A_UNDERLINE)
 	code |= 4;
     result = lynx_color_cfg_attr(code);
 
@@ -706,8 +706,8 @@ char *LYgetTableString(int code)
 {
     int mask = decode_mono_code(code);
     int second = encode_color_attr(mask);
-    int pair = PAIR_NUMBER(second);
-    int mono = (int) (mask & A_ATTRIBUTES);
+    int pair = PAIR_NUMBER((unsigned) second);
+    int mono = (int) ((unsigned) mask & A_ATTRIBUTES);
     int fg = lynx_color_pairs[pair].fg;
     int bg = lynx_color_pairs[pair].bg;
     unsigned n;
@@ -810,7 +810,7 @@ int lynx_chg_color(int color,
 void lynx_set_color(int a)
 {
     if (lynx_has_color && LYShowColor >= SHOW_COLOR_ON) {
-	(void) wattrset(LYwin, lynx_color_cfg_attr(a)
+	(void) wattrset(LYwin, (unsigned) lynx_color_cfg_attr(a)
 			| (((a + 1) < COLOR_PAIRS)
 			   ? (chtype) get_color_pair(a + 1)
 			   : A_NORMAL));

@@ -40,7 +40,7 @@ static void free_atoms(void);
 
 HTAtom *HTAtom_for(const char *string)
 {
-    int hash;
+    size_t hash;
     HTAtom *a;
 
     /* First time around, clear hash table

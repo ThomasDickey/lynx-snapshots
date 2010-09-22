@@ -1,4 +1,4 @@
-/* $LynxId: LYShowInfo.c,v 1.69 2009/01/19 23:42:23 tom Exp $ */
+/* $LynxId: LYShowInfo.c,v 1.70 2010/09/22 09:35:55 tom Exp $ */
 #include <HTUtils.h>
 #include <HTFile.h>
 #include <HTParse.h>
@@ -210,7 +210,7 @@ int LYShowInfo(DocInfo *doc,
 		char buf[MAX_LINE];
 		int buf_size;
 
-		if ((buf_size = readlink(temp, buf, sizeof(buf) - 1)) != -1) {
+		if ((buf_size = (int) readlink(temp, buf, sizeof(buf) - 1)) != -1) {
 		    buf[buf_size] = '\0';
 		} else {
 		    sprintf(buf, "%.*s", (int) sizeof(buf) - 1,

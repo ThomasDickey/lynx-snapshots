@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTUU.c,v 1.10 2010/04/29 23:57:11 tom Exp $
+ * $LynxId: HTUU.c,v 1.11 2010/09/21 23:55:12 tom Exp $
  *
  * MODULE							HTUU.c
  *			UUENCODE AND UUDECODE
@@ -69,14 +69,14 @@ static unsigned char pr2six[256];
  *             Returns the number of ASCII characters in "bufcoded".
  */
 int HTUU_encode(unsigned char *bufin,
-		unsigned int nbytes,
+		size_t nbytes,
 		char *bufcoded)
 {
 /* ENC is the basic 1 character encoding function to make a char printing */
 #define ENC(c) six2pr[c]
 
     register char *outptr = bufcoded;
-    unsigned int i;
+    size_t i;
 
     /* This doesn't seem to be needed (AL):   register unsigned char *inptr  = bufin; */
 
@@ -101,7 +101,7 @@ int HTUU_encode(unsigned char *bufin,
 	outptr[-2] = '=';
     }
     *outptr = '\0';
-    return (outptr - bufcoded);
+    return (int) (outptr - bufcoded);
 }
 
 /*--- function HTUU_decode ------------------------------------------------
@@ -182,7 +182,7 @@ int HTUU_decode(char *bufcoded,
      */
     bufin = bufcoded;
     while (pr2six[UCH(*(bufin++))] <= MAXVAL) ;
-    nprbytes = bufin - bufcoded - 1;
+    nprbytes = (int) (bufin - bufcoded - 1);
     nbytesdecoded = ((nprbytes + 3) / 4) * 3;
     if (nbytesdecoded > outbufsize) {
 	nprbytes = (outbufsize * 4) / 3;

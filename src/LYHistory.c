@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYHistory.c,v 1.77 2010/04/29 08:55:40 tom Exp $
+ * $LynxId: LYHistory.c,v 1.78 2010/09/22 10:49:45 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTP.h>
@@ -347,7 +347,7 @@ void LYAllocHistory(int entries)
 	int save = size_history;
 
 	size_history = (entries + 2) * 2;
-	want = (unsigned) size_history *sizeof(*history);
+	want = (unsigned) size_history *(unsigned) sizeof(*history);
 
 	if (history == 0) {
 	    history = (HistInfo *) malloc(want);
@@ -995,7 +995,7 @@ static void to_stack(char *str)
      * Register string.
      */
     if (buffstack == 0)
-	buffstack = typecallocn(char *, status_buf_size);
+	buffstack = typecallocn(char *, (size_t) status_buf_size);
 
     FREE(buffstack[topOfStack]);
     buffstack[topOfStack] = str;

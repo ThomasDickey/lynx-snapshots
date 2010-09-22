@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMainLoop.c,v 1.166 2010/06/18 10:56:54 tom Exp $
+ * $LynxId: LYMainLoop.c,v 1.167 2010/09/22 09:36:30 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTAccess.h>
@@ -5821,7 +5821,7 @@ int mainloop(void)
 				    PARSE_PATH + PARSE_PUNCTUATION)) != NULL) {
 		    const char *name = wwwName(Home_Dir());
 
-		    len = strlen(name);
+		    len = (unsigned) strlen(name);
 #ifdef VMS
 		    if (!strncasecomp(temp, name, len) &&
 			strlen(temp) > len)

@@ -20,7 +20,7 @@
 extern "C" {
 #endif
     extern int HTUU_encode(unsigned char *bufin,
-			   unsigned int nbytes,
+			   size_t nbytes,
 			   char *bufcoded);
 
     extern int HTUU_decode(char *bufcoded,

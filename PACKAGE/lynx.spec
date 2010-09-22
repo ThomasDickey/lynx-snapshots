@@ -1,4 +1,4 @@
-# $LynxId: lynx.spec,v 1.4 2010/09/17 09:52:19 tom Exp $
+# $LynxId: lynx.spec,v 1.6 2010/09/21 23:18:23 tom Exp $
 Summary: A text-based Web browser
 Name: lynx
 Version: 2.8.8
@@ -9,7 +9,7 @@ Source: lynx%{version}%{release}.tgz
 # URL: http://lynx.isc.org/
 Provides: webclient
 Provides: text-www-browser
-# BuildRequires: openssl-devel, pkgconfig, ncurses-devel >= 5.3-5, 
+# BuildRequires: openssl-devel, pkgconfig, ncurses-devel >= 5.3-5,
 # BuildRequires: zlib-devel, gettext, rsh, telnet, zip, unzip
 # Buildroot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
@@ -20,12 +20,22 @@ to use.  It will display HTML documents containing links to files residing on
 the local system, as well as files residing on remote systems running Gopher,
 HTTP, FTP, WAIS, and NNTP servers.
 
+%define lynx_doc %{_defaultdocdir}/lynx
+%define lynx_etc %{_sysconfdir}/lynx
+
 %prep
 %setup -q -n lynx%{version}%{release}
 
 %build
 CPPFLAGS="-DMISC_EXP -DEXP_HTTP_HEADERS" \
 %configure \
+	--target %{_target_platform} \
+	--prefix=%{_prefix} \
+	--bindir=%{_bindir} \
+	--datadir=%{lynx_doc} \
+	--libdir=%{lynx_etc} \
+	--mandir=%{_mandir} \
+	--sysconfdir=%{lynx_etc} \
 	--disable-font-switch \
 	--disable-internal-links \
 	--enable-8bit-toupper \
@@ -70,25 +80,33 @@ CPPFLAGS="-DMISC_EXP -DEXP_HTTP_HEADERS" \
 	--with-screen=ncursesw \
 	--with-ssl \
 	--with-zlib
-make
+make \
+	docdir=%{lynx_doc}
 
 %install
 rm -rf $RPM_BUILD_ROOT
 chmod -x samples/mailto-form.pl
-%makeinstall mandir=$RPM_BUILD_ROOT%{_mandir}/man1 libdir=$RPM_BUILD_ROOT/etc
+
+make install-full \
+	DESTDIR=$RPM_BUILD_ROOT \
+	docdir=%{lynx_doc}
+
+cat >>$RPM_BUILD_ROOT%{lynx_etc}/lynx.cfg <<EOF
+DEFAULT_INDEX_FILE:http://www.google.com/
+LOCALE_CHARSET:TRUE
+EOF
 
 %clean
 rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(-,root,root,-)
-%doc docs README INSTALLATION samples
-%doc test lynx.hlp lynx_help
 %{_bindir}/lynx
 %{_mandir}/*/*
 %{_datadir}/locale/*
-%config %{_sysconfdir}/lynx.cfg
-%config %{_sysconfdir}/lynx.lss
+%{lynx_doc}/*
+%config %{lynx_etc}/lynx.cfg
+%config %{lynx_etc}/lynx.lss
 
 %changelog
 

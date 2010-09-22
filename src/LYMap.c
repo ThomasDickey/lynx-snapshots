@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMap.c,v 1.37 2009/01/01 22:30:15 tom Exp $
+ * $LynxId: LYMap.c,v 1.38 2010/09/22 09:48:58 tom Exp $
  *			Lynx Client-side Image MAP Support	       LYMap.c
  *			==================================
  *
@@ -617,7 +617,7 @@ static int LYLoadIMGmap(const char *arg,
 void LYPrintImgMaps(FILE *fp)
 {
     const char *only = HTLoadedDocumentURL();
-    unsigned only_len = strlen(only);
+    size_t only_len = strlen(only);
     HTList *outer = LynxMaps;
     HTList *inner;
     LYImageMap *map;

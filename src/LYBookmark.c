@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYBookmark.c,v 1.65 2010/04/30 09:45:08 tom Exp $
+ * $LynxId: LYBookmark.c,v 1.66 2010/09/22 09:36:12 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTAlert.h>
@@ -44,7 +44,7 @@ int LYMBM2index(int ch)
 
 	if (result != 0
 	    && (result - letters) <= MBM_V_MAXFILES)
-	    return (result - letters);
+	    return (int) (result - letters);
     }
     return -1;
 }
