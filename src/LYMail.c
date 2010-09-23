@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMail.c,v 1.73 2010/04/29 09:16:49 tom Exp $
+ * $LynxId: LYMail.c,v 1.74 2010/09/23 09:15:58 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTParse.h>
@@ -1127,7 +1127,7 @@ void reply_by_mail(char *mail_address,
 #endif
     char buf[4096];		/* 512 */
     char *header = NULL;
-    int n;
+    size_t nbytes;
 #endif /* USE_VMS_MAILER */
 
     CTRACE((tfp, "reply_by_mail(\"%s\", \"%s\", \"%s\", \"%s\")\n",
@@ -1671,8 +1671,9 @@ void reply_by_mail(char *mail_address,
 #else
 	    fputs(header, fp);
 #endif
-	    while ((n = (int) fread(buf, 1, sizeof(buf), fd)) != 0) {
-		fwrite(buf, 1, (size_t) n, fp);
+	    while ((nbytes = fread(buf, 1, sizeof(buf), fd)) != 0) {
+		if (fwrite(buf, 1, (size_t) nbytes, fp) < nbytes)
+		    break;
 	    }
 #if CAN_PIPE_TO_MAILER
 	    pclose(fp);

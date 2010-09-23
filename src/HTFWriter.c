@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFWriter.c,v 1.93 2010/04/30 00:01:09 tom Exp $
+ * $LynxId: HTFWriter.c,v 1.94 2010/09/22 22:53:58 tom Exp $
  *
  *		FILE WRITER				HTFWrite.h
  *		===========
@@ -91,7 +91,7 @@ struct _HTStream {
 /*	Error handling
  *	------------------
  */
-static void HTFWriter_error(HTStream *me, char *id)
+static void HTFWriter_error(HTStream *me, const char *id)
 {
     char buf[200];
 

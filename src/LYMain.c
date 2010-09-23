@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMain.c,v 1.216 2010/09/19 18:20:35 tom Exp $
+ * $LynxId: LYMain.c,v 1.218 2010/09/23 09:52:26 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTP.h>
@@ -940,7 +940,7 @@ static void SetLocale(void)
     /* Set the text message domain.  */
 #if defined(HAVE_LIBINTL_H) || defined(HAVE_LIBGETTEXT_H)
     {
-	char *cp;
+	const char *cp;
 
 	if ((cp = LYGetEnv("LYNX_LOCALEDIR")) == 0)
 	    cp = LOCALEDIR;
@@ -959,6 +959,7 @@ int main(int argc,
     int i;			/* indexing variable */
     int status = 0;		/* exit status */
     char *temp = NULL;
+    const char *ccp;
     char *cp;
     FILE *fp;
     struct stat dir_info;
@@ -1033,8 +1034,8 @@ int main(int argc,
     signal(SIGQUIT, cleanup_sig);
     atexit(reset_break);
 
-    if (((cp = LYGetEnv("SHELL")) != NULL)
-	&& (strstr(LYPathLeaf(cp), "sh") != NULL))
+    if (((ccp = LYGetEnv("SHELL")) != NULL)
+	&& (strstr(LYPathLeaf(ccp), "sh") != NULL))
 	dj_is_bash = TRUE;
 #endif /* __DJGPP__ */
 
@@ -1077,11 +1078,11 @@ int main(int argc,
     /*
      * Set up the TRACE log path, and logging if appropriate.  - FM
      */
-    if ((cp = LYGetEnv("LYNX_TRACE_FILE")) == 0)
-	cp = FNAME_LYNX_TRACE;
+    if ((ccp = LYGetEnv("LYNX_TRACE_FILE")) == 0)
+	ccp = FNAME_LYNX_TRACE;
     LYTraceLogPath = typeMallocn(char, LY_MAXPATH);
 
-    LYAddPathToHome(LYTraceLogPath, LY_MAXPATH, cp);
+    LYAddPathToHome(LYTraceLogPath, LY_MAXPATH, ccp);
 
     /*
      * Act on -version, -trace and -trace-mask NOW.
@@ -1179,17 +1180,17 @@ int main(int argc,
      */
 #endif /* VMS */
 
-    if ((cp = LYGetEnv("LYNX_TEMP_SPACE")) != NULL)
-	StrAllocCopy(lynx_temp_space, cp);
+    if ((ccp = LYGetEnv("LYNX_TEMP_SPACE")) != NULL)
+	StrAllocCopy(lynx_temp_space, ccp);
 #if defined (UNIX) || defined (__DJGPP__)
-    else if ((cp = LYGetEnv("TMPDIR")) != NULL)
-	StrAllocCopy(lynx_temp_space, cp);
+    else if ((ccp = LYGetEnv("TMPDIR")) != NULL)
+	StrAllocCopy(lynx_temp_space, ccp);
 #endif
 #if defined (DOSPATH) || defined (__EMX__)
-    else if ((cp = LYGetEnv("TEMP")) != NULL)
-	StrAllocCopy(lynx_temp_space, cp);
-    else if ((cp = LYGetEnv("TMP")) != NULL)
-	StrAllocCopy(lynx_temp_space, cp);
+    else if ((ccp = LYGetEnv("TEMP")) != NULL)
+	StrAllocCopy(lynx_temp_space, ccp);
+    else if ((ccp = LYGetEnv("TMP")) != NULL)
+	StrAllocCopy(lynx_temp_space, ccp);
 #endif
     else
 #ifdef TEMP_SPACE
@@ -3077,7 +3078,7 @@ G)oto's" },
 		}
 		value = show_restriction(table[j].name);
 		printf("%s%s (%s)", column ? ", " : "  ", name, value);
-		column += 5 + strlen(name) + strlen(value);
+		column += (unsigned) (5 + strlen(name) + strlen(value));
 		if (column > 50) {
 		    column = 0;
 		    printf("\n");
@@ -4250,7 +4251,7 @@ static BOOL parse_arg(char **argv,
 	}
 
 	/* ignore option if it's not our turn */
-	if ((p->type & mask) == 0) {
+	if (((unsigned) (p->type) & mask) == 0) {
 	    CTRACE((tfp, "...skip (mask %u/%d)\n", mask, p->type & 7));
 	    return FALSE;
 	}
@@ -4296,7 +4297,7 @@ static BOOL parse_arg(char **argv,
 
 	case INT_ARG:
 	    if ((q->int_value != 0) && (next_arg != 0))
-		*(q->int_value) = strtol(next_arg, &temp_ptr, 0);
+		*(q->int_value) = (int) strtol(next_arg, &temp_ptr, 0);
 	    break;
 
 	case TIME_ARG:

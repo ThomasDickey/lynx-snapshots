@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTGopher.c,v 1.47 2010/09/22 00:50:23 tom Exp $
+ * $LynxId: HTGopher.c,v 1.48 2010/09/23 08:32:43 tom Exp $
  *
  *			GOPHER ACCESS				HTGopher.c
  *			=============
@@ -121,8 +121,8 @@ typedef struct _CSOfield_info {	/* For form-based CSO gateway - FM */
 static CSOfield_info *CSOfields = NULL;		/* For form-based CSO gateway - FM */
 
 typedef struct _CSOformgen_context {	/* For form-based CSO gateway - FM */
-    char *host;
-    char *seek;
+    const char *host;
+    const char *seek;
     CSOfield_info *fld;
     int port;
     int cur_line;

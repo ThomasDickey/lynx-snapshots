@@ -1,11 +1,11 @@
-dnl $LynxId: aclocal.m4,v 1.169 2010/09/19 19:20:37 tom Exp $
+dnl $LynxId: aclocal.m4,v 1.170 2010/09/23 08:10:55 tom Exp $
 dnl Macros for auto-configure script.
 dnl by T.E.Dickey <dickey@invisible-island.net>
 dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
 dnl and Philippe De Muyter <phdm@macqel.be>
 dnl
 dnl Created: 1997/1/28
-dnl Updated: 2010/9/19
+dnl Updated: 2010/9/23
 dnl
 dnl The autoconf used in Lynx development is GNU autoconf 2.13 or 2.52, patched
 dnl by Thomas Dickey.  See your local GNU archives, and this URL:
@@ -5483,14 +5483,34 @@ AC_MSG_RESULT($cf_cv_have_ttytype)
 test $cf_cv_have_ttytype = yes && AC_DEFINE(HAVE_TTYTYPE)
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_TYPE_LONG_LONG version: 1 updated: 2010/04/20 19:05:14
+dnl CF_TYPE_LONG_LONG version: 2 updated: 2010/09/23 04:08:01
 dnl -----------------
 dnl Check for long long type.
 AC_DEFUN([CF_TYPE_LONG_LONG],[
 AC_CACHE_CHECK(for long long type,cf_cv_type_long_long,[
-	AC_TRY_COMPILE([],[long long foo = 123456789123456789LL],
-	[cf_cv_type_long_long=yes],
-	[cf_cv_type_long_long=no])
+	cat >conftest.$ac_ext <<_CFEOF
+#include "confdefs.h"
+int
+main (void)
+{
+	long long foo = 123456789123456789LL;
+	return (foo == 0);
+}
+_CFEOF
+	(eval [$]ac_compile) 2>conftest.err
+	ac_status=$?
+	if test $ac_status = 0 && test -s conftest.err
+	then
+		fgrep warning conftest.err >/dev/null 2>&1 && ac_status=1
+	fi
+	if test $ac_status != 0
+	then
+		cf_cv_type_long_long=no
+	else
+		cf_cv_type_long_long=yes
+	fi
+	test -s conftest.err && cat conftest.err >&5
+	rm -f conftest*
 ])
 
 if test "$cf_cv_type_long_long" = yes ; then

@@ -1,4 +1,4 @@
-/* $LynxId: LYKeymap.c,v 1.69 2009/11/21 17:05:33 Bela.Lubkin Exp $ */
+/* $LynxId: LYKeymap.c,v 1.70 2010/09/22 23:02:55 tom Exp $ */
 #include <HTUtils.h>
 #include <LYUtils.h>
 #include <LYGlobalDefs.h>
@@ -1127,8 +1127,8 @@ Kcmd *LYKeycodeToKcmd(LYKeymapCode code)
  */
 Kcmd *LYStringToKcmd(const char *name)
 {
-    unsigned need = strlen(name);
-    unsigned j;
+    size_t need = strlen(name);
+    size_t j;
     BOOL exact = FALSE;
     Kcmd *result = 0;
     Kcmd *maybe = 0;
@@ -1203,13 +1203,13 @@ int LYStringToKeycode(char *src)
     } else if (len > 2 && !strncasecomp(src, "0x", 2)) {
 	char *dst = 0;
 
-	key = strtol(src, &dst, 0);
+	key = (int) strtol(src, &dst, 0);
 	if (non_empty(dst))
 	    key = -1;
     } else if (len > 6 && !strncasecomp(src, "key-", 4)) {
 	char *dst = 0;
 
-	key = strtol(src + 4, &dst, 0);
+	key = (int) strtol(src + 4, &dst, 0);
 	if (isEmpty(dst))
 	    key = -1;
     }
@@ -1264,7 +1264,7 @@ static char *pretty_html(int c)
 		*dst++ = (char) c;
 	    }
 	}
-	adj -= (dst - buf) - PRETTY_LEN;
+	adj -= (int) (dst - buf) - PRETTY_LEN;
 	while (adj-- > 0)
 	    *dst++ = ' ';
 	*dst = 0;

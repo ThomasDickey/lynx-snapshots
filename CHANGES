@@ -1,9 +1,10 @@
--- $LynxId: CHANGES,v 1.503 2010/09/19 19:34:23 tom Exp $
+-- $LynxId: CHANGES,v 1.504 2010/09/23 09:23:26 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
 2010-09-19 (2.8.8dev.6)
+* fix most gcc type-conversion warnings -TD
 * add configure check for ctags/etags programs, needed for some BSD ports -TD
 * add configure --with-textdomain option to allow overriding the "lynx"
   NLS textdomain, to help ensure that Lynx's build-script does not conflict

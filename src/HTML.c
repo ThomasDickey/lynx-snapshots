@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTML.c,v 1.139 2010/06/18 00:05:37 tom Exp $
+ * $LynxId: HTML.c,v 1.141 2010/09/23 09:18:00 tom Exp $
  *
  *		Structured stream to Rich hypertext converter
  *		============================================
@@ -725,7 +725,7 @@ void HTML_write(HTStructured * me, const char *s, int l)
 #ifdef USE_COLOR_STYLE
 static char *Style_className = 0;
 static char *Style_className_end = 0;
-static unsigned Style_className_len = 0;
+static size_t Style_className_len = 0;
 static int hcode;
 
 #ifdef LY_FIND_LEAKS
@@ -737,11 +737,11 @@ static void free_Style_className(void)
 
 static void addClassName(const char *prefix,
 			 const char *actual,
-			 unsigned length)
+			 size_t length)
 {
-    unsigned offset = strlen(prefix);
-    unsigned have = (unsigned) (Style_className_end - Style_className);
-    unsigned need = (offset + length + 1);
+    size_t offset = strlen(prefix);
+    size_t have = (unsigned) (Style_className_end - Style_className);
+    size_t need = (offset + length + 1);
 
     if ((have + need) >= Style_className_len) {
 	Style_className_len += 1024 + 2 * (have + need);
@@ -5567,7 +5567,7 @@ static int HTML_start_element(HTStructured * me, int element_number,
 #ifdef USE_JUSTIFY_ELTS
 	if (wait_for_this_stacked_elt < 0 &&
 	    HTML_dtd.tags[ElementNumber].can_justify == FALSE)
-	    wait_for_this_stacked_elt = me->stack - me->sp + MAX_NESTING;
+	    wait_for_this_stacked_elt = (int) (me->stack - me->sp) + MAX_NESTING;
 #endif
     }
 #ifdef USE_JUSTIFY_ELTS
@@ -5613,6 +5613,8 @@ static int HTML_start_element(HTStructured * me, int element_number,
 static int HTML_end_element(HTStructured * me, int element_number,
 			    char **include)
 {
+    static char empty[1];
+
     int i = 0;
     int status = HT_OK;
     char *temp = NULL, *cp = NULL;
@@ -6886,7 +6888,7 @@ static int HTML_end_element(HTStructured * me, int element_number,
 		} else {
 		    FREE(temp);
 		}
-		data = "";
+		data = empty;
 	    }
 	    /*
 	     * Display at least the requested number of text lines and/or blank
@@ -6915,7 +6917,7 @@ static int HTML_end_element(HTStructured * me, int element_number,
 			data = (cp + 1);
 		    } else {
 			StrAllocCopy(temp, data);
-			data = "";
+			data = empty;
 		    }
 		} else {
 		    FREE(temp);
@@ -6948,7 +6950,7 @@ static int HTML_end_element(HTStructured * me, int element_number,
 		    data = (cp + 1);
 		} else if (*data != '\0') {
 		    StrAllocCopy(temp, data);
-		    data = "";
+		    data = empty;
 		} else {
 		    FREE(temp);
 		}
@@ -7946,9 +7948,10 @@ static void CacheThru_write(HTStream *me, const char *str, int l)
 {
     if (me->status == HT_OK && l != 0) {
 	if (me->fp) {
-	    fwrite(str, 1, (unsigned) l, me->fp);
-	    if (ferror(me->fp))
+	    if (fwrite(str, 1, (size_t) l, me->fp) < (size_t) l
+		|| ferror(me->fp)) {
 		me->status = HT_ERROR;
+	    }
 	} else if (me->chunk) {
 	    me->last_chunk = HTChunkPutb2(me->last_chunk, str, l);
 	    if (me->last_chunk == NULL || me->last_chunk->allocated == 0)

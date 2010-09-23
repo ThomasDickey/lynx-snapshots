@@ -1,4 +1,4 @@
-/* $LynxId: LYGetFile.c,v 1.80 2010/04/29 09:16:49 tom Exp $ */
+/* $LynxId: LYGetFile.c,v 1.81 2010/09/23 09:37:14 tom Exp $ */
 #include <HTUtils.h>
 #include <HTTP.h>
 #include <HTAnchor.h>		/* Anchor class */
@@ -1321,6 +1321,7 @@ void add_trusted(char *str,
     struct trust *tp;
     char *path;
     char *src = str;
+    const char *after_tab;
     int Type = type;
     static BOOLEAN first = TRUE;
 
@@ -1334,10 +1335,12 @@ void add_trusted(char *str,
     }
 
     path = strchr(src, '\t');
-    if (path)
+    if (path) {
 	*path++ = '\0';
-    else
-	path = "";
+	after_tab = path;
+    } else {
+	after_tab = "";
+    }
 
     tp = (struct trust *) malloc(sizeof(*tp));
     if (tp == NULL)
@@ -1349,7 +1352,7 @@ void add_trusted(char *str,
     tp->path = NULL;
     tp->type = Type;
     StrAllocCopy(tp->src, src);
-    StrAllocCopy(tp->path, path);
+    StrAllocCopy(tp->path, after_tab);
     if (Type == EXEC_PATH) {
 	if (trusted_exec == &trusted_exec_default)
 	    tp->next = NULL;

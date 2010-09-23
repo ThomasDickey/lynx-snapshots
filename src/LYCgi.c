@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYCgi.c,v 1.58 2010/06/17 10:44:09 tom Exp $
+ * $LynxId: LYCgi.c,v 1.59 2010/09/22 22:51:03 tom Exp $
  *                   Lynx CGI support                              LYCgi.c
  *                   ================
  *
@@ -434,12 +434,14 @@ static int LYLoadCGI(const char *arg,
 	    CTRACE_FLUSH(tfp);
 
 	    if ((pid = fork()) > 0) {	/* The good, */
-		int chars, total_chars;
+		ssize_t chars;
+		int total_chars;
 
 		close(fd2[1]);
 
 		if (anAnchor->post_data) {
-		    int written, remaining, total_written = 0;
+		    ssize_t written;
+		    int remaining, total_written = 0;
 
 		    close(fd1[0]);
 
@@ -469,9 +471,9 @@ static int LYLoadCGI(const char *arg,
 			    break;
 			}
 			CTRACE((tfp, "LYNXCGI: Wrote %d bytes of POST data.\n",
-				written));
-			total_written += written;
-			remaining -= written;
+				(int) written));
+			total_written += (int) written;
+			remaining -= (int) written;
 			if (remaining == 0)
 			    break;
 		    }
@@ -496,9 +498,10 @@ static int LYLoadCGI(const char *arg,
 			PERROR("read() of CGI output failed");
 			break;
 		    }
-		    HTReadProgress(total_chars += chars, 0);
-		    CTRACE((tfp, "LYNXCGI: Rx: %.*s\n", chars, buf));
-		    (*target->isa->put_block) (target, buf, chars);
+		    total_chars += (int) chars;
+		    HTReadProgress(total_chars, 0);
+		    CTRACE((tfp, "LYNXCGI: Rx: %.*s\n", (int) chars, buf));
+		    (*target->isa->put_block) (target, buf, (int) chars);
 		}
 
 		if (chars < 0 && total_chars == 0) {

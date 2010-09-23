@@ -1,4 +1,4 @@
-/* $LynxId: LYForms.c,v 1.84 2010/04/30 00:00:55 tom Exp $ */
+/* $LynxId: LYForms.c,v 1.85 2010/09/22 23:01:41 tom Exp $ */
 #include <HTUtils.h>
 #include <HTCJK.h>
 #include <HTTP.h>
@@ -396,7 +396,7 @@ static int form_getstr(int cur,
     max_length = ((form->maxlength > 0 &&
 		   form->maxlength < sizeof(MyEdit.buffer))
 		  ? form->maxlength
-		  : (sizeof(MyEdit.buffer) - 1));
+		  : (unsigned) (sizeof(MyEdit.buffer) - 1));
     if (strlen(form->value) > max_length) {
 	/*
 	 * We can't fit the entire value into the editing buffer, so enter as
@@ -606,10 +606,10 @@ static int form_getstr(int cur,
 		while (e1 < e) {
 		    if (*e1 < ' ') {	/* Stop here? */
 			if (e1 > s)
-			    LYEditInsert(&MyEdit, s, e1 - s, -1, TRUE);
+			    LYEditInsert(&MyEdit, s, (int) (e1 - s), -1, TRUE);
 			s = e1;
 			if (*e1 == '\t') {	/* Replace by space */
-			    LYEditInsert(&MyEdit, (unsigned char *) " ", 1,
+			    LYEditInsert(&MyEdit, (unsigned const char *) " ", 1,
 					 -1, TRUE);
 			    s = ++e1;
 			} else
@@ -618,7 +618,7 @@ static int form_getstr(int cur,
 			++e1;
 		}
 		if (e1 > s)
-		    LYEditInsert(&MyEdit, s, e1 - s, -1, TRUE);
+		    LYEditInsert(&MyEdit, s, (int) (e1 - s), -1, TRUE);
 		while (e1 < e && *e1 == '\r')
 		    e1++;
 		if (e1 + 1 < e && *e1 == '\n')

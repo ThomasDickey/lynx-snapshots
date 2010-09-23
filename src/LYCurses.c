@@ -1,4 +1,4 @@
-/* $LynxId: LYCurses.c,v 1.152 2010/09/22 10:51:44 tom Exp $ */
+/* $LynxId: LYCurses.c,v 1.153 2010/09/23 09:06:19 tom Exp $ */
 #include <HTUtils.h>
 #include <HTAlert.h>
 
@@ -136,13 +136,13 @@ void VTHome(void)
 void LYaddAttr(int a)
 {
     Current_Attr |= a;
-    SLsmg_set_color(Current_Attr & ~Masked_Attr);
+    SLsmg_set_color((SLsmg_Color_Type) (Current_Attr & ~Masked_Attr));
 }
 
 void LYsubAttr(int a)
 {
     Current_Attr &= ~a;
-    SLsmg_set_color(Current_Attr & ~Masked_Attr);
+    SLsmg_set_color((SLsmg_Color_Type) (Current_Attr & ~Masked_Attr));
 }
 
 static void lynx_setup_attrs(void)
@@ -161,7 +161,7 @@ static void lynx_setup_attrs(void)
     int n;
 
     for (n = 1; n <= 7; n++)
-	SLtt_set_mono(n, NULL, (monoattr[n] & ~Masked_Attr));
+	SLtt_set_mono(n, NULL, (SLtt_Char_Type) (monoattr[n] & ~Masked_Attr));
 }
 
 void lynx_setup_colors(void)
@@ -298,7 +298,10 @@ static char *attr_to_string(int code)
 void LYbox(WINDOW * win, BOOLEAN formfield GCC_UNUSED)
 {
 #ifdef USE_SLANG
-    SLsmg_draw_box(win->top_y, win->left_x, win->height, win->width + 4);
+    SLsmg_draw_box(win->top_y,
+		   win->left_x,
+		   (unsigned) win->height,
+		   (unsigned) win->width + 4);
 #else
 #ifdef VMS
     /*
@@ -869,11 +872,11 @@ void LYnoVideo(int a)
     CTRACE((tfp, "LYnoVideo(%d)\n", a));
 #ifdef USE_SLANG
     if (a & 1)
-	Masked_Attr |= SLTT_BOLD_MASK;
+	Masked_Attr |= (int) SLTT_BOLD_MASK;
     if (a & 2)
-	Masked_Attr |= SLTT_REV_MASK;
+	Masked_Attr |= (int) SLTT_REV_MASK;
     if (a & 4)
-	Masked_Attr |= SLTT_ULINE_MASK;
+	Masked_Attr |= (int) SLTT_ULINE_MASK;
     lynx_setup_attrs();
 #else
 #ifdef USE_COLOR_TABLE
@@ -991,7 +994,7 @@ void start_curses(void)
 	size_change(0);
 
 #if (defined(VMS) || defined(REAL_UNIX_SYSTEM)) && !defined(__CYGWIN__)
-	if ((Masked_Attr & SLTT_ULINE_MASK) == 0) {
+	if ((Masked_Attr & (int) SLTT_ULINE_MASK) == 0) {
 	    SLtt_add_color_attribute(4, SLTT_ULINE_MASK);
 	    SLtt_add_color_attribute(5, SLTT_ULINE_MASK);
 	}
@@ -1811,7 +1814,11 @@ WINDOW *LYstartPopup(int *top_y,
 	*width = LYcolLimit - 5;
     }
 
-    SLsmg_fill_region(*top_y, *left_x - 1, *height, *width + 4, ' ');
+    SLsmg_fill_region(*top_y,
+		      *left_x - 1,
+		      (unsigned) *height,
+		      (unsigned) *width + 4,
+		      ' ');
     form_window = &fake_window;
     form_window->top_y = *top_y;
     form_window->left_x = *left_x;

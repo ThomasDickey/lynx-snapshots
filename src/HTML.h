@@ -124,8 +124,8 @@ extern "C" {
 	BOOL HiddenValue;
 	int lastraw;
 
-	char *comment_start;	/* for literate programming */
-	char *comment_end;
+	const char *comment_start;	/* for literate programming */
+	const char *comment_end;
 
 	HTTag *current_tag;
 	BOOL style_change;

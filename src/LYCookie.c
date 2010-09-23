@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYCookie.c,v 1.101 2010/06/18 10:54:16 tom Exp $
+ * $LynxId: LYCookie.c,v 1.102 2010/09/22 21:24:00 tom Exp $
  *
  *			       Lynx Cookie Support		   LYCookie.c
  *			       ===================
@@ -134,7 +134,7 @@ static void MemAllocCopy(char **dest,
     temp = typecallocn(char, (unsigned)(end - start) + 1);
     if (temp == NULL)
 	outofmem(__FILE__, "MemAllocCopy");
-    LYstrncpy(temp, start, (end - start));
+    LYstrncpy(temp, start, (int) (end - start));
     HTSACopy(dest, temp);
     FREE(temp);
 }
@@ -848,7 +848,7 @@ static char *alloc_attr_value(const char *value_start,
     char *value = NULL;
 
     if (value_start && value_end >= value_start) {
-	int value_len = (value_end - value_start);
+	int value_len = (int) (value_end - value_start);
 
 	if (value_len > max_cookies_buffer) {
 	    value_len = max_cookies_buffer;
@@ -881,7 +881,7 @@ static unsigned parse_attribute(unsigned flags,
     BOOLEAN known_attr = NO;
     int url_type;
 
-    flags &= ~FLAGS_KNOWN_ATTR;
+    flags &= (unsigned) (~FLAGS_KNOWN_ATTR);
     if (is_attr("secure", 6)) {
 	if (value == NULL) {
 	    known_attr = YES;
@@ -1040,7 +1040,7 @@ static unsigned parse_attribute(unsigned flags,
 	 * Don't process a repeat version.  - FM
 	 */
 	    cur_cookie->version < 1) {
-	    int temp = strtol(value, NULL, 10);
+	    int temp = (int) strtol(value, NULL, 10);
 
 	    if (errno != -ERANGE) {
 		cur_cookie->version = temp;
@@ -1053,7 +1053,7 @@ static unsigned parse_attribute(unsigned flags,
 	 * Don't process a repeat max-age.  - FM
 	 */
 	    !(flags & FLAGS_MAXAGE_ATTR)) {
-	    int temp = strtol(value, NULL, 10);
+	    int temp = (int) strtol(value, NULL, 10);
 
 	    cur_cookie->flags |= COOKIE_FLAG_EXPIRES_SET;
 	    if (errno == -ERANGE) {
@@ -1326,7 +1326,7 @@ static void LYProcessSetCookies(const char *SetCookie,
 					  cur_cookie,
 					  &cookie_len,
 					  attr_start,
-					  (attr_end - attr_start),
+					  (int) (attr_end - attr_start),
 					  value,
 					  address,
 					  hostname,
@@ -1620,7 +1620,7 @@ static void LYProcessSetCookies(const char *SetCookie,
 					  cur_cookie,
 					  &cookie_len,
 					  attr_start,
-					  (attr_end - attr_start),
+					  (int) (attr_end - attr_start),
 					  value,
 					  address,
 					  hostname,
