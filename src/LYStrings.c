@@ -1,4 +1,4 @@
-/* $LynxId: LYStrings.c,v 1.174 2010/09/22 10:52:38 tom Exp $ */
+/* $LynxId: LYStrings.c,v 1.175 2010/09/23 08:44:00 tom Exp $ */
 #include <HTUtils.h>
 #include <HTCJK.h>
 #include <UCAux.h>
@@ -829,7 +829,7 @@ static int sl_parse_mouse_event(int *x, int *y, int *button)
     /* "ESC [ M" has already been processed.  There more characters are
      * expected:  BUTTON X Y
      */
-    *button = SLang_getkey();
+    *button = (int) SLang_getkey();
     switch (*button) {
     case 040:			/* left button */
     case 041:			/* middle button */
@@ -842,14 +842,14 @@ static int sl_parse_mouse_event(int *x, int *y, int *button)
 	return -1;
     }
 
-    *x = SLang_getkey();
+    *x = (int) SLang_getkey();
     if (*x == CH_ESC)		/* Undo 7-bit replace for large x - kw */
-	*x = SLang_getkey() + 64 - 33;
+	*x = (int) SLang_getkey() + 64 - 33;
     else
 	*x -= 33;
-    *y = SLang_getkey();
+    *y = (int) SLang_getkey();
     if (*y == CH_ESC)		/* Undo 7-bit replace for large y - kw */
-	*y = SLang_getkey() + 64 - 33;
+	*y = (int) SLang_getkey() + 64 - 33;
     else
 	*y -= 33;
     return 0;
@@ -893,10 +893,14 @@ void ena_csi(BOOLEAN flag)
 
 #ifdef USE_SLANG
 #define define_key(string, code) \
-	SLkm_define_keysym ((char*)(string), code, Keymap_List)
+	SLkm_define_keysym ((SLFUTURE_CONST char*)(string), \
+			    (unsigned) code, \
+			    Keymap_List)
 #if SLANG_VERSION < 20000
 #define expand_substring(dst, first, last, final) \
- 	(SLexpand_escaped_string(dst, (char *)first, (char *)last), 1)
+ 	(SLexpand_escaped_string(dst, \
+				 (char *)first, \
+				 (char *)last), 1)
 static int SLang_get_error(void)
 {
     return SLang_Error;
@@ -905,7 +909,10 @@ static int SLang_get_error(void)
 int LY_Slang_UTF8_Mode = 0;
 
 #define expand_substring(dst, first, last, final) \
-	(SLexpand_escaped_string(dst, (char *)first, (char *)last, LY_Slang_UTF8_Mode), 1)
+	(SLexpand_escaped_string(dst, \
+				 (char *)first, \
+				 (char *)last, \
+				 LY_Slang_UTF8_Mode), 1)
 #endif
 
 static SLKeyMap_List_Type *Keymap_List;
@@ -1143,7 +1150,8 @@ static BOOLEAN unescape_string(char *src, char *dst, char *final)
 	    ok = TRUE;
 	}
     } else if (*src == DQUOTE) {
-	ok = expand_substring(dst, src + 1, src + strlen(src) - 1, final);
+	if (expand_substring(dst, src + 1, src + strlen(src) - 1, final))
+	    ok = TRUE;
 	(void) final;
     }
     return ok;
@@ -1684,7 +1692,7 @@ static int LYgetch_for(int code)
 	return (current_sl_modifier ? 0 : DO_NOTHING);
     }
 
-    keysym = key->f.keysym;
+    keysym = (int) key->f.keysym;
 
 #if defined (USE_MOUSE)
     if (keysym == MOUSE_KEYSYM)
@@ -4033,7 +4041,7 @@ static void draw_option(WINDOW * win, int entry,
     LYaddstr(Cnum);
     if (reversed)
 	SLsmg_set_color(2);
-    SLsmg_write_nstring((char *) value, win->width);
+    SLsmg_write_nstring((SLFUTURE_CONST char *) value, (unsigned) win->width);
     if (reversed)
 	SLsmg_set_color(0);
 #else

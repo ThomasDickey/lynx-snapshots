@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYUtils.c,v 1.196 2010/09/22 10:50:17 tom Exp $
+ * $LynxId: LYUtils.c,v 1.198 2010/09/23 09:39:14 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTCP.h>
@@ -379,8 +379,11 @@ void LYAddHilite(int cur,
 {
     HiliteList *list = &(links[cur].list);
     HiliteInfo *have = list->hl_info;
-    unsigned need = (unsigned) (list->hl_len - 1);
-    unsigned want = (unsigned) (list->hl_len += 1);
+    size_t need = (unsigned) (list->hl_len - 1);
+    size_t want;
+
+    list->hl_len = (short) (list->hl_len + 1);
+    want = (size_t) list->hl_len;
 
     if (have != NULL) {
 	have = typeRealloc(HiliteInfo, have, want);
@@ -1450,10 +1453,10 @@ void statusline(const char *text)
 	 */
 	remove_most_blanks(text_buff);
 #ifdef WIDEC_CURSES
-	len = strlen(text_buff);
+	len = (int) strlen(text_buff);
 	if (len >= (int) (sizeof(buffer) - 1))
 	    len = (int) (sizeof(buffer) - 1);
-	strncpy(buffer, text_buff, len)[len] = '\0';
+	strncpy(buffer, text_buff, (size_t) len)[len] = '\0';
 	/* FIXME: a binary search might be faster */
 	while (len > 0 && LYstrExtent(buffer, len, len) > max_length)
 	    buffer[--len] = '\0';
@@ -1620,7 +1623,7 @@ int LYReopenInput(void)
     if ((fd = fileno(stdin)) == 0
 	&& !isatty(fd)
 	&& LYConsoleInputFD(FALSE) == fd) {
-	char *term_name = NULL;
+	const char *term_name = NULL;
 	int new_fd = -1;
 
 #ifdef HAVE_TTYNAME
@@ -3447,8 +3450,11 @@ static int fmt_tempname(char *result,
      */
     counter = MAX_TEMPNAME;
     if (names_used < MAX_TEMPNAME) {
-	counter = (unsigned) (((float) MAX_TEMPNAME * lynx_rand()) /
-			      LYNX_RAND_MAX + 1);
+	long get_rand = lynx_rand();
+	long max_rand = LYNX_RAND_MAX;
+
+	counter = (unsigned) (((float) MAX_TEMPNAME * (float) get_rand) /
+			      (float) max_rand + 1);
 	/*
 	 * Avoid reusing a temporary name, since there are places in the code
 	 * which can refer to a temporary filename even after it has been

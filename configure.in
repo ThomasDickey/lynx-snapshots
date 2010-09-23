@@ -1,4 +1,4 @@
-dnl $LynxId: configure.in,v 1.220 2010/09/20 23:23:35 tom Exp $
+dnl $LynxId: configure.in,v 1.221 2010/09/22 21:29:54 tom Exp $
 dnl
 dnl Process this file with autoconf to produce a configure script.
 dnl
@@ -755,6 +755,7 @@ AC_TYPE_OFF_T
 AC_TYPE_PID_T
 AC_TYPE_UID_T
 AC_TYPE_MODE_T
+CF_CHECK_TYPE(ssize_t, int)
 CF_CHECK_TYPE(socklen_t, int, [
 #include <sys/types.h>
 #include <sys/socket.h>

@@ -1,6 +1,6 @@
 %{
 /*
- *  $LynxId: parsdate.y,v 1.12 2009/01/01 22:12:25 tom Exp $
+ *  $LynxId: parsdate.y,v 1.13 2010/09/22 21:18:43 tom Exp $
  *
  *  This module is adapted and extended from tin, to use for LYmktime().
  *
@@ -255,13 +255,13 @@ numzone	: tSNUMBER {
 	    if ((int)$1 < 0) {
 		/* Don't work with negative modulus. */
 		$1 = -(int)$1;
-		if ($1 > 9999 || (i = $1 % 100) >= 60) {
+		if ($1 > 9999 || (i = (int) ($1 % 100)) >= 60) {
 			YYABORT;
 		}
 		$$ = ($1 / 100) * 60 + i;
 	    }
 	    else {
-		if ($1 > 9999 || (i = $1 % 100) >= 60) {
+		if ($1 > 9999 || (i = (int) ($1 % 100)) >= 60) {
 			YYABORT;
 		}
 		$$ = -(($1 / 100) * 60 + i);
@@ -837,7 +837,7 @@ date_lex(void)
 	    }
 	    *p = '\0';
 	    yyInput--;
-	    return LookupWord(buff, p - buff);
+	    return LookupWord(buff, (int) (p - buff));
 	}
 
 	return *yyInput++;

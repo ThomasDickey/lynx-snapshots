@@ -1,5 +1,5 @@
 /*
- * $LynxId: GridText.c,v 1.191 2010/09/22 10:53:56 tom Exp $
+ * $LynxId: GridText.c,v 1.194 2010/09/23 09:32:45 tom Exp $
  *
  *		Character grid hypertext object
  *		===============================
@@ -806,8 +806,10 @@ static void LYAddHiText(TextAnchor *a,
 {
     HiliteInfo *have = a->lites.hl_info;
     unsigned need = (unsigned) (a->lites.hl_len - 1);
-    unsigned want = (unsigned) (a->lites.hl_len += 1) * (unsigned) sizeof(HiliteInfo);
+    unsigned want;
 
+    a->lites.hl_len = (short) (a->lites.hl_len + 1);
+    want = (unsigned) (a->lites.hl_len) * (unsigned) sizeof(HiliteInfo);
     if (have != NULL) {
 	have = (HiliteInfo *) realloc(have, want);
     } else {
@@ -10926,7 +10928,7 @@ int HText_SubmitForm(FormInfo * submit_item, DocInfo *doc, char *link_name,
 	 * Use the multipart MIME format.  Later we will ensure it does not
 	 * occur within the content.
 	 */
-	Boundary = "xnyLAaB03X";
+	StrAllocCopy(Boundary, "xnyLAaB03X");
     }
 
     /*
@@ -13930,7 +13932,7 @@ static void move_to_glyph(int YP,
 	     * next actual normal character is handled.  - kw
 	     */
 	    data = hightext;
-	    len = strlen(hightext);
+	    len = (int) strlen(hightext);
 	    end_of_data = hightext + len;
 	    last_i = i + len;
 	    XP_next += linkvlen;
@@ -14345,7 +14347,7 @@ void LYMoveToLink(int cur,
     } else {
 	/*  This should not happen. */
 	move_to_glyph(links[cur].ly, links[cur].lx, XP_draw_min,
-		      "", 0, links[cur].lx,
+		      "", 0, (unsigned) links[cur].lx,
 		      target, hightext, flags, utf_flag);
     }
 }

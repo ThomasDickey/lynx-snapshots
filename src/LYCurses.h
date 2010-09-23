@@ -1,4 +1,4 @@
-/* $LynxId: LYCurses.h,v 1.83 2009/11/27 12:58:31 tom Exp $ */
+/* $LynxId: LYCurses.h,v 1.84 2010/09/23 09:06:29 tom Exp $ */
 #ifndef LYCURSES_H
 #define LYCURSES_H
 
@@ -49,7 +49,11 @@
 #endif /* FALSE */
 
 #ifdef USE_SLANG
+#define ENABLE_SLFUTURE_CONST 1
 #include <slang.h>
+#ifndef SLFUTURE_CONST
+#define SLFUTURE_CONST		/* nothing */
+#endif
 typedef unsigned long chtype;
 
 #undef WINDOW

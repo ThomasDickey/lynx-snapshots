@@ -1,5 +1,5 @@
 /*
- * $LynxId: config.hin,v 1.119 2010/09/19 18:29:45 tom Exp $
+ * $LynxId: config.hin,v 1.120 2010/09/22 21:29:29 tom Exp $
  * vile:cmode
  *
  * The configure script translates "config.hin" into "lynx_cfg.h"
@@ -293,6 +293,7 @@
 #undef off_t			/* AC_TYPE_OFF_T */
 #undef pid_t			/* AC_TYPE_PID_T */
 #undef socklen_t		/* CF_CHECK_TYPE(socklen_t,...) */
+#undef ssize_t			/* CF_CHECK_TYPE(ssize_t,...) */
 #undef uid_t			/* AC_TYPE_UID_T */
 #undef ut_name			/* CF_UTMP */
 #undef ut_xstatus		/* CF_UTMP_UT_XSTATUS */

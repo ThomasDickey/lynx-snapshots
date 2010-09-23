@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFile.c,v 1.124 2010/09/22 00:12:36 tom Exp $
+ * $LynxId: HTFile.c,v 1.125 2010/09/23 10:43:48 tom Exp $
  *
  *			File Access				HTFile.c
  *			===========
@@ -147,8 +147,8 @@ static const char *HTCacheRoot = "/WWW$SCRATCH";	/* Where to cache things */
 static const char *HTCacheRoot = "/tmp/W3_Cache_";	/* Where to cache things */
 #endif /* VMS */
 
-#define NO_SUFFIX      "*"
-#define UNKNOWN_SUFFIX "*.*"
+static char s_no_suffix[] = "*";
+static char s_unknown_suffix[] = "*.*";
 
 /*
  *  Suffix registration.
@@ -157,12 +157,12 @@ static HTList *HTSuffixes = 0;
 
 static HTSuffix no_suffix =
 {
-    NO_SUFFIX, NULL, NULL, NULL, 1.0
+    s_no_suffix, NULL, NULL, NULL, 1.0
 };
 
 static HTSuffix unknown_suffix =
 {
-    UNKNOWN_SUFFIX, NULL, NULL, NULL, 1.0
+    s_unknown_suffix, NULL, NULL, NULL, 1.0
 };
 
 /*	To free up the suffixes at program exit.
@@ -508,9 +508,9 @@ void HTSetSuffix5(const char *suffix,
     HTSuffix *suff;
     BOOL trivial_enc = (BOOL) IsUnityEncStr(encoding);
 
-    if (strcmp(suffix, NO_SUFFIX) == 0)
+    if (strcmp(suffix, s_no_suffix) == 0)
 	suff = &no_suffix;
-    else if (strcmp(suffix, UNKNOWN_SUFFIX) == 0)
+    else if (strcmp(suffix, s_unknown_suffix) == 0)
 	suff = &unknown_suffix;
     else {
 	HTList *cur = HTSuffixes;

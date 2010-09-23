@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFTP.c,v 1.95 2010/09/22 00:53:07 tom Exp $
+ * $LynxId: HTFTP.c,v 1.96 2010/09/23 09:29:36 tom Exp $
  *
  *			File Transfer Protocol (FTP) Client
  *			for a WorldWideWeb browser
@@ -946,7 +946,7 @@ static int get_connection(const char *arg,
 	    /*
 	     * Create and send a mail address as the password. - FM
 	     */
-	    char *the_address;
+	    const char *the_address;
 	    char *user = NULL;
 	    const char *host = NULL;
 	    char *cp;
