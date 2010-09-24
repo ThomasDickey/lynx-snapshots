@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTAlert.c,v 1.89 2010/09/23 10:43:48 tom Exp $
+ * $LynxId: HTAlert.c,v 1.90 2010/09/23 20:43:49 tom Exp $
  *
  *	Displaying messages and getting input for Lynx Browser
  *	==========================================================
@@ -306,7 +306,9 @@ void HTReadProgress(off_t bytes, off_t total)
 		    int meter = (int) (((float) LYcolLimit * percent) - 5);
 
 		    CTRACE((tfp, "rateBAR: bytes: %" PRI_off_t ", total: "
-			    "%" PRI_off_t "\n", bytes, total));
+			    "%" PRI_off_t "\n",
+			    CAST_off_t(bytes),
+			    CAST_off_t(total)));
 		    CTRACE((tfp, "meter = %d\n", meter));
 
 		    HTSprintf0(&line, "%d%% ", (int) (percent * 100));

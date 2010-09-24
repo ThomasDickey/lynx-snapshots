@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYReadCFG.c,v 1.151 2010/09/22 09:54:46 tom Exp $
+ * $LynxId: LYReadCFG.c,v 1.152 2010/09/23 20:53:32 tom Exp $
  */
 #ifndef NO_RULES
 #include <HTRules.h>
@@ -1785,13 +1785,15 @@ typedef BOOL (optidx_set_t)[NOPTS_];
  * configuration variable.
  */
 void LYSetConfigValue(const char *name,
-		      char *value)
+		      const char *param)
 {
+    char *value = NULL;
     Config_Type *tbl = lookup_config(name);
     ParseUnionPtr q = ParseUnionOf(tbl);
     char *temp_name = 0;
     char *temp_value = 0;
 
+    StrAllocCopy(value, param);
     switch (tbl->type) {
     case CONF_BOOL:
 	if (q->set_value != 0)
@@ -1886,6 +1888,7 @@ void LYSetConfigValue(const char *name,
     default:
 	break;
     }
+    FREE(value);
 }
 
 /*

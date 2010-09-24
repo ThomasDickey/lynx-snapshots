@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYLeaks.c,v 1.32 2007/07/23 22:54:46 tom Exp $
+ * $LynxId: LYLeaks.c,v 1.33 2010/09/23 22:41:23 tom Exp $
  *
  *	Copyright (c) 1994, University of Kansas, All Rights Reserved
  *	(this file was rewritten twice - 1998/1999 and 2003/2004)
@@ -31,16 +31,16 @@ static AllocationList *ALp_RunTimeAllocations = NULL;
 
 #ifdef LEAK_SUMMARY
 
-static long now_allocated = 0;
-static long peak_alloced = 0;
+static size_t now_allocated = 0;
+static size_t peak_alloced = 0;
 
-static long total_alloced = 0;
-static long total_freed = 0;
+static size_t total_alloced = 0;
+static size_t total_freed = 0;
 
 static long count_mallocs = 0;
 static long count_frees = 0;
 
-static void CountMallocs(long size)
+static void CountMallocs(size_t size)
 {
     ++count_mallocs;
     total_alloced += size;
@@ -49,7 +49,7 @@ static void CountMallocs(long size)
 	peak_alloced = now_allocated;
 }
 
-static void CountFrees(long size)
+static void CountFrees(size_t size)
 {
     ++count_frees;
     total_freed += size;
@@ -779,7 +779,7 @@ char *LYLeakSACat(char **dest,
 		    "LYLeakSACat:  *dest equals src, contains \"%s\"\n",
 		    src));
 	} else if (*dest) {
-	    int length = strlen(*dest);
+	    size_t length = strlen(*dest);
 
 	    *dest = (char *) LYLeakRealloc(*dest,
 					   (length + strlen(src) + 1),
