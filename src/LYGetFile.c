@@ -1,4 +1,4 @@
-/* $LynxId: LYGetFile.c,v 1.81 2010/09/23 09:37:14 tom Exp $ */
+/* $LynxId: LYGetFile.c,v 1.82 2010/09/23 22:43:44 tom Exp $ */
 #include <HTUtils.h>
 #include <HTTP.h>
 #include <HTAnchor.h>		/* Anchor class */
@@ -1255,61 +1255,56 @@ struct trust {
     struct trust *next;
 };
 
-static struct trust trusted_exec_default =
-{
-    "file://localhost/", "", EXEC_PATH, NULL
-};
-static struct trust always_trusted_exec_default =
-{
-    "none", "", ALWAYS_EXEC_PATH, NULL
-};
-static struct trust trusted_cgi_default =
-{
-    "none", "", CGI_PATH, NULL
-};
+static struct trust *trusted_exec = 0;
+static struct trust *always_trusted_exec;
+static struct trust *trusted_cgi = 0;
 
-static struct trust *trusted_exec = &trusted_exec_default;
-static struct trust *always_trusted_exec = &always_trusted_exec_default;
-static struct trust *trusted_cgi = &trusted_cgi_default;
+static struct trust *new_trust(const char *src, const char *path, int type)
+{
+    struct trust *tp;
+
+    tp = typecalloc(struct trust);
+
+    if (tp == NULL)
+	outofmem(__FILE__, "new_trust");
+
+    assert(tp != NULL);
+
+    tp->type = type;
+    StrAllocCopy(tp->src, src);
+    StrAllocCopy(tp->path, path);
+
+    return tp;
+}
+
+static struct trust *get_trust(struct trust **table, const char *src, int type)
+{
+    if (*table == 0) {
+	*table = new_trust(src, "", type);
+    }
+    return *table;
+}
 
 #ifdef LY_FIND_LEAKS
-static void LYTrusted_free(void)
+static void free_data(struct trust *cur)
 {
-    struct trust *cur;
     struct trust *next;
 
-    if (trusted_exec != &trusted_exec_default) {
-	cur = trusted_exec;
-	while (cur) {
-	    FREE(cur->src);
-	    FREE(cur->path);
-	    next = cur->next;
-	    FREE(cur);
-	    cur = next;
-	}
+    cur = trusted_exec;
+    while (cur) {
+	FREE(cur->src);
+	FREE(cur->path);
+	next = cur->next;
+	FREE(cur);
+	cur = next;
     }
+}
 
-    if (always_trusted_exec != &always_trusted_exec_default) {
-	cur = always_trusted_exec;
-	while (cur) {
-	    FREE(cur->src);
-	    FREE(cur->path);
-	    next = cur->next;
-	    FREE(cur);
-	    cur = next;
-	}
-    }
-
-    if (trusted_cgi != &trusted_cgi_default) {
-	cur = trusted_cgi;
-	while (cur) {
-	    FREE(cur->src);
-	    FREE(cur->path);
-	    next = cur->next;
-	    FREE(cur);
-	    cur = next;
-	}
-    }
+static void LYTrusted_free(void)
+{
+    free_data(trusted_exec);
+    free_data(always_trusted_exec);
+    free_data(trusted_cgi);
 
     return;
 }
@@ -1342,34 +1337,16 @@ void add_trusted(char *str,
 	after_tab = "";
     }
 
-    tp = (struct trust *) malloc(sizeof(*tp));
-    if (tp == NULL)
-	outofmem(__FILE__, "add_trusted");
+    tp = new_trust(src, after_tab, Type);
 
-    assert(tp != NULL);
-
-    tp->src = NULL;
-    tp->path = NULL;
-    tp->type = Type;
-    StrAllocCopy(tp->src, src);
-    StrAllocCopy(tp->path, after_tab);
     if (Type == EXEC_PATH) {
-	if (trusted_exec == &trusted_exec_default)
-	    tp->next = NULL;
-	else
-	    tp->next = trusted_exec;
+	tp->next = trusted_exec;
 	trusted_exec = tp;
     } else if (Type == ALWAYS_EXEC_PATH) {
-	if (always_trusted_exec == &always_trusted_exec_default)
-	    tp->next = NULL;
-	else
-	    tp->next = always_trusted_exec;
+	tp->next = always_trusted_exec;
 	always_trusted_exec = tp;
     } else if (Type == CGI_PATH) {
-	if (trusted_cgi == &trusted_cgi_default)
-	    tp->next = NULL;
-	else
-	    tp->next = trusted_cgi;
+	tp->next = trusted_cgi;
 	trusted_cgi = tp;
     }
 }
@@ -1396,11 +1373,11 @@ BOOLEAN exec_ok(const char *source,
      * Choose the trust structure based on the type.
      */
     if (Type == EXEC_PATH) {
-	tp = trusted_exec;
+	tp = get_trust(&trusted_exec, "file://localhost/", EXEC_PATH);
     } else if (Type == ALWAYS_EXEC_PATH) {
-	tp = always_trusted_exec;
+	tp = get_trust(&always_trusted_exec, "none", ALWAYS_EXEC_PATH);
     } else if (Type == CGI_PATH) {
-	tp = trusted_cgi;
+	tp = get_trust(&trusted_cgi, "none", CGI_PATH);
     } else {
 	HTAlert(MALFORMED_EXEC_REQUEST);
 	return FALSE;
@@ -1471,7 +1448,7 @@ BOOLEAN exec_ok(const char *source,
 	tp = tp->next;
     }
     if (Type == EXEC_PATH &&
-	always_trusted_exec != &always_trusted_exec_default) {
+	always_trusted_exec->next != 0) {
 	Type = ALWAYS_EXEC_PATH;
 	tp = always_trusted_exec;
 	goto check_tp_for_entry;
