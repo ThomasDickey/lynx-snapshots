@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYStyle.c,v 1.68 2010/09/22 09:47:49 tom Exp $
+ * $LynxId: LYStyle.c,v 1.69 2010/09/24 22:07:20 tom Exp $
  *
  * character level styles for Lynx
  * (c) 1996 Rob Partington -- donated to the Lyncei (if they want it :-)
@@ -727,7 +727,7 @@ void cache_tag_styles(void)
     int i;
 
     for (i = 0; i < HTML_ELEMENTS; ++i) {
-	LYstrncpy(buf, HTML_dtd.tags[i].name, sizeof(buf) - 1);
+	LYStrNCpy(buf, HTML_dtd.tags[i].name, sizeof(buf) - 1);
 	LYLowerCase(buf);
 	cached_tag_styles[i] = hash_code(buf);
     }

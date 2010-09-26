@@ -1,4 +1,4 @@
-/* $LynxId: LYEdit.c,v 1.40 2009/11/22 17:25:19 tom Exp $ */
+/* $LynxId: LYEdit.c,v 1.41 2010/09/24 00:07:26 tom Exp $ */
 #include <HTUtils.h>
 #include <HTParse.h>
 #include <HTAlert.h>
@@ -116,7 +116,7 @@ int edit_current_file(char *newfile,
 	goto done;
     }
 #else /* something like UNIX */
-    if (strncmp(newfile, "file://localhost/", 16) == 0)
+    if (StrNCmp(newfile, "file://localhost/", 16) == 0)
 	colon = newfile + 16;
     else
 	colon = strchr(newfile, ':');
@@ -214,14 +214,14 @@ void edit_temporary_file(char *filename,
 #endif
     }
 #ifdef DOSPATH
-    else if (strncmp(editor, "VZ", 2) == 0) {
+    else if (StrNCmp(editor, "VZ", 2) == 0) {
 	/* for Vz editor */
 	format = "%s %s -%s";
 	HTAddXpand(&command, format, params++, editor);
 	HTAddParam(&command, format, params++, HTDOS_short_name(filename));
 	HTAddParam(&command, format, params++, position);
 	HTEndParam(&command, format, params);
-    } else if (strncmp(editor, "edit", 4) == 0) {
+    } else if (StrNCmp(editor, "edit", 4) == 0) {
 	/* for standard editor */
 	HTAddXpand(&command, format, params++, editor);
 	HTAddParam(&command, format, params++, HTDOS_short_name(filename));

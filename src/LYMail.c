@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMail.c,v 1.74 2010/09/23 09:15:58 tom Exp $
+ * $LynxId: LYMail.c,v 1.76 2010/09/25 11:22:16 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTParse.h>
@@ -134,7 +134,7 @@ static void extract_subject(char *dst,
 	    *cp1 = '\0';
 	}
 	if (*cp) {
-	    strncpy(dst, cp, MAX_SUBJECT);
+	    StrNCpy(dst, cp, MAX_SUBJECT);
 	    dst[MAX_SUBJECT] = '\0';
 	    SafeHTUnEscape(dst);
 	}
@@ -258,7 +258,7 @@ static int header_prompt(const char *label,
 
     if (*result != 0) {
 	LYaddstr(CTRL_U_TO_ERASE);
-	LYstrncpy(buffer, *result, sizeof(buffer) - 1);
+	LYStrNCpy(buffer, *result, sizeof(buffer) - 1);
     } else
 	*buffer = 0;
 
@@ -267,7 +267,7 @@ static int header_prompt(const char *label,
 
     LYaddstr(gettext(label));
     LYaddstr(": ");
-    ok = (LYgetstr(buffer, VISIBLE, limit, NORECALL) >= 0
+    ok = (LYGetStr(buffer, VISIBLE, limit, NORECALL) >= 0
 	  && !term_letter);
     LYaddstr("\n");
 
@@ -648,13 +648,13 @@ void mailform(const char *mailto_address,
      */
     if (subject[0] == '\0') {
 	if (non_empty(mailto_subject)) {
-	    LYstrncpy(subject, mailto_subject, MAX_SUBJECT);
+	    LYStrNCpy(subject, mailto_subject, MAX_SUBJECT);
 	} else {
 	    sprintf(subject, "mailto:%.63s", address);
 	}
     }
     _statusline(SUBJECT_PROMPT);
-    if (LYgetstr(subject, VISIBLE, MAX_SUBJECT, NORECALL) < 0) {
+    if (LYGetStr(subject, VISIBLE, MAX_SUBJECT, NORECALL) < 0) {
 	/*
 	 * User cancelled via ^G. - FM
 	 */
@@ -669,7 +669,7 @@ void mailform(const char *mailto_address,
 	sprintf(self, "%.*s", MAX_SUBJECT,
 		isEmpty(personal_mail_address) ? "" : personal_mail_address);
 	_statusline("Cc: ");
-	if (LYgetstr(self, VISIBLE, MAX_SUBJECT, NORECALL) < 0) {
+	if (LYGetStr(self, VISIBLE, MAX_SUBJECT, NORECALL) < 0) {
 	    /*
 	     * User cancelled via ^G. - FM
 	     */
@@ -772,7 +772,7 @@ void mailform(const char *mailto_address,
 	i = 0;
 	len = (int) strlen(mailto_content);
 	while (len > 78) {
-	    strncpy(buf, &mailto_content[i], 78);
+	    StrNCpy(buf, &mailto_content[i], 78);
 	    buf[78] = '\0';
 	    fprintf(fd, "%s\n", buf);
 	    i += 78;
@@ -784,7 +784,7 @@ void mailform(const char *mailto_address,
     i = 0;
     len = (int) strlen(mailto_content);
     while (len > 78) {
-	strncpy(buf, &mailto_content[i], 78);
+	StrNCpy(buf, &mailto_content[i], 78);
 	buf[78] = '\0';
 	fprintf(fd, "%s\n", buf);
 	i += 78;
@@ -1231,7 +1231,7 @@ void reply_by_mail(char *mail_address,
      * Set the default subject.  - FM
      */
     if ((default_subject[0] == '\0') && non_empty(title)) {
-	strncpy(default_subject, title, MAX_SUBJECT);
+	StrNCpy(default_subject, title, MAX_SUBJECT);
 	default_subject[MAX_SUBJECT] = '\0';
     }
 
@@ -1526,7 +1526,7 @@ void reply_by_mail(char *mail_address,
 	LYaddstr("\n\n");
 	LYrefresh();
 	*user_input = '\0';
-	if (LYgetstr(user_input, VISIBLE, sizeof(user_input), NORECALL) < 0 ||
+	if (LYGetStr(user_input, VISIBLE, sizeof(user_input), NORECALL) < 0 ||
 	    term_letter || STREQ(user_input, ".")) {
 	    goto cancelled;
 	}
@@ -1536,7 +1536,7 @@ void reply_by_mail(char *mail_address,
 	    remove_tildes(user_input);
 	    fprintf(fd, "%s\n", user_input);
 	    *user_input = '\0';
-	    if (LYgetstr(user_input, VISIBLE,
+	    if (LYGetStr(user_input, VISIBLE,
 			 sizeof(user_input), NORECALL) < 0) {
 		goto cancelled;
 	    }
@@ -1671,8 +1671,8 @@ void reply_by_mail(char *mail_address,
 #else
 	    fputs(header, fp);
 #endif
-	    while ((nbytes = fread(buf, 1, sizeof(buf), fd)) != 0) {
-		if (fwrite(buf, 1, (size_t) nbytes, fp) < nbytes)
+	    while ((nbytes = fread(buf, (size_t) 1, sizeof(buf), fd)) != 0) {
+		if (fwrite(buf, (size_t) 1, (size_t) nbytes, fp) < nbytes)
 		    break;
 	    }
 #if CAN_PIPE_TO_MAILER

@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTUtils.h,v 1.99 2010/09/23 20:34:05 tom Exp $
+ * $LynxId: HTUtils.h,v 1.102 2010/09/25 15:32:56 tom Exp $
  *
  * Utility macros for the W3 code library
  * MACROS FOR GENERAL USE
@@ -329,13 +329,13 @@ Standard C library for malloc() etc
 /* array/table size */
 #define	TABLESIZE(v)	(sizeof(v)/sizeof(v[0]))
 
-#define	typecalloc(cast)		(cast *)calloc(1,sizeof(cast))
-#define	typecallocn(cast,ntypes)	(cast *)calloc(ntypes,sizeof(cast))
+#define	typecalloc(cast)		(cast *)calloc((size_t)1, sizeof(cast))
+#define	typecallocn(cast,ntypes)	(cast *)calloc((size_t)(ntypes),sizeof(cast))
 
-#define typeRealloc(cast,ptr,ntypes)    (cast *)realloc(ptr, (ntypes)*sizeof(cast))
+#define typeRealloc(cast,ptr,ntypes)    (cast *)realloc(ptr, (size_t)(ntypes)*sizeof(cast))
 
 #define typeMalloc(cast)                (cast *)malloc(sizeof(cast))
-#define typeMallocn(cast,ntypes)        (cast *)malloc((ntypes)*sizeof(cast))
+#define typeMallocn(cast,ntypes)        (cast *)malloc((size_t)(ntypes)*sizeof(cast))
 
 /*
 
@@ -618,7 +618,7 @@ extern int WWW_TraceMask;
 /*
  * Printing-format for "UCode_t".
  */
-#define PRI_UCode_t	"ld"
+#define PRI_UCode_t	"lX"
 
 /*
  * Verbose-tracing.

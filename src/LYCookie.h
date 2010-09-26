@@ -1,3 +1,4 @@
+/* $LynxId: LYCookie.h,v 1.19 2010/09/25 11:35:24 tom Exp $ */
 #ifndef LYCOOKIES_H
 #define LYCOOKIES_H
 
@@ -46,7 +47,7 @@ extern "C" {
     extern char *LYAddCookieHeader(char *hostname,
 				   char *partialpath,
 				   int port,
-				   BOOL secure);
+				   int secure);
     extern void LYStoreCookies(char *cookie_file);
     extern void LYLoadCookies(char *cookie_file);
     extern void LYConfigCookies(void);

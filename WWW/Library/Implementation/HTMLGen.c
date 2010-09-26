@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTMLGen.c,v 1.31 2010/09/22 00:43:23 tom Exp $
+ * $LynxId: HTMLGen.c,v 1.34 2010/09/25 12:38:36 tom Exp $
  *
  *		HTML Generator
  *		==============
@@ -146,15 +146,14 @@ static void do_cstyle_flush(HTStructured * me)
  *	We keep track of all the breaks for when we chop the line
  */
 
-static void allow_break(HTStructured * me, int new_cleanness,
-			BOOL dlbc)
+static void allow_break(HTStructured * me, int new_cleanness, int dlbc)
 {
     if (dlbc && me->write_pointer == me->buffer)
 	dlbc = NO;
     me->line_break[new_cleanness] =
 	dlbc ? me->write_pointer - 1	/* Point to space */
 	: me->write_pointer;	/* point to gap */
-    me->delete_line_break_char[new_cleanness] = dlbc;
+    me->delete_line_break_char[new_cleanness] = (BOOLEAN) dlbc;
     if (new_cleanness >= me->cleanness &&
 	(me->overflowed || me->line_break[new_cleanness] > me->buffer))
 	me->cleanness = new_cleanness;
@@ -173,7 +172,7 @@ static void allow_break(HTStructured * me, int new_cleanness,
  *	   This should make the source files easier to read and modify
  *	by hand, too, though this is not a primary design consideration. TBL
  */
-static void HTMLGen_put_character(HTStructured * me, char c)
+static void HTMLGen_put_character(HTStructured * me, int c)
 {
     if (me->escape_specials && UCH(c) < 32) {
 	if (c == HT_NON_BREAK_SPACE || c == HT_EN_SPACE ||
@@ -201,7 +200,7 @@ static void HTMLGen_put_character(HTStructured * me, char c)
 	}
     }
 
-    *me->write_pointer++ = c;
+    *me->write_pointer++ = (char) c;
 
     if (c == '\n') {
 	HTMLGen_flush(me);

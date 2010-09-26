@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTString.c,v 1.62 2010/06/17 21:33:51 tom Exp $
+ * $LynxId: HTString.c,v 1.64 2010/09/25 11:32:30 tom Exp $
  *
  *	Case-independent string comparison		HTString.c
  *
@@ -307,7 +307,7 @@ char *HTSACopy(char **dest,
 	    if (*dest == NULL)
 		outofmem(__FILE__, "HTSACopy");
 	    assert(*dest != NULL);
-	    memcpy(*dest, src, size);
+	    MemCpy(*dest, src, size);
 	}
     } else {
 	FREE(*dest);
@@ -371,7 +371,7 @@ char *HTSACopy_extra(char **dest,
 	    *(EXTRA_TYPE *) (*dest) = size;
 	    *dest += EXTRA_SIZE;
 	}
-	memcpy(*dest, src, srcsize);
+	MemCpy(*dest, src, srcsize);
     } else {
 	Clear_extra(*dest);
     }
@@ -936,7 +936,7 @@ char *HTSprintf0(char **pstr, const char *fmt,...)
 
     LYva_start(ap, fmt);
     {
-	result = StrAllocVsprintf(pstr, 0, fmt, &ap);
+	result = StrAllocVsprintf(pstr, (size_t) 0, fmt, &ap);
     }
     va_end(ap);
 
@@ -1210,12 +1210,12 @@ void HTSABCopy(bstring **dest, const char *src,
 
 	assert(t != NULL);
 
-	if ((t->str = (char *) malloc(need)) == NULL)
-	    outofmem(__FILE__, "HTSABCopy");
+	if ((t->str = typeMallocn(char, need)) == NULL)
+	      outofmem(__FILE__, "HTSABCopy");
 
 	assert(t->str != NULL);
 
-	memcpy(t->str, src, (size_t) len);
+	MemCpy(t->str, src, len);
 	t->len = len;
 	t->str[t->len] = '\0';
 	*dest = t;
@@ -1257,21 +1257,21 @@ void HTSABCat(bstring **dest, const char *src,
 	if (t) {
 	    unsigned length = (unsigned) t->len + need;
 
-	    t->str = (char *) realloc(t->str, length);
+	    t->str = typeRealloc(char, t->str, length);
 	} else {
 	    if ((t = typecalloc(bstring)) == NULL)
 		  outofmem(__FILE__, "HTSACat");
 
 	    assert(t != NULL);
 
-	    t->str = (char *) malloc(need);
+	    t->str = typeMallocn(char, need);
 	}
 	if (t->str == NULL)
 	    outofmem(__FILE__, "HTSACat");
 
 	assert(t->str != NULL);
 
-	memcpy(t->str + t->len, src, (size_t) len);
+	MemCpy(t->str + t->len, src, len);
 	t->len += len;
 	t->str[t->len] = '\0';
 	*dest = t;
@@ -1301,7 +1301,7 @@ BOOL HTSABEql(bstring *a, bstring *b)
 
     if (len_a == len_b) {
 	if (len_a == 0
-	    || memcmp(a->str, b->str, (size_t) a->len) == 0)
+	    || MemCmp(a->str, b->str, a->len) == 0)
 	    return TRUE;
     }
     return FALSE;
@@ -1331,7 +1331,7 @@ bstring *HTBprintf(bstring **pstr, const char *fmt,...)
 
     LYva_start(ap, fmt);
     {
-	temp = StrAllocVsprintf(&temp, 0, fmt, &ap);
+	temp = StrAllocVsprintf(&temp, (size_t) 0, fmt, &ap);
 	if (non_empty(temp)) {
 	    HTSABCat(pstr, temp, (int) strlen(temp));
 	}

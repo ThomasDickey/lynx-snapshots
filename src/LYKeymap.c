@@ -1,4 +1,4 @@
-/* $LynxId: LYKeymap.c,v 1.70 2010/09/22 23:02:55 tom Exp $ */
+/* $LynxId: LYKeymap.c,v 1.72 2010/09/25 12:44:34 tom Exp $ */
 #include <HTUtils.h>
 #include <LYUtils.h>
 #include <LYGlobalDefs.h>
@@ -1156,7 +1156,7 @@ Kcmd *LYStringToKcmd(const char *name)
 }
 
 char *LYKeycodeToString(int c,
-			BOOLEAN upper8)
+			int upper8)
 {
     static char buf[30];
     unsigned n;
@@ -1296,8 +1296,7 @@ static char *format_binding(LYKeymap_t * table, int i)
 
 /* if both is true, produce an additional line for the corresponding
    uppercase key if its binding is different. - kw */
-static void print_binding(HTStream *target, int i,
-			  BOOLEAN both)
+static void print_binding(HTStream *target, int i, int both)
 {
     char *buf;
     LYKeymapCode lac1 = LYK_UNKNOWN;	/* 0 */
@@ -1473,7 +1472,7 @@ GLOBALDEF HTProtocol LYLynxKeymap =
  */
 int remap(char *key,
 	  const char *func,
-	  BOOLEAN for_dired)
+	  int for_dired)
 {
     Kcmd *mp;
     int c;
@@ -1521,12 +1520,12 @@ typedef struct {
 /*
  * Save the given keys in the table, setting them to the map'd value.
  */
-static void set_any_keys(ANY_KEYS * table, int size)
+static void set_any_keys(ANY_KEYS * table, size_t size)
 {
-    int j, k;
+    size_t j, k;
 
     for (j = 0; j < size; ++j) {
-	k = table[j].code + 1;
+	k = (size_t) (table[j].code + 1);
 	table[j].save = keymap[k];
 	keymap[k] = table[j].map;
     }
@@ -1535,12 +1534,12 @@ static void set_any_keys(ANY_KEYS * table, int size)
 /*
  * Restore the given keys from the table.
  */
-static void reset_any_keys(ANY_KEYS * table, int size)
+static void reset_any_keys(ANY_KEYS * table, size_t size)
 {
-    int j, k;
+    size_t j, k;
 
     for (j = 0; j < size; ++j) {
-	k = table[j].code + 1;
+	k = (size_t) (table[j].code + 1);
 	keymap[k] = table[j].save;
     }
 }

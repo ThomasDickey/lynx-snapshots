@@ -1,4 +1,7 @@
-/*      Displaying messages and getting input for WWW Library
+/*
+ * $LynxId: HTAlert.h,v 1.33 2010/09/25 11:36:09 tom Exp $
+ *
+ *      Displaying messages and getting input for WWW Library
  *      =====================================================
  *
  *         May 92 Created By C.T. Barker
@@ -113,7 +116,7 @@ extern "C" {
     extern void HTPromptUsernameAndPassword(const char *Msg,
 					    char **username,
 					    char **password,
-					    BOOL IsProxy);
+					    int IsProxy);
 
 /*	Confirm a cookie operation.			HTConfirmCookie()
  *	---------------------------

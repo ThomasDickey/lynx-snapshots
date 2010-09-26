@@ -1,5 +1,5 @@
 /*
- * $LynxId: SGML.h,v 1.44 2009/11/21 15:24:48 tom Exp $
+ * $LynxId: SGML.h,v 1.45 2010/09/24 00:12:09 tom Exp $
  *			       SGML parse and stream definition for libwww
  *                             SGML AND STRUCTURED STREAMS
  *
@@ -216,7 +216,7 @@ Structured Object definition
 
 	void (*_abort) (HTStructured * me, HTError e);
 
-	void (*put_character) (HTStructured * me, char ch);
+	void (*put_character) (HTStructured * me, int ch);
 
 	void (*put_string) (HTStructured * me, const char *str);
 

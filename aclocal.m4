@@ -1,4 +1,4 @@
-dnl $LynxId: aclocal.m4,v 1.170 2010/09/23 08:10:55 tom Exp $
+dnl $LynxId: aclocal.m4,v 1.171 2010/09/26 14:24:45 tom Exp $
 dnl Macros for auto-configure script.
 dnl by T.E.Dickey <dickey@invisible-island.net>
 dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
@@ -4716,7 +4716,7 @@ AC_MSG_RESULT($cf_result)
 test $cf_result = no && LIBS="$cf_slang_LIBS3"
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_SLANG_UNIX_DEFS version: 4 updated: 2010/04/03 15:30:05
+dnl CF_SLANG_UNIX_DEFS version: 5 updated: 2010/09/26 10:23:14
 dnl ------------------
 dnl Slang's header files rely on some predefined symbols to declare variables
 dnl that we might find useful.  This check is needed, because those symbols
@@ -4771,6 +4771,9 @@ SLang_TT_Baud_Rate = 1
 	[cf_cv_slang_unix=no])
 ])
 test $cf_cv_slang_unix = yes && AC_DEFINE(REAL_UNIX_SYSTEM)
+
+CF_CHECK_TYPE(SLsmg_Color_Type,int,[#include <slang.h>])
+CF_CHECK_TYPE(SLtt_Char_Type,unsigned long,[#include <slang.h>])
 ])dnl
 dnl ---------------------------------------------------------------------------
 dnl CF_SOCKS version: 8 updated: 2010/05/05 20:27:55

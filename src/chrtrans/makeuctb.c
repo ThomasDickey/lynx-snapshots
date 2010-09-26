@@ -1,5 +1,5 @@
 /*
- * $LynxId: makeuctb.c,v 1.45 2010/09/22 08:31:45 tom Exp $
+ * $LynxId: makeuctb.c,v 1.46 2010/09/24 09:52:56 tom Exp $
  *
  *  makeuctb.c, derived from conmakehash.c   - kw
  *
@@ -361,7 +361,7 @@ int main(int argc, char **argv)
     /*
      *  Now we comes to the tricky part.  Parse the input table.
      */
-    while (fgets(buffer, sizeof(buffer), ctbl) != NULL) {
+    while (fgets(buffer, (int) sizeof(buffer), ctbl) != NULL) {
 	if ((p = strchr(buffer, '\n')) != NULL) {
 	    *p = '\0';
 	} else {
@@ -649,7 +649,7 @@ int main(int argc, char **argv)
 	    while (*p == ' ' || *p == '\t') {
 		p++;
 	    }
-	    if (!strncmp(p, "idem", 4)) {
+	    if (!StrNCmp(p, "idem", 4)) {
 		for (i = fp0; i <= fp1; i++) {
 		    addpair(i, i);
 		}
@@ -697,7 +697,7 @@ int main(int argc, char **argv)
 	    while (*p == ' ' || *p == '\t') {
 		p++;
 	    }
-	    if (!strncmp(p, "idem", 4)) {
+	    if (!StrNCmp(p, "idem", 4)) {
 		addpair(fp0, fp0);
 		p += 4;
 	    }
@@ -743,9 +743,9 @@ int main(int argc, char **argv)
     }
 
     if (argc > 3) {
-	strncpy(this_MIMEcharset, argv[3], UC_MAXLEN_MIMECSNAME);
+	StrNCpy(this_MIMEcharset, argv[3], UC_MAXLEN_MIMECSNAME);
     } else if (this_MIMEcharset[0] == '\0') {
-	strncpy(this_MIMEcharset, tblname, UC_MAXLEN_MIMECSNAME);
+	StrNCpy(this_MIMEcharset, tblname, UC_MAXLEN_MIMECSNAME);
 	if ((p = strchr(this_MIMEcharset, '.')) != 0) {
 	    *p = '\0';
 	}
@@ -754,13 +754,13 @@ int main(int argc, char **argv)
 	*p = (char) TOLOWER(*p);
     }
     if (argc > 4) {
-	strncpy(this_LYNXcharset, argv[4], UC_MAXLEN_LYNXCSNAME);
+	StrNCpy(this_LYNXcharset, argv[4], UC_MAXLEN_LYNXCSNAME);
     } else if (this_LYNXcharset[0] == '\0') {
-	strncpy(this_LYNXcharset, this_MIMEcharset, UC_MAXLEN_LYNXCSNAME);
+	StrNCpy(this_LYNXcharset, this_MIMEcharset, UC_MAXLEN_LYNXCSNAME);
     }
 
     if (this_isDefaultMap == -1) {
-	this_isDefaultMap = !strncmp(this_MIMEcharset, "iso-8859-1", 10);
+	this_isDefaultMap = !StrNCmp(this_MIMEcharset, "iso-8859-1", 10);
     }
     fprintf(stderr,
 	    "makeuctb: %s: %stranslation map",

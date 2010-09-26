@@ -1,5 +1,5 @@
 /*                System dependencies in the W3 library
- * $LynxId: www_tcp.h,v 1.43 2010/09/22 00:35:17 tom Exp $
+ * $LynxId: www_tcp.h,v 1.45 2010/09/25 16:24:45 tom Exp $
  *
                                    SYSTEM DEPENDENCIES
 
@@ -46,10 +46,9 @@ Default values
 #define NETREAD(s,p,n) \
 	HTDoRead(s, p, (unsigned)(n))
 	/* Routine to write to a TCP-IP socket      */
-#define NETWRITE(s,p,n) \
-	write(s, p, (size_t)(n))
-#define SOCKET_READ read	/* normal socket read routine */
-#define IOCTL ioctl		/* normal ioctl routine for sockets */
+#define NETWRITE(s,p,n)		write(s, p, (size_t)(n))
+#define SOCKET_READ(s,b,l)	read(s,b,(size_t)(l))
+#define IOCTL(s,cmd,arg)	ioctl(s,(long)(cmd),arg)
 #define SOCKET_ERRNO errno	/* normal socket errno */
 
 /* Unless stated otherwise, */
@@ -216,7 +215,7 @@ extern int ws_netread(int fd, char *buf, int len);
 #define NETREAD(s,b,l)  ws_netread((s),(b),(l))		/* 1997/11/06 (Thu) */
 #define NETWRITE(s,b,l) send((s),(b),(l),0)
 #define NETCLOSE(s)     closesocket(s)
-#define IOCTL				ioctlsocket
+#define IOCTL(s,cmd,arg)	ioctlsocket(s,cmd,arg)
 #include <io.h>
 #include <string.h>
 #include <process.h>
@@ -327,7 +326,7 @@ VAX/VMS
 
 #ifdef UCX
 #undef IOCTL
-#define IOCTL HTioctl
+#define IOCTL(s,cmd,arg)	HTioctl(s,cmd,arg)
 #endif /* UCX */
 
 #ifdef WIN_TCP
@@ -375,7 +374,7 @@ extern int socket_ioctl();
 #define NETWRITE(s,b,l)     ((s)>10 ? socket_write((s),(b),(l)) : \
                                 write((s),(b),(l)))
 #define NETCLOSE(s)         ((s)>10 ? socket_close(s) : close(s))
-#define IOCTL socket_ioctl
+#define IOCTL(s,cmd,arg)	socket_ioctl(s,cmd,arg)
 #define SOCKET_ERRNO socket_errno
 #endif /* MULTINET */
 
@@ -392,7 +391,7 @@ extern int socket_ioctl();
 #define NETWRITE(s,b,l)     (si_get_sdc((s)) != 0 ? si_write((s),(b),(l)) : \
                                 write((s),(b),(l)))
 #define NETCLOSE(s)         (si_get_sdc((s)) != 0 ? si_close((s)) : close((s)))
-#define IOCTL si_ioctl
+#define IOCTL(s,cmd,arg)	si_ioctl(s,cmd,arg)
 #endif /* SOCKETSHR_TCP */
 
 #ifdef TCPIP_SERVICES
@@ -629,7 +628,7 @@ extern int errno;
 #undef SELECT
 #define TCP_INCLUDES_DONE
 #undef  IOCTL
-#define IOCTL(s,cmd,arg) ioctlsocket(s,cmd,(char*)(arg))
+#define IOCTL(s,cmd,arg)	ioctlsocket(s,cmd,(char*)(arg))
 #define DECL_ERRNO
 #include <errno.h>
 #include <sys/types.h>
@@ -937,7 +936,7 @@ typedef TYPE_FD_SET fd_set;
 typedef struct sockaddr_storage SockA;
 
 #ifdef SIN6_LEN
-#define SOCKADDR_LEN(soc_address) ((struct sockaddr *)&soc_address)->sa_len
+#define SOCKADDR_LEN(soc_address) (((struct sockaddr *)&soc_address)->sa_len)
 #else
 #ifndef SA_LEN
 #define SA_LEN(x) (((x)->sa_family == AF_INET6) \
@@ -946,7 +945,7 @@ typedef struct sockaddr_storage SockA;
 		      ? sizeof(struct sockaddr_in) \
 		      : sizeof(struct sockaddr)))	/* AF_UNSPEC? */
 #endif
-#define SOCKADDR_LEN(soc_address) SA_LEN((struct sockaddr *)&soc_address)
+#define SOCKADDR_LEN(soc_address) (socklen_t) (SA_LEN((struct sockaddr *)&soc_address))
 #endif /* SIN6_LEN */
 #else
 typedef struct sockaddr_in SockA;

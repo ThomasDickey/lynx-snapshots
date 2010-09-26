@@ -1,4 +1,4 @@
-/* $LynxId: LYGetFile.c,v 1.82 2010/09/23 22:43:44 tom Exp $ */
+/* $LynxId: LYGetFile.c,v 1.84 2010/09/25 11:19:25 tom Exp $ */
 #include <HTUtils.h>
 #include <HTTP.h>
 #include <HTAnchor.h>		/* Anchor class */
@@ -222,7 +222,7 @@ int getfile(DocInfo *doc, int *target)
 		return (NULLFILE);
 	    }
 	} else if (check_realm && !LYPermitURL && !LYJumpFileURL) {
-	    if (!(0 == strncmp(startrealm, WWWDoc.address,
+	    if (!(0 == StrNCmp(startrealm, WWWDoc.address,
 			       strlen(startrealm)) ||
 		  url_type == LYNXHIST_URL_TYPE ||
 		  url_type == LYNXKEYMAP_URL_TYPE ||
@@ -571,7 +571,7 @@ int getfile(DocInfo *doc, int *target)
 #endif
 		   url_type != LYNXCGI_URL_TYPE &&
 		   !(url_type == NEWS_URL_TYPE &&
-		     strncmp(doc->address, "news://", 7)) &&
+		     StrNCmp(doc->address, "news://", 7)) &&
 		   !(LYisLocalHost(doc->address) ||
 		     LYisLocalAlias(doc->address))) {
 	    HTUserMsg(ACCESS_ONLY_LOCALHOST);
@@ -670,7 +670,7 @@ int getfile(DocInfo *doc, int *target)
 		*cp = '\0';
 		StrAllocCopy(temp, doc->address);
 		cp += 3;
-		if (*cp && strncmp(cp, "%09", 3)) {
+		if (*cp && StrNCmp(cp, "%09", 3)) {
 		    StrAllocCat(temp, "?");
 		    StrAllocCat(temp, cp);
 		    if ((cp = strstr(temp, "%09")) != NULL) {
@@ -718,7 +718,7 @@ int getfile(DocInfo *doc, int *target)
 	     * If tuple's Path=GET%20/...  convert to an http URL.
 	     */
 	    if ((cp = strchr(doc->address + 9, '/')) != NULL &&
-		0 == strncmp(++cp, "hGET%20/", 8)) {
+		0 == StrNCmp(++cp, "hGET%20/", 8)) {
 		StrAllocCopy(tmp, "http://");
 		CTRACE((tfp, "getfile: URL '%s'\n",
 			doc->address));
@@ -1138,7 +1138,7 @@ int follow_link_number(int c,
     /*
      * Get the number, possibly with a letter suffix, from the user.
      */
-    if (LYgetstr(temp, VISIBLE, sizeof(temp), NORECALL) < 0 || *temp == 0) {
+    if (LYGetStr(temp, VISIBLE, sizeof(temp), NORECALL) < 0 || *temp == 0) {
 	HTInfoMsg(CANCELLED);
 	return (DO_NOTHING);
     }

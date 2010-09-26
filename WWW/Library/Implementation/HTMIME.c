@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTMIME.c,v 1.74 2010/09/22 00:42:30 tom Exp $
+ * $LynxId: HTMIME.c,v 1.75 2010/09/24 08:29:24 tom Exp $
  *
  *			MIME Message Parse			HTMIME.c
  *			==================
@@ -405,13 +405,13 @@ static int pumpData(HTStream *me)
 		     * some kind of match.
 		     */
 		    BOOL given_is_8859 =
-		    (BOOL) (!strncmp(cp4, "iso-8859-", 9) &&
+		    (BOOL) (!StrNCmp(cp4, "iso-8859-", 9) &&
 			    isdigit(UCH(cp4[9])));
 		    BOOL given_is_8859like =
 		    (BOOL) (given_is_8859 ||
-			    !strncmp(cp4, "windows-", 8) ||
-			    !strncmp(cp4, "cp12", 4) ||
-			    !strncmp(cp4, "cp-12", 5));
+			    !StrNCmp(cp4, "windows-", 8) ||
+			    !StrNCmp(cp4, "cp12", 4) ||
+			    !StrNCmp(cp4, "cp-12", 5));
 		    BOOL given_and_display_8859like =
 		    (BOOL) (given_is_8859like &&
 			    (strstr(LYchar_set_names[current_char_set],
@@ -1066,8 +1066,7 @@ static int dispatchField(HTStream *me)
  *	the beginning (that are not folded continuation lines) are ignored
  *	as unknown field names.  Fields with empty values are not picked up.
  */
-static void HTMIME_put_character(HTStream *me,
-				 char c)
+static void HTMIME_put_character(HTStream *me, int c)
 {
     /* MUST BE FAST */
     switch (me->state) {
@@ -2016,7 +2015,7 @@ static void HTMIME_put_character(HTStream *me,
       GET_VALUE:
 	if (c != '\n') {	/* Not end of line */
 	    if (me->value_pointer < me->value + VALUE_SIZE - 1) {
-		*me->value_pointer++ = c;
+		*me->value_pointer++ = (char) c;
 		break;
 	    } else {
 		goto value_too_long;

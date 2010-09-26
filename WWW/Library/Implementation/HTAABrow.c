@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTAABrow.c,v 1.33 2010/09/22 00:54:01 tom Exp $
+ * $LynxId: HTAABrow.c,v 1.34 2010/09/24 08:27:42 tom Exp $
  *
  * MODULE							HTAABrow.c
  *		BROWSER SIDE ACCESS AUTHORIZATION MODULE
@@ -189,7 +189,7 @@ static void HTAASetup_delete(HTAASetup * killme);	/* Forward */
  */
 static HTAAServer *HTAAServer_new(const char *hostname,
 				  int portnumber,
-				  BOOL IsProxy)
+				  int IsProxy)
 {
     HTAAServer *server;
 
@@ -200,7 +200,7 @@ static HTAAServer *HTAAServer_new(const char *hostname,
 
     server->hostname = NULL;
     server->portnumber = (portnumber > 0 ? portnumber : 80);
-    server->IsProxy = IsProxy;
+    server->IsProxy = (BOOLEAN) IsProxy;
     server->setups = HTList_new();
     server->realms = HTList_new();
 
@@ -280,7 +280,7 @@ static void HTAAServer_delete(HTAAServer *killme)
  */
 static HTAAServer *HTAAServer_lookup(const char *hostname,
 				     int portnumber,
-				     BOOL IsProxy)
+				     int IsProxy)
 {
     if (hostname) {
 	HTList *cur = server_table;
@@ -326,7 +326,7 @@ static HTAAServer *HTAAServer_lookup(const char *hostname,
 static HTAASetup *HTAASetup_lookup(const char *hostname,
 				   int portnumber,
 				   const char *docname,
-				   BOOL IsProxy)
+				   int IsProxy)
 {
     HTAAServer *server;
     HTAASetup *setup;
@@ -563,7 +563,7 @@ static HTAARealm *HTAARealm_new(HTList *realm_table,
  *	returned by AA package needs to (or should) be freed.
  *
  */
-static char *compose_auth_string(HTAAScheme scheme, HTAASetup * setup, BOOL IsProxy)
+static char *compose_auth_string(HTAAScheme scheme, HTAASetup * setup, int IsProxy)
 {
     char *cleartext = NULL;	/* Cleartext presentation */
     char *ciphertext = NULL;	/* Encrypted presentation */
@@ -816,7 +816,7 @@ static void free_HTAAGlobals(void)
 char *HTAA_composeAuth(const char *hostname,
 		       const int portnumber,
 		       const char *docname,
-		       BOOL IsProxy)
+		       int IsProxy)
 {
     char *auth_string;
     BOOL retry;
@@ -1049,7 +1049,7 @@ char *HTAA_composeAuth(const char *hostname,
 BOOL HTAA_shouldRetryWithAuth(char *start_of_headers,
 			      size_t length,
 			      int soc,
-			      BOOL IsProxy)
+			      int IsProxy)
 {
     HTAAScheme scheme;
     char *line = NULL;

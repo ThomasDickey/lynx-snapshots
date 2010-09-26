@@ -1,4 +1,4 @@
-/* $LynxId: LYOptions.c,v 1.138 2010/09/22 09:36:44 tom Exp $ */
+/* $LynxId: LYOptions.c,v 1.141 2010/09/25 11:20:21 tom Exp $ */
 #include <HTUtils.h>
 #include <HTFTP.h>
 #include <HTTP.h>		/* 'reloading' flag */
@@ -643,7 +643,7 @@ void LYoptions(void)
 		_statusline(EDITOR_LOCKED);
 	    } else {
 		if (non_empty(editor))
-		    LYstrncpy(display_option, editor, sizeof(display_option) - 1);
+		    LYStrNCpy(display_option, editor, sizeof(display_option) - 1);
 		else {		/* clear the NONE */
 		    LYmove(L_EDITOR, COL_OPTION_VALUES);
 		    LYaddstr("    ");
@@ -652,7 +652,7 @@ void LYoptions(void)
 		_statusline(ACCEPT_DATA);
 		LYmove(L_EDITOR, COL_OPTION_VALUES);
 		lynx_start_bold();
-		ch = LYgetstr(display_option, VISIBLE,
+		ch = LYGetStr(display_option, VISIBLE,
 			      sizeof(display_option), NORECALL);
 		lynx_stop_bold();
 		LYmove(L_EDITOR, COL_OPTION_VALUES);
@@ -679,7 +679,7 @@ void LYoptions(void)
 
 	case 'D':		/* Change the display. */
 	    if (non_empty(x_display)) {
-		LYstrncpy(display_option, x_display, sizeof(display_option) - 1);
+		LYStrNCpy(display_option, x_display, sizeof(display_option) - 1);
 	    } else {		/* clear the NONE */
 		LYmove(L_DISPLAY, COL_OPTION_VALUES);
 		LYaddstr("    ");
@@ -688,7 +688,7 @@ void LYoptions(void)
 	    _statusline(ACCEPT_DATA);
 	    LYmove(L_DISPLAY, COL_OPTION_VALUES);
 	    lynx_start_bold();
-	    ch = LYgetstr(display_option, VISIBLE,
+	    ch = LYGetStr(display_option, VISIBLE,
 			  sizeof(display_option), NORECALL);
 	    lynx_stop_bold();
 	    LYmove(L_DISPLAY, COL_OPTION_VALUES);
@@ -796,7 +796,7 @@ void LYoptions(void)
 		    goto draw_options;
 		}
 		if (non_empty(bookmark_page)) {
-		    LYstrncpy(display_option,
+		    LYStrNCpy(display_option,
 			      bookmark_page,
 			      sizeof(display_option) - 1);
 		} else {	/* clear the NONE */
@@ -807,7 +807,7 @@ void LYoptions(void)
 		_statusline(ACCEPT_DATA);
 		LYmove(L_HOME, C_DEFAULT);
 		lynx_start_bold();
-		ch = LYgetstr(display_option, VISIBLE,
+		ch = LYGetStr(display_option, VISIBLE,
 			      sizeof(display_option), NORECALL);
 		lynx_stop_bold();
 		LYmove(L_HOME, C_DEFAULT);
@@ -865,7 +865,7 @@ void LYoptions(void)
 
 	case 'P':		/* Change personal mail address for From headers. */
 	    if (non_empty(personal_mail_address)) {
-		LYstrncpy(display_option,
+		LYStrNCpy(display_option,
 			  personal_mail_address,
 			  sizeof(display_option) - 1);
 	    } else {		/* clear the NONE */
@@ -876,7 +876,7 @@ void LYoptions(void)
 	    _statusline(ACCEPT_DATA);
 	    LYmove(L_MAIL_ADDRESS, COL_OPTION_VALUES);
 	    lynx_start_bold();
-	    ch = LYgetstr(display_option, VISIBLE,
+	    ch = LYGetStr(display_option, VISIBLE,
 			  sizeof(display_option), NORECALL);
 	    lynx_stop_bold();
 	    LYmove(L_MAIL_ADDRESS, COL_OPTION_VALUES);
@@ -1081,7 +1081,7 @@ void LYoptions(void)
 
 	case 'G':		/* Change language preference. */
 	    if (non_empty(language)) {
-		LYstrncpy(display_option, language, sizeof(display_option) - 1);
+		LYStrNCpy(display_option, language, sizeof(display_option) - 1);
 	    } else {		/* clear the NONE */
 		LYmove(L_LANGUAGE, COL_OPTION_VALUES);
 		LYaddstr("    ");
@@ -1090,7 +1090,7 @@ void LYoptions(void)
 	    _statusline(ACCEPT_DATA);
 	    LYmove(L_LANGUAGE, COL_OPTION_VALUES);
 	    lynx_start_bold();
-	    ch = LYgetstr(display_option, VISIBLE,
+	    ch = LYGetStr(display_option, VISIBLE,
 			  sizeof(display_option), NORECALL);
 	    lynx_stop_bold();
 	    LYmove(L_LANGUAGE, COL_OPTION_VALUES);
@@ -1116,7 +1116,7 @@ void LYoptions(void)
 
 	case 'H':		/* Change charset preference. */
 	    if (non_empty(pref_charset)) {
-		LYstrncpy(display_option,
+		LYStrNCpy(display_option,
 			  pref_charset,
 			  sizeof(display_option) - 1);
 	    } else {		/* clear the NONE */
@@ -1127,7 +1127,7 @@ void LYoptions(void)
 	    _statusline(ACCEPT_DATA);
 	    LYmove(L_PREF_CHARSET, COL_OPTION_VALUES);
 	    lynx_start_bold();
-	    ch = LYgetstr(display_option, VISIBLE,
+	    ch = LYGetStr(display_option, VISIBLE,
 			  sizeof(display_option), NORECALL);
 	    lynx_stop_bold();
 	    LYmove(L_PREF_CHARSET, COL_OPTION_VALUES);
@@ -1450,7 +1450,7 @@ void LYoptions(void)
 	case 'A':		/* Change user agent string. */
 	    if (!no_useragent) {
 		if (non_empty(LYUserAgent)) {
-		    LYstrncpy(display_option,
+		    LYStrNCpy(display_option,
 			      LYUserAgent,
 			      sizeof(display_option) - 1);
 		} else {	/* clear the NONE */
@@ -1461,7 +1461,7 @@ void LYoptions(void)
 		_statusline(ACCEPT_DATA_OR_DEFAULT);
 		LYmove(L_User_Agent, COL_OPTION_VALUES);
 		lynx_start_bold();
-		ch = LYgetstr(display_option, VISIBLE,
+		ch = LYGetStr(display_option, VISIBLE,
 			      sizeof(display_option), NORECALL);
 		lynx_stop_bold();
 		LYmove(L_User_Agent, COL_OPTION_VALUES);
@@ -1782,7 +1782,7 @@ void edit_bookmarks(void)
 
 #define MULTI_OFFSET 8
     int a;			/* misc counter */
-    char MBM_tmp_line[LY_MAXPATH];	/* buffer for LYgetstr */
+    char MBM_tmp_line[LY_MAXPATH];	/* buffer for LYGetStr */
 
     /*
      * We need (MBM_V_MAXFILES + MULTI_OFFSET) lines to display the whole list
@@ -1981,11 +1981,11 @@ void edit_bookmarks(void)
 			       9);
 		    else
 			LYmove((3 + a), 9);
-		    LYstrncpy(MBM_tmp_line,
+		    LYStrNCpy(MBM_tmp_line,
 			      (!MBM_A_subdescript[a] ?
 			       "" : MBM_A_subdescript[a]),
 			      sizeof(MBM_tmp_line) - 1);
-		    (void) LYgetstr(MBM_tmp_line, VISIBLE,
+		    (void) LYGetStr(MBM_tmp_line, VISIBLE,
 				    sizeof(MBM_tmp_line), NORECALL);
 		    lynx_stop_bold();
 
@@ -2019,10 +2019,10 @@ void edit_bookmarks(void)
 		LYaddstr("| ");
 
 		lynx_start_bold();
-		LYstrncpy(MBM_tmp_line,
+		LYStrNCpy(MBM_tmp_line,
 			  NonNull(MBM_A_subbookmark[a]),
 			  sizeof(MBM_tmp_line) - 1);
-		(void) LYgetstr(MBM_tmp_line, VISIBLE,
+		(void) LYGetStr(MBM_tmp_line, VISIBLE,
 				sizeof(MBM_tmp_line), NORECALL);
 		lynx_stop_bold();
 
@@ -2077,7 +2077,7 @@ int popup_choice(int cur_choice,
 		 const char **choices,
 		 int i_length,
 		 int disabled,
-		 BOOLEAN for_mouse)
+		 int for_mouse)
 {
     if (column < 0)
 	column = (COL_OPTION_VALUES - 1);
@@ -3270,7 +3270,7 @@ int postoptions(DocInfo *newdoc)
      * old-style LYK_OPTIONS (mainloop):
      */
     if ((need_end_reload == TRUE &&
-	 (strncmp(newdoc->address, "http", 4) == 0 ||
+	 (StrNCmp(newdoc->address, "http", 4) == 0 ||
 	  isLYNXCGI(newdoc->address) == 0))) {
 	/*
 	 * An option has changed which may influence content negotiation, and

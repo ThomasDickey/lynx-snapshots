@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTWSRC.c,v 1.25 2010/04/30 08:29:00 tom Exp $
+ * $LynxId: HTWSRC.c,v 1.27 2010/09/25 00:35:26 tom Exp $
  *
  *			Parse WAIS Source file			HTWSRC.c
  *			======================
@@ -133,7 +133,7 @@ char from_hex(char c)
 /*		Treat One Character
  *		-------------------
  */
-static void WSRCParser_put_character(HTStream *me, char c)
+static void WSRCParser_put_character(HTStream *me, int c)
 {
     switch (me->state) {
     case beginning:
@@ -171,7 +171,7 @@ static void WSRCParser_put_character(HTStream *me, char c)
 	    me->state = before_value;
 	} else {
 	    if (me->param_count < PARAM_MAX)
-		me->param[me->param_count++] = c;
+		me->param[me->param_count++] = (char) c;
 	}
 	break;
 
@@ -189,7 +189,7 @@ static void WSRCParser_put_character(HTStream *me, char c)
 	}
 	me->state = (c == '"') ? quoted_value :
 	    (c == '(') ? bracketed_value : value;
-	me->param[me->param_count++] = c;	/* Don't miss first character */
+	me->param[me->param_count++] = (char) c;	/* Don't miss first character */
 	break;
 
     case value:
@@ -199,7 +199,7 @@ static void WSRCParser_put_character(HTStream *me, char c)
 	    me->state = before_tag;
 	} else {
 	    if (me->param_count < PARAM_MAX)
-		me->param[me->param_count++] = c;
+		me->param[me->param_count++] = (char) c;
 	}
 	break;
 
@@ -211,7 +211,7 @@ static void WSRCParser_put_character(HTStream *me, char c)
 	    break;
 	}
 	if (me->param_count < PARAM_MAX)
-	    me->param[me->param_count++] = c;
+	    me->param[me->param_count++] = (char) c;
 	break;
 
     case quoted_value:
@@ -230,7 +230,7 @@ static void WSRCParser_put_character(HTStream *me, char c)
 
     case escape_in_quoted:
 	if (me->param_count < PARAM_MAX)
-	    me->param[me->param_count++] = c;
+	    me->param[me->param_count++] = (char) c;
 	me->state = quoted_value;
 	break;
 
@@ -303,7 +303,7 @@ static void give_parameter(HTStream *me, int p)
 /*			Generate Outout
  *			===============
  */
-static void WSRC_gen_html(HTStream *me, BOOL source_file)
+static void WSRC_gen_html(HTStream *me, int source_file)
 {
     if (me->par_value[PAR_DATABASE_NAME]) {
 	char *shortname = 0;

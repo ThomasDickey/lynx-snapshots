@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYJump.c,v 1.36 2010/05/02 20:17:37 tom Exp $
+ * $LynxId: LYJump.c,v 1.39 2010/09/25 11:19:37 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTAlert.h>
@@ -230,7 +230,7 @@ char *LYJump(int key)
     }
 
     statusline(jtp->msg);
-    if ((ch = LYgetstr(buf, VISIBLE, (sizeof(buf) - 4), recall)) < 0) {
+    if ((ch = LYGetStr(buf, VISIBLE, (sizeof(buf) - 4), recall)) < 0) {
 	/*
 	 * User cancelled the Jump via ^G. - FM
 	 */
@@ -240,7 +240,7 @@ char *LYJump(int key)
 
   check_recall:
     bp = buf;
-    if (TOUPPER(key) == 'G' && strncmp(buf, "o ", 2) == 0)
+    if (TOUPPER(key) == 'G' && StrNCmp(buf, "o ", 2) == 0)
 	bp++;
     bp = LYSkipBlanks(bp);
     if (*bp == '\0' &&
@@ -289,7 +289,7 @@ char *LYJump(int key)
 	    ShortcutNum = 0;
 	if ((cp = (char *) HTList_objectAt(jtp->history,
 					   ShortcutNum)) != NULL) {
-	    LYstrncpy(buf, cp, sizeof(buf) - 1);
+	    LYStrNCpy(buf, cp, sizeof(buf) - 1);
 	    if (jump_buffer && jtp->shortcut &&
 		!strcmp(buf, jtp->shortcut)) {
 		_statusline(EDIT_CURRENT_SHORTCUT);
@@ -299,7 +299,7 @@ char *LYJump(int key)
 	    } else {
 		_statusline(EDIT_A_PREV_SHORTCUT);
 	    }
-	    if ((ch = LYgetstr(buf, VISIBLE,
+	    if ((ch = LYGetStr(buf, VISIBLE,
 			       sizeof(buf), recall)) < 0) {
 		/*
 		 * User cancelled the jump via ^G.
@@ -329,7 +329,7 @@ char *LYJump(int key)
 	    ShortcutNum = ShortcutTotal - 1;
 	if ((cp = (char *) HTList_objectAt(jtp->history,
 					   ShortcutNum)) != NULL) {
-	    LYstrncpy(buf, cp, sizeof(buf) - 1);
+	    LYStrNCpy(buf, cp, sizeof(buf) - 1);
 	    if (jump_buffer && jtp->shortcut &&
 		!strcmp(buf, jtp->shortcut)) {
 		_statusline(EDIT_CURRENT_SHORTCUT);
@@ -339,7 +339,7 @@ char *LYJump(int key)
 	    } else {
 		_statusline(EDIT_A_PREV_SHORTCUT);
 	    }
-	    if ((ch = LYgetstr(buf, VISIBLE, sizeof(buf), recall)) < 0) {
+	    if ((ch = LYGetStr(buf, VISIBLE, sizeof(buf), recall)) < 0) {
 		/*
 		 * User cancelled the jump via ^G.
 		 */
@@ -352,7 +352,7 @@ char *LYJump(int key)
 
     seeking.key = bp;
     found = (JumpDatum *) bsearch((char *) &seeking, (char *) jtp->table,
-				  jtp->nel, sizeof(JumpDatum), LYCompare);
+				  (size_t) jtp->nel, sizeof(JumpDatum), LYCompare);
     if (!found) {
 	user_message("Unknown target '%s'", buf);
 	LYSleepAlert();
@@ -453,7 +453,7 @@ static unsigned LYRead_Jumpfile(struct JumpTable *jtp)
 
     cp = jtp->mp = mp;
     for (i = 0; i < nel;) {
-	if (strncmp(cp, "<!--", 4) == 0 || strncmp(cp, "<dl>", 4) == 0) {
+	if (StrNCmp(cp, "<!--", 4) == 0 || StrNCmp(cp, "<dl>", 4) == 0) {
 	    cp = strchr(cp, '\n');
 	    if (cp == NULL)
 		break;

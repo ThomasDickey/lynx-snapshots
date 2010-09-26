@@ -1,4 +1,7 @@
-/*			CJK character converter		HTCJK.h
+/*
+ * $LynxId: HTCJK.h,v 1.18 2010/09/25 11:41:29 tom Exp $
+ *
+ *			CJK character converter		HTCJK.h
  *			=======================
  *
  *	Added 11-Jun-96 by FM, based on jiscode.h for
@@ -56,29 +59,29 @@ extern "C" {
 /*
  *  Function prototypes.
  */
-    extern void JISx0201TO0208_EUC(register unsigned char IHI,
-				   register unsigned char ILO,
-				   register unsigned char *OHI,
-				   register unsigned char *OLO);
+    extern void JISx0201TO0208_EUC(unsigned IHI,
+				   unsigned ILO,
+				   unsigned char *OHI,
+				   unsigned char *OLO);
 
-    extern unsigned char *SJIS_TO_JIS1(register unsigned char HI,
-				       register unsigned char LO,
-				       register unsigned char *JCODE);
+    extern unsigned char *SJIS_TO_JIS1(unsigned HI,
+				       unsigned LO,
+				       unsigned char *JCODE);
 
-    extern unsigned char *JIS_TO_SJIS1(register unsigned char HI,
-				       register unsigned char LO,
+    extern unsigned char *JIS_TO_SJIS1(unsigned HI,
+				       unsigned LO,
+				       unsigned char *SJCODE);
+
+    extern unsigned char *EUC_TO_SJIS1(unsigned HI,
+				       unsigned LO,
 				       register unsigned char *SJCODE);
 
-    extern unsigned char *EUC_TO_SJIS1(unsigned char HI,
-				       unsigned char LO,
-				       register unsigned char *SJCODE);
+    extern void JISx0201TO0208_SJIS(unsigned I,
+				    unsigned char *OHI,
+				    unsigned char *OLO);
 
-    extern void JISx0201TO0208_SJIS(register unsigned char I,
-				    register unsigned char *OHI,
-				    register unsigned char *OLO);
-
-    extern unsigned char *SJIS_TO_EUC1(unsigned char HI,
-				       unsigned char LO,
+    extern unsigned char *SJIS_TO_EUC1(unsigned HI,
+				       unsigned LO,
 				       unsigned char *EUCp);
 
     extern unsigned char *SJIS_TO_EUC(unsigned char *src,

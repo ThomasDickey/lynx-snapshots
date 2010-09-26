@@ -1,3 +1,4 @@
+/* $LynxId: LYOptions.h,v 1.29 2010/09/25 11:40:36 tom Exp $ */
 #ifndef LYOPTIONS_H
 #define LYOPTIONS_H
 
@@ -17,7 +18,7 @@ extern "C" {
 			    const char **choices,
 			    int length,
 			    int disabled,
-			    BOOLEAN mouse);
+			    int mouse);
 
 #define LYChoosePopup(cur, line, column, choices, length, disabled, mouse) \
 	popup_choice(cur, line, column, (const char **)choices, length, disabled, mouse)

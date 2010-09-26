@@ -1,4 +1,4 @@
-/* $LynxId: LYShowInfo.c,v 1.70 2010/09/22 09:35:55 tom Exp $ */
+/* $LynxId: LYShowInfo.c,v 1.72 2010/09/25 00:47:28 tom Exp $ */
 #include <HTUtils.h>
 #include <HTFile.h>
 #include <HTParse.h>
@@ -29,7 +29,7 @@
 #define END_DL()       fprintf(fp0, "\n</dl>\n")
 
 #define ADD_SS(label,value)       dt_String(fp0, label, value)
-#define ADD_NN(label,value,units) dt_Number(fp0, label, value, units)
+#define ADD_NN(label,value,units) dt_Number(fp0, label, (long) value, units)
 
 static int label_columns;
 
@@ -61,7 +61,7 @@ const char *LYVersionDate(void)
 {
     static char temp[LYNX_DATE_LEN + 1];
 
-    LYstrncpy(temp, &LYNX_DATE[LYNX_DATE_OFF], LYNX_DATE_LEN);
+    LYStrNCpy(temp, &LYNX_DATE[LYNX_DATE_OFF], LYNX_DATE_LEN);
     return temp;
 }
 

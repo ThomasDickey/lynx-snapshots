@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTGopher.c,v 1.48 2010/09/23 08:32:43 tom Exp $
+ * $LynxId: HTGopher.c,v 1.50 2010/09/25 00:43:55 tom Exp $
  *
  *			GOPHER ACCESS				HTGopher.c
  *			=============
@@ -157,7 +157,7 @@ static void init_acceptable(void)
  */
 static const char hex[17] = "0123456789abcdef";
 
-static char from_hex(char c)
+static char from_hex(int c)
 {
     return (char) ((c >= '0') && (c <= '9') ? c - '0'
 		   : (c >= 'A') && (c <= 'F') ? c - 'A' + 10
@@ -751,19 +751,19 @@ static void interpret_cso_key(const char *key,
 	 */
 	int error = 0;
 
-	if (0 == strncmp(key, "$(FID)", 6)) {
+	if (0 == StrNCmp(key, "$(FID)", 6)) {
 	    sprintf(buf, "%d", fld->id);
-	} else if (0 == strncmp(key, "$(FDESC)", 8)) {
+	} else if (0 == StrNCmp(key, "$(FDESC)", 8)) {
 	    sprintf(buf, "%.2046s", fld->description);
-	} else if (0 == strncmp(key, "$(FDEF)", 7)) {
+	} else if (0 == StrNCmp(key, "$(FDEF)", 7)) {
 	    strcpy(buf, fld->defreturn ? " checked" : "");
-	} else if (0 == strncmp(key, "$(FNDX)", 7)) {
+	} else if (0 == StrNCmp(key, "$(FNDX)", 7)) {
 	    strcpy(buf, fld->indexed ? "*" : "");
-	} else if (0 == strncmp(key, "$(FSIZE)", 8)) {
+	} else if (0 == StrNCmp(key, "$(FSIZE)", 8)) {
 	    sprintf(buf, " size=%d maxlength=%d",
 		    fld->max_size > 55 ? 55 : fld->max_size,
 		    fld->max_size);
-	} else if (0 == strncmp(key, "$(FSIZE2)", 9)) {
+	} else if (0 == StrNCmp(key, "$(FSIZE2)", 9)) {
 	    sprintf(buf, " maxlength=%d", fld->max_size);
 	} else {
 	    error = 1;
@@ -774,7 +774,7 @@ static void interpret_cso_key(const char *key,
 	}
     }
     buf[0] = '\0';
-    if (0 == strncmp(key, "$(NEXTFLD)", 10)) {
+    if (0 == StrNCmp(key, "$(NEXTFLD)", 10)) {
 	if (!ctx->fld)
 	    fld = CSOfields;
 	else
@@ -816,8 +816,8 @@ static void interpret_cso_key(const char *key,
 	}
 	ctx->fld = fld;
 
-    } else if ((0 == strncmp(key, "$(QFIELDS)", 10)) ||
-	       (0 == strncmp(key, "$(RFIELDS)", 10))) {
+    } else if ((0 == StrNCmp(key, "$(QFIELDS)", 10)) ||
+	       (0 == StrNCmp(key, "$(RFIELDS)", 10))) {
 	/*
 	 * Begin iteration sequence.
 	 */
@@ -829,7 +829,7 @@ static void interpret_cso_key(const char *key,
 	if (ctx->public_override)
 	    ctx->field_select++;
 
-    } else if (0 == strncmp(key, "$(NAMEFLD)", 10)) {
+    } else if (0 == StrNCmp(key, "$(NAMEFLD)", 10)) {
 	/*
 	 * Special, locate name field.  Flag lookup so QFIELDS will skip it.
 	 */
@@ -841,9 +841,9 @@ static void interpret_cso_key(const char *key,
 		break;
 	    }
 	ctx->fld = fld;
-    } else if (0 == strncmp(key, "$(HOST)", 7)) {
+    } else if (0 == StrNCmp(key, "$(HOST)", 7)) {
 	strcpy(buf, ctx->host);
-    } else if (0 == strncmp(key, "$(PORT)", 7)) {
+    } else if (0 == StrNCmp(key, "$(PORT)", 7)) {
 	sprintf(buf, "%d", ctx->port);
     } else {
 	/*
@@ -911,7 +911,7 @@ static int parse_cso_field_info(CSOfield_info *blk)
  *	================================================
  */
 static int parse_cso_fields(char *buf,
-			    int size)
+			    size_t size)
 {
     int ich;
     char *p = buf;
@@ -1172,7 +1172,7 @@ static int generate_cso_form(char *host,
 		    for (; ctemplate[i]; i++) {
 			for (line = ctemplate[i]; line[j]; j++) {
 			    if (line[j] == '$')
-				if (0 == strncmp(ctx.seek, &line[j], slen)) {
+				if (0 == StrNCmp(ctx.seek, &line[j], slen)) {
 				    if (j == 0)
 					j = (int) strlen(ctemplate[--i]) - 1;
 				    else
@@ -1340,23 +1340,23 @@ static int generate_cso_report(HTStream *Target)
 			    } else if (*l == '>') {
 				StrAllocCat(buf, "&gt;");
 				l++;
-			    } else if (strncmp(l, STR_NEWS_URL, LEN_NEWS_URL) &&
-				       strncmp(l, "snews://", 8) &&
-				       strncmp(l, "nntp://", 7) &&
-				       strncmp(l, "snewspost:", 10) &&
-				       strncmp(l, "snewsreply:", 11) &&
-				       strncmp(l, "newspost:", 9) &&
-				       strncmp(l, "newsreply:", 10) &&
-				       strncmp(l, "ftp://", 6) &&
-				       strncmp(l, "file:/", 6) &&
-				       strncmp(l, "finger://", 9) &&
-				       strncmp(l, "http://", 7) &&
-				       strncmp(l, "https://", 8) &&
-				       strncmp(l, "wais://", 7) &&
-				       strncmp(l, STR_MAILTO_URL,
+			    } else if (StrNCmp(l, STR_NEWS_URL, LEN_NEWS_URL) &&
+				       StrNCmp(l, "snews://", 8) &&
+				       StrNCmp(l, "nntp://", 7) &&
+				       StrNCmp(l, "snewspost:", 10) &&
+				       StrNCmp(l, "snewsreply:", 11) &&
+				       StrNCmp(l, "newspost:", 9) &&
+				       StrNCmp(l, "newsreply:", 10) &&
+				       StrNCmp(l, "ftp://", 6) &&
+				       StrNCmp(l, "file:/", 6) &&
+				       StrNCmp(l, "finger://", 9) &&
+				       StrNCmp(l, "http://", 7) &&
+				       StrNCmp(l, "https://", 8) &&
+				       StrNCmp(l, "wais://", 7) &&
+				       StrNCmp(l, STR_MAILTO_URL,
 					       LEN_MAILTO_URL) &&
-				       strncmp(l, "cso://", 6) &&
-				       strncmp(l, "gopher://", 9)) {
+				       StrNCmp(l, "cso://", 6) &&
+				       StrNCmp(l, "gopher://", 9)) {
 				HTSprintf(&buf, "%c", *l++);
 			    } else {
 				StrAllocCat(buf, "<a href=\"");
@@ -1385,22 +1385,22 @@ static int generate_cso_report(HTStream *Target)
 			} else if (*l == '>') {
 			    StrAllocCat(buf, "&gt;");
 			    l++;
-			} else if (strncmp(l, STR_NEWS_URL, LEN_NEWS_URL) &&
-				   strncmp(l, "snews://", 8) &&
-				   strncmp(l, "nntp://", 7) &&
-				   strncmp(l, "snewspost:", 10) &&
-				   strncmp(l, "snewsreply:", 11) &&
-				   strncmp(l, "newspost:", 9) &&
-				   strncmp(l, "newsreply:", 10) &&
-				   strncmp(l, "ftp://", 6) &&
-				   strncmp(l, "file:/", 6) &&
-				   strncmp(l, "finger://", 9) &&
-				   strncmp(l, "http://", 7) &&
-				   strncmp(l, "https://", 8) &&
-				   strncmp(l, "wais://", 7) &&
-				   strncmp(l, STR_MAILTO_URL, LEN_MAILTO_URL) &&
-				   strncmp(l, "cso://", 6) &&
-				   strncmp(l, "gopher://", 9)) {
+			} else if (StrNCmp(l, STR_NEWS_URL, LEN_NEWS_URL) &&
+				   StrNCmp(l, "snews://", 8) &&
+				   StrNCmp(l, "nntp://", 7) &&
+				   StrNCmp(l, "snewspost:", 10) &&
+				   StrNCmp(l, "snewsreply:", 11) &&
+				   StrNCmp(l, "newspost:", 9) &&
+				   StrNCmp(l, "newsreply:", 10) &&
+				   StrNCmp(l, "ftp://", 6) &&
+				   StrNCmp(l, "file:/", 6) &&
+				   StrNCmp(l, "finger://", 9) &&
+				   StrNCmp(l, "http://", 7) &&
+				   StrNCmp(l, "https://", 8) &&
+				   StrNCmp(l, "wais://", 7) &&
+				   StrNCmp(l, STR_MAILTO_URL, LEN_MAILTO_URL) &&
+				   StrNCmp(l, "cso://", 6) &&
+				   StrNCmp(l, "gopher://", 9)) {
 			    HTSprintf(&buf, "%c", *l++);
 			} else {
 			    StrAllocCat(buf, "<a href=\"");
@@ -1626,7 +1626,7 @@ static int HTLoadCSO(const char *arg,
 				break;
 			    }
 			}
-		    } else if (!strncmp(&data[start], "return=", 7)) {
+		    } else if (!StrNCmp(&data[start], "return=", 7)) {
 			if (!strcmp(&data[start + 7], "all")) {
 			    return_type = 1;
 			} else if (!strcmp(&data[start + 7], "selected")) {
@@ -1683,7 +1683,7 @@ static int HTLoadCSO(const char *arg,
     }
     generate_cso_report(Target);
     NETCLOSE(s);
-    (*Target->isa->put_block) (Target, end_form, sizeof(end_form) - 1);
+    (*Target->isa->put_block) (Target, end_form, (int) sizeof(end_form) - 1);
     (*Target->isa->_free) (Target);
     FREE(host);
     free_CSOfields();

@@ -1,5 +1,5 @@
 /*
- * $LynxId: dtd_util.c,v 1.74 2010/04/29 09:31:08 tom Exp $
+ * $LynxId: dtd_util.c,v 1.76 2010/09/25 00:30:23 tom Exp $
  *
  * Given a SGML_dtd structure, write a corresponding flat file, or "C" source.
  * Given the flat-file, write the "C" source.
@@ -335,7 +335,7 @@ static AttrType *sorted_AttrTypes(const AttrType * source)
     if (number != 0) {
 	result = typecallocn(AttrType, number + 1);
 	if (result != 0) {
-	    memcpy(result, source, number * sizeof(*result));
+	    MemCpy(result, source, number * sizeof(*result));
 	    qsort(result, number, sizeof(*result), compare_attr_types);
 	}
     }
@@ -1035,7 +1035,7 @@ static char *get_line(FILE *input)
     char temp[1024];
     char *result = 0;
 
-    if (fgets(temp, sizeof(temp), input) != 0) {
+    if (fgets(temp, (int) sizeof(temp), input) != 0) {
 	result = strdup(temp);
     }
     return result;

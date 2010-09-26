@@ -1,4 +1,4 @@
-/* $LynxId: LYUtils.h,v 1.83 2010/06/19 15:36:34 tom Exp $ */
+/* $LynxId: LYUtils.h,v 1.85 2010/09/24 09:58:04 tom Exp $ */
 #ifndef LYUTILS_H
 #define LYUTILS_H
 
@@ -134,7 +134,7 @@ extern "C" {
     extern char *LYGetEnv(const char *name);
     extern char *LYLastPathSep(const char *path);
     extern char *LYPathLeaf(char *pathname);
-    extern char *LYTildeExpand(char **pathname, BOOL embedded);
+    extern char *LYTildeExpand(char **pathname, int embedded);
     extern char *LYgetXDisplay(void);
     extern char *strip_trailing_slash(char *my_dirname);
     extern char *trimPoundSelector(char *address);
@@ -144,7 +144,7 @@ extern "C" {
     extern const char *index_to_restriction(unsigned inx);
     extern const char *wwwName(const char *pathname);
     extern int HTCheckForInterrupt(void);
-    extern int LYConsoleInputFD(BOOLEAN need_selectable);
+    extern int LYConsoleInputFD(int need_selectable);
     extern int LYCopyFile(char *src, char *dst);
     extern int LYGetHilitePos(int cur, int count);
     extern int LYRemoveTemp(char *name);
@@ -153,8 +153,8 @@ extern "C" {
     extern int LYValidateOutput(char *filename);
     extern int find_restriction(const char *name, int len);
     extern int number2arrows(int number);
-    extern size_t utf8_length(BOOL utf_flag, const char *data);
-    extern time_t LYmktime(char *string, BOOL absolute);
+    extern size_t utf8_length(int utf_flag, const char *data);
+    extern time_t LYmktime(char *string, int absolute);
     extern void BeginInternalPage(FILE *fp0, const char *Title, const char *HelpURL);
     extern void EndInternalPage(FILE *fp0);
     extern void HTAddSugFilename(char *fname);
@@ -174,7 +174,7 @@ extern "C" {
     extern void LYConvertToURL(char **AllocatedString, int fixit);
     extern void LYDoCSI(char *url, const char *comment, char **csi);
     extern void LYEnsureAbsoluteURL(char **href, const char *name, int fixit);
-    extern void LYFakeZap(BOOL set);
+    extern void LYFakeZap(int set);
     extern void LYFixCursesOn(const char *reason);
     extern void LYFreeHilites(int first, int last);
     extern void LYFreeStringList(HTList *list);
@@ -190,7 +190,7 @@ extern "C" {
     extern void LYsetXDisplay(char *new_display);
     extern void WriteInternalTitle(FILE *fp0, const char *Title);
     extern void change_sug_filename(char *fname);
-    extern void convert_to_spaces(char *string, BOOL condense);
+    extern void convert_to_spaces(char *string, int condense);
     extern void free_and_clear(char **obj);
     extern void noviceline(int more_flag);
     extern void parse_restrictions(const char *s);
@@ -514,8 +514,8 @@ extern "C" {
  */
 #define ON      1
 #define OFF     0
-#define STREQ(a,b) (strcmp(a,b) == 0)
-#define STRNEQ(a,b,c) (strncmp(a,b,c) == 0)
+#define STREQ(a,b)    (strcmp(a,b) == 0)
+#define STRNEQ(a,b,c) (StrNCmp(a,b,c) == 0)
 
 #define HIDE_CHMOD 0600
 #define HIDE_UMASK 0077

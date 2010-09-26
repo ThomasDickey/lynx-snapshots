@@ -1,4 +1,7 @@
-/*					HTML to rich text converter for libwww
+/*
+ * $LynxId: HTML.h,v 1.32 2010/09/25 11:36:37 tom Exp $
+ *
+ *					HTML to rich text converter for libwww
  *
  *			THE HTML TO RTF OBJECT CONVERTER
  *
@@ -213,7 +216,7 @@ extern "C" {
 /*
  *	Semi-Private functions. - FM
  */
-    extern void HTML_put_character(HTStructured * me, char c);
+    extern void HTML_put_character(HTStructured * me, int c);
     extern void HTML_put_string(HTStructured * me, const char *s);
     extern void HTML_write(HTStructured * me, const char *s, int l);
     extern int HTML_put_entity(HTStructured * me, int entity_number);

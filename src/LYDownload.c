@@ -1,4 +1,4 @@
-/* $LynxId: LYDownload.c,v 1.59 2008/12/14 18:26:03 tom Exp $ */
+/* $LynxId: LYDownload.c,v 1.62 2010/09/25 11:19:25 tom Exp $ */
 #include <HTUtils.h>
 #include <HTParse.h>
 #include <HTList.h>
@@ -88,9 +88,9 @@ void LYDownload(char *line)
     }
 #if defined(DIRED_SUPPORT)
     /* FIXME: use HTLocalName */
-    if (!strncmp(file, "file://localhost", 16)) {
+    if (!StrNCmp(file, "file://localhost", 16)) {
 #ifdef __DJGPP__
-	if (!strncmp(file + 16, "/dev/", 5))
+	if (!StrNCmp(file + 16, "/dev/", 5))
 	    file += 16;
 	else {
 	    file += 17;
@@ -104,9 +104,9 @@ void LYDownload(char *line)
     HTUnEscape(file);
 #else
 #if defined(_WINDOWS)		/* 1997/10/15 (Wed) 16:27:38 */
-    if (!strncmp(file, "file://localhost/", 17))
+    if (!StrNCmp(file, "file://localhost/", 17))
 	file += 17;
-    else if (!strncmp(file, "file:/", 6))
+    else if (!StrNCmp(file, "file:/", 6))
 	file += 6;
     HTUnEscape(file);
 #endif /* _WINDOWS */
@@ -134,11 +134,11 @@ void LYDownload(char *line)
 	_statusline(FILENAME_PROMPT);
       retry:
 	if (sug_file)
-	    LYstrncpy(buffer, sug_file, ((sizeof(buffer) / 2) - 1));
+	    LYStrNCpy(buffer, sug_file, ((sizeof(buffer) / 2) - 1));
 	else
 	    *buffer = '\0';
       check_recall:
-	if ((ch = LYgetstr(buffer,
+	if ((ch = LYGetStr(buffer,
 			   VISIBLE, (sizeof(buffer) / 2), recall)) < 0 ||
 	    *buffer == '\0' || ch == UPARROW || ch == DNARROW) {
 	    if (recall && ch == UPARROW) {
@@ -165,7 +165,7 @@ void LYDownload(char *line)
 		    goto retry;
 		} else if ((cp = (char *) HTList_objectAt(sug_filenames,
 							  FnameNum)) != NULL) {
-		    LYstrncpy(buffer, cp, sizeof(buffer) - 1);
+		    LYStrNCpy(buffer, cp, sizeof(buffer) - 1);
 		    if (FnameTotal == 1) {
 			_statusline(EDIT_THE_PREV_FILENAME);
 		    } else {
@@ -197,7 +197,7 @@ void LYDownload(char *line)
 		    goto retry;
 		} else if ((cp = (char *) HTList_objectAt(sug_filenames,
 							  FnameNum)) != NULL) {
-		    LYstrncpy(buffer, cp, sizeof(buffer) - 1);
+		    LYStrNCpy(buffer, cp, sizeof(buffer) - 1);
 		    if (FnameTotal == 1) {
 			_statusline(EDIT_THE_PREV_FILENAME);
 		    } else {
@@ -301,12 +301,12 @@ void LYDownload(char *line)
 		_statusline(FILENAME_PROMPT);
 	      again:
 		if (sug_file) {
-		    strncpy(buffer, sug_file, (sizeof(buffer) / 2) - 1);
+		    StrNCpy(buffer, sug_file, (sizeof(buffer) / 2) - 1);
 		} else {
 		    *buffer = '\0';
 		}
 	      check_again:
-		if ((ch = LYgetstr(buffer, VISIBLE,
+		if ((ch = LYGetStr(buffer, VISIBLE,
 				   sizeof(buffer), recall)) < 0 ||
 		    *buffer == '\0' || ch == UPARROW || ch == DNARROW) {
 		    if (recall && ch == UPARROW) {
@@ -334,7 +334,7 @@ void LYDownload(char *line)
 			} else if ((cp = (char *) HTList_objectAt(sug_filenames,
 								  FnameNum))
 				   != NULL) {
-			    LYstrncpy(buffer, cp, sizeof(buffer) - 1);
+			    LYStrNCpy(buffer, cp, sizeof(buffer) - 1);
 			    if (FnameTotal == 1) {
 				_statusline(EDIT_THE_PREV_FILENAME);
 			    } else {
@@ -367,7 +367,7 @@ void LYDownload(char *line)
 			} else if ((cp = (char *) HTList_objectAt(sug_filenames,
 								  FnameNum))
 				   != NULL) {
-			    LYstrncpy(buffer, cp, sizeof(buffer) - 1);
+			    LYStrNCpy(buffer, cp, sizeof(buffer) - 1);
 			    if (FnameTotal == 1) {
 				_statusline(EDIT_THE_PREV_FILENAME);
 			    } else {
@@ -429,7 +429,7 @@ void LYDownload(char *line)
     if (SecondS == TRUE) {
 #ifdef VMS
 	if (0 == strncasecomp(buffer, "sys$disk:", 9)) {
-	    if (0 == strncmp((buffer + 9), "[]", 2)) {
+	    if (0 == StrNCmp((buffer + 9), "[]", 2)) {
 		HTAddSugFilename(buffer + 11);
 	    } else {
 		HTAddSugFilename(buffer + 9);
@@ -494,7 +494,7 @@ int LYdownload_options(char **newfile, char *data_file)
     StrAllocCopy(downloaded_url, *newfile);
     LYLocalFileToURL(newfile, tempfile);
 
-    LYstrncpy(LYValidDownloadFile,
+    LYStrNCpy(LYValidDownloadFile,
 	      data_file,
 	      (sizeof(LYValidDownloadFile) - 1));
     LYforce_no_cache = TRUE;	/* don't cache this doc */

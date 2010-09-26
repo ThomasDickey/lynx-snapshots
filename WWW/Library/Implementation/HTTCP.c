@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTCP.c,v 1.102 2010/09/22 00:40:25 tom Exp $
+ * $LynxId: HTTCP.c,v 1.104 2010/09/25 11:32:53 tom Exp $
  *
  *			Generic Communication Code		HTTCP.c
  *			==========================
@@ -285,7 +285,9 @@ const char *HTInetString(SockA * soc_in)
 
     getnameinfo((struct sockaddr *) soc_in,
 		SOCKADDR_LEN(soc_in),
-		hostbuf, sizeof(hostbuf), NULL, 0, NI_NUMERICHOST);
+		hostbuf, (socklen_t) sizeof(hostbuf),
+		NULL, 0,
+		NI_NUMERICHOST);
     return hostbuf;
 #else
     static char string[20];
@@ -526,7 +528,7 @@ static size_t fill_rehostent(char *rehostent,
 	for (pcnt = phost->h_addr_list, i_addr = 0;
 	     i_addr < num_addrs;
 	     pcnt++, i_addr++) {
-	    memcpy(p_next_char, *pcnt, sizeof(phost->h_addr_list[0]));
+	    MemCpy(p_next_char, *pcnt, sizeof(phost->h_addr_list[0]));
 	    *p_next_charptr++ = p_next_char;
 	    p_next_char += sizeof(phost->h_addr_list[0]);
 	}
@@ -601,7 +603,9 @@ static unsigned long __stdcall _fork_func(void *arg)
 #endif
 
     if (gbl_phost) {
-	rehostentlen = fill_rehostent(rehostent, REHOSTENT_SIZE, gbl_phost);
+	rehostentlen = fill_rehostent(rehostent,
+				      (size_t) REHOSTENT_SIZE,
+				      gbl_phost);
 	if (rehostentlen == 0) {
 	    gbl_phost = (LYNX_HOSTENT *) NULL;
 	} else {
@@ -896,7 +900,9 @@ LYNX_HOSTENT *LYGetHostByName(char *str)
 	    dump_hostent("CHILD gethostbyname", phost);
 #endif
 	    if (OK_HOST(phost)) {
-		rehostentlen = fill_rehostent(rehostent, REHOSTENT_SIZE, phost);
+		rehostentlen = fill_rehostent(rehostent,
+					      (size_t) REHOSTENT_SIZE,
+					      phost);
 #ifdef DEBUG_HOSTENT_CHILD
 		dump_hostent("CHILD fill_rehostent", (LYNX_HOSTENT *) rehostent);
 #endif
@@ -1290,7 +1296,7 @@ static int HTParseInet(SockA * soc_in, const char *str)
      * probably worth waiting until the Phase transition from IV to V.
      */
     soc_in->sdn_nam.n_len = min(DN_MAXNAML, strlen(host));	/* <=6 in phase 4 */
-    strncpy(soc_in->sdn_nam.n_name, host, soc_in->sdn_nam.n_len + 1);
+    StrNCpy(soc_in->sdn_nam.n_name, host, soc_in->sdn_nam.n_len + 1);
     CTRACE((tfp,
 	    "DECnet: Parsed address as object number %d on host %.6s...\n",
 	    soc_in->sdn_objnum, host));
@@ -1344,7 +1350,7 @@ static int HTParseInet(SockA * soc_in, const char *str)
 	gbl_phost = LYGetHostByName(host);	/* See above */
 	if (!gbl_phost)
 	    goto failed;
-	memcpy((void *) &soc_in->sin_addr, gbl_phost->h_addr_list[0], gbl_phost->h_length);
+	MemCpy((void *) &soc_in->sin_addr, gbl_phost->h_addr_list[0], gbl_phost->h_length);
 #else /* !_WINDOWS_NSL */
 	{
 	    LYNX_HOSTENT *phost;
@@ -1358,7 +1364,7 @@ static int HTParseInet(SockA * soc_in, const char *str)
 	    if (phost->h_length != sizeof soc_in->sin_addr) {
 		HTAlwaysAlert(host, gettext("Address length looks invalid"));
 	    }
-	    memcpy((void *) &soc_in->sin_addr, phost->h_addr_list[0], phost->h_length);
+	    MemCpy((void *) &soc_in->sin_addr, phost->h_addr_list[0], phost->h_length);
 	}
 #endif /* _WINDOWS_NSL */
 
@@ -1505,7 +1511,7 @@ static void get_host_details(void)
 	return;			/* Fail! */
     }
     StrAllocCopy(hostname, res->ai_canonname);
-    memcpy(&HTHostAddress, res->ai_addr, res->ai_addrlen);
+    MemCpy(&HTHostAddress, res->ai_addr, res->ai_addrlen);
     freeaddrinfo(res);
 #else
     phost = gethostbyname(name);	/* See netdb.h */
@@ -1516,7 +1522,7 @@ static void get_host_details(void)
 	return;			/* Fail! */
     }
     StrAllocCopy(hostname, phost->h_name);
-    memcpy(&HTHostAddress, &phost->h_addr_list[0], phost->h_length);
+    MemCpy(&HTHostAddress, &phost->h_addr_list[0], phost->h_length);
 #endif /* INET6 */
     CTRACE((tfp, "     Name server says that I am `%s' = %s\n",
 	    hostname, HTInetString(&HTHostAddress)));
@@ -1666,7 +1672,8 @@ int HTDoConnect(const char *url,
 	    char hostbuf[1024], portbuf[1024];
 
 	    getnameinfo(res->ai_addr, res->ai_addrlen,
-			hostbuf, sizeof(hostbuf), portbuf, sizeof(portbuf),
+			hostbuf, (socklen_t) sizeof(hostbuf),
+			portbuf, (socklen_t) sizeof(portbuf),
 			NI_NUMERICHOST | NI_NUMERICSERV);
 	    HTSprintf0(&line,
 		       gettext("socket failed: family %d addr %s port %s."),
@@ -2026,7 +2033,7 @@ int HTDoRead(int fildes,
 	    otries = tries;
 	    if (t - otime >= 5) {
 		otime = t;
-		HTReadProgress(-1, 0);	/* Put "stalled" message */
+		HTReadProgress((off_t) (-1), (off_t) 0);	/* Put "stalled" message */
 	    }
 	}
 #endif

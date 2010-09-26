@@ -1,3 +1,4 @@
+/* $LynxId: LYKeymap.h,v 1.42 2010/09/25 11:35:30 tom Exp $ */
 #ifndef LYKEYMAP_H
 #define LYKEYMAP_H
 
@@ -10,7 +11,7 @@ extern "C" {
 #endif
     extern BOOLEAN LYisNonAlnumKeyname(int ch, int KeyName);
     extern HTList *LYcommandList(void);
-    extern char *LYKeycodeToString(int c, BOOLEAN upper8);
+    extern char *LYKeycodeToString(int c, int upper8);
     extern char *fmt_keys(int lkc_first, int lkc_second);
     extern char *key_for_func(int func);
     extern char *key_for_func_ext(int lac, int context_code);
@@ -19,7 +20,7 @@ extern "C" {
     extern int lacname_to_lac(const char *func);
     extern int lecname_to_lec(const char *func);
     extern int lkcstring_to_lkc(const char *src);
-    extern int remap(char *key, const char *func, BOOLEAN for_dired);
+    extern int remap(char *key, const char *func, int for_dired);
     extern void print_keymap(char **newfile);
     extern void reset_emacs_keys(void);
     extern void reset_numbers_as_arrows(void);

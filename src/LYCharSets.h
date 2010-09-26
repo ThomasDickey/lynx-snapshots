@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYCharSets.h,v 1.32 2009/11/21 15:52:05 tom Exp $
+ * $LynxId: LYCharSets.h,v 1.33 2010/09/25 01:01:58 tom Exp $
  */
 #ifndef LYCHARSETS_H
 #define LYCHARSETS_H
@@ -52,7 +52,7 @@ extern "C" {
     extern LYUCcharset LYCharSet_UC[];
     extern int UCGetLYhndl_byAnyName(char *value);
     extern void HTMLSetCharacterHandling(int i);
-    extern void HTMLSetUseDefaultRawMode(int i, BOOLEAN modeflag);
+    extern void HTMLSetUseDefaultRawMode(int i, int modeflag);
     extern void HTMLUseCharacterSet(int i);
     extern UCode_t HTMLGetEntityUCValue(const char *name);
     extern void Set_HTCJK(const char *inMIMEname, const char *outMIMEname);

@@ -1,5 +1,5 @@
 /*
- * $LynxId: UCAuto.c,v 1.43 2010/05/02 22:23:54 tom Exp $
+ * $LynxId: UCAuto.c,v 1.45 2010/09/25 00:51:53 tom Exp $
  *
  *  This file contains code for changing the Linux console mode.
  *  Currently some names for font files are hardwired in here.
@@ -371,7 +371,7 @@ void UCChangeTerminalCodepage(int newcs,
      * Also some cpNNN fonts used below are not in the kbd-data.  - kw
      */
 
-    if (!strncmp(name, "iso-8859-1", 10) &&
+    if (!StrNCmp(name, "iso-8859-1", 10) &&
 	(!name[10] || !isdigit(UCH(name[10])))) {
 	if ((lastHasUmap == Is_Set) && !strcmp(lastname, "cp850")) {
 	    /*
@@ -407,7 +407,7 @@ void UCChangeTerminalCodepage(int newcs,
 	TransT = GN_Blat1;	/* bogus! */
 	HasUmap = Dunno;	/* distributed lat0 files have bogus map data! */
 	Utf = Is_Unset;
-    } else if (!strncmp(name, "iso-8859-", 9)) {
+    } else if (!StrNCmp(name, "iso-8859-", 9)) {
 	if (strlen(name) <= 10 || !isdigit(UCH(name[10])))
 	    HTSprintf0(&tmpbuf1, "iso0%s", &name[9]);
 	else
@@ -495,7 +495,7 @@ void UCChangeTerminalCodepage(int newcs,
 	Utf = Dont_Care;
     } else if (!strcmp(name, "us-ascii")) {
 	Utf = Dont_Care;
-    } else if (!strncmp(name, "mnem", 4)) {
+    } else if (!StrNCmp(name, "mnem", 4)) {
 	Utf = Dont_Care;
     }
 
@@ -641,7 +641,7 @@ int Find_Best_Display_Charset(int ord)
 	HTInfoMsg(gettext("Charset name in CHARSET_SWITCH_RULES too long"));
 	return ord;
     }
-    strncpy(buf, r, s - r);
+    StrNCpy(buf, r, s - r);
     buf[s - r] = '\0';
     n = UCGetLYhndl_byMIME(buf);
     if (n < 0) {

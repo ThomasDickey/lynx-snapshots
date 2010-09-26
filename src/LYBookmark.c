@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYBookmark.c,v 1.66 2010/09/22 09:36:12 tom Exp $
+ * $LynxId: LYBookmark.c,v 1.69 2010/09/25 11:19:25 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTAlert.h>
@@ -120,7 +120,7 @@ const char *get_bookmark_filename(char **URL)
 	 */
 	if (LYSafeGets(&string_buffer, fp) != 0
 	    && *LYTrimNewline(string_buffer) != '\0'
-	    && !strncmp(string_buffer, "ncsa-xmosaic-hotlist-format-1", 29)) {
+	    && !StrNCmp(string_buffer, "ncsa-xmosaic-hotlist-format-1", 29)) {
 	    const char *newname;
 
 	    /*
@@ -243,7 +243,7 @@ void save_bookmark_link(const char *address,
 	    FREE(bookmark_URL);
 	    return;
 	}
-	LYstrncpy(filename_buffer, filename, sizeof(filename_buffer) - 1);
+	LYStrNCpy(filename_buffer, filename, sizeof(filename_buffer) - 1);
     }
 
     /*
@@ -290,13 +290,13 @@ void save_bookmark_link(const char *address,
 	    default:
 		break;
 	    }
-	    LYstrncpy(string_buffer, tmp_buffer, sizeof(string_buffer) - 1);
+	    LYStrNCpy(string_buffer, tmp_buffer, sizeof(string_buffer) - 1);
 	} else {
-	    LYstrncpy(string_buffer, title, sizeof(string_buffer) - 1);
+	    LYStrNCpy(string_buffer, title, sizeof(string_buffer) - 1);
 	}
 	LYReduceBlanks(string_buffer);
 	LYMBM_statusline(TITLE_PROMPT);
-	LYgetstr(string_buffer, VISIBLE, sizeof(string_buffer), NORECALL);
+	LYGetStr(string_buffer, VISIBLE, sizeof(string_buffer), NORECALL);
 	if (*string_buffer == '\0') {
 	    LYMBM_statusline(CANCELLED);
 	    LYSleepMsg();
@@ -1057,7 +1057,7 @@ static char *title_convert8bit(const char *Title)
     for (; *p; p++) {
 	char temp[2];
 
-	LYstrncpy(temp, p, sizeof(temp) - 1);
+	LYStrNCpy(temp, p, sizeof(temp) - 1);
 	if (UCH(*temp) <= 127) {
 	    StrAllocCat(comment, temp);
 	    StrAllocCat(ncr, temp);
@@ -1065,7 +1065,7 @@ static char *title_convert8bit(const char *Title)
 	    long unicode;
 	    char replace_buf[32];
 
-	    if (UCTransCharStr(replace_buf, sizeof(replace_buf), *temp,
+	    if (UCTransCharStr(replace_buf, (int) sizeof(replace_buf), *temp,
 			       charset_in, charset_out, YES) > 0)
 		StrAllocCat(comment, replace_buf);
 

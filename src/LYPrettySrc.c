@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYPrettySrc.c,v 1.22 2010/09/22 09:39:40 tom Exp $
+ * $LynxId: LYPrettySrc.c,v 1.24 2010/09/24 22:06:29 tom Exp $
  *
  * HTML source syntax highlighting
  * by Vlad Harchev <hvv@hippo.ru>
@@ -181,8 +181,8 @@ static void append_open_tag(char *tagname,
 /* returns FALSE if incorrect */
 int html_src_parse_tagspec(char *ts,
 			   HTlexeme lexeme,
-			   BOOL checkonly,
-			   BOOL isstart)
+			   int checkonly,
+			   int isstart)
 {
     BOOL stop = FALSE;
     BOOL code = FALSE;
@@ -393,7 +393,7 @@ static void failed_init(const char *tag, int lexeme)
     exit_immediately(EXIT_FAILURE);
 }
 
-void HTMLSRC_init_caches(BOOL dont_exit)
+void HTMLSRC_init_caches(int dont_exit)
 {
     int i;
     char *p;
@@ -402,7 +402,7 @@ void HTMLSRC_init_caches(BOOL dont_exit)
     CTRACE2(TRACE_CFG, (tfp, "HTMLSRC_init_caches(%d tagspecs)\n", HTL_num_lexemes));
     for (i = 0; i < HTL_num_lexemes; ++i) {
 	/*we assume that HT_tagspecs was NULLs at when program started */
-	LYstrncpy(buf,
+	LYStrNCpy(buf,
 		  HTL_tagspecs[i]
 		  ? HTL_tagspecs[i]
 		  : HTL_tagspecs_defaults[i],

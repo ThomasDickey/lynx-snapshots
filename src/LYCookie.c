@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYCookie.c,v 1.102 2010/09/22 21:24:00 tom Exp $
+ * $LynxId: LYCookie.c,v 1.105 2010/09/24 23:53:47 tom Exp $
  *
  *			       Lynx Cookie Support		   LYCookie.c
  *			       ===================
@@ -134,7 +134,7 @@ static void MemAllocCopy(char **dest,
     temp = typecallocn(char, (unsigned)(end - start) + 1);
     if (temp == NULL)
 	outofmem(__FILE__, "MemAllocCopy");
-    LYstrncpy(temp, start, (int) (end - start));
+    LYStrNCpy(temp, start, (int) (end - start));
     HTSACopy(dest, temp);
     FREE(temp);
 }
@@ -285,7 +285,7 @@ static BOOL is_prefix(const char *a, const char *b)
     if (len_a > len_b) {
 	return FALSE;
     } else {
-	if (strncmp(a, b, (unsigned) len_a) != 0) {
+	if (StrNCmp(a, b, (unsigned) len_a) != 0) {
 	    return FALSE;
 	}
 	if (len_a < len_b && (len_a > 1 || a[0] != '/')) {
@@ -670,7 +670,7 @@ static char *scan_cookie_sublist(char *hostname,
 				 int port,
 				 HTList *sublist,
 				 char *header,
-				 BOOL secure)
+				 int secure)
 {
     HTList *hl;
     cookie *co;
@@ -857,7 +857,7 @@ static char *alloc_attr_value(const char *value_start,
 
 	if (value == NULL)
 	    outofmem(__FILE__, "LYProcessSetCookies");
-	LYstrncpy(value, value_start, value_len);
+	LYStrNCpy(value, value_start, value_len);
     }
     return value;
 }
@@ -1837,7 +1837,7 @@ void LYSetCookie(const char *SetCookie,
 char *LYAddCookieHeader(char *hostname,
 			char *path,
 			int port,
-			BOOL secure)
+			int secure)
 {
     char *header = NULL;
     HTList *hl = domain_list, *next = NULL;
@@ -1955,7 +1955,7 @@ void LYLoadCookies(char *cookie_file)
 	for (tok_loop = 0; tok_out && tok_values[tok_loop].s; tok_loop++) {
 	    CTrace((tfp, "\t%d:[%03d]:[%s]\n",
 		    tok_loop, (int) (tok_out - buf), tok_out));
-	    LYstrncpy(tok_values[tok_loop].s,
+	    LYStrNCpy(tok_values[tok_loop].s,
 		      tok_out,
 		      (int) tok_values[tok_loop].n);
 	    /*
