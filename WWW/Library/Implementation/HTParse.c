@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTParse.c,v 1.63 2010/09/22 00:50:56 tom Exp $
+ * $LynxId: HTParse.c,v 1.67 2010/09/25 13:55:42 tom Exp $
  *
  *		Parse HyperText Document Address		HTParse.c
  *		================================
@@ -386,7 +386,7 @@ char *HTParse(const char *aName,
     /*
      * Make working copy of the input string to cut up.
      */
-    memcpy(name, aName, len1);
+    MemCpy(name, aName, len1);
 
     /*
      * Cut up the string into URL fields.
@@ -408,7 +408,7 @@ char *HTParse(const char *aName,
 	related.search = NULL;
 	related.anchor = NULL;
     } else {
-	memcpy(rel, relatedName, len2);
+	MemCpy(rel, relatedName, len2);
 	scan(rel, &related);
     }
     SHOW_PARTS(related);
@@ -851,8 +851,8 @@ void HTSimplify(char *filename)
 			 */
 			;
 		    if ((q[0] == '/') &&
-			(strncmp(q, "/../", 4) &&
-			 strncmp(q, "/..?", 4)) &&
+			(StrNCmp(q, "/../", 4) &&
+			 StrNCmp(q, "/..?", 4)) &&
 			!((q - 1) > filename && q[-1] == '/')) {
 			/*
 			 * Not at beginning of string or in a host field, so
@@ -924,7 +924,7 @@ void HTSimplify(char *filename)
 			return;
 		    q++;
 		}
-		if (strncmp(q, "../", 3) && strncmp(q, "./", 2)) {
+		if (StrNCmp(q, "../", 3) && StrNCmp(q, "./", 2)) {
 		    /*
 		     * Not after "//" at beginning of string or after "://",
 		     * and xxx is not ".." or ".", so remove the "xxx/..".
@@ -1014,7 +1014,7 @@ char *HTRelative(const char *aName,
 }
 
 #define AlloCopy(next,base,extra) \
-	typecallocn(char, (unsigned) ((next - base) + ((int) extra)))
+	typecallocn(char, ((next - base) + ((int) extra)))
 
 /*	Escape undesirable characters using %			HTEscape()
  *	-------------------------------------
@@ -1047,12 +1047,12 @@ static const char *hex = "0123456789ABCDEF";
 #define ACCEPTABLE(a)	( a>=32 && a<128 && ((isAcceptable[a-32]) & mask))
 
 char *HTEscape(const char *str,
-	       unsigned char mask)
+	       unsigned mask)
 {
     const char *p;
     char *q;
     char *result;
-    unsigned unacceptable = 0;
+    size_t unacceptable = 0;
 
     for (p = str; *p; p++)
 	if (!ACCEPTABLE(UCH(TOASCII(*p))))
@@ -1095,7 +1095,7 @@ char *HTEscapeUnsafe(const char *str)
     const char *p;
     char *q;
     char *result;
-    unsigned unacceptable = 0;
+    size_t unacceptable = 0;
 
     for (p = str; *p; p++)
 	if (UNSAFE(UCH(TOASCII(*p))))
@@ -1133,12 +1133,12 @@ char *HTEscapeUnsafe(const char *str)
  *	Unlike HTUnEscape(), this routine returns a calloced string.
  */
 char *HTEscapeSP(const char *str,
-		 unsigned char mask)
+		 unsigned mask)
 {
     const char *p;
     char *q;
     char *result;
-    unsigned unacceptable = 0;
+    size_t unacceptable = 0;
 
     for (p = str; *p; p++)
 	if (!(*p == ' ' || ACCEPTABLE(UCH(TOASCII(*p)))))
@@ -1175,7 +1175,7 @@ char *HTEscapeSP(const char *str,
  *	the ASCII hex code for character 16x+y.
  *	The string is converted in place, as it will never grow.
  */
-static char from_hex(char c)
+static char from_hex(int c)
 {
     return (char) (c >= '0' && c <= '9' ? c - '0'
 		   : c >= 'A' && c <= 'F' ? c - 'A' + 10

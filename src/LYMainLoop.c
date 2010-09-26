@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMainLoop.c,v 1.167 2010/09/22 09:36:30 tom Exp $
+ * $LynxId: LYMainLoop.c,v 1.172 2010/09/25 14:57:53 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTAccess.h>
@@ -153,8 +153,8 @@ HTAtom *WWW_SOURCE = 0;
 #define NONINTERNAL_OR_PHYS_DIFFERENT(p,n) are_different(p,n)
 #endif /* TRACK_INTERNAL_LINKS */
 
-static void exit_immediately_with_error_message(int state, BOOLEAN first_file);
-static void status_link(char *curlink_name, BOOLEAN show_more, BOOLEAN show_indx);
+static void exit_immediately_with_error_message(int state, int first_file);
+static void status_link(char *curlink_name, int show_more, int show_indx);
 static void show_main_statusline(const LinkInfo curlink, int for_what);
 static void form_noviceline(int);
 static int are_different(DocInfo *doc1, DocInfo *doc2);
@@ -663,7 +663,7 @@ static void do_check_goto_URL(char *user_input_buffer,
 
 	for (n = 0; n < TABLESIZE(table); n++) {
 	    if (*(table[n].flag)
-		&& !strncmp(user_input_buffer, table[n].name, strlen(table[n].name))) {
+		&& !StrNCmp(user_input_buffer, table[n].name, strlen(table[n].name))) {
 		found = TRUE;
 		HTUserMsg2(GOTO_XXXX_DISALLOWED, table[n].name);
 		break;
@@ -736,7 +736,7 @@ static BOOL do_check_recall(int ch,
 		LYAddPathSep0(user_input_buffer);
 	    } else {
 		HTUserMsg2(WWW_ILLEGAL_URL_MESSAGE, user_input_buffer);
-		LYstrncpy(user_input_buffer, *old_user_input, MAX_LINE - 1);
+		LYStrNCpy(user_input_buffer, *old_user_input, MAX_LINE - 1);
 		FREE(*old_user_input);
 		ret = FALSE;
 		break;
@@ -749,7 +749,7 @@ static BOOL do_check_recall(int ch,
 	LYTrimAllStartfile(user_input_buffer);
 	if (*user_input_buffer == '\0' &&
 	    !(recall && (ch == UPARROW || ch == DNARROW))) {
-	    LYstrncpy(user_input_buffer, *old_user_input, MAX_LINE - 1);
+	    LYStrNCpy(user_input_buffer, *old_user_input, MAX_LINE - 1);
 	    FREE(*old_user_input);
 	    HTInfoMsg(CANCELLED);
 	    ret = FALSE;
@@ -775,7 +775,7 @@ static BOOL do_check_recall(int ch,
 		*URLNum = 0;
 	    if ((cp = (char *) HTList_objectAt(Goto_URLs,
 					       *URLNum)) != NULL) {
-		LYstrncpy(user_input_buffer, cp, MAX_LINE - 1);
+		LYStrNCpy(user_input_buffer, cp, MAX_LINE - 1);
 		if (goto_buffer
 		    && **old_user_input
 		    && !strcmp(*old_user_input, user_input_buffer)) {
@@ -786,14 +786,14 @@ static BOOL do_check_recall(int ch,
 		} else {
 		    _statusline(EDIT_A_PREV_GOTO);
 		}
-		if ((ch = LYgetstr(user_input_buffer, VISIBLE,
-				   MAX_LINE,
+		if ((ch = LYGetStr(user_input_buffer, VISIBLE,
+				   (size_t) MAX_LINE,
 				   recall)) < 0) {
 		    /*
 		     * User cancelled the Goto via ^G.  Restore
 		     * user_input_buffer and break.  - FM
 		     */
-		    LYstrncpy(user_input_buffer, *old_user_input, MAX_LINE - 1);
+		    LYStrNCpy(user_input_buffer, *old_user_input, MAX_LINE - 1);
 		    FREE(*old_user_input);
 		    HTInfoMsg(CANCELLED);
 		    ret = FALSE;
@@ -820,7 +820,7 @@ static BOOL do_check_recall(int ch,
 		 */
 		*URLNum = URLTotal - 1;
 	    if ((cp = (char *) HTList_objectAt(Goto_URLs, *URLNum)) != NULL) {
-		LYstrncpy(user_input_buffer, cp, MAX_LINE - 1);
+		LYStrNCpy(user_input_buffer, cp, MAX_LINE - 1);
 		if (goto_buffer && **old_user_input &&
 		    !strcmp(*old_user_input, user_input_buffer)) {
 		    _statusline(EDIT_CURRENT_GOTO);
@@ -830,14 +830,14 @@ static BOOL do_check_recall(int ch,
 		} else {
 		    _statusline(EDIT_A_PREV_GOTO);
 		}
-		if ((ch = LYgetstr(user_input_buffer, VISIBLE,
-				   MAX_LINE,
+		if ((ch = LYGetStr(user_input_buffer, VISIBLE,
+				   (size_t) MAX_LINE,
 				   recall)) < 0) {
 		    /*
 		     * User cancelled the Goto via ^G.  Restore
 		     * user_input_buffer and break.  - FM
 		     */
-		    LYstrncpy(user_input_buffer, *old_user_input, MAX_LINE - 1);
+		    LYStrNCpy(user_input_buffer, *old_user_input, MAX_LINE - 1);
 		    FREE(*old_user_input);
 		    HTInfoMsg(CANCELLED);
 		    ret = FALSE;
@@ -921,11 +921,11 @@ static int DoTraversal(int c,
 	    traversal_host &&
 	    links[curdoc.link].lname) {
 	    if (!isLYNXIMGMAP(links[curdoc.link].lname)) {
-		rlink_allowed = (BOOL) !strncmp(traversal_host,
+		rlink_allowed = (BOOL) !StrNCmp(traversal_host,
 						links[curdoc.link].lname,
 						strlen(traversal_host));
 	    } else {
-		rlink_allowed = (BOOL) !strncmp(traversal_host,
+		rlink_allowed = (BOOL) !StrNCmp(traversal_host,
 						links[curdoc.link].lname + LEN_LYNXIMGMAP,
 						strlen(traversal_host));
 	    }
@@ -1010,7 +1010,7 @@ static BOOLEAN check_history(void)
 	? HDOC(nhist - 1).address
 	: HDOC(nhist - 1).address + LEN_LYNXIMGMAP;
 
-	if (!strncmp(base, text, strlen(base))) {
+	if (!StrNCmp(base, text, strlen(base))) {
 	    /*
 	     * Normal case - as best as we can check, the document at the top
 	     * of the history stack seems to be the document the List Page is
@@ -1190,10 +1190,10 @@ static int handle_LYK_ACTIVATE(int *c,
 	    *c = change_form_link(curdoc.link,
 				  &newdoc, refresh_screen,
 				  FALSE,
-				  (BOOLEAN) (real_cmd == LYK_SUBMIT ||
-					     real_cmd == LYK_NOCACHE ||
-					     real_cmd == LYK_DOWNLOAD ||
-					     real_cmd == LYK_HEAD));
+				  (real_cmd == LYK_SUBMIT ||
+				   real_cmd == LYK_NOCACHE ||
+				   real_cmd == LYK_DOWNLOAD ||
+				   real_cmd == LYK_HEAD));
 	    if (*c != LKC_DONE || *refresh_screen) {
 		/*
 		 * Cannot have been a submit field for which newdoc was filled
@@ -1287,7 +1287,7 @@ static int handle_LYK_ACTIVATE(int *c,
 		       isLYNXCOOKIE(curdoc.address) ||
 		       isLYNXCACHE(curdoc.address)) &&
 #endif
-		      !strncmp(links[curdoc.link].lname,
+		      !StrNCmp(links[curdoc.link].lname,
 			       helpfilepath,
 			       strlen(helpfilepath)))) {
 		    HTAlert(FILE_SERVED_LINKS_DISALLOWED);
@@ -1707,7 +1707,7 @@ static int handle_LYK_COMMAND(char *user_input_buffer)
 
     *user_input_buffer = 0;
     _statusline(": ");
-    if (LYgetstr(user_input_buffer, VISIBLE, MAX_LINE, RECALL_CMD) >= 0) {
+    if (LYGetStr(user_input_buffer, VISIBLE, (size_t) MAX_LINE, RECALL_CMD) >= 0) {
 	src = LYSkipBlanks(user_input_buffer);
 	tmp = LYSkipNonBlanks(src);
 	*tmp = 0;
@@ -2172,7 +2172,7 @@ static int handle_LYK_DOWNLOAD(int *cmd,
 	     */
 	    LYforce_no_cache = TRUE;
 
-	} else if (!strncmp(links[curdoc.link].lname, "data:", 5)) {
+	} else if (!StrNCmp(links[curdoc.link].lname, "data:", 5)) {
 	    if (*old_c != real_c) {
 		*old_c = real_c;
 		HTAlert(UNSUPPORTED_DATA_URL);
@@ -2396,7 +2396,7 @@ static int handle_LYK_ECGOTO(int *ch,
      * document's address.
      */
     StrAllocCopy(*old_user_input, user_input_buffer);
-    LYstrncpy(user_input_buffer,
+    LYStrNCpy(user_input_buffer,
 	      curdoc.address,
 	      (MAX_LINE - 1));
 
@@ -2411,7 +2411,7 @@ static int handle_LYK_ECGOTO(int *ch,
      * Offer the current document's URL for editing.  - FM
      */
     _statusline(EDIT_CURDOC_URL);
-    if (((*ch = LYgetstr(user_input_buffer, VISIBLE,
+    if (((*ch = LYGetStr(user_input_buffer, VISIBLE,
 			 MAX_LINE, RECALL_URL)) >= 0) &&
 	user_input_buffer[0] != '\0' &&
 	strcmp(user_input_buffer, curdoc.address)) {
@@ -2424,7 +2424,7 @@ static int handle_LYK_ECGOTO(int *ch,
      * User cancelled via ^G, a full deletion, or not modifying the URL.  - FM
      */
     HTInfoMsg(CANCELLED);
-    LYstrncpy(user_input_buffer, *old_user_input, MAX_LINE - 1);
+    LYStrNCpy(user_input_buffer, *old_user_input, MAX_LINE - 1);
     FREE(*old_user_input);
     return 0;
 }
@@ -2641,7 +2641,7 @@ static int handle_LYK_ELGOTO(int *ch,
      * address.  - FM
      */
     StrAllocCopy(*old_user_input, user_input_buffer);
-    LYstrncpy(user_input_buffer,
+    LYStrNCpy(user_input_buffer,
 	      ((links[curdoc.link].type == WWW_FORM_LINK_TYPE)
 	       ?
 	       links[curdoc.link].l_form->submit_action : links[curdoc.link].lname),
@@ -2651,7 +2651,7 @@ static int handle_LYK_ELGOTO(int *ch,
      * Offer the current link's URL for editing.  - FM
      */
     _statusline(EDIT_CURLINK_URL);
-    if (((*ch = LYgetstr(user_input_buffer, VISIBLE,
+    if (((*ch = LYGetStr(user_input_buffer, VISIBLE,
 			 MAX_LINE, RECALL_URL)) >= 0) &&
 	user_input_buffer[0] != '\0' &&
 	strcmp(user_input_buffer,
@@ -2667,7 +2667,7 @@ static int handle_LYK_ELGOTO(int *ch,
      * User cancelled via ^G, a full deletion, or not modifying the URL.  - FM
      */
     HTInfoMsg(CANCELLED);
-    LYstrncpy(user_input_buffer, *old_user_input, MAX_LINE - 1);
+    LYStrNCpy(user_input_buffer, *old_user_input, MAX_LINE - 1);
     FREE(*old_user_input);
     return 0;
 }
@@ -2905,13 +2905,13 @@ static BOOLEAN handle_LYK_GOTO(int *ch,
      * Ask the user.
      */
     _statusline(URL_TO_OPEN);
-    if ((*ch = LYgetstr(user_input_buffer, VISIBLE,
+    if ((*ch = LYGetStr(user_input_buffer, VISIBLE,
 			MAX_LINE, *recall)) < 0) {
 	/*
 	 * User cancelled the Goto via ^G.  Restore user_input_buffer and
 	 * break.  - FM
 	 */
-	LYstrncpy(user_input_buffer, *old_user_input, MAX_LINE - 1);
+	LYStrNCpy(user_input_buffer, *old_user_input, MAX_LINE - 1);
 	FREE(*old_user_input);
 	HTInfoMsg(CANCELLED);
 	return FALSE;
@@ -2981,13 +2981,13 @@ static BOOLEAN handle_LYK_HEAD(int *cmd)
 	    }
 	} else if (c == 'L') {
 	    if (links[curdoc.link].type != WWW_FORM_LINK_TYPE &&
-		strncmp(links[curdoc.link].lname, "http", 4) &&
-		strncmp(links[curdoc.link].lname,
+		StrNCmp(links[curdoc.link].lname, "http", 4) &&
+		StrNCmp(links[curdoc.link].lname,
 			"LYNXIMGMAP:http", 15) &&
 		LYCanDoHEAD(links[curdoc.link].lname) != TRUE &&
 		(links[curdoc.link].type != WWW_INTERN_LINK_TYPE ||
 		 !curdoc.address ||
-		 strncmp(curdoc.address, "http", 4))) {
+		 StrNCmp(curdoc.address, "http", 4))) {
 		HTUserMsg(LINK_NOT_HTTP_URL);
 	    } else if (links[curdoc.link].type == WWW_FORM_LINK_TYPE &&
 		       links[curdoc.link].l_form->disabled) {
@@ -2995,7 +2995,7 @@ static BOOLEAN handle_LYK_HEAD(int *cmd)
 	    } else if (links[curdoc.link].type == WWW_FORM_LINK_TYPE &&
 		       links[curdoc.link].l_form->submit_action != 0 &&
 		       !isLYNXCGI(links[curdoc.link].l_form->submit_action) &&
-		       strncmp(links[curdoc.link].l_form->submit_action,
+		       StrNCmp(links[curdoc.link].l_form->submit_action,
 			       "http", 4)) {
 		HTUserMsg(FORM_ACTION_NOT_HTTP_URL);
 	    } else if (links[curdoc.link].type == WWW_FORM_LINK_TYPE &&
@@ -3127,7 +3127,7 @@ static void handle_LYK_HISTORICAL(void)
     return;
 }
 
-static BOOLEAN handle_LYK_HISTORY(BOOLEAN ForcePush)
+static BOOLEAN handle_LYK_HISTORY(int ForcePush)
 {
     if (curdoc.title && !LYIsUIPage(curdoc.address, UIP_HISTORY)) {
 	/*
@@ -3167,7 +3167,7 @@ static BOOLEAN handle_LYK_HISTORY(BOOLEAN ForcePush)
 	    LYPermitURL = TRUE;
 	}
 	return TRUE;
-    }				/* end if strncmp */
+    }				/* end if StrNCmp */
     return FALSE;
 }
 
@@ -3212,7 +3212,7 @@ static void handle_LYK_INDEX(int *old_c,
 }
 
 static void handle_LYK_INDEX_SEARCH(BOOLEAN *force_load,
-				    BOOLEAN ForcePush,
+				    int ForcePush,
 				    int *old_c,
 				    int real_c)
 {
@@ -3432,7 +3432,7 @@ static BOOLEAN handle_LYK_JUMP(int c,
 		    return FALSE;
 		}
 		ret = HTParse((ret + 3), startfile, PARSE_ALL);
-		LYstrncpy(user_input_buffer, ret, MAX_LINE - 1);
+		LYStrNCpy(user_input_buffer, ret, MAX_LINE - 1);
 		FREE(ret);
 		return TRUE;
 	    }
@@ -3691,7 +3691,7 @@ static BOOLEAN handle_LYK_OPTIONS(int *cmd,
 	    ((strcmp(CurrentUserAgent, NonNull(LYUserAgent)) ||
 	      strcmp(CurrentNegoLanguage, NonNull(language)) ||
 	      strcmp(CurrentNegoCharset, NonNull(pref_charset))) &&
-	     (!strncmp(curdoc.address, "http", 4) ||
+	     (!StrNCmp(curdoc.address, "http", 4) ||
 	      isLYNXCGI(curdoc.address)))) {
 
 	    BOOLEAN canreparse_post = FALSE;
@@ -3713,7 +3713,7 @@ static BOOLEAN handle_LYK_OPTIONS(int *cmd,
 		if (((strcmp(CurrentUserAgent, NonNull(LYUserAgent)) ||
 		      strcmp(CurrentNegoLanguage, NonNull(language)) ||
 		      strcmp(CurrentNegoCharset, NonNull(pref_charset))) &&
-		     (strncmp(curdoc.address, "http", 4) == 0 ||
+		     (StrNCmp(curdoc.address, "http", 4) == 0 ||
 		      !isLYNXCGI(curdoc.address) == 0))) {
 		    /*
 		     * An option has changed which may influence content
@@ -4450,7 +4450,7 @@ static void handle_LYK_TAG_LINK(void)
 	if (dir_list_style == MIXED_STYLE) {
 	    if (!strcmp(LYGetHiliteStr(curdoc.link, 0), "../"))
 		return;
-	} else if (!strncmp(LYGetHiliteStr(curdoc.link, 0), "Up to ", 6))
+	} else if (!StrNCmp(LYGetHiliteStr(curdoc.link, 0), "Up to ", 6))
 	    return;
 	{
 	    /*
@@ -4794,7 +4794,7 @@ void handle_LYK_WHEREIS(int cmd,
 	 */
 	*prev_target = '\0';
     }
-    found = textsearch(&curdoc, prev_target, sizeof(prev_target) - 1,
+    found = textsearch(&curdoc, prev_target, (int) sizeof(prev_target) - 1,
 		       (cmd == LYK_WHEREIS)
 		       ? 0
 		       : ((cmd == LYK_NEXT)
@@ -4964,7 +4964,7 @@ static void handle_LYK_digit(int c,
 		    sprintf(user_input_buffer,
 			    LINK_ALREADY_CURRENT, number);
 		    HTUserMsg(user_input_buffer);
-		    LYstrncpy(user_input_buffer, temp, MAX_LINE - 1);
+		    LYStrNCpy(user_input_buffer, temp, MAX_LINE - 1);
 		    FREE(temp);
 		} else {
 		    /*
@@ -4997,7 +4997,7 @@ static void handle_LYK_digit(int c,
 		sprintf(user_input_buffer,
 			ALREADY_AT_PAGE, number);
 		HTUserMsg(user_input_buffer);
-		LYstrncpy(user_input_buffer, temp, MAX_LINE - 1);
+		LYStrNCpy(user_input_buffer, temp, MAX_LINE - 1);
 		FREE(temp);
 	    }
 	}
@@ -5028,7 +5028,7 @@ void handle_LYK_CHDIR(void)
     /* some people may prefer automatic clearing of the previous user input,
        here, to do this, just uncomment next line - VH */
     /* buf[0]='\0'; */
-    if (LYgetstr(buf, VISIBLE, sizeof(buf) - 1, NORECALL) < 0 || !*buf) {
+    if (LYGetStr(buf, VISIBLE, sizeof(buf) - 1, NORECALL) < 0 || !*buf) {
 	HTInfoMsg(CANCELLED);
 	return;
     }
@@ -5171,7 +5171,7 @@ static BOOLEAN handle_LYK_LINEWRAP_TOGGLE(int *cmd,
     /* Somehow the mouse is over the number instead of being over the
        name, so we decrease x. */
     c = LYChoosePopup(!LYwideLines, LYlines / 2 - 2, LYcolLimit / 2 - 6,
-		      choices, TABLESIZE(choices) - 1, FALSE, TRUE);
+		      choices, (int) TABLESIZE(choices) - 1, FALSE, TRUE);
     /*
      * LYhandlePopupList() wasn't really meant to be used outside of old-style
      * Options menu processing.  One result of mis-using it here is that we
@@ -5826,7 +5826,7 @@ int mainloop(void)
 		    if (!strncasecomp(temp, name, len) &&
 			strlen(temp) > len)
 #else
-		    if (!strncmp(temp, name, len) &&
+		    if (!StrNCmp(temp, name, len) &&
 			strlen(temp) > len)
 #endif /* VMS */
 		    {
@@ -5871,7 +5871,7 @@ int mainloop(void)
 					    wwwName(Home_Dir()));
 				StrAllocCat(newdoc.address, "/");
 				StrAllocCat(newdoc.address,
-					    (strncmp(BookmarkPage, "./", 2) ?
+					    (StrNCmp(BookmarkPage, "./", 2) ?
 					     BookmarkPage :
 					     (BookmarkPage + 2)));
 				StrAllocCopy(newdoc.title, BOOKMARK_TITLE);
@@ -6173,7 +6173,7 @@ int mainloop(void)
 		/*
 		 * Set up the traversal_host comparison string.
 		 */
-		if (strncmp((curdoc.address ? curdoc.address : "NULL"),
+		if (StrNCmp((curdoc.address ? curdoc.address : "NULL"),
 			    "http", 4)) {
 		    StrAllocCopy(traversal_host, NO_NOTHING);
 		} else if (check_realm) {
@@ -6506,17 +6506,19 @@ int mainloop(void)
 		    print_crawl_to_fd(cfp, curdoc.address, curdoc.title);
 		    LYCloseOutput(cfp);
 		} else {
+#ifdef UNIX
+		    FILE *fp = (dump_output_immediately
+				? stderr
+				: stdout);
+
+#else
+		    FILE *fp = stdout;
+#endif
 		    if (!dump_output_immediately)
 			cleanup();
-		    fprintf(
-#ifdef UNIX
-			       (dump_output_immediately
-				? stderr
-				: stdout),
-#else
-			       stdout,
-#endif
-			       gettext("Fatal error - could not open output file %s\n"), cfile);
+		    fprintf(fp,
+			    gettext("Fatal error - could not open output file %s\n"),
+			    cfile);
 		    if (!dump_output_immediately) {
 			exit_immediately(EXIT_FAILURE);
 		    }
@@ -6972,8 +6974,9 @@ int mainloop(void)
 		len = (unsigned) (e - s + 1);
 		if (len < MAX_LINE)
 		    len = MAX_LINE;	/* Required for do_check_goto_URL() */
-		buf = (char *) malloc(len);
-		strncpy(buf, (const char *) s, (unsigned) (e - s));
+		buf = typeMallocn(char, len);
+
+		StrNCpy(buf, (const char *) s, (e - s));
 		buf[e - s] = '\0';
 		t = (unsigned char *) buf;
 
@@ -7733,8 +7736,7 @@ static void form_noviceline(int disabled)
     }
 }
 
-static void exit_immediately_with_error_message(int state,
-						BOOLEAN first_file)
+static void exit_immediately_with_error_message(int state, int first_file)
 {
     char *buf = 0;
     char *buf2 = 0;
@@ -7788,8 +7790,8 @@ static void exit_immediately_with_error_message(int state,
 }
 
 static void status_link(char *curlink_name,
-			BOOLEAN show_more,
-			BOOLEAN show_indx)
+			int show_more,
+			int show_indx)
 {
 #define MAX_STATUS (LYcolLimit - 1)
 #define MIN_STATUS 0

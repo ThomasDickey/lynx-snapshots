@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFWriter.c,v 1.94 2010/09/22 22:53:58 tom Exp $
+ * $LynxId: HTFWriter.c,v 1.97 2010/09/25 01:00:57 tom Exp $
  *
  *		FILE WRITER				HTFWrite.h
  *		===========
@@ -109,7 +109,7 @@ static void HTFWriter_error(HTStream *me, const char *id)
 /*	Character handling
  *	------------------
  */
-static void HTFWriter_put_character(HTStream *me, char c)
+static void HTFWriter_put_character(HTStream *me, int c)
 {
     if (me->fp) {
 	putc(c, me->fp);
@@ -134,7 +134,7 @@ static void HTFWriter_write(HTStream *me, const char *s, int l)
     size_t result;
 
     if (me->fp) {
-	result = fwrite(s, 1, (unsigned) l, me->fp);
+	result = fwrite(s, (size_t) 1, (size_t) l, me->fp);
 	if (result != (size_t) l) {
 	    HTFWriter_error(me, "HTFWriter_write");
 	}
@@ -610,7 +610,7 @@ HTStream *HTSaveAndExecute(HTPresentation *pres,
 	if (!local_exec) {
 	    if (local_exec_on_local_files &&
 		(LYJumpFileURL ||
-		 !strncmp(anchor->address, "file://localhost", 16))) {
+		 !StrNCmp(anchor->address, "file://localhost", 16))) {
 		/* allow it to continue */
 		;
 	    } else {
@@ -653,7 +653,7 @@ HTStream *HTSaveAndExecute(HTPresentation *pres,
 	me->fp = LYOpenTempRewrite(fnam, BIN_SUFFIX, BIN_W);
     } else {
 #if defined(WIN_EX) && !defined(__CYGWIN__)	/* 1998/01/04 (Sun) */
-	if (!strncmp(anchor->address, "file://localhost", 16)) {
+	if (!StrNCmp(anchor->address, "file://localhost", 16)) {
 
 	    /* 1998/01/23 (Fri) 17:38:26 */
 	    unsigned char *cp, *view_fname;
@@ -664,7 +664,7 @@ HTStream *HTSaveAndExecute(HTPresentation *pres,
 	    me->fp = NULL;
 
 	    view_fname = fnam + 3;
-	    LYstrncpy(view_fname, anchor->address + 17, sizeof(fnam) - 5);
+	    LYStrNCpy(view_fname, anchor->address + 17, sizeof(fnam) - 5);
 	    HTUnEscape(view_fname);
 
 	    if (strchr(view_fname, ':') == NULL) {
@@ -1212,7 +1212,7 @@ HTStream *HTCompressed(HTPresentation *pres,
 	     (local_exec ||
 	      (local_exec_on_local_files &&
 	       (LYJumpFileURL ||
-		!strncmp(anchor->address, "file://localhost", 16))))))
+		!StrNCmp(anchor->address, "file://localhost", 16))))))
 #endif /* EXEC_LINKS || EXEC_SCRIPTS */
 	) {
 	StrAllocCopy(me->viewer_command, Pres->command);

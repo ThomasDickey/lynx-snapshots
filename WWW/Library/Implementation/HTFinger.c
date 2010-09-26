@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFinger.c,v 1.26 2010/09/22 00:46:26 tom Exp $
+ * $LynxId: HTFinger.c,v 1.27 2010/09/24 08:30:28 tom Exp $
  *
  *			FINGER ACCESS				HTFinger.c
  *			=============
@@ -203,22 +203,22 @@ static int response(char *command,
 	     */
 	    p = l = line;
 	    while (*l) {
-		if (strncmp(l, STR_NEWS_URL, LEN_NEWS_URL) &&
-		    strncmp(l, "snews://", 8) &&
-		    strncmp(l, "nntp://", 7) &&
-		    strncmp(l, "snewspost:", 10) &&
-		    strncmp(l, "snewsreply:", 11) &&
-		    strncmp(l, "newspost:", 9) &&
-		    strncmp(l, "newsreply:", 10) &&
-		    strncmp(l, "ftp://", 6) &&
-		    strncmp(l, "file:/", 6) &&
-		    strncmp(l, "finger://", 9) &&
-		    strncmp(l, "http://", 7) &&
-		    strncmp(l, "https://", 8) &&
-		    strncmp(l, "wais://", 7) &&
-		    strncmp(l, STR_MAILTO_URL, LEN_MAILTO_URL) &&
-		    strncmp(l, "cso://", 6) &&
-		    strncmp(l, "gopher://", 9))
+		if (StrNCmp(l, STR_NEWS_URL, LEN_NEWS_URL) &&
+		    StrNCmp(l, "snews://", 8) &&
+		    StrNCmp(l, "nntp://", 7) &&
+		    StrNCmp(l, "snewspost:", 10) &&
+		    StrNCmp(l, "snewsreply:", 11) &&
+		    StrNCmp(l, "newspost:", 9) &&
+		    StrNCmp(l, "newsreply:", 10) &&
+		    StrNCmp(l, "ftp://", 6) &&
+		    StrNCmp(l, "file:/", 6) &&
+		    StrNCmp(l, "finger://", 9) &&
+		    StrNCmp(l, "http://", 7) &&
+		    StrNCmp(l, "https://", 8) &&
+		    StrNCmp(l, "wais://", 7) &&
+		    StrNCmp(l, STR_MAILTO_URL, LEN_MAILTO_URL) &&
+		    StrNCmp(l, "cso://", 6) &&
+		    StrNCmp(l, "gopher://", 9))
 		    PUTC(*l++);
 		else {
 		    StrAllocCopy(href, l);
@@ -254,6 +254,8 @@ int HTLoadFinger(const char *arg,
 		 HTFormat format_out,
 		 HTStream *stream)
 {
+    static char empty[1];
+
     char *username, *sitename, *colon;	/* Fields extracted from URL */
     char *slash, *at_sign;	/* Fields extracted from URL */
     char *command, *str, *param;	/* Buffers */
@@ -316,7 +318,7 @@ int HTLoadFinger(const char *arg,
     } else if (slash) {
 	username = slash;
     } else {
-	username = "";
+	username = empty;
     }
 
     if (*sitename == '\0') {

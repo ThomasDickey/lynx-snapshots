@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTInit.c,v 1.73 2010/06/17 08:13:52 tom Exp $
+ * $LynxId: HTInit.c,v 1.77 2010/09/25 18:08:10 tom Exp $
  *
  *		Configuration-specific Initialization		HTInit.c
  *		----------------------------------------
@@ -43,13 +43,13 @@ static int HTLoadExtensionsConfigFile(char *fn);
        HTSetSuffix5(suffix, mimetype, type, description, 1.0)
 
 #define SET_PRESENT(mimetype, command, quality, delay) \
-  HTSetPresentation(mimetype, command, 0, quality, delay, 0.0, 0, media)
+  HTSetPresentation(mimetype, command, 0, quality, delay, 0.0, 0L, media)
 
 #define SET_EXTERNL(rep_in, rep_out, command, quality) \
-    HTSetConversion(rep_in, rep_out, command, quality, 3.0, 0.0, 0, mediaEXT)
+    HTSetConversion(rep_in, rep_out, command, quality, 3.0, 0.0, 0L, mediaEXT)
 
 #define SET_INTERNL(rep_in, rep_out, command, quality) \
-    HTSetConversion(rep_in, rep_out, command, quality, 0.0, 0.0, 0, mediaINT)
+    HTSetConversion(rep_in, rep_out, command, quality, 0.0, 0.0, 0L, mediaINT)
 
 void HTFormatInit(void)
 {
@@ -581,7 +581,7 @@ static char *LYGetContentType(const char *name,
 		test = LYSkipCBlanks(test);
 		next = LYSkipToken(test);
 		if ((next - test) == (int) length
-		    && !strncmp(test, name, length)) {
+		    && !StrNCmp(test, name, length)) {
 		    found = TRUE;
 		}
 		test = LYSkipCBlanks(next);
@@ -1397,11 +1397,13 @@ static int HTGetLine(char *s, int n, FILE *f)
     }
 }
 
-static void HTGetWord(char *word, char *line, char stop, char stop2)
+static void HTGetWord(char *word, char *line, int stop, int stop2)
 {
     int x = 0, y;
 
-    for (x = 0; line[x] && line[x] != stop && line[x] != stop2; x++) {
+    for (x = 0; (line[x]
+		 && UCH(line[x]) != UCH(stop)
+		 && UCH(line[x]) != UCH(stop2)); x++) {
 	word[x] = line[x];
     }
 
@@ -1410,7 +1412,9 @@ static void HTGetWord(char *word, char *line, char stop, char stop2)
 	++x;
     y = 0;
 
-    while ((line[y++] = line[x++])) ;
+    while ((line[y++] = line[x++])) {
+	;
+    }
 
     return;
 }
@@ -1430,7 +1434,7 @@ static int HTLoadExtensionsConfigFile(char *fn)
 	return count;
     }
 
-    while (!(HTGetLine(line, sizeof(line), f))) {
+    while (!(HTGetLine(line, (int) sizeof(line), f))) {
 	HTGetWord(word, line, ' ', '\t');
 	if (line[0] == '\0' || word[0] == '#')
 	    continue;

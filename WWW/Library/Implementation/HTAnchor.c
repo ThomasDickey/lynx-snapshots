@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTAnchor.c,v 1.67 2010/06/18 09:39:24 tom Exp $
+ * $LynxId: HTAnchor.c,v 1.69 2010/09/25 12:39:08 tom Exp $
  *
  *	Hypertext "Anchor" Object				HTAnchor.c
  *	==========================
@@ -79,7 +79,7 @@ static HTList adult_table[HASH_SIZE] =
  *	anchor you are creating : use newWithParent or newWithAddress.
  */
 static HTParentAnchor0 *HTParentAnchor0_new(const char *address,
-					    HASH_TYPE hash)
+					    unsigned hash)
 {
     HTParentAnchor0 *newAnchor = typecalloc(HTParentAnchor0);
 
@@ -90,7 +90,7 @@ static HTParentAnchor0 *HTParentAnchor0_new(const char *address,
 
     newAnchor->parent = newAnchor;	/* self */
     StrAllocCopy(newAnchor->address, address);
-    newAnchor->adult_hash = hash;
+    newAnchor->adult_hash = (HASH_TYPE) hash;
 
     return (newAnchor);
 }
@@ -133,7 +133,7 @@ static HTChildAnchor *HTChildAnchor_new(HTParentAnchor0 *parent)
 static HTChildAnchor *HText_pool_ChildAnchor_new(HTParentAnchor *parent)
 {
     HTChildAnchor *p = (HTChildAnchor *) HText_pool_calloc((HText *) (parent->document),
-							   sizeof(HTChildAnchor));
+							   (unsigned) sizeof(HTChildAnchor));
 
     if (p == NULL)
 	outofmem(__FILE__, "HText_pool_ChildAnchor_new");
@@ -1286,7 +1286,7 @@ LYUCcharset *HTAnchor_getUCInfoStage(HTParentAnchor *me,
 		 */
 		chndl = UCLYhndl_for_unspec;	/* always >= 0 */
 	}
-	memcpy(&stages->s[UCT_STAGE_MIME].C, &LYCharSet_UC[chndl],
+	MemCpy(&stages->s[UCT_STAGE_MIME].C, &LYCharSet_UC[chndl],
 	       sizeof(LYUCcharset));
 
 	stages->s[UCT_STAGE_MIME].lock = UCT_SETBY_DEFAULT;
@@ -1352,7 +1352,7 @@ LYUCcharset *HTAnchor_setUCInfoStage(HTParentAnchor *me,
 	    me->UCStages->s[which_stage].lock = set_by;
 	    me->UCStages->s[which_stage].LYhndl = LYhndl;
 	    if (LYhndl >= 0) {
-		memcpy(p, &LYCharSet_UC[LYhndl], sizeof(LYUCcharset));
+		MemCpy(p, &LYCharSet_UC[LYhndl], sizeof(LYUCcharset));
 
 #ifdef CAN_SWITCH_DISPLAY_CHARSET
 		/* Allow a switch to a more suitable display charset */
@@ -1428,7 +1428,7 @@ LYUCcharset *HTAnchor_copyUCInfoStage(HTParentAnchor *me,
 					     me->UCStages->s[to_stage].LYhndl);
 #endif
 	    if (p_to != p_from)
-		memcpy(p_to, p_from, sizeof(LYUCcharset));
+		MemCpy(p_to, p_from, sizeof(LYUCcharset));
 
 	    return (p_to);
 	}

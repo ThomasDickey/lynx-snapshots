@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTAlert.c,v 1.90 2010/09/23 20:43:49 tom Exp $
+ * $LynxId: HTAlert.c,v 1.92 2010/09/25 11:19:25 tom Exp $
  *
  *	Displaying messages and getting input for Lynx Browser
  *	==========================================================
@@ -629,10 +629,10 @@ char *HTPrompt(const char *Msg, const char *deflt)
 
     _statusline(Msg);
     if (deflt)
-	strncpy(Tmp, deflt, sizeof(Tmp) - 1);
+	StrNCpy(Tmp, deflt, sizeof(Tmp) - 1);
 
     if (!dump_output_immediately)
-	LYgetstr(Tmp, VISIBLE, sizeof(Tmp), NORECALL);
+	LYGetStr(Tmp, VISIBLE, sizeof(Tmp), NORECALL);
 
     StrAllocCopy(rep, Tmp);
 
@@ -652,7 +652,7 @@ char *HTPromptPassword(const char *Msg)
 
     if (!dump_output_immediately) {
 	_statusline(Msg ? Msg : PASSWORD_PROMPT);
-	LYgetstr(pw, HIDDEN, sizeof(pw), NORECALL);	/* hidden */
+	LYGetStr(pw, HIDDEN, sizeof(pw), NORECALL);	/* hidden */
 	StrAllocCopy(result, pw);
     } else {
 	printf("\n%s\n", PASSWORD_REQUIRED);
@@ -687,7 +687,7 @@ char *HTPromptPassword(const char *Msg)
 void HTPromptUsernameAndPassword(const char *Msg,
 				 char **username,
 				 char **password,
-				 BOOL IsProxy)
+				 int IsProxy)
 {
     if ((IsProxy == FALSE &&
 	 authentication_info[0] && authentication_info[1]) ||

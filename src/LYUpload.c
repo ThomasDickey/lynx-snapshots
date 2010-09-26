@@ -1,4 +1,6 @@
 /*
+ * $LynxId: LYUpload.c,v 1.35 2010/09/25 11:34:51 tom Exp $
+ *
  *  Routines to upload files to the local filesystem.
  *  Created by: Rick Mallett, Carleton University
  *  Report problems to rmallett@ccs.carleton.ca
@@ -86,7 +88,7 @@ int LYUpload(char *line)
 	_statusline(FILENAME_PROMPT);
       retry:
 	*tmpbuf = '\0';
-	if (LYgetstr(tmpbuf, VISIBLE, sizeof(tmpbuf), NORECALL) < 0)
+	if (LYGetStr(tmpbuf, VISIBLE, sizeof(tmpbuf), NORECALL) < 0)
 	    goto cancelled;
 
 	if (*tmpbuf == '\0')

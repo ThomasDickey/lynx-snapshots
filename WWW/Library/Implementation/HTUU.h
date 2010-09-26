@@ -1,4 +1,7 @@
-/*                              ENCODING TO PRINTABLE CHARACTERS
+/*
+ * $LynxId: HTUU.h,v 1.11 2010/09/25 11:43:27 tom Exp $
+ *
+ *                              ENCODING TO PRINTABLE CHARACTERS
 
    File module provides functions HTUU_encode() and HTUU_decode() which convert
    a buffer of bytes to/from RFC 1113 printable encoding format.  This

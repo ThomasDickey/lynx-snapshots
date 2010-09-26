@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYHistory.c,v 1.78 2010/09/22 10:49:45 tom Exp $
+ * $LynxId: LYHistory.c,v 1.80 2010/09/25 11:22:51 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTP.h>
@@ -111,8 +111,8 @@ void LYAddVisitedLink(DocInfo *doc)
      */
     if (doc->post_data || doc->isHEAD || doc->bookmark ||
 	(			/* special url or a temp file */
-	    (!strncmp(doc->address, "LYNX", 4) ||
-	     !strncmp(doc->address, "file://localhost/", 17)))) {
+	    (!StrNCmp(doc->address, "LYNX", 4) ||
+	     !StrNCmp(doc->address, "file://localhost/", 17)))) {
 	int related = 1;	/* First approximation only */
 
 	if (LYIsUIPage(doc->address, UIP_HISTORY) ||
@@ -243,7 +243,7 @@ BOOLEAN LYwouldPush(const char *title,
     if (docurl) {
 	size_t ulen;
 
-	if (strncmp(docurl, "file://localhost/", 17) != 0 ||
+	if (StrNCmp(docurl, "file://localhost/", 17) != 0 ||
 	    (ulen = strlen(docurl)) <= strlen(HTML_SUFFIX) ||
 	    strcmp(docurl + ulen - strlen(HTML_SUFFIX), HTML_SUFFIX) != 0) {
 	    /*
@@ -350,9 +350,9 @@ void LYAllocHistory(int entries)
 	want = (unsigned) size_history *(unsigned) sizeof(*history);
 
 	if (history == 0) {
-	    history = (HistInfo *) malloc(want);
+	    history = typeMallocn(HistInfo, want);
 	} else {
-	    history = (HistInfo *) realloc(history, want);
+	    history = typeRealloc(HistInfo, history, want);
 	}
 	if (history == 0)
 	    outofmem(__FILE__, "LYAllocHistory");
@@ -369,7 +369,7 @@ void LYAllocHistory(int entries)
 /*
  * Push the current filename, link and line number onto the history list.
  */
-int LYpush(DocInfo *doc, BOOLEAN force_push)
+int LYpush(DocInfo *doc, int force_push)
 {
     /*
      * Don't push NULL file names.

@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFormat.c,v 1.71 2010/09/22 00:46:54 tom Exp $
+ * $LynxId: HTFormat.c,v 1.72 2010/09/24 09:11:25 tom Exp $
  *
  *		Manage different file formats			HTFormat.c
  *		=============================
@@ -153,9 +153,9 @@ void HTSetPresentation(const char *representation,
 void HTSetConversion(const char *representation_in,
 		     const char *representation_out,
 		     HTConverter *converter,
-		     float quality,
-		     float secs,
-		     float secs_per_byte,
+		     double quality,
+		     double secs,
+		     double secs_per_byte,
 		     long int maxbytes,
 		     AcceptMedia media)
 {
@@ -178,9 +178,9 @@ void HTSetConversion(const char *representation_in,
     pres->converter = converter;
     pres->command = NULL;
     pres->testcommand = NULL;
-    pres->quality = quality;
-    pres->secs = secs;
-    pres->secs_per_byte = secs_per_byte;
+    pres->quality = (float) quality;
+    pres->secs = (float) secs;
+    pres->secs_per_byte = (float) secs_per_byte;
     pres->maxbytes = maxbytes;
     pres->get_accept = TRUE;
     pres->accept_opt = media;
@@ -343,7 +343,7 @@ static int half_match(char *trial_type, char *target)
 	    trial_type, target));
 
     /* main type matches */
-    if (!strncmp(trial_type, target, (size_t) ((cp - trial_type) - 1)))
+    if (!StrNCmp(trial_type, target, ((cp - trial_type) - 1)))
 	return 1;
 
     return 0;
@@ -611,7 +611,7 @@ void HTFilterPresentations(void)
  */
 float HTStackValue(HTFormat rep_in,
 		   HTFormat rep_out,
-		   float initial_value,
+		   double initial_value,
 		   long int length)
 {
     HTAtom *wildcard = WWW_WILDCARD_REP_OUT;
@@ -631,7 +631,7 @@ float HTStackValue(HTFormat rep_in,
 	    pres = (HTPresentation *) HTList_objectAt(HTPresentations, i);
 	    if (pres->rep == rep_in &&
 		(pres->rep_out == rep_out || pres->rep_out == wildcard)) {
-		float value = initial_value * pres->quality;
+		float value = (float) (initial_value * pres->quality);
 
 		if (HTMaxSecs > 0.0)
 		    value = (value
@@ -747,7 +747,7 @@ int HTCopy(HTParentAnchor *anchor,
 {
     HTStreamClass targetClass;
     BOOL suppress_readprogress = NO;
-    int bytes;
+    off_t bytes;
     int rv = 0;
 
     /*  Push the data down the stream
@@ -759,7 +759,7 @@ int HTCopy(HTParentAnchor *anchor,
      *
      * This operation could be put into a main event loop
      */
-    HTReadProgress(bytes = 0, 0);
+    HTReadProgress(bytes = 0, (off_t) 0);
     for (;;) {
 	int status;
 
@@ -883,7 +883,7 @@ int HTCopy(HTParentAnchor *anchor,
 	(*targetClass.put_block) (sink, input_buffer, status);
 	bytes += status;
 	if (!suppress_readprogress)
-	    HTReadProgress(bytes, anchor ? anchor->content_length : 0);
+	    HTReadProgress(bytes, (off_t) (anchor ? anchor->content_length : 0));
 	HTDisplayPartial();
 
     }				/* next bufferload */
@@ -920,7 +920,8 @@ int HTCopy(HTParentAnchor *anchor,
 int HTFileCopy(FILE *fp, HTStream *sink)
 {
     HTStreamClass targetClass;
-    int status, bytes;
+    int status;
+    off_t bytes;
     int rv = HT_OK;
 
     /*  Push the data down the stream
@@ -929,9 +930,11 @@ int HTFileCopy(FILE *fp, HTStream *sink)
 
     /*  Push binary from socket down sink
      */
-    HTReadProgress(bytes = 0, 0);
+    HTReadProgress(bytes = 0, (off_t) 0);
     for (;;) {
-	status = (int) fread(input_buffer, 1, INPUT_BUFFER_SIZE, fp);
+	status = (int) fread(input_buffer,
+			     (size_t) 1,
+			     (size_t) INPUT_BUFFER_SIZE, fp);
 	if (status == 0) {	/* EOF or error */
 	    if (ferror(fp) == 0) {
 		rv = HT_LOADED;
@@ -949,7 +952,7 @@ int HTFileCopy(FILE *fp, HTStream *sink)
 
 	(*targetClass.put_block) (sink, input_buffer, status);
 	bytes += status;
-	HTReadProgress(bytes, 0);
+	HTReadProgress(bytes, (off_t) 0);
 	/* Suppress last screen update in partial mode - a regular update under
 	 * control of mainloop() should follow anyway.  - kw
 	 */
@@ -993,11 +996,11 @@ int HTFileCopy(FILE *fp, HTStream *sink)
 int HTMemCopy(HTChunk *chunk, HTStream *sink)
 {
     HTStreamClass targetClass;
-    int bytes = 0;
+    off_t bytes;
     int rv = HT_OK;
 
     targetClass = *(sink->isa);
-    HTReadProgress(0, 0);
+    HTReadProgress(bytes = 0, (off_t) 0);
     for (; chunk != NULL; chunk = chunk->next) {
 
 	/* Push the data down the stream a piece at a time, in case we're
@@ -1006,7 +1009,7 @@ int HTMemCopy(HTChunk *chunk, HTStream *sink)
 	(*targetClass.put_block) (sink, chunk->data, chunk->size);
 	bytes += chunk->size;
 
-	HTReadProgress(bytes, 0);
+	HTReadProgress(bytes, (off_t) 0);
 	HTDisplayPartial();
 
 	if (HTCheckForInterrupt()) {
@@ -1049,7 +1052,8 @@ int HTMemCopy(HTChunk *chunk, HTStream *sink)
 static int HTGzFileCopy(gzFile gzfp, HTStream *sink)
 {
     HTStreamClass targetClass;
-    int status, bytes;
+    int status;
+    off_t bytes;
     int gzerrnum;
     int rv = HT_OK;
 
@@ -1059,7 +1063,7 @@ static int HTGzFileCopy(gzFile gzfp, HTStream *sink)
 
     /*  read and inflate gzip'd file, and push binary down sink
      */
-    HTReadProgress(bytes = 0, 0);
+    HTReadProgress(bytes = 0, (off_t) 0);
     for (;;) {
 	status = gzread(gzfp, input_buffer, INPUT_BUFFER_SIZE);
 	if (status <= 0) {	/* EOF or error */
@@ -1085,7 +1089,7 @@ static int HTGzFileCopy(gzFile gzfp, HTStream *sink)
 
 	(*targetClass.put_block) (sink, input_buffer, status);
 	bytes += status;
-	HTReadProgress(bytes, -1);
+	HTReadProgress(bytes, (off_t) - 1);
 	HTDisplayPartial();
 
 	if (HTCheckForInterrupt()) {
@@ -1145,7 +1149,7 @@ static int HTZzFileCopy(FILE *zzfp, HTStream *sink)
 
     z_stream s;
     HTStreamClass targetClass;
-    int bytes;
+    off_t bytes;
     int rv = HT_OK;
     char output_buffer[INPUT_BUFFER_SIZE];
     int status;
@@ -1172,11 +1176,13 @@ static int HTZzFileCopy(FILE *zzfp, HTStream *sink)
 
     /*  read and inflate deflate'd file, and push binary down sink
      */
-    HTReadProgress(bytes = 0, 0);
+    HTReadProgress(bytes = 0, (off_t) 0);
     for (;;) {
 	if (s.avail_in == 0) {
 	    s.next_in = (Bytef *) input_buffer;
-	    s.avail_in = (uInt) fread(input_buffer, 1, INPUT_BUFFER_SIZE, zzfp);
+	    s.avail_in = (uInt) fread(input_buffer,
+				      (size_t) 1,
+				      (size_t) INPUT_BUFFER_SIZE, zzfp);
 	    len = (int) s.avail_in;
 	}
 	status = inflate(&s, flush);
@@ -1185,7 +1191,7 @@ static int HTZzFileCopy(FILE *zzfp, HTStream *sink)
 	    if (len > 0) {
 		(*targetClass.put_block) (sink, output_buffer, len);
 		bytes += len;
-		HTReadProgress(bytes, -1);
+		HTReadProgress(bytes, (off_t) - 1);
 		HTDisplayPartial();
 	    }
 	    rv = HT_LOADED;
@@ -1214,7 +1220,7 @@ static int HTZzFileCopy(FILE *zzfp, HTStream *sink)
 
 	    (*targetClass.put_block) (sink, output_buffer, len);
 	    bytes += len;
-	    HTReadProgress(bytes, -1);
+	    HTReadProgress(bytes, (off_t) - 1);
 	    HTDisplayPartial();
 
 	    if (HTCheckForInterrupt()) {
@@ -1256,7 +1262,8 @@ static int HTZzFileCopy(FILE *zzfp, HTStream *sink)
 static int HTBzFileCopy(BZFILE * bzfp, HTStream *sink)
 {
     HTStreamClass targetClass;
-    int status, bytes;
+    int status;
+    off_t bytes;
     int bzerrnum;
     int rv = HT_OK;
 
@@ -1266,7 +1273,7 @@ static int HTBzFileCopy(BZFILE * bzfp, HTStream *sink)
 
     /*  read and inflate bzip'd file, and push binary down sink
      */
-    HTReadProgress(bytes = 0, 0);
+    HTReadProgress(bytes = 0, (off_t) 0);
     for (;;) {
 	status = BZ2_bzread(bzfp, input_buffer, INPUT_BUFFER_SIZE);
 	if (status <= 0) {	/* EOF or error */
@@ -1288,7 +1295,7 @@ static int HTBzFileCopy(BZFILE * bzfp, HTStream *sink)
 
 	(*targetClass.put_block) (sink, input_buffer, status);
 	bytes += status;
-	HTReadProgress(bytes, -1);
+	HTReadProgress(bytes, (off_t) - 1);
 	HTDisplayPartial();
 
 	if (HTCheckForInterrupt()) {
@@ -1780,9 +1787,9 @@ int HTParseBzFile(HTFormat rep_in,
  *	C representation of a new line.
  */
 
-static void NetToText_put_character(HTStream *me, char net_char)
+static void NetToText_put_character(HTStream *me, int net_char)
 {
-    char c = FROMASCII(net_char);
+    char c = (char) FROMASCII(net_char);
 
     if (me->had_cr) {
 	if (c == LF) {
@@ -1864,7 +1871,7 @@ static HTStream HTBaseStreamInstance;	/* Made static */
  *	There is only one error stream shared by anyone who wants a
  *	generic error returned from all stream methods.
  */
-static void HTErrorStream_put_character(HTStream *me GCC_UNUSED, char c GCC_UNUSED)
+static void HTErrorStream_put_character(HTStream *me GCC_UNUSED, int c GCC_UNUSED)
 {
     LYCancelDownload = TRUE;
 }

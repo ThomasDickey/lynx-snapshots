@@ -1,4 +1,4 @@
-/* $LynxId: LYForms.c,v 1.85 2010/09/22 23:01:41 tom Exp $ */
+/* $LynxId: LYForms.c,v 1.86 2010/09/24 09:40:44 tom Exp $ */
 #include <HTUtils.h>
 #include <HTCJK.h>
 #include <HTTP.h>
@@ -27,8 +27,8 @@
 #endif /* VMS && !USE_SLANG */
 
 static int form_getstr(int cur,
-		       BOOLEAN use_last_tfpos,
-		       BOOLEAN redraw_only);
+		       int use_last_tfpos,
+		       int redraw_only);
 
 /*
  * Returns an array of pointers to the given list
@@ -60,9 +60,9 @@ static char **options_list(OptionType * opt_ptr)
 int change_form_link_ex(int cur,
 			DocInfo *newdoc,
 			BOOLEAN *refresh_screen,
-			BOOLEAN use_last_tfpos,
-			BOOLEAN immediate_submit,
-			BOOLEAN redraw_only)
+			int use_last_tfpos,
+			int immediate_submit,
+			int redraw_only)
 {
     FormInfo *form = links[cur].l_form;
     char *link_name = form->name;
@@ -341,8 +341,8 @@ int change_form_link_ex(int cur,
 int change_form_link(int cur,
 		     DocInfo *newdoc,
 		     BOOLEAN *refresh_screen,
-		     BOOLEAN use_last_tfpos,
-		     BOOLEAN immediate_submit)
+		     int use_last_tfpos,
+		     int immediate_submit)
 {
     /*pass all our args and FALSE as last arg */
     return change_form_link_ex(cur,
@@ -361,8 +361,8 @@ static void LYSetLastTFPos(int pos)
 }
 
 static int form_getstr(int cur,
-		       BOOLEAN use_last_tfpos,
-		       BOOLEAN redraw_only)
+		       int use_last_tfpos,
+		       int redraw_only)
 {
     FormInfo *form = links[cur].l_form;
     char *value = form->value;

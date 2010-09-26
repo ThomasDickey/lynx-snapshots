@@ -1,5 +1,5 @@
 /*
- * $LynxId: GridText.h,v 1.61 2009/01/01 23:02:02 tom Exp $
+ * $LynxId: GridText.h,v 1.63 2010/09/24 23:01:59 tom Exp $
  *
  * Specialities of GridText as subclass of HText
  */
@@ -90,7 +90,7 @@ US-ASCII control characters <32 which are not defined in Unicode standard
     extern int HText_locateAnchor(HText *text, int anchor_number);
     extern int HText_anchorRelativeTo(HText *text, int top_lineno, int anchor_num);
 
-    extern void HText_setLastChar(HText *text, char ch);
+    extern void HText_setLastChar(HText *text, int ch);
     extern char HText_getLastChar(HText *text);
 
     extern int HText_sourceAnchors(HText *text);
@@ -100,7 +100,7 @@ US-ASCII control characters <32 which are not defined in Unicode standard
     extern const char *HText_getSugFname(void);
     extern void HTCheckFnameForCompression(char **fname,
 					   HTParentAnchor *anchor,
-					   BOOLEAN strip_ok);
+					   int strip_ok);
     extern const char *HText_getLastModified(void);
     extern const char *HText_getDate(void);
     extern const char *HText_getHttpHeaders(void);
@@ -115,7 +115,7 @@ US-ASCII control characters <32 which are not defined in Unicode standard
     extern const char *HText_getStyle(void);
 #endif
     extern void HText_setMainTextOwner(const char *owner);
-    extern void print_wwwfile_to_fd(FILE *fp, BOOLEAN is_email, BOOLEAN is_reply);
+    extern void print_wwwfile_to_fd(FILE *fp, int is_email, int is_reply);
     extern BOOL HText_select(HText *text);
     extern BOOL HText_POSTReplyLoaded(DocInfo *doc);
     extern BOOL HTFindPoundSelector(const char *selector);
@@ -132,10 +132,10 @@ US-ASCII control characters <32 which are not defined in Unicode standard
 				     int *go_line,
 				     int *linknum,
 				     int direction,
-				     BOOLEAN ta_skip);
+				     int ta_skip);
     extern BOOL HText_getFirstTargetInLine(HText *text,
 					   int line_num,
-					   BOOL utf_flag,
+					   int utf_flag,
 					   int *offset,
 					   int *tLen,
 					   char **data,
@@ -150,8 +150,8 @@ US-ASCII control characters <32 which are not defined in Unicode standard
 #endif
 
     extern BOOL HTLoadedDocumentEightbit(void);
-    extern BOOL HText_LastLineEmpty(HText *me, BOOL IgnoreSpaces);
-    extern BOOL HText_PreviousLineEmpty(HText *me, BOOL IgnoreSpaces);
+    extern BOOL HText_LastLineEmpty(HText *me, int IgnoreSpaces);
+    extern BOOL HText_PreviousLineEmpty(HText *me, int IgnoreSpaces);
     extern BOOL HText_inLineOne(HText *text);
     extern BOOLEAN HTLoadedDocumentIsHEAD(void);
     extern BOOLEAN HTLoadedDocumentIsSafe(void);
@@ -163,8 +163,8 @@ US-ASCII control characters <32 which are not defined in Unicode standard
     extern const char *HText_HiddenLinkAt(HText *text, int number);
     extern int HText_HiddenLinkCount(HText *text);
     extern int HText_LastLineOffset(HText *me);
-    extern int HText_LastLineSize(HText *me, BOOL IgnoreSpaces);
-    extern int HText_PreviousLineSize(HText *me, BOOL IgnoreSpaces);
+    extern int HText_LastLineSize(HText *me, int IgnoreSpaces);
+    extern int HText_PreviousLineSize(HText *me, int IgnoreSpaces);
     extern int HText_getCurrentColumn(HText *text);
     extern int HText_getLines(HText *text);
     extern int HText_getMaximumColumn(HText *text);
@@ -187,11 +187,11 @@ US-ASCII control characters <32 which are not defined in Unicode standard
     extern void HText_endStblCOLGROUP(HText *);
     extern void HText_endStblTD(HText *);
     extern void HText_endStblTR(HText *);
-    extern void HText_startStblCOL(HText *, int, short, BOOL);
-    extern void HText_startStblRowGroup(HText *, short);
-    extern void HText_startStblTABLE(HText *, short);
-    extern void HText_startStblTD(HText *, int, int, short, BOOL);
-    extern void HText_startStblTR(HText *, short);
+    extern void HText_startStblCOL(HText *, int, int, int);
+    extern void HText_startStblRowGroup(HText *, int);
+    extern void HText_startStblTABLE(HText *, int);
+    extern void HText_startStblTD(HText *, int, int, int, int);
+    extern void HText_startStblTR(HText *, int);
 
 /* forms stuff */
     extern void HText_beginForm(char *action,
@@ -202,18 +202,18 @@ US-ASCII control characters <32 which are not defined in Unicode standard
     extern void HText_endForm(HText *text);
     extern void HText_beginSelect(char *name,
 				  int name_cs,
-				  BOOLEAN multiple,
+				  int multiple,
 				  char *len);
     extern int HText_getOptionNum(HText *text);
     extern char *HText_setLastOptionValue(HText *text,
 					  char *value,
 					  char *submit_value,
 					  int order,
-					  BOOLEAN checked,
+					  int checked,
 					  int val_cs,
 					  int submit_val_cs);
     extern int HText_beginInput(HText *text,
-				BOOL underline,
+				int underline,
 				InputFieldData * I);
     extern void HText_endInput(HText *text);
     extern int HText_SubmitForm(FormInfo * submit_item, DocInfo *doc,
@@ -268,8 +268,8 @@ US-ASCII control characters <32 which are not defined in Unicode standard
 			     const char *target,
 			     const char *hightext,
 			     int flag,
-			     BOOL inU,
-			     BOOL utf_flag);
+			     int inU,
+			     int utf_flag);
 
 #ifdef USE_PRETTYSRC
     extern void HTMark_asSource(void);

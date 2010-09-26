@@ -1,4 +1,7 @@
-/*                          BROWSER SIDE ACCESS AUTHORIZATION MODULE
+/*
+ * $LynxId: HTAABrow.h,v 1.15 2010/09/25 11:42:32 tom Exp $
+ *
+ *                          BROWSER SIDE ACCESS AUTHORIZATION MODULE
 
    This module is the browser side interface to Access Authorization (AA) package.  It
    contains code only for browser.
@@ -72,7 +75,7 @@ Routines for Browser Side Recording of AA Info
  */ extern char *HTAA_composeAuth(const char *hostname,
 				  const int portnumber,
 				  const char *docname,
-				  BOOL IsProxy);
+				  int IsProxy);
 
 /* BROWSER PUBLIC                               HTAA_shouldRetryWithAuth()
  *
@@ -104,7 +107,7 @@ Routines for Browser Side Recording of AA Info
     extern BOOL HTAA_shouldRetryWithAuth(char *start_of_headers,
 					 size_t length,
 					 int soc,
-					 BOOL IsProxy);
+					 int IsProxy);
 
 /*
  *  Function to allow clearing of all Authorization info

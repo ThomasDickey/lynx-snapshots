@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMain.c,v 1.218 2010/09/23 09:52:26 tom Exp $
+ * $LynxId: LYMain.c,v 1.221 2010/09/25 11:12:44 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTP.h>
@@ -650,7 +650,7 @@ static void print_help_and_exit(int exit_status) GCC_NORETURN;
 static void print_help_strings(const char *name,
 			       const char *help,
 			       const char *value,
-			       BOOLEAN option);
+			       int option);
 
 #ifndef VMS
 BOOLEAN LYNoCore = NO_FORCED_CORE_DUMP;
@@ -866,10 +866,10 @@ static void FixCharacters(void)
 #endif /* EBCDIC */
 
 static BOOL GetStdin(char **buf,
-		     BOOL marker)
+		     int marker)
 {
     if (LYSafeGets(buf, stdin) != 0
-	&& (!marker || strncmp(*buf, "---", 3) != 0)) {
+	&& (!marker || StrNCmp(*buf, "---", 3) != 0)) {
 	LYTrimTrailing(*buf);
 	CTRACE((tfp, "...data: %s\n", *buf));
 	return TRUE;
@@ -916,7 +916,7 @@ static void append_ssl_version(char **target,
 #ifdef LYNX_SSL_VERSION
     if (*separator == ' ')
 	StrAllocCat(*target, ",");
-    LYstrncpy(SSLLibraryVersion, LYNX_SSL_VERSION, sizeof(SSLLibraryVersion) - 1);
+    LYStrNCpy(SSLLibraryVersion, LYNX_SSL_VERSION, sizeof(SSLLibraryVersion) - 1);
     if ((SSLcp = strchr(SSLLibraryVersion, ' ')) != NULL) {
 	*SSLcp++ = *separator;
 	if ((SSLcp = strchr(SSLcp, ' ')) != NULL) {
@@ -1082,7 +1082,7 @@ int main(int argc,
 	ccp = FNAME_LYNX_TRACE;
     LYTraceLogPath = typeMallocn(char, LY_MAXPATH);
 
-    LYAddPathToHome(LYTraceLogPath, LY_MAXPATH, ccp);
+    LYAddPathToHome(LYTraceLogPath, (size_t) LY_MAXPATH, ccp);
 
     /*
      * Act on -version, -trace and -trace-mask NOW.
@@ -1497,7 +1497,7 @@ int main(int argc,
     /*
      * Set the compilation default signature file.  - FM
      */
-    LYstrncpy(filename, LYNX_SIG_FILE, sizeof(filename) - 1);
+    LYStrNCpy(filename, LYNX_SIG_FILE, sizeof(filename) - 1);
     if (LYPathOffHomeOK(filename, sizeof(filename))) {
 	StrAllocCopy(LynxSigFile, filename);
 	LYAddPathToHome(filename, sizeof(filename), LynxSigFile);
@@ -1686,7 +1686,7 @@ int main(int argc,
 	if (LYCookieFile == NULL) {
 	    LYCookieFile = typeMallocn(char, LY_MAXPATH);
 
-	    LYAddPathToHome(LYCookieFile, LY_MAXPATH, FNAME_LYNX_COOKIES);
+	    LYAddPathToHome(LYCookieFile, (size_t) LY_MAXPATH, FNAME_LYNX_COOKIES);
 	} else {
 	    LYTildeExpand(&LYCookieFile, FALSE);
 	}
@@ -1973,7 +1973,7 @@ int main(int argc,
     /*
      * Check for a valid traversal request.  - FM
      */
-    if (traversal && strncmp(startfile, "http", 4)) {
+    if (traversal && StrNCmp(startfile, "http", 4)) {
 	fprintf(stderr,
 		"The '-traversal' switch is for http URLs and cannot be used for\n'%s'.\n",
 		startfile);
@@ -3964,7 +3964,7 @@ with filenames of these images"
 static void print_help_strings(const char *name,
 			       const char *help,
 			       const char *value,
-			       BOOLEAN option)
+			       int option)
 {
     int pad;
     int c;

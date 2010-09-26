@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYTraversal.c,v 1.28 2010/09/22 09:42:40 tom Exp $
+ * $LynxId: LYTraversal.c,v 1.30 2010/09/24 22:57:01 tom Exp $
  */
 #include <HTUtils.h>
 #include <LYGlobalDefs.h>
@@ -14,7 +14,7 @@
 
 /* routines to handle special traversal feature */
 
-static void final_perror(const char *msg, BOOLEAN clean_flag)
+static void final_perror(const char *msg, int clean_flag)
 {
     int saved_errno = errno;
 
@@ -162,7 +162,7 @@ BOOLEAN lookup_reject(char *target)
 	if (len != 0) {		/* if not an empty line */
 	    if (buffer[len - 1] == '*') {
 		/* if last char is * and the rest of the chars match */
-		if ((len == 1) || (strncmp(line, buffer, len - 1) == 0)) {
+		if ((len == 1) || (StrNCmp(line, buffer, len - 1) == 0)) {
 		    result = TRUE;
 		}
 	    } else {

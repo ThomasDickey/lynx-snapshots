@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYCgi.c,v 1.59 2010/09/22 22:51:03 tom Exp $
+ * $LynxId: LYCgi.c,v 1.61 2010/09/25 00:54:31 tom Exp $
  *                   Lynx CGI support                              LYCgi.c
  *                   ================
  *
@@ -212,7 +212,7 @@ static int LYLoadCGI(const char *arg,
 	return (status);
 
     } else {
-	if (strncmp(arg, "lynxcgi://localhost", 19) == 0) {
+	if (StrNCmp(arg, "lynxcgi://localhost", 19) == 0) {
 	    StrAllocCopy(pgm, arg + 19);
 	} else {
 	    StrAllocCopy(pgm, arg + 8);
@@ -435,7 +435,7 @@ static int LYLoadCGI(const char *arg,
 
 	    if ((pid = fork()) > 0) {	/* The good, */
 		ssize_t chars;
-		int total_chars;
+		off_t total_chars;
 
 		close(fd2[1]);
 
@@ -457,7 +457,7 @@ static int LYLoadCGI(const char *arg,
 		    remaining = BStrLen(anAnchor->post_data);
 		    while ((written = write(fd1[1],
 					    BStrData(anAnchor->post_data) + total_written,
-					    (unsigned) remaining)) != 0) {
+					    (size_t) remaining)) != 0) {
 			if (written < 0) {
 #ifdef EINTR
 			    if (errno == EINTR)
@@ -484,7 +484,7 @@ static int LYLoadCGI(const char *arg,
 		    close(fd1[1]);
 		}
 
-		HTReadProgress(total_chars = 0, 0);
+		HTReadProgress(total_chars = 0, (off_t) 0);
 		while ((chars = read(fd2[0], buf, sizeof(buf))) != 0) {
 		    if (chars < 0) {
 #ifdef EINTR
@@ -499,7 +499,7 @@ static int LYLoadCGI(const char *arg,
 			break;
 		    }
 		    total_chars += (int) chars;
-		    HTReadProgress(total_chars, 0);
+		    HTReadProgress(total_chars, (off_t) 0);
 		    CTRACE((tfp, "LYNXCGI: Rx: %.*s\n", (int) chars, buf));
 		    (*target->isa->put_block) (target, buf, (int) chars);
 		}

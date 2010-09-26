@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTForms.h,v 1.27 2009/05/28 22:49:51 tom Exp $
+ * $LynxId: HTForms.h,v 1.28 2010/09/24 09:40:07 tom Exp $
  */
 #ifndef HTFORMS_H
 #define HTFORMS_H
@@ -16,15 +16,15 @@ extern "C" {
  */ extern int change_form_link(int cur,
 				DocInfo *newdoc,
 				BOOLEAN *refresh_screen,
-				BOOLEAN use_last_tfpos,
-				BOOLEAN immediate_submit);
+				int use_last_tfpos,
+				int immediate_submit);
 
     extern int change_form_link_ex(int cur,
 				   DocInfo *newdoc,
 				   BOOLEAN *refresh_screen,
-				   BOOLEAN use_last_tfpos,
-				   BOOLEAN immediate_submit,
-				   BOOLEAN draw_only);
+				   int use_last_tfpos,
+				   int immediate_submit,
+				   int draw_only);
 
 /* InputFieldData is used to pass the info between HTML.c and Gridtext.c in
  * HText_beginInput()

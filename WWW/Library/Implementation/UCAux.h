@@ -1,5 +1,5 @@
 /*
- * $LynxId: UCAux.h,v 1.16 2009/03/10 21:17:21 tom Exp $
+ * $LynxId: UCAux.h,v 1.17 2010/09/24 00:14:04 tom Exp $
  */
 #ifndef UCAUX_H
 #define UCAUX_H
@@ -60,7 +60,7 @@ extern "C" {
 			      int hori_in);
 
     typedef void putc_func_t(HTStream *me,
-			     char ch);
+			     int ch);
 
     extern BOOL UCPutUtf8_charstring(HTStream *target,
 				     putc_func_t * actions,

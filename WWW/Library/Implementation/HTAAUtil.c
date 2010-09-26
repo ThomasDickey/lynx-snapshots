@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTAAUtil.c,v 1.29 2010/06/17 00:36:31 tom Exp $
+ * $LynxId: HTAAUtil.c,v 1.31 2010/09/24 23:51:22 tom Exp $
  *
  * MODULE							HTAAUtil.c
  *		COMMON PARTS OF ACCESS AUTHORIZATION MODULE
@@ -77,19 +77,19 @@ HTAAScheme HTAAScheme_enum(const char *name)
     StrAllocCopy(upcased, name);
     LYUpperCase(upcased);
 
-    if (!strncmp(upcased, "NONE", 4)) {
+    if (!StrNCmp(upcased, "NONE", 4)) {
 	FREE(upcased);
 	return HTAA_NONE;
-    } else if (!strncmp(upcased, "BASIC", 5)) {
+    } else if (!StrNCmp(upcased, "BASIC", 5)) {
 	FREE(upcased);
 	return HTAA_BASIC;
-    } else if (!strncmp(upcased, "PUBKEY", 6)) {
+    } else if (!StrNCmp(upcased, "PUBKEY", 6)) {
 	FREE(upcased);
 	return HTAA_PUBKEY;
-    } else if (!strncmp(upcased, "KERBEROSV4", 10)) {
+    } else if (!StrNCmp(upcased, "KERBEROSV4", 10)) {
 	FREE(upcased);
 	return HTAA_KERBEROS_V4;
-    } else if (!strncmp(upcased, "KERBEROSV5", 10)) {
+    } else if (!StrNCmp(upcased, "KERBEROSV5", 10)) {
 	FREE(upcased);
 	return HTAA_KERBEROS_V5;
     } else {
@@ -495,7 +495,7 @@ void HTAA_setupReader(char *start_of_headers,
 #endif
     start_pointer = buffer;
     if (start_of_headers) {
-	strncpy(buffer, start_of_headers, length);
+	StrNCpy(buffer, start_of_headers, length);
 	buffer[length] = '\0';
 	end_pointer = buffer + length;
     } else {

@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYCharUtils.c,v 1.106 2010/09/22 08:35:31 tom Exp $
+ * $LynxId: LYCharUtils.c,v 1.108 2010/09/24 09:56:59 tom Exp $
  *
  *  Functions associated with LYCharSets.c and the Lynx version of HTML.c - FM
  *  ==========================================================================
@@ -52,7 +52,7 @@ int OL_VOID = -29998;		/* flag for whether a count is set */
  *  converts any angle-brackets to "&lt;" or "&gt;". - FM
  */
 void LYEntify(char **str,
-	      BOOLEAN isTITLE)
+	      int isTITLE)
 {
     char *p = *str;
     char *q = NULL, *cp = NULL;
@@ -356,7 +356,7 @@ char *LYFindEndOfComment(char *str)
 	 */
 	return NULL;
 
-    if (strncmp(str, "<!--", 4))
+    if (StrNCmp(str, "<!--", 4))
 	/*
 	 * We don't have the start of a comment, so return the beginning of the
 	 * string.  - FM
@@ -465,7 +465,7 @@ void LYFillLocalFileURL(char **href,
     if (isEmpty(*href))
 	return;
 
-    if (!strcmp(*href, "//") || !strncmp(*href, "///", 3)) {
+    if (!strcmp(*href, "//") || !StrNCmp(*href, "///", 3)) {
 	if (base != NULL && isFILE_URL(base)) {
 	    StrAllocCopy(temp, STR_FILE_URL);
 	    StrAllocCat(temp, *href);
@@ -477,10 +477,10 @@ void LYFillLocalFileURL(char **href,
 	    StrAllocCat(*href, "//localhost");
 	} else if (!strcmp(*href, "file://")) {
 	    StrAllocCat(*href, "localhost");
-	} else if (!strncmp(*href, "file:///", 8)) {
+	} else if (!StrNCmp(*href, "file:///", 8)) {
 	    StrAllocCopy(temp, (*href + 7));
 	    LYLocalFileToURL(href, temp);
-	} else if (!strncmp(*href, "file:/", 6) && !LYIsHtmlSep(*(*href + 6))) {
+	} else if (!StrNCmp(*href, "file:/", 6) && !LYIsHtmlSep(*(*href + 6))) {
 	    StrAllocCopy(temp, (*href + 5));
 	    LYLocalFileToURL(href, temp);
 	}
@@ -496,7 +496,7 @@ void LYFillLocalFileURL(char **href,
     }
 
     /* use below: strlen("file://localhost/") = 17 */
-    if (!strncmp(*href, "file://localhost/", 17)
+    if (!StrNCmp(*href, "file://localhost/", 17)
 	&& (strlen(*href) == 19)
 	&& LYIsDosDrive(*href + 17)) {
 	/*
@@ -1074,11 +1074,11 @@ static const char *hex = "0123456789ABCDEF";
 char **LYUCFullyTranslateString(char **str,
 				int cs_from,
 				int cs_to,
-				BOOLEAN do_ent,
-				BOOL use_lynx_specials,
-				BOOLEAN plain_space,
-				BOOLEAN hidden,
-				BOOL Back,
+				int do_ent,
+				int use_lynx_specials,
+				int plain_space,
+				int hidden,
+				int Back,
 				CharUtil_st stype)
 {
     char *p;
@@ -1679,7 +1679,8 @@ char **LYUCFullyTranslateString(char **str,
 		 */
 	    } else if (code == 8204 || code == 8205 ||
 		       code == 8206 || code == 8207) {
-		CTRACE((tfp, "LYUCFullyTranslateString: Ignoring '%ld'.\n", code));
+		CTRACE((tfp, "LYUCFullyTranslateString: Ignoring '%"
+			PRI_UCode_t "'.\n", code));
 		replace_buf[0] = '\0';
 		state = S_got_outstring;
 		break;
@@ -1752,7 +1753,7 @@ char **LYUCFullyTranslateString(char **str,
 	    } else if (!T.output_utf8 && stype == st_HTML && !hidden &&
 		       !(HTPassEightBitRaw &&
 			 UCH(*p) >= lowest_8)) {
-		sprintf(replace_buf, "U%.2lX", code);
+		sprintf(replace_buf, "U%.2" PRI_UCode_t "", code);
 		state = S_got_outstring;
 	    } else {
 		puni = p;
@@ -1904,9 +1905,9 @@ char **LYUCFullyTranslateString(char **str,
 BOOL LYUCTranslateHTMLString(char **str,
 			     int cs_from,
 			     int cs_to,
-			     BOOL use_lynx_specials,
-			     BOOLEAN plain_space,
-			     BOOLEAN hidden,
+			     int use_lynx_specials,
+			     int plain_space,
+			     int hidden,
 			     CharUtil_st stype)
 {
     BOOL ret = YES;
@@ -1923,7 +1924,7 @@ BOOL LYUCTranslateHTMLString(char **str,
 BOOL LYUCTranslateBackFormData(char **str,
 			       int cs_from,
 			       int cs_to,
-			       BOOLEAN plain_space)
+			       int plain_space)
 {
     char **ret;
 
@@ -2323,12 +2324,12 @@ void LYHandleMETA(HTStructured * me, const BOOL *present,
 		 * be like ISO-8859 in structure, pretend we have some kind of
 		 * match.
 		 */
-		BOOL given_is_8859 = (BOOL) (!strncmp(cp4, "iso-8859-", 9) &&
+		BOOL given_is_8859 = (BOOL) (!StrNCmp(cp4, "iso-8859-", 9) &&
 					     isdigit(UCH(cp4[9])));
 		BOOL given_is_8859like = (BOOL) (given_is_8859
-						 || !strncmp(cp4, "windows-", 8)
-						 || !strncmp(cp4, "cp12", 4)
-						 || !strncmp(cp4, "cp-12", 5));
+						 || !StrNCmp(cp4, "windows-", 8)
+						 || !StrNCmp(cp4, "cp12", 4)
+						 || !StrNCmp(cp4, "cp-12", 5));
 		BOOL given_and_display_8859like = (BOOL) (given_is_8859like &&
 							  (strstr(LYchar_set_names[current_char_set],
 								  "ISO-8859") ||
@@ -2428,7 +2429,7 @@ void LYHandleMETA(HTStructured * me, const BOOL *present,
 #ifndef DONT_TRACK_INTERNAL_LINKS
 	    /* id_string seems to be used wrong below if given.
 	       not that it matters much.  avoid setting it here. - kw */
-	    if ((strncmp(href, "http", 4) == 0) &&
+	    if ((StrNCmp(href, "http", 4) == 0) &&
 		(cp = strchr(href, '#')) != NULL) {
 		StrAllocCopy(id_string, cp);
 		*cp = '\0';
@@ -2564,7 +2565,7 @@ void LYHandlePlike(HTStructured * me, const BOOL *present,
 		   const char **value,
 		   char **include GCC_UNUSED,
 		   int align_idx,
-		   BOOL start)
+		   int start)
 {
     if (TRUE) {
 	/*
@@ -2670,7 +2671,7 @@ void LYHandlePlike(HTStructured * me, const BOOL *present,
 void LYHandleSELECT(HTStructured * me, const BOOL *present,
 		    const char **value,
 		    char **include GCC_UNUSED,
-		    BOOL start)
+		    int start)
 {
     int i;
 
@@ -2861,8 +2862,8 @@ void LYHandleSELECT(HTStructured * me, const BOOL *present,
  *  URLs. - FM
  */
 int LYLegitimizeHREF(HTStructured * me, char **href,
-		     BOOL force_slash,
-		     BOOL strip_dots)
+		     int force_slash,
+		     int strip_dots)
 {
     int url_type = 0;
     char *p = NULL;
@@ -2956,7 +2957,7 @@ int LYLegitimizeHREF(HTStructured * me, char **href,
 
 	temp = HTParse(*href, Base, PARSE_ALL);
 	path = HTParse(temp, "", PARSE_PATH + PARSE_PUNCTUATION);
-	if (!strncmp(path, "/..", 3)) {
+	if (!StrNCmp(path, "/..", 3)) {
 	    cp = (path + 3);
 	    if (LYIsHtmlSep(*cp) || *cp == '\0') {
 		if (Base[4] == 's') {
@@ -2974,7 +2975,7 @@ int LYLegitimizeHREF(HTStructured * me, char **href,
 	    if (*cp == '\0') {
 		StrAllocCopy(*href, "/");
 	    } else if (LYIsHtmlSep(*cp)) {
-		while (!strncmp(cp, "/..", 3)) {
+		while (!StrNCmp(cp, "/..", 3)) {
 		    if (*(cp + 3) == '/') {
 			cp += 3;
 			continue;
@@ -3281,7 +3282,7 @@ BOOLEAN LYCommentHacks(HTParentAnchor *anchor,
     if (!(anchor && anchor->address))
 	return FALSE;
 
-    if (strncmp(comment, "!--X-Message-Id: ", 17) == 0) {
+    if (StrNCmp(comment, "!--X-Message-Id: ", 17) == 0) {
 	char *messageid = NULL;
 	char *p;
 
@@ -3326,7 +3327,7 @@ BOOLEAN LYCommentHacks(HTParentAnchor *anchor,
 	    return FALSE;
 	}
     }
-    if (strncmp(comment, "!--X-Subject: ", 14) == 0) {
+    if (StrNCmp(comment, "!--X-Subject: ", 14) == 0) {
 	char *subject = NULL;
 	char *p;
 

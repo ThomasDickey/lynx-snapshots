@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYReadCFG.c,v 1.152 2010/09/23 20:53:32 tom Exp $
+ * $LynxId: LYReadCFG.c,v 1.154 2010/09/24 22:57:51 tom Exp $
  */
 #ifndef NO_RULES
 #include <HTRules.h>
@@ -200,7 +200,7 @@ static void add_item_to_list(char *buffer,
 
 	if (cur_item->name == NULL)
 	    outofmem(__FILE__, "read_cfg");
-	LYstrncpy(cur_item->name, buffer, (int) (colon - buffer));
+	LYStrNCpy(cur_item->name, buffer, (int) (colon - buffer));
 	remove_backslashes(cur_item->name);
 
 	/*
@@ -217,7 +217,7 @@ static void add_item_to_list(char *buffer,
 
 	    if (cur_item->command == NULL)
 		outofmem(__FILE__, "read_cfg");
-	    LYstrncpy(cur_item->command,
+	    LYStrNCpy(cur_item->command,
 		      colon + 1,
 		      (int) (next_colon - (colon + 1)));
 	    remove_backslashes(cur_item->command);
@@ -249,8 +249,9 @@ lynx_list_item_type *find_item_by_number(lynx_list_item_type *list_ptr,
     return list_ptr;
 }
 
-int match_item_by_name(lynx_list_item_type *ptr, char *name,
-		       BOOLEAN only_overriders)
+int match_item_by_name(lynx_list_item_type *ptr,
+		       const char *name,
+		       int only_overriders)
 {
     return
 	(ptr->command != 0
@@ -789,7 +790,7 @@ static int lynx_sig_file_fun(char *value)
 {
     char temp[LY_MAXPATH];
 
-    LYstrncpy(temp, value, sizeof(temp) - 1);
+    LYStrNCpy(temp, value, sizeof(temp) - 1);
     if (LYPathOffHomeOK(temp, sizeof(temp))) {
 	StrAllocCopy(LynxSigFile, temp);
 	LYAddPathToHome(temp, sizeof(temp), LynxSigFile);
@@ -998,7 +999,7 @@ static int system_editor_fun(char *value)
 }
 
 #define SetViewer(mime_type, viewer) \
-    HTSetPresentation(mime_type, viewer, 0, 1.0, 3.0, 0.0, 0, mediaCFG)
+    HTSetPresentation(mime_type, viewer, 0, 1.0, 3.0, 0.0, 0L, mediaCFG)
 
 static int viewer_fun(char *value)
 {
@@ -1054,7 +1055,7 @@ static int nonrest_sigwinch_fun(char *value)
 }
 
 #ifdef USE_CHARSET_CHOICE
-static void matched_charset_choice(BOOL display_charset,
+static void matched_charset_choice(int display_charset,
 				   int i)
 {
     int j;
@@ -1073,7 +1074,7 @@ static void matched_charset_choice(BOOL display_charset,
 }
 
 static int parse_charset_choice(char *p,
-				BOOL display_charset)	/*if FALSE, then assumed doc charset */
+				int display_charset)	/*if FALSE, then assumed doc charset */
 {
     int len, i;
     int matches = 0;

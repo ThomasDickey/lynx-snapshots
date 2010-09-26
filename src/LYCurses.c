@@ -1,4 +1,4 @@
-/* $LynxId: LYCurses.c,v 1.153 2010/09/23 09:06:19 tom Exp $ */
+/* $LynxId: LYCurses.c,v 1.156 2010/09/25 00:48:03 tom Exp $ */
 #include <HTUtils.h>
 #include <HTAlert.h>
 
@@ -295,7 +295,7 @@ static char *attr_to_string(int code)
 /*
  *  This function boxes windows for (n)curses.
  */
-void LYbox(WINDOW * win, BOOLEAN formfield GCC_UNUSED)
+void LYbox(WINDOW * win, int formfield GCC_UNUSED)
 {
 #ifdef USE_SLANG
     SLsmg_draw_box(win->top_y,
@@ -1576,7 +1576,7 @@ BOOLEAN setup(char *terminal)
 
     printf("%s%s\n", gettext("Terminal ="), term);
     if ((strlen(term) < 5) ||
-	strncmp(term, "vt", 2) || !isdigit(term[2])) {
+	StrNCmp(term, "vt", 2) || !isdigit(term[2])) {
 	printf("%s\n",
 	       gettext("You must use a vt100, 200, etc. terminal with this program."));
 	printf(CONFIRM_PROCEED, "n/y");
@@ -1658,7 +1658,7 @@ BOOLEAN setup(char *terminal)
      * from all other links.  The workaround here is to disable the 'rev'
      * capability.
      */
-    if ((strncmp((const char *) ttytype, "sun", 3) == 0)) {
+    if ((StrNCmp((const char *) ttytype, "sun", 3) == 0)) {
 	LYnoVideo(2);
     }
 #endif /* HAVE_TTYTYPE */
@@ -1993,7 +1993,7 @@ static
 int LYstrExtent0(const char *string,
 		 int len,
 		 int maxCells GCC_UNUSED,
-		 BOOL retCellNum GCC_UNUSED)
+		 int retCellNum GCC_UNUSED)
 {
     int used = (len < 0 ? (int) strlen(string) : len);
     int result = used;

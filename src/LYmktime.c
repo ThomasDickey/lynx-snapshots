@@ -1,4 +1,4 @@
-/* $LynxId: LYmktime.c,v 1.9 2008/12/27 00:46:30 tom Exp $ */
+/* $LynxId: LYmktime.c,v 1.11 2010/09/25 00:51:53 tom Exp $ */
 
 #include <LYStrings.h>
 #include <LYUtils.h>
@@ -20,7 +20,7 @@ char *LYstrncpy(char *dst,
     if (n < 0)
 	n = 0;
 
-    val = strncpy(dst, src, n);
+    val = StrNCpy(dst, src, n);
     if (len < n)
 	*(dst + len) = '\0';
     else
@@ -54,7 +54,7 @@ FILE *TraceFP(void)
  * - FM
  */
 time_t LYmktime(char *string,
-		BOOL absolute)
+		int absolute)
 {
 #if USE_PARSDATE
     time_t result = 0;

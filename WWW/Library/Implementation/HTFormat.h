@@ -1,15 +1,15 @@
-/*                                            HTFormat: The format manager in the WWW Library
-                            MANAGE DIFFERENT DOCUMENT FORMATS
-
-   Here we describe the functions of the HTFormat module which handles conversion between
-   different data representations.  (In MIME parlance, a representation is known as a
-   content-type.  In WWW the term "format" is often used as it is shorter).
-
-   This module is implemented by HTFormat.c.  This hypertext document is used to generate
-   the HTFormat.h include file.  Part of the WWW library.
-
-Preamble
-
+/*
+ * $LynxId: HTFormat.h,v 1.32 2010/09/25 11:42:03 tom Exp $
+ *
+ *                                            HTFormat: The format manager in the WWW Library
+ *                          MANAGE DIFFERENT DOCUMENT FORMATS
+ *
+ * Here we describe the functions of the HTFormat module which handles conversion between
+ * different data representations.  (In MIME parlance, a representation is known as a
+ * content-type.  In WWW the term "format" is often used as it is shorter).
+ *
+ * This module is implemented by HTFormat.c.  This hypertext document is used to generate
+ * the HTFormat.h include file.  Part of the WWW library.
  */
 #ifndef HTFORMAT_H
 #define HTFORMAT_H
@@ -266,9 +266,9 @@ HTSetConversion:   Register a converstion routine
     extern void HTSetConversion(const char *rep_in,
 				const char *rep_out,
 				HTConverter *converter,
-				float quality,
-				float secs,
-				float secs_per_byte,
+				double quality,
+				double secs,
+				double secs_per_byte,
 				long int maxbytes,
 				AcceptMedia media
     );
@@ -326,7 +326,7 @@ HTStackValue: Find the cost of a filter stack
  */
     extern float HTStackValue(HTFormat format_in,
 			      HTFormat rep_out,
-			      float initial_value,
+			      double initial_value,
 			      long int length);
 
 #define NO_VALUE_FOUND  -1e20	/* returned if none found */

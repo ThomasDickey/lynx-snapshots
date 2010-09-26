@@ -1,4 +1,7 @@
-/*			Lynx Document Reference List Support	      LYList.c
+/*
+ * $LynxId: LYList.c,v 1.45 2010/09/25 12:46:05 tom Exp $
+ *
+ *			Lynx Document Reference List Support	      LYList.c
  *			====================================
  *
  *	Author: FM	Foteos Macrides (macrides@sci.wfbr.edu)
@@ -36,7 +39,7 @@
  *			Clear:	we only get addresses.
  */
 
-int showlist(DocInfo *newdoc, BOOLEAN titles)
+int showlist(DocInfo *newdoc, int titles)
 {
     int cnt;
     int refs, hidden_links;
@@ -68,7 +71,7 @@ int showlist(DocInfo *newdoc, BOOLEAN titles)
 
     LYRegisterUIPage(newdoc->address,
 		     titles ? UIP_LIST_PAGE : UIP_ADDRLIST_PAGE);
-    last_titles = titles;
+    last_titles = (BOOLEAN) titles;
     LYforce_HTML_mode = TRUE;	/* force this file to be HTML */
     LYforce_no_cache = TRUE;	/* force this file to be new */
 
@@ -152,7 +155,7 @@ int showlist(DocInfo *newdoc, BOOLEAN titles)
 	    HTSprintf0(&LinkTitle, "(internal)");
 	} else if (titles && child->type &&
 		   dest == child->dest &&
-		   !strncmp(HTAtom_name(child->type),
+		   !StrNCmp(HTAtom_name(child->type),
 			    "RelTitle: ", 10)) {
 	    HTSprintf0(&LinkTitle, "(%s)", HTAtom_name(child->type) + 10);
 	} else {
@@ -232,7 +235,7 @@ int showlist(DocInfo *newdoc, BOOLEAN titles)
     return (0);
 }
 
-static void print_refs(FILE *fp, BOOLEAN titles, int refs)
+static void print_refs(FILE *fp, int titles, int refs)
 {
     int cnt;
     char *address = NULL;
@@ -320,7 +323,7 @@ static void print_hidden_refs(FILE *fp, int refs, int hidden_links)
  *	titles		Set:	if we want titles where available
  *			Clear:	we only get addresses.
  */
-void printlist(FILE *fp, BOOLEAN titles)
+void printlist(FILE *fp, int titles)
 {
     int refs, hidden_links;
 

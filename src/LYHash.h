@@ -1,4 +1,4 @@
-/* $LynxId: LYHash.h,v 1.23 2007/07/22 23:08:36 tom Exp $ */
+/* $LynxId: LYHash.h,v 1.24 2010/09/24 10:57:49 tom Exp $ */
 #ifndef _LYHASH_H_
 #define _LYHASH_H_ 1
 
@@ -38,7 +38,7 @@ extern "C" {
     extern bucket nostyle_bucket;
 
     extern int hash_code_lowercase_on_fly(const char *string);
-    extern int hash_code_aggregate_char(char c, int hash);
+    extern int hash_code_aggregate_char(int c, int hash);
     extern int hash_code_aggregate_lower_str(const char *c, int hash_was);
 
     extern int s_a;

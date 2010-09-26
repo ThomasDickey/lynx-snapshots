@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYCharSets.c,v 1.64 2009/11/21 15:52:05 tom Exp $
+ * $LynxId: LYCharSets.c,v 1.66 2010/09/25 12:46:05 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTCJK.h>
@@ -494,7 +494,7 @@ void HTMLSetCharacterHandling(int i)
     }
 #endif /* USE_SLANG */
 
-    ena_csi((BOOLEAN) (LYlowest_eightbit[current_char_set] > 155));
+    ena_csi(LYlowest_eightbit[current_char_set] > 155);
 
     /* some diagnostics */
     if (TRACE) {
@@ -565,18 +565,18 @@ static void HTMLSetRawModeDefault(int i)
  * character set and the current LYRawMode value.  - FM
  */
 void HTMLSetUseDefaultRawMode(int i,
-			      BOOLEAN modeflag)
+			      int modeflag)
 {
     if (LYCharSet_UC[i].enc != UCT_ENC_CJK) {
 
 	int chndl = safeUCGetLYhndl_byMIME(UCAssume_MIMEcharset);
 
 	if (i == chndl)
-	    LYUseDefaultRawMode = modeflag;
+	    LYUseDefaultRawMode = (BOOLEAN) modeflag;
 	else
 	    LYUseDefaultRawMode = (BOOL) (!modeflag);
     } else			/* CJK encoding: */
-	LYUseDefaultRawMode = modeflag;
+	LYUseDefaultRawMode = (BOOLEAN) modeflag;
 
     return;
 }

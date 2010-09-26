@@ -1,5 +1,5 @@
 /*
- * $LynxId: UCAux.c,v 1.41 2010/04/29 09:10:58 tom Exp $
+ * $LynxId: UCAux.c,v 1.43 2010/09/25 15:36:51 tom Exp $
  */
 #include <HTUtils.h>
 
@@ -366,7 +366,7 @@ void UCSetBoxChars(int cset,
 	    /* *INDENT-OFF* */
 	    static struct {
 		int mapping;
-		int internal;
+		UCode_t internal;
 		int external;
 	    } table[] = {
 		{ 'j', 0x2518, 0 }, /* BOX DRAWINGS LIGHT UP AND LEFT */
@@ -386,7 +386,8 @@ void UCSetBoxChars(int cset,
 	    unsigned n;
 
 	    if (first) {
-		char *map = tigetstr("acsc");
+		static char acsc_name[] = "acsc";
+		char *map = tigetstr(acsc_name);
 
 		if (map != 0) {
 		    CTRACE((tfp, "build terminal line-drawing map\n"));
@@ -394,7 +395,8 @@ void UCSetBoxChars(int cset,
 			for (n = 0; n < TABLESIZE(table); ++n) {
 			    if (table[n].mapping == map[0]) {
 				table[n].external = UCH(map[1]);
-				CTRACE((tfp, "  map[%c] %#x -> %#x\n",
+				CTRACE((tfp,
+					"  map[%c] %#" PRI_UCode_t " -> %#x\n",
 					table[n].mapping,
 					table[n].internal,
 					table[n].external));
@@ -462,7 +464,7 @@ void UCSetBoxChars(int cset,
 #define PUTC(ch) ((*myPutc)(target, (char)(ch)))
 #define PUTC2(ch) ((*myPutc)(target,(char)(0x80|(0x3f &(ch)))))
 
-BOOL UCPutUtf8_charstring(HTStream *target, putc_func_t * myPutc, long code)
+BOOL UCPutUtf8_charstring(HTStream *target, putc_func_t * myPutc, UCode_t code)
 {
     if (code < 128)
 	return NO;		/* indicate to caller we didn't handle it */

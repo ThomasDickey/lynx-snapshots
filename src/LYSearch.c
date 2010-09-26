@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYSearch.c,v 1.24 2010/05/05 09:19:31 tom Exp $
+ * $LynxId: LYSearch.c,v 1.26 2010/09/25 11:20:40 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTAlert.h>
@@ -184,7 +184,7 @@ BOOL textsearch(DocInfo *cur_doc, char *prev_target,
 	 * LYK_NEXT or LYK_PREV was pressed, so copy the buffer into
 	 * prev_target.
 	 */
-	LYstrncpy(prev_target, prev_target_buffer, target_size);
+	LYStrNCpy(prev_target, prev_target_buffer, target_size);
 
     if (strlen(prev_target) == 0) {
 	/*
@@ -194,13 +194,13 @@ BOOL textsearch(DocInfo *cur_doc, char *prev_target,
 	 */
 	_statusline(ENTER_WHEREIS_QUERY);
 
-	ch = LYgetstr(prev_target, VISIBLE, (unsigned) target_size, recall);
+	ch = LYGetStr(prev_target, VISIBLE, (unsigned) target_size, recall);
 	if (ch < 0) {
 	    /*
 	     * User cancelled the search via ^G.  Restore prev_target and
 	     * return.  - FM
 	     */
-	    LYstrncpy(prev_target, prev_target_buffer, target_size);
+	    LYStrNCpy(prev_target, prev_target_buffer, target_size);
 	    HTInfoMsg(CANCELLED);
 	    return (FALSE);
 	}
@@ -249,7 +249,7 @@ BOOL textsearch(DocInfo *cur_doc, char *prev_target,
 	    QueryNum = 0;
 	if ((cp = (char *) HTList_objectAt(search_queries,
 					   QueryNum)) != NULL) {
-	    LYstrncpy(prev_target, cp, target_size);
+	    LYStrNCpy(prev_target, cp, target_size);
 	    if (*prev_target_buffer &&
 		!strcmp(prev_target_buffer, prev_target)) {
 		_statusline(EDIT_CURRENT_QUERY);
@@ -259,13 +259,13 @@ BOOL textsearch(DocInfo *cur_doc, char *prev_target,
 	    } else {
 		_statusline(EDIT_A_PREV_QUERY);
 	    }
-	    ch = LYgetstr(prev_target, VISIBLE, (unsigned) target_size, recall);
+	    ch = LYGetStr(prev_target, VISIBLE, (unsigned) target_size, recall);
 	    if (ch < 0) {
 		/*
 		 * User canceled the search via ^G.  Restore prev_target and
 		 * return.  - FM
 		 */
-		LYstrncpy(prev_target, prev_target_buffer, target_size);
+		LYStrNCpy(prev_target, prev_target_buffer, target_size);
 		HTInfoMsg(CANCELLED);
 		return (FALSE);
 	    }
@@ -301,7 +301,7 @@ BOOL textsearch(DocInfo *cur_doc, char *prev_target,
 	    QueryNum = QueryTotal - 1;
 	if ((cp = (char *) HTList_objectAt(search_queries,
 					   QueryNum)) != NULL) {
-	    LYstrncpy(prev_target, cp, target_size);
+	    LYStrNCpy(prev_target, cp, target_size);
 	    if (*prev_target_buffer &&
 		!strcmp(prev_target_buffer, prev_target)) {
 		_statusline(EDIT_CURRENT_QUERY);
@@ -311,13 +311,13 @@ BOOL textsearch(DocInfo *cur_doc, char *prev_target,
 	    } else {
 		_statusline(EDIT_A_PREV_QUERY);
 	    }
-	    ch = LYgetstr(prev_target, VISIBLE, (unsigned) target_size, recall);
+	    ch = LYGetStr(prev_target, VISIBLE, (unsigned) target_size, recall);
 	    if (ch < 0) {
 		/*
 		 * User cancelled the search via ^G.  Restore prev_target and
 		 * return.  - FM
 		 */
-		LYstrncpy(prev_target, prev_target_buffer, target_size);
+		LYStrNCpy(prev_target, prev_target_buffer, target_size);
 		HTInfoMsg(CANCELLED);
 		return (FALSE);
 	    }
@@ -327,7 +327,7 @@ BOOL textsearch(DocInfo *cur_doc, char *prev_target,
     /*
      * Replace the search string buffer with the new target.  - FM
      */
-    LYstrncpy(prev_target_buffer, prev_target, sizeof(prev_target_buffer) - 1);
+    LYStrNCpy(prev_target_buffer, prev_target, sizeof(prev_target_buffer) - 1);
     HTAddSearchQuery(prev_target_buffer);
 
     if (direction < 0) {

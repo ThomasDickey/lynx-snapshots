@@ -1,4 +1,4 @@
-/* $LynxId: LYCurses.h,v 1.84 2010/09/23 09:06:29 tom Exp $ */
+/* $LynxId: LYCurses.h,v 1.85 2010/09/25 00:48:03 tom Exp $ */
 #ifndef LYCURSES_H
 #define LYCURSES_H
 
@@ -338,7 +338,7 @@ extern "C" {
 #define LYstopPopup() LYsubwindow(0)
 #endif				/* NCURSES */
 
-    extern void LYbox(WINDOW * win, BOOLEAN formfield);
+    extern void LYbox(WINDOW * win, int formfield);
     extern WINDOW *LYstartPopup(int *top_y, int *left_x, int *height, int *width);
 
 /*

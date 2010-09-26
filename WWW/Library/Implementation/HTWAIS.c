@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTWAIS.c,v 1.34 2010/06/19 17:43:32 tom Exp $
+ * $LynxId: HTWAIS.c,v 1.35 2010/09/25 00:04:53 tom Exp $
  *
  *	WorldWideWeb - Wide Area Informaion Server Access	HTWAIS.c
  *	==================================================
@@ -243,7 +243,7 @@ static char *WWW_from_archie(char *file)
     if (!result)
 	return result;		/* Malloc error */
     strcpy(result, "file://");
-    strncat(result, file, end - file);
+    StrNCat(result, file, end - file);
     colon = strchr(result + 7, ':');	/* Expect colon after host */
     if (colon) {
 	for (; colon[0]; colon[0] = colon[1], colon++) ;	/* move down */
@@ -823,7 +823,7 @@ int HTLoadWAIS(const char *arg,
 	char *p;
 	HTStructured *target;
 
-	strncpy(keywords, key, MAX_KEYWORDS_LENGTH);
+	StrNCpy(keywords, key, MAX_KEYWORDS_LENGTH);
 	while ((p = strchr(keywords, '+')) != 0)
 	    *p = ' ';
 

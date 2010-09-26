@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFTP.c,v 1.96 2010/09/23 09:29:36 tom Exp $
+ * $LynxId: HTFTP.c,v 1.98 2010/09/25 00:05:51 tom Exp $
  *
  *			File Transfer Protocol (FTP) Client
  *			for a WorldWideWeb browser
@@ -296,7 +296,7 @@ char *HTVMS_name(const char *nn,
 
     strcpy(filename, fn);
     strcpy(nodename, "");	/* On same node?  Yes if node names match */
-    if (strncmp(nn, "localhost", 9)) {
+    if (StrNCmp(nn, "localhost", 9)) {
 	const char *p;
 	const char *q;
 
@@ -550,9 +550,9 @@ static int response(const char *cmd)
 		CTRACE((tfp, "    Rx: %s", response_text));
 
 		/* Check for login or help messages */
-		if (!strncmp(response_text, "230-", 4) ||
-		    !strncmp(response_text, "250-", 4) ||
-		    !strncmp(response_text, "220-", 4))
+		if (!StrNCmp(response_text, "230-", 4) ||
+		    !StrNCmp(response_text, "250-", 4) ||
+		    !StrNCmp(response_text, "220-", 4))
 		    help_message_cache_add(response_text + 4);
 
 		sscanf(response_text, "%d%c", &result, &continuation);
@@ -1016,7 +1016,7 @@ static int get_connection(const char *arg,
     use_list = FALSE;		/* reset */
     if (response("SYST\r\n") == 2) {
 	/* we got a line -- what kind of server are we talking to? */
-	if (strncmp(response_text + 4,
+	if (StrNCmp(response_text + 4,
 		    "UNIX Type: L8 MAC-OS MachTen", 28) == 0) {
 	    server_type = MACHTEN_SERVER;
 	    use_list = TRUE;
@@ -1034,7 +1034,7 @@ static int get_connection(const char *arg,
 	    use_list = TRUE;
 	    CTRACE((tfp, "HTFTP: Treating as MSDOS (Unix emulation) server.\n"));
 
-	} else if (strncmp(response_text + 4, "VMS", 3) == 0) {
+	} else if (StrNCmp(response_text + 4, "VMS", 3) == 0) {
 	    char *tilde = strstr(arg, "/~");
 
 	    use_list = TRUE;
@@ -1048,13 +1048,13 @@ static int get_connection(const char *arg,
 		CTRACE((tfp, "HTFTP: Treating as VMS server.\n"));
 	    }
 
-	} else if ((strncmp(response_text + 4, "VM/CMS", 6) == 0) ||
-		   (strncmp(response_text + 4, "VM ", 3) == 0)) {
+	} else if ((StrNCmp(response_text + 4, "VM/CMS", 6) == 0) ||
+		   (StrNCmp(response_text + 4, "VM ", 3) == 0)) {
 	    server_type = CMS_SERVER;
 	    use_list = TRUE;
 	    CTRACE((tfp, "HTFTP: Treating as CMS server.\n"));
 
-	} else if (strncmp(response_text + 4, "DCTS", 4) == 0) {
+	} else if (StrNCmp(response_text + 4, "DCTS", 4) == 0) {
 	    server_type = DCTS_SERVER;
 	    CTRACE((tfp, "HTFTP: Treating as DCTS server.\n"));
 
@@ -1069,28 +1069,28 @@ static int get_connection(const char *arg,
 	    set_mac_binary(server_type);
 	    CTRACE((tfp, "HTFTP: Treating as NetPresenz (MACOS) server.\n"));
 
-	} else if (strncmp(response_text + 4, "MACOS Peter's Server", 20) == 0) {
+	} else if (StrNCmp(response_text + 4, "MACOS Peter's Server", 20) == 0) {
 	    server_type = PETER_LEWIS_SERVER;
 	    use_list = TRUE;
 	    set_mac_binary(server_type);
 	    CTRACE((tfp, "HTFTP: Treating as Peter Lewis (MACOS) server.\n"));
 
-	} else if (strncmp(response_text + 4, "Windows_NT", 10) == 0) {
+	} else if (StrNCmp(response_text + 4, "Windows_NT", 10) == 0) {
 	    server_type = WINDOWS_NT_SERVER;
 	    CTRACE((tfp, "HTFTP: Treating as Window_NT server.\n"));
 	    set_unix_dirstyle(&server_type, &use_list);
 
-	} else if (strncmp(response_text + 4, "Windows2000", 11) == 0) {
+	} else if (StrNCmp(response_text + 4, "Windows2000", 11) == 0) {
 	    server_type = WINDOWS_2K_SERVER;
 	    CTRACE((tfp, "HTFTP: Treating as Window_2K server.\n"));
 	    set_unix_dirstyle(&server_type, &use_list);
 
-	} else if (strncmp(response_text + 4, "MS Windows", 10) == 0) {
+	} else if (StrNCmp(response_text + 4, "MS Windows", 10) == 0) {
 	    server_type = MS_WINDOWS_SERVER;
 	    use_list = TRUE;
 	    CTRACE((tfp, "HTFTP: Treating as MS Windows server.\n"));
 
-	} else if (strncmp(response_text + 4,
+	} else if (StrNCmp(response_text + 4,
 			   "MACOS AppleShare IP FTP Server", 30) == 0) {
 	    server_type = APPLESHARE_SERVER;
 	    use_list = TRUE;
@@ -1392,7 +1392,10 @@ static int get_listen_socket(void)
 
 	    getnameinfo((struct sockaddr *) &soc_address,
 			SOCKADDR_LEN(soc_address),
-			hostbuf, sizeof(hostbuf), portbuf, sizeof(portbuf),
+			hostbuf,
+			(socklen_t) sizeof(hostbuf),
+			portbuf,
+			(socklen_t) sizeof(portbuf),
 			NI_NUMERICHOST | NI_NUMERICSERV);
 	    sprintf(port_command, "EPRT |%d|%s|%s|%c%c", 2, hostbuf, portbuf,
 		    CR, LF);
@@ -1452,12 +1455,12 @@ static void set_years_and_date(void)
     int i;
 
     NowTime = time(NULL);
-    strncpy(day, (char *) ctime(&NowTime) + 8, 2);
+    StrNCpy(day, (char *) ctime(&NowTime) + 8, 2);
     day[2] = '\0';
     if (day[0] == ' ') {
 	day[0] = '0';
     }
-    strncpy(month, (char *) ctime(&NowTime) + 4, 3);
+    StrNCpy(month, (char *) ctime(&NowTime) + 4, 3);
     month[3] = '\0';
     for (i = 0; i < 12; i++) {
 	if (!strcasecomp(month, months[i])) {
@@ -1790,7 +1793,7 @@ static void parse_dls_line(char *line,
     entry_info->size = (unsigned long) size_num;
 
     cps = LYSkipBlanks(&line[23]);
-    if (!strncmp(cps, "-> ", 3) && cps[3] != '\0' && cps[3] != ' ') {
+    if (!StrNCmp(cps, "-> ", 3) && cps[3] != '\0' && cps[3] != ' ') {
 	StrAllocCopy(entry_info->type, ENTRY_IS_SYMBOLIC_LINK);
 	StrAllocCopy(entry_info->linkname, LYSkipBlanks(cps + 3));
 	entry_info->size = 0;	/* don't display size */
@@ -1853,12 +1856,12 @@ static void parse_vms_dir_entry(char *line,
 	i = (int) ((strstr(entry_info->filename, "READ")
 		    - entry_info->filename)
 		   + 4);
-	if (!strncmp(&entry_info->filename[i], "ME", 2)) {
+	if (!StrNCmp(&entry_info->filename[i], "ME", 2)) {
 	    i += 2;
 	    while (entry_info->filename[i] && entry_info->filename[i] != '.') {
 		i++;
 	    }
-	} else if (!strncmp(&entry_info->filename[i], ".ME", 3)) {
+	} else if (!StrNCmp(&entry_info->filename[i], ".ME", 3)) {
 	    i = (int) strlen(entry_info->filename);
 	} else {
 	    i = 0;
@@ -1912,7 +1915,7 @@ static void parse_vms_dir_entry(char *line,
 	    sprintf(date + 4, "%c%.1s ", HT_NON_BREAK_SPACE, cpd - 1);
 
 	/* Time or Year */
-	if (!strncmp(ThisYear, cpd + 5, 4) &&
+	if (!StrNCmp(ThisYear, cpd + 5, 4) &&
 	    strlen(cpd) > 15 && *(cpd + 12) == ':') {
 	    sprintf(date + 7, "%.5s", cpd + 10);
 	} else {
@@ -2382,7 +2385,7 @@ static EntryInfo *parse_dir_entry(char *entry,
 		return (entry_info);
 	    }
 	    *first = FALSE;
-	    if (!strncmp(entry, "total ", 6) ||
+	    if (!StrNCmp(entry, "total ", 6) ||
 		strstr(entry, "not available") != NULL) {
 		entry_info->display = FALSE;
 		return (entry_info);
@@ -2595,9 +2598,9 @@ static EntryInfo *parse_dir_entry(char *entry,
 	format = HTFileFormat(entry_info->filename, &encoding, &cp2);
 
 	if (cp2 == NULL) {
-	    if (!strncmp(HTAtom_name(format), "application", 11)) {
+	    if (!StrNCmp(HTAtom_name(format), "application", 11)) {
 		cp2 = HTAtom_name(format) + 12;
-		if (!strncmp(cp2, "x-", 2))
+		if (!StrNCmp(cp2, "x-", 2))
 		    cp2 += 2;
 	    } else {
 		cp2 = HTAtom_name(format);
@@ -2663,7 +2666,7 @@ static int compare_EntryInfo_structs(EntryInfo *entry1, EntryInfo *entry2)
 		strcpy(date1, &entry1->date[8]);
 		strcpy(time1, "00:00");
 	    }
-	    strncpy(month, entry1->date, 3);
+	    StrNCpy(month, entry1->date, 3);
 	    month[3] = '\0';
 	    for (i = 0; i < 12; i++) {
 		if (!strcasecomp(month, months[i])) {
@@ -2673,7 +2676,7 @@ static int compare_EntryInfo_structs(EntryInfo *entry1, EntryInfo *entry2)
 	    i++;
 	    sprintf(month, "%02d", i);
 	    strcat(date1, month);
-	    strncat(date1, &entry1->date[4], 2);
+	    StrNCat(date1, &entry1->date[4], 2);
 	    date1[8] = '\0';
 	    if (date1[6] == ' ' || date1[6] == HT_NON_BREAK_SPACE) {
 		date1[6] = '0';
@@ -2698,7 +2701,7 @@ static int compare_EntryInfo_structs(EntryInfo *entry1, EntryInfo *entry2)
 		strcpy(date2, &entry2->date[8]);
 		strcpy(time2, "00:00");
 	    }
-	    strncpy(month, entry2->date, 3);
+	    StrNCpy(month, entry2->date, 3);
 	    month[3] = '\0';
 	    for (i = 0; i < 12; i++) {
 		if (!strcasecomp(month, months[i])) {
@@ -2708,7 +2711,7 @@ static int compare_EntryInfo_structs(EntryInfo *entry1, EntryInfo *entry2)
 	    i++;
 	    sprintf(month, "%02d", i);
 	    strcat(date2, month);
-	    strncat(date2, &entry2->date[4], 2);
+	    StrNCat(date2, &entry2->date[4], 2);
 	    date2[8] = '\0';
 	    if (date2[6] == ' ' || date2[6] == HT_NON_BREAK_SPACE) {
 		date2[6] = '0';
@@ -2867,10 +2870,10 @@ static void LYListFmtParse(const char *fmtstr,
 
 		if (c != 'T') {
 		    if (cp2 == NULL) {
-			if (!strncmp(HTAtom_name(format),
+			if (!StrNCmp(HTAtom_name(format),
 				     "application", 11)) {
 			    cp2 = HTAtom_name(format) + 12;
-			    if (!strncmp(cp2, "x-", 2))
+			    if (!StrNCmp(cp2, "x-", 2))
 				cp2 += 2;
 			} else {
 			    cp2 = HTAtom_name(format);
@@ -3424,8 +3427,11 @@ static int setup_connection(const char *name,
 		    status = HT_NO_CONNECTION;
 		    break;
 		}
-		if (getnameinfo((struct sockaddr *) &ss, sslen, dst,
-				sizeof(dst), NULL, 0, NI_NUMERICHOST)) {
+		if (getnameinfo((struct sockaddr *) &ss,
+				sslen,
+				dst,
+				(socklen_t) sizeof(dst),
+				NULL, 0, NI_NUMERICHOST)) {
 		    fprintf(tfp, "HTFTP: getnameinfo failed\n");
 		    status = HT_NO_CONNECTION;
 		    break;
@@ -3515,7 +3521,7 @@ int HTFTPLoad(const char *name,
 	     ? "passive"
 	     : "normal")));
 
-    HTReadProgress(0, 0);
+    HTReadProgress((off_t) 0, (off_t) 0);
 
     status = setup_connection(name, anchor);
     if (status < 0)
@@ -3704,7 +3710,7 @@ int HTFTPLoad(const char *name,
 		    return -1;
 		}
 		/* Handle any unescaped "/%2F" path */
-		if (!strncmp(filename, "//", 2)) {
+		if (!StrNCmp(filename, "//", 2)) {
 		    int i;
 
 		    included_device = TRUE;
@@ -3859,7 +3865,7 @@ int HTFTPLoad(const char *name,
 		    goto listen;
 		}
 		/* Otherwise, go to appropriate directory and doctor filename */
-		if (!strncmp(filename, "/~", 2)) {
+		if (!StrNCmp(filename, "/~", 2)) {
 		    filename += 2;
 		    found_tilde = TRUE;
 		}
@@ -3967,7 +3973,7 @@ int HTFTPLoad(const char *name,
 	    }
 	default:
 	    /* Shift for any unescaped "/%2F" path */
-	    if (!strncmp(filename, "//", 2))
+	    if (!StrNCmp(filename, "//", 2))
 		filename++;
 	    break;
 	}
@@ -4066,7 +4072,7 @@ int HTFTPLoad(const char *name,
 		if (outstanding-- > 0) {
 		    status = response(0);
 		    if (status < 0 ||
-			(status == 2 && !strncmp(response_text, "221", 3)))
+			(status == 2 && !StrNCmp(response_text, "221", 3)))
 			outstanding = 0;
 		}
 	} else {		/* HT_INTERRUPTED */
@@ -4169,7 +4175,7 @@ int HTFTPLoad(const char *name,
 		    return HTLoadError(sink, 500, response_text);
 		} else if (status <= 0) {
 		    outstanding = 0;
-		} else if (status == 2 && !strncmp(response_text, "221", 3))
+		} else if (status == 2 && !StrNCmp(response_text, "221", 3))
 		    outstanding = 0;
 	    }
 	}
@@ -4178,7 +4184,7 @@ int HTFTPLoad(const char *name,
     while (outstanding-- > 0 &&
 	   (status > 0)) {
 	status = response(0);
-	if (status == 2 && !strncmp(response_text, "221", 3))
+	if (status == 2 && !StrNCmp(response_text, "221", 3))
 	    break;
     }
     data_soc = -1;		/* invalidate it */

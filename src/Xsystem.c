@@ -1,4 +1,4 @@
-/* $LynxId: Xsystem.c,v 1.23 2009/03/10 15:21:42 tom Exp $
+/* $LynxId: Xsystem.c,v 1.24 2010/09/24 22:07:35 tom Exp $
  *	like system("cmd") but return with exit code of "cmd"
  *	for Turbo-C/MS-C/LSI-C
  *  This code is in the public domain.
@@ -335,7 +335,7 @@ static int NEAR prog_go(PRO * p, int flag)
 
     if (s < p->cmd) {		/* cmd has no PATH nor Drive */
 	ep = LYGetEnv("PATH");
-	LYstrncpy(cmdb, p->cmd, sizeof(cmdb) - 1);
+	LYStrNCpy(cmdb, p->cmd, sizeof(cmdb) - 1);
 	for (;;) {
 	    if (extp) {		/* has extension */
 		if ((rc = open(cmdb, O_RDONLY)) >= 0) {
@@ -358,7 +358,7 @@ static int NEAR prog_go(PRO * p, int flag)
 		if (i > 0 && lc != ':' && lc != '\\' && lc != '/')
 		    cmdb[i++] = '\\';
 		cmdb[i] = 0;
-		LYstrncpy(cmdb + i, p->cmd, sizeof(cmdb) - 1 - i);
+		LYStrNCpy(cmdb + i, p->cmd, sizeof(cmdb) - 1 - i);
 	    } else {
 		if (rc == -2)
 		    return rc;
@@ -385,7 +385,7 @@ static char *NEAR tmpf(char *tp)
     int i;
 
     if ((ev = LYGetEnv("TMP")) != 0) {
-	LYstrncpy(tplate, ev, sizeof(tplate) - 2 - strlen(tp));
+	LYStrNCpy(tplate, ev, sizeof(tplate) - 2 - strlen(tp));
 	i = strlen(ev);
 	if (i && ev[i - 1] != '\\' && ev[i - 1] != '/')
 	    strcat(tplate, "\\");

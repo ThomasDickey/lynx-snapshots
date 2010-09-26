@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTAccess.c,v 1.70 2010/09/21 23:57:37 tom Exp $
+ * $LynxId: HTAccess.c,v 1.71 2010/09/24 08:51:18 tom Exp $
  *
  *		Access Manager					HTAccess.c
  *		==============
@@ -357,7 +357,7 @@ BOOL override_proxy(const char *addr)
 	if ((!templ_port || templ_port == port) &&
 	    (t_len > 0 && t_len <= h_len &&
 	     isdigit(UCH(*no_proxy)) &&
-	     !strncmp(host, no_proxy, (unsigned) t_len))) {
+	     !StrNCmp(host, no_proxy, t_len))) {
 	    FREE(host);
 	    return YES;
 	}
@@ -411,10 +411,10 @@ static int get_physical(const char *addr,
 	StrAllocCat(physical, "?0,0");
 	CTRACE((tfp, "HTAccess: Appending '?0,0' coordinate pair.\n"));
     }
-    if (!strncmp(physical, "Proxied=", 8)) {
+    if (!StrNCmp(physical, "Proxied=", 8)) {
 	HTAnchor_setPhysical(anchor, physical + 8);
 	using_proxy = YES;
-    } else if (!strncmp(physical, "NoProxy=", 8)) {
+    } else if (!StrNCmp(physical, "NoProxy=", 8)) {
 	HTAnchor_setPhysical(anchor, physical + 8);
 	override_flag = YES;
     } else {
@@ -523,7 +523,7 @@ static int get_physical(const char *addr,
 	    char *gatewayed = NULL;
 
 	    StrAllocCopy(gatewayed, proxy);
-	    if (!strncmp(gatewayed, "http", 4)) {
+	    if (!StrNCmp(gatewayed, "http", 4)) {
 		char *cp = strrchr(gatewayed, '/');
 
 		/* Append a slash to the proxy specification if it doesn't
@@ -535,7 +535,7 @@ static int get_physical(const char *addr,
 	    /*
 	     * Ensure that the proxy server uses ftp for file URLs. - FM
 	     */
-	    if (!strncmp(addr, "file", 4)) {
+	    if (!StrNCmp(addr, "file", 4)) {
 		StrAllocCat(gatewayed, "ftp");
 		StrAllocCat(gatewayed, (addr + 4));
 	    } else
@@ -795,7 +795,7 @@ static BOOL HTLoadDocument(const char *full_address,	/* may include #fragment */
      */
     if (!anchor->post_data) {
 	while ((cp = HTAnchor_physical(anchor)) != NULL &&
-	       !strncmp(cp, "Location=", 9)) {
+	       !StrNCmp(cp, "Location=", 9)) {
 	    DocAddress NewDoc;
 
 	    CTRACE((tfp, "HTAccess: '%s' is a redirection URL.\n",

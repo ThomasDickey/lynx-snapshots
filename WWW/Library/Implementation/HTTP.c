@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTP.c,v 1.118 2010/09/22 00:35:50 tom Exp $
+ * $LynxId: HTTP.c,v 1.120 2010/09/25 11:31:46 tom Exp $
  *
  * HyperText Tranfer Protocol	- Client implementation		HTTP.c
  * ==========================
@@ -83,7 +83,7 @@ static int HTSSLCallback(int preverify_ok, X509_STORE_CTX * x509_ctx GCC_UNUSED)
 #ifdef USE_X509_SUPPORT
     HTSprintf0(&msg,
 	       gettext("SSL callback:%s, preverify_ok=%d, ssl_okay=%d"),
-	       X509_verify_cert_error_string(X509_STORE_CTX_get_error(x509_ctx)),
+	       X509_verify_cert_error_string((long) X509_STORE_CTX_get_error(x509_ctx)),
 	       preverify_ok, ssl_okay);
     _HTProgress(msg);
     FREE(msg);
@@ -93,7 +93,8 @@ static int HTSSLCallback(int preverify_ok, X509_STORE_CTX * x509_ctx GCC_UNUSED)
     if (!(preverify_ok || ssl_okay || ssl_noprompt)) {
 #ifdef USE_X509_SUPPORT
 	HTSprintf0(&msg, SSL_FORCED_PROMPT,
-		   X509_verify_cert_error_string(X509_STORE_CTX_get_error(x509_ctx)));
+		   X509_verify_cert_error_string((long)
+						 X509_STORE_CTX_get_error(x509_ctx)));
 	if (HTForcedPrompt(ssl_noprompt, msg, YES))
 	    ssl_okay = 1;
 	else
@@ -161,24 +162,24 @@ void HTSSLInitPRNG(void)
 
 	t = time(NULL);
 	pid = getpid();
-	RAND_file_name(rand_file, 256);
+	RAND_file_name(rand_file, 256L);
 	CTRACE((tfp, "HTTP: Seeding PRNG\n"));
 	if (rand_file != NULL) {
 	    /* Seed as much as 1024 bytes from RAND_file_name */
-	    RAND_load_file(rand_file, 1024);
+	    RAND_load_file(rand_file, 1024L);
 	}
 	/* Seed in time (mod_ssl does this) */
-	RAND_seed((unsigned char *) &t, sizeof(time_t));
+	RAND_seed((unsigned char *) &t, (int) sizeof(time_t));
 	/* Seed in pid (mod_ssl does this) */
-	RAND_seed((unsigned char *) &pid, sizeof(pid));
+	RAND_seed((unsigned char *) &pid, (int) sizeof(pid));
 	/* Initialize system's random number generator */
-	RAND_bytes((unsigned char *) &seed, sizeof(long));
+	RAND_bytes((unsigned char *) &seed, (int) sizeof(long));
 
 	lynx_srand((unsigned) seed);
 	while (RAND_status() == 0) {
 	    /* Repeatedly seed the PRNG using the system's random number generator until it has been seeded with enough data */
 	    l = lynx_rand();
-	    RAND_seed((unsigned char *) &l, sizeof(long));
+	    RAND_seed((unsigned char *) &l, (int) sizeof(long));
 	}
 	if (rand_file != NULL) {
 	    /* Write a rand_file */
@@ -450,7 +451,7 @@ static void show_cert_issuer(X509 * peer_cert GCC_UNUSED)
     char ssl_dn[1024];
     char *msg = NULL;
 
-    X509_NAME_oneline(X509_get_issuer_name(peer_cert), ssl_dn, sizeof(ssl_dn));
+    X509_NAME_oneline(X509_get_issuer_name(peer_cert), ssl_dn, (int) sizeof(ssl_dn));
     HTSprintf0(&msg, gettext("Certificate issued by: %s"), ssl_dn);
     _HTProgress(msg);
     FREE(msg);
@@ -512,7 +513,7 @@ static int HTLoadHTTP(const char *arg,
     char *eol;			/* End of line if found */
     char *start_of_data;	/* Start of body of reply */
     int status;			/* tcp return */
-    int bytes_already_read;
+    off_t bytes_already_read;
     char crlf[3];		/* A CR LF equivalent string */
     HTStream *target;		/* Unconverted data */
     HTFormat format_in;		/* Format arriving in the message */
@@ -585,7 +586,7 @@ static int HTLoadHTTP(const char *arg,
 	goto done;
     }
 #ifdef USE_SSL
-    if (using_proxy && !strncmp(url, "http://", 7)) {
+    if (using_proxy && !StrNCmp(url, "http://", 7)) {
 	int portnumber;
 
 	if ((connect_url = strstr((url + 7), "https://"))) {
@@ -632,12 +633,12 @@ static int HTLoadHTTP(const char *arg,
     line_kept_clean = NULL;
 
 #ifdef USE_SSL
-    if (!strncmp(url, "https", 5))
+    if (!StrNCmp(url, "https", 5))
 	status = HTDoConnect(url, "HTTPS", HTTPS_PORT, &s);
     else
 	status = HTDoConnect(url, "HTTP", HTTP_PORT, &s);
 #else
-    if (!strncmp(url, "https", 5)) {
+    if (!StrNCmp(url, "https", 5)) {
 	HTAlert(gettext("This client does not contain support for HTTPS URLs."));
 	status = HT_NOT_LOADED;
 	goto done;
@@ -672,7 +673,7 @@ static int HTLoadHTTP(const char *arg,
     /*
      * If this is an https document, then do the SSL stuff here.
      */
-    if (did_connect || !strncmp(url, "https", 5)) {
+    if (did_connect || !StrNCmp(url, "https", 5)) {
 	SSL_handle = handle = HTGetSSLHandle();
 	SSL_set_fd(handle, s);
 	/* get host we're connecting to */
@@ -769,10 +770,10 @@ static int HTLoadHTTP(const char *arg,
 	peer_cert = SSL_get_peer_certificate(handle);
 #if defined(USE_OPENSSL_INCL) || defined(USE_GNUTLS_FUNCS)
 	X509_NAME_oneline(X509_get_subject_name(peer_cert),
-			  ssl_dn, sizeof(ssl_dn));
+			  ssl_dn, (int) sizeof(ssl_dn));
 #elif defined(USE_GNUTLS_INCL)
 	X509_NAME_oneline(X509_get_subject_name(peer_cert),
-			  ssl_dn + 1, sizeof(ssl_dn) - 1);
+			  ssl_dn + 1, (int) sizeof(ssl_dn) - 1);
 
 	/* Iterate over DN in incompatible GnuTLS format to bring it into OpenSSL format */
 	ssl_dn[0] = '/';
@@ -899,7 +900,7 @@ static int HTLoadHTTP(const char *arg,
 			size_t j = (size_t) ASN1_STRING_length(gn->d.ia5);
 
 			cert_host = (char *) malloc(j + 1);
-			memcpy(cert_host, ASN1_STRING_data(gn->d.ia5), j);
+			MemCpy(cert_host, ASN1_STRING_data(gn->d.ia5), j);
 			cert_host[j] = '\0';
 		    } else
 			continue;
@@ -1213,8 +1214,9 @@ static int HTLoadHTTP(const char *arg,
 	    char *colon;
 	    int portnumber;
 	    char *auth, *cookie = NULL;
-	    BOOL secure = (BOOL) (strncmp(anAnchor->address, "https", 5) ?
-				  FALSE : TRUE);
+	    BOOL secure = (BOOL) (StrNCmp(anAnchor->address, "https", 5)
+				  ? FALSE
+				  : TRUE);
 
 	    abspath = HTParse(arg, "", PARSE_PATH | PARSE_PUNCTUATION);
 	    docname = HTParse(arg, "", PARSE_PATH);
@@ -1222,7 +1224,7 @@ static int HTLoadHTTP(const char *arg,
 	    if (hostname &&
 		NULL != (colon = HTParsePort(hostname, &portnumber))) {
 		*colon = '\0';	/* Chop off port number */
-	    } else if (!strncmp(arg, "https", 5)) {
+	    } else if (!StrNCmp(arg, "https", 5)) {
 		portnumber = HTTPS_PORT;
 	    } else {
 		portnumber = HTTP_PORT;
@@ -1239,7 +1241,7 @@ static int HTLoadHTTP(const char *arg,
 		 * ultimate target of this request.  - FM & AJL
 		 */
 		char *host2 = NULL, *path2 = NULL;
-		int port2 = (strncmp(docname, "https", 5) ?
+		int port2 = (StrNCmp(docname, "https", 5) ?
 			     HTTP_PORT : HTTPS_PORT);
 
 		host2 = HTParse(docname, "", PARSE_HOST);
@@ -1296,7 +1298,7 @@ static int HTLoadHTTP(const char *arg,
 		 * Add 'Cookie:' header, if it's HTTP or HTTPS document being
 		 * proxied.
 		 */
-		if (!strncmp(docname, "http", 4)) {
+		if (!StrNCmp(docname, "http", 4)) {
 		    cookie = LYAddCookieHeader(host2, path2, port2, secure);
 		}
 		FREE(host2);
@@ -1489,12 +1491,12 @@ static int HTLoadHTTP(const char *arg,
 	BOOL end_of_file = NO;
 	int buffer_length = INIT_LINE_SIZE;
 
-	line_buffer = typecallocn(char, (unsigned) buffer_length);
+	line_buffer = typecallocn(char, (size_t) buffer_length);
 
 	if (line_buffer == NULL)
 	    outofmem(__FILE__, "HTLoadHTTP");
 
-	HTReadProgress(bytes_already_read = 0, 0);
+	HTReadProgress(bytes_already_read = 0, (off_t) 0);
 	do {			/* Loop to read in the first line */
 	    /*
 	     * Extend line buffer if necessary for those crazy WAIS URLs ;-)
@@ -1580,7 +1582,7 @@ static int HTLoadHTTP(const char *arg,
 #endif /* NOT_ASCII */
 
 	    bytes_already_read += status;
-	    HTReadProgress(bytes_already_read, 0);
+	    HTReadProgress(bytes_already_read, (off_t) 0);
 
 #ifdef UCX			/* UCX returns -1 on EOF */
 	    if (status == 0 || status == -1)
@@ -1599,7 +1601,7 @@ static int HTLoadHTTP(const char *arg,
 
 		if (line_kept_clean == NULL)
 		    outofmem(__FILE__, "HTLoadHTTP");
-		memcpy(line_kept_clean, line_buffer, (unsigned) buffer_length);
+		MemCpy(line_kept_clean, line_buffer, buffer_length);
 #ifdef SH_EX			/* FIX BUG by kaz@maczuka.hitachi.ibaraki.jp */
 		real_length_of_line = length + status;
 #endif
@@ -1639,9 +1641,9 @@ static int HTLoadHTTP(const char *arg,
      * can't handle the third word, so we try again without it.
      */
     if (extensions &&		/* Old buggy server or Help gateway? */
-	(0 == strncmp(line_buffer, "<TITLE>Bad File Request</TITLE>", 31) ||
-	 0 == strncmp(line_buffer, "Address should begin with", 25) ||
-	 0 == strncmp(line_buffer, "<TITLE>Help ", 12) ||
+	(0 == StrNCmp(line_buffer, "<TITLE>Bad File Request</TITLE>", 31) ||
+	 0 == StrNCmp(line_buffer, "Address should begin with", 25) ||
+	 0 == StrNCmp(line_buffer, "<TITLE>Help ", 12) ||
 	 0 == strcmp(line_buffer,
 		     "Document address invalid or access not authorised"))) {
 	FREE(line_buffer);
@@ -1703,7 +1705,7 @@ static int HTLoadHTTP(const char *arg,
 	     * Treat all plain text as HTML.  This sucks but its the only
 	     * solution without without looking at content.
 	     */
-	    if (!strncmp(HTAtom_name(format_in), "text/plain", 10)) {
+	    if (!StrNCmp(HTAtom_name(format_in), "text/plain", 10)) {
 		CTRACE((tfp, "HTTP: format_in being changed to text/HTML\n"));
 		format_in = WWW_HTML;
 	    }
@@ -1832,7 +1834,7 @@ static int HTLoadHTTP(const char *arg,
 			url = connect_url;
 			FREE(line_buffer);
 			FREE(line_kept_clean);
-			if (!strncmp(connect_url, "snews", 5)) {
+			if (!StrNCmp(connect_url, "snews", 5)) {
 			    CTRACE((tfp,
 				    "      Will attempt handshake and snews connection.\n"));
 			    status = HTNewsProxyConnect(s, url, anAnchor,
@@ -2039,7 +2041,7 @@ static int HTLoadHTTP(const char *arg,
 			FREE(line_buffer);
 			FREE(line_kept_clean);
 #ifdef USE_SSL
-			if (using_proxy && !strncmp(url, "https://", 8)) {
+			if (using_proxy && !StrNCmp(url, "https://", 8)) {
 			    url = arg;
 			    do_connect = TRUE;
 			    did_connect = FALSE;

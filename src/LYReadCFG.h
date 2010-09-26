@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYReadCFG.h,v 1.24 2010/09/23 20:53:47 tom Exp $
+ * $LynxId: LYReadCFG.h,v 1.25 2010/09/24 09:41:51 tom Exp $
  */
 #ifndef LYREADCFG_H
 #define LYREADCFG_H
@@ -59,7 +59,7 @@ extern "C" {
 			   *parent_filename, const char *dft_filename);
     extern int lynx_cfg_infopage(DocInfo *newdoc);
     extern int lynx_compile_opts(DocInfo *newdoc);
-    extern int match_item_by_name(lynx_list_item_type *ptr, char *name, BOOLEAN only_overriders);
+    extern int match_item_by_name(lynx_list_item_type *ptr, const char *name, int only_overriders);
     extern lynx_list_item_type *find_item_by_number(lynx_list_item_type *
 						    list_ptr,
 						    char *number);

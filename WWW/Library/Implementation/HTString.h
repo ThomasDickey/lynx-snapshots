@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTString.h,v 1.31 2009/03/17 22:25:50 tom Exp $
+ * $LynxId: HTString.h,v 1.34 2010/09/25 00:32:47 tom Exp $
  *						String handling for libwww
  *                                         STRINGS
  *                                            
@@ -28,10 +28,17 @@ extern "C" {
 
 #else
 #define AS_casecomp( a, b ) ( strcasecomp( ( a ), ( b ) ) )
-#define AS_ncmp( a, b, c )  ( strncmp( ( a ), ( b ), ( c ) ) )
+#define AS_ncmp( a, b, c )  ( StrNCmp( ( a ), ( b ), ( c ) ) )
 #define AS_cmp strcmp
 
 #endif				/* NOT_ASCII */
+
+#define StrNCat(a,b,c) strncat((a),(b),(size_t)(c))
+#define StrNCpy(a,b,c) strncpy((a),(b),(size_t)(c))
+#define StrNCmp(a,b,c) strncmp((a),(b),(size_t)(c))
+
+#define MemCpy(a,b,c)  memcpy((a),(b),(size_t)(c))
+#define MemCmp(a,b,c)  memcmp((a),(b),(size_t)(c))
 
     /*
      * Case-insensitive string comparison

@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYLocal.c,v 1.108 2010/06/17 21:18:00 tom Exp $
+ * $LynxId: LYLocal.c,v 1.112 2010/09/25 16:26:16 tom Exp $
  *
  *  Routines to manipulate the local filesystem.
  *  Written by: Rick Mallett, Carleton University
@@ -93,8 +93,8 @@ static char *render_item ( const char *	s,
 	const char *	path,
 	const char *	dir,
 	char *		buf,
-	int		bufsize,
-	BOOLEAN		url_syntax);
+	size_t		bufsize,
+	int		url_syntax);
 
 struct dired_menu {
     int cond;
@@ -376,6 +376,38 @@ static BOOLEAN ok_localname(char *dst, const char *src)
 }
 #endif /* OK_INSTALL */
 
+#define MAX_ARGC 10
+
+static char **make_argv(const char *command,...)
+{
+    static char *result[MAX_ARGC];
+    int argc = 0;
+    char *value;
+    va_list ap;
+
+    va_start(ap, command);
+    StrAllocCopy(result[argc++], command);
+    do {
+	result[argc] = 0;
+	value = (char *) va_arg(ap, char *);
+
+	if (value != 0)
+	    StrAllocCopy(result[argc], value);
+    } while (result[argc++] != 0);
+    va_end(ap);
+
+    return result;
+}
+
+static void free_argv(char **argv)
+{
+    int argc;
+
+    for (argc = 0; argv[argc] != 0; ++argc) {
+	free(argv[argc]);
+    }
+}
+
 /*
  * Execute DIRED command, return -1 or 0 on failure, 1 success.
  */
@@ -485,15 +517,16 @@ static int make_directory(char *path)
     const char *program;
 
     if ((program = HTGetProgramPath(ppMKDIR)) != NULL) {
-	char *args[5];
+	char **args;
 	char *msg = 0;
 
 	HTSprintf0(&msg, "make directory %s", path);
-	args[0] = "mkdir";
-	args[1] = path;
-	args[2] = (char *) 0;
+	args = make_argv("mkdir",
+			 path,
+			 NULL);
 	code = (LYExecv(program, args, msg) <= 0) ? -1 : 1;
 	FREE(msg);
+	free_argv(args);
     } else {
 #ifdef _WINDOWS
 	code = mkdir(path) ? -1 : 1;
@@ -511,16 +544,17 @@ static int remove_file(char *path)
     const char *program;
 
     if ((program = HTGetProgramPath(ppRM)) != NULL) {
-	char *args[5];
+	char **args;
 	char *tmpbuf = NULL;
 
-	args[0] = "rm";
-	args[1] = "-f";
-	args[2] = path;
-	args[3] = (char *) 0;
+	args = make_argv("rm",
+			 "-f",
+			 path,
+			 NULL);
 	HTSprintf0(&tmpbuf, gettext("remove %s"), path);
 	code = LYExecv(program, args, tmpbuf);
 	FREE(tmpbuf);
+	free_argv(args);
     } else {
 	code = remove(path) ? -1 : 1;
 	CTRACE((tfp, "builtin remove ->%d\n\t%s\n", code, path));
@@ -534,15 +568,16 @@ static int remove_directory(char *path)
     const char *program;
 
     if ((program = HTGetProgramPath(ppRMDIR)) != NULL) {
-	char *args[5];
+	char **args;
 	char *tmpbuf = NULL;
 
-	args[0] = "rmdir";
-	args[1] = path;
-	args[2] = (char *) 0;
+	args = make_argv("rmdir",
+			 path,
+			 NULL);
 	HTSprintf0(&tmpbuf, gettext("remove %s"), path);
 	code = LYExecv(program, args, tmpbuf);
 	FREE(tmpbuf);
+	free_argv(args);
     } else {
 	code = rmdir(path) ? -1 : 1;
 	CTRACE((tfp, "builtin rmdir ->%d\n\t%s\n", code, path));
@@ -556,15 +591,16 @@ static int touch_file(char *path)
     const char *program;
 
     if ((program = HTGetProgramPath(ppTOUCH)) != NULL) {
-	char *args[5];
+	char **args;
 	char *msg = NULL;
 
 	HTSprintf0(&msg, gettext("touch %s"), path);
-	args[0] = "touch";
-	args[1] = path;
-	args[2] = (char *) 0;
+	args = make_argv("touch",
+			 path,
+			 NULL);
 	code = (LYExecv(program, args, msg) <= 0) ? -1 : 1;
 	FREE(msg);
+	free_argv(args);
     } else {
 	FILE *fp;
 
@@ -586,15 +622,16 @@ static int move_file(char *source, char *target)
 
     if ((program = HTGetProgramPath(ppMV)) != NULL) {
 	char *msg = 0;
-	char *args[5];
+	char **args;
 
 	HTSprintf0(&msg, gettext("move %s to %s"), source, target);
-	args[0] = "mv";
-	args[1] = source;
-	args[2] = target;
-	args[3] = (char *) 0;
+	args = make_argv("mv",
+			 source,
+			 target,
+			 NULL);
 	code = (LYExecv(program, args, msg) <= 0) ? -1 : 1;
 	FREE(msg);
+	free_argv(args);
     } else {
 	struct stat sb;
 	char *actual = 0;
@@ -770,7 +807,7 @@ static int modify_tagged(char *testpath)
     _statusline(gettext("Enter new location for tagged items: "));
 
     given_target[0] = '\0';
-    LYgetstr(given_target, VISIBLE, sizeof(given_target), NORECALL);
+    LYGetStr(given_target, VISIBLE, sizeof(given_target), NORECALL);
     if (strlen(given_target)) {
 	/*
 	 * Replace ~/ references to the home directory.
@@ -785,7 +822,7 @@ static int modify_tagged(char *testpath)
 		FREE(cp1);
 		return 0;
 	    }
-	    LYstrncpy(given_target, cp1, sizeof(given_target) - 1);
+	    LYStrNCpy(given_target, cp1, sizeof(given_target) - 1);
 	    FREE(cp1);
 	}
 
@@ -872,7 +909,7 @@ static int modify_name(char *testpath)
 	} else {
 	    return ok_file_or_dir(&dir_info);
 	}
-	LYstrncpy(tmpbuf, LYPathLeaf(testpath), sizeof(tmpbuf) - 1);
+	LYStrNCpy(tmpbuf, LYPathLeaf(testpath), sizeof(tmpbuf) - 1);
 	if (get_filename(cp, tmpbuf, sizeof(tmpbuf)) == NULL)
 	    return 0;
 
@@ -933,7 +970,7 @@ static int modify_location(char *testpath)
     } else {
 	return ok_file_or_dir(&dir_info);
     }
-    LYstrncpy(tmpbuf, testpath, sizeof(tmpbuf) - 1);
+    LYStrNCpy(tmpbuf, testpath, sizeof(tmpbuf) - 1);
     *LYPathLeaf(tmpbuf) = '\0';
     if (get_filename(cp, tmpbuf, sizeof(tmpbuf)) == NULL)
 	return 0;
@@ -948,7 +985,7 @@ static int modify_location(char *testpath)
 	    && (tmpbuf[1] == '\0' || LYIsPathSep(tmpbuf[1]))) {
 	    StrAllocCopy(newpath, Home_Dir());
 	    StrAllocCat(newpath, (tmpbuf + 1));
-	    LYstrncpy(tmpbuf, newpath, sizeof(tmpbuf) - 1);
+	    LYStrNCpy(tmpbuf, newpath, sizeof(tmpbuf) - 1);
 	}
 	if (LYisAbsPath(tmpbuf)) {
 	    StrAllocCopy(newpath, tmpbuf);
@@ -1026,7 +1063,7 @@ int local_modify(DocInfo *doc, char **newpath)
 	    FREE(cp);
 	    return 0;
 	}
-	LYstrncpy(testpath, cp, sizeof(testpath) - 1);
+	LYStrNCpy(testpath, cp, sizeof(testpath) - 1);
 	FREE(cp);
 
 	if (ans == 'N') {
@@ -1338,7 +1375,7 @@ static int permit_location(char *destpath,
 	LYRegisterUIPage(*newpath, UIP_PERMIT_OPTIONS);
 
 	group_name = HTAA_GidToName((int) dir_info.st_gid);
-	LYstrncpy(LYValidPermitFile,
+	LYStrNCpy(LYValidPermitFile,
 		  srcpath,
 		  (sizeof(LYValidPermitFile) - 1));
 
@@ -1490,7 +1527,7 @@ static int permit_location(char *destpath,
 	    if (*cr != '\0') {
 		*cr++ = '\0';
 	    }
-	    if (strncmp(cp, "mode=", 5) == 0) {		/* Magic string. */
+	    if (StrNCmp(cp, "mode=", 5) == 0) {		/* Magic string. */
 		long mask = permit_bits(cp + 5);
 
 		if (mask != 0) {
@@ -1520,20 +1557,21 @@ static int permit_location(char *destpath,
 	 */
 	code = 1;
 	if ((program = HTGetProgramPath(ppCHMOD)) != NULL) {
-	    char *args[5];
+	    char **args;
 	    char amode[10];
 	    char *tmpbuf = NULL;
 
 	    HTSprintf0(&tmpbuf, "chmod %.4o %s", (unsigned int) new_mode, destpath);
 	    sprintf(amode, "%.4o", (unsigned int) new_mode);
-	    args[0] = "chmod";
-	    args[1] = amode;
-	    args[2] = destpath;
-	    args[3] = (char *) 0;
+	    args = make_argv("chmod",
+			     amode,
+			     destpath,
+			     NULL);
 	    if (LYExecv(program, args, tmpbuf) <= 0) {
 		code = -1;
 	    }
 	    FREE(tmpbuf);
+	    free_argv(args);
 	} else {
 	    if (chmod(destpath, new_mode) < 0) {
 		code = -1;
@@ -1629,7 +1667,7 @@ static char *LYonedot(char *line)
     static char line1[LY_MAXPATH];
 
     if (pathconf(line, _PC_NAME_MAX) <= 12) {
-	LYstrncpy(line1, line, sizeof(line1) - 1);
+	LYStrNCpy(line1, line, sizeof(line1) - 1);
 	for (;;) {
 	    if ((dot = strrchr(line1, '.')) == 0
 		|| LYLastPathSep(dot) != 0) {
@@ -1651,10 +1689,10 @@ static char *LYonedot(char *line)
 static char *match_op(const char *prefix,
 		      char *data)
 {
-    int len = (int) strlen(prefix);
+    size_t len = strlen(prefix);
 
-    if (!strncmp("LYNXDIRED://", data, 12)
-	&& !strncmp(prefix, data + 12, (unsigned) len)) {
+    if (!StrNCmp("LYNXDIRED://", data, 12)
+	&& !StrNCmp(prefix, data + 12, len)) {
 	len += 12;
 #if defined(USE_DOS_DRIVES)
 	if (data[len] == '/') {	/* this is normal */
@@ -2166,7 +2204,7 @@ static char *get_filename(const char *prompt,
 
     _statusline(prompt);
 
-    LYgetstr(buf, VISIBLE, bufsize, NORECALL);
+    LYGetStr(buf, VISIBLE, bufsize, NORECALL);
     if (strstr(buf, "../") != NULL) {
 	HTAlert(gettext("Illegal filename; request ignored."));
 	return NULL;
@@ -2377,7 +2415,7 @@ BOOLEAN local_install(char *destpath,
 		       savepath);
 	    FREE(tmpdest);
 	    return (-1);	/* don't do it */
-	} else if (!strncmp(savepath, destpath, strlen(destpath)) &&
+	} else if (!StrNCmp(savepath, destpath, strlen(destpath)) &&
 		   LYIsPathSep(savepath[strlen(destpath)]) &&
 		   LYLastPathSep(savepath + strlen(destpath) + 1) == 0) {
 	    HTUserMsg2(gettext("Already in target directory: %s"),
@@ -2408,7 +2446,7 @@ BOOLEAN local_install(char *destpath,
 			   args[src]);
 		FREE(args[src]);
 		continue;	/* skip this source file */
-	    } else if (!strncmp(args[src], destpath, strlen(destpath)) &&
+	    } else if (!StrNCmp(args[src], destpath, strlen(destpath)) &&
 		       LYIsPathSep(args[src][strlen(destpath)]) &&
 		       LYLastPathSep(args[src] + strlen(destpath) + 1) == 0) {
 		HTUserMsg2(gettext("Already in target directory: %s"),
@@ -2540,8 +2578,8 @@ static char *render_item(const char *s,
 			 const char *path,
 			 const char *dir,
 			 char *buf,
-			 int bufsize,
-			 BOOLEAN url_syntax)
+			 size_t bufsize,
+			 int url_syntax)
 {
     const char *cp;
     char *bp;
