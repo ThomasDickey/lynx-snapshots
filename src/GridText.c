@@ -1,5 +1,5 @@
 /*
- * $LynxId: GridText.c,v 1.198 2010/09/25 12:43:30 tom Exp $
+ * $LynxId: GridText.c,v 1.203 2010/09/27 10:42:01 tom Exp $
  *
  *		Character grid hypertext object
  *		===============================
@@ -372,6 +372,7 @@ typedef struct _TextAnchor {
     struct _TextAnchor *prev;	/* www_user_search only! */
     int sgml_offset;		/* used for updating position after reparsing */
     int number;			/* For user interface */
+    int show_number;		/* For user interface (unique-urls) */
     int line_num;		/* Place in document */
     short line_pos;		/* Bytes/chars - extent too */
     short extent;		/* (see HText_trimHightext) */
@@ -459,6 +460,7 @@ struct _HText {
     BOOL page_has_target;	/* has target on screen */
     BOOL has_utf8;		/* has utf-8 on screen or line */
     BOOL had_utf8;		/* had utf-8 when last displayed */
+    int next_number;		/* next a->number value */
 #ifdef DISP_PARTIAL
     int first_lineno_last_disp_partial;
     int last_lineno_last_disp_partial;
@@ -1088,6 +1090,7 @@ HText *HText_new(HTParentAnchor *anchor)
     self->stale = YES;
     self->toolbar = NO;
     self->tabs = NULL;
+    self->next_number = 1;
 #ifdef USE_SOURCE_CACHE
     /*
      * Remember the parse settings.
@@ -2296,7 +2299,7 @@ static void display_page(HText *text,
 	     */
 	    if (Anchor_ptr->show_anchor
 		&& non_empty(hi_string)
-		&& (Anchor_ptr->link_type & HYPERTEXT_ANCHOR)) {
+		&& (Anchor_ptr->link_type == HYPERTEXT_ANCHOR)) {
 		int count;
 		char *s;
 
@@ -3017,7 +3020,8 @@ static void split_line(HText *text, unsigned split)
 	       style->spaceBefore || style->spaceAfter)) {
 	p--;			/*  Strip trailers. */
     }
-    TailTrim = previous->data + previous->size - 1 - p;		/*  Strip trailers. */
+    /*  Strip trailers. */
+    TailTrim = (int) (previous->data + previous->size - 1 - p);
     previous->size = (unsigned short) (previous->size - TailTrim);
     p[1] = '\0';
 
@@ -3142,11 +3146,11 @@ static void split_line(HText *text, unsigned split)
 	    for (n = 0; n < line->numstyles; n++)
 		line->styles[n] = to[n + 1];
 	} else if (line->numstyles == 0) {
-	    line->styles[0].sc_horizpos = (unsigned) (~0);	/* ?!!! */
+	    line->styles[0].sc_horizpos = (~0);		/* ?!!! */
 	}
 	previous->numstyles = (unsigned short) (at_end - previous->styles + 1);
 	if (previous->numstyles == 0) {
-	    previous->styles[0].sc_horizpos = (unsigned) (~0);	/* ?!!! */
+	    previous->styles[0].sc_horizpos = (~0);	/* ?!!! */
 	}
     }
 #endif /*USE_COLOR_STYLE */
@@ -5073,6 +5077,41 @@ void HText_startStblRowGroup(HText *me, int alignment)
 	HText_cancelStbl(me);	/* give up */
 }
 
+static void compute_show_number(TextAnchor *a)
+{
+    HTAnchor *cur, *tst;
+    TextAnchor *b;
+    int match;
+
+    a->show_number = a->number;
+    if (unique_urls
+	&& HTMainText != 0
+	&& HTMainText->first_anchor != 0
+	&& a->anchor != 0
+	&& (cur = a->anchor->dest) != 0
+	&& cur->parent != 0
+	&& cur->parent->address != 0) {
+
+	match = 0;
+	for (b = HTMainText->first_anchor; b != a; b = b->next) {
+	    if (b->anchor != 0
+		&& (tst = b->anchor->dest) != 0
+		&& tst->parent != 0
+		&& tst->parent->address != 0
+		&& !strcmp(cur->parent->address,
+			   tst->parent->address)
+		&& !strcmp(NonNull(a->anchor->tag), NonNull(b->anchor->tag))) {
+		match = b->show_number;
+		break;
+	    }
+	}
+	if (match)
+	    a->show_number = match;
+	else
+	    a->show_number = HTMainText->next_number++;
+    }
+}
+
 /*		Anchor handling
  *		---------------
  */
@@ -5091,7 +5130,9 @@ static void add_link_number(HText *text, TextAnchor *a, int save_position)
 	char saved_lastchar = text->LastChar;
 	int saved_linenum = text->Lines;
 
-	sprintf(marker, "[%d]", a->number);
+	compute_show_number(a);
+
+	sprintf(marker, "[%d]", a->show_number);
 	HText_appendText(text, marker);
 	if (saved_linenum && text->Lines && saved_lastchar != ' ')
 	    text->LastChar = ']';	/* if marker not after space caused split */
@@ -5143,6 +5184,7 @@ int HText_beginAnchor(HText *text, int underline,
     } else {
 	a->number = 0;
     }
+    a->show_number = 0;
 
     if (number_links_on_left)
 	add_link_number(text, a, TRUE);
@@ -5842,7 +5884,7 @@ static void HText_trimHightext(HText *text,
 	     * is not yet done with it.  - kw
 	     */
 	    if (!anchor_ptr->extent && anchor_ptr->number &&
-		(anchor_ptr->link_type & HYPERTEXT_ANCHOR) &&
+		(anchor_ptr->link_type == HYPERTEXT_ANCHOR) &&
 		!anchor_ptr->show_anchor &&
 		anchor_ptr->number == text->last_anchor_number)
 		continue;
@@ -5876,7 +5918,7 @@ static void HText_trimHightext(HText *text,
 	 * Strip off any spaces or SpecialAttrChars at the beginning,
 	 * if they exist, but only on HYPERTEXT_ANCHORS.
 	 */
-	if (anchor_ptr->link_type & HYPERTEXT_ANCHOR) {
+	if (anchor_ptr->link_type == HYPERTEXT_ANCHOR) {
 	    ch = UCH(line_ptr->data[anchor_ptr->line_pos]);
 	    while (isspace(ch) ||
 		   IsSpecialAttrChar(ch)) {
@@ -5975,7 +6017,7 @@ static void HText_trimHightext(HText *text,
 		/*handle LY_SOFT_NEWLINEs -VH */
 		hi_offset += remove_special_attr_chars(hi_string);
 
-		if (anchor_ptr->link_type & HYPERTEXT_ANCHOR) {
+		if (anchor_ptr->link_type == HYPERTEXT_ANCHOR) {
 		    LYTrimTrailing(hi_string);
 		}
 		if (non_empty(hi_string)) {
@@ -5994,7 +6036,7 @@ static void HText_trimHightext(HText *text,
 
 	hilite_str = LYGetHiTextStr(anchor_ptr, 0);
 	remove_special_attr_chars(hilite_str);
-	if (anchor_ptr->link_type & HYPERTEXT_ANCHOR) {
+	if (anchor_ptr->link_type == HYPERTEXT_ANCHOR) {
 	    LYTrimTrailing(hilite_str);
 	}
 
@@ -6080,6 +6122,20 @@ HTChildAnchor *HText_childNextNumber(int number, void **prev)
 	return (HTChildAnchor *) 0;	/* Fail */
     *prev = (void *) a;
     return a->anchor;
+}
+
+/*
+ * For the -unique-urls option, find the anchor-number of the first occurrence
+ * of a given address.
+ */
+int HText_findAnchorNumber(void *avoid)
+{
+    TextAnchor *a = (TextAnchor *) avoid;
+
+    if (a->number > 0 && a->show_number == 0)
+	compute_show_number(a);
+
+    return a->show_number;
 }
 
 static const char *inputFieldDesc(FormInfo * input)
@@ -7046,7 +7102,6 @@ void HText_pageDisplay(int line_num,
 	HText_trimHightext(HTMainText, FALSE, stop_before);
     }
 #endif
-
     display_page(HTMainText, line_num - 1, target);
 
 #ifdef DISP_PARTIAL
@@ -7140,8 +7195,7 @@ static BOOL anchor_is_numbered(TextAnchor *Anchor_ptr)
     BOOL result = FALSE;
 
     if (Anchor_ptr->show_anchor
-    /* FIXME: && non_empty(hi_string) */
-	&& (Anchor_ptr->link_type & HYPERTEXT_ANCHOR)) {
+	&& (Anchor_ptr->link_type == HYPERTEXT_ANCHOR)) {
 	result = TRUE;
     } else if (Anchor_ptr->link_type == INPUT_ANCHOR
 	       && Anchor_ptr->input_field->type != F_HIDDEN_TYPE) {
@@ -7415,13 +7469,7 @@ BOOL HTFindPoundSelector(const char *selector)
 BOOL HText_selectAnchor(HText *text, HTChildAnchor *anchor)
 {
     TextAnchor *a;
-
-/* This is done later, hence HText_select is unused in GridText.c
-   Should it be the contrary ? @@@
-    if (text != HTMainText) {
-	HText_select(text);
-    }
-*/
+    int l;
 
     for (a = text->first_anchor; a; a = a->next) {
 	if (a->anchor == anchor)
@@ -7435,19 +7483,18 @@ BOOL HText_selectAnchor(HText *text, HTChildAnchor *anchor)
     if (text != HTMainText) {	/* Comment out by ??? */
 	HTMainText = text;	/* Put back in by tbl 921208 */
 	HTMainAnchor = text->node_anchor;
-    } {
-	int l = a->line_num;
-
-	CTRACE((tfp, "HText: Selecting anchor [%d] at line %d\n",
-		a->number, l));
-
-	if (!text->stale &&
-	    (l >= text->top_of_screen) &&
-	    (l < text->top_of_screen + display_lines + 1))
-	    return YES;
-
-	www_search_result = l - (display_lines / 3);	/* put in global variable */
     }
+    l = a->line_num;
+
+    CTRACE((tfp, "HText: Selecting anchor [%d] at line %d\n",
+	    a->number, l));
+
+    if (!text->stale &&
+	(l >= text->top_of_screen) &&
+	(l < text->top_of_screen + display_lines + 1))
+	return YES;
+
+    www_search_result = l - (display_lines / 3);	/* put in global variable */
 
     return YES;
 }
@@ -10309,7 +10356,12 @@ int HText_beginInput(HText *text,
 	break;
     }
     if (fields_are_numbered() && (a->number > 0)) {
-	sprintf(marker, "[%d]", a->number);
+	if (HTMainText != 0) {
+	    a->show_number = HTMainText->next_number++;
+	} else {
+	    a->show_number = a->number;
+	}
+	sprintf(marker, "[%d]", a->show_number);
 	adjust_marker = (int) strlen(marker);
 	if (number_fields_on_left) {
 	    BOOL had_bracket = (BOOL) (f->type == F_OPTION_LIST_TYPE);
@@ -10449,7 +10501,7 @@ void HText_endInput(HText *text)
 	&& text->last_anchor->number > 0) {
 	char marker[20];
 
-	sprintf(marker, "[%d]", text->last_anchor->number);
+	sprintf(marker, "[%d]", text->last_anchor->show_number);
 	HText_appendText(text, marker);
     }
 }
@@ -13424,6 +13476,7 @@ int HText_InsertFile(LinkInfo * form_link)
     /*  [anything "special" needed based on ->show_anchor value ?] */
     a->next = anchor_ptr;
     a->number = anchor_ptr->number;
+    a->show_number = anchor_ptr->show_number;
     a->line_pos = anchor_ptr->line_pos;
     a->extent = anchor_ptr->extent;
     a->sgml_offset = SGML_offset();

@@ -1,5 +1,5 @@
 /*
- * $LynxId: GridText.h,v 1.63 2010/09/24 23:01:59 tom Exp $
+ * $LynxId: GridText.h,v 1.65 2010/09/26 23:31:23 tom Exp $
  *
  * Specialities of GridText as subclass of HText
  */
@@ -67,6 +67,7 @@ US-ASCII control characters <32 which are not defined in Unicode standard
 #endif				/* VMS && VAXC && !__DECC */
 
     extern HTChildAnchor *HText_childNextNumber(int n, void **prev);
+    extern int HText_findAnchorNumber(void *avoid);
     extern void HText_FormDescNumber(int n, const char **desc);
 
 /*	Is there any file left?

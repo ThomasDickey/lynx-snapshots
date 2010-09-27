@@ -1,4 +1,4 @@
-.\" $LynxId: lynx.man,v 1.88 2010/01/23 00:53:50 tom Exp $
+.\" $LynxId: lynx.man,v 1.89 2010/09/27 10:49:29 tom Exp $
 .nr N -1
 .nr D 5
 .TH LYNX 1
@@ -835,6 +835,11 @@ toggles use of underline/bold attribute for links.
 .TP
 .B \-underscore
 toggles use of _underline_ format in dumps.
+.TP
+.B \-unique_urls
+check for duplicate link numbers in
+each page and corresponding lists,
+and reuse the original link number.
 .TP
 .B \-use_mouse
 turn on mouse support, if available.

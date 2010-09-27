@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTAlert.h,v 1.33 2010/09/25 11:36:09 tom Exp $
+ * $LynxId: HTAlert.h,v 1.34 2010/09/26 16:36:38 tom Exp $
  *
  *      Displaying messages and getting input for WWW Library
  *      =====================================================
@@ -151,7 +151,7 @@ extern "C" {
 				     int server_status);
 
     extern void LYSleepAlert(void);
-    extern void LYSleepDebug(void);
+    extern void LYSleepDelay(void);
     extern void LYSleepInfo(void);
     extern void LYSleepMsg(void);
     extern void LYSleepReplay(void);

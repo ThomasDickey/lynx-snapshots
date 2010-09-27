@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMain.c,v 1.221 2010/09/25 11:12:44 tom Exp $
+ * $LynxId: LYMain.c,v 1.224 2010/09/27 00:23:43 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTP.h>
@@ -219,6 +219,7 @@ BOOLEAN number_fields_on_left = TRUE;
 BOOLEAN number_links_on_left = TRUE;
 BOOLEAN recent_sizechange = FALSE;	/* the window size changed recently? */
 BOOLEAN soft_dquotes = FALSE;
+BOOLEAN unique_urls = FALSE;
 BOOLEAN use_underscore = SUBSTITUTE_UNDERSCORES;
 BOOLEAN verbose_img = VERBOSE_IMAGES;	/* show filenames or not */
 BOOLEAN vi_keys = VI_KEYS_ALWAYS_ON;
@@ -479,7 +480,7 @@ LinkInfo links[MAXLINKS];
 
 BOOLEAN nomore = FALSE;		/* display -more- string in statusline messages */
 int AlertSecs;			/* time-delay for HTAlert() messages   */
-int DebugSecs;			/* time-delay for HTProgress messages */
+int DelaySecs;			/* time-delay for HTProgress messages */
 int InfoSecs;			/* time-delay for Information messages */
 int LYMultiBookmarks = MULTI_BOOKMARK_SUPPORT;
 int LYStatusLine = -1;		/* Line for statusline() if > -1 */
@@ -1134,7 +1135,7 @@ int main(int argc,
     StrAllocCopy(ftp_format, FTP_FORMAT);
 
     AlertSecs = SECS2Secs(ALERTSECS);
-    DebugSecs = SECS2Secs(DEBUGSECS);
+    DelaySecs = SECS2Secs(DEBUGSECS);
     InfoSecs = SECS2Secs(INFOSECS);
     MessageSecs = SECS2Secs(MESSAGESECS);
     ReplaySecs = SECS2Secs(REPLAYSECS);
@@ -1518,43 +1519,45 @@ int main(int argc,
     read_cfg(lynx_cfg_file, "main program", 1, (FILE *) 0);
 
 #if defined(USE_COLOR_STYLE)
-    /*
-     * A command-line "-lss" always overrides the config-file, even if it is
-     * an empty string such as -lss="".
-     */
-    if (lynx_lss_file2 != 0) {
-	FREE(lynx_lss_file);
-	lynx_lss_file = lynx_lss_file2;
-	lynx_lss_file2 = 0;
-    }
+    if (!dump_output_immediately) {
+	/*
+	 * A command-line "-lss" always overrides the config-file, even if it is
+	 * an empty string such as -lss="".
+	 */
+	if (lynx_lss_file2 != 0) {
+	    FREE(lynx_lss_file);
+	    lynx_lss_file = lynx_lss_file2;
+	    lynx_lss_file2 = 0;
+	}
 
-    /*
-     * If no alternate lynx-style file was specified on the command line, see
-     * if it's in the environment.
-     */
-    if (!lynx_lss_file) {
-	if (((cp = LYGetEnv("LYNX_LSS")) != NULL) ||
-	    (cp = LYGetEnv("lynx_lss")) != NULL)
-	    StrAllocCopy(lynx_lss_file, cp);
-    }
+	/*
+	 * If no alternate lynx-style file was specified on the command line, see
+	 * if it's in the environment.
+	 */
+	if (!lynx_lss_file) {
+	    if (((cp = LYGetEnv("LYNX_LSS")) != NULL) ||
+		(cp = LYGetEnv("lynx_lss")) != NULL)
+		StrAllocCopy(lynx_lss_file, cp);
+	}
 
-    /*
-     * If we still don't have a lynx-style file, use the userdefs.h definition.
-     */
-    if (!lynx_lss_file)
-	StrAllocCopy(lynx_lss_file, LYNX_LSS_FILE);
+	/*
+	 * If we still don't have a lynx-style file, use the userdefs.h definition.
+	 */
+	if (!lynx_lss_file)
+	    StrAllocCopy(lynx_lss_file, LYNX_LSS_FILE);
 
-    LYTildeExpand(&lynx_lss_file, TRUE);
+	LYTildeExpand(&lynx_lss_file, TRUE);
 
-    /*
-     * If the lynx-style file is not available, inform the user and exit.
-     */
-    if (non_empty(lynx_lss_file) && !LYCanReadFile(lynx_lss_file)) {
-	fprintf(stderr, gettext("\nLynx file \"%s\" is not available.\n\n"),
-		lynx_lss_file);
-	exit_immediately(EXIT_FAILURE);
-    } else {
-	style_readFromFile(lynx_lss_file);
+	/*
+	 * If the lynx-style file is not available, inform the user and exit.
+	 */
+	if (non_empty(lynx_lss_file) && !LYCanReadFile(lynx_lss_file)) {
+	    fprintf(stderr, gettext("\nLynx file \"%s\" is not available.\n\n"),
+		    lynx_lss_file);
+	    exit_immediately(EXIT_FAILURE);
+	} else {
+	    style_readFromFile(lynx_lss_file);
+	}
     }
 #endif /* USE_COLOR_STYLE */
 
@@ -3399,7 +3402,7 @@ with -dump, format output as with -traversal, but to stdout"
    ),
 #endif
    PARSE_INT(
-      "delay",		4|NEED_TIME_ARG,	DebugSecs,
+      "delay",		4|NEED_TIME_ARG,	DelaySecs,
       "=NNN\nset NNN-second delay at statusline message"
    ),
    PARSE_FUN(
@@ -3416,7 +3419,7 @@ with -dump, format output as with -traversal, but to stdout"
 -crawl'ing, mark wrapped lines in interactive session"
    ),
    PARSE_FUN(
-      "dump",		4|FUNCTION_ARG,		dump_output_fun,
+      "dump",		1|FUNCTION_ARG,		dump_output_fun,
       "dump the first file to stdout and exit"
    ),
    PARSE_FUN(
@@ -3907,6 +3910,10 @@ bug which treated '>' as a co-terminator for\ndouble-quotes and tags"
    PARSE_SET(
       "underscore",	4|TOGGLE_ARG,		use_underscore,
       "toggles use of _underline_ format in dumps"
+   ),
+   PARSE_SET(
+      "unique_urls",	4|TOGGLE_ARG,		unique_urls,
+      "toggles use of unique-urls setting for -dump and -listonly options"
    ),
 #if defined(USE_MOUSE)
    PARSE_SET(

@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTAlert.c,v 1.92 2010/09/25 11:19:25 tom Exp $
+ * $LynxId: HTAlert.c,v 1.93 2010/09/26 16:36:38 tom Exp $
  *
  *	Displaying messages and getting input for Lynx Browser
  *	==========================================================
@@ -152,7 +152,7 @@ void HTProgress(const char *Msg)
     statusline(Msg);
     LYstore_message(Msg);
     CTRACE((tfp, "%s\n", Msg));
-    LYSleepDebug();
+    LYSleepDelay();
 }
 
 const char *HTProgressUnits(int rate)
@@ -1138,10 +1138,10 @@ void LYSleepAlert(void)
 	LYSleep(AlertSecs);
 }
 
-void LYSleepDebug(void)
+void LYSleepDelay(void)
 {
     if (okToSleep())
-	LYSleep(DebugSecs);
+	LYSleep(DelaySecs);
 }
 
 void LYSleepInfo(void)
