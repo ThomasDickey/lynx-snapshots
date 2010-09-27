@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYGlobalDefs.h,v 1.124 2010/06/18 00:12:13 tom Exp $
+ * $LynxId: LYGlobalDefs.h,v 1.126 2010/09/26 17:03:15 tom Exp $
  *
  * global variable definitions
  */
@@ -390,6 +390,7 @@ extern "C" {
     extern char *personal_extension_map;
     extern char *LYHostName;
     extern char *LYLocalDomain;
+    extern BOOLEAN unique_urls;
     extern BOOLEAN use_underscore;
     extern BOOLEAN no_list;
     extern BOOLEAN no_margins;
@@ -454,7 +455,7 @@ extern "C" {
     extern int AlertSecs;
     extern int InfoSecs;
     extern int MessageSecs;
-    extern int DebugSecs;
+    extern int DelaySecs;
     extern int ReplaySecs;
 
     extern char *LYUserAgent;	/* Lynx User-Agent header */

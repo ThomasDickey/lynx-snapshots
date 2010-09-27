@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYReadCFG.c,v 1.154 2010/09/24 22:57:51 tom Exp $
+ * $LynxId: LYReadCFG.c,v 1.156 2010/09/27 10:45:02 tom Exp $
  */
 #ifndef NO_RULES
 #include <HTRules.h>
@@ -1371,7 +1371,7 @@ static Config_Type Config_Table [] =
 #ifdef VMS
      PARSE_PRG(RC_CSWING_PATH,          ppCSWING),
 #endif
-     PARSE_TIM(RC_DELAYSECS,            DebugSecs),
+     PARSE_TIM(RC_DELAYSECS,            DelaySecs),
      PARSE_FUN(RC_DEFAULT_BOOKMARK_FILE, default_bookmark_file_fun),
      PARSE_FUN(RC_DEFAULT_CACHE_SIZE,   default_cache_size_fun),
 #ifdef USE_DEFAULT_COLORS
@@ -1616,6 +1616,7 @@ static Config_Type Config_Table [] =
 #endif
      PARSE_PRG(RC_UNCOMPRESS_PATH,      ppUNCOMPRESS),
      PARSE_SET(RC_UNDERLINE_LINKS,      LYUnderlineLinks),
+     PARSE_SET(RC_UNIQUE_URLS,          unique_urls),
      PARSE_PRG(RC_UNZIP_PATH,           ppUNZIP),
 #ifdef DIRED_SUPPORT
      PARSE_ADD(RC_UPLOADER,             uploaders),

@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYrcFile.h,v 1.35 2010/06/18 00:08:05 tom Exp $
+ * $LynxId: LYrcFile.h,v 1.36 2010/09/26 17:05:07 tom Exp $
  */
 #ifndef LYRCFILE_H
 #define LYRCFILE_H
@@ -243,6 +243,7 @@
 #define RC_TRUSTED_LYNXCGI              "trusted_lynxcgi"
 #define RC_UNCOMPRESS_PATH              "uncompress_path"
 #define RC_UNDERLINE_LINKS              "underline_links"
+#define RC_UNIQUE_URLS                  "unique_urls"
 #define RC_UNZIP_PATH                   "unzip_path"
 #define RC_UPLOADER                     "uploader"
 #define RC_URL_DOMAIN_PREFIXES          "url_domain_prefixes"
