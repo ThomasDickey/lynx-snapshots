@@ -1,4 +1,4 @@
-/* $LynxId: LYCurses.h,v 1.85 2010/09/25 00:48:03 tom Exp $ */
+/* $LynxId: LYCurses.h,v 1.86 2010/10/04 08:56:09 tom Exp $ */
 #ifndef LYCURSES_H
 #define LYCURSES_H
 
@@ -191,6 +191,10 @@ typedef char chtype;
 
 #ifdef ERR
 #undef ERR			/* all versions of curses define this */
+#endif
+
+#ifdef KEY_EVENT
+#undef KEY_EVENT		/* wincon.h or Cygwin's copy of it */
 #endif
 
 #ifdef MOUSE_MOVED
