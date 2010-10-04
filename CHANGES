@@ -1,9 +1,12 @@
--- $LynxId: CHANGES,v 1.505 2010/09/27 00:20:59 tom Exp $
+-- $LynxId: CHANGES,v 1.507 2010/10/04 00:27:34 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2010-09-26 (2.8.8dev.6)
+2010-10-03 (2.8.8dev.6)
+* amend change for Debian #514897 to exclude XML documents (Debian #592883) -TD
+* use HTParsePort() in a few places, e.g., HTFinger.c, to allow for IPv6
+  addresses with colons (Debian #587330) -TD
 * modify option -dump so it is parsed in the first pass, using that to suppress
   requirement for lss file if lynx is used only to dump output -TD
 * add option -unique-urls (Debian #586762) -TD

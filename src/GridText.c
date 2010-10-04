@@ -1,5 +1,5 @@
 /*
- * $LynxId: GridText.c,v 1.203 2010/09/27 10:42:01 tom Exp $
+ * $LynxId: GridText.c,v 1.204 2010/10/03 17:47:23 tom Exp $
  *
  *		Character grid hypertext object
  *		===============================
@@ -1557,7 +1557,7 @@ static int display_line(HTLine *line,
 		 * the margin, or if it is preceded by a white character (we
 		 * loaded 'M' into LastDisplayChar if it was a multibyte
 		 * character) or hyphen, though it should have been excluded by
-		 * HText_appendCharacter() or by split_line() in those cases. 
+		 * HText_appendCharacter() or by split_line() in those cases.
 		 * -FM
 		 */
 		break;
@@ -9371,7 +9371,29 @@ static void HText_AddHiddenLink(HText *text, TextAnchor *textanchor)
     if ((dest = HTAnchor_followLink(textanchor->anchor)) &&
 	(text->hiddenlinkflag != HIDDENLINKS_IGNORE ||
 	 HTList_isEmpty(text->hidden_links))) {
-	HTList_appendObject(text->hidden_links, HTAnchor_address(dest));
+	char *value = HTAnchor_address(dest);
+	BOOL ignore = FALSE;
+
+	if (unique_urls) {
+	    int cnt;
+	    char *check;
+
+	    for (cnt = 0;; ++cnt) {
+
+		check = (char *) HTList_objectAt(text->hidden_links, cnt);
+		if (check == 0)
+		    break;
+		if (!strcmp(check, value)) {
+		    ignore = TRUE;
+		    break;
+		}
+	    }
+	}
+	if (ignore) {
+	    FREE(value);
+	} else {
+	    HTList_appendObject(text->hidden_links, value);
+	}
     }
 
     return;
@@ -13766,7 +13788,7 @@ static void redraw_part_of_line(HTLine *line, const char *str,
 		 * the margin, or if it is preceded by a white character (we
 		 * loaded 'M' into LastDisplayChar if it was a multibyte
 		 * character) or hyphen, though it should have been excluded by
-		 * HText_appendCharacter() or by split_line() in those cases. 
+		 * HText_appendCharacter() or by split_line() in those cases.
 		 * -FM
 		 */
 		break;

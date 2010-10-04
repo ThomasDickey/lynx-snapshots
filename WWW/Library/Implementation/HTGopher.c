@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTGopher.c,v 1.50 2010/09/25 00:43:55 tom Exp $
+ * $LynxId: HTGopher.c,v 1.51 2010/10/03 22:30:43 tom Exp $
  *
  *			GOPHER ACCESS				HTGopher.c
  *			=============
@@ -1527,12 +1527,9 @@ static int HTLoadCSO(const char *arg,
 	return HT_NOT_LOADED;
     }
     host = HTParse(arg, "", PARSE_HOST);
-    if ((cp = strchr(host, ':')) != NULL) {
-	if (cp[1] >= '0' && cp[1] <= '9') {
-	    port = atoi((cp + 1));
-	    if (port == CSO_PORT) {
-		*cp = '\0';
-	    }
+    if ((cp = HTParsePort(host, &port)) != NULL) {
+	if (port == CSO_PORT) {
+	    *cp = '\0';
 	}
     }
     anAnchor->safe = TRUE;
