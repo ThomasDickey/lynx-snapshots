@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYUtils.c,v 1.203 2010/09/25 13:04:06 tom Exp $
+ * $LynxId: LYUtils.c,v 1.204 2010/10/04 09:00:23 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTCP.h>
@@ -219,7 +219,7 @@ static LY_TEMP *FindTempfileByFP(FILE *fp)
  * Use RegQueryValueExA() rather than RegQueryValueEx() for compatibility
  * with non-Unicode winvile
  */
-int w32_get_reg_sz(HKEY hkey, const char *name, char *value, unsigned length)
+static int w32_get_reg_sz(HKEY hkey, const char *name, char *value, unsigned length)
 {
     int result;
     DWORD dwSzBuffer = length;
@@ -255,7 +255,7 @@ char *LYGetEnv(const char *name)
 	HKEY hkey;
 	char buffer[256];
 
-	for (j = 0; j < TABLESIZE(rootkeys); ++j) {
+	for (j = 0; j < (int) TABLESIZE(rootkeys); ++j) {
 	    if (RegOpenKeyEx(rootkeys[j],
 			     LYNX_SUBKEY W32_STRING("\\Environment"),
 			     0,
@@ -7753,7 +7753,7 @@ char *w32_strerror(DWORD ercode)
 		      LANG_NEUTRAL, msg_buff, sizeof(msg_buff), NULL);
     }
 
-    strcpy(tmp_buff, msg_buff);
+    strcpy((char *) tmp_buff, msg_buff);
     p = q = tmp_buff;
     i = 0;
     while (*p) {

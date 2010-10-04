@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYExtern.c,v 1.45 2010/09/25 00:54:06 tom Exp $
+ * $LynxId: LYExtern.c,v 1.46 2010/10/04 08:56:57 tom Exp $
  *
  External application support.
  This feature allows lynx to pass a given URL to an external program.
@@ -52,7 +52,7 @@ static char *decode_string(char *s)
 	    /* Do nothing if at the end of the string. Or if the chars
 	       are not hex-digits. */
 	    if (!*(s + 1) || !*(s + 2)
-		|| !(isxdigit(*(s + 1)) && isxdigit(*(s + 2)))) {
+		|| !(isxdigit(UCH(*(s + 1))) && isxdigit(UCH(*(s + 2))))) {
 		*p = *s;
 		continue;
 	    }
