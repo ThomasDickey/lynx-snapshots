@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTAccess.c,v 1.71 2010/09/24 08:51:18 tom Exp $
+ * $LynxId: HTAccess.c,v 1.73 2010/10/03 22:49:46 tom Exp $
  *
  *		Access Manager					HTAccess.c
  *		==============
@@ -285,9 +285,8 @@ BOOL override_proxy(const char *addr)
 	return NO;
     }
 
-    if (NULL != (p = strrchr(Host, ':'))) {	/* Port specified */
+    if (NULL != (p = HTParsePort(Host, &port))) {	/* Port specified */
 	*p++ = 0;		/* Chop off port */
-	port = atoi(p);
     } else {			/* Use default port */
 	acc_method = HTParse(addr, "", PARSE_ACCESS);
 	if (acc_method != NULL) {
@@ -329,18 +328,24 @@ BOOL override_proxy(const char *addr)
 	const char *colon = NULL;
 	int templ_port = 0;
 	int t_len;
+	int brackets = 0;
 
 	while (*no_proxy && (WHITE(*no_proxy) || *no_proxy == ','))
 	    no_proxy++;		/* Skip whitespace and separators */
 
 	end = no_proxy;
 	while (*end && !WHITE(*end) && *end != ',') {	/* Find separator */
-	    if (*end == ':')
+	    if (!brackets && (*end == ':'))
 		colon = end;	/* Port number given */
+	    else if (*end == '[')
+		++brackets;
+	    else if (*end == ']')
+		--brackets;
 	    end++;
 	}
 
 	if (colon) {
+	    /* unlike HTParsePort(), this may be followed by non-digits */
 	    templ_port = atoi(colon + 1);
 	    t_len = (int) (colon - no_proxy);
 	} else {
@@ -448,15 +453,16 @@ static int get_physical(const char *addr,
 #ifdef USE_GATEWAYS
 
     if (!override_flag && !using_proxy) {	/* else ignore no_proxy env var */
+	char *host = NULL;
+	int port;
+
 	if (!strcasecomp(acc_method, "news")) {
 	    /*
 	     * News is different, so we need to check the name of the server,
 	     * as well as the default port for selective exclusions.
 	     */
-	    char *host = NULL;
-
 	    if ((host = HTParse(addr, "", PARSE_HOST))) {
-		if (strchr(host, ':') == NULL) {
+		if (HTParsePort(host, &port) == NULL) {
 		    StrAllocCopy(Server_addr, "news://");
 		    StrAllocCat(Server_addr, host);
 		    StrAllocCat(Server_addr, ":119/");
@@ -472,10 +478,8 @@ static int get_physical(const char *addr,
 	     * Wais also needs checking of the default port for selective
 	     * exclusions.
 	     */
-	    char *host = NULL;
-
 	    if ((host = HTParse(addr, "", PARSE_HOST))) {
-		if (!(strchr(host, ':'))) {
+		if (!(HTParsePort(host, &port))) {
 		    StrAllocCopy(Server_addr, "wais://");
 		    StrAllocCat(Server_addr, host);
 		    StrAllocCat(Server_addr, ":210/");

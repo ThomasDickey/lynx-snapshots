@@ -1,5 +1,5 @@
 /*
- * $LynxId: SGML.c,v 1.139 2010/09/25 15:40:04 tom Exp $
+ * $LynxId: SGML.c,v 1.140 2010/10/04 00:04:12 tom Exp $
  *
  *			General SGML Parser code		SGML.c
  *			========================
@@ -38,6 +38,11 @@
 #ifdef USE_PRETTYSRC
 # include <LYPrettySrc.h>
 #endif
+
+#define AssumeCP1252(context) \
+	(((context)->inUCLYhndl == LATIN1 \
+	  || (context)->inUCLYhndl == US_ASCII) \
+	 && !(context)->extended_html)
 
 #define INVALID (-1)
 
@@ -1910,8 +1915,7 @@ static void SGML_character(HTStream *context, int c_in)
 	 *
 	 * http://www.whatwg.org/specs/web-apps/current-work/multipage/infrastructure.html#character-encodings-0
 	 */
-	if (context->inUCLYhndl == LATIN1
-	    || context->inUCLYhndl == US_ASCII) {
+	if (AssumeCP1252(context)) {
 	    clong = LYcp1252ToUnicode((UCode_t) c);
 	    goto top1;
 	}
@@ -2641,7 +2645,9 @@ static void SGML_character(HTStream *context, int c_in)
 		UCode_t code = (UCode_t) lcode;
 
 /* =============== work in ASCII below here ===============  S/390 -- gil -- 1092 */
-		code = LYcp1252ToUnicode(code);
+		if (AssumeCP1252(context)) {
+		    code = LYcp1252ToUnicode(code);
+		}
 		/*
 		 * Check for special values.  - FM
 		 */
