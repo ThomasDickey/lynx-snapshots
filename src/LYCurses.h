@@ -1,4 +1,4 @@
-/* $LynxId: LYCurses.h,v 1.86 2010/10/04 08:56:09 tom Exp $ */
+/* $LynxId: LYCurses.h,v 1.87 2010/10/31 17:56:18 tom Exp $ */
 #ifndef LYCURSES_H
 #define LYCURSES_H
 
@@ -260,7 +260,7 @@ typedef char chtype;
 #  include <LYGCurses.h>
 #  else
 #   include <curses.h>		/* everything else */
-# endif				/* VMS && __GNUC__ */
+# endif	/* VMS && __GNUC__ */
 #endif /* HAVE_CONFIG_H */
 
 /*

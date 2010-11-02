@@ -1,4 +1,4 @@
-/* $LynxId: LYCurses.c,v 1.156 2010/09/25 00:48:03 tom Exp $ */
+/* $LynxId: LYCurses.c,v 1.158 2010/10/31 17:56:18 tom Exp $ */
 #include <HTUtils.h>
 #include <HTAlert.h>
 
@@ -1138,7 +1138,7 @@ void start_curses(void)
 	   when the keypad is switched on, some keybindings may be overriden. */
 	keypad(LYwin, TRUE);
 	keypad_on = 1;
-#  endif			/* HAVE_KEYPAD */
+#  endif /* HAVE_KEYPAD */
 
 	if (-1 == lynx_initialize_keymaps()) {
 	    endwin();
@@ -1244,8 +1244,6 @@ void start_curses(void)
     _eth_init();
 #endif /* __DJGPP__ */
 #endif /* not VMS */
-
-/* nonl();   *//* seems to slow things down */
 
 #ifdef VMS
     crmode();
@@ -1488,7 +1486,7 @@ void stop_curses(void)
 
 #ifdef __DJGPP__
     ScreenClear();
-#elif !defined(PDCURSES)	/* some flavor of win32?  */
+#elif !defined(PDCURSES) /* some flavor of win32?  */
     clrscr();
 #endif /* win32 */
 
@@ -1781,7 +1779,7 @@ void LYsubwindow(WINDOW * param)
 	    wbkgd(my_subwindow, (chtype) (b | ' '));
 	}
 	LynxWChangeStyle(my_subwindow, s_menu_bg, STACK_OFF);
-#elif defined(HAVE_GETBKGD)	/* not defined in ncurses 1.8.7 */
+#elif defined(HAVE_GETBKGD) /* not defined in ncurses 1.8.7 */
 	wbkgd(my_subwindow, getbkgd(LYwin));
 #endif
 #endif

@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTVMS_WaisUI.c,v 1.16 2010/09/25 00:32:18 tom Exp $
+ * $LynxId: HTVMS_WaisUI.c,v 1.17 2010/10/29 21:10:14 tom Exp $
  *								HTVMS_WAISUI.c
  *
  *	Adaptation for Lynx by F.Macrides (macrides@sci.wfeb.edu)
@@ -695,7 +695,7 @@ SearchAPDU *makeSearchAPDU(long small,
 		query->DatabaseNames = (char **) s_realloc((char *) query->DatabaseNames,
 							   (size_t) (sizeof(char
 									    *) *
-								       (i + 2)));
+								     (i + 2)));
 
 	    query->DatabaseNames[i] = s_strdup(ptr);
 	    query->DatabaseNames[i + 1] = NULL;
@@ -713,7 +713,7 @@ SearchAPDU *makeSearchAPDU(long small,
 		query->ElementSetNames = (char **) s_realloc((char *) query->ElementSetNames,
 							     (size_t) (sizeof(char
 									      *) *
-								         (i + 2)));
+								       (i + 2)));
 
 	    query->ElementSetNames[i] = s_strdup(ptr);
 	    query->ElementSetNames[i + 1] = NULL;

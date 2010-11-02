@@ -1,4 +1,4 @@
-/* $LynxId: LYForms.c,v 1.86 2010/09/24 09:40:44 tom Exp $ */
+/* $LynxId: LYForms.c,v 1.87 2010/10/31 17:56:18 tom Exp $ */
 #include <HTUtils.h>
 #include <HTCJK.h>
 #include <HTTP.h>
@@ -528,7 +528,7 @@ static int form_getstr(int cur,
 		MyEdit.dirty = TRUE;
 	    }
 	} else
-#  endif			/* NCURSES || PDCURSES */
+#  endif /* NCURSES || PDCURSES */
 #endif /* USE_MOUSE */
 
 	{

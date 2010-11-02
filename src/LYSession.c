@@ -1,4 +1,4 @@
-/* $LynxId: LYSession.c,v 1.6 2008/07/02 21:24:27 Paul.B.Mahol Exp $ */
+/* $LynxId: LYSession.c,v 1.7 2010/10/31 18:15:33 Paul.B.Mahol Exp $ */
 
 #include <LYSession.h>
 
@@ -63,10 +63,11 @@ void RestoreSession(void)
     DocInfo doc;
     VisitedLink *vl;
     int i = 0;
-    short errors = 10;		/* how many syntax errors are allowed in */
-
-    /* session file before aborting. */
+    short errors = 10;		/* how many syntax errors are allowed in
+				 * session file before aborting. */
     char *value1, *value2, *rsline, *linktext, *rslevel;
+
+    memset(&doc, 0, sizeof(doc));
 
     /*
      * This should be done only once, here:  iff USE_SESSIONS is defined or: 

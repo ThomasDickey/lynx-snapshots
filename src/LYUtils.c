@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYUtils.c,v 1.204 2010/10/04 09:00:23 tom Exp $
+ * $LynxId: LYUtils.c,v 1.205 2010/10/31 17:56:21 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTCP.h>
@@ -2978,9 +2978,9 @@ static BOOLEAN LYToggleSigDfl(int sig,
 #  else
 #   ifdef HAVE_TERMIO_H
 #    include <termio.h>
-#   endif			/* HAVE_TERMIO_H */
-#  endif			/* HAVE_TERMIOS_H */
-# endif				/* TERMIO_AND_TERMIOS */
+#   endif /* HAVE_TERMIO_H */
+#  endif /* HAVE_TERMIOS_H */
+# endif	/* TERMIO_AND_TERMIOS */
 #endif /* TERMIO_AND_CURSES */
 
 void size_change(int sig GCC_UNUSED)
@@ -7574,7 +7574,7 @@ int put_clip(const char *s)
     return 0;
 }
 
-#  endif			/* !defined(WIN_EX) && defined(HAVE_POPEN) */
+#  endif /* !defined(WIN_EX) && defined(HAVE_POPEN) */
 
 #endif /* __EMX__ */
 

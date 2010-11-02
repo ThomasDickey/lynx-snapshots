@@ -1,5 +1,5 @@
 /*
- * $LynxId: dirent.c,v 1.3 2009/03/11 00:31:33 tom Exp $
+ * $LynxId: dirent.c,v 1.4 2010/10/31 17:56:17 tom Exp $
  *
  * dir.c for MS-DOS by Samuel Lam <skl@van-bc.UUCP>, June/87 
  */
@@ -19,7 +19,6 @@
  *    of all cases.  It is still not too clean, but it is far more efficient.
  *    Changes made by Gordon Chaffee (chaffee@bugs-bunny.cs.berkeley.edu)
  */
-
 
 /*Includes: 
  *    crt 
@@ -123,6 +122,7 @@ DIR *opendirx(char *name, char *pattern)
 	return NULL;
     }
     dirp = malloc(sizeof(DIR));
+
     if (dirp == NULL) {
 	return dirp;
     }
@@ -153,7 +153,7 @@ DIR *opendirx(char *name, char *pattern)
     }
     do {
 	if (((dp = malloc(sizeof(struct _dircontents))) == NULL) ||
-	     ((dp->_d_entry = malloc(strlen(s) + 1)) == NULL)) {
+	      ((dp->_d_entry = malloc(strlen(s) + 1)) == NULL)) {
 	    if (dp)
 		free(dp);
 	    free_dircontents(dirp->dd_contents);
@@ -180,13 +180,13 @@ DIR *opendir(char *name)
     return opendirx(name, "*");
 }
 
-void closedir(DIR * dirp)
+void closedir(DIR *dirp)
 {
     free_dircontents(dirp->dd_contents);
     free(dirp);
 }
 
-struct dirent *readdir(DIR * dirp)
+struct dirent *readdir(DIR *dirp)
 {
     /* static struct dirent dp; */
     if (dirp->dd_cp == NULL)
@@ -204,25 +204,23 @@ struct dirent *readdir(DIR * dirp)
     dirp->dd_cp = dirp->dd_cp->_d_next;
     dirp->dd_loc++;
 
-
     return &dp;
 }
 
-void seekdir(DIR * dirp, long off)
+void seekdir(DIR *dirp, long off)
 {
     long i = off;
     struct _dircontents *dp;
 
     if (off >= 0) {
-	for (dp = dirp->dd_contents; --i >= 0 && dp; dp = dp->_d_next);
+	for (dp = dirp->dd_contents; --i >= 0 && dp; dp = dp->_d_next) ;
 
 	dirp->dd_loc = off - (i + 1);
 	dirp->dd_cp = dp;
     }
 }
 
-
-long telldir(DIR * dirp)
+long telldir(DIR *dirp)
 {
     return dirp->dd_loc;
 }
@@ -263,14 +261,12 @@ static char *getdirent(char *dir)
 }
 /* end of getdirent() */
 
-struct passwd *_cdecl
- getpwnam(char *name)
+struct passwd *_cdecl getpwnam(char *name)
 {
     return NULL;
 }
 
-struct passwd *_cdecl
- getpwuid(int uid)
+struct passwd *_cdecl getpwuid(int uid)
 {
     return NULL;
 }
@@ -280,8 +276,7 @@ int getuid()
     return 0;
 }
 
-void _cdecl
- endpwent(void)
+void _cdecl endpwent(void)
 {
 }
 

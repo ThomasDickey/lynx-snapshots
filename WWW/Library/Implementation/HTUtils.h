@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTUtils.h,v 1.102 2010/09/25 15:32:56 tom Exp $
+ * $LynxId: HTUtils.h,v 1.103 2010/10/27 00:08:52 tom Exp $
  *
  * Utility macros for the W3 code library
  * MACROS FOR GENERAL USE
@@ -157,12 +157,12 @@ char *alloca();
 #define LY_MAXPATH 256
 #endif
 
-#ifndef	GCC_NORETURN
-#define	GCC_NORETURN		/* nothing */
+#ifndef GCC_NORETURN
+#define GCC_NORETURN		/* nothing */
 #endif
 
-#ifndef	GCC_UNUSED
-#define	GCC_UNUSED		/* nothing */
+#ifndef GCC_UNUSED
+#define GCC_UNUSED		/* nothing */
 #endif
 
 #if defined(__GNUC__) && defined(_FORTIFY_SOURCE)

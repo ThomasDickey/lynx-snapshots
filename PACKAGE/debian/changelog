@@ -1,3 +1,9 @@
+lynx-dev (2.8.8dev.7) unstable; urgency=low
+
+  * changes for dev.7
+
+ -- Thomas E. Dickey <dickey@invisible-island.net>  Mon, 01 Nov 2010 17:32:06 -0400
+
 lynx-dev (2.8.8dev.6) unstable; urgency=low
 
   * add build-script for testing, adapted from Debian lynx-cur package.

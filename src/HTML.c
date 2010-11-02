@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTML.c,v 1.146 2010/09/25 17:00:36 tom Exp $
+ * $LynxId: HTML.c,v 1.148 2010/11/01 22:19:09 tom Exp $
  *
  *		Structured stream to Rich hypertext converter
  *		============================================
@@ -312,8 +312,10 @@ void HTML_put_character(HTStructured * me, int c)
 	return;
     }
     me->lastraw = c;
-    if (c == '\r')
+    if (c == '\r') {
 	c = '\n';
+	uc = UCH(c);
+    }
 
     /*
      * Handle SGML_LITTERAL tags that have HTChunk elements.  - FM

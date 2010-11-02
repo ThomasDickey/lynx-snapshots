@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFormat.h,v 1.32 2010/09/25 11:42:03 tom Exp $
+ * $LynxId: HTFormat.h,v 1.33 2010/10/27 00:13:53 tom Exp $
  *
  *                                            HTFormat: The format manager in the WWW Library
  *                          MANAGE DIFFERENT DOCUMENT FORMATS
@@ -44,7 +44,11 @@ extern "C" {
    useful for diagnostics, and for users who want to see the original, whatever
    it is.
 
-																	 *//* Internal ones *//* #define WWW_SOURCE HTAtom_for("www/source") *//* Whatever it was originally */ extern HTAtom *WWW_SOURCE;
+																	 */
+/* Internal ones */
+/* #define WWW_SOURCE HTAtom_for("www/source") */
+/* Whatever it was originally */
+    extern HTAtom *WWW_SOURCE;
     /* calculated once, heavy used */
 
 /*

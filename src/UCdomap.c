@@ -1,5 +1,5 @@
 /*
- * $LynxId: UCdomap.c,v 1.86 2010/09/25 15:31:34 tom Exp $
+ * $LynxId: UCdomap.c,v 1.87 2010/10/31 17:56:22 tom Exp $
  *
  *  UCdomap.c
  *  =========
@@ -2171,7 +2171,7 @@ static int CpOrdinal(const unsigned UCode_t cp, const int other)
     CTRACE((tfp, "Found %i.\n", ret));
     return ret;
 }
-#  endif			/* __EMX__ */
+#  endif /* __EMX__ */
 #endif /* CAN_AUTODETECT_DISPLAY_CHARSET */
 #endif /* EXP_CHARTRANS_AUTOSWITCH */
 
