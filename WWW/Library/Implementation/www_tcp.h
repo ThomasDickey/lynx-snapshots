@@ -1,5 +1,5 @@
 /*                System dependencies in the W3 library
- * $LynxId: www_tcp.h,v 1.45 2010/09/25 16:24:45 tom Exp $
+ * $LynxId: www_tcp.h,v 1.47 2010/10/31 17:56:16 tom Exp $
  *
                                    SYSTEM DEPENDENCIES
 
@@ -159,7 +159,8 @@ extern const unsigned char IBM1047[];
 /* For debugging
 #include <assert.h>
 #define   TOASCII(c) (assert((c)>=0 && (c)<256), un_IBM1047[c])
-*//* for production */
+*/
+/* for production */
 #define   TOASCII(c) (un_IBM1047[c])
 
 #define FROMASCII(c) (IBM1047[c])
@@ -746,10 +747,10 @@ typedef unsigned short mode_t;
 
 # ifdef HAVE_LIMITS_H
 #  include <limits.h>
-# endif				/* HAVE_LIMITS_H */
+# endif	/* HAVE_LIMITS_H */
 # if !defined(MAXINT) && defined(INT_MAX)
 #  define MAXINT INT_MAX
-# endif				/* !MAXINT && INT_MAX */
+# endif	/* !MAXINT && INT_MAX */
 
 #else
 

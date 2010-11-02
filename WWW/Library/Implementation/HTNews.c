@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTNews.c,v 1.66 2010/09/25 00:42:40 tom Exp $
+ * $LynxId: HTNews.c,v 1.67 2010/10/27 00:10:51 tom Exp $
  *
  *			NEWS ACCESS				HTNews.c
  *			===========
@@ -94,7 +94,6 @@ static int s;			/* Socket for NewsHost */
 static int HTCanPost = FALSE;	/* Current POST permission */
 static char response_text[LINE_LENGTH + 1];	/* Last response */
 
-/* static HText *	HT;	*//* the new hypertext */
 static HTStructured *target;	/* The output sink */
 static HTStructuredClass targetClass;	/* Copy of fn addresses */
 static HTStream *rawtarget = NULL;	/* The output sink for rawtext */

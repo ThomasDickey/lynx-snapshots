@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYLocal.c,v 1.112 2010/09/25 16:26:16 tom Exp $
+ * $LynxId: LYLocal.c,v 1.114 2010/11/01 08:46:02 tom Exp $
  *
  *  Routines to manipulate the local filesystem.
  *  Written by: Rick Mallett, Carleton University
@@ -386,6 +386,7 @@ static char **make_argv(const char *command,...)
     va_list ap;
 
     va_start(ap, command);
+    result[0] = 0;
     StrAllocCopy(result[argc++], command);
     do {
 	result[argc] = 0;
@@ -1756,7 +1757,7 @@ static char *build_command(char *line,
 	    }
 	    return buffer;
 	}
-#  endif			/* OK_GZIP */
+#  endif /* OK_GZIP */
 	if ((arg = match_op("UNTAR_Z", line)) != 0) {
 #define FMT_UNTAR_Z "cd %s; %s %s |  %s %s %s"
 	    if ((program = HTGetProgramPath(ppZCAT)) != NULL) {
@@ -1781,7 +1782,7 @@ static char *build_command(char *line,
 	    HTEndParam(&buffer, FMT_UNTAR, 4);
 	    return buffer;
 	}
-# endif				/* !ARCHIVE_ONLY */
+# endif	/* !ARCHIVE_ONLY */
 
 # ifdef OK_GZIP
 	if ((arg = match_op("TAR_GZ", line)) != 0) {
@@ -1800,7 +1801,7 @@ static char *build_command(char *line,
 	    }
 	    return buffer;
 	}
-# endif				/* OK_GZIP */
+# endif	/* OK_GZIP */
 
 	if ((arg = match_op("TAR_Z", line)) != 0) {
 #define FMT_TAR_Z "cd %s; %s %s %s %s | %s >%s%s"
@@ -1882,7 +1883,7 @@ static char *build_command(char *line,
 	}
 	return buffer;
     }
-# endif				/* !ARCHIVE_ONLY */
+# endif	/* !ARCHIVE_ONLY */
 #endif /* OK_ZIP */
 
     if ((arg = match_op("COMPRESS", line)) != 0) {

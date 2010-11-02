@@ -1,5 +1,5 @@
 /*
- * $LynxId: tidy_tls.h,v 1.1 2008/04/27 22:50:39 tom Exp $
+ * $LynxId: tidy_tls.h,v 1.2 2010/10/27 00:07:26 tom Exp $
  * Copyright 2008, Thomas E. Dickey
  */
 #ifndef TIDY_TLS_H
@@ -103,7 +103,7 @@ struct _SSL {
 /* use either SSL_VERIFY_NONE or SSL_VERIFY_PEER, the last 2 options
  * are 'ored' with SSL_VERIFY_PEER if they are desired */
 #define SSL_VERIFY_PEER			0x01
-
+/* *INDENT-OFF* */
 extern SSL *SSL_new(SSL_CTX * ctx);
 extern SSL_CIPHER *SSL_get_current_cipher(SSL * ssl);
 extern SSL_CTX *SSL_CTX_new(SSL_METHOD * method);
@@ -134,5 +134,6 @@ extern void SSL_CTX_free(SSL_CTX * ctx);
 extern void SSL_CTX_set_verify(SSL_CTX * ctx, int verify_mode, int (*verify_callback) (int, X509_STORE_CTX *));
 extern void SSL_free(SSL * ssl);
 extern void SSL_load_error_strings(void);
+/* *INDENT-ON* */
 
 #endif /* TIDY_TLS_H */

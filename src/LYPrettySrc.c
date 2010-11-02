@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYPrettySrc.c,v 1.24 2010/09/24 22:06:29 tom Exp $
+ * $LynxId: LYPrettySrc.c,v 1.25 2010/10/27 00:15:12 tom Exp $
  *
  * HTML source syntax highlighting
  * by Vlad Harchev <hvv@hippo.ru>
@@ -159,7 +159,8 @@ static void append_open_tag(char *tagname,
 	int n = tag->number_of_attributes;
 	attr *attrs = tag->attributes;
 
-/*.... *//* this is not implemented though it's easy */
+/*.... */
+/* this is not implemented though it's easy */
 #  endif
 
 	hcode = hash_code_aggregate_char('.', hcode);

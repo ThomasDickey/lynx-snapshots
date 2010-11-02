@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFile.c,v 1.126 2010/09/24 08:52:55 tom Exp $
+ * $LynxId: HTFile.c,v 1.127 2010/10/27 00:10:02 tom Exp $
  *
  *			File Access				HTFile.c
  *			===========
@@ -31,7 +31,8 @@
 #define LONG_LIST		/* Define this for long style unix listings (ls -l),
 				   the actual style is configurable from lynx.cfg */
 #endif
-/* #define NO_PARENT_DIR_REFERENCE *//* Define this for no parent links */
+/* #define NO_PARENT_DIR_REFERENCE */
+/* Define this for no parent links */
 #endif /* !VMS */
 
 #if defined(DOSPATH)

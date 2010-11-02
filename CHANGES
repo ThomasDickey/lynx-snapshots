@@ -1,7 +1,14 @@
--- $LynxId: CHANGES,v 1.508 2010/10/04 08:19:06 tom Exp $
+-- $LynxId: CHANGES,v 1.511 2010/11/01 21:30:42 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
+
+2010-11-01 (2.8.8dev.7)
+* restore \r to \n conversion in HTML_put_character(), broken in gcc warning
+  cleanup (report by FLWM) -TD
+* fix a double-free in make_argv() (report by FLWM) -TD
+* add a memset in RestoreSession(), fixes uninitialized memory reference for
+  the VLINK section -PBM
 
 2010-10-04 (2.8.8dev.6)
 * amend change for Debian #514897 to exclude XML documents (Debian #592883) -TD

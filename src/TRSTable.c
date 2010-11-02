@@ -1,5 +1,5 @@
 /*
- * $LynxId: TRSTable.c,v 1.28 2010/09/25 12:47:08 tom Exp $
+ * $LynxId: TRSTable.c,v 1.29 2010/10/27 00:15:10 tom Exp $
  *		Simple table object
  *		===================
  * Authors
@@ -1322,7 +1322,8 @@ static int Stbl_fakeFinishCellInTable(STable_info *me,
 	}
 
 	/* Fake </TR> at BOL */
-/* Stbl_finishCellInTable(lineno, 0, 0); *//* Needed? */
+	/* Stbl_finishCellInTable(lineno, 0, 0); */
+	/* Needed? */
 
 	/* Fake <TR> at BOL */
 	if (Stbl_addRowToTable(me, al, lineno) < 0) {

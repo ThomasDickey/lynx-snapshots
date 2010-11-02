@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTAAUtil.h,v 1.12 2010/06/17 00:36:04 tom Exp $
+ * $LynxId: HTAAUtil.h,v 1.13 2010/10/27 00:09:52 tom Exp $
  *
  *                                            Utilities for the Authorization parts of libwww
  *           COMMON PARTS OF AUTHORIZATION MODULE TO BOTH SERVER AND BROWSER
@@ -48,7 +48,8 @@ extern "C" {
 #define MAX_FIELDNAME_LEN       16	/* @@ Longest field name in       */
     /* protection setup file          */
 #define MAX_PATHNAME_LEN        80	/* @@ Longest passwd/group file   */
-/* pathname to allow               *//*
+/* pathname to allow               */
+/*
 
    Datatype definitions
 

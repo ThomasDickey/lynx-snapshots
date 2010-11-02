@@ -1,5 +1,5 @@
 /*
- * $LynxId: UCAuto.c,v 1.45 2010/09/25 00:51:53 tom Exp $
+ * $LynxId: UCAuto.c,v 1.46 2010/10/31 17:56:21 tom Exp $
  *
  *  This file contains code for changing the Linux console mode.
  *  Currently some names for font files are hardwired in here.
@@ -788,7 +788,7 @@ static int _Switch_Display_Charset(int ord, enum switch_display_charset_t really
     CTRACE((tfp, "Display font set to '%s'.\n", name));
     return ord;
 }
-#  endif			/* __EMX__ */
+#  endif /* __EMX__ */
 
 int Switch_Display_Charset(const int ord, const enum switch_display_charset_t really)
 {

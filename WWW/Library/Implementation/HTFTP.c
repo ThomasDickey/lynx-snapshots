@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFTP.c,v 1.98 2010/09/25 00:05:51 tom Exp $
+ * $LynxId: HTFTP.c,v 1.99 2010/10/31 17:56:13 tom Exp $
  *
  *			File Transfer Protocol (FTP) Client
  *			for a WorldWideWeb browser
@@ -133,7 +133,7 @@ typedef struct _connection {
 #elif defined(SYS_HPUX)
 #  if defined(_XOPEN_SOURCE_EXTENDED) && defined(SO_PROTOTYPE)
 #    define LY_SOCKLEN socklen_t
-#  else				/* HPUX 10.20, etc. */
+#  else	/* HPUX 10.20, etc. */
 #    define LY_SOCKLEN int
 #  endif
 #elif defined(SYS_TRU64)
