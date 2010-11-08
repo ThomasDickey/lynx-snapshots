@@ -1,5 +1,5 @@
 /*
- * $LynxId: UCdomap.c,v 1.87 2010/10/31 17:56:22 tom Exp $
+ * $LynxId: UCdomap.c,v 1.89 2010/11/07 21:21:09 tom Exp $
  *
  *  UCdomap.c
  *  =========
@@ -81,7 +81,7 @@
 #include <mnem2_suni.h>		/* RFC 1345 Mnemonic    */
 #include <next_uni.h>		/* NeXT character set   */
 #include <rfc_suni.h>		/* RFC 1345 w/o Intro   */
-/* #include <utf8_uni.h> *//* UNICODE UTF 8        */
+/* #include <utf8_uni.h> */ /* UNICODE UTF 8        */
 #include <viscii_uni.h>		/* Vietnamese (VISCII)  */
 #include <cp866u_uni.h>		/* Ukrainian Cyrillic (866) */
 #include <koi8u_uni.h>		/* Ukrainian Cyrillic (koi8-u */
@@ -978,14 +978,14 @@ int UCTransUniCharStr(char *outbuf,
 	     */
 	    HTSprintf0(&tocode, "%s//TRANSLIT", LYCharSet_UC[charset_out].MIMEname);
 	    cd = iconv_open(tocode, "UTF-16BE");
-	    if (cd == (iconv_t) - 1) {
+	    if (cd == (iconv_t) -1) {
 		/*
 		 * Try again, without TRANSLIT
 		 */
 		HTSprintf0(&tocode, "%s", LYCharSet_UC[charset_out].MIMEname);
 		cd = iconv_open(tocode, "UTF-16BE");
 
-		if (cd == (iconv_t) - 1) {
+		if (cd == (iconv_t) -1) {
 		    CTRACE((tfp,
 			    "Warning: Cannot transcode form charset %s to %s!\n",
 			    "UTF-16BE", tocode));
@@ -993,7 +993,7 @@ int UCTransUniCharStr(char *outbuf,
 	    }
 	    FREE(tocode);
 
-	    if (cd != (iconv_t) - 1) {
+	    if (cd != (iconv_t) -1) {
 		rc = (int) iconv(cd, (ICONV_CONST char **) &pin, &inleft,
 				 &pout, &outleft);
 		iconv_close(cd);
@@ -2210,7 +2210,7 @@ void UCInit(void)
     UC_CHARSET_SETUP_big5;		  /*** Taipei (Big5)	    */
 
     UC_CHARSET_SETUP_viscii;	/* Vietnamese (VISCII)  */
-    UC_CHARSET_SETUP;		/* us-ascii *//* 7 bit approximations */
+    UC_CHARSET_SETUP;		/* us-ascii */ /* 7 bit approximations */
 
     UC_CHARSET_SETUP_x_transparent;	  /*** Transparent	  */
 

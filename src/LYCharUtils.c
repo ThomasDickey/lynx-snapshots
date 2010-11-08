@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYCharUtils.c,v 1.108 2010/09/24 09:56:59 tom Exp $
+ * $LynxId: LYCharUtils.c,v 1.109 2010/11/07 21:21:01 tom Exp $
  *
  *  Functions associated with LYCharSets.c and the Lynx version of HTML.c - FM
  *  ==========================================================================
@@ -1754,6 +1754,7 @@ char **LYUCFullyTranslateString(char **str,
 		       !(HTPassEightBitRaw &&
 			 UCH(*p) >= lowest_8)) {
 		sprintf(replace_buf, "U%.2" PRI_UCode_t "", code);
+
 		state = S_got_outstring;
 	    } else {
 		puni = p;

@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTAlert.c,v 1.93 2010/09/26 16:36:38 tom Exp $
+ * $LynxId: HTAlert.c,v 1.94 2010/11/07 21:21:00 tom Exp $
  *
  *	Displaying messages and getting input for Lynx Browser
  *	==========================================================
@@ -178,15 +178,16 @@ static const char *sprint_bytes(char *s, off_t n, const char *was_units)
 
     if (LYTransferRate == rateKB || LYTransferRate == rateEtaKB_maybe) {
 	if (n >= 10 * kb_units) {
-	    sprintf(s, "%" PRI_off_t, CAST_off_t(n / kb_units));
+	    sprintf(s, "%" PRI_off_t, CAST_off_t (n / kb_units));
 	} else if (n > 999) {	/* Avoid switching between 1016b/s and 1K/s */
 	    sprintf(s, "%.2g", ((double) n) / (double) kb_units);
 	} else {
-	    sprintf(s, "%" PRI_off_t, CAST_off_t(n));
+	    sprintf(s, "%" PRI_off_t, CAST_off_t (n));
+
 	    u = HTProgressUnits(rateBYTES);
 	}
     } else {
-	sprintf(s, "%" PRI_off_t, CAST_off_t(n));
+	sprintf(s, "%" PRI_off_t, CAST_off_t (n));
     }
 
     if (!was_units || was_units != u)
@@ -307,8 +308,8 @@ void HTReadProgress(off_t bytes, off_t total)
 
 		    CTRACE((tfp, "rateBAR: bytes: %" PRI_off_t ", total: "
 			    "%" PRI_off_t "\n",
-			    CAST_off_t(bytes),
-			    CAST_off_t(total)));
+			    CAST_off_t (bytes),
+			    CAST_off_t (total)));
 		    CTRACE((tfp, "meter = %d\n", meter));
 
 		    HTSprintf0(&line, "%d%% ", (int) (percent * 100));

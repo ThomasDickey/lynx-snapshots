@@ -1,5 +1,5 @@
 /*
- * $LynxId: UCAux.c,v 1.43 2010/09/25 15:36:51 tom Exp $
+ * $LynxId: UCAux.c,v 1.44 2010/11/07 21:21:09 tom Exp $
  */
 #include <HTUtils.h>
 
@@ -464,7 +464,7 @@ void UCSetBoxChars(int cset,
 #define PUTC(ch) ((*myPutc)(target, (char)(ch)))
 #define PUTC2(ch) ((*myPutc)(target,(char)(0x80|(0x3f &(ch)))))
 
-BOOL UCPutUtf8_charstring(HTStream *target, putc_func_t * myPutc, UCode_t code)
+BOOL UCPutUtf8_charstring(HTStream *target, putc_func_t *myPutc, UCode_t code)
 {
     if (code < 128)
 	return NO;		/* indicate to caller we didn't handle it */

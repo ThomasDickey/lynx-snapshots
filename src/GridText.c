@@ -1,5 +1,5 @@
 /*
- * $LynxId: GridText.c,v 1.204 2010/10/03 17:47:23 tom Exp $
+ * $LynxId: GridText.c,v 1.206 2010/11/08 09:57:30 tom Exp $
  *
  *		Character grid hypertext object
  *		===============================
@@ -2299,7 +2299,7 @@ static void display_page(HText *text,
 	     */
 	    if (Anchor_ptr->show_anchor
 		&& non_empty(hi_string)
-		&& (Anchor_ptr->link_type == HYPERTEXT_ANCHOR)) {
+		&& (Anchor_ptr->link_type & HYPERTEXT_ANCHOR)) {
 		int count;
 		char *s;
 
@@ -4628,7 +4628,7 @@ static int HText_insertBlanksInStblLines(HText *me, int ncols)
     /*
      * oldpos, newpos:  allocate space for two int arrays.
      */
-    oldpos = typecallocn(int, 2 * (size_t) ncols);
+    oldpos = typecallocn(int, 2 * (size_t)ncols);
     if (!oldpos)
 	return -1;
     else
@@ -5884,7 +5884,7 @@ static void HText_trimHightext(HText *text,
 	     * is not yet done with it.  - kw
 	     */
 	    if (!anchor_ptr->extent && anchor_ptr->number &&
-		(anchor_ptr->link_type == HYPERTEXT_ANCHOR) &&
+		(anchor_ptr->link_type & HYPERTEXT_ANCHOR) &&
 		!anchor_ptr->show_anchor &&
 		anchor_ptr->number == text->last_anchor_number)
 		continue;
@@ -5918,7 +5918,7 @@ static void HText_trimHightext(HText *text,
 	 * Strip off any spaces or SpecialAttrChars at the beginning,
 	 * if they exist, but only on HYPERTEXT_ANCHORS.
 	 */
-	if (anchor_ptr->link_type == HYPERTEXT_ANCHOR) {
+	if (anchor_ptr->link_type & HYPERTEXT_ANCHOR) {
 	    ch = UCH(line_ptr->data[anchor_ptr->line_pos]);
 	    while (isspace(ch) ||
 		   IsSpecialAttrChar(ch)) {
@@ -6017,7 +6017,7 @@ static void HText_trimHightext(HText *text,
 		/*handle LY_SOFT_NEWLINEs -VH */
 		hi_offset += remove_special_attr_chars(hi_string);
 
-		if (anchor_ptr->link_type == HYPERTEXT_ANCHOR) {
+		if (anchor_ptr->link_type & HYPERTEXT_ANCHOR) {
 		    LYTrimTrailing(hi_string);
 		}
 		if (non_empty(hi_string)) {
@@ -6036,7 +6036,7 @@ static void HText_trimHightext(HText *text,
 
 	hilite_str = LYGetHiTextStr(anchor_ptr, 0);
 	remove_special_attr_chars(hilite_str);
-	if (anchor_ptr->link_type == HYPERTEXT_ANCHOR) {
+	if (anchor_ptr->link_type & HYPERTEXT_ANCHOR) {
 	    LYTrimTrailing(hilite_str);
 	}
 
@@ -7195,7 +7195,7 @@ static BOOL anchor_is_numbered(TextAnchor *Anchor_ptr)
     BOOL result = FALSE;
 
     if (Anchor_ptr->show_anchor
-	&& (Anchor_ptr->link_type == HYPERTEXT_ANCHOR)) {
+	&& (Anchor_ptr->link_type & HYPERTEXT_ANCHOR)) {
 	result = TRUE;
     } else if (Anchor_ptr->link_type == INPUT_ANCHOR
 	       && Anchor_ptr->input_field->type != F_HIDDEN_TYPE) {

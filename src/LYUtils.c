@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYUtils.c,v 1.205 2010/10/31 17:56:21 tom Exp $
+ * $LynxId: LYUtils.c,v 1.206 2010/11/07 21:21:08 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTCP.h>
@@ -2891,7 +2891,7 @@ BOOLEAN inlocaldomain(void)
  * ignored anyway.) - kw
  */
 void LYExtSignal(int sig,
-		 LYSigHandlerFunc_t * handler)
+		 LYSigHandlerFunc_t *handler)
 {
 #ifdef SIGWINCH
     /* add more cases to if(condition) if required... */

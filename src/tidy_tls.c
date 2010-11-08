@@ -1,5 +1,5 @@
 /*
- * $LynxId: tidy_tls.c,v 1.5 2010/06/20 19:25:46 tom Exp $
+ * $LynxId: tidy_tls.c,v 1.6 2010/11/07 21:21:10 tom Exp $
  * Copyright 2008, Thomas E. Dickey
  * with fix Copyright 2008 by Thomas Viehmann
  *
@@ -27,7 +27,7 @@ static int last_error = 0;
 	    gnutls_x509_crt_get_issuer_dn_by_oid(xcert, oid, 0, 0, target, &len)
 
 /* thewhat: which DN to get 0 = subject, 1 = issuer */
-static int ExtractCertificate(const gnutls_datum_t * cert, X509_NAME * result, int thewhat)
+static int ExtractCertificate(const gnutls_datum_t *cert, X509_NAME * result, int thewhat)
 {
     gnutls_x509_crt_t xcert;
     int rc;

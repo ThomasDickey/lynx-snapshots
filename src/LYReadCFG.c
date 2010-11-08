@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYReadCFG.c,v 1.156 2010/09/27 10:45:02 tom Exp $
+ * $LynxId: LYReadCFG.c,v 1.157 2010/11/07 21:21:06 tom Exp $
  */
 #ifndef NO_RULES
 #include <HTRules.h>
@@ -1904,7 +1904,7 @@ static void do_read_cfg(const char *cfg_filename,
 			const char *parent_filename,
 			int nesting_level,
 			FILE *fp0,
-			optidx_set_t * allowed)
+			optidx_set_t *allowed)
 {
     FILE *fp;
     char *buffer = 0;

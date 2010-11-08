@@ -1,4 +1,4 @@
-/* $LynxId: LYKeymap.c,v 1.72 2010/09/25 12:44:34 tom Exp $ */
+/* $LynxId: LYKeymap.c,v 1.73 2010/11/07 21:21:04 tom Exp $ */
 #include <HTUtils.h>
 #include <LYUtils.h>
 #include <LYGlobalDefs.h>
@@ -1274,7 +1274,7 @@ static char *pretty_html(int c)
     return 0;
 }
 
-static char *format_binding(LYKeymap_t * table, int i)
+static char *format_binding(LYKeymap_t *table, int i)
 {
     LYKeymapCode the_key = (LYKeymapCode) table[i];
     char *buf = 0;

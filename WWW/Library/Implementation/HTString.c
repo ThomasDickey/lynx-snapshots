@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTString.c,v 1.64 2010/09/25 11:32:30 tom Exp $
+ * $LynxId: HTString.c,v 1.65 2010/11/07 21:20:58 tom Exp $
  *
  *	Case-independent string comparison		HTString.c
  *
@@ -777,6 +777,7 @@ PUBLIC_IF_FIND_LEAKS char *StrAllocVsprintf(char **pstr,
 
 			else if (type == 'Z')
 			    VA_INTGR(size_t);
+
 			else
 			    VA_INTGR(int);
 
