@@ -1,4 +1,4 @@
-// $LynxId: lynx_cfg.h,v 1.4 2009/11/21 16:33:41 tom Exp $
+// $LynxId: lynx_cfg.h,v 1.5 2010/11/06 13:37:00 tom Exp $
 // definitions abstracted from makefile.msc
 
 #ifndef LYNX_CFG_H
@@ -6,7 +6,7 @@
 
 #define __WIN32__
 #define _WINDOWS
-#define _WIN32_WINNT 0x0400 
+#define _WIN32_WINNT 0x0400
 
 #define ACCESS_AUTH 1
 #define CJK_EX 1
@@ -61,8 +61,8 @@
 #define FANCY_CURSES 1
 #endif
 
-#pragma warning (disable : 4244) /* conversion from 'xxx' to 'yyy', possible loss of data */
-#pragma warning (disable : 4267) /* conversion from 'xxx' to 'yyy', possible loss of data */
-#pragma warning (disable : 4311) /* 'type cast': pointer truncation from 'xxx' to 'yyy' FIXME */
+#pragma warning (disable : 4244)	/* conversion from 'xxx' to 'yyy', possible loss of data */
+#pragma warning (disable : 4267)	/* conversion from 'xxx' to 'yyy', possible loss of data */
+#pragma warning (disable : 4311)	/* 'type cast': pointer truncation from 'xxx' to 'yyy' FIXME */
 
 #endif /* LYNX_CFG_H */

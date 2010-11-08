@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTCP.c,v 1.105 2010/10/27 00:11:11 tom Exp $
+ * $LynxId: HTTCP.c,v 1.106 2010/11/07 21:20:58 tom Exp $
  *
  *			Generic Communication Code		HTTCP.c
  *			==========================
@@ -2102,7 +2102,7 @@ int HTDoRead(int fildes,
 #ifdef USE_READPROGRESS
     CTRACE2(TRACE_TIMING, (tfp, "...HTDoRead returns %d (%" PRI_time_t
 			   " seconds)\n",
-			   result, CAST_time_t(time((time_t *) 0) - start)));
+			   result, CAST_time_t (time((time_t *)0) - start)));
 #endif
     return result;
 }

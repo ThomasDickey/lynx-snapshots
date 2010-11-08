@@ -58,8 +58,7 @@ static time_t mkgmtime(register struct tm *t)
  *		if tm_isdst >= 0 use it, else compute it
  */
 
-time_t
-mktime(struct tm * t)
+time_t mktime(struct tm * t)
 {
     time_t result;
 

@@ -1,5 +1,5 @@
 /*
- * $LynxId: userdefs.h,v 1.259 2010/10/04 09:53:59 tom Exp $
+ * $LynxId: userdefs.h,v 1.260 2010/11/06 13:34:13 tom Exp $
  *
  * Lynx - Hypertext navigation system
  *
@@ -1184,7 +1184,7 @@
  *
  *  NOTE: This can generate A REAL LOT of mail, be warned!!!
  */
-/* #define ALERTMAIL "webmaster@localhost" *//*error recipient if no owner */
+/* #define ALERTMAIL "webmaster@localhost" */ /*error recipient if no owner */
 
 /*********************************
  * If CHECKMAIL is set to TRUE, the user will be informed (via a status line

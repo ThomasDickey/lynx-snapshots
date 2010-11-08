@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFormat.c,v 1.72 2010/09/24 09:11:25 tom Exp $
+ * $LynxId: HTFormat.c,v 1.73 2010/11/07 21:20:56 tom Exp $
  *
  *		Manage different file formats			HTFormat.c
  *		=============================
@@ -1089,7 +1089,7 @@ static int HTGzFileCopy(gzFile gzfp, HTStream *sink)
 
 	(*targetClass.put_block) (sink, input_buffer, status);
 	bytes += status;
-	HTReadProgress(bytes, (off_t) - 1);
+	HTReadProgress(bytes, (off_t) -1);
 	HTDisplayPartial();
 
 	if (HTCheckForInterrupt()) {
@@ -1191,7 +1191,7 @@ static int HTZzFileCopy(FILE *zzfp, HTStream *sink)
 	    if (len > 0) {
 		(*targetClass.put_block) (sink, output_buffer, len);
 		bytes += len;
-		HTReadProgress(bytes, (off_t) - 1);
+		HTReadProgress(bytes, (off_t) -1);
 		HTDisplayPartial();
 	    }
 	    rv = HT_LOADED;
@@ -1220,7 +1220,7 @@ static int HTZzFileCopy(FILE *zzfp, HTStream *sink)
 
 	    (*targetClass.put_block) (sink, output_buffer, len);
 	    bytes += len;
-	    HTReadProgress(bytes, (off_t) - 1);
+	    HTReadProgress(bytes, (off_t) -1);
 	    HTDisplayPartial();
 
 	    if (HTCheckForInterrupt()) {
@@ -1295,7 +1295,7 @@ static int HTBzFileCopy(BZFILE * bzfp, HTStream *sink)
 
 	(*targetClass.put_block) (sink, input_buffer, status);
 	bytes += status;
-	HTReadProgress(bytes, (off_t) - 1);
+	HTReadProgress(bytes, (off_t) -1);
 	HTDisplayPartial();
 
 	if (HTCheckForInterrupt()) {

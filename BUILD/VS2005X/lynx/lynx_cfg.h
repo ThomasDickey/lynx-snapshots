@@ -1,4 +1,4 @@
-// $LynxId: lynx_cfg.h,v 1.3 2009/11/21 16:33:41 tom Exp $
+// $LynxId: lynx_cfg.h,v 1.4 2010/11/06 13:37:00 tom Exp $
 // definitions abstracted from makefile.msc
 
 #ifndef LYNX_CFG_H
@@ -62,9 +62,9 @@
 #define FANCY_CURSES 1
 #endif
 
-#pragma warning (disable : 4244) /* conversion from 'xxx' to 'yyy', possible loss of data */
-#pragma warning (disable : 4267) /* conversion from 'xxx' to 'yyy', possible loss of data */
-#pragma warning (disable : 4311) /* 'type cast': pointer truncation from 'xxx' to 'yyy' FIXME */
-#pragma warning (disable : 4996) /* 'xxx': This function or variable may be unsafe. Consider using yyy instead. */
+#pragma warning (disable : 4244)	/* conversion from 'xxx' to 'yyy', possible loss of data */
+#pragma warning (disable : 4267)	/* conversion from 'xxx' to 'yyy', possible loss of data */
+#pragma warning (disable : 4311)	/* 'type cast': pointer truncation from 'xxx' to 'yyy' FIXME */
+#pragma warning (disable : 4996)	/* 'xxx': This function or variable may be unsafe. Consider using yyy instead. */
 
 #endif /* LYNX_CFG_H */

@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTP.c,v 1.120 2010/09/25 11:31:46 tom Exp $
+ * $LynxId: HTTP.c,v 1.121 2010/11/07 21:20:58 tom Exp $
  *
  * HyperText Tranfer Protocol	- Client implementation		HTTP.c
  * ==========================
@@ -170,6 +170,7 @@ void HTSSLInitPRNG(void)
 	}
 	/* Seed in time (mod_ssl does this) */
 	RAND_seed((unsigned char *) &t, (int) sizeof(time_t));
+
 	/* Seed in pid (mod_ssl does this) */
 	RAND_seed((unsigned char *) &pid, (int) sizeof(pid));
 	/* Initialize system's random number generator */
@@ -1048,12 +1049,12 @@ static int HTLoadHTTP(const char *arg,
 		if (pres->quality < 1.0) {
 		    if (pres->maxbytes > 0) {
 			sprintf(temp, ";q=%4.3f;mxb=%" PRI_off_t "",
-				pres->quality, CAST_off_t(pres->maxbytes));
+				pres->quality, CAST_off_t (pres->maxbytes));
 		    } else {
 			sprintf(temp, ";q=%4.3f", pres->quality);
 		    }
 		} else if (pres->maxbytes > 0) {
-		    sprintf(temp, ";mxb=%" PRI_off_t "", CAST_off_t(pres->maxbytes));
+		    sprintf(temp, ";mxb=%" PRI_off_t "", CAST_off_t (pres->maxbytes));
 		} else {
 		    temp[0] = '\0';
 		}

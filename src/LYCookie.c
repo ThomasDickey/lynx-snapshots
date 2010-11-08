@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYCookie.c,v 1.105 2010/09/24 23:53:47 tom Exp $
+ * $LynxId: LYCookie.c,v 1.106 2010/11/07 21:21:02 tom Exp $
  *
  *			       Lynx Cookie Support		   LYCookie.c
  *			       ===================
@@ -1061,7 +1061,7 @@ static unsigned parse_attribute(unsigned flags,
 	    } else {
 		cur_cookie->expires = (time(NULL) + temp);
 		CTrace((tfp, "LYSetCookie: expires %" PRI_time_t ", %s",
-			CAST_time_t(cur_cookie->expires),
+			CAST_time_t (cur_cookie->expires),
 			ctime(&cur_cookie->expires)));
 	    }
 	    flags |= FLAGS_MAXAGE_ATTR;
@@ -1082,7 +1082,7 @@ static unsigned parse_attribute(unsigned flags,
 		cur_cookie->expires = LYmktime(value, FALSE);
 		if (cur_cookie->expires > 0) {
 		    CTrace((tfp, "LYSetCookie: expires %" PRI_time_t ", %s",
-			    CAST_time_t(cur_cookie->expires),
+			    CAST_time_t (cur_cookie->expires),
 			    ctime(&cur_cookie->expires)));
 		}
 	    }
@@ -1723,7 +1723,7 @@ static void LYProcessSetCookies(const char *SetCookie,
 		(co->value ? co->value : "[no value]")));
 	if (co->expires > 0) {
 	    CTrace((tfp, "                    expires: %" PRI_time_t ", %s\n",
-		    CAST_time_t(co->expires),
+		    CAST_time_t (co->expires),
 		    ctime(&co->expires)));
 	}
 	if (isHTTPS_URL(address) &&
@@ -2098,7 +2098,7 @@ void LYStoreCookies(char *cookie_file)
 		continue;
 
 	    CTrace((tfp, "LYStoreCookies: %" PRI_time_t " cf %" PRI_time_t " ",
-		    CAST_time_t(now), CAST_time_t(co->expires)));
+		    CAST_time_t (now), CAST_time_t (co->expires)));
 
 	    if ((co->flags & COOKIE_FLAG_DISCARD)) {
 		CTrace((tfp, "not stored - DISCARD\n"));
@@ -2124,7 +2124,7 @@ void LYStoreCookies(char *cookie_file)
 		    (de->domain[0] == '.') ? "TRUE" : "FALSE",
 		    co->path,
 		    co->flags & COOKIE_FLAG_SECURE ? "TRUE" : "FALSE",
-		    CAST_time_t(co->expires), co->name,
+		    CAST_time_t (co->expires), co->name,
 		    (co->quoted ? "\"" : ""),
 		    NonNull(co->value),
 		    (co->quoted ? "\"" : ""));

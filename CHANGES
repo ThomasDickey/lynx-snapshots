@@ -1,9 +1,12 @@
--- $LynxId: CHANGES,v 1.511 2010/11/01 21:30:42 tom Exp $
+-- $LynxId: CHANGES,v 1.514 2010/11/08 10:12:13 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2010-11-01 (2.8.8dev.7)
+2010-11-08 (2.8.8dev.7)
+* undo a cleanup change to link-types from dev.6 which broke some uses of
+  input-anchors (report by FLWM) -TD
+* minor formatting improvements to sources using cindent 2.0-20101107 -TD
 * restore \r to \n conversion in HTML_put_character(), broken in gcc warning
   cleanup (report by FLWM) -TD
 * fix a double-free in make_argv() (report by FLWM) -TD
