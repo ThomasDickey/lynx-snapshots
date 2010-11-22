@@ -1,5 +1,5 @@
 /*
- * $LynxId: GridText.c,v 1.206 2010/11/08 09:57:30 tom Exp $
+ * $LynxId: GridText.c,v 1.207 2010/11/22 12:55:04 tom Exp $
  *
  *		Character grid hypertext object
  *		===============================
@@ -10379,7 +10379,7 @@ int HText_beginInput(HText *text,
     }
     if (fields_are_numbered() && (a->number > 0)) {
 	if (HTMainText != 0) {
-	    a->show_number = HTMainText->next_number++;
+	    HText_findAnchorNumber(a);
 	} else {
 	    a->show_number = a->number;
 	}

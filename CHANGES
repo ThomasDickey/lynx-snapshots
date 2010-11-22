@@ -1,9 +1,12 @@
--- $LynxId: CHANGES,v 1.514 2010/11/08 10:12:13 tom Exp $
+-- $LynxId: CHANGES,v 1.515 2010/11/22 13:02:10 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2010-11-08 (2.8.8dev.7)
+2010-11-21 (2.8.8dev.7)
+* correct one of the places where link-number is formatted, for form input
+  anchors.  This was broken in dev.6 by the -unique_urls changes (report by
+  DK) -TD
 * undo a cleanup change to link-types from dev.6 which broke some uses of
   input-anchors (report by FLWM) -TD
 * minor formatting improvements to sources using cindent 2.0-20101107 -TD
