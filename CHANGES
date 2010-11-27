@@ -1,9 +1,20 @@
--- $LynxId: CHANGES,v 1.515 2010/11/22 13:02:10 tom Exp $
+-- $LynxId: CHANGES,v 1.518 2010/11/26 20:17:33 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2010-11-21 (2.8.8dev.7)
+2010-11-26 (2.8.8dev.7)
+* improve configure check for IDNA library, which may depend upon intllib,
+  e.g., building with mingw on cygwin -DK
+* modify autoconf macros which look for X libraries, e.g., for PDCurses, to
+  accommodate ongoing changes in xorg package scripts -TD
+* reorganize autoconf macro CF_WITH_CURSES_DIR, to make it usable for both
+  curses and ncurses -TD
+* several changes to autoconf macros to lessen use of legacy shell feature
+  "${name-value}" in favor of "${name:-value}", since the former is broken in
+  recent versions of bash -TD
+* apply overlooked patch from pre-2.8.5, makes RMDIR_PATH configurable
+  (report/patch by Frank Heckenbach).
 * correct one of the places where link-number is formatted, for form input
   anchors.  This was broken in dev.6 by the -unique_urls changes (report by
   DK) -TD
@@ -15,6 +26,7 @@ Changes since Lynx 2.8 release
 * fix a double-free in make_argv() (report by FLWM) -TD
 * add a memset in RestoreSession(), fixes uninitialized memory reference for
   the VLINK section -PBM
+* update config.guess (2010-09-24), config.sub (2010-09-11)
 
 2010-10-04 (2.8.8dev.6)
 * amend change for Debian #514897 to exclude XML documents (Debian #592883) -TD
