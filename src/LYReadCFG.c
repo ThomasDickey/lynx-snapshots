@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYReadCFG.c,v 1.157 2010/11/07 21:21:06 tom Exp $
+ * $LynxId: LYReadCFG.c,v 1.158 2010/11/26 18:10:19 Frank.Heckenbach Exp $
  */
 #ifndef NO_RULES
 #include <HTRules.h>
@@ -1549,6 +1549,7 @@ static Config_Type Config_Table [] =
 #endif
      PARSE_SET(RC_REUSE_TEMPFILES,      LYReuseTempfiles),
      PARSE_PRG(RC_RLOGIN_PATH,          ppRLOGIN),
+     PARSE_PRG(RC_RMDIR_PATH,           ppRMDIR),
      PARSE_PRG(RC_RM_PATH,              ppRM),
 #ifndef NO_RULES
      PARSE_FUN(RC_RULE,                 HTSetConfiguration),

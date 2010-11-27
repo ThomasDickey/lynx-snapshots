@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYrcFile.h,v 1.36 2010/09/26 17:05:07 tom Exp $
+ * $LynxId: LYrcFile.h,v 1.37 2010/11/26 18:10:19 Frank.Heckenbach Exp $
  */
 #ifndef LYRCFILE_H
 #define LYRCFILE_H
@@ -190,6 +190,7 @@
 #define RC_REPLAYSECS                   "replaysecs"
 #define RC_REUSE_TEMPFILES              "reuse_tempfiles"
 #define RC_RLOGIN_PATH                  "rlogin_path"
+#define RC_RMDIR_PATH                   "rmdir_path"
 #define RC_RM_PATH                      "rm_path"
 #define RC_RULE                         "rule"
 #define RC_RULESFILE                    "rulesfile"
