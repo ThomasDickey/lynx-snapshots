@@ -1,9 +1,12 @@
--- $LynxId: CHANGES,v 1.518 2010/11/26 20:17:33 tom Exp $
+-- $LynxId: CHANGES,v 1.520 2010/12/08 01:30:25 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2010-11-26 (2.8.8dev.7)
+2010-12-07 (2.8.8dev.7)
+* cleanup URLs in lynx documentation -DK
+* add check in getfile() when handling a "mailto:" url, to prevent it when the
+  user has requested a dump (Debian #533308) -TD
 * improve configure check for IDNA library, which may depend upon intllib,
   e.g., building with mingw on cygwin -DK
 * modify autoconf macros which look for X libraries, e.g., for PDCurses, to

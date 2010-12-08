@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMessages_en.h,v 1.70 2009/05/28 23:11:50 tom Exp $
+ * $LynxId: LYMessages_en.h,v 1.71 2010/12/08 01:28:43 Doug.Kaufman Exp $
  *
  * Lynx - Hypertext navigation system
  *
@@ -19,11 +19,6 @@
  * Lynx source, covering all but those messages which (a) are used for
  * debugging (CTRACE) or (b) are constants used in interaction with
  * other programs.
- *
- * Links to collections of alternate definitions, developed by the Lynx
- * User Community, are maintained in Lynx links:
- *
- *    http://www.subir.com/lynx.html
  *
  * See ABOUT-NLS and po/readme for details and location of contributed
  * translations.  When no translation is available, the English default is
