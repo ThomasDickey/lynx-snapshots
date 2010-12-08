@@ -1,4 +1,4 @@
-/* $LynxId: LYGetFile.c,v 1.84 2010/09/25 11:19:25 tom Exp $ */
+/* $LynxId: LYGetFile.c,v 1.85 2010/12/07 20:59:41 tom Exp $ */
 #include <HTUtils.h>
 #include <HTTP.h>
 #include <HTAnchor.h>		/* Anchor class */
@@ -525,7 +525,7 @@ int getfile(DocInfo *doc, int *target)
 	} else if (url_type == MAILTO_URL_TYPE) {
 	    if (no_mail) {
 		HTUserMsg(MAIL_DISABLED);
-	    } else {
+	    } else if (!dump_output_immediately) {
 		HTParentAnchor *tmpanchor = HTAnchor_findAddress(&WWWDoc);
 		const char *title;
 		char *tmptitle = NULL;

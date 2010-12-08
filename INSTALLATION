@@ -915,10 +915,10 @@ Borland C:
     The original Win32 port was built with Borland C++ 4.52, but later
     versions reportedly can be used.  Before compiling the Lynx sources, you
     need a curses library, and it is recommended that you have the zlib
-    library.  Get pdcurses2.3 from "http://www.lightlink.com/hessling/".  I
+    library.  Get pdcurses2.3 from "http://pdcurses.sourceforge.net/".  I
     have modified it so that mouse support is no longer broken for Lynx (see
     "http://www.fdisk.com/doslynx/").  You will want to get zlib from
-    "http://www.gzip.org/zlib/ ".  Compile these libraries, and
+    "http://www.zlib.net/ ".  Compile these libraries, and
     put them in a convenient place (pdcurses inside the Lynx directory).
 
     Unpack the latest Lynx source distribution, and make an obj directory
@@ -938,6 +938,7 @@ Borland C:
     information can be found in "http://www.fdisk.com/doslynx/lynxport.htm".
 
 -- 1997/10/12 - W. Buttles <lynx-port@fdisk.com>
+-- 2010/11/27 - URL's updated by Doug Kaufman <dkaufman@rahul.net>
 
 Cygwin:
     It is possible to compile under the cygwin system, which will allow you to
@@ -1013,7 +1014,7 @@ V. Compile instructions -- 386 DOS
 
     If you wish to compile with "USE_ZLIB" (recommended), you must have the
     zlib library.  Get the source from
-	    http://www.gzip.org/zlib/
+	    http://www.zlib.net
     and compile it.  Put libz.a in the lib subdirectory of DJGPP, and put
     zlib.h and zconf.h in the include subdirectory.
 
@@ -1021,8 +1022,8 @@ V. Compile instructions -- 386 DOS
     package and a TCP package.  You can use PDCurses (available at
     "http://pdcurses.sourceforge.net/") and the DJGPP port of WATTCP.  The
     updated version of WATTCP is known as WATT-32, and is available at
-    "http://www.bgnett.no/~giva/".  You can also use slang (available at
-    "http://www.s-lang.org/") as your screen library.  You must
+    "http://home.broadpark.no/~gvanem/".  You can also use slang (available at
+    "http://www.jedsoft.org/slang/") as your screen library.  You must
     compile these before you go any further.  If you wish to use PDCurses 2.6,
     you need to first apply the following patch:
 
@@ -1154,13 +1155,13 @@ V. Compile instructions -- 386 DOS
 
     If you wish to compile with SSL enabled, you need to get and compile
     OpenSSL. The DJGPP port has been successfully compiled with the
-    0.9.7 stable series of OpenSSL. DJGPP can compile OpenSSL from the
+    development version of OpenSSL. DJGPP can compile OpenSSL from the
     standard source distribution (http://www.openssl.org/). See the file
     "INSTALL.DJGPP" in the OpenSSL distribution.
 
 
     If you have trouble applying the patches, try using the "patch" program,
-    ("http://www.delorie.com/pub/djgpp/current/v2gnu/pat253b.zip").
+    ("http://www.delorie.com/pub/djgpp/current/v2gnu/pat261b.zip").
     To read the Unix man style documentation, use, for example, "less"
     ("http://www.delorie.com/pub/djgpp/current/v2gnu/lss374b.zip").
     Compile or place your compiled PDCurses library in /djgpp/pdcur26, and
@@ -1197,27 +1198,27 @@ V. Compile instructions -- 386 DOS
     If all goes well, you will have a lynx.exe file.  If you have trouble,
     check to be sure djgpp.env is the way it came in the original package.
 
-    To test Lynx_386 you must have a packet driver installed.  The simplest
-    method is to use a null packet driver that just allows Lynx to start up,
-    but doesn't do anything else.  One such executable driver has been posted,
-    uuencoded, to the lynx-dev mailing list:
-    "http://www.flora.org/lynx-dev/html/month011998/msg00057.html".
-    Start the dummy packet driver with "nullpkt 0x60", and take it out of
-    memory with "nullpkt -u".  You can also use slip8250.com.  See the CRYNWR
-    package "ftp://ftp.simtel.net/pub/simtelnet/msdos/pktdrvr/pktd11.zip".
-    Usage is "slip8250 0x60", but you may have to invoke it as, for example,
-    "slip8250  0x60 6 3 0x2F8" so that it uses COM2 and IRQ 3, in order to
-    avoid an IRQ conflict with a mouse or some other device.  Another packet
+    To test Lynx_386 you must have a packet driver installed. The simplest
+    method is to use a null packet driver that just allows Lynx to start
+    up, but doesn't do anything else. One such executable driver has been
+    posted, uuencoded, to the lynx-dev mailing list in January 1998,
+    but is corrupted in the mailing list archive. You can get this at
+    "http://www.ncf.ca/ncf/pda/computer/dos/net/nullpkt.zip". Start the
+    dummy packet driver with "nullpkt 0x60", and take it out of memory with
+    "nullpkt -u". You can also use slip8250.com. See the CRYNWR package
+    "ftp://ftp.simtel.net/pub/simtelnet/msdos/pktdrvr/pktd11.zip". Usage
+    is "slip8250 0x60", but you may have to invoke it as, for example,
+    "slip8250 0x60 6 3 0x2F8" so that it uses COM2 and IRQ 3, in order to
+    avoid an IRQ conflict with a mouse or some other device. Another packet
     driver is slipper.exe, which is available from many sites, including
-    "ftp://ftp.trumpet.com.au/slipper".  To remove it from memory use
-    termin.com (usage "termin 0x60"), available in the CRYNWR package.  To
-    connect over a dialup PPP connection you need dosppp or klos' pppshare.
-    (Find at:
+    "http://www.cavazza.it/file/bbs/intsoft/slippr15.zip". To remove it from
+    memory use termin.com (usage "termin 0x60"), available in the CRYNWR
+    package. To connect over a dialup PPP connection you need dosppp or klos'
+    pppshare. (Find at:
     "http://www.ibiblio.org/pub/micro/pc-stuff/freedos/files/net/dosppp/dosppp06.zip"
     "http://www.ncf.carleton.ca/ncf/pda/computer/dos/net/dosppp06.zip"
-    "http://mvmpc200.ciw.uni-karlsruhe.de/~mvmpc9/user/TONI/dosppp/dosppp06.zip"
-    "ftp://ftp.oldskool.org/pub/tvdog/internet/dosppp06.zip";
-    "ftp://ftp.klos.com/pub/demo/pppshare.exe")
+    "http://www.cavazza.it/file/bbs/intsoft/dosppp06.zip"
+    "http://www.cavazza.it/file/bbs/intsoft/pppshare.exe")
 
     File access looks like this:
 
@@ -1254,7 +1255,7 @@ V. Compile instructions -- 386 DOS
     lynx2-* directory.  Place a copy of this batch file, named "djgpp.bat",
     in the lynx2-* directory, move to that directory and type "djgpp".  A more
     complete batch file with error checking and annotation can be found at:
-    "http://www.flora.org/lynx-dev/html/month111997/msg00250.html".
+    "http://lists.nongnu.org/archive/html/lynx-dev/1997-11/msg00250.html".
 
     If you use the configure method, remember that if you configure with
     the option "--enable-nls", you also need to set LIBS="-liconv". A
@@ -1285,7 +1286,7 @@ V. Compile instructions -- 386 DOS
 
 -- 1997/9/29 - D. Kaufman <dkaufman@rahul.net>
 -- 1997/10/3 - B. Schiavo <Wschiavo@concentric.net>
--- Last update - 2004/01/19
+-- Last update - 2010/11/27
 
 
 VI. General installation instructions
@@ -1387,4 +1388,4 @@ VIII. Acknowledgment
 
 -- 1999/04/24 - H. Nelson <lynx-admin@irm.nara.kindai.ac.jp>
 -- vile:txtmode
--- $LynxId: INSTALLATION,v 1.113 2010/09/19 18:40:53 tom Exp $
+-- $LynxId: INSTALLATION,v 1.114 2010/12/08 01:28:43 Doug.Kaufman Exp $

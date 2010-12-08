@@ -1,5 +1,5 @@
 /*
- * $LynxId: userdefs.h,v 1.260 2010/11/06 13:34:13 tom Exp $
+ * $LynxId: userdefs.h,v 1.261 2010/12/08 01:28:43 Doug.Kaufman Exp $
  *
  * Lynx - Hypertext navigation system
  *
@@ -506,7 +506,7 @@
  * An index to your CWIS can be placed here or a document containing
  * pointers to lots of interesting places on the web.
  */
-#define DEFAULT_INDEX_FILE "http://www.ncsa.uiuc.edu/SDG/Software/Mosaic/MetaIndex.html"
+#define DEFAULT_INDEX_FILE "http://scout.wisc.edu/"
 
 /*****************************
  * If USE_TRACE_LOG is set FALSE, then when TRACE mode is invoked the
