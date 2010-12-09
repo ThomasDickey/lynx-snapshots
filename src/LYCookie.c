@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYCookie.c,v 1.106 2010/11/07 21:21:02 tom Exp $
+ * $LynxId: LYCookie.c,v 1.107 2010/12/08 09:42:15 tom Exp $
  *
  *			       Lynx Cookie Support		   LYCookie.c
  *			       ===================
@@ -134,7 +134,7 @@ static void MemAllocCopy(char **dest,
     temp = typecallocn(char, (unsigned)(end - start) + 1);
     if (temp == NULL)
 	outofmem(__FILE__, "MemAllocCopy");
-    LYStrNCpy(temp, start, (int) (end - start));
+    LYStrNCpy(temp, start, (end - start));
     HTSACopy(dest, temp);
     FREE(temp);
 }

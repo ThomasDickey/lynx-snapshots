@@ -1,4 +1,4 @@
-/* $LynxId: LYStrings.c,v 1.181 2010/09/25 15:20:49 tom Exp $ */
+/* $LynxId: LYStrings.c,v 1.182 2010/12/08 09:42:15 tom Exp $ */
 #include <HTUtils.h>
 #include <HTCJK.h>
 #include <UCAux.h>
@@ -994,7 +994,7 @@ static const char *expand_tiname(const char *first, size_t len, char **result, c
     if ((code = lookup_tiname(name, strnames)) >= 0
 	|| (code = lookup_tiname(name, strfnames)) >= 0) {
 	if (cur_term->type.Strings[code] != 0) {
-	    LYStrNCpy(*result, cur_term->type.Strings[code], (int) (final - *result));
+	    LYStrNCpy(*result, cur_term->type.Strings[code], (final - *result));
 	    (*result) += strlen(*result);
 	}
     }
@@ -2780,7 +2780,7 @@ char *LYElideString(char *str,
     static char s_str[MAX_LINE];
     int len;
 
-    LYStrNCpy(buff, str, (int) sizeof(buff) - 1);
+    LYStrNCpy(buff, str, sizeof(buff) - 1);
     len = (int) strlen(buff);
     if (len > (LYcolLimit - 9)) {
 	buff[cut_pos] = '.';
@@ -5070,7 +5070,7 @@ int LYgetstr(char *inputline,
 	}
 
 	if (recall != NORECALL && (ch == UPARROW || ch == DNARROW)) {
-	    LYStrNCpy(inputline, MyEdit.buffer, (int) bufsize);
+	    LYStrNCpy(inputline, MyEdit.buffer, bufsize);
 	    LYAddToCloset(recall, MyEdit.buffer);
 	    CTRACE((tfp, "LYgetstr(%s) recall\n", inputline));
 	    return (ch);
@@ -5163,7 +5163,7 @@ int LYgetstr(char *inputline,
 	    /*
 	     * Terminate the string and return.
 	     */
-	    LYStrNCpy(inputline, MyEdit.buffer, (int) bufsize);
+	    LYStrNCpy(inputline, MyEdit.buffer, bufsize);
 	    if (!hidden)
 		LYAddToCloset(recall, MyEdit.buffer);
 	    CTRACE((tfp, "LYgetstr(%s) LYE_ENTER\n", inputline));
