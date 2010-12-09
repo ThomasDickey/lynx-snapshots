@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYrcFile.h,v 1.37 2010/11/26 18:10:19 Frank.Heckenbach Exp $
+ * $LynxId: LYrcFile.h,v 1.38 2010/12/07 21:31:51 tom Exp $
  */
 #ifndef LYRCFILE_H
 #define LYRCFILE_H
@@ -75,6 +75,7 @@
 #define RC_ENABLE_LYNXRC                "enable_lynxrc"
 #define RC_ENABLE_SCROLLBACK            "enable_scrollback"
 #define RC_EXTERNAL                     "external"
+#define RC_EXTERNAL_MENU                "external_menu"
 #define RC_FILE_EDITOR                  "file_editor"
 #define RC_FILE_SORTING_METHOD          "file_sorting_method"
 #define RC_FINGER_PROXY                 "finger_proxy"

@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYReadCFG.c,v 1.158 2010/11/26 18:10:19 Frank.Heckenbach Exp $
+ * $LynxId: LYReadCFG.c,v 1.159 2010/12/09 00:53:07 tom Exp $
  */
 #ifndef NO_RULES
 #include <HTRules.h>
@@ -48,7 +48,7 @@ BOOLEAN LYUseNoviceLineTwo = TRUE;
 /*
  * Translate a TRUE/FALSE field in a string buffer.
  */
-static BOOL is_true(char *string)
+static BOOL is_true(const char *string)
 {
     if (!strcasecomp(string, "TRUE") || !strcasecomp(string, "ON"))
 	return (TRUE);
@@ -59,9 +59,10 @@ static BOOL is_true(char *string)
 /*
  * Find an unescaped colon in a string buffer.
  */
-static char *find_colon(char *buffer)
+static const char *find_colon(const char *buffer)
 {
-    char ch, *buf = buffer;
+    char ch;
+    const char *buf = buffer;
 
     if (buf == NULL)
 	return NULL;
@@ -79,19 +80,34 @@ static char *find_colon(char *buffer)
     return NULL;
 }
 
+static void free_item_list_item(lynx_list_item_type **list,
+				lynx_list_item_type *ptr)
+{
+    lynx_list_item_type *prev;
+    lynx_list_item_type *cur;
+
+    for (cur = *list, prev = 0; cur != 0; prev = cur, cur = cur->next) {
+	if (cur == ptr) {
+
+	    if (prev != 0)
+		prev->next = cur->next;
+	    else
+		*list = cur->next;
+
+	    FREE(cur->name);
+	    FREE(cur->menu_name);
+	    FREE(cur->command);
+	    FREE(cur);
+	    break;
+	}
+    }
+}
+
 static void free_item_list(lynx_list_item_type **ptr)
 {
-    lynx_list_item_type *cur = *ptr;
-    lynx_list_item_type *next;
-
-    while (cur) {
-	next = cur->next;
-	FREE(cur->name);
-	FREE(cur->command);
-	FREE(cur);
-	cur = next;
+    while (*ptr != 0) {
+	free_item_list_item(ptr, *ptr);
     }
-    *ptr = NULL;
 }
 
 /*
@@ -112,15 +128,76 @@ static void free_all_item_lists(void)
     return;
 }
 
+static const char *parse_list_bool(BOOL *target, const char *source)
+{
+    const char *result;
+
+    source = LYSkipCBlanks(source);
+    result = find_colon(source);
+
+    if (*source != '\0') {
+	char temp[20];
+	size_t len = ((result != 0)
+		      ? (size_t) (result - source)
+		      : strlen(source));
+
+	if (len > sizeof(temp))
+	    len = (sizeof(temp) - 1);
+	LYStrNCpy(temp, source, len);
+	*target = is_true(temp);
+	CTRACE2(TRACE_CFG, (tfp, "parse_list_bool(%s) '%d'\n", source, *target));
+    }
+    return result;
+}
+
+static const char *parse_list_int(int *target, const char *source)
+{
+    const char *result;
+
+    source = LYSkipCBlanks(source);
+    result = find_colon(source);
+
+    if (*source != '\0') {
+	*target = atoi(source);
+	CTRACE2(TRACE_CFG, (tfp, "parse_list_int(%s) '%d'\n", source, *target));
+    }
+    return result;
+}
+
+static const char *parse_list_string(char **target, const char *source)
+{
+    const char *result;
+
+    source = LYSkipCBlanks(source);
+    result = find_colon(source);
+
+    if (*source != '\0') {
+	const char *next = ((result == 0)
+			    ? (source + strlen(source))
+			    : result);
+
+	*target = typecallocn(char, (size_t) (next - source + 1));
+
+	if (*target == NULL)
+	    outofmem(__FILE__, "read_cfg");
+	LYStrNCpy(*target, source, (next - source));
+	remove_backslashes(*target);
+
+	CTRACE2(TRACE_CFG, (tfp, "parse_list_string(%s) '%s'\n", source, *target));
+    }
+    return result;
+}
+
 /*
  * Process string buffer fields for DOWNLOADER or UPLOADER
  *                               or PRINTERS   or EXTERNALS menus
  */
 static void add_item_to_list(char *buffer,
 			     lynx_list_item_type **list_ptr,
-			     int special)
+			     int special,
+			     int menu_name)
 {
-    char *colon, *next_colon, *last_colon;
+    const char *colon, *last_colon;
     lynx_list_item_type *cur_item, *prev_item;
 
     /*
@@ -128,24 +205,30 @@ static void add_item_to_list(char *buffer,
      * field, and act properly when found depending if external environment
      * $DISPLAY variable is set.
      */
-    if ((last_colon = strrchr(buffer, ':')) != NULL && *(last_colon - 1) != '\\') {
-	*last_colon++ = '\0';
-	/*
-	 * If last_colon equals XWINDOWS then only continue
-	 * if there is a $DISPLAY variable
-	 */
-	if (!strcasecomp(last_colon, "XWINDOWS")) {
-	    if (LYgetXDisplay() == NULL)
-		return;
-	}
-	/*
-	 * If last_colon equals NON_XWINDOWS then only continue
-	 * if there is no $DISPLAY variable
-	 */
-	else if (!strcasecomp(last_colon, "NON_XWINDOWS")) {
-	    if (LYgetXDisplay() != NULL)
-		return;
-	}
+    if ((colon = find_colon(buffer)) == 0) {
+	return;
+    }
+    for (last_colon = colon;
+	 (colon = find_colon(last_colon + 1)) != 0;
+	 last_colon = colon) {
+	;
+    }
+
+    /*
+     * If colon equals XWINDOWS then only continue
+     * if there is a $DISPLAY variable
+     */
+    if (!strcasecomp(last_colon + 1, "XWINDOWS")) {
+	if (LYgetXDisplay() == NULL)
+	    return;
+    }
+    /*
+     * If colon equals NON_XWINDOWS then only continue
+     * if there is no $DISPLAY variable
+     */
+    else if (!strcasecomp(last_colon + 1, "NON_XWINDOWS")) {
+	if (LYgetXDisplay() != NULL)
+	    return;
     }
 
     /*
@@ -182,59 +265,40 @@ static void add_item_to_list(char *buffer,
 
 	assert(cur_item != NULL);
     }
-    cur_item->next = NULL;
-    cur_item->name = NULL;
-    cur_item->command = NULL;
-    cur_item->always_enabled = FALSE;
-    cur_item->override_primary_action = FALSE;
+    /* fill-in nonzero default values */
     cur_item->pagelen = 66;
 
     /*
      * Find first unescaped colon and process fields
      */
     if ((colon = find_colon(buffer)) != NULL) {
-	/*
-	 * Process name field
-	 */
-	cur_item->name = typecallocn(char, (unsigned) (colon - buffer + 1));
+	colon = parse_list_string(&(cur_item->name), buffer);
 
-	if (cur_item->name == NULL)
-	    outofmem(__FILE__, "read_cfg");
-	LYStrNCpy(cur_item->name, buffer, (int) (colon - buffer));
-	remove_backslashes(cur_item->name);
-
-	/*
-	 * Find end of command string and beginning of TRUE/FALSE option field. 
-	 * If we do not find a colon that ends the command string, leave the
-	 * always_enabled option flag as FALSE.  In any case, we want the
-	 * command string.
-	 */
-	if ((next_colon = find_colon(colon + 1)) == NULL) {
-	    next_colon = colon + strlen(colon);
+	if (colon && menu_name) {
+	    colon = parse_list_string(&(cur_item->menu_name), colon + 1);
 	}
-	if (next_colon - (colon + 1) > 0) {
-	    cur_item->command = typecallocn(char, (unsigned) (next_colon - colon));
-
-	    if (cur_item->command == NULL)
-		outofmem(__FILE__, "read_cfg");
-	    LYStrNCpy(cur_item->command,
-		      colon + 1,
-		      (int) (next_colon - (colon + 1)));
-	    remove_backslashes(cur_item->command);
+	if (colon) {
+	    colon = parse_list_string(&(cur_item->command), colon + 1);
 	}
-	if (*next_colon++) {
-	    colon = next_colon;
-	    if ((next_colon = strchr(colon, ':')) != 0)
-		*next_colon++ = '\0';
-	    cur_item->always_enabled = is_true(colon);
-	    if (next_colon) {
-		if (special) {
-		    cur_item->pagelen = atoi(next_colon);
-		} else {
-		    cur_item->override_primary_action = is_true(next_colon);
-		}
+	if (colon) {
+	    colon = parse_list_bool(&(cur_item->always_enabled), colon + 1);
+	}
+	if (colon) {
+	    if (special) {
+		(void) parse_list_int(&(cur_item->pagelen), colon + 1);
+	    } else {
+		(void) parse_list_bool(&(cur_item->override_action), colon + 1);
 	    }
 	}
+    }
+
+    /* ignore empty data */
+    if (cur_item->name == NULL
+	|| cur_item->command == NULL) {
+	CTRACE2(TRACE_CFG, (tfp, "ignoring incomplete list_item '%s'\n", buffer));
+	free_item_list_item(list_ptr, cur_item);
+    } else if (cur_item->menu_name == NULL) {
+	StrAllocCopy(cur_item->menu_name, cur_item->command);
     }
 }
 
@@ -256,7 +320,7 @@ int match_item_by_name(lynx_list_item_type *ptr,
     return
 	(ptr->command != 0
 	 && !strncasecomp(ptr->name, name, (int) strlen(ptr->name))
-	 && (only_overriders ? ptr->override_primary_action : 1));
+	 && (only_overriders ? ptr->override_action : 1));
 }
 
 #if defined(USE_COLOR_STYLE) || defined(USE_COLOR_TABLE)
@@ -399,10 +463,8 @@ The special strings 'nocolor' or 'default', or\n")
 static void parse_color(char *buffer)
 {
     int color;
-    char *fg, *bg;
-    char *temp = 0;
-
-    StrAllocCopy(temp, buffer);	/* save a copy, for error messages */
+    const char *fg, *bg;
+    char *temp_fg = 0;
 
     /*
      * We are expecting a line of the form:
@@ -410,32 +472,31 @@ static void parse_color(char *buffer)
      */
     color = atoi(buffer);
     if (NULL == (fg = find_colon(buffer)))
-	exit_with_color_syntax(temp);
+	exit_with_color_syntax(buffer);
 
     assert(fg != NULL);
 
-    *fg++ = '\0';
-
-    if (NULL == (bg = find_colon(fg)))
-	exit_with_color_syntax(temp);
+    if (NULL == (bg = find_colon(++fg)))
+	exit_with_color_syntax(buffer);
 
     assert(bg != NULL);
 
-    *bg++ = '\0';
+    StrAllocCopy(temp_fg, fg);
+    temp_fg[bg++ - fg] = '\0';
 
 #if defined(USE_SLANG)
-    if ((check_color(fg, default_fg) == ERR_COLOR) ||
+    if ((check_color(temp_fg, default_fg) == ERR_COLOR) ||
 	(check_color(bg, default_bg) == ERR_COLOR))
-	exit_with_color_syntax(temp);
+	exit_with_color_syntax(buffer);
 
-    SLtt_set_color(color, NULL, fg, bg);
+    SLtt_set_color(color, NULL, temp_fg, bg);
 #else
     if (lynx_chg_color(color,
-		       check_color(fg, default_fg),
+		       check_color(temp_fg, default_fg),
 		       check_color(bg, default_bg)) < 0)
-	exit_with_color_syntax(temp);
+	exit_with_color_syntax(buffer);
 #endif
-    FREE(temp);
+    FREE(temp_fg);
 }
 #endif /* USE_COLOR_TABLE */
 /* *INDENT-OFF* */
@@ -550,29 +611,29 @@ static int outgoing_mail_charset_fun(char *value)
  */
 static int assumed_color_fun(char *buffer)
 {
-    char *fg = buffer, *bg;
-    char *temp = 0;
+    const char *fg = buffer, *bg;
+    char *temp_fg = 0;
 
     if (LYuse_default_colors) {
-	StrAllocCopy(temp, buffer);	/* save a copy, for error messages */
 
 	/*
 	 * We are expecting a line of the form:
 	 *    FOREGROUND:BACKGROUND
 	 */
 	if (NULL == (bg = find_colon(fg)))
-	    exit_with_color_syntax(temp);
+	    exit_with_color_syntax(buffer);
 
 	assert(bg != NULL);
 
-	*bg++ = '\0';
+	StrAllocCopy(temp_fg, fg);
+	temp_fg[bg++ - fg] = '\0';
 
-	default_fg = check_color(fg, default_fg);
+	default_fg = check_color(temp_fg, default_fg);
 	default_bg = check_color(bg, default_bg);
 
 	if (default_fg == ERR_COLOR
 	    || default_bg == ERR_COLOR)
-	    exit_with_color_syntax(temp);
+	    exit_with_color_syntax(buffer);
 #ifdef USE_SLANG
 	/*
 	 * Sorry - the order of initialization of slang precludes setting the
@@ -583,7 +644,7 @@ static int assumed_color_fun(char *buffer)
 	 * interface) -TD
 	 */
 #endif
-	FREE(temp);
+	FREE(temp_fg);
     } else {
 	CTRACE((tfp, "...ignored since DEFAULT_COLORS:off\n"));
     }
@@ -1137,6 +1198,18 @@ static int parse_assumed_doc_charset_choice(char *p)
 
 #endif /* USE_CHARSET_CHOICE */
 
+#ifdef USE_EXTERNALS
+/*
+ * EXTERNAL and EXTERNAL_MENU share the same list.  EXTERNAL_MENU allows
+ * setting a different name than the command string.
+ */
+static int external_fun(char *str)
+{
+    add_item_to_list(str, &externals, FALSE, FALSE);
+    return 0;
+}
+#endif
+
 #ifdef USE_PRETTYSRC
 static void html_src_bad_syntax(char *value,
 				char *option_name)
@@ -1396,7 +1469,8 @@ static Config_Type Config_Table [] =
      PARSE_FUN(RC_ENABLE_LYNXRC,        enable_lynxrc),
      PARSE_SET(RC_ENABLE_SCROLLBACK,    enable_scrollback),
 #ifdef USE_EXTERNALS
-     PARSE_ADD(RC_EXTERNAL,             externals),
+     PARSE_FUN(RC_EXTERNAL,             external_fun),
+     PARSE_ADD(RC_EXTERNAL_MENU,        externals),
 #endif
      PARSE_Env(RC_FINGER_PROXY,         0),
 #if defined(_WINDOWS)	/* 1998/10/05 (Mon) 17:34:15 */
@@ -1862,7 +1936,10 @@ void LYSetConfigValue(const char *name,
 	break;
     case CONF_ADD_ITEM:
 	if (q->add_value != 0)
-	    add_item_to_list(value, q->add_value, (q->add_value == &printers));
+	    add_item_to_list(value,
+			     q->add_value,
+			     (q->add_value == &printers),
+			     TRUE);
 	break;
 
     case CONF_ADD_STRING:

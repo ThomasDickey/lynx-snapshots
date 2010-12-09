@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYUtils.c,v 1.206 2010/11/07 21:21:08 tom Exp $
+ * $LynxId: LYUtils.c,v 1.207 2010/12/08 09:42:15 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTCP.h>
@@ -547,7 +547,7 @@ static BOOL show_whereis_targets(int flag,
 		tmp[0] = data[itmp];
 		utf_extra = utf8_length(utf_flag, data + itmp);
 		if (utf_extra) {
-		    LYStrNCpy(&tmp[1], &data[itmp + 1], (int) utf_extra);
+		    LYStrNCpy(&tmp[1], &data[itmp + 1], utf_extra);
 		    itmp += (int) utf_extra;
 		    /*
 		     * Start emphasis immediately if we are making the link
@@ -618,7 +618,7 @@ static BOOL show_whereis_targets(int flag,
 		     */
 		    utf_extra = utf8_length(utf_flag, data + itmp);
 		    if (utf_extra) {
-			LYStrNCpy(&tmp[1], &data[itmp + 1], (int) utf_extra);
+			LYStrNCpy(&tmp[1], &data[itmp + 1], utf_extra);
 			itmp += (int) utf_extra;
 			/*
 			 * Make sure we don't restore emphasis to the last
@@ -744,7 +744,7 @@ static BOOL show_whereis_targets(int flag,
 		tmp[0] = data[itmp];
 		utf_extra = utf8_length(utf_flag, data + itmp);
 		if (utf_extra) {
-		    LYStrNCpy(&tmp[1], &data[itmp + 1], (int) utf_extra);
+		    LYStrNCpy(&tmp[1], &data[itmp + 1], utf_extra);
 		    itmp += (int) utf_extra;
 		    /*
 		     * Start emphasis immediately if we are making the link
@@ -818,7 +818,7 @@ static BOOL show_whereis_targets(int flag,
 		     */
 		    utf_extra = utf8_length(utf_flag, data + itmp);
 		    if (utf_extra) {
-			LYStrNCpy(&tmp[1], &data[itmp + 1], (int) utf_extra);
+			LYStrNCpy(&tmp[1], &data[itmp + 1], utf_extra);
 			itmp += (int) utf_extra;
 			/*
 			 * Make sure we don't restore emphasis to the last
@@ -938,7 +938,7 @@ static BOOL show_whereis_targets(int flag,
 			     */
 			    utf_extra = utf8_length(utf_flag, data + itmp);
 			    if (utf_extra) {
-				LYStrNCpy(&tmp[1], &data[itmp + 1], (int) utf_extra);
+				LYStrNCpy(&tmp[1], &data[itmp + 1], utf_extra);
 				itmp += (int) utf_extra;
 				/*
 				 * Make sure we don't restore emphasis to the
@@ -4772,7 +4772,7 @@ BOOLEAN LYExpandHostForURL(char **AllocatedString,
 		while (*EndS && !WHITE(*EndS) && *EndS != ',') {
 		    EndS++;	/* Find separator */
 		}
-		LYStrNCpy(DomainSuffix, StartS, (int) (EndS - StartS));
+		LYStrNCpy(DomainSuffix, StartS, (EndS - StartS));
 	    }
 	} while ((GotHost == FALSE) && (*DomainSuffix != '\0'));
 
@@ -4788,7 +4788,7 @@ BOOLEAN LYExpandHostForURL(char **AllocatedString,
 	    while (*EndP && !WHITE(*EndP) && *EndP != ',') {
 		EndP++;		/* Find separator */
 	    }
-	    LYStrNCpy(DomainPrefix, StartP, (int) (EndP - StartP));
+	    LYStrNCpy(DomainPrefix, StartP, (EndP - StartP));
 	}
     } while ((GotHost == FALSE) && (*DomainPrefix != '\0'));
 
@@ -5544,7 +5544,7 @@ void LYAddPathToHome(char *fbuffer,
 	 * what fits of the home path and return.  This will fail, but we need
 	 * something in the buffer.  - FM
 	 */
-	LYStrNCpy(fbuffer, home, (int) (fbuffer_size - 1));
+	LYStrNCpy(fbuffer, home, (fbuffer_size - 1));
 	FREE(home);
 	return;
     }
