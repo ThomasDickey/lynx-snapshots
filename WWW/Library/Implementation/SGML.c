@@ -1,5 +1,5 @@
 /*
- * $LynxId: SGML.c,v 1.141 2010/11/07 21:20:59 tom Exp $
+ * $LynxId: SGML.c,v 1.142 2010/12/10 01:46:10 tom Exp $
  *
  *			General SGML Parser code		SGML.c
  *			========================
@@ -42,7 +42,7 @@
 #define AssumeCP1252(context) \
 	(((context)->inUCLYhndl == LATIN1 \
 	  || (context)->inUCLYhndl == US_ASCII) \
-	 && !(context)->extended_html)
+	 && html5_charsets)
 
 #define INVALID (-1)
 

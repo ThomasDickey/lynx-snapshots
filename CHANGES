@@ -1,9 +1,12 @@
--- $LynxId: CHANGES,v 1.521 2010/12/09 01:06:16 tom Exp $
+-- $LynxId: CHANGES,v 1.522 2010/12/10 09:56:49 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2010-12-07 (2.8.8dev.7)
+2010-12-10 (2.8.8dev.7)
+* add HTML5_CHARSETS feature, which allows the user to choose whether to
+  interpret pages without an explicit charset according to the HTML5
+  "compatibility" feature (Debian #604466, #514897) -TD
 * add EXTERNAL_MENU feature to lynx.cfg, which allows the user to customize the
   menu-entry shown, e.g., to suppress the display of the URL
   (Debian #603646) -TD

@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYReadCFG.c,v 1.159 2010/12/09 00:53:07 tom Exp $
+ * $LynxId: LYReadCFG.c,v 1.160 2010/12/10 01:16:27 tom Exp $
  */
 #ifndef NO_RULES
 #include <HTRules.h>
@@ -1501,6 +1501,7 @@ static Config_Type Config_Table [] =
      PARSE_STR(RC_HIDDEN_LINK_MARKER,   hidden_link_marker),
 #endif
      PARSE_SET(RC_HISTORICAL_COMMENTS,  historical_comments),
+     PARSE_SET(RC_HTML5_CHARSETS,       html5_charsets),
 #ifdef USE_PRETTYSRC
      PARSE_FUN(RC_HTMLSRC_ATTRNAME_XFORM, read_htmlsrc_attrname_xform),
      PARSE_FUN(RC_HTMLSRC_TAGNAME_XFORM, read_htmlsrc_tagname_xform),

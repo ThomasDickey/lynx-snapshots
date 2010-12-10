@@ -1,4 +1,4 @@
-/* $LynxId: LYOptions.c,v 1.141 2010/09/25 11:20:21 tom Exp $ */
+/* $LynxId: LYOptions.c,v 1.142 2010/12/10 01:51:49 tom Exp $ */
 #include <HTUtils.h>
 #include <HTFTP.h>
 #include <HTTP.h>		/* 'reloading' flag */
@@ -2337,6 +2337,8 @@ static const char *raw_mode_string = RC_RAW_MODE;
 static const char *locale_charset_string = RC_LOCALE_CHARSET;
 #endif
 
+static const char *html5_charsets_string = RC_HTML5_CHARSETS;
+
 /*
  * File Management Options
  */
@@ -3028,6 +3030,12 @@ int postoptions(DocInfo *newdoc)
 	    LYLocaleCharset = (BOOLEAN) code;
 	}
 #endif
+	/* Use HTML5 charset replacements: ON/OFF */
+	if (!strcmp(data[i].tag, html5_charsets_string)
+	    && GetOptValues(bool_values, data[i].value, &code)) {
+	    html5_charsets = (BOOLEAN) code;
+	    assume_char_set_changed = TRUE;
+	}
 
 	/* Display Character Set: SELECT */
 	if (!strcmp(data[i].tag, display_char_set_string)) {
@@ -3659,6 +3667,10 @@ static int gen_options(char **newfile)
 #else
 #define LYLocaleCharset FALSE
 #endif
+    PutLabel(fp0, gettext("Use HTML5 charset replacements"), html5_charsets_string);
+    BeginSelect(fp0, html5_charsets_string);
+    PutOptValues(fp0, html5_charsets, bool_values);
+    EndSelect(fp0);
 
     /* Display Character Set: SELECT */
     PutLabel(fp0, gettext("Display character set"), display_char_set_string);
