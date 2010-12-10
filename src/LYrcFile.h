@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYrcFile.h,v 1.38 2010/12/07 21:31:51 tom Exp $
+ * $LynxId: LYrcFile.h,v 1.39 2010/12/10 01:20:54 tom Exp $
  */
 #ifndef LYRCFILE_H
 #define LYRCFILE_H
@@ -97,6 +97,7 @@
 #define RC_HELPFILE                     "helpfile"
 #define RC_HIDDEN_LINK_MARKER           "hidden_link_marker"
 #define RC_HISTORICAL_COMMENTS          "historical_comments"
+#define RC_HTML5_CHARSETS               "html5_charsets"
 #define RC_HTMLSRC_ATTRNAME_XFORM       "htmlsrc_attrname_xform"
 #define RC_HTMLSRC_TAGNAME_XFORM        "htmlsrc_tagname_xform"
 #define RC_HTTPS_PROXY                  "https_proxy"

@@ -1,4 +1,4 @@
-/* $LynxId: LYrcFile.c,v 1.85 2010/09/22 09:48:18 tom Exp $ */
+/* $LynxId: LYrcFile.c,v 1.87 2010/12/10 09:45:31 tom Exp $ */
 #include <HTUtils.h>
 #include <HTFTP.h>
 #include <LYUtils.h>
@@ -427,6 +427,7 @@ file lists such as FTP directories.  The options are:\n\
 #ifndef DISABLE_FTP
     MAYBE_SET(RC_FTP_PASSIVE,           ftp_passive,        MSG_ENABLE_LYNXRC),
 #endif
+    MAYBE_SET(RC_HTML5_CHARSETS,        html5_charsets,     MSG_ENABLE_LYNXRC),
 #ifdef EXP_KEYBOARD_LAYOUT
     PARSE_ARY(RC_KBLAYOUT,              current_layout,     LYKbLayoutNames, NULL),
 #endif
