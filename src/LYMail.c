@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMail.c,v 1.76 2010/09/25 11:22:16 tom Exp $
+ * $LynxId: LYMail.c,v 1.80 2010/12/11 14:52:59 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTParse.h>
@@ -1095,9 +1095,6 @@ void reply_by_mail(char *mail_address,
 		   const char *title,
 		   const char *refid)
 {
-#ifndef NO_ANONYMOUS_EMAIL
-    static char *personal_name = NULL;
-#endif
     char user_input[LINESIZE];
     FILE *fd, *fp;
     const char *label = NULL;
@@ -1336,21 +1333,21 @@ void reply_by_mail(char *mail_address,
 	LYaddstr(ENTER_NAME_OR_BLANK);
 #if USE_VMS_MAILER
 	if (isPMDF) {
-	    label = "Personal_name: ";
+	    label = "Personal_name";
 	} else {
-	    label = "X-Personal_name: ";
+	    label = "X-Personal_name";
 	}
 #else
-	label = "X-Personal_Name: ";
+	label = "X-Personal_Name";
 #endif /* USE_VMS_MAILER */
-	if (!header_prompt(label, &personal_name, LINESIZE)) {
+	if (!header_prompt(label, &personal_mail_name, LINESIZE)) {
 	    goto cancelled;
 	}
-	if (*personal_name) {
+	if (*personal_mail_name) {
 #if USE_VMS_MAILER
-	    fprintf((isPMDF ? hfd : fd), "%s: %s\n", label, personal_name);
+	    fprintf((isPMDF ? hfd : fd), "%s: %s\n", label, personal_mail_name);
 #else
-	    HTSprintf(&header, "%s: %s\n", label, personal_name);
+	    HTSprintf(&header, "%s: %s\n", label, personal_mail_name);
 #endif /* VMS */
 	}
 
@@ -1523,6 +1520,7 @@ void reply_by_mail(char *mail_address,
 	LYaddstr(ENTER_MESSAGE_BELOW);
 	LYaddstr(ENTER_PERIOD_WHEN_DONE_A);
 	LYaddstr(ENTER_PERIOD_WHEN_DONE_B);
+	LYaddstr(CTRL_G_TO_CANCEL_SEND);
 	LYaddstr("\n\n");
 	LYrefresh();
 	*user_input = '\0';

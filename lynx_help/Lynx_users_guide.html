@@ -1,5 +1,5 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-<!-- $LynxId: Lynx_users_guide.html,v 1.110 2010/06/19 11:09:56 Paul.B.Mahol Exp $ -->
+<!-- $LynxId: Lynx_users_guide.html,v 1.112 2010/12/11 14:27:16 tom Exp $ -->
 <html>
 <head>
 <title>Lynx Users Guide v2.8.7</title>
@@ -521,6 +521,7 @@ HREF="keystrokes/option_help.html">HELP!</A>
 
   Display and Character Sets
   Use locale-based character set(!): [OFF]
+  Use HTML5 charset replacements(!): [OFF]
   Display character set            : [Cyrillic (ISO-8859-5)..........]
   Assumed document character set(!): [iso-8859-1......]
   Raw 8-bit (!)                    : [OFF]
@@ -539,6 +540,7 @@ HREF="keystrokes/option_help.html">HELP!</A>
 
   Headers Transferred to Remote Servers
   Personal mail address            : __________________________________________
+  Personal mail name               : __________________________________________
   Password for anonymous ftp       : __________________________________________
   Preferred media type (!)         : [Accept lynx's internal types]
   Preferred encoding (!)           : [All_____]
@@ -856,6 +858,12 @@ return to Lynx or the '<em>&gt;</em>' command to save the options to a
             (the compilation default is not to send the header), or via the
             <em>-from</em> command line toggle.
 
+   <dt>Personal mail name
+	<dd>This mail name will be included as the "X-Personal_Name" field in
+	    any mail or comments that you send if that header has not been
+	    disabled via the NO_ANONYMOUS_EMAIL definition in
+            <A HREF="#lynx.cfg">lynx.cfg</A>.
+
    <dt>Popups for select fields
         <dd>Lynx normally uses a popup window for the OPTIONs in form
             SELECT fields when the field does not have the MULTIPLE
@@ -1036,6 +1044,11 @@ return to Lynx or the '<em>&gt;</em>' command to save the options to a
             inter-document searches only, and determines whether searches
             for words within documents will be done in a case-sensitive or
             case-insensitive manner.
+
+   <dt>Use HTML5 charset replacements
+        <dd>This option allows lynx to treat pages with ISO-8859-1 (Latin1)
+	    or ASCII encoding as if they were Windows 1252.  That allows
+	    a few punctuation characters to be shown.
 
    <dt>Use locale-based character set
         <dd>This option allows you to request lynx to obtain a MIME name

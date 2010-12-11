@@ -1,9 +1,11 @@
--- $LynxId: CHANGES,v 1.522 2010/12/10 09:56:49 tom Exp $
+-- $LynxId: CHANGES,v 1.525 2010/12/11 14:28:43 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2010-12-10 (2.8.8dev.7)
+2010-12-11 (2.8.8dev.7)
+* add PERSONAL_MAIL_NAME to options menu and .lynxrc (Debian #603647) -TD
+* remind user how to cancel message (Debian #292787) -TD
 * add HTML5_CHARSETS feature, which allows the user to choose whether to
   interpret pages without an explicit charset according to the HTML5
   "compatibility" feature (Debian #604466, #514897) -TD

@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYrcFile.h,v 1.39 2010/12/10 01:20:54 tom Exp $
+ * $LynxId: LYrcFile.h,v 1.40 2010/12/11 14:12:47 tom Exp $
  */
 #ifndef LYRCFILE_H
 #define LYRCFILE_H
@@ -174,6 +174,7 @@
 #define RC_PERSONAL_EXTENSION_MAP       "personal_extension_map"
 #define RC_PERSONAL_MAILCAP             "personal_mailcap"
 #define RC_PERSONAL_MAIL_ADDRESS        "personal_mail_address"
+#define RC_PERSONAL_MAIL_NAME           "personal_mail_name"
 #define RC_POSITIONABLE_EDITOR		"positionable_editor"
 #define RC_PREFERRED_CHARSET            "preferred_charset"
 #define RC_PREFERRED_ENCODING           "preferred_encoding"

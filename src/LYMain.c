@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMain.c,v 1.225 2010/12/10 01:17:41 tom Exp $
+ * $LynxId: LYMain.c,v 1.226 2010/12/11 14:19:47 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTP.h>
@@ -449,7 +449,8 @@ char *lynxlinksfile = NULL;	/* the current visited links file URL */
 char *lynxlistfile = NULL;	/* the current list file URL */
 char *original_dir = NULL;	/* the original directory */
 char *personal_extension_map = NULL;	/* .mime.types */
-char *personal_mail_address = NULL;	/* the users mail address */
+char *personal_mail_address = NULL;	/* the user's mail address */
+char *personal_mail_name = NULL;	/* the user's personal name mail */
 char *personal_type_map = NULL;	/* .mailcap */
 char *pref_charset = NULL;	/* preferred character set */
 char *proxyauth_info[2] =
