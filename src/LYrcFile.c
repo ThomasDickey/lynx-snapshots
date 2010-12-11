@@ -1,4 +1,4 @@
-/* $LynxId: LYrcFile.c,v 1.87 2010/12/10 09:45:31 tom Exp $ */
+/* $LynxId: LYrcFile.c,v 1.88 2010/12/11 14:20:53 tom Exp $ */
 #include <HTUtils.h>
 #include <HTFTP.h>
 #include <LYUtils.h>
@@ -464,6 +464,16 @@ If you do not want this information given out, set the NO_FROM_HEADER\n\
 to TRUE in lynx.cfg, or use the -nofrom command line switch.  You also\n\
 could leave this field blank, but then you won't have it included in\n\
 your mailed comments.\n\
+")),
+    PARSE_STR(RC_PERSONAL_MAIL_NAME,    personal_mail_name, N_("\
+personal_mail_name specifies your personal name, for mail.  The\n\
+name is sent for mailed comments.  Lynx will prompt for this,\n\
+showing the configured value as a default when sending mail.\n\
+This is not necessarily the same as a name provided as part of the\n\
+personal_mail_address.\n\
+Lynx does not save your changes to that default value as a side-effect\n\
+of sending email.  To update the default value, you must use the options\n\
+menu, or modify this file directly.\n\
 ")),
     PARSE_STR(RC_PREFERRED_CHARSET,     pref_charset, N_("\
 preferred_charset specifies the character set in MIME notation (e.g.,\n\

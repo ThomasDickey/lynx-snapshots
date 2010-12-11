@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYGlobalDefs.h,v 1.127 2010/12/10 01:17:05 tom Exp $
+ * $LynxId: LYGlobalDefs.h,v 1.128 2010/12/11 14:19:17 tom Exp $
  *
  * global variable definitions
  */
@@ -377,6 +377,7 @@ extern "C" {
     extern char *indexfile;
     extern char *anonftp_password;
     extern char *personal_mail_address;
+    extern char *personal_mail_name;
     extern char *homepage;	/* startfile or command line argument */
     extern char *editor;	/* if non empty it enables edit mode with
 

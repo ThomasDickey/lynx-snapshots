@@ -1,4 +1,4 @@
-/* $LynxId: LYOptions.c,v 1.142 2010/12/10 01:51:49 tom Exp $ */
+/* $LynxId: LYOptions.c,v 1.143 2010/12/11 14:36:42 tom Exp $ */
 #include <HTUtils.h>
 #include <HTFTP.h>
 #include <HTTP.h>		/* 'reloading' flag */
@@ -2196,6 +2196,7 @@ static OptValues keypad_mode_values[] =
 };
 static const char *lineedit_mode_string = RC_LINEEDIT_MODE;
 static const char *mail_address_string = RC_PERSONAL_MAIL_ADDRESS;
+static const char *personal_name_string = RC_PERSONAL_MAIL_NAME;
 static const char *search_type_string = RC_CASE_SENSITIVE_SEARCHING;
 
 #ifndef DISABLE_FTP
@@ -2848,6 +2849,13 @@ int postoptions(DocInfo *newdoc)
 	    FREE(personal_mail_address);
 	    StrAllocCopy(personal_mail_address, data[i].value);
 	}
+#ifndef NO_ANONYMOUS_EMAIL
+	/* Personal Name: INPUT */
+	if (!strcmp(data[i].tag, personal_name_string)) {
+	    FREE(personal_mail_name);
+	    StrAllocCopy(personal_mail_name, data[i].value);
+	}
+#endif
 
 	/* Anonymous FTP Password: INPUT */
 #ifndef DISABLE_FTP
@@ -3838,9 +3846,15 @@ static int gen_options(char **newfile)
     PutTextInput(fp0, mail_address_string,
 		 NonNull(personal_mail_address), text_len, "");
 
+#ifndef NO_ANONYMOUS_EMAIL
+    PutLabel(fp0, gettext("Personal name for mail"), personal_name_string);
+    PutTextInput(fp0, personal_name_string,
+		 NonNull(personal_mail_name), text_len, "");
+#endif
+
     /* Anonymous FTP Address: INPUT */
 #ifndef DISABLE_FTP
-    PutLabel(fp0, gettext("Password for anonymous ftp"), mail_address_string);
+    PutLabel(fp0, gettext("Password for anonymous ftp"), anonftp_password_string);
     PutTextInput(fp0, anonftp_password_string,
 		 NonNull(anonftp_password), text_len, "");
 #endif
