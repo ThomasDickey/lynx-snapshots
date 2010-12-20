@@ -1,4 +1,4 @@
-dnl $LynxId: aclocal.m4,v 1.175 2010/11/26 20:15:56 tom Exp $
+dnl $LynxId: aclocal.m4,v 1.176 2010/12/19 23:21:04 tom Exp $
 dnl Macros for auto-configure script.
 dnl by T.E.Dickey <dickey@invisible-island.net>
 dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
@@ -5432,31 +5432,6 @@ AC_CACHE_VAL(cf_cv_tm_gmtoff,[
 AC_MSG_RESULT($cf_cv_tm_gmtoff)
 test $cf_cv_tm_gmtoff = no && AC_DEFINE(DONT_HAVE_TM_GMTOFF)
 ])dnl
-dnl ---------------------------------------------------------------------------
-dnl CF_TRY_PKG_CONFIG version: 4 updated: 2010/06/14 17:42:30
-dnl -----------------
-dnl This is a simple wrapper to use for pkg-config, for libraries which may be
-dnl available in that form.
-dnl
-dnl $1 = package name
-dnl $2 = extra logic to use, if any, after updating CFLAGS and LIBS
-dnl $3 = logic to use if pkg-config does not have the package
-AC_DEFUN([CF_TRY_PKG_CONFIG],[
-AC_REQUIRE([CF_PKG_CONFIG])
-
-if test "$PKG_CONFIG" != none && "$PKG_CONFIG" --exists $1; then
-	CF_VERBOSE(found package $1)
-	cf_pkgconfig_incs="`$PKG_CONFIG --cflags $1 2>/dev/null`"
-	cf_pkgconfig_libs="`$PKG_CONFIG --libs   $1 2>/dev/null`"
-	CF_VERBOSE(package $1 CFLAGS: $cf_pkgconfig_incs)
-	CF_VERBOSE(package $1 LIBS: $cf_pkgconfig_libs)
-	CF_ADD_CFLAGS($cf_pkgconfig_incs)
-	CF_ADD_LIBS($cf_pkgconfig_libs)
-	ifelse([$2],,:,[$2])
-else
-	ifelse([$3],,:,[$3])
-fi
-])
 dnl ---------------------------------------------------------------------------
 dnl CF_TRY_PKG_CONFIG version: 4 updated: 2010/06/14 17:42:30
 dnl -----------------
