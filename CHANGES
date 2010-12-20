@@ -1,7 +1,12 @@
--- $LynxId: CHANGES,v 1.525 2010/12/11 14:28:43 tom Exp $
+-- $LynxId: CHANGES,v 1.526 2010/12/19 23:47:24 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
+
+2010-12-19 (2.8.8dev.8)
+* remove duplicate copy of CF_TRY_PKG_CONFIG added to aclocal.m4 in 2.8.8dev.4,
+  which caused autoconf-2.13 to emit weird error messages about undefined
+  symbols (report by TG) -TD
 
 2010-12-11 (2.8.8dev.7)
 * add PERSONAL_MAIL_NAME to options menu and .lynxrc (Debian #603647) -TD
