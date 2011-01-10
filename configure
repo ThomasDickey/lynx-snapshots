@@ -1261,7 +1261,7 @@ rm conftest.sed
 
 PACKAGE=lynx
 # $Format: "VERSION=$ProjectVersion$"$
-VERSION=2.8.8dev.7
+VERSION=2.8.8dev.8
 
 echo "$as_me:1266: checking for DESTDIR" >&5
 echo $ECHO_N "checking for DESTDIR... $ECHO_C" >&6

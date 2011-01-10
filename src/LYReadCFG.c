@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYReadCFG.c,v 1.160 2010/12/10 01:16:27 tom Exp $
+ * $LynxId: LYReadCFG.c,v 1.161 2011/01/10 10:27:52 tom Exp $
  */
 #ifndef NO_RULES
 #include <HTRules.h>
@@ -1205,7 +1205,7 @@ static int parse_assumed_doc_charset_choice(char *p)
  */
 static int external_fun(char *str)
 {
-    add_item_to_list(str, &externals, FALSE, FALSE);
+    add_item_to_list(str, &externals, FALSE, TRUE);
     return 0;
 }
 #endif
@@ -1469,8 +1469,8 @@ static Config_Type Config_Table [] =
      PARSE_FUN(RC_ENABLE_LYNXRC,        enable_lynxrc),
      PARSE_SET(RC_ENABLE_SCROLLBACK,    enable_scrollback),
 #ifdef USE_EXTERNALS
-     PARSE_FUN(RC_EXTERNAL,             external_fun),
-     PARSE_ADD(RC_EXTERNAL_MENU,        externals),
+     PARSE_ADD(RC_EXTERNAL,             externals),
+     PARSE_FUN(RC_EXTERNAL_MENU,        external_fun),
 #endif
      PARSE_Env(RC_FINGER_PROXY,         0),
 #if defined(_WINDOWS)	/* 1998/10/05 (Mon) 17:34:15 */
@@ -1940,7 +1940,7 @@ void LYSetConfigValue(const char *name,
 	    add_item_to_list(value,
 			     q->add_value,
 			     (q->add_value == &printers),
-			     TRUE);
+			     FALSE);
 	break;
 
     case CONF_ADD_STRING:
