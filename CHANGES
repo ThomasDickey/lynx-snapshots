@@ -1,9 +1,11 @@
--- $LynxId: CHANGES,v 1.526 2010/12/19 23:47:24 tom Exp $
+-- $LynxId: CHANGES,v 1.527 2011/01/10 10:22:59 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2010-12-19 (2.8.8dev.8)
+2011-01-10 (2.8.8dev.8)
+* correct sense of menu-name parameter in add_item_to_list() from dev.7
+  changes (report by Larry Hart) -TD
 * remove duplicate copy of CF_TRY_PKG_CONFIG added to aclocal.m4 in 2.8.8dev.4,
   which caused autoconf-2.13 to emit weird error messages about undefined
   symbols (report by TG) -TD
