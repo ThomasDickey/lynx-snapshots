@@ -1,7 +1,15 @@
--- $LynxId: CHANGES,v 1.527 2011/01/10 10:22:59 tom Exp $
+-- $LynxId: CHANGES,v 1.530 2011/05/08 16:00:25 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
+
+2011-05-08 (2.8.8dev.9)
+* updated several configure script macros (TD):
+  CF_CURSES_CPPFLAGS, CF_CURSES_FUNCS, CF_CURSES_HEADER, CF_CURSES_LIBS,
+  CF_CURSES_TERM_H, CF_DISABLE_RPATH_HACK, CF_PDCURSES_X11, CF_PKG_CONFIG,
+  CF_RPATH_HACK, CF_STRUCT_TERMIOS, CF_XOPEN_CURSES, CF_XOPEN_SOURCE,
+  CF_X_ATHENA_LIBS
+* update config.guess (2011-01-01), config.sub (2011-04-01)
 
 2011-01-10 (2.8.8dev.8)
 * correct sense of menu-name parameter in add_item_to_list() from dev.7
