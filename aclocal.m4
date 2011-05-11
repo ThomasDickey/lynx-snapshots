@@ -1,4 +1,4 @@
-dnl $LynxId: aclocal.m4,v 1.181 2011/05/08 15:23:06 tom Exp $
+dnl $LynxId: aclocal.m4,v 1.182 2011/05/10 09:21:03 tom Exp $
 dnl Macros for auto-configure script.
 dnl by T.E.Dickey <dickey@invisible-island.net>
 dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
@@ -5065,6 +5065,9 @@ if test "$cf_cv_srand_func" != unknown ; then
 #endif
 #ifdef HAVE_LIMITS_H
 #include <limits.h>
+#endif
+#ifdef HAVE_BSD_RANDOM_H
+#include <bsd/random.h>
 #endif
 		],[long x = $cf_cv_rand_max],,
 		[cf_cv_rand_max="(1L<<$cf_rand_max)-1"])
