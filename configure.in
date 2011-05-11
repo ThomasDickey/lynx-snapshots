@@ -1,4 +1,4 @@
-dnl $LynxId: configure.in,v 1.224 2011/01/10 10:22:59 tom Exp $
+dnl $LynxId: configure.in,v 1.226 2011/05/10 09:21:44 tom Exp $
 dnl
 dnl Process this file with autoconf to produce a configure script.
 dnl
@@ -491,6 +491,7 @@ if test "x$cf_cv_use_libssl"  != xno ; then
 elif test "x$cf_cv_use_libgnutls" != xno ; then
     if test "x$cf_cv_gnutls_compat" = xno ; then
         CF_GNUTLS($cf_cv_use_libgnutls,tidy_tls\$o)
+		AC_CHECK_FUNCS(gnutls_priority_set_direct)
     else
         CF_GNUTLS($cf_cv_use_libgnutls)
     fi
@@ -731,6 +732,7 @@ AC_HEADER_DIRENT
 dnl Don't check for sys/wait.h here since it is covered by another test.
 AC_CHECK_HEADERS( \
 	arpa/inet.h \
+	bsd/random.h \
 	fcntl.h \
 	limits.h \
 	stdlib.h \

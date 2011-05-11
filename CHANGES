@@ -1,9 +1,13 @@
--- $LynxId: CHANGES,v 1.530 2011/05/08 16:00:25 tom Exp $
+-- $LynxId: CHANGES,v 1.533 2011/05/11 10:52:58 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2011-05-08 (2.8.8dev.9)
+2011-05-11 (2.8.8dev.9)
+* add configure check for <bsd/random.h>, used in Debian package -TD
+* modify src/tidy_tls.c to use gnutls_priority_set_direct() in preference to
+  various access functions, to eliminate deprecation warnings (report by
+  Andreas Metzler) -TD
 * updated several configure script macros (TD):
   CF_CURSES_CPPFLAGS, CF_CURSES_FUNCS, CF_CURSES_HEADER, CF_CURSES_LIBS,
   CF_CURSES_TERM_H, CF_DISABLE_RPATH_HACK, CF_PDCURSES_X11, CF_PKG_CONFIG,

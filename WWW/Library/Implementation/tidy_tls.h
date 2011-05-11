@@ -1,6 +1,6 @@
 /*
- * $LynxId: tidy_tls.h,v 1.2 2010/10/27 00:07:26 tom Exp $
- * Copyright 2008, Thomas E. Dickey
+ * $LynxId: tidy_tls.h,v 1.3 2011/05/11 10:53:36 tom Exp $
+ * Copyright 2008,2011 Thomas E. Dickey
  */
 #ifndef TIDY_TLS_H
 #define TIDY_TLS_H
@@ -108,7 +108,7 @@ extern SSL *SSL_new(SSL_CTX * ctx);
 extern SSL_CIPHER *SSL_get_current_cipher(SSL * ssl);
 extern SSL_CTX *SSL_CTX_new(SSL_METHOD * method);
 extern SSL_METHOD *SSLv23_client_method(void);
-extern X509 *SSL_get_peer_certificate(SSL * ssl);
+extern const X509 *SSL_get_peer_certificate(SSL * ssl);
 extern X509_NAME *X509_get_issuer_name(const X509 * cert);
 extern X509_NAME *X509_get_subject_name(const X509 * cert);
 extern char *X509_NAME_oneline(X509_NAME * name, char *buf, int len);
