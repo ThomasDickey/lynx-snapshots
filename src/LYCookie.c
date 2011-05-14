@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYCookie.c,v 1.107 2010/12/08 09:42:15 tom Exp $
+ * $LynxId: LYCookie.c,v 1.109 2011/05/13 20:40:20 tom Exp $
  *
  *			       Lynx Cookie Support		   LYCookie.c
  *			       ===================
@@ -389,8 +389,9 @@ static void store_cookie(cookie * co, const char *hostname,
 	    break;		/* continue as if nothing were wrong */
 
 	case INVCHECK_QUERY:
+	    /* will prompt later if we get that far */
 	    invprompt_reasons |= FAILS_COND1;
-	    break;		/* will prompt later if we get that far */
+	    break;
 
 	case INVCHECK_STRICT:
 	    CTrace((tfp,
@@ -880,6 +881,8 @@ static unsigned parse_attribute(unsigned flags,
 {
     BOOLEAN known_attr = NO;
     int url_type;
+
+    CTrace((tfp, "parse_attribute %.*s\n", attr_len, attr_start));
 
     flags &= (unsigned) (~FLAGS_KNOWN_ATTR);
     if (is_attr("secure", 6)) {
@@ -1783,10 +1786,11 @@ void LYSetCookie(const char *SetCookie,
 	    *ptr = '\0';
 	}
 	/* trim a trailing slash, unless we have only a "/" */
-	if ((ptr = strrchr(path, '/')) != NULL &&
-	    (ptr != path) &&
-	    ptr[1] == '\0') {
-	    CTrace((tfp, "discarding trailing \"/\" in request URI\n"));
+	if ((ptr = strrchr(path, '/')) != NULL) {
+	    if (ptr == path) {
+		++ptr;
+	    }
+	    CTrace((tfp, "discarding \"%s\" from request URI\n", ptr));
 	    *ptr = '\0';
 	}
     }
