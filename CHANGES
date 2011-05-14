@@ -1,9 +1,30 @@
--- $LynxId: CHANGES,v 1.533 2011/05/11 10:52:58 tom Exp $
+-- $LynxId: CHANGES,v 1.537 2011/05/13 20:41:34 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2011-05-11 (2.8.8dev.9)
+2011-05-13 (2.8.8dev.9)
+* amend change to cookie prefix matching from Debian #460108.  The discussion
+  overlooked this definition from RFC 2109:
+   Path   Defaults to the path of the request URL that generated the
+          Set-Cookie response, up to, but not including, the
+          right-most /.
+  In that context, lynx was correct to extract the default "path" attribute
+  of
+    http://jukebox/cgi-bin/disorder
+  as
+    /cgi-bin
+  rather than
+    /cgi-bin/disorder
+  as asserted in the report.  However, lynx warned unnecessarily (according to
+  the bug report) about the given path attribute.  Deciding whether to suppress
+  this warning is under control of the user via the lynx.cfg setting
+  COOKIE_QUERY_INVALID_DOMAINS since 2.8.2dev.16 (report by Owen Leibman) -TD
+* add eo.po (Esperanto) from
+    http://translationproject.org/latest/lynx
+* modify format of ADVANCED_COOKIE_CONFIRMATION message in nl.po per guideline
+  to allow localized single-letter responses to prompt (report by Jurgen
+  Gaeremy) -TD
 * add configure check for <bsd/random.h>, used in Debian package -TD
 * modify src/tidy_tls.c to use gnutls_priority_set_direct() in preference to
   various access functions, to eliminate deprecation warnings (report by
