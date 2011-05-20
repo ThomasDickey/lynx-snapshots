@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTForms.h,v 1.28 2010/09/24 09:40:07 tom Exp $
+ * $LynxId: HTForms.h,v 1.29 2011/05/19 10:53:07 tom Exp $
  */
 #ifndef HTFORMS_H
 #define HTFORMS_H
@@ -35,6 +35,7 @@ extern "C" {
 	int checked;
 	const char *iclass;
 	int disabled;
+	int readonly;
 	const char *error;
 	const char *height;
 	const char *id;
@@ -91,10 +92,13 @@ extern "C" {
 	char *orig_submit_value;	/* original submit value */
 	int size_l;		/* The length of the option list */
 	int disabled;		/* If YES, can't change values */
+	int readonly;		/* If YES, can't change values */
 	int name_cs;
 	int value_cs;
 	char *accept_cs;
     } FormInfo;
+
+#define FormIsReadonly(form) ((form)->disabled || (form)->readonly)
 
 /*
  * As structure for info associated with a form.  There is some redundancy

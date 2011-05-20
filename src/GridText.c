@@ -1,5 +1,5 @@
 /*
- * $LynxId: GridText.c,v 1.207 2010/11/22 12:55:04 tom Exp $
+ * $LynxId: GridText.c,v 1.209 2011/05/19 23:18:02 tom Exp $
  *
  *		Character grid hypertext object
  *		===============================
@@ -10081,6 +10081,7 @@ int HText_beginInput(HText *text,
     f->select_list = 0;
     f->number = HTFormNumber;
     f->disabled = HTFormDisabled || I->disabled;
+    f->readonly = I->readonly;
     f->no_cache = NO;
 
     HTFormFields++;
@@ -12680,6 +12681,7 @@ static void insert_new_textarea_anchor(TextAnchor **curr_anchor, HTLine **exit_h
     f->maxlength = anchor->input_field->maxlength;
     f->no_cache = anchor->input_field->no_cache;
     f->disabled = anchor->input_field->disabled;
+    f->readonly = anchor->input_field->readonly;
     f->value_cs = current_char_set;	/* use current setting - kw */
 
     /*  Init all the fields in the new HTLine (but see the #if).   */
@@ -13521,6 +13523,7 @@ int HText_InsertFile(LinkInfo * form_link)
     f->maxlength = anchor_ptr->input_field->maxlength;
     f->no_cache = anchor_ptr->input_field->no_cache;
     f->disabled = anchor_ptr->input_field->disabled;
+    f->readonly = anchor_ptr->input_field->readonly;
     f->value_cs = (file_cs >= 0) ? file_cs : current_char_set;
 
     /*  Init all the fields in the new HTLine (but see the #if).   */

@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMainLoop.c,v 1.172 2010/09/25 14:57:53 tom Exp $
+ * $LynxId: LYMainLoop.c,v 1.173 2011/05/19 10:56:00 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTAccess.h>
@@ -1183,7 +1183,7 @@ static int handle_LYK_ACTIVATE(int *c,
 		if (user_mode == NOVICE_MODE &&
 		    textinput_activated &&
 		    (real_cmd == LYK_ACTIVATE || real_cmd == LYK_SUBMIT)) {
-		    form_noviceline(links[curdoc.link].l_form->disabled);
+		    form_noviceline(FormIsReadonly(links[curdoc.link].l_form));
 		}
 	    }
 
@@ -2525,7 +2525,7 @@ static void handle_LYK_DWIMHELP(const char **cshelpfile)
      */
     if (curdoc.link >= 0 && curdoc.link < nlinks &&
 	links[curdoc.link].type == WWW_FORM_LINK_TYPE &&
-	!links[curdoc.link].l_form->disabled &&
+	!FormIsReadonly(links[curdoc.link].l_form) &&
 	F_TEXTLIKE(links[curdoc.link].l_form->type)) {
 	*cshelpfile = LYLineeditHelpURL();
     }
@@ -2990,7 +2990,7 @@ static BOOLEAN handle_LYK_HEAD(int *cmd)
 		 StrNCmp(curdoc.address, "http", 4))) {
 		HTUserMsg(LINK_NOT_HTTP_URL);
 	    } else if (links[curdoc.link].type == WWW_FORM_LINK_TYPE &&
-		       links[curdoc.link].l_form->disabled) {
+		       FormIsReadonly(links[curdoc.link].l_form)) {
 		HTUserMsg(FORM_ACTION_DISABLED);
 	    } else if (links[curdoc.link].type == WWW_FORM_LINK_TYPE &&
 		       links[curdoc.link].l_form->submit_action != 0 &&
@@ -6539,7 +6539,7 @@ int mainloop(void)
 		     * Replace novice lines if in NOVICE_MODE.
 		     */
 		    if (user_mode == NOVICE_MODE) {
-			form_noviceline(links[curdoc.link].l_form->disabled);
+			form_noviceline(FormIsReadonly(links[curdoc.link].l_form));
 		    }
 		    real_c = change_form_link(curdoc.link,
 					      &newdoc, &refresh_screen,
@@ -6569,7 +6569,7 @@ int mainloop(void)
 #ifdef TEXTFIELDS_MAY_NEED_ACTIVATION
 		} else if (LinkIsTextarea(curdoc.link)
 			   && textfields_need_activation
-			   && !links[curdoc.link].l_form->disabled
+			   && !FormIsReadonly(links[curdoc.link].l_form)
 			   && peek_mouse_link() < 0 &&
 			   (((LKC_TO_LAC(keymap, real_c) == LYK_NEXT_LINK ||
 #ifdef TEXTAREA_AUTOGROW
