@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTML.h,v 1.32 2010/09/25 11:36:37 tom Exp $
+ * $LynxId: HTML.h,v 1.33 2011/05/19 09:57:53 tom Exp $
  *
  *					HTML to rich text converter for libwww
  *
@@ -104,6 +104,7 @@ extern "C" {
 	int textarea_cols;
 	int textarea_rows;
 	int textarea_disabled;
+	int textarea_readonly;
 	char *textarea_id;
 	HTChunk math;		/* Grow by 128 */
 	HTChunk style_block;	/* Grow by 128 */

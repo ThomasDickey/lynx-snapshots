@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTML.c,v 1.148 2010/11/01 22:19:09 tom Exp $
+ * $LynxId: HTML.c,v 1.150 2011/05/19 23:27:28 tom Exp $
  *
  *		Structured stream to Rich hypertext converter
  *		============================================
@@ -4418,6 +4418,9 @@ static int HTML_start_element(HTStructured * me, int element_number,
 		}
 	    }
 
+	    if (present && present[HTML_BUTTON_READONLY])
+		I.readonly = YES;
+
 	    if (present && present[HTML_BUTTON_DISABLED])
 		I.disabled = YES;
 
@@ -4775,7 +4778,7 @@ static int HTML_start_element(HTStructured * me, int element_number,
 		I.value = ImageSrc;
 	    }
 	    if (present && present[HTML_INPUT_READONLY])
-		I.disabled = YES;
+		I.readonly = YES;
 	    if (present && present[HTML_INPUT_CHECKED])
 		I.checked = YES;
 	    if (present && present[HTML_INPUT_SIZE] &&
@@ -5026,10 +5029,11 @@ static int HTML_start_element(HTStructured * me, int element_number,
 	 * Lynx treats disabled and readonly textarea's the same -
 	 * unmodifiable in either case.
 	 */
-	me->textarea_disabled = NO;
+	me->textarea_readonly = NO;
 	if (present && present[HTML_TEXTAREA_READONLY])
-	    me->textarea_disabled = YES;
+	    me->textarea_readonly = YES;
 
+	me->textarea_disabled = NO;
 	if (present && present[HTML_TEXTAREA_DISABLED])
 	    me->textarea_disabled = YES;
 
@@ -6825,6 +6829,7 @@ static int HTML_end_element(HTStructured * me, int element_number,
 	    I.accept_cs = me->textarea_accept_cs;
 	    me->textarea_accept_cs = NULL;
 	    I.disabled = me->textarea_disabled;
+	    I.readonly = me->textarea_readonly;
 	    I.id = me->textarea_id;
 
 	    /*
@@ -7696,7 +7701,6 @@ HTStructured *HTML_new(HTParentAnchor *anchor,
     me->textarea_accept_cs = NULL;
     me->textarea_cols = 0;
     me->textarea_rows = 4;
-    me->textarea_disabled = NO;
     me->textarea_id = NULL;
 
     HTChunkInit(&me->math, 128);

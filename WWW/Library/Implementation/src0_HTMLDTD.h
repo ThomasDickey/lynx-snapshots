@@ -1,4 +1,4 @@
-/* $LynxId: src0_HTMLDTD.h,v 1.43 2009/11/21 15:24:48 tom Exp $ */
+/* $LynxId: src0_HTMLDTD.h,v 1.44 2011/05/19 23:49:11 tom Exp $ */
 #ifndef src_HTMLDTD_H0
 #define src_HTMLDTD_H0 1
 
@@ -394,6 +394,7 @@ static const attr BUTTON_attr_list[] = {
 	{ "NAME"          T(N) },
 	{ "ONBLUR"        T(N) },
 	{ "ONFOCUS"       T(N) },
+	{ "READONLY"      T(N) },
 	{ "TABINDEX"      T(N) },
 	{ "TYPE"          T(N) },
 	{ "VALUE"         T(N) },
@@ -1383,6 +1384,7 @@ static const attr BUTTON_attr[] = {     /* BUTTON attributes */
 	{ "NAME"          T(N) },
 	{ "ONBLUR"        T(N) },
 	{ "ONFOCUS"       T(N) },
+	{ "READONLY"      T(N) },
 	{ "STYLE"         T(N) },
 	{ "TABINDEX"      T(N) },
 	{ "TITLE"         T(N) },
