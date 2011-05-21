@@ -1,9 +1,11 @@
--- $LynxId: CHANGES,v 1.539 2011/05/19 23:25:27 tom Exp $
+-- $LynxId: CHANGES,v 1.540 2011/05/21 15:20:10 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2011-05-19 (2.8.8dev.9)
+2011-05-21 (2.8.8dev.9)
+* improve scripts/tbl2html.pl, to handle translation of octal escapes in the
+  approximation comments -TD
 * amend implementation of "readonly" attribute from 2.8.7dev.10 to distinguish
   it from "disabled" (report by David Paschal) -TD
 * amend change to cookie prefix matching from Debian #460108.  The discussion
