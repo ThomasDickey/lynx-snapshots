@@ -1,6 +1,6 @@
 $ v0 = 0
 $ v = f$verify(v0)
-$! $LynxId: build.com,v 1.17 2010/06/19 16:01:33 Christoph.J.Gartmann Exp $
+$! $LynxId: build.com,v 1.19 2011/05/23 23:49:53 tom Exp $
 $!			BUILD.COM
 $!
 $!   Command file to build LYNX.EXE on VMS systems.
@@ -294,9 +294,14 @@ $  if option .eqs. "TCPIP"         then optfile = "TCPIPSHR"
 $  if option .eqs. "TCPWARE"       then optfile = "TCPWARESHR"
 $!
 $  if option .eqs. "SOCKETSHR_TCP" then extra_defs = extra_defs + ",_DECC_V4_SOURCE"
-$  if option .eqs. "TCPIP"         then extra_defs = extra_defs + ",_DECC_V4_SOURCE,TCPIP_SERVICES"
+$  if option .eqs. "TCPIP"         then extra_defs = extra_defs + ",TCPIP_SERVICES"
 $  if option .eqs. "MULTINET" then -
 	extra_defs = extra_defs + ",_DECC_V4_SOURCE,__SOCKET_TYPEDEFS"
+$!
+$  if option .eqs. "TCPIP"
+$  then
+$     if f$trnlnm("TCPIP$IPC_SHR") .eqs. "" then define TCPIP$IPC_SHR SYS$LIBRARY:TCPIP$IPC_SHR
+$  endif
 $!
 $  v1 = f$verify(1)
 $! DECC:

@@ -1,6 +1,6 @@
 $ v0 = 0
 $ v = f$verify(v0)
-$! $LynxId: libmake.com,v 1.13 2010/06/19 16:04:14 Christoph.J.Gartmann Exp $
+$! $LynxId: libmake.com,v 1.15 2011/05/23 23:58:48 tom Exp $
 $!			LIBMAKE.COM
 $!
 $!   Command file to build the WWWLibrary on VMS systems.
@@ -88,8 +88,13 @@ $    extra_defs = extra_defs + ",MUCX"
 $ ENDIF
 $!
 $ if transport .eqs. "SOCKETSHR_TCP" then extra_defs = extra_defs + ",_DECC_V4_SOURCE"
-$ if transport .eqs. "TCPIP"         then extra_defs = extra_defs + ",_DECC_V4_SOURCE,TCPIP_SERVICES"
+$ if transport .eqs. "TCPIP"         then extra_defs = extra_defs + ",TCPIP_SERVICES"
 $ if transport .eqs. "TCPWARE"       then extra_defs = extra_defs + ",UCX"
+$!
+$  if option .eqs. "TCPIP"
+$  then
+$     if f$trnlnm("TCPIP$IPC_SHR") .eqs. "" then define TCPIP$IPC_SHR SYS$LIBRARY:TCPIP$IPC_SHR
+$  endif
 $!
 $ if P2 .nes. ""
 $ then

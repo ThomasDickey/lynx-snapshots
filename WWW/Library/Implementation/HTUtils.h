@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTUtils.h,v 1.104 2011/05/10 09:31:54 tom Exp $
+ * $LynxId: HTUtils.h,v 1.105 2011/05/24 08:50:26 tom Exp $
  *
  * Utility macros for the W3 code library
  * MACROS FOR GENERAL USE
@@ -730,7 +730,9 @@ extern int WWW_TraceMask;
 #undef free_func
 #endif /* USE_SSL */
 
-#ifdef HAVE_BSD_RANDOM_H
+#ifdef HAVE_BSD_STDLIB_H
+#include <bsd/stdlib.h>		/* prototype for arc4random.h */
+#elif defined(HAVE_BSD_RANDOM_H)
 #include <bsd/random.h>		/* prototype for arc4random.h */
 #endif
 

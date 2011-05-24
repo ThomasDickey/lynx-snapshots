@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTParse.c,v 1.67 2010/09/25 13:55:42 tom Exp $
+ * $LynxId: HTParse.c,v 1.68 2011/05/24 09:21:01 tom Exp $
  *
  *		Parse HyperText Document Address		HTParse.c
  *		================================
@@ -465,14 +465,12 @@ char *HTParse(const char *aName,
      * Handle the host field.
      */
     if (wanted & PARSE_HOST) {
-	char *host;
-
 	if (given.host || related.host) {
 	    if (wanted & PARSE_PUNCTUATION) {
 		*tail++ = '/';
 		*tail++ = '/';
 	    }
-	    strcpy(host = tail, given.host ? given.host : related.host);
+	    strcpy(tail, given.host ? given.host : related.host);
 #define CLEAN_URLS
 #ifdef CLEAN_URLS
 	    /*
@@ -537,7 +535,7 @@ char *HTParse(const char *aName,
 	     * Depending on locale-support, we could have a literal UTF-8
 	     * string as a host name, or a URL-encoded form of that.
 	     */
-	    convert_to_idna(host);
+	    convert_to_idna(tail);
 #endif
 #endif /* CLEAN_URLS */
 	}

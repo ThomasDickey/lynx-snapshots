@@ -1,4 +1,4 @@
-/* $LynxId: LYmktime.c,v 1.12 2010/11/07 21:21:08 tom Exp $ */
+/* $LynxId: LYmktime.c,v 1.13 2011/05/24 09:51:41 tom Exp $ */
 
 #include <LYStrings.h>
 #include <LYUtils.h>
@@ -64,7 +64,7 @@ time_t LYmktime(char *string,
 	result = parsedate(string, 0);
 
 	if (!absolute) {
-	    if ((time((time_t *) 0) - result) >= 0)
+	    if ((long) (time((time_t *) 0) - result) >= 0)
 		result = 0;
 	}
 	if (result != 0) {
