@@ -1,7 +1,7 @@
 %{
 
 /*
- *  $LynxId: parsdate.y,v 1.17 2010/11/07 22:32:51 tom Exp $
+ *  $LynxId: parsdate.y,v 1.18 2011/05/24 08:23:53 tom Exp $
  *
  *  This module is adapted and extended from tin, to use for LYmktime().
  *
@@ -527,10 +527,10 @@ static const TABLE	TimezoneTable[] = {
 
 static time_t ToSeconds(time_t Hours, time_t Minutes, time_t Seconds, MERIDIAN Meridian)
 {
-    if (Minutes < 0 || Minutes > 59 || Seconds < 0 || Seconds > 61)
+    if ((long) Minutes < 0 || Minutes > 59 || (long) Seconds < 0 || Seconds > 61)
 	return -1;
     if (Meridian == MER24) {
-	if (Hours < 0 || Hours > 23)
+	if ((long) Hours < 0 || Hours > 23)
 	    return -1;
     } else {
 	if (Hours < 1 || Hours > 12)
@@ -566,7 +566,7 @@ static time_t Convert(time_t Month, time_t Day, time_t Year, time_t Hours,
     time_t Julian;
     time_t tod;
 
-    if (Year < 0)
+    if ((long) Year < 0)
 	Year = -Year;
     if (Year < 70)
 	Year += 2000;
@@ -596,7 +596,7 @@ static time_t Convert(time_t Month, time_t Day, time_t Year, time_t Hours,
 	Julian += *++mp;
     Julian *= SECSPERDAY;
     Julian += yyTimezone * 60L;
-    if ((tod = ToSeconds(Hours, Minutes, Seconds, Meridian)) < 0) {
+    if ((long) (tod = ToSeconds(Hours, Minutes, Seconds, Meridian)) < 0) {
 	return -1;
     }
     Julian += tod;
@@ -920,7 +920,7 @@ time_t parsedate(char *p,
     if (yyHaveDate || yyHaveTime) {
 	Start = Convert(yyMonth, yyDay, yyYear, yyHour, yyMinutes, yySeconds,
 			yyMeridian, yyDSTmode);
-	if (Start < 0)
+	if ((long) Start < 0)
 	    return -1;
     } else {
 	Start = now->time;
@@ -934,5 +934,5 @@ time_t parsedate(char *p,
 
     /* Have to do *something* with a legitimate -1 so it's distinguishable
      * from the error return value.  (Alternately could set errno on error.) */
-    return Start == -1 ? 0 : Start;
+    return (Start == (time_t) -1) ? 0 : Start;
 }

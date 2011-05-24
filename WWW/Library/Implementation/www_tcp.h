@@ -1,5 +1,5 @@
 /*                System dependencies in the W3 library
- * $LynxId: www_tcp.h,v 1.47 2010/10/31 17:56:16 tom Exp $
+ * $LynxId: www_tcp.h,v 1.52 2011/05/24 10:51:58 tom Exp $
  *
                                    SYSTEM DEPENDENCIES
 
@@ -400,10 +400,13 @@ extern int socket_ioctl();
  * TCPIP Services has all of the entrypoints including ioctl().
  */
 #undef NETWRITE
-#define NETWRITE(s,b,l) send((s),(char *)(b),(l))
+#define NETWRITE(s,b,l) send((s),(char *)(b),(l),0)
 
 #define TYPE_FD_SET int
+
+#if 0				/* this should be declared via time.h */
 typedef TYPE_FD_SET fd_set;
+#endif
 
 #endif /* TCPIP_SERVICES */
 
@@ -440,30 +443,49 @@ extern char *vms_errno_string();
 #ifndef __SOCKET_TYPEDEFS
 #define __SOCKET_TYPEDEFS 1
 #endif /* !__SOCKET_TYPEDEFS */
+
 #include <time.h>
 #include <types.h>
+/*
+ * DEC C before version 5.2 added some typedefs to <types.h> which happen
+ * to be suppressed if the version-4 compatibility define is set.  In
+ * particular, lynx uses "off_t".  According to Rod Reiger, "size_t" may
+ * also be undeclared.
+ */
+#ifdef _DECC_V4_SOURCE
+#define off_t long
+#endif
+
 #ifdef __TIME_T
 #undef  __TYPES
 #define __TYPES 1
 #define __TYPES_LOADED 1
 #endif /* __TIME_T */
+
 #ifdef __SOCKET_TYPEDEFS
 #undef __SOCKET_TYPEDEFS
 #endif /* __SOCKET_TYPEDEFS */
+
 #include "multinet_root:[multinet.include.sys]types.h"
+
 #ifndef __SOCKET_TYPEDEFS
 #define __SOCKET_TYPEDEFS 1
 #endif /* !__SOCKET_TYPEDEFS */
+
 #include "multinet_root:[multinet.include]errno.h"
+
 #ifdef __TYPES
 #undef  __TIME_T
 #define __TIME_T 1
 #endif /* __TYPE */
+
 #ifdef __TIME_LOADED
 #undef  __TIME
 #define __TIME 1		/* to avoid double definitions in in.h */
 #endif /* __TIME_LOADED */
+
 #include "multinet_root:[multinet.include.sys]time.h"
+
 #define MULTINET_NO_PROTOTYPES	/* DECC is compatible-but-different */
 #include "multinet_root:[multinet.include.sys]socket.h"
 #undef MULTINET_NO_PROTOTYPES
@@ -758,7 +780,7 @@ typedef unsigned short mode_t;
 #define DECL_SYS_ERRLIST 1
 #endif
 
-#if defined(VMS) && !defined(TCPIP_SERVICES)
+#if defined(VMS)
 #define socklen_t unsigned
 #else
 #define socklen_t int		/* used for default LY_SOCKLEN definition */

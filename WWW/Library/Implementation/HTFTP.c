@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFTP.c,v 1.99 2010/10/31 17:56:13 tom Exp $
+ * $LynxId: HTFTP.c,v 1.100 2011/05/24 09:49:44 tom Exp $
  *
  *			File Transfer Protocol (FTP) Client
  *			for a WorldWideWeb browser
@@ -1199,7 +1199,7 @@ static int get_listen_socket(void)
 
 #ifdef INET6
     /* query address family of control connection */
-    slen = sizeof(soc_address);
+    slen = (LY_SOCKLEN) sizeof(soc_address);
     if (getsockname(control->socket, (struct sockaddr *) &soc_address,
 		    &slen) < 0) {
 	return HTInetStatus("getsockname failed");
@@ -1288,7 +1288,7 @@ static int get_listen_socket(void)
 #else
     {
 	int status;
-	LY_SOCKLEN address_length = sizeof(soc_address);
+	LY_SOCKLEN address_length = (LY_SOCKLEN) sizeof(soc_address);
 
 #ifdef SOCKS
 	if (socks_flag)
@@ -3420,7 +3420,7 @@ static int setup_connection(const char *name,
 		}
 		passive_port = (PortNumber) p0;
 
-		sslen = sizeof(ss);
+		sslen = (LY_SOCKLEN) sizeof(ss);
 		if (getpeername(control->socket, (struct sockaddr *) &ss,
 				&sslen) < 0) {
 		    fprintf(tfp, "HTFTP: getpeername(control) failed\n");
@@ -4034,7 +4034,7 @@ int HTFTPLoad(const char *name,
 #else
 	struct sockaddr_in soc_address;
 #endif /* INET6 */
-	LY_SOCKLEN soc_addrlen = sizeof(soc_address);
+	LY_SOCKLEN soc_addrlen = (LY_SOCKLEN) sizeof(soc_address);
 
 #ifdef SOCKS
 	if (socks_flag)

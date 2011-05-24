@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYReadCFG.c,v 1.161 2011/01/10 10:27:52 tom Exp $
+ * $LynxId: LYReadCFG.c,v 1.162 2011/05/24 09:04:24 tom Exp $
  */
 #ifndef NO_RULES
 #include <HTRules.h>
@@ -271,7 +271,7 @@ static void add_item_to_list(char *buffer,
     /*
      * Find first unescaped colon and process fields
      */
-    if ((colon = find_colon(buffer)) != NULL) {
+    if (find_colon(buffer) != NULL) {
 	colon = parse_list_string(&(cur_item->name), buffer);
 
 	if (colon && menu_name) {

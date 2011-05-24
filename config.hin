@@ -1,5 +1,5 @@
 /*
- * $LynxId: config.hin,v 1.123 2011/05/10 09:22:34 tom Exp $
+ * $LynxId: config.hin,v 1.124 2011/05/24 08:45:30 tom Exp $
  * vile:cmode
  *
  * The configure script translates "config.hin" into "lynx_cfg.h"
@@ -57,6 +57,7 @@
 #undef HAVE_ARPA_INET_H
 #undef HAVE_ASSUME_DEFAULT_COLORS /* ncurses extension */
 #undef HAVE_BSD_RANDOM_H	/* have bsd/random.h */
+#undef HAVE_BSD_STDLIB_H	/* have bsd/stdlib.h */
 #undef HAVE_BSD_TOUCHLINE	/* CF_CURS_TOUCHLINE */
 #undef HAVE_CATGETS		/* defined if you want to use non-GNU catgets */
 #undef HAVE_CBREAK

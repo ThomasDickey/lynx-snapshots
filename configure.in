@@ -1,4 +1,4 @@
-dnl $LynxId: configure.in,v 1.226 2011/05/10 09:21:44 tom Exp $
+dnl $LynxId: configure.in,v 1.227 2011/05/24 08:43:15 tom Exp $
 dnl
 dnl Process this file with autoconf to produce a configure script.
 dnl
@@ -733,6 +733,7 @@ dnl Don't check for sys/wait.h here since it is covered by another test.
 AC_CHECK_HEADERS( \
 	arpa/inet.h \
 	bsd/random.h \
+	bsd/stdlib.h \
 	fcntl.h \
 	limits.h \
 	stdlib.h \

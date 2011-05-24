@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFinger.c,v 1.28 2010/10/03 22:10:34 tom Exp $
+ * $LynxId: HTFinger.c,v 1.29 2011/05/24 09:21:13 tom Exp $
  *
  *			FINGER ACCESS				HTFinger.c
  *			=============
@@ -256,7 +256,7 @@ int HTLoadFinger(const char *arg,
 {
     static char empty[1];
 
-    char *username, *sitename, *colon;	/* Fields extracted from URL */
+    char *username, *sitename;	/* Fields extracted from URL */
     char *slash, *at_sign;	/* Fields extracted from URL */
     char *command, *str, *param;	/* Buffers */
     int port;			/* Port number from URL */
@@ -324,7 +324,7 @@ int HTLoadFinger(const char *arg,
     if (*sitename == '\0') {
 	HTAlert(gettext("Could not load data (no sitename in finger URL)"));
 	result = HT_NOT_LOADED;	/* Ignore if no name */
-    } else if ((colon = HTParsePort(sitename, &port)) != NULL) {
+    } else if (HTParsePort(sitename, &port) != NULL) {
 	if (port != 79) {
 	    HTAlert(gettext("Invalid port number - will only use port 79!"));
 	    result = HT_NOT_LOADED;	/* Ignore if wrong port */

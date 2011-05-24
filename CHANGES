@@ -1,9 +1,13 @@
--- $LynxId: CHANGES,v 1.540 2011/05/21 15:20:10 tom Exp $
+-- $LynxId: CHANGES,v 1.542 2011/05/24 10:53:58 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2011-05-21 (2.8.8dev.9)
+2011-05-24 (2.8.8dev.9)
+* build-fix for DEC C 5.x with _DECC_V4_SOURCE defined, i.e., missing
+  declaration of "off_t" (report/analysis by Rod Reiger) -TD
+* build-fixes for Alpha VMS V8.3 with C V7.1-015, based on lynx 2.8.7
+  development snapshot (report/analysis by Scott Harrod) -TD
 * improve scripts/tbl2html.pl, to handle translation of octal escapes in the
   approximation comments -TD
 * amend implementation of "readonly" attribute from 2.8.7dev.10 to distinguish

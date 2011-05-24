@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTAccess.c,v 1.73 2010/10/03 22:49:46 tom Exp $
+ * $LynxId: HTAccess.c,v 1.74 2011/05/24 09:35:29 tom Exp $
  *
  *		Access Manager					HTAccess.c
  *		==============
@@ -286,7 +286,7 @@ BOOL override_proxy(const char *addr)
     }
 
     if (NULL != (p = HTParsePort(Host, &port))) {	/* Port specified */
-	*p++ = 0;		/* Chop off port */
+	*p = 0;			/* Chop off port */
     } else {			/* Use default port */
 	acc_method = HTParse(addr, "", PARSE_ACCESS);
 	if (acc_method != NULL) {

@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMain.c,v 1.226 2010/12/11 14:19:47 tom Exp $
+ * $LynxId: LYMain.c,v 1.227 2011/05/23 22:55:22 Scott.Harrod Exp $
  */
 #include <HTUtils.h>
 #include <HTTP.h>
@@ -1133,8 +1133,8 @@ int main(int argc,
 
 #ifndef VMS
     StrAllocCopy(list_format, LIST_FORMAT);
-#endif /* !VMS */
     StrAllocCopy(ftp_format, FTP_FORMAT);
+#endif /* !VMS */
 
     AlertSecs = SECS2Secs(ALERTSECS);
     DelaySecs = SECS2Secs(DEBUGSECS);
