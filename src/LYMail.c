@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMail.c,v 1.80 2010/12/11 14:52:59 tom Exp $
+ * $LynxId: LYMail.c,v 1.82 2011/05/26 01:00:05 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTParse.h>
@@ -327,7 +327,7 @@ static char *blat_cmd(char *mail_cmd,
 		      char *ccaddr,
 		      char *mail_addr)
 {
-    static char *b_cmd;
+    char *b_cmd = NULL;
 
 #ifdef USE_ALT_BLAT_MAILER
 
@@ -343,7 +343,7 @@ static char *blat_cmd(char *mail_cmd,
 
 #else /* !USE_ALT_BLAT_MAILER */
 
-    static char bl_cmd_file[512];
+    char bl_cmd_file[LY_MAXPATH];
     FILE *fp;
 
 #ifdef __CYGWIN__
@@ -467,31 +467,24 @@ int LYSendMailFile(char *the_address,
 		   char *message)
 {
     char *cmd = NULL;
-
-#ifdef __DJGPP__
-    char *shell;
-#endif /* __DJGPP__ */
     int code;
 
     if (!LYSystemMail())
 	return 0;
 
 #if USE_BLAT_MAILER
-    if (mail_is_blat)
-	StrAllocCopy(cmd,
-		     blat_cmd(system_mail,
-			      the_filename,
-			      the_address,
-			      the_subject,
-			      the_ccaddr,
-			      personal_mail_address
-		     )
-	    );
-    else
+    if (mail_is_blat) {
+	cmd = blat_cmd(system_mail,
+		       the_filename,
+		       the_address,
+		       the_subject,
+		       the_ccaddr,
+		       personal_mail_address);
+    } else
 #endif
 #ifdef __DJGPP__
-    if ((shell = LYGetEnv("SHELL")) != NULL) {
-	if (strstr(shell, "sh") != NULL) {
+    if (LYGetEnv("SHELL")) {
+	if (dj_is_bash) {
 	    HTSprintf0(&cmd, "%s -c %s -t \"%s\" -F %s",
 		       shell,
 		       system_mail,
@@ -504,18 +497,12 @@ int LYSendMailFile(char *the_address,
 		       the_address,
 		       the_filename);
 	}
-    } else {
-	HTSprintf0(&cmd, "%s -t \"%s\" -F %s",
-		   system_mail,
-		   the_address,
-		   the_filename);
-    }
-#else
-	HTSprintf0(&cmd, "%s -t \"%s\" -F %s",
-		   system_mail,
-		   the_address,
-		   the_filename);
+    } else
 #endif /* __DJGPP__ */
+	HTSprintf0(&cmd, "%s -t \"%s\" -F %s",
+		   system_mail,
+		   the_address,
+		   the_filename);
 
     stop_curses();
     SetOutputMode(O_TEXT);

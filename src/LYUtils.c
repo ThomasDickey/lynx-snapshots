@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYUtils.c,v 1.207 2010/12/08 09:42:15 tom Exp $
+ * $LynxId: LYUtils.c,v 1.208 2011/05/27 00:40:54 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTCP.h>
@@ -2754,15 +2754,21 @@ BOOLEAN LYCanDoHEAD(const char *address)
  */
 BOOLEAN LYCloseInput(FILE *fp)
 {
+    int result = FALSE;
+
     if (fp != 0) {
 	int err = ferror(fp);
+	LY_TEMP *p = FindTempfileByFP(fp);
 
 	fclose(fp);
+	if (p != 0) {
+	    p->file = 0;
+	}
 	if (!err) {
-	    return TRUE;
+	    result = TRUE;
 	}
     }
-    return FALSE;
+    return result;
 }
 
 /*
@@ -2770,16 +2776,24 @@ BOOLEAN LYCloseInput(FILE *fp)
  */
 BOOLEAN LYCloseOutput(FILE *fp)
 {
+    int result = FALSE;
+
     if (fp != 0) {
 	int err = ferror(fp);
+	LY_TEMP *p = FindTempfileByFP(fp);
 
 	fclose(fp);
+	if (p != 0) {
+	    p->file = 0;
+	}
 	if (!err) {
-	    return TRUE;
+	    result = TRUE;
 	}
     }
-    HTAlert(CANNOT_WRITE_TO_FILE);
-    return FALSE;
+    if (!result) {
+	HTAlert(CANNOT_WRITE_TO_FILE);
+    }
+    return result;
 }
 
 /*
