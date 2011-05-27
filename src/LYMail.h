@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMail.h,v 1.14 2011/05/26 09:23:05 tom Exp $
+ * $LynxId: LYMail.h,v 1.15 2011/05/27 09:54:07 tom Exp $
  */
 #ifndef LYMAIL_H
 #define LYMAIL_H
@@ -17,14 +17,42 @@ extern "C" {
 #define USE_BLAT_MAILER 1
 #endif
 
+#ifndef USE_ALTBLAT_MAILER
+#define USE_ALTBLAT_MAILER 0
+#endif
+
 #ifndef USE_BLAT_MAILER
 #define USE_BLAT_MAILER 0
 #endif
+
+#ifdef USE_BLAT_MAILER
+
+#undef SYSTEM_MAIL
+#undef SYSTEM_MAIL_FLAGS
+
+#ifdef USE_ALT_BLAT_MAILER
+#define SYSTEM_MAIL		ALTBLAT_MAIL
+#define SYSTEM_MAIL_FLAGS	""
+#else
+#define SYSTEM_MAIL		BLAT_MAIL
+#define SYSTEM_MAIL_FLAGS	""
+#define USE_ALT_BLAT_MAILER     0
+#endif
+
+#endif				/* USE_BLAT_MAILER */
 
 #ifdef VMS
 #define USE_VMS_MAILER 1
 #else
 #define USE_VMS_MAILER 0
+#endif
+
+#ifndef SYSTEM_MAIL
+#define SYSTEM_MAIL "sendmail"
+#endif
+
+#ifndef SYSTEM_MAIL_FLAGS
+#define SYSTEM_MAIL_FLAGS ""
 #endif
 
 /*

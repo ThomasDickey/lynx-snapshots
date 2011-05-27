@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYGlobalDefs.h,v 1.128 2010/12/11 14:19:17 tom Exp $
+ * $LynxId: LYGlobalDefs.h,v 1.129 2011/05/27 08:39:07 tom Exp $
  *
  * global variable definitions
  */
@@ -652,6 +652,7 @@ extern "C" {
     extern BOOLEAN no_table_center;
 
 #if USE_BLAT_MAILER
+    extern BOOLEAN mail_is_altblat;
     extern BOOLEAN mail_is_blat;
 #endif
 

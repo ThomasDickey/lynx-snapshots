@@ -1,5 +1,5 @@
 /*
- * $LynxId: userdefs.h,v 1.263 2011/01/10 10:22:59 tom Exp $
+ * $LynxId: userdefs.h,v 1.264 2011/05/27 09:33:23 tom Exp $
  *
  * Lynx - Hypertext navigation system
  *
@@ -1497,6 +1497,14 @@
 #endif /* FNAMES_8_3 */
 #endif
 
+#ifndef BLAT_MAIL
+#define BLAT_MAIL "blat"
+#endif
+
+#ifndef ALTBLAT_MAIL
+#define ALTBLAT_MAIL "blatj"
+#endif
+
 #define BIN_SUFFIX  ".bin"
 #define TEXT_SUFFIX ".txt"
 
@@ -1517,27 +1525,17 @@
 #ifdef DOSPATH
 
 #ifdef _WINDOWS
-#ifdef SYSTEM_MAIL
-#undef SYSTEM_MAIL
+
+#ifndef USE_BLAT_MAILER
+#define USE_BLAT_MAILER 1
 #endif
-#ifdef SYSTEM_MAIL_FLAGS
-#undef SYSTEM_MAIL_FLAGS
-#endif
-#ifdef USE_ALT_BLAT_MAILER
-#define SYSTEM_MAIL		"BLAT"
-#define SYSTEM_MAIL_FLAGS	""
-#else
-#define SYSTEM_MAIL		"BLATJ"
-#define SYSTEM_MAIL_FLAGS	""
-#endif
+
 #else
 /* have to define something... */
-#ifdef SYSTEM_MAIL
 #undef SYSTEM_MAIL
-#endif /* SYSTEM_MAIL */
-#define SYSTEM_MAIL "sendmail"
-#define SYSTEM_MAIL_FLAGS "-t -oi"
-#endif
+#define SYSTEM_MAIL             "sendmail"
+#define SYSTEM_MAIL_FLAGS       "-t -oi"
+#endif /* _WINDOWS */
 
 /*
 **  The following executables may be used at run time.  Unless you change
