@@ -1,3 +1,6 @@
+/*
+ * $LynxId: LYMail.h,v 1.14 2011/05/26 09:23:05 tom Exp $
+ */
 #ifndef LYMAIL_H
 #define LYMAIL_H
 
@@ -8,25 +11,34 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
 #ifdef SH_EX
+#undef USE_BLAT_MAILER
 #define USE_BLAT_MAILER 1
-#else
+#endif
+
+#ifndef USE_BLAT_MAILER
 #define USE_BLAT_MAILER 0
 #endif
+
 #ifdef VMS
 #define USE_VMS_MAILER 1
 #else
 #define USE_VMS_MAILER 0
 #endif
+
 /*
  * Ifdef's in case we have a working popen/pclose, useful for piping to the
  * mail program.
  */
+#ifndef CAN_PIPE_TO_MAILER
 #if !defined(HAVE_POPEN) || USE_VMS_MAILER || defined(DOSPATH) || defined(__CYGWIN__)
 #define CAN_PIPE_TO_MAILER 0
 #else
 #define CAN_PIPE_TO_MAILER 1
 #endif
+#endif
+
     extern BOOLEAN term_letter;
 
     extern BOOLEAN LYSystemMail(void);

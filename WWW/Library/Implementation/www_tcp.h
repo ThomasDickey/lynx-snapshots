@@ -1,5 +1,5 @@
 /*                System dependencies in the W3 library
- * $LynxId: www_tcp.h,v 1.52 2011/05/24 10:51:58 tom Exp $
+ * $LynxId: www_tcp.h,v 1.53 2011/05/24 23:48:50 tom Exp $
  *
                                    SYSTEM DEPENDENCIES
 
@@ -449,11 +449,11 @@ extern char *vms_errno_string();
 /*
  * DEC C before version 5.2 added some typedefs to <types.h> which happen
  * to be suppressed if the version-4 compatibility define is set.  In
- * particular, lynx uses "off_t".  According to Rod Reiger, "size_t" may
- * also be undeclared.
+ * particular, lynx uses "off_t".  VAX-C used "unsigned", DEC-C uses "int".
  */
-#ifdef _DECC_V4_SOURCE
-#define off_t long
+#if defined(_DECC_V4_SOURCE) && !defined(____OFF_T)
+#undef off_t
+#define off_t int
 #endif
 
 #ifdef __TIME_T
