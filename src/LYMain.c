@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMain.c,v 1.227 2011/05/23 22:55:22 Scott.Harrod Exp $
+ * $LynxId: LYMain.c,v 1.228 2011/05/27 09:51:51 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTP.h>
@@ -16,6 +16,7 @@
 #include <HTML.h>
 #include <LYUtils.h>
 #include <LYGlobalDefs.h>
+#include <LYMail.h>
 #include <LYOptions.h>
 #include <LYSignal.h>
 #include <LYGetFile.h>
@@ -350,6 +351,15 @@ BOOLEAN no_table_center = FALSE;	/* 1998/10/09 (Fri) 15:12:49 */
 
 #if USE_BLAT_MAILER
 BOOLEAN mail_is_blat = TRUE;
+BOOLEAN mail_is_altblat = USE_ALTBLAT_MAILER;
+
+#if USE_ALTBLAT_MAILER
+#define THIS_BLAT_MAIL ALTBLAT_MAIL
+#define THAT_BLAT_MAIL BLAT_MAIL
+#else
+#define THIS_BLAT_MAIL BLAT_MAIL
+#define THAT_BLAT_MAIL ALTBLAT_MAIL
+#endif
 #endif
 
 #ifdef USE_BLINK
@@ -1154,11 +1164,7 @@ int main(int argc,
     StrAllocCopy(language, PREFERRED_LANGUAGE);
     StrAllocCopy(pref_charset, PREFERRED_CHARSET);
     StrAllocCopy(system_mail, SYSTEM_MAIL);
-#ifdef SYSTEM_MAIL_FLAGS
     StrAllocCopy(system_mail_flags, SYSTEM_MAIL_FLAGS);
-#else
-    StrAllocCopy(system_mail_flags, "");
-#endif
 
     StrAllocCopy(LYUserAgent, LYNX_NAME);
     StrAllocCat(LYUserAgent, "/");
@@ -3271,6 +3277,12 @@ static Config_Type Arg_Table [] =
       "accept_all_cookies", 4|SET_ARG,		LYAcceptAllCookies,
       "\naccept cookies without prompting if Set-Cookie handling\nis on"
    ),
+#if USE_BLAT_MAILER
+   PARSE_SET(
+      "altblat",	4|TOGGLE_ARG,		mail_is_altblat,
+      "select mail tool (`"THIS_BLAT_MAIL"' ==> `"THAT_BLAT_MAIL"')"
+   ),
+#endif
    PARSE_FUN(
       "anonymous",	2|FUNCTION_ARG,		anonymous_fun,
       "apply restrictions for anonymous account,\nsee also -restrictions"
@@ -3587,7 +3599,7 @@ soon as they are seen)"
 #if USE_BLAT_MAILER
    PARSE_SET(
       "noblat",		4|TOGGLE_ARG,		mail_is_blat,
-      "select mail tool (`BLAT' ==> `sendmail')"
+      "select mail tool (`"THIS_BLAT_MAIL"' ==> `sendmail')"
    ),
 #endif
    PARSE_FUN(

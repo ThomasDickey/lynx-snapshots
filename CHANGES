@@ -1,9 +1,13 @@
--- $LynxId: CHANGES,v 1.543 2011/05/27 00:46:17 tom Exp $
+-- $LynxId: CHANGES,v 1.544 2011/05/27 09:50:23 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2011-05-26 (2.8.8dev.9)
+2011-05-27 (2.8.8dev.9)
+* modify blat/blatj configuration so that support for both is compiled-in
+  for DOSPATH configurations.  Add "-altblat" option to select blat vs blatj.
+  Define USE_ALT_BLAT_MAILER to specify which is the default (prompted by
+  report by LarryL) -TD
 * correct an interaction between LYCloseOutput() and LYRemoveTemp() as used in
   send_file_to_mail(), to allow a temporary file to be closed and used by
   external program before removing it -TD

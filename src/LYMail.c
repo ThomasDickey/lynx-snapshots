@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMail.c,v 1.82 2011/05/26 01:00:05 tom Exp $
+ * $LynxId: LYMail.c,v 1.83 2011/05/27 08:51:44 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTParse.h>
@@ -329,57 +329,57 @@ static char *blat_cmd(char *mail_cmd,
 {
     char *b_cmd = NULL;
 
-#ifdef USE_ALT_BLAT_MAILER
+    if (mail_is_altblat) {
 
-    HTSprintf0(&b_cmd, "%s %s -t \"%s\" -s \"%s\" %s%s%s%s",
-	       mail_cmd,
-	       filename,
-	       address,
-	       subject,
-	       system_mail_flags,
-	       ccaddr ? " -c \"" : "",
-	       NonNull(ccaddr),
-	       ccaddr ? "\"" : "");
+	HTSprintf0(&b_cmd, "%s %s -t \"%s\" -s \"%s\" %s%s%s%s",
+		   mail_cmd,
+		   filename,
+		   address,
+		   subject,
+		   system_mail_flags,
+		   ccaddr ? " -c \"" : "",
+		   NonNull(ccaddr),
+		   ccaddr ? "\"" : "");
 
-#else /* !USE_ALT_BLAT_MAILER */
+    } else {
 
-    char bl_cmd_file[LY_MAXPATH];
-    FILE *fp;
+	char bl_cmd_file[LY_MAXPATH];
+	FILE *fp;
 
 #ifdef __CYGWIN__
-    char dosname[LY_MAXPATH];
+	char dosname[LY_MAXPATH];
 #endif
 
-    bl_cmd_file[0] = '\0';
-    if ((fp = LYOpenTemp(bl_cmd_file, ".blt", "w")) == NULL) {
-	HTAlert(FORM_MAILTO_FAILED);
-	return NULL;
-    }
+	bl_cmd_file[0] = '\0';
+	if ((fp = LYOpenTemp(bl_cmd_file, ".blt", "w")) == NULL) {
+	    HTAlert(FORM_MAILTO_FAILED);
+	    return NULL;
+	}
 #ifdef __CYGWIN__
-    cygwin_conv_to_full_win32_path(filename, dosname);
-    fprintf(fp, "%s\n", dosname);
+	cygwin_conv_to_full_win32_path(filename, dosname);
+	fprintf(fp, "%s\n", dosname);
 #else
-    fprintf(fp, "%s\n", filename);
+	fprintf(fp, "%s\n", filename);
 #endif
-    fprintf(fp, "-t\n%s\n", address);
-    if (subject)
-	fprintf(fp, "-s\n%s\n", subject);
-    if (non_empty(mail_addr)) {
-	fprintf(fp, "-f\n%s\n", mail_addr);
-    }
-    if (non_empty(ccaddr)) {
-	fprintf(fp, "-c\n%s\n", ccaddr);
-    }
-    LYCloseOutput(fp);
+	fprintf(fp, "-t\n%s\n", address);
+	if (subject)
+	    fprintf(fp, "-s\n%s\n", subject);
+	if (non_empty(mail_addr)) {
+	    fprintf(fp, "-f\n%s\n", mail_addr);
+	}
+	if (non_empty(ccaddr)) {
+	    fprintf(fp, "-c\n%s\n", ccaddr);
+	}
+	LYCloseOutput(fp);
 
 #ifdef __CYGWIN__
-    cygwin_conv_to_full_win32_path(bl_cmd_file, dosname);
-    HTSprintf0(&b_cmd, "%s \"@%s\"", mail_cmd, dosname);
+	cygwin_conv_to_full_win32_path(bl_cmd_file, dosname);
+	HTSprintf0(&b_cmd, "%s \"@%s\"", mail_cmd, dosname);
 #else
-    HTSprintf0(&b_cmd, "%s @%s", mail_cmd, bl_cmd_file);
+	HTSprintf0(&b_cmd, "%s @%s", mail_cmd, bl_cmd_file);
 #endif
 
-#endif /* USE_ALT_BLAT_MAILER */
+    }
 
     return b_cmd;
 }
