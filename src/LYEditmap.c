@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYEditmap.c,v 1.27 2008/09/07 23:00:47 tom Exp $
+ * $LynxId: LYEditmap.c,v 1.28 2011/05/28 13:07:55 tom Exp $
  *
  * LYEditMap.c
  * Keybindings for line and form editting.
@@ -11,7 +11,7 @@
 #include <LYKeymap.h>		/* KEYMAP_SIZE, LKC_*, LYK_* - kw */
 
 /* * * * * LynxEditactionCodes * * * * */
-#ifdef EXP_ALT_BINDINGS
+#ifdef USE_ALT_BINDINGS
 
 /* Last valid index for the (lynxkeycode+modifier -> lynxeditactioncode)
  * tables.  Currently all three tables are the same.  - kw
@@ -26,7 +26,7 @@
 #define LKC_TO_LEC_M2(c) ((c)>LAST_MOD2_LKC? (int)LYE_UNMOD: Mod2Binding[c])
 #define LKC_TO_LEC_M3(c) ((c)>LAST_MOD3_LKC? (int)LYE_UNMOD: Mod3Binding[c])
 
-#endif /* EXP_ALT_BINDINGS */
+#endif /* USE_ALT_BINDINGS */
 
 int current_lineedit = 0;	/* Index into LYLineEditors[]   */
 
@@ -281,7 +281,7 @@ LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
              /*                 ^^=upper-case-line,  ^_=lower-case-line   */
 /* Why the difference for tab? - kw */
 
-#ifdef EXP_ALT_BINDINGS
+#ifdef USE_ALT_BINDINGS
 static LYEditCode BetterEditBinding[KEYMAP_SIZE-1]={
 
 LYE_NOP,        LYE_BOL,        LYE_BACK,       LYE_ABORT,
@@ -923,7 +923,7 @@ LYE_UNMOD,      LYE_UNMOD,
 static short *Mod2Binding = Mod1Binding;
 static short *Mod3Binding = Mod1Binding;
 
-#endif /* EXP_ALT_BINDINGS */
+#endif /* USE_ALT_BINDINGS */
 /* *INDENT-ON* */
 
 /*
@@ -933,7 +933,7 @@ static short *Mod3Binding = Mod1Binding;
 LYEditCode *LYLineEditors[] =
 {
     DefaultEditBinding,		/* You can't please everyone, so you ... DW */
-#ifdef EXP_ALT_BINDINGS
+#ifdef USE_ALT_BINDINGS
     BetterEditBinding,		/* No, you certainly can't ... /ked 10/27/98 */
     BashlikeEditBinding,	/* and one more... - kw 1999-02-15 */
 #endif
@@ -946,7 +946,7 @@ LYEditCode *LYLineEditors[] =
 const char *LYLineeditNames[] =
 {
     "Default Binding",
-#ifdef EXP_ALT_BINDINGS
+#ifdef USE_ALT_BINDINGS
     "Alternate Bindings",
     "Bash-like Bindings",
 #endif
@@ -962,7 +962,7 @@ const char *LYLineeditNames[] =
 const char *LYLineeditHelpURLs[] =
 {
     EDIT_HELP,
-#ifdef EXP_ALT_BINDINGS
+#ifdef USE_ALT_BINDINGS
     ALT_EDIT_HELP,
     BASHLIKE_EDIT_HELP,
 #endif
@@ -981,7 +981,7 @@ int EditBinding(int xlkc)
 	c = TOASCII(c);
     }
 #endif
-#ifdef EXP_ALT_BINDINGS
+#ifdef USE_ALT_BINDINGS
     /*
      * Get intermediate code from one of the lynxkeycode+modifier tables if
      * applicable, otherwise get the lynxeditactioncode directly.  If we have
@@ -1033,7 +1033,7 @@ BOOL LYRemapEditBinding(int xlkc,
 
     if (xlkc < 0 || (xlkc & LKC_ISLAC) || c >= KEYMAP_SIZE + 1)
 	return FALSE;
-#ifdef EXP_ALT_BINDINGS
+#ifdef USE_ALT_BINDINGS
     if (xlkc & LKC_MOD1) {
 	if (c > LAST_MOD1_LKC)
 	    return FALSE;
@@ -1053,7 +1053,7 @@ BOOL LYRemapEditBinding(int xlkc,
 	    Mod3Binding[c] = (short) lec;
 	return TRUE;
     } else
-#endif /* EXP_ALT_BINDINGS */
+#endif /* USE_ALT_BINDINGS */
     {
 #ifndef UCHAR_MAX
 #define UCHAR_MAX 255
@@ -1165,7 +1165,7 @@ int LYEditKeyForAction(int lac,
 	if ((editaction & LYE_DF) && mod3found < 0)
 	    mod3found = i;
     }
-#ifdef EXP_ALT_BINDINGS
+#ifdef USE_ALT_BINDINGS
     if (mod3found >= 0) {
 	for (i = mod3found; i >= 0; i = NEXT_I(i, LAST_MOD3_LKC)) {
 	    editaction = CurrentLineEditor()[i];
@@ -1280,7 +1280,7 @@ int LYEditKeyForAction(int lac,
 	    }
 	}
     }
-#endif /* EXP_ALT_BINDINGS */
+#endif /* USE_ALT_BINDINGS */
     if (pmodkey)
 	*pmodkey = -1;
     return (-1);

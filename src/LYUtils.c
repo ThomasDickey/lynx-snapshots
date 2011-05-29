@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYUtils.c,v 1.208 2011/05/27 00:40:54 tom Exp $
+ * $LynxId: LYUtils.c,v 1.210 2011/05/28 13:05:14 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTCP.h>
@@ -2768,7 +2768,7 @@ BOOLEAN LYCloseInput(FILE *fp)
 	    result = TRUE;
 	}
     }
-    return result;
+    return (BOOLEAN) result;
 }
 
 /*
@@ -2793,7 +2793,7 @@ BOOLEAN LYCloseOutput(FILE *fp)
     if (!result) {
 	HTAlert(CANNOT_WRITE_TO_FILE);
     }
-    return result;
+    return (BOOLEAN) result;
 }
 
 /*
@@ -6492,7 +6492,7 @@ static uip_entry ly_uip[] =
   , { UIP_PERMIT_OPTIONS	, 0	      , NULL, NULL, NULL }
   , { UIP_UPLOAD_OPTIONS	, UIP_F_LMULTI, NULL, NULL, NULL }
 #endif
-#ifdef EXP_ADDRLIST_PAGE
+#ifdef USE_ADDRLIST_PAGE
   , { UIP_ADDRLIST_PAGE		, UIP_F_LMULTI, NULL, NULL, NULL }
 #endif
   , { UIP_LYNXCFG		, UIP_F_LMULTI, NULL, NULL, NULL }

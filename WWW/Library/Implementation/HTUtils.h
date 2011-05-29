@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTUtils.h,v 1.105 2011/05/24 08:50:26 tom Exp $
+ * $LynxId: HTUtils.h,v 1.107 2011/05/28 15:13:56 tom Exp $
  *
  * Utility macros for the W3 code library
  * MACROS FOR GENERAL USE

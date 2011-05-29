@@ -1,4 +1,4 @@
-dnl $LynxId: configure.in,v 1.227 2011/05/24 08:43:15 tom Exp $
+dnl $LynxId: configure.in,v 1.230 2011/05/28 14:35:26 tom Exp $
 dnl
 dnl Process this file with autoconf to produce a configure script.
 dnl
@@ -732,8 +732,6 @@ AC_HEADER_DIRENT
 dnl Don't check for sys/wait.h here since it is covered by another test.
 AC_CHECK_HEADERS( \
 	arpa/inet.h \
-	bsd/random.h \
-	bsd/stdlib.h \
 	fcntl.h \
 	limits.h \
 	stdlib.h \
@@ -801,7 +799,6 @@ AC_CHECK_FUNCS( \
 	usleep \
 	vasprintf \
 	waitpid \
-	zError \
 )
 AC_REPLACE_FUNCS( \
 	mktime \
@@ -875,7 +872,7 @@ test $use_menu_options = no && AC_DEFINE(NO_OPTION_MENU)
 dnl --------------------------------------------------------------------------
 AC_MSG_CHECKING(if sessions code should be used)
 CF_ARG_DISABLE(sessions,
-[  --disable-sessions      use experimental sessions code],
+[  --disable-sessions      use sessions code],
 	[use_sessions=$enableval],
 	[use_sessions=yes])
 AC_MSG_RESULT($use_sessions)
@@ -887,7 +884,7 @@ fi
 dnl --------------------------------------------------------------------------
 AC_MSG_CHECKING(if session-caching code should be used)
 CF_ARG_DISABLE(session-cache,
-[  --disable-session-cache use experimental session-caching code],
+[  --disable-session-cache use session-caching code],
 	[use_session_cache=$enableval],
 	[use_session_cache=yes])
 AC_MSG_RESULT($use_session_cache)
@@ -896,13 +893,13 @@ if test $use_session_cache != no ; then
 fi
 
 dnl --------------------------------------------------------------------------
-AC_MSG_CHECKING(if experimental address-list page should be used)
-CF_ARG_ENABLE(addrlist-page,
-[  --enable-addrlist-page  use experimental address-list page],
+AC_MSG_CHECKING(if address-list page should be used)
+CF_ARG_DISABLE(addrlist-page,
+[  --disable-addrlist-page disable address-list page],
 	[use_addrlist_page=$enableval],
-	[use_addrlist_page=no])
+	[use_addrlist_page=yes])
 AC_MSG_RESULT($use_addrlist_page)
-test $use_addrlist_page != no && AC_DEFINE(EXP_ADDRLIST_PAGE)
+test $use_addrlist_page != no && AC_DEFINE(USE_ADDRLIST_PAGE)
 
 dnl --------------------------------------------------------------------------
 AC_MSG_CHECKING(if experimental CJK logic should be used)
@@ -978,12 +975,12 @@ CF_ARG_ENABLE(alt-bindings,
 	[use_alt_bindings=$enableval],
 	[use_alt_bindings=yes])
 AC_MSG_RESULT($use_alt_bindings)
-test $use_alt_bindings != no && AC_DEFINE(EXP_ALT_BINDINGS)
+test $use_alt_bindings != no && AC_DEFINE(USE_ALT_BINDINGS)
 
 dnl --------------------------------------------------------------------------
 AC_MSG_CHECKING(if ascii case-conversion should be used)
 CF_ARG_DISABLE(ascii-ctypes,
-[  --disable-ascii-ctypes  use ascii case-conversion],
+[  --disable-ascii-ctypes  disable use of ascii case-conversion],
 	[use_ascii_ctypes=$enableval],
 	[use_ascii_ctypes=yes])
 AC_MSG_RESULT($use_ascii_ctypes)
@@ -1001,7 +998,7 @@ test $use_ext_htmldtd = "no" && AC_DEFINE(NO_EXTENDED_HTMLDTD)
 dnl --------------------------------------------------------------------------
 AC_MSG_CHECKING(if file-upload logic should be used)
 CF_ARG_DISABLE(file-upload,
-[  --disable-file-upload   use file-upload support],
+[  --disable-file-upload   disable file-upload support],
 	[use_file_upload=$enableval],
 	[use_file_upload=yes])
 AC_MSG_RESULT($use_file_upload)
@@ -1010,7 +1007,7 @@ test $use_file_upload != no && AC_DEFINE(USE_FILE_UPLOAD)
 dnl --------------------------------------------------------------------------
 AC_MSG_CHECKING(if IDNA support should be used)
 CF_ARG_DISABLE(idna,
-[  --disable-idna          provide IDNA support],
+[  --disable-idna          disable IDNA support],
 	[use_idna=$enableval],
 	[use_idna=yes])
 AC_MSG_RESULT($use_idna)
@@ -1022,7 +1019,7 @@ fi
 dnl --------------------------------------------------------------------------
 AC_MSG_CHECKING(if element-justification logic should be used)
 CF_ARG_DISABLE(justify-elts,
-[  --disable-justify-elts  use element-justification logic],
+[  --disable-justify-elts  disable element-justification logic],
 	[use_justify_elts=$enableval],
 	[use_justify_elts=yes])
 AC_MSG_RESULT($use_justify_elts)
@@ -1031,7 +1028,7 @@ test $use_justify_elts != no && AC_DEFINE(USE_JUSTIFY_ELTS)
 dnl --------------------------------------------------------------------------
 AC_MSG_CHECKING(if partial-display should be used)
 CF_ARG_DISABLE(partial,
-[  --disable-partial       use partial-display logic],
+[  --disable-partial       disable partial-display logic],
 	[use_partial_display=$enableval],
 	[use_partial_display=yes])
 AC_MSG_RESULT($use_partial_display)
@@ -1049,7 +1046,7 @@ test $use_filed_cookies != no && AC_DEFINE(USE_PERSISTENT_COOKIES)
 dnl --------------------------------------------------------------------------
 AC_MSG_CHECKING(if html source should be colorized)
 CF_ARG_DISABLE(prettysrc,
-[  --disable-prettysrc     colorize HTML source],
+[  --disable-prettysrc     disable colorization of HTML source],
 	[use_prettysrc=$enableval],
 	[use_prettysrc=yes])
 AC_MSG_RESULT($use_prettysrc)
@@ -1058,7 +1055,7 @@ test $use_prettysrc != no && AC_DEFINE(USE_PRETTYSRC)
 dnl --------------------------------------------------------------------------
 AC_MSG_CHECKING(if progress-bar code should be used)
 CF_ARG_DISABLE(progressbar,
-[  --disable-progressbar   use progress-bar],
+[  --disable-progressbar   disable progress-bar],
 	[use_progressbar=$enableval],
 	[use_progressbar=yes])
 AC_MSG_RESULT($use_progressbar)
@@ -1067,7 +1064,7 @@ test $use_progressbar != no && AC_DEFINE(USE_PROGRESSBAR)
 dnl --------------------------------------------------------------------------
 AC_MSG_CHECKING(if read-progress message should show ETA)
 CF_ARG_DISABLE(read-eta,
-[  --disable-read-eta      read-progress message shows ETA],
+[  --disable-read-eta      disable read-progress message shows ETA],
 	[use_read_eta=$enableval],
 	[use_read_eta=yes])
 AC_MSG_RESULT($use_read_eta)
@@ -1076,7 +1073,7 @@ test $use_read_eta != no && AC_DEFINE(USE_READPROGRESS)
 dnl --------------------------------------------------------------------------
 AC_MSG_CHECKING(if source caching should be used)
 CF_ARG_DISABLE(source-cache,
-[  --disable-source-cache  cache HTML source for parse mode changes],
+[  --disable-source-cache  do not cache HTML source for parse mode changes],
 	[use_source_cache=$enableval],
 	[use_source_cache=yes])
 AC_MSG_RESULT($use_source_cache)
@@ -1085,7 +1082,7 @@ test $use_source_cache != no && AC_DEFINE(USE_SOURCE_CACHE)
 dnl --------------------------------------------------------------------------
 AC_MSG_CHECKING(if scrollbar code should be used)
 CF_ARG_DISABLE(scrollbar,
-[  --disable-scrollbar     use scrollbar, with mouse],
+[  --disable-scrollbar     disable scrollbar with mouse],
 	[use_scrollbar=$enableval],
 	[use_scrollbar=yes])
 AC_MSG_RESULT($use_scrollbar)

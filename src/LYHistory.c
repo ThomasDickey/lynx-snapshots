@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYHistory.c,v 1.80 2010/09/25 11:22:51 tom Exp $
+ * $LynxId: LYHistory.c,v 1.81 2011/05/28 13:05:14 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTP.h>
@@ -130,7 +130,7 @@ void LYAddVisitedLink(DocInfo *doc)
 	    LYIsUIPage(doc->address, UIP_OPTIONS_MENU) ||
 	    isLYNXKEYMAP(doc->address) ||
 	    LYIsUIPage(doc->address, UIP_LIST_PAGE) ||
-#ifdef EXP_ADDRLIST_PAGE
+#ifdef USE_ADDRLIST_PAGE
 	    LYIsUIPage(doc->address, UIP_ADDRLIST_PAGE) ||
 #endif
 	    LYIsUIPage(doc->address, UIP_CONFIG_DEF) ||

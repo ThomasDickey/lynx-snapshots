@@ -1,11 +1,11 @@
-dnl $LynxId: aclocal.m4,v 1.182 2011/05/10 09:21:03 tom Exp $
+dnl $LynxId: aclocal.m4,v 1.186 2011/05/28 16:14:57 tom Exp $
 dnl Macros for auto-configure script.
 dnl by T.E.Dickey <dickey@invisible-island.net>
 dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
 dnl and Philippe De Muyter <phdm@macqel.be>
 dnl
 dnl Created: 1997/01/28
-dnl Updated: 2011/05/08
+dnl Updated: 2011/05/28
 dnl
 dnl The autoconf used in Lynx development is GNU autoconf 2.13 or 2.52, patched
 dnl by Thomas Dickey.  See your local GNU archives, and this URL:
@@ -1663,7 +1663,7 @@ CF_CURSES_HEADER
 CF_TERM_HEADER
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_CURSES_FUNCS version: 16 updated: 2011/04/09 18:19:55
+dnl CF_CURSES_FUNCS version: 17 updated: 2011/05/14 16:07:29
 dnl ---------------
 dnl Curses-functions are a little complicated, since a lot of them are macros.
 AC_DEFUN([CF_CURSES_FUNCS],
@@ -1684,7 +1684,8 @@ do
 			[
 #ifndef ${cf_func}
 long foo = (long)(&${cf_func});
-${cf_cv_main_return:-return}(foo == 0);
+if (foo + 1234 > 5678)
+	${cf_cv_main_return:-return}(foo);
 #endif
 			],
 			[cf_result=yes],
@@ -5016,7 +5017,7 @@ AC_MSG_RESULT($cf_use_socks5p_h)
 test "$cf_use_socks5p_h" = yes && AC_DEFINE(INCLUDE_PROTOTYPES)
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_SRAND version: 8 updated: 2007/04/22 12:01:07
+dnl CF_SRAND version: 9 updated: 2011/05/28 12:10:58
 dnl --------
 dnl Check for functions similar to srand() and rand().  lrand48() and random()
 dnl return a 31-bit value, while rand() returns a value less than RAND_MAX
@@ -5066,12 +5067,40 @@ if test "$cf_cv_srand_func" != unknown ; then
 #ifdef HAVE_LIMITS_H
 #include <limits.h>
 #endif
-#ifdef HAVE_BSD_RANDOM_H
-#include <bsd/random.h>
-#endif
 		],[long x = $cf_cv_rand_max],,
 		[cf_cv_rand_max="(1L<<$cf_rand_max)-1"])
 	])
+
+	case $cf_cv_srand_func in
+	*/arc4random)
+		AC_MSG_CHECKING(if <bsd/stdlib.h> should be included)
+		AC_TRY_COMPILE([#include <bsd/stdlib.h>],
+					   [void *arc4random(int);
+						void *x = arc4random(1)],
+					   [cf_bsd_stdlib_h=no],
+					   [cf_bsd_stdlib_h=yes])
+	    AC_MSG_RESULT($cf_bsd_stdlib_h)
+		if test "$cf_bsd_stdlib_h" = yes
+		then
+			AC_DEFINE(HAVE_BSD_STDLIB_H)
+		else
+			AC_MSG_CHECKING(if <bsd/random.h> should be included)
+			AC_TRY_COMPILE([#include <bsd/random.h>],
+						   [void *arc4random(int);
+							void *x = arc4random(1)],
+						   [cf_bsd_random_h=no],
+						   [cf_bsd_random_h=yes])
+			AC_MSG_RESULT($cf_bsd_random_h)
+			if test "$cf_bsd_random_h" = yes
+			then
+				AC_DEFINE(HAVE_BSD_RANDOM_H)
+			else
+				AC_MSG_WARN(no header file found for arc4random)
+			fi
+		fi
+		;;
+	esac
+
 	CF_SRAND_PARSE($cf_func,cf_srand_func,cf_rand_func)
 
 	CF_UPPER(cf_rand_max,ifelse($1,,my_,$1)rand_max)
@@ -6150,7 +6179,7 @@ $3="$withval"
 AC_SUBST($3)dnl
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_WITH_ZLIB version: 3 updated: 2007/07/29 13:19:54
+dnl CF_WITH_ZLIB version: 4 updated: 2011/05/28 12:10:58
 dnl ------------
 dnl check for libz aka "zlib"
 AC_DEFUN([CF_WITH_ZLIB],[
@@ -6161,6 +6190,10 @@ AC_DEFUN([CF_WITH_ZLIB],[
 ],[
 	gzopen("name","mode")
 ],z,,,zlib)
+
+AC_CHECK_FUNCS( \
+	zError \
+)
 ])dnl
 dnl ---------------------------------------------------------------------------
 dnl CF_XOPEN_CURSES version: 11 updated: 2011/01/18 18:15:30

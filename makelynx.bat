@@ -1,5 +1,5 @@
 @echo off
-@rem $LynxId: makelynx.bat,v 1.14 2009/11/21 15:33:24 tom Exp $
+@rem $LynxId: makelynx.bat,v 1.15 2011/05/28 13:07:55 tom Exp $
 @echo Windows/Dos batch makefile for MingW32 and lynx.exe
 @echo Remember to precede this by "command /E:8192" for Windows prior to
 @echo W2000 and "cmd.exe /E:8192" for subsequent Window versions and to
@@ -67,7 +67,7 @@ echo #define _WIN_CC		 1 >> lynx_cfg.h
 rem echo #define USE_SCROLLBAR	 1 >> lynx_cfg.h
 
 SET DEFINES=-DCJK_EX
-SET DEFINES=%DEFINES% -DEXP_ALT_BINDINGS
+SET DEFINES=%DEFINES% -DUSE_ALT_BINDINGS
 SET DEFINES=%DEFINES% -DEXP_NESTED_TABLES
 SET DEFINES=%DEFINES% -DUSE_JUSTIFY_ELTS
 SET DEFINES=%DEFINES% -DUSE_PERSISTENT_COOKIES

@@ -1,4 +1,4 @@
-/* $LynxId: LYKeymap.c,v 1.74 2011/05/26 23:24:42 tom Exp $ */
+/* $LynxId: LYKeymap.c,v 1.75 2011/05/28 13:05:14 tom Exp $ */
 #include <HTUtils.h>
 #include <LYUtils.h>
 #include <LYGlobalDefs.h>
@@ -898,7 +898,7 @@ static Kcmd revmap[] = {
     DATA(
 	LYK_INSERT_FILE, "INSERTFILE",
 	"insert file into a textarea (just above cursorline)" ),
-#ifdef EXP_ADDRLIST_PAGE
+#ifdef USE_ADDRLIST_PAGE
     DATA(
 	LYK_ADDRLIST, "ADDRLIST",
 	"like LIST command, but always shows the links' URLs" ),

@@ -1,4 +1,4 @@
-// $LynxId: lynx_cfg.h,v 1.5 2010/11/06 13:37:00 tom Exp $
+// $LynxId: lynx_cfg.h,v 1.6 2011/05/28 13:07:55 tom Exp $
 // definitions abstracted from makefile.msc
 
 #ifndef LYNX_CFG_H
@@ -13,7 +13,7 @@
 #define DIRED_SUPPORT 1
 #define DISP_PARTIAL 1
 #define DOSPATH 1
-#define EXP_ALT_BINDINGS 1
+#define USE_ALT_BINDINGS 1
 #define EXP_NESTED_TABLES 1
 #define HAVE_KEYPAD 1
 #define HAVE_PUTENV 1

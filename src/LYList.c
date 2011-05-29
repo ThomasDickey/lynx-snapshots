@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYList.c,v 1.49 2010/10/03 17:09:22 tom Exp $
+ * $LynxId: LYList.c,v 1.50 2011/05/28 13:05:14 tom Exp $
  *
  *			Lynx Document Reference List Support	      LYList.c
  *			====================================
@@ -76,7 +76,7 @@ int showlist(DocInfo *newdoc, int titles)
     LYforce_HTML_mode = TRUE;	/* force this file to be HTML */
     LYforce_no_cache = TRUE;	/* force this file to be new */
 
-#ifdef EXP_ADDRLIST_PAGE
+#ifdef USE_ADDRLIST_PAGE
     if (titles != TRUE)
 	BeginInternalPage(fp0, ADDRLIST_PAGE_TITLE, LIST_PAGE_HELP);
     else
