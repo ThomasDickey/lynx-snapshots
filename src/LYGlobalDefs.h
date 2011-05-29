@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYGlobalDefs.h,v 1.129 2011/05/27 08:39:07 tom Exp $
+ * $LynxId: LYGlobalDefs.h,v 1.130 2011/05/27 21:26:14 tom Exp $
  *
  * global variable definitions
  */
@@ -670,6 +670,14 @@ extern "C" {
 
 #define	cygwin_conv_to_full_posix_path(p, q) \
 	cygwin32_conv_to_full_posix_path(p, q)
+#endif
+
+#ifdef __CYGWIN__
+#define ConvertToWin32Path(p, q) \
+	cygwin_conv_to_full_win32_path(p, q);
+#else
+#define ConvertToWin32Path(p, q) \
+	q = p
 #endif
 
 #ifdef USE_SCROLLBAR

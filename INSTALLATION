@@ -180,7 +180,11 @@ II. Compile instructions -- UNIX
 	do not support a configure script, such as MS-DOS, Win32 and VMS, you
 	must edit lynx.cfg).
 
-  --disable-alt-bindings 		(prevent defining EXP_ALT_BINDINGS)
+  --disable-addrlist-page		(prevent defining USE_ADDRLIST_PAGE)
+	Turn off code that displays an alternative list-page, bound to 'A'
+	rather than 'l', which always lists URLs rather than titles.
+
+  --disable-alt-bindings 		(prevent defining USE_ALT_BINDINGS)
 	Compiles-in an alternative set of line-edit bindings, in addition
 	to the default bindings.
 
@@ -385,10 +389,6 @@ II. Compile instructions -- UNIX
 	We recommend that you leave this enabled, since we need this
 	information to diagnose problems with either Lynx or the sites to which
 	you connect.
-
-  --enable-addrlist-page		(define EXP_ADDRLIST_PAGE)
-	Compiles-in an alternative list-page, bound to 'A' rather than 'l',
-	which always lists URLs rather than titles.
 
   --enable-ascii-ctypes			(define USE_ASCII_CTYPES)
 	Compiles-in alternative case-conversion functions which ensure that
@@ -1388,4 +1388,4 @@ VIII. Acknowledgment
 
 -- 1999/04/24 - H. Nelson <lynx-admin@irm.nara.kindai.ac.jp>
 -- vile:txtmode
--- $LynxId: INSTALLATION,v 1.114 2010/12/08 01:28:43 Doug.Kaufman Exp $
+-- $LynxId: INSTALLATION,v 1.116 2011/05/28 13:07:55 tom Exp $

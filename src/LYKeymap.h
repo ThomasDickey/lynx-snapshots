@@ -1,4 +1,4 @@
-/* $LynxId: LYKeymap.h,v 1.42 2010/09/25 11:35:30 tom Exp $ */
+/* $LynxId: LYKeymap.h,v 1.43 2011/05/28 13:05:14 tom Exp $ */
 #ifndef LYKEYMAP_H
 #define LYKEYMAP_H
 
@@ -200,7 +200,7 @@ extern "C" {
 	,LYK_GROW_TEXTAREA
 	,LYK_INSERT_FILE
 
-#ifdef EXP_ADDRLIST_PAGE
+#ifdef USE_ADDRLIST_PAGE
 	,LYK_ADDRLIST
 #else
 #define LYK_ADDRLIST      LYK_ADD_BOOKMARK

@@ -1,4 +1,4 @@
-/* $LynxId: LYUtils.h,v 1.85 2010/09/24 09:58:04 tom Exp $ */
+/* $LynxId: LYUtils.h,v 1.86 2011/05/28 13:05:14 tom Exp $ */
 #ifndef LYUTILS_H
 #define LYUTILS_H
 
@@ -89,7 +89,7 @@ extern "C" {
 #define LYIsPathSep(ch) ((ch) == '/')
 #define LYIsDosDrive(s) FALSE	/* really nothing */
 #endif
-#ifdef EXP_ADDRLIST_PAGE
+#ifdef USE_ADDRLIST_PAGE
 #define LYIsListpageTitle(name) \
     (!strcmp((name), LIST_PAGE_TITLE) || \
      !strcmp((name), ADDRLIST_PAGE_TITLE))

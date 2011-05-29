@@ -1,4 +1,4 @@
-# $LynxId: makefile.bcb,v 1.14 2009/11/21 16:33:41 tom Exp $
+# $LynxId: makefile.bcb,v 1.15 2011/05/28 13:07:55 tom Exp $
 #
 # Borland C++ / C++ builder
 # 1997/11/08 (Sat) 10:45:37
@@ -50,7 +50,7 @@ CC_FLAGS = $(DEBUG) $(CS_DEFS) $(SOCK_DEFS) \
 -DDISP_PARTIAL \
 -DDONT_HAVE_TM_GMTOFF \
 -DDOSPATH \
--DEXP_ALT_BINDINGS \
+-DUSE_ALT_BINDINGS \
 -DEXP_NESTED_TABLES \
 -DFANCY_CURSES \
 -DHAVE_DIRENT_H=1 \

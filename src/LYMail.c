@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMail.c,v 1.83 2011/05/27 08:51:44 tom Exp $
+ * $LynxId: LYMail.c,v 1.87 2011/05/27 23:14:46 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTParse.h>
@@ -320,8 +320,7 @@ Blat <filename> -t <recipient> [optional switches (see below)]
 
 */
 
-static char *blat_cmd(char *mail_cmd,
-		      char *filename,
+static char *blat_cmd(char *filename,
 		      char *address,
 		      char *subject,
 		      char *ccaddr,
@@ -330,24 +329,30 @@ static char *blat_cmd(char *mail_cmd,
     char *b_cmd = NULL;
 
     if (mail_is_altblat) {
+	const char *format = "%s %s -t %s -s %s %s%s%s";
 
-	HTSprintf0(&b_cmd, "%s %s -t \"%s\" -s \"%s\" %s%s%s%s",
-		   mail_cmd,
-		   filename,
-		   address,
-		   subject,
-		   system_mail_flags,
-		   ccaddr ? " -c \"" : "",
-		   NonNull(ccaddr),
-		   ccaddr ? "\"" : "");
+	HTAddParam(&b_cmd, format, 1, ALTBLAT_MAIL);
+	HTAddParam(&b_cmd, format, 2, filename);
+	HTAddParam(&b_cmd, format, 3, address);
+	HTAddParam(&b_cmd, format, 4, subject);
+	HTAddToCmd(&b_cmd, format, 5, ALTBLAT_MAIL_FLAGS);
+	if (non_empty(ccaddr)) {
+	    HTAddToCmd(&b_cmd, format, 6, " -c ");
+	    HTAddParam(&b_cmd, format, 7, NonNull(ccaddr));
+	}
+	HTEndParam(&b_cmd, format, 8);
 
     } else {
 
+	const char *format = "%s @%s";
 	char bl_cmd_file[LY_MAXPATH];
 	FILE *fp;
 
 #ifdef __CYGWIN__
 	char dosname[LY_MAXPATH];
+
+#else
+	char *dosname;
 #endif
 
 	bl_cmd_file[0] = '\0';
@@ -355,12 +360,12 @@ static char *blat_cmd(char *mail_cmd,
 	    HTAlert(FORM_MAILTO_FAILED);
 	    return NULL;
 	}
-#ifdef __CYGWIN__
-	cygwin_conv_to_full_win32_path(filename, dosname);
+
+	HTAddParam(&b_cmd, format, 1, BLAT_MAIL);
+
+	ConvertToWin32Path(filename, dosname);
 	fprintf(fp, "%s\n", dosname);
-#else
-	fprintf(fp, "%s\n", filename);
-#endif
+
 	fprintf(fp, "-t\n%s\n", address);
 	if (subject)
 	    fprintf(fp, "-s\n%s\n", subject);
@@ -372,12 +377,10 @@ static char *blat_cmd(char *mail_cmd,
 	}
 	LYCloseOutput(fp);
 
-#ifdef __CYGWIN__
-	cygwin_conv_to_full_win32_path(bl_cmd_file, dosname);
-	HTSprintf0(&b_cmd, "%s \"@%s\"", mail_cmd, dosname);
-#else
-	HTSprintf0(&b_cmd, "%s @%s", mail_cmd, bl_cmd_file);
-#endif
+	ConvertToWin32Path(bl_cmd_file, dosname);
+
+	HTAddParam(&b_cmd, format, 2, dosname);
+	HTEndParam(&b_cmd, format, 3);
 
     }
 
@@ -474,8 +477,7 @@ int LYSendMailFile(char *the_address,
 
 #if USE_BLAT_MAILER
     if (mail_is_blat) {
-	cmd = blat_cmd(system_mail,
-		       the_filename,
+	cmd = blat_cmd(the_filename,
 		       the_address,
 		       the_subject,
 		       the_ccaddr,
@@ -484,25 +486,32 @@ int LYSendMailFile(char *the_address,
 #endif
 #ifdef __DJGPP__
     if (LYGetEnv("SHELL")) {
+	extern int dj_is_bash;
+	extern char *shell;
+	const char *c_option;
+	const char *format = "%s %s %s -t %s -F %s";
+
 	if (dj_is_bash) {
-	    HTSprintf0(&cmd, "%s -c %s -t \"%s\" -F %s",
-		       shell,
-		       system_mail,
-		       the_address,
-		       the_filename);
+	    c_option = "-c";
 	} else {
-	    HTSprintf0(&cmd, "%s /c %s -t \"%s\" -F %s",
-		       shell,
-		       system_mail,
-		       the_address,
-		       the_filename);
+	    c_option = "/c";
 	}
+	HTAddParam(&cmd, format, 1, shell);
+	HTAddParam(&cmd, format, 2, c_option);
+	HTAddParam(&cmd, format, 3, system_mail);
+	HTAddParam(&cmd, format, 4, the_address);
+	HTAddParam(&cmd, format, 5, the_filename);
+	HTEndParam(&cmd, format, 6);
     } else
 #endif /* __DJGPP__ */
-	HTSprintf0(&cmd, "%s -t \"%s\" -F %s",
-		   system_mail,
-		   the_address,
-		   the_filename);
+    {
+	const char *format = "%s -t %s -F %s";
+
+	HTAddParam(&cmd, format, 1, system_mail);
+	HTAddParam(&cmd, format, 2, the_address);
+	HTAddParam(&cmd, format, 3, the_filename);
+	HTEndParam(&cmd, format, 4);
+    }
 
     stop_curses();
     SetOutputMode(O_TEXT);

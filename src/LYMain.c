@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMain.c,v 1.228 2011/05/27 09:51:51 tom Exp $
+ * $LynxId: LYMain.c,v 1.229 2011/05/27 22:55:56 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTP.h>
@@ -3599,7 +3599,7 @@ soon as they are seen)"
 #if USE_BLAT_MAILER
    PARSE_SET(
       "noblat",		4|TOGGLE_ARG,		mail_is_blat,
-      "select mail tool (`"THIS_BLAT_MAIL"' ==> `sendmail')"
+      "select mail tool (`"THIS_BLAT_MAIL"' ==> `"SYSTEM_MAIL"')"
    ),
 #endif
    PARSE_FUN(

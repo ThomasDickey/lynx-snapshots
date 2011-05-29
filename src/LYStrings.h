@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYStrings.h,v 1.78 2010/09/25 11:18:47 tom Exp $
+ * $LynxId: LYStrings.h,v 1.79 2011/05/28 13:07:55 tom Exp $
  */
 #ifndef LYSTRINGS_H
 #define LYSTRINGS_H
@@ -189,7 +189,7 @@ extern "C" {
 #define VISIBLE  0
 #define HIDDEN   1
 
-#ifdef EXP_ALT_BINDINGS
+#ifdef USE_ALT_BINDINGS
 /*  Enable code implementing additional, mostly emacs-like, line-editing
     functions. - kw */
 #define ENHANCED_LINEEDIT

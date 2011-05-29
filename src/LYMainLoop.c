@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMainLoop.c,v 1.173 2011/05/19 10:56:00 tom Exp $
+ * $LynxId: LYMainLoop.c,v 1.174 2011/05/28 13:05:14 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTAccess.h>
@@ -1492,7 +1492,7 @@ static int handle_LYK_ACTIVATE(int *c,
     return 0;
 }
 
-#ifdef EXP_ADDRLIST_PAGE
+#ifdef USE_ADDRLIST_PAGE
 static BOOLEAN handle_LYK_ADDRLIST(int *cmd)
 {
     /*
@@ -1524,7 +1524,7 @@ static BOOLEAN handle_LYK_ADDRLIST(int *cmd)
     }
     return FALSE;
 }
-#endif /* EXP_ADDRLIST_PAGE */
+#endif /* USE_ADDRLIST_PAGE */
 
 static void handle_LYK_ADD_BOOKMARK(BOOLEAN *refresh_screen,
 				    int *old_c,
@@ -7292,12 +7292,12 @@ int mainloop(void)
 		goto new_cmd;
 	    break;
 
-#ifdef EXP_ADDRLIST_PAGE
+#ifdef USE_ADDRLIST_PAGE
 	case LYK_ADDRLIST:	/* always list URL's (only) */
 	    if (handle_LYK_ADDRLIST(&cmd))
 		goto new_cmd;
 	    break;
-#endif /* EXP_ADDRLIST_PAGE */
+#endif /* USE_ADDRLIST_PAGE */
 
 	case LYK_VLINKS:	/* list links visited during the current session */
 	    if (handle_LYK_VLINKS(&cmd, &newdoc_link_is_absolute))
