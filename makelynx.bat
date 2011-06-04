@@ -1,5 +1,5 @@
 @echo off
-@rem $LynxId: makelynx.bat,v 1.15 2011/05/28 13:07:55 tom Exp $
+@rem $LynxId: makelynx.bat,v 1.16 2011/06/04 00:59:22 tom Exp $
 @echo Windows/Dos batch makefile for MingW32 and lynx.exe
 @echo Remember to precede this by "command /E:8192" for Windows prior to
 @echo W2000 and "cmd.exe /E:8192" for subsequent Window versions and to
@@ -61,7 +61,6 @@ echo #define HAVE_STRERROR	 1 >> lynx_cfg.h
 echo #define LYNX_CFG_FILE "./lynx.cfg" >> lynx_cfg.h
 echo #define LY_MAXPATH       1024 >> lynx_cfg.h
 echo #define USE_BLAT_MAILER	 1 >> lynx_cfg.h
-echo #define USE_ALT_BLAT_MAILER 1 >> lynx_cfg.h
 echo #define VC			2.14FM  >> lynx_cfg.h
 echo #define _WIN_CC		 1 >> lynx_cfg.h
 rem echo #define USE_SCROLLBAR	 1 >> lynx_cfg.h

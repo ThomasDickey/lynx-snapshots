@@ -1,9 +1,13 @@
--- $LynxId: CHANGES,v 1.546 2011/05/28 13:13:56 tom Exp $
+-- $LynxId: CHANGES,v 1.547 2011/06/04 12:39:52 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2011-05-28 (2.8.8dev.9)
+2011-06-04 (2.8.8dev.9)
+* update command-line syntax for the blat mailer, to work with blat 2.6.2 -TD
+* change default in makelynx.bat to assume blat rather than blatj, because
+  the latter does not provide a way to authenticate user/password on a mail
+  server -TD
 * change #define's for addrlist-page and alt-bindings to reflect their
   non-experimental status -TD
 * change default for --enable-addrlist-page configure option to enabled -TD
