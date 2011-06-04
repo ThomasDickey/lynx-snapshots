@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMail.h,v 1.16 2011/05/27 23:18:26 tom Exp $
+ * $LynxId: LYMail.h,v 1.17 2011/06/02 10:37:23 tom Exp $
  */
 #ifndef LYMAIL_H
 #define LYMAIL_H
@@ -17,8 +17,8 @@ extern "C" {
 #define USE_BLAT_MAILER 1
 #endif
 
-#ifndef USE_ALTBLAT_MAILER
-#define USE_ALTBLAT_MAILER 0
+#ifndef USE_ALT_BLAT_MAILER
+#define USE_ALT_BLAT_MAILER 0
 #endif
 
 #ifndef USE_BLAT_MAILER

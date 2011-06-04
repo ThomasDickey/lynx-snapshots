@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMain.c,v 1.229 2011/05/27 22:55:56 tom Exp $
+ * $LynxId: LYMain.c,v 1.230 2011/06/02 10:37:33 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTP.h>
@@ -351,9 +351,9 @@ BOOLEAN no_table_center = FALSE;	/* 1998/10/09 (Fri) 15:12:49 */
 
 #if USE_BLAT_MAILER
 BOOLEAN mail_is_blat = TRUE;
-BOOLEAN mail_is_altblat = USE_ALTBLAT_MAILER;
+BOOLEAN mail_is_altblat = USE_ALT_BLAT_MAILER;
 
-#if USE_ALTBLAT_MAILER
+#if USE_ALT_BLAT_MAILER
 #define THIS_BLAT_MAIL ALTBLAT_MAIL
 #define THAT_BLAT_MAIL BLAT_MAIL
 #else

@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMail.c,v 1.87 2011/05/27 23:14:46 tom Exp $
+ * $LynxId: LYMail.c,v 1.88 2011/06/04 13:32:51 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTParse.h>
@@ -303,20 +303,51 @@ static void show_addresses(char *addresses)
 #if USE_BLAT_MAILER
 
 /*
-syntax:
+ * blat's options-file parser (see makeargv.cpp) treats backslash and double
+ * quote characters specially.  lynx doesn't.  Do a conversion as we write the
+ * option.
+ */
+static void blat_option(FILE *fp, const char *option, const char *value)
+{
+    if (non_empty(value)) {
+	const char *special = "\\\"";
+	size_t length = strlen(value);
+	size_t reject = strcspn(value, special);
+
+	fputs(option, fp);
+	fputc(' ', fp);
+	if (length == reject) {
+	    fputs(value, fp);
+	} else {
+	    fputc('"', fp);
+	    while (*value != '\0') {
+		if (strchr(special, *value)) {
+		    fputc('\\', fp);
+		}
+		fputc(UCH(*value), fp);
+		++value;
+	    }
+	    fputc('"', fp);
+	}
+	fputc('\n', fp);
+    }
+}
+
+/*
+syntax for blat 2.6.2:
 Blat <filename> -t <recipient> [optional switches (see below)]
 
-<filename>    : file with the message body
--t <recipient>: recipient list (comma separated)
--s <subj>     : subject line
--f <sender>   : overrides the default sender address (must be known to server)
--i <addr>     : a 'From:' address, not necessarily known to the SMTP server.
--c <recipient>: carbon copy recipient list (comma separated)
--b <recipient>: blind carbon copy recipient list (comma separated)
--h            : displays this help.
--mime         : MIME Quoted-Printable Content-Transfer-Encoding.
--q            : supresses *all* output.
--server <addr>: overrides the default SMTP server to be used.
+-bodyF <filename> : file with the message body
+-t <recipient>    : recipient list (comma separated)
+-s <subj>         : subject line
+-f <sender>       : overrides the default sender address (must be known to server)
+-i <addr>         : a 'From:' address, not necessarily known to the SMTP server.
+-c <recipient>    : carbon copy recipient list (comma separated)
+-b <recipient>    : blind carbon copy recipient list (comma separated)
+-help             : displays the help message.
+-mime             : MIME Quoted-Printable Content-Transfer-Encoding.
+-q                : supresses *all* output.
+-server <addr>    : overrides the default SMTP server to be used.
 
 */
 
@@ -344,7 +375,7 @@ static char *blat_cmd(char *filename,
 
     } else {
 
-	const char *format = "%s @%s";
+	const char *format = "%s -of %s";
 	char bl_cmd_file[LY_MAXPATH];
 	FILE *fp;
 
@@ -364,17 +395,11 @@ static char *blat_cmd(char *filename,
 	HTAddParam(&b_cmd, format, 1, BLAT_MAIL);
 
 	ConvertToWin32Path(filename, dosname);
-	fprintf(fp, "%s\n", dosname);
-
-	fprintf(fp, "-t\n%s\n", address);
-	if (subject)
-	    fprintf(fp, "-s\n%s\n", subject);
-	if (non_empty(mail_addr)) {
-	    fprintf(fp, "-f\n%s\n", mail_addr);
-	}
-	if (non_empty(ccaddr)) {
-	    fprintf(fp, "-c\n%s\n", ccaddr);
-	}
+	blat_option(fp, "-bodyF", dosname);
+	blat_option(fp, "-t", address);
+	blat_option(fp, "-s", subject);
+	blat_option(fp, "-f", mail_addr);
+	blat_option(fp, "-c", ccaddr);
 	LYCloseOutput(fp);
 
 	ConvertToWin32Path(bl_cmd_file, dosname);
