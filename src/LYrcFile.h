@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYrcFile.h,v 1.40 2010/12/11 14:12:47 tom Exp $
+ * $LynxId: LYrcFile.h,v 1.41 2011/06/04 15:12:12 tom Exp $
  */
 #ifndef LYRCFILE_H
 #define LYRCFILE_H
@@ -44,6 +44,7 @@
 #define RC_COLOR_STYLE                  "color_style"
 #define RC_COMPRESS_PATH                "compress_path"
 #define RC_CONNECT_TIMEOUT              "connect_timeout"
+#define RC_CONV_JISX0201KANA            "conv_jisx0201kana"
 #define RC_COOKIE_ACCEPT_DOMAINS        "cookie_accept_domains"
 #define RC_COOKIE_FILE                  "cookie_file"
 #define RC_COOKIE_LOOSE_INVALID_DOMAINS "cookie_loose_invalid_domains"
@@ -138,6 +139,7 @@
 #define RC_MAX_COOKIES_GLOBAL           "max_cookies_global"
 #define RC_MAX_URI_SIZE                 "max_uri_size"
 #define RC_MESSAGESECS                  "messagesecs"
+#define RC_MESSAGE_LANGUAGE             "message_language"
 #define RC_MINIMAL_COMMENTS             "minimal_comments"
 #define RC_MKDIR_PATH                   "mkdir_path"
 #define RC_MULTI_BOOKMARK               "multi_bookmark"
@@ -175,7 +177,7 @@
 #define RC_PERSONAL_MAILCAP             "personal_mailcap"
 #define RC_PERSONAL_MAIL_ADDRESS        "personal_mail_address"
 #define RC_PERSONAL_MAIL_NAME           "personal_mail_name"
-#define RC_POSITIONABLE_EDITOR		"positionable_editor"
+#define RC_POSITIONABLE_EDITOR          "positionable_editor"
 #define RC_PREFERRED_CHARSET            "preferred_charset"
 #define RC_PREFERRED_ENCODING           "preferred_encoding"
 #define RC_PREFERRED_LANGUAGE           "preferred_language"
@@ -264,6 +266,7 @@
 #define RC_VI_KEYS                      "vi_keys"
 #define RC_VI_KEYS_ALWAYS_ON            "vi_keys_always_on"
 #define RC_WAIS_PROXY                   "wais_proxy"
+#define RC_WAIT_VIEWER_TERMINATION      "wait_viewer_termination"
 #define RC_XHTML_PARSING                "xhtml_parsing"
 #define RC_XLOADIMAGE_COMMAND           "xloadimage_command"
 #define RC_ZCAT_PATH                    "zcat_path"

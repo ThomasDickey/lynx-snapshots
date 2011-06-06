@@ -1,4 +1,4 @@
-/* $LynxId: LYCurses.c,v 1.158 2010/10/31 17:56:18 tom Exp $ */
+/* $LynxId: LYCurses.c,v 1.160 2011/06/06 09:20:59 tom Exp $ */
 #include <HTUtils.h>
 #include <HTAlert.h>
 
@@ -450,11 +450,11 @@ void curses_w_style(WINDOW * win, int style,
     int YP, XP;
 
 #if !OMIT_SCN_KEEPING
-    bucket *ds = (style == NOSTYLE ? &nostyle_bucket : &hashStyles[style]);
+    bucket *ds = (style == NOSTYLE ? nostyle_bucket() : &hashStyles[style]);
 
 #else
     bucket *ds = (style == NOSTYLE ? &nostyle_bucket :
-		  (style == SPECIAL_STYLE ? &special_bucket : &hashStyles[style]));
+		  (style == SPECIAL_STYLE ? special_bucket() : &hashStyles[style]));
 #endif
 
     if (!ds->name) {
@@ -924,6 +924,188 @@ static WINDOW *LYscreen = NULL;
 #if defined(PDCURSES) && defined(PDC_BUILD) && PDC_BUILD >= 2401
 int saved_scrsize_x = 0;
 int saved_scrsize_y = 0;
+
+int saved_scrsize_x2 = 0;
+int saved_scrsize_y2 = 0;
+int saved_winpos_x2 = 0;
+int saved_winpos_y2 = 0;
+#endif
+
+#ifdef USE_MAXSCREEN_TOGGLE
+static HWND currentWindowHandle = NULL;
+static char dummyWindowTitle[256];
+
+static int CALLBACK EnumWindowsProc(HWND hwnd, LPARAM lParam)
+{
+    char this_title[256];
+
+    if (GetWindowText(hwnd, this_title, sizeof(this_title) - 1) &&
+	(strncmp(dummyWindowTitle, this_title, 256) == 0)) {
+	currentWindowHandle = hwnd;
+	return FALSE;
+    }
+    return TRUE;
+}
+
+static void setCurrentWindowHandle(void)
+{
+    char org_title[256];
+    DWORD pid;
+    int i;
+
+    if (currentWindowHandle != NULL) {
+	return;
+    }
+    pid = GetCurrentProcessId();
+    sprintf(dummyWindowTitle, "Lynx for Win32 (pid=%ld)", pid);
+    GetConsoleTitle(org_title, sizeof(org_title) - 1);
+    SetConsoleTitle(dummyWindowTitle);
+    for (i = 0; i < 10; i++) {
+	EnumWindows(EnumWindowsProc, (LPARAM) 0);
+	if (currentWindowHandle != NULL) {
+	    break;
+	}
+	CTRACE((tfp,
+		"Failed to get current window handle. Try again...(%d)\n", i));
+	Sleep(100);
+    }
+    SetConsoleTitle(org_title);
+}
+
+static void moveWindowHXY(HWND hwnd, int x, int y)
+{
+    int win_height, win_width;
+    RECT winrect;
+
+    GetWindowRect(hwnd, &winrect);
+    win_width = winrect.right - winrect.left;
+    win_height = winrect.bottom - winrect.top;
+
+    if ((x != winrect.left) || (y != winrect.top)) {
+	MoveWindow(hwnd, x, y, win_width, win_height, TRUE);
+	CTRACE((tfp, "move window from (%d,%d) to (%d,%d).\n", winrect.left,
+		winrect.top, x, y));
+    }
+}
+
+static void adjustWindowPos(void)
+{
+    int disp_height, disp_width, win_height, win_width;
+    int newwin_left, newwin_top;
+    RECT winrect;
+    DWORD pid;
+
+    setCurrentWindowHandle();
+    if (currentWindowHandle == NULL) {
+	return;
+    }
+    GetWindowThreadProcessId(currentWindowHandle, &pid);
+    disp_width = GetSystemMetrics(SM_CXFULLSCREEN);
+    disp_height = GetSystemMetrics(SM_CYFULLSCREEN);
+    Sleep(100);			/* If not, GetWindowRect sometimes return wrong value. */
+    GetWindowRect(currentWindowHandle, &winrect);
+    win_width = winrect.right - winrect.left;
+    win_height = winrect.bottom - winrect.top;
+    CTRACE((tfp, "Display Size: (%4d,%3d)\n", disp_width, disp_height));
+    CTRACE((tfp, "Orig WinRect: (%4d,%4d,%3d,%3d), ",
+	    winrect.left, winrect.right, winrect.top, winrect.bottom));
+    CTRACE((tfp, "Size: (%4d,%3d)\n", win_width, win_height));
+
+    newwin_left = winrect.left;
+    newwin_top = winrect.top;
+    if (disp_width < winrect.right) {
+	if (win_width <= disp_width) {
+	    newwin_left = disp_width - win_width;
+	} else {
+	    newwin_left = 0;
+	}
+    }
+    if (disp_height < winrect.bottom) {
+	if (win_height <= disp_height) {
+	    newwin_top = disp_height - win_height;
+	} else {
+	    newwin_top = 0;
+	}
+    }
+
+    moveWindowHXY(currentWindowHandle, newwin_left, newwin_top);
+}
+
+void maxmizeWindowSize(void)
+{
+    int disp_height, disp_width, win_height, win_width;
+    RECT winrect;
+    DWORD pid;
+    int font_width, font_height;
+
+    setCurrentWindowHandle();
+    if (currentWindowHandle == NULL) {
+	return;
+    }
+    GetWindowThreadProcessId(currentWindowHandle, &pid);
+    disp_width = GetSystemMetrics(SM_CXFULLSCREEN);
+    disp_height = GetSystemMetrics(SM_CYFULLSCREEN);
+    GetWindowRect(currentWindowHandle, &winrect);
+    win_width = winrect.right - winrect.left;
+    win_height = winrect.bottom - winrect.top;
+    saved_winpos_x2 = winrect.left;
+    saved_winpos_y2 = winrect.top;
+
+    if ((win_width <= disp_width) && (win_height <= disp_height)) {
+	GetClientRect(currentWindowHandle, &winrect);
+	win_width = winrect.right - winrect.left;
+	win_height = winrect.bottom - winrect.top;
+	CTRACE((tfp, "Current Rect: (%4d,%4d,%3d,%3d), ",
+		winrect.left, winrect.right, winrect.top, winrect.bottom));
+	CTRACE((tfp, "Size: (%4d,%3d)\n", win_width, win_height));
+
+	if (scrsize_x == 0) {
+	    scrsize_x = COLS;
+	    scrsize_y = LINES + 1;
+	}
+	if ((scrsize_x == 0) || (scrsize_y == 0)) {
+	    CTRACE((tfp, "Illegal value: scrsize_x=%d, scrsize_y=%d\n",
+		    scrsize_x, scrsize_y));
+	} else {
+	    font_width = win_width / scrsize_x;
+	    font_height = win_height / scrsize_y;
+	    CTRACE((tfp, "Font Size: (%2d,%2d)\n", font_width, font_height));
+	    if ((font_width == 0) || (font_height == 0)) {
+		CTRACE((tfp, "Illegal font size.\n"));
+	    } else {
+		LYcols = scrsize_x = (disp_width - 4) / font_width;
+		LYlines = scrsize_y = (disp_height - 32) / font_height;
+		LYlines--;
+		CTRACE((tfp, "New Screen Size: (%2d,%2d)\n", scrsize_x, scrsize_y));
+		resize_term(scrsize_y, scrsize_x);
+		Sleep(100);
+		moveWindowHXY(currentWindowHandle, 0, 0);
+		recent_sizechange = TRUE;
+	    }
+	}
+    }
+}
+
+void recoverWindowSize(void)
+{
+    if ((0 < saved_scrsize_x2) && (0 < saved_scrsize_y2)) {
+	LYcols = scrsize_x = saved_scrsize_x2;
+	LYlines = scrsize_y = saved_scrsize_y2;
+	LYlines--;
+	wclear(curscr);
+	doupdate();
+	resize_term(scrsize_y, scrsize_x);
+
+	setCurrentWindowHandle();
+	if (currentWindowHandle != NULL) {
+	    Sleep(100);
+	    moveWindowHXY(currentWindowHandle, saved_winpos_x2, saved_winpos_y2);
+	}
+	recent_sizechange = TRUE;
+    } else {
+	CTRACE((tfp, "scrsize_{xy} is not saved yet.\n"));
+    }
+}
 #endif
 
 void start_curses(void)
@@ -1285,12 +1467,26 @@ void start_curses(void)
     if ((scrsize_x != 0) && (scrsize_y != 0)) {
 	if (saved_scrsize_x == 0) {
 	    saved_scrsize_x = COLS;
-	    saved_scrsize_y = LINES;
+	    saved_scrsize_y = LINES + 1;
 	}
 	CTRACE((tfp, "resize_term: x=%d, y=%d\n", scrsize_x, scrsize_y));
 	CTRACE((tfp, "saved terminal size: x=%d, y=%d\n", saved_scrsize_x, saved_scrsize_y));
 	resize_term(scrsize_y, scrsize_x);
+	LYlines = scrsize_y - 1;
+	LYcols = scrsize_x;
 	LYclear();
+#ifdef _WINDOWS
+	adjustWindowPos();
+#endif
+    }
+    if (saved_scrsize_x2 == 0) {
+	if (saved_scrsize_x == 0) {
+	    saved_scrsize_x2 = COLS;
+	    saved_scrsize_y2 = LINES + 1;
+	} else {
+	    saved_scrsize_x2 = scrsize_x;
+	    saved_scrsize_y2 = scrsize_y;
+	}
     }
 #endif
     CTRACE((tfp, "start_curses: done.\n"));

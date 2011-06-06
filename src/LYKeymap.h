@@ -1,4 +1,4 @@
-/* $LynxId: LYKeymap.h,v 1.43 2011/05/28 13:05:14 tom Exp $ */
+/* $LynxId: LYKeymap.h,v 1.44 2011/06/05 19:05:41 tom Exp $ */
 #ifndef LYKEYMAP_H
 #define LYKEYMAP_H
 
@@ -269,6 +269,12 @@ extern "C" {
 	,LYK_CACHE_JAR
 #else
 #define LYK_CACHE_JAR LYK_UNKNOWN
+#endif
+
+#ifdef USE_MAXSCREEN_TOGGLE
+	,LYK_MAXSCREEN_TOGGLE
+#else
+#define LYK_MAXSCREEN_TOGGLE  LYK_UNKNOWN
 #endif
 
     } LYKeymapCode;

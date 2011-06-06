@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTDOS.c,v 1.38 2010/09/25 00:42:02 tom Exp $
+ * $LynxId: HTDOS.c,v 1.39 2011/06/04 18:45:09 tom Exp $
  *							DOS specific routines
  */
 
@@ -12,6 +12,7 @@
 
 #ifdef _WINDOWS
 #include <LYGlobalDefs.h>
+#include <HTAlert.h>
 #endif
 
 /*
@@ -108,7 +109,16 @@ char *HTDOS_name(const char *wwwname)
     static char *result = NULL;
     int joe;
 
+#if defined(SH_EX)		/* 2000/03/07 (Tue) 18:32:42 */
+    if (unsafe_filename(wwwname)) {
+	HTUserMsg2("unsafe filename : %s", wwwname);
+	copy_plus(&result, "BAD_LOCAL_FILE_NAME");
+    } else {
+	copy_plus(&result, wwwname);
+    }
+#else
     copy_plus(&result, wwwname);
+#endif
 #ifdef __DJGPP__
     if (result[0] == '/'
 	&& result[1] == 'd'
@@ -126,6 +136,10 @@ char *HTDOS_name(const char *wwwname)
     /* the rest of path may be with or without drive letter  */
     if ((result[1] != '\\') && (result[0] == '\\')) {
 	for (joe = 0; (result[joe] = result[joe + 1]) != 0; joe++) ;
+    }
+    /* convert '|' after the drive letter to ':' */
+    if (isalpha(UCH(result[0])) && result[1] == '|') {
+	result[1] = ':';
     }
 #ifdef _WINDOWS			/* 1998/04/02 (Thu) 08:59:48 */
     if (LYLastPathSep(result) != NULL

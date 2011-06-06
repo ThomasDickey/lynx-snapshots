@@ -1,5 +1,5 @@
 /*
- * $LynxId: userdefs.h,v 1.264 2011/05/27 09:33:23 tom Exp $
+ * $LynxId: userdefs.h,v 1.266 2011/06/06 00:35:56 tom Exp $
  *
  * Lynx - Hypertext navigation system
  *
@@ -1524,6 +1524,12 @@
 
 #ifdef DOSPATH
 
+/*
+ * Define this to setup feature that uses directory of lynx.exe to locate
+ * associated configuration files.
+#define USE_PROGRAM_DIR 1
+ */
+
 #ifdef _WINDOWS
 
 #ifndef USE_BLAT_MAILER
@@ -1626,8 +1632,8 @@
 #define MARK_HIDDEN_LINKS
 
 /*****************************
- * USE_TH_JP_AUTO_DETECT, CONV_JISX0201KANA_JISX0208KANA,
- * and KANJI_CODE_OVERRIDE are the macros for Japanese. - TH
+ * USE_TH_JP_AUTO_DETECT and KANJI_CODE_OVERRIDE are the macros
+ * for Japanese. - TH
  */
 /*****************************
  * USE_TH_JP_AUTO_DETECT enables a new Japanese charset detection routine.
@@ -1639,13 +1645,6 @@
  * Lynx falls back to the old assumption of the three kanji codes mixed.
  */
 #define USE_TH_JP_AUTO_DETECT
-
-/*****************************
- * If CONV_JISX0201KANA_JISX0208KANA is set, Lynx will convert
- * JIS X0201 Kana to JIS X0208 Kana, i.e., convert half-width kana
- * to full-width.
- */
-#define CONV_JISX0201KANA_JISX0208KANA
 
 /*****************************
  * Uncomment the following line to enable the kanji code override routine.

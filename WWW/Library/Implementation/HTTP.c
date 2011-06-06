@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTP.c,v 1.121 2010/11/07 21:20:58 tom Exp $
+ * $LynxId: HTTP.c,v 1.122 2011/06/05 20:38:32 tom Exp $
  *
  * HyperText Tranfer Protocol	- Client implementation		HTTP.c
  * ==========================
@@ -127,6 +127,21 @@ SSL *HTGetSSLHandle(void)
 	SSL_CTX_set_default_verify_paths(ssl_ctx);
 	SSL_CTX_set_verify(ssl_ctx, SSL_VERIFY_PEER, HTSSLCallback);
 #endif /* SSLEAY_VERSION_NUMBER < 0x0800 */
+#if defined(USE_PROGRAM_DIR) & !defined(USE_GNUTLS_INCL)
+	{
+	    X509_LOOKUP *lookup;
+
+	    lookup = X509_STORE_add_lookup(ssl_ctx->cert_store,
+					   X509_LOOKUP_file());
+	    if (lookup != NULL) {
+		char *certfile = NULL;
+
+		HTSprintf0(&certfile, "%s\\cert.pem", program_dir);
+		X509_LOOKUP_load_file(lookup, certfile, X509_FILETYPE_PEM);
+		FREE(certfile);
+	    }
+	}
+#endif
 #ifdef USE_GNUTLS_INCL
 	if ((certfile = LYGetEnv("SSL_CERT_FILE")) != NULL) {
 	    CTRACE((tfp,
@@ -139,6 +154,13 @@ SSL *HTGetSSLHandle(void)
 			"HTGetSSLHandle: certfile is set to %s by config SSL_CERT_FILE\n",
 			certfile));
 	    }
+#if defined(USE_PROGRAM_DIR)
+	    else {
+		HTSprintf0(&(certfile), "%s\\cert.pem", program_dir);
+		CTRACE((tfp,
+			"HTGetSSLHandle: certfile is set to %s by installed directory\n", certfile));
+	    }
+#endif
 	}
 #endif
 	atexit(free_ssl_ctx);
@@ -157,11 +179,23 @@ void HTSSLInitPRNG(void)
     if (RAND_status() == 0) {
 	char rand_file[256];
 	time_t t;
-	int pid;
 	long l, seed;
 
+#ifndef _WINDOWS
+	pid_t pid;
+
+#else
+	DWORD pid;
+#endif
+
 	t = time(NULL);
+
+#ifndef _WINDOWS
 	pid = getpid();
+#else
+	pid = GetCurrentThreadId();
+#endif
+
 	RAND_file_name(rand_file, 256L);
 	CTRACE((tfp, "HTTP: Seeding PRNG\n"));
 	if (rand_file != NULL) {

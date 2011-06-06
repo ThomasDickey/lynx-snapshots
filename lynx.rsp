@@ -82,5 +82,8 @@
 ../obj/lyutils.obj
 ../obj/xsystem.obj
 ../curses/PDCURSES.LIB
-../curses/ZLIB.LIB
+../curses/zdllbor.lib
+../curses/libeay32.lib
+../curses/ssleay32.lib
 ../curses/iconv.lib
+../curses/libintl.lib

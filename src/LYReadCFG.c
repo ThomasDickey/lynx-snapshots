@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYReadCFG.c,v 1.162 2011/05/24 09:04:24 tom Exp $
+ * $LynxId: LYReadCFG.c,v 1.164 2011/06/06 00:01:36 tom Exp $
  */
 #ifndef NO_RULES
 #include <HTRules.h>
@@ -945,6 +945,23 @@ static int status_buffer_size_fun(char *value)
     return 0;
 }
 
+static int startfile_fun(char *value)
+{
+    StrAllocCopy(startfile, value);
+
+#ifdef USE_PROGRAM_DIR
+    if (is_url(startfile) == 0) {
+	char *tmp = NULL;
+
+	HTSprintf0(&tmp, "%s\\%s", program_dir, startfile);
+	FREE(startfile);
+	LYLocalFileToURL(&startfile, tmp);
+	FREE(tmp);
+    }
+#endif
+    return 0;
+}
+
 static int suffix_fun(char *value)
 {
     char *mime_type, *p, *parsed;
@@ -1376,6 +1393,20 @@ static int screen_size_fun(char *value)
 }
 #endif
 
+#if defined(HAVE_LIBINTL_H) || defined(HAVE_LIBGETTEXT_H)
+static int message_language_fun(char *value)
+{
+    char *tmp = NULL;
+
+    HTSprintf0(&tmp, "LANG=%s", value);
+    putenv(tmp);
+
+    LYSetTextDomain();
+
+    return 0;
+}
+#endif
+
 /* This table is searched ignoring case */
 /* *INDENT-OFF* */
 static Config_Type Config_Table [] =
@@ -1429,6 +1460,7 @@ static Config_Type Config_Table [] =
      PARSE_PRG(RC_COMPRESS_PATH,        ppCOMPRESS),
      PARSE_PRG(RC_COPY_PATH,            ppCOPY),
      PARSE_INT(RC_CONNECT_TIMEOUT,      connect_timeout),
+     PARSE_SET(RC_CONV_JISX0201KANA,    conv_jisx0201kana),
      PARSE_STR(RC_COOKIE_ACCEPT_DOMAINS, LYCookieSAcceptDomains),
 #ifdef USE_PERSISTENT_COOKIES
      PARSE_STR(RC_COOKIE_FILE,          LYCookieFile),
@@ -1559,6 +1591,9 @@ static Config_Type Config_Table [] =
      PARSE_INT(RC_MAX_COOKIES_GLOBAL,   max_cookies_global),
      PARSE_INT(RC_MAX_URI_SIZE,         max_uri_size),
      PARSE_TIM(RC_MESSAGESECS,          MessageSecs),
+#if defined(HAVE_LIBINTL_H) || defined(HAVE_LIBGETTEXT_H)
+     PARSE_FUN(RC_MESSAGE_LANGUAGE,     message_language_fun),
+#endif
      PARSE_SET(RC_MINIMAL_COMMENTS,     minimal_comments),
      PARSE_PRG(RC_MKDIR_PATH,           ppMKDIR),
      PARSE_ENU(RC_MULTI_BOOKMARK_SUPPORT, LYMultiBookmarks, tbl_multi_bookmarks),
@@ -1659,7 +1694,7 @@ static Config_Type Config_Table [] =
      PARSE_ENU(RC_SOURCE_CACHE_FOR_ABORTED, LYCacheSourceForAborted, tbl_abort_source_cache),
 #endif
      PARSE_STR(RC_SSL_CERT_FILE,        SSL_cert_file),
-     PARSE_STR(RC_STARTFILE,            startfile),
+     PARSE_FUN(RC_STARTFILE,            startfile_fun),
      PARSE_FUN(RC_STATUS_BUFFER_SIZE,   status_buffer_size_fun),
      PARSE_SET(RC_STRIP_DOTDOT_URLS,    LYStripDotDotURLs),
      PARSE_SET(RC_SUBSTITUTE_UNDERSCORES, use_underscore),
@@ -1711,6 +1746,7 @@ static Config_Type Config_Table [] =
      PARSE_SET(RC_VI_KEYS_ALWAYS_ON,    vi_keys),
      PARSE_FUN(RC_VIEWER,               viewer_fun),
      PARSE_Env(RC_WAIS_PROXY,           0),
+     PARSE_SET(RC_WAIT_VIEWER_TERMINATION, wait_viewer_termination),
      PARSE_STR(RC_XLOADIMAGE_COMMAND,   XLoadImageCommand),
      PARSE_SET(RC_XHTML_PARSING,        LYxhtml_parsing),
      PARSE_PRG(RC_ZCAT_PATH,            ppZCAT),

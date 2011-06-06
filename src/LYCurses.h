@@ -1,4 +1,4 @@
-/* $LynxId: LYCurses.h,v 1.87 2010/10/31 17:56:18 tom Exp $ */
+/* $LynxId: LYCurses.h,v 1.88 2011/06/05 19:19:26 tom Exp $ */
 #ifndef LYCURSES_H
 #define LYCURSES_H
 
@@ -325,6 +325,12 @@ typedef char chtype;
 #else
 #define USE_CURSES_PAIR_0
 #endif
+#endif
+
+#if defined(_WINDOWS) && defined(PDCURSES) && defined(PDC_BUILD) && PDC_BUILD >= 2401
+#define USE_MAXSCREEN_TOGGLE 1
+extern void maxmizeWindowSize(void);
+extern void recoverWindowSize(void);
 #endif
 
 #endif /* USE_SLANG */

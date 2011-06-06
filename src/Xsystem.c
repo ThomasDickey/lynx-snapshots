@@ -1,4 +1,4 @@
-/* $LynxId: Xsystem.c,v 1.24 2010/09/24 22:07:35 tom Exp $
+/* $LynxId: Xsystem.c,v 1.26 2011/06/06 00:42:29 tom Exp $
  *	like system("cmd") but return with exit code of "cmd"
  *	for Turbo-C/MS-C/LSI-C
  *  This code is in the public domain.
@@ -528,13 +528,10 @@ int xsystem(char *cmd)
     return rc < 0 ? 0xFF00 : rc;
 }
 
-int exec_command(char *cmd, int wait_flag GCC_UNUSED)
+int exec_command(char *cmd, int wait_flag)
 {
     int rc;
 
-#if defined(__MINGW32__)
-    rc = system(cmd);
-#else
     PRO *p;
     char *pif;
     int cmd_str;
@@ -568,7 +565,6 @@ int exec_command(char *cmd, int wait_flag GCC_UNUSED)
     else
 	rc = prog_go(p, P_NOWAIT);
 
-#endif
     return rc;
 }
 

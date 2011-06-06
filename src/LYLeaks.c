@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYLeaks.c,v 1.33 2010/09/23 22:41:23 tom Exp $
+ * $LynxId: LYLeaks.c,v 1.34 2011/06/06 09:47:22 tom Exp $
  *
  *	Copyright (c) 1994, University of Kansas, All Rights Reserved
  *	(this file was rewritten twice - 1998/1999 and 2003/2004)
@@ -314,10 +314,14 @@ void LYLeaks(void)
 	    gettext("Total memory leakage this run:"),
 	    (unsigned) st_total);
 #ifdef LEAK_SUMMARY
-    fprintf(Fp_leakagesink, "%s\t%ld\n", gettext("Peak allocation"), peak_alloced);
-    fprintf(Fp_leakagesink, "%s\t%ld\n", gettext("Bytes allocated"), total_alloced);
-    fprintf(Fp_leakagesink, "%s\t%ld\n", gettext("Total mallocs"), count_mallocs);
-    fprintf(Fp_leakagesink, "%s\t%ld\n", gettext("Total frees"), count_frees);
+    fprintf(Fp_leakagesink,
+	    "%s\t%lu\n", gettext("Peak allocation"), (unsigned long) peak_alloced);
+    fprintf(Fp_leakagesink,
+	    "%s\t%lu\n", gettext("Bytes allocated"), (unsigned long) total_alloced);
+    fprintf(Fp_leakagesink,
+	    "%s\t%ld\n", gettext("Total mallocs"), count_mallocs);
+    fprintf(Fp_leakagesink,
+	    "%s\t%ld\n", gettext("Total frees"), count_frees);
 #endif
     fclose(Fp_leakagesink);
 

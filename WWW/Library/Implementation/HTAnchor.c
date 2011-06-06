@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTAnchor.c,v 1.69 2010/09/25 12:39:08 tom Exp $
+ * $LynxId: HTAnchor.c,v 1.70 2011/06/06 08:25:33 tom Exp $
  *
  *	Hypertext "Anchor" Object				HTAnchor.c
  *	==========================
@@ -170,7 +170,7 @@ static BOOL HTSEquivalent(const char *s,
 		return (NO);
 	    }
 	}
-	return (HT_EQUIV(*s, *t));
+	return (BOOL) (HT_EQUIV(*s, *t));
     } else {
 	return (BOOL) (s == t);	/* Two NULLs are equivalent, aren't they ? */
     }

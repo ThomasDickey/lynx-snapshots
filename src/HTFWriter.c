@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFWriter.c,v 1.97 2010/09/25 01:00:57 tom Exp $
+ * $LynxId: HTFWriter.c,v 1.98 2011/06/04 14:18:10 tom Exp $
  *
  *		FILE WRITER				HTFWrite.h
  *		===========
@@ -408,7 +408,7 @@ static void HTFWriter_free(HTStream *me)
 #endif
 	    }
 #ifdef _WIN_CC
-	    exec_command(me->end_command, FALSE);
+	    exec_command(me->end_command, wait_viewer_termination);
 #else
 	    LYSystem(me->end_command);
 #endif
