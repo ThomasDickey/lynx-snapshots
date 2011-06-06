@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYStyle.c,v 1.69 2010/09/24 22:07:20 tom Exp $
+ * $LynxId: LYStyle.c,v 1.70 2011/06/06 09:28:29 tom Exp $
  *
  * character level styles for Lynx
  * (c) 1996 Rob Partington -- donated to the Lyncei (if they want it :-)
@@ -51,16 +51,6 @@ int last_styles[MAX_LAST_STYLES + 1] =
 int last_colorattr_ptr = 0;
 
 bucket hashStyles[CSHASHSIZE];
-bucket special_bucket =
-{
-    "<special>",		/* in order something to be in trace. */
-    0, 0, 0, 0, NULL
-};
-bucket nostyle_bucket =
-{
-    "<NOSTYLE>",		/* in order something to be in trace. */
-    0, 0, 0, 0, NULL
-};
 
 int cached_tag_styles[HTML_ELEMENTS];
 int current_tag_style;
@@ -118,6 +108,28 @@ static unsigned char our_pairs[2]
 [MAX_BLINK]
 [MAX_COLOR + 1]
 [MAX_COLOR + 1];
+
+static bucket *new_bucket(const char *name)
+{
+    bucket *result = typecalloc(bucket);
+
+    if (!result)
+	outofmem(__FILE__, "new_bucket");
+    StrAllocCopy(result->name, name);
+    return result;
+}
+
+#if OMIT_SCN_KEEPING
+bucket *special_bucket(void)
+{
+    return new_bucket("<special>");
+}
+#endif
+
+bucket *nostyle_bucket(void)
+{
+    return new_bucket("<NOSTYLE>");
+}
 
 static char *TrimLowercase(char *buffer)
 {

@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMainLoop.c,v 1.174 2011/05/28 13:05:14 tom Exp $
+ * $LynxId: LYMainLoop.c,v 1.175 2011/06/05 20:38:08 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTAccess.h>
@@ -3200,6 +3200,16 @@ static void handle_LYK_INDEX(int *old_c,
 		last_kcode = NOKANJI;	/* AUTO */
 	    }
 #endif
+#ifdef USE_PROGRAM_DIR
+	    if (is_url(indexfile) == 0) {
+		char *tmp = NULL;
+
+		HTSprintf0(&tmp, "%s\\%s", program_dir, indexfile);
+		FREE(indexfile);
+		LYLocalFileToURL(&indexfile, tmp);
+		FREE(tmp);
+	    }
+#endif
 	    set_address(&newdoc, indexfile);
 	    StrAllocCopy(newdoc.title, gettext("System Index"));	/* name it */
 	    LYFreePostData(&newdoc);
@@ -5187,6 +5197,25 @@ static BOOLEAN handle_LYK_LINEWRAP_TOGGLE(int *cmd,
 	LYshiftWin = 0;
     *flag = TRUE;
     HTUserMsg(LYwideLines ? LINEWRAP_OFF : LINEWRAP_ON);
+    return reparse_or_reload(cmd);
+}
+#endif
+
+#ifdef USE_MAXSCREEN_TOGGLE
+static BOOLEAN handle_LYK_MAXSCREEN_TOGGLE(int *cmd)
+{
+    static int flag = 0;
+
+    CTRACE((tfp, "Entering handle_LYK_MAXSCREEN_TOGGLE\n"));
+    if (flag) {
+	CTRACE((tfp, "Calling recoverWindowSize()\n"));
+	recoverWindowSize();
+	flag = 0;
+    } else {
+	CTRACE((tfp, "Calling maxmizeWindowSize()\n"));
+	maxmizeWindowSize();
+	flag = 1;
+    }
     return reparse_or_reload(cmd);
 }
 #endif
@@ -7416,6 +7445,13 @@ int mainloop(void)
 	    break;
 	case LYK_LINEWRAP_TOGGLE:
 	    if (handle_LYK_LINEWRAP_TOGGLE(&cmd, &refresh_screen))
+		goto new_cmd;
+	    break;
+#endif
+
+#ifdef USE_MAXSCREEN_TOGGLE
+	case LYK_MAXSCREEN_TOGGLE:
+	    if (handle_LYK_MAXSCREEN_TOGGLE(&cmd))
 		goto new_cmd;
 	    break;
 #endif

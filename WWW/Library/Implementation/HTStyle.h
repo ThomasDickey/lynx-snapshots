@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTStyle.h,v 1.16 2009/11/27 13:07:57 tom Exp $
+ * $LynxId: HTStyle.h,v 1.17 2011/06/06 09:12:01 tom Exp $
 					    HTStyle: Style management for libwww
                               STYLE DEFINITION FOR HYPERTEXT
 
@@ -156,7 +156,7 @@ extern "C" {
  *              -----------
  */
     typedef struct _HTStyleSheet {
-	char *name;
+	const char *name;
 	HTStyle *styles;
     } HTStyleSheet;
 

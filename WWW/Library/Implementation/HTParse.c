@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTParse.c,v 1.68 2011/05/24 09:21:01 tom Exp $
+ * $LynxId: HTParse.c,v 1.69 2011/06/06 10:46:18 tom Exp $
  *
  *		Parse HyperText Document Address		HTParse.c
  *		================================
@@ -300,7 +300,8 @@ static void convert_to_idna(char *host)
 			buffer,
 			idna_strerror((Idna_rc) code)));
 	    }
-	    FREE(output);
+	    if (output)
+		(free) (output);
 	}
 	free(buffer);
     }

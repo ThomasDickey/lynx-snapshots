@@ -1,4 +1,4 @@
-/* $LynxId: LYStrings.c,v 1.182 2010/12/08 09:42:15 tom Exp $ */
+/* $LynxId: LYStrings.c,v 1.184 2011/06/06 08:26:37 tom Exp $ */
 #include <HTUtils.h>
 #include <HTCJK.h>
 #include <UCAux.h>
@@ -1548,7 +1548,7 @@ static int LYmouse_menu(int x, int y, int atlink, int code)
     int actions[TOTAL_MENUENTRIES];
 
     int c, c1, retlac;
-    unsigned filter_out = (atlink ? ENT_ONLY_DOC : ENT_ONLY_LINK);
+    unsigned filter_out = (unsigned) (atlink ? ENT_ONLY_DOC : ENT_ONLY_LINK);
 
     c = c1 = 0;
     while (c < (int) TOTAL_MENUENTRIES) {
@@ -5031,6 +5031,9 @@ int LYgetstr(char *inputline,
 			   : (sizeof(MyEdit.buffer) - 1));
     LYSetupEdit(&MyEdit, inputline, MaxStringSize, LYcolLimit - x);
     MyEdit.hidden = (BOOL) hidden;
+#ifdef FEPCTRL
+    fep_on();
+#endif
 
     CTRACE((tfp, "called LYgetstr\n"));
     for (;;) {
@@ -5073,6 +5076,9 @@ int LYgetstr(char *inputline,
 	    LYStrNCpy(inputline, MyEdit.buffer, bufsize);
 	    LYAddToCloset(recall, MyEdit.buffer);
 	    CTRACE((tfp, "LYgetstr(%s) recall\n", inputline));
+#ifdef FEPCTRL
+	    fep_off();
+#endif
 	    return (ch);
 	}
 	ch |= CurModif;
@@ -5167,6 +5173,9 @@ int LYgetstr(char *inputline,
 	    if (!hidden)
 		LYAddToCloset(recall, MyEdit.buffer);
 	    CTRACE((tfp, "LYgetstr(%s) LYE_ENTER\n", inputline));
+#ifdef FEPCTRL
+	    fep_off();
+#endif
 	    return (ch);
 
 #ifdef CAN_CUT_AND_PASTE
@@ -5217,6 +5226,9 @@ int LYgetstr(char *inputline,
 	     */
 	    inputline[0] = '\0';
 	    CTRACE((tfp, "LYgetstr LYE_ABORT\n"));
+#ifdef FEPCTRL
+	    fep_off();
+#endif
 	    return (-1);
 
 	case LYE_STOP:
@@ -5274,6 +5286,9 @@ int LYgetstr(char *inputline,
 #endif /* SUPPORT_MULTIBYTE_EDIT */
 	}
     }
+#ifdef FEPCTRL
+    fep_off();
+#endif
 }
 
 const char *LYLineeditHelpURL(void)

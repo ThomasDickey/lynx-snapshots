@@ -1,4 +1,4 @@
-/* $LynxId: LYForms.c,v 1.88 2011/05/19 10:54:36 tom Exp $ */
+/* $LynxId: LYForms.c,v 1.89 2011/06/04 15:08:15 tom Exp $ */
 #include <HTUtils.h>
 #include <HTCJK.h>
 #include <HTTP.h>
@@ -457,7 +457,9 @@ static int form_getstr(int cur,
     if (redraw_only) {
 	return 0;		/*return value won't be analysed */
     }
-
+#ifdef FEPCTRL
+    fep_on();
+#endif
     /*
      * And go for it!
      */
@@ -643,6 +645,9 @@ static int form_getstr(int cur,
 		LYRefreshEdit(&MyEdit);
 	    } else {
 		HTInfoMsg(gettext("Clipboard empty or Not text data."));
+#ifdef FEPCTRL
+		fep_off();
+#endif
 		continue;
 	    }
 	}
@@ -657,6 +662,9 @@ static int form_getstr(int cur,
 	    break;
 	}
 	if (action == LYE_ABORT) {
+#ifdef FEPCTRL
+	    fep_off();
+#endif
 	    return (DO_NOTHING);
 	}
 	if (action == LYE_STOP) {
@@ -694,6 +702,9 @@ static int form_getstr(int cur,
 		    c = HTConfirmDefault(PREV_DOC_QUERY, NO);
 		}
 		if (c == YES) {
+#ifdef FEPCTRL
+		    fep_off();
+#endif
 		    return (ch);
 		} else {
 		    if (FormIsReadonly(form))
@@ -840,6 +851,9 @@ static int form_getstr(int cur,
 	if (non_empty(form->value))
 	    form->value_cs = current_char_set;
     }
+#ifdef FEPCTRL
+    fep_off();
+#endif
     return (ch);
 }
 

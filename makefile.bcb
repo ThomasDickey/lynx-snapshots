@@ -1,4 +1,4 @@
-# $LynxId: makefile.bcb,v 1.15 2011/05/28 13:07:55 tom Exp $
+# $LynxId: makefile.bcb,v 1.16 2011/06/04 14:18:03 tom Exp $
 #
 # Borland C++ / C++ builder
 # 1997/11/08 (Sat) 10:45:37
@@ -42,7 +42,7 @@ DEBUG=
 #SOCK_DEFS = /DUSE_WINSOCK2_H /D_WIN32_WINNT=0x0400
 
 CC_FLAGS = $(DEBUG) $(CS_DEFS) $(SOCK_DEFS) \
--I./;$(ETC_LIB);SRC;$(WWW_LIB);$(BCC_INC);SRC/CHRTRANS \
+-I./;$(ETC_LIB);$(ETC_LIB)/openssl;SRC;$(WWW_LIB);$(BCC_INC);SRC/CHRTRANS \
 -DACCESS_AUTH \
 -DCJK_EX \
 -DCOLOR_CURSES \
@@ -71,6 +71,10 @@ CC_FLAGS = $(DEBUG) $(CS_DEFS) $(SOCK_DEFS) \
 -DUSE_EXTERNALS \
 -DUSE_JUSTIFY_ELTS \
 -DUSE_MULTIBYTE_CURSES \
+-DFEPCTRL \
+-DENABLE_NLS \
+-DHAVE_GETTEXT \
+-DHAVE_LIBINTL_H \
 -DUSE_PERSISTENT_COOKIES \
 -DUSE_PRETTYSRC \
 -DUSE_READPROGRESS \
@@ -80,6 +84,8 @@ CC_FLAGS = $(DEBUG) $(CS_DEFS) $(SOCK_DEFS) \
 -DWIN_EX \
 -D_WINDOWS \
 -D_WIN_CC=1 \
+-DUSE_SSL \
+-DUSE_X509_SUPPORT \
 -DEXP_JAPANESEUTF8_SUPPORT
 
 #
@@ -98,8 +104,12 @@ clean :
 	-del /f/s/q *.i
 
 Dep_lynxdexe = \
-   $(ETC_LIB)/zlib.lib\
+   $(ETC_LIB)/zdllbor.lib\
    $(ETC_LIB)/pdcurses.lib\
+   $(ETC_LIB)/libeay32.lib\
+   $(ETC_LIB)/ssleay32.lib\
+   $(ETC_LIB)/iconv.lib\
+   $(ETC_LIB)/libintl.lib\
    $(ETC_LIB)/iconv.lib\
    $(OBJ)/DefaultStyle.obj\
    $(OBJ)/GridText.obj\

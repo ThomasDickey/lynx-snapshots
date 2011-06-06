@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYGlobalDefs.h,v 1.130 2011/05/27 21:26:14 tom Exp $
+ * $LynxId: LYGlobalDefs.h,v 1.131 2011/06/05 20:38:08 tom Exp $
  *
  * global variable definitions
  */
@@ -594,6 +594,9 @@ extern "C" {
     extern int scrsize_y;
 #endif
 
+    extern BOOLEAN conv_jisx0201kana;
+    extern BOOLEAN wait_viewer_termination;
+
 #ifndef NO_LYNX_TRACE
     extern FILE *LYTraceLogFP;	/* Pointer for TRACE log         */
     extern char *LYTraceLogPath;	/* Path for TRACE log            */
@@ -632,6 +635,10 @@ extern "C" {
 
     extern int HTNoDataOK;	/* HT_NO_DATA-is-ok hack */
     extern BOOLEAN FileInitAlreadyDone;
+
+#ifdef USE_PROGRAM_DIR
+    extern char *program_dir;
+#endif
 
 #ifdef __DJGPP__
     extern BOOLEAN watt_debug;

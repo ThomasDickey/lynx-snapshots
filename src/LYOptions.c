@@ -1,4 +1,4 @@
-/* $LynxId: LYOptions.c,v 1.143 2010/12/11 14:36:42 tom Exp $ */
+/* $LynxId: LYOptions.c,v 1.144 2011/06/06 08:52:56 tom Exp $ */
 #include <HTUtils.h>
 #include <HTFTP.h>
 #include <HTTP.h>		/* 'reloading' flag */
@@ -3140,7 +3140,7 @@ int postoptions(DocInfo *newdoc)
 
 	/* Send User Agent: INPUT */
 	if (!strcmp(data[i].tag, send_user_agent_string)) {
-	    LYSendUserAgent = !strcasecomp(data[i].value, "ON");
+	    LYSendUserAgent = (BOOLEAN) !strcasecomp(data[i].value, "ON");
 	}
 
 	/* User Agent: INPUT */

@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFile.c,v 1.127 2010/10/27 00:10:02 tom Exp $
+ * $LynxId: HTFile.c,v 1.128 2011/06/06 09:27:35 tom Exp $
  *
  *			File Access				HTFile.c
  *			===========
@@ -2088,8 +2088,9 @@ static int print_local_dir(DIR *dp, char *localname,
 	     */
 	    if (strcmp(DIRED_NAME(HTBTree_object(next_element)), "..")) {
 #ifdef DIRED_SUPPORT
-		test = (DIRED_BLOK(HTBTree_object(next_element))
-			== 'D' ? 'D' : 'F');
+		test =
+		    (char) (DIRED_BLOK(HTBTree_object(next_element))
+			    == 'D' ? 'D' : 'F');
 		if (state != test) {
 #ifndef LONG_LIST
 		    if (dir_list_style == FILES_FIRST) {

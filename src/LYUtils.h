@@ -1,4 +1,4 @@
-/* $LynxId: LYUtils.h,v 1.86 2011/05/28 13:05:14 tom Exp $ */
+/* $LynxId: LYUtils.h,v 1.87 2011/06/04 18:34:52 tom Exp $ */
 #ifndef LYUTILS_H
 #define LYUTILS_H
 
@@ -271,6 +271,11 @@ extern "C" {
 #if defined(WIN_EX)		/* 1997/10/16 (Thu) 20:13:28 */
     extern char *HTDOS_short_name(const char *path);
     extern char *w32_strerror(DWORD ercode);
+#endif
+
+#if defined(WIN_EX) || defined(__CYGWIN__)	/* 2000/03/07 (Tue) 17:17:46 */
+    extern int unsafe_filename(const char *fname);
+    extern FILE *safe_fopen(const char *fname, const char *mode);
 #endif
 
 #ifdef VMS

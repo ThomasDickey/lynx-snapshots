@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTNews.c,v 1.67 2010/10/27 00:10:51 tom Exp $
+ * $LynxId: HTNews.c,v 1.68 2011/06/06 08:26:22 tom Exp $
  *
  *			NEWS ACCESS				HTNews.c
  *			===========
@@ -2486,8 +2486,8 @@ static int HTLoadNews(const char *arg,
 	    }
 	    SnipIn(command, "GROUP %.*s", 9, groupName);
 	} else {
-	    size_t add_open = (strchr(p1, '<') == 0);
-	    size_t add_close = (strchr(p1, '>') == 0);
+	    size_t add_open = (size_t) (strchr(p1, '<') == 0);
+	    size_t add_close = (size_t) (strchr(p1, '>') == 0);
 
 	    if (strlen(p1) + add_open + add_close >= 252) {
 		FREE(ProxyHost);

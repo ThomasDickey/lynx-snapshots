@@ -1,4 +1,4 @@
-/* $LynxId: LYKeymap.c,v 1.75 2011/05/28 13:05:14 tom Exp $ */
+/* $LynxId: LYKeymap.c,v 1.76 2011/06/05 21:17:54 tom Exp $ */
 #include <HTUtils.h>
 #include <LYUtils.h>
 #include <LYGlobalDefs.h>
@@ -82,13 +82,8 @@ LYK_UP_TWO,       LYK_CHG_CENTER,   LYK_RELOAD,    LYK_TO_CLIPBOARD,
 LYK_TRACE_TOGGLE,  LYK_NEXT_DOC,  LYK_SWITCH_DTD,  LYK_REFRESH,
 /* ^T */            /* ^U */        /* ^V */       /* ^W */
 
-#ifdef USE_CACHEJAR
-LYK_CACHE_JAR,          0,              0,             0,
+LYK_CACHE_JAR,          0,   LYK_MAXSCREEN_TOGGLE,     0,
 /* ^X */            /* ^Y */        /* ^Z */       /* ESC */
-#else
-0,                      0,              0,             0,
-/* ^X */            /* ^Y */        /* ^Z */       /* ESC */
-#endif
 
 0,                      0,              0,             0,
 /* ^\ */            /* ^] */        /* ^^ */       /* ^_ */
@@ -981,6 +976,11 @@ static Kcmd revmap[] = {
     DATA(
 	LYK_CACHE_JAR, "CACHE_JAR",
 	"examine list of cached documents" ),
+#endif
+#ifdef USE_MAXSCREEN_TOGGLE
+    DATA(
+	LYK_MAXSCREEN_TOGGLE, "MAXSCREEN_TOGGLE",
+	"toggle max screen and normal" ),
 #endif
     DATA(
 	LYK_UNKNOWN, NULL,

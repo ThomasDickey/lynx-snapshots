@@ -1,5 +1,5 @@
 /*
- * $LynxId: GridText.c,v 1.209 2011/05/19 23:18:02 tom Exp $
+ * $LynxId: GridText.c,v 1.212 2011/06/06 09:28:09 tom Exp $
  *
  *		Character grid hypertext object
  *		===============================
@@ -63,11 +63,7 @@
 
 #include <LYJustify.h>
 
-#ifdef CONV_JISX0201KANA_JISX0208KANA
 #define is_CJK2(b) (IS_CJK_TTY && is8bits(UCH(b)))
-#else
-#define is_CJK2(b) (IS_CJK_TTY && is8bits(UCH(b)) && kanji_code != SJIS)
-#endif
 
 #ifdef USE_CURSES_PADS
 #  define DISPLAY_COLS    (LYwideLines ? MAX_COLS : LYcols)
@@ -3958,6 +3954,10 @@ void HText_appendCharacter(HText *text, int ch)
 		 * JIS X0201 Kana in SJIS support.  - by ASATAKU
 		 */
 		if ((text->kcode != JIS)
+#ifdef USE_TH_JP_AUTO_DETECT
+		    && (text->specified_kcode != EUC)
+		    && (text->detected_kcode != DET_EUC)
+#endif
 		    && (
 #ifdef KANJI_CODE_OVERRIDE
 			   (last_kcode == SJIS) ||
@@ -3976,16 +3976,16 @@ void HText_appendCharacter(HText *text, int ch)
 		    ) &&
 		    (UCH(ch) >= 0xA1) &&
 		    (UCH(ch) <= 0xDF)) {
-#ifdef CONV_JISX0201KANA_JISX0208KANA
-		    unsigned char c = UCH(ch);
-		    unsigned char kb = UCH(text->kanji_buf);
+		    if (conv_jisx0201kana) {
+			unsigned char c = UCH(ch);
+			unsigned char kb = UCH(text->kanji_buf);
 
-		    JISx0201TO0208_SJIS(c,
-					(unsigned char *) &kb,
-					(unsigned char *) &c);
-		    ch = (char) c;
-		    text->kanji_buf = kb;
-#endif
+			JISx0201TO0208_SJIS(c,
+					    (unsigned char *) &kb,
+					    (unsigned char *) &c);
+			ch = (char) c;
+			text->kanji_buf = kb;
+		    }
 		    /* 1998/01/19 (Mon) 09:06:15 */
 		    text->permissible_split = (int) text->last_line->size;
 		} else {
@@ -4440,9 +4440,9 @@ void HText_appendCharacter(HText *text, int ch)
 			line->data[line->size++] = (char) tmp[0];
 			line->data[line->size++] = (char) tmp[1];
 		    } else if (IS_EUC(hi, lo)) {
-#ifdef CONV_JISX0201KANA_JISX0208KANA
-			JISx0201TO0208_EUC(hi, lo, &hi, &lo);
-#endif
+			if (conv_jisx0201kana) {
+			    JISx0201TO0208_EUC(hi, lo, &hi, &lo);
+			}
 			line->data[line->size++] = (char) hi;
 			line->data[line->size++] = (char) lo;
 		    } else {
@@ -4456,15 +4456,14 @@ void HText_appendCharacter(HText *text, int ch)
 
 		case SJIS:
 		    if ((text->kcode == EUC) || (text->kcode == JIS)) {
-#ifndef CONV_JISX0201KANA_JISX0208KANA
-			if (IS_EUC_X0201KANA(hi, lo))
-			    line->data[line->size++] = lo;
-			else
-#endif
-			{
-			    EUC_TO_SJIS1(hi, lo, tmp);
-			    line->data[line->size++] = (char) tmp[0];
-			    line->data[line->size++] = (char) tmp[1];
+			if (!conv_jisx0201kana && IS_EUC_X0201KANA(hi, lo)) {
+			    if (IS_EUC_X0201KANA(hi, lo)) {
+				line->data[line->size++] = (char) lo;
+			    } else {
+				EUC_TO_SJIS1(hi, lo, tmp);
+				line->data[line->size++] = (char) tmp[0];
+				line->data[line->size++] = (char) tmp[1];
+			    }
 			}
 		    } else if (IS_SJIS_2BYTE(hi, lo)) {
 			line->data[line->size++] = (char) hi;
@@ -4486,15 +4485,13 @@ void HText_appendCharacter(HText *text, int ch)
 		line->data[line->size++] = (char) lo;
 	    }
 	    text->kanji_buf = 0;
-	}
-#ifndef CONV_JISX0201KANA_JISX0208KANA
-	else if ((HTCJK == JAPANESE) && IS_SJIS_X0201KANA(UCH((ch))) &&
-		 (kanji_code == EUC)) {
-	    line->data[line->size++] = UCH(0x8e);
-	    line->data[line->size++] = ch;
-	}
-#endif
-	else if (IS_CJK_TTY) {
+	} else if (!conv_jisx0201kana
+		   && (HTCJK == JAPANESE)
+		   && IS_SJIS_X0201KANA(UCH((ch))) &&
+		   (kanji_code == EUC)) {
+	    line->data[line->size++] = (char) UCH(0x8e);
+	    line->data[line->size++] = (char) ch;
+	} else if (IS_CJK_TTY) {
 	    line->data[line->size++] = (char) ((kanji_code != NOKANJI) ?
 					       ch :
 					       (font & HT_CAPITALS) ?
@@ -11305,9 +11302,26 @@ int HText_SubmitForm(FormInfo * submit_item, DocInfo *doc, char *link_name,
 		if (check_form_specialchars(val_used) != 0) {
 		    /*  We should translate back. */
 		    StrAllocCopy(copied_val_used, val_used);
-		    success = LYUCTranslateBackFormData(&copied_val_used,
-							form_ptr->value_cs,
-							target_cs, PlainText);
+		    success = FALSE;
+		    if (HTCJK == JAPANESE) {
+			if ((0 <= target_cs) &&
+			    !strcmp(LYCharSet_UC[target_cs].MIMEname, "euc-jp")) {
+			    TO_EUC((const unsigned char *) val_used,
+				   (unsigned char *) copied_val_used);
+			    success = YES;
+			} else if ((0 <= target_cs) &&
+				   !strcmp(LYCharSet_UC[target_cs].MIMEname,
+					   "shift_jis")) {
+			    TO_SJIS((const unsigned char *) val_used,
+				    (unsigned char *) copied_val_used);
+			    success = YES;
+			}
+		    }
+		    if (!success) {
+			success = LYUCTranslateBackFormData(&copied_val_used,
+							    form_ptr->value_cs,
+							    target_cs, PlainText);
+		    }
 		    CTRACE((tfp, "field \"%s\" %d %s -> %d %s %s\n",
 			    NonNull(form_ptr->name),
 			    form_ptr->value_cs,
@@ -14312,7 +14326,8 @@ static void move_to_glyph(int YP,
 		sdata += utf_extra;
 		data += utf_extra;
 		utf_extra = 0;
-	    } else if (IS_CJK_TTY && is8bits(buffer[0])) {
+	    } else if (IS_CJK_TTY && is8bits(buffer[0])
+		       && (!conv_jisx0201kana && (kanji_code != SJIS))) {
 		/*
 		 * For CJK strings, by Masanobu Kimura.
 		 */

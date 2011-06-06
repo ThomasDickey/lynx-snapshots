@@ -1,5 +1,5 @@
 /*
- * $LynxId: SGML.c,v 1.142 2010/12/10 01:46:10 tom Exp $
+ * $LynxId: SGML.c,v 1.143 2011/06/06 09:10:38 tom Exp $
  *
  *			General SGML Parser code		SGML.c
  *			========================
@@ -4634,7 +4634,7 @@ unsigned char *SJIS_TO_JIS1(unsigned HI,
 			    unsigned LO,
 			    unsigned char *JCODE)
 {
-    HI = UCH(HI - UCH((HI <= 0x9F) ? 0x71 : 0xB1));
+    HI = UCH(HI - (unsigned) UCH((HI <= 0x9F) ? 0x71 : 0xB1));
     HI = UCH((HI << 1) + 1);
     if (0x7F < LO)
 	LO--;
