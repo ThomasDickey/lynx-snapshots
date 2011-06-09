@@ -1,14 +1,17 @@
--- $LynxId: CHANGES,v 1.550 2011/06/06 10:45:40 tom Exp $
+-- $LynxId: CHANGES,v 1.553 2011/06/09 10:49:38 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2011-06-06 (2.8.8dev.9)
+2011-06-09 (2.8.8dev.9)
+* modify cookie domain-matching to accommodate RFC 6265, which states that a
+  leading dot on a domain attribute should be discarded (report by Sebastien
+  Hinderer) -TD
 * integrate most of the changes from patch in 2.8.6rel.4 package at
 	http://en.sourceforge.jp/project/lynx-win32-pata -TH, TD
   + provide toggle between normal/fullscreen
   + ifdef'd changes for FEP.
-  + correct a few translations in ja.po
+  + correct a message translation in ja.po
   + modify Xsystem.c to not use MinGW's system() call.
   + add three items to lynx.cfg
 	conv_jisx0201kana
