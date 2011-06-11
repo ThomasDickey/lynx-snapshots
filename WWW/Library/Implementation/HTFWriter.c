@@ -8,6 +8,8 @@
  *		strings written must be less than buffer size.
  */
 
+#define HTSTREAM_INTERNAL 1
+
 #include <HTUtils.h>
 
 #include <HTFWriter.h>
