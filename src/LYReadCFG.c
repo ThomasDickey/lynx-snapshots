@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYReadCFG.c,v 1.164 2011/06/06 00:01:36 tom Exp $
+ * $LynxId: LYReadCFG.c,v 1.166 2011/06/12 00:30:30 tom Exp $
  */
 #ifndef NO_RULES
 #include <HTRules.h>
@@ -1413,6 +1413,9 @@ static Config_Type Config_Table [] =
 {
      PARSE_SET(RC_ACCEPT_ALL_COOKIES,   LYAcceptAllCookies),
      PARSE_TIM(RC_ALERTSECS,            AlertSecs),
+#if USE_BLAT_MAILER
+     PARSE_SET(RC_ALT_BLAT_MAIL,        mail_is_altblat),
+#endif
      PARSE_SET(RC_ALWAYS_RESUBMIT_POSTS, LYresubmit_posts),
 #ifdef EXEC_LINKS
      PARSE_DEF(RC_ALWAYS_TRUSTED_EXEC,  ALWAYS_EXEC_PATH),
@@ -1432,6 +1435,9 @@ static Config_Type Config_Table [] =
 #ifndef DISABLE_BIBP
      PARSE_STR(RC_BIBP_BIBHOST,         BibP_bibhost),
      PARSE_STR(RC_BIBP_GLOBALSERVER,    BibP_globalserver),
+#endif
+#if USE_BLAT_MAILER
+     PARSE_SET(RC_BLAT_MAIL,            mail_is_blat),
 #endif
      PARSE_SET(RC_BLOCK_MULTI_BOOKMARKS, LYMBMBlocked),
      PARSE_SET(RC_BOLD_H1,              bold_H1),
@@ -1638,7 +1644,7 @@ static Config_Type Config_Table [] =
 #endif /* USE_PERSISTENT_COOKIES */
      PARSE_STR(RC_PERSONAL_EXTENSION_MAP, personal_extension_map),
      PARSE_STR(RC_PERSONAL_MAILCAP,     personal_type_map),
-     PARSE_LST(RC_POSITIONABLE_EDITOR,	positionable_editor),
+     PARSE_LST(RC_POSITIONABLE_EDITOR,  positionable_editor),
      PARSE_STR(RC_PREFERRED_CHARSET,    pref_charset),
      PARSE_ENU(RC_PREFERRED_ENCODING,   LYAcceptEncoding, tbl_preferred_encoding),
      PARSE_STR(RC_PREFERRED_LANGUAGE,   language),
