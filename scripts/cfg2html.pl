@@ -1,5 +1,5 @@
 #!/usr/bin/perl -w
-# $LynxId: cfg2html.pl,v 1.13 2009/11/24 09:41:47 tom Exp $
+# $LynxId: cfg2html.pl,v 1.15 2011/06/12 18:40:16 tom Exp $
 #
 # This script uses embedded formatting directives in the lynx.cfg file to
 # guide it in extracting comments and related information to construct a
@@ -19,6 +19,8 @@
 #		to the remainder of the file.
 #	fi
 #		turn justification back on
+#	url text
+#		embed an HREF to external site.
 #
 use strict;
 
@@ -57,7 +59,7 @@ if ( defined $opt_m ) {
 # compile time.
 sub ok {
 	my ($name) = @_;
-	my $ret = defined $opt_a || defined($settings_avail{uc $name})+0;
+	my $ret = defined($settings_avail{uc $name})+0;
 	$ret;
 }
 
@@ -247,6 +249,10 @@ EOF
 		if ( $c =~ /^\.ex/ ) {
 			$ex = $once;
 			printf FP "<h3><em>Example%s:</em></h3>\n", $ex > 1 ? "s" : "";
+		} elsif ( $c =~ /^\.url/ ) {
+			my $url = $c;
+			$url =~ s/^\.url\s+//;
+			printf FP "<blockquote><a href=\"%s\">%s</a></blockquote>\n", $url, $url;
 		} elsif ( $c =~ /^\.nf/ ) {
 			printf FP "<pre>\n";
 			$nf = $count;

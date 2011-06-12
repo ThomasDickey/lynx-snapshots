@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYrcFile.h,v 1.41 2011/06/04 15:12:12 tom Exp $
+ * $LynxId: LYrcFile.h,v 1.42 2011/06/12 00:30:05 tom Exp $
  */
 #ifndef LYRCFILE_H
 #define LYRCFILE_H
@@ -11,6 +11,7 @@
 /* configuration-variable names to share with LYReadCFG.c and LYOptions.c */
 #define RC_ACCEPT_ALL_COOKIES           "accept_all_cookies"
 #define RC_ALERTSECS                    "alertsecs"
+#define RC_ALT_BLAT_MAIL                "alt_blat_mail"
 #define RC_ALWAYS_RESUBMIT_POSTS        "always_resubmit_posts"
 #define RC_ALWAYS_TRUSTED_EXEC          "always_trusted_exec"
 #define RC_ANONFTP_PASSWORD             "anonftp_password"
@@ -24,6 +25,7 @@
 #define RC_BAD_HTML                     "bad_html"
 #define RC_BIBP_BIBHOST                 "bibp_bibhost"
 #define RC_BIBP_GLOBALSERVER            "bibp_globalserver"
+#define RC_BLAT_MAIL                    "blat_mail"
 #define RC_BLOCK_MULTI_BOOKMARKS        "block_multi_bookmarks"
 #define RC_BOLD_H1                      "bold_h1"
 #define RC_BOLD_HEADERS                 "bold_headers"

@@ -1,9 +1,11 @@
--- $LynxId: CHANGES,v 1.555 2011/06/11 10:31:06 tom Exp $
+-- $LynxId: CHANGES,v 1.556 2011/06/12 16:04:15 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2011-06-11 (2.8.8dev.9)
+2011-06-12 (2.8.8dev.9)
+* modfy cfg2html to add ".url" directive for referencing RFC's etc -TD
+* document blat/blatj usage in lynx.cfg -TD
 * add/use WriteStreamTitle(), to provide doctype for cookie-jar page, used to
   help validate the page -TD
 * improve readability of cookie-jar page by showing the unescaped cookie

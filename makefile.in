@@ -1,4 +1,4 @@
-# $LynxId: makefile.in,v 1.117 2011/01/10 10:22:59 tom Exp $
+# $LynxId: makefile.in,v 1.118 2011/06/12 18:36:28 tom Exp $
 ##makefile for lynx
 
 SHELL		= @CONFIG_SHELL@
@@ -355,7 +355,7 @@ LYNXHELP_URL='$(LYNX_URL)/lynx_help/'
 @LYNXCFG_MAKE@	@-rm -f $(CFG2HTML)
 @LYNXCFG_MAKE@	sed -n -e '/Config_Type  *Config_Table/,/{0, *0, *0}/ p' $(SRC_DIR)/LYReadCFG.i | \
 @LYNXCFG_MAKE@	sed  -e 's/ *{ *"\([^"]*\)".*/\1/' | \
-@LYNXCFG_MAKE@	perl $(scripts_dir)/cfg2html.pl -ms $(srcdir)/lynx.cfg
+@LYNXCFG_MAKE@	perl $(scripts_dir)/cfg2html.pl -ams $(srcdir)/lynx.cfg
 @LYNXCFG_MAKE@	-rm -f $(SRC_DIR)/LYReadCFG.i
 
 help_files.sed : makefile $(srcdir)/lynx_help/help_files.txt
