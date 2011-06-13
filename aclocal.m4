@@ -1,11 +1,11 @@
-dnl $LynxId: aclocal.m4,v 1.186 2011/05/28 16:14:57 tom Exp $
+dnl $LynxId: aclocal.m4,v 1.188 2011/06/12 23:29:39 tom Exp $
 dnl Macros for auto-configure script.
 dnl by T.E.Dickey <dickey@invisible-island.net>
 dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
 dnl and Philippe De Muyter <phdm@macqel.be>
 dnl
 dnl Created: 1997/01/28
-dnl Updated: 2011/05/28
+dnl Updated: 2011/06/12
 dnl
 dnl The autoconf used in Lynx development is GNU autoconf 2.13 or 2.52, patched
 dnl by Thomas Dickey.  See your local GNU archives, and this URL:
@@ -3298,7 +3298,7 @@ AC_TRY_COMPILE([
 test $cf_cv_path_lastlog != no && AC_DEFINE(USE_LASTLOG)
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_LD_RPATH_OPT version: 3 updated: 2010/06/02 05:03:05
+dnl CF_LD_RPATH_OPT version: 4 updated: 2011/06/04 20:09:13
 dnl ---------------
 dnl For the given system and compiler, find the compiler flags to pass to the
 dnl loader to use the "rpath" feature.
@@ -3319,7 +3319,7 @@ irix*) #(vi
 linux*|gnu*|k*bsd*-gnu) #(vi
 	LD_RPATH_OPT="-Wl,-rpath,"
 	;;
-openbsd[[2-9]].*) #(vi
+openbsd[[2-9]].*|mirbsd*) #(vi
 	LD_RPATH_OPT="-Wl,-rpath,"
 	;;
 freebsd*) #(vi
@@ -5017,7 +5017,7 @@ AC_MSG_RESULT($cf_use_socks5p_h)
 test "$cf_use_socks5p_h" = yes && AC_DEFINE(INCLUDE_PROTOTYPES)
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_SRAND version: 9 updated: 2011/05/28 12:10:58
+dnl CF_SRAND version: 10 updated: 2011/06/12 19:28:32
 dnl --------
 dnl Check for functions similar to srand() and rand().  lrand48() and random()
 dnl return a 31-bit value, while rand() returns a value less than RAND_MAX
@@ -5078,7 +5078,10 @@ if test "$cf_cv_srand_func" != unknown ; then
 					   [void *arc4random(int);
 						void *x = arc4random(1)],
 					   [cf_bsd_stdlib_h=no],
-					   [cf_bsd_stdlib_h=yes])
+					   [AC_TRY_COMPILE([#include <bsd/stdlib.h>],
+									   [unsigned x = arc4random()],
+									   [cf_bsd_stdlib_h=yes],
+									   [cf_bsd_stdlib_h=no])])
 	    AC_MSG_RESULT($cf_bsd_stdlib_h)
 		if test "$cf_bsd_stdlib_h" = yes
 		then
@@ -5089,7 +5092,10 @@ if test "$cf_cv_srand_func" != unknown ; then
 						   [void *arc4random(int);
 							void *x = arc4random(1)],
 						   [cf_bsd_random_h=no],
-						   [cf_bsd_random_h=yes])
+						   [AC_TRY_COMPILE([#include <bsd/random.h>],
+										   [unsigned x = arc4random()],
+										   [cf_bsd_random_h=yes],
+										   [cf_bsd_random_h=no])])
 			AC_MSG_RESULT($cf_bsd_random_h)
 			if test "$cf_bsd_random_h" = yes
 			then
@@ -5435,7 +5441,7 @@ AC_SUBST(TAR_FILE_OPTIONS)
 AC_SUBST(TAR_PIPE_OPTIONS)
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_TERMCAP_LIBS version: 12 updated: 2010/06/20 09:24:28
+dnl CF_TERMCAP_LIBS version: 13 updated: 2011/06/08 18:09:57
 dnl ---------------
 dnl Look for termcap libraries, or the equivalent in terminfo.
 dnl
@@ -5485,7 +5491,7 @@ if test "$cf_cv_termlib" = none; then
 fi
 if test "$cf_cv_termlib" = none; then
 	# allow curses library for broken AIX system.
-	AC_CHECK_LIB(curses, initscr, [CF_ADD_LIBS(-lcurses) cf_cv_termlib=termcap])
+	AC_CHECK_LIB(curses, initscr, [CF_ADD_LIBS(-lcurses)])
 	AC_CHECK_LIB(termcap, tgoto, [CF_ADD_LIBS(-ltermcap) cf_cv_termlib=termcap])
 fi
 ])
