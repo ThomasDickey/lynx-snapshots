@@ -1,7 +1,12 @@
--- $LynxId: CHANGES,v 1.556 2011/06/12 16:04:15 tom Exp $
+-- $LynxId: CHANGES,v 1.557 2011/10/06 22:15:28 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
+
+2011-10-06 (2.8.8dev.10)
+* updated several configure script macros (TD):
+  CF_ANSI_CC_CHECK, CF_CURSES_LIBS, CF_LD_RPATH_OPT, CF_NETLIBS,
+  CF_XOPEN_SOURCE, CF_X_ATHENA_LIBS
 
 2011-06-12 (2.8.8dev.9)
 * modfy cfg2html to add ".url" directive for referencing RFC's etc -TD
