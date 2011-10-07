@@ -336,11 +336,12 @@
 			0:0:BOX
 			1:0:CLEAR
 	40:META
-		4 attributes:
-			0:0:CONTENT
-			1:0:HTTP-EQUIV
-			2:0:NAME
-			3:0:SCHEME
+		5 attributes:
+			0:0:CHARSET
+			1:0:CONTENT
+			2:0:HTTP-EQUIV
+			3:0:NAME
+			4:0:SCHEME
 	41:NEXTID
 		1 attributes:
 			0:0:N
@@ -2509,11 +2510,12 @@
 		flags:
 	75:META
 		justify
-		4 attributes:
-			0:0:CONTENT
-			1:0:HTTP-EQUIV
-			2:0:NAME
-			3:0:SCHEME
+		5 attributes:
+			0:0:CHARSET
+			1:0:CONTENT
+			2:0:HTTP-EQUIV
+			3:0:NAME
+			4:0:SCHEME
 		1 attr_types
 			META
 		contents: SGML_EMPTY
