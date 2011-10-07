@@ -1,4 +1,4 @@
-/* $LynxId: LYCurses.c,v 1.160 2011/06/06 09:20:59 tom Exp $ */
+/* $LynxId: LYCurses.c,v 1.161 2011/10/07 00:39:43 tom Exp $ */
 #include <HTUtils.h>
 #include <HTAlert.h>
 
@@ -2928,7 +2928,7 @@ void lynx_stop_link_color(int flag,
 			  int pending GCC_UNUSED)
 {
 #ifdef USE_COLOR_STYLE
-    LynxChangeStyle(flag == ON ? s_alink : s_a, ABS_OFF);
+    LynxChangeStyle(flag == TRUE ? s_alink : s_a, ABS_OFF);
 #else
     if (flag) {
 	lynx_stop_reverse();

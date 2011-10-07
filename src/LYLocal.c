@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYLocal.c,v 1.114 2010/11/01 08:46:02 tom Exp $
+ * $LynxId: LYLocal.c,v 1.115 2011/10/07 00:41:24 tom Exp $
  *
  *  Routines to manipulate the local filesystem.
  *  Written by: Rick Mallett, Carleton University
@@ -1597,7 +1597,7 @@ void tagflag(int flag,
     if (nlinks > 0) {
 	LYmove(links[cur].ly, 2);
 	lynx_stop_reverse();
-	if (flag == ON) {
+	if (flag == TRUE) {
 	    LYaddch('+');
 	} else {
 	    LYaddch(' ');
@@ -1630,7 +1630,7 @@ void showtags(HTList *t)
 	s = t;
 	while ((name = (char *) HTList_nextObject(s)) != NULL) {
 	    if (!strcmp(links[i].lname, name)) {
-		tagflag(ON, i);
+		tagflag(TRUE, i);
 		break;
 	    }
 	}

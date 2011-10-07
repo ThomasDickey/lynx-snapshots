@@ -1,5 +1,5 @@
 /*
- * $LynxId: GridText.c,v 1.215 2011/06/11 12:34:51 tom Exp $
+ * $LynxId: GridText.c,v 1.216 2011/10/07 00:38:52 tom Exp $
  *
  *		Character grid hypertext object
  *		===============================
@@ -124,8 +124,8 @@ const char *unchecked_box = "[ ]";
 const char *checked_radio = "(*)";
 const char *unchecked_radio = "( )";
 
-static BOOLEAN underline_on = OFF;
-static BOOLEAN bold_on = OFF;
+static BOOLEAN underline_on = FALSE;
+static BOOLEAN bold_on = FALSE;
 
 #ifdef USE_SOURCE_CACHE
 int LYCacheSource = SOURCE_CACHE_NONE;
@@ -2406,7 +2406,7 @@ static void display_page(HText *text,
 		/*
 		 * Bold the link after incrementing nlinks.
 		 */
-		LYhighlight(OFF, (nlinks - 1), target);
+		LYhighlight(FALSE, (nlinks - 1), target);
 
 		display_flag = TRUE;
 
@@ -4018,27 +4018,27 @@ void HText_appendCharacter(HText *text, int ch)
 	    if (ch == LY_UNDERLINE_START_CHAR) {
 		line->data[line->size++] = LY_UNDERLINE_START_CHAR;
 		line->data[line->size] = '\0';
-		underline_on = ON;
+		underline_on = TRUE;
 		if (!(dump_output_immediately && use_underscore))
 		    ctrl_chars_on_this_line++;
 		return;
 	    } else if (ch == LY_UNDERLINE_END_CHAR) {
 		line->data[line->size++] = LY_UNDERLINE_END_CHAR;
 		line->data[line->size] = '\0';
-		underline_on = OFF;
+		underline_on = FALSE;
 		if (!(dump_output_immediately && use_underscore))
 		    ctrl_chars_on_this_line++;
 		return;
 	    } else if (ch == LY_BOLD_START_CHAR) {
 		line->data[line->size++] = LY_BOLD_START_CHAR;
 		line->data[line->size] = '\0';
-		bold_on = ON;
+		bold_on = TRUE;
 		ctrl_chars_on_this_line++;
 		return;
 	    } else if (ch == LY_BOLD_END_CHAR) {
 		line->data[line->size++] = LY_BOLD_END_CHAR;
 		line->data[line->size] = '\0';
-		bold_on = OFF;
+		bold_on = FALSE;
 		ctrl_chars_on_this_line++;
 		return;
 	    } else if (ch == LY_SOFT_HYPHEN) {
@@ -14399,7 +14399,7 @@ void LYMoveToLink(int cur,
     HTLine *todr;
     int i, n = 0;
     int XP_draw_min = 0;
-    int flags = ((flag == ON) ? 1 : 0) | (inU ? 2 : 0);
+    int flags = ((flag == TRUE) ? 1 : 0) | (inU ? 2 : 0);
 
     /*
      * We need to protect changed form text fields preceding this

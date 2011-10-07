@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMainLoop.c,v 1.175 2011/06/05 20:38:08 tom Exp $
+ * $LynxId: LYMainLoop.c,v 1.176 2011/10/07 00:39:22 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTAccess.h>
@@ -513,7 +513,7 @@ static BOOL set_curdoc_link(int nextlink)
 	&& nextlink >= 0
 	&& nextlink < nlinks) {
 	if (curdoc.link >= 0 && curdoc.link < nlinks) {
-	    LYhighlight(OFF, curdoc.link, prev_target);
+	    LYhighlight(FALSE, curdoc.link, prev_target);
 	    result = TRUE;
 	}
 	curdoc.link = nextlink;
@@ -548,7 +548,7 @@ static void goto_line(int nextline)
 static void set_curdoc_link_by_mouse(int nextlink)
 {
     if (set_curdoc_link(nextlink)) {
-	LYhighlight(ON, nextlink, prev_target);
+	LYhighlight(TRUE, nextlink, prev_target);
 	LYmsec_delay(20);
     }
 }
@@ -3574,7 +3574,7 @@ static void handle_LYK_MAIN_MENU(int *old_c,
 	    newdoc.isHEAD = FALSE;
 	    newdoc.safe = FALSE;
 	    newdoc.internal_link = FALSE;
-	    LYhighlight(OFF, curdoc.link, prev_target);
+	    LYhighlight(FALSE, curdoc.link, prev_target);
 #ifdef DIRED_SUPPORT
 	    if (lynx_edit_mode) {
 		DIRED_UNCACHE_2;
@@ -3834,7 +3834,7 @@ static void handle_LYK_NEXT_LINK(int c,
 				 int real_c)
 {
     if (curdoc.link < nlinks - 1) {	/* next link */
-	LYhighlight(OFF, curdoc.link, prev_target);
+	LYhighlight(FALSE, curdoc.link, prev_target);
 #ifdef FASTTAB
 	/*
 	 * Move to different textarea if TAB in textarea.
@@ -4475,7 +4475,7 @@ static void handle_LYK_TAG_LINK(void)
 		    found = TRUE;
 		    HTList_removeObject(tagged, tagname);
 		    FREE(tagname);
-		    tagflag(OFF, curdoc.link);
+		    tagflag(FALSE, curdoc.link);
 		    break;
 		}
 	    }
@@ -4485,7 +4485,7 @@ static void handle_LYK_TAG_LINK(void)
 		tagname = NULL;
 		StrAllocCopy(tagname, links[curdoc.link].lname);
 		HTList_addObject(tagged, tagname);
-		tagflag(ON, curdoc.link);
+		tagflag(TRUE, curdoc.link);
 	    }
 	}
 	if (curdoc.link < nlinks - 1) {
@@ -6510,10 +6510,10 @@ int mainloop(void)
 	     * Highlight current link, unless it is an active text input field.
 	     */
 	    if (!curlink_is_editable) {
-		LYhighlight(ON, curdoc.link, prev_target);
+		LYhighlight(TRUE, curdoc.link, prev_target);
 #ifndef INACTIVE_INPUT_STYLE_VH
 	    } else if (!textinput_activated) {
-		LYhighlight(ON, curdoc.link, prev_target);
+		LYhighlight(TRUE, curdoc.link, prev_target);
 #endif
 	    }
 	}

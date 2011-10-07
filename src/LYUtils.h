@@ -1,4 +1,4 @@
-/* $LynxId: LYUtils.h,v 1.88 2011/06/11 10:20:06 tom Exp $ */
+/* $LynxId: LYUtils.h,v 1.89 2011/10/07 00:36:40 tom Exp $ */
 #ifndef LYUTILS_H
 #define LYUTILS_H
 
@@ -522,8 +522,6 @@ extern "C" {
 /*
  *  Miscellaneous.
  */
-#define ON      1
-#define OFF     0
 #define STREQ(a,b)    (strcmp(a,b) == 0)
 #define STRNEQ(a,b,c) (StrNCmp(a,b,c) == 0)
 

@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYSearch.c,v 1.26 2010/09/25 11:20:40 tom Exp $
+ * $LynxId: LYSearch.c,v 1.27 2011/10/07 00:40:58 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTAlert.h>
@@ -336,7 +336,7 @@ BOOL textsearch(DocInfo *cur_doc, char *prev_target,
 	    /*
 	     * Found in link, changed cur, we're done.
 	     */
-	    LYhighlight(OFF, oldcur, prev_target);
+	    LYhighlight(FALSE, oldcur, prev_target);
 	    return (TRUE);
 	}
     } else {
@@ -349,7 +349,7 @@ BOOL textsearch(DocInfo *cur_doc, char *prev_target,
 	    /*
 	     * Found in link, changed cur, we're done.
 	     */
-	    LYhighlight(OFF, oldcur, prev_target);
+	    LYhighlight(FALSE, oldcur, prev_target);
 	    return (TRUE);
 	}
 
@@ -369,7 +369,7 @@ BOOL textsearch(DocInfo *cur_doc, char *prev_target,
      */
     www_user_search((cur_doc->line + offset), cur_doc, prev_target, direction);
     if (cur_doc->link != oldcur) {
-	LYhighlight(OFF, oldcur, prev_target);
+	LYhighlight(FALSE, oldcur, prev_target);
 	return (TRUE);
     }
     return (BOOL) (www_search_result > 0);
