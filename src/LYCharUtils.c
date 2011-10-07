@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYCharUtils.c,v 1.113 2011/06/11 12:15:50 tom Exp $
+ * $LynxId: LYCharUtils.c,v 1.114 2011/10/07 00:57:58 Kihara.Hideto Exp $
  *
  *  Functions associated with LYCharSets.c and the Lynx version of HTML.c - FM
  *  ==========================================================================
@@ -2029,7 +2029,7 @@ void LYHandleMETA(HTStructured * me, const BOOL *present,
 		  const char **value,
 		  char **include GCC_UNUSED)
 {
-    char *http_equiv = NULL, *name = NULL, *content = NULL;
+    char *http_equiv = NULL, *name = NULL, *content = NULL, *charset = NULL;
     char *href = NULL, *id_string = NULL, *temp = NULL;
     char *cp, *cp0, *cp1 = NULL;
     int url_type = 0;
@@ -2079,141 +2079,49 @@ void LYHandleMETA(HTStructured * me, const BOOL *present,
 	    FREE(content);
 	}
     }
+    if (present[HTML_META_CHARSET] &&
+	non_empty(value[HTML_META_CHARSET])) {
+	StrAllocCopy(charset, value[HTML_META_CHARSET]);
+	convert_to_spaces(charset, TRUE);
+	LYUCTranslateHTMLString(&charset, me->tag_charset, me->tag_charset,
+				NO, NO, YES, st_other);
+	if (*charset == '\0') {
+	    FREE(charset);
+	}
+    }
     CTRACE((tfp,
-	    "LYHandleMETA: HTTP-EQUIV=\"%s\" NAME=\"%s\" CONTENT=\"%s\"\n",
+	    "LYHandleMETA: HTTP-EQUIV=\"%s\" NAME=\"%s\" CONTENT=\"%s\" CHARSET=\"%s\"\n",
 	    NONNULL(http_equiv),
 	    NONNULL(name),
-	    NONNULL(content)));
+	    NONNULL(content),
+	    NONNULL(charset)));
 
     /*
-     * Make sure we have META name/value pairs to handle.  - FM
+     * Check for a text/html Content-Type with a charset directive, if we
+     * didn't already set the charset via a server's header.  - AAC & FM
      */
-    if (!(http_equiv || name) || !content)
-	goto free_META_copies;
-
-    /*
-     * Check for a no-cache Pragma
-     * or Cache-Control directive. - FM
-     */
-    if (!strcasecomp(NonNull(http_equiv), "Pragma") ||
-	!strcasecomp(NonNull(http_equiv), "Cache-Control")) {
-	LYUCTranslateHTMLString(&content, me->tag_charset, me->tag_charset,
-				NO, NO, YES, st_other);
-	if (!strcasecomp(content, "no-cache")) {
-	    me->node_anchor->no_cache = TRUE;
-	    HText_setNoCache(me->text);
-	}
-
-	/*
-	 * If we didn't get a Cache-Control MIME header, and the META has one,
-	 * convert to lowercase, store it in the anchor element, and if we
-	 * haven't yet set no_cache, check whether we should.  - FM
-	 */
-	if ((!me->node_anchor->cache_control) &&
-	    !strcasecomp(NonNull(http_equiv), "Cache-Control")) {
-	    LYLowerCase(content);
-	    StrAllocCopy(me->node_anchor->cache_control, content);
-	    if (me->node_anchor->no_cache == FALSE) {
-		cp0 = content;
-		while ((cp = strstr(cp0, "no-cache")) != NULL) {
-		    cp += 8;
-		    while (*cp != '\0' && WHITE(*cp))
-			cp++;
-		    if (*cp == '\0' || *cp == ';') {
-			me->node_anchor->no_cache = TRUE;
-			HText_setNoCache(me->text);
-			break;
-		    }
-		    cp0 = cp;
-		}
-		if (me->node_anchor->no_cache == TRUE)
-		    goto free_META_copies;
-		cp0 = content;
-		while ((cp = strstr(cp0, "max-age")) != NULL) {
-		    cp += 7;
-		    while (*cp != '\0' && WHITE(*cp))
-			cp++;
-		    if (*cp == '=') {
-			cp++;
-			while (*cp != '\0' && WHITE(*cp))
-			    cp++;
-			if (isdigit(UCH(*cp))) {
-			    cp0 = cp;
-			    while (isdigit(UCH(*cp)))
-				cp++;
-			    if (*cp0 == '0' && cp == (cp0 + 1)) {
-				me->node_anchor->no_cache = TRUE;
-				HText_setNoCache(me->text);
-				break;
-			    }
-			}
-		    }
-		    cp0 = cp;
-		}
-	    }
-	}
-
-	/*
-	 * Check for an Expires directive. - FM
-	 */
-    } else if (!strcasecomp(NonNull(http_equiv), "Expires")) {
-	/*
-	 * If we didn't get an Expires MIME header, store it in the anchor
-	 * element, and if we haven't yet set no_cache, check whether we
-	 * should.  Note that we don't accept a Date header via META tags,
-	 * because it's likely to be untrustworthy, but do check for a Date
-	 * header from a server when making the comparison.  - FM
-	 */
-	LYUCTranslateHTMLString(&content, me->tag_charset, me->tag_charset,
-				NO, NO, YES, st_other);
-	StrAllocCopy(me->node_anchor->expires, content);
-	if (me->node_anchor->no_cache == FALSE) {
-	    if (!strcmp(content, "0")) {
-		/*
-		 * The value is zero, which we treat as an absolute no-cache
-		 * directive.  - FM
-		 */
-		me->node_anchor->no_cache = TRUE;
-		HText_setNoCache(me->text);
-	    } else if (me->node_anchor->date != NULL) {
-		/*
-		 * We have a Date header, so check if the value is less than or
-		 * equal to that.  - FM
-		 */
-		if (LYmktime(content, TRUE) <=
-		    LYmktime(me->node_anchor->date, TRUE)) {
-		    me->node_anchor->no_cache = TRUE;
-		    HText_setNoCache(me->text);
-		}
-	    } else if (LYmktime(content, FALSE) == 0) {
-		/*
-		 * We don't have a Date header, and the value is in past for
-		 * us.  - FM
-		 */
-		me->node_anchor->no_cache = TRUE;
-		HText_setNoCache(me->text);
-	    }
-	}
-
-	/*
-	 * Check for a text/html Content-Type with a charset directive, if we
-	 * didn't already set the charset via a server's header.  - AAC & FM
-	 */
-    } else if (isEmpty(me->node_anchor->charset) &&
-	       !strcasecomp(NonNull(http_equiv), "Content-Type")) {
+    if (isEmpty(me->node_anchor->charset) &&
+	(charset ||
+	 (!strcasecomp(NonNull(http_equiv), "Content-Type") && content))) {
 	LYUCcharset *p_in = NULL;
 	LYUCcharset *p_out = NULL;
 
-	LYUCTranslateHTMLString(&content, me->tag_charset, me->tag_charset,
-				NO, NO, YES, st_other);
-	LYLowerCase(content);
+	if (charset) {
+	    LYLowerCase(charset);
+	} else {
+	    LYUCTranslateHTMLString(&content, me->tag_charset, me->tag_charset,
+				    NO, NO, YES, st_other);
+	    LYLowerCase(content);
+	}
 
-	if ((cp1 = strstr(content, "charset")) != NULL) {
+	if ((cp1 = charset) != NULL ||
+	    (cp1 = strstr(content, "charset")) != NULL) {
 	    BOOL chartrans_ok = NO;
 	    char *cp3 = NULL, *cp4;
 	    int chndl;
 
-	    cp1 += 7;
+	    if (!charset)
+		cp1 += 7;
 	    while (*cp1 == ' ' || *cp1 == '=' || *cp1 == '"')
 		cp1++;
 
@@ -2378,6 +2286,117 @@ void LYHandleMETA(HTStructured * me, const BOOL *present,
 	 * Set the kcode element based on the charset.  - FM
 	 */
 	HText_setKcode(me->text, me->node_anchor->charset, p_in);
+    }
+
+    /*
+     * Make sure we have META name/value pairs to handle.  - FM
+     */
+    if (!(http_equiv || name) || !content)
+	goto free_META_copies;
+
+    /*
+     * Check for a no-cache Pragma
+     * or Cache-Control directive. - FM
+     */
+    if (!strcasecomp(NonNull(http_equiv), "Pragma") ||
+	!strcasecomp(NonNull(http_equiv), "Cache-Control")) {
+	LYUCTranslateHTMLString(&content, me->tag_charset, me->tag_charset,
+				NO, NO, YES, st_other);
+	if (!strcasecomp(content, "no-cache")) {
+	    me->node_anchor->no_cache = TRUE;
+	    HText_setNoCache(me->text);
+	}
+
+	/*
+	 * If we didn't get a Cache-Control MIME header, and the META has one,
+	 * convert to lowercase, store it in the anchor element, and if we
+	 * haven't yet set no_cache, check whether we should.  - FM
+	 */
+	if ((!me->node_anchor->cache_control) &&
+	    !strcasecomp(NonNull(http_equiv), "Cache-Control")) {
+	    LYLowerCase(content);
+	    StrAllocCopy(me->node_anchor->cache_control, content);
+	    if (me->node_anchor->no_cache == FALSE) {
+		cp0 = content;
+		while ((cp = strstr(cp0, "no-cache")) != NULL) {
+		    cp += 8;
+		    while (*cp != '\0' && WHITE(*cp))
+			cp++;
+		    if (*cp == '\0' || *cp == ';') {
+			me->node_anchor->no_cache = TRUE;
+			HText_setNoCache(me->text);
+			break;
+		    }
+		    cp0 = cp;
+		}
+		if (me->node_anchor->no_cache == TRUE)
+		    goto free_META_copies;
+		cp0 = content;
+		while ((cp = strstr(cp0, "max-age")) != NULL) {
+		    cp += 7;
+		    while (*cp != '\0' && WHITE(*cp))
+			cp++;
+		    if (*cp == '=') {
+			cp++;
+			while (*cp != '\0' && WHITE(*cp))
+			    cp++;
+			if (isdigit(UCH(*cp))) {
+			    cp0 = cp;
+			    while (isdigit(UCH(*cp)))
+				cp++;
+			    if (*cp0 == '0' && cp == (cp0 + 1)) {
+				me->node_anchor->no_cache = TRUE;
+				HText_setNoCache(me->text);
+				break;
+			    }
+			}
+		    }
+		    cp0 = cp;
+		}
+	    }
+	}
+
+	/*
+	 * Check for an Expires directive. - FM
+	 */
+    } else if (!strcasecomp(NonNull(http_equiv), "Expires")) {
+	/*
+	 * If we didn't get an Expires MIME header, store it in the anchor
+	 * element, and if we haven't yet set no_cache, check whether we
+	 * should.  Note that we don't accept a Date header via META tags,
+	 * because it's likely to be untrustworthy, but do check for a Date
+	 * header from a server when making the comparison.  - FM
+	 */
+	LYUCTranslateHTMLString(&content, me->tag_charset, me->tag_charset,
+				NO, NO, YES, st_other);
+	StrAllocCopy(me->node_anchor->expires, content);
+	if (me->node_anchor->no_cache == FALSE) {
+	    if (!strcmp(content, "0")) {
+		/*
+		 * The value is zero, which we treat as an absolute no-cache
+		 * directive.  - FM
+		 */
+		me->node_anchor->no_cache = TRUE;
+		HText_setNoCache(me->text);
+	    } else if (me->node_anchor->date != NULL) {
+		/*
+		 * We have a Date header, so check if the value is less than or
+		 * equal to that.  - FM
+		 */
+		if (LYmktime(content, TRUE) <=
+		    LYmktime(me->node_anchor->date, TRUE)) {
+		    me->node_anchor->no_cache = TRUE;
+		    HText_setNoCache(me->text);
+		}
+	    } else if (LYmktime(content, FALSE) == 0) {
+		/*
+		 * We don't have a Date header, and the value is in past for
+		 * us.  - FM
+		 */
+		me->node_anchor->no_cache = TRUE;
+		HText_setNoCache(me->text);
+	    }
+	}
 
 	/*
 	 * Check for a Refresh directive.  - FM
@@ -2566,6 +2585,7 @@ void LYHandleMETA(HTStructured * me, const BOOL *present,
     FREE(http_equiv);
     FREE(name);
     FREE(content);
+    FREE(charset);
 }
 
 /*

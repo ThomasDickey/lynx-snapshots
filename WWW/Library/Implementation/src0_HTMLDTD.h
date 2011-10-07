@@ -1,4 +1,4 @@
-/* $LynxId: src0_HTMLDTD.h,v 1.44 2011/05/19 23:49:11 tom Exp $ */
+/* $LynxId: src0_HTMLDTD.h,v 1.45 2011/10/07 00:54:36 Kihara.Hideto Exp $ */
 #ifndef src_HTMLDTD_H0
 #define src_HTMLDTD_H0 1
 
@@ -847,6 +847,7 @@ static const AttrType MATH_attr_type[] = {
 };
 
 static const attr META_attr_list[] = {
+	{ "CHARSET"       T(N) },
 	{ "CONTENT"       T(N) },
 	{ "HTTP-EQUIV"    T(N) },
 	{ "NAME"          T(N) },
@@ -1794,6 +1795,7 @@ static const attr MATH_attr[] = {       /* MATH attributes */
 };
 
 static const attr META_attr[] = {       /* META attributes */
+	{ "CHARSET"       T(N) },
 	{ "CONTENT"       T(N) },
 	{ "HTTP-EQUIV"    T(N) },
 	{ "NAME"          T(N) },

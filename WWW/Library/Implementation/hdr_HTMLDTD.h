@@ -1,4 +1,4 @@
-/* $LynxId: hdr_HTMLDTD.h,v 1.21 2011/05/19 23:49:11 tom Exp $ */
+/* $LynxId: hdr_HTMLDTD.h,v 1.22 2011/10/07 00:54:36 Kihara.Hideto Exp $ */
 #ifndef hdr_HTMLDTD_H
 #define hdr_HTMLDTD_H 1
 
@@ -670,11 +670,12 @@ extern "C" {
 #define HTML_MATH_TITLE           7
 #define HTML_MATH_ATTRIBUTES      8
 
-#define HTML_META_CONTENT         0
-#define HTML_META_HTTP_EQUIV      1
-#define HTML_META_NAME            2
-#define HTML_META_SCHEME          3
-#define HTML_META_ATTRIBUTES      4
+#define HTML_META_CHARSET         0
+#define HTML_META_CONTENT         1
+#define HTML_META_HTTP_EQUIV      2
+#define HTML_META_NAME            3
+#define HTML_META_SCHEME          4
+#define HTML_META_ATTRIBUTES      5
 
 #define HTML_NEXTID_N             0
 #define HTML_NEXTID_ATTRIBUTES    1
