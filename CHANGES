@@ -1,9 +1,13 @@
--- $LynxId: CHANGES,v 1.559 2011/10/07 08:38:58 tom Exp $
+-- $LynxId: CHANGES,v 1.562 2011/12/01 09:22:14 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2011-10-07 (2.8.8dev.10)
+2011-12-01 (2.8.8dev.10)
+* ensure that button/input tags have a value for display, in case the tag is
+  improperly terminated (report by Aki Helin) -TD
+* work around glibc bug in sscanf in SGML_character() using strtol() (report by
+  Aki Helin) -TD
 * add check for charset attribute on meta element -Kihara Hideto
 * eliminate ON/OFF macros, using TRUE/FALSE both to work around breakage from
   zlib 1.2.5.1 changes as well as because they were unnecessary (GenToo

@@ -1,5 +1,5 @@
 /*
- * $LynxId: SGML.c,v 1.144 2011/06/11 12:09:43 tom Exp $
+ * $LynxId: SGML.c,v 1.147 2011/12/01 02:11:01 tom Exp $
  *
  *			General SGML Parser code		SGML.c
  *			========================
@@ -2634,17 +2634,14 @@ static void SGML_character(HTStream *context, int c_in)
 	    /*
 	     * Terminate the numeric entity and try to handle it.  - FM
 	     */
-	    unsigned long lcode;
+	    UCode_t code;
 	    int i;
 
 	    HTChunkTerminate(string);
 #ifdef USE_PRETTYSRC
 	    entity_string = string->data;
 #endif
-	    if ((context->isHex
-		 ? sscanf(string->data, "%lx", &lcode)
-		 : sscanf(string->data, "%lu", &lcode)) == 1) {
-		UCode_t code = (UCode_t) lcode;
+	    if (UCScanCode(&code, string->data, context->isHex)) {
 
 /* =============== work in ASCII below here ===============  S/390 -- gil -- 1092 */
 		if (AssumeCP1252(context)) {
