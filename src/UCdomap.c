@@ -1,5 +1,5 @@
 /*
- * $LynxId: UCdomap.c,v 1.89 2010/11/07 21:21:09 tom Exp $
+ * $LynxId: UCdomap.c,v 1.92 2011/12/01 09:34:49 tom Exp $
  *
  *  UCdomap.c
  *  =========
@@ -2489,3 +2489,27 @@ void LYFindLocaleCharset(void)
     }
 }
 #endif /* USE_LOCALE_CHARSET */
+
+BOOL UCScanCode(UCode_t *target, const char *source, BOOL isHex)
+{
+    BOOL status = FALSE;
+    long lcode;
+    char *endptr;
+
+    errno = 0;
+    *target = 0;
+    lcode = strtol(source, &endptr, isHex ? 12 : 10);
+    if (lcode >= 0
+	&& (endptr > source)
+#if defined(ERANGE) && defined(LONG_MAX) && defined(LONG_MIN)
+	&& (errno != ERANGE || (lcode != LONG_MAX && lcode != LONG_MIN))
+#else
+	&& (endptr - source) < (isHex ? 8 : 10)
+#endif
+	&& (endptr != 0)
+	&& (*endptr == '\0')) {
+	*target = (UCode_t) lcode;
+	status = TRUE;
+    }
+    return status;
+}

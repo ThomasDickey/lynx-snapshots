@@ -1,5 +1,5 @@
 /*
- * $LynxId: UCMap.h,v 1.26 2010/09/25 15:18:32 tom Exp $
+ * $LynxId: UCMap.h,v 1.27 2011/12/01 02:00:57 tom Exp $
  */
 #ifndef UCMAP_H
 #define UCMAP_H
@@ -24,6 +24,8 @@ extern "C" {
     } UCStatus;
 
     typedef long UCode_t;
+
+    extern BOOL UCScanCode(UCode_t *, const char *, BOOL);
 
     extern int UCTransUniChar(UCode_t unicode,
 			      int charset_out);

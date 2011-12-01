@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYCharUtils.c,v 1.114 2011/10/07 00:57:58 Kihara.Hideto Exp $
+ * $LynxId: LYCharUtils.c,v 1.116 2011/12/01 09:41:59 tom Exp $
  *
  *  Functions associated with LYCharSets.c and the Lynx version of HTML.c - FM
  *  ==========================================================================
@@ -1110,7 +1110,6 @@ char **LYUCFullyTranslateString(char **str,
     int uck;
     int lowest_8;
     UCode_t code = 0;
-    unsigned long lcode;
     BOOL output_utf8 = 0, repl_translated_C0 = 0;
     size_t len;
     const char *name = NULL;
@@ -1550,15 +1549,12 @@ char **LYUCFullyTranslateString(char **str,
 	     * (3) Is 127 and we don't have HTPassHighCtrlRaw or HTCJK set.
 	     * (4) Is 128 - 159 and we don't have HTPassHighCtrlNum set.
 	     */
-	    if ((((what == P_hex)
-		  ? sscanf(cp, "%lx", &lcode)
-		  : sscanf(cp, "%lu", &lcode)) != 1) ||
-		lcode > 0x7fffffffL) {
+	    if (UCScanCode(&code, cp, (BOOL) (what == P_hex))) {
+		code = LYcp1252ToUnicode(code);
+		state = S_check_uni;
+	    } else {
 		state = S_recover;
 		break;
-	    } else {
-		code = LYcp1252ToUnicode((UCode_t) lcode);
-		state = S_check_uni;
 	    }
 	    break;
 
