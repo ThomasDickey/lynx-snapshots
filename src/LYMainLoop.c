@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMainLoop.c,v 1.176 2011/10/07 00:39:22 tom Exp $
+ * $LynxId: LYMainLoop.c,v 1.178 2012/01/17 00:33:58 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTAccess.h>
@@ -3400,6 +3400,119 @@ static void handle_LYK_INSTALL(void)
 }
 #endif
 
+static const char *hexy = "0123456789ABCDEF";
+
+#define HEX(n) hexy[(n) & 0xf]
+/*
+ * URL-encode a parameter which can then be appended to a URI.
+ * RFC-3986 lists reserved characters, which should be encoded.
+ */
+static char *urlencode(char *str)
+{
+    char *result = NULL;
+    char *ptr;
+    int ch;
+
+    if (non_empty(str)) {
+	result = malloc(strlen(str) * 3 + 1);
+	ptr = result;
+
+	assert(result);
+
+	while ((ch = UCH(*str++)) != 0) {
+	    if (ch == ' ') {
+		*ptr = '+';
+		ptr++;
+	    } else if (ch > 127 ||
+		       strchr(":/?#[]@!$&'()*+,;=", ch) != 0) {
+		*ptr++ = '%';
+		*ptr++ = HEX(ch >> 4);
+		*ptr++ = HEX(ch);
+	    } else {
+		*ptr++ = (char) ch;
+	    }
+	}
+	*ptr = '\0';
+    }
+
+    return result;
+}
+
+/*
+ * Fill in "%s" marker(s) in the url_template by prompting the user for the
+ * values.
+ */
+static BOOLEAN check_JUMP_param(char **url_template)
+{
+    int param = 1;
+    char *subs;
+    char *result = *url_template;
+    char *encoded = NULL;
+    int code = TRUE;
+
+    CTRACE((tfp, "check_JUMP_param: %s\n", result));
+
+    while ((subs = strstr(result, "%s")) != 0) {
+	char prompt[MAX_LINE];
+	char input[MAX_LINE];
+	RecallType recall = NORECALL;
+
+	CTRACE((tfp, "Prompt for query param%d: %s\n", param, result));
+
+	sprintf(prompt, "Query param%d: ", param++);
+	statusline(prompt);
+	*input = '\0';
+	if (LYGetStr(input, VISIBLE, sizeof(input), recall) < 0) {
+	    /*
+	     * cancelled via ^G
+	     */
+	    HTInfoMsg(CANCELLED);
+	    code = FALSE;
+	    break;
+	} else if ((encoded = urlencode(input)) != '\0') {
+	    int subs_at = (subs - result);
+	    int fill_in = (int) strlen(encoded) - 2;
+	    size_t have = strlen(result);
+	    size_t want = strlen(encoded) + have - 1;
+	    int n;
+	    char *update = realloc(result, want + 1);
+
+	    if (update == 0) {
+		HTInfoMsg(NOT_ENOUGH_MEMORY);
+		code = FALSE;
+		break;
+	    }
+
+	    CTRACE((tfp, "  reply: %s\n", input));
+	    CTRACE((tfp, "  coded: %s\n", encoded));
+
+	    result = update;
+	    result[want] = '\0';
+	    for (n = (int) want; (n - fill_in) >= subs_at; --n) {
+		result[n] = result[n - fill_in];
+	    }
+	    for (n = subs_at; encoded[n - subs_at] != '\0'; ++n) {
+		result[n] = encoded[n - subs_at];
+	    }
+	    CTRACE((tfp, "  subst: %s\n", result));
+	} else {
+	    HTInfoMsg(CANCELLED);
+	    code = FALSE;
+	    break;
+	}
+    }
+    FREE(encoded);
+    *url_template = result;
+    return TRUE;
+}
+
+static void fill_JUMP_Params(char **addressp)
+{
+    if (LYJumpFileURL) {
+	check_JUMP_param(addressp);
+    }
+}
+
 static BOOLEAN handle_LYK_JUMP(int c,
 			       char *user_input_buffer,
 			       char **old_user_input GCC_UNUSED,
@@ -3451,6 +3564,8 @@ static BOOLEAN handle_LYK_JUMP(int c,
 	    if (!LYTrimStartfile(ret)) {
 		LYRemoveBlanks(user_input_buffer);
 	    }
+	    if (!check_JUMP_param(&ret))
+		return FALSE;
 	    set_address(&newdoc, ret);
 	    StrAllocCopy(lynxjumpfile, ret);
 	    LYFreePostData(&newdoc);
@@ -5597,6 +5712,7 @@ int mainloop(void)
 		}
 		tmpDocInfo = newdoc;
 		tmpNewline = -1;
+		fill_JUMP_Params(&newdoc.address);
 		getresult = getfile(&newdoc, &tmpNewline);
 		if (!reloading && !popped_doc && (tmpNewline >= 0)) {
 		    LYSetNewline(tmpNewline);
@@ -5607,6 +5723,7 @@ int mainloop(void)
 #else /* TRACK_INTERNAL_LINKS */
 	    tmpDocInfo = newdoc;
 	    tmpNewline = -1;
+	    fill_JUMP_Params(&newdoc.address);
 	    getresult = getfile(&newdoc, &tmpNewline);
 	    if (!reloading && !popped_doc && (tmpNewline >= 0)) {
 		LYSetNewline(tmpNewline);

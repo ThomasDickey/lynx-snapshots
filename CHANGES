@@ -1,9 +1,11 @@
--- $LynxId: CHANGES,v 1.562 2011/12/01 09:22:14 tom Exp $
+-- $LynxId: CHANGES,v 1.563 2012/01/16 11:50:27 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2011-12-01 (2.8.8dev.10)
+2012-01-16 (2.8.8dev.10)
+* provide a way to substitute parameters in URLs for jumpfiles (adapted from
+  patch by Mark Skilbeck -TD
 * ensure that button/input tags have a value for display, in case the tag is
   improperly terminated (report by Aki Helin) -TD
 * work around glibc bug in sscanf in SGML_character() using strtol() (report by

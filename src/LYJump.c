@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYJump.c,v 1.39 2010/09/25 11:19:37 tom Exp $
+ * $LynxId: LYJump.c,v 1.40 2012/01/17 00:43:43 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTAlert.h>
@@ -213,8 +213,8 @@ char *LYJump(int key)
     if (!jump_buffer || isEmpty(jtp->shortcut))
 	*buf = '\0';
     else if (non_empty(jtp->shortcut)) {
-	if (strlen(jtp->shortcut) > 119)
-	    jtp->shortcut[119] = '\0';
+	if (strlen(jtp->shortcut) > sizeof(buf) - 5)
+	    jtp->shortcut[sizeof(buf) - 5] = '\0';
 	strcpy(buf, jtp->shortcut);
     }
 

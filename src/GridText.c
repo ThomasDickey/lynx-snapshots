@@ -1,5 +1,5 @@
 /*
- * $LynxId: GridText.c,v 1.216 2011/10/07 00:38:52 tom Exp $
+ * $LynxId: GridText.c,v 1.217 2011/12/27 01:52:36 tom Exp $
  *
  *		Character grid hypertext object
  *		===============================
@@ -10630,7 +10630,7 @@ static void load_a_file(const char *val_used,
     size_t bytes;
     char buffer[257];
 
-    CTRACE((tfp, "Ok, about to convert %s to mime/thingy\n", val_used));
+    CTRACE((tfp, "Ok, about to convert \"%s\" to mime/thingy\n", val_used));
 
     if (*val_used) {		/* ignore empty form field */
 	if ((fd = fopen(val_used, BIN_R)) == 0) {
@@ -11246,7 +11246,7 @@ int HText_SubmitForm(FormInfo * submit_item, DocInfo *doc, char *link_name,
 #ifdef USE_FILE_UPLOAD
 	    case F_FILE_TYPE:
 		val_used = NonNull(form_ptr->value);
-		CTRACE((tfp, "I will submit %s (from %s)\n",
+		CTRACE((tfp, "I will submit \"%s\" (from %s)\n",
 			val_used, name_used));
 		break;
 #endif
