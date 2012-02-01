@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMainLoop.c,v 1.178 2012/01/17 00:33:58 tom Exp $
+ * $LynxId: LYMainLoop.c,v 1.179 2012/02/01 00:05:07 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTAccess.h>
@@ -3470,7 +3470,7 @@ static BOOLEAN check_JUMP_param(char **url_template)
 	    code = FALSE;
 	    break;
 	} else if ((encoded = urlencode(input)) != '\0') {
-	    int subs_at = (subs - result);
+	    int subs_at = (int) (subs - result);
 	    int fill_in = (int) strlen(encoded) - 2;
 	    size_t have = strlen(result);
 	    size_t want = strlen(encoded) + have - 1;

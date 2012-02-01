@@ -1,30 +1,38 @@
-<!DOCTYPE html PUBLIC "-//IETF//DTD HTML 3.0//EN">
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<!-- $LynxId: edit_help.html,v 1.13 2012/01/31 23:17:33 tom Exp $ -->
+
 <html>
 <head>
-<title>Lynx Line Editor Default Key Binding</title>
-<link rev="made" href="mailto:lynx-dev@nongnu.org">
-<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content=
+  "HTML Tidy for Linux/x86 (vers 6 November 2007), see www.w3.org">
+
+  <title>Lynx Line Editor Default Key Binding</title>
+  <link rev="made" href="mailto:lynx-dev@nongnu.org">
+  <meta http-equiv="Content-Type" content=
+  "text/html; charset=us-ascii">
 </head>
+
 <body>
-<h1>+++DEFAULT BINDING+++</h1>
+  <h1>DEFAULT BINDING</h1>
 
-Lynx invokes a built-in <em>Line Editor</em> for entering strings in
-response to prompts, in forms, and for email messages if an external editor
-has not been defined.  Alternative key bindings can be offered
-by configuring with --enable-alt-bindings or by adding them in LYEditmap.c
-before compiling Lynx.  If available, they may
-be selected via the 'o'ptions menu, or by editing lineedit_mode in the
-'.lynxrc' file.
+  <p>Lynx invokes a built-in <em>Line Editor</em> for entering
+  strings in response to prompts, in forms, and for email messages
+  if an external editor has not been defined. Alternative key
+  bindings can be offered by configuring with --enable-alt-bindings
+  or by adding them in LYEditmap.c before compiling Lynx. If
+  available, they may be selected via the 'o'ptions menu, or by
+  editing lineedit_mode in the '.lynxrc' file.</p>
 
-<p>Two such alternative key bindings, which may be available on your system,
-are the <A HREF="alt_edit_help.html">Alternative Binding</A> keymap and the
-<A HREF="bashlike_edit_help.html">Bash-like Binding</A> keymap.
+  <p>Two such alternative key bindings, which may be available on
+  your system, are the <a href="alt_edit_help.html">Alternative
+  Binding</a> keymap and the <a href=
+  "bashlike_edit_help.html">Bash-like Binding</a> keymap.</p>
 
-<p>Note: setting emacs/vi keys ON has no effect on line-editor bindings.
+  <p>Note: setting emacs/vi keys ON has no effect on line-editor
+  bindings.</p>
 
-<p>This is the <em>Default Binding</em> keymap:
-
-<pre>
+  <p>This is the <em>Default Binding</em> keymap:</p>
+  <pre>
      ENTER  Input complete        -  RETURN
      TAB    Input complete        -  TAB, Do
      ABORT  Input cancelled       -  Ctrl-G, Ctrl-O, (Ctrl-C on some systems)
@@ -49,7 +57,8 @@ are the <A HREF="alt_edit_help.html">Alternative Binding</A> keymap and the
      LKCMD  Invoke cmd prompt     -  Ctrl-V (in form text fields, only) [2]
      SWMAP  Switch input keymap   -  Ctrl-^ (if compiled in)
 
-<A NAME="TASpecial">Special commands for use only in textarea fields</A>[3]:
+<a name=
+"TASpecial">Special commands for use only in textarea fields</a>[3]:
 
           Textarea external edit  - Ctrl-X e
           Insert file in textarea - Ctrl-X i
@@ -64,8 +73,7 @@ are the <A HREF="alt_edit_help.html">Alternative Binding</A> keymap and the
 
 [3]  For other key combinations using Ctrl-X as a prefix key, see the
      Help page for the <a rel="Sibling" title="Bash-Like Binding"
-                        href="bashlike_edit_help.html"
-                      >Bash-Like</a> Binding.
+href="bashlike_edit_help.html">Bash-Like</a> Binding.
 </pre>
 </body>
 </html>

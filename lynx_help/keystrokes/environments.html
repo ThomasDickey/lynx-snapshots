@@ -1,29 +1,38 @@
-<!DOCTYPE html PUBLIC "-//IETF//DTD HTML 3.0//EN">
-<!-- $LynxId: environments.html,v 1.13 2007/05/13 22:47:50 Chuck.Houpt Exp $ -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<!-- $LynxId: environments.html,v 1.14 2012/01/31 23:25:10 tom Exp $ -->
+
 <html>
 <head>
-<title>Help on Environment variables</title>
-<LINK rev="made" href="mailto:lynx-dev@nongnu.org">
-<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content=
+  "HTML Tidy for Linux/x86 (vers 6 November 2007), see www.w3.org">
+
+  <title>Help on Environment variables</title>
+  <link rev="made" href="mailto:lynx-dev@nongnu.org">
+  <meta http-equiv="Content-Type" content=
+  "text/html; charset=us-ascii">
 </head>
+
 <body>
-<pre>
+  <pre>
 
 <em>ENVIRONMENT</em>
        In addition to various  "standard"  environment  variables
        such as HOME, PATH, USER, DISPLAY, TMPDIR, etc, Lynx utilizes
-       several Lynx-specific environment variables, <a href="#env">if they exist</a>.
+       several Lynx-specific environment variables, <a href=
+"#env">if they exist</a>.
 
        Others may be created or modified by Lynx to pass data to
        an external program, or for other reasons.  These are
        listed separately <a href="#setenv">below</a>.
 
-       See also the sections on <a href="#cgi">SIMULATED CGI SUPPORT</a> and
+       See also the sections on <a href=
+"#cgi">SIMULATED CGI SUPPORT</a> and
        <a href="#language">NATIVE LANGUAGE SUPPORT</a>, below.
 
        Note:  Not all environment variables apply to all types of
        platforms supported by Lynx, though most do.  Feedback on
-       platform dependencies is solicited.  See also <a href="#dos">win32/dos</a> specific
+       platform dependencies is solicited.  See also <a href=
+"#dos">win32/dos</a> specific
        variables.
 
 <a name="env"><em>
@@ -132,7 +141,8 @@ Environment Variables Used By Lynx:
                            the form PROTOCOL_proxy (literally:
                            http_proxy, ftp_proxy, gopher_proxy,
                            etc), to "http://some.server.dom:port/".
-                           See <a href="#proxy">Proxy details and examples</a>.
+                           See <a href=
+"#proxy">Proxy details and examples</a>.
 
        WWW_access_GATEWAY
                            Lynx still  supports  use  of  gateway
@@ -144,7 +154,8 @@ Environment Variables Used By Lynx:
                            discontinued.  Note that  you  do  not
                            include  a  terminal '/' for gateways,
                            but do for proxies specified by PROTOCOL_proxy
-                           environment variables.  See <a href="#proxy">Proxy details</a>.
+                           environment variables.  See <a href=
+"#proxy">Proxy details</a>.
 
        WWW_HOME
                            This  variable,  if set, will override

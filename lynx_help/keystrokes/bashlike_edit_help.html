@@ -1,28 +1,40 @@
-<!DOCTYPE html PUBLIC "-//IETF//DTD HTML 3.0//EN">
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<!-- $LynxId: bashlike_edit_help.html,v 1.8 2012/01/31 23:21:55 tom Exp $ -->
+
 <html>
 <head>
-<title>Lynx Line Editor Bash-Like Key Binding</title>
-<link rev="made" href="mailto:lynx-dev@nongnu.org">
-<link rel="Sibling" title="Default Binding" href="edit_help.html">
-<link rel="Sibling" title="Alternative Binding" href="alt_edit_help.html">
-<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content=
+  "HTML Tidy for Linux/x86 (vers 6 November 2007), see www.w3.org">
+
+  <title>Lynx Line Editor Bash-Like Key Binding</title>
+  <link rev="made" href="mailto:lynx-dev@nongnu.org">
+  <link rel="Sibling" title="Default Binding" href=
+  "edit_help.html">
+  <link rel="Sibling" title="Alternative Binding" href=
+  "alt_edit_help.html">
+  <meta http-equiv="Content-Type" content=
+  "text/html; charset=us-ascii">
 </head>
+
 <body>
-<h1>+++BASH-LIKE BINDING+++</h1>
+  <h1>BASH-LIKE BINDING</h1>
 
-Lynx invokes a built-in <em>Line Editor</em> for entering strings in
-response to prompts, in forms, and for email messages if an external editor
-has not been defined.  Several sets of key-bindings can be offered
-by configuring with --enable-alt-bindings or by adding them in
-LYEditmap.c before compiling Lynx.  If available,
-they may be selected via the 'o'ptions menu, or by editing lineedit_mode in
-the '.lynxrc' file.
+  <p>Lynx invokes a built-in <em>Line Editor</em> for entering
+  strings in response to prompts, in forms, and for email messages
+  if an external editor has not been defined. Several sets of
+  key-bindings can be offered by configuring with
+  --enable-alt-bindings or by adding them in LYEditmap.c before
+  compiling Lynx. If available, they may be selected via the
+  'o'ptions menu, or by editing lineedit_mode in the '.lynxrc'
+  file.</p>
 
-<p>Note: setting emacs/vi keys ON has no direct effect on line-editor bindings.
+  <p>Note: setting emacs/vi keys ON has no direct effect on
+  line-editor bindings.</p>
 
-<p>This is the <em>Bash-like Binding</em> keymap.</p>
-<h2>Basic commands</h2>
-<pre>
+  <p>This is the <em>Bash-like Binding</em> keymap.</p>
+
+  <h2>Basic commands</h2>
+  <pre>
      ENTER  Input complete        -  Enter, RETURN
      TAB    Completion [2]/ Next  -  TAB, Do
      ABORT  Cancel / Undo Change  -  C-g, C-_
@@ -48,21 +60,25 @@ the '.lynxrc' file.
      LKCMD  Invoke cmd prompt     -  C-v [FORM]
      SWMAP  Switch input keymap   -  C-^ (if compiled in)
 
-<A NAME="TASpecial">Special commands for use in textarea fields</A> [FORM]:
+<a name=
+"TASpecial">Special commands for use in textarea fields</a> [FORM]:
 
      PASS!  Textarea external edit  - C-e C-e [4], C-x e
      PASS!  Insert file in textarea - C-x i
      PASS!  Grow textarea           - C-x g
-
 </pre>
-Here is a little textarea for practice:<BR>
-<FORM action=""><TEXTAREA name="practice" cols=40 ROWS=5>
+
+  <p>Here is a little textarea for practice:<br></p>
+
+  <form action="">
+    <textarea name="practice" cols="40" rows="5">
 This text cannot be submitted.  Normally lines like
 these would be part of a form that is filled out and
 then submitted.  You can move around here and delete
 or add text as you like, using the Line-Editor keys.
-</TEXTAREA><INPUT TYPE=reset VALUE="[reset content]"></FORM>
-<pre>
+</textarea><input type="reset" value="[reset content]">
+  </form>
+  <pre>
 
 Advanced emacs-like commands:
 
@@ -72,32 +88,39 @@ Advanced emacs-like commands:
     KILLREG Kill region between mark and position  -  C-x C-w [3]
     YANK    Insert text last killed (with KILLREG) -  C-y
 </pre>
-<h2>Notes</h2>
-<P><samp>
-     <DFN>C-</DFN><strong>key</strong> means Control+<strong><kbd>key</kbd></strong>.  <DFN
-     ><code>C-x </code></DFN><strong>key</strong> means first Control+<kbd>x</kbd>, then
-     <strong><kbd>key</kbd></strong>.
-                                                                       <DFN
-                        >M-</DFN>key means Meta+<strong><kbd>key</kbd></strong>, where Meta
-     is a modifier that can be entered in a variety of ways:
-</samp></P><UL>
-<LI>First ESC, then the <strong><kbd>key</kbd></strong>.
-    This doesn't work with all systems or on all connections, and if it
-    does may not work for some keys (because the ESC character is also
-    part of code sequences for "normal" function keys).
-<LI>Alt+<strong><kbd>key</kbd></strong>.
-    This works if the terminal, console, or comm program is set up to
-    interpret Alt as a modifier to send ESC.  The Linux console acts
-    like that by default for most keys;  Kermit can be set up to do it,
-    xterm can be for some keys, and so on.  But the same caveats as for
-    the previous item apply.
-    This Alt mapping may also be possible, independent of the ESC character,
-    for some keys in Lynx for DOS/i386 or for Win32.
-<LI>C-x <strong><kbd>key</kbd></strong>.
-    Actually, currently the same internal table is used for Meta and the
-    C-x prefix.  Therefore all M-<strong><kbd>key</kbd></strong> combinations can
-    also be typed as C-x <strong><kbd>key</kbd></strong>, and vice versa.
-</UL><pre>
+
+  <h2>Notes</h2>
+
+  <p><samp><dfn>C-</dfn><strong>key</strong> means
+  Control+<strong><kbd>key</kbd></strong>.
+  <dfn><code>C-x</code></dfn> <strong>key</strong> means first
+  Control+<kbd>x</kbd>, then <strong><kbd>key</kbd></strong>.
+  <dfn>M-</dfn>key means Meta+<strong><kbd>key</kbd></strong>,
+  where Meta is a modifier that can be entered in a variety of
+  ways:</samp></p>
+
+  <ul>
+    <li>First ESC, then the <strong><kbd>key</kbd></strong>. This
+    doesn't work with all systems or on all connections, and if it
+    does may not work for some keys (because the ESC character is
+    also part of code sequences for "normal" function keys).</li>
+
+    <li>Alt+<strong><kbd>key</kbd></strong>. This works if the
+    terminal, console, or comm program is set up to interpret Alt
+    as a modifier to send ESC. The Linux console acts like that by
+    default for most keys; Kermit can be set up to do it, xterm can
+    be for some keys, and so on. But the same caveats as for the
+    previous item apply. This Alt mapping may also be possible,
+    independent of the ESC character, for some keys in Lynx for
+    DOS/i386 or for Win32.</li>
+
+    <li>C-x <strong><kbd>key</kbd></strong>. Actually, currently
+    the same internal table is used for Meta and the C-x prefix.
+    Therefore all M-<strong><kbd>key</kbd></strong> combinations
+    can also be typed as C-x <strong><kbd>key</kbd></strong>, and
+    vice versa.</li>
+  </ul>
+  <pre>
 [1] "next" means the character "under" a box or underline style cursor; it
     means "to the immediate right of" an I-beam (between characters) type
     cursor.
@@ -123,7 +146,6 @@ Advanced emacs-like commands:
     the benefit of those where this doesn't apply.
 [FORM] In form text fields, only.  Ignored by Line Editor elsewhere.
 
-
 More notes
 
    When a text input field, including a textarea line, is selected,
@@ -131,14 +153,13 @@ More notes
    If a key has no function defined in the Line Editor binding, it
    can either be ignored, or passed on for normal key command handling,
    where modifiers like C-x or Meta currently have no effect (see the
-   <A HREF="LYNXKEYMAP:"
-   >Key Map Page</A> accessible with the key <kbd>K</kbd> for current information).
-
-
+   <a href=
+"LYNXKEYMAP:">Key Map Page</a> accessible with the key <kbd>K</kbd> for current information).
 </pre>
-<h2>Additional details on other keys, for the curious
-(very much subject to change)</h2>
-<pre>
+
+  <h2>Additional details on other keys, for the curious (very much
+  subject to change)</h2>
+  <pre>
 Normal key action when used in form fields, subject to remapping
 with KEYMAP: [FORM (except Up-Arrow, Down-Arrow)]
             C-l [3], C-o, C-z [5], C-\ [5], C-] [5]
@@ -204,8 +225,8 @@ Meta + other (mostly, printable character) keys:
               control (C1) range if appropriate according to
               Display Character Set.
 
-
 [emacskey] Normal key action subject to emacs_keys setting.
+
 [!] Action of key with Meta modifier follows action of key without
     Meta.  If you manage to enter the Meta key while Line-Editor
     Binding is not set to Bash-Like, and the unmodified binding
