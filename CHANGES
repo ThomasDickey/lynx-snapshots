@@ -1,9 +1,10 @@
--- $LynxId: CHANGES,v 1.563 2012/01/16 11:50:27 tom Exp $
+-- $LynxId: CHANGES,v 1.564 2012/01/31 10:35:41 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2012-01-16 (2.8.8dev.10)
+2012-01-31 (2.8.8dev.10)
+* use tidy to indent html documentation -TD
 * provide a way to substitute parameters in URLs for jumpfiles (adapted from
   patch by Mark Skilbeck -TD
 * ensure that button/input tags have a value for display, in case the tag is
