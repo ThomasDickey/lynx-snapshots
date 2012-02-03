@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTAccess.c,v 1.74 2011/05/24 09:35:29 tom Exp $
+ * $LynxId: HTAccess.c,v 1.75 2012/02/03 01:43:58 tom Exp $
  *
  *		Access Manager					HTAccess.c
  *		==============
@@ -686,6 +686,11 @@ static int HTLoad(const char *addr,
 {
     HTProtocol *p;
     int status = get_physical(addr, anchor);
+
+    if (reloading) {
+	FREE(anchor->charset);
+	FREE(anchor->UCStages);
+    }
 
     if (status == HT_FORBIDDEN) {
 	/* prevent crash if telnet or similar was forbidden by rule. - kw */
