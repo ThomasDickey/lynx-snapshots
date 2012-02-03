@@ -1,5 +1,5 @@
 /*
- * $LynxId: GridText.c,v 1.217 2011/12/27 01:52:36 tom Exp $
+ * $LynxId: GridText.c,v 1.218 2012/02/03 01:27:52 tom Exp $
  *
  *		Character grid hypertext object
  *		===============================
@@ -9055,13 +9055,14 @@ BOOLEAN HTLoadedDocumentIsSafe(void)
 
 const char *HTLoadedDocumentCharset(void)
 {
-    if (!HTMainText)
-	return (NULL);
+    const char *result = NULL;
 
-    if (HTMainText->node_anchor && HTMainText->node_anchor->charset)
-	return (HTMainText->node_anchor->charset);
-    else
-	return (NULL);
+    if (HTMainText &&
+	HTMainText->node_anchor) {
+	result = HTMainText->node_anchor->charset;
+    }
+
+    return result;
 }
 
 BOOL HTLoadedDocumentEightbit(void)
@@ -11029,8 +11030,7 @@ int HText_SubmitForm(FormInfo * submit_item, DocInfo *doc, char *link_name,
     }
 
     if (target_cs < 0 &&
-	HTMainText->node_anchor->charset &&
-	*HTMainText->node_anchor->charset) {
+	non_empty(HTMainText->node_anchor->charset)) {
 	target_cs = UCGetLYhndl_byMIME(HTMainText->node_anchor->charset);
 	if (target_cs >= 0) {
 	    target_csname = HTMainText->node_anchor->charset;

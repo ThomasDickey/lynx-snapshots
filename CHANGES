@@ -1,9 +1,12 @@
--- $LynxId: CHANGES,v 1.564 2012/01/31 10:35:41 tom Exp $
+-- $LynxId: CHANGES,v 1.565 2012/02/03 01:47:08 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2012-01-31 (2.8.8dev.10)
+2012-02-02 (2.8.8dev.10)
+* modify HTLoad() to discard charset information before reloading a document,
+  in case the server changes the content-type information between loads
+  (report by Stanislav Brabec) -TD
 * use tidy to indent html documentation -TD
 * provide a way to substitute parameters in URLs for jumpfiles (adapted from
   patch by Mark Skilbeck -TD

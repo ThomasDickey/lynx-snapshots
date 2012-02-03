@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTAnchor.c,v 1.70 2011/06/06 08:25:33 tom Exp $
+ * $LynxId: HTAnchor.c,v 1.71 2012/02/03 01:52:50 tom Exp $
  *
  *	Hypertext "Anchor" Object				HTAnchor.c
  *	==========================
@@ -1234,6 +1234,29 @@ void HTAnchor_setPhysical(HTParentAnchor *me,
     }
 }
 
+#ifdef DEBUG
+static void show_stages(HTParentAnchor *me, const char *tag, int which_stage)
+{
+    int j;
+
+    CTRACE((tfp, "Stages %s*%s", NonNull(me->charset), tag));
+    for (j = 0; j < UCT_STAGEMAX; j++) {
+	CTRACE((tfp, " "));
+	if (j == which_stage)
+	    CTRACE((tfp, "("));
+	CTRACE((tfp, "%d:%d:%s",
+		j,
+		me->UCStages->s[j].LYhndl,
+		NonNull(me->UCStages->s[j].C.MIMEname)));
+	if (j == which_stage)
+	    CTRACE((tfp, ")"));
+    }
+    CTRACE((tfp, "\n"));
+}
+#else
+#define show_stages(me,tag,which_stage)		/* nothing */
+#endif
+
 /*
  *  We store charset info in the HTParentAnchor object, for several
  *  "stages".  (See UCDefs.h)
@@ -1261,42 +1284,45 @@ void HTAnchor_setPhysical(HTParentAnchor *me,
 LYUCcharset *HTAnchor_getUCInfoStage(HTParentAnchor *me,
 				     int which_stage)
 {
-    if (me && !me->UCStages) {
-	int i;
-	int chndl = UCLYhndl_for_unspec;	/* always >= 0 */
-	UCAnchorInfo *stages = typecalloc(UCAnchorInfo);
+    LYUCcharset *result = NULL;
 
-	if (stages == NULL)
-	    outofmem(__FILE__, "HTAnchor_getUCInfoStage");
-
-	assert(stages != NULL);
-
-	for (i = 0; i < UCT_STAGEMAX; i++) {
-	    stages->s[i].C.MIMEname = "";
-	    stages->s[i].LYhndl = -1;
-	}
-	if (me->charset) {
-	    chndl = UCGetLYhndl_byMIME(me->charset);
-	    if (chndl < 0)
-		chndl = UCLYhndl_for_unrec;
-	    if (chndl < 0)
-		/*
-		 * UCLYhndl_for_unrec not defined :-(
-		 * fallback to UCLYhndl_for_unspec which always valid.
-		 */
-		chndl = UCLYhndl_for_unspec;	/* always >= 0 */
-	}
-	MemCpy(&stages->s[UCT_STAGE_MIME].C, &LYCharSet_UC[chndl],
-	       sizeof(LYUCcharset));
-
-	stages->s[UCT_STAGE_MIME].lock = UCT_SETBY_DEFAULT;
-	stages->s[UCT_STAGE_MIME].LYhndl = chndl;
-	me->UCStages = stages;
-    }
     if (me) {
-	return (&me->UCStages->s[which_stage].C);
+	if (!me->UCStages) {
+	    int i;
+	    int chndl = UCLYhndl_for_unspec;	/* always >= 0 */
+	    UCAnchorInfo *stages = typecalloc(UCAnchorInfo);
+
+	    if (stages == NULL)
+		outofmem(__FILE__, "HTAnchor_getUCInfoStage");
+
+	    assert(stages != NULL);
+
+	    for (i = 0; i < UCT_STAGEMAX; i++) {
+		stages->s[i].C.MIMEname = "";
+		stages->s[i].LYhndl = -1;
+	    }
+	    if (me->charset) {
+		chndl = UCGetLYhndl_byMIME(me->charset);
+		if (chndl < 0)
+		    chndl = UCLYhndl_for_unrec;
+		if (chndl < 0)
+		    /*
+		     * UCLYhndl_for_unrec not defined :-(
+		     * fallback to UCLYhndl_for_unspec which always valid.
+		     */
+		    chndl = UCLYhndl_for_unspec;	/* always >= 0 */
+	    }
+	    MemCpy(&stages->s[UCT_STAGE_MIME].C, &LYCharSet_UC[chndl],
+		   sizeof(LYUCcharset));
+
+	    stages->s[UCT_STAGE_MIME].lock = UCT_SETBY_DEFAULT;
+	    stages->s[UCT_STAGE_MIME].LYhndl = chndl;
+	    me->UCStages = stages;
+	}
+	result = (&me->UCStages->s[which_stage].C);
+	show_stages(me, "_getUCInfoStage", which_stage);
     }
-    return (NULL);
+    return (result);
 }
 
 int HTAnchor_getUCLYhndl(HTParentAnchor *me,
@@ -1362,6 +1388,7 @@ LYUCcharset *HTAnchor_setUCInfoStage(HTParentAnchor *me,
 	    } else {
 		p->UChndl = -1;
 	    }
+	    show_stages(me, "_setUCInfoStage", which_stage);
 	    return (p);
 	}
     }
@@ -1373,21 +1400,25 @@ LYUCcharset *HTAnchor_resetUCInfoStage(HTParentAnchor *me,
 				       int which_stage,
 				       int set_by)
 {
+    LYUCcharset *result = NULL;
     int ohandle;
 
-    if (!me || !me->UCStages)
-	return (NULL);
-    me->UCStages->s[which_stage].lock = set_by;
-    ohandle = me->UCStages->s[which_stage].LYhndl;
-    me->UCStages->s[which_stage].LYhndl = LYhndl;
+    if (me && me->UCStages) {
+	me->UCStages->s[which_stage].lock = set_by;
+	ohandle = me->UCStages->s[which_stage].LYhndl;
+	me->UCStages->s[which_stage].LYhndl = LYhndl;
 #ifdef CAN_SWITCH_DISPLAY_CHARSET
-    /* Allow a switch to a more suitable display charset */
-    if (LYhndl >= 0 && LYhndl != ohandle && which_stage == UCT_STAGE_PARSER)
-	setup_switch_display_charset(me, LYhndl);
+	/* Allow a switch to a more suitable display charset */
+	if (LYhndl >= 0 && LYhndl != ohandle
+	    && which_stage == UCT_STAGE_PARSER)
+	    setup_switch_display_charset(me, LYhndl);
 #else
-    (void) ohandle;
+	(void) ohandle;
 #endif
-    return (&me->UCStages->s[which_stage].C);
+	show_stages(me, "_resetUCInfoStage", which_stage);
+	result = (&me->UCStages->s[which_stage].C);
+    }
+    return result;
 }
 
 /*
