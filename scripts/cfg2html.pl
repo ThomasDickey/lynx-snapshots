@@ -1,5 +1,5 @@
 #!/usr/bin/perl -w
-# $LynxId: cfg2html.pl,v 1.15 2011/06/12 18:40:16 tom Exp $
+# $LynxId: cfg2html.pl,v 1.16 2012/02/04 00:54:50 tom Exp $
 #
 # This script uses embedded formatting directives in the lynx.cfg file to
 # guide it in extracting comments and related information to construct a
@@ -47,7 +47,7 @@ if ( defined $opt_m ) {
 	%settings_avail = ();
 	foreach $l (@settings_) {
 		chop $l;
-		if ($l =~ /^[a-zA-Z_][a-zA-Z_0-9]*$/) {
+		if ($l =~ /^[[:alpha:]_][[:alnum:]_]*$/) {
 			$settings_avail{uc $l} = 1;
 		}
 	}
@@ -125,7 +125,7 @@ sub gen_alphatoc {
 EOF
 	$m=0;
 	for $n (0..$#input) {
-		if ( $input[$n] =~ /^\.h2\s*[A-Z][A-Z0-9_]*$/ ) {
+		if ( $input[$n] =~ /^\.h2\s*[[:upper:]][[:upper:][:digit:]_]*$/ ) {
 			$minor[$m] = $input[$n];
 			$minor[$m] =~ s/^.h2\s*//;
 			$m++ if (ok($minor[$m]) || defined $opt_a);
@@ -240,8 +240,8 @@ EOF
 			next;
 		} elsif ( $c =~ /^\./ ) {
 			my $s = $c;
-			$s =~ s/^\.[a-z]+\s//;
-			if ( $s =~ /^[0-9]+$/ ) {
+			$s =~ s/^\.[[:lower:]]+\s//;
+			if ( $s =~ /^[[:digit:]]+$/ ) {
 				$count = $s;
 				$once = $s;
 			}
@@ -284,7 +284,7 @@ EOF
 			}
 			$m = 0;
 			$first = 1;
-		} elsif ( $c =~ /^[#A-Za-z]/ && $m != 0 ) {
+		} elsif ( $c =~ /^[#[:alpha:]]/ && $m != 0 ) {
 			if ( $first ) {
 				close(FP);++$curfilename;
 				push @optnames,$h2[0];
@@ -324,7 +324,7 @@ EOF
 			$c =~ s/'([^ ])'/"<strong>$1<\/strong>"/g;
 
 			my $k = 0;
-			if ( $c =~ /^[a-zA-Z_]+:/ ) {
+			if ( $c =~ /^[[:alpha:]_][[:alnum:]_]+:/ ) {
 				$t = $c;
 				$t =~ s/:.*//;
 				$k = $keys{$t};
@@ -468,8 +468,8 @@ EOF
 		} elsif ( $h1 != 0 ) {
 			if ( $c =~ /^\.(nf|ex)/ ) {
 				my $s = $c;
-				$s =~ s/^\.[a-z]+\s//;
-				if ( $s =~ /^[0-9]+$/ ) {
+				$s =~ s/^\.[[:lower:]]+\s//;
+				if ( $s =~ /^[[:digit:]]+$/ ) {
 					$count = $s;
 					$once = $s;
 				}
@@ -484,7 +484,7 @@ EOF
 				$nf = 0;
 			} elsif ( $input[$n] =~ /^\.ex/ ) {
 				$ex = $once;
-				$descs{$major[$m]} .= 
+				$descs{$major[$m]} .=
 					"<h3><em>Example"
 					.
 					($ex > 1 ? "s" : "")

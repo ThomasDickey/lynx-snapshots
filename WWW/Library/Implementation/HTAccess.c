@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTAccess.c,v 1.75 2012/02/03 01:43:58 tom Exp $
+ * $LynxId: HTAccess.c,v 1.76 2012/02/04 00:15:53 tom Exp $
  *
  *		Access Manager					HTAccess.c
  *		==============
@@ -895,15 +895,16 @@ static BOOL HTLoadDocument(const char *full_address,	/* may include #fragment */
 	 * based on an If-Modified-Since check, etc.) but the code for doing
 	 * those other things isn't available yet.
 	 */
-	if (LYoverride_no_cache ||
+	if (!reloading &&
+	    (LYoverride_no_cache ||
 #ifdef DONT_TRACK_INTERNAL_LINKS
-	    !HText_hasNoCacheSet(text) ||
-	    !HText_AreDifferent(anchor, full_address)
+	     !HText_hasNoCacheSet(text) ||
+	     !HText_AreDifferent(anchor, full_address)
 #else
-	    ((LYinternal_flag || !HText_hasNoCacheSet(text)) &&
-	     !isLYNXIMGMAP(full_address))
+	     ((LYinternal_flag || !HText_hasNoCacheSet(text)) &&
+	      !isLYNXIMGMAP(full_address))
 #endif /* TRACK_INTERNAL_LINKS */
-	    ) {
+	    )) {
 	    CTRACE((tfp, "HTAccess: Document already in memory.\n"));
 	    HText_select(text);
 
