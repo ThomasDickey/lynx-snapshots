@@ -1,9 +1,15 @@
--- $LynxId: CHANGES,v 1.565 2012/02/03 01:47:08 tom Exp $
+-- $LynxId: CHANGES,v 1.568 2012/02/04 00:56:27 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2012-02-02 (2.8.8dev.10)
+2012-02-03 (2.8.8dev.10)
+* modify cfg2html.pl to handle options which contain a digit, e.g.,
+  HTML5_CHARSETS whose default value was not marked properly -TD
+* modify HTLoadDocument() to not retain a cached document if user is explicitly
+  doing a refresh.  This fixes the case for a #fragment url, which was
+  otherwise treated as the same as the address without the #fragment -TD
+* clarify version of GPL used in README (request by Paul Menzel) -TD
 * modify HTLoad() to discard charset information before reloading a document,
   in case the server changes the content-type information between loads
   (report by Stanislav Brabec) -TD

@@ -42,11 +42,11 @@ HOW TO GET LYNX
 
 LICENSE
 
-   Lynx is distributed under the GNU General Public License (GPL) without
-   restrictions on usage or redistribution.  The Lynx copyright statement,
-   "COPYHEADER", and GNU GPL, "COPYING", are included in the top-level
-   directory of the distribution.  Lynx is supported by the Lynx user
-   community, an entirely volunteer (and unofficial) organization.
+   Lynx is distributed under the GNU General Public License, version 2 (GPLv2)
+   without restrictions on usage or redistribution.  The Lynx copyright
+   statement, "COPYHEADER", and GNU GPL, "COPYING", are included in the
+   top-level directory of the distribution.  Lynx is supported by the Lynx
+   user community, an entirely volunteer (and unofficial) organization.
 
    Certain portions of the Lynx source distribution were originally
    created by CERN and have been modified during the development of

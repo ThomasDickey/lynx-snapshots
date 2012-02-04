@@ -1167,9 +1167,8 @@ V. Compile instructions -- 386 DOS
     Compile or place your compiled PDCurses library in /djgpp/pdcur26, and
     compile or place your compiled WATT-32 library in /djgpp/watt32.  If
     using the SLANG library, put libslang.a in your DJGPP/lib directory and put
-    slang.h and slcurses.h in your DJGPP/include directory, or in the
-    appropriate directories specified by LIBRARY_PATH and INCLUDE_PATH in your
-    DJGPP.ENV file.
+    slang.h in your DJGPP/include directory, or in the appropriate directories
+    specified by LIBRARY_PATH and INCLUDE_PATH in your DJGPP.ENV file.
 
     Move to the "lynx2-*/WWW/Library/djgpp" directory.  If compiling with
     PDCurses, do "make".  If using SLANG, do "make -f makefile.sla".  This
@@ -1388,4 +1387,4 @@ VIII. Acknowledgment
 
 -- 1999/04/24 - H. Nelson <lynx-admin@irm.nara.kindai.ac.jp>
 -- vile:txtmode
--- $LynxId: INSTALLATION,v 1.116 2011/05/28 13:07:55 tom Exp $
+-- $LynxId: INSTALLATION,v 1.117 2012/02/03 22:29:17 tom Exp $
