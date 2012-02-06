@@ -1,9 +1,11 @@
--- $LynxId: CHANGES,v 1.568 2012/02/04 00:56:27 tom Exp $
+-- $LynxId: CHANGES,v 1.569 2012/02/05 19:14:53 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2012-02-03 (2.8.8dev.10)
+2012-02-05 (2.8.8dev.10)
+* modify comparison for splitting lines to allow for long preformatted lines,
+  e.g., using &nbsp;'s to not wrap when the line-wrap mode is disabled -TD
 * modify cfg2html.pl to handle options which contain a digit, e.g.,
   HTML5_CHARSETS whose default value was not marked properly -TD
 * modify HTLoadDocument() to not retain a cached document if user is explicitly

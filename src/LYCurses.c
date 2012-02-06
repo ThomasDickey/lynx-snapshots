@@ -1,4 +1,4 @@
-/* $LynxId: LYCurses.c,v 1.161 2011/10/07 00:39:43 tom Exp $ */
+/* $LynxId: LYCurses.c,v 1.162 2012/02/05 14:53:36 tom Exp $ */
 #include <HTUtils.h>
 #include <HTAlert.h>
 
@@ -1306,6 +1306,7 @@ void start_curses(void)
 
 #ifdef USE_CURSES_PADS
 	if (LYuseCursesPads) {
+	    CTRACE((tfp, "using curses-pads\n"));
 	    LYwin = newpad(LYlines, MAX_COLS);
 	    LYshiftWin = 0;
 	    LYwideLines = FALSE;
