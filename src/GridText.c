@@ -1,5 +1,5 @@
 /*
- * $LynxId: GridText.c,v 1.218 2012/02/03 01:27:52 tom Exp $
+ * $LynxId: GridText.c,v 1.220 2012/02/05 21:39:18 tom Exp $
  *
  *		Character grid hypertext object
  *		===============================
@@ -2850,6 +2850,7 @@ static void split_line(HText *text, unsigned split)
 
 #ifdef DEBUG_APPCH
     CTRACE((tfp, "GridText: split_line(%p,%d) called\n", text, split));
+    CTRACE((tfp, "   previous=%s\n", previous->data));
     CTRACE((tfp, "   bold_on=%d, underline_on=%d\n", bold_on, underline_on));
 #endif
 
@@ -4309,20 +4310,32 @@ void HText_appendCharacter(HText *text, int ch)
 
     /*
      * Check for end of line.
+     *
+     * Notes:
+     * 1) text->permissible_split is nonzero if we found a place to split the
+     *    line.  If there is no such place, we still will wrap at the display
+     *    limits (the comparison against LYcols_cu).  Furthermore, if the
+     *    curses-pads feature is active, we will ignore the first comparison
+     *    (against WRAP_COLS) to allow wide preformatted text to be displayed
+     *    without wrapping.
+     * 2) ctrl_chars_on_this_line are nonprintable bytes used for formatting.
      */
     actual = ((indent + (int) line->offset + (int) line->size) +
 	      ((line->size > 0) &&
-	       (int) (line->data[line->size - 1] == LY_SOFT_HYPHEN ? 1 : 0)));
+	       (int) (line->data[line->size - 1] == LY_SOFT_HYPHEN ? 1 : 0))
+	      - ctrl_chars_on_this_line);
 
-    if ((actual
-	 + (int) style->rightIndent
-	 - ctrl_chars_on_this_line
-	 + ((IS_CJK_TTY && text->kanji_buf) ? 1 : 0)
-	) >= WRAP_COLS(text)
+    if (((text->permissible_split
+#ifdef USE_CURSES_PADS
+	  || !LYwideLines
+#endif
+	 ) && (actual
+	       + (int) style->rightIndent
+	       + ((IS_CJK_TTY && text->kanji_buf) ? 1 : 0)
+	 ) >= WRAP_COLS(text))
 	|| (text->T.output_utf8
 	    && ((actual
 		 + UTFXTRA_ON_THIS_LINE
-		 - ctrl_chars_on_this_line
 		 + UTF_XLEN(ch)
 		) > (LYcols_cu(text) - 1)))) {
 

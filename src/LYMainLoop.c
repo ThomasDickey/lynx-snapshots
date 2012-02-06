@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMainLoop.c,v 1.179 2012/02/01 00:05:07 tom Exp $
+ * $LynxId: LYMainLoop.c,v 1.181 2012/02/05 19:04:59 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTAccess.h>
@@ -5289,30 +5289,41 @@ static BOOLEAN handle_LYK_LINEWRAP_TOGGLE(int *cmd,
 	3
     };
     int c;
+    int code = FALSE;
 
-    if (LYwin == stdscr)
-	return FALSE;
+    CTRACE((tfp, "Entering handle_LYK_LINEWRAP_TOGGLE\n"));
+    if (LYwin != stdscr) {
+	/* Somehow the mouse is over the number instead of being over the
+	   name, so we decrease x. */
+	c = LYChoosePopup(!LYwideLines,
+			  LYlines / 2 - 2,
+			  LYcolLimit / 2 - 6,
+			  choices, (int) TABLESIZE(choices) - 1,
+			  FALSE, TRUE);
+	/*
+	 * LYhandlePopupList() wasn't really meant to be used outside of
+	 * old-style Options menu processing.  One result of mis-using it here
+	 * is that we have to deal with side-effects regarding SIGINT signal
+	 * handler and the term_options global variable.  - kw
+	 */
+	if (!term_options) {
+	    CTRACE((tfp,
+		    "...setting LYwideLines %d, LYtableCols %d (have %d and %d)\n",
+		    c, wrap[c],
+		    LYwideLines,
+		    LYtableCols));
 
-    /* Somehow the mouse is over the number instead of being over the
-       name, so we decrease x. */
-    c = LYChoosePopup(!LYwideLines, LYlines / 2 - 2, LYcolLimit / 2 - 6,
-		      choices, (int) TABLESIZE(choices) - 1, FALSE, TRUE);
-    /*
-     * LYhandlePopupList() wasn't really meant to be used outside of old-style
-     * Options menu processing.  One result of mis-using it here is that we
-     * have to deal with side-effects regarding SIGINT signal handler and the
-     * term_options global variable.  - kw
-     */
-    if (term_options)
-	return FALSE;
-    LYwideLines = c;
-    LYtableCols = wrap[c];
+	    LYwideLines = c;
+	    LYtableCols = wrap[c];
 
-    if (LYwideLines == 0)
-	LYshiftWin = 0;
-    *flag = TRUE;
-    HTUserMsg(LYwideLines ? LINEWRAP_OFF : LINEWRAP_ON);
-    return reparse_or_reload(cmd);
+	    if (LYwideLines == 0)
+		LYshiftWin = 0;
+	    *flag = TRUE;
+	    HTUserMsg(LYwideLines ? LINEWRAP_OFF : LINEWRAP_ON);
+	    code = reparse_or_reload(cmd);
+	}
+    }
+    return code;
 }
 #endif
 
