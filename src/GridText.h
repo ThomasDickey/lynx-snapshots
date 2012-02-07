@@ -1,5 +1,5 @@
 /*
- * $LynxId: GridText.h,v 1.65 2010/09/26 23:31:23 tom Exp $
+ * $LynxId: GridText.h,v 1.67 2012/02/07 00:36:09 tom Exp $
  *
  * Specialities of GridText as subclass of HText
  */
@@ -260,7 +260,8 @@ US-ASCII control characters <32 which are not defined in Unicode standard
     extern BOOL HText_AreDifferent(HTParentAnchor *anchor,
 				   const char *full_address);
 
-    extern int HText_ExtEditForm(LinkInfo * form_link);
+    extern int HText_EditTextArea(LinkInfo * form_link);
+    extern void HText_EditTextField(LinkInfo * form_link);
     extern void HText_ExpandTextarea(LinkInfo * form_link, int newlines);
     extern int HText_InsertFile(LinkInfo * form_link);
 

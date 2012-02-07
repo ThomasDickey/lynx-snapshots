@@ -1,9 +1,10 @@
--- $LynxId: CHANGES,v 1.569 2012/02/05 19:14:53 tom Exp $
+-- $LynxId: CHANGES,v 1.570 2012/02/07 01:45:24 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2012-02-05 (2.8.8dev.10)
+2012-02-06 (2.8.8dev.10)
+* extend ^X-e editing of textarea's to include single-line fields -TD
 * modify comparison for splitting lines to allow for long preformatted lines,
   e.g., using &nbsp;'s to not wrap when the line-wrap mode is disabled -TD
 * modify cfg2html.pl to handle options which contain a digit, e.g.,

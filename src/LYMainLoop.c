@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMainLoop.c,v 1.181 2012/02/05 19:04:59 tom Exp $
+ * $LynxId: LYMainLoop.c,v 1.183 2012/02/07 00:36:19 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTAccess.h>
@@ -53,6 +53,10 @@
 #define LinkIsTextarea(linkNumber) \
 		(links[linkNumber].type == WWW_FORM_LINK_TYPE && \
 		 links[linkNumber].l_form->type == F_TEXTAREA_TYPE)
+
+#define LinkIsTextLike(linkNumber) \
+	     (links[linkNumber].type == WWW_FORM_LINK_TYPE && \
+	      F_TEXTLIKE(links[linkNumber].l_form->type))
 
 #ifdef KANJI_CODE_OVERRIDE
 char *str_kcode(HTkcode code)
@@ -2524,9 +2528,8 @@ static void handle_LYK_DWIMHELP(const char **cshelpfile)
      * if current link is a text input form field.  - kw
      */
     if (curdoc.link >= 0 && curdoc.link < nlinks &&
-	links[curdoc.link].type == WWW_FORM_LINK_TYPE &&
 	!FormIsReadonly(links[curdoc.link].l_form) &&
-	F_TEXTLIKE(links[curdoc.link].l_form->type)) {
+	LinkIsTextLike(curdoc.link)) {
 	*cshelpfile = LYLineeditHelpURL();
     }
 }
@@ -2545,16 +2548,16 @@ static void handle_LYK_EDIT_TEXTAREA(BOOLEAN *refresh_screen,
 	    *old_c = real_c;
 	    HTUserMsg(NO_EDITOR);
 	}
-    }
-    /*
-     * See if the current link is in a form TEXTAREA.
-     */
-    else if (LinkIsTextarea(curdoc.link)) {
+    } else if (LinkIsTextarea(curdoc.link)) {
+	/*
+	 * if the current link is in a form TEXTAREA, it requires handling
+	 * for the possible multiple lines.
+	 */
 
 	/* stop screen */
 	stop_curses();
 
-	(void) HText_ExtEditForm(&links[curdoc.link]);
+	(void) HText_EditTextArea(&links[curdoc.link]);
 
 	/*
 	 * TODO:
@@ -2572,6 +2575,14 @@ static void handle_LYK_EDIT_TEXTAREA(BOOLEAN *refresh_screen,
 	start_curses();
 	*refresh_screen = TRUE;
 
+    } else if (LinkIsTextLike(curdoc.link)) {
+	/*
+	 * other text fields are single-line
+	 */
+	stop_curses();
+	HText_EditTextField(&links[curdoc.link]);
+	start_curses();
+	*refresh_screen = TRUE;
     } else {
 
 	HTInfoMsg(NOT_IN_TEXTAREA_NOEDIT);
@@ -6533,8 +6544,7 @@ int mainloop(void)
 
 	curlink_is_editable = (BOOLEAN)
 	    (nlinks > 0 &&
-	     (links[curdoc.link].type == WWW_FORM_LINK_TYPE) &&
-	     F_TEXTLIKE(links[curdoc.link].l_form->type));
+	     LinkIsTextLike(curdoc.link));
 
 	use_last_tfpos = (BOOLEAN)
 	    (curlink_is_editable &&
@@ -6718,8 +6728,7 @@ int mainloop(void)
 		    LKC_TO_LAC(keymap, real_c) != LYK_CHANGE_LINK) {
 		    do_change_link();
 		    if ((c == '\n' || c == '\r') &&
-			links[curdoc.link].type == WWW_FORM_LINK_TYPE &&
-			F_TEXTLIKE(links[curdoc.link].l_form->type) &&
+			LinkIsTextLike(curdoc.link) &&
 			!textfields_need_activation) {
 			c = DO_NOTHING;
 		    }
@@ -6952,8 +6961,7 @@ int mainloop(void)
 	case 0:		/* unmapped character */
 	default:
 	    if (curdoc.link >= 0 && curdoc.link < nlinks &&
-		links[curdoc.link].type == WWW_FORM_LINK_TYPE &&
-		F_TEXTLIKE(links[curdoc.link].l_form->type)) {
+		LinkIsTextLike(curdoc.link)) {
 
 #ifdef TEXTFIELDS_MAY_NEED_ACTIVATION
 		if (textfields_need_activation) {
