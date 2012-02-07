@@ -1,5 +1,5 @@
 /*
- * $LynxId: GridText.c,v 1.220 2012/02/05 21:39:18 tom Exp $
+ * $LynxId: GridText.c,v 1.224 2012/02/07 01:43:47 tom Exp $
  *
  *		Character grid hypertext object
  *		===============================
@@ -12919,37 +12919,16 @@ static BOOLEAN IsFormsTextarea(FormInfo * form, TextAnchor *anchor_ptr)
 		      !strcmp(anchor_ptr->input_field->name, form->name));
 }
 
-static int finish_ExtEditForm(LinkInfo * form_link, TextAnchor *start_anchor,
-			      char *ed_temp,
-			      int orig_cnt)
+static char *readEditedFile(char *ed_temp)
 {
     struct stat stat_info;
     size_t size;
 
     FILE *fp;
 
-    TextAnchor *anchor_ptr;
-    TextAnchor *end_anchor = NULL;
-    BOOLEAN wrapalert = FALSE;
-
-    int entry_line = form_link->anchor_line_num;
-    int exit_line = 0;
-    int line_cnt = 1;
-
-    HTLine *htline = NULL;
-
     char *ebuf;
-    char *line;
-    char *lp;
-    char *cp;
-    int match_tag = 0;
-    int newlines = 0;
-    int len, len0;
-    int wanted_fieldlen_wrap = -1;	/* not yet asked; 0 means don't. */
-    char *skip_at = NULL;
-    int skip_num = 0, i;
 
-    CTRACE((tfp, "GridText: entered HText_ExtEditForm()\n"));
+    CTRACE((tfp, "GridText: entered HText_EditTextArea()\n"));
 
     /*
      * Read back the edited temp file into our buffer.
@@ -12961,7 +12940,7 @@ static int finish_ExtEditForm(LinkInfo * form_link, TextAnchor *start_anchor,
 	ebuf = typecalloc(char);
 
 	if (!ebuf)
-	    outofmem(__FILE__, "HText_ExtEditForm");
+	    outofmem(__FILE__, "HText_EditTextArea");
 
 	assert(ebuf != NULL);
     } else {
@@ -12992,13 +12971,47 @@ static int finish_ExtEditForm(LinkInfo * form_link, TextAnchor *start_anchor,
 	   && (CanTrimTextArea(UCH(ebuf[size - 1])) || (ebuf[size - 1] == '\0')))
 	ebuf[--size] = '\0';
 
+    return ebuf;
+}
+
+static int finish_ExtEditForm(LinkInfo * form_link, TextAnchor *start_anchor,
+			      char *ed_temp,
+			      int orig_cnt)
+{
+    TextAnchor *anchor_ptr;
+    TextAnchor *end_anchor = NULL;
+    BOOLEAN wrapalert = FALSE;
+
+    int entry_line = form_link->anchor_line_num;
+    int exit_line = 0;
+    int line_cnt = 1;
+
+    HTLine *htline = NULL;
+
+    char *ebuf;
+    char *line;
+    char *lp;
+    char *cp;
+    int match_tag = 0;
+    int newlines = 0;
+    int len, len0;
+    int wanted_fieldlen_wrap = -1;	/* not yet asked; 0 means don't. */
+    char *skip_at = NULL;
+    int skip_num = 0, i;
+
+    CTRACE((tfp, "GridText: entered HText_EditTextArea()\n"));
+
+    if ((ebuf = readEditedFile(ed_temp)) == 0) {
+	return 0;
+    }
+
     /*
      * Copy each line from the temp file into the corresponding anchor
      * struct.  Add new lines to the TEXTAREA if needed.  (Always leave
      * the user with a blank line at the end of the TEXTAREA.)
      */
     if ((line = typeMallocn(char, MAX_LINE)) == 0)
-	  outofmem(__FILE__, "HText_ExtEditForm");
+	  outofmem(__FILE__, "HText_EditTextArea");
 
     assert(line != NULL);
 
@@ -13192,7 +13205,7 @@ static int finish_ExtEditForm(LinkInfo * form_link, TextAnchor *start_anchor,
  *
  * --KED 02/01/99
  */
-int HText_ExtEditForm(LinkInfo * form_link)
+int HText_EditTextArea(LinkInfo * form_link)
 {
     char *ed_temp;
     FILE *fp;
@@ -13209,7 +13222,7 @@ int HText_ExtEditForm(LinkInfo * form_link)
 
     FormInfo *form = form_link->l_form;
 
-    CTRACE((tfp, "GridText: entered HText_ExtEditForm()\n"));
+    CTRACE((tfp, "GridText: entered HText_EditTextArea()\n"));
 
     ed_temp = typeMallocn(char, LY_MAXPATH);
 
@@ -13274,7 +13287,7 @@ int HText_ExtEditForm(LinkInfo * form_link)
     LYRemoveTemp(ed_temp);
     FREE(ed_temp);
 
-    CTRACE((tfp, "GridText: exiting HText_ExtEditForm()\n"));
+    CTRACE((tfp, "GridText: exiting HText_EditTextArea()\n"));
 
     /*
      * Return the offset needed to move the cursor from its current
@@ -13283,6 +13296,69 @@ int HText_ExtEditForm(LinkInfo * form_link)
      * the caller deal with moving us there, however ...  :-) ...
      */
     return offset;
+}
+
+/*
+ * Similar to HText_EditTextArea, but assume a single-line text field -TD
+ */
+void HText_EditTextField(LinkInfo * form_link)
+{
+    char *ed_temp;
+    FILE *fp;
+
+    FormInfo *form = form_link->l_form;
+
+    CTRACE((tfp, "GridText: entered HText_EditTextField()\n"));
+
+    ed_temp = typeMallocn(char, LY_MAXPATH);
+
+    if ((fp = LYOpenTemp(ed_temp, "", "w")) == 0) {
+	FREE(ed_temp);
+	return;
+    }
+
+    /*
+     * Write the anchors' text to the temp edit file.
+     */
+    fputs(form->value, fp);
+    fputc('\n', fp);
+
+    LYCloseTempFP(fp);
+
+    CTRACE((tfp, "GridText: text field |%s| dumped to tempfile\n", form_link->lname));
+    CTRACE((tfp, "GridText: invoking editor (%s) on tempfile\n", editor));
+
+    edit_temporary_file(ed_temp, "", NULL);
+
+    CTRACE((tfp, "GridText: returned from editor (%s)\n", editor));
+
+    if (!form->disabled) {
+	char *ebuf;
+	char *p;
+
+	if ((ebuf = readEditedFile(ed_temp)) != 0) {
+	    /*
+	     * Only use the first line of the result, and only that up to
+	     * the size of the field.
+	     */
+	    for (p = ebuf; *p != '\0'; ++p) {
+		if ((p - ebuf) >= form->size - 1) {
+		    *p = '\0';
+		    break;
+		} else if (*p == '\n' || *p == '\r') {
+		    *p = '\0';
+		    break;
+		}
+	    }
+	    StrAllocCopy(form->value, ebuf);
+	    FREE(ebuf);
+	}
+    }
+
+    LYRemoveTemp(ed_temp);
+    FREE(ed_temp);
+
+    CTRACE((tfp, "GridText: exiting HText_EditTextField()\n"));
 }
 
 /*
