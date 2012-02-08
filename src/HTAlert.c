@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTAlert.c,v 1.94 2010/11/07 21:21:00 tom Exp $
+ * $LynxId: HTAlert.c,v 1.95 2012/02/08 01:45:28 tom Exp $
  *
  *	Displaying messages and getting input for Lynx Browser
  *	==========================================================
@@ -623,20 +623,17 @@ BOOL confirm_post_resub(const char *address,
 char *HTPrompt(const char *Msg, const char *deflt)
 {
     char *rep = NULL;
-    char Tmp[200];
-
-    Tmp[0] = '\0';
-    Tmp[sizeof(Tmp) - 1] = '\0';
+    bstring *data = NULL;
 
     _statusline(Msg);
-    if (deflt)
-	StrNCpy(Tmp, deflt, sizeof(Tmp) - 1);
+    BStrCopy0(data, deflt ? deflt : "");
 
     if (!dump_output_immediately)
-	LYGetStr(Tmp, VISIBLE, sizeof(Tmp), NORECALL);
+	LYgetBString(&data, VISIBLE, 0, NORECALL);
 
-    StrAllocCopy(rep, Tmp);
+    StrAllocCopy(rep, data->str);
 
+    BStrFree(data);
     return rep;
 }
 
@@ -647,14 +644,14 @@ char *HTPrompt(const char *Msg, const char *deflt)
 char *HTPromptPassword(const char *Msg)
 {
     char *result = NULL;
-    char pw[120];
-
-    pw[0] = '\0';
+    bstring *data = NULL;
 
     if (!dump_output_immediately) {
 	_statusline(Msg ? Msg : PASSWORD_PROMPT);
-	LYGetStr(pw, HIDDEN, sizeof(pw), NORECALL);	/* hidden */
-	StrAllocCopy(result, pw);
+	BStrCopy0(data, "");
+	LYgetBString(&data, HIDDEN, 0, NORECALL);
+	StrAllocCopy(result, data->str);
+	BStrFree(data);
     } else {
 	printf("\n%s\n", PASSWORD_REQUIRED);
 	StrAllocCopy(result, "");

@@ -1,4 +1,4 @@
-/* $LynxId: LYOptions.c,v 1.144 2011/06/06 08:52:56 tom Exp $ */
+/* $LynxId: LYOptions.c,v 1.147 2012/02/08 01:02:48 tom Exp $ */
 #include <HTUtils.h>
 #include <HTFTP.h>
 #include <HTTP.h>		/* 'reloading' flag */
@@ -344,7 +344,7 @@ void LYoptions(void)
     /*
      * If the user changes the display we need memory to put it in.
      */
-    char display_option[MAX_LINE];
+    bstring *my_data = NULL;
     char *choices[MAXCHOICES];
     int CurrentCharSet = current_char_set;
     int CurrentAssumeCharSet = UCLYhndl_for_unspec;
@@ -642,29 +642,28 @@ void LYoptions(void)
 	    } else if (system_editor) {
 		_statusline(EDITOR_LOCKED);
 	    } else {
-		if (non_empty(editor))
-		    LYStrNCpy(display_option, editor, sizeof(display_option) - 1);
-		else {		/* clear the NONE */
+		if (non_empty(editor)) {
+		    BStrCopy0(my_data, editor);
+		} else {	/* clear the NONE */
 		    LYmove(L_EDITOR, COL_OPTION_VALUES);
 		    LYaddstr("    ");
-		    *display_option = '\0';
+		    BStrCopy0(my_data, "");
 		}
 		_statusline(ACCEPT_DATA);
 		LYmove(L_EDITOR, COL_OPTION_VALUES);
 		lynx_start_bold();
-		ch = LYGetStr(display_option, VISIBLE,
-			      sizeof(display_option), NORECALL);
+		ch = LYgetBString(&my_data, VISIBLE, 0, NORECALL);
 		lynx_stop_bold();
 		LYmove(L_EDITOR, COL_OPTION_VALUES);
 		if (term_options || ch == -1) {
 		    LYaddstr(non_empty(editor) ?
 			     editor : "NONE");
-		} else if (*display_option == '\0') {
+		} else if (isBEmpty(my_data)) {
 		    FREE(editor);
 		    LYaddstr("NONE");
 		} else {
-		    StrAllocCopy(editor, display_option);
-		    LYaddstr(display_option);
+		    StrAllocCopy(editor, my_data->str);
+		    LYaddstr(editor);
 		}
 		LYclrtoeol();
 		if (ch == -1) {
@@ -679,17 +678,16 @@ void LYoptions(void)
 
 	case 'D':		/* Change the display. */
 	    if (non_empty(x_display)) {
-		LYStrNCpy(display_option, x_display, sizeof(display_option) - 1);
+		BStrCopy0(my_data, x_display);
 	    } else {		/* clear the NONE */
 		LYmove(L_DISPLAY, COL_OPTION_VALUES);
 		LYaddstr("    ");
-		*display_option = '\0';
+		BStrCopy0(my_data, "");
 	    }
 	    _statusline(ACCEPT_DATA);
 	    LYmove(L_DISPLAY, COL_OPTION_VALUES);
 	    lynx_start_bold();
-	    ch = LYGetStr(display_option, VISIBLE,
-			  sizeof(display_option), NORECALL);
+	    ch = LYgetBString(&my_data, VISIBLE, 0, NORECALL);
 	    lynx_stop_bold();
 	    LYmove(L_DISPLAY, COL_OPTION_VALUES);
 
@@ -701,7 +699,7 @@ void LYoptions(void)
 
 	    if ((term_options || ch == -1) ||
 		(x_display != NULL &&
-		 !CompareEnvVars(x_display, display_option))) {
+		 !CompareEnvVars(x_display, my_data->str))) {
 		/*
 		 * Cancelled, or a non-NULL display string wasn't changed.  -
 		 * FM
@@ -716,7 +714,7 @@ void LYoptions(void)
 		}
 		response = ' ';
 		break;
-	    } else if (*display_option == '\0') {
+	    } else if (isBEmpty(my_data)) {
 		if ((x_display == NULL) ||
 		    (x_display != NULL && *x_display == '\0')) {
 		    /*
@@ -732,12 +730,12 @@ void LYoptions(void)
 	    /*
 	     * Set the new DISPLAY variable.  - FM
 	     */
-	    LYsetXDisplay(display_option);
+	    LYsetXDisplay(my_data->str);
 	    validate_x_display();
 	    cp = NULL;
 	    LYaddstr(x_display ? x_display : "NONE");
 	    LYclrtoeol();
-	    summarize_x_display(display_option);
+	    summarize_x_display(my_data->str);
 	    response = ' ';
 	    break;
 
@@ -796,27 +794,24 @@ void LYoptions(void)
 		    goto draw_options;
 		}
 		if (non_empty(bookmark_page)) {
-		    LYStrNCpy(display_option,
-			      bookmark_page,
-			      sizeof(display_option) - 1);
+		    BStrCopy0(my_data, bookmark_page);
 		} else {	/* clear the NONE */
 		    LYmove(L_HOME, C_DEFAULT);
 		    LYclrtoeol();
-		    *display_option = '\0';
+		    BStrCopy0(my_data, "");
 		}
 		_statusline(ACCEPT_DATA);
 		LYmove(L_HOME, C_DEFAULT);
 		lynx_start_bold();
-		ch = LYGetStr(display_option, VISIBLE,
-			      sizeof(display_option), NORECALL);
+		ch = LYgetBString(&my_data, VISIBLE, 0, NORECALL);
 		lynx_stop_bold();
 		LYmove(L_HOME, C_DEFAULT);
+		BStrAlloc(my_data, my_data->len + LY_MAXPATH);	/* lengthen */
 		if (term_options ||
-		    ch == -1 || *display_option == '\0') {
+		    ch == -1 || isBEmpty(my_data)) {
 		    LYaddstr(non_empty(bookmark_page) ?
 			     bookmark_page : "NONE");
-		} else if (!LYPathOffHomeOK(display_option,
-					    sizeof(display_option))) {
+		} else if (!LYPathOffHomeOK(my_data->str, my_data->len)) {
 		    LYaddstr(non_empty(bookmark_page) ?
 			     bookmark_page : "NONE");
 		    LYclrtoeol();
@@ -824,7 +819,7 @@ void LYoptions(void)
 		    response = ' ';
 		    break;
 		} else {
-		    StrAllocCopy(bookmark_page, display_option);
+		    StrAllocCopy(bookmark_page, my_data->str);
 		    StrAllocCopy(MBM_A_subbookmark[0], bookmark_page);
 		    LYaddstr(bookmark_page);
 		}
@@ -865,31 +860,28 @@ void LYoptions(void)
 
 	case 'P':		/* Change personal mail address for From headers. */
 	    if (non_empty(personal_mail_address)) {
-		LYStrNCpy(display_option,
-			  personal_mail_address,
-			  sizeof(display_option) - 1);
+		BStrCopy0(my_data, personal_mail_address);
 	    } else {		/* clear the NONE */
 		LYmove(L_MAIL_ADDRESS, COL_OPTION_VALUES);
 		LYaddstr("    ");
-		*display_option = '\0';
+		BStrCopy0(my_data, "");
 	    }
 	    _statusline(ACCEPT_DATA);
 	    LYmove(L_MAIL_ADDRESS, COL_OPTION_VALUES);
 	    lynx_start_bold();
-	    ch = LYGetStr(display_option, VISIBLE,
-			  sizeof(display_option), NORECALL);
+	    ch = LYgetBString(&my_data, VISIBLE, 0, NORECALL);
 	    lynx_stop_bold();
 	    LYmove(L_MAIL_ADDRESS, COL_OPTION_VALUES);
 	    if (term_options || ch == -1) {
 		LYaddstr((personal_mail_address &&
 			  *personal_mail_address) ?
 			 personal_mail_address : "NONE");
-	    } else if (*display_option == '\0') {
+	    } else if (isBEmpty(my_data)) {
 		FREE(personal_mail_address);
 		LYaddstr("NONE");
 	    } else {
-		StrAllocCopy(personal_mail_address, display_option);
-		LYaddstr(display_option);
+		StrAllocCopy(personal_mail_address, my_data->str);
+		LYaddstr(personal_mail_address);
 	    }
 	    LYclrtoeol();
 	    if (ch == -1) {
@@ -1081,28 +1073,27 @@ void LYoptions(void)
 
 	case 'G':		/* Change language preference. */
 	    if (non_empty(language)) {
-		LYStrNCpy(display_option, language, sizeof(display_option) - 1);
+		BStrCopy0(my_data, language);
 	    } else {		/* clear the NONE */
 		LYmove(L_LANGUAGE, COL_OPTION_VALUES);
 		LYaddstr("    ");
-		*display_option = '\0';
+		BStrCopy0(my_data, "");
 	    }
 	    _statusline(ACCEPT_DATA);
 	    LYmove(L_LANGUAGE, COL_OPTION_VALUES);
 	    lynx_start_bold();
-	    ch = LYGetStr(display_option, VISIBLE,
-			  sizeof(display_option), NORECALL);
+	    ch = LYgetBString(&my_data, VISIBLE, 0, NORECALL);
 	    lynx_stop_bold();
 	    LYmove(L_LANGUAGE, COL_OPTION_VALUES);
 	    if (term_options || ch == -1) {
 		LYaddstr(non_empty(language) ?
 			 language : "NONE");
-	    } else if (*display_option == '\0') {
+	    } else if (isBEmpty(my_data)) {
 		FREE(language);
 		LYaddstr("NONE");
 	    } else {
-		StrAllocCopy(language, display_option);
-		LYaddstr(display_option);
+		StrAllocCopy(language, my_data->str);
+		LYaddstr(language);
 	    }
 	    LYclrtoeol();
 	    if (ch == -1) {
@@ -1116,30 +1107,27 @@ void LYoptions(void)
 
 	case 'H':		/* Change charset preference. */
 	    if (non_empty(pref_charset)) {
-		LYStrNCpy(display_option,
-			  pref_charset,
-			  sizeof(display_option) - 1);
+		BStrCopy0(my_data, pref_charset);
 	    } else {		/* clear the NONE */
 		LYmove(L_PREF_CHARSET, COL_OPTION_VALUES);
 		LYaddstr("    ");
-		*display_option = '\0';
+		BStrCopy0(my_data, "");
 	    }
 	    _statusline(ACCEPT_DATA);
 	    LYmove(L_PREF_CHARSET, COL_OPTION_VALUES);
 	    lynx_start_bold();
-	    ch = LYGetStr(display_option, VISIBLE,
-			  sizeof(display_option), NORECALL);
+	    ch = LYgetBString(&my_data, VISIBLE, 0, NORECALL);
 	    lynx_stop_bold();
 	    LYmove(L_PREF_CHARSET, COL_OPTION_VALUES);
 	    if (term_options || ch == -1) {
 		LYaddstr(non_empty(pref_charset) ?
 			 pref_charset : "NONE");
-	    } else if (*display_option == '\0') {
+	    } else if (isBEmpty(my_data)) {
 		FREE(pref_charset);
 		LYaddstr("NONE");
 	    } else {
-		StrAllocCopy(pref_charset, display_option);
-		LYaddstr(display_option);
+		StrAllocCopy(pref_charset, my_data->str);
+		LYaddstr(pref_charset);
 	    }
 	    LYclrtoeol();
 	    if (ch == -1) {
@@ -1450,33 +1438,30 @@ void LYoptions(void)
 	case 'A':		/* Change user agent string. */
 	    if (!no_useragent) {
 		if (non_empty(LYUserAgent)) {
-		    LYStrNCpy(display_option,
-			      LYUserAgent,
-			      sizeof(display_option) - 1);
+		    BStrCopy0(my_data, LYUserAgent);
 		} else {	/* clear the NONE */
 		    LYmove(L_HOME, COL_OPTION_VALUES);
 		    LYaddstr("    ");
-		    *display_option = '\0';
+		    BStrCopy0(my_data, "");
 		}
 		_statusline(ACCEPT_DATA_OR_DEFAULT);
 		LYmove(L_User_Agent, COL_OPTION_VALUES);
 		lynx_start_bold();
-		ch = LYGetStr(display_option, VISIBLE,
-			      sizeof(display_option), NORECALL);
+		ch = LYgetBString(&my_data, VISIBLE, 0, NORECALL);
 		lynx_stop_bold();
 		LYmove(L_User_Agent, COL_OPTION_VALUES);
 		if (term_options || ch == -1) {
 		    LYaddstr((LYUserAgent &&
 			      *LYUserAgent) ?
 			     LYUserAgent : "NONE");
-		} else if (*display_option == '\0') {
+		} else if (isBEmpty(my_data)) {
 		    StrAllocCopy(LYUserAgent, LYUserAgentDefault);
 		    LYaddstr((LYUserAgent &&
 			      *LYUserAgent) ?
 			     LYUserAgent : "NONE");
 		} else {
-		    StrAllocCopy(LYUserAgent, display_option);
-		    LYaddstr(display_option);
+		    StrAllocCopy(LYUserAgent, my_data->str);
+		    LYaddstr(LYUserAgent);
 		}
 		LYclrtoeol();
 		if (ch == -1) {
@@ -1586,6 +1571,8 @@ void LYoptions(void)
     term_options = FALSE;
     LYStatusLine = -1;		/* let user_mode have some of the screen */
     signal(SIGINT, cleanup_sig);
+    BStrFree(my_data);
+    return;
 }
 
 static int widest_choice(const char **choices)
@@ -1782,7 +1769,7 @@ void edit_bookmarks(void)
 
 #define MULTI_OFFSET 8
     int a;			/* misc counter */
-    char MBM_tmp_line[LY_MAXPATH];	/* buffer for LYGetStr */
+    bstring *my_data = NULL;
 
     /*
      * We need (MBM_V_MAXFILES + MULTI_OFFSET) lines to display the whole list
@@ -1981,18 +1968,16 @@ void edit_bookmarks(void)
 			       9);
 		    else
 			LYmove((3 + a), 9);
-		    LYStrNCpy(MBM_tmp_line,
+		    BStrCopy0(my_data,
 			      (!MBM_A_subdescript[a] ?
-			       "" : MBM_A_subdescript[a]),
-			      sizeof(MBM_tmp_line) - 1);
-		    (void) LYGetStr(MBM_tmp_line, VISIBLE,
-				    sizeof(MBM_tmp_line), NORECALL);
+			       "" : MBM_A_subdescript[a]));
+		    (void) LYgetBString(&my_data, VISIBLE, 0, NORECALL);
 		    lynx_stop_bold();
 
-		    if (strlen(MBM_tmp_line) < 1) {
+		    if (isBEmpty(my_data)) {
 			FREE(MBM_A_subdescript[a]);
 		    } else {
-			StrAllocCopy(MBM_A_subdescript[a], MBM_tmp_line);
+			StrAllocCopy(MBM_A_subdescript[a], my_data->str);
 		    }
 		    if (LYlines < (MBM_V_MAXFILES + MULTI_OFFSET))
 			LYmove((3 + a)
@@ -2019,26 +2004,25 @@ void edit_bookmarks(void)
 		LYaddstr("| ");
 
 		lynx_start_bold();
-		LYStrNCpy(MBM_tmp_line,
-			  NonNull(MBM_A_subbookmark[a]),
-			  sizeof(MBM_tmp_line) - 1);
-		(void) LYGetStr(MBM_tmp_line, VISIBLE,
-				sizeof(MBM_tmp_line), NORECALL);
+		BStrCopy0(my_data, NonNull(MBM_A_subbookmark[a]));
+		(void) LYgetBString(&my_data, VISIBLE, 0, NORECALL);
 		lynx_stop_bold();
 
-		if (*MBM_tmp_line == '\0') {
+		if (isBEmpty(my_data)) {
 		    if (a == 0)
 			StrAllocCopy(MBM_A_subbookmark[a], bookmark_page);
 		    else
 			FREE(MBM_A_subbookmark[a]);
-		} else if (!LYPathOffHomeOK(MBM_tmp_line,
-					    sizeof(MBM_tmp_line))) {
-		    LYMBM_statusline(USE_PATH_OFF_HOME);
-		    LYSleepAlert();
 		} else {
-		    StrAllocCopy(MBM_A_subbookmark[a], MBM_tmp_line);
-		    if (a == 0) {
-			StrAllocCopy(bookmark_page, MBM_A_subbookmark[a]);
+		    BStrAlloc(my_data, my_data->len + LY_MAXPATH);
+		    if (!LYPathOffHomeOK(my_data->str, my_data->len)) {
+			LYMBM_statusline(USE_PATH_OFF_HOME);
+			LYSleepAlert();
+		    } else {
+			StrAllocCopy(MBM_A_subbookmark[a], my_data->str);
+			if (a == 0) {
+			    StrAllocCopy(bookmark_page, MBM_A_subbookmark[a]);
+			}
 		    }
 		}
 		if (LYlines < (MBM_V_MAXFILES + MULTI_OFFSET))
@@ -2059,6 +2043,7 @@ void edit_bookmarks(void)
 	}			/* end for */
     }				/* end while */
 
+    BStrFree(my_data);
     term_options = FALSE;
     signal(SIGINT, cleanup_sig);
 }

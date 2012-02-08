@@ -1,4 +1,4 @@
-/* $LynxId: LYKeymap.c,v 1.79 2011/06/11 12:36:28 tom Exp $ */
+/* $LynxId: LYKeymap.c,v 1.80 2012/02/07 16:04:24 tom Exp $ */
 #include <HTUtils.h>
 #include <LYUtils.h>
 #include <LYGlobalDefs.h>
@@ -1350,15 +1350,32 @@ int lecname_to_lec(const char *func)
 {
     int i;
     struct emap *mp;
+    int result = -1;
 
     if (non_empty(func)) {
 	for (i = 0, mp = ekmap; (*mp).name != NULL; mp++, i++) {
 	    if (strcmp((*mp).name, func) == 0) {
-		return (*mp).code;
+		result = (*mp).code;
+		break;
 	    }
 	}
     }
-    return (-1);
+    return result;
+}
+
+const char *lec_to_lecname(int code)
+{
+    struct emap *mp;
+    int i;
+    const char *result = 0;
+
+    for (i = 0, mp = ekmap; (*mp).name != NULL; mp++, i++) {
+	if ((*mp).code == code) {
+	    result = (*mp).name;
+	    break;
+	}
+    }
+    return result;
 }
 
 /*

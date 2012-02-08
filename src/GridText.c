@@ -1,5 +1,5 @@
 /*
- * $LynxId: GridText.c,v 1.224 2012/02/07 01:43:47 tom Exp $
+ * $LynxId: GridText.c,v 1.226 2012/02/07 21:11:50 tom Exp $
  *
  *		Character grid hypertext object
  *		===============================
@@ -7653,7 +7653,10 @@ void HTAddSearchQuery(char *query)
 
 int do_www_search(DocInfo *doc)
 {
-    char searchstring[256], temp[256], *cp, *tmpaddress = NULL;
+    char searchstring[256];
+    char temp[256];
+    char *cp;
+    char *tmpaddress = NULL;
     int ch;
     RecallType recall;
     int QueryTotal;
@@ -10642,7 +10645,7 @@ static void load_a_file(const char *val_used,
 {
     FILE *fd;
     size_t bytes;
-    char buffer[257];
+    char buffer[BUFSIZ + 1];
 
     CTRACE((tfp, "Ok, about to convert \"%s\" to mime/thingy\n", val_used));
 
@@ -10650,7 +10653,7 @@ static void load_a_file(const char *val_used,
 	if ((fd = fopen(val_used, BIN_R)) == 0) {
 	    HTAlert(gettext("Can't open file for uploading"));
 	} else {
-	    while ((bytes = fread(buffer, sizeof(char), (size_t) 256, fd)) != 0) {
+	    while ((bytes = fread(buffer, sizeof(char), BUFSIZ, fd)) != 0) {
 		HTSABCat(result, buffer, (int) bytes);
 	    }
 	    LYCloseInput(fd);

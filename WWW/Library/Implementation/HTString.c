@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTString.c,v 1.65 2010/11/07 21:20:58 tom Exp $
+ * $LynxId: HTString.c,v 1.67 2012/02/08 00:34:44 tom Exp $
  *
  *	Case-independent string comparison		HTString.c
  *
@@ -1187,6 +1187,20 @@ void HTEndParam(char **result,
 /* Binary-strings (may have embedded nulls).  Some modules (HTGopher) assume
  * there is a null on the end, anyway.
  */
+
+/* (Re)allocate a bstring, e.g., to increase its buffer size for ad hoc
+ * operations.
+ */
+void HTSABAlloc(bstring **dest, int len)
+{
+    if (*dest == 0)
+	*dest = typecalloc(bstring);
+
+    if ((*dest)->len != len) {
+	(*dest)->str = typeRealloc(char, (*dest)->str, len);
+	(*dest)->len = len;
+    }
+}
 
 /* Allocate a new bstring, and return it.
 */

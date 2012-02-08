@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTChunk.c,v 1.26 2010/09/25 00:32:33 tom Exp $
+ * $LynxId: HTChunk.c,v 1.27 2012/02/07 11:28:44 tom Exp $
  *
  *		Chunk handling:	Flexible arrays
  *		===============================
@@ -150,10 +150,11 @@ HTChunk *HTChunkPutc2(HTChunk *ch, int c)
 	HTChunk *chunk = HTChunkCreateMayFail(ch->growby, ch->failok);
 
 	ch->next = chunk;
-	HTChunkPutc(chunk, UCH(c));
-	return chunk;
+	ch = chunk;
+	HTChunkPutc(ch, UCH(c));
+    } else {
+	ch->data[ch->size++] = (char) c;
     }
-    ch->data[ch->size++] = (char) c;
     return ch;
 }
 
@@ -205,11 +206,12 @@ HTChunk *HTChunkPutb2(HTChunk *ch, const char *b, int l)
 
 	chunk = HTChunkCreateMayFail(ch->growby, ch->failok);
 	ch->next = chunk;
-	HTChunkPutb(chunk, b + m, l - m);
-	return chunk;
+	ch = chunk;
+	HTChunkPutb(ch, b + m, l - m);
+    } else {
+	MemCpy(ch->data + ch->size, b, (unsigned) l);
+	ch->size += l;
     }
-    MemCpy(ch->data + ch->size, b, (unsigned) l);
-    ch->size += l;
     return ch;
 }
 
@@ -305,7 +307,7 @@ void HTChunkPuts(HTChunk *ch, const char *s)
 	for (p = s; *p; p++) {
 	    if (ch->size >= ch->allocated) {
 		if (!HTChunkRealloc(ch, ch->growby))
-		    return;
+		    break;
 	    }
 	    ch->data[ch->size++] = *p;
 	}
@@ -323,8 +325,9 @@ HTChunk *HTChunkPuts2(HTChunk *ch, const char *s)
 		HTChunk *chunk = HTChunkCreateMayFail(ch->growby, ch->failok);
 
 		ch->next = chunk;
-		HTChunkPuts(chunk, p);
-		return chunk;
+		ch = chunk;
+		HTChunkPuts(ch, p);
+		break;
 	    }
 	    ch->data[ch->size++] = *p;
 	}

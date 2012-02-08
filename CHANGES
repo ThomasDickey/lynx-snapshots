@@ -1,9 +1,12 @@
--- $LynxId: CHANGES,v 1.570 2012/02/07 01:45:24 tom Exp $
+-- $LynxId: CHANGES,v 1.571 2012/02/07 21:21:05 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2012-02-06 (2.8.8dev.10)
+2012-02-07 (2.8.8dev.10)
+* modify LYgetstr, making it call revised function LYgetBString which handles
+  bstring's, and allows editing fields which can grow without fixed buffer
+  limits -TD
 * extend ^X-e editing of textarea's to include single-line fields -TD
 * modify comparison for splitting lines to allow for long preformatted lines,
   e.g., using &nbsp;'s to not wrap when the line-wrap mode is disabled -TD
