@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYBookmark.c,v 1.69 2010/09/25 11:19:25 tom Exp $
+ * $LynxId: LYBookmark.c,v 1.70 2012/02/08 01:37:55 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTAlert.h>
@@ -207,11 +207,11 @@ void save_bookmark_link(const char *address,
     const char *filename;
     char *bookmark_URL = NULL;
     char filename_buffer[LY_MAXPATH];
-    char string_buffer[BUFSIZ];
-    char tmp_buffer[BUFSIZ];
     char *Address = NULL;
     char *Title = NULL;
     int i, c;
+    bstring *string_data = NULL;
+    bstring *tmp_data = NULL;
     DocAddress WWWDoc;
     HTParentAnchor *tmpanchor;
     HText *text;
@@ -282,28 +282,30 @@ void save_bookmark_link(const char *address,
 	if (HTCJK == JAPANESE) {
 	    switch (kanji_code) {
 	    case EUC:
-		TO_EUC((const unsigned char *) title, (unsigned char *) tmp_buffer);
+		BStrAlloc(tmp_data, MAX_LINE + 2 * (int) strlen(title));
+		TO_EUC((const unsigned char *) title, (unsigned char *) tmp_data->str);
 		break;
 	    case SJIS:
-		TO_SJIS((const unsigned char *) title, (unsigned char *) tmp_buffer);
+		BStrAlloc(tmp_data, MAX_LINE + (int) strlen(title));
+		TO_SJIS((const unsigned char *) title, (unsigned char *) tmp_data->str);
 		break;
 	    default:
 		break;
 	    }
-	    LYStrNCpy(string_buffer, tmp_buffer, sizeof(string_buffer) - 1);
+	    BStrCopy0(string_data, tmp_data->str);
 	} else {
-	    LYStrNCpy(string_buffer, title, sizeof(string_buffer) - 1);
+	    BStrCopy0(string_data, title);
 	}
-	LYReduceBlanks(string_buffer);
+	LYReduceBlanks(string_data->str);
 	LYMBM_statusline(TITLE_PROMPT);
-	LYGetStr(string_buffer, VISIBLE, sizeof(string_buffer), NORECALL);
-	if (*string_buffer == '\0') {
+	LYgetBString(&string_data, VISIBLE, 0, NORECALL);
+	if (isBEmpty(string_data)) {
 	    LYMBM_statusline(CANCELLED);
 	    LYSleepMsg();
 	    FREE(bookmark_URL);
 	    return;
 	}
-    } while (!havevisible(string_buffer));
+    } while (!havevisible(string_data->str));
 
     /*
      * Create the Title with any left-angle-brackets converted to &lt; entities
@@ -313,7 +315,7 @@ void save_bookmark_link(const char *address,
      * character set which may need changing.  Do NOT convert any 8-bit chars
      * if we have CJK display.  - LP
      */
-    LYformTitle(&Title, string_buffer);
+    LYformTitle(&Title, string_data->str);
     LYEntify(&Title, TRUE);
     if (UCSaveBookmarksInUnicode &&
 	have8bit(Title) && (!LYHaveCJKCharacterSet)) {
@@ -432,6 +434,8 @@ Note: if you edit this file manually\n\
     /*
      * Clean up and report success.
      */
+    BStrFree(string_data);
+    BStrFree(tmp_data);
     FREE(Title);
     FREE(Address);
     FREE(bookmark_URL);

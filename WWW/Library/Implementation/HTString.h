@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTString.h,v 1.34 2010/09/25 00:32:47 tom Exp $
+ * $LynxId: HTString.h,v 1.37 2012/02/07 23:41:25 tom Exp $
  *						String handling for libwww
  *                                         STRINGS
  *                                            
@@ -128,6 +128,7 @@ extern "C" {
 	int len;
     } bstring;
 
+    extern void HTSABAlloc(bstring **dest, int len);
     extern void HTSABCopy(bstring **dest, const char *src, int len);
     extern void HTSABCopy0(bstring **dest, const char *src);
     extern void HTSABCat(bstring **dest, const char *src, int len);
@@ -142,11 +143,13 @@ extern "C" {
 
 #define isBEmpty(p)   ((p) == 0 || BStrLen(p) == 0)
 
-#define BStrCopy(d,s)  HTSABCopy(  &(d), BStrData(s), BStrLen(s))
-#define BStrCopy0(d,s) HTSABCopy0( &(d), s)
-#define BStrCat(d,s)   HTSABCat(   &(d), BStrData(s), BStrLen(s))
-#define BStrCat0(d,s)  HTSABCat0(  &(d), s)
-#define BStrFree(d)    HTSABFree(  &(d))
+#define BStrAlloc(d,n)   HTSABAlloc( &(d), n)
+#define BStrCopy(d,s)    HTSABCopy( &(d), BStrData(s), BStrLen(s))
+#define BStrCopy0(d,s)   HTSABCopy0( &(d), s)
+#define BStrCopy1(d,s,n) HTSABCopy(  &(d), s, n)
+#define BStrCat(d,s)     HTSABCat( &(d), BStrData(s), BStrLen(s))
+#define BStrCat0(d,s)    HTSABCat0( &(d), s)
+#define BStrFree(d)      HTSABFree( &(d))
 
     extern bstring *HTBprintf(bstring **pstr, const char *fmt,...) GCC_PRINTFLIKE(2,3);
 
