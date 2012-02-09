@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYJump.c,v 1.40 2012/01/17 00:43:43 tom Exp $
+ * $LynxId: LYJump.c,v 1.42 2012/02/09 01:56:47 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTAlert.h>
@@ -181,9 +181,10 @@ BOOL LYJumpInit(char *config)
 
 char *LYJump(int key)
 {
+    static bstring *buf = NULL;
+
     JumpDatum seeking;
     JumpDatum *found;
-    static char buf[124];
     char *bp, *cp;
     struct JumpTable *jtp;
     int ch;
@@ -210,16 +211,19 @@ char *LYJump(int key)
     if (jtp->nel == 0)
 	return NULL;
 
-    if (!jump_buffer || isEmpty(jtp->shortcut))
-	*buf = '\0';
-    else if (non_empty(jtp->shortcut)) {
-	if (strlen(jtp->shortcut) > sizeof(buf) - 5)
-	    jtp->shortcut[sizeof(buf) - 5] = '\0';
-	strcpy(buf, jtp->shortcut);
+    if (!jump_buffer || isEmpty(jtp->shortcut)) {
+	BStrCopy0(buf, "");
+    } else if (non_empty(jtp->shortcut)) {
+	size_t len = (size_t) BStrLen(buf);
+
+	if (strlen(jtp->shortcut) > len) {
+	    jtp->shortcut[len] = '\0';
+	    BStrCopy0(buf, jtp->shortcut);
+	}
     }
 
     ShortcutTotal = (jtp->history ? HTList_count(jtp->history) : 0);
-    if (jump_buffer && *buf) {
+    if (jump_buffer && !isBEmpty(buf)) {
 	recall = ((ShortcutTotal > 1) ? RECALL_URL : NORECALL);
 	ShortcutNum = 0;
 	FirstShortcutRecall = FALSE;
@@ -230,7 +234,7 @@ char *LYJump(int key)
     }
 
     statusline(jtp->msg);
-    if ((ch = LYGetStr(buf, VISIBLE, (sizeof(buf) - 4), recall)) < 0) {
+    if ((ch = LYgetBString(&buf, VISIBLE, 0, recall)) < 0) {
 	/*
 	 * User cancelled the Jump via ^G. - FM
 	 */
@@ -239,8 +243,8 @@ char *LYJump(int key)
     }
 
   check_recall:
-    bp = buf;
-    if (TOUPPER(key) == 'G' && StrNCmp(buf, "o ", 2) == 0)
+    bp = buf->str;
+    if (TOUPPER(key) == 'G' && StrNCmp(buf->str, "o ", 2) == 0)
 	bp++;
     bp = LYSkipBlanks(bp);
     if (*bp == '\0' &&
@@ -248,8 +252,8 @@ char *LYJump(int key)
 	/*
 	 * User cancelled the Jump via a zero-length string. - FM
 	 */
-	*buf = '\0';
-	StrAllocCopy(jtp->shortcut, buf);
+	BStrCopy0(buf, "");
+	StrAllocCopy(jtp->shortcut, buf->str);
 	HTInfoMsg(CANCELLED);
 	return NULL;
     }
@@ -259,13 +263,15 @@ char *LYJump(int key)
 
 	LYJumpFileURL = FALSE;
 	if (no_goto) {
-	    *buf = '\0';
-	    StrAllocCopy(jtp->shortcut, buf);
+	    BStrCopy0(buf, "");
+	    StrAllocCopy(jtp->shortcut, buf->str);
 	    HTUserMsg(RANDOM_URL_DISALLOWED);
 	    return NULL;
 	}
-	sprintf(buf, "Go %.*s", (int) sizeof(buf) - 4, bp);
-	return (bp = buf);
+	HTSprintf0(&temp, "Go %s", bp);
+	BStrCopy0(buf, temp);
+	FREE(temp);
+	return (bp = buf->str);
     }
 #endif /* PERMIT_GOTO_FROM_JUMP */
 
@@ -289,9 +295,9 @@ char *LYJump(int key)
 	    ShortcutNum = 0;
 	if ((cp = (char *) HTList_objectAt(jtp->history,
 					   ShortcutNum)) != NULL) {
-	    LYStrNCpy(buf, cp, sizeof(buf) - 1);
+	    BStrCopy0(buf, cp);
 	    if (jump_buffer && jtp->shortcut &&
-		!strcmp(buf, jtp->shortcut)) {
+		!strcmp(buf->str, jtp->shortcut)) {
 		_statusline(EDIT_CURRENT_SHORTCUT);
 	    } else if ((jump_buffer && ShortcutTotal == 2) ||
 		       (!jump_buffer && ShortcutTotal == 1)) {
@@ -299,8 +305,7 @@ char *LYJump(int key)
 	    } else {
 		_statusline(EDIT_A_PREV_SHORTCUT);
 	    }
-	    if ((ch = LYGetStr(buf, VISIBLE,
-			       sizeof(buf), recall)) < 0) {
+	    if ((ch = LYgetBString(&buf, VISIBLE, 0, recall)) < 0) {
 		/*
 		 * User cancelled the jump via ^G.
 		 */
@@ -329,9 +334,9 @@ char *LYJump(int key)
 	    ShortcutNum = ShortcutTotal - 1;
 	if ((cp = (char *) HTList_objectAt(jtp->history,
 					   ShortcutNum)) != NULL) {
-	    LYStrNCpy(buf, cp, sizeof(buf) - 1);
+	    BStrCopy0(buf, cp);
 	    if (jump_buffer && jtp->shortcut &&
-		!strcmp(buf, jtp->shortcut)) {
+		!strcmp(buf->str, jtp->shortcut)) {
 		_statusline(EDIT_CURRENT_SHORTCUT);
 	    } else if ((jump_buffer && ShortcutTotal == 2) ||
 		       (!jump_buffer && ShortcutTotal == 1)) {
@@ -339,7 +344,7 @@ char *LYJump(int key)
 	    } else {
 		_statusline(EDIT_A_PREV_SHORTCUT);
 	    }
-	    if ((ch = LYGetStr(buf, VISIBLE, sizeof(buf), recall)) < 0) {
+	    if ((ch = LYgetBString(&buf, VISIBLE, 0, recall)) < 0) {
 		/*
 		 * User cancelled the jump via ^G.
 		 */
@@ -354,7 +359,7 @@ char *LYJump(int key)
     found = (JumpDatum *) bsearch((char *) &seeking, (char *) jtp->table,
 				  (size_t) jtp->nel, sizeof(JumpDatum), LYCompare);
     if (!found) {
-	user_message("Unknown target '%s'", buf);
+	user_message("Unknown target '%s'", buf->str);
 	LYSleepAlert();
     }
 

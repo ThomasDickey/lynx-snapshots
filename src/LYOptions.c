@@ -1,4 +1,4 @@
-/* $LynxId: LYOptions.c,v 1.147 2012/02/08 01:02:48 tom Exp $ */
+/* $LynxId: LYOptions.c,v 1.148 2012/02/09 01:56:18 tom Exp $ */
 #include <HTUtils.h>
 #include <HTFTP.h>
 #include <HTTP.h>		/* 'reloading' flag */
@@ -811,7 +811,7 @@ void LYoptions(void)
 		    ch == -1 || isBEmpty(my_data)) {
 		    LYaddstr(non_empty(bookmark_page) ?
 			     bookmark_page : "NONE");
-		} else if (!LYPathOffHomeOK(my_data->str, my_data->len)) {
+		} else if (!LYPathOffHomeOK(my_data->str, (size_t) my_data->len)) {
 		    LYaddstr(non_empty(bookmark_page) ?
 			     bookmark_page : "NONE");
 		    LYclrtoeol();
@@ -2015,7 +2015,7 @@ void edit_bookmarks(void)
 			FREE(MBM_A_subbookmark[a]);
 		} else {
 		    BStrAlloc(my_data, my_data->len + LY_MAXPATH);
-		    if (!LYPathOffHomeOK(my_data->str, my_data->len)) {
+		    if (!LYPathOffHomeOK(my_data->str, (size_t) my_data->len)) {
 			LYMBM_statusline(USE_PATH_OFF_HOME);
 			LYSleepAlert();
 		    } else {

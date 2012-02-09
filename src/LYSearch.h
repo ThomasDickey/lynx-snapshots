@@ -9,8 +9,7 @@
 extern "C" {
 #endif
     extern BOOL textsearch(DocInfo *cur_doc,
-			   char *prev_target,
-			   int target_size,
+			   bstring *prev_target,
 			   int direction);
 
 #define IN_FILE 1

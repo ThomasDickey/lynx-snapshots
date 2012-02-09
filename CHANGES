@@ -1,12 +1,20 @@
--- $LynxId: CHANGES,v 1.571 2012/02/07 21:21:05 tom Exp $
+-- $LynxId: CHANGES,v 1.573 2012/02/09 01:34:11 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2012-02-07 (2.8.8dev.10)
+2012-02-08 (2.8.8dev.10)
+* replaced most LYgetStr calls with LYgetBString, except for LYMail.c and
+  LYNews.c since those do use LYgetStr's limits as it was designed.  Other
+  calls generally did not need those limits -TD
+* modify finish_ExtEditForm to eliminate wrapping when an edited line is longer
+  than MAX_LINE.  The user is still offered the choice of wrapping to the
+  displayed size of a TEXTAREA, but if declined, the TEXTAREA's content will
+  not be wrapped -TD
 * modify LYgetstr, making it call revised function LYgetBString which handles
   bstring's, and allows editing fields which can grow without fixed buffer
-  limits -TD
+  limits.  In particular, forms all use the same calls, which means that
+  their result is no longer limited by MAX_LINE -TD
 * extend ^X-e editing of textarea's to include single-line fields -TD
 * modify comparison for splitting lines to allow for long preformatted lines,
   e.g., using &nbsp;'s to not wrap when the line-wrap mode is disabled -TD
