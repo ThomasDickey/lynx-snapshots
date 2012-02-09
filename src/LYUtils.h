@@ -1,4 +1,4 @@
-/* $LynxId: LYUtils.h,v 1.89 2011/10/07 00:36:40 tom Exp $ */
+/* $LynxId: LYUtils.h,v 1.90 2012/02/08 22:12:09 tom Exp $ */
 #ifndef LYUTILS_H
 #define LYUTILS_H
 
@@ -117,7 +117,7 @@ extern "C" {
 				      char *prefix_list, char *suffix_list);
     extern BOOLEAN LYFixCursesOnForAccess(const char *addr, const char *physical);
     extern BOOLEAN LYPathOffHomeOK(char *fbuffer, size_t fbuffer_size);
-    extern BOOLEAN LYValidateFilename(char *result, char *given);
+    extern BOOLEAN LYValidateFilename(bstring *result, bstring *given);
     extern BOOLEAN LYisAbsPath(const char *path);
     extern BOOLEAN LYisLocalAlias(const char *filename);
     extern BOOLEAN LYisLocalFile(const char *filename);

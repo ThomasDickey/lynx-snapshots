@@ -1,4 +1,4 @@
-/* $LynxId: LYDownload.c,v 1.62 2010/09/25 11:19:25 tom Exp $ */
+/* $LynxId: LYDownload.c,v 1.64 2012/02/08 22:23:59 tom Exp $ */
 #include <HTUtils.h>
 #include <HTParse.h>
 #include <HTList.h>
@@ -31,8 +31,8 @@ void LYDownload(char *line)
     int method_number;
     int count;
     char *the_command = 0;
-    char buffer[LY_MAXPATH];
-    char command[LY_MAXPATH];
+    bstring *buffer = NULL;
+    bstring *command = NULL;
     char *cp;
     lynx_list_item_type *download_command = 0;
     int ch;
@@ -133,14 +133,18 @@ void LYDownload(char *line)
 	 */
 	_statusline(FILENAME_PROMPT);
       retry:
-	if (sug_file)
-	    LYStrNCpy(buffer, sug_file, ((sizeof(buffer) / 2) - 1));
-	else
-	    *buffer = '\0';
+	if (sug_file) {
+	    BStrCopy0(buffer, sug_file);
+	} else {
+	    BStrCopy0(buffer, "");
+	}
+
       check_recall:
-	if ((ch = LYGetStr(buffer,
-			   VISIBLE, (sizeof(buffer) / 2), recall)) < 0 ||
-	    *buffer == '\0' || ch == UPARROW || ch == DNARROW) {
+	if ((ch = LYgetBString(&buffer, VISIBLE, 0, recall)) < 0 ||
+	    isBEmpty(buffer) ||
+	    ch == UPARROW ||
+	    ch == DNARROW) {
+
 	    if (recall && ch == UPARROW) {
 		if (FirstRecall) {
 		    FirstRecall = FALSE;
@@ -165,7 +169,7 @@ void LYDownload(char *line)
 		    goto retry;
 		} else if ((cp = (char *) HTList_objectAt(sug_filenames,
 							  FnameNum)) != NULL) {
-		    LYStrNCpy(buffer, cp, sizeof(buffer) - 1);
+		    BStrCopy0(buffer, cp);
 		    if (FnameTotal == 1) {
 			_statusline(EDIT_THE_PREV_FILENAME);
 		    } else {
@@ -197,7 +201,7 @@ void LYDownload(char *line)
 		    goto retry;
 		} else if ((cp = (char *) HTList_objectAt(sug_filenames,
 							  FnameNum)) != NULL) {
-		    LYStrNCpy(buffer, cp, sizeof(buffer) - 1);
+		    BStrCopy0(buffer, cp);
 		    if (FnameTotal == 1) {
 			_statusline(EDIT_THE_PREV_FILENAME);
 		    } else {
@@ -213,11 +217,11 @@ void LYDownload(char *line)
 	    goto cancelled;
 	}
 
-	strcpy(command, buffer);
+	BStrCopy(command, buffer);
 	if (!LYValidateFilename(buffer, command))
 	    goto cancelled;
 #ifdef HAVE_POPEN
-	else if (LYIsPipeCommand(buffer)) {
+	else if (LYIsPipeCommand(buffer->str)) {
 	    /* I don't know how to download to a pipe */
 	    HTAlert(CANNOT_WRITE_TO_FILE);
 	    _statusline(NEW_FILENAME_PROMPT);
@@ -230,7 +234,7 @@ void LYDownload(char *line)
 	/*
 	 * See if it already exists.
 	 */
-	switch (LYValidateOutput(buffer)) {
+	switch (LYValidateOutput(buffer->str)) {
 	case 'Y':
 	    break;
 	case 'N':
@@ -239,16 +243,15 @@ void LYDownload(char *line)
 	    FnameNum = FnameTotal;
 	    goto retry;
 	default:
-	    FREE(Line);
-	    return;
+	    goto cleanup;
 	}
 
 	/*
 	 * See if we can write to it.
 	 */
-	CTRACE((tfp, "LYDownload: filename is %s\n", buffer));
+	CTRACE((tfp, "LYDownload: filename is %s\n", buffer->str));
 
-	if (!LYCanWriteFile(buffer)) {
+	if (!LYCanWriteFile(buffer->str)) {
 	    FirstRecall = TRUE;
 	    FnameNum = FnameTotal;
 	    goto retry;
@@ -260,13 +263,13 @@ void LYDownload(char *line)
 	/*
 	 * Try rename() first.  - FM
 	 */
-	CTRACE((tfp, "command: rename(%s, %s)\n", file, buffer));
-	if (rename(file, buffer)) {
+	CTRACE((tfp, "command: rename(%s, %s)\n", file, buffer->str));
+	if (rename(file, buffer->str)) {
 	    /*
 	     * Failed.  Use spawned COPY_COMMAND.  - FM
 	     */
 	    CTRACE((tfp, "         FAILED!\n"));
-	    LYCopyFile(file, buffer);
+	    LYCopyFile(file, buffer->str);
 	} else {
 	    /*
 	     * We don't have the temporary file (it was renamed to a permanent
@@ -274,18 +277,18 @@ void LYDownload(char *line)
 	     */
 	    LYDidRename = TRUE;
 	}
-	chmod(buffer, HIDE_CHMOD);
+	chmod(buffer->str, HIDE_CHMOD);
 #else /* Unix: */
 
-	LYCopyFile(file, buffer);
-	LYRelaxFilePermissions(buffer);
+	LYCopyFile(file, buffer->str);
+	LYRelaxFilePermissions(buffer->str);
 #endif /* VMS */
 
     } else {
 	/*
 	 * Use configured download commands.
 	 */
-	buffer[0] = '\0';
+	BStrCopy0(buffer, "");
 	for (count = 0, download_command = downloaders;
 	     count < method_number;
 	     count++, download_command = download_command->next) ;	/* null body */
@@ -299,16 +302,20 @@ void LYDownload(char *line)
 	     */
 	    if (HTCountCommandArgs(download_command->command) >= 2) {
 		_statusline(FILENAME_PROMPT);
+
 	      again:
 		if (sug_file) {
-		    StrNCpy(buffer, sug_file, (sizeof(buffer) / 2) - 1);
+		    BStrCopy0(buffer, sug_file);
 		} else {
-		    *buffer = '\0';
+		    BStrCopy0(buffer, "");
 		}
+
 	      check_again:
-		if ((ch = LYGetStr(buffer, VISIBLE,
-				   sizeof(buffer), recall)) < 0 ||
-		    *buffer == '\0' || ch == UPARROW || ch == DNARROW) {
+		if ((ch = LYgetBString(&buffer, VISIBLE, 0, recall)) < 0 ||
+		    isBEmpty(buffer) ||
+		    ch == UPARROW ||
+		    ch == DNARROW) {
+
 		    if (recall && ch == UPARROW) {
 			if (FirstRecall) {
 			    FirstRecall = FALSE;
@@ -334,7 +341,7 @@ void LYDownload(char *line)
 			} else if ((cp = (char *) HTList_objectAt(sug_filenames,
 								  FnameNum))
 				   != NULL) {
-			    LYStrNCpy(buffer, cp, sizeof(buffer) - 1);
+			    BStrCopy0(buffer, cp);
 			    if (FnameTotal == 1) {
 				_statusline(EDIT_THE_PREV_FILENAME);
 			    } else {
@@ -367,7 +374,7 @@ void LYDownload(char *line)
 			} else if ((cp = (char *) HTList_objectAt(sug_filenames,
 								  FnameNum))
 				   != NULL) {
-			    LYStrNCpy(buffer, cp, sizeof(buffer) - 1);
+			    BStrCopy0(buffer, cp);
 			    if (FnameTotal == 1) {
 				_statusline(EDIT_THE_PREV_FILENAME);
 			    } else {
@@ -384,7 +391,7 @@ void LYDownload(char *line)
 		}
 
 		if (no_dotfiles || !show_dotfiles) {
-		    if (*LYPathLeaf(buffer) == '.') {
+		    if (*LYPathLeaf(buffer->str) == '.') {
 			HTAlert(FILENAME_CANNOT_BE_DOT);
 			_statusline(NEW_FILENAME_PROMPT);
 			goto again;
@@ -394,7 +401,7 @@ void LYDownload(char *line)
 		 * Cancel if the user entered "/dev/null" on Unix, or an "nl:"
 		 * path on VMS.  - FM
 		 */
-		if (LYIsNullDevice(buffer)) {
+		if (LYIsNullDevice(buffer->str)) {
 		    goto cancelled;
 		}
 		SecondS = TRUE;
@@ -410,7 +417,7 @@ void LYDownload(char *line)
 	    count = 1;
 	    HTAddParam(&the_command, download_command->command, count, file);
 	    if (HTCountCommandArgs(download_command->command) > 1)
-		HTAddParam(&the_command, download_command->command, ++count, buffer);
+		HTAddParam(&the_command, download_command->command, ++count, buffer->str);
 	    HTEndParam(&the_command, download_command->command, count);
 
 	} else {
@@ -428,30 +435,31 @@ void LYDownload(char *line)
 
     if (SecondS == TRUE) {
 #ifdef VMS
-	if (0 == strncasecomp(buffer, "sys$disk:", 9)) {
-	    if (0 == StrNCmp((buffer + 9), "[]", 2)) {
-		HTAddSugFilename(buffer + 11);
+	if (0 == strncasecomp(buffer->str, "sys$disk:", 9)) {
+	    if (0 == StrNCmp((buffer->str + 9), "[]", 2)) {
+		HTAddSugFilename(buffer->str + 11);
 	    } else {
-		HTAddSugFilename(buffer + 9);
+		HTAddSugFilename(buffer->str + 9);
 	    }
 	} else {
-	    HTAddSugFilename(buffer);
+	    HTAddSugFilename(buffer->str);
 	}
 #else
-	HTAddSugFilename(buffer);
+	HTAddSugFilename(buffer->str);
 #endif /* VMS */
     }
-    FREE(Line);
-    return;
+    goto cleanup;
 
   failed:
     HTAlert(CANNOT_DOWNLOAD_FILE);
-    FREE(Line);
-    return;
+    goto cleanup;
 
   cancelled:
     HTInfoMsg(CANCELLING);
+
+  cleanup:
     FREE(Line);
+    BStrFree(buffer);
     return;
 }
 

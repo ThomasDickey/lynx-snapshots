@@ -1,4 +1,4 @@
-/* $LynxId: LYStrings.c,v 1.198 2012/02/08 01:22:55 tom Exp $ */
+/* $LynxId: LYStrings.c,v 1.200 2012/02/08 15:51:01 tom Exp $ */
 #include <HTUtils.h>
 #include <HTCJK.h>
 #include <UCAux.h>
@@ -3580,60 +3580,62 @@ int get_popup_number(const char *msg,
 		     int *c,
 		     int *rel)
 {
-    char temp[120];
-    char *p = temp;
-    int num;
+    bstring *temp = NULL;
+    int result = 0;
 
     /*
      * Load the c argument into the prompt buffer.
      */
-    temp[0] = (char) *c;
-    temp[1] = '\0';
+    BStrCopy0(temp, "?");
+    temp->str[0] = (char) *c;
+
     _statusline(msg);
 
     /*
      * Get the number, possibly with a suffix, from the user.
      */
-    if (LYGetStr(temp, VISIBLE, sizeof(temp), NORECALL) < 0 || *temp == 0) {
+    if (LYgetBString(&temp, VISIBLE, 0, NORECALL) < 0 || isBEmpty(temp)) {
 	HTInfoMsg(CANCELLED);
 	*c = '\0';
 	*rel = '\0';
-	return (0);
-    }
-
-    *rel = '\0';
-    num = atoi(p);
-    while (isdigit(UCH(*p)))
-	++p;
-    switch (*p) {
-    case '+':
-    case '-':
-	/* 123+ or 123- */
-	*rel = *p++;
-	*c = *p;
-	break;
-    default:
-	*c = *p++;
-	*rel = *p;
-	break;
-    case 0:
-	break;
-    }
-
-    /*
-     * If we had a 'g' or 'p' suffix, load it into c.  Otherwise, zero c.  Then
-     * return the number.
-     */
-    if (*p == 'g' || *p == 'G') {
-	*c = 'g';
-    } else if (*p == 'p' || *p == 'P') {
-	*c = 'p';
     } else {
-	*c = '\0';
+	char *p = temp->str;
+
+	*rel = '\0';
+	result = atoi(p);
+	while (isdigit(UCH(*p)))
+	    ++p;
+	switch (*p) {
+	case '+':
+	case '-':
+	    /* 123+ or 123- */
+	    *rel = *p++;
+	    *c = *p;
+	    break;
+	default:
+	    *c = *p++;
+	    *rel = *p;
+	    break;
+	case 0:
+	    break;
+	}
+
+	/*
+	 * If we had a 'g' or 'p' suffix, load it into c.  Otherwise, zero c.  Then
+	 * return the number.
+	 */
+	if (*p == 'g' || *p == 'G') {
+	    *c = 'g';
+	} else if (*p == 'p' || *p == 'P') {
+	    *c = 'p';
+	} else {
+	    *c = '\0';
+	}
+	if (*rel != '+' && *rel != '-')
+	    *rel = 0;
     }
-    if (*rel != '+' && *rel != '-')
-	*rel = 0;
-    return num;
+    BStrFree(temp);
+    return result;
 }
 
 #ifdef USE_COLOR_STYLE
@@ -4149,8 +4151,8 @@ int LYhandlePopupList(int cur_choice,
     char Cnum[64];
     int Lnum;
     int npages;
-    static char prev_target[MAX_LINE];	/* Search string buffer */
-    static char prev_target_buffer[MAX_LINE];	/* Next search buffer */
+    static bstring *prev_target = NULL;		/* Search string buffer */
+    static bstring *next_target = NULL;		/* Next search buffer */
     static BOOL first = TRUE;
     char *cp;
     int ch = 0;
@@ -4177,10 +4179,10 @@ int LYhandlePopupList(int cur_choice,
      * Initialize the search string buffer. - FM
      */
     if (first) {
-	*prev_target_buffer = '\0';
+	BStrCopy0(next_target, "");
 	first = FALSE;
     }
-    *prev_target = '\0';
+    BStrCopy0(prev_target, "");
     QueryTotal = (search_queries ? HTList_count(search_queries) : 0);
     recall = ((QueryTotal >= 1) ? RECALL_URL : NORECALL);
     QueryNum = QueryTotal;
@@ -4789,7 +4791,7 @@ int LYhandlePopupList(int cur_choice,
 	    break;
 
 	case LYK_NEXT:
-	    if (recall && *prev_target_buffer == '\0') {
+	    if (recall && isBEmpty(next_target)) {
 		/*
 		 * We got a 'n'ext command with no prior query specified within
 		 * the popup window.  See if one was entered when the popup was
@@ -4803,21 +4805,17 @@ int LYhandlePopupList(int cur_choice,
 		 */
 		if ((cp = (char *) HTList_objectAt(search_queries,
 						   0)) != NULL) {
-		    LYStrNCpy(prev_target_buffer,
-			      cp,
-			      sizeof(prev_target_buffer) - 1);
+		    BStrCopy0(next_target, cp);
 		    QueryNum = 0;
 		    FirstRecall = FALSE;
 		}
 	    }
-	    strcpy(prev_target, prev_target_buffer);
+	    BStrCopy(prev_target, next_target);
 	    /* FALLTHRU */
 	case LYK_WHEREIS:
-	    if (*prev_target == '\0') {
+	    if (isBEmpty(prev_target)) {
 		_statusline(ENTER_WHEREIS_QUERY);
-		if ((ch = LYGetStr(prev_target, VISIBLE,
-				   sizeof(prev_target_buffer),
-				   recall)) < 0) {
+		if ((ch = LYgetBString(&prev_target, VISIBLE, 0, recall)) < 0) {
 		    /*
 		     * User cancelled the search via ^G.  - FM
 		     */
@@ -4827,7 +4825,7 @@ int LYhandlePopupList(int cur_choice,
 	    }
 
 	  check_recall:
-	    if (*prev_target == '\0' &&
+	    if (isBEmpty(prev_target) &&
 		!(recall && (ch == UPARROW || ch == DNARROW))) {
 		/*
 		 * No entry.  Simply break.  - FM
@@ -4842,13 +4840,13 @@ int LYhandlePopupList(int cur_choice,
 		     * Use the current string or last query in the list.  - FM
 		     */
 		    FirstRecall = FALSE;
-		    if (*prev_target_buffer) {
+		    if (!isBEmpty(next_target)) {
 			for (QueryNum = (QueryTotal - 1);
 			     QueryNum > 0; QueryNum--) {
 			    if ((cp = (char *) HTList_objectAt(search_queries,
 							       QueryNum))
 				!= NULL &&
-				!strcmp(prev_target_buffer, cp)) {
+				!strcmp(next_target->str, cp)) {
 				break;
 			    }
 			}
@@ -4869,19 +4867,18 @@ int LYhandlePopupList(int cur_choice,
 		}
 		if ((cp = (char *) HTList_objectAt(search_queries,
 						   QueryNum)) != NULL) {
-		    LYStrNCpy(prev_target, cp, sizeof(prev_target) - 1);
-		    if (*prev_target_buffer &&
-			!strcmp(prev_target_buffer, prev_target)) {
+		    BStrCopy0(prev_target, cp);
+		    if (!isBEmpty(next_target) &&
+			!strcmp(next_target->str, prev_target->str)) {
 			_statusline(EDIT_CURRENT_QUERY);
-		    } else if ((*prev_target_buffer && QueryTotal == 2) ||
-			       (!(*prev_target_buffer) &&
-				QueryTotal == 1)) {
+		    } else if ((!isBEmpty(next_target) && QueryTotal == 2) ||
+			       (isBEmpty(next_target) && QueryTotal == 1)) {
 			_statusline(EDIT_THE_PREV_QUERY);
 		    } else {
 			_statusline(EDIT_A_PREV_QUERY);
 		    }
-		    if ((ch = LYGetStr(prev_target, VISIBLE,
-				       sizeof(prev_target_buffer), recall)) < 0) {
+		    if ((ch = LYgetBString(&prev_target,
+					   VISIBLE, 0, recall)) < 0) {
 			/*
 			 * User cancelled the search via ^G.  - FM
 			 */
@@ -4896,13 +4893,13 @@ int LYhandlePopupList(int cur_choice,
 		     * Use the current string or first query in the list.  - FM
 		     */
 		    FirstRecall = FALSE;
-		    if (*prev_target_buffer) {
+		    if (!isBEmpty(next_target)) {
 			for (QueryNum = 0;
 			     QueryNum < (QueryTotal - 1); QueryNum++) {
 			    if ((cp = (char *) HTList_objectAt(search_queries,
 							       QueryNum))
 				!= NULL &&
-				!strcmp(prev_target_buffer, cp)) {
+				!strcmp(next_target->str, cp)) {
 				break;
 			    }
 			}
@@ -4923,21 +4920,18 @@ int LYhandlePopupList(int cur_choice,
 		}
 		if ((cp = (char *) HTList_objectAt(search_queries,
 						   QueryNum)) != NULL) {
-		    LYStrNCpy(prev_target, cp, sizeof(prev_target) - 1);
-		    if (*prev_target_buffer &&
-			!strcmp(prev_target_buffer, prev_target)) {
+		    BStrCopy0(prev_target, cp);
+		    if (isBEmpty(next_target) &&
+			!strcmp(next_target->str, prev_target->str)) {
 			_statusline(EDIT_CURRENT_QUERY);
-		    } else if ((*prev_target_buffer &&
-				QueryTotal == 2) ||
-			       (!(*prev_target_buffer) &&
-				QueryTotal == 1)) {
+		    } else if ((!isBEmpty(next_target) && QueryTotal == 2) ||
+			       (isBEmpty(next_target) && QueryTotal == 1)) {
 			_statusline(EDIT_THE_PREV_QUERY);
 		    } else {
 			_statusline(EDIT_A_PREV_QUERY);
 		    }
-		    if ((ch = LYGetStr(prev_target, VISIBLE,
-				       sizeof(prev_target_buffer),
-				       recall)) < 0) {
+		    if ((ch = LYgetBString(&prev_target,
+					   VISIBLE, 0, recall)) < 0) {
 			/*
 			 * User cancelled the search via ^G. - FM
 			 */
@@ -4950,8 +4944,8 @@ int LYhandlePopupList(int cur_choice,
 	    /*
 	     * Replace the search string buffer with the new target.  - FM
 	     */
-	    strcpy(prev_target_buffer, prev_target);
-	    HTAddSearchQuery(prev_target_buffer);
+	    BStrCopy(next_target, prev_target);
+	    HTAddSearchQuery(next_target->str);
 
 	    /*
 	     * Start search at the next choice.  - FM
@@ -4959,10 +4953,10 @@ int LYhandlePopupList(int cur_choice,
 	    for (j = 1; Cptr[i + j] != NULL; j++) {
 		FormatChoiceNum(buffer, max_choices, (i + j), Cptr[i + j]);
 		if (LYcase_sensitive) {
-		    if (strstr(buffer, prev_target_buffer) != NULL)
+		    if (strstr(buffer, next_target->str) != NULL)
 			break;
 		} else {
-		    if (LYstrstr(buffer, prev_target_buffer) != NULL)
+		    if (LYstrstr(buffer, next_target->str) != NULL)
 			break;
 		}
 	    }
@@ -4987,7 +4981,7 @@ int LYhandlePopupList(int cur_choice,
 	     * If we started at the beginning, it can't be present.  - FM
 	     */
 	    if (cur_choice == 0) {
-		HTUserMsg2(STRING_NOT_FOUND, prev_target_buffer);
+		HTUserMsg2(STRING_NOT_FOUND, next_target->str);
 		goto restore_popup_statusline;
 	    }
 
@@ -4997,10 +4991,10 @@ int LYhandlePopupList(int cur_choice,
 	    for (j = 0; j < cur_choice; j++) {
 		FormatChoiceNum(buffer, max_choices, (j + 1), Cptr[j]);
 		if (LYcase_sensitive) {
-		    if (strstr(buffer, prev_target_buffer) != NULL)
+		    if (strstr(buffer, next_target->str) != NULL)
 			break;
 		} else {
-		    if (LYstrstr(buffer, prev_target_buffer) != NULL)
+		    if (LYstrstr(buffer, next_target->str) != NULL)
 			break;
 		}
 	    }
@@ -5025,7 +5019,7 @@ int LYhandlePopupList(int cur_choice,
 	    /*
 	     * Didn't find it in the preceding choices either.  - FM
 	     */
-	    HTUserMsg2(STRING_NOT_FOUND, prev_target_buffer);
+	    HTUserMsg2(STRING_NOT_FOUND, next_target->str);
 
 	  restore_popup_statusline:
 	    /*
@@ -5033,7 +5027,7 @@ int LYhandlePopupList(int cur_choice,
 	     * FM
 	     */
 	    _statusline(popup_status_msg);
-	    *prev_target = '\0';
+	    BStrCopy0(prev_target, "");
 	    QueryTotal = (search_queries ? HTList_count(search_queries)
 			  : 0);
 	    recall = ((QueryTotal >= 1) ? RECALL_URL : NORECALL);

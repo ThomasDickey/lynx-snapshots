@@ -1,4 +1,4 @@
-/* $LynxId: LYGetFile.c,v 1.85 2010/12/07 20:59:41 tom Exp $ */
+/* $LynxId: LYGetFile.c,v 1.87 2012/02/08 21:01:03 tom Exp $ */
 #include <HTUtils.h>
 #include <HTTP.h>
 #include <HTAnchor.h>		/* Anchor class */
@@ -547,12 +547,13 @@ int getfile(DocInfo *doc, int *target)
 		}
 		cp = strchr(doc->address, ':') + 1;
 		reply_by_mail(cp,
-			      ((HTMainAnchor && !LYUserSpecifiedURL) ?
-			       (char *) HTMainAnchor->address :
-			       (char *) doc->address),
+			      ((HTMainAnchor && !LYUserSpecifiedURL)
+			       ? (char *) HTMainAnchor->address
+			       : (char *) doc->address),
 			      title,
-			      (HTMainAnchor && !LYUserSpecifiedURL) ?
-			      HTMainAnchor->message_id : NULL);
+			      (HTMainAnchor && !LYUserSpecifiedURL)
+			      ? HTMainAnchor->message_id
+			      : NULL);
 		FREE(tmptitle);
 	    }
 	    return (NULLFILE);
@@ -1123,25 +1124,30 @@ int follow_link_number(int c,
 		       DocInfo *doc,
 		       int *num)
 {
-    char temp[120];
-    char *p = temp;
+    bstring *temp = NULL;
+    char *p;
     int rel = 0;
     int new_top, new_link;
     BOOL want_go;
     int curline = *num;		/* passed in from mainloop() */
+    int code;
 
     CTRACE((tfp, "follow_link_number(%d,%d,...)\n", c, cur));
-    temp[0] = (char) c;
-    temp[1] = '\0';
+    BStrCopy0(temp, "?");
+    temp->str[0] = (char) c;
     *num = -1;
     _statusline(FOLLOW_LINK_NUMBER);
+
     /*
      * Get the number, possibly with a letter suffix, from the user.
      */
-    if (LYGetStr(temp, VISIBLE, sizeof(temp), NORECALL) < 0 || *temp == 0) {
+    if (LYgetBString(&temp, VISIBLE, sizeof(temp), NORECALL) < 0 ||
+	isBEmpty(temp)) {
 	HTInfoMsg(CANCELLED);
 	return (DO_NOTHING);
     }
+
+    p = temp->str;
     *num = atoi(p);
     while (isdigit(UCH(*p)))
 	++p;
@@ -1161,7 +1167,7 @@ int follow_link_number(int c,
     }
     /* don't currently check for errors typing suffix */
 
-    CTRACE((tfp, "  temp=%s, *num=%d, rel='%c'\n", temp, *num, rel));
+    CTRACE((tfp, "  temp=%s, *num=%d, rel='%c'\n", temp->str, *num, rel));
     /*
      * Check if we had a 'p' or 'P' following the number as a flag for
      * displaying the page with that number.  - FM
@@ -1169,15 +1175,15 @@ int follow_link_number(int c,
     if ((c == 'p' || c == 'P') && display_lines == 0) {
 	CTRACE((tfp, " curline=%d, LYlines=%d, display too small!\n",
 		curline, LYlines));
-	return (PRINT_ERROR);
+	code = PRINT_ERROR;
     } else if (c == 'p' || c == 'P') {
 	int nlines = HText_getNumOfLines();
-	int npages = ((nlines + 1) > display_lines) ?
-	(((nlines + 1) + (display_lines - 1)) / (display_lines))
-	: 1;
-	int curpage = ((curline + 1) > display_lines) ?
-	(((curline + 1) + (display_lines - 1)) / (display_lines))
-	: 1;
+	int npages = (((nlines + 1) > display_lines)
+		      ? (((nlines + 1) + (display_lines - 1)) / (display_lines))
+		      : 1);
+	int curpage = (((curline + 1) > display_lines)
+		       ? (((curline + 1) + (display_lines - 1)) / (display_lines))
+		       : 1);
 
 	CTRACE((tfp, " nlines=%d, npages=%d, curline=%d, curpage=%d\n",
 		nlines, npages, curline, curpage));
@@ -1187,63 +1193,68 @@ int follow_link_number(int c,
 	    *num = curpage + *num;
 	else if (rel == '-')
 	    *num = curpage - *num;
-	doc->line = (npages <= 1) ?
-	    1 :
-	    ((*num <= npages) ? (((*num - 1) * display_lines) + 1)
-	     : (((npages - 1) * display_lines) + 1));
-	return (DO_GOTOPAGE_STUFF);
-    }
-
-    /*
-     * Check if we want to make the link corresponding to the number the
-     * current link, rather than ACTIVATE-ing it.
-     */
-    want_go = (BOOL) (c == 'g' || c == 'G');
-
-    /* If rel, add or subtract num from current link, or
-     * nearest previous/subsequent link if current link is not on screen.
-     */
-    if (rel)
-	*num = HTGetRelLinkNum(*num, rel, cur);
-    /*
-     * If we have a valid number, act on it.
-     */
-    if (*num > 0) {
-	int info;
-	char *text = NULL;
+	doc->line = ((npages <= 1)
+		     ? 1
+		     : ((*num <= npages)
+			? (((*num - 1) * display_lines) + 1)
+			: (((npages - 1) * display_lines) + 1)));
+	code = DO_GOTOPAGE_STUFF;
+    } else {
 
 	/*
-	 * Get the lname, and hightext, directly from www structures and add it
-	 * to the cur link so that we can pass it transparently on to
-	 * getfile(), and load new_top and new_link if we instead want to make
-	 * the link number current.  These things are done so that a link can
-	 * be selected anywhere in the current document, whether it is
-	 * displayed on the screen or not!
+	 * Check if we want to make the link corresponding to the number the
+	 * current link, rather than ACTIVATE-ing it.
 	 */
-	info = HTGetLinkInfo(*num,
-			     want_go,
-			     &new_top,
-			     &new_link,
-			     &text,
-			     &links[cur].lname);
-	if (text != NULL)
-	    LYSetHilite(cur, text);
-	if (info == WWW_INTERN_LINK_TYPE) {
-	    links[cur].type = WWW_INTERN_LINK_TYPE;
-	    return (DO_LINK_STUFF);
-	} else if (info == LINK_LINE_FOUND) {
-	    doc->line = new_top + 1;
-	    doc->link = new_link;
-	    return (DO_GOTOLINK_STUFF);
-	} else if (info) {
-	    links[cur].type = WWW_LINK_TYPE;
-	    return (DO_LINK_STUFF);
+	want_go = (BOOL) (c == 'g' || c == 'G');
+
+	/* If rel, add or subtract num from current link, or
+	 * nearest previous/subsequent link if current link is not on screen.
+	 */
+	if (rel)
+	    *num = HTGetRelLinkNum(*num, rel, cur);
+	/*
+	 * If we have a valid number, act on it.
+	 */
+	if (*num > 0) {
+	    int info;
+	    char *text = NULL;
+
+	    /*
+	     * Get the lname, and hightext, directly from www structures and
+	     * add it to the cur link so that we can pass it transparently on
+	     * to getfile(), and load new_top and new_link if we instead want
+	     * to make the link number current.  These things are done so that
+	     * a link can be selected anywhere in the current document, whether
+	     * it is displayed on the screen or not!
+	     */
+	    info = HTGetLinkInfo(*num,
+				 want_go,
+				 &new_top,
+				 &new_link,
+				 &text,
+				 &links[cur].lname);
+	    if (text != NULL)
+		LYSetHilite(cur, text);
+
+	    if (info == WWW_INTERN_LINK_TYPE) {
+		links[cur].type = WWW_INTERN_LINK_TYPE;
+		code = DO_LINK_STUFF;
+	    } else if (info == LINK_LINE_FOUND) {
+		doc->line = new_top + 1;
+		doc->link = new_link;
+		code = DO_GOTOLINK_STUFF;
+	    } else if (info) {
+		links[cur].type = WWW_LINK_TYPE;
+		code = DO_LINK_STUFF;
+	    } else {
+		code = PRINT_ERROR;
+	    }
 	} else {
-	    return (PRINT_ERROR);
+	    code = PRINT_ERROR;
 	}
-    } else {
-	return (PRINT_ERROR);
     }
+    BStrFree(temp);
+    return code;
 }
 
 #if defined(EXEC_LINKS) || defined(LYNXCGI_LINKS)

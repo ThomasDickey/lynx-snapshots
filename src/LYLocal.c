@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYLocal.c,v 1.115 2011/10/07 00:41:24 tom Exp $
+ * $LynxId: LYLocal.c,v 1.117 2012/02/08 20:32:47 tom Exp $
  *
  *  Routines to manipulate the local filesystem.
  *  Written by: Rick Mallett, Carleton University
@@ -79,9 +79,8 @@
 #endif /* FNAMES_8_3 */
 #endif /* OK_INSTALL */
 
-static char *get_filename(const char *prompt,
-			  char *buf,
-			  size_t bufsize);
+static int get_filename(const char *prompt,
+			bstring *buf);
 
 #ifdef OK_PERMIT
 static int permit_location(char *destpath,
@@ -791,7 +790,7 @@ static char *parse_directory(char *path)
 static int modify_tagged(char *testpath)
 {
     char *cp;
-    char given_target[MAX_LINE];
+    bstring *given_target = NULL;
     char *dst_path = NULL;
     char *src_path = NULL;
     char *old_path = NULL;
@@ -807,39 +806,35 @@ static int modify_tagged(char *testpath)
 
     _statusline(gettext("Enter new location for tagged items: "));
 
-    given_target[0] = '\0';
-    LYGetStr(given_target, VISIBLE, sizeof(given_target), NORECALL);
-    if (strlen(given_target)) {
+    BStrCopy0(given_target, "");
+    LYgetBString(&given_target, VISIBLE, 0, NORECALL);
+    if (!isBEmpty(given_target)) {
 	/*
 	 * Replace ~/ references to the home directory.
 	 */
-	if (LYIsTilde(given_target[0]) && LYIsPathSep(given_target[1])) {
+	if (LYIsTilde(given_target->str[0]) && LYIsPathSep(given_target->str[1])) {
 	    char *cp1 = NULL;
 
 	    StrAllocCopy(cp1, Home_Dir());
-	    StrAllocCat(cp1, (given_target + 1));
-	    if (strlen(cp1) > (sizeof(given_target) - 1)) {
-		HTAlert(gettext("Path too long"));
-		FREE(cp1);
-		return 0;
-	    }
-	    LYStrNCpy(given_target, cp1, sizeof(given_target) - 1);
+	    StrAllocCat(cp1, (given_target->str + 1));
+	    BStrCopy0(given_target, cp1);
 	    FREE(cp1);
 	}
 
 	/*
 	 * If path is relative, prefix it with current location.
 	 */
-	if (!LYIsPathSep(given_target[0])) {
+	if (!LYIsPathSep(given_target->str[0])) {
 	    dst_path = HTLocalName(testpath);
 	    LYAddPathSep(&dst_path);
-	    StrAllocCat(dst_path, given_target);
+	    StrAllocCat(dst_path, given_target->str);
 	} else {
-	    dst_path = HTLocalName(given_target);
+	    dst_path = HTLocalName(given_target->str);
 	}
 
 	if (!ok_stat(dst_path, &dst_info)) {
 	    FREE(dst_path);
+	    BStrFree(given_target);
 	    return 0;
 	}
 
@@ -855,6 +850,7 @@ static int modify_tagged(char *testpath)
 		    || same_location(&src_info, &dst_info)
 		    || !dir_has_same_owner(&dst_info, &src_info)) {
 		    FREE(src_path);
+		    BStrFree(given_target);
 		    return 0;
 		}
 	    }
@@ -880,6 +876,7 @@ static int modify_tagged(char *testpath)
 	FREE(src_path);
 	FREE(dst_path);
     }
+    BStrFree(given_target);
     return count;
 }
 
@@ -889,7 +886,7 @@ static int modify_tagged(char *testpath)
 static int modify_name(char *testpath)
 {
     const char *cp;
-    char tmpbuf[DIRED_MAXBUF];
+    bstring *tmpbuf = NULL;
     char *newpath = NULL;
     struct stat dir_info;
     int code = 0;
@@ -900,6 +897,7 @@ static int modify_name(char *testpath)
     testpath = strip_trailing_slash(testpath);
 
     if (ok_stat(testpath, &dir_info)) {
+
 	/*
 	 * Change the name of the file or directory.
 	 */
@@ -910,32 +908,35 @@ static int modify_name(char *testpath)
 	} else {
 	    return ok_file_or_dir(&dir_info);
 	}
-	LYStrNCpy(tmpbuf, LYPathLeaf(testpath), sizeof(tmpbuf) - 1);
-	if (get_filename(cp, tmpbuf, sizeof(tmpbuf)) == NULL)
-	    return 0;
 
-	/*
-	 * Do not allow the user to also change the location at this time.
-	 */
-	if (LYLastPathSep(tmpbuf) != 0) {
-	    HTAlert(gettext("Illegal character (path-separator) found! Request ignored."));
-	} else if (strlen(tmpbuf)) {
-	    if ((cp = LYLastPathSep(testpath)) != NULL)
-		HTSprintf0(&newpath, "%.*s%s",
-			   (int) (cp - testpath + 1), testpath, tmpbuf);
-	    else
-		StrAllocCopy(newpath, tmpbuf);
+	BStrCopy0(tmpbuf, LYPathLeaf(testpath));
+	if (get_filename(cp, tmpbuf)) {
 
 	    /*
-	     * Make sure the destination does not already exist.
+	     * Do not allow the user to also change the location at this time.
 	     */
-	    if (not_already_exists(newpath)) {
-		code = move_file(testpath, newpath);
-	    }
-	    FREE(newpath);
+	    if (LYLastPathSep(tmpbuf->str) != 0) {
+		HTAlert(gettext("Illegal character (path-separator) found! Request ignored."));
+	    } else if (strlen(tmpbuf->str)) {
+		if ((cp = LYLastPathSep(testpath)) != NULL) {
+		    HTSprintf0(&newpath, "%.*s%s",
+			       (int) (cp - testpath + 1),
+			       testpath, tmpbuf->str);
+		} else {
+		    StrAllocCopy(newpath, tmpbuf->str);
+		}
 
+		/*
+		 * Make sure the destination does not already exist.
+		 */
+		if (not_already_exists(newpath)) {
+		    code = move_file(testpath, newpath);
+		}
+		FREE(newpath);
+	    }
 	}
     }
+    BStrFree(tmpbuf);
     return code;
 }
 
@@ -946,7 +947,7 @@ static int modify_location(char *testpath)
 {
     const char *cp;
     char *sp;
-    char tmpbuf[MAX_LINE];
+    bstring *tmpbuf = NULL;
     char *newpath = NULL;
     char *savepath = NULL;
     struct stat old_info;
@@ -971,49 +972,52 @@ static int modify_location(char *testpath)
     } else {
 	return ok_file_or_dir(&dir_info);
     }
-    LYStrNCpy(tmpbuf, testpath, sizeof(tmpbuf) - 1);
-    *LYPathLeaf(tmpbuf) = '\0';
-    if (get_filename(cp, tmpbuf, sizeof(tmpbuf)) == NULL)
-	return 0;
-    if (strlen(tmpbuf)) {
-	StrAllocCopy(savepath, testpath);
-	StrAllocCopy(newpath, testpath);
 
-	/*
-	 * Allow ~/ references to the home directory.
-	 */
-	if (LYIsTilde(tmpbuf[0])
-	    && (tmpbuf[1] == '\0' || LYIsPathSep(tmpbuf[1]))) {
-	    StrAllocCopy(newpath, Home_Dir());
-	    StrAllocCat(newpath, (tmpbuf + 1));
-	    LYStrNCpy(tmpbuf, newpath, sizeof(tmpbuf) - 1);
-	}
-	if (LYisAbsPath(tmpbuf)) {
-	    StrAllocCopy(newpath, tmpbuf);
-	} else if ((sp = LYLastPathSep(newpath)) != NULL) {
-	    *++sp = '\0';
-	    StrAllocCat(newpath, tmpbuf);
-	} else {
-	    HTAlert(gettext("Unexpected failure - unable to find trailing path separator"));
+    BStrCopy0(tmpbuf, testpath);
+    *LYPathLeaf(tmpbuf->str) = '\0';
+    if (get_filename(cp, tmpbuf)) {
+	if (strlen(tmpbuf->str)) {
+	    StrAllocCopy(savepath, testpath);
+	    StrAllocCopy(newpath, testpath);
+
+	    /*
+	     * Allow ~/ references to the home directory.
+	     */
+	    if (LYIsTilde(tmpbuf->str[0])
+		&& (tmpbuf->str[1] == '\0' || LYIsPathSep(tmpbuf->str[1]))) {
+		StrAllocCopy(newpath, Home_Dir());
+		StrAllocCat(newpath, (tmpbuf->str + 1));
+		BStrCopy0(tmpbuf, newpath);
+	    }
+	    if (LYisAbsPath(tmpbuf->str)) {
+		StrAllocCopy(newpath, tmpbuf->str);
+	    } else if ((sp = LYLastPathSep(newpath)) != NULL) {
+		*++sp = '\0';
+		StrAllocCat(newpath, tmpbuf->str);
+	    } else {
+		HTAlert(gettext("Unexpected failure - unable to find trailing path separator"));
+		FREE(newpath);
+		FREE(savepath);
+		BStrFree(tmpbuf);
+		return 0;
+	    }
+
+	    /*
+	     * Make sure the source and target have the same owner (uid).
+	     */
+	    old_info = dir_info;
+	    if (!ok_stat(newpath, &dir_info)) {
+		code = 0;
+	    } else if (same_location(&old_info, &dir_info)) {
+		code = 0;
+	    } else if (dir_has_same_owner(&dir_info, &old_info)) {
+		code = move_file(savepath, newpath);
+	    }
 	    FREE(newpath);
 	    FREE(savepath);
-	    return 0;
 	}
-
-	/*
-	 * Make sure the source and target have the same owner (uid).
-	 */
-	old_info = dir_info;
-	if (!ok_stat(newpath, &dir_info)) {
-	    code = 0;
-	} else if (same_location(&old_info, &dir_info)) {
-	    code = 0;
-	} else if (dir_has_same_owner(&dir_info, &old_info)) {
-	    code = move_file(savepath, newpath);
-	}
-	FREE(newpath);
-	FREE(savepath);
     }
+    BStrFree(tmpbuf);
     return code;
 }
 
@@ -1024,8 +1028,9 @@ int local_modify(DocInfo *doc, char **newpath)
 {
     int ans;
     char *cp;
-    char testpath[DIRED_MAXBUF];	/* a bit ridiculous */
+    bstring *testpath = NULL;
     int count;
+    int code = 0;
 
     if (!HTList_isEmpty(tagged)) {
 	cp = HTpartURL_toFile(doc->address);
@@ -1064,20 +1069,20 @@ int local_modify(DocInfo *doc, char **newpath)
 	    FREE(cp);
 	    return 0;
 	}
-	LYStrNCpy(testpath, cp, sizeof(testpath) - 1);
+	BStrCopy0(testpath, cp);
 	FREE(cp);
 
 	if (ans == 'N') {
-	    return modify_name(testpath);
+	    code = modify_name(testpath->str);
 	} else if (ans == 'L') {
-	    if (modify_location(testpath)) {
+	    if (modify_location(testpath->str)) {
 		if (doc->link == (nlinks - 1))
 		    --doc->link;
-		return 1;
+		code = 1;
 	    }
 #ifdef OK_PERMIT
 	} else if (ans == 'P') {
-	    return (permit_location(NULL, testpath, newpath));
+	    code = permit_location(NULL, testpath->str, newpath);
 #endif /* OK_PERMIT */
 	} else {
 	    /*
@@ -1086,7 +1091,8 @@ int local_modify(DocInfo *doc, char **newpath)
 	    HTAlert(gettext("This feature not yet implemented!"));
 	}
     }
-    return 0;
+    BStrFree(testpath);
+    return code;
 }
 
 #define BadChars() ((!no_dotfiles && show_dotfiles) \
@@ -1099,23 +1105,23 @@ int local_modify(DocInfo *doc, char **newpath)
 static int create_file(char *current_location)
 {
     int code = FALSE;
-    char tmpbuf[DIRED_MAXBUF];
+    bstring *tmpbuf = NULL;
     char *testpath = NULL;
 
-    tmpbuf[0] = '\0';
-    if (get_filename(gettext("Enter name of file to create: "),
-		     tmpbuf, sizeof(tmpbuf)) != NULL) {
+    BStrCopy0(tmpbuf, "");
+    if (get_filename(gettext("Enter name of file to create: "), tmpbuf)) {
 
-	if (strstr(tmpbuf, "//") != NULL) {
+	if (strstr(tmpbuf->str, "//") != NULL) {
 	    HTAlert(gettext("Illegal redirection \"//\" found! Request ignored."));
-	} else if (strlen(tmpbuf) && strchr(BadChars(), tmpbuf[0]) == NULL) {
+	} else if (strlen(tmpbuf->str) &&
+		   strchr(BadChars(), tmpbuf->str[0]) == NULL) {
 	    StrAllocCopy(testpath, current_location);
 	    LYAddPathSep(&testpath);
 
 	    /*
 	     * Append the target filename to the current location.
 	     */
-	    StrAllocCat(testpath, tmpbuf);
+	    StrAllocCat(testpath, tmpbuf->str);
 
 	    /*
 	     * Make sure the target does not already exist
@@ -1126,6 +1132,7 @@ static int create_file(char *current_location)
 	    FREE(testpath);
 	}
     }
+    BStrFree(tmpbuf);
     return code;
 }
 
@@ -1135,20 +1142,20 @@ static int create_file(char *current_location)
 static int create_directory(char *current_location)
 {
     int code = FALSE;
-    char tmpbuf[DIRED_MAXBUF];
+    bstring *tmpbuf = NULL;
     char *testpath = NULL;
 
-    tmpbuf[0] = '\0';
-    if (get_filename(gettext("Enter name for new directory: "),
-		     tmpbuf, sizeof(tmpbuf)) != NULL) {
+    BStrCopy0(tmpbuf, "");
+    if (get_filename(gettext("Enter name for new directory: "), tmpbuf)) {
 
-	if (strstr(tmpbuf, "//") != NULL) {
+	if (strstr(tmpbuf->str, "//") != NULL) {
 	    HTAlert(gettext("Illegal redirection \"//\" found! Request ignored."));
-	} else if (strlen(tmpbuf) && strchr(BadChars(), tmpbuf[0]) == NULL) {
+	} else if (strlen(tmpbuf->str) &&
+		   strchr(BadChars(), tmpbuf->str[0]) == NULL) {
 	    StrAllocCopy(testpath, current_location);
 	    LYAddPathSep(&testpath);
 
-	    StrAllocCat(testpath, tmpbuf);
+	    StrAllocCat(testpath, tmpbuf->str);
 
 	    /*
 	     * Make sure the target does not already exist.
@@ -1159,6 +1166,7 @@ static int create_directory(char *current_location)
 	    FREE(testpath);
 	}
     }
+    BStrFree(tmpbuf);
     return code;
 }
 
@@ -1300,7 +1308,7 @@ int local_remove(DocInfo *doc)
 
 #ifdef OK_PERMIT
 
-static char LYValidPermitFile[LY_MAXPATH] = "\0";
+static bstring *LYValidPermitFile = NULL;
 
 static long permit_bits(char *string_mode)
 {
@@ -1376,9 +1384,7 @@ static int permit_location(char *destpath,
 	LYRegisterUIPage(*newpath, UIP_PERMIT_OPTIONS);
 
 	group_name = HTAA_GidToName((int) dir_info.st_gid);
-	LYStrNCpy(LYValidPermitFile,
-		  srcpath,
-		  (sizeof(LYValidPermitFile) - 1));
+	BStrCopy0(LYValidPermitFile, srcpath);
 
 	fprintf(fp0, "<Html><Head>\n<Title>%s</Title>\n</Head>\n<Body>\n",
 		PERMIT_OPTIONS_TITLE);
@@ -1462,7 +1468,7 @@ static int permit_location(char *destpath,
 	 * Make sure we have a valid set-permission file comparison string
 	 * loaded via a previous call with srcpath != NULL.  - KW
 	 */
-	if (LYValidPermitFile[0] == '\0') {
+	if (isBEmpty(LYValidPermitFile)) {
 	    if (LYCursesON)
 		HTAlert(INVALID_PERMIT_URL);
 	    else
@@ -1497,7 +1503,7 @@ static int permit_location(char *destpath,
 	 * Make sure that the file string is the one from the last displayed
 	 * File Permissions menu.  - KW
 	 */
-	if (strcmp(destpath, LYValidPermitFile)) {
+	if (strcmp(destpath, LYValidPermitFile->str)) {
 	    if (LYCursesON)
 		HTAlert(INVALID_PERMIT_URL);
 	    else
@@ -2195,34 +2201,31 @@ int dired_options(DocInfo *doc, char **newfile)
 }
 
 /*
- * Check DIRED filename.
+ * Check DIRED filename, return true on success
  */
-static char *get_filename(const char *prompt,
-			  char *buf,
-			  size_t bufsize)
+static int get_filename(const char *prompt,
+			bstring *buf)
 {
     char *cp;
 
     _statusline(prompt);
 
-    LYGetStr(buf, VISIBLE, bufsize, NORECALL);
-    if (strstr(buf, "../") != NULL) {
+    LYgetBString(&buf, VISIBLE, 0, NORECALL);
+    if (strstr(buf->str, "../") != NULL) {
 	HTAlert(gettext("Illegal filename; request ignored."));
-	return NULL;
-    }
-
-    if (no_dotfiles || !show_dotfiles) {
-	cp = LYLastPathSep(buf);	/* find last slash */
+	return FALSE;
+    } else if (no_dotfiles || !show_dotfiles) {
+	cp = LYLastPathSep(buf->str);	/* find last slash */
 	if (cp)
 	    cp += 1;
 	else
-	    cp = buf;
+	    cp = buf->str;
 	if (*cp == '.') {
 	    HTAlert(gettext("Illegal filename; request ignored."));
-	    return NULL;
+	    return FALSE;
 	}
     }
-    return buf;
+    return !isBEmpty(buf);
 }
 
 #ifdef OK_INSTALL

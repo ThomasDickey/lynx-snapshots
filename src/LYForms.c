@@ -1,4 +1,4 @@
-/* $LynxId: LYForms.c,v 1.95 2012/02/07 17:33:29 tom Exp $ */
+/* $LynxId: LYForms.c,v 1.96 2012/02/09 01:01:53 tom Exp $ */
 #include <HTUtils.h>
 #include <HTCJK.h>
 #include <HTTP.h>
@@ -250,7 +250,7 @@ int change_form_link_ex(int cur,
 	    LYSetHilite(cur, form->value);
 #ifdef TEXT_SUBMIT_CONFIRM_WANTED
 	    if (!immediate_submit && (c == '\r' || c == '\n') &&
-		!HTConfirmDefault(NO_SUBMIT_BUTTON_QUERY), YES) {
+		!HTConfirmDefault(NO_SUBMIT_BUTTON_QUERY, YES)) {
 		/* User was prompted and declined; if canceled with ^G
 		 * let mainloop stay on this field, otherwise move on to
 		 * the next field or link. - kw

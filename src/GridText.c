@@ -1,5 +1,5 @@
 /*
- * $LynxId: GridText.c,v 1.226 2012/02/07 21:11:50 tom Exp $
+ * $LynxId: GridText.c,v 1.229 2012/02/09 01:55:40 tom Exp $
  *
  *		Character grid hypertext object
  *		===============================
@@ -7653,8 +7653,8 @@ void HTAddSearchQuery(char *query)
 
 int do_www_search(DocInfo *doc)
 {
-    char searchstring[256];
-    char temp[256];
+    bstring *searchstring = NULL;
+    bstring *temp = NULL;
     char *cp;
     char *tmpaddress = NULL;
     int ch;
@@ -7662,6 +7662,7 @@ int do_www_search(DocInfo *doc)
     int QueryTotal;
     int QueryNum;
     BOOLEAN PreviousSearch = FALSE;
+    int code;
 
     /*
      * Load the default query buffer
@@ -7672,28 +7673,28 @@ int do_www_search(DocInfo *doc)
 	 * Use its query as the default.
 	 */
 	PreviousSearch = TRUE;
-	LYStrNCpy(searchstring, ++cp, sizeof(searchstring) - 1);
-	for (cp = searchstring; *cp; cp++)
+	BStrCopy0(searchstring, ++cp);
+	for (cp = searchstring->str; *cp; cp++)
 	    if (*cp == '+')
 		*cp = ' ';
-	HTUnEscape(searchstring);
-	strcpy(temp, searchstring);
+	HTUnEscape(searchstring->str);
+	BStrCopy(temp, searchstring);
 	/*
 	 * Make sure it's treated as the most recent query.  -FM
 	 */
-	HTAddSearchQuery(searchstring);
+	HTAddSearchQuery(searchstring->str);
     } else {
 	/*
 	 * New search; no default.
 	 */
-	searchstring[0] = '\0';
-	temp[0] = '\0';
+	BStrCopy0(searchstring, "");
+	BStrCopy0(temp, "");
     }
 
     /*
      * Prompt for a query string.
      */
-    if (searchstring[0] == '\0') {
+    if (isBEmpty(searchstring)) {
 	if (HTMainAnchor->isIndexPrompt)
 	    _statusline(HTMainAnchor->isIndexPrompt);
 	else
@@ -7704,10 +7705,13 @@ int do_www_search(DocInfo *doc)
     recall = (((PreviousSearch && QueryTotal >= 2) ||
 	       (!PreviousSearch && QueryTotal >= 1)) ? RECALL_URL : NORECALL);
     QueryNum = QueryTotal;
+
   get_query:
-    if ((ch = LYGetStr(searchstring, VISIBLE,
-		       sizeof(searchstring), recall)) < 0 ||
-	*searchstring == '\0' || ch == UPARROW || ch == DNARROW) {
+    if ((ch = LYgetBString(&searchstring, VISIBLE, 0, recall)) < 0 ||
+	isBEmpty(searchstring) ||
+	ch == UPARROW ||
+	ch == DNARROW) {
+
 	if (recall && ch == UPARROW) {
 	    if (PreviousSearch) {
 		/*
@@ -7728,11 +7732,12 @@ int do_www_search(DocInfo *doc)
 		QueryNum = 0;
 	    if ((cp = (char *) HTList_objectAt(search_queries,
 					       QueryNum)) != NULL) {
-		LYStrNCpy(searchstring, cp, sizeof(searchstring) - 1);
-		if (*temp && !strcmp(temp, searchstring)) {
+		BStrCopy0(searchstring, cp);
+		if (!isBEmpty(temp) &&
+		    !strcmp(temp->str, searchstring->str)) {
 		    _statusline(EDIT_CURRENT_QUERY);
-		} else if ((*temp && QueryTotal == 2) ||
-			   (!(*temp) && QueryTotal == 1)) {
+		} else if ((!isBEmpty(temp) && QueryTotal == 2) ||
+			   (isBEmpty(temp) && QueryTotal == 1)) {
 		    _statusline(EDIT_THE_PREV_QUERY);
 		} else {
 		    _statusline(EDIT_A_PREV_QUERY);
@@ -7759,11 +7764,12 @@ int do_www_search(DocInfo *doc)
 		QueryNum = QueryTotal - 1;
 	    if ((cp = (char *) HTList_objectAt(search_queries,
 					       QueryNum)) != NULL) {
-		LYStrNCpy(searchstring, cp, sizeof(searchstring) - 1);
-		if (*temp && !strcmp(temp, searchstring)) {
+		BStrCopy0(searchstring, cp);
+		if (!isBEmpty(temp) &&
+		    !strcmp(temp->str, searchstring->str)) {
 		    _statusline(EDIT_CURRENT_QUERY);
-		} else if ((*temp && QueryTotal == 2) ||
-			   (!(*temp) && QueryTotal == 1)) {
+		} else if ((!isBEmpty(temp) && QueryTotal == 2) ||
+			   (isBEmpty(temp) && QueryTotal == 1)) {
 		    _statusline(EDIT_THE_PREV_QUERY);
 		} else {
 		    _statusline(EDIT_A_PREV_QUERY);
@@ -7776,82 +7782,80 @@ int do_www_search(DocInfo *doc)
 	 * Search cancelled.
 	 */
 	HTInfoMsg(CANCELLED);
-	return (NULLFILE);
-    }
+	code = NULLFILE;
+    } else {
 
-    /*
-     * Strip leaders and trailers.  -FM
-     */
-    LYTrimLeading(searchstring);
-    if (!(*searchstring)) {
-	HTInfoMsg(CANCELLED);
-	return (NULLFILE);
-    }
-    LYTrimTrailing(searchstring);
+	LYTrimLeading(searchstring->str);
+	LYTrimTrailing(searchstring->str);
+	if (isBEmpty(searchstring)) {
+	    HTInfoMsg(CANCELLED);
+	    code = NULLFILE;
+	} else if (!LYforce_no_cache &&
+		   !strcmp(temp->str, searchstring->str)) {
+	    /*
+	     * Don't resubmit the same query unintentionally.
+	     */
+	    HTUserMsg(USE_C_R_TO_RESUB_CUR_QUERY);
+	    code = NULLFILE;
+	} else {
 
-    /*
-     * Don't resubmit the same query unintentionally.
-     */
-    if (!LYforce_no_cache && 0 == strcmp(temp, searchstring)) {
-	HTUserMsg(USE_C_R_TO_RESUB_CUR_QUERY);
-	return (NULLFILE);
-    }
+	    /*
+	     * Add searchstring to the query list,
+	     * or make it the most current.  -FM
+	     */
+	    HTAddSearchQuery(searchstring->str);
 
-    /*
-     * Add searchstring to the query list,
-     * or make it the most current.  -FM
-     */
-    HTAddSearchQuery(searchstring);
-
-    /*
-     * Show the URL with the new query.
-     */
-    if ((cp = strchr(doc->address, '?')) != NULL)
-	*cp = '\0';
-    StrAllocCopy(tmpaddress, doc->address);
-    StrAllocCat(tmpaddress, "?");
-    StrAllocCat(tmpaddress, searchstring);
-    user_message(WWW_WAIT_MESSAGE, tmpaddress);
+	    /*
+	     * Show the URL with the new query.
+	     */
+	    if ((cp = strchr(doc->address, '?')) != NULL)
+		*cp = '\0';
+	    StrAllocCopy(tmpaddress, doc->address);
+	    StrAllocCat(tmpaddress, "?");
+	    StrAllocCat(tmpaddress, searchstring->str);
+	    user_message(WWW_WAIT_MESSAGE, tmpaddress);
 #ifdef SYSLOG_REQUESTED_URLS
-    LYSyslog(tmpaddress);
+	    LYSyslog(tmpaddress);
 #endif
-    FREE(tmpaddress);
-    if (cp)
-	*cp = '?';
+	    FREE(tmpaddress);
+	    if (cp)
+		*cp = '?';
 
-    /*
-     * OK, now we do the search.
-     */
-    if (HTSearch(searchstring, HTMainAnchor)) {
-	/*
-	 * Memory leak fixed.
-	 * 05-28-94 Lynx 2-3-1 Garrett Arch Blythe
-	 */
-	auto char *cp_freeme = NULL;
+	    /*
+	     * OK, now we do the search.
+	     */
+	    if (HTSearch(searchstring->str, HTMainAnchor)) {
+		auto char *cp_freeme = NULL;
 
-	if (traversal)
-	    cp_freeme = stub_HTAnchor_address((HTAnchor *) HTMainAnchor);
-	else
-	    cp_freeme = HTAnchor_address((HTAnchor *) HTMainAnchor);
-	StrAllocCopy(doc->address, cp_freeme);
-	FREE(cp_freeme);
+		if (traversal)
+		    cp_freeme = stub_HTAnchor_address((HTAnchor *) HTMainAnchor);
+		else
+		    cp_freeme = HTAnchor_address((HTAnchor *) HTMainAnchor);
+		StrAllocCopy(doc->address, cp_freeme);
+		FREE(cp_freeme);
 
-	CTRACE((tfp, "\ndo_www_search: newfile: %s\n", doc->address));
+		CTRACE((tfp, "\ndo_www_search: newfile: %s\n", doc->address));
 
-	/*
-	 * Yah, the search succeeded.
-	 */
-	return (NORMAL);
+		/*
+		 * Yah, the search succeeded.
+		 */
+		code = NORMAL;
+	    } else {
+
+		/*
+		 * Either the search failed (Yuk), or we got redirection.
+		 * If it's redirection, use_this_url_instead is set, and
+		 * mainloop() will deal with it such that security features
+		 * and restrictions are checked before acting on the URL, or
+		 * rejecting it.  -FM
+		 */
+		code = NOT_FOUND;
+	    }
+	}
     }
-
-    /*
-     * Either the search failed (Yuk), or we got redirection.
-     * If it's redirection, use_this_url_instead is set, and
-     * mainloop() will deal with it such that security features
-     * and restrictions are checked before acting on the URL, or
-     * rejecting it.  -FM
-     */
-    return (NOT_FOUND);
+    BStrFree(searchstring);
+    BStrFree(temp);
+    return code;
 }
 
 static void write_offset(FILE *fp, HTLine *line)
@@ -12998,9 +13002,11 @@ static int finish_ExtEditForm(LinkInfo * form_link, TextAnchor *start_anchor,
     int match_tag = 0;
     int newlines = 0;
     int len, len0;
+    int display_size;
     int wanted_fieldlen_wrap = -1;	/* not yet asked; 0 means don't. */
     char *skip_at = NULL;
     int skip_num = 0, i;
+    size_t line_used = MAX_LINE;
 
     CTRACE((tfp, "GridText: entered HText_EditTextArea()\n"));
 
@@ -13013,14 +13019,15 @@ static int finish_ExtEditForm(LinkInfo * form_link, TextAnchor *start_anchor,
      * struct.  Add new lines to the TEXTAREA if needed.  (Always leave
      * the user with a blank line at the end of the TEXTAREA.)
      */
-    if ((line = typeMallocn(char, MAX_LINE)) == 0)
+    if ((line = typeMallocn(char, line_used)) == 0)
 	  outofmem(__FILE__, "HText_EditTextArea");
 
     assert(line != NULL);
 
     anchor_ptr = start_anchor;
-    if (anchor_ptr->input_field->size <= 4 ||
-	anchor_ptr->input_field->size >= MAX_LINE)
+    display_size = anchor_ptr->input_field->size;
+    if (display_size <= 4 ||
+	display_size >= MAX_LINE)
 	wanted_fieldlen_wrap = 0;
 
     len = 0;
@@ -13047,22 +13054,28 @@ static int finish_ExtEditForm(LinkInfo * form_link, TextAnchor *start_anchor,
 	else
 	    len = (int) strlen(lp);
 
-	if (wanted_fieldlen_wrap < 0 && !wrapalert &&
-	    len0 + len >= start_anchor->input_field->size &&
+	if (wanted_fieldlen_wrap < 0 &&
+	    !wrapalert &&
+	    len0 + len >= display_size &&
 	    (cp = strchr(lp, ' ')) != NULL &&
-	    (cp - lp) < start_anchor->input_field->size - 1) {
+	    (cp - lp) < display_size - 1) {
+
 	    LYFixCursesOn("ask for confirmation:");
 	    LYerase();		/* don't show previous state */
 	    if (HTConfirmDefault(gettext("Wrap lines to fit displayed area?"),
 				 NO)) {
-		wanted_fieldlen_wrap = start_anchor->input_field->size - 1;
+		wanted_fieldlen_wrap = display_size - 1;
 	    } else {
 		wanted_fieldlen_wrap = 0;
 	    }
 	}
-	if (wanted_fieldlen_wrap > 0 && len0 + len > wanted_fieldlen_wrap) {
+
+	if (wanted_fieldlen_wrap > 0 &&
+	    len0 + len > wanted_fieldlen_wrap) {
+
 	    for (i = wanted_fieldlen_wrap - len0;
 		 i + len0 >= wanted_fieldlen_wrap / 4; i--) {
+
 		if (isspace(UCH(lp[i]))) {
 		    len = i + 1;
 		    cp = lp + i;
@@ -13093,7 +13106,10 @@ static int finish_ExtEditForm(LinkInfo * form_link, TextAnchor *start_anchor,
 		}
 	    }
 	}
-	if (wanted_fieldlen_wrap > 0 && len0 + len > wanted_fieldlen_wrap) {
+
+	if (wanted_fieldlen_wrap > 0 &&
+	    (len0 + len) > wanted_fieldlen_wrap) {
+
 	    i = len - 1;
 	    while (len0 + i + 1 > wanted_fieldlen_wrap &&
 		   isspace(UCH(lp[i])))
@@ -13102,23 +13118,17 @@ static int finish_ExtEditForm(LinkInfo * form_link, TextAnchor *start_anchor,
 		len = wanted_fieldlen_wrap - len0;
 	}
 
-	if (len0 + len >= MAX_LINE) {
-	    if (!wrapalert) {
-		LYFixCursesOn("show alert:");
-		HTAlert(gettext("Very long lines have been wrapped!"));
-		wrapalert = TRUE;
-	    }
-	    /*
-	     * First try to find a space character for wrapping - kw
-	     */
-	    for (i = MAX_LINE - len0 - 1; i > 0; i--) {
-		if (isspace(UCH(lp[i]))) {
-		    len = i;
-		    break;
-		}
-	    }
-	    if (len0 + len >= MAX_LINE)
-		len = MAX_LINE - len0 - 1;
+	/*
+	 * Check if the new text will fit in the buffer.  HTML does not define
+	 * a "maxlength" attribute for TEXTAREA; its data can grow as needed.
+	 * Lynx will not adjust the display to reflect larger amounts of text;
+	 * it relies on the rows/cols attributes as well as the initial content
+	 * of the text area for the layout.
+	 */
+	if ((size_t) (len0 + len) >= line_used) {
+	    line_used = (size_t) (3 * (len0 + len)) / 2;
+	    if ((line = typeRealloc(char, line, line_used)) == 0)
+		  outofmem(__FILE__, "HText_EditTextArea");
 	}
 
 	strncat(line, lp, (size_t) len);
