@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYLocal.c,v 1.117 2012/02/08 20:32:47 tom Exp $
+ * $LynxId: LYLocal.c,v 1.118 2012/02/09 11:45:06 tom Exp $
  *
  *  Routines to manipulate the local filesystem.
  *  Written by: Rick Mallett, Carleton University
@@ -2568,7 +2568,7 @@ void reset_dired_menu(void)
 	    FREE(mp->link);
 	    FREE(mp->rest);
 	    FREE(mp->href);
-	    mp_next = mp_next;
+	    mp_next = mp->next;
 	    FREE(mp);
 	}
 	menu_head = NULL;

@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYUtils.c,v 1.215 2012/02/08 22:31:58 tom Exp $
+ * $LynxId: LYUtils.c,v 1.218 2012/02/09 18:56:48 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTCP.h>
@@ -4235,21 +4235,13 @@ void LYConvertToURL(char **AllocatedString,
 	else
 #endif /* USE_DOS_DRIVES */
 	if (LYIsTilde(*old_string)) {
-	    /*
-	     * On Unix, convert '~' to Home_Dir().
-	     */
-	    StrAllocCat(*AllocatedString, wwwName(Home_Dir()));
-	    if ((cp = strchr(old_string, '/')) != NULL) {
-		/*
-		 * Append rest of path, if present, skipping "user" if "~user"
-		 * was entered, simplifying, and eliminating any residual
-		 * relative elements.  - FM
-		 */
-		StrAllocCopy(temp, cp);
-		LYTrimRelFromAbsPath(temp);
-		StrAllocCat(*AllocatedString, temp);
-		FREE(temp);
-	    }
+	    char *his_home = NULL;
+
+	    StrAllocCopy(his_home, old_string);
+	    LYTildeExpand(&his_home, FALSE);
+	    StrAllocCat(*AllocatedString, his_home);
+	    FREE(his_home);
+
 	    CTRACE((tfp, "Converted '%s' to '%s'\n",
 		    old_string, *AllocatedString));
 	} else {
@@ -5499,6 +5491,29 @@ char *LYTildeExpand(char **pathname,
 	    FREE(second);
 	} else if (temp[1] == '\0') {
 	    StrAllocCopy(*pathname, wwwName(Home_Dir()));
+#ifndef NOUSERS
+	} else {
+	    char *save;
+	    char saved = '\0';
+	    struct passwd *pw;
+
+	    for (save = temp; *save != '\0'; ++save) {
+		if (LYIsPathSep(*save)) {
+		    saved = *save;
+		    *save = '\0';
+		    break;
+		}
+	    }
+	    pw = getpwnam(temp + 1);
+	    *save = saved;
+	    if (pw != 0 && non_empty(pw->pw_dir)) {
+		temp = NULL;
+		StrAllocCopy(temp, save);
+		StrAllocCopy(*pathname, pw->pw_dir);
+		StrAllocCat(*pathname, temp);
+		FREE(temp);
+	    }
+#endif
 	}
 	CTRACE((tfp, "expanded path %s\n", *pathname));
     }
@@ -6631,67 +6646,58 @@ const char *wwwName(const char *pathname)
  * expand it.  Expand home-directory expressions in the given string.  Only
  * allow pipes if the user can spawn shell commands.
  */
-BOOLEAN LYValidateFilename(bstring *result,
-			   bstring *given)
+BOOLEAN LYValidateFilename(bstring **result,
+			   bstring **given)
 {
     BOOLEAN code = TRUE;
     char *cp = NULL;
-    const char *cp2 = NULL;
 
     /*
      * Cancel if the user entered "/dev/null" on Unix, or an "nl:" path on VMS. 
      * - FM
      */
-    if (LYIsNullDevice(given->str)) {
+    if (LYIsNullDevice((*given)->str)) {
 	/* just ignore it */
 	code = FALSE;
 #ifdef HAVE_POPEN
-    } else if (LYIsPipeCommand(given->str)) {
+    } else if (LYIsPipeCommand((*given)->str)) {
 	if (no_shell) {
 	    HTUserMsg(SPAWNING_DISABLED);
 	    code = FALSE;
 	} else {
-	    BStrCopy(result, given);
+	    BStrCopy(*result, (*given));
 	}
 #endif
     } else {
-	if ((cp = FindLeadingTilde(given->str, TRUE)) != 0
-	    && (cp2 = wwwName(Home_Dir())) != 0) {
-	    if (LYIsTilde(cp[0]) && LYIsPathSep(cp[1])) {
-		char *cp1 = NULL;
+	if ((cp = FindLeadingTilde((*given)->str, TRUE)) != 0) {
+	    char *cp1 = NULL;
 
-		*cp++ = '\0';
-		StrAllocCopy(cp1, cp);
-
-		BStrCopy(result, given);
-		LYTrimPathSep(result->str);
-		BStrCat0(result, cp2);
-		BStrCat0(result, cp1);
-		BStrCopy(given, result);
-
-		FREE(cp1);
-	    }
+	    StrAllocCopy(cp1, (*given)->str);
+	    LYTildeExpand(&cp1, TRUE);
+	    BStrCopy0(*result, cp1);
+	    BStrCopy0(*given, cp1);
+	    FREE(cp1);
 	}
 #ifdef VMS
-	if (strchr(given->str, '/') != NULL) {
-	    BStrCopy0(result, HTVMS_name("", given->str));
-	    BStrCopy(given, result);
+	if (strchr((*given)->str, '/') != NULL) {
+	    BStrCopy0(*result, HTVMS_name("", (*given)->str));
+	    BStrCopy(*given, *result);
 	}
-	if (given->str[0] != '/'
-	    && strchr(given->str, ':') == NULL) {
-	    BStrCopy0(result, "sys$disk:");
-	    if (strchr(given->str, ']') == NULL)
-		BStrCat0(result, "[]");
-	    BStrCat(result, given);
+	if ((*given)->str[0] != '/'
+	    && strchr((*given)->str, ':') == NULL) {
+	    BStrCopy0(*result, "sys$disk:");
+	    if (strchr((*given)->str, ']') == NULL)
+		BStrCat0(*result, "[]");
+	    BStrCat(*result, (*given));
 	} else {
-	    BStrCopy(result, given);
+	    BStrCopy(*result, (*given));
 	}
 #else
 
 #ifndef __EMX__
-	if (!LYisAbsPath(given->str)) {
+	if (!LYisAbsPath((*given)->str)) {
 #if defined(__DJGPP__) || defined(_WINDOWS)
-	    if (strchr(result->str, ':') != NULL)
+	    if (strchr(*result->str, ':') != NULL)
 		cp = NULL;
 	    else
 #endif /*  __DJGPP__ || _WINDOWS */
@@ -6710,14 +6716,14 @@ BOOLEAN LYValidateFilename(bstring *result,
 
 	if (cp) {
 	    LYTrimPathSep(cp);
-	    BStrCopy0(result, cp);
-	    BStrCat0(result, "/");
+	    BStrCopy0(*result, cp);
+	    BStrCat0(*result, "/");
 	} else {
-	    BStrCopy0(result, "");
+	    BStrCopy0(*result, "");
 	}
 	if (code) {
-	    cp = HTSYS_name(given->str);
-	    BStrCat0(result, cp);
+	    cp = HTSYS_name((*given)->str);
+	    BStrCat0(*result, cp);
 	}
 #endif /* VMS */
     }
@@ -6767,6 +6773,8 @@ int LYValidateOutput(char *filename)
 	} else if (c == NO) {
 	    return 'N';
 	}
+    } else if (!LYCanWriteFile(filename)) {
+	return 'N';
     }
     return 'Y';
 }

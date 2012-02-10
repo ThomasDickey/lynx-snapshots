@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYUpload.c,v 1.35 2010/09/25 11:34:51 tom Exp $
+ * $LynxId: LYUpload.c,v 1.36 2012/02/09 15:09:38 tom Exp $
  *
  *  Routines to upload files to the local filesystem.
  *  Created by: Rick Mallett, Carleton University
@@ -126,10 +126,6 @@ int LYUpload(char *line)
 	 * See if we can write to it.
 	 */
 	CTRACE((tfp, "LYUpload: filename is %s", filename));
-
-	if (!LYCanWriteFile(filename)) {
-	    goto retry;
-	}
 
 	HTAddParam(&the_upload, upload_command->command, 1, filename);
 	HTEndParam(&the_upload, upload_command->command, 1);

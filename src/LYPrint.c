@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYPrint.c,v 1.93 2012/02/08 23:40:43 tom Exp $
+ * $LynxId: LYPrint.c,v 1.95 2012/02/09 18:55:26 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTAccess.h>
@@ -328,14 +328,14 @@ static void send_file_to_file(DocInfo *newdoc,
 	break;
     }
 
-    if (!LYValidateFilename(buffer, filename)) {
+    if (!LYValidateFilename(&buffer, &filename)) {
 	CancelPrint(SAVE_REQUEST_CANCELLED);
     }
 
     /*
      * See if it already exists.
      */
-    switch (LYValidateOutput(buffer->str)) {
+    switch (c = LYValidateOutput(buffer->str)) {
     case 'Y':
 	break;
     case 'N':
@@ -1411,7 +1411,7 @@ char *GetFileName(void)
      * Expand tilde's, make filename absolute, etc.
      */
     BStrCopy0(tbuf, "");
-    if (!LYValidateFilename(tbuf, fbuf))
+    if (!LYValidateFilename(&tbuf, &fbuf))
 	goto cleanup;
 
     /*

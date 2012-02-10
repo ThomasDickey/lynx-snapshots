@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYJump.c,v 1.42 2012/02/09 01:56:47 tom Exp $
+ * $LynxId: LYJump.c,v 1.43 2012/02/09 13:02:30 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTAlert.h>
@@ -449,7 +449,7 @@ static unsigned LYRead_Jumpfile(struct JumpTable *jtp)
 	cp++;
     }
 
-    jtp->table = (JumpDatum *) malloc(nel * sizeof(JumpDatum));
+    jtp->table = (JumpDatum *) malloc((nel + 1) * sizeof(JumpDatum));
     if (jtp->table == NULL) {
 	HTAlert(OUTOF_MEM_FOR_JUMP_TABLE);
 	FREE(mp);

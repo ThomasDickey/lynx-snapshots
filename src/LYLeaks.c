@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYLeaks.c,v 1.34 2011/06/06 09:47:22 tom Exp $
+ * $LynxId: LYLeaks.c,v 1.36 2012/02/10 00:33:39 tom Exp $
  *
  *	Copyright (c) 1994, University of Kansas, All Rights Reserved
  *	(this file was rewritten twice - 1998/1999 and 2003/2004)
@@ -10,6 +10,8 @@
  *	05-26-94	created Lynx 2-3-1 Garrett Arch Blythe
  *	10-30-97	modified to handle StrAllocCopy() and
  *			  StrAllocCat(). - KW & FM
+ *	07-23-07	free leaks of THIS module too -TD
+ *	02-09-12	add bstring functions -TD
  */
 
 /*
@@ -57,8 +59,8 @@ static void CountFrees(size_t size)
 }
 
 #else
-#define CountMallocs() ++count_mallocs
-#define CountFrees()		/* nothing */
+#define CountMallocs(size) ++count_mallocs
+#define CountFrees(size)	/* nothing */
 #endif
 
 /*
@@ -453,6 +455,7 @@ AllocationList *LYLeak_mark_malloced(void *vp_malloced,
 		     * Add the new item to the allocation list.
 		     */
 		    AddToList(ALp_new);
+		    CountMallocs(st_bytes);
 		}
 	    }
 	}
@@ -489,7 +492,7 @@ void *LYLeakCalloc(size_t st_number, size_t st_bytes, const char *cp_File,
 	 * Allocate the requested memory.
 	 */
 	vp_calloc = (void *) calloc(st_number, st_bytes);
-	CountMallocs(st_bytes);
+	CountMallocs(st_bytes * st_number);
 
 	/*
 	 * Only if the allocation was a success do we track information.
@@ -602,8 +605,8 @@ void *LYLeakRealloc(void *vp_Alloced,
 	 * Perform the resize.  If not NULL, record the information.
 	 */
 	vp_realloc = (void *) realloc(vp_Alloced, st_newBytes);
-	CountMallocs(st_newBytes);
 	CountFrees(ALp_renew->st_Bytes);
+	CountMallocs(st_newBytes);
 
 	if (vp_realloc != NULL) {
 	    ALp_renew->st_Sequence = count_mallocs;
@@ -741,7 +744,7 @@ void LYLeakFree(void *vp_Alloced,
 /*
  *  Allocates a new copy of a string, and returns it.
  *  Tracks allocations by using other LYLeakFoo functions.
- *  Equivalent to HTSACopy in HTUtils.c - KW
+ *  Equivalent to HTSACopy in HTString.c - KW
  */
 char *LYLeakSACopy(char **dest,
 		   const char *src,
@@ -804,6 +807,159 @@ char *LYLeakSACat(char **dest,
     return *dest;
 }
 
+/******************************************************************************/
+
+/*
+ * Equivalents for bstring functions in HTString.c -TD
+ */
+/* same as HTSABAlloc */
+void LYLeakSABAlloc(bstring **dest,
+		    int len,
+		    const char *cp_File,
+		    const short ssi_Line)
+{
+    if (*dest == 0) {
+	*dest = LYLeakCalloc(1, sizeof(bstring), cp_File, ssi_Line);
+    }
+
+    if ((*dest)->len != len) {
+	(*dest)->str = (char *) LYLeakRealloc((*dest)->str,
+					      (size_t) len,
+					      cp_File,
+					      ssi_Line);
+	if ((*dest)->str == NULL)
+	    outofmem(__FILE__, "LYLeakSABalloc");
+
+	(*dest)->len = len;
+    }
+}
+
+/* same as HTSABCopy */
+void LYLeakSABCopy(bstring **dest,
+		   const char *src,
+		   int len,
+		   const char *cp_File,
+		   const short ssi_Line)
+{
+    bstring *t;
+    unsigned need = (unsigned) (len + 1);
+
+    CTRACE2(TRACE_BSTRING,
+	    (tfp, "HTSABCopy(%p, %p, %d)\n",
+	     (void *) dest, (const void *) src, len));
+    LYLeakSABFree(dest, cp_File, ssi_Line);
+    if (src) {
+	if (TRACE_BSTRING) {
+	    CTRACE((tfp, "===    %4d:", len));
+	    trace_bstring2(src, len);
+	    CTRACE((tfp, "\n"));
+	}
+	if ((t = (bstring *) LYLeakMalloc(sizeof(bstring), cp_File, ssi_Line))
+	    == NULL)
+	      outofmem(__FILE__, "HTSABCopy");
+
+	assert(t != NULL);
+
+	if ((t->str = (char *) LYLeakMalloc(need, cp_File, ssi_Line)) == NULL)
+	    outofmem(__FILE__, "HTSABCopy");
+
+	assert(t->str != NULL);
+
+	MemCpy(t->str, src, len);
+	t->len = len;
+	t->str[t->len] = '\0';
+	*dest = t;
+    }
+    if (TRACE_BSTRING) {
+	CTRACE((tfp, "=>     %4d:", BStrLen(*dest)));
+	trace_bstring(*dest);
+	CTRACE((tfp, "\n"));
+    }
+}
+
+/* same as HTSABCopy0 */
+void LYLeakSABCopy0(bstring **dest,
+		    const char *src,
+		    const char *cp_File,
+		    const short ssi_Line)
+{
+    LYLeakSABCopy(dest, src, (int) strlen(src), cp_File, ssi_Line);
+}
+
+/* same as HTSABCat */
+void LYLeakSABCat(bstring **dest,
+		  const char *src,
+		  int len,
+		  const char *cp_File,
+		  const short ssi_Line)
+{
+    bstring *t = *dest;
+
+    CTRACE2(TRACE_BSTRING,
+	    (tfp, "HTSABCat(%p, %p, %d)\n",
+	     (void *) dest, (const void *) src, len));
+    if (src) {
+	unsigned need = (unsigned) (len + 1);
+
+	if (TRACE_BSTRING) {
+	    CTRACE((tfp, "===    %4d:", len));
+	    trace_bstring2(src, len);
+	    CTRACE((tfp, "\n"));
+	}
+	if (t) {
+	    unsigned length = (unsigned) t->len + need;
+
+	    t->str = (char *) LYLeakRealloc(t->str, length, cp_File, ssi_Line);
+	} else {
+	    if ((t = (bstring *) LYLeakCalloc(1, sizeof(bstring), cp_File,
+		ssi_Line)) == NULL)
+		  outofmem(__FILE__, "HTSACat");
+
+	    assert(t != NULL);
+
+	    t->str = (char *) LYLeakMalloc(need, cp_File, ssi_Line);
+	}
+	if (t->str == NULL)
+	    outofmem(__FILE__, "HTSACat");
+
+	assert(t->str != NULL);
+
+	MemCpy(t->str + t->len, src, len);
+	t->len += len;
+	t->str[t->len] = '\0';
+	*dest = t;
+    }
+    if (TRACE_BSTRING) {
+	CTRACE((tfp, "=>     %4d:", BStrLen(*dest)));
+	trace_bstring(*dest);
+	CTRACE((tfp, "\n"));
+    }
+}
+
+/* same as HTSABCat0 */
+void LYLeakSABCat0(bstring **dest,
+		   const char *src,
+		   const char *cp_File,
+		   const short ssi_Line)
+{
+    LYLeakSABCat(dest, src, (int) strlen(src), cp_File, ssi_Line);
+}
+
+/* same as HTSABFree */
+void LYLeakSABFree(bstring **ptr,
+		   const char *cp_File,
+		   const short ssi_Line)
+{
+    if (*ptr != NULL) {
+	if ((*ptr)->str)
+	    LYLeakFree((*ptr)->str, cp_File, ssi_Line);
+	LYLeakFree(*ptr, cp_File, ssi_Line);
+	*ptr = NULL;
+    }
+}
+
+/******************************************************************************/
+
 #if defined(LY_FIND_LEAKS) && defined(LY_FIND_LEAKS_EXTENDED)
 
 const char *leak_cp_File_hack = __FILE__;
@@ -833,7 +989,7 @@ short leak_ssi_Line_hack = __LINE__;
  *  Remarks/Portability/Dependencies/Restrictions:
  *		The price for generality is severe inefficiency: several
  *		list lookups are done to be on the safe side.
- *		We don't get he real allocation size, only a minimum based
+ *		We don't get the real allocation size, only a minimum based
  *		on the string length of the result.  So the amount of memory
  *		leakage may get underestimated.
  *		If *dest is an invalid pointer value on entry (i.e. was not

@@ -1,4 +1,4 @@
-/* $LynxId: LYDownload.c,v 1.64 2012/02/08 22:23:59 tom Exp $ */
+/* $LynxId: LYDownload.c,v 1.66 2012/02/09 18:55:26 tom Exp $ */
 #include <HTUtils.h>
 #include <HTParse.h>
 #include <HTList.h>
@@ -218,7 +218,7 @@ void LYDownload(char *line)
 	}
 
 	BStrCopy(command, buffer);
-	if (!LYValidateFilename(buffer, command))
+	if (!LYValidateFilename(&buffer, &command))
 	    goto cancelled;
 #ifdef HAVE_POPEN
 	else if (LYIsPipeCommand(buffer->str)) {
@@ -251,11 +251,6 @@ void LYDownload(char *line)
 	 */
 	CTRACE((tfp, "LYDownload: filename is %s\n", buffer->str));
 
-	if (!LYCanWriteFile(buffer->str)) {
-	    FirstRecall = TRUE;
-	    FnameNum = FnameTotal;
-	    goto retry;
-	}
 	SecondS = TRUE;
 
 	HTInfoMsg(SAVING);

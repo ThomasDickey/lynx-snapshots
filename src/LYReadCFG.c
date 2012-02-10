@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYReadCFG.c,v 1.166 2011/06/12 00:30:30 tom Exp $
+ * $LynxId: LYReadCFG.c,v 1.167 2012/02/10 01:10:22 tom Exp $
  */
 #ifndef NO_RULES
 #include <HTRules.h>
@@ -2004,8 +2004,11 @@ void LYSetConfigValue(const char *name,
 #endif
 
     case CONF_PRG:
-	if (StrAllocCopy(temp_value, value))
+	if (isEmpty(value)) {
+	    HTSetProgramPath((ProgramPaths) (q->def_value), NULL);
+	} else if (StrAllocCopy(temp_value, value)) {
 	    HTSetProgramPath((ProgramPaths) (q->def_value), temp_value);
+	}
 	break;
 
     default:
@@ -2316,7 +2319,7 @@ void read_cfg(const char *cfg_filename,
 	      int nesting_level,
 	      FILE *fp0)
 {
-    HTInitProgramPaths();
+    HTInitProgramPaths(TRUE);
     do_read_cfg(cfg_filename, parent_filename, nesting_level, fp0, NULL);
 }
 

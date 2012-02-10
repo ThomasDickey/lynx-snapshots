@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTCP.c,v 1.106 2010/11/07 21:20:58 tom Exp $
+ * $LynxId: HTTCP.c,v 1.107 2012/02/09 12:36:45 tom Exp $
  *
  *			Generic Communication Code		HTTCP.c
  *			==========================
@@ -450,7 +450,7 @@ static size_t fill_rehostent(char *rehostent,
 			     size_t rehostentsize,
 			     const LYNX_HOSTENT *phost)
 {
-    AlignedHOSTENT *data = (AlignedHOSTENT *) rehostent;
+    AlignedHOSTENT *data = (AlignedHOSTENT *) (void *) rehostent;
     int num_addrs = 0;
     int num_aliases = 0;
     char **pcnt;
@@ -513,7 +513,7 @@ static size_t fill_rehostent(char *rehostent,
 
     data->h.h_addrtype = phost->h_addrtype;
     data->h.h_length = phost->h_length;
-    p_next_charptr = (char **) (rehostent + curlen);
+    p_next_charptr = (char **) (void *) (rehostent + curlen);
     p_next_char = rehostent + curlen;
     if (phost->h_addr_list)
 	p_next_char += (size_t) (num_addrs + 1) * sizeof(phost->h_addr_list[0]);
@@ -706,7 +706,7 @@ LYNX_HOSTENT *LYGetHostByName(char *str)
      *   in the child's, otherwise the internal pointers built by the child's
      *   call to fill_rehostent would be invalid when seen by the parent).  -kw
      */
-    char *rehostent = (char *) &aligned_full_rehostent;
+    void *rehostent = (void *) &aligned_full_rehostent;
 
     /* for transfer of status from child to parent: */
     struct _statuses {

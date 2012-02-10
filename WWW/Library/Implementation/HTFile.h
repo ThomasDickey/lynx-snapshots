@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFile.h,v 1.32 2010/09/24 00:32:16 tom Exp $
+ * $LynxId: HTFile.h,v 1.33 2012/02/10 00:59:15 tom Exp $
  *							File access in libwww
  *				FILE ACCESS
  *
@@ -347,7 +347,7 @@ extern "C" {
 /*
  * Reset the list of known program paths to the ones that are compiled-in
  */
-    extern void HTInitProgramPaths(void);
+    extern void HTInitProgramPaths(BOOL init);
 
 /*
  *  The Protocols

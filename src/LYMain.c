@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMain.c,v 1.232 2011/06/06 00:01:44 tom Exp $
+ * $LynxId: LYMain.c,v 1.236 2012/02/10 01:19:45 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTP.h>
@@ -810,6 +810,7 @@ static void free_lynx_globals(void)
 #endif
     FREE(startrealm);
     FREE(personal_mail_address);
+    FREE(personal_mail_name);
     FREE(anonftp_password);
     FREE(URLDomainPrefixes);
     FREE(URLDomainSuffixes);
@@ -818,6 +819,7 @@ static void free_lynx_globals(void)
     FREE(LYTransferName);
     FREE(LYTraceLogPath);
     FREE(lynx_cfg_file);
+    FREE(SSL_cert_file);
 #if defined(USE_COLOR_STYLE)
     FREE(lynx_lss_file2);
     FREE(lynx_lss_file);
@@ -827,7 +829,7 @@ static void free_lynx_globals(void)
     LYFreeHilites(0, nlinks);
     nlinks = 0;
     LYFreeStringList(LYcommandList());
-    HTInitProgramPaths();
+    HTInitProgramPaths(FALSE);
 #if EXTENDED_STARTFILE_RECALL
     FREE(nonoption);
 #endif
@@ -1008,6 +1010,20 @@ int main(int argc,
     setuid(getuid());
 #endif
 
+#ifdef LY_FIND_LEAKS
+    /*
+     * Register the final function to be executed when being exited.  Will
+     * display memory leaks if the -find-leaks option is used.  This should
+     * be the first call to atexit() for leak-checking, which ensures that 
+     * all of the other functions will be invoked before LYLeaks().
+     */
+    atexit(LYLeaks);
+    /*
+     * Register the function which will free our allocated globals.
+     */
+    atexit(free_lynx_globals);
+#endif /* LY_FIND_LEAKS */
+
 #ifdef    NOT_ASCII
     FixCharacters();
 #endif /* NOT_ASCII */
@@ -1130,18 +1146,6 @@ int main(int argc,
 	parse_arg(&argv[i], 1, &i);
     }
     LYOpenTraceLog();
-
-#ifdef LY_FIND_LEAKS
-    /*
-     * Register the final function to be executed when being exited.  Will
-     * display memory leaks if the -find-leaks option is used.
-     */
-    atexit(LYLeaks);
-    /*
-     * Register the function which will free our allocated globals.
-     */
-    atexit(free_lynx_globals);
-#endif /* LY_FIND_LEAKS */
 
     SetLocale();
 

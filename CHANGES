@@ -1,9 +1,25 @@
--- $LynxId: CHANGES,v 1.573 2012/02/09 01:34:11 tom Exp $
+-- $LynxId: CHANGES,v 1.580 2012/02/10 01:52:10 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2012-02-08 (2.8.8dev.10)
+2012-02-09 (2.8.8dev.10)
+* use ASCII apostrophe for 7-bit approximation to U+02bd as well -TD
+* use ASCII apostrophe 0x27 for 7-bit approximation to Unicode apostrophe
+  U+02bc (suggested by Ralph Babel)
+* update LYLeaks.c / LYLeaks.h to include the bstring allocation, copy and free
+  functions -TD
+* several fixes for the -find-leaks option, e.g., include LYLeaks.h in a few
+  modules, modify the StrAllocVsprintf function to update the bookkeeping,
+  etc -TD
+* move call to LYCanWriteFile into LYValidateOutput, to make prompts for
+  download, print and upload more alike -TD
+* correct an old bug in send_file_to_file(), used when printing a page to a
+  file, which prevented its check for appending to an existing file -TD
+* modify LYValidateFilename to use LYTildeExpand -TD
+* modify LYConvertToURL to use LYTildeExpand for Unix, and further modify
+  LYTildeExpand to lookup given user's home directory, thereby making commands
+  such as "g ~root/tmp" work as expected -TD
 * replaced most LYgetStr calls with LYgetBString, except for LYMail.c and
   LYNews.c since those do use LYgetStr's limits as it was designed.  Other
   calls generally did not need those limits -TD
