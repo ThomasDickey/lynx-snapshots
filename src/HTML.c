@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTML.c,v 1.153 2012/02/05 22:23:51 tom Exp $
+ * $LynxId: HTML.c,v 1.154 2012/02/10 01:26:31 tom Exp $
  *
  *		Structured stream to Rich hypertext converter
  *		============================================
@@ -4780,8 +4780,6 @@ static int HTML_start_element(HTStructured * me, int element_number,
 		 * Use ImageSrc if no other alt or value is supplied. --LE
 		 */
 		I.value = ImageSrc;
-	    } else if (I.value == 0) {
-		StrAllocCopy(I.value, "");
 	    }
 	    if (present && present[HTML_INPUT_READONLY])
 		I.readonly = YES;

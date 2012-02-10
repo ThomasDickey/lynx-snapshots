@@ -1,7 +1,9 @@
 %{
 
+#include <LYLeaks.h>
+
 /*
- *  $LynxId: parsdate.y,v 1.18 2011/05/24 08:23:53 tom Exp $
+ *  $LynxId: parsdate.y,v 1.19 2012/02/09 20:05:26 tom Exp $
  *
  *  This module is adapted and extended from tin, to use for LYmktime().
  *

@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTString.c,v 1.67 2012/02/08 00:34:44 tom Exp $
+ * $LynxId: HTString.c,v 1.69 2012/02/09 22:02:21 tom Exp $
  *
  *	Case-independent string comparison		HTString.c
  *
@@ -359,7 +359,7 @@ char *HTSACopy_extra(char **dest,
 	EXTRA_TYPE size = 0;
 
 	if (*dest != 0) {
-	    size = *(EXTRA_TYPE *) ((*dest) - EXTRA_SIZE);
+	    size = *(EXTRA_TYPE *) (void *) ((*dest) - EXTRA_SIZE);
 	}
 	if ((*dest == 0) || (size < srcsize)) {
 	    FREE_extra(*dest);
@@ -368,7 +368,7 @@ char *HTSACopy_extra(char **dest,
 	    if (*dest == NULL)
 		outofmem(__FILE__, "HTSACopy_extra");
 	    assert(*dest != NULL);
-	    *(EXTRA_TYPE *) (*dest) = size;
+	    *(EXTRA_TYPE *) (void *) (*dest) = size;
 	    *dest += EXTRA_SIZE;
 	}
 	MemCpy(*dest, src, srcsize);
@@ -649,9 +649,8 @@ PUBLIC_IF_FIND_LEAKS char *StrAllocVsprintf(char **pstr,
 	    result = HTAlloc(pstr ? *pstr : 0, new_len);
 	    if (result != 0) {
 		strcpy(result + dst_len, temp);
-		mark_malloced(temp, new_len);
 	    }
-	    free(temp);
+	    (free) (temp);
 	} else {
 	    result = temp;
 	    mark_malloced(temp, strlen(temp));
@@ -1198,6 +1197,7 @@ void HTSABAlloc(bstring **dest, int len)
 
     if ((*dest)->len != len) {
 	(*dest)->str = typeRealloc(char, (*dest)->str, len);
+
 	(*dest)->len = len;
     }
 }

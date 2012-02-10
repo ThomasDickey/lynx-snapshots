@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYSearch.c,v 1.29 2012/02/08 15:02:45 tom Exp $
+ * $LynxId: LYSearch.c,v 1.31 2012/02/09 19:02:53 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTAlert.h>
@@ -153,7 +153,7 @@ static int check_prev_target_in_links(int *cur,
  * insensitive depending on the 'LYcase_sensitive' global variable
  */
 BOOL textsearch(DocInfo *cur_doc,
-		bstring *prev_target,
+		bstring **prev_target,
 		int direction)
 {
     int offset;
@@ -179,14 +179,17 @@ BOOL textsearch(DocInfo *cur_doc,
     recall = ((QueryTotal >= 1) ? RECALL_URL : NORECALL);
     QueryNum = QueryTotal;
 
-    if (direction != 0)
+    if (direction != 0) {
 	/*
 	 * LYK_NEXT or LYK_PREV was pressed, so copy the buffer into
 	 * prev_target.
 	 */
-	BStrCopy(prev_target, my_prev_target);
+	BStrCopy(*prev_target, my_prev_target);
+    } else if (*prev_target == 0) {
+	BStrCopy0(*prev_target, "");
+    }
 
-    if (strlen(prev_target->str) == 0) {
+    if (strlen((*prev_target)->str) == 0) {
 	/*
 	 * This is a new WHEREIS search ('/'), or LYK_NEXT was pressed but
 	 * there was no previous search, so we need to get a search string from
@@ -194,20 +197,20 @@ BOOL textsearch(DocInfo *cur_doc,
 	 */
 	_statusline(ENTER_WHEREIS_QUERY);
 
-	ch = LYgetBString(&prev_target, VISIBLE, 0, recall);
+	ch = LYgetBString(prev_target, VISIBLE, 0, recall);
 	if (ch < 0) {
 	    /*
 	     * User cancelled the search via ^G.  Restore prev_target and
 	     * return.  - FM
 	     */
-	    BStrCopy(prev_target, my_prev_target);
+	    BStrCopy(*prev_target, my_prev_target);
 	    HTInfoMsg(CANCELLED);
 	    return (FALSE);
 	}
     }
 
   check_recall:
-    if (strlen(prev_target->str) == 0 &&
+    if (strlen((*prev_target)->str) == 0 &&
 	!(recall && (ch == UPARROW || ch == DNARROW))) {
 	/*
 	 * No entry.  Simply return, retaining the current buffer.  Because
@@ -249,9 +252,9 @@ BOOL textsearch(DocInfo *cur_doc,
 	    QueryNum = 0;
 	if ((cp = (char *) HTList_objectAt(search_queries,
 					   QueryNum)) != NULL) {
-	    BStrCopy0(prev_target, cp);
+	    BStrCopy0(*prev_target, cp);
 	    if (!isBEmpty(my_prev_target) &&
-		!strcmp(my_prev_target->str, prev_target->str)) {
+		!strcmp(my_prev_target->str, (*prev_target)->str)) {
 		_statusline(EDIT_CURRENT_QUERY);
 	    } else if ((!isBEmpty(my_prev_target) && QueryTotal == 2) ||
 		       (isBEmpty(my_prev_target) && QueryTotal == 1)) {
@@ -259,13 +262,13 @@ BOOL textsearch(DocInfo *cur_doc,
 	    } else {
 		_statusline(EDIT_A_PREV_QUERY);
 	    }
-	    ch = LYgetBString(&prev_target, VISIBLE, 0, recall);
+	    ch = LYgetBString(prev_target, VISIBLE, 0, recall);
 	    if (ch < 0) {
 		/*
 		 * User canceled the search via ^G.  Restore prev_target and
 		 * return.  - FM
 		 */
-		BStrCopy(prev_target, my_prev_target);
+		BStrCopy(*prev_target, my_prev_target);
 		HTInfoMsg(CANCELLED);
 		return (FALSE);
 	    }
@@ -301,9 +304,9 @@ BOOL textsearch(DocInfo *cur_doc,
 	    QueryNum = QueryTotal - 1;
 	if ((cp = (char *) HTList_objectAt(search_queries,
 					   QueryNum)) != NULL) {
-	    BStrCopy0(prev_target, cp);
+	    BStrCopy0(*prev_target, cp);
 	    if (!isBEmpty(my_prev_target) &&
-		!strcmp(my_prev_target->str, prev_target->str)) {
+		!strcmp(my_prev_target->str, (*prev_target)->str)) {
 		_statusline(EDIT_CURRENT_QUERY);
 	    } else if ((!isBEmpty(my_prev_target) && QueryTotal == 2) ||
 		       (isBEmpty(my_prev_target) && QueryTotal == 1)) {
@@ -311,13 +314,13 @@ BOOL textsearch(DocInfo *cur_doc,
 	    } else {
 		_statusline(EDIT_A_PREV_QUERY);
 	    }
-	    ch = LYgetBString(&prev_target, VISIBLE, 0, recall);
+	    ch = LYgetBString(prev_target, VISIBLE, 0, recall);
 	    if (ch < 0) {
 		/*
 		 * User cancelled the search via ^G.  Restore prev_target and
 		 * return.  - FM
 		 */
-		BStrCopy(prev_target, my_prev_target);
+		BStrCopy(*prev_target, my_prev_target);
 		HTInfoMsg(CANCELLED);
 		return (FALSE);
 	    }
@@ -327,16 +330,16 @@ BOOL textsearch(DocInfo *cur_doc,
     /*
      * Replace the search string buffer with the new target.  - FM
      */
-    BStrCopy(my_prev_target, prev_target);
+    BStrCopy(my_prev_target, *prev_target);
     HTAddSearchQuery(my_prev_target->str);
 
     if (direction < 0) {
 	offset = 0;
-	if (check_prev_target_in_links(&cur_doc->link, prev_target->str)) {
+	if (check_prev_target_in_links(&cur_doc->link, (*prev_target)->str)) {
 	    /*
 	     * Found in link, changed cur, we're done.
 	     */
-	    LYhighlight(FALSE, oldcur, prev_target->str);
+	    LYhighlight(FALSE, oldcur, (*prev_target)->str);
 	    return (TRUE);
 	}
     } else {
@@ -345,11 +348,11 @@ BOOL textsearch(DocInfo *cur_doc,
 	 * Search the links on the currently displayed page for the string,
 	 * starting after the current link.  - FM
 	 */
-	if (check_next_target_in_links(&cur_doc->link, prev_target->str)) {
+	if (check_next_target_in_links(&cur_doc->link, (*prev_target)->str)) {
 	    /*
 	     * Found in link, changed cur, we're done.
 	     */
-	    LYhighlight(FALSE, oldcur, prev_target->str);
+	    LYhighlight(FALSE, oldcur, (*prev_target)->str);
 	    return (TRUE);
 	}
 
@@ -367,9 +370,9 @@ BOOL textsearch(DocInfo *cur_doc,
      * Resume search, this time for all text.  Set www_search_result if string
      * found, and position the hit near top of screen.
      */
-    www_user_search((cur_doc->line + offset), cur_doc, prev_target->str, direction);
+    www_user_search((cur_doc->line + offset), cur_doc, (*prev_target)->str, direction);
     if (cur_doc->link != oldcur) {
-	LYhighlight(FALSE, oldcur, prev_target->str);
+	LYhighlight(FALSE, oldcur, (*prev_target)->str);
 	return (TRUE);
     }
     return (BOOL) (www_search_result > 0);

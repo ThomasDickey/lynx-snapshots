@@ -1,5 +1,5 @@
 /*
- * $LynxId: GridText.c,v 1.229 2012/02/09 01:55:40 tom Exp $
+ * $LynxId: GridText.c,v 1.230 2012/02/09 11:49:06 tom Exp $
  *
  *		Character grid hypertext object
  *		===============================
@@ -245,7 +245,7 @@ There are 3 functions - POOL_NEW, POOL_FREE, and ALLOC_IN_POOL.
  * Returns a pointer to the "allocated" memory or NULL if fails.
  * Updates 'poolptr' if necessary.
  */
-static pool_data *ALLOC_IN_POOL(HTPool ** ppoolptr, unsigned request)
+static void *ALLOC_IN_POOL(HTPool ** ppoolptr, unsigned request)
 {
     HTPool *pool = *ppoolptr;
     pool_data *ptr;

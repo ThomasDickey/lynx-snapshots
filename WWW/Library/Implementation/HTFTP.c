@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFTP.c,v 1.100 2011/05/24 09:49:44 tom Exp $
+ * $LynxId: HTFTP.c,v 1.101 2012/02/09 12:34:48 tom Exp $
  *
  *			File Transfer Protocol (FTP) Client
  *			for a WorldWideWeb browser
@@ -1304,7 +1304,7 @@ static int get_listen_socket(void)
 	    return HTInetStatus("getsockname");
 #ifdef INET6
 	CTRACE((tfp, "HTFTP: This host is %s\n",
-		HTInetString((SockA *) soc_in)));
+		HTInetString((void *) soc_in)));
 
 	soc_in->sin_port = 0;	/* Unspecified: please allocate */
 #else
@@ -1352,7 +1352,7 @@ static int get_listen_socket(void)
 #ifdef INET6
     CTRACE((tfp, "HTFTP: bound to port %d on %s\n",
 	    (int) ntohs(soc_in->sin_port),
-	    HTInetString((SockA *) soc_in)));
+	    HTInetString((void *) soc_in)));
 #else
     CTRACE((tfp, "HTFTP: bound to port %d on %s\n",
 	    (int) ntohs(soc_in->sin_port),

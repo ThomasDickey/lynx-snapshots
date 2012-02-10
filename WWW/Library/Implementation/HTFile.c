@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFile.c,v 1.128 2011/06/06 09:27:35 tom Exp $
+ * $LynxId: HTFile.c,v 1.129 2012/02/10 01:10:51 tom Exp $
  *
  *			File Access				HTFile.c
  *			===========
@@ -3086,7 +3086,7 @@ void HTSetProgramPath(ProgramPaths code, const char *path)
 /*
  * Reset the list of known program paths to the ones that are compiled-in
  */
-void HTInitProgramPaths(void)
+void HTInitProgramPaths(BOOL init)
 {
     ProgramPaths code;
     int n;
@@ -3218,7 +3218,9 @@ void HTInitProgramPaths(void)
 	if (test != NULL && test != path) {
 	    free((char *) test);
 	}
-	HTSetProgramPath(code, path);
+	if (init) {
+	    HTSetProgramPath(code, path);
+	}
     }
 }
 

@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYStyle.c,v 1.70 2011/06/06 09:28:29 tom Exp $
+ * $LynxId: LYStyle.c,v 1.71 2012/02/10 01:24:18 tom Exp $
  *
  * character level styles for Lynx
  * (c) 1996 Rob Partington -- donated to the Lyncei (if they want it :-)
@@ -622,6 +622,7 @@ static void HStyle_addStyle(char *buffer)
 			      name ? name : "!?! empty !?!"));
 	if (!default_color_reset)
 	    parse_style(name);
+	FREE(name);
 	return;			/* do not need to process it again */
     }
     CTRACE2(TRACE_STYLE, (tfp, "READCSS:%s\n", name ? name : "!?! empty !?!"));

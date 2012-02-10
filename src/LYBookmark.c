@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYBookmark.c,v 1.70 2012/02/08 01:37:55 tom Exp $
+ * $LynxId: LYBookmark.c,v 1.71 2012/02/09 13:01:39 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTAlert.h>
@@ -292,7 +292,7 @@ void save_bookmark_link(const char *address,
 	    default:
 		break;
 	    }
-	    BStrCopy0(string_data, tmp_data->str);
+	    BStrCopy0(string_data, tmp_data ? tmp_data->str : title);
 	} else {
 	    BStrCopy0(string_data, title);
 	}

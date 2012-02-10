@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMainLoop.c,v 1.187 2012/02/09 01:55:58 tom Exp $
+ * $LynxId: LYMainLoop.c,v 1.193 2012/02/10 00:26:26 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTAccess.h>
@@ -591,7 +591,7 @@ static int do_change_link(void)
 			else HTuncache_current_document()
 #endif /* DIRED_SUPPORT */
 
-static void do_check_goto_URL(bstring *user_input_buffer,
+static void do_check_goto_URL(bstring **user_input,
 			      char **old_user_input,
 			      BOOLEAN *force_load)
 {
@@ -646,27 +646,27 @@ static void do_check_goto_URL(bstring *user_input_buffer,
     BOOLEAN found = FALSE;
 
     /* allow going to anchors */
-    if (user_input_buffer->str[0] == '#') {
-	if (user_input_buffer->str[1] &&
-	    HTFindPoundSelector(user_input_buffer->str + 1)) {
+    if ((*user_input)->str[0] == '#') {
+	if ((*user_input)->str[1] &&
+	    HTFindPoundSelector((*user_input)->str + 1)) {
 	    /* HTFindPoundSelector will initialize www_search_result,
 	       so we do nothing else. */
-	    HTAddGotoURL(user_input_buffer->str);
+	    HTAddGotoURL((*user_input)->str);
 	    trimPoundSelector(curdoc.address);
-	    StrAllocCat(curdoc.address, user_input_buffer->str);
+	    StrAllocCat(curdoc.address, (*user_input)->str);
 	}
     } else {
 	/*
 	 * If it's not a URL then make it one.
 	 */
-	StrAllocCopy(*old_user_input, user_input_buffer->str);
+	StrAllocCopy(*old_user_input, (*user_input)->str);
 	LYEnsureAbsoluteURL(old_user_input, "", TRUE);
-	BStrCopy0(user_input_buffer, *old_user_input);
+	BStrCopy0((*user_input), *old_user_input);
 	FREE(*old_user_input);
 
 	for (n = 0; n < TABLESIZE(table); n++) {
 	    if (*(table[n].flag)
-		&& !StrNCmp(user_input_buffer->str,
+		&& !StrNCmp((*user_input)->str,
 			    table[n].name,
 			    strlen(table[n].name))) {
 		found = TRUE;
@@ -677,12 +677,12 @@ static void do_check_goto_URL(bstring *user_input_buffer,
 	if (found) {
 	    ;
 	} else if (LYValidate &&
-		   !isHTTP_URL(user_input_buffer->str) &&
-		   !isHTTPS_URL(user_input_buffer->str)) {
+		   !isHTTP_URL((*user_input)->str) &&
+		   !isHTTPS_URL((*user_input)->str)) {
 	    HTUserMsg(GOTO_NON_HTTP_DISALLOWED);
 
 	} else {
-	    set_address(&newdoc, user_input_buffer->str);
+	    set_address(&newdoc, (*user_input)->str);
 	    newdoc.isHEAD = FALSE;
 	    /*
 	     * Might be an anchor in the same doc from a POST form.  If so,
@@ -713,7 +713,7 @@ static void do_check_goto_URL(bstring *user_input_buffer,
 
 /* returns FALSE if user cancelled input or URL was invalid, TRUE otherwise */
 static BOOL do_check_recall(int ch,
-			    bstring *user_input_buffer,
+			    bstring **user_input,
 			    char **old_user_input,
 			    int URLTotal,
 			    int *URLNum,
@@ -728,20 +728,20 @@ static BOOL do_check_recall(int ch,
 
     for (;;) {
 #ifdef WIN_EX			/* 1998/10/11 (Sun) 10:41:05 */
-	int len = strlen(user_input_buffer->str);
+	int len = strlen((*user_input)->str);
 
 	if (len >= 3) {
 	    if (len < MAX_LINE - 1
-		&& LYIsHtmlSep(user_input_buffer->str[len - 3])
-		&& LYIsDosDrive(user_input_buffer->str + len - 2))
-		LYAddPathSep0(user_input_buffer->str);
+		&& LYIsHtmlSep((*user_input)->str[len - 3])
+		&& LYIsDosDrive((*user_input)->str + len - 2))
+		LYAddPathSep0((*user_input)->str);
 
-	} else if (len == 2 && user_input_buffer->str[1] == ':') {
-	    if (LYIsDosDrive(user_input_buffer->str)) {
-		LYAddPathSep0(user_input_buffer->str);
+	} else if (len == 2 && (*user_input)->str[1] == ':') {
+	    if (LYIsDosDrive((*user_input)->str)) {
+		LYAddPathSep0((*user_input)->str);
 	    } else {
-		HTUserMsg2(WWW_ILLEGAL_URL_MESSAGE, user_input_buffer->str);
-		BStrCopy0(user_input_buffer, *old_user_input);
+		HTUserMsg2(WWW_ILLEGAL_URL_MESSAGE, (*user_input)->str);
+		BStrCopy0((*user_input), *old_user_input);
 		FREE(*old_user_input);
 		ret = FALSE;
 		break;
@@ -751,10 +751,10 @@ static BOOL do_check_recall(int ch,
 	/*
 	 * Get rid of leading spaces (and any other spaces).
 	 */
-	LYTrimAllStartfile(user_input_buffer->str);
-	if (isBEmpty(user_input_buffer) &&
+	LYTrimAllStartfile((*user_input)->str);
+	if (isBEmpty(*user_input) &&
 	    !(recall && (ch == UPARROW || ch == DNARROW))) {
-	    BStrCopy0(user_input_buffer, *old_user_input);
+	    BStrCopy0((*user_input), *old_user_input);
 	    FREE(*old_user_input);
 	    HTInfoMsg(CANCELLED);
 	    ret = FALSE;
@@ -780,10 +780,10 @@ static BOOL do_check_recall(int ch,
 		*URLNum = 0;
 	    if ((cp = (char *) HTList_objectAt(Goto_URLs,
 					       *URLNum)) != NULL) {
-		BStrCopy0(user_input_buffer, cp);
+		BStrCopy0((*user_input), cp);
 		if (goto_buffer
 		    && **old_user_input
-		    && !strcmp(*old_user_input, user_input_buffer->str)) {
+		    && !strcmp(*old_user_input, (*user_input)->str)) {
 		    _statusline(EDIT_CURRENT_GOTO);
 		} else if ((goto_buffer && URLTotal == 2) ||
 			   (!goto_buffer && URLTotal == 1)) {
@@ -791,13 +791,12 @@ static BOOL do_check_recall(int ch,
 		} else {
 		    _statusline(EDIT_A_PREV_GOTO);
 		}
-		if ((ch = LYgetBString(&user_input_buffer,
-				       VISIBLE, 0, recall)) < 0) {
+		if ((ch = LYgetBString(user_input, VISIBLE, 0, recall)) < 0) {
 		    /*
 		     * User cancelled the Goto via ^G.  Restore
-		     * user_input_buffer and break.  - FM
+		     * user_input and break.  - FM
 		     */
-		    BStrCopy0(user_input_buffer, *old_user_input);
+		    BStrCopy0((*user_input), *old_user_input);
 		    FREE(*old_user_input);
 		    HTInfoMsg(CANCELLED);
 		    ret = FALSE;
@@ -824,9 +823,9 @@ static BOOL do_check_recall(int ch,
 		 */
 		*URLNum = URLTotal - 1;
 	    if ((cp = (char *) HTList_objectAt(Goto_URLs, *URLNum)) != NULL) {
-		BStrCopy0(user_input_buffer, cp);
+		BStrCopy0((*user_input), cp);
 		if (goto_buffer && **old_user_input &&
-		    !strcmp(*old_user_input, user_input_buffer->str)) {
+		    !strcmp(*old_user_input, (*user_input)->str)) {
 		    _statusline(EDIT_CURRENT_GOTO);
 		} else if ((goto_buffer && URLTotal == 2) ||
 			   (!goto_buffer && URLTotal == 1)) {
@@ -834,13 +833,12 @@ static BOOL do_check_recall(int ch,
 		} else {
 		    _statusline(EDIT_A_PREV_GOTO);
 		}
-		if ((ch = LYgetBString(&user_input_buffer,
-				       VISIBLE, 0, recall)) < 0) {
+		if ((ch = LYgetBString(user_input, VISIBLE, 0, recall)) < 0) {
 		    /*
 		     * User cancelled the Goto via ^G.  Restore
-		     * user_input_buffer and break.  - FM
+		     * user_input and break.  - FM
 		     */
-		    BStrCopy0(user_input_buffer, *old_user_input);
+		    BStrCopy0((*user_input), *old_user_input);
 		    FREE(*old_user_input);
 		    HTInfoMsg(CANCELLED);
 		    ret = FALSE;
@@ -1702,16 +1700,16 @@ static void handle_LYK_CLEAR_AUTH(int *old_c,
     }
 }
 
-static int handle_LYK_COMMAND(bstring *user_input_buffer)
+static int handle_LYK_COMMAND(bstring **user_input)
 {
     LYKeymapCode ch;
     Kcmd *mp;
     char *src, *tmp;
 
-    BStrCopy0(user_input_buffer, "");
+    BStrCopy0((*user_input), "");
     _statusline(": ");
-    if (LYgetBString(&user_input_buffer, VISIBLE, 0, RECALL_CMD) >= 0) {
-	src = LYSkipBlanks(user_input_buffer->str);
+    if (LYgetBString(user_input, VISIBLE, 0, RECALL_CMD) >= 0) {
+	src = LYSkipBlanks((*user_input)->str);
 	tmp = LYSkipNonBlanks(src);
 	*tmp = 0;
 	ch = ((mp = LYStringToKcmd(src)) != 0) ? mp->code : LYK_UNKNOWN;
@@ -2364,7 +2362,7 @@ static int handle_LYK_DWIMEDIT(int *cmd,
 }
 
 static int handle_LYK_ECGOTO(int *ch,
-			     bstring *user_input_buffer,
+			     bstring **user_input,
 			     char **old_user_input,
 			     int *old_c,
 			     int real_c)
@@ -2395,11 +2393,11 @@ static int handle_LYK_ECGOTO(int *ch,
 #endif /* DIRED_SUPPORT */
 
     /*
-     * Save the current user_input_buffer string, and load the current
+     * Save the current user_input string, and load the current
      * document's address.
      */
-    StrAllocCopy(*old_user_input, user_input_buffer->str);
-    BStrCopy0(user_input_buffer, curdoc.address);
+    StrAllocCopy(*old_user_input, (*user_input)->str);
+    BStrCopy0((*user_input), curdoc.address);
 
     /*
      * Warn the user if the current document has POST data associated with it. 
@@ -2412,12 +2410,11 @@ static int handle_LYK_ECGOTO(int *ch,
      * Offer the current document's URL for editing.  - FM
      */
     _statusline(EDIT_CURDOC_URL);
-    if (((*ch = LYgetBString(&user_input_buffer, VISIBLE,
-			     0, RECALL_URL)) >= 0) &&
-	!isBEmpty(user_input_buffer) &&
-	strcmp(user_input_buffer->str, curdoc.address)) {
-	LYTrimAllStartfile(user_input_buffer->str);
-	if (!isBEmpty(user_input_buffer)) {
+    if (((*ch = LYgetBString(user_input, VISIBLE, 0, RECALL_URL)) >= 0) &&
+	!isBEmpty(*user_input) &&
+	strcmp((*user_input)->str, curdoc.address)) {
+	LYTrimAllStartfile((*user_input)->str);
+	if (!isBEmpty(*user_input)) {
 	    return 2;
 	}
     }
@@ -2425,7 +2422,7 @@ static int handle_LYK_ECGOTO(int *ch,
      * User cancelled via ^G, a full deletion, or not modifying the URL.  - FM
      */
     HTInfoMsg(CANCELLED);
-    BStrCopy0(user_input_buffer, *old_user_input);
+    BStrCopy0((*user_input), *old_user_input);
     FREE(*old_user_input);
     return 0;
 }
@@ -2587,7 +2584,7 @@ static void handle_LYK_EDIT_TEXTAREA(BOOLEAN *refresh_screen,
 }
 
 static int handle_LYK_ELGOTO(int *ch,
-			     bstring *user_input_buffer,
+			     bstring **user_input,
 			     char **old_user_input,
 			     int *old_c,
 			     int real_c)
@@ -2645,11 +2642,11 @@ static int handle_LYK_ELGOTO(int *ch,
 #endif /* DIRED_SUPPORT */
 
     /*
-     * Save the current user_input_buffer string, and load the current link's
+     * Save the current user_input string, and load the current link's
      * address.  - FM
      */
-    StrAllocCopy(*old_user_input, user_input_buffer->str);
-    BStrCopy0(user_input_buffer,
+    StrAllocCopy(*old_user_input, (*user_input)->str);
+    BStrCopy0((*user_input),
 	      ((links[curdoc.link].type == WWW_FORM_LINK_TYPE)
 	       ? links[curdoc.link].l_form->submit_action
 	       : links[curdoc.link].lname));
@@ -2657,15 +2654,14 @@ static int handle_LYK_ELGOTO(int *ch,
      * Offer the current link's URL for editing.  - FM
      */
     _statusline(EDIT_CURLINK_URL);
-    if (((*ch = LYgetBString(&user_input_buffer, VISIBLE,
-			     0, RECALL_URL)) >= 0) &&
-	!isBEmpty(user_input_buffer) &&
-	strcmp(user_input_buffer->str,
+    if (((*ch = LYgetBString(user_input, VISIBLE, 0, RECALL_URL)) >= 0) &&
+	!isBEmpty(*user_input) &&
+	strcmp((*user_input)->str,
 	       ((links[curdoc.link].type == WWW_FORM_LINK_TYPE)
 		? links[curdoc.link].l_form->submit_action
 		: links[curdoc.link].lname))) {
-	LYTrimAllStartfile(user_input_buffer->str);
-	if (!isBEmpty(user_input_buffer)) {
+	LYTrimAllStartfile((*user_input)->str);
+	if (!isBEmpty(*user_input)) {
 	    return 2;
 	}
     }
@@ -2673,7 +2669,7 @@ static int handle_LYK_ELGOTO(int *ch,
      * User cancelled via ^G, a full deletion, or not modifying the URL.  - FM
      */
     HTInfoMsg(CANCELLED);
-    BStrCopy0(user_input_buffer, *old_user_input);
+    BStrCopy0((*user_input), *old_user_input);
     FREE(*old_user_input);
     return 0;
 }
@@ -2874,7 +2870,7 @@ static void handle_LYK_FIRST_LINK(void)
 }
 
 static BOOLEAN handle_LYK_GOTO(int *ch,
-			       bstring *user_input_buffer,
+			       bstring **user_input,
 			       char **old_user_input,
 			       RecallType * recall,
 			       int *URLTotal,
@@ -2892,12 +2888,12 @@ static BOOLEAN handle_LYK_GOTO(int *ch,
 	return FALSE;
     }
 
-    StrAllocCopy(*old_user_input, user_input_buffer->str);
+    StrAllocCopy(*old_user_input, (*user_input)->str);
     if (!goto_buffer)
-	BStrCopy0(user_input_buffer, "");
+	BStrCopy0((*user_input), "");
 
     *URLTotal = (Goto_URLs ? HTList_count(Goto_URLs) : 0);
-    if (goto_buffer && !isBEmpty(user_input_buffer)) {
+    if (goto_buffer && !isBEmpty(*user_input)) {
 	*recall = ((*URLTotal > 1) ? RECALL_URL : NORECALL);
 	*URLNum = 0;
 	*FirstURLRecall = FALSE;
@@ -2911,12 +2907,12 @@ static BOOLEAN handle_LYK_GOTO(int *ch,
      * Ask the user.
      */
     _statusline(URL_TO_OPEN);
-    if ((*ch = LYgetBString(&user_input_buffer, VISIBLE, 0, *recall)) < 0) {
+    if ((*ch = LYgetBString(user_input, VISIBLE, 0, *recall)) < 0) {
 	/*
-	 * User cancelled the Goto via ^G.  Restore user_input_buffer and
+	 * User cancelled the Goto via ^G.  Restore user_input and
 	 * break.  - FM
 	 */
-	BStrCopy0(user_input_buffer, *old_user_input);
+	BStrCopy0((*user_input), *old_user_input);
 	FREE(*old_user_input);
 	HTInfoMsg(CANCELLED);
 	return FALSE;
@@ -3509,7 +3505,7 @@ static BOOLEAN check_JUMP_param(char **url_template)
     BStrFree(input);
     FREE(encoded);
     *url_template = result;
-    return TRUE;
+    return (BOOLEAN) code;
 }
 
 static void fill_JUMP_Params(char **addressp)
@@ -3520,7 +3516,7 @@ static void fill_JUMP_Params(char **addressp)
 }
 
 static BOOLEAN handle_LYK_JUMP(int c,
-			       bstring *user_input_buffer,
+			       bstring **user_input,
 			       char **old_user_input GCC_UNUSED,
 			       RecallType * recall GCC_UNUSED,
 			       BOOLEAN *FirstURLRecall GCC_UNUSED,
@@ -3546,7 +3542,7 @@ static BOOLEAN handle_LYK_JUMP(int c,
 #ifdef PERMIT_GOTO_FROM_JUMP
 	    if (!strncasecomp(ret, "Go ", 3)) {
 		LYJumpFileURL = FALSE;
-		StrAllocCopy(*old_user_input, user_input_buffer->str);
+		StrAllocCopy(*old_user_input, (*user_input)->str);
 		*URLTotal = (Goto_URLs ? HTList_count(Goto_URLs) : 0);
 		*recall = ((*URLTotal >= 1) ? RECALL_URL : NORECALL);
 		*URLNum = *URLTotal;
@@ -3561,14 +3557,14 @@ static BOOLEAN handle_LYK_JUMP(int c,
 		    return FALSE;
 		}
 		ret = HTParse((ret + 3), startfile, PARSE_ALL);
-		BStrCopy0(user_input_buffer, ret);
+		BStrCopy0((*user_input), ret);
 		FREE(ret);
 		return TRUE;
 	    }
 #endif /* PERMIT_GOTO_FROM_JUMP */
 	    ret = HTParse(ret, startfile, PARSE_ALL);
 	    if (!LYTrimStartfile(ret)) {
-		LYRemoveBlanks(user_input_buffer->str);
+		LYRemoveBlanks((*user_input)->str);
 	    }
 	    if (!check_JUMP_param(&ret))
 		return FALSE;
@@ -4925,7 +4921,7 @@ void handle_LYK_WHEREIS(int cmd,
 	 */
 	BStrCopy0(prev_target, "");
     }
-    found = textsearch(&curdoc, prev_target,
+    found = textsearch(&curdoc, &prev_target,
 		       (cmd == LYK_WHEREIS)
 		       ? 0
 		       : ((cmd == LYK_NEXT)
@@ -5343,6 +5339,14 @@ static BOOLEAN handle_LYK_MAXSCREEN_TOGGLE(int *cmd)
 }
 #endif
 
+#ifdef LY_FIND_LEAKS
+#define CleanupMainLoop() \
+ 	BStrFree(prev_target); \
+ 	BStrFree(user_input_buffer)
+#else
+#define CleanupMainLoop()	/* nothing */
+#endif
+
 /*
  * Here's where we do all the work.
  * mainloop is basically just a big switch dependent on the users input.  I
@@ -5351,7 +5355,6 @@ static BOOLEAN handle_LYK_MAXSCREEN_TOGGLE(int *cmd)
  * This needs some work to make it neater.  - Lou Moutilli
  *					(memoir from the original Lynx - FM)
  */
-
 int mainloop(void)
 {
 #if defined(WIN_EX)		/* 1997/10/08 (Wed) 14:52:06 */
@@ -5823,6 +5826,7 @@ int mainloop(void)
 		    /*
 		     * If nhist = 0 then it must be the first file.
 		     */
+		    CleanupMainLoop();
 		    exit_immediately_with_error_message(NOT_FOUND, first_file);
 		    return (EXIT_FAILURE);
 		}
@@ -5887,6 +5891,7 @@ int mainloop(void)
 			newdoc.internal_link = FALSE;
 			goto try_again;
 		    } else {
+			CleanupMainLoop();
 			exit_immediately_with_error_message(NULLFILE, first_file);
 			return (EXIT_FAILURE);
 		    }
@@ -6013,6 +6018,7 @@ int mainloop(void)
 			    FREE(temp);
 			    if (LYValidate) {
 				HTAlert(BOOKMARKS_DISABLED);
+				CleanupMainLoop();
 				return (EXIT_FAILURE);
 			    }
 			    if ((temp = HTParse(newdoc.address, "",
@@ -6208,6 +6214,7 @@ int mainloop(void)
 	    } else if (!dump_links_only) {
 		print_wwwfile_to_fd(stdout, FALSE, FALSE);
 	    }
+	    CleanupMainLoop();
 	    return ((dump_server_status >= 400) ? EXIT_FAILURE : EXIT_SUCCESS);
 	}
 
@@ -6671,6 +6678,7 @@ int mainloop(void)
 		    fprintf(fp,
 			    gettext("Fatal error - could not open output file %s\n"),
 			    cfile);
+		    CleanupMainLoop();
 		    if (!dump_output_immediately) {
 			exit_immediately(EXIT_FAILURE);
 		    }
@@ -6909,8 +6917,10 @@ int mainloop(void)
 	 * loop.
 	 */
 	if (traversal) {
-	    if ((c = DoTraversal(c, &crawl_ok)) < 0)
+	    if ((c = DoTraversal(c, &crawl_ok)) < 0) {
+		CleanupMainLoop();
 		return (EXIT_FAILURE);
+	    }
 	}
 	/* traversal */
 #ifdef WIN_EX
@@ -6972,7 +6982,7 @@ int mainloop(void)
 	    break;
 
 	case LYK_COMMAND:
-	    cmd = handle_LYK_COMMAND(user_input_buffer);
+	    cmd = handle_LYK_COMMAND(&user_input_buffer);
 	    goto new_cmd;
 
 	case LYK_INTERRUPT:
@@ -7032,11 +7042,14 @@ int mainloop(void)
 	    break;
 
 	case LYK_QUIT:		/* quit */
-	    if (handle_LYK_QUIT())
+	    if (handle_LYK_QUIT()) {
+		CleanupMainLoop();
 		return (EXIT_SUCCESS);
+	    }
 	    break;
 
 	case LYK_ABORT:	/* don't ask the user about quitting */
+	    CleanupMainLoop();
 	    return (EXIT_SUCCESS);
 
 	case LYK_NEXT_PAGE:	/* next page */
@@ -7152,7 +7165,7 @@ int mainloop(void)
 		*t = '\0';
 		get_clip_release();
 		BStrCopy0(user_input_buffer, buf);
-		do_check_goto_URL(user_input_buffer, &temp, &force_load);
+		do_check_goto_URL(&user_input_buffer, &temp, &force_load);
 		free(buf);
 	    }
 	    break;
@@ -7279,6 +7292,7 @@ int mainloop(void)
 	case LYK_PREV_DOC:	/* back up a level */
 	    switch (handle_PREV_DOC(&cmd, &old_c, real_c)) {
 	    case 1:
+		CleanupMainLoop();
 		return (EXIT_SUCCESS);
 	    case 2:
 		goto new_cmd;
@@ -7313,22 +7327,22 @@ int mainloop(void)
 	    break;
 
 	case LYK_ELGOTO:	/* edit URL of current link and go to it  */
-	    if (handle_LYK_ELGOTO(&ch, user_input_buffer, &temp, &old_c, real_c))
-		do_check_goto_URL(user_input_buffer, &temp, &force_load);
+	    if (handle_LYK_ELGOTO(&ch, &user_input_buffer, &temp, &old_c, real_c))
+		do_check_goto_URL(&user_input_buffer, &temp, &force_load);
 	    break;
 
 	case LYK_ECGOTO:	/* edit current URL and go to to it     */
-	    if (handle_LYK_ECGOTO(&ch, user_input_buffer, &temp, &old_c, real_c))
-		do_check_goto_URL(user_input_buffer, &temp, &force_load);
+	    if (handle_LYK_ECGOTO(&ch, &user_input_buffer, &temp, &old_c, real_c))
+		do_check_goto_URL(&user_input_buffer, &temp, &force_load);
 	    break;
 
 	case LYK_GOTO:		/* 'g' to goto a random URL  */
-	    if (handle_LYK_GOTO(&ch, user_input_buffer, &temp, &recall,
+	    if (handle_LYK_GOTO(&ch, &user_input_buffer, &temp, &recall,
 				&URLTotal, &URLNum, &FirstURLRecall, &old_c,
 				real_c)) {
-		if (do_check_recall(ch, user_input_buffer, &temp, URLTotal,
+		if (do_check_recall(ch, &user_input_buffer, &temp, URLTotal,
 				    &URLNum, recall, &FirstURLRecall))
-		    do_check_goto_URL(user_input_buffer, &temp, &force_load);
+		    do_check_goto_URL(&user_input_buffer, &temp, &force_load);
 	    }
 	    break;
 
@@ -7537,12 +7551,12 @@ int mainloop(void)
 	    break;
 
 	case LYK_JUMP:
-	    if (handle_LYK_JUMP(c, user_input_buffer, &temp, &recall,
+	    if (handle_LYK_JUMP(c, &user_input_buffer, &temp, &recall,
 				&FirstURLRecall, &URLNum, &URLTotal, &ch,
 				&old_c, real_c)) {
-		if (do_check_recall(ch, user_input_buffer, &temp, URLTotal,
+		if (do_check_recall(ch, &user_input_buffer, &temp, URLTotal,
 				    &URLNum, recall, &FirstURLRecall))
-		    do_check_goto_URL(user_input_buffer, &temp, &force_load);
+		    do_check_goto_URL(&user_input_buffer, &temp, &force_load);
 	    }
 	    break;
 

@@ -1,7 +1,8 @@
-/* $LynxId: LYSession.c,v 1.7 2010/10/31 18:15:33 Paul.B.Mahol Exp $ */
+/* $LynxId: LYSession.c,v 1.8 2012/02/09 20:00:59 tom Exp $ */
 
 #include <LYSession.h>
 
+#include <LYLeaks.h>
 #include <LYUtils.h>
 #include <LYStrings.h>
 #include <LYHistory.h>

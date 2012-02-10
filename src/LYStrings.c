@@ -1,4 +1,4 @@
-/* $LynxId: LYStrings.c,v 1.200 2012/02/08 15:51:01 tom Exp $ */
+/* $LynxId: LYStrings.c,v 1.202 2012/02/09 18:48:45 tom Exp $ */
 #include <HTUtils.h>
 #include <HTCJK.h>
 #include <UCAux.h>
@@ -2901,7 +2901,9 @@ static void ExtendEditor(EDREC * edit, int position)
     size_t need = (size_t) (++position);
 
     if (need >= MaxLen && (BufLimit == 0 || need < BufLimit)) {
-	CTRACE((tfp, "ExtendEditor from %d to %d\n", MaxLen, need));
+	CTRACE((tfp, "ExtendEditor from %u to %u\n",
+		(unsigned) MaxLen,
+		(unsigned) need));
 	Buf = typeRealloc(char, Buf, need);
 	Offs2Col = typeRealloc(int, Offs2Col, need + 1);
 
@@ -2920,10 +2922,10 @@ void LYFinishEdit(EDREC * edit)
 
 void LYSetupEdit(EDREC * edit, char *old_value, size_t buffer_limit, int display_limit)
 {
-    CTRACE((tfp, "LYSetupEdit buffer %d, display %d:%s\n",
-	    buffer_limit,
+    CTRACE((tfp, "LYSetupEdit buffer %u, display %d:%s\n",
+	    (unsigned) buffer_limit,
 	    display_limit,
-	    NonNull(old_value)));
+	    old_value));
 
     BufLimit = buffer_limit;
     if (buffer_limit == 0)
@@ -3682,7 +3684,9 @@ static void fill_edited_line(int prompting GCC_UNUSED, int length, int ch)
 void LYRefreshEdit(EDREC * edit)
 {
     /* bytes and characters are not the same thing */
+#if defined(DEBUG_EDIT)
     int all_bytes;
+#endif
     int pos_bytes = Pos;
     int dpy_bytes;
     int lft_bytes;		/* base of string which is displayed */
@@ -3728,12 +3732,12 @@ void LYRefreshEdit(EDREC * edit)
     IsDirty = FALSE;
 
     StrLen = strlen(&Buf[0]);
-    all_bytes = (int) StrLen;
 
     all_cells = LYstrCells(Buf);
     pos_cells = LYstrExtent2(Buf, Pos);
 
 #if defined(SUPPORT_MULTIBYTE_EDIT) && defined(DEBUG_EDIT)
+    all_bytes = (int) StrLen;
     lft_chars = mbcs_glyphs(Buf, DspStart);
     pos_chars = mbcs_glyphs(Buf, Pos);
     all_chars = mbcs_glyphs(Buf, all_bytes);
@@ -5074,6 +5078,10 @@ int LYgetBString(bstring **inputline,
     CTRACE((tfp, "called LYgetBString hidden %d, recall %d\n", hidden, recall));
 
     LYGetYX(y, x);		/* Use screen from cursor position to eol */
+
+    if (*inputline == NULL)	/* caller may not have initialized this */
+	BStrCopy0(*inputline, "");
+
     LYSetupEdit(edit, (*inputline)->str, max_cols, LYcolLimit - x);
     IsHidden = (BOOL) hidden;
 #ifdef FEPCTRL
