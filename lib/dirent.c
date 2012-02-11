@@ -1,5 +1,5 @@
 /*
- * $LynxId: dirent.c,v 1.4 2010/10/31 17:56:17 tom Exp $
+ * $LynxId: dirent.c,v 1.5 2012/02/10 11:35:49 tom Exp $
  *
  * dir.c for MS-DOS by Samuel Lam <skl@van-bc.UUCP>, June/87 
  */
@@ -25,6 +25,16 @@
  */
 #ifdef HAVE_CONFIG_H
 #include "lynx_cfg.h"
+#endif
+
+#ifndef __GNUC__
+#pragma warning (disable : 4100) /* unreferenced formal parameter */
+#pragma warning (disable : 4127) /* conditional expression is constant */
+#pragma warning (disable : 4201) /* nameless struct/union */
+#pragma warning (disable : 4214) /* bit field types other than int */
+#pragma warning (disable : 4310) /* cast truncates constant value */
+#pragma warning (disable : 4514) /* unreferenced inline function has been removed */
+#pragma warning (disable : 4996) /* This function or variable may be unsafe. ... */
 #endif
 
 #include <windows.h>

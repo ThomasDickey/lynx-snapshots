@@ -1,4 +1,4 @@
-/* $LynxId: LYForms.c,v 1.96 2012/02/09 01:01:53 tom Exp $ */
+/* $LynxId: LYForms.c,v 1.97 2012/02/10 18:36:39 tom Exp $ */
 #include <HTUtils.h>
 #include <HTCJK.h>
 #include <HTTP.h>
@@ -104,7 +104,7 @@ int change_form_link_ex(int cur,
 	    (void) LYhandlePopupList(form->num_value,
 				     links[cur].ly,
 				     links[cur].lx,
-				     (const char **) my_data,
+				     (STRING2PTR) my_data,
 				     form->size,
 				     form->size_l,
 				     FormIsReadonly(form),
@@ -120,7 +120,7 @@ int change_form_link_ex(int cur,
 	form->num_value = LYhandlePopupList(form->num_value,
 					    links[cur].ly,
 					    links[cur].lx,
-					    (const char **) my_data,
+					    (STRING2PTR) my_data,
 					    form->size,
 					    form->size_l,
 					    FormIsReadonly(form),

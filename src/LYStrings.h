@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYStrings.h,v 1.86 2012/02/07 19:47:45 tom Exp $
+ * $LynxId: LYStrings.h,v 1.87 2012/02/10 18:36:39 tom Exp $
  */
 #ifndef LYSTRINGS_H
 #define LYSTRINGS_H
@@ -9,6 +9,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+    typedef const char *const Const2CharPtr;
     typedef enum {
 	NORECALL = 0
 	,RECALL_URL
@@ -38,8 +39,8 @@ extern "C" {
     extern int get_popup_number(const char *msg,
 				int *c,
 				int *rel);
-    extern int LYarrayLength(const char **list);
-    extern int LYarrayWidth(const char **list);
+    extern int LYarrayLength(STRING2PTR list);
+    extern int LYarrayWidth(STRING2PTR list);
     extern int LYgetch(void);
     extern int LYgetch_choice(void);
     extern int LYgetch_input(void);
@@ -337,7 +338,7 @@ extern "C" {
     extern int LYhandlePopupList(int cur_choice,
 				 int ly,
 				 int lx,
-				 const char **choices,
+				 STRING2PTR choices,
 				 int width,
 				 int i_length,
 				 int disabled,

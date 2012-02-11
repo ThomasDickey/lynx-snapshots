@@ -1,4 +1,4 @@
-/* $LynxId: LYOptions.h,v 1.29 2010/09/25 11:40:36 tom Exp $ */
+/* $LynxId: LYOptions.h,v 1.30 2012/02/10 18:39:49 tom Exp $ */
 #ifndef LYOPTIONS_H
 #define LYOPTIONS_H
 
@@ -15,13 +15,13 @@ extern "C" {
     extern int popup_choice(int cur_choice,
 			    int line,
 			    int column,
-			    const char **choices,
+			    STRING2PTR choices,
 			    int length,
 			    int disabled,
 			    int mouse);
 
 #define LYChoosePopup(cur, line, column, choices, length, disabled, mouse) \
-	popup_choice(cur, line, column, (const char **)choices, length, disabled, mouse)
+	popup_choice(cur, line, column, (STRING2PTR) choices, length, disabled, mouse)
 
 #ifndef NO_OPTION_FORMS
     extern void LYMenuVisitedLinks(FILE *fp0, int disable_all);

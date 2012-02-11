@@ -1,5 +1,5 @@
 /*
- * $LynxId: SGML.h,v 1.45 2010/09/24 00:12:09 tom Exp $
+ * $LynxId: SGML.h,v 1.46 2012/02/10 18:32:26 tom Exp $
  *			       SGML parse and stream definition for libwww
  *                             SGML AND STRUCTURED STREAMS
  *
@@ -173,7 +173,7 @@ extern "C" {
     typedef struct {
 	HTTag *tags;		/* Must be in strcmp order by name */
 	int number_of_tags;
-	const char **entity_names;	/* Must be in strcmp order by name */
+	STRING2PTR entity_names;	/* Must be in strcmp order by name */
 	size_t number_of_entities;
 	/*  "entity_names" table probably unused,
 	 *  see comments in HTMLDTD.c near the top
@@ -226,7 +226,7 @@ Structured Object definition
 
 	int (*start_element) (HTStructured * me, int element_number,
 			      const BOOL *attribute_present,
-			      const char **attribute_value,
+			      STRING2PTR attribute_value,
 			      int charset,
 			      char **include);
 

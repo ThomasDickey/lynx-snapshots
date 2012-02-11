@@ -1,5 +1,5 @@
 /*
- * $LynxId: UCdomap.c,v 1.92 2011/12/01 09:34:49 tom Exp $
+ * $LynxId: UCdomap.c,v 1.93 2012/02/10 18:44:11 tom Exp $
  *
  *  UCdomap.c
  *  =========
@@ -293,7 +293,7 @@ static void UCconsole_map_init(void);
 static int UC_MapGN(int UChndl, int update_flag);
 static int UC_FindGN_byMIME(const char *UC_MIMEcharset);
 static void UCreset_allocated_LYCharSets(void);
-static const char **UC_setup_LYCharSets_repl(int UC_charset_in_hndl, unsigned lowest8);
+static STRING2PTR UC_setup_LYCharSets_repl(int UC_charset_in_hndl, unsigned lowest8);
 static int UC_Register_with_LYCharSets(int s,
 				       const char *UC_MIMEcharset,
 				       const char *UC_LYNXcharset,
@@ -1689,7 +1689,7 @@ int UCGetLYhndl_byMIME(const char *value)
 /*
  * We need to remember which ones were allocated and which are static.
  */
-static const char **remember_allocated_LYCharSets[MAXCHARSETS];
+static STRING2PTR remember_allocated_LYCharSets[MAXCHARSETS];
 
 static void UCreset_allocated_LYCharSets(void)
 {
@@ -1713,10 +1713,10 @@ static void UCfree_allocated_LYCharSets(void)
 }
 #endif
 
-static const char **UC_setup_LYCharSets_repl(int UC_charset_in_hndl,
-					     unsigned lowest8)
+static STRING2PTR UC_setup_LYCharSets_repl(int UC_charset_in_hndl,
+					   unsigned lowest8)
 {
-    const char **ISO_Latin1 = LYCharSets[0];
+    STRING2PTR ISO_Latin1 = LYCharSets[0];
     const char **p;
     char **prepl;
     const u16 *pp;
@@ -1850,7 +1850,7 @@ static const char **UC_setup_LYCharSets_repl(int UC_charset_in_hndl,
 	FREE(prepl);
 	return NULL;
     }
-    return (const char **) prepl;
+    return (STRING2PTR) prepl;
 }
 
 /*
@@ -1862,7 +1862,7 @@ static int UC_Register_with_LYCharSets(int s,
 				       int lowest_eightbit)
 {
     int i, LYhndl, found;
-    const char **repl;
+    STRING2PTR repl;
 
     LYhndl = -1;
     if (LYNumCharsets == 0) {
