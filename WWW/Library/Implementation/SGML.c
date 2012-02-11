@@ -1,5 +1,5 @@
 /*
- * $LynxId: SGML.c,v 1.147 2011/12/01 02:11:01 tom Exp $
+ * $LynxId: SGML.c,v 1.148 2012/02/10 18:32:26 tom Exp $
  *
  *			General SGML Parser code		SGML.c
  *			========================
@@ -337,7 +337,7 @@ static void HTMLSRC_apply_markup(HTStream *context,
 	    (*context->actions->start_element) (context->target,
 						(int) ts->element,
 						ts->present,
-						(const char **) ts->value,
+						(STRING2PTR) ts->value,
 						context->current_tag_charset,
 						&context->include);
 	else
@@ -1357,7 +1357,7 @@ static void start_element(HTStream *context)
     status = (*context->actions->start_element) (context->target,
 						 (int) TAGNUM_OF_TAGP(new_tag),
 						 context->present,
-						 (const char **) context->value,	/* coerce type for think c */
+						 (STRING2PTR) context->value,	/* coerce type for think c */
 						 context->current_tag_charset,
 						 &context->include);
     if (status == HT_PARSER_OTHER_CONTENT)

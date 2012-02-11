@@ -1,4 +1,4 @@
-/* $LynxId: LYStrings.c,v 1.202 2012/02/09 18:48:45 tom Exp $ */
+/* $LynxId: LYStrings.c,v 1.203 2012/02/10 18:37:31 tom Exp $ */
 #include <HTUtils.h>
 #include <HTCJK.h>
 #include <UCAux.h>
@@ -3652,6 +3652,8 @@ static void remember_column(EDREC * edit, int offset)
 {
     int y0, x0;
 
+    (void) y0;
+    (void) x0;
 #if defined(USE_SLANG)
     y0 = 0;
     x0 = SLsmg_get_column();
@@ -3978,13 +3980,13 @@ static void reinsertEdit(EditFieldData *edit, char *result)
 static int caselessCmpList(const void *a,
 			   const void *b)
 {
-    return strcasecomp(*(const char *const *) a, *(const char *const *) b);
+    return strcasecomp(*(STRING2PTR) a, *(STRING2PTR) b);
 }
 
 static int normalCmpList(const void *a,
 			 const void *b)
 {
-    return strcmp(*(const char *const *) a, *(const char *const *) b);
+    return strcmp(*(STRING2PTR) a, *(STRING2PTR) b);
 }
 
 static char **sortedList(HTList *list, int ignorecase)
@@ -4027,7 +4029,7 @@ static char **sortedList(HTList *list, int ignorecase)
     return result;
 }
 
-int LYarrayLength(const char **list)
+int LYarrayLength(STRING2PTR list)
 {
     int result = 0;
 
@@ -4036,7 +4038,7 @@ int LYarrayLength(const char **list)
     return result;
 }
 
-int LYarrayWidth(const char **list)
+int LYarrayWidth(STRING2PTR list)
 {
     int result = 0;
     int check;
@@ -4065,7 +4067,7 @@ static void FormatChoiceNum(char *dst,
     }
 }
 
-static unsigned options_width(const char **list)
+static unsigned options_width(STRING2PTR list)
 {
     unsigned width = 0;
     int count = 0;
@@ -4137,7 +4139,7 @@ static void draw_option(WINDOW * win, int entry,
 int LYhandlePopupList(int cur_choice,
 		      int ly,
 		      int lx,
-		      const char **choices,
+		      STRING2PTR choices,
 		      int width,
 		      int i_length,
 		      int disabled,
@@ -4168,7 +4170,7 @@ int LYhandlePopupList(int cur_choice,
     int number;
     char buffer[MAX_LINE];
     const char *popup_status_msg = NULL;
-    const char **Cptr = NULL;
+    STRING2PTR Cptr = NULL;
 
 #define CAN_SCROLL_DOWN	1
 #define CAN_SCROLL_UP	2
@@ -5077,6 +5079,8 @@ int LYgetBString(bstring **inputline,
 
     CTRACE((tfp, "called LYgetBString hidden %d, recall %d\n", hidden, recall));
 
+    (void) y;
+    (void) x;
     LYGetYX(y, x);		/* Use screen from cursor position to eol */
 
     if (*inputline == NULL)	/* caller may not have initialized this */
@@ -5174,7 +5178,7 @@ int LYgetBString(bstring **inputline,
 		    char **data = sortedList(list, (BOOL) (recall == RECALL_CMD));
 		    int old_y, old_x;
 		    int cur_choice = 0;
-		    int num_options = LYarrayLength((const char **) data);
+		    int num_options = LYarrayLength((STRING2PTR) data);
 
 		    while (cur_choice < num_options
 			   && strcasecomp(data[cur_choice], Buf) < 0)
@@ -5184,7 +5188,7 @@ int LYgetBString(bstring **inputline,
 		    cur_choice = LYhandlePopupList(cur_choice,
 						   0,
 						   old_x,
-						   (const char **) data,
+						   (STRING2PTR) data,
 						   -1,
 						   -1,
 						   FALSE,

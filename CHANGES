@@ -1,9 +1,14 @@
--- $LynxId: CHANGES,v 1.580 2012/02/10 01:52:10 tom Exp $
+-- $LynxId: CHANGES,v 1.583 2012/02/10 20:00:53 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
 2012-02-09 (2.8.8dev.10)
+* add bzlib to win32 makefile.msc -TD
+* define WIN32_LEAN_AND_MEAN in makefile.msc to accommodate naming conflict
+  in recent Win32 SDKs, which otherwise include winsock.h in windows.h -TD
+* fixes for the dev.9 Win32 feature to toggle between normal/fullscreen,
+  by checking the actual screensize after maximizing the display -TD
 * use ASCII apostrophe for 7-bit approximation to U+02bd as well -TD
 * use ASCII apostrophe 0x27 for 7-bit approximation to Unicode apostrophe
   U+02bc (suggested by Ralph Babel)

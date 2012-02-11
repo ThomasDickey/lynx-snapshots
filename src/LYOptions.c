@@ -1,4 +1,4 @@
-/* $LynxId: LYOptions.c,v 1.148 2012/02/09 01:56:18 tom Exp $ */
+/* $LynxId: LYOptions.c,v 1.149 2012/02/10 18:36:39 tom Exp $ */
 #include <HTUtils.h>
 #include <HTFTP.h>
 #include <HTTP.h>		/* 'reloading' flag */
@@ -129,13 +129,13 @@ static void SetupChosenShowColor(void)
 static int boolean_choice(int status,
 			  int line,
 			  int column,
-			  const char **choices);
+			  STRING2PTR choices);
 
 #define LYChooseBoolean(status, line, column, choices) \
-	(BOOLEAN) boolean_choice(status, line, column, (const char **)choices)
+	(BOOLEAN) boolean_choice(status, line, column, (const char *const*)choices)
 
 #define LYChooseEnum(status, line, column, choices) \
-	boolean_choice(status, line, column, (const char **)choices)
+	boolean_choice(status, line, column, (const char *const*)choices)
 
 #define MAXCHOICES 10
 
@@ -278,7 +278,7 @@ void LYoptions(void)
 	"ON",
 	NULL
     };
-    static const char *caseless_choices[] =
+    static const char *const caseless_choices[] =
     {
 	"CASE INSENSITIVE",
 	"CASE SENSITIVE",
@@ -351,7 +351,6 @@ void LYoptions(void)
     int CurrentShowColor = LYShowColor;
     BOOLEAN CurrentRawMode = LYRawMode;
     BOOLEAN AddValueAccepted = FALSE;
-    char *cp = NULL;
     BOOL use_assume_charset;
 
 #if defined(VMS) || defined(USE_SLANG)
@@ -732,7 +731,6 @@ void LYoptions(void)
 	     */
 	    LYsetXDisplay(my_data->str);
 	    validate_x_display();
-	    cp = NULL;
 	    LYaddstr(x_display ? x_display : "NONE");
 	    LYclrtoeol();
 	    summarize_x_display(my_data->str);
@@ -1575,7 +1573,7 @@ void LYoptions(void)
     return;
 }
 
-static int widest_choice(const char **choices)
+static int widest_choice(STRING2PTR choices)
 {
     int n, width = 0;
 
@@ -1604,7 +1602,7 @@ static void show_choice(const char *choice,
 static int boolean_choice(int cur_choice,
 			  int line,
 			  int column,
-			  const char **choices)
+			  STRING2PTR choices)
 {
     int response = 0;
     int cmd = 0;
@@ -2059,7 +2057,7 @@ void edit_bookmarks(void)
 int popup_choice(int cur_choice,
 		 int line,
 		 int column,
-		 const char **choices,
+		 STRING2PTR choices,
 		 int i_length,
 		 int disabled,
 		 int for_mouse)
@@ -2071,7 +2069,7 @@ int popup_choice(int cur_choice,
     cur_choice = LYhandlePopupList(cur_choice,
 				   line,
 				   column,
-				   (const char **) choices,
+				   (STRING2PTR) choices,
 				   -1,
 				   i_length,
 				   disabled,
@@ -3388,7 +3386,7 @@ static void PutLabel(FILE *fp, const char *name,
  * so, return that name, so the subsequence will_save_rc() check in PutLabel()
  * will flag the composite as not-saved.
  */
-static const char *check_if_write_lynxrc(const char **table)
+static const char *check_if_write_lynxrc(STRING2PTR table)
 {
     int n;
     const char *result = NULL;

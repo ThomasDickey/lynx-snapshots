@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYCharUtils.h,v 1.27 2011/06/11 10:35:56 tom Exp $
+ * $LynxId: LYCharUtils.h,v 1.28 2012/02/10 18:36:39 tom Exp $
  */
 #ifndef LYCHARUTILS_H
 #define LYCHARUTILS_H
@@ -73,15 +73,15 @@ extern "C" {
     extern char *LYLowercaseI_OL_String(int seqnum);
     extern void LYGetChartransInfo(HTStructured * me);
     extern void LYHandleMETA(HTStructured * me, const BOOL *present,
-			     const char **value,
+			     STRING2PTR value,
 			     char **include);
     extern void LYHandlePlike(HTStructured * me, const BOOL *present,
-			      const char **value,
+			      STRING2PTR value,
 			      char **include,
 			      int align_idx,
 			      int start);
     extern void LYHandleSELECT(HTStructured * me, const BOOL *present,
-			       const char **value,
+			       STRING2PTR value,
 			       char **include,
 			       int start);
     extern int LYLegitimizeHREF(HTStructured * me, char **href,
@@ -89,7 +89,7 @@ extern "C" {
 				int strip_dots);
     extern void LYCheckForContentBase(HTStructured * me);
     extern void LYCheckForID(HTStructured * me, const BOOL *present,
-			     const char **value,
+			     STRING2PTR value,
 			     int attribute);
     extern void LYHandleID(HTStructured * me, const char *id);
     extern BOOLEAN LYoverride_default_alignment(HTStructured * me);

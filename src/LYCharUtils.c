@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYCharUtils.c,v 1.116 2011/12/01 09:41:59 tom Exp $
+ * $LynxId: LYCharUtils.c,v 1.117 2012/02/10 18:36:39 tom Exp $
  *
  *  Functions associated with LYCharSets.c and the Lynx version of HTML.c - FM
  *  ==========================================================================
@@ -2022,7 +2022,7 @@ void LYParseRefreshURL(char *content,
  *  This function processes META tags in HTML streams. - FM
  */
 void LYHandleMETA(HTStructured * me, const BOOL *present,
-		  const char **value,
+		  STRING2PTR value,
 		  char **include GCC_UNUSED)
 {
     char *http_equiv = NULL, *name = NULL, *content = NULL, *charset = NULL;
@@ -2594,7 +2594,7 @@ void LYHandleMETA(HTStructured * me, const BOOL *present,
  *  end tag is present or not in the markup. - FM
  */
 void LYHandlePlike(HTStructured * me, const BOOL *present,
-		   const char **value,
+		   STRING2PTR value,
 		   char **include GCC_UNUSED,
 		   int align_idx,
 		   int start)
@@ -2701,7 +2701,7 @@ void LYHandlePlike(HTStructured * me, const BOOL *present,
  *  an end tag. - FM
  */
 void LYHandleSELECT(HTStructured * me, const BOOL *present,
-		    const char **value,
+		    STRING2PTR value,
 		    char **include GCC_UNUSED,
 		    int start)
 {
@@ -3096,7 +3096,7 @@ void LYCheckForContentBase(HTStructured * me)
  *  or ID attribute was present in the tag. - FM
  */
 void LYCheckForID(HTStructured * me, const BOOL *present,
-		  const char **value,
+		  STRING2PTR value,
 		  int attribute)
 {
     HTChildAnchor *ID_A = NULL;

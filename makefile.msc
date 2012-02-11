@@ -1,4 +1,4 @@
-# $LynxId: makefile.msc,v 1.24 2011/05/28 13:07:55 tom Exp $
+# $LynxId: makefile.msc,v 1.27 2012/02/10 19:30:03 tom Exp $
 #
 # Makefile for `Lynx' browser for Microsoft Visual C++ 4.2 or later
 #
@@ -66,7 +66,7 @@ INCLUDES = \
  /I "$(SRC_DIR)\chrtrans" \
  /I "$(WWW_DIR)" \
  /I "$(ETC_LIB)"
-DEFS = $(CS_DEFS) $(SOCK_DEFS) $(SSL_DEFS) $(SCREEN_DEFS) \
+DEFS = /D "WIN32_LEAN_AND_MEAN" $(CS_DEFS) $(SOCK_DEFS) $(SSL_DEFS) $(SCREEN_DEFS) \
  /D "ACCESS_AUTH" \
  /D "CJK_EX" \
  /D "DIRED_SUPPORT" \
@@ -98,6 +98,7 @@ DEFS = $(CS_DEFS) $(SOCK_DEFS) $(SSL_DEFS) $(SCREEN_DEFS) \
  /D "USE_READPROGRESS" \
  /D "USE_SCROLLBAR" \
  /D "USE_SOURCE_CACHE" \
+ /D "USE_BZLIB" \
  /D "USE_ZLIB" \
  /D "WIN32" \
  /D "WIN_EX" \
@@ -109,16 +110,19 @@ DEFS = $(CS_DEFS) $(SOCK_DEFS) $(SSL_DEFS) $(SCREEN_DEFS) \
  /D _WIN_CC="1" \
  /D VC="2.14FM"
 
+# /GX == /EHsc == 
+# /EHs enable C++ EH (no SEH exceptions)  /EHa enable C++ EH (w/ SEH exceptions)
+# /EHc extern "C" defaults to nothrow     
 !if "$(DEBUG)" == ""
-CFLAGS   = /nologo /MT /W3 /GX /O2 /c
+CFLAGS   = /nologo /MT /W3 /EHsc /O2 /c
 LDFLAGS  = /nologo /subsystem:console /incremental:no /machine:I386
 !else
-CFLAGS   = /nologo /MT /W3 /GX /Zi /c
+CFLAGS   = /nologo /MT /W3 /EHsc /Zi /c
 LDFLAGS  = /debug /nologo /subsystem:console /incremental:no /machine:I386
 !endif
 
 LIBS     = kernel32.lib user32.lib wsock32.lib advapi32.lib /NODEFAULTLIB:libc\
- $(ETC_LIB)\$(SCREEN_LIB).lib $(ETC_LIB)\zlib.lib dirent.obj $(SSL_LIBS)
+ $(ETC_LIB)\$(SCREEN_LIB).lib $(ETC_LIB)\libbz2.lib $(ETC_LIB)\zlib.lib dirent.obj $(SSL_LIBS)
 
 COMPILE = $(CC) $(CFLAGS) $(INCLUDES) $(DEFS)
 LINK    = $(LD) $(LDFLAGS) /map:lynx.map /out:$@

@@ -1,5 +1,5 @@
 /*
- * $LynxId: GridText.c,v 1.230 2012/02/09 11:49:06 tom Exp $
+ * $LynxId: GridText.c,v 1.231 2012/02/10 18:22:04 tom Exp $
  *
  *		Character grid hypertext object
  *		===============================
@@ -1611,6 +1611,7 @@ static int display_line(HTLine *line,
 		    {
 			int y, x;
 
+			(void) y;
 			getyx(LYwin, y, x);
 			if (x >= DISPLAY_COLS || x == 0)
 			    break;
@@ -2229,6 +2230,7 @@ static void display_page(HText *text,
 		 * line.  -FM
 		 */
 		LYstopTargetEmphasis();
+		(void) y;
 		LYGetYX(y, offset);
 		data = (char *) &data[itmp];
 

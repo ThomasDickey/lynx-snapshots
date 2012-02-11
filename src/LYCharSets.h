@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYCharSets.h,v 1.33 2010/09/25 01:01:58 tom Exp $
+ * $LynxId: LYCharSets.h,v 1.34 2012/02/10 18:43:40 tom Exp $
  */
 #ifndef LYCHARSETS_H
 #define LYCHARSETS_H
@@ -43,9 +43,9 @@ extern "C" {
  */
     extern int LYCharSetsDeclared(void);
 
-    extern const char **LYCharSets[];
+    extern STRING2PTR LYCharSets[];
     extern const char *SevenBitApproximations[];
-    extern const char **p_entity_values;
+    extern STRING2PTR p_entity_values;
     extern const char *LYchar_set_names[];	/* Full name, not MIME */
     extern int LYlowest_eightbit[];
     extern int LYNumCharsets;

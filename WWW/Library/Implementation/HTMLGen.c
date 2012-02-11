@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTMLGen.c,v 1.36 2011/06/11 12:10:02 tom Exp $
+ * $LynxId: HTMLGen.c,v 1.37 2012/02/10 18:32:26 tom Exp $
  *
  *		HTML Generator
  *		==============
@@ -312,7 +312,7 @@ static void HTMLGen_write(HTStructured * me, const char *s,
  */
 static int HTMLGen_start_element(HTStructured * me, int element_number,
 				 const BOOL *present,
-				 const char **value,
+				 STRING2PTR value,
 				 int charset GCC_UNUSED,
 				 char **insert GCC_UNUSED)
 {

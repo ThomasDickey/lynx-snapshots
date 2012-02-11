@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYUtils.c,v 1.218 2012/02/09 18:56:48 tom Exp $
+ * $LynxId: LYUtils.c,v 1.221 2012/02/10 18:22:50 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTCP.h>
@@ -629,6 +629,7 @@ static BOOL show_whereis_targets(int flag,
 			    LYstopTargetEmphasis();
 			    TargetEmphasisON = FALSE;
 			    LYGetYX(y, offset);
+			    (void) y;
 			    LYmove(hLine, (offset + 1));
 			} else {
 			    LYaddstr(tmp);
@@ -1535,6 +1536,7 @@ void statusline(const char *text)
 		      ? (chtype) hashStyles[a].color
 		      : A_NORMAL) | ' ');
 	    LYGetYX(y, x);
+	    (void) x;
 	    if (y == at_lineno) {
 		LYclrtoeol();
 	    }
@@ -1723,8 +1725,8 @@ void LYFakeZap(int set)
 
 static int DontCheck(void)
 {
-    static long last;
-    long next;
+    static time_t last;
+    time_t next;
 
     /** Curses or slang setup was not invoked **/
     if (dump_output_immediately)
@@ -6697,7 +6699,7 @@ BOOLEAN LYValidateFilename(bstring **result,
 #ifndef __EMX__
 	if (!LYisAbsPath((*given)->str)) {
 #if defined(__DJGPP__) || defined(_WINDOWS)
-	    if (strchr(*result->str, ':') != NULL)
+	    if (strchr((*result)->str, ':') != NULL)
 		cp = NULL;
 	    else
 #endif /*  __DJGPP__ || _WINDOWS */
