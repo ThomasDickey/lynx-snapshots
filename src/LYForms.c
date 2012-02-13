@@ -1,4 +1,4 @@
-/* $LynxId: LYForms.c,v 1.97 2012/02/10 18:36:39 tom Exp $ */
+/* $LynxId: LYForms.c,v 1.98 2012/02/12 17:40:17 tom Exp $ */
 #include <HTUtils.h>
 #include <HTCJK.h>
 #include <HTTP.h>
@@ -245,7 +245,9 @@ int change_form_link_ex(int cur,
 	 * kw
 	 */
 	if (immediate_submit ||
-	    ((c == '\r' || c == '\n' || c == LAC_TO_LKC0(LYK_SUBMIT)) &&
+	    ((c == '\r' ||
+	      c == '\n' ||
+	      c == LAC_TO_LKC0(LYK_MOUSE_SUBMIT)) &&
 	     peek_mouse_link() == -1)) {
 	    LYSetHilite(cur, form->value);
 #ifdef TEXT_SUBMIT_CONFIRM_WANTED
@@ -274,7 +276,7 @@ int change_form_link_ex(int cur,
 		       ((no_file_url &&
 			 isFILE_URL(form->submit_action)) ||
 			!strncasecomp(form->submit_action, "lynx", 4))) {
-		c = LAC_TO_LKC0(LYK_SUBMIT);
+		c = LAC_TO_LKC0(LYK_MOUSE_SUBMIT);
 		break;
 	    } else {
 		if (form->no_cache &&

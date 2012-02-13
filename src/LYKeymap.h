@@ -1,4 +1,4 @@
-/* $LynxId: LYKeymap.h,v 1.45 2012/02/07 16:02:11 tom Exp $ */
+/* $LynxId: LYKeymap.h,v 1.48 2012/02/12 18:29:34 tom Exp $ */
 #ifndef LYKEYMAP_H
 #define LYKEYMAP_H
 
@@ -151,7 +151,9 @@ extern "C" {
 	,LYK_PREV_DOC
 	,LYK_NEXT_DOC
 	,LYK_ACTIVATE
-	,LYK_SUBMIT		/* mostly like LYK_ACTIVATE, for mouse use, don't map */
+	,LYK_MOUSE_SUBMIT	/* mostly like LYK_ACTIVATE, for mouse use, don't map */
+	,LYK_SUBMIT
+	,LYK_RESET
 	,LYK_GOTO
 	,LYK_ECGOTO
 	,LYK_HELP
@@ -240,6 +242,7 @@ extern "C" {
 
 #ifdef SUPPORT_CHDIR
 	,LYK_CHDIR
+	,LYK_PWD
 #endif
 
 #ifdef USE_CURSES_PADS

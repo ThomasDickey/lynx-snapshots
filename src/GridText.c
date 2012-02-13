@@ -1,5 +1,5 @@
 /*
- * $LynxId: GridText.c,v 1.231 2012/02/10 18:22:04 tom Exp $
+ * $LynxId: GridText.c,v 1.236 2012/02/13 00:33:15 tom Exp $
  *
  *		Character grid hypertext object
  *		===============================
@@ -579,11 +579,6 @@ void mark_justify_start_position(void *text)
 #define UNDERSCORES(n) \
  ((n) >= MAX_LINE ? underscore_string : &underscore_string[(MAX_LINE-1)] - (n))
 
-/*
- *	Memory leak fixed.
- *	05-29-94 Lynx 2-3-1 Garrett Arch Blythe
- *	Changed to arrays.
- */
 static char underscore_string[MAX_LINE + 1];
 char star_string[MAX_LINE + 1];
 
@@ -908,6 +903,9 @@ static void HText_getChartransInfo(HText *me)
 static void PerFormInfo_free(PerFormInfo * form)
 {
     if (form) {
+	FREE(form->data.submit_action);
+	FREE(form->data.submit_enctype);
+	FREE(form->data.submit_title);
 	FREE(form->accept_cs);
 	FREE(form->thisacceptcs);
 	FREE(form);
@@ -1166,8 +1164,6 @@ HText *HText_new(HTParentAnchor *anchor)
 		   HTAnchor_getUCInfoStage(anchor, UCT_STAGE_HTEXT));
 
     /*
-     * Memory leak fixed.
-     * 05-29-94 Lynx 2-3-1 Garrett Arch Blythe
      * Check to see if our underline and star_string need initialization
      * if the underline is not filled with dots.
      */
@@ -1611,8 +1607,8 @@ static int display_line(HTLine *line,
 		    {
 			int y, x;
 
-			(void) y;
 			getyx(LYwin, y, x);
+			(void) y;
 			if (x >= DISPLAY_COLS || x == 0)
 			    break;
 		    }
@@ -2230,8 +2226,8 @@ static void display_page(HText *text,
 		 * line.  -FM
 		 */
 		LYstopTargetEmphasis();
-		(void) y;
 		LYGetYX(y, offset);
+		(void) y;
 		data = (char *) &data[itmp];
 
 		/*
@@ -2315,10 +2311,6 @@ static void display_page(HText *text,
 
 		link_dest = HTAnchor_followLink(Anchor_ptr->anchor);
 		{
-		    /*
-		     * Memory leak fixed 05-27-94
-		     * Garrett Arch Blythe
-		     */
 		    auto char *cp_AnchorAddress = NULL;
 
 		    if (traversal)
@@ -9448,13 +9440,25 @@ const char *HText_HiddenLinkAt(HText *text, int number)
  * These routines are used to build forms consisting
  * of input fields
  */
-static int HTFormMethod;
-static char *HTFormAction = NULL;
-static char *HTFormEnctype = NULL;
-static char *HTFormTitle = NULL;
-static char *HTFormAcceptCharset = NULL;
 static BOOLEAN HTFormDisabled = FALSE;
 static PerFormInfo *HTCurrentForm;
+
+static BOOLEAN addFormAction(FormInfo * f)
+{
+    BOOLEAN result = FALSE;
+
+    if (HTCurrentForm != NULL) {
+	result = TRUE;
+	f->submit_action = NULL;
+	StrAllocCopy(f->submit_action, HTCurrentForm->data.submit_action);
+	if (HTCurrentForm->data.submit_enctype != NULL)
+	    StrAllocCopy(f->submit_enctype, HTCurrentForm->data.submit_enctype);
+	if (HTCurrentForm->data.submit_title != NULL)
+	    StrAllocCopy(f->submit_title, HTCurrentForm->data.submit_title);
+	f->submit_method = HTCurrentForm->data.submit_method;
+    }
+    return result;
+}
 
 void HText_beginForm(char *action,
 		     char *method,
@@ -9463,9 +9467,14 @@ void HText_beginForm(char *action,
 		     const char *accept_cs)
 {
     PerFormInfo *newform;
+    int HTFormMethod = URL_GET_METHOD;
+    char *HTFormAction = NULL;
+    char *HTFormEnctype = NULL;
+    char *HTFormTitle = NULL;
+    char *HTFormAcceptCharset = NULL;
 
-    HTFormMethod = URL_GET_METHOD;
     HTFormNumber++;
+
     HTFormFields = 0;
     HTFormDisabled = FALSE;
 
@@ -9518,23 +9527,25 @@ void HText_beginForm(char *action,
     }
 
     /*
-     * Create a new "PerFormInfo" structure to hold info on the current
-     * form.  The HTForm* variables could all migrate there, currently
-     * this isn't done (yet?) but it might be less confusing.
-     * Currently the only data saved in this structure that will actually
-     * be used is the accept_cs string.
-     * This will be appended to the forms list kept by the HText object
-     * if and when we reach a HText_endForm.  - kw
+     * Create a new "PerFormInfo" structure to hold info on the current form. 
+     * This will be appended to the forms list kept by the HText object if and
+     * when we reach a HText_endForm.
      */
     newform = typecalloc(PerFormInfo);
     if (newform == NULL)
 	outofmem(__FILE__, "HText_beginForm");
 
     assert(newform != NULL);
-    newform->number = HTFormNumber;
 
     PerFormInfo_free(HTCurrentForm);	/* shouldn't happen here - kw */
     HTCurrentForm = newform;
+
+    newform->number = HTFormNumber;
+    newform->data.submit_action = HTFormAction;
+    newform->data.submit_enctype = HTFormEnctype;
+    newform->data.submit_method = HTFormMethod;
+    newform->data.submit_title = HTFormTitle;
+    newform->accept_cs = HTFormAcceptCharset;
 
     CTRACE((tfp, "BeginForm: action:%s Method:%d%s%s%s%s%s%s\n",
 	    HTFormAction, HTFormMethod,
@@ -9562,39 +9573,29 @@ void HText_endForm(HText *text)
 	    for (a = text->first_anchor; a != NULL; a = a->next) {
 		if (a->link_type == INPUT_ANCHOR &&
 		    a->input_field->number == HTFormNumber &&
-		    a->input_field->type == F_TEXT_TYPE) {
+		    a->input_field->type != F_TEXTAREA_TYPE &&
+		    F_TEXTLIKE(a->input_field->type)) {
 		    /*
 		     * Got it.  Make it submitting.  -FM
 		     */
-		    a->input_field->submit_action = NULL;
-		    StrAllocCopy(a->input_field->submit_action, HTFormAction);
-		    if (HTFormEnctype != NULL)
-			StrAllocCopy(a->input_field->submit_enctype,
-				     HTFormEnctype);
-		    if (HTFormTitle != NULL)
-			StrAllocCopy(a->input_field->submit_title, HTFormTitle);
-		    a->input_field->submit_method = HTFormMethod;
-		    a->input_field->type = F_TEXT_SUBMIT_TYPE;
-		    if (HTFormDisabled)
-			a->input_field->disabled = TRUE;
+		    if (addFormAction(a->input_field)) {
+			a->input_field->type = F_TEXT_SUBMIT_TYPE;
+			if (HTFormDisabled)
+			    a->input_field->disabled = TRUE;
+		    }
 		    break;
 		}
 	    }
 	}
 
 	/*
-	 * Append info on the current form to the HText object's list of
-	 * forms.
+	 * Append info on the current form to the HText object's list of forms. 
 	 * HText_beginInput call will have set some of the data in the
-	 * PerFormInfo structure (if there were any form fields at all),
-	 * we also fill in the ACCEPT-CHARSET data now (this could have
-	 * been done earlier).  - kw
+	 * PerFormInfo structure (if there were any form fields at all).
 	 */
 	if (HTCurrentForm) {
 	    if (HTFormDisabled)
 		HTCurrentForm->disabled = TRUE;
-	    HTCurrentForm->accept_cs = HTFormAcceptCharset;
-	    HTFormAcceptCharset = NULL;
 	    if (!text->forms)
 		text->forms = HTList_new();
 	    HTList_appendObject(text->forms, HTCurrentForm);
@@ -9609,10 +9610,6 @@ void HText_endForm(HText *text)
     FREE(HTCurSelectGroup);
     FREE(HTCurSelectGroupSize);
     FREE(HTCurSelectedOptionValue);
-    FREE(HTFormAction);
-    FREE(HTFormEnctype);
-    FREE(HTFormTitle);
-    FREE(HTFormAcceptCharset);
     HTFormFields = 0;
     HTFormDisabled = FALSE;
 }
@@ -10102,12 +10099,6 @@ int HText_beginInput(HText *text,
     HTFormFields++;
 
     /*
-     * Set the no_cache flag if the METHOD is POST.  -FM
-     */
-    if (HTFormMethod == URL_POST_METHOD)
-	f->no_cache = TRUE;
-
-    /*
      * Set up VALUE.
      */
     if (I->value)
@@ -10328,14 +10319,7 @@ int HText_beginInput(HText *text,
 	    StrAllocCopy(f->value, "Submit");
 	    f->size = 6;
 	}
-	f->submit_action = NULL;
-	StrAllocCopy(f->submit_action, HTFormAction);
-	if (HTFormEnctype != NULL)
-	    StrAllocCopy(f->submit_enctype, HTFormEnctype);
-	if (HTFormTitle != NULL)
-	    StrAllocCopy(f->submit_title, HTFormTitle);
-	f->submit_method = HTFormMethod;
-
+	addFormAction(f);
     } else if (f->type == F_RADIO_TYPE || f->type == F_CHECKBOX_TYPE) {
 	f->size = 3;
 	if (IValue == NULL)
@@ -10484,11 +10468,16 @@ int HText_beginInput(HText *text,
 	HTCurrentForm->last_field = f;
 	HTCurrentForm->nfields++;	/* will count hidden fields - kw */
 	/*
+	 * Set the no_cache flag if the METHOD is POST.  -FM
+	 */
+	if (HTCurrentForm->data.submit_method == URL_POST_METHOD)
+	    f->no_cache = TRUE;
+	/*
 	 * Propagate form field's accept-charset attribute to enclosing
 	 * form if the form itself didn't have an accept-charset - kw
 	 */
-	if (f->accept_cs && !HTFormAcceptCharset) {
-	    StrAllocCopy(HTFormAcceptCharset, f->accept_cs);
+	if (f->accept_cs && !HTCurrentForm->accept_cs) {
+	    StrAllocCopy(HTCurrentForm->accept_cs, f->accept_cs);
 	}
 	if (!text->forms) {
 	    text->forms = HTList_new();
@@ -10921,6 +10910,11 @@ static int check_if_base64_needed(int submit_method,
     return !printable && ((submit_method == URL_MAIL_METHOD) && (width > 72));
 }
 
+PerFormInfo *HText_PerFormInfo(int number)
+{
+    return (PerFormInfo *) HTList_objectAt(HTMainText->forms, number - 1);
+}
+
 /*
  * HText_SubmitForm - generate submit data from form fields.
  * For mailto forms, send the data.
@@ -10929,8 +10923,9 @@ static int check_if_base64_needed(int submit_method,
  * Returns 1 if *doc set appropriately for next request,
  * 0 otherwise.  - kw
  */
-int HText_SubmitForm(FormInfo * submit_item, DocInfo *doc, char *link_name,
-		     char *link_value)
+int HText_SubmitForm(FormInfo * submit_item, DocInfo *doc,
+		     const char *link_name,
+		     const char *link_value)
 {
     BOOL had_chartrans_warning = NO;
     BOOL have_accept_cs = NO;
@@ -10967,8 +10962,7 @@ int HText_SubmitForm(FormInfo * submit_item, DocInfo *doc, char *link_name,
     if (!HTMainText)
 	return 0;
 
-    thisform = (PerFormInfo *) HTList_objectAt(HTMainText->forms, form_number
-					       - 1);
+    thisform = HText_PerFormInfo(form_number);
     /*  Sanity check */
     if (!thisform) {
 	CTRACE((tfp, "SubmitForm: form %d not in HTMainText's list!\n",
@@ -11889,22 +11883,21 @@ void HText_DisableCurrentForm(void)
     TextAnchor *anchor_ptr;
 
     HTFormDisabled = TRUE;
-    if (!HTMainText)
-	return;
+    if (HTMainText != NULL) {
+	/*
+	 * Go through list of anchors and set the disabled flag.
+	 */
+	for (anchor_ptr = HTMainText->first_anchor;
+	     anchor_ptr != NULL;
+	     anchor_ptr = anchor_ptr->next) {
 
-    /*
-     * Go through list of anchors and set the disabled flag.
-     */
-    for (anchor_ptr = HTMainText->first_anchor;
-	 anchor_ptr != NULL;
-	 anchor_ptr = anchor_ptr->next) {
-	if (anchor_ptr->link_type == INPUT_ANCHOR &&
-	    anchor_ptr->input_field->number == HTFormNumber) {
+	    if (anchor_ptr->link_type == INPUT_ANCHOR &&
+		anchor_ptr->input_field->number == HTFormNumber) {
 
-	    anchor_ptr->input_field->disabled = TRUE;
+		anchor_ptr->input_field->disabled = TRUE;
+	    }
 	}
     }
-
     return;
 }
 
@@ -12072,10 +12065,6 @@ static void free_all_texts(void)
     FREE(HTCurSelectGroup);
     FREE(HTCurSelectGroupSize);
     FREE(HTCurSelectedOptionValue);
-    FREE(HTFormAction);
-    FREE(HTFormEnctype);
-    FREE(HTFormTitle);
-    FREE(HTFormAcceptCharset);
     PerFormInfo_free(HTCurrentForm);
 
     return;

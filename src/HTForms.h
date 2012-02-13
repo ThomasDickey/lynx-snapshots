@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTForms.h,v 1.31 2012/02/07 16:24:29 tom Exp $
+ * $LynxId: HTForms.h,v 1.33 2012/02/12 22:30:53 tom Exp $
  */
 #ifndef HTFORMS_H
 #define HTFORMS_H
@@ -108,8 +108,8 @@ extern "C" {
  */
     typedef struct _PerFormInfo {
 	int number;		/* form number, see GridText.c */
-	/* except for the last two, the following fields aren't actually used.. */
 	int disabled;		/* If YES, can't change values */
+	FormInfo data;
 	struct _PerFormInfo *next;	/* pointer to next form in doc */
 	int nfields;		/* number of fields */
 	FormInfo *first_field;
@@ -140,6 +140,10 @@ extern "C" {
 	F_KEYGEN_TYPE,
 	F_BUTTON_TYPE
     } FieldTypes;
+
+#define F_SUBMITLIKE(type) ((type) == F_SUBMIT_TYPE || \
+			    (type) == F_IMAGE_SUBMIT_TYPE || \
+			    (type) == F_TEXT_SUBMIT_TYPE)
 
 #define F_TEXTLIKE(type) ((type) == F_TEXT_TYPE || \
 			  (type) == F_TEXT_SUBMIT_TYPE || \

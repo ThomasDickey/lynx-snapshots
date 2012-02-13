@@ -1,4 +1,4 @@
-/* $LynxId: LYKeymap.c,v 1.80 2012/02/07 16:04:24 tom Exp $ */
+/* $LynxId: LYKeymap.c,v 1.83 2012/02/12 18:35:32 tom Exp $ */
 #include <HTUtils.h>
 #include <LYUtils.h>
 #include <LYGlobalDefs.h>
@@ -743,8 +743,14 @@ static Kcmd revmap[] = {
 	LYK_ACTIVATE, "ACTIVATE",
 	"go to the document given by the current link" ),
     DATA(
-	LYK_SUBMIT, "MOUSE_SUBMIT",
+	LYK_MOUSE_SUBMIT, "MOUSE_SUBMIT",
 	"DO NOT MAP:  follow current link, submit" ),
+    DATA(
+	LYK_SUBMIT, "SUBMIT",
+	"prompt and submit form" ),
+    DATA(
+	LYK_RESET, "RESET",
+	"reset fields on current form" ),
     DATA(
 	LYK_GOTO, "GOTO",
 	"go to a document given as a URL" ),
@@ -943,6 +949,9 @@ static Kcmd revmap[] = {
     DATA(
 	LYK_CHDIR, "CHDIR",
 	"change current directory" ),
+    DATA(
+	LYK_PWD, "PWD",
+	"print current directory" ),
 #endif
 #ifdef USE_CURSES_PADS
     DATA(

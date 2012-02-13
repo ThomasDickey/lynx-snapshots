@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMainLoop.c,v 1.193 2012/02/10 00:26:26 tom Exp $
+ * $LynxId: LYMainLoop.c,v 1.206 2012/02/13 00:29:19 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTAccess.h>
@@ -1058,8 +1058,7 @@ static int handle_LYK_ACTIVATE(int *c,
 	     */
 	    if (links[curdoc.link].l_form->type == F_SUBMIT_TYPE ||
 		links[curdoc.link].l_form->type == F_IMAGE_SUBMIT_TYPE ||
-		links[curdoc.link].l_form->type ==
-		F_TEXT_SUBMIT_TYPE) {
+		links[curdoc.link].l_form->type == F_TEXT_SUBMIT_TYPE) {
 		/*
 		 * Do nothing if it's disabled.  - FM
 		 */
@@ -1072,9 +1071,7 @@ static int handle_LYK_ACTIVATE(int *c,
 		/*
 		 * Make sure we have an action.  - FM
 		 */
-		if (!links[curdoc.link].l_form->submit_action ||
-		    *links[curdoc.link].l_form->submit_action
-		    == '\0') {
+		if (isEmpty(links[curdoc.link].l_form->submit_action)) {
 		    HTUserMsg(NO_FORM_ACTION);
 		    HTOutputFormat = WWW_PRESENT;
 		    LYforce_no_cache = FALSE;
@@ -1178,12 +1175,13 @@ static int handle_LYK_ACTIVATE(int *c,
 					 (real_cmd == LYK_NOCACHE ||
 					  real_cmd == LYK_DOWNLOAD ||
 					  real_cmd == LYK_HEAD ||
-					  (real_cmd == LYK_SUBMIT &&
+					  (real_cmd == LYK_MOUSE_SUBMIT &&
 					   !textinput_activated)) ?
 					 FOR_PANEL : FOR_INPUT);
 		if (user_mode == NOVICE_MODE &&
 		    textinput_activated &&
-		    (real_cmd == LYK_ACTIVATE || real_cmd == LYK_SUBMIT)) {
+		    (real_cmd == LYK_ACTIVATE ||
+		     real_cmd == LYK_MOUSE_SUBMIT)) {
 		    form_noviceline(FormIsReadonly(links[curdoc.link].l_form));
 		}
 	    }
@@ -1191,7 +1189,7 @@ static int handle_LYK_ACTIVATE(int *c,
 	    *c = change_form_link(curdoc.link,
 				  &newdoc, refresh_screen,
 				  FALSE,
-				  (real_cmd == LYK_SUBMIT ||
+				  (real_cmd == LYK_MOUSE_SUBMIT ||
 				   real_cmd == LYK_NOCACHE ||
 				   real_cmd == LYK_DOWNLOAD ||
 				   real_cmd == LYK_HEAD));
@@ -1263,7 +1261,8 @@ static int handle_LYK_ACTIVATE(int *c,
 		case '\n':
 		case '\r':
 		default:
-		    if ((real_cmd == LYK_ACTIVATE || real_cmd == LYK_SUBMIT) &&
+		    if ((real_cmd == LYK_ACTIVATE ||
+			 real_cmd == LYK_MOUSE_SUBMIT) &&
 			F_TEXTLIKE(links[curdoc.link].l_form->type) &&
 			textinput_activated) {
 			return 3;
@@ -1491,6 +1490,104 @@ static int handle_LYK_ACTIVATE(int *c,
 	}
     }
     return 0;
+}
+/*
+ * If the given form link does not point to the requested type, search for
+ * the first link belonging to the form which does.  If there are none,
+ * return null.
+ */
+#define SameFormAction(form,submit) \
+ 	((submit) \
+	 ? (F_SUBMITLIKE((form)->type)) \
+	 : ((form)->type == F_RESET_TYPE))
+
+static FormInfo *FindFormAction(FormInfo * given, BOOLEAN submit)
+{
+    FormInfo *result = NULL;
+    FormInfo *fi;
+    int i;
+
+    if (given == NULL) {
+	HTAlert(LINK_NOT_IN_FORM);
+    } else if (SameFormAction(given, submit)) {
+	result = given;
+    } else {
+	for (i = 0; i < nlinks; i++) {
+	    if ((fi = links[i].l_form) != 0 &&
+		fi->number == given->number &&
+		(SameFormAction(fi, submit))) {
+		result = fi;
+		break;
+	    }
+	}
+    }
+    return result;
+}
+
+static FormInfo *MakeFormAction(FormInfo * given, BOOLEAN submit)
+{
+    FormInfo *result = typecalloc(FormInfo);
+
+    if (result == NULL)
+	outofmem(__FILE__, "MakeFormAction");
+
+    *result = *given;
+    if (submit) {
+	if (result->submit_action == 0) {
+	    PerFormInfo *pfi = HText_PerFormInfo(result->number);
+
+	    *result = pfi->data;
+	}
+	result->type = F_SUBMIT_TYPE;
+    } else {
+	result->type = F_RESET_TYPE;
+    }
+    result->number = given->number;
+    return result;
+}
+
+static void handle_LYK_SUBMIT(int cur, DocInfo *doc, BOOLEAN *refresh_screen)
+{
+    FormInfo *form = FindFormAction(links[cur].l_form, TRUE);
+    FormInfo *make = NULL;
+    char *save_submit_action = NULL;
+
+    if (form == 0) {
+	make = MakeFormAction(links[cur].l_form, TRUE);
+	form = make;
+    }
+
+    StrAllocCopy(save_submit_action, form->submit_action);
+    form->submit_action = HTPrompt(EDIT_SUBMIT_URL, form->submit_action);
+
+    if (isEmpty(form->submit_action) ||
+	(!isLYNXCGI(form->submit_action) &&
+	 StrNCmp(form->submit_action, "http", 4))) {
+	HTUserMsg(FORM_ACTION_NOT_HTTP_URL);
+    } else {
+	HTInfoMsg(SUBMITTING_FORM);
+	HText_SubmitForm(form, doc, form->name, form->value);
+	*refresh_screen = TRUE;
+    }
+
+    StrAllocCopy(form->submit_action, save_submit_action);
+    FREE(make);
+}
+
+static void handle_LYK_RESET(int cur, BOOLEAN *refresh_screen)
+{
+    FormInfo *form = FindFormAction(links[cur].l_form, FALSE);
+    FormInfo *make = NULL;
+
+    if (form == 0) {
+	make = MakeFormAction(links[cur].l_form, FALSE);
+	form = make;
+    }
+
+    HTInfoMsg(RESETTING_FORM);
+    HText_ResetForm(form);
+    *refresh_screen = TRUE;
+    FREE(make);
 }
 
 #ifdef USE_ADDRLIST_PAGE
@@ -1992,10 +2089,8 @@ static void handle_LYK_DIRED_MENU(BOOLEAN *refresh_screen,
 		FREE(cp);
 		if ((cp = strrchr(VMSdir, ']')) != NULL) {
 		    *(cp + 1) = '\0';
-		    cp == NULL;
 		} else if ((cp = strrchr(VMSdir, ':')) != NULL) {
 		    *(cp + 1) = '\0';
-		    cp == NULL;
 		}
 	    }
 	    HTSprintf0(&temp, "%s %s", HTGetProgramPath(ppCSWING), VMSdir);
@@ -2614,8 +2709,7 @@ static int handle_LYK_ELGOTO(int *ch,
 	return 0;
     }
     if ((links[curdoc.link].type == WWW_FORM_LINK_TYPE) &&
-	(!links[curdoc.link].l_form->submit_action ||
-	 *links[curdoc.link].l_form->submit_action == '\0')) {
+	(isEmpty(links[curdoc.link].l_form->submit_action))) {
 	/*
 	 * Form submit button with no ACTION defined.  - FM
 	 */
@@ -2983,8 +3077,7 @@ static BOOLEAN handle_LYK_HEAD(int *cmd)
 	} else if (c == 'L') {
 	    if (links[curdoc.link].type != WWW_FORM_LINK_TYPE &&
 		StrNCmp(links[curdoc.link].lname, "http", 4) &&
-		StrNCmp(links[curdoc.link].lname,
-			"LYNXIMGMAP:http", 15) &&
+		StrNCmp(links[curdoc.link].lname, "LYNXIMGMAP:http", 15) &&
 		LYCanDoHEAD(links[curdoc.link].lname) != TRUE &&
 		(links[curdoc.link].type != WWW_INTERN_LINK_TYPE ||
 		 !curdoc.address ||
@@ -3460,7 +3553,7 @@ static BOOLEAN check_JUMP_param(char **url_template)
 
 	CTRACE((tfp, "Prompt for query param%d: %s\n", param, result));
 
-	sprintf(prompt, "Query param%d: ", param++);
+	sprintf(prompt, gettext("Query parameter %d: "), param++);
 	statusline(prompt);
 	BStrCopy0(input, "");
 	if (LYgetBString(&input, VISIBLE, 0, recall) < 0) {
@@ -5201,6 +5294,22 @@ void handle_LYK_CHDIR(void)
     }
     FREE(p);
 }
+
+static void handle_LYK_PWD(void)
+{
+    char buffer[LY_MAXPATH];
+    int save_secs = InfoSecs;
+    BOOLEAN save_wait = no_pause;
+
+    if (Secs2SECS(save_secs) < 1)
+	InfoSecs = SECS2Secs(1);
+    no_pause = FALSE;
+
+    HTInfoMsg(Current_Dir(buffer));
+
+    InfoSecs = save_secs;
+    no_pause = save_wait;
+}
 #endif
 
 #ifdef USE_CURSES_PADS
@@ -6629,8 +6738,10 @@ int mainloop(void)
 	 */
 	if (!show_help) {
 	    show_main_statusline(links[curdoc.link],
-				 (curlink_is_editable && textinput_activated) ?
-				 FOR_INPUT : FOR_PANEL);
+				 ((curlink_is_editable &&
+				   textinput_activated)
+				  ? FOR_INPUT
+				  : FOR_PANEL));
 	} else {
 	    show_help = FALSE;
 	}
@@ -7309,7 +7420,7 @@ int mainloop(void)
 
 	    /* FALLTHRU */
 	case LYK_ACTIVATE:	/* follow a link */
-	case LYK_SUBMIT:	/* follow a link, submit TEXT_SUBMIT input */
+	case LYK_MOUSE_SUBMIT:	/* follow a link, submit TEXT_SUBMIT input */
 	    switch (handle_LYK_ACTIVATE(&c,
 					cmd,
 					&try_internal,
@@ -7324,6 +7435,14 @@ int mainloop(void)
 		pending_form_c = c;
 		break;
 	    }
+	    break;
+
+	case LYK_SUBMIT:
+	    handle_LYK_SUBMIT(curdoc.link, &newdoc, &refresh_screen);
+	    break;
+
+	case LYK_RESET:
+	    handle_LYK_RESET(curdoc.link, &refresh_screen);
 	    break;
 
 	case LYK_ELGOTO:	/* edit URL of current link and go to it  */
@@ -7569,6 +7688,9 @@ int mainloop(void)
 #ifdef SUPPORT_CHDIR
 	case LYK_CHDIR:
 	    handle_LYK_CHDIR();
+	    break;
+	case LYK_PWD:
+	    handle_LYK_PWD();
 	    break;
 #endif
 #ifdef USE_CURSES_PADS
