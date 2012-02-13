@@ -1,4 +1,4 @@
-/* $LynxId: LYStrings.c,v 1.203 2012/02/10 18:37:31 tom Exp $ */
+/* $LynxId: LYStrings.c,v 1.205 2012/02/13 00:33:02 tom Exp $ */
 #include <HTUtils.h>
 #include <HTCJK.h>
 #include <UCAux.h>
@@ -505,11 +505,13 @@ static int set_clicked_link(int x,
 			links[i].l_form->type == F_TEXT_SUBMIT_TYPE) {
 			if (code != FOR_INPUT
 			/* submit current input field directly */
-			    || !(cury == y && (curx >= lx) && ((curx - lx) <= len))) {
-			    c = LAC_TO_LKC0(LYK_SUBMIT);
+			    || !(cury == y &&
+				 (curx >= lx) &&
+				 ((curx - lx) <= len))) {
+			    c = LAC_TO_LKC0(LYK_MOUSE_SUBMIT);
 			    mouse_link = i;
 			} else {
-			    c = LAC_TO_LKC0(LYK_SUBMIT);
+			    c = LAC_TO_LKC0(LYK_MOUSE_SUBMIT);
 			    mouse_link = -1;
 			}
 			mouse_err = 0;
@@ -1538,7 +1540,7 @@ static int LYmouse_menu(int x, int y, int atlink, int code)
 #endif
 	{"Search index",		LYK_INDEX_SEARCH,	ENT_ONLY_DOC},
 	{"Set Options",			LYK_OPTIONS,		ENT_ONLY_DOC},
-	{"Activate this link",		LYK_SUBMIT,		ENT_ONLY_LINK},
+	{"Activate this link",		LYK_MOUSE_SUBMIT,	ENT_ONLY_LINK},
 	{"Download",			LYK_DOWNLOAD,		ENT_ONLY_LINK}
     };
     /* *INDENT-ON* */
@@ -2278,8 +2280,9 @@ static int LYgetch_for(int code)
 		    c = set_clicked_link(event.x, event.y, code, 1);
 		} else if (event.bstate & BUTTON1_DOUBLE_CLICKED) {
 		    c = set_clicked_link(event.x, event.y, code, 2);
-		    if (c == LAC_TO_LKC0(LYK_SUBMIT) && code == FOR_INPUT)
-			lac = LYK_SUBMIT;
+		    if (c == LAC_TO_LKC0(LYK_MOUSE_SUBMIT) &&
+			code == FOR_INPUT)
+			lac = LYK_MOUSE_SUBMIT;
 		} else if (event.bstate & BUTTON3_CLICKED) {
 		    c = LAC_TO_LKC0(LYK_PREV_DOC);
 		} else if (code == FOR_PROMPT
@@ -2300,7 +2303,7 @@ static int LYgetch_for(int code)
 			mouse_link = -1;	/* Forget about approx stuff. */
 
 		    lac = LYmouse_menu(event.x, event.y, atlink, code);
-		    if (lac == LYK_SUBMIT) {
+		    if (lac == LYK_MOUSE_SUBMIT) {
 			if (mouse_link == -1)
 			    lac = LYK_ACTIVATE;
 #ifdef TEXTFIELDS_MAY_NEED_ACTIVATION
@@ -2329,7 +2332,8 @@ static int LYgetch_for(int code)
 		}
 #endif
 		if (code == FOR_INPUT && mouse_link == -1 &&
-		    lac != LYK_REFRESH && lac != LYK_SUBMIT) {
+		    lac != LYK_REFRESH &&
+		    lac != LYK_MOUSE_SUBMIT) {
 		    ungetmouse(&event);		/* Caller will process this. */
 		    wgetch(LYwin);	/* ungetmouse puts KEY_MOUSE back */
 		    c = MOUSE_KEY;
@@ -3652,8 +3656,6 @@ static void remember_column(EDREC * edit, int offset)
 {
     int y0, x0;
 
-    (void) y0;
-    (void) x0;
 #if defined(USE_SLANG)
     y0 = 0;
     x0 = SLsmg_get_column();
@@ -3663,6 +3665,9 @@ static void remember_column(EDREC * edit, int offset)
     getyx(stdscr, y0, x0);
 #endif
     Offs2Col[offset] = x0;
+
+    (void) y0;
+    (void) x0;
 }
 
 static void fill_edited_line(int prompting GCC_UNUSED, int length, int ch)
@@ -5077,11 +5082,12 @@ int LYgetBString(bstring **inputline,
     BOOL refresh_mb = TRUE;
 #endif /* SUPPORT_MULTIBYTE_EDIT */
 
-    CTRACE((tfp, "called LYgetBString hidden %d, recall %d\n", hidden, recall));
+    CTRACE((tfp, "called LYgetBString hidden %d, recall %d\n", hidden, (int) recall));
+
+    LYGetYX(y, x);		/* Use screen from cursor position to eol */
 
     (void) y;
     (void) x;
-    LYGetYX(y, x);		/* Use screen from cursor position to eol */
 
     if (*inputline == NULL)	/* caller may not have initialized this */
 	BStrCopy0(*inputline, "");

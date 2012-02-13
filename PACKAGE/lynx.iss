@@ -1,4 +1,4 @@
-; $LynxId: lynx.iss,v 1.4 2009/11/22 23:59:04 tom Exp $
+; $LynxId: lynx.iss,v 1.5 2012/02/11 13:21:25 tom Exp $
 ; vile:ts=2 sw=2 notabinsert
 ;
 ; This is the BASE script for different flavors of the installer for Lynx.
@@ -30,6 +30,22 @@
 #ifndef ScreenDllName
 #define ScreenDllName "pdcurses.dll"
 #endif
+#endif
+
+#ifndef BzipDllName
+#define BzipDllName "bzip2.dll"
+#endif
+
+#ifndef ZlibDllName
+#define ZlibDllName "zlib.dll"
+#endif
+
+#ifndef BzipExeName
+#define BzipExeName "bzip2.exe"
+#endif
+
+#ifndef GzipExeName
+#define GzipExeName "gzip.exe"
 #endif
 
 #ifndef SetupBaseName
@@ -110,6 +126,10 @@ Name: "{app}\tmp"
 #ifndef NoScreenDll
 #emit 'Source: "' + DllsSrcDir + '\' + ScreenDllName + '"; DestDir: "{app}"; DestName: ' + ScreenDllName + '; Flags: ignoreversion'
 #endif
+#emit 'Source: "' + DllsSrcDir + '\' + ZlibDllName + '"; DestDir: "{app}"; DestName: ' + ZlibDllName + '; Flags: ignoreversion'
+#emit 'Source: "' + DllsSrcDir + '\' + BzipDllName + '"; DestDir: "{app}"; DestName: ' + BzipDllName + '; Flags: ignoreversion'
+#emit 'Source: "' + DllsSrcDir + '\' + BzipExeName + '"; DestDir: "{app}"; DestName: ' + BzipExeName + '; Flags: ignoreversion'
+#emit 'Source: "' + DllsSrcDir + '\' + GzipExeName + '"; DestDir: "{app}"; DestName: ' + GzipExeName + '; Flags: ignoreversion'
 #emit 'Source: "' + DocsSrcDir + '\*.*"; DestDir: "{app}\doc"; Flags: '
 #emit 'Source: "' + DocsSrcDir + '\samples\*.*"; DestDir: "{app}\doc\samples"; Flags: '
 #emit 'Source: "' + DocsSrcDir + '\test\*.*"; DestDir: "{app}\doc\test"; Flags: '

@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMessages_en.h,v 1.71 2010/12/08 01:28:43 Doug.Kaufman Exp $
+ * $LynxId: LYMessages_en.h,v 1.73 2012/02/12 23:59:14 tom Exp $
  *
  * Lynx - Hypertext navigation system
  *
@@ -141,6 +141,8 @@
 #define RESETTING_FORM gettext("Resetting form...")
 #define RELOADING_FORM \
  gettext("Reloading document.  Any form entries will be lost!")
+#define LINK_NOT_IN_FORM \
+ gettext("The current link is not in a FORM")
 #define CANNOT_TRANSCODE_FORM gettext("Warning: Cannot transcode form data to charset %s!")
 
 #define NORMAL_LINK_MESSAGE \
@@ -364,6 +366,7 @@
 #define CURRENT_DOC_HAS_POST_DATA gettext("Current document has POST data.")
 #define EDIT_CURDOC_URL gettext("Edit this document's URL: ")
 #define EDIT_CURLINK_URL gettext("Edit the current link's URL: ")
+#define EDIT_SUBMIT_URL gettext("Edit the form's submit-URL: ")
 #define EDIT_FM_MENU_URLS_DISALLOWED gettext("You cannot edit File Management URLs")
 #define ENTER_DATABASE_QUERY gettext("Enter a database query: ")
 #define ENTER_WHEREIS_QUERY gettext("Enter a whereis query: ")

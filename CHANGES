@@ -1,9 +1,15 @@
--- $LynxId: CHANGES,v 1.583 2012/02/10 20:00:53 tom Exp $
+-- $LynxId: CHANGES,v 1.588 2012/02/13 00:16:30 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2012-02-09 (2.8.8dev.10)
+2012-02-12 (2.8.8dev.10)
+* updated po/lynx.pot; there are a few new messages -TD
+* add "submit" and "reset" commands (Debian #603645) -TD
+* add "pwd" command, to show current working directory in the statusline -TD
+* modify check in HText_endForm() when a form contains only a single input
+  field, to allow a return in any text-like field other than textarea to cause
+  the form to be submitted (Debian #603648) -TD
 * add bzlib to win32 makefile.msc -TD
 * define WIN32_LEAN_AND_MEAN in makefile.msc to accommodate naming conflict
   in recent Win32 SDKs, which otherwise include winsock.h in windows.h -TD
