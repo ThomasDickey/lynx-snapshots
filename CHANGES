@@ -1,7 +1,12 @@
--- $LynxId: CHANGES,v 1.588 2012/02/13 00:16:30 tom Exp $
+-- $LynxId: CHANGES,v 1.591 2012/02/15 23:42:06 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
+
+2012-02-15 (2.8.8dev.11)
+* update eo.po, et.po and tr.po from
+    http://translationproject.org/latest/lynx
+* correct dll name for bzip2 in lynx.iss package script -TD
 
 2012-02-12 (2.8.8dev.10)
 * updated po/lynx.pot; there are a few new messages -TD

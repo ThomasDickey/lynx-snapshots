@@ -1,4 +1,4 @@
-; $LynxId: lynx.iss,v 1.5 2012/02/11 13:21:25 tom Exp $
+; $LynxId: lynx.iss,v 1.6 2012/02/13 22:17:17 tom Exp $
 ; vile:ts=2 sw=2 notabinsert
 ;
 ; This is the BASE script for different flavors of the installer for Lynx.
@@ -33,7 +33,7 @@
 #endif
 
 #ifndef BzipDllName
-#define BzipDllName "bzip2.dll"
+#define BzipDllName "libbz2.dll"
 #endif
 
 #ifndef ZlibDllName
