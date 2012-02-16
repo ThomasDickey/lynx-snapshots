@@ -1,3 +1,9 @@
+lynx-dev (2.8.8dev.11) unstable; urgency=low
+
+  * changes for dev.11
+
+ -- Thomas E. Dickey <dickey@invisible-island.net>  Wed, 15 Feb 2012 18:43:49 -0500
+
 lynx-dev (2.8.8dev.10) unstable; urgency=low
 
   * changes for dev.10
