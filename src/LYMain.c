@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMain.c,v 1.236 2012/02/10 01:19:45 tom Exp $
+ * $LynxId: LYMain.c,v 1.237 2012/02/20 01:32:18 Kihara.Hideto Exp $
  */
 #include <HTUtils.h>
 #include <HTTP.h>
@@ -3577,13 +3577,13 @@ soon as they are seen)"
       "historical",	4|TOGGLE_ARG,		historical_comments,
       "toggles use of '>' or '-->' as terminator for comments"
    ),
-   PARSE_SET(
-      "html5_charsets",	4|TOGGLE_ARG,		html5_charsets,
-      "toggles use of '>' or '-->' as terminator for comments"
-   ),
    PARSE_FUN(
       "homepage",	4|NEED_FUNCTION_ARG,	homepage_fun,
       "=URL\nset homepage separate from start page"
+   ),
+   PARSE_SET(
+      "html5_charsets",	4|TOGGLE_ARG,		html5_charsets,
+      "toggles use of HTML5 charset replacements"
    ),
    PARSE_SET(
       "image_links",	4|TOGGLE_ARG,		clickable_images,

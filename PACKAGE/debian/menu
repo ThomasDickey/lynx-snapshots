@@ -1,2 +1,0 @@
-?package(lynx-dev):needs="text" section="Applications/Network/Web Browsing"\
-  title="Lynx-dev" command="lynx"

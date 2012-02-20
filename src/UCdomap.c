@@ -1,5 +1,5 @@
 /*
- * $LynxId: UCdomap.c,v 1.93 2012/02/10 18:44:11 tom Exp $
+ * $LynxId: UCdomap.c,v 1.94 2012/02/20 01:08:51 Thorsten.Glaser Exp $
  *
  *  UCdomap.c
  *  =========
@@ -2498,7 +2498,7 @@ BOOL UCScanCode(UCode_t *target, const char *source, BOOL isHex)
 
     errno = 0;
     *target = 0;
-    lcode = strtol(source, &endptr, isHex ? 12 : 10);
+    lcode = strtol(source, &endptr, isHex ? 16 : 10);
     if (lcode >= 0
 	&& (endptr > source)
 #if defined(ERANGE) && defined(LONG_MAX) && defined(LONG_MIN)
