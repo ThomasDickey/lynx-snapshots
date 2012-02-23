@@ -1,7 +1,12 @@
--- $LynxId: CHANGES,v 1.593 2012/02/20 01:34:18 tom Exp $
+-- $LynxId: CHANGES,v 1.595 2012/02/23 00:42:23 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
+
+2012-02-22 (2.8.8dev.12)
+* amend the dev.10 change to HTLoadDocument(), which broke caching of forms,
+  to limit it to just the case where the user has pressed ^R, etc (report by
+  TG) -TD
 
 2012-02-19 (2.8.8dev.11)
 * correct help-message for -html5_charset option -Kihara Hideto
