@@ -1,7 +1,10 @@
--- $LynxId: CHANGES,v 1.597 2012/02/23 01:18:46 tom Exp $
+-- $LynxId: CHANGES,v 1.598 2012/02/23 09:52:17 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
+
+2012-02-23 (2.8.8dev.13)
+* add configure check for windres needed for mingw build if cross-compiling -TD
 
 2012-02-22 (2.8.8dev.12)
 * treat charsets ISO-8859-8-E and ISO-8859-8-I as aliases of ISO-8859-8
