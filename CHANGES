@@ -1,9 +1,11 @@
--- $LynxId: CHANGES,v 1.595 2012/02/23 00:42:23 tom Exp $
+-- $LynxId: CHANGES,v 1.597 2012/02/23 01:18:46 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
 2012-02-22 (2.8.8dev.12)
+* treat charsets ISO-8859-8-E and ISO-8859-8-I as aliases of ISO-8859-8
+  (Owen Leibman)
 * amend the dev.10 change to HTLoadDocument(), which broke caching of forms,
   to limit it to just the case where the user has pressed ^R, etc (report by
   TG) -TD

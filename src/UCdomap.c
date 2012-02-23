@@ -1,5 +1,5 @@
 /*
- * $LynxId: UCdomap.c,v 1.94 2012/02/20 01:08:51 Thorsten.Glaser Exp $
+ * $LynxId: UCdomap.c,v 1.95 2012/02/23 01:05:42 tom Exp $
  *
  *  UCdomap.c
  *  =========
@@ -1558,6 +1558,10 @@ int UCGetLYhndl_byMIME(const char *value)
 #endif
     if (!strncasecomp(value, "iso", 3) && !StrNCmp(value + 3, "8859", 4)) {
 	return getLYhndl_byCP("iso-", value + 3);
+    }
+    if (!strcasecomp(value, "iso-8859-8-i") ||
+	!strcasecomp(value, "iso-8859-8-e")) {
+	return UCGetLYhndl_byMIME("iso-8859-8");
     }
 #if !NO_CHARSET_euc_jp
     if (!strcasecomp(value, "x-euc-jp") ||
