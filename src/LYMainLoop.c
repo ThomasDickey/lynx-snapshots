@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMainLoop.c,v 1.206 2012/02/13 00:29:19 tom Exp $
+ * $LynxId: LYMainLoop.c,v 1.207 2012/02/23 00:39:12 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTAccess.h>
@@ -4387,7 +4387,7 @@ static void handle_LYK_RELOAD(int real_cmd)
      * RAW_TOGGLE, etc.  - KW
      */
     if (real_cmd == LYK_RELOAD)
-	reloading = TRUE;
+	reloading = REAL_RELOAD;
 
     return;
 }

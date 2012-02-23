@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTAccess.c,v 1.76 2012/02/04 00:15:53 tom Exp $
+ * $LynxId: HTAccess.c,v 1.77 2012/02/23 00:39:40 tom Exp $
  *
  *		Access Manager					HTAccess.c
  *		==============
@@ -895,7 +895,7 @@ static BOOL HTLoadDocument(const char *full_address,	/* may include #fragment */
 	 * based on an If-Modified-Since check, etc.) but the code for doing
 	 * those other things isn't available yet.
 	 */
-	if (!reloading &&
+	if ((reloading != REAL_RELOAD) &&
 	    (LYoverride_no_cache ||
 #ifdef DONT_TRACK_INTERNAL_LINKS
 	     !HText_hasNoCacheSet(text) ||
