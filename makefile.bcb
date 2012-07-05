@@ -1,4 +1,4 @@
-# $LynxId: makefile.bcb,v 1.16 2011/06/04 14:18:03 tom Exp $
+# $LynxId: makefile.bcb,v 1.17 2012/07/05 00:57:52 tom Exp $
 #
 # Borland C++ / C++ builder
 # 1997/11/08 (Sat) 10:45:37
@@ -19,10 +19,10 @@ TASM32  = Tasm32
 #
 BCB = $(MAKEDIR)/..
 BCC_INC = $(BCB)/INCLUDE
-#BCC_INC = c:/cbuilder/include
 WWW_LIB = WWW/Library/Implementation
-OBJ = ..\obj
-ETC_LIB = ../curses
+
+ETC_INC = c:\app\GnuWin32\include
+ETC_LIB = c:\app\GnuWin32\bin-bcc
 
 
 #
@@ -36,13 +36,13 @@ DEBUG=
 # Uncomment the CS_DEFS and CS_OBJS lines if you wish to build the color-style
 # configuration.
 #CS_DEFS = /DCHAR_BIT=8 /DUSE_COLOR_STYLE
-#CS_OBJS = $(OBJ)/LYHash.obj $(OBJ)/LYStyle.obj
+#CS_OBJS = LYHash.obj LYStyle.obj
 
 # Uncomment SOCK_DEFS if you wish to build with winsock2.
 #SOCK_DEFS = /DUSE_WINSOCK2_H /D_WIN32_WINNT=0x0400
 
 CC_FLAGS = $(DEBUG) $(CS_DEFS) $(SOCK_DEFS) \
--I./;$(ETC_LIB);$(ETC_LIB)/openssl;SRC;$(WWW_LIB);$(BCC_INC);SRC/CHRTRANS \
+-I./;$(ETC_INC);$(ETC_INC)/openssl;SRC;$(WWW_LIB);$(BCC_INC);SRC/CHRTRANS \
 -DACCESS_AUTH \
 -DCJK_EX \
 -DCOLOR_CURSES \
@@ -71,7 +71,6 @@ CC_FLAGS = $(DEBUG) $(CS_DEFS) $(SOCK_DEFS) \
 -DUSE_EXTERNALS \
 -DUSE_JUSTIFY_ELTS \
 -DUSE_MULTIBYTE_CURSES \
--DFEPCTRL \
 -DENABLE_NLS \
 -DHAVE_GETTEXT \
 -DHAVE_LIBINTL_H \
@@ -82,9 +81,11 @@ CC_FLAGS = $(DEBUG) $(CS_DEFS) $(SOCK_DEFS) \
 -DUSE_ZLIB \
 -DVC="2.14FM" \
 -DWIN_EX \
+-D_MSC_VER=0 \
 -D_WINDOWS \
 -D_WIN_CC=1 \
--DUSE_SSL \
+-DUSE_PROGRAM_DIR \
+-DICONV_CONST=const \
 -DUSE_X509_SUPPORT \
 -DEXP_JAPANESEUTF8_SUPPORT
 
@@ -99,530 +100,529 @@ lynx : BccW32.cfg $(Dep_lynx)
 clean :
 	-del *.tds
 	-del *.map
-	-del $(OBJ)\*.obj
+	-del *.obj
 	-del BccW32.cfg 
 	-del /f/s/q *.i
 
 Dep_lynxdexe = \
-   $(ETC_LIB)/zdllbor.lib\
-   $(ETC_LIB)/pdcurses.lib\
+   $(ETC_LIB)/zlib1.lib\
+   $(ETC_LIB)/curses2.lib\
    $(ETC_LIB)/libeay32.lib\
-   $(ETC_LIB)/ssleay32.lib\
-   $(ETC_LIB)/iconv.lib\
-   $(ETC_LIB)/libintl.lib\
-   $(ETC_LIB)/iconv.lib\
-   $(OBJ)/DefaultStyle.obj\
-   $(OBJ)/GridText.obj\
-   $(OBJ)/HTAABrow.obj\
-   $(OBJ)/HTAAProt.obj\
-   $(OBJ)/HTAAUtil.obj\
-   $(OBJ)/HTAccess.obj\
-   $(OBJ)/HTAlert.obj\
-   $(OBJ)/HTAnchor.obj\
-   $(OBJ)/HTAssoc.obj\
-   $(OBJ)/HTAtom.obj\
-   $(OBJ)/HTBtree.obj\
-   $(OBJ)/HTChunk.obj\
-   $(OBJ)/HTDOS.obj\
-   $(OBJ)/HTFile.obj\
-   $(OBJ)/HTFinger.obj\
-   $(OBJ)/HTFormat.obj\
-   $(OBJ)/HTFtp.obj\
-   $(OBJ)/HTFwriter.obj\
-   $(OBJ)/HTGopher.obj\
-   $(OBJ)/HTGroup.obj\
-   $(OBJ)/HTInit.obj\
-   $(OBJ)/HTLex.obj\
-   $(OBJ)/HTList.obj\
-   $(OBJ)/HTMIME.obj\
-   $(OBJ)/HTML.obj\
-   $(OBJ)/HTMLDTD.obj\
-   $(OBJ)/HTMLGen.obj\
-   $(OBJ)/HTNews.obj\
-   $(OBJ)/HTParse.obj\
-   $(OBJ)/HTPlain.obj\
-   $(OBJ)/HTRules.obj\
-   $(OBJ)/HTString.obj\
-   $(OBJ)/HTStyle.obj\
-   $(OBJ)/HTTP.obj\
-   $(OBJ)/HTTcp.obj\
-   $(OBJ)/HTTelnet.obj\
-   $(OBJ)/HTUU.obj\
-   $(OBJ)/HTWSRC.obj\
-   $(OBJ)/LYBookmark.obj\
-   $(OBJ)/LYCgi.obj\
-   $(OBJ)/LYCharSets.obj\
-   $(OBJ)/LYCharUtils.obj\
-   $(OBJ)/LYClean.obj\
-   $(OBJ)/LYCookie.obj\
-   $(OBJ)/LYCurses.obj\
-   $(OBJ)/LYDownload.obj\
-   $(OBJ)/LYEdit.obj\
-   $(OBJ)/LYEditmap.obj\
-   $(OBJ)/LYExit.obj\
-   $(OBJ)/LYExtern.obj\
-   $(OBJ)/LYForms.obj\
-   $(OBJ)/LYGetFile.obj\
-   $(OBJ)/LYHistory.obj\
-   $(OBJ)/LYJump.obj\
-   $(OBJ)/LYKeymap.obj\
-   $(OBJ)/LYLeaks.obj\
-   $(OBJ)/LYList.obj\
-   $(OBJ)/LYLocal.obj\
-   $(OBJ)/LYMail.obj\
-   $(OBJ)/LYMain.obj\
-   $(OBJ)/LYMainLoop.obj\
-   $(OBJ)/LYMap.obj\
-   $(OBJ)/LYNews.obj\
-   $(OBJ)/LYOptions.obj\
-   $(OBJ)/LYPrettySrc.obj\
-   $(OBJ)/LYPrint.obj\
-   $(OBJ)/LYReadCFG.obj\
-   $(OBJ)/LYSearch.obj\
-   $(OBJ)/LYSession.obj\
-   $(OBJ)/LYShowInfo.obj\
-   $(OBJ)/LYStrings.obj\
-   $(OBJ)/LYTraversal.obj\
-   $(OBJ)/LYUpload.obj\
-   $(OBJ)/LYUtils.obj\
-   $(OBJ)/LYmktime.obj\
-   $(OBJ)/LYrcFile.obj\
-   $(OBJ)/parsdate.obj\
-   $(OBJ)/SGML.obj\
-   $(OBJ)/TRSTable.obj\
-   $(OBJ)/UCAuto.obj\
-   $(OBJ)/UCAux.obj\
-   $(OBJ)/UCdomap.obj\
-   $(OBJ)/Xsystem.obj $(CS_OBJS)
+   $(ETC_LIB)/libssl32.lib\
+   $(ETC_LIB)/libiconv2.lib\
+   $(ETC_LIB)/libintl3.lib\
+   DefaultStyle.obj\
+   GridText.obj\
+   HTAABrow.obj\
+   HTAAProt.obj\
+   HTAAUtil.obj\
+   HTAccess.obj\
+   HTAlert.obj\
+   HTAnchor.obj\
+   HTAssoc.obj\
+   HTAtom.obj\
+   HTBtree.obj\
+   HTChunk.obj\
+   HTDOS.obj\
+   HTFile.obj\
+   HTFinger.obj\
+   HTFormat.obj\
+   HTFtp.obj\
+   HTFwriter.obj\
+   HTGopher.obj\
+   HTGroup.obj\
+   HTInit.obj\
+   HTLex.obj\
+   HTList.obj\
+   HTMIME.obj\
+   HTML.obj\
+   HTMLDTD.obj\
+   HTMLGen.obj\
+   HTNews.obj\
+   HTParse.obj\
+   HTPlain.obj\
+   HTRules.obj\
+   HTString.obj\
+   HTStyle.obj\
+   HTTP.obj\
+   HTTcp.obj\
+   HTTelnet.obj\
+   HTUU.obj\
+   HTWSRC.obj\
+   LYBookmark.obj\
+   LYCgi.obj\
+   LYCharSets.obj\
+   LYCharUtils.obj\
+   LYClean.obj\
+   LYCookie.obj\
+   LYCurses.obj\
+   LYDownload.obj\
+   LYEdit.obj\
+   LYEditmap.obj\
+   LYExit.obj\
+   LYExtern.obj\
+   LYForms.obj\
+   LYGetFile.obj\
+   LYHistory.obj\
+   LYJump.obj\
+   LYKeymap.obj\
+   LYLeaks.obj\
+   LYList.obj\
+   LYLocal.obj\
+   LYMail.obj\
+   LYMain.obj\
+   LYMainLoop.obj\
+   LYMap.obj\
+   LYNews.obj\
+   LYOptions.obj\
+   LYPrettySrc.obj\
+   LYPrint.obj\
+   LYReadCFG.obj\
+   LYSearch.obj\
+   LYSession.obj\
+   LYShowInfo.obj\
+   LYStrings.obj\
+   LYTraversal.obj\
+   LYUpload.obj\
+   LYUtils.obj\
+   LYmktime.obj\
+   LYrcFile.obj\
+   parsdate.obj\
+   SGML.obj\
+   TRSTable.obj\
+   UCAuto.obj\
+   UCAux.obj\
+   UCdomap.obj\
+   Xsystem.obj $(CS_OBJS)
 
 
 lynx.exe : $(Dep_lynxdexe)
 #	$(BCC32) $(DEBUG) -lOS -elynx.exe @lynx_dbg.rsp
-	$(BCC32) $(DEBUG) -lOS -elynx.exe $(CS_OBJS) @lynx.rsp
+	$(BCC32) $(DEBUG) -lOS -elynx.exe $(CS_OBJS) -L$(ETC_LIB) @lynx.rsp
 #
 ###
 
-$(OBJ)/HTDOS.obj :  $(WWW_LIB)/HTDOS.c
+HTDOS.obj :  $(WWW_LIB)/HTDOS.c
   $(BCC32) -P- -c @&&|
  $(CEAT_lynxdexe) $(CC_FLAGS) -o$@ $(WWW_LIB)/HTDOS.c
 |
 
-$(OBJ)/UCAuto.obj :  src/UCAuto.c
+UCAuto.obj :  src/UCAuto.c
   $(BCC32) -P- -c @&&|
  $(CEAT_lynxdexe) $(CC_FLAGS) -o$@ src/UCAuto.c
 |
 
-$(OBJ)/UCAux.obj :  src/UCAux.c
+UCAux.obj :  src/UCAux.c
   $(BCC32) -P- -c @&&|
  $(CEAT_lynxdexe) $(CC_FLAGS) -o$@ src/UCAux.c
 |
 
-$(OBJ)/UCdomap.obj :  src/UCdomap.c
+UCdomap.obj :  src/UCdomap.c
   $(BCC32) -P- -c @&&|
  $(CEAT_lynxdexe) $(CC_FLAGS) -o$@ src/UCdomap.c
 |
 
-$(OBJ)/HTAlert.obj :  src/HTAlert.c
+HTAlert.obj :  src/HTAlert.c
   $(BCC32) -P- -c @&&|
  $(CEAT_lynxdexe) $(CC_FLAGS) -o$@ src/HTAlert.c
 |
 
-$(OBJ)/HTFwriter.obj :  src/HTFwriter.c
+HTFwriter.obj :  src/HTFwriter.c
   $(BCC32) -P- -c @&&|
  $(CEAT_lynxdexe) $(CC_FLAGS) -o$@ src/HTFwriter.c
 |
 
-$(OBJ)/HTInit.obj :  src/HTInit.c
+HTInit.obj :  src/HTInit.c
   $(BCC32) -P- -c @&&|
  $(CEAT_lynxdexe) $(CC_FLAGS) -o$@ src/HTInit.c
 |
 
-$(OBJ)/HTTcp.obj :  $(WWW_LIB)/HTTcp.c
+HTTcp.obj :  $(WWW_LIB)/HTTcp.c
   $(BCC32) -P- -c @&&|
  $(CEAT_lynxdexe) $(CC_FLAGS) -o$@ $(WWW_LIB)/HTTcp.c
 |
 
-$(OBJ)/HTAABrow.obj :  $(WWW_LIB)/HTAABrow.c
+HTAABrow.obj :  $(WWW_LIB)/HTAABrow.c
   $(BCC32) -P- -c @&&|
  $(CEAT_lynxdexe) $(CC_FLAGS) -o$@ $(WWW_LIB)/HTAABrow.c
 |
 
-$(OBJ)/HTAAProt.obj :  $(WWW_LIB)/HTAAProt.c
+HTAAProt.obj :  $(WWW_LIB)/HTAAProt.c
   $(BCC32) -P- -c @&&|
  $(CEAT_lynxdexe) $(CC_FLAGS) -o$@ $(WWW_LIB)/HTAAProt.c
 |
 
-$(OBJ)/HTAAUtil.obj :  $(WWW_LIB)/HTAAUtil.c
+HTAAUtil.obj :  $(WWW_LIB)/HTAAUtil.c
   $(BCC32) -P- -c @&&|
  $(CEAT_lynxdexe) $(CC_FLAGS) -o$@ $(WWW_LIB)/HTAAUtil.c
 |
 
-$(OBJ)/HTAccess.obj :  $(WWW_LIB)/HTAccess.c
+HTAccess.obj :  $(WWW_LIB)/HTAccess.c
   $(BCC32) -P- -c @&&|
  $(CEAT_lynxdexe) $(CC_FLAGS) -o$@ $(WWW_LIB)/HTAccess.c
 |
 
-$(OBJ)/HTAnchor.obj :  $(WWW_LIB)/HTAnchor.c
+HTAnchor.obj :  $(WWW_LIB)/HTAnchor.c
   $(BCC32) -P- -c @&&|
  $(CEAT_lynxdexe) $(CC_FLAGS) -o$@ $(WWW_LIB)/HTAnchor.c
 |
 
-$(OBJ)/HTAssoc.obj :  $(WWW_LIB)/HTAssoc.c
+HTAssoc.obj :  $(WWW_LIB)/HTAssoc.c
   $(BCC32) -P- -c @&&|
  $(CEAT_lynxdexe) $(CC_FLAGS) -o$@ $(WWW_LIB)/HTAssoc.c
 |
 
-$(OBJ)/HTAtom.obj :  $(WWW_LIB)/HTAtom.c
+HTAtom.obj :  $(WWW_LIB)/HTAtom.c
   $(BCC32) -P- -c @&&|
  $(CEAT_lynxdexe) $(CC_FLAGS) -o$@ $(WWW_LIB)/HTAtom.c
 |
 
-$(OBJ)/HTBtree.obj :  $(WWW_LIB)/HTBtree.c
+HTBtree.obj :  $(WWW_LIB)/HTBtree.c
   $(BCC32) -P- -c @&&|
  $(CEAT_lynxdexe) $(CC_FLAGS) -o$@ $(WWW_LIB)/HTBtree.c
 |
 
-$(OBJ)/HTChunk.obj :  $(WWW_LIB)/HTChunk.c
+HTChunk.obj :  $(WWW_LIB)/HTChunk.c
   $(BCC32) -P- -c @&&|
  $(CEAT_lynxdexe) $(CC_FLAGS) -o$@ $(WWW_LIB)/HTChunk.c
 |
 
-$(OBJ)/HTFile.obj :  $(WWW_LIB)/HTFile.c
+HTFile.obj :  $(WWW_LIB)/HTFile.c
   $(BCC32) -P- -c @&&|
  $(CEAT_lynxdexe) $(CC_FLAGS) -o$@ $(WWW_LIB)/HTFile.c
 |
 
-$(OBJ)/HTFinger.obj :  $(WWW_LIB)/HTFinger.c
+HTFinger.obj :  $(WWW_LIB)/HTFinger.c
   $(BCC32) -P- -c @&&|
  $(CEAT_lynxdexe) $(CC_FLAGS) -o$@ $(WWW_LIB)/HTFinger.c
 |
 
-$(OBJ)/HTFormat.obj :  $(WWW_LIB)/HTFormat.c
+HTFormat.obj :  $(WWW_LIB)/HTFormat.c
   $(BCC32) -P- -c @&&|
  $(CEAT_lynxdexe) $(CC_FLAGS) -o$@ $(WWW_LIB)/HTFormat.c
 |
 
-$(OBJ)/HTFtp.obj :  $(WWW_LIB)/HTFtp.c
+HTFtp.obj :  $(WWW_LIB)/HTFtp.c
   $(BCC32) -P- -c @&&|
  $(CEAT_lynxdexe) $(CC_FLAGS) -o$@ $(WWW_LIB)/HTFtp.c
 |
 
-$(OBJ)/HTGopher.obj :  $(WWW_LIB)/HTGopher.c
+HTGopher.obj :  $(WWW_LIB)/HTGopher.c
   $(BCC32) -P- -c @&&|
  $(CEAT_lynxdexe) $(CC_FLAGS) -o$@ $(WWW_LIB)/HTGopher.c
 |
 
-$(OBJ)/HTGroup.obj :  $(WWW_LIB)/HTGroup.c
+HTGroup.obj :  $(WWW_LIB)/HTGroup.c
   $(BCC32) -P- -c @&&|
  $(CEAT_lynxdexe) $(CC_FLAGS) -o$@ $(WWW_LIB)/HTGroup.c
 |
 
-$(OBJ)/HTLex.obj :  $(WWW_LIB)/HTLex.c
+HTLex.obj :  $(WWW_LIB)/HTLex.c
   $(BCC32) -P- -c @&&|
  $(CEAT_lynxdexe) $(CC_FLAGS) -o$@ $(WWW_LIB)/HTLex.c
 |
 
-$(OBJ)/HTList.obj :  $(WWW_LIB)/HTList.c
+HTList.obj :  $(WWW_LIB)/HTList.c
   $(BCC32) -P- -c @&&|
  $(CEAT_lynxdexe) $(CC_FLAGS) -o$@ $(WWW_LIB)/HTList.c
 |
 
-$(OBJ)/HTMIME.obj :  $(WWW_LIB)/HTMIME.c
+HTMIME.obj :  $(WWW_LIB)/HTMIME.c
   $(BCC32) -P- -c @&&|
  $(CEAT_lynxdexe) $(CC_FLAGS) -o$@ $(WWW_LIB)/HTMIME.c
 |
 
-$(OBJ)/HTMLDTD.obj :  $(WWW_LIB)/HTMLDTD.c
+HTMLDTD.obj :  $(WWW_LIB)/HTMLDTD.c
   $(BCC32) -P- -c @&&|
  $(CEAT_lynxdexe) $(CC_FLAGS) -o$@ $(WWW_LIB)/HTMLDTD.c
 |
 
-$(OBJ)/HTMLGen.obj :  $(WWW_LIB)/HTMLGen.c
+HTMLGen.obj :  $(WWW_LIB)/HTMLGen.c
   $(BCC32) -P- -c @&&|
  $(CEAT_lynxdexe) $(CC_FLAGS) -o$@ $(WWW_LIB)/HTMLGen.c
 |
 
-$(OBJ)/HTNews.obj :  $(WWW_LIB)/HTNews.c
+HTNews.obj :  $(WWW_LIB)/HTNews.c
   $(BCC32) -P- -c @&&|
  $(CEAT_lynxdexe) $(CC_FLAGS) -o$@ $(WWW_LIB)/HTNews.c
 |
 
-$(OBJ)/HTParse.obj :  $(WWW_LIB)/HTParse.c
+HTParse.obj :  $(WWW_LIB)/HTParse.c
   $(BCC32) -P- -c @&&|
  $(CEAT_lynxdexe) $(CC_FLAGS) -o$@ $(WWW_LIB)/HTParse.c
 |
 
-$(OBJ)/HTPlain.obj :  $(WWW_LIB)/HTPlain.c
+HTPlain.obj :  $(WWW_LIB)/HTPlain.c
   $(BCC32) -P- -c @&&|
  $(CEAT_lynxdexe) $(CC_FLAGS) -o$@ $(WWW_LIB)/HTPlain.c
 |
 
-$(OBJ)/HTRules.obj :  $(WWW_LIB)/HTRules.c
+HTRules.obj :  $(WWW_LIB)/HTRules.c
   $(BCC32) -P- -c @&&|
  $(CEAT_lynxdexe) $(CC_FLAGS) -o$@ $(WWW_LIB)/HTRules.c
 |
 
-$(OBJ)/HTString.obj :  $(WWW_LIB)/HTString.c
+HTString.obj :  $(WWW_LIB)/HTString.c
   $(BCC32) -P- -c @&&|
  $(CEAT_lynxdexe) $(CC_FLAGS) -o$@ $(WWW_LIB)/HTString.c
 |
 
-$(OBJ)/HTStyle.obj :  $(WWW_LIB)/HTStyle.c
+HTStyle.obj :  $(WWW_LIB)/HTStyle.c
   $(BCC32) -P- -c @&&|
  $(CEAT_lynxdexe) $(CC_FLAGS) -o$@ $(WWW_LIB)/HTStyle.c
 |
 
-$(OBJ)/HTTelnet.obj :  $(WWW_LIB)/HTTelnet.c
+HTTelnet.obj :  $(WWW_LIB)/HTTelnet.c
   $(BCC32) -P- -c @&&|
  $(CEAT_lynxdexe) $(CC_FLAGS) -o$@ $(WWW_LIB)/HTTelnet.c
 |
 
-$(OBJ)/HTTP.obj :  $(WWW_LIB)/HTTP.c
+HTTP.obj :  $(WWW_LIB)/HTTP.c
   $(BCC32) -P- -c @&&|
  $(CEAT_lynxdexe) $(CC_FLAGS) -o$@ $(WWW_LIB)/HTTP.c
 |
 
-$(OBJ)/HTUU.obj :  $(WWW_LIB)/HTUU.c
+HTUU.obj :  $(WWW_LIB)/HTUU.c
   $(BCC32) -P- -c @&&|
  $(CEAT_lynxdexe) $(CC_FLAGS) -o$@ $(WWW_LIB)/HTUU.c
 |
 
-$(OBJ)/HTWSRC.obj :  $(WWW_LIB)/HTWSRC.c
+HTWSRC.obj :  $(WWW_LIB)/HTWSRC.c
   $(BCC32) -P- -c @&&|
  $(CEAT_lynxdexe) $(CC_FLAGS) -o$@ $(WWW_LIB)/HTWSRC.c
 |
 
-$(OBJ)/SGML.obj :  $(WWW_LIB)/SGML.c
+SGML.obj :  $(WWW_LIB)/SGML.c
   $(BCC32) -P- -c @&&|
  $(CEAT_lynxdexe) $(CC_FLAGS) -o$@ $(WWW_LIB)/SGML.c
 |
 
-$(OBJ)/DefaultStyle.obj :  src/DefaultStyle.c
+DefaultStyle.obj :  src/DefaultStyle.c
   $(BCC32) -P- -c @&&|
  $(CEAT_lynxdexe) $(CC_FLAGS) -o$@ src/DefaultStyle.c
 |
 
-$(OBJ)/GridText.obj :  src/GridText.c
+GridText.obj :  src/GridText.c
   $(BCC32) -P- -c @&&|
  $(CEAT_lynxdexe) $(CC_FLAGS) -o$@ src/GridText.c
 |
 
-$(OBJ)/HTML.obj :  src/HTML.c
+HTML.obj :  src/HTML.c
   $(BCC32) -P- -c @&&|
  $(CEAT_lynxdexe) $(CC_FLAGS) -o$@ src/HTML.c
 |
 
-$(OBJ)/LYBookmark.obj :  src/LYBookmark.c
+LYBookmark.obj :  src/LYBookmark.c
   $(BCC32) -P- -c @&&|
  $(CEAT_lynxdexe) $(CC_FLAGS) -o$@ src/LYBookmark.c
 |
 
-$(OBJ)/LYCgi.obj :  src/LYCgi.c
+LYCgi.obj :  src/LYCgi.c
   $(BCC32) -P- -c @&&|
  $(CEAT_lynxdexe) $(CC_FLAGS) -o$@ src/LYCgi.c
 |
 
-$(OBJ)/LYCharSets.obj :  src/LYCharSets.c
+LYCharSets.obj :  src/LYCharSets.c
   $(BCC32) -P- -c @&&|
  $(CEAT_lynxdexe) $(CC_FLAGS) -o$@ src/LYCharSets.c
 |
 
-$(OBJ)/LYCharUtils.obj :  src/LYCharUtils.c
+LYCharUtils.obj :  src/LYCharUtils.c
   $(BCC32) -P- -c @&&|
  $(CEAT_lynxdexe) $(CC_FLAGS) -o$@ src/LYCharUtils.c
 |
 
-$(OBJ)/LYClean.obj :  src/LYClean.c
+LYClean.obj :  src/LYClean.c
   $(BCC32) -P- -c @&&|
  $(CEAT_lynxdexe) $(CC_FLAGS) -o$@ src/LYClean.c
 |
 
-$(OBJ)/LYCookie.obj :  src/LYCookie.c
+LYCookie.obj :  src/LYCookie.c
   $(BCC32) -P- -c @&&|
  $(CEAT_lynxdexe) $(CC_FLAGS) -o$@ src/LYCookie.c
 |
 
-$(OBJ)/LYCurses.obj :  src/LYCurses.c
+LYCurses.obj :  src/LYCurses.c
   $(BCC32) -P- -c @&&|
  $(CEAT_lynxdexe) $(CC_FLAGS) -o$@ src/LYCurses.c
 |
 
-$(OBJ)/LYDownload.obj :  src/LYDownload.c
+LYDownload.obj :  src/LYDownload.c
   $(BCC32) -P- -c @&&|
  $(CEAT_lynxdexe) $(CC_FLAGS) -o$@ src/LYDownload.c
 |
 
-$(OBJ)/LYEdit.obj :  src/LYEdit.c
+LYEdit.obj :  src/LYEdit.c
   $(BCC32) -P- -c @&&|
  $(CEAT_lynxdexe) $(CC_FLAGS) -o$@ src/LYEdit.c
 |
 
-$(OBJ)/LYEditmap.obj :  src/LYEditmap.c
+LYEditmap.obj :  src/LYEditmap.c
   $(BCC32) -P- -c @&&|
  $(CEAT_lynxdexe) $(CC_FLAGS) -o$@ src/LYEditmap.c
 |
 
-$(OBJ)/LYExit.obj :  src/LYExit.c
+LYExit.obj :  src/LYExit.c
   $(BCC32) -P- -c @&&|
  $(CEAT_lynxdexe) $(CC_FLAGS) -o$@ src/LYExit.c
 |
 
-$(OBJ)/LYExtern.obj :  src/LYExtern.c
+LYExtern.obj :  src/LYExtern.c
   $(BCC32) -P- -c @&&|
  $(CEAT_lynxdexe) $(CC_FLAGS) -o$@ src/LYExtern.c
 |
 
-$(OBJ)/LYForms.obj :  src/LYForms.c
+LYForms.obj :  src/LYForms.c
   $(BCC32) -P- -c @&&|
  $(CEAT_lynxdexe) $(CC_FLAGS) -o$@ src/LYForms.c
 |
 
-$(OBJ)/LYGetFile.obj :  src/LYGetFile.c
+LYGetFile.obj :  src/LYGetFile.c
   $(BCC32) -P- -c @&&|
  $(CEAT_lynxdexe) $(CC_FLAGS) -o$@ src/LYGetFile.c
 |
 
-$(OBJ)/LYHash.obj :  src/LYHash.c
+LYHash.obj :  src/LYHash.c
   $(BCC32) -P- -c @&&|
  $(CEAT_lynxdexe) $(CC_FLAGS) -o$@ src/LYHash.c
 |
 
-$(OBJ)/LYHistory.obj :  src/LYHistory.c
+LYHistory.obj :  src/LYHistory.c
   $(BCC32) -P- -c @&&|
  $(CEAT_lynxdexe) $(CC_FLAGS) -o$@ src/LYHistory.c
 |
 
-$(OBJ)/LYJump.obj :  src/LYJump.c
+LYJump.obj :  src/LYJump.c
   $(BCC32) -P- -c @&&|
  $(CEAT_lynxdexe) $(CC_FLAGS) -o$@ src/LYJump.c
 |
 
-$(OBJ)/LYKeymap.obj :  src/LYKeymap.c
+LYKeymap.obj :  src/LYKeymap.c
   $(BCC32) -P- -c @&&|
  $(CEAT_lynxdexe) $(CC_FLAGS) -o$@ src/LYKeymap.c
 |
 
-$(OBJ)/LYLeaks.obj :  src/LYLeaks.c
+LYLeaks.obj :  src/LYLeaks.c
   $(BCC32) -P- -c @&&|
  $(CEAT_lynxdexe) $(CC_FLAGS) -o$@ src/LYLeaks.c
 |
 
-$(OBJ)/LYList.obj :  src/LYList.c
+LYList.obj :  src/LYList.c
   $(BCC32) -P- -c @&&|
  $(CEAT_lynxdexe) $(CC_FLAGS) -o$@ src/LYList.c
 |
 
-$(OBJ)/LYLocal.obj :  src/LYLocal.c
+LYLocal.obj :  src/LYLocal.c
   $(BCC32) -P- -c @&&|
  $(CEAT_lynxdexe) $(CC_FLAGS) -o$@ src/LYLocal.c
 |
 
-$(OBJ)/LYMail.obj :  src/LYMail.c
+LYMail.obj :  src/LYMail.c
   $(BCC32) -P- -c @&&|
  $(CEAT_lynxdexe) $(CC_FLAGS) -o$@ src/LYMail.c
 |
 
-$(OBJ)/LYMain.obj :  src/LYMain.c
+LYMain.obj :  src/LYMain.c
   $(BCC32) -P- -c @&&|
  $(CEAT_lynxdexe) $(CC_FLAGS) -o$@ src/LYMain.c
 |
 
-$(OBJ)/LYMainLoop.obj :  src/LYMainLoop.c
+LYMainLoop.obj :  src/LYMainLoop.c
   $(BCC32) -P- -c @&&|
  $(CEAT_lynxdexe) $(CC_FLAGS) -o$@ src/LYMainLoop.c
 |
 
-$(OBJ)/LYMap.obj :  src/LYMap.c
+LYMap.obj :  src/LYMap.c
   $(BCC32) -P- -c @&&|
  $(CEAT_lynxdexe) $(CC_FLAGS) -o$@ src/LYMap.c
 |
 
-$(OBJ)/LYNews.obj :  src/LYNews.c
+LYNews.obj :  src/LYNews.c
   $(BCC32) -P- -c @&&|
  $(CEAT_lynxdexe) $(CC_FLAGS) -o$@ src/LYNews.c
 |
 
-$(OBJ)/LYOptions.obj :  src/LYOptions.c
+LYOptions.obj :  src/LYOptions.c
   $(BCC32) -P- -c @&&|
  $(CEAT_lynxdexe) $(CC_FLAGS) -o$@ src/LYOptions.c
 |
 
-$(OBJ)/LYPrint.obj :  src/LYPrint.c
+LYPrint.obj :  src/LYPrint.c
   $(BCC32) -P- -c @&&|
  $(CEAT_lynxdexe) $(CC_FLAGS) -o$@ src/LYPrint.c
 |
 
-$(OBJ)/LYPrettySrc.obj :  src/LYPrettySrc.c
+LYPrettySrc.obj :  src/LYPrettySrc.c
   $(BCC32) -P- -c @&&|
  $(CEAT_lynxdexe) $(CC_FLAGS) -o$@ src/LYPrettySrc.c
 |
 
-$(OBJ)/LYmktime.obj :  src/LYmktime.c
+LYmktime.obj :  src/LYmktime.c
   $(BCC32) -P- -c @&&|
  $(CEAT_lynxdexe) $(CC_FLAGS) -o$@ src/LYmktime.c
 |
 
-$(OBJ)/LYrcFile.obj :  src/LYrcFile.c
+LYrcFile.obj :  src/LYrcFile.c
   $(BCC32) -P- -c @&&|
  $(CEAT_lynxdexe) $(CC_FLAGS) -o$@ src/LYrcFile.c
 |
 
-$(OBJ)/LYReadCFG.obj :  src/LYReadCFG.c
+LYReadCFG.obj :  src/LYReadCFG.c
   $(BCC32) -P- -c @&&|
  $(CEAT_lynxdexe) $(CC_FLAGS) -o$@ src/LYReadCFG.c
 |
 
-$(OBJ)/LYSearch.obj :  src/LYSearch.c
+LYSearch.obj :  src/LYSearch.c
   $(BCC32) -P- -c @&&|
  $(CEAT_lynxdexe) $(CC_FLAGS) -o$@ src/LYSearch.c
 |
 
-$(OBJ)/LYSession.obj :  src/LYSession.c
+LYSession.obj :  src/LYSession.c
   $(BCC32) -P- -c @&&|
  $(CEAT_lynxdexe) $(CC_FLAGS) -o$@ src/LYSession.c
 |
 
-$(OBJ)/LYShowInfo.obj :  src/LYShowInfo.c
+LYShowInfo.obj :  src/LYShowInfo.c
   $(BCC32) -P- -c @&&|
  $(CEAT_lynxdexe) $(CC_FLAGS) -o$@ src/LYShowInfo.c
 |
 
-$(OBJ)/LYStrings.obj :  src/LYStrings.c
+LYStrings.obj :  src/LYStrings.c
   $(BCC32) -P- -c @&&|
  $(CEAT_lynxdexe) $(CC_FLAGS) -o$@ src/LYStrings.c
 |
 
-$(OBJ)/LYStyle.obj :  src/LYStyle.c
+LYStyle.obj :  src/LYStyle.c
   $(BCC32) -P- -c @&&|
  $(CEAT_lynxdexe) $(CC_FLAGS) -o$@ src/LYStyle.c
 |
 
-$(OBJ)/LYTraversal.obj :  src/LYTraversal.c
+LYTraversal.obj :  src/LYTraversal.c
   $(BCC32) -P- -c @&&|
  $(CEAT_lynxdexe) $(CC_FLAGS) -o$@ src/LYTraversal.c
 |
 
-$(OBJ)/LYUpload.obj :  src/LYUpload.c
+LYUpload.obj :  src/LYUpload.c
   $(BCC32) -P- -c @&&|
  $(CEAT_lynxdexe) $(CC_FLAGS) -o$@ src/LYUpload.c
 |
 
-$(OBJ)/LYUtils.obj :  src/LYUtils.c
+LYUtils.obj :  src/LYUtils.c
   $(BCC32) -P- -c @&&|
  $(CEAT_lynxdexe) $(CC_FLAGS) -o$@ src/LYUtils.c
 |
 
-$(OBJ)/parsdate.obj :  src/parsdate.c
+parsdate.obj :  src/parsdate.c
   $(BCC32) -P- -c @&&|
  $(CEAT_lynxdexe) $(CC_FLAGS) -o$@ src/parsdate.c
 |
 
-$(OBJ)/TRSTable.obj :  src/TRSTable.c
+TRSTable.obj :  src/TRSTable.c
   $(BCC32) -P- -c @&&|
  $(CEAT_lynxdexe) $(CC_FLAGS) -o$@ src/TRSTable.c
 |
 
-$(OBJ)/Xsystem.obj :  src/Xsystem.c
+Xsystem.obj :  src/Xsystem.c
   $(BCC32) -P- -c @&&|
  $(CEAT_lynxdexe) $(CC_FLAGS) -o$@ src/Xsystem.c
 |

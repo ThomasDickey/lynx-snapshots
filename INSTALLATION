@@ -912,6 +912,30 @@ IV. Compile instructions -- Win32 (Windows95/98/NT)
 
 Borland C:
 
+--  --------------------------------------------------------------------------
+    Download these "setup" files from http://gnuwin32.sourceforge.net
+	libiconv-1.9.2-1.exe (libiconv)
+	libintl-0.14.4.exe (libintl)
+	openssl-0.9.8h-1-setup.exe (openssl)
+	pdcurses-2.6.exe (pdcurses)
+	zlib-1.2.3.exe (zlib)
+    Install all of the packages in the same directory, e.g., "c:\app\GnuWin32".
+
+    Fix is needed in GnuWin32 include/zconf.h, change line reading
+    	#if 1	/* HAVE_UNISTD_H -- this line is updated by ./configure */
+    to
+    	#ifdef HAVE_UNISTD_H
+
+    Prepare import-libraries using Borland's implib program.  The ".lib"
+    files that it uses are a different format than the Microsoft import
+    libraries.
+    	for {name} in *.dll
+	do
+		implib -a {name}.lib {name}.dll
+	done
+
+--  --------------------------------------------------------------------------
+
     The original Win32 port was built with Borland C++ 4.52, but later
     versions reportedly can be used.  Before compiling the Lynx sources, you
     need a curses library, and it is recommended that you have the zlib
@@ -1387,4 +1411,4 @@ VIII. Acknowledgment
 
 -- 1999/04/24 - H. Nelson <lynx-admin@irm.nara.kindai.ac.jp>
 -- vile:txtmode
--- $LynxId: INSTALLATION,v 1.117 2012/02/03 22:29:17 tom Exp $
+-- $LynxId: INSTALLATION,v 1.118 2012/07/05 00:40:44 tom Exp $
