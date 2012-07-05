@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTUtils.h,v 1.109 2012/02/10 18:44:24 tom Exp $
+ * $LynxId: HTUtils.h,v 1.110 2012/07/04 19:37:26 tom Exp $
  *
  * Utility macros for the W3 code library
  * MACROS FOR GENERAL USE
@@ -224,7 +224,7 @@ extern void sleep(unsigned __seconds);
 #define popen _popen
 #define pclose _pclose
 
-#if defined(_MSC_VER)
+#if defined(_MSC_VER) && (_MSC_VER > 0)
 typedef unsigned short mode_t;
 #endif
 

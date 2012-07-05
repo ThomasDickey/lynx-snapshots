@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYUtils.c,v 1.221 2012/02/10 18:22:50 tom Exp $
+ * $LynxId: LYUtils.c,v 1.222 2012/07/05 00:56:21 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTCP.h>
@@ -18,12 +18,17 @@ extern int kbhit(void);		/* FIXME: use conio.h */
 
 #ifdef DONT_USE_GETTEXT
 #undef gettext
+#elif defined(HAVE_GETTEXT)
+#undef gettext
+#define gettext conio_gettext
 #endif
 
 #include <conio.h>
 
 #ifdef DONT_USE_GETTEXT
 #define gettext(s) s
+#elif defined(HAVE_GETTEXT)
+#undef gettext
 #endif
 
 #if !defined(kbhit) && defined(_WCONIO_DEFINED)

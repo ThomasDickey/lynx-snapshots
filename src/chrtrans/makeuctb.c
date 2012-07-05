@@ -1,5 +1,5 @@
 /*
- * $LynxId: makeuctb.c,v 1.46 2010/09/24 09:52:56 tom Exp $
+ * $LynxId: makeuctb.c,v 1.47 2012/07/04 20:58:29 tom Exp $
  *
  *  makeuctb.c, derived from conmakehash.c   - kw
  *
@@ -30,7 +30,7 @@
 #define DONT_USE_SOCKS5
 #include <UCDefs.h>
 #include <UCkd.h>
-#include <LYUtils.h>
+#include <ctype.h>
 
 /*
  *  Don't try to use LYexit() since this is a standalone file.
@@ -88,7 +88,7 @@ static void usage(void)
 }
 
 #ifdef USE_ASCII_CTYPES
-int ascii_tolower(int i)
+static int ascii_tolower(int i)
 {
     if (91 > i && i > 64)
 	return (i + 32);
