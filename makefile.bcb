@@ -1,4 +1,4 @@
-# $LynxId: makefile.bcb,v 1.17 2012/07/05 00:57:52 tom Exp $
+# $LynxId: makefile.bcb,v 1.18 2012/07/05 09:52:45 tom Exp $
 #
 # Borland C++ / C++ builder
 # 1997/11/08 (Sat) 10:45:37
@@ -21,9 +21,11 @@ BCB = $(MAKEDIR)/..
 BCC_INC = $(BCB)/INCLUDE
 WWW_LIB = WWW/Library/Implementation
 
-ETC_INC = c:\app\GnuWin32\include
-ETC_LIB = c:\app\GnuWin32\bin-bcc
-
+# "GW32_ROOT" is the location of the GnuWin32 binaries and header files.
+# Aside from the Borland files, it holds all of the external libraries
+# needed by Lynx.  It can/should be an environment variable (see makew32.bat).
+ETC_INC = $(GW32_ROOT)\include
+ETC_LIB = $(GW32_ROOT)\bin-bcc
 
 #
 # Options
@@ -98,19 +100,22 @@ lynx : BccW32.cfg $(Dep_lynx)
 	echo MakeNode 
 
 clean :
+	-del lynx.rsp
 	-del *.tds
 	-del *.map
 	-del *.obj
 	-del BccW32.cfg 
 	-del /f/s/q *.i
 
-Dep_lynxdexe = \
+LYNX_LIBS = \
    $(ETC_LIB)/zlib1.lib\
    $(ETC_LIB)/curses2.lib\
    $(ETC_LIB)/libeay32.lib\
    $(ETC_LIB)/libssl32.lib\
    $(ETC_LIB)/libiconv2.lib\
-   $(ETC_LIB)/libintl3.lib\
+   $(ETC_LIB)/libintl3.lib
+
+LYNX_OBJS = \
    DefaultStyle.obj\
    GridText.obj\
    HTAABrow.obj\
@@ -195,8 +200,13 @@ Dep_lynxdexe = \
    UCdomap.obj\
    Xsystem.obj $(CS_OBJS)
 
+Dep_lynxdexe = $(LYNX_LIBS) $(LYNX_OBJS) $(CS_OBJS)
 
-lynx.exe : $(Dep_lynxdexe)
+lynx.rsp : BccW32.cfg $(LYNX_OBJS)
+	dir /b *.obj >$@
+	FOR %p IN ($(LYNX_LIBS)) DO echo %p >>$@
+
+lynx.exe : $(Dep_lynxdexe) lynx.rsp
 #	$(BCC32) $(DEBUG) -lOS -elynx.exe @lynx_dbg.rsp
 	$(BCC32) $(DEBUG) -lOS -elynx.exe $(CS_OBJS) -L$(ETC_LIB) @lynx.rsp
 #
