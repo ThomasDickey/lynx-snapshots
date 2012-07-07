@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="8.00"
+	Version="9.00"
 	Name="makeuctb"
 	ProjectGUID="{3EF8C45C-FC77-47B8-A5B6-5F9034ECE06E}"
 	RootNamespace="makeuctb"
 	Keyword="Win32Proj"
+	TargetFrameworkVersion="131072"
 	>
 	<Platforms>
 		<Platform
@@ -27,7 +28,7 @@
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
-				CommandLine="setlocal&#x0D;&#x0A;set MYDST=..\..\..\src\chrtrans&#x0D;&#x0A;copy $(TargetPath) %MYDST%&#x0D;&#x0A;cd %MYDST%&#x0D;&#x0A;call makehdrs&#x0D;&#x0A;endlocal"
+				CommandLine="setlocal&#x0D;&#x0A;set MYDST=..\..\..\src\chrtrans&#x0D;&#x0A;copy $(TargetPath) %MYDST%&#x0D;&#x0A;cd %MYDST%&#x0D;&#x0A;call makehdrs&#x0D;&#x0A;endlocal&#x0D;&#x0A;"
 				Outputs="..\..\..\src\chrtrans\makeuctb.exe;..\..\..\src\chrtrans\def7_uni.h;..\..\..\src\chrtrans\cp1250_uni.h;..\..\..\src\chrtrans\cp1251_uni.h;..\..\..\src\chrtrans\cp1252_uni.h;..\..\..\src\chrtrans\cp1253_uni.h;..\..\..\src\chrtrans\cp1255_uni.h;..\..\..\src\chrtrans\cp1256_uni.h;..\..\..\src\chrtrans\cp1257_uni.h;..\..\..\src\chrtrans\cp437_uni.h;..\..\..\src\chrtrans\cp737_uni.h;..\..\..\src\chrtrans\cp775_uni.h;..\..\..\src\chrtrans\cp850_uni.h;..\..\..\src\chrtrans\cp852_uni.h;..\..\..\src\chrtrans\cp857_uni.h;..\..\..\src\chrtrans\cp862_uni.h;..\..\..\src\chrtrans\cp864_uni.h;..\..\..\src\chrtrans\cp866_uni.h;..\..\..\src\chrtrans\cp866u_uni.h;..\..\..\src\chrtrans\cp869_uni.h;..\..\..\src\chrtrans\dmcs_uni.h;..\..\..\src\chrtrans\hp_uni.h;..\..\..\src\chrtrans\iso01_uni.h;..\..\..\src\chrtrans\iso02_uni.h;..\..\..\src\chrtrans\iso03_uni.h;..\..\..\src\chrtrans\iso04_uni.h;..\..\..\src\chrtrans\iso05_uni.h;..\..\..\src\chrtrans\iso06_uni.h;..\..\..\src\chrtrans\iso07_uni.h;..\..\..\src\chrtrans\iso08_uni.h;..\..\..\src\chrtrans\iso09_uni.h;..\..\..\src\chrtrans\iso10_uni.h;..\..\..\src\chrtrans\iso13_uni.h;..\..\..\src\chrtrans\iso14_uni.h;..\..\..\src\chrtrans\iso15_uni.h;..\..\..\src\chrtrans\koi8r_uni.h;..\..\..\src\chrtrans\koi8u_uni.h;..\..\..\src\chrtrans\mac_uni.h;..\..\..\src\chrtrans\mnem2_suni.h;..\..\..\src\chrtrans\mnem_suni.h;..\..\..\src\chrtrans\next_uni.h;..\..\..\src\chrtrans\pt154_uni.h;..\..\..\src\chrtrans\rfc_suni.h;..\..\..\src\chrtrans\utf8_uni.h;..\..\..\src\chrtrans\viscii_uni.h"
 			/>
 			<Tool
@@ -66,6 +67,8 @@
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
 				SubSystem="1"
+				RandomizedBaseAddress="1"
+				DataExecutionPrevention="0"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -87,9 +90,6 @@
 				Name="VCAppVerifierTool"
 			/>
 			<Tool
-				Name="VCWebDeploymentTool"
-			/>
-			<Tool
 				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
@@ -106,7 +106,7 @@
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
-				CommandLine="setlocal&#x0D;&#x0A;set MYDST=..\..\..\src\chrtrans&#x0D;&#x0A;copy $(TargetPath) %MYDST%&#x0D;&#x0A;cd %MYDST%&#x0D;&#x0A;call makehdrs&#x0D;&#x0A;endlocal"
+				CommandLine="setlocal&#x0D;&#x0A;set MYDST=..\..\..\src\chrtrans&#x0D;&#x0A;copy $(TargetPath) %MYDST%&#x0D;&#x0A;cd %MYDST%&#x0D;&#x0A;call makehdrs&#x0D;&#x0A;endlocal&#x0D;&#x0A;"
 				Outputs="..\..\..\src\chrtrans\makeuctb.exe;..\..\..\src\chrtrans\def7_uni.h;..\..\..\src\chrtrans\cp1250_uni.h;..\..\..\src\chrtrans\cp1251_uni.h;..\..\..\src\chrtrans\cp1252_uni.h;..\..\..\src\chrtrans\cp1253_uni.h;..\..\..\src\chrtrans\cp1255_uni.h;..\..\..\src\chrtrans\cp1256_uni.h;..\..\..\src\chrtrans\cp1257_uni.h;..\..\..\src\chrtrans\cp437_uni.h;..\..\..\src\chrtrans\cp737_uni.h;..\..\..\src\chrtrans\cp775_uni.h;..\..\..\src\chrtrans\cp850_uni.h;..\..\..\src\chrtrans\cp852_uni.h;..\..\..\src\chrtrans\cp857_uni.h;..\..\..\src\chrtrans\cp862_uni.h;..\..\..\src\chrtrans\cp864_uni.h;..\..\..\src\chrtrans\cp866_uni.h;..\..\..\src\chrtrans\cp866u_uni.h;..\..\..\src\chrtrans\cp869_uni.h;..\..\..\src\chrtrans\dmcs_uni.h;..\..\..\src\chrtrans\hp_uni.h;..\..\..\src\chrtrans\iso01_uni.h;..\..\..\src\chrtrans\iso02_uni.h;..\..\..\src\chrtrans\iso03_uni.h;..\..\..\src\chrtrans\iso04_uni.h;..\..\..\src\chrtrans\iso05_uni.h;..\..\..\src\chrtrans\iso06_uni.h;..\..\..\src\chrtrans\iso07_uni.h;..\..\..\src\chrtrans\iso08_uni.h;..\..\..\src\chrtrans\iso09_uni.h;..\..\..\src\chrtrans\iso10_uni.h;..\..\..\src\chrtrans\iso13_uni.h;..\..\..\src\chrtrans\iso14_uni.h;..\..\..\src\chrtrans\iso15_uni.h;..\..\..\src\chrtrans\koi8r_uni.h;..\..\..\src\chrtrans\koi8u_uni.h;..\..\..\src\chrtrans\mac_uni.h;..\..\..\src\chrtrans\mnem2_suni.h;..\..\..\src\chrtrans\mnem_suni.h;..\..\..\src\chrtrans\next_uni.h;..\..\..\src\chrtrans\pt154_uni.h;..\..\..\src\chrtrans\rfc_suni.h;..\..\..\src\chrtrans\utf8_uni.h;..\..\..\src\chrtrans\viscii_uni.h"
 			/>
 			<Tool
@@ -144,6 +144,8 @@
 				SubSystem="1"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
+				RandomizedBaseAddress="1"
+				DataExecutionPrevention="0"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -163,9 +165,6 @@
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"

@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMail.c,v 1.89 2012/07/06 21:18:09 tom Exp $
+ * $LynxId: LYMail.c,v 1.90 2012/07/07 13:48:13 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTParse.h>
@@ -318,29 +318,42 @@ static void show_addresses(char *addresses)
 static void blat_option(FILE *fp, const char *option, const char *value)
 {
     if (non_empty(value)) {
+	char *result = malloc(strlen(option) + 4 + 4 * strlen(value));
+	char *working = result;
 
-	fprintf(fp, "%s \"", option);
+	CTRACE((tfp, "blat_option(opt=\"%s\", value=\"%s\")\n", option, value));
+	sprintf(working, "%s \"", option);
+	working += strlen(working);
+
 	while (*value != '\0') {
 	    unsigned ch = UCH(*value);
 
 	    switch (ch) {
-	    case '\'':
-		fputs("\\\\", fp);
+	    case '\\':
+		*working++ = '\\';
+		*working++ = '\\';
 		break;
 	    case '"':
-		fputs("\"", fp);
+		*working++ = '\\';
+		*working++ = '"';
 		break;
 	    default:
 		if (ch < ' ' || ch > '~') {
-		    fprintf(fp, "\\%03o", ch);
+		    sprintf(working, "\\%03o", ch);
 		} else {
-		    fputc(ch, fp);
+		    *working++ = ch;
 		}
 		break;
 	    }
 	    ++value;
 	}
-	fprintf(fp, "\"\n");
+	*working++ = '"';
+	*working++ = '\n';
+	*working = 0;
+
+	CTRACE((tfp, "->%s", result));
+	fputs(result, fp);
+	FREE(result);
     }
 }
 
