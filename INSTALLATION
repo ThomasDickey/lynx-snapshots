@@ -25,6 +25,8 @@ First, you must configure Lynx for your system regardless of the port you use.
 Follow the instructions given immediately below to configure for your system,
 and then go to the respective section concerning the port you wish to compile.
 
+-------------------------------------------------------------------------------
+
 I. General configuration instructions (all ports).
 
 Step 1.  Compile-time Variables.
@@ -93,6 +95,8 @@ Step 5.  Anonymous Accounts *** VERY IMPORTANT!!!!! ***
   allowing mischief or damage by malicious users, so make sure the wrapper
   uses the -cfg and -homepage switches to specify  lynx.cfg  and start-file,
   rather than relying on variables LYNX_CFG, LYNX_CFG_FILE and WWW_HOME.
+
+-------------------------------------------------------------------------------
 
 II. Compile instructions -- UNIX
 
@@ -174,7 +178,7 @@ II. Compile instructions -- UNIX
     for information on defines for which there are no option switches.
 
   --datadir
-	Defines the location where you want the documentation files installed. 
+	Defines the location where you want the documentation files installed.
 	The configure script constructs makefile actions to install lynx.cfg
 	modified to reflect this in the HELPFILE setting.  (For platforms which
 	do not support a configure script, such as MS-DOS, Win32 and VMS, you
@@ -339,7 +343,7 @@ II. Compile instructions -- UNIX
 	it.
 
   --disable-persistent-cookies		(prevent defining USE_PERSISTENT_COOKIES)
-	Turn off support for saving cookies to a file, for subsequent reuse. 
+	Turn off support for saving cookies to a file, for subsequent reuse.
 	Persistent cookie support will use (or create) the file specified by
 	the 'COOKIE_FILE' option, or default to ".lynx_cookies" in the home
 	directory.  (Currently there is no protection against conflict if
@@ -363,17 +367,17 @@ II. Compile instructions -- UNIX
 
   --disable-rpath-hack
 	The rpath-hack makes it simpler to build programs, particularly with
-	the *BSD ports which may have essential libraries in unusual places. 
-	But it can interfere with building an executable for the base system. 
+	the *BSD ports which may have essential libraries in unusual places.
+	But it can interfere with building an executable for the base system.
 	Use this option in that case.
 
   --disable-scrollbar			(define USE_SCROLLBAR)
-	Turn off support for scrollbar on the right-margin of the screen. 
+	Turn off support for scrollbar on the right-margin of the screen.
 	If you configure with ncurses, this works with the mouse on xterm,
 	etc.
 
   --disable-session-cache		(define USE_CACHE_JAR)
-	Turn off support for saving/restoring session information in files. 
+	Turn off support for saving/restoring session information in files.
 	Configurable from lynx.cfg
 
   --disable-sessions			(define USE_SESSIONS)
@@ -814,6 +818,7 @@ II. Compile instructions -- UNIX
     libraries are available for many platforms if you don't wish to compile
     one yourself.
 
+-------------------------------------------------------------------------------
 
 III. Compile instructions -- VMS
 
@@ -907,35 +912,69 @@ Step 3b.  (optional compilation method)
     You instead can SOCKSify the proxy server, and it will handle all clients,
     not just Lynx.
 
+-------------------------------------------------------------------------------
 
 IV. Compile instructions -- Win32 (Windows95/98/NT)
 
 Borland C:
+---------
 
---  --------------------------------------------------------------------------
+Simplified:
+----------
+
+Sources:
+    Download the current sources (choose a zip-file) from http://lynx.isc.org
+    and unzip them into a directory where you will build Lynx.
+
+Compiler:
+    Download the Borland C/C++ 5.51 compiler from
+	http://forms.embarcadero.com/forms/BCC32CompilerDownload
+
+    This is a file named "freecompilertools.exe".
+
+    Run that to install the compiler, e.g., in
+	c:\app\bcc55
+
+    Do not install into a directory with spaces in its name, such as
+	c:\program files
+
+Libraries:
     Download these "setup" files from http://gnuwin32.sourceforge.net
 	libiconv-1.9.2-1.exe (libiconv)
 	libintl-0.14.4.exe (libintl)
 	openssl-0.9.8h-1-setup.exe (openssl)
 	pdcurses-2.6.exe (pdcurses)
 	zlib-1.2.3.exe (zlib)
-    Install all of the packages in the same directory, e.g., "c:\app\GnuWin32".
 
-    Fix is needed in GnuWin32 include/zconf.h, change line reading
+    Install all of the packages in the same directory, "c:\app\GnuWin32".
+
+    A fix is needed in GnuWin32 include/zconf.h: change line reading
     	#if 1	/* HAVE_UNISTD_H -- this line is updated by ./configure */
     to
     	#ifdef HAVE_UNISTD_H
 
     Prepare import-libraries using Borland's implib program.  The ".lib"
-    files that it uses are a different format than the Microsoft import
-    libraries.
-    	for {name} in *.dll
-	do
-		implib -a {name}.lib {name}.dll
-	done
+    files that it uses are a different format than the import libraries
+    distributed with GnuWin2.  From Lynx's source directory run
+        bcblibs
 
---  --------------------------------------------------------------------------
+Environment:
+    At this point, the bin-directory for the compiler and for the GnuWin32
+    libraries should be in your path.
 
+Building:
+    From Lynx's source directory
+	cd src\chrtrans
+	makew32 clean
+	makew32
+	cd ..\..
+	makew32 clean
+	makew32
+
+-------------------------------------------------------------------------------
+
+Detailed:
+--------
     The original Win32 port was built with Borland C++ 4.52, but later
     versions reportedly can be used.  Before compiling the Lynx sources, you
     need a curses library, and it is recommended that you have the zlib
@@ -963,6 +1002,8 @@ Borland C:
 
 -- 1997/10/12 - W. Buttles <lynx-port@fdisk.com>
 -- 2010/11/27 - URL's updated by Doug Kaufman <dkaufman@rahul.net>
+
+-------------------------------------------------------------------------------
 
 Cygwin:
     It is possible to compile under the cygwin system, which will allow you to
@@ -993,6 +1034,8 @@ Visual C++:
 	make-msc
 
     to build lynx.
+
+-------------------------------------------------------------------------------
 
 V. Compile instructions -- 386 DOS
 
@@ -1183,7 +1226,6 @@ V. Compile instructions -- 386 DOS
     standard source distribution (http://www.openssl.org/). See the file
     "INSTALL.DJGPP" in the OpenSSL distribution.
 
-
     If you have trouble applying the patches, try using the "patch" program,
     ("http://www.delorie.com/pub/djgpp/current/v2gnu/pat261b.zip").
     To read the Unix man style documentation, use, for example, "less"
@@ -1311,6 +1353,7 @@ V. Compile instructions -- 386 DOS
 -- 1997/10/3 - B. Schiavo <Wschiavo@concentric.net>
 -- Last update - 2010/11/27
 
+-------------------------------------------------------------------------------
 
 VI. General installation instructions
 
@@ -1345,6 +1388,7 @@ VI. General installation instructions
     build, be certain to do a "make clean" (or "make distclean" for those
     using auto-configure) before attempting to compile again.
 
+-------------------------------------------------------------------------------
 
 VII. Setting environment variables before running Lynx (optional)
 
@@ -1411,4 +1455,4 @@ VIII. Acknowledgment
 
 -- 1999/04/24 - H. Nelson <lynx-admin@irm.nara.kindai.ac.jp>
 -- vile:txtmode
--- $LynxId: INSTALLATION,v 1.118 2012/07/05 00:40:44 tom Exp $
+-- $LynxId: INSTALLATION,v 1.120 2012/07/06 11:53:52 tom Exp $

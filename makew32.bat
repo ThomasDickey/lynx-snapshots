@@ -1,5 +1,5 @@
 @echo off
-rem $LynxId: makew32.bat,v 1.4 2012/07/05 21:11:22 tom Exp $
+rem $LynxId: makew32.bat,v 1.5 2012/07/05 23:34:52 tom Exp $
 setlocal
 
 rem Check if GW32_ROOT is defined, and if not, fill in a default value.
@@ -13,7 +13,9 @@ rem Check if GW32_ROOT is defined, and if not, fill in a default value.
 	goto finish
 
 :doit
-	set PATH=%PATH%;%GW32_ROOT\bin
+rem	if     exist %GW32_ROOT%\bcblibs set PATH=%PATH%;%GW32_ROOT%\bcblibs
+rem	if not exist %GW32_ROOT%\bcblibs set PATH=%PATH%;%GW32_ROOT%\bin
+	set PATH=%PATH%;%GW32_ROOT%\bin
 
 rem Borland C
 rem    -m                Displays the date and time stamp of each file

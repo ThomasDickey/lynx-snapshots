@@ -1,5 +1,5 @@
 @echo off
-rem $LynxId: bcblibs.bat,v 1.4 2012/07/05 21:13:25 tom Exp $
+rem $LynxId: bcblibs.bat,v 1.5 2012/07/05 23:32:15 tom Exp $
 rem Use this script to construct import-libraries for the Borland C compiler
 rem from the dll's in the GnuWin32 directory.
 rem
@@ -40,7 +40,7 @@ rem Check if GW32_ROOT is defined, and if not, fill in a default value.
 	set SOURCE=%1.dll
 	set TARGET=..\bcblibs\%1.lib
 	copy %1.dll ..\bcblibs
-	implib %TARGET% %1.dll
+	implib -a %TARGET% %1.dll
 	:goto :eof
 
 :failed
