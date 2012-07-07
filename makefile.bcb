@@ -1,4 +1,4 @@
-# $LynxId: makefile.bcb,v 1.18 2012/07/05 09:52:45 tom Exp $
+# $LynxId: makefile.bcb,v 1.19 2012/07/06 00:36:00 tom Exp $
 #
 # Borland C++ / C++ builder
 # 1997/11/08 (Sat) 10:45:37
@@ -25,7 +25,7 @@ WWW_LIB = WWW/Library/Implementation
 # Aside from the Borland files, it holds all of the external libraries
 # needed by Lynx.  It can/should be an environment variable (see makew32.bat).
 ETC_INC = $(GW32_ROOT)\include
-ETC_LIB = $(GW32_ROOT)\bin-bcc
+ETC_LIB = $(GW32_ROOT)\bcblibs
 
 #
 # Options
@@ -43,7 +43,15 @@ DEBUG=
 # Uncomment SOCK_DEFS if you wish to build with winsock2.
 #SOCK_DEFS = /DUSE_WINSOCK2_H /D_WIN32_WINNT=0x0400
 
-CC_FLAGS = $(DEBUG) $(CS_DEFS) $(SOCK_DEFS) \
+# Uncomment these lines if you wish to build with openssl
+#SSL_DEFS = -DUSE_SSL -DUSE_X509_SUPPORT
+#SSL_LIBS = $(ETC_LIB)\libeay32.lib $(ETC_LIB)\libssl32.lib
+
+# Uncomment these lines if you wish to build with iconv
+#I18N_DEFS = -DHAVE_GETTEXT -DHAVE_LIBINTL_H
+#I18N_LIBS = $(ETC_LIB)\libiconv2.lib $(ETC_LIB)\libintl3.lib -DICONV_CONST=const -DEXP_JAPANESEUTF8_SUPPORT
+
+CC_FLAGS = $(DEBUG) $(CS_DEFS) $(SOCK_DEFS) $(SSL_DEFS) $(I18N_DEFS) \
 -I./;$(ETC_INC);$(ETC_INC)/openssl;SRC;$(WWW_LIB);$(BCC_INC);SRC/CHRTRANS \
 -DACCESS_AUTH \
 -DCJK_EX \
@@ -74,8 +82,6 @@ CC_FLAGS = $(DEBUG) $(CS_DEFS) $(SOCK_DEFS) \
 -DUSE_JUSTIFY_ELTS \
 -DUSE_MULTIBYTE_CURSES \
 -DENABLE_NLS \
--DHAVE_GETTEXT \
--DHAVE_LIBINTL_H \
 -DUSE_PERSISTENT_COOKIES \
 -DUSE_PRETTYSRC \
 -DUSE_READPROGRESS \
@@ -86,10 +92,7 @@ CC_FLAGS = $(DEBUG) $(CS_DEFS) $(SOCK_DEFS) \
 -D_MSC_VER=0 \
 -D_WINDOWS \
 -D_WIN_CC=1 \
--DUSE_PROGRAM_DIR \
--DICONV_CONST=const \
--DUSE_X509_SUPPORT \
--DEXP_JAPANESEUTF8_SUPPORT
+-DUSE_PROGRAM_DIR
 
 #
 # Dependency List
@@ -107,13 +110,9 @@ clean :
 	-del BccW32.cfg 
 	-del /f/s/q *.i
 
-LYNX_LIBS = \
+LYNX_LIBS = $(SSL_LIBS) $(I18N_LIBS) \
    $(ETC_LIB)/zlib1.lib\
-   $(ETC_LIB)/curses2.lib\
-   $(ETC_LIB)/libeay32.lib\
-   $(ETC_LIB)/libssl32.lib\
-   $(ETC_LIB)/libiconv2.lib\
-   $(ETC_LIB)/libintl3.lib
+   $(ETC_LIB)/curses2.lib
 
 LYNX_OBJS = \
    DefaultStyle.obj\

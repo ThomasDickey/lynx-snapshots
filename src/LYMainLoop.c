@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMainLoop.c,v 1.207 2012/02/23 00:39:12 tom Exp $
+ * $LynxId: LYMainLoop.c,v 1.209 2012/07/06 16:18:57 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTAccess.h>
@@ -312,7 +312,7 @@ BOOLEAN LYOpenTraceLog(void)
 	fflush(stderr);
 	fprintf(tfp, "\t\t%s (%s)\n\n", LYNX_TRACELOG_TITLE, LYNX_VERSION);
 	/*
-	 * If TRACE is on, indicate whether the anonymous restrictions are set. 
+	 * If TRACE is on, indicate whether the anonymous restrictions are set.
 	 * - FM, LP, kw
 	 *
 	 * This is only a summary for convenience - it doesn't take the case of
@@ -1235,7 +1235,7 @@ static int handle_LYK_ACTIVATE(int *c,
 		    }
 		}
 		/*
-		 * Moved here from earlier to only apply when it should. 
+		 * Moved here from earlier to only apply when it should.
 		 * Anyway, why should realm checking be overridden for form
 		 * submissions, this seems to be an unnecessary loophole??  But
 		 * that's the way it was, maybe there is some reason.  However,
@@ -1349,9 +1349,9 @@ static int handle_LYK_ACTIVATE(int *c,
 #ifndef DONT_TRACK_INTERNAL_LINKS
 	    /*
 	     * For internal links, retain POST content if present.  If we are
-	     * on the List Page, prevent pushing it on the history stack. 
+	     * on the List Page, prevent pushing it on the history stack.
 	     * Otherwise set try_internal to signal that the top of the loop
-	     * should attempt to reposition directly, without calling getfile. 
+	     * should attempt to reposition directly, without calling getfile.
 	     * - kw
 	     */
 	    /*
@@ -1526,23 +1526,29 @@ static FormInfo *FindFormAction(FormInfo * given, BOOLEAN submit)
 
 static FormInfo *MakeFormAction(FormInfo * given, BOOLEAN submit)
 {
-    FormInfo *result = typecalloc(FormInfo);
+    FormInfo *result = 0;
 
-    if (result == NULL)
-	outofmem(__FILE__, "MakeFormAction");
+    if (given != 0) {
+	result = typecalloc(FormInfo);
 
-    *result = *given;
-    if (submit) {
-	if (result->submit_action == 0) {
-	    PerFormInfo *pfi = HText_PerFormInfo(result->number);
+	if (result == NULL)
+	    outofmem(__FILE__, "MakeFormAction");
 
-	    *result = pfi->data;
+	*result = *given;
+	if (result != 0) {
+	    if (submit) {
+		if (result->submit_action == 0) {
+		    PerFormInfo *pfi = HText_PerFormInfo(result->number);
+
+		    *result = pfi->data;
+		}
+		result->type = F_SUBMIT_TYPE;
+	    } else {
+		result->type = F_RESET_TYPE;
+	    }
+	    result->number = given->number;
 	}
-	result->type = F_SUBMIT_TYPE;
-    } else {
-	result->type = F_RESET_TYPE;
     }
-    result->number = given->number;
     return result;
 }
 
@@ -1584,10 +1590,12 @@ static void handle_LYK_RESET(int cur, BOOLEAN *refresh_screen)
 	form = make;
     }
 
-    HTInfoMsg(RESETTING_FORM);
-    HText_ResetForm(form);
-    *refresh_screen = TRUE;
-    FREE(make);
+    if (form != 0) {
+	HTInfoMsg(RESETTING_FORM);
+	HText_ResetForm(form);
+	*refresh_screen = TRUE;
+	FREE(make);
+    }
 }
 
 #ifdef USE_ADDRLIST_PAGE
@@ -1741,7 +1749,7 @@ static void handle_LYK_ADD_BOOKMARK(BOOLEAN *refresh_screen,
 	    return;
 	} else if (curdoc.bookmark != NULL) {
 	    /*
-	     * It's a bookmark file from which all of the links were deleted. 
+	     * It's a bookmark file from which all of the links were deleted.
 	     * - FM
 	     */
 	    HTUserMsg(BOOKMARKS_NOLINKS);
@@ -2495,7 +2503,7 @@ static int handle_LYK_ECGOTO(int *ch,
     BStrCopy0((*user_input), curdoc.address);
 
     /*
-     * Warn the user if the current document has POST data associated with it. 
+     * Warn the user if the current document has POST data associated with it.
      * - FM
      */
     if (curdoc.post_data)
@@ -2842,7 +2850,7 @@ static BOOLEAN handle_LYK_FASTBACKW_LINK(int *cmd,
     if (samepage) {
 	/*
 	 * If the link as determined so far is part of a group of textarea
-	 * fields, try to use the first of them that's on the screen instead. 
+	 * fields, try to use the first of them that's on the screen instead.
 	 * - kw
 	 */
 	if (nextlink > 0 &&
@@ -4165,7 +4173,7 @@ static int handle_PREV_DOC(int *cmd,
 	/*
 	 * Check if the previous document is a reply from a POST, and if so,
 	 * seek confirmation of resubmission if the safe element is not set and
-	 * the document is not still in the cache or LYresubmit_posts is set. 
+	 * the document is not still in the cache or LYresubmit_posts is set.
 	 * If not confirmed and it is not the startfile, pop it so we go to the
 	 * yet previous document, until we're OK or reach the startfile.  If we
 	 * reach the startfile and its not OK or we don't get confirmation,
@@ -4379,7 +4387,7 @@ static void handle_LYK_RELOAD(int real_cmd)
     lynx_force_repaint();
 #endif /* VMS */
     /*
-     * Reload should force a cache refresh on a proxy.  -- Ari L. 
+     * Reload should force a cache refresh on a proxy.  -- Ari L.
      * <luotonen@dxcern.cern.ch>
      *
      * -- but only if this was really a reload requested by the user, not if we
@@ -5460,7 +5468,7 @@ static BOOLEAN handle_LYK_MAXSCREEN_TOGGLE(int *cmd)
  * Here's where we do all the work.
  * mainloop is basically just a big switch dependent on the users input.  I
  * have tried to offload most of the work done here to procedures to make it
- * more modular, but this procedure still does a lot of variable manipulation. 
+ * more modular, but this procedure still does a lot of variable manipulation.
  * This needs some work to make it neater.  - Lou Moutilli
  *					(memoir from the original Lynx - FM)
  */
@@ -5647,7 +5655,7 @@ int mainloop(void)
 		 * Don't actually push if this is a LYNXDOWNLOAD URL, because
 		 * that returns NORMAL even if it fails due to a spoof attempt
 		 * or file access problem, and we set the newdoc structure
-		 * elements to the curdoc structure elements under case NORMAL. 
+		 * elements to the curdoc structure elements under case NORMAL.
 		 * - FM
 		 */
 		if (!isLYNXDOWNLOAD(newdoc.address)) {
@@ -5962,7 +5970,7 @@ int mainloop(void)
 		    crawl_ok = FALSE;
 		    if (traversal_link_to_add) {
 			/*
-			 * It's a binary file, or the fetch attempt failed. 
+			 * It's a binary file, or the fetch attempt failed.
 			 * Add it to TRAVERSE_REJECT_FILE so we don't try again
 			 * in this run.
 			 */
@@ -6168,7 +6176,7 @@ int mainloop(void)
 
 		if (traversal) {
 		    /*
-		     * During traversal build up lists of all links traversed. 
+		     * During traversal build up lists of all links traversed.
 		     * Traversal mode is a special feature for traversing http
 		     * links in the web.
 		     */
@@ -6410,7 +6418,7 @@ int mainloop(void)
 			 * letters.  If it doesn't have a suffix mapped to
 			 * text/html, we'll set the entire path (including the
 			 * lead slash) as a "suffix" mapped to text/html to
-			 * ensure it is always treated as an HTML source file. 
+			 * ensure it is always treated as an HTML source file.
 			 * We are counting on a tail match to this full path
 			 * for some other URL fetched during the session having
 			 * too low a probability to worry about, but it could
@@ -7060,6 +7068,10 @@ int mainloop(void)
 	if (cmd != LYK_UP_LINK && cmd != LYK_DOWN_LINK)
 	    follow_col = -1;
 
+	CTRACE((tfp, "Handling key as %s\n",
+		LYKeycodeToKcmd(cmd)
+		? LYKeycodeToKcmd(cmd)->name
+		: "unknown"));
 	switch (cmd) {
 	case -1:
 	    HTUserMsg(COMMAND_UNKNOWN);
