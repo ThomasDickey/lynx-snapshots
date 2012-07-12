@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYPrint.c,v 1.95 2012/02/09 18:55:26 tom Exp $
+ * $LynxId: LYPrint.c,v 1.96 2012/07/07 15:19:42 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTAccess.h>
@@ -504,7 +504,7 @@ static void send_file_to_mail(DocInfo *newdoc,
     }
 
     _statusline(MAIL_ADDRESS_PROMPT);
-    BStrCopy0(user_response, personal_mail_address);
+    BStrCopy0(user_response, NonNull(personal_mail_address));
     if (LYgetBString(&user_response, VISIBLE, 0, RECALL_MAIL) < 0 ||
 	isBEmpty(user_response)) {
 	CancelPrint(MAIL_REQUEST_CANCELLED);
