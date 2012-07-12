@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMainLoop.c,v 1.209 2012/07/06 16:18:57 tom Exp $
+ * $LynxId: LYMainLoop.c,v 1.210 2012/07/07 16:28:47 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTAccess.h>
@@ -7069,9 +7069,9 @@ int mainloop(void)
 	    follow_col = -1;
 
 	CTRACE((tfp, "Handling key as %s\n",
-		LYKeycodeToKcmd(cmd)
-		? LYKeycodeToKcmd(cmd)->name
-		: "unknown"));
+		((LYKeycodeToKcmd((LYKeymapCode) cmd) != 0)
+		 ? LYKeycodeToKcmd((LYKeymapCode) cmd)->name
+		 : "unknown")));
 	switch (cmd) {
 	case -1:
 	    HTUserMsg(COMMAND_UNKNOWN);
