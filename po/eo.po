@@ -7,7 +7,7 @@ msgstr ""
 "Project-Id-Version: lynx 2.8.8-dev9\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2012-02-12 19:13-0500\n"
-"PO-Revision-Date: 2012-02-15 12:30-0500\n"
+"PO-Revision-Date: 2012-03-07 00:56-0500\n"
 "Last-Translator: Keith Bowes <zooplah@gmail.com>\n"
 "Language-Team: Esperanto <translation-team-eo@lists.sourceforge.net>\n"
 "Language: eo\n"
@@ -350,7 +350,7 @@ msgstr "La aktuala ligilo ne estas en formularo"
 #: LYMessages.c:146
 #, c-format
 msgid "Warning: Cannot transcode form data to charset %s!"
-msgstr "Averto: Ne eblas ŝanĝi la signaron de la formularo al %s!"
+msgstr "Averto: Ne eblas ŝanĝi la kodoprezenton de la formularo al %s!"
 
 #. #define NORMAL_LINK_MESSAGE
 #: LYMessages.c:149
@@ -4292,7 +4292,7 @@ msgid ""
 "\n"
 msgstr ""
 "\n"
-"Linko-signaroj ne deklaritaj.\n"
+"Linko-kodoprezentoj ne deklaritaj.\n"
 "\n"
 
 #: src/LYMain.c:1526
@@ -4338,7 +4338,7 @@ msgstr "stato de daŭrantaj kuketoj ŝanĝiĝos nur en la sekva seanco."
 #: src/LYMain.c:2644 src/LYMain.c:2689
 #, c-format
 msgid "Lynx: ignoring unrecognized charset=%s\n"
-msgstr "Linko: ignoranta nekonatan signaron=%s\n"
+msgstr "Linko: ignoranta nekonatan kodoprezenton=%s\n"
 
 #: src/LYMain.c:3208
 #, c-format
@@ -4420,7 +4420,7 @@ msgstr "Neniu sekva dokumento ĉeesta"
 
 #: src/LYMainLoop.c:4334
 msgid "charset for this document specified explicitly, sorry..."
-msgstr "bedaŭrinde signaro por ĉi tiu dokumento specifita aparte..."
+msgstr "bedaŭrinde kodoprezento por ĉi tiu dokumento specifita aparte..."
 
 #: src/LYMainLoop.c:5240
 msgid "cd to:"
@@ -4897,12 +4897,12 @@ msgstr "Klavararanĝo"
 #.
 #: src/LYOptions.c:3649
 msgid "Display and Character Set"
-msgstr "Elmontrado kaj signaro"
+msgstr "Elmontrado kaj kodoprezento"
 
 #. Use locale-based character set: ON/OFF
 #: src/LYOptions.c:3654
 msgid "Use locale-based character set"
-msgstr "Bazi signaron sur lokaĵaro"
+msgstr "Uzi lokaĵaran kodoprezenton"
 
 #: src/LYOptions.c:3661
 msgid "Use HTML5 charset replacements"
@@ -4911,11 +4911,11 @@ msgstr "Anstataŭigi signojn laŭ HTML5"
 #. Display Character Set: SELECT
 #: src/LYOptions.c:3667
 msgid "Display character set"
-msgstr "Montra signaro"
+msgstr "Elmontra kodoprezento"
 
 #: src/LYOptions.c:3698
 msgid "Assumed document character set"
-msgstr "Supozita dokumenta signaro"
+msgstr "Apriora dokumenta kodoprezento"
 
 #.
 #. * Since CJK people hardly mixed with other world
@@ -5020,7 +5020,7 @@ msgstr "Preferata kunprema formato"
 #. Preferred Document Character Set: INPUT
 #: src/LYOptions.c:3858
 msgid "Preferred document character set"
-msgstr "Preferata dokumenta signaro"
+msgstr "Preferata dokumenta kodoprezento"
 
 #. Preferred Document Language: INPUT
 #: src/LYOptions.c:3863
@@ -5365,7 +5365,7 @@ msgstr "Ligilnomo:"
 
 #: src/LYShowInfo.c:324 src/LYShowInfo.c:339
 msgid "Charset:"
-msgstr "Signaro:"
+msgstr "kodoprezento:"
 
 #: src/LYShowInfo.c:338
 msgid "(assumed)"
@@ -5624,9 +5624,9 @@ msgid ""
 msgstr ""
 "La difino character_set regas la prezenton de 8-bitaj\n"
 "signoj por via terminalo. Se 8-bitaj signoj ne ĝuste elmontriĝas\n"
-"ĉe via ekrano, vi provu malsaman 8-bitan signaron\n"
-"aŭ uzu la 7-bitajn signarajn aproksimaĵojn.\n"
-"Aktuale validaj signaroj estas:\n"
+"ĉe via ekrano, vi provu malsaman 8-bitan kodoprezenton\n"
+"aŭ uzu la 7-bitajn kodoprezentajn aproksimaĵojn.\n"
+"Aktuale validaj kodoprezentoj estas:\n"
 
 #: src/LYrcFile.c:359
 msgid ""
@@ -5819,14 +5819,14 @@ msgid ""
 "an error response, though the sending of an unacceptable response\n"
 "is also allowed.\n"
 msgstr ""
-"preferred_charset specifas la signaron laŭ MIME-notacio (ekzemple\n"
+"preferred_charset specifas la kodoprezenton laŭ MIME-notacio (ekzemple\n"
 "ISO-8859-2, ISO-8859-5), kion Linko indikos preferita en petoj\n"
 "al HTTP-serviloj uzante la kapon Accept-Charset. La valoro ne inkluzivu\n"
-"la signarojn ISO-8859-1 aŭ US-ASCII pro tio, ke tiuj valoroj jam estas\n"
+"la kodoprezentojn ISO-8859-1 aŭ US-ASCII pro tio, ke tiuj valoroj jam estas\n"
 "aŭtomate supozitaj. Povas esti listo apartigitaj per komoj.\n"
-"Se dosiero laŭ tiu signaro estas havebla, la servilo sendos ĝin.\n"
+"Se dosiero laŭ tiu kodoprezento estas havebla, la servilo sendos ĝin.\n"
 "Se neniu kapo Accept-Charset estas ĉeesta, la aŭtomata valoro estas ĉia\n"
-"signaro aprobinda. Se kapo Accept-Charset ĉeestas,\n"
+"kodoprezento aprobinda. Se kapo Accept-Charset ĉeestas,\n"
 "kaj se la servilo ne eblas sendi respondon, kiu estas aprobinda\n"
 "laŭ la kapo Accept-Charset, do la servilo sendu eraro-respondon\n"
 "kvankam sendi malaprobindan respondon\n"
@@ -6172,15 +6172,3 @@ msgstr ""
 "Se vi serĉas la ĝeneralan agordo-dosieron - ĝi ordinare\n"
 "nomiĝas \"lynx.cfg\". Ĝi havas malsaman enhavon kaj formaton.\n"
 "Ĝi ne estas ĉi tiu dosiero.\n"
-
-#~ msgid " (p%d of %d)"
-#~ msgstr " (p%d el %d)"
-
-#~ msgid "Very long lines have been wrapped!"
-#~ msgstr "Tre longaj linoj estis falditaj!"
-
-#~ msgid "Path too long"
-#~ msgstr "Vojo tro longa"
-
-#~ msgid "See http://www.openssl.org/ for information about OpenSSL."
-#~ msgstr "Vidi al http://www.openssl.org/ por informoj pri OpenSSL."

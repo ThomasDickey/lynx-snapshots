@@ -1,9 +1,13 @@
--- $LynxId: CHANGES,v 1.601 2012/07/12 09:16:02 tom Exp $
+-- $LynxId: CHANGES,v 1.603 2012/08/01 11:03:12 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2012-07-12 (2.8.8dev.13)
+2012-08-01 (2.8.8dev.13)
+* improve checking of certificates in the gnutls_certificate_verify_peers2()
+  (report by Martin Georgiev) -TD
+* update de.po eo.po sv.po vi.po from
+    http://translationproject.org/latest/lynx
 * use PDCurses "wide" variation in makefile.msc -TD
 * modified quoting for parameter values passed to blat mailer to ensure that
   it handles embedded blanks (report by pfourier) -TD
