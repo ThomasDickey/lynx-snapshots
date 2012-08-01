@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTP.c,v 1.123 2011/06/11 12:09:21 tom Exp $
+ * $LynxId: HTTP.c,v 1.124 2012/08/01 11:00:26 tom Exp $
  *
  * HyperText Tranfer Protocol	- Client implementation		HTTP.c
  * ==========================
@@ -764,6 +764,9 @@ static int HTLoadHTTP(const char *arg,
 #endif /* SSLEAY_VERSION_NUMBER >= 0x0900 */
 	}
 #ifdef USE_GNUTLS_INCL
+	gnutls_certificate_set_verify_flags(handle->gnutls_cred,
+					    GNUTLS_VERIFY_DO_NOT_ALLOW_SAME |
+					    GNUTLS_VERIFY_ALLOW_X509_V1_CA_CRT);
 	ret = gnutls_certificate_verify_peers2(handle->gnutls_state, &tls_status);
 	if (ret < 0) {
 	    int flag_continue = 1;
