@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFile.c,v 1.129 2012/02/10 01:10:51 tom Exp $
+ * $LynxId: HTFile.c,v 1.131 2012/08/02 09:04:52 tom Exp $
  *
  *			File Access				HTFile.c
  *			===========
@@ -191,6 +191,22 @@ static char *FormatStr(char **bufp,
     return *bufp;
 }
 
+static char *FormatSize(char **bufp,
+			char *start,
+			off_t entry)
+{
+    char fmt[512];
+
+    if (*start) {
+	sprintf(fmt, "%%%.*s" PRI_off_t, (int) sizeof(fmt) - 3, start);
+	HTSprintf0(bufp, fmt, entry);
+    } else {
+	sprintf(fmt, "%" PRI_off_t, entry);
+	StrAllocCopy(*bufp, fmt);
+    }
+    return *bufp;
+}
+
 static char *FormatNum(char **bufp,
 		       char *start,
 		       int entry)
@@ -366,7 +382,7 @@ static void LYListFmtParse(const char *fmtstr,
 	    break;
 
 	case 's':		/* size in bytes */
-	    FormatNum(&buf, start, (int) data->file_info.st_size);
+	    FormatSize(&buf, start, data->file_info.st_size);
 	    break;
 
 	case 'K':		/* size in Kilobytes but not for directories */
@@ -377,7 +393,7 @@ static void LYListFmtParse(const char *fmtstr,
 	    }
 	    /* FALL THROUGH */
 	case 'k':		/* size in Kilobytes */
-	    FormatNum(&buf, start, (int) ((data->file_info.st_size + 1023) / 1024));
+	    FormatSize(&buf, start, ((data->file_info.st_size + 1023) / 1024));
 	    StrAllocCat(buf, "K");
 	    break;
 

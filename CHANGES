@@ -1,9 +1,11 @@
--- $LynxId: CHANGES,v 1.603 2012/08/01 11:03:12 tom Exp $
+-- $LynxId: CHANGES,v 1.604 2012/08/02 08:35:21 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2012-08-01 (2.8.8dev.13)
+2012-08-02 (2.8.8dev.13)
+* correct formatting of large file-sizes in directory listing (Debian
+  #666213) -TD
 * improve checking of certificates in the gnutls_certificate_verify_peers2()
   (report by Martin Georgiev) -TD
 * update de.po eo.po sv.po vi.po from
