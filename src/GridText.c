@@ -1,5 +1,5 @@
 /*
- * $LynxId: GridText.c,v 1.236 2012/02/13 00:33:15 tom Exp $
+ * $LynxId: GridText.c,v 1.237 2012/08/02 09:40:04 tom Exp $
  *
  *		Character grid hypertext object
  *		===============================
@@ -2801,6 +2801,8 @@ static HTStyleChange *skip_matched_and_correct_offsets(HTStyleChange *end,
 }
 #endif /* USE_COLOR_STYLE */
 
+#define reset_horizpos(value) value = 0, value = ~value
+
 static void split_line(HText *text, unsigned split)
 {
     HTStyle *style = text->style;
@@ -3132,11 +3134,11 @@ static void split_line(HText *text, unsigned split)
 	    for (n = 0; n < line->numstyles; n++)
 		line->styles[n] = to[n + 1];
 	} else if (line->numstyles == 0) {
-	    line->styles[0].sc_horizpos = (~0);		/* ?!!! */
+	    reset_horizpos(line->styles[0].sc_horizpos);
 	}
 	previous->numstyles = (unsigned short) (at_end - previous->styles + 1);
 	if (previous->numstyles == 0) {
-	    previous->styles[0].sc_horizpos = (~0);	/* ?!!! */
+	    reset_horizpos(previous->styles[0].sc_horizpos);
 	}
     }
 #endif /*USE_COLOR_STYLE */
