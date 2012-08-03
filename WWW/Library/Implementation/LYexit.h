@@ -55,7 +55,7 @@ extern "C" {
 /*
  * Function declarations
  */
-    extern void outofmem(const char *fname, const char *func);
+    extern void outofmem(const char *fname, const char *func) GCC_NORETURN;
     extern void reset_signals(void);
     extern void exit_immediately(int status) GCC_NORETURN;
     extern void LYexit(int status) GCC_NORETURN;

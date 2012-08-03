@@ -1,5 +1,5 @@
 /*
- * $LynxId: GridText.c,v 1.237 2012/08/02 09:40:04 tom Exp $
+ * $LynxId: GridText.c,v 1.238 2012/08/03 17:28:03 tom Exp $
  *
  *		Character grid hypertext object
  *		===============================
@@ -7787,6 +7787,7 @@ int do_www_search(DocInfo *doc)
 	    HTInfoMsg(CANCELLED);
 	    code = NULLFILE;
 	} else if (!LYforce_no_cache &&
+		   !isBEmpty(temp) &&
 		   !strcmp(temp->str, searchstring->str)) {
 	    /*
 	     * Don't resubmit the same query unintentionally.
