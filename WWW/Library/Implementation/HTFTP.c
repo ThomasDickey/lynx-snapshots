@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFTP.c,v 1.101 2012/02/09 12:34:48 tom Exp $
+ * $LynxId: HTFTP.c,v 1.102 2012/08/03 12:34:58 tom Exp $
  *
  *			File Transfer Protocol (FTP) Client
  *			for a WorldWideWeb browser
@@ -155,6 +155,13 @@ typedef struct _connection {
 #define FREE_TARGET  (*target->isa->_free)         (target)
 #define ABORT_TARGET (*target->isa->_free)         (target)
 
+#define TRACE_ENTRY(tag, entry_info) \
+    CTRACE((tfp, "HTFTP: %s filename: %s  date: %s  size: %" PRI_off_t "\n", \
+	    tag, \
+	    entry_info->filename, \
+	    NonNull(entry_info->date), \
+	    entry_info->size))
+
 struct _HTStructured {
     const HTStructuredClass *isa;
     /* ... */
@@ -243,6 +250,20 @@ static char *data_write_pointer;
 
 #define NEXT_DATA_CHAR next_data_char()
 static int close_connection(connection * con);
+
+#ifdef HAVE_ATOLL
+#define LYatoll(n) atoll(n)
+#else
+static off_t LYatoll(const char *value)
+{
+    off_t result = 0;
+
+    while (*value != '\0') {
+	result = (result * 10) + (off_t) (*value++ - '0');
+    }
+    return result;
+}
+#endif
 
 #ifdef LY_FIND_LEAKS
 /*
@@ -1481,7 +1502,7 @@ typedef struct _EntryInfo {
     char *linkname;		/* symbolic link, if any */
     char *type;
     char *date;
-    unsigned long size;
+    off_t size;
     BOOLEAN display;		/* show this entry? */
 #ifdef LONG_LIST
     unsigned long file_links;
@@ -1577,7 +1598,7 @@ static void parse_eplf_line(char *line,
 {
     char *cp = line;
     char ct[26];
-    unsigned long size;
+    off_t size;
     time_t secs;
     static time_t base;		/* time() value on this OS in 1970 */
     static int flagbase = 0;
@@ -1604,7 +1625,7 @@ static void parse_eplf_line(char *line,
 	case 's':
 	    size = 0;
 	    while (*(++cp) && (*cp != ','))
-		size = (size * 10) + (unsigned long) (*cp - '0');
+		size = (size * 10) + (off_t) (*cp - '0');
 	    info->size = size;
 	    break;
 	case 'm':
@@ -1640,8 +1661,8 @@ static void parse_ls_line(char *line,
     char *cp;
 #endif
     int i, j;
-    unsigned long base = 1;
-    unsigned long size_num = 0;
+    off_t base = 1;
+    off_t size_num = 0;
 
     for (i = (int) strlen(line) - 1;
 	 (i > 13) && (!isspace(UCH(line[i])) || !is_ls_date(&line[i - 12]));
@@ -1663,7 +1684,7 @@ static void parse_ls_line(char *line,
     }
     j = i - 14;
     while (isdigit(UCH(line[j]))) {
-	size_num += ((unsigned long) (line[j] - '0') * base);
+	size_num += ((off_t) (line[j] - '0') * base);
 	base *= 10;
 	j--;
     }
@@ -1729,7 +1750,7 @@ static void parse_dls_line(char *line,
 {
     short j;
     int base = 1;
-    int size_num = 0;
+    off_t size_num = 0;
     int len;
     char *cps = NULL;
 
@@ -1790,7 +1811,7 @@ static void parse_dls_line(char *line,
 	    j--;
 	}
     }
-    entry_info->size = (unsigned long) size_num;
+    entry_info->size = size_num;
 
     cps = LYSkipBlanks(&line[23]);
     if (!StrNCmp(cps, "-> ", 3) && cps[3] != '\0' && cps[3] != ' ') {
@@ -1933,7 +1954,7 @@ static void parse_vms_dir_entry(char *line,
 	    cps--;
 	if (cps < cpd)
 	    *cpd = '\0';
-	entry_info->size = (unsigned long) atol(cps);
+	entry_info->size = LYatoll(cps);
 	cps = cpd + 1;
 	while (isdigit(UCH(*cps)))
 	    cps++;
@@ -1952,17 +1973,13 @@ static void parse_vms_dir_entry(char *line,
 		cpd++;
 	    if (*cpd == '\0') {
 		/* Assume it's blocks */
-		entry_info->size = ((unsigned long) atol(cps) * 512);
+		entry_info->size = (LYatoll(cps) * 512);
 		break;
 	    }
 	}
     }
 
-    /* Wrap it up */
-    CTRACE((tfp, "HTFTP: VMS filename: %s  date: %s  size: %lu\n",
-	    entry_info->filename,
-	    NonNull(entry_info->date),
-	    entry_info->size));
+    TRACE_ENTRY("VMS", entry_info);
     return;
 }				/* parse_vms_dir_entry() */
 
@@ -1997,7 +2014,7 @@ static void parse_ms_windows_dir_entry(char *line,
 	cpd = LYSkipNonBlanks(cps);
 	*cpd++ = '\0';
 	if (isdigit(UCH(*cps))) {
-	    entry_info->size = (unsigned long) atol(cps);
+	    entry_info->size = LYatoll(cps);
 	} else {
 	    StrAllocCopy(entry_info->type, ENTRY_IS_DIRECTORY);
 	}
@@ -2030,11 +2047,7 @@ static void parse_ms_windows_dir_entry(char *line,
 	}
     }
 
-    /* Wrap it up */
-    CTRACE((tfp, "HTFTP: MS Windows filename: %s  date: %s  size: %lu\n",
-	    entry_info->filename,
-	    NonNull(entry_info->date),
-	    entry_info->size));
+    TRACE_ENTRY("MS Windows", entry_info);
     return;
 }				/* parse_ms_windows_dir_entry */
 
@@ -2130,7 +2143,7 @@ static void parse_windows_nt_dir_entry(char *line,
 	cpd = LYSkipNonBlanks(cps);
 	*cpd = '\0';
 	if (isdigit(*cps)) {
-	    entry_info->size = atol(cps);
+	    entry_info->size = LYatoll(cps);
 	} else {
 	    StrAllocCopy(entry_info->type, ENTRY_IS_DIRECTORY);
 	}
@@ -2228,7 +2241,7 @@ static void parse_cms_dir_entry(char *line,
 	}
 	if (Records > 0 && RecordLength > 0) {
 	    /* Compute an approximate size. */
-	    entry_info->size = ((unsigned long) Records * (unsigned long) RecordLength);
+	    entry_info->size = ((off_t) Records * (off_t) RecordLength);
 	}
     }
 
@@ -2278,11 +2291,7 @@ static void parse_cms_dir_entry(char *line,
 	}
     }
 
-    /* Wrap it up. */
-    CTRACE((tfp, "HTFTP: VM/CMS filename: %s  date: %s  size: %lu\n",
-	    entry_info->filename,
-	    NonNull(entry_info->date),
-	    entry_info->size));
+    TRACE_ENTRY("VM/CMS", entry_info);
     return;
 }				/* parse_cms_dir_entry */
 
@@ -2760,6 +2769,24 @@ static char *FormatStr(char **bufp,
     return *bufp;
 }
 
+static char *FormatSize(char **bufp,
+			char *start,
+			off_t value)
+{
+    char fmt[512];
+
+    if (*start) {
+	sprintf(fmt, "%%%.*s" PRI_off_t, (int) sizeof(fmt) - 3, start);
+
+	HTSprintf(bufp, fmt, value);
+    } else {
+	sprintf(fmt, "%" PRI_off_t, value);
+
+	StrAllocCat(*bufp, fmt);
+    }
+    return *bufp;
+}
+
 static char *FormatNum(char **bufp,
 		       char *start,
 		       unsigned long value)
@@ -2895,7 +2922,7 @@ static void LYListFmtParse(const char *fmtstr,
 	    break;
 
 	case 's':		/* size in bytes */
-	    FormatNum(&buf, start, data->size);
+	    FormatSize(&buf, start, data->size);
 	    break;
 
 	case 'K':		/* size in Kilobytes but not for directories */
@@ -2908,10 +2935,10 @@ static void LYListFmtParse(const char *fmtstr,
 	case 'k':		/* size in Kilobytes */
 	    /* FIXME - this is inconsistent with HTFile.c, but historical */
 	    if (data->size < 1024) {
-		FormatNum(&buf, start, data->size);
+		FormatSize(&buf, start, data->size);
 		StrAllocCat(buf, " bytes");
 	    } else {
-		FormatNum(&buf, start, data->size / 1024);
+		FormatSize(&buf, start, data->size / 1024);
 		StrAllocCat(buf, "Kb");
 	    }
 	    break;

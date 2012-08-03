@@ -1,4 +1,4 @@
-dnl $LynxId: configure.in,v 1.236 2012/02/23 09:45:16 tom Exp $
+dnl $LynxId: configure.in,v 1.237 2012/08/03 12:23:37 tom Exp $
 dnl
 dnl Process this file with autoconf to produce a configure script.
 dnl
@@ -783,6 +783,7 @@ CF_FIONBIO
 CF_REMOVE_BROKEN
 CF_FUNC_LSTAT
 AC_CHECK_FUNCS( \
+	atoll \
 	ctermid \
 	cuserid \
 	ftime \

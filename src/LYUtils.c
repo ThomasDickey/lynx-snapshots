@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYUtils.c,v 1.224 2012/07/06 00:29:26 tom Exp $
+ * $LynxId: LYUtils.c,v 1.225 2012/08/03 17:38:47 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTCP.h>
@@ -6684,7 +6684,7 @@ BOOLEAN LYValidateFilename(bstring **result,
 	}
 #endif
     } else {
-	if ((cp = FindLeadingTilde((*given)->str, TRUE)) != 0) {
+	if (FindLeadingTilde((*given)->str, TRUE) != 0) {
 	    char *cp1 = NULL;
 
 	    StrAllocCopy(cp1, (*given)->str);

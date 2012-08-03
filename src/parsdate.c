@@ -21,7 +21,7 @@ static const char yysccsid[] = "@(#)yaccpar	1.9 (Berkeley) 02/21/93";
 #include <LYLeaks.h>
 
 /*
- *  $LynxId: parsdate.c,v 1.13 2012/02/10 01:37:59 tom Exp $
+ *  $LynxId: parsdate.c,v 1.14 2012/08/03 18:36:10 tom Exp $
  *
  *  This module is adapted and extended from tin, to use for LYmktime().
  *
@@ -1008,7 +1008,7 @@ static int yygrowstack(YYSTACKDATA *data)
     else if ((newsize *= 2) > YYMAXDEPTH)
         newsize = YYMAXDEPTH;
 
-    i = data->s_mark - data->s_base;
+    i = (int) (data->s_mark - data->s_base);
     newss = (short *)realloc(data->s_base, newsize * sizeof(*newss));
     if (newss == 0)
         return -1;

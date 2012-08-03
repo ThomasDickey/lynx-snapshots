@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYPrint.c,v 1.96 2012/07/07 15:19:42 tom Exp $
+ * $LynxId: LYPrint.c,v 1.97 2012/08/03 17:39:19 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTAccess.h>
@@ -137,13 +137,12 @@ static void SetupFilename(bstring **filename,
 {
     HTFormat format;
     HTAtom *encoding;
-    char *cp;
 
     BStrCopy0(*filename, sug_filename);		/* add suggestion info */
     BStrAlloc(*filename, LY_MAXPATH);	/* FIXME */
     change_sug_filename((*filename)->str);
     if (!(HTisDocumentSource())
-	&& (cp = strrchr((*filename)->str, '.')) != NULL) {
+	&& strrchr((*filename)->str, '.') != NULL) {
 	format = HTFileFormat((*filename)->str, &encoding, NULL);
 	CTRACE((tfp, "... format %s\n", format->name));
 	if (!strcasecomp(format->name, "text/html") ||
