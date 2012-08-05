@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMain.c,v 1.237 2012/02/20 01:32:18 Kihara.Hideto Exp $
+ * $LynxId: LYMain.c,v 1.238 2012/08/05 01:03:03 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTP.h>
@@ -3128,7 +3128,7 @@ G)oto's" },
 	    print_help_strings(table[j].name, table[j].help, value, FALSE);
 	}
 	first = TRUE;
-	for (j = 0;; j++) {
+	for (j = 0; j < TABLESIZE(table); j++) {
 	    found = FALSE;
 	    if ((name = index_to_restriction(j)) == 0) {
 		break;

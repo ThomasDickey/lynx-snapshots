@@ -1,4 +1,4 @@
-dnl $LynxId: configure.in,v 1.237 2012/08/03 12:23:37 tom Exp $
+dnl $LynxId: configure.in,v 1.238 2012/08/04 12:55:50 tom Exp $
 dnl
 dnl Process this file with autoconf to produce a configure script.
 dnl
@@ -107,6 +107,7 @@ AC_PROG_MAKE_SET
 AC_PROG_INSTALL
 AC_PROG_YACC
 CF_PROG_LINT
+CF_MAKEFLAGS
 CF_MAKE_TAGS
 
 CF_ACVERSION_CHECK(2.52,
