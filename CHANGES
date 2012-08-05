@@ -1,9 +1,25 @@
--- $LynxId: CHANGES,v 1.604 2012/08/02 08:35:21 tom Exp $
+-- $LynxId: CHANGES,v 1.610 2012/08/05 01:08:02 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2012-08-02 (2.8.8dev.13)
+2012-08-04 (2.8.8dev.13)
+* fix an unbounded loop in restrictions_fun() which could cause a core dump
+  (Debian #616107) -TD
+* add LDFLAGS to top-level makefile.in, for consistency with other recursive
+  options (suggested by Naomasa Maruyama) -TD
+* modify makefile.in and src/makefile.in to pass make-flags, e.g., "-n" for
+  POSIX make -TD
+* updated configure macros (TD):
+  + add check for clang warning options
+  + check for tinfo library, which may be present
+  + omit -Wpointer-arith check for pre-3.0 gcc
+  + add check for 'make' programs ${MAKEFLAGS} versus ${MFLAGS}, for recursive
+    operation.
+* updated list for "$(TABLES)" in src/makefile.in so that parallel builds work
+  properly (patch by Diego Elio Petteno)
+* remove extra "$(LDFLAGS)" from src/makefile.in when linking lynx (patch by
+  Josef Sontgen)
 * correct formatting of large file-sizes in directory listing (Debian
   #666213) -TD
 * improve checking of certificates in the gnutls_certificate_verify_peers2()

@@ -1,4 +1,4 @@
-# $LynxId: makefile.in,v 1.122 2012/02/23 02:08:07 tom Exp $
+# $LynxId: makefile.in,v 1.124 2012/08/04 14:11:29 tom Exp $
 ##makefile for lynx
 
 SHELL		= @CONFIG_SHELL@
@@ -23,6 +23,7 @@ ETAGS		= @ETAGS@
 x		= @EXEEXT@
 o		= .@OBJEXT@
 
+LDFLAGS		= @EXTRA_LDFLAGS@ @LDFLAGS@
 LIBS		= @LIBS@
 
 INSTALL		= @INSTALL@
@@ -99,7 +100,7 @@ COMPRESS_EXT=@COMPRESS_EXT@
 # Path of scripts directory
 scripts_dir=$(srcdir)/scripts
 
-MAKE_RECUR = $(MAKE) DESTDIR="$(DESTDIR)" CC="$(CC)"
+MAKE_RECUR = $(MAKE) @cf_cv_makeflags@ DESTDIR="$(DESTDIR)" CC="$(CC)"
 
 @LYNXCFG_MAKE@CFG2HTML = alphatoc.html body.html cattoc.html
 
@@ -186,6 +187,7 @@ WWW_CFLAGS = \
 SRC_CFLAGS = \
 	CFLAGS="$(CFLAGS)" \
 	CPPFLAGS="$(CPPFLAGS)" \
+	LDFLAGS="$(LDFLAGS)" \
 	LIBS="$(LIBS) $(RESOLVLIB) $(WAISLIB) $(SITE_LIBS)" \
 	SITE_DEFS="$(SITE_DEFS)" \
 	WWWINC=$(WWW_DIR) \

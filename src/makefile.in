@@ -1,4 +1,4 @@
-# $LynxId: makefile.in,v 1.65 2012/02/23 09:42:34 tom Exp $
+# $LynxId: makefile.in,v 1.68 2012/08/04 13:15:18 tom Exp $
 # template-makefile for Lynx src directory
 
 SHELL		= @CONFIG_SHELL@
@@ -33,6 +33,8 @@ BUILD_CPP	= @BUILD_CPP@
 BUILD_CFLAGS	= @BUILD_CFLAGS@
 BUILD_CPPFLAGS	= @BUILD_CPPFLAGS@ @DEFS@
 BUILD_EXEEXT	= @BUILD_EXEEXT@
+
+MAKE_RECUR	= $(MAKE) @cf_cv_makeflags@ DESTDIR="$(DESTDIR)" CC="$(CC)"
 
 YACC		= @YACC@
 WINDRES		= @WINDRES@
@@ -103,7 +105,7 @@ all: lynx$x
 
 lynx$x:   message do_chartrans_stuff $(top_builddir)/LYHelp.h $(OBJS) $(WWWLIB)
 	@echo "Linking and creating Lynx executable"
-	$(CC) $(CC_OPTS) $(LDFLAGS) -o $@  $(OBJS) $(WWWLIB) $(LDFLAGS) $(LIBS) $(INTLLIB)
+	$(CC) $(CC_OPTS) $(LDFLAGS) -o $@  $(OBJS) $(WWWLIB) $(LIBS) $(INTLLIB)
 	@echo "Copying Lynx executable into top-level directory"
 	rm -f $(top_builddir)/$@
 	cp $@ $(top_builddir)/
@@ -113,7 +115,7 @@ message:
 	@echo "Compiling Lynx sources"
 
 do_chartrans_stuff:
-	-cd chrtrans && $(MAKE) \
+	-cd chrtrans && $(MAKE_RECUR) \
 		SITE_DEFS="$(SITE_DEFS)" \
 		BUILD_CFLAGS="$(BUILD_CFLAGS)" \
 		BUILD_CPPFLAGS="$(BUILD_CPPFLAGS)" \
@@ -126,7 +128,7 @@ lint:
 
 clean:
 	rm -f lynx$x core *.core *.leaks *.i *$o *.bak tags TAGS test_*
-	cd chrtrans && $(MAKE) clean
+	cd chrtrans && $(MAKE_RECUR) clean
 
 tags:
 	$(CTAGS) *.[ch]
@@ -170,9 +172,11 @@ TABLES= \
  $(CHRTR)cp775_uni.h \
  $(CHRTR)cp850_uni.h \
  $(CHRTR)cp852_uni.h \
+ $(CHRTR)cp857_uni.h \
  $(CHRTR)cp862_uni.h \
  $(CHRTR)cp864_uni.h \
  $(CHRTR)cp866_uni.h \
+ $(CHRTR)cp866u_uni.h \
  $(CHRTR)cp869_uni.h \
  $(CHRTR)def7_uni.h \
  $(CHRTR)dmcs_uni.h \
@@ -187,18 +191,22 @@ TABLES= \
  $(CHRTR)iso08_uni.h \
  $(CHRTR)iso09_uni.h \
  $(CHRTR)iso10_uni.h \
+ $(CHRTR)iso13_uni.h \
+ $(CHRTR)iso14_uni.h \
  $(CHRTR)iso15_uni.h \
  $(CHRTR)koi8r_uni.h \
+ $(CHRTR)koi8u_uni.h \
  $(CHRTR)mac_uni.h \
- $(CHRTR)mnem_suni.h \
  $(CHRTR)mnem2_suni.h \
+ $(CHRTR)mnem_suni.h \
  $(CHRTR)next_uni.h \
+ $(CHRTR)pt154_uni.h \
  $(CHRTR)rfc_suni.h \
  $(CHRTR)utf8_uni.h \
  $(CHRTR)viscii_uni.h
 
 $(TABLES):
-	-cd chrtrans && $(MAKE) tables
+	-cd chrtrans && $(MAKE_RECUR) tables
 
 UCdomap$o :	UCdomap.c \
 		chrtrans/UCkd.h \
@@ -207,7 +215,7 @@ UCdomap$o :	UCdomap.c \
 	UCdomap.h $(CMN)UCMap.h $(TABLES) $(top_srcdir)/userdefs.h
 
 chrtrans/makeuctb$(BUILD_EXEEXT):
-	cd chrtrans; make makeuctb$(BUILD_EXEEXT)
+	cd chrtrans && $(MAKE_RECUR) makeuctb$(BUILD_EXEEXT)
 
 UCAux$o : UCAux.c $(CMN)UCAux.h $(CMN)UCDefs.h
 LYCookie$o : $(top_srcdir)/userdefs.h
