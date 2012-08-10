@@ -1,11 +1,11 @@
-dnl $LynxId: aclocal.m4,v 1.191 2012/08/04 13:11:32 tom Exp $
+dnl $LynxId: aclocal.m4,v 1.192 2012/08/10 15:33:46 tom Exp $
 dnl Macros for auto-configure script.
 dnl by T.E.Dickey <dickey@invisible-island.net>
 dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
 dnl and Philippe De Muyter <phdm@macqel.be>
 dnl
 dnl Created: 1997/01/28
-dnl Updated: 2012/08/03
+dnl Updated: 2012/08/10
 dnl
 dnl The autoconf used in Lynx development is GNU autoconf 2.13 or 2.52, patched
 dnl by Thomas Dickey.  See your local GNU archives, and this URL:
@@ -1535,6 +1535,28 @@ of GNU C library (aka glibc).])
 	fi
 fi
 
+])dnl
+dnl ---------------------------------------------------------------------------
+dnl CF_CHECK_SIZEOF version: 1 updated: 2012/08/10 11:32:08
+dnl ---------------
+dnl Improve on AC_CHECK_SIZEOF for cases when the build-environment is
+dnl deficient, e.g., if someone tries to build in busybox.  Use the second
+dnl parameter as the fallback value.
+dnl
+dnl By the way, 2.13/2.52 differ in AC_CHECK_SIZEOF regarding the types they
+dnl can detect; the former includes only stdio.h for types while the latter
+dnl includes several header files.
+AC_DEFUN([CF_CHECK_SIZEOF],[
+AC_CHECK_SIZEOF([$1],[$2])
+if test "${ac_cv_type_$1:+set}" = set; then
+	if test "${ac_cv_sizeof_$1:+set}" != set; then
+		AC_MSG_WARN(using $2 for sizeof $1)
+		ac_cv_sizeof_$1=$2
+	elif test "x${ac_cv_sizeof_$1}" = x0; then
+		AC_MSG_WARN([sizeof $1 not found, using $2])
+		ac_cv_sizeof_$1=$2
+	fi
+fi
 ])dnl
 dnl ---------------------------------------------------------------------------
 dnl CF_CHECK_SSL_X509 version: 4 updated: 2008/12/11 19:00:39

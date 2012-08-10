@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFormat.c,v 1.74 2011/06/11 12:13:09 tom Exp $
+ * $LynxId: HTFormat.c,v 1.75 2012/08/10 11:48:05 tom Exp $
  *
  *		Manage different file formats			HTFormat.c
  *		=============================
@@ -742,7 +742,9 @@ int HTCopy(HTParentAnchor *anchor,
 {
     HTStreamClass targetClass;
     BOOL suppress_readprogress = NO;
-    off_t bytes;
+    off_t limit = anchor ? anchor->content_length : 0;
+    off_t bytes = anchor ? anchor->actual_length : 0;
+    off_t total;
     int rv = 0;
 
     /*  Push the data down the stream
@@ -754,7 +756,7 @@ int HTCopy(HTParentAnchor *anchor,
      *
      * This operation could be put into a main event loop
      */
-    HTReadProgress(bytes = 0, (off_t) 0);
+    HTReadProgress(bytes, (off_t) 0);
     for (;;) {
 	int status;
 
@@ -875,13 +877,24 @@ int HTCopy(HTParentAnchor *anchor,
 	}
 #endif /* NOT_ASCII */
 
-	(*targetClass.put_block) (sink, input_buffer, status);
-	bytes += status;
+	total = bytes + status;
+	if (limit == 0 || (total < limit)) {
+	    (*targetClass.put_block) (sink, input_buffer, status);
+	} else if (bytes < limit) {
+	    (*targetClass.put_block) (sink, input_buffer, (int) (limit - bytes));
+	}
+	bytes = total;
 	if (!suppress_readprogress)
-	    HTReadProgress(bytes, (off_t) (anchor ? anchor->content_length : 0));
+	    HTReadProgress(bytes, limit);
 	HTDisplayPartial();
 
     }				/* next bufferload */
+    if (anchor != 0) {
+	CTRACE((tfp, "HTCopy copied %"
+		PRI_off_t " actual, %"
+		PRI_off_t " limit\n", bytes, limit));
+	anchor->actual_length = bytes;
+    }
 
     _HTProgress(TRANSFER_COMPLETE);
     (void) NETCLOSE(file_number);
