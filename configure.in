@@ -1,4 +1,4 @@
-dnl $LynxId: configure.in,v 1.238 2012/08/04 12:55:50 tom Exp $
+dnl $LynxId: configure.in,v 1.239 2012/08/10 15:31:34 tom Exp $
 dnl
 dnl Process this file with autoconf to produce a configure script.
 dnl
@@ -769,10 +769,10 @@ CF_CHECK_TYPE(socklen_t, int, [
 CF_TYPE_LONG_LONG
 CF_TM_GMTOFF
 
-AC_CHECK_SIZEOF(int,4)
-AC_CHECK_SIZEOF(long,4)
-AC_CHECK_SIZEOF(off_t,4)
-AC_CHECK_SIZEOF(time_t,4)
+CF_CHECK_SIZEOF(int,4)
+CF_CHECK_SIZEOF(long,4)
+CF_CHECK_SIZEOF(off_t,4)
+CF_CHECK_SIZEOF(time_t,4)
 
 dnl --------------------------------------------------------------------------
 dnl Checks for library units

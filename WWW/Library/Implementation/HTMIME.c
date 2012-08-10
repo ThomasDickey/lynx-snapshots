@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTMIME.c,v 1.76 2011/06/11 12:10:40 tom Exp $
+ * $LynxId: HTMIME.c,v 1.77 2012/08/10 11:49:03 tom Exp $
  *
  *			MIME Message Parse			HTMIME.c
  *			==================
@@ -1075,7 +1075,11 @@ static void HTMIME_put_character(HTStream *me, int c)
     switch (me->state) {
       begin_transparent:
     case MIME_TRANSPARENT:
-	(*me->targetClass.put_character) (me->target, c);
+	me->anchor->actual_length += 1;
+	if (me->anchor->content_length == 0 ||
+	    (me->anchor->content_length >= me->anchor->actual_length)) {
+	    (me->targetClass.put_character) (me->target, c);
+	}
 	return;
 
 	/* RFC-2616 describes chunked transfer coding */
