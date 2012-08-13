@@ -1,4 +1,4 @@
-/* $LynxId: LYrcFile.c,v 1.88 2010/12/11 14:20:53 tom Exp $ */
+/* $LynxId: LYrcFile.c,v 1.89 2012/08/13 00:30:44 tom Exp $ */
 #include <HTUtils.h>
 #include <HTFTP.h>
 #include <LYUtils.h>
@@ -650,6 +650,113 @@ static Config_Type *lookup_config(const char *name)
     return tbl;
 }
 
+BOOL LYsetRcValue(const char *name, const char *param)
+{
+    char MBM_line[256];
+    char *notes;
+    int n;
+    Config_Type *tbl;
+    ParseUnionPtr q;
+    BOOL changed = TRUE;
+    char *value = NULL;
+
+    StrAllocCopy(value, param);
+    value = LYSkipBlanks(value);
+    CTRACE2(TRACE_CFG, (tfp, "LYrcFile %s:%s\n", name, value));
+
+    tbl = lookup_config(name);
+    if (tbl->name == 0) {
+	const char *special = RC_MULTI_BOOKMARK;
+
+	if (!strncasecomp(name, special, (int) strlen(special))) {
+	    tbl = lookup_config(special);
+	}
+	/*
+	 * lynx ignores unknown keywords.
+	 * This includes known keywords where there is no ENABLE_LYNXRC.
+	 */
+	if (tbl->name == 0) {
+	    CTRACE((tfp, "LYrcFile: ignored %s=%s\n", name, value));
+	    return FALSE;
+	}
+    }
+
+    q = ParseUnionOf(tbl);
+    switch (tbl->type) {
+    case CONF_BOOL:
+	if (q->set_value != 0)
+	    *(q->set_value) = getBool(value);
+	break;
+
+    case CONF_FUN:
+	if (q->fun_value != 0)
+	    (*(q->fun_value)) (value);
+	break;
+
+    case CONF_ARRAY:
+	for (n = 0; tbl->strings[n] != 0; ++n) {
+	    if (!strcasecomp(value, tbl->strings[n])) {
+		*(q->int_value) = n;
+		break;
+	    }
+	}
+	break;
+
+    case CONF_ENUM:
+	if (tbl->table != 0)
+	    LYgetEnum(tbl->table, value, q->int_value);
+	break;
+
+    case CONF_INT:
+	if (q->int_value != 0) {
+	    int ival;
+
+	    if (1 == sscanf(value, "%d", &ival))
+		*(q->int_value) = ival;
+	}
+	break;
+
+    case CONF_LIS:
+	if (q->str_value != 0) {
+	    if (*(q->str_value) != NULL)
+		StrAllocCat(*(q->str_value), ",");
+	    StrAllocCat(*(q->str_value), value);
+	}
+	break;
+
+    case CONF_MBM:
+	for (n = 1; n <= MBM_V_MAXFILES; n++) {
+	    sprintf(MBM_line, "multi_bookmark%c", LYindex2MBM(n));
+
+	    if (!strcasecomp(name, MBM_line)) {
+		if ((notes = strchr(value, ',')) != 0) {
+		    *notes++ = '\0';
+		    LYTrimTrailing(value);
+		    notes = LYSkipBlanks(notes);
+		} else {
+		    notes = value + strlen(value);
+		}
+		StrAllocCopy(MBM_A_subbookmark[n], value);
+		StrAllocCopy(MBM_A_subdescript[n], notes);
+		break;
+	    }
+	}
+	break;
+
+    case CONF_STR:
+	if (q->str_value != 0)
+	    StrAllocCopy(*(q->str_value), value);
+	break;
+
+    default:
+	changed = FALSE;
+	break;
+    }
+    FREE(value);
+
+    return changed;
+}
+
 /* Read and process user options.  If the passed-in fp is NULL, open the
  * regular user defaults file for reading, otherwise use fp which has to be a
  * file open for reading.  - kw
@@ -658,8 +765,6 @@ void read_rc(FILE *fp)
 {
     char *buffer = NULL;
     char rcfile[LY_MAXPATH];
-    char MBM_line[256];
-    int n;
 
     if (!fp) {
 	/*
@@ -678,9 +783,7 @@ void read_rc(FILE *fp)
      * Process the entries.
      */
     while (LYSafeGets(&buffer, fp) != NULL) {
-	char *name, *value, *notes;
-	Config_Type *tbl;
-	ParseUnionPtr q;
+	char *name, *value;
 
 	/* Most lines in the config file are comment lines.  Weed them out
 	 * now.  Also, leading whitespace is ok, so trim it.
@@ -699,96 +802,7 @@ void read_rc(FILE *fp)
 	}
 	*value++ = '\0';
 	LYTrimTrailing(name);
-	value = LYSkipBlanks(value);
-	CTRACE2(TRACE_CFG, (tfp, "LYrcFile %s:%s\n", name, value));
-
-	tbl = lookup_config(name);
-	if (tbl->name == 0) {
-	    const char *special = RC_MULTI_BOOKMARK;
-
-	    if (!strncasecomp(name, special, (int) strlen(special))) {
-		tbl = lookup_config(special);
-	    }
-	    /*
-	     * lynx ignores unknown keywords.
-	     * This includes known keywords where there is no ENABLE_LYNXRC.
-	     */
-	    if (tbl->name == 0) {
-		CTRACE((tfp, "LYrcFile: ignored %s=%s\n", name, value));
-		continue;
-	    }
-	}
-
-	q = ParseUnionOf(tbl);
-	switch (tbl->type) {
-	case CONF_BOOL:
-	    if (q->set_value != 0)
-		*(q->set_value) = getBool(value);
-	    break;
-
-	case CONF_FUN:
-	    if (q->fun_value != 0)
-		(*(q->fun_value)) (value);
-	    break;
-
-	case CONF_ARRAY:
-	    for (n = 0; tbl->strings[n] != 0; ++n) {
-		if (!strcasecomp(value, tbl->strings[n])) {
-		    *(q->int_value) = n;
-		    break;
-		}
-	    }
-	    break;
-
-	case CONF_ENUM:
-	    if (tbl->table != 0)
-		LYgetEnum(tbl->table, value, q->int_value);
-	    break;
-
-	case CONF_INT:
-	    if (q->int_value != 0) {
-		int ival;
-
-		if (1 == sscanf(value, "%d", &ival))
-		    *(q->int_value) = ival;
-	    }
-	    break;
-
-	case CONF_LIS:
-	    if (q->str_value != 0) {
-		if (*(q->str_value) != NULL)
-		    StrAllocCat(*(q->str_value), ",");
-		StrAllocCat(*(q->str_value), value);
-	    }
-	    break;
-
-	case CONF_MBM:
-	    for (n = 1; n <= MBM_V_MAXFILES; n++) {
-		sprintf(MBM_line, "multi_bookmark%c", LYindex2MBM(n));
-
-		if (!strcasecomp(name, MBM_line)) {
-		    if ((notes = strchr(value, ',')) != 0) {
-			*notes++ = '\0';
-			LYTrimTrailing(value);
-			notes = LYSkipBlanks(notes);
-		    } else {
-			notes = value + strlen(value);
-		    }
-		    StrAllocCopy(MBM_A_subbookmark[n], value);
-		    StrAllocCopy(MBM_A_subdescript[n], notes);
-		    break;
-		}
-	    }
-	    break;
-
-	case CONF_STR:
-	    if (q->str_value != 0)
-		StrAllocCopy(*(q->str_value), value);
-	    break;
-
-	case CONF_NIL:
-	    break;
-	}
+	LYsetRcValue(name, value);
     }
 
     LYCloseInput(fp);

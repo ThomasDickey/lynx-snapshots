@@ -1,4 +1,4 @@
-.\" $LynxId: lynx.man,v 1.90 2012/02/05 19:09:07 tom Exp $
+.\" $LynxId: lynx.man,v 1.91 2012/08/13 01:05:48 tom Exp $
 .nr N -1
 .nr D 5
 .TH LYNX 1
@@ -205,7 +205,8 @@ and hexadecimal values represent other 8-bit codes.
 .TP
 .B set
 followed by a "name=value" allows one to override values set in the
-lynx.cfg file.
+lynx.cfg or .lynxrc files.
+\fILynx\fP tries the cfg-file setting first.
 .RE
 .TP
 .B \-color

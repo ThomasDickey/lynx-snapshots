@@ -1,4 +1,4 @@
-# $LynxId: makefile.in,v 1.30 2010/09/19 19:29:35 tom Exp $
+# $LynxId: makefile.in,v 1.31 2012/08/12 23:55:17 tom Exp $
 # Make WWW under unix for a.n.other unix system (bsd)
 # Use this as a template
 
@@ -11,6 +11,7 @@ LFLAGS =
 
 prefix		= @prefix@
 exec_prefix	= @exec_prefix@
+datarootdir	= @datarootdir@
 top_srcdir	= @top_srcdir@
 srcdir		= @srcdir@
 VPATH		= $(srcdir)
