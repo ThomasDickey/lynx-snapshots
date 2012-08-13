@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYrcFile.h,v 1.42 2011/06/12 00:30:05 tom Exp $
+ * $LynxId: LYrcFile.h,v 1.43 2012/08/13 00:16:53 tom Exp $
  */
 #ifndef LYRCFILE_H
 #define LYRCFILE_H
@@ -283,6 +283,7 @@ extern Config_Enum tbl_transfer_rate[];
 extern Config_Enum tbl_user_mode[];
 
 extern BOOL LYgetEnum(Config_Enum * table, const char *name, int *result);
+extern BOOL LYsetRcValue(const char *name, const char *param);
 extern BOOL will_save_rc(const char *name);
 extern const char *LYputEnum(Config_Enum * table, int value);
 extern int enable_lynxrc(char *value);

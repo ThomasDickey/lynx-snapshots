@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYReadCFG.c,v 1.167 2012/02/10 01:10:22 tom Exp $
+ * $LynxId: LYReadCFG.c,v 1.168 2012/08/13 00:09:29 tom Exp $
  */
 #ifndef NO_RULES
 #include <HTRules.h>
@@ -1904,9 +1904,10 @@ typedef BOOL (optidx_set_t)[NOPTS_];
  * For simple (boolean, string, integer, time) values, set the corresponding
  * configuration variable.
  */
-void LYSetConfigValue(const char *name,
+BOOL LYSetConfigValue(const char *name,
 		      const char *param)
 {
+    BOOL changed = TRUE;
     char *value = NULL;
     Config_Type *tbl = lookup_config(name);
     ParseUnionPtr q = ParseUnionOf(tbl);
@@ -2012,9 +2013,12 @@ void LYSetConfigValue(const char *name,
 	break;
 
     default:
+	changed = FALSE;
 	break;
     }
     FREE(value);
+
+    return changed;
 }
 
 /*

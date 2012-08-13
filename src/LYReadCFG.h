@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYReadCFG.h,v 1.26 2011/06/06 00:08:21 tom Exp $
+ * $LynxId: LYReadCFG.h,v 1.27 2012/08/13 00:09:50 tom Exp $
  */
 #ifndef LYREADCFG_H
 #define LYREADCFG_H
@@ -64,7 +64,7 @@ extern "C" {
 						    list_ptr,
 						    char *number);
     extern void reload_read_cfg(void);	/* implemented in LYMain.c */
-    extern void LYSetConfigValue(const char *name, const char *value);
+    extern BOOL LYSetConfigValue(const char *name, const char *value);
     extern void LYSetTextDomain(void);
 
 #ifdef __cplusplus

@@ -1,4 +1,4 @@
-# $LynxId: makefile.in,v 1.124 2012/08/04 14:11:29 tom Exp $
+# $LynxId: makefile.in,v 1.125 2012/08/12 23:54:35 tom Exp $
 ##makefile for lynx
 
 SHELL		= @CONFIG_SHELL@
@@ -66,6 +66,7 @@ sysconfdir= @sysconfdir@
 SYSCONFDIR= $(DESTDIR)$(sysconfdir)
 
 ## Where you want the doc-files installed
+datarootdir= @datarootdir@
 docdir    = @datadir@/lynx_doc
 DOCDIR    = $(DESTDIR)$(docdir)
 

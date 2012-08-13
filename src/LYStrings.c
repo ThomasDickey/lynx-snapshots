@@ -1,4 +1,4 @@
-/* $LynxId: LYStrings.c,v 1.205 2012/02/13 00:33:02 tom Exp $ */
+/* $LynxId: LYStrings.c,v 1.206 2012/08/13 00:18:00 tom Exp $ */
 #include <HTUtils.h>
 #include <HTCJK.h>
 #include <UCAux.h>
@@ -37,6 +37,7 @@
 
 #ifdef USE_CMD_LOGGING
 #include <LYReadCFG.h>
+#include <LYrcFile.h>
 #endif
 
 #include <LYShowInfo.h>
@@ -6182,8 +6183,13 @@ int LYReadCmdKey(int mode)
 			*tmp++ = '\0';
 			tmp = LYSkipBlanks(tmp);
 		    }
-		    CTRACE((tfp, "LYSetConfigValue(%s, %s)\n", src, tmp));
-		    LYSetConfigValue(src, tmp);
+		    if (LYSetConfigValue(src, tmp)) {
+			CTRACE((tfp, "LYSetConfigValue(%s, %s)\n", src, tmp));
+		    } else if (LYsetRcValue(src, tmp)) {
+			CTRACE((tfp, "LYsetRcValue(%s, %s)\n", src, tmp));
+		    } else {
+			CTRACE((tfp, "?? set ignored %s\n", src));
+		    }
 		}
 		break;
 	    }

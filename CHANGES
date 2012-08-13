@@ -1,9 +1,13 @@
--- $LynxId: CHANGES,v 1.612 2012/08/10 15:38:14 tom Exp $
+-- $LynxId: CHANGES,v 1.614 2012/08/13 01:03:30 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2012-08-10 (2.8.8dev.13)
+2012-08-12 (2.8.8dev.13)
+* modify handling of "set" in -cmd_script option to try both cfg-file and
+  rc-file settings (prompted by discussion with Andrew Watts) -TD
+* update configure script to add --datarootdir option, which changes the
+  default for man-page from /usr/lib to /usr/share -TD
 * modify configure check for sizeof(time_t), sizeof(off_t) to help recover if
   it is run in a deficient environment such as busybox -TD
 * limit downloaded files by Content-Length if any, to match behavior of IE,
