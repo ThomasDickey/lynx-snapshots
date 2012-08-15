@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTCP.c,v 1.107 2012/02/09 12:36:45 tom Exp $
+ * $LynxId: HTTCP.c,v 1.112 2012/08/14 23:18:41 tom Exp $
  *
  *			Generic Communication Code		HTTCP.c
  *			==========================
@@ -349,6 +349,15 @@ BOOL valid_hostname(char *name)
 }
 
 #ifdef NSL_FORK
+/* for transfer of status from child to parent: */
+typedef struct _statuses {
+    size_t rehostentlen;
+    int h_length;
+    int child_errno;		/* sometimes useful to pass this on */
+    int child_h_errno;
+    BOOL h_errno_valid;
+} STATUSES;
+
 /*
  *  Function to allow us to be killed with a normal signal (not
  *  SIGKILL), but don't go through normal libc exit() processing, which
@@ -373,11 +382,12 @@ int lynx_nsl_status = HT_OK;
  *  addresses, in a format inspired by gdb's print format. - kw
  */
 static void dump_hostent(const char *msgprefix,
-			 const LYNX_HOSTENT *phost)
+			 void *data)
 {
     if (TRACE) {
 	int i;
 	char **pcnt;
+	const LYNX_HOSTENT *phost = data;
 
 	CTRACE((tfp, "%s: %p ", msgprefix, (const void *) phost));
 	if (phost) {
@@ -633,7 +643,7 @@ extern int h_errno;
  * struct via a pipe in one read -TD
  */
 #ifdef NSL_FORK
-static unsigned readit(int fd, char *buffer, size_t length)
+static unsigned read_bytes(int fd, char *buffer, size_t length)
 {
     unsigned result = 0;
 
@@ -650,13 +660,414 @@ static unsigned readit(int fd, char *buffer, size_t length)
     }
     return result;
 }
+
+static BOOL setup_nsl_fork(void (*really) (char *, char *, STATUSES *, void *),
+			   unsigned (*readit) (int, char *, size_t),
+			   void (*dumpit) (const char *, void *),
+			   char *host,
+			   char *port,
+			   void *rehostent)
+{
+    STATUSES statuses;
+
+    /*
+     * fork-based gethostbyname() with checks for interrupts.
+     * - Tom Zerucha (tz@execpc.com) & FM
+     */
+    int got_rehostent = 0;
+
+#if HAVE_SIGACTION
+    sigset_t old_sigset;
+    sigset_t new_sigset;
+#endif
+    /*
+     * Pipe, child pid, status buffers, start time, select() control
+     * variables.
+     */
+    int fpid, waitret;
+    int pfd[2], selret;
+    unsigned readret;
+
+#ifdef HAVE_TYPE_UNIONWAIT
+    union wait waitstat;
+
+#else
+    int waitstat = 0;
+#endif
+    time_t start_time = time((time_t *) 0);
+    fd_set readfds;
+    struct timeval one_second;
+    long dns_patience = 30;	/* how many seconds will we wait for DNS? */
+    int child_exited = 0;
+
+    memset(&statuses, 0, sizeof(STATUSES));
+    statuses.h_errno_valid = NO;
+
+    /*
+     * Reap any children that have terminated since last time through.
+     * This might include children that we killed, then waited with WNOHANG
+     * before they were actually ready to be reaped.  (Should be max of 1
+     * in this state, but the loop is safe if waitpid() is implemented
+     * correctly:  returns 0 when children exist but none have exited; -1
+     * with errno == ECHILD when no children.) -BL
+     */
+    do {
+	waitret = waitpid(-1, 0, WNOHANG);
+    } while (waitret > 0 || (waitret == -1 && errno == EINTR));
+    waitret = 0;
+
+    IGNORE_RC(pipe(pfd));
+
+#if HAVE_SIGACTION
+    /*
+     * Attempt to prevent a rare situation where the child could execute
+     * the Lynx signal handlers because it gets killed before it even has a
+     * chance to reset its handlers, resulting in bogus 'Exiting via
+     * interrupt' message and screen corruption or worse.
+     * Should that continue to be reported, for systems without
+     * sigprocmask(), we need to find a different solutions for those.  -
+     * kw 19990430
+     */
+    sigemptyset(&new_sigset);
+    sigaddset(&new_sigset, SIGTERM);
+    sigaddset(&new_sigset, SIGINT);
+#ifndef NOSIGHUP
+    sigaddset(&new_sigset, SIGHUP);
+#endif /* NOSIGHUP */
+#ifdef SIGTSTP
+    sigaddset(&new_sigset, SIGTSTP);
+#endif /* SIGTSTP */
+#ifdef SIGWINCH
+    sigaddset(&new_sigset, SIGWINCH);
+#endif /* SIGWINCH */
+    sigprocmask(SIG_BLOCK, &new_sigset, &old_sigset);
+#endif /* HAVE_SIGACTION */
+
+    if ((fpid = fork()) == 0) {
+	/*
+	 * Child - for the long call.
+	 *
+	 * Make sure parent can kill us at will.  -BL
+	 */
+	(void) signal(SIGTERM, quench);
+
+	/*
+	 * Also make sure the child does not run one of the signal handlers
+	 * that may have been installed by Lynx if one of those signals
+	 * occurs.  For example we don't want the child to remove temp
+	 * files on ^C, let the parent deal with that.  - kw
+	 */
+	(void) signal(SIGINT, quench);
+#ifndef NOSIGHUP
+	(void) signal(SIGHUP, quench);
+#endif /* NOSIGHUP */
+#ifdef SIGTSTP
+	if (no_suspend)
+	    (void) signal(SIGTSTP, SIG_IGN);
+	else
+	    (void) signal(SIGTSTP, SIG_DFL);
+#endif /* SIGTSTP */
+#ifdef SIGWINCH
+	(void) signal(SIGWINCH, SIG_IGN);
+#endif /* SIGWINCH */
+#ifndef __linux__
+#ifndef DOSPATH
+	signal(SIGBUS, SIG_DFL);
+#endif /* DOSPATH */
+#endif /* !__linux__ */
+	signal(SIGSEGV, SIG_DFL);
+	signal(SIGILL, SIG_DFL);
+
+#if HAVE_SIGACTION
+	/* Restore signal mask to whatever it was before the fork. -kw */
+	sigprocmask(SIG_SETMASK, &old_sigset, NULL);
+#endif /* HAVE_SIGACTION */
+
+	/*
+	 * Child won't use read side.  -BL
+	 */
+	close(pfd[0]);
+#ifdef HAVE_H_ERRNO
+	/* to detect cases when it doesn't get set although it should */
+	h_errno = -2;
+#endif
+	set_errno(0);
+	really(host, port, &statuses, rehostent);
+	/*
+	 * Send variables indicating status of lookup to parent.  That
+	 * includes rehostentlen, which the parent will use as the size for
+	 * the second read (if > 0).
+	 */
+	if (!statuses.child_errno)
+	    statuses.child_errno = errno;
+	IGNORE_RC(write(pfd[1], &statuses, sizeof(statuses)));
+
+	if (statuses.rehostentlen) {
+	    /*
+	     * Return our resulting rehostent through pipe...
+	     */
+	    IGNORE_RC(write(pfd[1], rehostent, statuses.rehostentlen));
+	    close(pfd[1]);
+	    _exit(0);
+	} else {
+	    /*
+	     * ...  or return error as exit code.
+	     */
+	    _exit(1);
+	}
+    }
+#if HAVE_SIGACTION
+    /*
+     * (parent) Restore signal mask to whatever it was before the fork.  -
+     * kw
+     */
+    sigprocmask(SIG_SETMASK, &old_sigset, NULL);
+#endif /* HAVE_SIGACTION */
+
+    /*
+     * (parent) Wait until lookup finishes, or interrupt, or cycled too
+     * many times (just in case) -BL
+     */
+
+    close(pfd[1]);		/* parent won't use write side -BL */
+
+    if (fpid < 0) {		/* fork failed */
+	close(pfd[0]);
+	goto failed;
+    }
+
+    while (child_exited || (long) (time((time_t *) 0) - start_time) < dns_patience) {
+
+	FD_ZERO(&readfds);
+	/*
+	 * This allows us to abort immediately, not after 1-second timeout,
+	 * when user hits abort key.  Can't do this when using SLANG (or at
+	 * least I don't know how), so SLANG users must live with up-to-1s
+	 * timeout.  -BL
+	 *
+	 * Whoops -- we need to make sure stdin is actually selectable!
+	 * /dev/null isn't, on some systems, which makes some useful Lynx
+	 * invocations fail.  -BL
+	 */
+	{
+	    int kbd_fd = LYConsoleInputFD(TRUE);
+
+	    if (kbd_fd != INVSOC) {
+		FD_SET(kbd_fd, &readfds);
+	    }
+	}
+
+	one_second.tv_sec = 1;
+	one_second.tv_usec = 0;
+	FD_SET(pfd[0], &readfds);
+
+	/*
+	 * Return when data received, interrupted, or failed.  If nothing
+	 * is waiting, we sleep for 1 second in select(), to be nice to the
+	 * system.  -BL
+	 */
+#ifdef SOCKS
+	if (socks_flag)
+	    selret = Rselect(pfd[0] + 1, &readfds, NULL, NULL, &one_second);
+	else
+#endif /* SOCKS */
+	    selret = select(pfd[0] + 1, &readfds, NULL, NULL, &one_second);
+
+	if ((selret > 0) && FD_ISSET(pfd[0], &readfds)) {
+	    /*
+	     * First get status, including length of address.  -BL, kw
+	     */
+	    readret = read_bytes(pfd[0], (char *) &statuses, sizeof(statuses));
+	    if (readret == sizeof(statuses)) {
+		h_errno = statuses.child_h_errno;
+		set_errno(statuses.child_errno);
+#ifdef HAVE_H_ERRNO
+		if (statuses.h_errno_valid) {
+		    lynx_nsl_status = HT_H_ERRNO_VALID;
+		    /*
+		     * If something went wrong in the child process other
+		     * than normal lookup errors, and it appears that we
+		     * have enough info to know what went wrong, generate
+		     * diagnostic output.  ENOMEM observed on linux in
+		     * processes constrained with ulimit.  It would be too
+		     * unkind to abort the session, access to local files
+		     * or through a proxy may still work.  - kw
+		     */
+		    if (
+#ifdef NETDB_INTERNAL		/* linux glibc: defined in netdb.h */
+			   (errno && h_errno == NETDB_INTERNAL) ||
+#endif
+			   (errno == ENOMEM &&
+			    statuses.rehostentlen == 0 &&
+		    /* should probably be NETDB_INTERNAL if child
+		       memory exhausted, but we may find that
+		       h_errno remains unchanged. - kw */
+			    h_errno == -2)) {
+#ifndef MULTINET
+			HTInetStatus("CHILD gethostbyname");
+#endif
+			HTAlert(LYStrerror(statuses.child_errno));
+			if (errno == ENOMEM) {
+			    /*
+			     * Not much point in continuing, right?  Fake a
+			     * 'z', should shorten pointless guessing
+			     * cycle.  - kw
+			     */
+			    LYFakeZap(YES);
+			}
+		    }
+		}
+#endif /* HAVE_H_ERRNO */
+		if (statuses.rehostentlen > sizeof(LYNX_HOSTENT)) {
+		    /*
+		     * Then get the full reorganized hostent.  -BL, kw
+		     */
+		    readret = (*readit) (pfd[0], rehostent, statuses.rehostentlen);
+#ifdef DEBUG_HOSTENT
+		    dumpit("Read from pipe", rehostent);
+#endif
+		    if (readret == statuses.rehostentlen) {
+			got_rehostent = 1;
+			lynx_nsl_status = HT_OK;
+		    } else if (!statuses.h_errno_valid) {
+			lynx_nsl_status = HT_INTERNAL;
+		    }
+		}
+	    } else {
+		lynx_nsl_status = HT_ERROR;
+	    }
+	    /*
+	     * Make sure child is cleaned up.  -BL
+	     */
+	    if (!child_exited)
+		waitret = waitpid(fpid, &waitstat, WNOHANG);
+	    if (!WIFEXITED(waitstat) && !WIFSIGNALED(waitstat)) {
+		kill(fpid, SIGTERM);
+		waitret = waitpid(fpid, &waitstat, WNOHANG);
+	    }
+	    break;
+	}
+
+	/*
+	 * Clean up if child exited before & no data received.  -BL
+	 */
+	if (child_exited) {
+	    waitret = waitpid(fpid, &waitstat, WNOHANG);
+	    break;
+	}
+	/*
+	 * If child exited, loop once more looking for data.  -BL
+	 */
+	if ((waitret = waitpid(fpid, &waitstat, WNOHANG)) > 0) {
+	    /*
+	     * Data will be arriving right now, so make sure we don't
+	     * short-circuit out for too many loops, and skip the interrupt
+	     * check.  -BL
+	     */
+	    child_exited = 1;
+	    continue;
+	}
+
+	/*
+	 * Abort if interrupt key pressed.
+	 */
+	if (HTCheckForInterrupt()) {
+	    CTRACE((tfp, "LYGetHostByName: INTERRUPTED gethostbyname.\n"));
+	    kill(fpid, SIGTERM);
+	    waitpid(fpid, NULL, WNOHANG);
+	    close(pfd[0]);
+	    lynx_nsl_status = HT_INTERRUPTED;
+	    return FALSE;
+	}
+    }
+    close(pfd[0]);
+    if (waitret <= 0) {
+	kill(fpid, SIGTERM);
+	waitret = waitpid(fpid, &waitstat, WNOHANG);
+    }
+    if (waitret > 0) {
+	if (WIFEXITED(waitstat)) {
+	    CTRACE((tfp,
+		    "LYGetHostByName: NSL_FORK child %d exited, status 0x%x.\n",
+		    (int) waitret, WEXITSTATUS(waitstat)));
+	} else if (WIFSIGNALED(waitstat)) {
+	    CTRACE((tfp,
+		    "LYGetHostByName: NSL_FORK child %d got signal, status 0x%x!\n",
+		    (int) waitret, WTERMSIG(waitstat)));
+#ifdef WCOREDUMP
+	    if (WCOREDUMP(waitstat)) {
+		CTRACE((tfp,
+			"LYGetHostByName: NSL_FORK child %d dumped core!\n",
+			(int) waitret));
+	    }
+#endif /* WCOREDUMP */
+	} else if (WIFSTOPPED(waitstat)) {
+	    CTRACE((tfp,
+		    "LYGetHostByName: NSL_FORK child %d is stopped, status 0x%x!\n",
+		    (int) waitret, WSTOPSIG(waitstat)));
+	}
+    }
+    if (!got_rehostent) {
+	goto failed;
+    }
+    return TRUE;
+  failed:
+    return FALSE;
+}
+
+/*
+ * This is called via the child-side of the fork.
+ */
+static void really_gethostbyname(char *host,
+				 char *port GCC_UNUSED,
+				 STATUSES * statuses,
+				 void *rehostent)
+{
+    LYNX_HOSTENT *phost;	/* Pointer to host - See netdb.h */
+
+    (void) port;
+
+    phost = gethostbyname(host);
+    statuses->rehostentlen = 0;
+    statuses->child_errno = errno;
+    statuses->child_h_errno = h_errno;
+#ifdef HAVE_H_ERRNO
+    statuses->h_errno_valid = YES;
+#endif
+#ifdef MVS
+    CTRACE((tfp, "really_gethostbyname() returned %d\n", phost));
+#endif /* MVS */
+
+#ifdef DEBUG_HOSTENT_CHILD
+    dump_hostent("CHILD gethostbyname", phost);
+#endif
+    if (OK_HOST(phost)) {
+	statuses->rehostentlen = fill_rehostent(rehostent,
+						(size_t) REHOSTENT_SIZE,
+						phost);
+#ifdef DEBUG_HOSTENT_CHILD
+	dump_hostent("CHILD fill_rehostent", (LYNX_HOSTENT *) rehostent);
+#endif
+    }
+    if (statuses->rehostentlen <= sizeof(LYNX_HOSTENT) ||
+	!OK_HOST((LYNX_HOSTENT *) rehostent)) {
+	statuses->rehostentlen = 0;
+	statuses->h_length = 0;
+    } else {
+	statuses->h_length = ((LYNX_HOSTENT *) rehostent)->h_length;
+#ifdef HAVE_H_ERRNO
+	if (h_errno == -2)	/* success, but h_errno unchanged? */
+	    statuses->h_errno_valid = NO;
+#endif
+    }
+}
 #endif /* NSL_FORK */
 
 /*	Resolve an internet hostname, like gethostbyname
  *	------------------------------------------------
  *
  *  On entry,
- *	str	points to the given host name, not numeric address,
+ *	host	points to the given host name, not numeric address,
  *		without colon or port number.
  *
  *  On exit,
@@ -686,16 +1097,15 @@ static unsigned readit(int fd, char *buffer, size_t length)
  *	HT_ERROR		Resolver error, reason not known
  *	HT_INTERNAL		Internal error
  */
-LYNX_HOSTENT *LYGetHostByName(char *str)
+LYNX_HOSTENT *LYGetHostByName(char *host)
 {
-    char *host = str;
 
 #ifdef NSL_FORK
     /* for transfer of result between from child to parent: */
     static AlignedHOSTENT aligned_full_rehostent;
 
     /*
-     * We could define rehosten directly as a static char
+     * We could define rehostent directly as a static char
      * rehostent[REHOSTENT_SIZE], but the indirect approach via the above
      * struct should automatically take care of alignment requirements.
      * Note that, in addition,
@@ -707,17 +1117,6 @@ LYNX_HOSTENT *LYGetHostByName(char *str)
      *   call to fill_rehostent would be invalid when seen by the parent).  -kw
      */
     void *rehostent = (void *) &aligned_full_rehostent;
-
-    /* for transfer of status from child to parent: */
-    struct _statuses {
-	size_t rehostentlen;
-	int h_length;
-	int child_errno;	/* sometimes useful to pass this on */
-	int child_h_errno;
-	BOOL h_errno_valid;
-    } statuses;
-
-    size_t rehostentlen = 0;
 #endif /* NSL_FORK */
 
     LYNX_HOSTENT *result_phost = NULL;
@@ -726,16 +1125,16 @@ LYNX_HOSTENT *LYGetHostByName(char *str)
     _resolve_hook = ResolveYield;
 #endif
 
-    if (!str) {
+    if (!host) {
 	CTRACE((tfp, "LYGetHostByName: Can't parse `NULL'.\n"));
 	lynx_nsl_status = HT_INTERNAL;
 	return NULL;
     }
-    CTRACE((tfp, "LYGetHostByName: parsing `%s'.\n", str));
+    CTRACE((tfp, "LYGetHostByName: parsing `%s'.\n", host));
 
     /*  Could disable this if all our callers already check - kw */
     if (HTCheckForInterrupt()) {
-	CTRACE((tfp, "LYGetHostByName: INTERRUPTED for '%s'.\n", str));
+	CTRACE((tfp, "LYGetHostByName: INTERRUPTED for '%s'.\n", host));
 	lynx_nsl_status = HT_INTERRUPTED;
 	return NULL;
     }
@@ -760,381 +1159,13 @@ LYNX_HOSTENT *LYGetHostByName(char *str)
     lynx_nsl_status = HT_INTERNAL;	/* should be set to something else below */
 
 #ifdef NSL_FORK
-    statuses.h_errno_valid = NO;
-    /*
-     * Start block for fork-based gethostbyname() with checks for interrupts.
-     * - Tom Zerucha (tz@execpc.com) & FM
-     */
-    {
-	int got_rehostent = 0;
-
-#if HAVE_SIGACTION
-	sigset_t old_sigset;
-	sigset_t new_sigset;
-#endif
-	/*
-	 * Pipe, child pid, status buffers, start time, select() control
-	 * variables.
-	 */
-	int fpid, waitret;
-	int pfd[2], selret;
-	unsigned readret;
-
-#ifdef HAVE_TYPE_UNIONWAIT
-	union wait waitstat;
-
-#else
-	int waitstat = 0;
-#endif
-	time_t start_time = time((time_t *) 0);
-	fd_set readfds;
-	struct timeval one_second;
-	long dns_patience = 30;	/* how many seconds will we wait for DNS? */
-	int child_exited = 0;
-
-	/*
-	 * Reap any children that have terminated since last time through.
-	 * This might include children that we killed, then waited with WNOHANG
-	 * before they were actually ready to be reaped.  (Should be max of 1
-	 * in this state, but the loop is safe if waitpid() is implemented
-	 * correctly:  returns 0 when children exist but none have exited; -1
-	 * with errno == ECHILD when no children.) -BL
-	 */
-	do {
-	    waitret = waitpid(-1, 0, WNOHANG);
-	} while (waitret > 0 || (waitret == -1 && errno == EINTR));
-	waitret = 0;
-
-	IGNORE_RC(pipe(pfd));
-
-#if HAVE_SIGACTION
-	/*
-	 * Attempt to prevent a rare situation where the child could execute
-	 * the Lynx signal handlers because it gets killed before it even has a
-	 * chance to reset its handlers, resulting in bogus 'Exiting via
-	 * interrupt' message and screen corruption or worse.
-	 * Should that continue to be reported, for systems without
-	 * sigprocmask(), we need to find a different solutions for those.  -
-	 * kw 19990430
-	 */
-	sigemptyset(&new_sigset);
-	sigaddset(&new_sigset, SIGTERM);
-	sigaddset(&new_sigset, SIGINT);
-#ifndef NOSIGHUP
-	sigaddset(&new_sigset, SIGHUP);
-#endif /* NOSIGHUP */
-#ifdef SIGTSTP
-	sigaddset(&new_sigset, SIGTSTP);
-#endif /* SIGTSTP */
-#ifdef SIGWINCH
-	sigaddset(&new_sigset, SIGWINCH);
-#endif /* SIGWINCH */
-	sigprocmask(SIG_BLOCK, &new_sigset, &old_sigset);
-#endif /* HAVE_SIGACTION */
-
-	if ((fpid = fork()) == 0) {
-	    LYNX_HOSTENT *phost;	/* Pointer to host - See netdb.h */
-
-	    /*
-	     * Child - for the long call.
-	     *
-	     * Make sure parent can kill us at will.  -BL
-	     */
-	    (void) signal(SIGTERM, quench);
-
-	    /*
-	     * Also make sure the child does not run one of the signal handlers
-	     * that may have been installed by Lynx if one of those signals
-	     * occurs.  For example we don't want the child to remove temp
-	     * files on ^C, let the parent deal with that.  - kw
-	     */
-	    (void) signal(SIGINT, quench);
-#ifndef NOSIGHUP
-	    (void) signal(SIGHUP, quench);
-#endif /* NOSIGHUP */
-#ifdef SIGTSTP
-	    if (no_suspend)
-		(void) signal(SIGTSTP, SIG_IGN);
-	    else
-		(void) signal(SIGTSTP, SIG_DFL);
-#endif /* SIGTSTP */
-#ifdef SIGWINCH
-	    (void) signal(SIGWINCH, SIG_IGN);
-#endif /* SIGWINCH */
-#ifndef __linux__
-#ifndef DOSPATH
-	    signal(SIGBUS, SIG_DFL);
-#endif /* DOSPATH */
-#endif /* !__linux__ */
-	    signal(SIGSEGV, SIG_DFL);
-	    signal(SIGILL, SIG_DFL);
-
-#if HAVE_SIGACTION
-	    /* Restore signal mask to whatever it was before the fork. -kw */
-	    sigprocmask(SIG_SETMASK, &old_sigset, NULL);
-#endif /* HAVE_SIGACTION */
-
-	    /*
-	     * Child won't use read side.  -BL
-	     */
-	    close(pfd[0]);
-#ifdef HAVE_H_ERRNO
-	    /* to detect cases when it doesn't get set although it should */
-	    h_errno = -2;
-#endif
-	    set_errno(0);
-	    phost = gethostbyname(host);
-	    statuses.child_errno = errno;
-	    statuses.child_h_errno = h_errno;
-#ifdef HAVE_H_ERRNO
-	    statuses.h_errno_valid = YES;
-#endif
-#ifdef MVS
-	    CTRACE((tfp, "LYGetHostByName: gethostbyname() returned %d\n", phost));
-#endif /* MVS */
-
-#ifdef DEBUG_HOSTENT_CHILD
-	    dump_hostent("CHILD gethostbyname", phost);
-#endif
-	    if (OK_HOST(phost)) {
-		rehostentlen = fill_rehostent(rehostent,
-					      (size_t) REHOSTENT_SIZE,
-					      phost);
-#ifdef DEBUG_HOSTENT_CHILD
-		dump_hostent("CHILD fill_rehostent", (LYNX_HOSTENT *) rehostent);
-#endif
-	    }
-	    if (rehostentlen <= sizeof(LYNX_HOSTENT) ||
-		!OK_HOST((LYNX_HOSTENT *) rehostent)) {
-		rehostentlen = 0;
-		statuses.h_length = 0;
-	    } else {
-		statuses.h_length = ((LYNX_HOSTENT *) rehostent)->h_length;
-#ifdef HAVE_H_ERRNO
-		if (h_errno == -2)	/* success, but h_errno unchanged? */
-		    statuses.h_errno_valid = NO;
-#endif
-	    }
-	    /*
-	     * Send variables indicating status of lookup to parent.  That
-	     * includes rehostentlen, which the parent will use as the size for
-	     * the second read (if > 0).
-	     */
-	    if (!statuses.child_errno)
-		statuses.child_errno = errno;
-	    statuses.rehostentlen = rehostentlen;
-	    IGNORE_RC(write(pfd[1], &statuses, sizeof(statuses)));
-
-	    if (rehostentlen) {
-		/*
-		 * Return our resulting rehostent through pipe...
-		 */
-		IGNORE_RC(write(pfd[1], rehostent, rehostentlen));
-		close(pfd[1]);
-		_exit(0);
-	    } else {
-		/*
-		 * ...  or return error as exit code.
-		 */
-		_exit(1);
-	    }
-	}
-#if HAVE_SIGACTION
-	/*
-	 * (parent) Restore signal mask to whatever it was before the fork.  -
-	 * kw
-	 */
-	sigprocmask(SIG_SETMASK, &old_sigset, NULL);
-#endif /* HAVE_SIGACTION */
-
-	/*
-	 * (parent) Wait until lookup finishes, or interrupt, or cycled too
-	 * many times (just in case) -BL
-	 */
-
-	close(pfd[1]);		/* parent won't use write side -BL */
-
-	if (fpid < 0) {		/* fork failed */
-	    close(pfd[0]);
-	    goto failed;
-	}
-
-	while (child_exited || (long) (time((time_t *) 0) - start_time) < dns_patience) {
-
-	    FD_ZERO(&readfds);
-	    /*
-	     * This allows us to abort immediately, not after 1-second timeout,
-	     * when user hits abort key.  Can't do this when using SLANG (or at
-	     * least I don't know how), so SLANG users must live with up-to-1s
-	     * timeout.  -BL
-	     *
-	     * Whoops -- we need to make sure stdin is actually selectable!
-	     * /dev/null isn't, on some systems, which makes some useful Lynx
-	     * invocations fail.  -BL
-	     */
-	    {
-		int kbd_fd = LYConsoleInputFD(TRUE);
-
-		if (kbd_fd != INVSOC) {
-		    FD_SET(kbd_fd, &readfds);
-		}
-	    }
-
-	    one_second.tv_sec = 1;
-	    one_second.tv_usec = 0;
-	    FD_SET(pfd[0], &readfds);
-
-	    /*
-	     * Return when data received, interrupted, or failed.  If nothing
-	     * is waiting, we sleep for 1 second in select(), to be nice to the
-	     * system.  -BL
-	     */
-#ifdef SOCKS
-	    if (socks_flag)
-		selret = Rselect(pfd[0] + 1, &readfds, NULL, NULL, &one_second);
-	    else
-#endif /* SOCKS */
-		selret = select(pfd[0] + 1, &readfds, NULL, NULL, &one_second);
-
-	    if ((selret > 0) && FD_ISSET(pfd[0], &readfds)) {
-		/*
-		 * First get status, including length of address.  -BL, kw
-		 */
-		readret = readit(pfd[0], (char *) &statuses, sizeof(statuses));
-		if (readret == sizeof(statuses)) {
-		    h_errno = statuses.child_h_errno;
-		    set_errno(statuses.child_errno);
-#ifdef HAVE_H_ERRNO
-		    if (statuses.h_errno_valid) {
-			lynx_nsl_status = HT_H_ERRNO_VALID;
-			/*
-			 * If something went wrong in the child process other
-			 * than normal lookup errors, and it appears that we
-			 * have enough info to know what went wrong, generate
-			 * diagnostic output.  ENOMEM observed on linux in
-			 * processes constrained with ulimit.  It would be too
-			 * unkind to abort the session, access to local files
-			 * or through a proxy may still work.  - kw
-			 */
-			if (
-#ifdef NETDB_INTERNAL		/* linux glibc: defined in netdb.h */
-			       (errno && h_errno == NETDB_INTERNAL) ||
-#endif
-			       (errno == ENOMEM &&
-				statuses.rehostentlen == 0 &&
-			/* should probably be NETDB_INTERNAL if child
-			   memory exhausted, but we may find that
-			   h_errno remains unchanged. - kw */
-				h_errno == -2)) {
-#ifndef MULTINET
-			    HTInetStatus("CHILD gethostbyname");
-#endif
-			    HTAlert(LYStrerror(statuses.child_errno));
-			    if (errno == ENOMEM) {
-				/*
-				 * Not much point in continuing, right?  Fake a
-				 * 'z', should shorten pointless guessing
-				 * cycle.  - kw
-				 */
-				LYFakeZap(YES);
-			    }
-			}
-		    }
-#endif /* HAVE_H_ERRNO */
-		    if (statuses.rehostentlen > sizeof(LYNX_HOSTENT)) {
-			/*
-			 * Then get the full reorganized hostent.  -BL, kw
-			 */
-			readret = readit(pfd[0], rehostent, statuses.rehostentlen);
-#ifdef DEBUG_HOSTENT
-			dump_hostent("Read from pipe", (LYNX_HOSTENT *) rehostent);
-#endif
-			if (readret == statuses.rehostentlen) {
-			    got_rehostent = 1;
-			    result_phost = (LYNX_HOSTENT *) rehostent;
-			    lynx_nsl_status = HT_OK;
-			} else if (!statuses.h_errno_valid) {
-			    lynx_nsl_status = HT_INTERNAL;
-			}
-		    }
-		} else {
-		    lynx_nsl_status = HT_ERROR;
-		}
-		/*
-		 * Make sure child is cleaned up.  -BL
-		 */
-		if (!child_exited)
-		    waitret = waitpid(fpid, &waitstat, WNOHANG);
-		if (!WIFEXITED(waitstat) && !WIFSIGNALED(waitstat)) {
-		    kill(fpid, SIGTERM);
-		    waitret = waitpid(fpid, &waitstat, WNOHANG);
-		}
-		break;
-	    }
-
-	    /*
-	     * Clean up if child exited before & no data received.  -BL
-	     */
-	    if (child_exited) {
-		waitret = waitpid(fpid, &waitstat, WNOHANG);
-		break;
-	    }
-	    /*
-	     * If child exited, loop once more looking for data.  -BL
-	     */
-	    if ((waitret = waitpid(fpid, &waitstat, WNOHANG)) > 0) {
-		/*
-		 * Data will be arriving right now, so make sure we don't
-		 * short-circuit out for too many loops, and skip the interrupt
-		 * check.  -BL
-		 */
-		child_exited = 1;
-		continue;
-	    }
-
-	    /*
-	     * Abort if interrupt key pressed.
-	     */
-	    if (HTCheckForInterrupt()) {
-		CTRACE((tfp, "LYGetHostByName: INTERRUPTED gethostbyname.\n"));
-		kill(fpid, SIGTERM);
-		waitpid(fpid, NULL, WNOHANG);
-		close(pfd[0]);
-		lynx_nsl_status = HT_INTERRUPTED;
-		return NULL;
-	    }
-	}
-	close(pfd[0]);
-	if (waitret <= 0) {
-	    kill(fpid, SIGTERM);
-	    waitret = waitpid(fpid, &waitstat, WNOHANG);
-	}
-	if (waitret > 0) {
-	    if (WIFEXITED(waitstat)) {
-		CTRACE((tfp,
-			"LYGetHostByName: NSL_FORK child %d exited, status 0x%x.\n",
-			(int) waitret, WEXITSTATUS(waitstat)));
-	    } else if (WIFSIGNALED(waitstat)) {
-		CTRACE((tfp,
-			"LYGetHostByName: NSL_FORK child %d got signal, status 0x%x!\n",
-			(int) waitret, WTERMSIG(waitstat)));
-#ifdef WCOREDUMP
-		if (WCOREDUMP(waitstat)) {
-		    CTRACE((tfp,
-			    "LYGetHostByName: NSL_FORK child %d dumped core!\n",
-			    (int) waitret));
-		}
-#endif /* WCOREDUMP */
-	    } else if (WIFSTOPPED(waitstat)) {
-		CTRACE((tfp,
-			"LYGetHostByName: NSL_FORK child %d is stopped, status 0x%x!\n",
-			(int) waitret, WSTOPSIG(waitstat)));
-	    }
-	}
-	if (!got_rehostent) {
-	    goto failed;
-	}
+    if (!setup_nsl_fork(really_gethostbyname,
+			read_bytes,
+			dump_hostent,
+			host, NULL, rehostent)) {
+	goto failed;
     }
+    result_phost = (LYNX_HOSTENT *) rehostent;
 #else /* Not NSL_FORK: */
 
 #ifdef _WINDOWS_NSL
@@ -1394,11 +1425,151 @@ static int HTParseInet(SockA * soc_in, const char *str)
 #endif /* !INET6 */
 
 #ifdef INET6
-static LYNX_ADDRINFO *HTGetAddrInfo(const char *str,
-				    const int defport)
+
+#if defined(NSL_FORK)
+
+#define MAX_ADDRINFO 6
+
+typedef struct {
+    LYNX_ADDRINFO h[MAX_ADDRINFO];
+    char heap[128 * MAX_ADDRINFO];
+} AlignedADDRINFO;
+
+#ifdef DEBUG_HOSTENT_CHILD
+static void dump_addrinfo(const char *tag, void *data)
+{
+    LYNX_ADDRINFO *res;
+
+    for (res = (LYNX_ADDRINFO *) data; res; res = res->ai_next) {
+	CTRACE((tfp, "%s: family %d, socktype %d, protocol %d\n",
+		tag,
+		res->ai_family,
+		res->ai_socktype,
+		res->ai_protocol));
+    }
+}
+#endif
+
+/*
+ * Copy the relevant information.
+ */
+static size_t fill_addrinfo(char *buffer,
+			    const LYNX_ADDRINFO *phost)
+{
+    LYNX_ADDRINFO *actual = (LYNX_ADDRINFO *) buffer;
+    int count = 0;
+    char *heap = (char *) &(actual[MAX_ADDRINFO]);
+
+    while (count++ < MAX_ADDRINFO) {
+	memset(actual, 0, sizeof(LYNX_ADDRINFO));
+
+	actual->ai_flags = phost->ai_flags;
+	actual->ai_family = phost->ai_family;
+	actual->ai_socktype = phost->ai_socktype;
+	actual->ai_protocol = phost->ai_protocol;
+	actual->ai_addrlen = phost->ai_addrlen;
+
+	if ((int) (heap + phost->ai_addrlen - buffer) >=
+	    (int) sizeof(AlignedADDRINFO)) {
+	    heap = buffer;
+	    break;
+	}
+
+	actual->ai_addr = (struct sockaddr *) heap;
+	MemCpy(heap, phost->ai_addr, phost->ai_addrlen);
+	heap += phost->ai_addrlen;
+
+	phost = phost->ai_next;
+	if (phost != 0) {
+	    actual->ai_next = (actual + 1);
+	    ++actual;
+	} else {
+	    break;
+	}
+    }
+    return (size_t) (heap - buffer);
+}
+
+/*
+ * Read data, repair pointers as done in fill_addrinfo().
+ */
+static unsigned read_addrinfo(int fd, char *buffer, size_t length)
+{
+    unsigned result = read_bytes(fd, buffer, length);
+    LYNX_ADDRINFO *actual = (LYNX_ADDRINFO *) buffer;
+    int count = 0;
+    char *heap = (char *) &(actual[MAX_ADDRINFO]);
+
+    while (count++ < MAX_ADDRINFO) {
+	if (actual->ai_addr) {
+	    actual->ai_addr = (struct sockaddr *) heap;
+	    heap += actual->ai_addrlen;
+	}
+	if (actual->ai_next == 0)
+	    break;
+	actual->ai_next = (actual + 1);
+	++actual;
+    }
+
+    return result;
+}
+
+/*
+ * This is called via the child-side of the fork.
+ */
+static void really_getaddrinfo(char *host,
+			       char *port,
+			       STATUSES * statuses,
+			       void *result)
 {
     LYNX_ADDRINFO hints, *res;
     int error;
+
+    memset(&hints, 0, sizeof(hints));
+    hints.ai_family = PF_UNSPEC;
+    hints.ai_socktype = SOCK_STREAM;
+    error = getaddrinfo(host, port, &hints, &res);
+    if (error || !res) {
+	CTRACE((tfp, "HTGetAddrInfo: getaddrinfo(%s, %s): %s\n", host, port,
+		gai_strerror(error)));
+    } else {
+	statuses->child_errno = errno;
+	statuses->child_h_errno = h_errno;
+#ifdef HAVE_H_ERRNO
+	statuses->h_errno_valid = YES;
+#endif
+
+#ifdef DEBUG_HOSTENT_CHILD
+	dump_addrinfo("CHILD getaddrinfo", res);
+#endif
+	statuses->rehostentlen = fill_addrinfo(result, res);
+#ifdef DEBUG_HOSTENT_CHILD
+	dump_addrinfo("CHILD fill_readdrinfo", (LYNX_ADDRINFO *) result);
+#endif
+	if (statuses->rehostentlen <= sizeof(LYNX_ADDRINFO)) {
+	    statuses->rehostentlen = 0;
+	    statuses->h_length = 0;
+	} else {
+	    statuses->h_length = (int) (((LYNX_ADDRINFO *) result)->ai_addrlen);
+	}
+    }
+}
+#endif /* NSL_FORK */
+
+static LYNX_ADDRINFO *HTGetAddrInfo(const char *str,
+				    const int defport)
+{
+#ifdef NSL_FORK
+    /* for transfer of result between from child to parent: */
+    static AlignedADDRINFO aligned_full_readdrinfo;
+
+    void *readdrinfo = (void *) &aligned_full_readdrinfo;
+
+#else
+    LYNX_ADDRINFO hints;
+    int error;
+#endif /* NSL_FORK */
+    LYNX_ADDRINFO *res;
     char *p;
     char *s = NULL;
     char *host, *port;
@@ -1421,6 +1592,16 @@ static LYNX_ADDRINFO *HTGetAddrInfo(const char *str,
 	port = pbuf;
     }
 
+#ifdef NSL_FORK
+    if (setup_nsl_fork(really_getaddrinfo,
+		       read_addrinfo,
+		       dump_addrinfo,
+		       host, port, readdrinfo)) {
+	res = readdrinfo;
+    } else {
+	res = NULL;
+    }
+#else
     memset(&hints, 0, sizeof(hints));
     hints.ai_family = PF_UNSPEC;
     hints.ai_socktype = SOCK_STREAM;
@@ -1430,6 +1611,7 @@ static LYNX_ADDRINFO *HTGetAddrInfo(const char *str,
 		gai_strerror(error)));
 	res = NULL;
     }
+#endif
 
     free(s);
     return res;
@@ -1768,8 +1950,10 @@ int HTDoConnect(const char *url,
 		    HTAlert(gettext("Connection failed (too many retries)."));
 #ifdef INET6
 		    FREE(line);
+#ifndef NSL_FORK
 		    if (res0)
 			freeaddrinfo(res0);
+#endif
 #endif /* INET6 */
 		    return HT_NO_DATA;
 		}
@@ -1959,8 +2143,10 @@ int HTDoConnect(const char *url,
 
 #ifdef INET6
     FREE(line);
+#ifndef NSL_FORK
     if (res0)
 	freeaddrinfo(res0);
+#endif
 #endif /* INET6 */
     return status;
 }
