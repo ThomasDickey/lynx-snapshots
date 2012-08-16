@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFWriter.c,v 1.99 2011/06/11 12:15:28 tom Exp $
+ * $LynxId: HTFWriter.c,v 1.100 2012/08/15 23:25:33 tom Exp $
  *
  *		FILE WRITER				HTFWrite.h
  *		===========
@@ -659,9 +659,6 @@ HTStream *HTSaveAndExecute(HTPresentation *pres,
 
 	    /* 1998/01/23 (Fri) 17:38:26 */
 	    unsigned char *cp, *view_fname;
-
-#define IS_SJIS_HI1(hi) ((0x81<=hi)&&(hi<=0x9F))	/* 1st lev. */
-#define IS_SJIS_HI2(hi) ((0xE0<=hi)&&(hi<=0xEF))	/* 2nd lev. */
 
 	    me->fp = NULL;
 

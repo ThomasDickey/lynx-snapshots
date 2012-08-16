@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTCJK.h,v 1.18 2010/09/25 11:41:29 tom Exp $
+ * $LynxId: HTCJK.h,v 1.19 2012/08/15 23:11:03 tom Exp $
  *
  *			CJK character converter		HTCJK.h
  *			=======================
@@ -33,8 +33,8 @@ extern "C" {
 #define TO_HANGUL	"\033$(C"
 #define TO_ASCII	"\033(B"
 #define IS_SJIS_LO(lo)	((0x40<=lo)&&(lo!=0x7F)&&(lo<=0xFC))
-#define IS_SJIS_HI1(hi) ((0x81<=hi)&&(hi<=0x9F))	/* 1st lev. */
-#define IS_SJIS_HI2(hi) ((0xE0<=hi)&&(hi<=0xEF))	/* 2nd lev. */
+#define IS_SJIS_HI1(hi) ((0x81 <= (hi)) && ((hi) <= 0x9F))	/* 1st lev. */
+#define IS_SJIS_HI2(hi) ((0xE0 <= (hi)) && ((hi) <= 0xEF))	/* 2nd lev. */
 #define IS_SJIS(hi,lo,in_sjis) (!IS_SJIS_LO(lo)?0:IS_SJIS_HI1(hi)?(in_sjis=1):in_sjis&&IS_SJIS_HI2(hi))
 #define IS_SJIS_2BYTE(hi,lo) (IS_SJIS_LO(lo)&&(IS_SJIS_HI1(hi)||IS_SJIS_HI2(hi)))
 #define IS_SJIS_X0201KANA(lo) ((0xA1<=lo)&&(lo<=0xDF))

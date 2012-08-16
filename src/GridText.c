@@ -1,5 +1,5 @@
 /*
- * $LynxId: GridText.c,v 1.238 2012/08/03 17:28:03 tom Exp $
+ * $LynxId: GridText.c,v 1.239 2012/08/15 22:20:41 tom Exp $
  *
  *		Character grid hypertext object
  *		===============================
@@ -14646,7 +14646,7 @@ static int LYHandleCache(const char *arg,
 #ifdef USE_SOURCE_CACHE
     char *source_cache_file = NULL;
 #endif
-    long Size = 0;
+    off_t Size = 0;
     int x = -1;
 
     /*
@@ -14760,7 +14760,8 @@ static int LYHandleCache(const char *arg,
 		   x, STR_LYNXCACHE, x, title, address, address);
 	PUTS(buf);
 	if (Size > 0) {
-	    HTSprintf0(&buf, "Size: %ld  ", Size);
+	    HTSprintf0(&buf, "Size: %" PRI_off_t "  ", Size);
+
 	    PUTS(buf);
 	}
 	if (cachedoc != NULL && cachedoc->Lines > 0) {

@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMainLoop.c,v 1.210 2012/07/07 16:28:47 tom Exp $
+ * $LynxId: LYMainLoop.c,v 1.211 2012/08/15 23:18:03 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTAccess.h>
@@ -116,7 +116,7 @@ static char *str_sjis(char *to, char *from)
 	strcpy(to, from);
 #endif
     } else {
-	TO_SJIS(from, to);
+	TO_SJIS((unsigned char *) from, (unsigned char *) to);
     }
     return to;
 }

@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTMIME.c,v 1.77 2012/08/10 11:49:03 tom Exp $
+ * $LynxId: HTMIME.c,v 1.78 2012/08/15 10:59:12 tom Exp $
  *
  *			MIME Message Parse			HTMIME.c
  *			==================
@@ -791,10 +791,10 @@ static int dispatchField(HTStream *me)
 	/*
 	 * Convert to integer and indicate in anchor.  - FM
 	 */
-	me->anchor->content_length = atoi(me->value);
+	me->anchor->content_length = LYatoll(me->value);
 	if (me->anchor->content_length < 0)
 	    me->anchor->content_length = 0;
-	CTRACE((tfp, "        Converted to integer: '%ld'\n",
+	CTRACE((tfp, "        Converted to integer: '%" PRI_off_t "'\n",
 		me->anchor->content_length));
 	break;
     case miCONTENT_LOCATION:

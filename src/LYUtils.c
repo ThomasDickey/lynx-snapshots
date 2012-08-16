@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYUtils.c,v 1.225 2012/08/03 17:38:47 tom Exp $
+ * $LynxId: LYUtils.c,v 1.227 2012/08/15 23:11:03 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTCP.h>
@@ -7965,13 +7965,10 @@ static char *device_list[] =
     NULL
 };
 
-#define IS_SJIS_HI1(hi) ((0x81<=hi)&&(hi<=0x9F))	/* 1st lev. */
-#define IS_SJIS_HI2(hi) ((0xE0<=hi)&&(hi<=0xEF))	/* 2nd lev. */
-
 int unsafe_filename(const char *fname)
 {
     int i, len, sum;
-    unsigned char *cp;
+    char *cp;
     char *save;
 
     i = 0;
@@ -7985,7 +7982,7 @@ int unsafe_filename(const char *fname)
     save = cp = strdup(fname);
 
     while (*cp) {
-	if (IS_SJIS_HI1(*cp) || IS_SJIS_HI2(*cp))
+	if (IS_SJIS_HI1(UCH(*cp)) || IS_SJIS_HI2(UCH(*cp)))
 	    cp += 2;		/* KANJI skip */
 	if (IS_SEP(*cp)) {
 	    *cp = '\0';
@@ -8017,10 +8014,7 @@ int unsafe_filename(const char *fname)
     }
     free(save);
 
-    if (sum != 0)
-	return 1;
-    else
-	return 0;
+    return (sum != 0);
 }
 
 FILE *safe_fopen(const char *fname, const char *mode)
