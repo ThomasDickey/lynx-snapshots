@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFTP.c,v 1.102 2012/08/03 12:34:58 tom Exp $
+ * $LynxId: HTFTP.c,v 1.104 2012/08/15 23:14:42 tom Exp $
  *
  *			File Transfer Protocol (FTP) Client
  *			for a WorldWideWeb browser
@@ -251,10 +251,8 @@ static char *data_write_pointer;
 #define NEXT_DATA_CHAR next_data_char()
 static int close_connection(connection * con);
 
-#ifdef HAVE_ATOLL
-#define LYatoll(n) atoll(n)
-#else
-static off_t LYatoll(const char *value)
+#ifndef HAVE_ATOLL
+off_t LYatoll(const char *value)
 {
     off_t result = 0;
 
@@ -1853,7 +1851,7 @@ static void parse_vms_dir_entry(char *line,
 				EntryInfo *entry_info)
 {
     int i, j;
-    unsigned int ialloc;
+    off_t ialloc;
     char *cp, *cpd, *cps, date[16];
     const char *sp = " ";
 
@@ -1959,7 +1957,7 @@ static void parse_vms_dir_entry(char *line,
 	while (isdigit(UCH(*cps)))
 	    cps++;
 	*cps = '\0';
-	ialloc = (unsigned) atoi(cpd + 1);
+	ialloc = LYatoll(cpd + 1);
 	/* Check if used is in blocks or bytes */
 	if (entry_info->size <= ialloc)
 	    entry_info->size *= 512;

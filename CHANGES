@@ -1,9 +1,9 @@
--- $LynxId: CHANGES,v 1.616 2012/08/14 23:10:22 tom Exp $
+-- $LynxId: CHANGES,v 1.617 2012/08/15 09:47:38 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2012-08-14 (2.8.8dev.13)
+2012-08-15 (2.8.8dev.13)
 * make nsl-fork work for the DNS lookup using getaddrinfo, i.e., for IPv6
   configurations (report by FLWM) -TD
 * add U+0218, U+0219, U+021a, and U+021b to 0x53, 0x73, 0x54, and 0x74,

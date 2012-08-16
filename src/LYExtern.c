@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYExtern.c,v 1.49 2012/02/10 18:36:39 tom Exp $
+ * $LynxId: LYExtern.c,v 1.50 2012/08/15 23:16:22 tom Exp $
  *
  External application support.
  This feature allows lynx to pass a given URL to an external program.
@@ -31,8 +31,8 @@
 
 #ifdef WIN_EX
 /* ASCII char -> HEX digit */
-#define ASC2HEXD(x) (((x) >= '0' && (x) <= '9') ?               \
-		     ((x) - '0') : (toupper(x) - 'A' + 10))
+#define ASC2HEXD(x) ((UCH(x) >= '0' && UCH(x) <= '9') ?               \
+		     (UCH(x) - '0') : (toupper(UCH(x)) - 'A' + 10))
 
 /* Decodes the forms %xy in a URL to the character the hexadecimal
    code of which is xy. xy are hexadecimal digits from

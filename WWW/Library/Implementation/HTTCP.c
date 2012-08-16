@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTCP.c,v 1.112 2012/08/14 23:18:41 tom Exp $
+ * $LynxId: HTTCP.c,v 1.113 2012/08/15 22:24:41 tom Exp $
  *
  *			Generic Communication Code		HTTCP.c
  *			==========================
@@ -1456,7 +1456,7 @@ static void dump_addrinfo(const char *tag, void *data)
 static size_t fill_addrinfo(char *buffer,
 			    const LYNX_ADDRINFO *phost)
 {
-    LYNX_ADDRINFO *actual = (LYNX_ADDRINFO *) buffer;
+    LYNX_ADDRINFO *actual = (LYNX_ADDRINFO *) (void *) buffer;
     int count = 0;
     char *heap = (char *) &(actual[MAX_ADDRINFO]);
 
@@ -1475,7 +1475,7 @@ static size_t fill_addrinfo(char *buffer,
 	    break;
 	}
 
-	actual->ai_addr = (struct sockaddr *) heap;
+	actual->ai_addr = (struct sockaddr *) (void *) heap;
 	MemCpy(heap, phost->ai_addr, phost->ai_addrlen);
 	heap += phost->ai_addrlen;
 
@@ -1496,13 +1496,13 @@ static size_t fill_addrinfo(char *buffer,
 static unsigned read_addrinfo(int fd, char *buffer, size_t length)
 {
     unsigned result = read_bytes(fd, buffer, length);
-    LYNX_ADDRINFO *actual = (LYNX_ADDRINFO *) buffer;
+    LYNX_ADDRINFO *actual = (LYNX_ADDRINFO *) (void *) buffer;
     int count = 0;
     char *heap = (char *) &(actual[MAX_ADDRINFO]);
 
     while (count++ < MAX_ADDRINFO) {
 	if (actual->ai_addr) {
-	    actual->ai_addr = (struct sockaddr *) heap;
+	    actual->ai_addr = (struct sockaddr *) (void *) heap;
 	    heap += actual->ai_addrlen;
 	}
 	if (actual->ai_next == 0)

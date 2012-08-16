@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFile.c,v 1.131 2012/08/02 09:04:52 tom Exp $
+ * $LynxId: HTFile.c,v 1.132 2012/08/15 22:10:08 tom Exp $
  *
  *			File Access				HTFile.c
  *			===========
@@ -199,9 +199,11 @@ static char *FormatSize(char **bufp,
 
     if (*start) {
 	sprintf(fmt, "%%%.*s" PRI_off_t, (int) sizeof(fmt) - 3, start);
+
 	HTSprintf0(bufp, fmt, entry);
     } else {
 	sprintf(fmt, "%" PRI_off_t, entry);
+
 	StrAllocCopy(*bufp, fmt);
     }
     return *bufp;
