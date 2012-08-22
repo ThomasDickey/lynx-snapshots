@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTMIME.c,v 1.78 2012/08/15 10:59:12 tom Exp $
+ * $LynxId: HTMIME.c,v 1.79 2012/08/22 09:48:46 tom Exp $
  *
  *			MIME Message Parse			HTMIME.c
  *			==================
@@ -577,7 +577,12 @@ static int pumpData(HTStream *me)
 	    FREE(url);
 	}
     }
-    CTRACE((tfp, "...end of pumpData\n"));
+    CTRACE((tfp, "...end of pumpData, copied %"
+	    PRI_off_t " vs %"
+	    PRI_off_t "\n",
+	    me->anchor->actual_length,
+	    me->anchor->content_length));
+    me->anchor->actual_length = 0;
     return HT_OK;
 }
 
@@ -1078,6 +1083,8 @@ static void HTMIME_put_character(HTStream *me, int c)
 	me->anchor->actual_length += 1;
 	if (me->anchor->content_length == 0 ||
 	    (me->anchor->content_length >= me->anchor->actual_length)) {
+	    (me->targetClass.put_character) (me->target, c);
+	} else {
 	    (me->targetClass.put_character) (me->target, c);
 	}
 	return;

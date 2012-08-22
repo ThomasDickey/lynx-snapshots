@@ -1,3 +1,9 @@
+lynx-dev (2.8.8dev.14) unstable; urgency=high
+
+  * fix regresion in dev.13
+
+ -- Thomas E. Dickey <dickey@invisible-island.net>  Wed, 22 Aug 2012 06:22:28 -0400
+
 lynx-dev (2.8.8dev.13) unstable; urgency=low
 
   * changes for dev.13
