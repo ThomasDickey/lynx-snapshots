@@ -1,7 +1,14 @@
--- $LynxId: CHANGES,v 1.617 2012/08/15 09:47:38 tom Exp $
+-- $LynxId: CHANGES,v 1.619 2012/08/22 09:56:16 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
+
+2012-08-22 (2.8.8dev.14)
+* reset anchor's actual-length calculation at the end of pumpData() to handle
+  scenario where this is used for internal data movement, i.e., for
+  decompressing files (report by Owen Leibman, Debian #681214) -TD
+* drop two files overlooked in previous commit:
+  lynx.rsp and WWW/Library/Implementation/HTFWriter.c
 
 2012-08-15 (2.8.8dev.13)
 * make nsl-fork work for the DNS lookup using getaddrinfo, i.e., for IPv6
