@@ -1,7 +1,12 @@
--- $LynxId: CHANGES,v 1.619 2012/08/22 09:56:16 tom Exp $
+-- $LynxId: CHANGES,v 1.620 2012/11/08 22:33:33 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
+
+2012-11-08 (2.8.8dev.15)
+* improve checking of certificates in the gnutls_certificate_verify_peers2()
+  by handling special case where self-signed certificates should be reported
+  (patch by Jamie Strandboge).
 
 2012-08-22 (2.8.8dev.14)
 * reset anchor's actual-length calculation at the end of pumpData() to handle
