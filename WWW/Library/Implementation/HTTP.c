@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTP.c,v 1.124 2012/08/01 11:00:26 tom Exp $
+ * $LynxId: HTTP.c,v 1.125 2012/11/08 09:37:42 Jamie.Strandboge Exp $
  *
  * HyperText Tranfer Protocol	- Client implementation		HTTP.c
  * ==========================
@@ -768,16 +768,17 @@ static int HTLoadHTTP(const char *arg,
 					    GNUTLS_VERIFY_DO_NOT_ALLOW_SAME |
 					    GNUTLS_VERIFY_ALLOW_X509_V1_CA_CRT);
 	ret = gnutls_certificate_verify_peers2(handle->gnutls_state, &tls_status);
-	if (ret < 0) {
+	if (ret < 0 || (ret == 0 &&
+			tls_status & GNUTLS_CERT_SIGNER_NOT_FOUND)) {
 	    int flag_continue = 1;
 	    char *msg2;
 
-	    if (tls_status & GNUTLS_CERT_SIGNER_NOT_FOUND) {
+	    if (ret == 0 && tls_status & GNUTLS_CERT_SIGNER_NOT_FOUND) {
+		msg2 = gettext("self signed certificate");
+	    } else if (tls_status & GNUTLS_CERT_SIGNER_NOT_FOUND) {
 		msg2 = gettext("no issuer was found");
 	    } else if (tls_status & GNUTLS_CERT_SIGNER_NOT_CA) {
 		msg2 = gettext("issuer is not a CA");
-	    } else if (tls_status & GNUTLS_CERT_SIGNER_NOT_FOUND) {
-		msg2 = gettext("the certificate has no known issuer");
 	    } else if (tls_status & GNUTLS_CERT_REVOKED) {
 		msg2 = gettext("the certificate has been revoked");
 	    } else {
