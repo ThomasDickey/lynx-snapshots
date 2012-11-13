@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTCP.c,v 1.120 2012/11/13 01:52:33 tom Exp $
+ * $LynxId: HTTCP.c,v 1.122 2012/11/13 10:49:38 tom Exp $
  *
  *			Generic Communication Code		HTTCP.c
  *			==========================
@@ -348,7 +348,6 @@ BOOL valid_hostname(char *name)
     return (BOOL) (*cp == '\0' || (*cp == '.' && iseg != 0 && cp[1] == '\0'));
 }
 
-#ifdef NSL_FORK
 /* for transfer of status from child to parent: */
 typedef struct _statuses {
     size_t rehostentlen;
@@ -367,7 +366,6 @@ static void quench(int sig GCC_UNUSED)
 {
     _exit(2);
 }
-#endif /* NSL_FORK */
 
 int lynx_nsl_status = HT_OK;
 
@@ -437,11 +435,12 @@ static void dump_hostent(const char *msgprefix,
     }
 }
 
+#ifdef NSL_FORK
+
 /*
  * Even though it is a small amount, we cannot count on reading the whole
  * struct via a pipe in one read -TD
  */
-#ifdef NSL_FORK
 static unsigned read_bytes(int fd, char *buffer, size_t length)
 {
     unsigned result = 0;
@@ -515,6 +514,7 @@ static unsigned read_hostent(int fd, char *buffer, size_t length)
 
     return have;
 }
+#endif /* NSL_FORK */
 
 /*
  *  fill_rehostent - copies as much as possible relevant content from
@@ -610,6 +610,7 @@ static size_t fill_rehostent(void **rehostent,
     }
     return need;
 }
+#endif /* NSL_FORK */
 
 /*
  * This chunk of code is used in both win32 and cygwin.
@@ -653,7 +654,8 @@ static unsigned long __stdcall _fork_func(void *arg)
 }
 #endif /* __CYGWIN__ */
 #endif /* _WINDOWS_NSL */
-#endif /* NSL_FORK */
+
+#ifdef NSL_FORK
 
 #ifndef HAVE_H_ERRNO
 #undef  h_errno
