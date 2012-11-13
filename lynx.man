@@ -1,4 +1,4 @@
-.\" $LynxId: lynx.man,v 1.91 2012/08/13 01:05:48 tom Exp $
+.\" $LynxId: lynx.man,v 1.92 2012/11/13 09:34:36 tom Exp $
 .nr N -1
 .nr D 5
 .TH LYNX 1
@@ -140,7 +140,7 @@ this switch.
 prepend a request URL comment and BASE tag to text/html
 outputs for \fB\-source\fR dumps.
 .TP
-.B \-bibp\fR=\fIURL
+.B \-bibhost\fR=\fIURL
 specify a local bibp server (default http://bibhost/).
 .TP
 .B \-blink
