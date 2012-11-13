@@ -1,9 +1,15 @@
--- $LynxId: CHANGES,v 1.622 2012/11/09 00:18:52 tom Exp $
+-- $LynxId: CHANGES,v 1.625 2012/11/13 01:07:03 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2012-11-08 (2.8.8dev.15)
+2012-11-12 (2.8.8dev.15)
+* revise nsl-fork logic for passing addrinfo and hostent data back to eliminate
+  fixed limit on the number of records to return -TD
+* correct problem with loop logic in fill_addrinfo() exposed by multiple
+  addresses from
+    http://fbcdn-sphotos-d-a.akamaihd.net
+  (report/analysis by TG) -TD
 * updates for configure script macros (TD):
   + add 3rd parameter to AC_DEFINE's to allow autoheader to run
   + remove unused macros

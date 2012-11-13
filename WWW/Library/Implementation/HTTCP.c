@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTCP.c,v 1.113 2012/08/15 22:24:41 tom Exp $
+ * $LynxId: HTTCP.c,v 1.120 2012/11/13 01:52:33 tom Exp $
  *
  *			Generic Communication Code		HTTCP.c
  *			==========================
@@ -375,8 +375,6 @@ int lynx_nsl_status = HT_OK;
 #define DEBUG_HOSTENT_CHILD	/* for NSL_FORK, may screw up trace file */
 
 /*
- *  Two auxiliary functions for name lookup and LYNX_HOSTENT.
- *
  *  dump_hostent - dumps the contents of a LYNX_HOSTENT to the
  *  trace log or stderr, including all pointer values, strings, and
  *  addresses, in a format inspired by gdb's print format. - kw
@@ -440,6 +438,85 @@ static void dump_hostent(const char *msgprefix,
 }
 
 /*
+ * Even though it is a small amount, we cannot count on reading the whole
+ * struct via a pipe in one read -TD
+ */
+#ifdef NSL_FORK
+static unsigned read_bytes(int fd, char *buffer, size_t length)
+{
+    unsigned result = 0;
+
+    while (length != 0) {
+	unsigned got = (unsigned) read(fd, buffer, length);
+
+	if ((int) got > 0) {
+	    result += got;
+	    buffer += got;
+	    length -= got;
+	} else {
+	    break;
+	}
+    }
+    return result;
+}
+
+static unsigned read_hostent(int fd, char *buffer, size_t length)
+{
+    unsigned have = read_bytes(fd, buffer, length);
+
+    if (have) {
+	LYNX_HOSTENT *data = (LYNX_HOSTENT *) buffer;
+	char *next_char = (char *) data + sizeof(*data);
+	char **next_ptr = (char **) next_char;
+	long offset = 0;
+	int n;
+	int num_addrs = 0;
+	int num_aliases = 0;
+
+	if (data->h_addr_list) {
+	    data->h_addr_list = next_ptr;
+	    while (next_ptr[num_addrs] != 0) {
+		++num_addrs;
+	    }
+	    next_ptr += (num_addrs + 1);
+	    next_char += (size_t) (num_addrs + 1) * sizeof(data->h_addr_list[0]);
+	}
+
+	if (data->h_aliases) {
+	    data->h_aliases = next_ptr;
+	    while (next_ptr[num_aliases] != 0) {
+		++num_aliases;
+	    }
+	    next_ptr += (num_aliases + 1);
+	    next_char += (size_t) (num_aliases + 1) * sizeof(data->h_aliases[0]);
+	}
+
+	if (data->h_name) {
+	    offset = next_char - data->h_name;
+	    data->h_name = next_char;
+	} else if (data->h_addr_list) {
+	    offset = next_char - (char *) data->h_addr_list[0];
+	} else if (data->h_aliases) {
+	    offset = next_char - (char *) data->h_aliases[0];
+	}
+
+	if (data->h_addr_list) {
+	    for (n = 0; n < num_addrs; ++n) {
+		data->h_addr_list[n] += offset;
+	    }
+	}
+
+	if (data->h_aliases) {
+	    for (n = 0; n < num_aliases; ++n) {
+		data->h_aliases[n] += offset;
+	    }
+	}
+    }
+
+    return have;
+}
+
+/*
  *  fill_rehostent - copies as much as possible relevant content from
  *  the LYNX_HOSTENT pointed to by phost to the char buffer given
  *  by rehostent, subject to maximum output length rehostentsize,
@@ -456,129 +533,82 @@ typedef struct {
     char rest[REHOSTENT_SIZE];
 } AlignedHOSTENT;
 
-static size_t fill_rehostent(char *rehostent,
-			     size_t rehostentsize,
+static size_t fill_rehostent(void **rehostent,
 			     const LYNX_HOSTENT *phost)
 {
-    AlignedHOSTENT *data = (AlignedHOSTENT *) (void *) rehostent;
+    LYNX_HOSTENT *data = 0;
     int num_addrs = 0;
     int num_aliases = 0;
-    char **pcnt;
+    char *result = 0;
     char *p_next_char;
     char **p_next_charptr;
     size_t name_len = 0;
-    size_t required_per_addr;
-    size_t curlen = sizeof(LYNX_HOSTENT);
-    size_t available = rehostentsize - curlen;
-    size_t chk_available, mem_this_alias, required_this_alias;
-    int i_addr, i_alias;
+    size_t need = sizeof(LYNX_HOSTENT);
+    int n;
 
     if (!phost)
 	return 0;
-    required_per_addr = (size_t) phost->h_length + sizeof(char *);
 
-    if (phost->h_addr_list)
-	available -= sizeof(phost->h_addr_list[0]);
-    if (phost->h_aliases)
-	available -= sizeof(phost->h_aliases[0]);
-    if (phost->h_name)
-	available--;
-    if (phost->h_addr_list) {
-	if (phost->h_addr_list[0]) {
-	    if (available >= required_per_addr) {
-		num_addrs++;
-		available -= required_per_addr;
-	    }
-	}
-    }
     if (phost->h_name) {
 	name_len = strlen(phost->h_name);
-	if (available >= name_len) {
-	    available -= name_len;
-	} else {
-	    name_len = 0;
-	}
+	need += name_len + 1;
     }
-    if (num_addrs) {
-	for (pcnt = phost->h_addr_list + 1; *pcnt; pcnt++) {
-	    if (available >= required_per_addr) {
-		num_addrs++;
-		available -= required_per_addr;
-	    } else {
-		break;
-	    }
+    if (phost->h_addr_list) {
+	while (phost->h_addr_list[num_addrs]) {
+	    num_addrs++;
 	}
+	need += ((size_t) num_addrs + 1) * ((size_t) phost->h_length
+					    + sizeof(phost->h_addr_list[0]));
     }
-    chk_available = available;
     if (phost->h_aliases) {
-	for (pcnt = phost->h_aliases; *pcnt; pcnt++) {
-	    required_this_alias = sizeof(phost->h_aliases[0]) +
-		strlen(*pcnt) + 1;
-	    if (chk_available >= required_this_alias) {
-		num_aliases++;
-		chk_available -= required_this_alias;
-	    }
+	while (phost->h_aliases[num_aliases]) {
+	    need += strlen(phost->h_aliases[num_aliases]) + 1;
+	    num_aliases++;
 	}
+	need += ((size_t) num_aliases + 1) * sizeof(phost->h_aliases[0]);
     }
 
-    data->h.h_addrtype = phost->h_addrtype;
-    data->h.h_length = phost->h_length;
-    p_next_charptr = (char **) (void *) (rehostent + curlen);
-    p_next_char = rehostent + curlen;
+    if ((result = calloc(need, sizeof(char))) == 0)
+	  outofmem(__FILE__, "fill_rehostent");
+    *rehostent = result;
+
+    data = (LYNX_HOSTENT *) result;
+
+    data->h_addrtype = phost->h_addrtype;
+    data->h_length = phost->h_length;
+
+    p_next_char = result + sizeof(LYNX_HOSTENT);
+    p_next_charptr = (char **) p_next_char;
     if (phost->h_addr_list)
 	p_next_char += (size_t) (num_addrs + 1) * sizeof(phost->h_addr_list[0]);
     if (phost->h_aliases)
 	p_next_char += (size_t) (num_aliases + 1) * sizeof(phost->h_aliases[0]);
 
-    if (phost->h_addr_list) {
-	data->h.h_addr_list = p_next_charptr;
-	for (pcnt = phost->h_addr_list, i_addr = 0;
-	     i_addr < num_addrs;
-	     pcnt++, i_addr++) {
-	    MemCpy(p_next_char, *pcnt, sizeof(phost->h_addr_list[0]));
-	    *p_next_charptr++ = p_next_char;
-	    p_next_char += sizeof(phost->h_addr_list[0]);
-	}
-	*p_next_charptr = NULL;
-    } else {
-	data->h.h_addr_list = NULL;
+    if (phost->h_name) {
+	data->h_name = p_next_char;
+	strcpy(p_next_char, phost->h_name);
+	p_next_char += name_len + 1;
     }
 
-    if (phost->h_name) {
-	data->h.h_name = p_next_char;
-	if (name_len) {
-	    strcpy(p_next_char, phost->h_name);
-	    p_next_char += name_len + 1;
-	} else {
-	    *p_next_char++ = '\0';
+    if (phost->h_addr_list) {
+	data->h_addr_list = p_next_charptr;
+	for (n = 0; n < num_addrs; ++n) {
+	    MemCpy(p_next_char, phost->h_addr_list[n], phost->h_length);
+	    *p_next_charptr++ = p_next_char;
+	    p_next_char += phost->h_length;
 	}
-    } else {
-	data->h.h_name = NULL;
+	++p_next_charptr;
     }
 
     if (phost->h_aliases) {
-	data->h.h_aliases = p_next_charptr;
-	for (pcnt = phost->h_aliases, i_alias = 0;
-	     (*pcnt && i_alias < num_addrs);
-	     pcnt++, i_alias++) {
-	    mem_this_alias = strlen(*pcnt) + 1;
-	    required_this_alias = sizeof(phost->h_aliases[0]) +
-		mem_this_alias;
-	    if (available >= required_this_alias) {
-		i_alias++;
-		available -= required_this_alias;
-		strcpy(p_next_char, *pcnt);
-		*p_next_charptr++ = p_next_char;
-		p_next_char += mem_this_alias;
-	    }
-	    p_next_char += sizeof(phost->h_aliases[0]);
+	data->h_aliases = p_next_charptr;
+	for (n = 0; n < num_aliases; ++n) {
+	    strcpy(p_next_char, phost->h_aliases[n]);
+	    *p_next_charptr++ = p_next_char;
+	    p_next_char += strlen(phost->h_aliases[n]) + 1;;
 	}
-	*p_next_charptr = NULL;
-    } else {
-	data->h.h_aliases = NULL;
     }
-    curlen = (size_t) (p_next_char - (char *) rehostent);
-    return curlen;
+    return need;
 }
 
 /*
@@ -610,9 +640,7 @@ static unsigned long __stdcall _fork_func(void *arg)
 #endif
 
     if (gbl_phost) {
-	rehostentlen = fill_rehostent(rehostent,
-				      (size_t) REHOSTENT_SIZE,
-				      gbl_phost);
+	rehostentlen = fill_rehostent(&rehostent, gbl_phost);
 	if (rehostentlen == 0) {
 	    gbl_phost = (LYNX_HOSTENT *) NULL;
 	} else {
@@ -638,35 +666,12 @@ extern int h_errno;
 #endif
 #endif
 
-/*
- * Even though it is a small amount, we cannot count on reading the whole
- * struct via a pipe in one read -TD
- */
-#ifdef NSL_FORK
-static unsigned read_bytes(int fd, char *buffer, size_t length)
-{
-    unsigned result = 0;
-
-    while (length != 0) {
-	unsigned got = (unsigned) read(fd, buffer, length);
-
-	if ((int) got > 0) {
-	    result += got;
-	    buffer += got;
-	    length -= got;
-	} else {
-	    break;
-	}
-    }
-    return result;
-}
-
-static BOOL setup_nsl_fork(void (*really) (char *, char *, STATUSES *, void *),
+static BOOL setup_nsl_fork(void (*really) (char *, char *, STATUSES *, void **),
 			   unsigned (*readit) (int, char *, size_t),
 			   void (*dumpit) (const char *, void *),
 			   char *host,
 			   char *port,
-			   void *rehostent)
+			   void **rehostent)
 {
     STATUSES statuses;
 
@@ -806,7 +811,7 @@ static BOOL setup_nsl_fork(void (*really) (char *, char *, STATUSES *, void *),
 	    /*
 	     * Return our resulting rehostent through pipe...
 	     */
-	    IGNORE_RC(write(pfd[1], rehostent, statuses.rehostentlen));
+	    IGNORE_RC(write(pfd[1], *rehostent, statuses.rehostentlen));
 	    close(pfd[1]);
 	    _exit(0);
 	} else {
@@ -918,13 +923,15 @@ static BOOL setup_nsl_fork(void (*really) (char *, char *, STATUSES *, void *),
 		    }
 		}
 #endif /* HAVE_H_ERRNO */
-		if (statuses.rehostentlen > sizeof(LYNX_HOSTENT)) {
+		if (statuses.rehostentlen != 0) {
 		    /*
 		     * Then get the full reorganized hostent.  -BL, kw
 		     */
-		    readret = (*readit) (pfd[0], rehostent, statuses.rehostentlen);
+		    if ((*rehostent = malloc(statuses.rehostentlen)) == 0)
+			outofmem(__FILE__, "setup_nsl_fork");
+		    readret = (*readit) (pfd[0], *rehostent, statuses.rehostentlen);
 #ifdef DEBUG_HOSTENT
-		    dumpit("Read from pipe", rehostent);
+		    dumpit("Read from pipe", *rehostent);
 #endif
 		    if (readret == statuses.rehostentlen) {
 			got_rehostent = 1;
@@ -1021,9 +1028,10 @@ static BOOL setup_nsl_fork(void (*really) (char *, char *, STATUSES *, void *),
 static void really_gethostbyname(char *host,
 				 char *port GCC_UNUSED,
 				 STATUSES * statuses,
-				 void *rehostent)
+				 void **rehostent)
 {
     LYNX_HOSTENT *phost;	/* Pointer to host - See netdb.h */
+    LYNX_HOSTENT *result = 0;
 
     (void) port;
 
@@ -1042,19 +1050,17 @@ static void really_gethostbyname(char *host,
     dump_hostent("CHILD gethostbyname", phost);
 #endif
     if (OK_HOST(phost)) {
-	statuses->rehostentlen = fill_rehostent(rehostent,
-						(size_t) REHOSTENT_SIZE,
-						phost);
+	statuses->rehostentlen = fill_rehostent(rehostent, phost);
+	result = (LYNX_HOSTENT *) (*rehostent);
 #ifdef DEBUG_HOSTENT_CHILD
-	dump_hostent("CHILD fill_rehostent", (LYNX_HOSTENT *) rehostent);
+	dump_hostent("CHILD fill_rehostent", result);
 #endif
     }
-    if (statuses->rehostentlen <= sizeof(LYNX_HOSTENT) ||
-	!OK_HOST((LYNX_HOSTENT *) rehostent)) {
+    if (statuses->rehostentlen <= sizeof(LYNX_HOSTENT) || !OK_HOST(result)) {
 	statuses->rehostentlen = 0;
 	statuses->h_length = 0;
     } else {
-	statuses->h_length = ((LYNX_HOSTENT *) rehostent)->h_length;
+	statuses->h_length = result->h_length;
 #ifdef HAVE_H_ERRNO
 	if (h_errno == -2)	/* success, but h_errno unchanged? */
 	    statuses->h_errno_valid = NO;
@@ -1102,21 +1108,7 @@ LYNX_HOSTENT *LYGetHostByName(char *host)
 
 #ifdef NSL_FORK
     /* for transfer of result between from child to parent: */
-    static AlignedHOSTENT aligned_full_rehostent;
-
-    /*
-     * We could define rehostent directly as a static char
-     * rehostent[REHOSTENT_SIZE], but the indirect approach via the above
-     * struct should automatically take care of alignment requirements.
-     * Note that, in addition,
-     * - this must be static, as we shall return a pointer to it which must
-     *   remain valid, and
-     * - we have to use the same rehostent in the child process as in the
-     *   parent (its address in the parent's address space must be the same as
-     *   in the child's, otherwise the internal pointers built by the child's
-     *   call to fill_rehostent would be invalid when seen by the parent).  -kw
-     */
-    void *rehostent = (void *) &aligned_full_rehostent;
+    LYNX_HOSTENT *rehostent = 0;
 #endif /* NSL_FORK */
 
     LYNX_HOSTENT *result_phost = NULL;
@@ -1160,12 +1152,12 @@ LYNX_HOSTENT *LYGetHostByName(char *host)
 
 #ifdef NSL_FORK
     if (!setup_nsl_fork(really_gethostbyname,
-			read_bytes,
+			read_hostent,
 			dump_hostent,
-			host, NULL, rehostent)) {
+			host, NULL, (void **) &rehostent)) {
 	goto failed;
     }
-    result_phost = (LYNX_HOSTENT *) rehostent;
+    result_phost = rehostent;
 #else /* Not NSL_FORK: */
 
 #ifdef _WINDOWS_NSL
@@ -1243,7 +1235,7 @@ LYNX_HOSTENT *LYGetHostByName(char *host)
 #endif /* !NSL_FORK */
 
 #ifdef DEBUG_HOSTENT
-    dump_hostent("End of LYGetHostByName", result_phost);
+    dump_hostent("LYGetHostByName", result_phost);
     CTRACE((tfp, "LYGetHostByName: Resolved name to a hostent.\n"));
 #endif
 
@@ -1426,68 +1418,89 @@ static int HTParseInet(SockA * soc_in, const char *str)
 
 #ifdef INET6
 
-#if defined(NSL_FORK)
-
-#define MAX_ADDRINFO 6
-
-typedef struct {
-    LYNX_ADDRINFO h[MAX_ADDRINFO];
-    char heap[128 * MAX_ADDRINFO];
-} AlignedADDRINFO;
-
-#ifdef DEBUG_HOSTENT_CHILD
 static void dump_addrinfo(const char *tag, void *data)
 {
     LYNX_ADDRINFO *res;
+    int count = 0;
 
+    CTRACE((tfp, "dump_addrinfo %s:\n", tag));
     for (res = (LYNX_ADDRINFO *) data; res; res = res->ai_next) {
-	CTRACE((tfp, "%s: family %d, socktype %d, protocol %d\n",
-		tag,
+	char hostbuf[1024], portbuf[1024];
+
+	++count;
+	hostbuf[0] = '\0';
+	portbuf[0] = '\0';
+	getnameinfo(res->ai_addr, res->ai_addrlen,
+		    hostbuf, (socklen_t) sizeof(hostbuf),
+		    portbuf, (socklen_t) sizeof(portbuf),
+		    NI_NUMERICHOST | NI_NUMERICSERV);
+
+	CTRACE((tfp,
+		"\t[%d] family %d, socktype %d, protocol %d addr %s port %s\n",
+		count,
 		res->ai_family,
 		res->ai_socktype,
-		res->ai_protocol));
+		res->ai_protocol,
+		hostbuf,
+		portbuf));
     }
 }
-#endif
+
+#if defined(NSL_FORK)
 
 /*
- * Copy the relevant information.
+ * Copy the relevant information (on the child-side).
  */
-static size_t fill_addrinfo(char *buffer,
+static size_t fill_addrinfo(void **buffer,
 			    const LYNX_ADDRINFO *phost)
 {
-    LYNX_ADDRINFO *actual = (LYNX_ADDRINFO *) (void *) buffer;
+    const LYNX_ADDRINFO *q;
+    LYNX_ADDRINFO *actual;
+    LYNX_ADDRINFO *result;
     int count = 0;
-    char *heap = (char *) &(actual[MAX_ADDRINFO]);
+    int limit = 0;
+    size_t need = sizeof(LYNX_ADDRINFO);
+    char *heap;
 
-    while (count++ < MAX_ADDRINFO) {
-	memset(actual, 0, sizeof(LYNX_ADDRINFO));
+    CTRACE((tfp, "filladdr_info %p\n", (const void *) phost));
+    for (q = phost; q != 0; q = q->ai_next) {
+	++limit;
+	need += phost->ai_addrlen;
+	need += sizeof(LYNX_ADDRINFO);
+    }
+    CTRACE((tfp, "...fill_addrinfo %d:%lu\n", limit, need));
 
-	actual->ai_flags = phost->ai_flags;
-	actual->ai_family = phost->ai_family;
+    if ((result = calloc(need, sizeof(char))) == 0)
+	  outofmem(__FILE__, "fill_addrinfo");
+
+    *buffer = actual = result;
+    heap = ((char *) actual) + ((size_t) limit * sizeof(LYNX_ADDRINFO));
+
+    for (count = 0; count < limit; ++count) {
+
+	/*
+	 * copying the whole structure seems simpler but because it is not
+	 * packed, uninitialized gaps make it hard to analyse with valgrind.
+	 */
+	/* *INDENT-EQLS* */
+	actual->ai_flags    = phost->ai_flags;
+	actual->ai_family   = phost->ai_family;
 	actual->ai_socktype = phost->ai_socktype;
 	actual->ai_protocol = phost->ai_protocol;
-	actual->ai_addrlen = phost->ai_addrlen;
+	actual->ai_addrlen  = phost->ai_addrlen;
+	actual->ai_addr     = (struct sockaddr *) (void *) heap;
 
-	if ((int) (heap + phost->ai_addrlen - buffer) >=
-	    (int) sizeof(AlignedADDRINFO)) {
-	    heap = buffer;
-	    break;
-	}
-
-	actual->ai_addr = (struct sockaddr *) (void *) heap;
 	MemCpy(heap, phost->ai_addr, phost->ai_addrlen);
 	heap += phost->ai_addrlen;
 
 	phost = phost->ai_next;
-	if (phost != 0) {
-	    actual->ai_next = (actual + 1);
-	    ++actual;
-	} else {
-	    break;
-	}
+
+	actual->ai_next = ((count + 1 < limit)
+			   ? (actual + 1)
+			   : 0);
+	++actual;
     }
-    return (size_t) (heap - buffer);
+    return (size_t) (heap - (char *) result);
 }
 
 /*
@@ -1497,20 +1510,32 @@ static unsigned read_addrinfo(int fd, char *buffer, size_t length)
 {
     unsigned result = read_bytes(fd, buffer, length);
     LYNX_ADDRINFO *actual = (LYNX_ADDRINFO *) (void *) buffer;
+    LYNX_ADDRINFO *res;
     int count = 0;
-    char *heap = (char *) &(actual[MAX_ADDRINFO]);
+    int limit;
+    char *heap;
 
-    while (count++ < MAX_ADDRINFO) {
-	if (actual->ai_addr) {
-	    actual->ai_addr = (struct sockaddr *) (void *) heap;
-	    heap += actual->ai_addrlen;
+    CTRACE((tfp, "read_addrinfo length %lu\n", (unsigned long) length));
+    for (limit = 0; actual[limit].ai_next; ++limit) {
+    }
+    ++limit;
+    heap = (char *) (actual + limit);
+    CTRACE((tfp, "...read_addrinfo %d items\n", limit));
+
+    for (res = actual, count = 0; count < limit; ++count) {
+	res->ai_addr = (struct sockaddr *) (void *) heap;
+	heap += res->ai_addrlen;
+	if (count < limit - 1) {
+	    res->ai_next = (res + 1);
+	    ++res;
+	} else {
+	    res->ai_next = 0;
 	}
-	if (actual->ai_next == 0)
-	    break;
-	actual->ai_next = (actual + 1);
-	++actual;
     }
 
+#ifdef DEBUG_HOSTENT
+    dump_addrinfo("read_addrinfo", buffer);
+#endif
     return result;
 }
 
@@ -1520,7 +1545,7 @@ static unsigned read_addrinfo(int fd, char *buffer, size_t length)
 static void really_getaddrinfo(char *host,
 			       char *port,
 			       STATUSES * statuses,
-			       void *result)
+			       void **result)
 {
     LYNX_ADDRINFO hints, *res;
     int error;
@@ -1544,13 +1569,13 @@ static void really_getaddrinfo(char *host,
 #endif
 	statuses->rehostentlen = fill_addrinfo(result, res);
 #ifdef DEBUG_HOSTENT_CHILD
-	dump_addrinfo("CHILD fill_readdrinfo", (LYNX_ADDRINFO *) result);
+	dump_addrinfo("CHILD fill_addrinfo", (LYNX_ADDRINFO *) (*result));
 #endif
 	if (statuses->rehostentlen <= sizeof(LYNX_ADDRINFO)) {
 	    statuses->rehostentlen = 0;
 	    statuses->h_length = 0;
 	} else {
-	    statuses->h_length = (int) (((LYNX_ADDRINFO *) result)->ai_addrlen);
+	    statuses->h_length = (int) (((LYNX_ADDRINFO *) (*result))->ai_addrlen);
 	}
     }
 }
@@ -1561,9 +1586,7 @@ static LYNX_ADDRINFO *HTGetAddrInfo(const char *str,
 {
 #ifdef NSL_FORK
     /* for transfer of result between from child to parent: */
-    static AlignedADDRINFO aligned_full_readdrinfo;
-
-    void *readdrinfo = (void *) &aligned_full_readdrinfo;
+    void *readdrinfo = 0;
 
 #else
     LYNX_ADDRINFO hints;
@@ -1596,7 +1619,7 @@ static LYNX_ADDRINFO *HTGetAddrInfo(const char *str,
     if (setup_nsl_fork(really_getaddrinfo,
 		       read_addrinfo,
 		       dump_addrinfo,
-		       host, port, readdrinfo)) {
+		       host, port, &readdrinfo)) {
 	res = readdrinfo;
     } else {
 	res = NULL;
@@ -1614,6 +1637,9 @@ static LYNX_ADDRINFO *HTGetAddrInfo(const char *str,
 #endif
 
     free(s);
+#ifdef DEBUG_HOSTENT
+    dump_addrinfo("HTGetAddrInfo", res);
+#endif
     return res;
 }
 #endif /* INET6 */
