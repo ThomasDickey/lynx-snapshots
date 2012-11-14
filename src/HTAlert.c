@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTAlert.c,v 1.95 2012/02/08 01:45:28 tom Exp $
+ * $LynxId: HTAlert.c,v 1.96 2012/11/14 01:19:06 tom Exp $
  *
  *	Displaying messages and getting input for Lynx Browser
  *	==========================================================
@@ -167,6 +167,7 @@ const char *HTProgressUnits(int rate)
     return ((rate == rateKB)
 #ifdef USE_READPROGRESS
 	    || (rate == rateEtaKB)
+	    || (rate == rateEtaKB2)
 #endif
 	)? kbunits : bunits;
 }
@@ -176,7 +177,7 @@ static const char *sprint_bytes(char *s, off_t n, const char *was_units)
     static off_t kb_units = 1024;
     const char *u = HTProgressUnits(LYTransferRate);
 
-    if (LYTransferRate == rateKB || LYTransferRate == rateEtaKB_maybe) {
+    if (isRateInKB(LYTransferRate)) {
 	if (n >= 10 * kb_units) {
 	    sprintf(s, "%" PRI_off_t, CAST_off_t (n / kb_units));
 	} else if (n > 999) {	/* Avoid switching between 1016b/s and 1K/s */
@@ -196,16 +197,40 @@ static const char *sprint_bytes(char *s, off_t n, const char *was_units)
 }
 
 #ifdef USE_READPROGRESS
-#define TIME_HMS_LENGTH (16)
+#define TIME_HMS_LENGTH (36)
 static char *sprint_tbuf(char *s, long t)
 {
-    if (t > 3600)
-	sprintf(s, "%ldh%ldm%lds", t / 3600, (t / 60) % 60, t % 60);
-    else if (t > 60)
-	sprintf(s, "%ldm%lds", t / 60, t % 60);
-    else
-	sprintf(s, "%ld sec", t);
-    return s;
+    const char *format = ((LYTransferRate == rateEtaBYTES2 ||
+			   LYTransferRate == rateEtaKB2)
+			  ? "% 2ld%c"
+			  : "%ld%c");
+    char *base = s;
+
+    if (t < 0) {
+	strcpy(s, "forever");
+    } else {
+	if (t > (3600 * 24)) {
+	    sprintf(s, format, t / (3600 * 24), 'd');
+	    s += strlen(s);
+	    t %= (3600 * 24);
+	}
+	if (t > 3600) {
+	    sprintf(s, format, t / 3600, 'h');
+	    s += strlen(s);
+	    t %= 3600;
+	}
+	if (t > 60) {
+	    sprintf(s, format, t / 60, 'm');
+	    s += strlen(s);
+	    t %= 60;
+	}
+	if (s == base) {
+	    sprintf(s, "% 2ld sec", t);
+	} else if (t != 0) {
+	    sprintf(s, format, t, 's');
+	}
+    }
+    return base;
 }
 #endif /* USE_READPROGRESS */
 

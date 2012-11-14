@@ -1,4 +1,4 @@
-/* $LynxId: LYOptions.c,v 1.149 2012/02/10 18:36:39 tom Exp $ */
+/* $LynxId: LYOptions.c,v 1.150 2012/11/14 01:07:12 tom Exp $ */
 #include <HTUtils.h>
 #include <HTFTP.h>
 #include <HTTP.h>		/* 'reloading' flag */
@@ -2381,6 +2381,8 @@ static OptValues rate_values[] =
 #ifdef USE_READPROGRESS
     {rateEtaBYTES, N_("Show %s/sec, ETA"), "rate_eta_bytes"},
     {rateEtaKB, N_("Show %s/sec, ETA"), "rate_eta_kb"},
+    {rateEtaBYTES2, N_("Show %s/sec (2-digits), ETA"), "rate_eta_bytes2"},
+    {rateEtaKB2, N_("Show %s/sec (2-digits), ETA"), "rate_eta_kb2"},
 #endif
 #ifdef USE_PROGRESSBAR
     {rateBAR, N_("Show progressbar"), "rate_bar"},

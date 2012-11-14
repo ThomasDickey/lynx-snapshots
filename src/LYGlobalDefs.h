@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYGlobalDefs.h,v 1.132 2012/07/04 23:34:06 tom Exp $
+ * $LynxId: LYGlobalDefs.h,v 1.133 2012/11/14 01:09:44 tom Exp $
  *
  * global variable definitions
  */
@@ -192,6 +192,8 @@ extern "C" {
 #ifdef USE_READPROGRESS
 	,rateEtaBYTES
 	,rateEtaKB
+	,rateEtaBYTES2
+	,rateEtaKB2
 #endif
 #ifdef USE_PROGRESSBAR
 	,rateBAR
@@ -199,9 +201,9 @@ extern "C" {
     } TransferRate;
 
 #ifdef USE_READPROGRESS
-#  define rateEtaKB_maybe	rateEtaKB
+#  define isRateInKB(n) ((n) == rateKB || (n) == rateEtaKB || (n) == rateEtaKB2)
 #else
-#  define rateEtaKB_maybe	rateKB
+#  define isRateInKB(n) ((n) == rateKB)
 #endif
 
 #define TITLE_LINES  1

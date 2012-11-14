@@ -1,10 +1,14 @@
--- $LynxId: CHANGES,v 1.626 2012/11/13 09:35:51 tom Exp $
+-- $LynxId: CHANGES,v 1.628 2012/11/14 01:15:50 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
 2012-11-13 (2.8.8dev.15)
-* correct typo for -bibhost option in manpage (Redhat #854574).
+* provide more readable ETA message as an option (prompted by patch by Joerg
+  Hahn) -TD
+* add GNUTLS call to enable SNI (Server Name Indication) extension (Ubuntu
+  #732177) -TD
+* correct typo for -bibhost option in manpage (Redhat #854574) -TD
 * revise nsl-fork logic for passing addrinfo and hostent data back to eliminate
   fixed limit on the number of records to return -TD
 * correct problem with loop logic in fill_addrinfo() exposed by multiple
