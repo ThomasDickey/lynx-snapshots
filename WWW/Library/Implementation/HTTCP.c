@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTCP.c,v 1.122 2012/11/13 10:49:38 tom Exp $
+ * $LynxId: HTTCP.c,v 1.123 2012/11/13 21:35:01 tom Exp $
  *
  *			Generic Communication Code		HTTCP.c
  *			==========================
@@ -464,9 +464,9 @@ static unsigned read_hostent(int fd, char *buffer, size_t length)
     unsigned have = read_bytes(fd, buffer, length);
 
     if (have) {
-	LYNX_HOSTENT *data = (LYNX_HOSTENT *) buffer;
+	LYNX_HOSTENT *data = (LYNX_HOSTENT *) (void *) buffer;
 	char *next_char = (char *) data + sizeof(*data);
-	char **next_ptr = (char **) next_char;
+	char **next_ptr = (char **) (void *) next_char;
 	long offset = 0;
 	int n;
 	int num_addrs = 0;
@@ -572,13 +572,13 @@ static size_t fill_rehostent(void **rehostent,
 	  outofmem(__FILE__, "fill_rehostent");
     *rehostent = result;
 
-    data = (LYNX_HOSTENT *) result;
+    data = (LYNX_HOSTENT *) (void *) result;
 
     data->h_addrtype = phost->h_addrtype;
     data->h_length = phost->h_length;
 
     p_next_char = result + sizeof(LYNX_HOSTENT);
-    p_next_charptr = (char **) p_next_char;
+    p_next_charptr = (char **) (void *) p_next_char;
     if (phost->h_addr_list)
 	p_next_char += (size_t) (num_addrs + 1) * sizeof(phost->h_addr_list[0]);
     if (phost->h_aliases)
