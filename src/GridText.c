@@ -1,5 +1,5 @@
 /*
- * $LynxId: GridText.c,v 1.239 2012/08/15 22:20:41 tom Exp $
+ * $LynxId: GridText.c,v 1.240 2012/11/15 00:48:46 tom Exp $
  *
  *		Character grid hypertext object
  *		===============================
@@ -4277,6 +4277,9 @@ void HText_appendCharacter(HText *text, int ch)
 	     target_cu + UTF_XLEN(ch) >= LYcols_cu(text))) {
 	    int saved_kanji_buf;
 	    eGridState saved_state;
+	    BOOL add_blank = (dont_wrap_pre
+			      && line->size
+			      && (line->data[line->size - 1] == ' '));
 
 	    new_line(text);
 	    line = text->last_line;
@@ -4286,6 +4289,8 @@ void HText_appendCharacter(HText *text, int ch)
 	    text->kanji_buf = '\0';
 	    text->state = S_text;
 	    HText_appendCharacter(text, LY_SOFT_NEWLINE);
+	    if (add_blank)
+		HText_appendCharacter(text, ' ');
 	    text->kanji_buf = saved_kanji_buf;
 	    text->state = saved_state;
 	}

@@ -1,9 +1,12 @@
--- $LynxId: CHANGES,v 1.628 2012/11/14 01:15:50 tom Exp $
+-- $LynxId: CHANGES,v 1.629 2012/11/15 00:51:22 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2012-11-13 (2.8.8dev.15)
+2012-11-14 (2.8.8dev.15)
+* fix special case when -dont_wrap_pre option is used, to restore space between
+  words which was lost when inserting a soft newline used to splice together
+  segments of a long line (Ubuntu #806749) -TD
 * provide more readable ETA message as an option (prompted by patch by Joerg
   Hahn) -TD
 * add GNUTLS call to enable SNI (Server Name Indication) extension (Ubuntu

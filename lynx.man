@@ -1,4 +1,4 @@
-.\" $LynxId: lynx.man,v 1.92 2012/11/13 09:34:36 tom Exp $
+.\" $LynxId: lynx.man,v 1.93 2012/11/15 00:56:24 tom Exp $
 .nr N -1
 .nr D 5
 .TH LYNX 1
@@ -269,8 +269,8 @@ set the display variable for X rexec-ed programs.
 set the charset for the terminal output.
 .TP
 .B \-dont_wrap_pre
-inhibit wrapping of text in <pre> when \fB\-dump\fR'ing and \fB\-crawl\fR'ing,
-mark wrapped lines in interactive session.
+inhibit wrapping of text when \fB\-dump\fR'ing and \fB\-crawl\fR'ing,
+mark wrapped lines of <pre> in interactive session.
 .TP
 .B \-dump
 dumps the formatted output of the default document or those
