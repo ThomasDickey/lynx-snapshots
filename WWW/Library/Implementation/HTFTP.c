@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFTP.c,v 1.104 2012/08/15 23:14:42 tom Exp $
+ * $LynxId: HTFTP.c,v 1.106 2012/11/15 23:51:23 tom Exp $
  *
  *			File Transfer Protocol (FTP) Client
  *			for a WorldWideWeb browser
@@ -4007,6 +4007,22 @@ int HTFTPLoad(const char *name,
 	 * dealing with if we don't know yet.  - FM
 	 */
 	if (!(type) || (type && *type != 'D')) {
+	    /*
+	     * If we are retrieving a file we will (except for CMS) use
+	     * binary mode, which lets us use the size command supported by
+	     * ftp servers which implement RFC 3659.  Knowing the size lets
+	     * us in turn display ETA in the progress message -TD
+	     */
+	    if (control->binary) {
+		int code;
+		off_t size;
+
+		status = send_cmd_2("SIZE", filename);
+		if (status == 2 &&
+		    sscanf(response_text, "%d %" PRI_off_t, &code, &size) == 2) {
+		    anchor->content_length = size;
+		}
+	    }
 	    status = send_cmd_2("RETR", filename);
 	    if (status >= 5) {
 		int check;
@@ -4078,11 +4094,6 @@ int HTFTPLoad(const char *name,
 	CTRACE((tfp, "TCP: Accepted new socket %d\n", status));
 	data_soc = status;
     }
-    /* !ftp_local_passive */
-#if 0				/* no - this makes the data connection go away too soon (2.8.3dev.22) */
-    if ((status = send_cmd_nowait("QUIT")) == 1)
-	outstanding++;
-#endif
 
     if (isDirectory) {
 	if (server_type == UNIX_SERVER && !unsure_type &&
@@ -4170,13 +4181,6 @@ int HTFTPLoad(const char *name,
 	/* Reset buffering to control connection DD 921208 */
 
 	if (rv < 0) {
-#if 0				/* any known servers where ABOR would work this way? */
-	    if (rv == HT_INTERRUPTED || rv == -501)
-		if (send_cmd_nowait("ABOR") == 1) {
-		    outstanding++;
-		    CTRACE((tfp, "HTFTP: outstanding responses: %d\n", outstanding));
-		}
-#endif
 	    if (rv == -2)	/* weird error, don't expect much response */
 		outstanding--;
 	    else if (rv == HT_INTERRUPTED || rv == -1)
