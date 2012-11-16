@@ -1,9 +1,12 @@
--- $LynxId: CHANGES,v 1.630 2012/11/15 23:53:12 tom Exp $
+-- $LynxId: CHANGES,v 1.631 2012/11/16 10:17:38 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2012-11-15 (2.8.8dev.15)
+2012-11-16 (2.8.8dev.15)
+* modify the Inno Setup files to show lynx's version numbers.  Development
+  and prerelease versions are indicated in the numeric-only versions by
+  prefixing a "10" or "20" -TD
 * ask for filesize when downloading via ftp, to use this in the read-progress
   ETA -TD
 * fix special case when -dont_wrap_pre option is used, to restore space between
