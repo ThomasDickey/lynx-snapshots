@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTAlert.c,v 1.96 2012/11/14 01:19:06 tom Exp $
+ * $LynxId: HTAlert.c,v 1.97 2012/11/16 01:22:25 tom Exp $
  *
  *	Displaying messages and getting input for Lynx Browser
  *	==========================================================
@@ -364,7 +364,9 @@ void HTReadProgress(off_t bytes, off_t total)
 
 #ifdef USE_READPROGRESS
 	    if (LYTransferRate == rateEtaBYTES
-		|| LYTransferRate == rateEtaKB) {
+		|| LYTransferRate == rateEtaKB
+		|| LYTransferRate == rateEtaBYTES2
+		|| LYTransferRate == rateEtaKB2) {
 		char tbuf[TIME_HMS_LENGTH];
 
 		if (now - last_active >= 5)
