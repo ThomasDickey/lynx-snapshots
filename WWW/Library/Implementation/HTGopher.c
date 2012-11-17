@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTGopher.c,v 1.55 2011/06/11 13:06:08 tom Exp $
+ * $LynxId: HTGopher.c,v 1.56 2012/11/17 01:33:36 tom Exp $
  *
  *			GOPHER ACCESS				HTGopher.c
  *			=============
@@ -21,6 +21,7 @@
 #define HTSTREAM_INTERNAL 1
 
 #include <HTUtils.h>		/* Coding convention macros */
+#include <HTFile.h>		/* For HTFileFormat() */
 
 #ifndef DISABLE_GOPHER
 #include <HTAlert.h>
@@ -1692,8 +1693,6 @@ static int HTLoadCSO(const char *arg,
 /*	Load by name.						HTLoadGopher
  *	=============
  *
- *  Bug:  No decoding of strange data types as yet.
- *
  */
 static int HTLoadGopher(const char *arg,
 			HTParentAnchor *anAnchor,
@@ -1941,11 +1940,28 @@ static int HTLoadGopher(const char *arg,
 		      s, sink);
 	break;
 
+    default:
+	{
+	    HTAtom *encoding = 0;
+	    const char *desc = 0;
+	    HTFormat format = HTFileFormat(arg, &encoding, &desc);
+
+	    /*
+	     * Ignore WWW_BINARY (since that is returned by HTFileFormat when
+	     * it does not have a representation), but otherwise use the
+	     * result.
+	     */
+	    if (format != WWW_BINARY) {
+		HTParseSocket(format, format_out, anAnchor, s, sink);
+		break;
+	    }
+	}
+	/* FALL-THRU */
+
     case GOPHER_MACBINHEX:
     case GOPHER_PCBINARY:
     case GOPHER_UUENCODED:
     case GOPHER_BINARY:
-    default:
 	/*
 	 * Specifying WWW_UNKNOWN forces dump to local disk.
 	 */

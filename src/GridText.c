@@ -1,5 +1,5 @@
 /*
- * $LynxId: GridText.c,v 1.240 2012/11/15 00:48:46 tom Exp $
+ * $LynxId: GridText.c,v 1.241 2012/11/16 10:55:31 tom Exp $
  *
  *		Character grid hypertext object
  *		===============================
@@ -13350,14 +13350,10 @@ void HText_EditTextField(LinkInfo * form_link)
 
 	if ((ebuf = readEditedFile(ed_temp)) != 0) {
 	    /*
-	     * Only use the first line of the result, and only that up to
-	     * the size of the field.
+	     * Only use the first line of the result.
 	     */
 	    for (p = ebuf; *p != '\0'; ++p) {
-		if ((p - ebuf) >= form->size - 1) {
-		    *p = '\0';
-		    break;
-		} else if (*p == '\n' || *p == '\r') {
+		if (*p == '\n' || *p == '\r') {
 		    *p = '\0';
 		    break;
 		}
