@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFormat.c,v 1.75 2012/08/10 11:48:05 tom Exp $
+ * $LynxId: HTFormat.c,v 1.76 2012/11/17 01:31:19 tom Exp $
  *
  *		Manage different file formats			HTFormat.c
  *		=============================
@@ -498,18 +498,10 @@ HTStream *HTStreamStack(HTFormat rep_in,
     HTPresentation *match;
     HTStream *result;
 
-    CTRACE((tfp, "HTFormat: Constructing stream stack for %s to %s (%s)\n",
+    CTRACE((tfp, "StreamStack: Constructing stream stack for %s to %s (%s)\n",
 	    HTAtom_name(rep_in),
 	    HTAtom_name(rep_out),
 	    NONNULL(anchor->content_type_params)));
-
-    /* don't return on WWW_SOURCE some people might like
-     * to make use of the source!!!!  LJM
-     */
-#if 0
-    if (rep_out == WWW_SOURCE || rep_out == rep_in)
-	return sink;		/*  LJM */
-#endif
 
     if (rep_out == rep_in) {
 	result = sink;

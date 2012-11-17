@@ -1,9 +1,14 @@
--- $LynxId: CHANGES,v 1.631 2012/11/16 10:17:38 tom Exp $
+-- $LynxId: CHANGES,v 1.633 2012/11/17 01:30:19 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
 2012-11-16 (2.8.8dev.15)
+* modify default case for HTLoadGopher() to use the file's suffix to obtain
+  a MIME mapping rather than always storing unknown types to disk (suggested by
+  Dario Niederman) -TD
+* modify ^X-e handling to not limit the result to the form field's length
+  (report by Keith Bowes) -TD
 * modify the Inno Setup files to show lynx's version numbers.  Development
   and prerelease versions are indicated in the numeric-only versions by
   prefixing a "10" or "20" -TD
