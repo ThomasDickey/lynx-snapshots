@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYLocal.c,v 1.118 2012/02/09 11:45:06 tom Exp $
+ * $LynxId: LYLocal.c,v 1.119 2012/11/18 22:25:54 tom Exp $
  *
  *  Routines to manipulate the local filesystem.
  *  Written by: Rick Mallett, Carleton University
@@ -1568,8 +1568,8 @@ static int permit_location(char *destpath,
 	    char amode[10];
 	    char *tmpbuf = NULL;
 
-	    HTSprintf0(&tmpbuf, "chmod %.4o %s", (unsigned int) new_mode, destpath);
-	    sprintf(amode, "%.4o", (unsigned int) new_mode);
+	    HTSprintf0(&tmpbuf, "chmod %.4o %s", (unsigned) new_mode, destpath);
+	    sprintf(amode, "%.4o", (unsigned) new_mode);
 	    args = make_argv("chmod",
 			     amode,
 			     destpath,
@@ -1584,7 +1584,7 @@ static int permit_location(char *destpath,
 		code = -1;
 	    }
 	    CTRACE((tfp, "builtin chmod %.4o ->%d\n\t%s\n",
-		    new_mode, code, destpath));
+		    (unsigned) new_mode, code, destpath));
 	}
 	if (code == 1)
 	    LYforce_no_cache = TRUE;	/* Force update of dired listing. */

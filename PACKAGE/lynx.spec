@@ -1,4 +1,4 @@
-# $LynxId: lynx.spec,v 1.15 2012/11/08 22:39:38 tom Exp $
+# $LynxId: lynx.spec,v 1.16 2012/11/17 01:55:11 tom Exp $
 Summary: A text-based Web browser
 Name: lynx
 Version: 2.8.8
@@ -24,6 +24,8 @@ HTTP, FTP, WAIS, and NNTP servers.
 %define lynx_etc %{_sysconfdir}/lynx
 
 %prep
+
+%define debug_package %{nil}
 %setup -q -n lynx%{version}%{release}
 
 %build

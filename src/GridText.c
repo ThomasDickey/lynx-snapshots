@@ -1,5 +1,5 @@
 /*
- * $LynxId: GridText.c,v 1.241 2012/11/16 10:55:31 tom Exp $
+ * $LynxId: GridText.c,v 1.243 2012/11/18 22:09:20 tom Exp $
  *
  *		Character grid hypertext object
  *		===============================
@@ -2163,10 +2163,9 @@ static void display_page(HText *text,
 		   ((int) line->offset + LenNeeded) <= DISPLAY_COLS) {
 		size_t itmp = 0;
 		size_t written = 0;
-		int x_pos = offset + (int) (cp - data);
+		int x_off = offset + (int) (cp - data);
 		size_t len = strlen(target);
 		size_t utf_extra = 0;
-		int y;
 
 		text->page_has_target = YES;
 
@@ -2185,14 +2184,16 @@ static void display_page(HText *text,
 			/*
 			 * Ignore special characters.
 			 */
-			x_pos--;
+			x_off--;
 
 		    } else if (&data[itmp] >= cp) {
 			if (cp == &data[itmp]) {
 			    /*
 			     * First printable character of target.
 			     */
-			    LYmove((i + title_lines), x_pos);
+			    LYmove((i + title_lines),
+				   line->offset + LYstrExtent2(line->data,
+							       x_off - line->offset));
 			}
 			/*
 			 * Output all the printable target chars.
@@ -2226,17 +2227,11 @@ static void display_page(HText *text,
 		 * line.  -FM
 		 */
 		LYstopTargetEmphasis();
-		LYGetYX(y, offset);
-		(void) y;
 		data = (char *) &data[itmp];
+		offset = (int) (data - line->data + line->offset);
 
-		/*
-		 * Adjust the cursor position, should we be at
-		 * the end of the line, or not have another hit
-		 * in it.  -FM
-		 */
-		LYmove((i + title_lines + 1), 0);
 	    }			/* end while */
+	    LYmove((i + title_lines + 1), 0);
 #endif /* USE_COLOR_STYLE */
 #endif /* SHOW_WHEREIS_TARGETS */
 
