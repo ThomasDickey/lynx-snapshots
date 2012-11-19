@@ -1,9 +1,11 @@
--- $LynxId: CHANGES,v 1.633 2012/11/17 01:30:19 tom Exp $
+-- $LynxId: CHANGES,v 1.634 2012/11/18 21:54:53 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2012-11-16 (2.8.8dev.15)
+2012-11-18 (2.8.8dev.15)
+* corrected position of highlighting from search/whereis function when using
+  multibyte characters (Debian #673385) -TD
 * modify default case for HTLoadGopher() to use the file's suffix to obtain
   a MIME mapping rather than always storing unknown types to disk (suggested by
   Dario Niederman) -TD

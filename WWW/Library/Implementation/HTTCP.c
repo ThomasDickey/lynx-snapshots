@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTCP.c,v 1.123 2012/11/13 21:35:01 tom Exp $
+ * $LynxId: HTTCP.c,v 1.124 2012/11/18 22:24:15 tom Exp $
  *
  *			Generic Communication Code		HTTCP.c
  *			==========================
@@ -1470,7 +1470,7 @@ static size_t fill_addrinfo(void **buffer,
 	need += phost->ai_addrlen;
 	need += sizeof(LYNX_ADDRINFO);
     }
-    CTRACE((tfp, "...fill_addrinfo %d:%lu\n", limit, need));
+    CTRACE((tfp, "...fill_addrinfo %d:%lu\n", limit, (unsigned long) need));
 
     if ((result = calloc(need, sizeof(char))) == 0)
 	  outofmem(__FILE__, "fill_addrinfo");
