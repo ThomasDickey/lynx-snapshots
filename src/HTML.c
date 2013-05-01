@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTML.c,v 1.155 2012/02/10 18:36:39 tom Exp $
+ * $LynxId: HTML.c,v 1.156 2013/04/30 22:13:50 tom Exp $
  *
  *		Structured stream to Rich hypertext converter
  *		============================================
@@ -689,7 +689,7 @@ void HTML_write(HTStructured * me, const char *s, int l)
  *	request (doesn't have a URL from which the document can be retrieved
  *	with GET), and can only be used from within that document.
  *
- * *If DONT_TRACK_INTERNAL_LINKS is not defined, we keep track of whether a
+ * *If track_internal_links is true, we keep track of whether a
  *  link destination was given as an internal link.  This information is
  *  recorded in the type of the link between anchor objects, and is available
  *  to the HText object and the mainloop from there.  URL References to
@@ -705,7 +705,7 @@ void HTML_write(HTStructured * me, const char *s, int l)
  *  e. HREF=""		      -> [...]/mypath/mydoc.htm      (marked internal)
  *  f. HREF="#frag"	      -> [...]/mypath/mydoc.htm#frag (marked internal)
  *
- * *If DONT_TRACK_INTERNAL_LINKS is defined, URL-less URL-References are
+ * *If track_internal_links is false, URL-less URL-References are
  *  resolved differently from URL-References with a non-empty URL (using the
  *  current stream's retrieval address instead of the base), but we make no
  *  further distinction.  Resolution is then as in the examples above, execept

@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYHistory.c,v 1.84 2011/06/11 12:36:10 tom Exp $
+ * $LynxId: LYHistory.c,v 1.85 2013/04/30 22:20:30 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTP.h>
@@ -762,12 +762,12 @@ BOOLEAN historytarget(DocInfo *newdoc)
 	     HDOC(nhist - 1).internal_link &&
 	     number == history[nhist - 1].intern_seq_start))
 	&& !(LYforce_no_cache == TRUE && LYoverride_no_cache == FALSE)) {
-#ifndef DONT_TRACK_INTERNAL_LINKS
-	LYforce_no_cache = FALSE;
-	LYinternal_flag = TRUE;
-	newdoc->internal_link = TRUE;
-	treat_as_intern = TRUE;
-#endif
+	if (track_internal_links) {
+	    LYforce_no_cache = FALSE;
+	    LYinternal_flag = TRUE;
+	    newdoc->internal_link = TRUE;
+	    treat_as_intern = TRUE;
+	}
     } else {
 	newdoc->internal_link = FALSE;
     }

@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTelnet.c,v 1.39 2009/11/21 17:05:33 Bela.Lubkin Exp $
+ * $LynxId: HTTelnet.c,v 1.40 2013/01/04 21:42:42 tom Exp $
  *
  *		Telnet Access, Rlogin, etc			HTTelnet.c
  *		==========================
@@ -101,7 +101,7 @@ static int remote_session(char *acc_method, char *host)
     if (port)
 	*port++ = '\0';		/* Split */
 
-    if (!hostname || *hostname == '\0') {
+    if (*hostname == '\0') {
 	CTRACE((tfp, "HTTelnet: No host specified!\n"));
 	return HT_NO_DATA;
     } else if (!valid_hostname(hostname)) {

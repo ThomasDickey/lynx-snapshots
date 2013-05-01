@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYEditmap.c,v 1.28 2011/05/28 13:07:55 tom Exp $
+ * $LynxId: LYEditmap.c,v 1.29 2013/01/04 00:03:24 tom Exp $
  *
  * LYEditMap.c
  * Keybindings for line and form editting.
@@ -282,7 +282,7 @@ LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
 /* Why the difference for tab? - kw */
 
 #ifdef USE_ALT_BINDINGS
-static LYEditCode BetterEditBinding[KEYMAP_SIZE-1]={
+static LYEditCode BetterEditBinding[KEYMAP_SIZE - 1]={
 
 LYE_NOP,        LYE_BOL,        LYE_BACK,       LYE_ABORT,
 /* nul          ^A              ^B              ^C      */
@@ -540,7 +540,7 @@ LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
              /*         M-bs,M-del=delete-prev-word, M-d=delete-next-word, */
              /*                M-b=BACKW,            M-f=FORWW,            */
 
-static LYEditCode BashlikeEditBinding[KEYMAP_SIZE-1]={
+static LYEditCode BashlikeEditBinding[KEYMAP_SIZE - 1] = {
 
 LYE_SETMARK,    LYE_BOL,        LYE_BACK,       LYE_ABORT,
 /* nul          ^A              ^B              ^C      */

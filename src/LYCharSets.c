@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYCharSets.c,v 1.67 2012/02/10 18:43:40 tom Exp $
+ * $LynxId: LYCharSets.c,v 1.68 2013/01/04 21:47:16 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTCJK.h>
@@ -712,10 +712,10 @@ int UCGetLYhndl_byAnyName(char *value)
 {
     int i;
 
-    LYTrimTrailing(value);
     if (value == NULL)
 	return -1;
 
+    LYTrimTrailing(value);
     CTRACE((tfp, "UCGetLYhndl_byAnyName(%s)\n", value));
 
     /* search by name */

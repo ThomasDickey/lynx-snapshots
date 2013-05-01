@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTP.c,v 1.126 2012/11/13 22:49:46 tom Exp $
+ * $LynxId: HTTP.c,v 1.127 2013/01/04 09:42:02 tom Exp $
  *
  * HyperText Tranfer Protocol	- Client implementation		HTTP.c
  * ==========================
@@ -194,10 +194,8 @@ void HTSSLInitPRNG(void)
 
 	RAND_file_name(rand_file, 256L);
 	CTRACE((tfp, "HTTP: Seeding PRNG\n"));
-	if (rand_file != NULL) {
-	    /* Seed as much as 1024 bytes from RAND_file_name */
-	    RAND_load_file(rand_file, 1024L);
-	}
+	/* Seed as much as 1024 bytes from RAND_file_name */
+	RAND_load_file(rand_file, 1024L);
 	/* Seed in time (mod_ssl does this) */
 	RAND_seed((unsigned char *) &t, (int) sizeof(time_t));
 
@@ -212,10 +210,8 @@ void HTSSLInitPRNG(void)
 	    l = lynx_rand();
 	    RAND_seed((unsigned char *) &l, (int) sizeof(long));
 	}
-	if (rand_file != NULL) {
-	    /* Write a rand_file */
-	    RAND_write_file(rand_file);
-	}
+	/* Write a rand_file */
+	RAND_write_file(rand_file);
     }
 #endif /* SSLEAY_VERSION_NUMBER >= 0x00905100 */
     return;

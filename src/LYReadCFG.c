@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYReadCFG.c,v 1.168 2012/08/13 00:09:29 tom Exp $
+ * $LynxId: LYReadCFG.c,v 1.171 2013/04/30 09:52:44 tom Exp $
  */
 #ifndef NO_RULES
 #include <HTRules.h>
@@ -756,7 +756,7 @@ static int keymap_fun(char *key)
 		fprintf(stderr,
 			gettext("key remapping of %s to %s for %s failed\n"),
 			key, func, efunc + 1);
-	    } else if (func && !strcmp("TOGGLE_HELP", func)) {
+	    } else if (!strcmp("TOGGLE_HELP", func)) {
 		LYUseNoviceLineTwo = FALSE;
 	    }
 	    return 0;
@@ -764,7 +764,7 @@ static int keymap_fun(char *key)
 	    fprintf(stderr, gettext("key remapping of %s to %s failed\n"),
 		    key, func);
 	} else {
-	    if (func && !strcmp("TOGGLE_HELP", func))
+	    if (!strcmp("TOGGLE_HELP", func))
 		LYUseNoviceLineTwo = FALSE;
 	}
 	if (efunc) {
@@ -1724,6 +1724,7 @@ static Config_Type Config_Table [] =
      PARSE_INT(RC_TIMEOUT,              lynx_timeout),
 #endif
      PARSE_PRG(RC_TOUCH_PATH,           ppTOUCH),
+     PARSE_SET(RC_TRACK_INTERNAL_LINKS, track_internal_links),
      PARSE_SET(RC_TRIM_INPUT_FIELDS,    LYtrimInputFields),
 #ifdef EXEC_LINKS
      PARSE_DEF(RC_TRUSTED_EXEC,         EXEC_PATH),
@@ -1990,12 +1991,10 @@ BOOL LYSetConfigValue(const char *name,
 	if (*(q->lst_value) == NULL) {
 	    *(q->lst_value) = HTList_new();
 	}
-	if (q->lst_value != 0) {
-	    char *my_value = NULL;
-
-	    StrAllocCopy(my_value, value);
-	    HTList_appendObject(*(q->lst_value), my_value);
-	}
+	temp_value = NULL;
+	StrAllocCopy(temp_value, value);
+	HTList_appendObject(*(q->lst_value), temp_value);
+	temp_value = NULL;
 	break;
 
 #if defined(EXEC_LINKS) || defined(LYNXCGI_LINKS)

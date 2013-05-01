@@ -1,4 +1,4 @@
-/* $LynxId: LYGetFile.c,v 1.87 2012/02/08 21:01:03 tom Exp $ */
+/* $LynxId: LYGetFile.c,v 1.89 2013/05/01 00:21:02 tom Exp $ */
 #include <HTUtils.h>
 #include <HTTP.h>
 #include <HTAnchor.h>		/* Anchor class */
@@ -430,12 +430,9 @@ int getfile(DocInfo *doc, int *target)
 	    WWWDoc.bookmark = doc->bookmark;
 	    WWWDoc.isHEAD = doc->isHEAD;
 	    WWWDoc.safe = doc->safe;
-#ifndef DONT_TRACK_INTERNAL_LINKS
-	    if (doc->internal_link && !reloading) {
+	    if (track_internal_links && doc->internal_link && !reloading) {
 		LYinternal_flag = TRUE;
 	    }
-#endif
-
 #ifdef DIRED_SUPPORT
 	    lynx_edit_mode = FALSE;
 #endif /* DIRED_SUPPORT */
@@ -1519,8 +1516,10 @@ static int fix_httplike_urls(DocInfo *doc, UrlTypes type)
 	char *second = strchr(first, ':');
 
 	CTRACE((tfp, "fix_httplike_urls: URL '%s'\n", doc->address));
-
-	*second++ = '\0';
+	if (second == 0)
+	    second = first + strlen(first);
+	else
+	    *second++ = '\0';
 	HTSprintf0(&path, "%s//%s%s", STR_FTP_URL, first, second);
 	FREE(doc->address);
 	doc->address = path;

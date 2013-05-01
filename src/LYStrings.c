@@ -1,4 +1,4 @@
-/* $LynxId: LYStrings.c,v 1.206 2012/08/13 00:18:00 tom Exp $ */
+/* $LynxId: LYStrings.c,v 1.208 2013/01/04 01:40:27 tom Exp $ */
 #include <HTUtils.h>
 #include <HTCJK.h>
 #include <UCAux.h>
@@ -5413,6 +5413,7 @@ int LYscanFloat2(const char **source, float *result)
     const char *src = *source;
 
     src = LYSkipCBlanks(src);
+    *result = 0.0;
     if (strchr(src, '.') != 0) {
 	long frc_part = 0;
 	float scale = 1.0;
@@ -5447,6 +5448,7 @@ int LYscanFloat2(const char **source, float *result)
 		if (sscanf(extra, "%f", &scale) == 1) {
 		    *result *= scale;
 		}
+		FREE(extra);
 		src = LYSkipCNonBlanks(src);
 	    } else {
 		src = 0;

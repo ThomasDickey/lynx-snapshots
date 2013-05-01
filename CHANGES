@@ -1,7 +1,12 @@
--- $LynxId: CHANGES,v 1.634 2012/11/18 21:54:53 tom Exp $
+-- $LynxId: CHANGES,v 1.638 2013/04/30 09:55:16 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
+
+2013-04-30 (2.8.8dev.16)
++ make DONT_TRACK_INTERNAL_LINKS logic configurable via lynx.cfg as
+  TRACK_INTERNAL_LINKS; the configure script now sets the default value -TD
+* fix issues found by Coverity scan -TD
 
 2012-11-18 (2.8.8dev.15)
 * corrected position of highlighting from search/whereis function when using
@@ -271,7 +276,7 @@ Changes since Lynx 2.8 release
 * remind user how to cancel message (Debian #292787) -TD
 * add HTML5_CHARSETS feature, which allows the user to choose whether to
   interpret pages without an explicit charset according to the HTML5
-  "compatibility" feature (Debian #604466, #514897) -TD
+  "compatibility" feature (Debian #604466, Debian #514897) -TD
 * add EXTERNAL_MENU feature to lynx.cfg, which allows the user to customize the
   menu-entry shown, e.g., to suppress the display of the URL
   (Debian #603646) -TD
@@ -910,7 +915,7 @@ Changes since Lynx 2.8 release
   by discussion by Chuck Houpt and TG) -TD
 * fix an off-by-one in HText_canScrollDown() and total_pages in GridText.c -TH
 * rewrite strcasecomp_asterisk() to support wildcards as in RFC 2818 (prompted
-  by less-complete Debian patch for #401447, see also #268102) -TD
+  by less-complete patch from Debian #401447, see also Debian #268102) -TD
 * improve X.509 certificate validation -TG
   This is tested for OpenSSL, ifdef'd to not break gnutls.  Changes:
   + peer certificate is cached, no need to call SSL_get_peer_certificate()
@@ -1202,7 +1207,7 @@ Changes since Lynx 2.8 release
   if it cannot find the lss file.  cf: 2000-07-16 (2.8.4dev.5) -TD
 * fix a sign-extension in alignment case-statement in split_line() which could
   cause a large indent for lines which are wider than the display (Debian
-  #360832, #372670) -TD
+  #360832, Debian #372670) -TD
 * fix ifdef's in LYOptions.c to make --disable-menu-options work (report by
   PW) -TD
 
@@ -8211,16 +8216,16 @@ recently, FreeBSD 4.1, NetBSD 1.5 and OpenBSD 2.8 (curses/ncurses).
 1998-09-08 (2.8.1dev25-intl)
 * Resynch with dev tree - JES
 
-1998-09-07 (2.8.1dev.21-intl)
+1998-09-07 (2.8.1dev.21-intl p3)
 * About half through language hooks in WWW/Lib... - JES
   Integrated part of Chebucto's French translations - JES
 * Included latest ABOUT-NLS from GNU project,
 
-1998-08-27 (2.8.1dev.21-intl)
+1998-08-27 (2.8.1dev.21-intl p2)
 * Tested language hooks using src/LYNews.c and Italian messages file
   provided by Sabato De Rosa <sabato.derosa@usa.net>.  Made changes to
   LYMain.c, LYMainLoop.c, LYNews.c and HTNews.c - JES
-1998-08-27 (2.8.1dev.21-intl)
+1998-08-27 (2.8.1dev.21-intl p1)
 * add hooks to GNU gettext for international language support - JES
   (This is an experimental modification that will be patched into
   the main Lynx release after other platform testing.  I've only done

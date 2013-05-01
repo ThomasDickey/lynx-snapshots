@@ -1,5 +1,5 @@
 /*
- * $LynxId: UCAuto.c,v 1.47 2012/02/12 17:30:42 tom Exp $
+ * $LynxId: UCAuto.c,v 1.49 2013/04/30 09:20:19 tom Exp $
  *
  *  This file contains code for changing the Linux console mode.
  *  Currently some names for font files are hardwired in here.
@@ -75,7 +75,6 @@ typedef enum {
  */
 typedef enum {
     GN_Blat1,			/* Latin-1 */
-    GN_0decgraf,		/* VT100 graphics */
     GN_Ucp437,			/* PC -> PC */
     GN_Kuser,			/* user-defined */
     GN_dunno,
@@ -346,8 +345,6 @@ void UCChangeTerminalCodepage(int newcs,
 	} else {
 	    if (fp1)
 		LYRemoveTemp(old_font);
-	    if (fp2)
-		LYRemoveTemp(old_umap);
 	    FREE(old_font);
 	    FREE(old_umap);
 	}
@@ -513,8 +510,6 @@ void UCChangeTerminalCodepage(int newcs,
 	     * Switch Linux console to lat1 table.
 	     */
 	    write_esc("\033(B");
-	} else if (TransT == GN_0decgraf) {
-	    write_esc("\033(0");
 	} else if (TransT == GN_Ucp437) {
 	    /*
 	     * Switch Linux console to 437 table?

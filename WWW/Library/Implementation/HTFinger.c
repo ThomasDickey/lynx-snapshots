@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFinger.c,v 1.29 2011/05/24 09:21:13 tom Exp $
+ * $LynxId: HTFinger.c,v 1.30 2013/01/04 21:40:19 tom Exp $
  *
  *			FINGER ACCESS				HTFinger.c
  *			=============
@@ -163,11 +163,7 @@ static int response(char *command,
     PUTS(sitename);
     END(HTML_EM);
     PUTS(": ");
-    if (command) {
-	StrAllocCopy(cmd, command);
-    } else {
-	StrAllocCopy(cmd, "");
-    }
+    StrAllocCopy(cmd, command);
     for (i = ((int) strlen(cmd) - 1); i >= 0; i--) {
 	if (cmd[i] == LF || cmd[i] == CR) {
 	    cmd[i] = '\0';

@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMain.c,v 1.238 2012/08/05 01:03:03 tom Exp $
+ * $LynxId: LYMain.c,v 1.240 2013/04/30 09:52:15 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTP.h>
@@ -150,6 +150,13 @@ LOCAL_EXECUTION_LINKS_ON_BUT_NOT_REMOTE;
 #if defined(LYNXCGI_LINKS) && !defined(VMS)	/* WebSter Mods -jkt */
 char *LYCgiDocumentRoot = NULL;	/* DOCUMENT_ROOT in the lynxcgi env */
 #endif /* LYNXCGI_LINKS */
+
+#ifdef TRACK_INTERNAL_LINKS
+BOOLEAN track_internal_links = TRUE;
+
+#else
+BOOLEAN track_internal_links = FALSE;
+#endif
 
 #ifdef REVERSE_CLEAR_SCREEN_PROBLEM
 BOOLEAN enable_scrollback = TRUE;
@@ -4251,7 +4258,9 @@ static BOOL parse_arg(char **argv,
      */
     if (*arg_name != '-'
 #if EXTENDED_OPTION_LOGIC
-	|| (no_options_further == TRUE && nof_index < (*countp))
+	|| ((no_options_further == TRUE)
+	    && (countp != 0)
+	    && (nof_index < (*countp)))
 #endif
 	) {
 #if EXTENDED_STARTFILE_RECALL

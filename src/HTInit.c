@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTInit.c,v 1.77 2010/09/25 18:08:10 tom Exp $
+ * $LynxId: HTInit.c,v 1.78 2013/01/04 21:44:57 tom Exp $
  *
  *		Configuration-specific Initialization		HTInit.c
  *		----------------------------------------
@@ -698,7 +698,7 @@ static int BuildCommand(HTChunk *cmd,
 		}
 		break;
 	    case 's':
-		if (TmpFileLen && TmpFileName) {
+		if (TmpFileLen) {
 		    HTChunkPuts(cmd, TmpFileName);
 		}
 		break;

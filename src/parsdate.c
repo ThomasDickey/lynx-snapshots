@@ -5,7 +5,7 @@ static const char yysccsid[] = "@(#)yaccpar	1.9 (Berkeley) 02/21/93";
 #define YYBYACC 1
 #define YYMAJOR 1
 #define YYMINOR 9
-#define YYPATCH 20120114
+#define YYPATCH 20121003
 
 #define YYEMPTY        (-1)
 #define yyclearin      (yychar = YYEMPTY)
@@ -21,7 +21,7 @@ static const char yysccsid[] = "@(#)yaccpar	1.9 (Berkeley) 02/21/93";
 #include <LYLeaks.h>
 
 /*
- *  $LynxId: parsdate.c,v 1.14 2012/08/03 18:36:10 tom Exp $
+ *  $LynxId: parsdate.c,v 1.16 2013/01/05 02:00:30 tom Exp $
  *
  *  This module is adapted and extended from tin, to use for LYmktime().
  *
@@ -185,8 +185,12 @@ typedef union {
 #endif
 
 /* Parameters sent to yyerror. */
+#ifndef YYERROR_DECL
 #define YYERROR_DECL() yyerror(const char *s)
+#endif
+#ifndef YYERROR_CALL
 #define YYERROR_CALL(msg) yyerror(msg)
+#endif
 
 extern int YYPARSE_DECL();
 
@@ -802,74 +806,72 @@ static int date_lex(void)
     int i;
     int nesting;
 
+    /* Get first character after the whitespace. */
     for (;;) {
-	/* Get first character after the whitespace. */
-	for (;;) {
-	    while (CTYPE(isspace, *yyInput))
-		yyInput++;
-	    c = *yyInput;
-
-	    /* Ignore RFC 822 comments, typically time zone names. */
-	    if (c != LPAREN)
-		break;
-	    for (nesting = 1;
-		 (c = *++yyInput) != RPAREN || --nesting;
-		) {
-		if (c == LPAREN) {
-		    nesting++;
-		} else if (!IS7BIT(c) || c == '\0' || c == '\r'
-			   || (c == '\\'
-			       && ((c = *++yyInput) == '\0'
-				   || !IS7BIT(c)))) {
-		    /* Lexical error: bad comment. */
-		    return '?';
-		}
-	    }
+	while (CTYPE(isspace, *yyInput))
 	    yyInput++;
-	}
+	c = *yyInput;
 
-	/* A number? */
-	if (CTYPE(isdigit, c) || c == '-' || c == '+') {
-	    if (c == '-' || c == '+') {
-		sign = c == '-' ? -1 : 1;
-		yyInput++;
-		if (!CTYPE(isdigit, *yyInput)) {
-		    /* Return the isolated plus or minus sign. */
-		    --yyInput;
-		    return *yyInput++;
-		}
-	    } else {
-		sign = 0;
+	/* Ignore RFC 822 comments, typically time zone names. */
+	if (c != LPAREN)
+	    break;
+	for (nesting = 1;
+	     (c = *++yyInput) != RPAREN || --nesting;
+	    ) {
+	    if (c == LPAREN) {
+		nesting++;
+	    } else if (!IS7BIT(c) || c == '\0' || c == '\r'
+		       || (c == '\\'
+			   && ((c = *++yyInput) == '\0'
+			       || !IS7BIT(c)))) {
+		/* Lexical error: bad comment. */
+		return '?';
 	    }
-	    for (p = buff;
-		 (c = *yyInput++) != '\0' && CTYPE(isdigit, c);
-		) {
-		if (p < &buff[sizeof buff - 1])
-		    *p++ = (char) c;
-	    }
-	    *p = '\0';
-	    i = atoi(buff);
-
-	    yyInput--;
-	    yylval.Number = sign < 0 ? -i : i;
-	    return sign ? tSNUMBER : tUNUMBER;
 	}
-
-	/* A word? */
-	if (CTYPE(isalpha, c)) {
-	    for (p = buff;
-		 (c = *yyInput++) == '.' || CTYPE(isalpha, c);
-		) {
-		if (p < &buff[sizeof buff - 1])
-		    *p++ = (char) (CTYPE(isupper, c) ? tolower(c) : c);
-	    }
-	    *p = '\0';
-	    yyInput--;
-	    return LookupWord(buff, (int) (p - buff));
-	}
-
-	return *yyInput++;
+	yyInput++;
     }
+
+    /* A number? */
+    if (CTYPE(isdigit, c) || c == '-' || c == '+') {
+	if (c == '-' || c == '+') {
+	    sign = c == '-' ? -1 : 1;
+	    yyInput++;
+	    if (!CTYPE(isdigit, *yyInput)) {
+		/* Return the isolated plus or minus sign. */
+		--yyInput;
+		return *yyInput++;
+	    }
+	} else {
+	    sign = 0;
+	}
+	for (p = buff;
+	     (c = *yyInput++) != '\0' && CTYPE(isdigit, c);
+	    ) {
+	    if (p < &buff[sizeof buff - 1])
+		*p++ = (char) c;
+	}
+	*p = '\0';
+	i = atoi(buff);
+
+	yyInput--;
+	yylval.Number = sign < 0 ? -i : i;
+	return sign ? tSNUMBER : tUNUMBER;
+    }
+
+    /* A word? */
+    if (CTYPE(isalpha, c)) {
+	for (p = buff;
+	     (c = *yyInput++) == '.' || CTYPE(isalpha, c);
+	    ) {
+	    if (p < &buff[sizeof buff - 1])
+		*p++ = (char) (CTYPE(isupper, c) ? tolower(c) : c);
+	}
+	*p = '\0';
+	yyInput--;
+	return LookupWord(buff, (int) (p - buff));
+    }
+
+    return *yyInput++;
 }
 
 static int GetTimeInfo(TIMEINFO * Now)
@@ -984,7 +986,7 @@ time_t parsedate(char *p,
      * from the error return value.  (Alternately could set errno on error.) */
     return (Start == (time_t) -1) ? 0 : Start;
 }
-#line 987 "y.tab.c"
+#line 989 "y.tab.c"
 
 #if YYDEBUG
 #include <stdio.h>		/* needed for printf */
@@ -1476,7 +1478,7 @@ case 35:
 	    yyval.Meridian = yystack.l_mark[0].Meridian;
 	}
 break;
-#line 1479 "y.tab.c"
+#line 1481 "y.tab.c"
     }
     yystack.s_mark -= yym;
     yystate = *yystack.s_mark;

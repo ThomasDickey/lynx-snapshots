@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFTP.c,v 1.106 2012/11/15 23:51:23 tom Exp $
+ * $LynxId: HTFTP.c,v 1.114 2013/01/05 01:35:12 tom Exp $
  *
  *			File Transfer Protocol (FTP) Client
  *			for a WorldWideWeb browser
@@ -351,9 +351,13 @@ char *HTVMS_name(const char *nn,
 	HTSprintf0(&vmsname, "%s%s:[%s]%s",
 		   nodename, filename + 1, second + 1, last + 1);
 	*second = *last = '/';	/* restore filename */
-	for (p = strchr(vmsname, '['); *p != ']'; p++)
-	    if (*p == '/')
-		*p = '.';	/* Convert dir sep.  to dots */
+	if ((p = strchr(vmsname, '[')) != 0) {
+	    while (*p != '\0' && *p != ']') {
+		if (*p == '/')
+		    *p = '.';	/* Convert dir sep.  to dots */
+		++p;
+	    }
+	}
     }
     FREE(nodename);
     FREE(filename);
@@ -764,6 +768,15 @@ static void set_unix_dirstyle(eServerType *ServerType, BOOLEAN *UseList)
     }
 }
 
+#define CheckForInterrupt(msg) \
+	if (status == HT_INTERRUPTED) { \
+	    CTRACE((tfp, "HTFTP: Interrupted %s.\n", msg)); \
+	    _HTProgress(CONNECTION_INTERRUPTED); \
+	    NETCLOSE(control->socket); \
+	    control->socket = -1; \
+	    return HT_INTERRUPTED; \
+	}
+
 /*	Get a valid connection to the host
  *	----------------------------------
  *
@@ -821,13 +834,13 @@ static int get_connection(const char *arg,
     }
     con->socket = -1;
 
-    if (!arg)
+    if (isEmpty(arg)) {
+	free(con);
 	return -1;		/* Bad if no name specified     */
-    if (!*arg)
-	return -1;		/* Bad if name had zero length  */
+    }
 
-/* Get node name:
-*/
+    /* Get node name:
+     */
     CTRACE((tfp, "get_connection(%s)\n", arg));
     {
 	char *p1 = HTParse(arg, "", PARSE_HOST);
@@ -914,17 +927,11 @@ static int get_connection(const char *arg,
     HTInitInput(control->socket);
     init_help_message_cache();	/* Clear the login message buffer. */
 
-/*	Now we log in		Look up username, prompt for pw.
-*/
+    /*  Now we log in           Look up username, prompt for pw.
+     */
     status = response((char *) 0);	/* Get greeting */
+    CheckForInterrupt("at beginning of login");
 
-    if (status == HT_INTERRUPTED) {
-	CTRACE((tfp, "HTFTP: Interrupted at beginning of login.\n"));
-	_HTProgress(CONNECTION_INTERRUPTED);
-	NETCLOSE(control->socket);
-	control->socket = -1;
-	return HT_INTERRUPTED;
-    }
     server_type = GENERIC_SERVER;	/* reset */
     if (status == 2) {		/* Send username */
 	char *cp;		/* look at greeting text */
@@ -947,13 +954,7 @@ static int get_connection(const char *arg,
 			    ? username
 			    : "anonymous");
 
-	if (status == HT_INTERRUPTED) {
-	    CTRACE((tfp, "HTFTP: Interrupted while sending username.\n"));
-	    _HTProgress(CONNECTION_INTERRUPTED);
-	    NETCLOSE(control->socket);
-	    control->socket = -1;
-	    return HT_INTERRUPTED;
-	}
+	CheckForInterrupt("while sending username");
     }
     if (status == 3) {		/* Send password */
 	if (password) {
@@ -1001,26 +1002,13 @@ static int get_connection(const char *arg,
 	}
 	status = response(command);
 	FREE(command);
-	if (status == HT_INTERRUPTED) {
-	    CTRACE((tfp, "HTFTP: Interrupted while sending password.\n"));
-	    _HTProgress(CONNECTION_INTERRUPTED);
-	    NETCLOSE(control->socket);
-	    control->socket = -1;
-	    return HT_INTERRUPTED;
-	}
+	CheckForInterrupt("while sending password");
     }
     FREE(username);
 
     if (status == 3) {
 	status = send_cmd_1("ACCT noaccount");
-	if (status == HT_INTERRUPTED) {
-	    CTRACE((tfp, "HTFTP: Interrupted while sending password.\n"));
-	    _HTProgress(CONNECTION_INTERRUPTED);
-	    NETCLOSE(control->socket);
-	    control->socket = -1;
-	    return HT_INTERRUPTED;
-	}
-
+	CheckForInterrupt("while sending password");
     }
     if (status != 2) {
 	CTRACE((tfp, "HTFTP: Login fail: %s", response_text));
@@ -1127,20 +1115,6 @@ static int get_connection(const char *arg,
 	get_ftp_pwd(&server_type, &use_list);
     }
 
-/*  Now we inform the server of the port number we will listen on
-*/
-#ifdef NOTREPEAT_PORT
-    {
-	int status = response(port_command);
-
-	if (status != 2) {
-	    if (control->socket)
-		close_connection(control->socket);
-	    return -status;	/* Bad return */
-	}
-	CTRACE((tfp, "HTFTP: Port defined.\n"));
-    }
-#endif /* NOTREPEAT_PORT */
     return con->socket;		/* Good return */
 }
 
@@ -1319,8 +1293,10 @@ static int get_listen_socket(void)
 	    status = getsockname(control->socket,
 				 (struct sockaddr *) &soc_address,
 				 &address_length);
-	if (status < 0)
+	if (status < 0) {
+	    close(new_socket);
 	    return HTInetStatus("getsockname");
+	}
 #ifdef INET6
 	CTRACE((tfp, "HTFTP: This host is %s\n",
 		HTInetString((void *) soc_in)));
@@ -1349,8 +1325,10 @@ static int get_listen_socket(void)
 	    /* Cast to generic sockaddr */
 			  SOCKADDR_LEN(soc_address)
 		);
-	if (status < 0)
+	if (status < 0) {
+	    close(new_socket);
 	    return HTInetStatus("bind");
+	}
 
 	address_length = sizeof(soc_address);
 #ifdef SOCKS
@@ -1363,8 +1341,10 @@ static int get_listen_socket(void)
 	    status = getsockname(new_socket,
 				 (struct sockaddr *) &soc_address,
 				 &address_length);
-	if (status < 0)
+	if (status < 0) {
+	    close(new_socket);
 	    return HTInetStatus("getsockname");
+	}
     }
 #endif /* POLL_PORTS */
 
@@ -1790,7 +1770,7 @@ static void parse_dls_line(char *line,
 		StrAllocCopy(entry_info->type, "");
 	} else {
 	    StrAllocCopy(entry_info->filename, line);
-	    if (cps && cps != line && *(cps - 1) == '/')
+	    if (cps != line && *(cps - 1) == '/')
 		StrAllocCopy(entry_info->type, ENTRY_IS_DIRECTORY);
 	    else
 		StrAllocCopy(entry_info->type, "");
@@ -2345,7 +2325,7 @@ static EntryInfo *parse_dir_entry(char *entry,
 	    /* if still unchanged... */
 	    parse_dls_line(entry, entry_info, pspilledname);
 
-	    if (!entry_info->filename || *entry_info->filename == '\0') {
+	    if (isEmpty(entry_info->filename)) {
 		entry_info->display = FALSE;
 		return (entry_info);
 	    }
@@ -2577,7 +2557,11 @@ static EntryInfo *parse_dir_entry(char *entry,
     }
 #endif
 
-    if (entry_info->filename && strlen(entry_info->filename) > 3) {
+    if (isEmpty(entry_info->filename)) {
+	entry_info->display = FALSE;
+	return (entry_info);
+    }
+    if (strlen(entry_info->filename) > 3) {
 	if (((cp = strrchr(entry_info->filename, '.')) != NULL &&
 	     0 == strncasecomp(cp, ".me", 3)) &&
 	    (cp[3] == '\0' || cp[3] == ';')) {
@@ -2980,6 +2964,7 @@ static void LYListFmtParse(const char *fmtstr,
     FREE(str);
 }
 #endif /* LONG_LIST */
+
 /*	Read a directory into an hypertext object from the data socket
  *	--------------------------------------------------------------
  *
@@ -3080,6 +3065,7 @@ static int read_directory(HTParentAnchor *parent,
 		    ABORT_TARGET;
 		    HTBTreeAndObject_free(bt);
 		    FREE(spilledname);
+		    HTChunkFree(chunk);
 		    return HT_INTERRUPTED;
 		}
 	    }
@@ -3101,6 +3087,7 @@ static int read_directory(HTParentAnchor *parent,
 			ABORT_TARGET;
 			HTBTreeAndObject_free(bt);
 			FREE(spilledname);
+			HTChunkFree(chunk);
 			return HT_INTERRUPTED;
 		    }
 		} else if ((char) ic == CR || (char) ic == LF) {	/* Terminator? */
@@ -3433,7 +3420,7 @@ static int setup_connection(const char *name,
 		    ;		/* null body */
 		}
 		for ( /*nothing */ ;
-		     *p && *p && *p != '(';
+		     *p && *p != '(';
 		     p++) {	/*) */
 		    ;		/* null body */
 		}
