@@ -1,4 +1,4 @@
-/* $LynxId: LYShowInfo.c,v 1.72 2010/09/25 00:47:28 tom Exp $ */
+/* $LynxId: LYShowInfo.c,v 1.73 2013/01/04 01:20:17 tom Exp $ */
 #include <HTUtils.h>
 #include <HTFile.h>
 #include <HTParse.h>
@@ -209,11 +209,14 @@ int LYShowInfo(DocInfo *doc,
 	    if (S_ISLNK(dir_info.st_mode)) {
 		char buf[MAX_LINE];
 		int buf_size;
+		size_t limit = sizeof(buf) - 1;
 
-		if ((buf_size = (int) readlink(temp, buf, sizeof(buf) - 1)) != -1) {
+		if ((buf_size = (int) readlink(temp, buf, limit)) != -1) {
+		    if (buf_size > (int) limit)
+			buf_size = (int) limit;
 		    buf[buf_size] = '\0';
 		} else {
-		    sprintf(buf, "%.*s", (int) sizeof(buf) - 1,
+		    sprintf(buf, "%.*s", (int) limit,
 			    gettext("Unable to follow link"));
 		}
 		ADD_SS(gettext("Points to file:"), buf);

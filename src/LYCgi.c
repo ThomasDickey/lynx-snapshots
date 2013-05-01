@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYCgi.c,v 1.64 2011/06/11 12:35:20 tom Exp $
+ * $LynxId: LYCgi.c,v 1.65 2013/01/04 09:44:59 tom Exp $
  *                   Lynx CGI support                              LYCgi.c
  *                   ================
  *
@@ -220,7 +220,7 @@ static int LYLoadCGI(const char *arg,
     }
 
     StrAllocCopy(orig_pgm, pgm);
-    if ((cp = trimPoundSelector(pgm)) != NULL) {
+    if (trimPoundSelector(pgm) != NULL) {
 	/*
 	 * Strip a #fragment from path.  In this case any pgm_args found above
 	 * will also be bogus, since the '?' came after the '#' and is part of

@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTAccess.c,v 1.77 2012/02/23 00:39:40 tom Exp $
+ * $LynxId: HTAccess.c,v 1.78 2013/04/30 22:59:03 tom Exp $
  *
  *		Access Manager					HTAccess.c
  *		==============
@@ -858,7 +858,7 @@ static BOOL HTLoadDocument(const char *full_address,	/* may include #fragment */
 	 * (3) we are repositioning within the currently loaded document based
 	 * on the target anchor's address (URL_Reference).
 	 *
-	 * If DONT_TRACK_INTERNAL_LINKS is defined, HText_AreDifferent() is
+	 * If track_internal_links is false, HText_AreDifferent() is
 	 * used to determine whether (3) applies.  If the target address
 	 * differs from that of the current document only by a fragment and the
 	 * target address has an appended fragment, repositioning without
@@ -873,7 +873,7 @@ static BOOL HTLoadDocument(const char *full_address,	/* may include #fragment */
 	 * (e.g., user requested RELOAD, or HTTP response with no-cache header
 	 * and we are not overriding).
 	 *
-	 * If DONT_TRACK_INTERNAL_LINKS is undefined, a target address that
+	 * If track_internal_links is true, a target address that
 	 * points to the same URL as the current document may still result in
 	 * reloading, depending on whether the original URL-Reference was given
 	 * as an internal link in the context of the previously loaded
@@ -897,14 +897,12 @@ static BOOL HTLoadDocument(const char *full_address,	/* may include #fragment */
 	 */
 	if ((reloading != REAL_RELOAD) &&
 	    (LYoverride_no_cache ||
-#ifdef DONT_TRACK_INTERNAL_LINKS
-	     !HText_hasNoCacheSet(text) ||
-	     !HText_AreDifferent(anchor, full_address)
-#else
-	     ((LYinternal_flag || !HText_hasNoCacheSet(text)) &&
-	      !isLYNXIMGMAP(full_address))
-#endif /* TRACK_INTERNAL_LINKS */
-	    )) {
+	     ((!track_internal_links &&
+	       (!HText_hasNoCacheSet(text) ||
+		!HText_AreDifferent(anchor, full_address))) ||
+	      (track_internal_links &&
+	       (((LYinternal_flag || !HText_hasNoCacheSet(text)) &&
+		 !isLYNXIMGMAP(full_address))))))) {
 	    CTRACE((tfp, "HTAccess: Document already in memory.\n"));
 	    HText_select(text);
 

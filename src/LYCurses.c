@@ -1,4 +1,4 @@
-/* $LynxId: LYCurses.c,v 1.164 2012/02/10 18:22:15 tom Exp $ */
+/* $LynxId: LYCurses.c,v 1.168 2013/05/01 00:07:08 tom Exp $ */
 #include <HTUtils.h>
 #include <HTAlert.h>
 
@@ -448,18 +448,29 @@ void curses_w_style(WINDOW * win, int style,
 #endif
 
     int YP, XP;
+    bucket *ds;
+    BOOL free_ds = TRUE;
 
-#if !OMIT_SCN_KEEPING
-    bucket *ds = (style == NOSTYLE ? nostyle_bucket() : &hashStyles[style]);
-
-#else
-    bucket *ds = (style == NOSTYLE ? &nostyle_bucket :
-		  (style == SPECIAL_STYLE ? special_bucket() : &hashStyles[style]));
+    switch (style) {
+#if OMIT_SCN_KEEPING
+    case SPECIAL_STYLE:
+	ds = special_bucket();
+	break;
 #endif
+    case NOSTYLE:
+	ds = nostyle_bucket();
+	break;
+    default:
+	ds = &hashStyles[style];
+	free_ds = FALSE;
+	break;
+    }
 
     if (!ds->name) {
 	CTRACE2(TRACE_STYLE, (tfp, "CSS.CS:Style %d not configured\n", style));
 #if !OMIT_SCN_KEEPING
+	if (free_ds)
+	    free(ds);
 	return;
 #endif
     }
@@ -474,6 +485,8 @@ void curses_w_style(WINDOW * win, int style,
 	LYAttrset(win, ds->color, ds->mono);
 	if (win == LYwin)
 	    SetCachedStyle(YP, XP, (unsigned) s_normal);
+	if (free_ds)
+	    free(ds);
 	return;
     }
 
@@ -524,6 +537,11 @@ void curses_w_style(WINDOW * win, int style,
 	LYAttrset(win, ds->color, ds->mono);
 	break;
     }
+
+    if (free_ds)
+	free(ds);
+
+    return;
 }
 
 /*
@@ -775,7 +793,8 @@ static void lynx_map_color(int n)
 
     CTRACE((tfp, "lynx_map_color(%d)\n", n));
 
-    if (n + 1 < (int) TABLESIZE(lynx_color_pairs)) {
+    if (n + 1 < (int) TABLESIZE(lynx_color_pairs)
+	&& n < (int) TABLESIZE(lynx_color_cfg)) {
 	for (j = n + 1; j < COLOR_PAIRS_MAX; j += COLOR_CFG_MAX) {
 	    lynx_color_pairs[j].fg = lynx_color_cfg[n].fg;
 	    lynx_color_pairs[j].bg = lynx_color_cfg[n].bg;
@@ -2140,6 +2159,8 @@ void LYwaddnstr(WINDOW * w GCC_UNUSED,
 	&& (LYshiftWin == 0)
 	&& LYwideLines == FALSE
 	&& ((int) len > (LYcolLimit - x0))
+	&& (y0 >= 0)
+	&& (x0 >= 0)
 	&& (x0 < LYcolLimit)) {
 	WINDOW *sub = derwin(LYwin, LYlines, LYcolLimit, 0, 0);
 
@@ -2860,6 +2881,10 @@ void LYrefresh(void)
 	int y, x;
 
 	getyx(LYwin, y, x);
+	if (y < 0)
+	    y = 0;
+	if (x < 0)
+	    x = 0;
 	if (x > LYcolLimit)
 	    x = LYcolLimit;
 	wmove(stdscr, y, x);

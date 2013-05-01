@@ -1,5 +1,5 @@
 /*
- * $LynxId: GridText.c,v 1.243 2012/11/18 22:09:20 tom Exp $
+ * $LynxId: GridText.c,v 1.252 2013/05/01 00:43:19 tom Exp $
  *
  *		Character grid hypertext object
  *		===============================
@@ -993,7 +993,7 @@ HText *HText_new(HTParentAnchor *anchor)
     HText *self = typecalloc(HText);
 
     if (!self)
-	return self;
+	outofmem(__FILE__, "HText_New");
 
     CTRACE((tfp, "GridText: start HText_new\n"));
 
@@ -2308,13 +2308,12 @@ static void display_page(HText *text,
 		{
 		    auto char *cp_AnchorAddress = NULL;
 
-		    if (traversal)
+		    if (traversal) {
 			cp_AnchorAddress = stub_HTAnchor_address(link_dest);
-		    else {
-#ifndef DONT_TRACK_INTERNAL_LINKS
+		    } else if (track_internal_links) {
 			if (Anchor_ptr->link_type == INTERNAL_LINK_ANCHOR) {
-			    link_dest_intl = HTAnchor_followTypedLink(
-									 Anchor_ptr->anchor, HTInternalLink);
+			    link_dest_intl = HTAnchor_followTypedLink(Anchor_ptr->anchor,
+								      HTInternalLink);
 			    if (link_dest_intl && link_dest_intl != link_dest) {
 
 				CTRACE((tfp,
@@ -2322,15 +2321,18 @@ static void display_page(HText *text,
 					link_dest_intl->parent->address));
 				link_dest_intl = NULL;
 			    }
-			} else
+			} else {
 			    link_dest_intl = NULL;
+			}
 			if (link_dest_intl) {
 			    char *cp2 = HTAnchor_address(link_dest_intl);
 
 			    cp_AnchorAddress = cp2;
-			} else
-#endif
+			} else {
 			    cp_AnchorAddress = HTAnchor_address(link_dest);
+			}
+		    } else {
+			cp_AnchorAddress = HTAnchor_address(link_dest);
 		    }
 		    FREE(links[nlinks].lname);
 
@@ -4873,42 +4875,41 @@ void HText_cancelStbl(HText *me)
 */
 void HText_startStblTABLE(HText *me, int alignment)
 {
+    if (me) {
 #ifdef EXP_NESTED_TABLES
-    STable_info *current = me->stbl;
+	STable_info *current = me->stbl;
 #endif
 
-    if (!me)
-	return;
-
-#ifdef EXP_NESTED_TABLES
-    if (nested_tables) {
-	if (current)
-	    new_line(me);
-    } else
-#endif
-    {
-	if (me->stbl)
-	    HText_cancelStbl(me);	/* auto cancel previously open table */
-    }
-
-    me->stbl = Stbl_startTABLE(alignment);
-    if (me->stbl) {
-	CTRACE((tfp, "startStblTABLE: started.\n"));
 #ifdef EXP_NESTED_TABLES
 	if (nested_tables) {
-	    Stbl_set_enclosing(me->stbl, current, me->last_anchor_before_stbl);
-	}
+	    if (current)
+		new_line(me);
+	} else
 #endif
-	me->last_anchor_before_stbl = me->last_anchor;
-    } else {
-	CTRACE((tfp, "startStblTABLE: failed.\n"));
+	{
+	    if (me->stbl)
+		HText_cancelStbl(me);	/* auto cancel previously open table */
+	}
+
+	me->stbl = Stbl_startTABLE(alignment);
+	if (me->stbl) {
+	    CTRACE((tfp, "startStblTABLE: started.\n"));
+#ifdef EXP_NESTED_TABLES
+	    if (nested_tables) {
+		Stbl_set_enclosing(me->stbl, current, me->last_anchor_before_stbl);
+	    }
+#endif
+	    me->last_anchor_before_stbl = me->last_anchor;
+	} else {
+	    CTRACE((tfp, "startStblTABLE: failed.\n"));
+	}
     }
 }
 
 #ifdef EXP_NESTED_TABLES
 static void free_enclosed_stbl(HText *me)
 {
-    if (me->enclosed_stbl != NULL) {
+    if (me != NULL && me->enclosed_stbl != NULL) {
 	HTList *list = me->enclosed_stbl;
 	STable_info *stbl;
 
@@ -5174,13 +5175,11 @@ int HText_beginAnchor(HText *text, int underline,
     a->link_type = HYPERTEXT_ANCHOR;
     text->last_anchor = a;
 
-#ifndef DONT_TRACK_INTERNAL_LINKS
-    if (HTAnchor_followTypedLink(anc, HTInternalLink)) {
+    if (track_internal_links
+	&& HTAnchor_followTypedLink(anc, HTInternalLink)) {
 	a->number = ++(text->last_anchor_number);
 	a->link_type = INTERNAL_LINK_ANCHOR;
-    } else
-#endif
-    if (HTAnchor_followLink(anc)) {
+    } else if (HTAnchor_followLink(anc)) {
 	a->number = ++(text->last_anchor_number);
     } else {
 	a->number = 0;
@@ -5960,8 +5959,7 @@ static void HText_trimHightext(HText *text,
 	/*
 	 * Copy the link name into the data structure.
 	 */
-	if (line_ptr->data
-	    && anchor_ptr->extent > 0
+	if (anchor_ptr->extent > 0
 	    && anchor_ptr->line_pos >= 0) {
 	    int size = (int) line_ptr->size - anchor_ptr->line_pos;
 
@@ -6329,9 +6327,7 @@ int HTGetLinkInfo(int number,
     TextAnchor *a;
     HTAnchor *link_dest;
 
-#ifndef DONT_TRACK_INTERNAL_LINKS
     HTAnchor *link_dest_intl = NULL;
-#endif
     int anchors_this_line = 0, anchors_this_screen = 0;
     int prev_anchor_line = -1, prev_prev_anchor_line = -1;
 
@@ -6446,8 +6442,7 @@ int HTGetLinkInfo(int number,
 
 		    if (traversal) {
 			cp_freeme = stub_HTAnchor_address(link_dest);
-		    } else {
-#ifndef DONT_TRACK_INTERNAL_LINKS
+		    } else if (track_internal_links) {
 			if (a->link_type == INTERNAL_LINK_ANCHOR) {
 			    link_dest_intl =
 				HTAnchor_followTypedLink(a->anchor, HTInternalLink);
@@ -6465,9 +6460,11 @@ int HTGetLinkInfo(int number,
 			    FREE(*lname);
 			    *lname = cp2;
 			    return (WWW_INTERN_LINK_TYPE);
-			} else
-#endif
+			} else {
 			    cp_freeme = HTAnchor_address(link_dest);
+			}
+		    } else {
+			cp_freeme = HTAnchor_address(link_dest);
 		    }
 		    StrAllocCopy(*lname, cp_freeme);
 		    FREE(cp_freeme);
@@ -9733,9 +9730,8 @@ static char *HText_skipOptionNumPrefix(char *opname)
 }
 
 /*
- *  We couldn't set the value field for the previous option
- *  tag so we have to do it now.  Assume that the last anchor
- *  was the previous options tag.
+ * We couldn't set the value field for the previous option tag so we have to do
+ * it now.  Assume that the last anchor was the previous options' tag.
  */
 char *HText_setLastOptionValue(HText *text, char *value,
 			       char *submit_value,
@@ -9846,11 +9842,11 @@ char *HText_setLastOptionValue(HText *text, char *value,
 		return NULL;
 	    }
 
-	    new_ptr = text->last_anchor->input_field->select_list =
-		typecalloc(OptionType);
+	    new_ptr = typecalloc(OptionType);
 	    if (new_ptr == NULL)
 		outofmem(__FILE__, "HText_setLastOptionValue");
 
+	    text->last_anchor->input_field->select_list = new_ptr;
 	    first_option = TRUE;
 	} else {
 	    while (op_ptr->next) {
@@ -9887,10 +9883,7 @@ char *HText_setLastOptionValue(HText *text, char *value,
 	}
 	cp[j] = '\0';
 	if (IS_CJK_TTY) {
-	    if (cp &&
-		(tmp = typecallocn(unsigned char, strlen(cp) * 2 + 1)) != 0) {
-		if (tmp == NULL)
-		    outofmem(__FILE__, "HText_setLastOptionValue");
+	    if ((tmp = typecallocn(unsigned char, strlen(cp) * 2 + 1)) != 0) {
 		if (kanji_code == EUC) {
 		    TO_EUC((unsigned char *) cp, tmp);
 		    val_cs = current_char_set;
@@ -9906,6 +9899,8 @@ char *HText_setLastOptionValue(HText *text, char *value,
 		}
 		StrAllocCopy(new_ptr->name, (const char *) tmp);
 		FREE(tmp);
+	    } else {
+		outofmem(__FILE__, "HText_setLastOptionValue");
 	    }
 	} else {
 	    StrAllocCopy(new_ptr->name, cp);
@@ -12564,12 +12559,17 @@ static int increment_tagged_htline(HTLine *ht, TextAnchor *a, int *lx_val,
 		    && (n + post_n + 2) < MAX_LINE) {
 		    val = atoi(lx);
 		    if ((val == *old_val) || (*old_val == 0)) {
+			const char *r;
+
 			if (*old_val != 0)
 			    (*old_val)++;
 			val += incr;
 			sprintf(lx, "%d", val);
 			new_n = (int) strlen(lx);
-			strcat(lx, strchr(ht->next->data, ']'));
+			if ((r = strchr(ht->next->data, ']')) == 0) {
+			    r = "";
+			}
+			strcat(lx, r);
 
 			/*
 			 * We keep the the same number of chars from the
@@ -12959,10 +12959,13 @@ static char *readEditedFile(char *ed_temp)
 	}
 	assert(ebuf != NULL);
 
-	fp = fopen(ed_temp, "r");
-	size = fread(ebuf, (size_t) 1, size, fp);
-	LYCloseInput(fp);
-	ebuf[size] = '\0';	/* Terminate! - kw */
+	if ((fp = fopen(ed_temp, "r")) != 0) {
+	    size = fread(ebuf, (size_t) 1, size, fp);
+	    LYCloseInput(fp);
+	    ebuf[size] = '\0';	/* Terminate! - kw */
+	} else {
+	    size = 0;
+	}
     }
 
     /*
@@ -13225,76 +13228,73 @@ int HText_EditTextArea(LinkInfo * form_link)
     int start_line = 0;
     int entry_line = form_link->anchor_line_num;
     int orig_cnt = 0;
-    int offset;
+    int offset = 0;
 
     FormInfo *form = form_link->l_form;
 
     CTRACE((tfp, "GridText: entered HText_EditTextArea()\n"));
 
-    ed_temp = typeMallocn(char, LY_MAXPATH);
+    if ((ed_temp = typeMallocn(char, LY_MAXPATH)) == 0) {
+	outofmem(__FILE__, "HText_EditTextArea");
+    } else if ((fp = LYOpenTemp(ed_temp, "", "w")) != 0) {
 
-    if ((fp = LYOpenTemp(ed_temp, "", "w")) == 0) {
-	FREE(ed_temp);
-	return (0);
-    }
+	/*
+	 * Begin at the beginning, to find 1st anchor in the TEXTAREA, then
+	 * write all of its lines (anchors) out to the edit temp file.
+	 */
+	anchor_ptr = HTMainText->first_anchor;
 
-    /*
-     * Begin at the beginning, to find 1st anchor in the TEXTAREA, then
-     * write all of its lines (anchors) out to the edit temp file.
-     */
-    anchor_ptr = HTMainText->first_anchor;
+	while (anchor_ptr) {
 
-    while (anchor_ptr) {
+	    if (IsFormsTextarea(form, anchor_ptr)) {
 
-	if (IsFormsTextarea(form, anchor_ptr)) {
+		if (firstanchor) {
+		    firstanchor = FALSE;
+		    start_anchor = anchor_ptr;
+		    start_line = anchor_ptr->line_num;
+		}
+		orig_cnt++;
 
-	    if (firstanchor) {
-		firstanchor = FALSE;
-		start_anchor = anchor_ptr;
-		start_line = anchor_ptr->line_num;
+		/*
+		 * Write the anchors' text to the temp edit file.
+		 */
+		fputs(anchor_ptr->input_field->value, fp);
+		fputc('\n', fp);
+
+	    } else {
+
+		if (!firstanchor)
+		    break;
 	    }
-	    orig_cnt++;
+	    anchor_ptr = anchor_ptr->next;
+	}
+	LYCloseTempFP(fp);
+
+	if (start_anchor != 0) {
+	    CTRACE((tfp, "GridText: TEXTAREA name=|%s| dumped to tempfile\n", form->name));
+	    CTRACE((tfp, "GridText: invoking editor (%s) on tempfile\n", editor));
 
 	    /*
-	     * Write the anchors' text to the temp edit file.
+	     * Go edit the TEXTAREA temp file, with the initial editor line
+	     * corresponding to the TEXTAREA line the cursor is on (if such
+	     * positioning is supported by the editor [as lynx knows it]).
 	     */
-	    fputs(anchor_ptr->input_field->value, fp);
-	    fputc('\n', fp);
+	    ed_offset[0] = 0;	/* pre-ANSI compilers don't initialize aggregates - TD */
+	    if (((entry_line - start_line) > 0) && editor_can_position())
+		sprintf(ed_offset, "%d", ((entry_line - start_line) + 1));
 
-	} else {
+	    edit_temporary_file(ed_temp, ed_offset, NULL);
 
-	    if (!firstanchor)
-		break;
+	    CTRACE((tfp, "GridText: returned from editor (%s)\n", editor));
+
+	    if (!form->disabled)
+		offset = finish_ExtEditForm(form_link, start_anchor, ed_temp, orig_cnt);
+
+	    CTRACE((tfp, "GridText: exiting HText_EditTextArea()\n"));
 	}
-	anchor_ptr = anchor_ptr->next;
+	LYRemoveTemp(ed_temp);
+	FREE(ed_temp);
     }
-    LYCloseTempFP(fp);
-
-    CTRACE((tfp, "GridText: TEXTAREA name=|%s| dumped to tempfile\n", form->name));
-    CTRACE((tfp, "GridText: invoking editor (%s) on tempfile\n", editor));
-
-    /*
-     * Go edit the TEXTAREA temp file, with the initial editor line
-     * corresponding to the TEXTAREA line the cursor is on (if such
-     * positioning is supported by the editor [as lynx knows it]).
-     */
-    ed_offset[0] = 0;		/* pre-ANSI compilers don't initialize aggregates - TD */
-    if (((entry_line - start_line) > 0) && editor_can_position())
-	sprintf(ed_offset, "%d", ((entry_line - start_line) + 1));
-
-    edit_temporary_file(ed_temp, ed_offset, NULL);
-
-    CTRACE((tfp, "GridText: returned from editor (%s)\n", editor));
-
-    if (form->disabled)
-	offset = 0;
-    else
-	offset = finish_ExtEditForm(form_link, start_anchor, ed_temp, orig_cnt);
-
-    LYRemoveTemp(ed_temp);
-    FREE(ed_temp);
-
-    CTRACE((tfp, "GridText: exiting HText_EditTextArea()\n"));
 
     /*
      * Return the offset needed to move the cursor from its current

@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTAABrow.c,v 1.34 2010/09/24 08:27:42 tom Exp $
+ * $LynxId: HTAABrow.c,v 1.38 2013/04/30 09:11:00 tom Exp $
  *
  * MODULE							HTAABrow.c
  *		BROWSER SIDE ACCESS AUTHORIZATION MODULE
@@ -638,7 +638,7 @@ static char *compose_auth_string(HTAAScheme scheme, HTAASetup * setup, int IsPro
 		   NonNull(thePort));
 	FREE(proxiedHost);
 	FREE(thePort);
-	username = realm->username;
+	StrAllocCopy(username, realm->username);
 	password = NULL;
 	HTPromptUsernameAndPassword(msg, &username, &password, IsProxy);
 
@@ -1058,6 +1058,7 @@ BOOL HTAA_shouldRetryWithAuth(char *start_of_headers,
     HTAssocList **scheme_specifics = NULL;
     char *ctemplate = NULL;
     char *temp = NULL;
+    BOOL result = NO;
 
     /*
      * Setup atexit() freeing if not done already.  - FM
@@ -1147,12 +1148,12 @@ BOOL HTAA_shouldRetryWithAuth(char *start_of_headers,
 	     * No proxy authorization valid
 	     */
 	    proxy_setup = NULL;
-	    return NO;
+	    result = NO;
 	}
 	/*
 	 * Doing it for proxy.  -AJL
 	 */
-	if (proxy_setup && proxy_setup->server) {
+	else if (proxy_setup && proxy_setup->server) {
 	    /*
 	     * We have already tried with proxy authorization.  Either we don't
 	     * have access or username or password was misspelled.
@@ -1164,13 +1165,14 @@ BOOL HTAA_shouldRetryWithAuth(char *start_of_headers,
 
 	    if (NO == HTConfirm(AUTH_FAILED_PROMPT)) {
 		proxy_setup = NULL;
-		return NO;
+		result = NO;
 	    } else {
 		/*
 		 * Re-ask username+password (if misspelled).
 		 */
+		HTList_delete(valid_schemes);
 		proxy_setup->retry = YES;
-		return YES;
+		result = YES;
 	    }
 	} else {
 	    /*
@@ -1196,21 +1198,19 @@ BOOL HTAA_shouldRetryWithAuth(char *start_of_headers,
 	    FREE(ctemplate);
 
 	    HTAlert(gettext("Proxy authorization required -- retrying"));
-	    return YES;
+	    result = YES;
 	}
-	/* Never reached */
     }
     /*
      * Normal WWW authorization.
      */
-    if (num_schemes == 0) {
+    else if (num_schemes == 0) {
 	/*
 	 * No authorization valid.
 	 */
 	current_setup = NULL;
-	return NO;
-    }
-    if (current_setup && current_setup->server) {
+	result = NO;
+    } else if (current_setup && current_setup->server) {
 	/*
 	 * So we have already tried with WWW authorization.  Either we don't
 	 * have access or username or password was misspelled.
@@ -1222,13 +1222,13 @@ BOOL HTAA_shouldRetryWithAuth(char *start_of_headers,
 
 	if (NO == HTConfirm(AUTH_FAILED_PROMPT)) {
 	    current_setup = NULL;
-	    return NO;
+	    result = NO;
 	} else {
 	    /*
 	     * Re-ask username+password (if misspelled).
 	     */
 	    current_setup->retry = YES;
-	    return YES;
+	    result = YES;
 	}
     } else {
 	/*
@@ -1254,9 +1254,13 @@ BOOL HTAA_shouldRetryWithAuth(char *start_of_headers,
 	FREE(ctemplate);
 
 	HTAlert(gettext("Access without authorization denied -- retrying"));
-	return YES;
+	result = YES;
     }
-    /* Never reached */
+
+    if (result == NO) {
+	HTList_delete(valid_schemes);
+    }
+    return result;
 }
 
 /*

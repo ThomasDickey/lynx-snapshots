@@ -1,5 +1,5 @@
 /*
- * $LynxId: TRSTable.c,v 1.29 2010/10/27 00:15:10 tom Exp $
+ * $LynxId: TRSTable.c,v 1.31 2013/05/01 01:00:38 tom Exp $
  *		Simple table object
  *		===================
  * Authors
@@ -646,6 +646,7 @@ static int Stbl_finishCellInRow(STable_rowinfo *me, STable_states *s, int end_td
 			if (me->Line != lastcell->cLine)
 			    goto trace_and_return;
 		    }
+		    newstate = CS__cb;
 		} else {
 		    if (!me->fixed_line) {
 			me->fixed_line = YES;	/* type=b def of fixed_line ii */
@@ -654,7 +655,6 @@ static int Stbl_finishCellInRow(STable_rowinfo *me, STable_states *s, int end_td
 		    s->state = CS__cbc;
 		    goto trace_and_return;
 		}
-		newstate = empty ? CS__cb : CS__cbc;
 		break;
 	    case CS__ef:
 		ret = 0;
@@ -776,10 +776,10 @@ static int Stbl_finishCellInRow(STable_rowinfo *me, STable_states *s, int end_td
 			if (me->Line != lastcell->cLine)
 			    goto trace_and_return;
 		    }
+		    newstate = CS__cf;
 		} else {
 		    goto trace_and_return;
 		}
-		newstate = empty ? CS__cf : CS__cbc;
 		break;
 	    case CS__ef:	/* ignored error */
 	    case CS__cf:	/* ignored error */

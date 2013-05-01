@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYJump.c,v 1.43 2012/02/09 13:02:30 tom Exp $
+ * $LynxId: LYJump.c,v 1.45 2013/01/05 00:28:46 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTAlert.h>
@@ -422,6 +422,7 @@ static unsigned LYRead_Jumpfile(struct JumpTable *jtp)
 	if (read(fd, mp, (size_t) st.st_size) < st.st_size) {
 	    HTAlert(ERROR_READING_JUMP_FILE);
 	    FREE(mp);
+	    close(fd);
 	    return 0;
 	}
 	mp[st.st_size] = '\0';
@@ -432,12 +433,15 @@ static unsigned LYRead_Jumpfile(struct JumpTable *jtp)
 	if (fgets(mp, blocksize, fp) == NULL) {
 	    HTAlert(ERROR_READING_JUMP_FILE);
 	    FREE(mp);
+	    close(fd);
 	    return 0;
-	} else
+	} else {
 	    while (fgets(mp + strlen(mp), blocksize, fp) != NULL) {
 		;
 	    }
+	}
 	LYCloseInput(fp);
+	close(fd);
     }
 #endif /* VMS */
 
@@ -492,8 +496,6 @@ static unsigned LYRead_Jumpfile(struct JumpTable *jtp)
 	CTRACE((tfp, "Read jumpfile[%u] key='%s', url='%s'\n",
 		i, jtp->table[i].key, jtp->table[i].url));
 	i++;
-	if (!cp)
-	    break;
     }
 
     return i;

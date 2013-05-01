@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTUtils.h,v 1.112 2012/08/15 23:11:48 tom Exp $
+ * $LynxId: HTUtils.h,v 1.113 2013/04/30 22:45:03 tom Exp $
  *
  * Utility macros for the W3 code library
  * MACROS FOR GENERAL USE
@@ -54,8 +54,6 @@ char *alloca();
 
 #include <sys/types.h>
 #include <stdio.h>
-
-#define DONT_TRACK_INTERNAL_LINKS 1
 
 /* Explicit system-configure */
 #ifdef VMS

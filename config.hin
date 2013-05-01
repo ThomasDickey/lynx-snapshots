@@ -1,5 +1,5 @@
 /*
- * $LynxId: config.hin,v 1.127 2012/08/03 12:24:16 tom Exp $
+ * $LynxId: config.hin,v 1.128 2013/04/30 10:57:49 tom Exp $
  * vile:cmode
  *
  * The configure script translates "config.hin" into "lynx_cfg.h"
@@ -32,7 +32,6 @@
 #undef DISABLE_NEWS		/* CF_ARG_DISABLE(news) */
 #undef DISP_PARTIAL		/* CF_ARG_ENABLE(partial) */
 #undef DONT_HAVE_TM_GMTOFF	/* CF_TM_GMTOFF */
-#undef DONT_TRACK_INTERNAL_LINKS /* CF_ARG_DISABLE(internal-links) */
 #undef ENABLE_IPV6		/* CF_CHECK_IPV6 */
 #undef ENABLE_NLS		/* defined if NLS is requested */
 #undef ENABLE_OPTS_CHANGE_EXEC	/* CF_ARG_ENABLE(change-exec) */
@@ -176,6 +175,7 @@
 #undef HAVE_WINSOCK_H		/* CF_NETLIBS */
 #undef HAVE_WREDRAWLN
 #undef HAVE_WRESIZE
+#undef TRACK_INTERNAL_LINKS	/* CF_ARG_DISABLE(internal-links) */
 #undef HAVE_XCURSES		/* CF_PDCURSES_X11 */
 #undef HAVE_ZERROR
 #undef HAVE__NC_FREEALL		/* ncurses debugging extension */

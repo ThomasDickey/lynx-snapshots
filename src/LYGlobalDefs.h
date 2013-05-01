@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYGlobalDefs.h,v 1.133 2012/11/14 01:09:44 tom Exp $
+ * $LynxId: LYGlobalDefs.h,v 1.134 2013/04/30 09:51:46 tom Exp $
  *
  * global variable definitions
  */
@@ -422,6 +422,7 @@ extern "C" {
     extern BOOLEAN LYRestricted;	/* whether we had -anonymous option */
     extern BOOLEAN LYValidate;
     extern BOOLEAN LYPermitURL;
+    extern BOOLEAN track_internal_links;
     extern BOOLEAN enable_scrollback;	/* Clear screen before displaying new page */
     extern BOOLEAN keep_mime_headers;	/* Include mime headers and *
 

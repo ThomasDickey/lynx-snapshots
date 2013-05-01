@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYUtils.c,v 1.227 2012/08/15 23:11:03 tom Exp $
+ * $LynxId: LYUtils.c,v 1.230 2013/04/30 23:56:38 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTCP.h>
@@ -546,7 +546,8 @@ static BOOL show_whereis_targets(int flag,
 	     * characters of the hightext if we're making the link current.
 	     * -FM
 	     */
-	    if ((Offset < offset) &&
+	    if (offset >= 0 &&
+		(Offset < offset) &&
 		((Offset + tLen) > offset)) {
 		itmp = 0;
 		written = 0;
@@ -2930,10 +2931,6 @@ void LYExtSignal(int sig,
 	act.sa_handler = handler;
 	sigemptyset(&act.sa_mask);
 	act.sa_flags = 0;
-#ifdef SA_RESTART
-	if (sig != SIGWINCH)
-	    act.sa_flags |= SA_RESTART;
-#endif /* SA_RESTART */
 	sigaction(sig, &act, NULL);
     } else
 #endif /* defined(SIGWINCH) */
@@ -3188,9 +3185,10 @@ void change_sug_filename(char *fname)
 	HTSprintf0(&temp, "file://localhost/%s" PID_FMT, cp2, GETPID());
     }
     if (!StrNCmp(fname, temp, strlen(temp))) {
-	cp = strrchr(fname, '.');
-	if (strlen(cp) > (strlen(temp) - 4))
-	    cp = NULL;
+	if ((cp = strrchr(fname, '.')) != 0) {
+	    if (strlen(cp) > (strlen(temp) - 4))
+		cp = NULL;
+	}
 	StrAllocCopy(temp, NonNull(cp));
 	sprintf(fname, "temp%.*s", LY_MAXPATH - 10, temp);
     }

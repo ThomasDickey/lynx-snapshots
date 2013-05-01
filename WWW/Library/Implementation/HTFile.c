@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFile.c,v 1.132 2012/08/15 22:10:08 tom Exp $
+ * $LynxId: HTFile.c,v 1.135 2013/05/01 00:09:25 tom Exp $
  *
  *			File Access				HTFile.c
  *			===========
@@ -1169,10 +1169,10 @@ void LYGetFileInfo(const char *filename,
     LYLocalFileToURL(&Aname, Afn);
     file_anchor = HTAnchor_findSimpleAddress(Aname);
 
-    file_csname = file_anchor->charset;
     format = HTFileFormat(filename, &myEnc, pdesc);
     format = HTCharsetFormat(format, file_anchor, UCLYhndl_HTFile_for_unspec);
     file_cs = HTAnchor_getUCLYhndl(file_anchor, UCT_STAGE_MIME);
+    file_csname = file_anchor->charset;
     if (!file_csname) {
 	if (file_cs >= 0)
 	    file_csname = LYCharSet_UC[file_cs].MIMEname;
@@ -2289,12 +2289,14 @@ static BOOL sniffStream(FILE *fp, char *buffer, size_t needed)
     long offset = ftell(fp);
     BOOL result = FALSE;
 
-    if (fread(buffer, sizeof(char), needed, fp) == needed) {
-	result = TRUE;
-    }
-    if (fseek(fp, offset, SEEK_SET) < 0) {
-	CTRACE((tfp, "error seeking in stream\n"));
-	result = FALSE;
+    if (offset >= 0) {
+	if (fread(buffer, sizeof(char), needed, fp) == needed) {
+	    result = TRUE;
+	}
+	if (fseek(fp, offset, SEEK_SET) < 0) {
+	    CTRACE((tfp, "error seeking in stream\n"));
+	    result = FALSE;
+	}
     }
     return result;
 }
@@ -2385,6 +2387,7 @@ static int decompressAndParse(HTParentAnchor *anchor,
     char *localname = filename;
     int bin;
     FILE *fp;
+    int result = FALSE;
 
 #ifdef VMS
     /*
@@ -2443,6 +2446,7 @@ static int decompressAndParse(HTParentAnchor *anchor,
 	    if (isDOWNLOAD(cftGzip)) {
 		if (isGzipStream(fp)) {
 		    fclose(fp);
+		    fp = 0;
 		    gzfp = gzopen(localname, BIN_R);
 
 		    CTRACE((tfp, "HTLoadFile: gzopen of `%s' gives %p\n",
@@ -2464,6 +2468,7 @@ static int decompressAndParse(HTParentAnchor *anchor,
 	    if (isDOWNLOAD(cftBzip2)) {
 		if (isBzip2Stream(fp)) {
 		    fclose(fp);
+		    fp = 0;
 		    bzfp = BZ2_bzopen(localname, BIN_R);
 
 		    CTRACE((tfp, "HTLoadFile: bzopen of `%s' gives %p\n",
@@ -2520,6 +2525,7 @@ static int decompressAndParse(HTParentAnchor *anchor,
 		if (strcmp(format_out->name, "www/download") != 0) {
 		    if (isGzipStream(fp)) {
 			fclose(fp);
+			fp = 0;
 			gzfp = gzopen(localname, BIN_R);
 
 			CTRACE((tfp, "HTLoadFile: gzopen of `%s' gives %p\n",
@@ -2537,6 +2543,7 @@ static int decompressAndParse(HTParentAnchor *anchor,
 		if (strcmp(format_out->name, "www/download") != 0) {
 		    if (isBzip2Stream(fp)) {
 			fclose(fp);
+			fp = 0;
 			bzfp = BZ2_bzopen(localname, BIN_R);
 
 			CTRACE((tfp, "HTLoadFile: bzopen of `%s' gives %p\n",
@@ -2621,11 +2628,14 @@ static int decompressAndParse(HTParentAnchor *anchor,
 #endif /* USE_ZLIB || USE_BZLIB */
 	{
 	    *statusp = HTParseFile(format, format_out, anchor, fp, sink);
-	    fclose(fp);
 	}
-	return TRUE;
+	if (fp != 0) {
+	    fclose(fp);
+	    fp = 0;
+	}
+	result = TRUE;
     }				/* If successful open */
-    return FALSE;
+    return result;
 }
 
 /*	Load a document.

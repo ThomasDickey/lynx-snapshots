@@ -1,4 +1,4 @@
-/* $LynxId: LYKeymap.c,v 1.83 2012/02/12 18:35:32 tom Exp $ */
+/* $LynxId: LYKeymap.c,v 1.84 2013/01/04 00:04:03 tom Exp $ */
 #include <HTUtils.h>
 #include <LYUtils.h>
 #include <LYGlobalDefs.h>
@@ -1802,7 +1802,7 @@ char *key_for_func_ext(int lac,
 BOOLEAN LYisNonAlnumKeyname(int ch,
 			    int KeyName)
 {
-    if (ch < 0 || ch >= KEYMAP_SIZE)
+    if (ch < 0 || (ch + 1) >= KEYMAP_SIZE)
 	return (FALSE);
     if (ch > 0
 	&& strchr("0123456789\

@@ -460,7 +460,7 @@ II. Compile instructions -- UNIX
 	generate an HTMLized copy of lynx.cfg which will be installed with
 	the other help files.
 
-  --enable-internal-links		(prevent defining DONT_TRACK_INTERNAL_LINKS)
+  --enable-internal-links		(define TRACK_INTERNAL_LINKS)
         With `internal links' (links within a document to a location within
         the same document) enabled, Lynx will distinguish between, for example,
         `<A HREF="foo#frag">' and `<A HREF="#frag">' within a document whose
@@ -1455,4 +1455,4 @@ VIII. Acknowledgment
 
 -- 1999/04/24 - H. Nelson <lynx-admin@irm.nara.kindai.ac.jp>
 -- vile:txtmode
--- $LynxId: INSTALLATION,v 1.120 2012/07/06 11:53:52 tom Exp $
+-- $LynxId: INSTALLATION,v 1.121 2013/04/30 09:47:15 tom Exp $

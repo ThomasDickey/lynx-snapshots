@@ -3,7 +3,7 @@
 #include <LYLeaks.h>
 
 /*
- *  $LynxId: parsdate.y,v 1.19 2012/02/09 20:05:26 tom Exp $
+ *  $LynxId: parsdate.y,v 1.20 2013/01/05 01:58:50 tom Exp $
  *
  *  This module is adapted and extended from tin, to use for LYmktime().
  *
@@ -756,74 +756,72 @@ static int date_lex(void)
     int i;
     int nesting;
 
+    /* Get first character after the whitespace. */
     for (;;) {
-	/* Get first character after the whitespace. */
-	for (;;) {
-	    while (CTYPE(isspace, *yyInput))
-		yyInput++;
-	    c = *yyInput;
-
-	    /* Ignore RFC 822 comments, typically time zone names. */
-	    if (c != LPAREN)
-		break;
-	    for (nesting = 1;
-		 (c = *++yyInput) != RPAREN || --nesting;
-		) {
-		if (c == LPAREN) {
-		    nesting++;
-		} else if (!IS7BIT(c) || c == '\0' || c == '\r'
-			   || (c == '\\'
-			       && ((c = *++yyInput) == '\0'
-				   || !IS7BIT(c)))) {
-		    /* Lexical error: bad comment. */
-		    return '?';
-		}
-	    }
+	while (CTYPE(isspace, *yyInput))
 	    yyInput++;
-	}
+	c = *yyInput;
 
-	/* A number? */
-	if (CTYPE(isdigit, c) || c == '-' || c == '+') {
-	    if (c == '-' || c == '+') {
-		sign = c == '-' ? -1 : 1;
-		yyInput++;
-		if (!CTYPE(isdigit, *yyInput)) {
-		    /* Return the isolated plus or minus sign. */
-		    --yyInput;
-		    return *yyInput++;
-		}
-	    } else {
-		sign = 0;
+	/* Ignore RFC 822 comments, typically time zone names. */
+	if (c != LPAREN)
+	    break;
+	for (nesting = 1;
+	     (c = *++yyInput) != RPAREN || --nesting;
+	    ) {
+	    if (c == LPAREN) {
+		nesting++;
+	    } else if (!IS7BIT(c) || c == '\0' || c == '\r'
+		       || (c == '\\'
+			   && ((c = *++yyInput) == '\0'
+			       || !IS7BIT(c)))) {
+		/* Lexical error: bad comment. */
+		return '?';
 	    }
-	    for (p = buff;
-		 (c = *yyInput++) != '\0' && CTYPE(isdigit, c);
-		) {
-		if (p < &buff[sizeof buff - 1])
-		    *p++ = (char) c;
-	    }
-	    *p = '\0';
-	    i = atoi(buff);
-
-	    yyInput--;
-	    yylval.Number = sign < 0 ? -i : i;
-	    return sign ? tSNUMBER : tUNUMBER;
 	}
-
-	/* A word? */
-	if (CTYPE(isalpha, c)) {
-	    for (p = buff;
-		 (c = *yyInput++) == '.' || CTYPE(isalpha, c);
-		) {
-		if (p < &buff[sizeof buff - 1])
-		    *p++ = (char) (CTYPE(isupper, c) ? tolower(c) : c);
-	    }
-	    *p = '\0';
-	    yyInput--;
-	    return LookupWord(buff, (int) (p - buff));
-	}
-
-	return *yyInput++;
+	yyInput++;
     }
+
+    /* A number? */
+    if (CTYPE(isdigit, c) || c == '-' || c == '+') {
+	if (c == '-' || c == '+') {
+	    sign = c == '-' ? -1 : 1;
+	    yyInput++;
+	    if (!CTYPE(isdigit, *yyInput)) {
+		/* Return the isolated plus or minus sign. */
+		--yyInput;
+		return *yyInput++;
+	    }
+	} else {
+	    sign = 0;
+	}
+	for (p = buff;
+	     (c = *yyInput++) != '\0' && CTYPE(isdigit, c);
+	    ) {
+	    if (p < &buff[sizeof buff - 1])
+		*p++ = (char) c;
+	}
+	*p = '\0';
+	i = atoi(buff);
+
+	yyInput--;
+	yylval.Number = sign < 0 ? -i : i;
+	return sign ? tSNUMBER : tUNUMBER;
+    }
+
+    /* A word? */
+    if (CTYPE(isalpha, c)) {
+	for (p = buff;
+	     (c = *yyInput++) == '.' || CTYPE(isalpha, c);
+	    ) {
+	    if (p < &buff[sizeof buff - 1])
+		*p++ = (char) (CTYPE(isupper, c) ? tolower(c) : c);
+	}
+	*p = '\0';
+	yyInput--;
+	return LookupWord(buff, (int) (p - buff));
+    }
+
+    return *yyInput++;
 }
 
 static int GetTimeInfo(TIMEINFO * Now)

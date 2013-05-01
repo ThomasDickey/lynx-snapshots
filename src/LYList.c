@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYList.c,v 1.50 2011/05/28 13:05:14 tom Exp $
+ * $LynxId: LYList.c,v 1.51 2013/04/30 22:09:43 tom Exp $
  *
  *			Lynx Document Reference List Support	      LYList.c
  *			====================================
@@ -131,11 +131,11 @@ int showlist(DocInfo *newdoc, int titles)
 			cnt, cnt, desc);
 	    }
 	} else if (value >= result) {
-#ifndef DONT_TRACK_INTERNAL_LINKS
-	    dest_intl = HTAnchor_followTypedLink(child, HTInternalLink);
-#endif
-	    dest = dest_intl ?
-		dest_intl : HTAnchor_followLink(child);
+	    if (track_internal_links)
+		dest_intl = HTAnchor_followTypedLink(child, HTInternalLink);
+	    dest = (dest_intl
+		    ? dest_intl
+		    : HTAnchor_followLink(child));
 	    parent = HTAnchor_parent(dest);
 	    if (!intern_w_post && dest_intl &&
 		HTMainAnchor &&

@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMainLoop.c,v 1.211 2012/08/15 23:18:03 tom Exp $
+ * $LynxId: LYMainLoop.c,v 1.215 2013/04/30 22:39:19 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTAccess.h>
@@ -148,14 +148,13 @@ static void set_ws_title(char *str)
 HTLinkType *HTInternalLink = 0;
 HTAtom *WWW_SOURCE = 0;
 
-#ifndef DONT_TRACK_INTERNAL_LINKS
-#define NO_INTERNAL_OR_DIFFERENT(c,n) TRUE
-#define NONINTERNAL_OR_PHYS_DIFFERENT(p,n) (!curdoc.internal_link || \
-			   are_phys_different(p,n))
-#else /* TRACK_INTERNAL_LINKS */
-#define NO_INTERNAL_OR_DIFFERENT(c,n) are_different(c,n)
-#define NONINTERNAL_OR_PHYS_DIFFERENT(p,n) are_different(p,n)
-#endif /* TRACK_INTERNAL_LINKS */
+#define NONINTERNAL_OR_PHYS_DIFFERENT(p,n) \
+	((track_internal_links && \
+	 (!curdoc.internal_link || are_phys_different(p,n))) || \
+	are_different(p,n))
+
+#define NO_INTERNAL_OR_DIFFERENT(c,n) \
+	(track_internal_links || are_different(c,n))
 
 static void exit_immediately_with_error_message(int state, int first_file);
 static void status_link(char *curlink_name, int show_more, int show_indx);
@@ -163,9 +162,7 @@ static void show_main_statusline(const LinkInfo curlink, int for_what);
 static void form_noviceline(int);
 static int are_different(DocInfo *doc1, DocInfo *doc2);
 
-#ifndef DONT_TRACK_INTERNAL_LINKS
 static int are_phys_different(DocInfo *doc1, DocInfo *doc2);
-#endif
 
 #define FASTTAB
 
@@ -991,7 +988,6 @@ static int DoTraversal(int c,
     return c;
 }
 
-#ifndef DONT_TRACK_INTERNAL_LINKS
 static BOOLEAN check_history(void)
 {
     const char *base;
@@ -1026,7 +1022,6 @@ static BOOLEAN check_history(void)
     }
     return FALSE;
 }
-#endif
 
 static int handle_LYK_ACTIVATE(int *c,
 			       int cmd GCC_UNUSED,
@@ -1346,7 +1341,6 @@ static int handle_LYK_ACTIVATE(int *c,
 	     */
 	    set_address(&newdoc, links[curdoc.link].lname);
 	    StrAllocCopy(newdoc.title, LYGetHiliteStr(curdoc.link, 0));
-#ifndef DONT_TRACK_INTERNAL_LINKS
 	    /*
 	     * For internal links, retain POST content if present.  If we are
 	     * on the List Page, prevent pushing it on the history stack.
@@ -1354,86 +1348,87 @@ static int handle_LYK_ACTIVATE(int *c,
 	     * should attempt to reposition directly, without calling getfile.
 	     * - kw
 	     */
-	    /*
-	     * Might be an internal link anchor in the same doc.  If so, take
-	     * the try_internal shortcut if we didn't fall through from
-	     * LYK_NOCACHE.  - kw
-	     */
-	    newdoc.internal_link =
-		(links[curdoc.link].type == WWW_INTERN_LINK_TYPE);
-	    if (newdoc.internal_link) {
+	    if (track_internal_links) {
 		/*
-		 * Special case of List Page document with an internal link
-		 * indication, which may really stand for an internal link
-		 * within the document the List Page is about.  - kw
+		 * Might be an internal link anchor in the same doc.  If so, take
+		 * the try_internal shortcut if we didn't fall through from
+		 * LYK_NOCACHE.  - kw
 		 */
-		if (LYIsListpageTitle(NonNull(curdoc.title)) &&
-		    (LYIsUIPage(curdoc.address, UIP_LIST_PAGE) ||
-		     LYIsUIPage(curdoc.address, UIP_ADDRLIST_PAGE))) {
-		    if (check_history()) {
-			LYinternal_flag = TRUE;
-		    } else {
-			HTLastConfirmCancelled();	/* reset flag */
-			if (!confirm_post_resub(newdoc.address,
-						newdoc.title,
-						((LYresubmit_posts &&
-						  HText_POSTReplyLoaded(&newdoc))
-						 ? 1
-						 : 2),
-						2)) {
-			    if (HTLastConfirmCancelled() ||
-				(LYresubmit_posts &&
-				 cmd != LYK_NOCACHE &&
-				 !HText_POSTReplyLoaded(&newdoc))) {
-				/* cancel the whole thing */
-				LYforce_no_cache = FALSE;
-				reloading = FALSE;
-				copy_address(&newdoc, &curdoc);
-				StrAllocCopy(newdoc.title, curdoc.title);
-				newdoc.internal_link = curdoc.internal_link;
-				HTInfoMsg(CANCELLED);
-				return 1;
-			    } else if (LYresubmit_posts &&
-				       cmd != LYK_NOCACHE) {
-				/* If LYresubmit_posts is set, and the
-				   answer was No, and the key wasn't
-				   NOCACHE, and we have a cached copy,
-				   then use it. - kw */
-				LYforce_no_cache = FALSE;
-			    } else {
-				/* if No, but not ^C or ^G, drop
-				 * the post data.  Maybe the link
-				 * wasn't meant to be internal after
-				 * all, here we can recover from that
-				 * assumption. - kw */
-				LYFreePostData(&newdoc);
-				newdoc.internal_link = FALSE;
-				HTAlert(DISCARDING_POST_DATA);
+		newdoc.internal_link =
+		    (links[curdoc.link].type == WWW_INTERN_LINK_TYPE);
+		if (newdoc.internal_link) {
+		    /*
+		     * Special case of List Page document with an internal link
+		     * indication, which may really stand for an internal link
+		     * within the document the List Page is about.  - kw
+		     */
+		    if (LYIsListpageTitle(NonNull(curdoc.title)) &&
+			(LYIsUIPage(curdoc.address, UIP_LIST_PAGE) ||
+			 LYIsUIPage(curdoc.address, UIP_ADDRLIST_PAGE))) {
+			if (check_history()) {
+			    LYinternal_flag = TRUE;
+			} else {
+			    HTLastConfirmCancelled();	/* reset flag */
+			    if (!confirm_post_resub(newdoc.address,
+						    newdoc.title,
+						    ((LYresubmit_posts &&
+						      HText_POSTReplyLoaded(&newdoc))
+						     ? 1
+						     : 2),
+						    2)) {
+				if (HTLastConfirmCancelled() ||
+				    (LYresubmit_posts &&
+				     cmd != LYK_NOCACHE &&
+				     !HText_POSTReplyLoaded(&newdoc))) {
+				    /* cancel the whole thing */
+				    LYforce_no_cache = FALSE;
+				    reloading = FALSE;
+				    copy_address(&newdoc, &curdoc);
+				    StrAllocCopy(newdoc.title, curdoc.title);
+				    newdoc.internal_link = curdoc.internal_link;
+				    HTInfoMsg(CANCELLED);
+				    return 1;
+				} else if (LYresubmit_posts &&
+					   cmd != LYK_NOCACHE) {
+				    /* If LYresubmit_posts is set, and the
+				       answer was No, and the key wasn't
+				       NOCACHE, and we have a cached copy,
+				       then use it. - kw */
+				    LYforce_no_cache = FALSE;
+				} else {
+				    /* if No, but not ^C or ^G, drop
+				     * the post data.  Maybe the link
+				     * wasn't meant to be internal after
+				     * all, here we can recover from that
+				     * assumption. - kw */
+				    LYFreePostData(&newdoc);
+				    newdoc.internal_link = FALSE;
+				    HTAlert(DISCARDING_POST_DATA);
+				}
 			    }
 			}
+			/*
+			 * Don't push the List Page if we follow an internal link
+			 * given by it.  - kw
+			 */
+			free_address(&curdoc);
+		    } else if (cmd != LYK_NOCACHE) {
+			*try_internal = TRUE;
 		    }
-		    /*
-		     * Don't push the List Page if we follow an internal link
-		     * given by it.  - kw
+		    if (!(LYresubmit_posts && newdoc.post_data))
+			LYinternal_flag = TRUE;
+		    /* We still set force_load so that history pushing
+		     * etc. will be done.  - kw
 		     */
-		    free_address(&curdoc);
-		} else if (cmd != LYK_NOCACHE) {
-		    *try_internal = TRUE;
+		    *force_load = TRUE;
+		    return 1;
+		} else {
+		    /*
+		     * Free POST content if not an internal link.  - kw
+		     */
+		    LYFreePostData(&newdoc);
 		}
-		if (!(LYresubmit_posts && newdoc.post_data))
-		    LYinternal_flag = TRUE;
-		/* We still set force_load so that history pushing
-		 * etc. will be done.  - kw
-		 */
-		*force_load = TRUE;
-		return 1;
-	    } else {
-		/*
-		 * Free POST content if not an internal link.  - kw
-		 */
-		LYFreePostData(&newdoc);
 	    }
-#endif /* TRACK_INTERNAL_LINKS */
 	    /*
 	     * Might be an anchor in the same doc from a POST form.  If so,
 	     * don't free the content.  -- FM
@@ -2322,24 +2317,28 @@ static int handle_LYK_DOWNLOAD(int *cmd,
 	     */
 	    set_address(&newdoc, links[curdoc.link].lname);
 	    StrAllocCopy(newdoc.title, LYGetHiliteStr(curdoc.link, 0));
-#ifndef DONT_TRACK_INTERNAL_LINKS
 	    /*
 	     * Might be an internal link in the same doc from a POST form.  If
 	     * so, don't free the content.  - kw
 	     */
-	    if (links[curdoc.link].type != WWW_INTERN_LINK_TYPE)
-#else
-	    /*
-	     * Might be an anchor in the same doc from a POST form.  If so,
-	     * don't free the content.  -- FM
-	     */
-	    if (are_different(&curdoc, &newdoc))
-#endif /* TRACK_INTERNAL_LINKS */
-	    {
-		LYFreePostData(&newdoc);
-		FREE(newdoc.bookmark);
-		newdoc.isHEAD = FALSE;
-		newdoc.safe = FALSE;
+	    if (track_internal_links) {
+		if (links[curdoc.link].type != WWW_INTERN_LINK_TYPE) {
+		    LYFreePostData(&newdoc);
+		    FREE(newdoc.bookmark);
+		    newdoc.isHEAD = FALSE;
+		    newdoc.safe = FALSE;
+		}
+	    } else {
+		/*
+		 * Might be an anchor in the same doc from a POST form.  If so,
+		 * don't free the content.  -- FM
+		 */
+		if (are_different(&curdoc, &newdoc)) {
+		    LYFreePostData(&newdoc);
+		    FREE(newdoc.bookmark);
+		    newdoc.isHEAD = FALSE;
+		    newdoc.safe = FALSE;
+		}
 	    }
 	    newdoc.internal_link = FALSE;
 	    newdoc.link = (user_mode == NOVICE_MODE) ? 1 : 0;
@@ -3515,7 +3514,7 @@ static char *urlencode(char *str)
     char *ptr;
     int ch;
 
-    if (non_empty(str)) {
+    if (str != NULL) {
 	result = malloc(strlen(str) * 3 + 1);
 	ptr = result;
 
@@ -3564,6 +3563,10 @@ static BOOLEAN check_JUMP_param(char **url_template)
 	sprintf(prompt, gettext("Query parameter %d: "), param++);
 	statusline(prompt);
 	BStrCopy0(input, "");
+
+	if (encoded)
+	    FREE(encoded);
+
 	if (LYgetBString(&input, VISIBLE, 0, recall) < 0) {
 	    /*
 	     * cancelled via ^G
@@ -5082,78 +5085,78 @@ static void handle_LYK_digit(int c,
 	 */
 	set_address(&newdoc, links[lindx].lname);
 	StrAllocCopy(newdoc.title, LYGetHiliteStr(lindx, 0));
-#ifndef DONT_TRACK_INTERNAL_LINKS
 	/*
 	 * For internal links, retain POST content if present.  If we are on
 	 * the List Page, prevent pushing it on the history stack.  Otherwise
 	 * set try_internal to signal that the top of the loop should attempt
 	 * to reposition directly, without calling getfile.  - kw
 	 */
-	if (links[lindx].type == WWW_INTERN_LINK_TYPE) {
-	    LYinternal_flag = TRUE;
-	    newdoc.internal_link = TRUE;
-	    if (LYIsListpageTitle(NonNull(curdoc.title)) &&
-		(LYIsUIPage(curdoc.address, UIP_LIST_PAGE) ||
-		 LYIsUIPage(curdoc.address, UIP_ADDRLIST_PAGE))) {
-		if (check_history()) {
-		    LYinternal_flag = TRUE;
-		} else {
-		    HTLastConfirmCancelled();	/* reset flag */
-		    if (!confirm_post_resub(newdoc.address,
-					    newdoc.title,
-					    ((LYresubmit_posts &&
-					      HText_POSTReplyLoaded(&newdoc))
-					     ? 1
-					     : 2),
-					    2)) {
-			if (HTLastConfirmCancelled() ||
-			    (LYresubmit_posts &&
-			     !HText_POSTReplyLoaded(&newdoc))) {
-			    /* cancel the whole thing */
-			    LYforce_no_cache = FALSE;
-			    reloading = FALSE;
-			    copy_address(&newdoc, &curdoc);
-			    StrAllocCopy(newdoc.title, curdoc.title);
-			    newdoc.internal_link = curdoc.internal_link;
-			    HTInfoMsg(CANCELLED);
-			    if (nlinks > 0)
-				HText_pageDisplay(curdoc.line, prev_target->str);
-			    break;
-			} else if (LYresubmit_posts) {
-			    /* If LYresubmit_posts is set, and the
-			       answer was No, and we have a cached
-			       copy, then use it. - kw */
-			    LYforce_no_cache = FALSE;
-			} else {
-			    /* if No, but not ^C or ^G, drop
-			     * the post data.  Maybe the link
-			     * wasn't meant to be internal after
-			     * all, here we can recover from that
-			     * assumption. - kw */
-			    LYFreePostData(&newdoc);
-			    newdoc.internal_link = FALSE;
-			    HTAlert(DISCARDING_POST_DATA);
+	if (track_internal_links) {
+	    if (links[lindx].type == WWW_INTERN_LINK_TYPE) {
+		LYinternal_flag = TRUE;
+		newdoc.internal_link = TRUE;
+		if (LYIsListpageTitle(NonNull(curdoc.title)) &&
+		    (LYIsUIPage(curdoc.address, UIP_LIST_PAGE) ||
+		     LYIsUIPage(curdoc.address, UIP_ADDRLIST_PAGE))) {
+		    if (check_history()) {
+			LYinternal_flag = TRUE;
+		    } else {
+			HTLastConfirmCancelled();	/* reset flag */
+			if (!confirm_post_resub(newdoc.address,
+						newdoc.title,
+						((LYresubmit_posts &&
+						  HText_POSTReplyLoaded(&newdoc))
+						 ? 1
+						 : 2),
+						2)) {
+			    if (HTLastConfirmCancelled() ||
+				(LYresubmit_posts &&
+				 !HText_POSTReplyLoaded(&newdoc))) {
+				/* cancel the whole thing */
+				LYforce_no_cache = FALSE;
+				reloading = FALSE;
+				copy_address(&newdoc, &curdoc);
+				StrAllocCopy(newdoc.title, curdoc.title);
+				newdoc.internal_link = curdoc.internal_link;
+				HTInfoMsg(CANCELLED);
+				if (nlinks > 0)
+				    HText_pageDisplay(curdoc.line, prev_target->str);
+				break;
+			    } else if (LYresubmit_posts) {
+				/* If LYresubmit_posts is set, and the
+				   answer was No, and we have a cached
+				   copy, then use it. - kw */
+				LYforce_no_cache = FALSE;
+			    } else {
+				/* if No, but not ^C or ^G, drop
+				 * the post data.  Maybe the link
+				 * wasn't meant to be internal after
+				 * all, here we can recover from that
+				 * assumption. - kw */
+				LYFreePostData(&newdoc);
+				newdoc.internal_link = FALSE;
+				HTAlert(DISCARDING_POST_DATA);
+			    }
 			}
 		    }
-		}
+		    /*
+		     * Don't push the List Page if we follow an internal link given
+		     * by it.  - kw
+		     */
+		    free_address(&curdoc);
+		} else
+		    *try_internal = TRUE;
+		if (!(LYresubmit_posts && newdoc.post_data))
+		    LYinternal_flag = TRUE;
+		*force_load = TRUE;
+		break;
+	    } else {
 		/*
-		 * Don't push the List Page if we follow an internal link given
-		 * by it.  - kw
+		 * Free POST content if not an internal link.  - kw
 		 */
-		free_address(&curdoc);
-	    } else
-		*try_internal = TRUE;
-	    if (!(LYresubmit_posts && newdoc.post_data))
-		LYinternal_flag = TRUE;
-	    *force_load = TRUE;
-	    break;
-	} else {
-	    /*
-	     * Free POST content if not an internal link.  - kw
-	     */
-	    LYFreePostData(&newdoc);
+		LYFreePostData(&newdoc);
+	    }
 	}
-#endif /* DONT_TRACK_INTERNAL_LINKS */
 	/*
 	 * Might be an anchor in the same doc from a POST form.  If so, don't
 	 * free the content.  -- FM
@@ -5669,22 +5672,20 @@ int mainloop(void)
 		LYhist_prev(&newdoc);
 		popped_doc = TRUE;
 
-#ifndef DONT_TRACK_INTERNAL_LINKS
 		/*
 		 * If curdoc had been reached via an internal
 		 * (fragment) link from what we now have just
 		 * popped into newdoc, then override non-caching in
 		 * all cases. - kw
 		 */
-		if (curdoc.internal_link &&
+		if (track_internal_links &&
+		    curdoc.internal_link &&
 		    !are_phys_different(&curdoc, &newdoc)) {
 		    LYinternal_flag = TRUE;
 		    LYoverride_no_cache = TRUE;
 		    LYforce_no_cache = FALSE;
 		    try_internal = TRUE;
-		} else
-#endif /* TRACK_INTERNAL_LINKS */
-		{
+		} else {
 		    /*
 		     * Force a no_cache override unless it's a bookmark file,
 		     * or it has POST content and LYresubmit_posts is set
@@ -5792,51 +5793,62 @@ int mainloop(void)
 	    if (popped_doc)
 		LYNoRefererForThis = TRUE;
 
-#ifndef DONT_TRACK_INTERNAL_LINKS
-	    if (try_internal) {
-		if (newdoc.address &&
-		    isLYNXIMGMAP(newdoc.address)) {
-		    try_internal = FALSE;
-		} else if (curdoc.address &&
-			   isLYNXIMGMAP(curdoc.address)) {
-		    try_internal = FALSE;
+	    if (track_internal_links) {
+		if (try_internal) {
+		    if (newdoc.address &&
+			isLYNXIMGMAP(newdoc.address)) {
+			try_internal = FALSE;
+		    } else if (curdoc.address &&
+			       isLYNXIMGMAP(curdoc.address)) {
+			try_internal = FALSE;
+		    }
 		}
-	    }
-	    if (try_internal) {
-		char *hashp = findPoundSelector(newdoc.address);
+		if (try_internal) {
+		    char *hashp = findPoundSelector(newdoc.address);
 
-		if (hashp) {
-		    HTFindPoundSelector(hashp + 1);
-		}
-		getresult = (HTMainText != NULL) ? NORMAL : NOT_FOUND;
-		try_internal = FALSE;	/* done */
-		/* fix up newdoc.address which may have been fragment-only */
-		if (getresult == NORMAL && (!hashp || hashp == newdoc.address)) {
-		    if (!hashp) {
-			set_address(&newdoc, HTLoadedDocumentURL());
+		    if (hashp) {
+			HTFindPoundSelector(hashp + 1);
+		    }
+		    getresult = (HTMainText != NULL) ? NORMAL : NOT_FOUND;
+		    try_internal = FALSE;	/* done */
+		    /* fix up newdoc.address which may have been fragment-only */
+		    if (getresult == NORMAL && (!hashp || hashp == newdoc.address)) {
+			if (!hashp) {
+			    set_address(&newdoc, HTLoadedDocumentURL());
+			} else {
+			    StrAllocCopy(temp, HTLoadedDocumentURL());
+			    StrAllocCat(temp, hashp);	/* append fragment */
+			    set_address(&newdoc, temp);
+			    FREE(temp);
+			}
+		    }
+		} else {
+		    if (newdoc.internal_link && newdoc.address &&
+			*newdoc.address == '#' && nhist > 0) {
+			char *cp0;
+
+			if (isLYNXIMGMAP(HDOC(nhist_1).address))
+			    cp0 = HDOC(nhist_1).address + LEN_LYNXIMGMAP;
+			else
+			    cp0 = HDOC(nhist_1).address;
+			StrAllocCopy(temp, cp0);
+			(void) trimPoundSelector(temp);
+			StrAllocCat(temp, newdoc.address);
+			free_address(&newdoc);
+			newdoc.address = temp;
+			temp = NULL;
+		    }
+		    tmpDocInfo = newdoc;
+		    tmpNewline = -1;
+		    fill_JUMP_Params(&newdoc.address);
+		    getresult = getfile(&newdoc, &tmpNewline);
+		    if (!reloading && !popped_doc && (tmpNewline >= 0)) {
+			LYSetNewline(tmpNewline);
 		    } else {
-			StrAllocCopy(temp, HTLoadedDocumentURL());
-			StrAllocCat(temp, hashp);	/* append fragment */
-			set_address(&newdoc, temp);
-			FREE(temp);
+			newdoc.link = tmpDocInfo.link;
 		    }
 		}
 	    } else {
-		if (newdoc.internal_link && newdoc.address &&
-		    *newdoc.address == '#' && nhist > 0) {
-		    char *cp0;
-
-		    if (isLYNXIMGMAP(HDOC(nhist_1).address))
-			cp0 = HDOC(nhist_1).address + LEN_LYNXIMGMAP;
-		    else
-			cp0 = HDOC(nhist_1).address;
-		    StrAllocCopy(temp, cp0);
-		    (void) trimPoundSelector(temp);
-		    StrAllocCat(temp, newdoc.address);
-		    free_address(&newdoc);
-		    newdoc.address = temp;
-		    temp = NULL;
-		}
 		tmpDocInfo = newdoc;
 		tmpNewline = -1;
 		fill_JUMP_Params(&newdoc.address);
@@ -5847,17 +5859,6 @@ int mainloop(void)
 		    newdoc.link = tmpDocInfo.link;
 		}
 	    }
-#else /* TRACK_INTERNAL_LINKS */
-	    tmpDocInfo = newdoc;
-	    tmpNewline = -1;
-	    fill_JUMP_Params(&newdoc.address);
-	    getresult = getfile(&newdoc, &tmpNewline);
-	    if (!reloading && !popped_doc && (tmpNewline >= 0)) {
-		LYSetNewline(tmpNewline);
-	    } else {
-		newdoc.link = tmpDocInfo.link;
-	    }
-#endif /* TRACK_INTERNAL_LINKS */
 
 #ifdef INACTIVE_INPUT_STYLE_VH
 	    textinput_redrawn = FALSE;	/* for sure */
@@ -7277,7 +7278,7 @@ int mainloop(void)
 			}
 			if (!nl2) {
 			    while (s1 < s) {
-				if (*s1 != '\r' && *s1 != '\r')
+				if (*s1 != '\r' && *s1 != '\n')
 				    *t = *s1;
 				t++, s1++;
 			    }
@@ -7782,7 +7783,6 @@ static int are_different(DocInfo *doc1, DocInfo *doc2)
 /* This determines whether two docs are _physically_ different,
  * meaning they are "from different files". - kw
  */
-#ifndef DONT_TRACK_INTERNAL_LINKS
 static int are_phys_different(DocInfo *doc1, DocInfo *doc2)
 {
     char *cp1, *cp2, *ap1 = doc1->address, *ap2 = doc2->address;
@@ -7848,7 +7848,6 @@ static int are_phys_different(DocInfo *doc1, DocInfo *doc2)
      */
     return (FALSE);
 }
-#endif
 
 /*
  * Utility for freeing the list of goto URLs.  - FM
@@ -8075,18 +8074,20 @@ static void exit_immediately_with_error_message(int state, int first_file)
     if (!dump_output_immediately)
 	cleanup();
 
+    if (buf != 0) {
 #ifdef UNIX
-    if (dump_output_immediately) {
-	fputs(buf, stderr);
-    } else
+	if (dump_output_immediately) {
+	    fputs(buf, stderr);
+	} else
 #endif /* UNIX */
-    {
-	SetOutputMode(O_TEXT);
-	fputs(buf, stdout);
-	SetOutputMode(O_BINARY);
-    }
+	{
+	    SetOutputMode(O_TEXT);
+	    fputs(buf, stdout);
+	    SetOutputMode(O_BINARY);
+	}
 
-    FREE(buf);
+	FREE(buf);
+    }
 
     if (!dump_output_immediately) {
 	exit_immediately(EXIT_FAILURE);

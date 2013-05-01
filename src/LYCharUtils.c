@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYCharUtils.c,v 1.117 2012/02/10 18:36:39 tom Exp $
+ * $LynxId: LYCharUtils.c,v 1.118 2013/04/30 22:16:02 tom Exp $
  *
  *  Functions associated with LYCharSets.c and the Lynx version of HTML.c - FM
  *  ==========================================================================
@@ -2457,15 +2457,14 @@ void LYHandleMETA(HTStructured * me, const BOOL *present,
 	     * Check for an anchor in http or https URLs.  - FM
 	     */
 	    cp = NULL;
-#ifndef DONT_TRACK_INTERNAL_LINKS
 	    /* id_string seems to be used wrong below if given.
 	       not that it matters much.  avoid setting it here. - kw */
-	    if ((StrNCmp(href, "http", 4) == 0) &&
+	    if (track_internal_links &&
+		(StrNCmp(href, "http", 4) == 0) &&
 		(cp = strchr(href, '#')) != NULL) {
 		StrAllocCopy(id_string, cp);
 		*cp = '\0';
 	    }
-#endif
 	    if (me->inA) {
 		/*
 		 * Ugh!  The META tag, which is a HEAD element, is in an
