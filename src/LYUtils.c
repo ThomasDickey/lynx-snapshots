@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYUtils.c,v 1.230 2013/04/30 23:56:38 tom Exp $
+ * $LynxId: LYUtils.c,v 1.237 2013/05/02 11:00:14 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTCP.h>
@@ -1211,6 +1211,8 @@ void LYhighlight(int flag,
 		int row = LYP + hi_count + title_adjust;
 
 		hi_offset = LYGetHilitePos(cur, hi_count);
+		if (hi_offset < 0)
+		    continue;
 		lynx_stop_link_color(flag == TRUE, links[cur].inUnderline);
 		LYmove(row, hi_offset);
 
@@ -2817,13 +2819,16 @@ BOOLEAN LYCloseOutput(FILE *fp)
  */
 BOOLEAN LYCanWriteFile(const char *filename)
 {
+    BOOLEAN result = FALSE;
+
     if (LYCloseOutput(fopen(filename, "w"))) {
-	remove(filename);
-	return TRUE;
+	if (remove(filename) == 0) {
+	    result = TRUE;
+	}
     } else {
 	_statusline(NEW_FILENAME_PROMPT);
-	return FALSE;
     }
+    return result;
 }
 
 /*
@@ -5897,9 +5902,10 @@ static FILE *OpenHiddenFile(const char *name, const char *mode)
 	if (fd < 0
 	    && errno == EEXIST
 	    && IsOurFile(name)) {
-	    remove(name);
-	    /* FIXME: there's a race at this point if directory is open */
-	    fd = open(name, O_CREAT | O_EXCL | O_WRONLY, HIDE_CHMOD);
+	    if (remove(name) == 0) {
+		/* FIXME: there's a race at this point if directory is open */
+		fd = open(name, O_CREAT | O_EXCL | O_WRONLY, HIDE_CHMOD);
+	    }
 	}
 	if (fd >= 0) {
 #if defined(O_BINARY) && defined(__CYGWIN__)
@@ -5930,7 +5936,7 @@ static FILE *OpenHiddenFile(const char *name, const char *mode)
 
 	if (chmod(name, HIDE_CHMOD) == 0 || errno == ENOENT)
 	    fp = fopen(name, mode);
-	umask(save);
+	(void) umask(save);
     }
     return fp;
 }
@@ -5943,7 +5949,7 @@ FILE *LYNewBinFile(const char *name)
 #ifdef VMS
     FILE *fp = fopen(name, BIN_W, "mbc=32");
 
-    chmod(name, HIDE_CHMOD);
+    (void) chmod(name, HIDE_CHMOD);
 #else
     FILE *fp = OpenHiddenFile(name, BIN_W);
 #endif
@@ -5956,7 +5962,7 @@ FILE *LYNewTxtFile(const char *name)
 
 #ifdef VMS
     fp = fopen(name, TXT_W, "shr=get");
-    chmod(name, HIDE_CHMOD);
+    (void) chmod(name, HIDE_CHMOD);
 #else
     SetDefaultMode(O_TEXT);
 
@@ -5974,7 +5980,7 @@ FILE *LYAppendToTxtFile(const char *name)
 
 #ifdef VMS
     fp = fopen(name, TXT_A, "shr=get");
-    chmod(name, HIDE_CHMOD);
+    (void) chmod(name, HIDE_CHMOD);
 #else
     SetDefaultMode(O_TEXT);
 
@@ -6007,8 +6013,8 @@ void LYRelaxFilePermissions(const char *name)
 	mode_t save = umask(HIDE_UMASK);
 
 	mode = ((mode & 0700) | 0066) & ~save;
-	umask(save);
-	chmod(name, mode);
+	(void) umask(save);
+	(void) chmod(name, mode);
     }
 }
 #endif
@@ -6016,18 +6022,22 @@ void LYRelaxFilePermissions(const char *name)
 /*
  * Check if the given anchor has an associated file-cache.
  */
-BOOLEAN LYCachedTemp(char *result,
+BOOLEAN LYCachedTemp(char *target,
 		     char **cached)
 {
+    BOOLEAN result = FALSE;
+
     if (*cached) {
-	LYStrNCpy(result, *cached, LY_MAXPATH);
+	LYStrNCpy(target, *cached, LY_MAXPATH);
 	FREE(*cached);
-	if (LYCanReadFile(result)) {
-	    remove(result);
+	if (LYCanReadFile(target)) {
+	    if (remove(target) != 0) {
+		CTRACE((tfp, "cannot remove %s\n", target));
+	    }
 	}
-	return TRUE;
+	result = TRUE;
     }
-    return FALSE;
+    return result;
 }
 
 #ifndef HAVE_MKDTEMP
@@ -6100,7 +6110,7 @@ FILE *LYOpenTemp(char *result,
 		printf("%s: %s\n", lynx_temp_space, LYStrerror(errno));
 		exit_immediately(EXIT_FAILURE);
 	    }
-	    umask(old_mask);
+	    (void) umask(old_mask);
 	    lynx_temp_subspace = 1;
 	    StrAllocCat(lynx_temp_space, "/");
 	    CTRACE((tfp, "made subdirectory %s\n", lynx_temp_space));
@@ -6434,7 +6444,7 @@ int LYRemoveTemp(char *name)
 void LYCleanupTemp(void)
 {
     while (ly_temp != 0) {
-	LYRemoveTemp(ly_temp->name);
+	(void) LYRemoveTemp(ly_temp->name);
     }
 #if defined(MULTI_USER_UNIX)
     if (lynx_temp_subspace > 0) {
@@ -6848,7 +6858,7 @@ FILE *InternalPageFP(char *filename,
     if (LYReuseTempfiles && reuse_flag) {
 	fp = LYOpenTempRewrite(filename, HTML_SUFFIX, BIN_W);
     } else {
-	LYRemoveTemp(filename);
+	(void) LYRemoveTemp(filename);
 	fp = LYOpenTemp(filename, HTML_SUFFIX, BIN_W);
     }
     if (fp == NULL) {

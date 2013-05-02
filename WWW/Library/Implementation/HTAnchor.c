@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTAnchor.c,v 1.71 2012/02/03 01:52:50 tom Exp $
+ * $LynxId: HTAnchor.c,v 1.73 2013/05/02 10:46:12 tom Exp $
  *
  *	Hypertext "Anchor" Object				HTAnchor.c
  *	==========================
@@ -774,7 +774,7 @@ static void HTParentAnchor_free(HTParentAnchor *me)
 
 	if ((fd = fopen(me->FileCache, "r")) != NULL) {
 	    fclose(fd);
-	    remove(me->FileCache);
+	    (void) remove(me->FileCache);
 	}
 	FREE(me->FileCache);
     }
@@ -823,7 +823,7 @@ void HTAnchor_clearSourceCache(HTParentAnchor *me)
     if (me->source_cache_file) {
 	CTRACE((tfp, "SourceCache: Removing file %s\n",
 		me->source_cache_file));
-	LYRemoveTemp(me->source_cache_file);
+	(void) LYRemoveTemp(me->source_cache_file);
 	FREE(me->source_cache_file);
     }
     if (me->source_cache_chunk) {

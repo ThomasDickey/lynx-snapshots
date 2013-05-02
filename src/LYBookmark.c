@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYBookmark.c,v 1.72 2013/01/04 21:05:08 tom Exp $
+ * $LynxId: LYBookmark.c,v 1.74 2013/05/02 10:43:29 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTAlert.h>
@@ -153,7 +153,7 @@ static const char *convert_mosaic_bookmark_file(const char *filename_buffer)
     char *buf = NULL;
     int line = -2;
 
-    LYRemoveTemp(newfile);
+    (void) LYRemoveTemp(newfile);
     if ((nfp = LYOpenTemp(newfile, HTML_SUFFIX, "w")) == NULL) {
 	LYMBM_statusline(NO_TEMP_FOR_HOTLIST);
 	LYSleepAlert();
@@ -321,8 +321,10 @@ void save_bookmark_link(const char *address,
 	have8bit(Title) && (!LYHaveCJKCharacterSet)) {
 	char *p = title_convert8bit(Title);
 
-	FREE(Title);
-	Title = p;
+	if (p != 0) {
+	    FREE(Title);
+	    Title = p;
+	}
     }
 
     /*
@@ -600,7 +602,7 @@ void remove_bookmark_link(int cur,
      */
     if (!regular) {
 	if (LYCopyFile(newfile, filename_buffer) == 0) {
-	    LYRemoveTemp(newfile);
+	    (void) LYRemoveTemp(newfile);
 	    return;
 	}
 	LYSleepAlert();		/* give a chance to see error from cp - kw */
@@ -682,7 +684,7 @@ void remove_bookmark_link(int cur,
 	HTUserMsg2(gettext("File may be recoverable from %s during this session"),
 		   newfile);
     } else {
-	LYRemoveTemp(newfile);
+	(void) LYRemoveTemp(newfile);
     }
 }
 
@@ -1063,7 +1065,7 @@ static char *title_convert8bit(const char *Title)
 	if (UCH(*temp) <= 127) {
 	    StrAllocCat(comment, temp);
 	    StrAllocCat(ncr, temp);
-	} else {
+	} else if (charset_out >= 0) {
 	    long unicode;
 	    char replace_buf[32];
 

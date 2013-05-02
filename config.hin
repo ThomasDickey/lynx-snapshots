@@ -1,5 +1,5 @@
 /*
- * $LynxId: config.hin,v 1.128 2013/04/30 10:57:49 tom Exp $
+ * $LynxId: config.hin,v 1.129 2013/05/01 08:55:50 tom Exp $
  * vile:cmode
  *
  * The configure script translates "config.hin" into "lynx_cfg.h"
@@ -292,6 +292,7 @@
 #undef ZIP_PATH			/* CF_PATH_PROG(zip) */
 #undef _WINDOWS_NSL		/* CF_ARG_ENABLE(nsl-fork) */
 #undef inline			/* AC_C_INLINE */
+#undef intptr_t			/* AC_CHECK_TYPE(intptr_t,...) */
 #undef lynx_rand		/* CF_SRAND */
 #undef lynx_srand		/* CF_SRAND */
 #undef mode_t			/* AC_TYPE_MODE_T */

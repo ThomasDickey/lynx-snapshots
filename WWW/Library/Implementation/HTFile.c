@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFile.c,v 1.135 2013/05/01 00:09:25 tom Exp $
+ * $LynxId: HTFile.c,v 1.136 2013/05/01 10:48:11 tom Exp $
  *
  *			File Access				HTFile.c
  *			===========
@@ -2881,22 +2881,22 @@ int HTLoadFile(const char *addr,
 			    FREE(cp);
 			    value = HTStackValue(format, format_out,
 						 filevalue, 0L);
-			    switch (cft) {
-			    case cftCompress:
-				atomname = "application/x-compressed";
-				break;
-			    case cftGzip:
-				atomname = "application/x-gzip";
-				break;
-			    case cftDeflate:
-				atomname = "application/x-deflate";
-				break;
-			    case cftBzip2:
-				atomname = "application/x-bzip2";
-				break;
-			    case cftNone:
-				break;
-			    }
+			}
+			switch (cft) {
+			case cftCompress:
+			    atomname = "application/x-compressed";
+			    break;
+			case cftGzip:
+			    atomname = "application/x-gzip";
+			    break;
+			case cftDeflate:
+			    atomname = "application/x-deflate";
+			    break;
+			case cftBzip2:
+			    atomname = "application/x-bzip2";
+			    break;
+			case cftNone:
+			    break;
 			}
 
 			if (atomname != NULL) {

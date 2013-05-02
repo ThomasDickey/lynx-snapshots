@@ -1,4 +1,4 @@
-/* $LynxId: LYForms.c,v 1.101 2013/01/04 21:50:03 tom Exp $ */
+/* $LynxId: LYForms.c,v 1.102 2013/05/01 09:19:14 tom Exp $ */
 #include <HTUtils.h>
 #include <HTCJK.h>
 #include <HTTP.h>
@@ -387,6 +387,10 @@ static int form_getstr(int cur,
      * Get the initial position of the cursor.
      */
     LYGetYX(startline, startcol);
+    if (startline < 0)
+	startline = 0;
+    if (startcol < 0)
+	startcol = 0;
     if ((startcol + form->size) > LYcolLimit)
 	far_col = LYcolLimit;
     else
