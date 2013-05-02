@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMail.c,v 1.90 2012/07/07 13:48:13 tom Exp $
+ * $LynxId: LYMail.c,v 1.91 2013/05/02 11:02:26 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTParse.h>
@@ -992,7 +992,7 @@ void mailmsg(int cur,
 	    }
 	}
 
-	convert_explorer(address);
+	(void) convert_explorer(address);
 
 	/*
 	 * Unescape the address field.  - FM

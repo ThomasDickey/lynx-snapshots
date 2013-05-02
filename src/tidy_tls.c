@@ -1,5 +1,5 @@
 /*
- * $LynxId: tidy_tls.c,v 1.10 2011/05/11 10:49:57 tom Exp $
+ * $LynxId: tidy_tls.c,v 1.11 2013/05/01 08:52:41 tom Exp $
  * Copyright 2008-2011,2011 Thomas E. Dickey
  * with fix Copyright 2008 by Thomas Viehmann
  *
@@ -576,7 +576,7 @@ int SSL_read(SSL * ssl, void *buffer, int length)
 int SSL_set_fd(SSL * ssl, int fd)
 {
     gnutls_transport_set_ptr(ssl->gnutls_state,
-			     (gnutls_transport_ptr_t) (fd));
+			     (gnutls_transport_ptr_t) (intptr_t) (fd));
     return 1;
 }
 

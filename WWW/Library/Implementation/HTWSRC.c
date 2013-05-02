@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTWSRC.c,v 1.28 2011/06/11 12:11:53 tom Exp $
+ * $LynxId: HTWSRC.c,v 1.29 2013/05/01 22:32:59 tom Exp $
  *
  *			Parse WAIS Source file			HTWSRC.c
  *			======================
@@ -187,11 +187,12 @@ static void WSRCParser_put_character(HTStream *me, int c)
 	me->param_count = 0;
 	if (c == '"') {
 	    me->state = quoted_value;
-	    break;
+	} else {
+	    me->state = ((c == '(')
+			 ? bracketed_value
+			 : value);
+	    me->param[me->param_count++] = (char) c;	/* Don't miss first character */
 	}
-	me->state = (c == '"') ? quoted_value :
-	    (c == '(') ? bracketed_value : value;
-	me->param[me->param_count++] = (char) c;	/* Don't miss first character */
 	break;
 
     case value:

@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFormat.c,v 1.76 2012/11/17 01:31:19 tom Exp $
+ * $LynxId: HTFormat.c,v 1.78 2013/05/01 10:52:13 tom Exp $
  *
  *		Manage different file formats			HTFormat.c
  *		=============================
@@ -1094,11 +1094,7 @@ static int HTGzFileCopy(gzFile gzfp, HTStream *sink)
 
 	if (HTCheckForInterrupt()) {
 	    _HTProgress(TRANSFER_INTERRUPTED);
-	    if (bytes) {
-		rv = HT_INTERRUPTED;
-	    } else {
-		rv = -1;
-	    }
+	    rv = HT_INTERRUPTED;
 	    break;
 	}
     }				/* next bufferload */
@@ -1200,7 +1196,7 @@ static int HTZzFileCopy(FILE *zzfp, HTStream *sink)
 	    status = inflateReset(&s);
 	    if (status != Z_OK) {
 		CTRACE((tfp, "HTZzFileCopy inflateReset() %s\n", zError(status)));
-		rv = bytes ? HT_PARTIAL_CONTENT : -1;
+		rv = -1;
 		break;
 	    }
 	    s.next_in = (Bytef *) dummy_head;

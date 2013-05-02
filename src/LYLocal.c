@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYLocal.c,v 1.123 2013/04/30 08:51:14 tom Exp $
+ * $LynxId: LYLocal.c,v 1.124 2013/05/02 10:42:28 tom Exp $
  *
  *  Routines to manipulate the local filesystem.
  *  Written by: Rick Mallett, Carleton University
@@ -1371,7 +1371,7 @@ static int permit_location(char *destpath,
 
 	user_filename = LYPathLeaf(srcpath);
 
-	LYRemoveTemp(tempfile);
+	(void) LYRemoveTemp(tempfile);
 	if ((fp0 = LYOpenTemp(tempfile, HTML_SUFFIX, "w")) == NULL) {
 	    HTAlert(gettext("Unable to open permit options file"));
 	    return (code);

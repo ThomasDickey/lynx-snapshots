@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYNews.c,v 1.57 2010/09/25 11:20:13 tom Exp $
+ * $LynxId: LYNews.c,v 1.58 2013/05/02 10:39:50 tom Exp $
  */
 #include <HTUtils.h>
 #ifndef DISABLE_NEWS
@@ -139,7 +139,7 @@ char *LYNewsPost(char *newsgroups,
 	current_char_set == UCGetLYhndl_byMIME("shift_jis")) {
 	if ((fc = LYOpenTemp(CJKfile, HTML_SUFFIX, "w")) == NULL) {
 	    HTAlert(CANNOT_OPEN_TEMP);
-	    LYRemoveTemp(my_tempfile);
+	    (void) LYRemoveTemp(my_tempfile);
 	    return (postfile);
 	}
     }

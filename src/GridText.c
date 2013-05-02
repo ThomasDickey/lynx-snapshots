@@ -1,5 +1,5 @@
 /*
- * $LynxId: GridText.c,v 1.252 2013/05/01 00:43:19 tom Exp $
+ * $LynxId: GridText.c,v 1.255 2013/05/02 10:47:41 tom Exp $
  *
  *		Character grid hypertext object
  *		===============================
@@ -8846,7 +8846,7 @@ BOOLEAN HTreparse_document(void)
 	fp = fopen(HTMainAnchor->source_cache_file, "r");
 	if (!fp) {
 	    CTRACE((tfp, "  Cannot read file %s\n", HTMainAnchor->source_cache_file));
-	    LYRemoveTemp(HTMainAnchor->source_cache_file);
+	    (void) LYRemoveTemp(HTMainAnchor->source_cache_file);
 	    FREE(HTMainAnchor->source_cache_file);
 	} else {
 
@@ -11136,14 +11136,21 @@ int HText_SubmitForm(FormInfo * submit_item, DocInfo *doc,
 	assert(my_data != NULL);
     }
 
-    if (target_csname == NULL && target_cs >= 0) {
-	if ((form_is_special & SPECIAL_8BIT) != 0) {
-	    target_csname = LYCharSet_UC[target_cs].MIMEname;
-	} else if ((form_is_special & SPECIAL_FORM) != 0) {
-	    target_csname = LYCharSet_UC[target_cs].MIMEname;
+    if (target_csname == NULL) {
+	if (target_cs >= 0) {
+	    if ((form_is_special & SPECIAL_8BIT) != 0) {
+		target_csname = LYCharSet_UC[target_cs].MIMEname;
+	    } else if ((form_is_special & SPECIAL_FORM) != 0) {
+		target_csname = LYCharSet_UC[target_cs].MIMEname;
+	    } else {
+		target_csname = "us-ascii";
+	    }
 	} else {
 	    target_csname = "us-ascii";
+	    target_cs = UCLYhndl_for_unspec;	/* always >= 0 */
 	}
+    } else if (target_cs < 0) {
+	target_cs = UCLYhndl_for_unspec;	/* always >= 0 */
     }
 
     if (submit_item->submit_method == URL_GET_METHOD && Boundary == NULL) {
@@ -13292,7 +13299,7 @@ int HText_EditTextArea(LinkInfo * form_link)
 
 	    CTRACE((tfp, "GridText: exiting HText_EditTextArea()\n"));
 	}
-	LYRemoveTemp(ed_temp);
+	(void) LYRemoveTemp(ed_temp);
 	FREE(ed_temp);
     }
 
@@ -13358,7 +13365,7 @@ void HText_EditTextField(LinkInfo * form_link)
 	}
     }
 
-    LYRemoveTemp(ed_temp);
+    (void) LYRemoveTemp(ed_temp);
     FREE(ed_temp);
 
     CTRACE((tfp, "GridText: exiting HText_EditTextField()\n"));
@@ -14566,9 +14573,12 @@ void redraw_lines_of_link(int cur)
 	 row <= display_lines && (text = LYGetHiliteStr(cur, count)) != NULL;
 	 ++count) {
 	col = LYGetHilitePos(cur, count);
-	LYmove(row++, col);
-	redraw_part_of_line(todr1, text, (int) strlen(text), HTMainText);
+	if (col >= 0) {
+	    LYmove(row, col);
+	    redraw_part_of_line(todr1, text, (int) strlen(text), HTMainText);
+	}
 	todr1 = todr1->next;
+	row++;
     }
 #undef pvtTITLE_HEIGHT
     return;

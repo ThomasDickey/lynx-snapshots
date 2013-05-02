@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMain.c,v 1.240 2013/04/30 09:52:15 tom Exp $
+ * $LynxId: LYMain.c,v 1.241 2013/05/02 10:41:09 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTP.h>
@@ -2352,7 +2352,7 @@ void reload_read_cfg(void)
     }
     if (!save_rc(rcfp)) {
 	HTAlwaysAlert(NULL, OPTIONS_NOT_SAVED);
-	LYRemoveTemp(tempfile);
+	(void) LYRemoveTemp(tempfile);
 	FREE(tempfile);
 	return;			/* can not write the very own file :( */
     } {
@@ -2393,7 +2393,7 @@ void reload_read_cfg(void)
 	 */
 	rcfp = fopen(tempfile, "r");
 	read_rc(rcfp);
-	LYRemoveTemp(tempfile);
+	(void) LYRemoveTemp(tempfile);
 	FREE(tempfile);		/* done with it - kw */
 
 #ifdef USE_CHARSET_CHOICE

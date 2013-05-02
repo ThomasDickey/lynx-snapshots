@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTGopher.c,v 1.58 2013/01/04 21:10:29 tom Exp $
+ * $LynxId: HTGopher.c,v 1.60 2013/05/01 22:20:13 tom Exp $
  *
  *			GOPHER ACCESS				HTGopher.c
  *			=============
@@ -1138,9 +1138,7 @@ static int generate_cso_form(char *host,
      */
     out = 0;
     buf[out] = '\0';
-    for (i = full_flag ? /***1***/ 0 : 0;
-	 ctemplate[i];
-	 i++) {
+    for (i = 0; ctemplate[i]; i++) {
 	/*
 	 * Search the current string for substitution, flagged by $(
 	 */
@@ -1423,7 +1421,7 @@ static int generate_cso_report(HTStream *Target)
 		    (*Target->isa->put_block) (Target, buf, (int) strlen(buf));
 		}
 	    } else {
-		HTSprintf0(&buf, "<DD>%s\n", fname ? fname : rcode);
+		HTSprintf0(&buf, "<DD>%s\n", fname);
 		(*Target->isa->put_block) (Target, buf, (int) strlen(buf));
 	    }
 	}

@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTML.c,v 1.156 2013/04/30 22:13:50 tom Exp $
+ * $LynxId: HTML.c,v 1.159 2013/05/02 11:03:41 tom Exp $
  *
  *		Structured stream to Rich hypertext converter
  *		============================================
@@ -484,13 +484,6 @@ void HTML_put_character(HTStructured * me, int c)
 
     if (c == '\n' || c == '\t') {
 	HText_setLastChar(me->text, ' ');	/* set it to a generic separator */
-
-	/*
-	 * \r's are ignored.  In order to keep collapsing spaces correctly we
-	 * must default back to the previous separator if there was one.
-	 */
-    } else if (c == '\r' && HText_getLastChar(me->text) == ' ') {
-	HText_setLastChar(me->text, ' ');	/* set it to a generic separator */
     } else {
 	HText_setLastChar(me->text, c);
     }
@@ -724,11 +717,12 @@ void HTML_write(HTStructured * me, const char *s, int l)
    locally here, don't confuse with LYinternal_flag which is for
    overriding non-caching similar to LYoverride_no_cache. - kw */
 #define CHECK_FOR_INTERN(flag,s) \
-   	flag = (BOOLEAN) ((s && (*s=='#' || *s=='\0')) ? TRUE : FALSE)
+   	flag = (BOOLEAN) (((s) && (*(s)=='#' || *(s)=='\0')) ? TRUE : FALSE)
 
 /* Last argument to pass to HTAnchor_findChildAndLink() calls,
    just an abbreviation. - kw */
-#define INTERN_LT (HTLinkType *)(intern_flag ? HTInternalLink : NULL)
+#define INTERN_CHK(flag) (HTLinkType *)((flag) ? HTInternalLink : NULL)
+#define INTERN_LT         INTERN_CHK(intern_flag)
 
 #ifdef USE_COLOR_STYLE
 static char *Style_className = 0;
@@ -891,7 +885,7 @@ static void LYHandleFIG(HTStructured * me, const BOOL *present,
 		me->CurrentA = HTAnchor_findChildAndLink(me->node_anchor,	/* Parent */
 							 NULL,	/* Tag */
 							 href,	/* Addresss */
-							 INTERN_LT);	/* Type */
+							 INTERN_CHK(*intern_flag));	/* Type */
 		HText_beginAnchor(me->text, me->inUnderline, me->CurrentA);
 		if (me->inBoldH == FALSE)
 		    HText_appendCharacter(me->text, LY_BOLD_START_CHAR);
@@ -7841,7 +7835,7 @@ static void CacheThru_do_free(HTStream *me)
     if (me->anchor->source_cache_file) {
 	CTRACE((tfp, "SourceCacheWriter: Removing previous file %s\n",
 		me->anchor->source_cache_file));
-	LYRemoveTemp(me->anchor->source_cache_file);
+	(void) LYRemoveTemp(me->anchor->source_cache_file);
 	FREE(me->anchor->source_cache_file);
     }
     if (me->anchor->source_cache_chunk) {
@@ -7869,7 +7863,7 @@ static void CacheThru_do_free(HTStream *me)
 		HTAlert(gettext("Source cache error - disk full?"));
 		source_cache_file_error = TRUE;
 	    }
-	    LYRemoveTemp(me->filename);
+	    (void) LYRemoveTemp(me->filename);
 	    me->anchor->source_cache_file = NULL;
 	}
     } else if (me->status != HT_OK) {
@@ -7908,7 +7902,7 @@ static void CacheThru_abort(HTStream *me, HTError e)
 	if (me->filename) {
 	    CTRACE((tfp, "SourceCacheWriter: Removing active file %s\n",
 		    me->filename));
-	    LYRemoveTemp(me->filename);
+	    (void) LYRemoveTemp(me->filename);
 	    FREE(me->filename);
 	}
 	if (me->chunk) {

@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTInit.c,v 1.78 2013/01/04 21:44:57 tom Exp $
+ * $LynxId: HTInit.c,v 1.79 2013/05/02 11:04:48 tom Exp $
  *
  *		Configuration-specific Initialization		HTInit.c
  *		----------------------------------------
@@ -779,7 +779,7 @@ int LYTestMailcapCommand(const char *testcommand,
     }
 
     HTChunkFree(expanded);
-    LYRemoveTemp(TmpFileName);
+    (void) LYRemoveTemp(TmpFileName);
 
     return result;
 }

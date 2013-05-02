@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFTP.c,v 1.114 2013/01/05 01:35:12 tom Exp $
+ * $LynxId: HTFTP.c,v 1.116 2013/05/01 10:46:59 tom Exp $
  *
  *			File Transfer Protocol (FTP) Client
  *			for a WorldWideWeb browser
@@ -4140,23 +4140,23 @@ int HTFTPLoad(const char *name,
 		format = HTCharsetFormat(format, anchor, -1);
 		StrAllocCopy(anchor->content_type, format->name);
 		format = HTAtom_for("www/compressed");
+	    }
 
-		switch (cft) {
-		case cftCompress:
-		    StrAllocCopy(anchor->content_encoding, "x-compress");
-		    break;
-		case cftGzip:
-		    StrAllocCopy(anchor->content_encoding, "x-gzip");
-		    break;
-		case cftDeflate:
-		    StrAllocCopy(anchor->content_encoding, "x-deflate");
-		    break;
-		case cftBzip2:
-		    StrAllocCopy(anchor->content_encoding, "x-bzip2");
-		    break;
-		case cftNone:
-		    break;
-		}
+	    switch (cft) {
+	    case cftCompress:
+		StrAllocCopy(anchor->content_encoding, "x-compress");
+		break;
+	    case cftGzip:
+		StrAllocCopy(anchor->content_encoding, "x-gzip");
+		break;
+	    case cftDeflate:
+		StrAllocCopy(anchor->content_encoding, "x-deflate");
+		break;
+	    case cftBzip2:
+		StrAllocCopy(anchor->content_encoding, "x-bzip2");
+		break;
+	    case cftNone:
+		break;
 	    }
 	}
 	FREE(FileName);
@@ -4177,8 +4177,9 @@ int HTFTPLoad(const char *name,
 		outstanding = 0;
 	    CTRACE((tfp, "HTFTP: Closing data socket %d\n", data_soc));
 	    status = NETCLOSE(data_soc);
-	} else
+	} else {
 	    status = 2;		/* data_soc already closed in HTCopy - kw */
+	}
 
 	if (status < 0 && rv != HT_INTERRUPTED && rv != -1) {
 	    (void) HTInetStatus("close");	/* Comment only */
@@ -4189,10 +4190,9 @@ int HTFTPLoad(const char *name,
 		    data_soc = -1;	/* invalidate it */
 		    init_help_message_cache();	/* to free memory */
 		    return HTLoadError(sink, 500, response_text);
-		} else if (status <= 0) {
+		} else if (status == 2 && !StrNCmp(response_text, "221", 3)) {
 		    outstanding = 0;
-		} else if (status == 2 && !StrNCmp(response_text, "221", 3))
-		    outstanding = 0;
+		}
 	    }
 	}
 	final_status = HT_LOADED;

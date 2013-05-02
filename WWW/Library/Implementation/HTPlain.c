@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTPlain.c,v 1.49 2011/06/11 12:09:07 tom Exp $
+ * $LynxId: HTPlain.c,v 1.51 2013/05/02 11:09:30 tom Exp $
  *
  *		Plain text object		HTWrite.c
  *		=================
@@ -151,41 +151,17 @@ static void HTPlain_put_character(HTStream *me, int c)
     } else if (TOASCII(UCH(c)) >= 127 && TOASCII(UCH(c)) < 161 &&
 	       HTPassHighCtrlRaw) {
 	HText_appendCharacter(me->text, c);
+#if CH_NBSP < 127
     } else if (UCH(c) == CH_NBSP) {	/* S/390 -- gil -- 0341 */
 	HText_appendCharacter(me->text, ' ');
+#endif
+#if CH_SHY < 127
     } else if (UCH(c) == CH_SHY) {
 	return;
+#endif
     } else if ((UCH(c) >= ' ' && TOASCII(UCH(c)) < 127) ||
 	       c == '\n' || c == '\t') {
 	HText_appendCharacter(me->text, c);
-    } else if (TOASCII(UCH(c)) > 160) {
-	if (!HTPassEightBitRaw &&
-	    !((me->outUCLYhndl == LATIN1) ||
-	      (me->outUCI->enc & (UCT_CP_SUPERSETOF_LAT1)))) {
-	    int len, high, low, i, diff = 1;
-	    const char *name;
-	    UCode_t value = (UCode_t) FROMASCII((TOASCII(UCH(c)) - 160));
-
-	    name = HTMLGetEntityName(value);
-	    len = (int) strlen(name);
-	    for (low = 0, high = (int) HTML_dtd.number_of_entities;
-		 high > low;
-		 diff < 0 ? (low = i + 1) : (high = i)) {
-		/* Binary search */
-		i = (low + (high - low) / 2);
-		diff = AS_ncmp(HTML_dtd.entity_names[i], name, (unsigned) len);
-		if (diff == 0) {
-		    HText_appendText(me->text,
-				     LYCharSets[me->outUCLYhndl][i]);
-		    break;
-		}
-	    }
-	    if (diff) {
-		HText_appendCharacter(me->text, c);
-	    }
-	} else {
-	    HText_appendCharacter(me->text, c);
-	}
     }
 #endif /* REMOVE_CR_ONLY */
 }

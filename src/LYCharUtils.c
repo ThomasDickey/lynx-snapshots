@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYCharUtils.c,v 1.118 2013/04/30 22:16:02 tom Exp $
+ * $LynxId: LYCharUtils.c,v 1.120 2013/05/02 00:17:41 tom Exp $
  *
  *  Functions associated with LYCharSets.c and the Lynx version of HTML.c - FM
  *  ==========================================================================
@@ -746,10 +746,6 @@ char *LYUppercaseI_OL_String(int seqnum)
     if (Arabic >= 500) {
 	strcat(OLstring, "D");
 	Arabic -= 500;
-	while (Arabic >= 500) {
-	    strcat(OLstring, "C");
-	    Arabic -= 10;
-	}
     }
 
     if (Arabic >= 400) {
@@ -770,10 +766,6 @@ char *LYUppercaseI_OL_String(int seqnum)
     if (Arabic >= 50) {
 	strcat(OLstring, "L");
 	Arabic -= 50;
-	while (Arabic >= 50) {
-	    strcat(OLstring, "X");
-	    Arabic -= 10;
-	}
     }
 
     if (Arabic >= 40) {
@@ -880,10 +872,6 @@ char *LYLowercaseI_OL_String(int seqnum)
     if (Arabic >= 500) {
 	strcat(OLstring, "d");
 	Arabic -= 500;
-	while (Arabic >= 500) {
-	    strcat(OLstring, "c");
-	    Arabic -= 10;
-	}
     }
 
     if (Arabic >= 400) {
@@ -904,10 +892,6 @@ char *LYLowercaseI_OL_String(int seqnum)
     if (Arabic >= 50) {
 	strcat(OLstring, "l");
 	Arabic -= 50;
-	while (Arabic >= 50) {
-	    strcat(OLstring, "x");
-	    Arabic -= 10;
-	}
     }
 
     if (Arabic >= 40) {
