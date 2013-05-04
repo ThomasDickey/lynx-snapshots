@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMainLoop.c,v 1.215 2013/04/30 22:39:19 tom Exp $
+ * $LynxId: LYMainLoop.c,v 1.216 2013/05/03 20:29:37 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTAccess.h>
@@ -7262,8 +7262,7 @@ int mainloop(void)
 		    len = MAX_LINE;	/* Required for do_check_goto_URL() */
 		buf = typeMallocn(char, len);
 
-		StrNCpy(buf, (const char *) s, (e - s));
-		buf[e - s] = '\0';
+		LYStrNCpy(buf, (const char *) s, (e - s));
 		t = (unsigned char *) buf;
 
 		while (s < e) {

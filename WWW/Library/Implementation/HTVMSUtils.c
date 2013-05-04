@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTVMSUtils.c,v 1.37 2010/09/25 11:39:49 tom Exp $
+ * $LynxId: HTVMSUtils.c,v 1.38 2013/05/03 20:32:37 tom Exp $
  *
  * MODULE							HTVMSUtil.c
  *		VMS Utility Routines
@@ -645,8 +645,7 @@ int compare_VMSEntryInfo_structs(VMSEntryInfo * entry1, VMSEntryInfo * entry2)
 		strcpy(date1, (char *) &entry1->date[8]);
 		strcpy(time1, "00:00");
 	    }
-	    StrNCpy(month, entry1->date, 3);
-	    month[3] = '\0';
+	    LYStrNCpy(month, entry1->date, 3);
 	    for (i = 0; i < 12; i++) {
 		if (!strcasecomp(month, months[i])) {
 		    break;
@@ -668,8 +667,7 @@ int compare_VMSEntryInfo_structs(VMSEntryInfo * entry1, VMSEntryInfo * entry2)
 		strcpy(date2, (char *) &entry2->date[8]);
 		strcpy(time2, "00:00");
 	    }
-	    StrNCpy(month, entry2->date, 3);
-	    month[3] = '\0';
+	    LYStrNCpy(month, entry2->date, 3);
 	    for (i = 0; i < 12; i++) {
 		if (!strcasecomp(month, months[i])) {
 		    break;

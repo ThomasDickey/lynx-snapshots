@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYStrings.h,v 1.87 2012/02/10 18:36:39 tom Exp $
+ * $LynxId: LYStrings.h,v 1.88 2013/05/03 09:37:02 tom Exp $
  */
 #ifndef LYSTRINGS_H
 #define LYSTRINGS_H
@@ -9,6 +9,13 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#define SQUOTE '\''
+#define DQUOTE '"'
+#define ESCAPE '\\'
+#define LPAREN '('
+#define RPAREN ')'
+
     typedef const char *const Const2CharPtr;
     typedef enum {
 	NORECALL = 0

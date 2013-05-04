@@ -1,5 +1,5 @@
 /*
- * $LynxId: GridText.c,v 1.255 2013/05/02 10:47:41 tom Exp $
+ * $LynxId: GridText.c,v 1.258 2013/05/03 20:29:37 tom Exp $
  *
  *		Character grid hypertext object
  *		===============================
@@ -1576,8 +1576,7 @@ static int display_line(HTLine *line,
 		LastDisplayChar = 'M';
 	    }
 	    if (utf_extra) {
-		StrNCpy(&buffer[1], data, utf_extra);
-		buffer[utf_extra + 1] = '\0';
+		LYStrNCpy(&buffer[1], data, utf_extra);
 		LYaddstr(buffer);
 		buffer[1] = '\0';
 		data += utf_extra;
@@ -2200,8 +2199,7 @@ static void display_page(HText *text,
 			 */
 			utf_extra = utf8_length(text->T.output_utf8, data + itmp);
 			if (utf_extra) {
-			    StrNCpy(&tmp[1], &line->data[itmp + 1], utf_extra);
-			    tmp[utf_extra + 1] = '\0';
+			    LYStrNCpy(&tmp[1], &line->data[itmp + 1], utf_extra);
 			    itmp += utf_extra;
 			    LYaddstr(tmp);
 			    tmp[1] = '\0';
@@ -4121,8 +4119,8 @@ void HText_appendCharacter(HText *text, int ch)
 		if (!text->permissible_split || text->source) {
 		    text->permissible_split = line->size;
 		    while (text->permissible_split > 0 &&
-			   (line->data[text->permissible_split - 1] & 0x80)
-			   == 0xC0) {
+			   (line->data[text->permissible_split - 1] & 0xc0)
+			   == 0x80) {
 			text->permissible_split--;
 		    }
 		    if (text->permissible_split == line->size)
@@ -5692,14 +5690,12 @@ void HText_appendText(HText *text, const char *str)
 {
     const char *p;
 
-    if (str == NULL)
-	return;
-
-    if (text->halted == 3)
-	return;
-
-    for (p = str; *p; p++) {
-	HText_appendCharacter(text, *p);
+    if (str != NULL &&
+	text != NULL &&
+	text->halted != 3) {
+	for (p = str; *p; p++) {
+	    HText_appendCharacter(text, *p);
+	}
     }
 }
 
@@ -13041,8 +13037,7 @@ static int finish_ExtEditForm(LinkInfo * form_link, TextAnchor *start_anchor,
 
 	if (skip_at) {
 	    len0 = (int) (skip_at - lp);
-	    StrNCpy(line, lp, len0);
-	    line[len0] = '\0';
+	    LYStrNCpy(line, lp, len0);
 	    lp = skip_at + skip_num;
 	    skip_at = NULL;
 	    skip_num = 0;
@@ -13706,8 +13701,7 @@ int HText_InsertFile(LinkInfo * form_link)
 	    if (lp[len])
 		lp[len + 1] = '\0';	/* prevent next iteration */
 	}
-	StrNCpy(line, lp, len);
-	*(line + len) = '\0';
+	LYStrNCpy(line, lp, len);
 
 	/*
 	 * If not the first line from the insert file, we need to add
@@ -13917,8 +13911,7 @@ static void redraw_part_of_line(HTLine *line, const char *str,
 		LastDisplayChar = 'M';
 	    }
 	    if (utf_extra) {
-		StrNCpy(&buffer[1], data, utf_extra);
-		buffer[utf_extra + 1] = '\0';
+		LYStrNCpy(&buffer[1], data, utf_extra);
 		LYaddstr(buffer);
 		buffer[1] = '\0';
 		data += utf_extra;
@@ -14397,8 +14390,7 @@ static void move_to_glyph(int YP,
 	    }
 #endif
 	    if (utf_extra) {
-		StrNCpy(&buffer[1], data, utf_extra);
-		buffer[utf_extra + 1] = '\0';
+		LYStrNCpy(&buffer[1], data, utf_extra);
 		if (!drawing && i >= XP_draw_min) {
 		    LYmove(YP, i - 1);
 		    drawing = YES;

@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMail.c,v 1.91 2013/05/02 11:02:26 tom Exp $
+ * $LynxId: LYMail.c,v 1.92 2013/05/03 20:29:37 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTParse.h>
@@ -134,8 +134,7 @@ static void extract_subject(char *dst,
 	    *cp1 = '\0';
 	}
 	if (*cp) {
-	    StrNCpy(dst, cp, MAX_SUBJECT);
-	    dst[MAX_SUBJECT] = '\0';
+	    LYStrNCpy(dst, cp, MAX_SUBJECT);
 	    SafeHTUnEscape(dst);
 	}
 	if (cp1) {
@@ -817,8 +816,7 @@ void mailform(const char *mailto_address,
 	i = 0;
 	len = (int) strlen(mailto_content);
 	while (len > 78) {
-	    StrNCpy(buf, &mailto_content[i], 78);
-	    buf[78] = '\0';
+	    LYStrNCpy(buf, &mailto_content[i], 78);
 	    fprintf(fd, "%s\n", buf);
 	    i += 78;
 	    len = (int) strlen(&mailto_content[i]);
@@ -829,8 +827,7 @@ void mailform(const char *mailto_address,
     i = 0;
     len = (int) strlen(mailto_content);
     while (len > 78) {
-	StrNCpy(buf, &mailto_content[i], 78);
-	buf[78] = '\0';
+	LYStrNCpy(buf, &mailto_content[i], 78);
 	fprintf(fd, "%s\n", buf);
 	i += 78;
 	len = (int) strlen(&mailto_content[i]);
@@ -1273,8 +1270,7 @@ void reply_by_mail(char *mail_address,
      * Set the default subject.  - FM
      */
     if ((default_subject[0] == '\0') && non_empty(title)) {
-	StrNCpy(default_subject, title, MAX_SUBJECT);
-	default_subject[MAX_SUBJECT] = '\0';
+	LYStrNCpy(default_subject, title, MAX_SUBJECT);
     }
 
     /*

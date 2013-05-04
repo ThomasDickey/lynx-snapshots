@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTAlert.c,v 1.97 2012/11/16 01:22:25 tom Exp $
+ * $LynxId: HTAlert.c,v 1.99 2013/05/03 08:41:08 tom Exp $
  *
  *	Displaying messages and getting input for Lynx Browser
  *	==========================================================
@@ -656,7 +656,7 @@ char *HTPrompt(const char *Msg, const char *deflt)
     BStrCopy0(data, deflt ? deflt : "");
 
     if (!dump_output_immediately)
-	LYgetBString(&data, VISIBLE, 0, NORECALL);
+	(void) LYgetBString(&data, VISIBLE, 0, NORECALL);
 
     StrAllocCopy(rep, data->str);
 
@@ -676,7 +676,7 @@ char *HTPromptPassword(const char *Msg)
     if (!dump_output_immediately) {
 	_statusline(Msg ? Msg : PASSWORD_PROMPT);
 	BStrCopy0(data, "");
-	LYgetBString(&data, HIDDEN, 0, NORECALL);
+	(void) LYgetBString(&data, HIDDEN, 0, NORECALL);
 	StrAllocCopy(result, data->str);
 	BStrFree(data);
     } else {

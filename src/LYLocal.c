@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYLocal.c,v 1.124 2013/05/02 10:42:28 tom Exp $
+ * $LynxId: LYLocal.c,v 1.125 2013/05/03 08:43:42 tom Exp $
  *
  *  Routines to manipulate the local filesystem.
  *  Written by: Rick Mallett, Carleton University
@@ -807,7 +807,7 @@ static int modify_tagged(char *testpath)
     _statusline(gettext("Enter new location for tagged items: "));
 
     BStrCopy0(given_target, "");
-    LYgetBString(&given_target, VISIBLE, 0, NORECALL);
+    (void) LYgetBString(&given_target, VISIBLE, 0, NORECALL);
     if (!isBEmpty(given_target)) {
 	/*
 	 * Replace ~/ references to the home directory.
@@ -2210,7 +2210,7 @@ static int get_filename(const char *prompt,
 
     _statusline(prompt);
 
-    LYgetBString(&buf, VISIBLE, 0, NORECALL);
+    (void) LYgetBString(&buf, VISIBLE, 0, NORECALL);
     if (strstr(buf->str, "../") != NULL) {
 	HTAlert(gettext("Illegal filename; request ignored."));
 	return FALSE;

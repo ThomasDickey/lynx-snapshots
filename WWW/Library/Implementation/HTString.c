@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTString.c,v 1.69 2012/02/09 22:02:21 tom Exp $
+ * $LynxId: HTString.c,v 1.70 2013/05/03 09:44:08 tom Exp $
  *
  *	Case-independent string comparison		HTString.c
  *
@@ -395,29 +395,31 @@ char *HTSACopy_extra(char **dest,
 char *HTNextField(char **pstr)
 {
     char *p = *pstr;
-    char *start;		/* start of field */
+    char *start = NULL;		/* start of field */
 
-    while (*p && WHITE(*p))
-	p++;			/* Strip white space */
-    if (!*p) {
-	*pstr = p;
-	return NULL;		/* No first field */
-    }
-    if (*p == '"') {		/* quoted field */
-	p++;
-	start = p;
-	for (; *p && *p != '"'; p++) {
-	    if (*p == '\\' && p[1])
-		p++;		/* Skip escaped chars */
+    if (p != NULL) {
+	while (*p && WHITE(*p))
+	    p++;		/* Strip white space */
+	if (!*p) {
+	    *pstr = p;
+	} else {
+	    if (*p == '"') {	/* quoted field */
+		p++;
+		start = p;
+		for (; *p && *p != '"'; p++) {
+		    if (*p == '\\' && p[1])
+			p++;	/* Skip escaped chars */
+		}
+	    } else {
+		start = p;
+		while (*p && !WHITE(*p))
+		    p++;	/* Skip first field */
+	    }
+	    if (*p)
+		*p++ = '\0';
+	    *pstr = p;
 	}
-    } else {
-	start = p;
-	while (*p && !WHITE(*p))
-	    p++;		/* Skip first field */
     }
-    if (*p)
-	*p++ = '\0';
-    *pstr = p;
     return start;
 }
 

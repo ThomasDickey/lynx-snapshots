@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTMLGen.c,v 1.37 2012/02/10 18:32:26 tom Exp $
+ * $LynxId: HTMLGen.c,v 1.39 2013/05/03 20:53:46 tom Exp $
  *
  *		HTML Generator
  *		==============
@@ -43,10 +43,9 @@
 #include <LYLeaks.h>
 
 #ifdef USE_COLOR_STYLE
-char class_string[TEMPSTRINGSIZE];
+char class_string[TEMPSTRINGSIZE + 1];
 
 static char *Style_className = NULL;
-static char myHash[128];
 static int hcode;
 #endif
 
@@ -325,15 +324,16 @@ static int HTMLGen_start_element(HTStructured * me, int element_number,
     char *title_tmp = NULL;
 
     if (LYPreparsedSource) {
+	char *myHash = NULL;
+
 	/*
 	 * Same logic as in HTML_start_element, copied from there.  - kw
 	 */
 	HTSprintf(&Style_className, ";%s", HTML_dtd.tags[element_number].name);
-	strcpy(myHash, HTML_dtd.tags[element_number].name);
+	StrAllocCopy(myHash, HTML_dtd.tags[element_number].name);
 	if (class_string[0]) {
-	    int len = (int) strlen(myHash);
-
-	    sprintf(myHash + len, ".%.*s", (int) sizeof(myHash) - len - 2, class_string);
+	    StrAllocCat(myHash, ".");
+	    StrAllocCat(myHash, class_string);
 	    HTSprintf(&Style_className, ".%s", class_string);
 	}
 	class_string[0] = '\0';
@@ -369,6 +369,7 @@ static int HTMLGen_start_element(HTStructured * me, int element_number,
 	    do_cstyle_flush(me);
 	    HText_characterStyle(me->text, hcode, 1);
 	}
+	FREE(myHash);
     }
 #endif /* USE_COLOR_STYLE */
     me->preformatted = YES;	/* free text within tags */

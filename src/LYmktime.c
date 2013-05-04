@@ -1,4 +1,4 @@
-/* $LynxId: LYmktime.c,v 1.13 2011/05/24 09:51:41 tom Exp $ */
+/* $LynxId: LYmktime.c,v 1.14 2013/05/03 20:14:06 tom Exp $ */
 
 #include <LYStrings.h>
 #include <LYUtils.h>
@@ -106,7 +106,7 @@ time_t LYmktime(char *string,
 	s++;
     if (*s == '\0' || (s - start) > 2)
 	return (0);
-    LYstrncpy(temp, start, (int) (s - start));
+    LYStrNCpy(temp, start, (s - start));
     day = atoi(temp);
     if (day < 1 || day > 31)
 	return (0);
@@ -125,7 +125,7 @@ time_t LYmktime(char *string,
 	(s - start) < (isdigit(UCH(*(s - 1))) ? 2 : 3) ||
 	(s - start) > (isdigit(UCH(*(s - 1))) ? 2 : 9))
 	return (0);
-    LYstrncpy(temp, start, (isdigit(UCH(*(s - 1))) ? 2 : 3));
+    LYStrNCpy(temp, start, (isdigit(UCH(*(s - 1))) ? 2 : 3));
     switch (TOUPPER(temp[0])) {
     case '0':
     case '1':
@@ -213,7 +213,7 @@ time_t LYmktime(char *string,
     while (*s != '\0' && isdigit(UCH(*s)))
 	s++;
     if ((s - start) == 4) {
-	LYstrncpy(temp, start, 4);
+	LYStrNCpy(temp, start, 4);
     } else if ((s - start) == 2) {
 	now = time(NULL);
 	/*
@@ -226,9 +226,9 @@ time_t LYmktime(char *string,
 	 * in 2100 -- setting up the next crisis...) - BL
 	 */
 	if (atoi(start) >= 70)
-	    LYstrncpy(temp, "19", 2);
+	    LYStrNCpy(temp, "19", 2);
 	else
-	    LYstrncpy(temp, "20", 2);
+	    LYStrNCpy(temp, "20", 2);
 	strncat(temp, start, 2);
 	temp[4] = '\0';
     } else {
@@ -251,7 +251,7 @@ time_t LYmktime(char *string,
 	    s++;
 	if (*s != ':' || (s - start) > 2)
 	    return (0);
-	LYstrncpy(temp, start, (int) (s - start));
+	LYStrNCpy(temp, start, (s - start));
 	hour = atoi(temp);
 
 	/*
@@ -266,7 +266,7 @@ time_t LYmktime(char *string,
 	    s++;
 	if (*s != ':' || (s - start) > 2)
 	    return (0);
-	LYstrncpy(temp, start, (int) (s - start));
+	LYStrNCpy(temp, start, (s - start));
 	minutes = atoi(temp);
 
 	/*
@@ -281,7 +281,7 @@ time_t LYmktime(char *string,
 	    s++;
 	if (*s == '\0' || (s - start) > 2)
 	    return (0);
-	LYstrncpy(temp, start, (int) (s - start));
+	LYStrNCpy(temp, start, (s - start));
 	seconds = atoi(temp);
     }
 

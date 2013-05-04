@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYUpload.c,v 1.36 2012/02/09 15:09:38 tom Exp $
+ * $LynxId: LYUpload.c,v 1.38 2013/05/03 10:53:50 tom Exp $
  *
  *  Routines to upload files to the local filesystem.
  *  Created by: Rick Mallett, Carleton University
@@ -175,19 +175,16 @@ int LYUpload_options(char **newfile,
     FILE *fp0;
     lynx_list_item_type *cur_upload;
     int count;
-    static char curloc[LY_MAXPATH];
-    char *cp;
+    char *curloc = NULL;
 
     if ((fp0 = InternalPageFP(tempfile, TRUE)) == 0)
 	return (-1);
 
 #ifdef VMS
-    strcpy(curloc, "/sys$login");
+    StrAllocCopy(curloc, "/sys$login");
 #else
-    cp = HTfullURL_toFile(directory);
-    strcpy(curloc, cp);
+    StrAllocCopy(curloc, HTfullURL_toFile(directory));
     LYTrimPathSep(curloc);
-    FREE(cp);
 #endif /* VMS */
 
     LYLocalFileToURL(newfile, tempfile);
@@ -218,6 +215,7 @@ int LYUpload_options(char **newfile,
     LYCloseTempFP(fp0);
 
     LYforce_no_cache = TRUE;
+    FREE(curloc);
 
     return (0);
 }
