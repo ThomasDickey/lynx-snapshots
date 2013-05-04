@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTWAIS.c,v 1.36 2011/06/11 12:13:32 tom Exp $
+ * $LynxId: HTWAIS.c,v 1.37 2013/05/03 20:53:27 tom Exp $
  *
  *	WorldWideWeb - Wide Area Informaion Server Access	HTWAIS.c
  *	==================================================
@@ -818,7 +818,7 @@ int HTLoadWAIS(const char *arg,
 	char *p;
 	HTStructured *target;
 
-	StrNCpy(keywords, key, MAX_KEYWORDS_LENGTH);
+	LYStrNCpy(keywords, key, MAX_KEYWORDS_LENGTH);
 	while ((p = strchr(keywords, '+')) != 0)
 	    *p = ' ';
 

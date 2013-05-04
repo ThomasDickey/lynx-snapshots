@@ -1,4 +1,4 @@
-/* $LynxId: LYCurses.c,v 1.168 2013/05/01 00:07:08 tom Exp $ */
+/* $LynxId: LYCurses.c,v 1.169 2013/05/03 23:19:18 tom Exp $ */
 #include <HTUtils.h>
 #include <HTAlert.h>
 
@@ -258,33 +258,38 @@ int string_to_attr(const char *name)
 #ifdef USE_COLOR_STYLE
 static char *attr_to_string(int code)
 {
-    static char result[sizeof(Mono_Attrs) + 80];
-    unsigned i;
-    int pair = PAIR_NUMBER((unsigned) code);
-    int bold = (pair != 0 && ((unsigned) code & A_BOLD) != 0);
+    static char *result;
 
-    if (bold)
-	code &= (int) ~A_BOLD;
+    if (code >= 0) {
+	unsigned i;
+	int pair = PAIR_NUMBER((unsigned) code);
+	int bold = (pair != 0 && ((unsigned) code & A_BOLD) != 0);
 
-    *result = 0;
-    for (i = 0; i < TABLESIZE(Mono_Attrs); i++) {
-	if (Mono_Attrs[i].code & code) {
-	    if (*result)
-		strcat(result, "+");
-	    strcat(result, Mono_Attrs[i].name);
+	StrAllocCopy(result, "");
+
+	if (bold)
+	    code &= (int) ~A_BOLD;
+
+	for (i = 0; i < TABLESIZE(Mono_Attrs); i++) {
+	    if (Mono_Attrs[i].code & code) {
+		if (non_empty(result))
+		    StrAllocCat(result, "+");
+		StrAllocCat(result, Mono_Attrs[i].name);
+	    }
 	}
-    }
-    if (pair != 0) {
-	short f, b;
+	if (pair != 0) {
+	    short f, b;
 
-	if (pair_content((short) pair, &f, &b) != ERR) {
-	    const char *fg = lookup_color(bold ? f + COLORS : f);
-	    const char *bg = lookup_color(b);
-
-	    if (*result)
-		strcat(result, "+");
-	    sprintf(result + strlen(result), "%s/%s", fg, bg);
+	    if (pair_content((short) pair, &f, &b) != ERR) {
+		if (non_empty(result))
+		    StrAllocCat(result, "+");
+		StrAllocCat(result, lookup_color(bold ? f + COLORS : f));
+		StrAllocCat(result, "/");
+		StrAllocCat(result, lookup_color(b));
+	    }
 	}
+    } else {
+	FREE(result);
     }
     return result;
 }
@@ -422,20 +427,24 @@ void setHashStyle(int style,
 static void LYAttrset(WINDOW * win, int color,
 		      int mono)
 {
+    char *shown = NULL;
+
     if (lynx_has_color
 	&& LYShowColor >= SHOW_COLOR_ON
 	&& color >= 0) {
 	CTRACE2(TRACE_STYLE, (tfp, "CSS:LYAttrset color %#x -> (%s)\n",
-			      color, attr_to_string(color)));
+			      color, shown = attr_to_string(color)));
 	(void) wattrset(win, (unsigned) color);
     } else if (mono >= 0) {
 	CTRACE2(TRACE_STYLE, (tfp, "CSS:LYAttrset mono %#x -> (%s)\n",
-			      mono, attr_to_string(mono)));
+			      mono, shown = attr_to_string(mono)));
 	(void) wattrset(win, (unsigned) mono);
     } else {
 	CTRACE2(TRACE_STYLE, (tfp, "CSS:LYAttrset (A_NORMAL)\n"));
 	(void) wattrset(win, A_NORMAL);
     }
+    if (shown != NULL)
+	(void) attr_to_string(-1);
 }
 
 void curses_w_style(WINDOW * win, int style,

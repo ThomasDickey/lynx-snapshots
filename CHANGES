@@ -1,10 +1,14 @@
--- $LynxId: CHANGES,v 1.638 2013/04/30 09:55:16 tom Exp $
+-- $LynxId: CHANGES,v 1.640 2013/05/03 09:27:54 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2013-04-30 (2.8.8dev.16)
-+ make DONT_TRACK_INTERNAL_LINKS logic configurable via lynx.cfg as
+2013-05-03 (2.8.8dev.16)
+* correct handling of backslash in TrimCommand() function introduced in
+  2.8.6dev.4, used to process the commands for "test=" in mime-types -TD
+* correct 2.8.3dev.13 check for permissible place to split UTF-8 encoded text,
+  reported by Coverity -TD
+* make DONT_TRACK_INTERNAL_LINKS logic configurable via lynx.cfg as
   TRACK_INTERNAL_LINKS; the configure script now sets the default value -TD
 * fix issues found by Coverity scan -TD
 

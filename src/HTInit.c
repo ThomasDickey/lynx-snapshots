@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTInit.c,v 1.79 2013/05/02 11:04:48 tom Exp $
+ * $LynxId: HTInit.c,v 1.83 2013/05/03 19:47:08 tom Exp $
  *
  *		Configuration-specific Initialization		HTInit.c
  *		----------------------------------------
@@ -262,7 +262,7 @@ static char *GetCommand(char *s, char **t)
 		*s2 = '\0';
 		return (++s);
 	    }
-	    if (*s == '\\') {
+	    if (*s == ESCAPE) {
 		quoted = 1;
 		++s;
 	    } else {
@@ -301,22 +301,24 @@ static void TrimCommand(char *command)
 	    if (escape) {
 		escape = FALSE;
 	    } else if (squote) {
-		if (ch == '\'')
+		if (ch == SQUOTE)
 		    squote = FALSE;
 	    } else if (dquote) {
-		if (ch == '"')
+		switch (ch) {
+		case DQUOTE:
 		    dquote = FALSE;
+		    break;
+		case ESCAPE:
+		    escape = TRUE;
+		    break;
+		}
 	    } else {
 		switch (ch) {
-		case '"':
+		case DQUOTE:
 		    dquote = TRUE;
 		    break;
-		case '\'':
+		case SQUOTE:
 		    squote = TRUE;
-		    break;
-		case '\\':
-		    if (dquote)
-			escape = TRUE;
 		    break;
 		}
 	    }
@@ -364,7 +366,7 @@ static int ProcessMailcapEntry(FILE *fp, struct MailcapEntry *mc, AcceptMedia me
 
 	    assert(rawentry != NULL);
 	}
-	if (len > 0 && LineBuf[len - 1] == '\\') {
+	if (len > 0 && LineBuf[len - 1] == ESCAPE) {
 	    LineBuf[len - 1] = '\0';
 	    strcat(rawentry, LineBuf);
 	} else {
@@ -497,9 +499,9 @@ static const char *LYSkipQuoted(const char *s)
     while (*s != 0) {
 	if (escaped) {
 	    escaped = 0;
-	} else if (*s == '\\') {
+	} else if (*s == ESCAPE) {
 	    escaped = 1;
-	} else if (*s == '"') {
+	} else if (*s == DQUOTE) {
 	    ++s;
 	    break;
 	}
@@ -524,7 +526,7 @@ static const char *LYSkipToken(const char *s)
 
 static const char *LYSkipValue(const char *s)
 {
-    if (*s == '"')
+    if (*s == DQUOTE)
 	s = LYSkipQuoted(s);
     else
 	s = LYSkipToken(s);
@@ -540,12 +542,12 @@ static char *LYCopyValue(const char *s)
     char *result = 0;
     int j, k;
 
-    if (*s == '"') {
+    if (*s == DQUOTE) {
 	t = LYSkipQuoted(s);
 	StrAllocCopy(result, s + 1);
 	result[t - s - 2] = '\0';
 	for (j = k = 0;; ++j, ++k) {
-	    if (result[j] == '\\') {
+	    if (result[j] == ESCAPE) {
 		++j;
 	    }
 	    if ((result[k] = result[j]) == '\0')
@@ -623,7 +625,7 @@ BOOL LYMailcapUsesPctS(const char *controlstring)
     for (from = controlstring; *from != '\0'; from++) {
 	if (escaped) {
 	    escaped = 0;
-	} else if (*from == '\\') {
+	} else if (*from == ESCAPE) {
 	    escaped = 1;
 	} else if (prefixed) {
 	    prefixed = 0;
@@ -677,7 +679,7 @@ static int BuildCommand(HTChunk *cmd,
 	if (escaped) {
 	    escaped = 0;
 	    HTChunkPutc(cmd, UCH(*from));
-	} else if (*from == '\\') {
+	} else if (*from == ESCAPE) {
 	    escaped = 1;
 	} else if (prefixed) {
 	    prefixed = 0;

@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTVMS_WaisUI.c,v 1.17 2010/10/29 21:10:14 tom Exp $
+ * $LynxId: HTVMS_WaisUI.c,v 1.19 2013/05/03 20:51:49 tom Exp $
  *								HTVMS_WAISUI.c
  *
  *	Adaptation for Lynx by F.Macrides (macrides@sci.wfeb.edu)
@@ -243,8 +243,7 @@ static long transport_message(long connection,
     {
 	char length_array[11];
 
-	StrNCpy(length_array, header.msg_len, 10);
-	length_array[10] = '\0';
+	LYStrNCpy(length_array, header.msg_len, 10);
 	response_length = atol(length_array);
 	/*
 	   if(verbose){
@@ -1833,12 +1832,12 @@ query_term *makeAttributeTerm(char *use,
     qt->TermType = TT_Attribute;
 
     /* copy in the attributes */
-    StrNCpy(qt->Use, use, ATTRIBUTE_SIZE);
-    StrNCpy(qt->Relation, relation, ATTRIBUTE_SIZE);
-    StrNCpy(qt->Position, position, ATTRIBUTE_SIZE);
-    StrNCpy(qt->Structure, structure, ATTRIBUTE_SIZE);
-    StrNCpy(qt->Truncation, truncation, ATTRIBUTE_SIZE);
-    StrNCpy(qt->Completeness, completeness, ATTRIBUTE_SIZE);
+    LYStrNCpy(qt->Use, use, ATTRIBUTE_SIZE);
+    LYStrNCpy(qt->Relation, relation, ATTRIBUTE_SIZE);
+    LYStrNCpy(qt->Position, position, ATTRIBUTE_SIZE);
+    LYStrNCpy(qt->Structure, structure, ATTRIBUTE_SIZE);
+    LYStrNCpy(qt->Truncation, truncation, ATTRIBUTE_SIZE);
+    LYStrNCpy(qt->Completeness, completeness, ATTRIBUTE_SIZE);
 
     qt->Term = duplicateAny(term);
 
@@ -1870,7 +1869,7 @@ query_term *makeOperatorTerm(char *operatorCode)
 
     qt->TermType = TT_Operator;
 
-    StrNCpy(qt->Operator, operatorCode, OPERATOR_SIZE);
+    LYStrNCpy(qt->Operator, operatorCode, OPERATOR_SIZE);
 
     qt->Term = NULL;
     qt->ResultSetID = NULL;
@@ -1914,7 +1913,7 @@ char *writeQueryTerm(query_term *qt, char *buffer, long *len)
 
     switch (qt->TermType) {
     case TT_Attribute:
-	StrNCpy(attributes, qt->Use, ATTRIBUTE_LIST_SIZE);
+	LYStrNCpy(attributes, qt->Use, ATTRIBUTE_LIST_SIZE);
 	s_strncat(attributes, AT_DELIMITER, sizeof(AT_DELIMITER) + 1, ATTRIBUTE_LIST_SIZE);
 	s_strncat(attributes, qt->Relation, ATTRIBUTE_SIZE, ATTRIBUTE_LIST_SIZE);
 	s_strncat(attributes, AT_DELIMITER, sizeof(AT_DELIMITER) + 1, ATTRIBUTE_LIST_SIZE);

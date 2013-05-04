@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTMIME.c,v 1.84 2013/04/30 08:46:21 tom Exp $
+ * $LynxId: HTMIME.c,v 1.86 2013/05/03 20:52:54 tom Exp $
  *
  *			MIME Message Parse			HTMIME.c
  *			==================
@@ -273,7 +273,7 @@ static int pumpData(HTStream *me)
 	FREE(me->compression_encoding);
 	StrAllocCopy(me->compression_encoding, new_encoding);
 
-	strcpy(me->value, new_content);
+	LYStrNCpy(me->value, new_content, VALUE_SIZE - 1);
 	StrAllocCopy(me->anchor->content_type_params, me->value);
 	me->format = HTAtom_for(me->value);
     }

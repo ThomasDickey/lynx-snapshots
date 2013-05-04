@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYUtils.c,v 1.237 2013/05/02 11:00:14 tom Exp $
+ * $LynxId: LYUtils.c,v 1.238 2013/05/03 20:21:20 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTCP.h>
@@ -1473,7 +1473,7 @@ void statusline(const char *text)
 	len = (int) strlen(text_buff);
 	if (len >= (int) (sizeof(buffer) - 1))
 	    len = (int) (sizeof(buffer) - 1);
-	StrNCpy(buffer, text_buff, len)[len] = '\0';
+	LYStrNCpy(buffer, text_buff, len);
 	/* FIXME: a binary search might be faster */
 	while (len > 0 && LYstrExtent(buffer, len, len) > max_length)
 	    buffer[--len] = '\0';

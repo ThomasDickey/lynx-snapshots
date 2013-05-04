@@ -1,5 +1,5 @@
 /*
- * $LynxId: UCAuto.c,v 1.49 2013/04/30 09:20:19 tom Exp $
+ * $LynxId: UCAuto.c,v 1.50 2013/05/03 20:30:33 tom Exp $
  *
  *  This file contains code for changing the Linux console mode.
  *  Currently some names for font files are hardwired in here.
@@ -637,8 +637,7 @@ int Find_Best_Display_Charset(int ord)
 	HTInfoMsg(gettext("Charset name in CHARSET_SWITCH_RULES too long"));
 	return ord;
     }
-    StrNCpy(buf, r, s - r);
-    buf[s - r] = '\0';
+    LYStrNCpy(buf, r, s - r);
     n = UCGetLYhndl_byMIME(buf);
     if (n < 0) {
 	sprintf(buf,
@@ -733,7 +732,8 @@ static int _Switch_Display_Charset(int ord, enum switch_display_charset_t really
 
 	rc = VioGetFont(font, 0);	/* Retrieve data for current font */
 	if (rc) {
-	    sprintf(msgbuf, gettext("Can't fetch current font info: err=%#x=%d"), rc, rc);
+	    sprintf(msgbuf,
+		    gettext("Can't fetch current font info: err=%#x=%d"), rc, rc);
 	    HTInfoMsg(msgbuf);
 	    ord = ord1 = auto_display_charset;
 	    goto retry;

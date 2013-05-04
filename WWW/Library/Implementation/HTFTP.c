@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFTP.c,v 1.116 2013/05/01 10:46:59 tom Exp $
+ * $LynxId: HTFTP.c,v 1.120 2013/05/03 23:53:30 tom Exp $
  *
  *			File Transfer Protocol (FTP) Client
  *			for a WorldWideWeb browser
@@ -1452,15 +1452,15 @@ static void set_years_and_date(void)
     char day[8], month[8], date[12];
     time_t NowTime;
     int i;
+    char *printable;
 
     NowTime = time(NULL);
-    StrNCpy(day, (char *) ctime(&NowTime) + 8, 2);
-    day[2] = '\0';
+    printable = ctime(&NowTime);
+    LYStrNCpy(day, printable + 8, 2);
     if (day[0] == ' ') {
 	day[0] = '0';
     }
-    StrNCpy(month, (char *) ctime(&NowTime) + 4, 3);
-    month[3] = '\0';
+    LYStrNCpy(month, printable + 4, 3);
     for (i = 0; i < 12; i++) {
 	if (!strcasecomp(month, months[i])) {
 	    break;
@@ -1469,8 +1469,7 @@ static void set_years_and_date(void)
     i++;
     sprintf(date, "9999%02d%.2s", i, day);
     TheDate = atoi(date);
-    strcpy(ThisYear, (char *) ctime(&NowTime) + 20);
-    ThisYear[4] = '\0';
+    LYStrNCpy(ThisYear, printable + 20, 4);
     sprintf(LastYear, "%d", (atoi(ThisYear) - 1));
     HaveYears = TRUE;
 }
@@ -1611,8 +1610,7 @@ static void parse_eplf_line(char *line,
 	    while (*(++cp) && (*cp != ','))
 		secs = (secs * 10) + (*cp - '0');
 	    secs += base;	/* assumes that time_t is #seconds */
-	    strcpy(ct, ctime(&secs));
-	    ct[24] = 0;
+	    LYStrNCpy(ct, ctime(&secs), 24);
 	    StrAllocCopy(info->date, ct);
 	    break;
 	case '/':
@@ -2604,133 +2602,99 @@ static EntryInfo *parse_dir_entry(char *entry,
     return (entry_info);
 }
 
+static void formatDate(char target[16], EntryInfo *entry)
+{
+    char temp[8], month[4];
+    int i;
+
+    /*
+     * Set up for sorting in reverse chronological order. - FM
+     */
+    if (entry->date[9] == ':') {
+	strcpy(target, "9999");
+	LYStrNCpy(temp, &entry->date[7], 5);
+	if (temp[0] == ' ') {
+	    temp[0] = '0';
+	}
+    } else {
+	LYStrNCpy(target, &entry->date[8], 4);
+	strcpy(temp, "00:00");
+    }
+    LYStrNCpy(month, entry->date, 3);
+    for (i = 0; i < 12; i++) {
+	if (!strcasecomp(month, months[i])) {
+	    break;
+	}
+    }
+    i++;
+    sprintf(month, "%02d", i);
+    strcat(target, month);
+    StrNCat(target, &entry->date[4], 2);
+    if (target[6] == ' ' || target[6] == HT_NON_BREAK_SPACE) {
+	target[6] = '0';
+    }
+
+    /* If no year given, assume last year if it would otherwise be in the
+     * future by more than one day.  The one day tolerance is to account for a
+     * possible timezone difference. - kw
+     */
+    if (target[0] == '9' && atoi(target) > TheDate + 1) {
+	for (i = 0; i < 4; i++) {
+	    target[i] = LastYear[i];
+	}
+    }
+    strcat(target, temp);
+}
+
 static int compare_EntryInfo_structs(EntryInfo *entry1, EntryInfo *entry2)
 {
-    int i, status;
-    char date1[16], date2[16], time1[8], time2[8], month[4];
+    int status;
+    char date1[16], date2[16];
+    int result = strcmp(entry1->filename, entry2->filename);
 
     switch (HTfileSortMethod) {
     case FILE_BY_SIZE:
 	/* both equal or both 0 */
-	if (entry1->size == entry2->size)
-	    return (strcmp(entry1->filename, entry2->filename));
-	else if (entry1->size > entry2->size)
-	    return (1);
-	else
-	    return (-1);
+	if (entry1->size > entry2->size)
+	    result = 1;
+	else if (entry1->size < entry2->size)
+	    result = -1;
+	break;
 
     case FILE_BY_TYPE:
 	if (entry1->type && entry2->type) {
 	    status = strcasecomp(entry1->type, entry2->type);
 	    if (status)
-		return (status);
-	    /* else fall to filename comparison */
+		result = status;
 	}
-	return (strcmp(entry1->filename, entry2->filename));
+	break;
 
     case FILE_BY_DATE:
-	if (entry1->date && entry2->date) {
+	if (entry1->date && entry2->date &&
+	    strlen(entry1->date) == 12 &&
+	    strlen(entry2->date) == 12) {
 	    /*
-	     * Make sure we have the correct length. - FM
-	     */
-	    if (strlen(entry1->date) != 12 || strlen(entry2->date) != 12) {
-		return (strcmp(entry1->filename, entry2->filename));
-	    }
-	    /*
-	     * Set the years and date,
-	     * if we don't have them yet.
+	     * Set the years and date, if we don't have them yet.
 	     */
 	    if (!HaveYears) {
 		set_years_and_date();
 	    }
-	    /*
-	     * Set up for sorting in reverse
-	     * chronological order. - FM
-	     */
-	    if (entry1->date[9] == ':') {
-		strcpy(date1, "9999");
-		strcpy(time1, &entry1->date[7]);
-		if (time1[0] == ' ') {
-		    time1[0] = '0';
-		}
-	    } else {
-		strcpy(date1, &entry1->date[8]);
-		strcpy(time1, "00:00");
-	    }
-	    StrNCpy(month, entry1->date, 3);
-	    month[3] = '\0';
-	    for (i = 0; i < 12; i++) {
-		if (!strcasecomp(month, months[i])) {
-		    break;
-		}
-	    }
-	    i++;
-	    sprintf(month, "%02d", i);
-	    strcat(date1, month);
-	    StrNCat(date1, &entry1->date[4], 2);
-	    date1[8] = '\0';
-	    if (date1[6] == ' ' || date1[6] == HT_NON_BREAK_SPACE) {
-		date1[6] = '0';
-	    }
-	    /* If no year given, assume last year if it would otherwise be in
-	     * the future by more than one day.  The one day tolerance is to
-	     * account for a possible timezone difference.  - kw
-	     */
-	    if (date1[0] == '9' && atoi(date1) > TheDate + 1) {
-		for (i = 0; i < 4; i++) {
-		    date1[i] = LastYear[i];
-		}
-	    }
-	    strcat(date1, time1);
-	    if (entry2->date[9] == ':') {
-		strcpy(date2, "9999");
-		strcpy(time2, &entry2->date[7]);
-		if (time2[0] == ' ') {
-		    time2[0] = '0';
-		}
-	    } else {
-		strcpy(date2, &entry2->date[8]);
-		strcpy(time2, "00:00");
-	    }
-	    StrNCpy(month, entry2->date, 3);
-	    month[3] = '\0';
-	    for (i = 0; i < 12; i++) {
-		if (!strcasecomp(month, months[i])) {
-		    break;
-		}
-	    }
-	    i++;
-	    sprintf(month, "%02d", i);
-	    strcat(date2, month);
-	    StrNCat(date2, &entry2->date[4], 2);
-	    date2[8] = '\0';
-	    if (date2[6] == ' ' || date2[6] == HT_NON_BREAK_SPACE) {
-		date2[6] = '0';
-	    }
-	    /* If no year given, assume last year if it would otherwise be in
-	     * the future by more than one day.  The one day tolerance is to
-	     * account for a possible timezone difference.  - kw
-	     */
-	    if (date2[0] == '9' && atoi(date2) > TheDate + 1) {
-		for (i = 0; i < 4; i++) {
-		    date2[i] = LastYear[i];
-		}
-	    }
-	    strcat(date2, time2);
+	    formatDate(date1, entry1);
+	    formatDate(date2, entry2);
 	    /*
 	     * Do the comparison. - FM
 	     */
 	    status = strcasecomp(date2, date1);
 	    if (status)
-		return (status);
-	    /* else fall to filename comparison */
+		result = status;
 	}
-	return (strcmp(entry1->filename, entry2->filename));
+	break;
 
     case FILE_BY_NAME:
     default:
-	return (strcmp(entry1->filename, entry2->filename));
+	break;
     }
+    return result;
 }
 
 #ifdef LONG_LIST

@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTAAUtil.c,v 1.34 2013/04/30 23:16:09 tom Exp $
+ * $LynxId: HTAAUtil.c,v 1.35 2013/05/03 20:32:37 tom Exp $
  *
  * MODULE							HTAAUtil.c
  *		COMMON PARTS OF ACCESS AUTHORIZATION MODULE
@@ -495,8 +495,7 @@ void HTAA_setupReader(char *start_of_headers,
 #endif
     start_pointer = buffer;
     if (start_of_headers) {
-	StrNCpy(buffer, start_of_headers, length);
-	buffer[length] = '\0';
+	LYStrNCpy(buffer, start_of_headers, length);
 	end_pointer = buffer + length;
     } else {
 	*start_pointer = '\0';
