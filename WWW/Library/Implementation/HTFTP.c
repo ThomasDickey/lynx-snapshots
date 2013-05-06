@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFTP.c,v 1.120 2013/05/03 23:53:30 tom Exp $
+ * $LynxId: HTFTP.c,v 1.121 2013/05/06 00:09:50 tom Exp $
  *
  *			File Transfer Protocol (FTP) Client
  *			for a WorldWideWeb browser
@@ -2814,7 +2814,8 @@ static void LYListFmtParse(const char *fmtstr,
 	    FormatStr(&buf, start, data->filename);
 	    PUTS(buf);
 	    END(HTML_A);
-	    *buf = '\0';
+	    if (buf != 0)
+		*buf = '\0';
 	    if (c != 'A' && data->linkname != 0) {
 		PUTS(" -> ");
 		PUTS(data->linkname);

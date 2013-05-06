@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTP.c,v 1.127 2013/01/04 09:42:02 tom Exp $
+ * $LynxId: HTTP.c,v 1.128 2013/05/05 19:36:45 tom Exp $
  *
  * HyperText Tranfer Protocol	- Client implementation		HTTP.c
  * ==========================
@@ -548,8 +548,8 @@ static int HTLoadHTTP(const char *arg,
     BOOL do_post = FALSE;	/* ARE WE posting ? */
     const char *METHOD;
 
-    char *line_buffer;
-    char *line_kept_clean;
+    char *line_buffer = NULL;
+    char *line_kept_clean = NULL;
 
 #ifdef SH_EX			/* FIX BUG by kaz@maczuka.hitachi.ibaraki.jp */
     int real_length_of_line = 0;
@@ -2155,7 +2155,7 @@ static int HTLoadHTTP(const char *arg,
 		    HTAlert(line_buffer);
 		    HTTP_NETCLOSE(s, handle);
 		    status = HT_NO_DATA;
-		    goto done;
+		    goto clean_up;
 
 		default:
 		    /*

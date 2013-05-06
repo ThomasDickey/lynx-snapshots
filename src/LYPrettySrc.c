@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYPrettySrc.c,v 1.25 2010/10/27 00:15:12 tom Exp $
+ * $LynxId: LYPrettySrc.c,v 1.28 2013/05/06 00:53:30 tom Exp $
  *
  * HTML source syntax highlighting
  * by Vlad Harchev <hvv@hippo.ru>
@@ -109,9 +109,20 @@ static void append_close_tag(char *tagname,
     }
 
     subj = typecalloc(HT_tagspec);
+    if (subj == 0)
+	outofmem(__FILE__, "append_close_tag");
+
     subj->element = (HTMLElement) idx;
+
     subj->present = typecallocn(BOOL, (unsigned) nattr);
+
+    if (subj->present == 0)
+	outofmem(__FILE__, "append_close_tag");
+
     subj->value = typecallocn(char *, (unsigned) nattr);
+
+    if (subj->value == 0)
+	outofmem(__FILE__, "append_close_tag");
 
     subj->start = FALSE;
 #ifdef USE_COLOR_STYLE
@@ -399,6 +410,7 @@ void HTMLSRC_init_caches(int dont_exit)
     int i;
     char *p;
     char buf[1000];
+    static char empty[] = "";
 
     CTRACE2(TRACE_CFG, (tfp, "HTMLSRC_init_caches(%d tagspecs)\n", HTL_num_lexemes));
     for (i = 0; i < HTL_num_lexemes; ++i) {
@@ -420,7 +432,7 @@ void HTMLSRC_init_caches(int dont_exit)
 				    TRUE) && !dont_exit) {
 	    failed_init("1st", i);
 	}
-	if (!html_src_parse_tagspec(p ? p + 1 : NULL,
+	if (!html_src_parse_tagspec(p ? p + 1 : empty,
 				    (HTlexeme) i,
 				    FALSE,
 				    FALSE) && !dont_exit) {

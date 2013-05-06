@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYNews.c,v 1.58 2013/05/02 10:39:50 tom Exp $
+ * $LynxId: LYNews.c,v 1.59 2013/05/04 13:15:30 tom Exp $
  */
 #include <HTUtils.h>
 #ifndef DISABLE_NEWS
@@ -450,7 +450,7 @@ char *LYNewsPost(char *newsgroups,
 	    LYCloseTempFP(fc);
 	    StrAllocCopy(postfile, CJKfile);
 	    LYCloseInput(fd);
-	    LYRemoveTemp(my_tempfile);
+	    (void) LYRemoveTemp(my_tempfile);
 	    strcpy(my_tempfile, CJKfile);
 	    CJKfile[0] = '\0';
 	} else {
@@ -482,8 +482,8 @@ char *LYNewsPost(char *newsgroups,
 #endif /* !VMS */
     term_message = FALSE;
     if (!postfile)
-	LYRemoveTemp(my_tempfile);
-    LYRemoveTemp(CJKfile);
+	(void) LYRemoveTemp(my_tempfile);
+    (void) LYRemoveTemp(CJKfile);
     FREE(NewsGroups);
     FREE(References);
 

@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTAnchor.c,v 1.73 2013/05/02 10:46:12 tom Exp $
+ * $LynxId: HTAnchor.c,v 1.74 2013/05/05 19:25:16 tom Exp $
  *
  *	Hypertext "Anchor" Object				HTAnchor.c
  *	==========================
@@ -319,68 +319,72 @@ HTChildAnchor *HTAnchor_findChildAndLink(HTParentAnchor *parent,	/* May not be 0
 	    (ltype == HTInternalLink) ? " (internal link)" : "",
 	    NonNull(href)));
 
-    if (tag && *tag) {
-	child = HTAnchor_findNamedChild(parent->parent, tag);
+    if (parent == 0) {
+	child = 0;
     } else {
-	child = HTAnchor_addChild(parent);
-    }
-
-    if (href && *href) {
-	const char *fragment = NULL;
-	HTParentAnchor0 *dest;
-
-	if (ltype == HTInternalLink && *href == '#') {
-	    dest = parent->parent;
+	if (non_empty(tag)) {
+	    child = HTAnchor_findNamedChild(parent->parent, tag);
 	} else {
-	    const char *relative_to = ((parent->inBASE && *href != '#')
-				       ? parent->content_base
-				       : parent->address);
-	    DocAddress parsed_doc;
-
-	    parsed_doc.address = HTParse(href, relative_to,
-					 PARSE_ALL_WITHOUT_ANCHOR);
-
-	    parsed_doc.post_data = NULL;
-	    parsed_doc.post_content_type = NULL;
-	    if (ltype && parent->post_data && ltype == HTInternalLink) {
-		/* for internal links, find a destination with the same
-		   post data if the source of the link has post data. - kw
-		   Example: LYNXIMGMAP: */
-		parsed_doc.post_data = parent->post_data;
-		parsed_doc.post_content_type = parent->post_content_type;
-	    }
-	    parsed_doc.bookmark = NULL;
-	    parsed_doc.isHEAD = FALSE;
-	    parsed_doc.safe = FALSE;
-
-	    dest = HTAnchor_findAddress_in_adult_table(&parsed_doc);
-	    FREE(parsed_doc.address);
+	    child = HTAnchor_addChild(parent);
 	}
 
-	/*
-	 * [from HTAnchor_findAddress()]
-	 * If the address represents a sub-anchor, we load its parent (above),
-	 * then we create a named child anchor within that parent.
-	 */
-	fragment = (*href == '#') ? href + 1 : HTParseAnchor(href);
+	if (non_empty(href)) {
+	    const char *fragment = NULL;
+	    HTParentAnchor0 *dest;
 
-	if (*fragment)
-	    dest = (HTParentAnchor0 *) HTAnchor_findNamedChild(dest, fragment);
+	    if (ltype == HTInternalLink && *href == '#') {
+		dest = parent->parent;
+	    } else {
+		const char *relative_to = ((parent->inBASE && *href != '#')
+					   ? parent->content_base
+					   : parent->address);
+		DocAddress parsed_doc;
 
-	if (tag && *tag) {
-	    if (child->dest) {	/* DUPLICATE_ANCHOR_NAME_WORKAROUND  - kw */
-		CTRACE((tfp,
-			"*** Duplicate ChildAnchor %p named `%s'",
-			(void *) child, tag));
-		if ((HTAnchor *) dest != child->dest || ltype != child->type) {
+		parsed_doc.address = HTParse(href, relative_to,
+					     PARSE_ALL_WITHOUT_ANCHOR);
+
+		parsed_doc.post_data = NULL;
+		parsed_doc.post_content_type = NULL;
+		if (ltype && parent->post_data && ltype == HTInternalLink) {
+		    /* for internal links, find a destination with the same
+		       post data if the source of the link has post data. - kw
+		       Example: LYNXIMGMAP: */
+		    parsed_doc.post_data = parent->post_data;
+		    parsed_doc.post_content_type = parent->post_content_type;
+		}
+		parsed_doc.bookmark = NULL;
+		parsed_doc.isHEAD = FALSE;
+		parsed_doc.safe = FALSE;
+
+		dest = HTAnchor_findAddress_in_adult_table(&parsed_doc);
+		FREE(parsed_doc.address);
+	    }
+
+	    /*
+	     * [from HTAnchor_findAddress()]
+	     * If the address represents a sub-anchor, we load its parent (above),
+	     * then we create a named child anchor within that parent.
+	     */
+	    fragment = (*href == '#') ? href + 1 : HTParseAnchor(href);
+
+	    if (*fragment)
+		dest = (HTParentAnchor0 *) HTAnchor_findNamedChild(dest, fragment);
+
+	    if (tag && *tag) {
+		if (child->dest) {	/* DUPLICATE_ANCHOR_NAME_WORKAROUND  - kw */
 		    CTRACE((tfp,
-			    ", different dest %p or type, creating unnamed child\n",
-			    (void *) child->dest));
-		    child = HTAnchor_addChild(parent);
+			    "*** Duplicate ChildAnchor %p named `%s'",
+			    (void *) child, tag));
+		    if ((HTAnchor *) dest != child->dest || ltype != child->type) {
+			CTRACE((tfp,
+				", different dest %p or type, creating unnamed child\n",
+				(void *) child->dest));
+			child = HTAnchor_addChild(parent);
+		    }
 		}
 	    }
+	    HTAnchor_link(child, (HTAnchor *) dest, ltype);
 	}
-	HTAnchor_link(child, (HTAnchor *) dest, ltype);
     }
     return child;
 }

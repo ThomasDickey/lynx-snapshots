@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMap.c,v 1.45 2013/04/30 23:16:59 tom Exp $
+ * $LynxId: LYMap.c,v 1.47 2013/05/06 00:53:46 tom Exp $
  *			Lynx Client-side Image MAP Support	       LYMap.c
  *			==================================
  *
@@ -273,7 +273,7 @@ BOOL LYAddMapElement(char *map,
     else
 	StrAllocCopy(tmp->title, address);
     if (track_internal_links)
-	tmp->intern_flag = intern_flag;
+	tmp->intern_flag = (BOOLEAN) intern_flag;
     HTList_appendObject(theMap->elements, tmp);
 
     CTRACE((tfp,
@@ -370,15 +370,20 @@ static HTList *get_the_list(DocAddress *wwwdoc,
 			    HTParentAnchor *anchor,
 			    HTParentAnchor **punderlying)
 {
-    if (anchor && anchor->post_data) {
+    HTList *result;
+
+    if (anchor->post_data) {
 	fill_DocAddress(wwwdoc, address, anchor, punderlying);
-	if (non_empty(punderlying))
-	    return (*punderlying)->imaps;
-	return anchor->imaps;
+	if (non_empty(punderlying)) {
+	    result = (*punderlying)->imaps;
+	} else {
+	    result = anchor->imaps;
+	}
     } else {
 	fill_DocAddress(wwwdoc, address, NULL, punderlying);
-	return LynxMaps;
+	result = LynxMaps;
     }
+    return result;
 }
 
 /*	LYLoadIMGmap - F.Macrides (macrides@sci.wfeb.edu)

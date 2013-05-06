@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFormat.c,v 1.78 2013/05/01 10:52:13 tom Exp $
+ * $LynxId: HTFormat.c,v 1.80 2013/05/05 20:19:02 tom Exp $
  *
  *		Manage different file formats			HTFormat.c
  *		=============================
@@ -1296,11 +1296,7 @@ static int HTBzFileCopy(BZFILE * bzfp, HTStream *sink)
 
 	if (HTCheckForInterrupt()) {
 	    _HTProgress(TRANSFER_INTERRUPTED);
-	    if (bytes) {
-		rv = HT_INTERRUPTED;
-	    } else {
-		rv = -1;
-	    }
+	    rv = HT_INTERRUPTED;
 	    break;
 	}
     }				/* next bufferload */
@@ -1450,48 +1446,54 @@ int HTParseFile(HTFormat rep_in,
     HTStream *stream;
     HTStreamClass targetClass;
     int rv;
+    int result;
 
-    if (fp == NULL)
-	return HT_LOADED;
-
-    stream = HTStreamStack(rep_in, format_out, sink, anchor);
-
-    if (!stream) {
-	char *buffer = 0;
-
-	if (LYCancelDownload) {
-	    LYCancelDownload = FALSE;
-	    return -1;
-	}
-	HTSprintf0(&buffer, CANNOT_CONVERT_I_TO_O,
-		   HTAtom_name(rep_in), HTAtom_name(format_out));
-	CTRACE((tfp, "HTFormat(in HTParseFile): %s\n", buffer));
-	rv = HTLoadError(sink, 501, buffer);
-	FREE(buffer);
-	return rv;
-    }
-
-    /*
-     * Push the data down the stream
-     *
-     * @@ Bug:  This decision ought to be made based on "encoding" rather than
-     * on content-type.  @@@ When we handle encoding.  The current method
-     * smells anyway.
-     */
-    targetClass = *(stream->isa);	/* Copy pointers to procedures */
-    rv = HTFileCopy(fp, stream);
-    if (rv == -1 || rv == HT_INTERRUPTED) {
-	(*targetClass._abort) (stream, NULL);
+    if (fp == NULL) {
+	result = HT_LOADED;
     } else {
-	(*targetClass._free) (stream);
-    }
+	stream = HTStreamStack(rep_in, format_out, sink, anchor);
 
-    if (rv == -1)
-	return HT_NO_DATA;
-    else if (rv == HT_INTERRUPTED || (rv > 0 && rv != HT_LOADED))
-	return HT_PARTIAL_CONTENT;
-    else
-	return HT_LOADED;
+	if (!stream || !stream->isa) {
+	    char *buffer = 0;
+
+	    if (LYCancelDownload) {
+		LYCancelDownload = FALSE;
+		result = -1;
+	    } else {
+		HTSprintf0(&buffer, CANNOT_CONVERT_I_TO_O,
+			   HTAtom_name(rep_in), HTAtom_name(format_out));
+		CTRACE((tfp, "HTFormat(in HTParseFile): %s\n", buffer));
+		rv = HTLoadError(sink, 501, buffer);
+		FREE(buffer);
+		result = rv;
+	    }
+	} else {
+
+	    /*
+	     * Push the data down the stream
+	     *
+	     * @@ Bug:  This decision ought to be made based on "encoding"
+	     * rather than on content-type.  @@@ When we handle encoding.  The
+	     * current method smells anyway.
+	     */
+	    targetClass = *(stream->isa);	/* Copy pointers to procedures */
+	    rv = HTFileCopy(fp, stream);
+	    if (rv == -1 || rv == HT_INTERRUPTED) {
+		(*targetClass._abort) (stream, NULL);
+	    } else {
+		(*targetClass._free) (stream);
+	    }
+
+	    if (rv == -1) {
+		result = HT_NO_DATA;
+	    } else if (rv == HT_INTERRUPTED || (rv > 0 && rv != HT_LOADED)) {
+		result = HT_PARTIAL_CONTENT;
+	    } else {
+		result = HT_LOADED;
+	    }
+	}
+    }
+    return result;
 }
 
 #ifdef USE_SOURCE_CACHE
@@ -1520,9 +1522,10 @@ int HTParseMem(HTFormat rep_in,
     HTStream *stream;
     HTStreamClass targetClass;
     int rv;
+    int result;
 
     stream = HTStreamStack(rep_in, format_out, sink, anchor);
-    if (!stream) {
+    if (!stream || !stream->isa) {
 	char *buffer = 0;
 
 	HTSprintf0(&buffer, CANNOT_CONVERT_I_TO_O,
@@ -1530,15 +1533,17 @@ int HTParseMem(HTFormat rep_in,
 	CTRACE((tfp, "HTFormat(in HTParseMem): %s\n", buffer));
 	rv = HTLoadError(sink, 501, buffer);
 	FREE(buffer);
-	return rv;
-    }
+	result = rv;
+    } else {
 
-    /* Push the data down the stream
-     */
-    targetClass = *(stream->isa);
-    (void) HTMemCopy(chunk, stream);
-    (*targetClass._free) (stream);
-    return HT_LOADED;
+	/* Push the data down the stream
+	 */
+	targetClass = *(stream->isa);
+	(void) HTMemCopy(chunk, stream);
+	(*targetClass._free) (stream);
+	result = HT_LOADED;
+    }
+    return result;
 }
 #endif
 
@@ -1585,47 +1590,52 @@ int HTParseGzFile(HTFormat rep_in,
     HTStream *stream;
     HTStreamClass targetClass;
     int rv;
+    int result;
 
     stream = HTStreamStack(rep_in, format_out, sink, anchor);
 
-    if (!stream) {
+    if (!stream || !stream->isa) {
 	char *buffer = 0;
 
 	HTCloseGzFile(gzfp);
 	if (LYCancelDownload) {
 	    LYCancelDownload = FALSE;
-	    return -1;
+	    result = -1;
+	} else {
+	    HTSprintf0(&buffer, CANNOT_CONVERT_I_TO_O,
+		       HTAtom_name(rep_in), HTAtom_name(format_out));
+	    CTRACE((tfp, "HTFormat(in HTParseGzFile): %s\n", buffer));
+	    rv = HTLoadError(sink, 501, buffer);
+	    FREE(buffer);
+	    result = rv;
 	}
-	HTSprintf0(&buffer, CANNOT_CONVERT_I_TO_O,
-		   HTAtom_name(rep_in), HTAtom_name(format_out));
-	CTRACE((tfp, "HTFormat(in HTParseGzFile): %s\n", buffer));
-	rv = HTLoadError(sink, 501, buffer);
-	FREE(buffer);
-	return rv;
-    }
-
-    /*
-     * Push the data down the stream
-     *
-     * @@ Bug:  This decision ought to be made based on "encoding" rather than
-     * on content-type.  @@@ When we handle encoding.  The current method
-     * smells anyway.
-     */
-    targetClass = *(stream->isa);	/* Copy pointers to procedures */
-    rv = HTGzFileCopy(gzfp, stream);
-    if (rv == -1 || rv == HT_INTERRUPTED) {
-	(*targetClass._abort) (stream, NULL);
     } else {
-	(*targetClass._free) (stream);
-    }
 
-    HTCloseGzFile(gzfp);
-    if (rv == -1)
-	return HT_NO_DATA;
-    else if (rv == HT_INTERRUPTED || (rv > 0 && rv != HT_LOADED))
-	return HT_PARTIAL_CONTENT;
-    else
-	return HT_LOADED;
+	/*
+	 * Push the data down the stream
+	 *
+	 * @@ Bug:  This decision ought to be made based on "encoding" rather than
+	 * on content-type.  @@@ When we handle encoding.  The current method
+	 * smells anyway.
+	 */
+	targetClass = *(stream->isa);	/* Copy pointers to procedures */
+	rv = HTGzFileCopy(gzfp, stream);
+	if (rv == -1 || rv == HT_INTERRUPTED) {
+	    (*targetClass._abort) (stream, NULL);
+	} else {
+	    (*targetClass._free) (stream);
+	}
+
+	HTCloseGzFile(gzfp);
+	if (rv == -1) {
+	    result = HT_NO_DATA;
+	} else if (rv == HT_INTERRUPTED || (rv > 0 && rv != HT_LOADED)) {
+	    result = HT_PARTIAL_CONTENT;
+	} else {
+	    result = HT_LOADED;
+	}
+    }
+    return result;
 }
 
 /*	HTParseZzFile
@@ -1653,47 +1663,52 @@ int HTParseZzFile(HTFormat rep_in,
     HTStream *stream;
     HTStreamClass targetClass;
     int rv;
+    int result;
 
     stream = HTStreamStack(rep_in, format_out, sink, anchor);
 
-    if (!stream) {
+    if (!stream || !stream->isa) {
 	char *buffer = 0;
 
 	fclose(zzfp);
 	if (LYCancelDownload) {
 	    LYCancelDownload = FALSE;
-	    return -1;
+	    result = -1;
+	} else {
+	    HTSprintf0(&buffer, CANNOT_CONVERT_I_TO_O,
+		       HTAtom_name(rep_in), HTAtom_name(format_out));
+	    CTRACE((tfp, "HTFormat(in HTParseGzFile): %s\n", buffer));
+	    rv = HTLoadError(sink, 501, buffer);
+	    FREE(buffer);
+	    result = rv;
 	}
-	HTSprintf0(&buffer, CANNOT_CONVERT_I_TO_O,
-		   HTAtom_name(rep_in), HTAtom_name(format_out));
-	CTRACE((tfp, "HTFormat(in HTParseGzFile): %s\n", buffer));
-	rv = HTLoadError(sink, 501, buffer);
-	FREE(buffer);
-	return rv;
-    }
-
-    /*
-     * Push the data down the stream
-     *
-     * @@ Bug:  This decision ought to be made based on "encoding" rather than
-     * on content-type.  @@@ When we handle encoding.  The current method
-     * smells anyway.
-     */
-    targetClass = *(stream->isa);	/* Copy pointers to procedures */
-    rv = HTZzFileCopy(zzfp, stream);
-    if (rv == -1 || rv == HT_INTERRUPTED) {
-	(*targetClass._abort) (stream, NULL);
     } else {
-	(*targetClass._free) (stream);
-    }
 
-    fclose(zzfp);
-    if (rv == -1)
-	return HT_NO_DATA;
-    else if (rv == HT_INTERRUPTED || (rv > 0 && rv != HT_LOADED))
-	return HT_PARTIAL_CONTENT;
-    else
-	return HT_LOADED;
+	/*
+	 * Push the data down the stream
+	 *
+	 * @@ Bug:  This decision ought to be made based on "encoding" rather than
+	 * on content-type.  @@@ When we handle encoding.  The current method
+	 * smells anyway.
+	 */
+	targetClass = *(stream->isa);	/* Copy pointers to procedures */
+	rv = HTZzFileCopy(zzfp, stream);
+	if (rv == -1 || rv == HT_INTERRUPTED) {
+	    (*targetClass._abort) (stream, NULL);
+	} else {
+	    (*targetClass._free) (stream);
+	}
+
+	fclose(zzfp);
+	if (rv == -1) {
+	    result = HT_NO_DATA;
+	} else if (rv == HT_INTERRUPTED || (rv > 0 && rv != HT_LOADED)) {
+	    result = HT_PARTIAL_CONTENT;
+	} else {
+	    result = HT_LOADED;
+	}
+    }
+    return result;
 }
 #endif /* USE_ZLIB */
 
@@ -1729,47 +1744,52 @@ int HTParseBzFile(HTFormat rep_in,
     HTStream *stream;
     HTStreamClass targetClass;
     int rv;
+    int result;
 
     stream = HTStreamStack(rep_in, format_out, sink, anchor);
 
-    if (!stream) {
+    if (!stream || !stream->isa) {
 	char *buffer = 0;
 
 	HTCloseBzFile(bzfp);
 	if (LYCancelDownload) {
 	    LYCancelDownload = FALSE;
-	    return -1;
+	    result = -1;
+	} else {
+	    HTSprintf0(&buffer, CANNOT_CONVERT_I_TO_O,
+		       HTAtom_name(rep_in), HTAtom_name(format_out));
+	    CTRACE((tfp, "HTFormat(in HTParseBzFile): %s\n", buffer));
+	    rv = HTLoadError(sink, 501, buffer);
+	    FREE(buffer);
+	    result = rv;
 	}
-	HTSprintf0(&buffer, CANNOT_CONVERT_I_TO_O,
-		   HTAtom_name(rep_in), HTAtom_name(format_out));
-	CTRACE((tfp, "HTFormat(in HTParseBzFile): %s\n", buffer));
-	rv = HTLoadError(sink, 501, buffer);
-	FREE(buffer);
-	return rv;
-    }
-
-    /*
-     * Push the data down the stream
-     *
-     * @@ Bug:  This decision ought to be made based on "encoding" rather than
-     * on content-type.  @@@ When we handle encoding.  The current method
-     * smells anyway.
-     */
-    targetClass = *(stream->isa);	/* Copy pointers to procedures */
-    rv = HTBzFileCopy(bzfp, stream);
-    if (rv == -1 || rv == HT_INTERRUPTED) {
-	(*targetClass._abort) (stream, NULL);
     } else {
-	(*targetClass._free) (stream);
-    }
 
-    HTCloseBzFile(bzfp);
-    if (rv == -1)
-	return HT_NO_DATA;
-    else if (rv == HT_INTERRUPTED || (rv > 0 && rv != HT_LOADED))
-	return HT_PARTIAL_CONTENT;
-    else
-	return HT_LOADED;
+	/*
+	 * Push the data down the stream
+	 *
+	 * @@ Bug:  This decision ought to be made based on "encoding" rather than
+	 * on content-type.  @@@ When we handle encoding.  The current method
+	 * smells anyway.
+	 */
+	targetClass = *(stream->isa);	/* Copy pointers to procedures */
+	rv = HTBzFileCopy(bzfp, stream);
+	if (rv == -1 || rv == HT_INTERRUPTED) {
+	    (*targetClass._abort) (stream, NULL);
+	} else {
+	    (*targetClass._free) (stream);
+	}
+
+	HTCloseBzFile(bzfp);
+	if (rv == -1) {
+	    result = HT_NO_DATA;
+	} else if (rv == HT_INTERRUPTED || (rv > 0 && rv != HT_LOADED)) {
+	    result = HT_PARTIAL_CONTENT;
+	} else {
+	    result = HT_LOADED;
+	}
+    }
+    return result;
 }
 #endif /* USE_BZLIB */
 

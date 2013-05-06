@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTCP.c,v 1.124 2012/11/18 22:24:15 tom Exp $
+ * $LynxId: HTTCP.c,v 1.125 2013/05/06 00:07:19 tom Exp $
  *
  *			Generic Communication Code		HTTCP.c
  *			==========================
@@ -486,7 +486,6 @@ static unsigned read_hostent(int fd, char *buffer, size_t length)
 	    while (next_ptr[num_aliases] != 0) {
 		++num_aliases;
 	    }
-	    next_ptr += (num_aliases + 1);
 	    next_char += (size_t) (num_aliases + 1) * sizeof(data->h_aliases[0]);
 	}
 
@@ -570,6 +569,7 @@ static size_t fill_rehostent(void **rehostent,
 
     if ((result = calloc(need, sizeof(char))) == 0)
 	  outofmem(__FILE__, "fill_rehostent");
+
     *rehostent = result;
 
     data = (LYNX_HOSTENT *) (void *) result;
@@ -578,6 +578,7 @@ static size_t fill_rehostent(void **rehostent,
     data->h_length = phost->h_length;
 
     p_next_char = result + sizeof(LYNX_HOSTENT);
+
     p_next_charptr = (char **) (void *) p_next_char;
     if (phost->h_addr_list)
 	p_next_char += (size_t) (num_addrs + 1) * sizeof(phost->h_addr_list[0]);
@@ -1472,8 +1473,8 @@ static size_t fill_addrinfo(void **buffer,
     }
     CTRACE((tfp, "...fill_addrinfo %d:%lu\n", limit, (unsigned long) need));
 
-    if ((result = calloc(need, sizeof(char))) == 0)
-	  outofmem(__FILE__, "fill_addrinfo");
+    if ((result = (LYNX_ADDRINFO *) calloc(1, need)) == 0)
+	outofmem(__FILE__, "fill_addrinfo");
 
     *buffer = actual = result;
     heap = ((char *) actual) + ((size_t) limit * sizeof(LYNX_ADDRINFO));
@@ -1485,12 +1486,12 @@ static size_t fill_addrinfo(void **buffer,
 	 * packed, uninitialized gaps make it hard to analyse with valgrind.
 	 */
 	/* *INDENT-EQLS* */
-	actual->ai_flags    = phost->ai_flags;
-	actual->ai_family   = phost->ai_family;
+	actual->ai_flags = phost->ai_flags;
+	actual->ai_family = phost->ai_family;
 	actual->ai_socktype = phost->ai_socktype;
 	actual->ai_protocol = phost->ai_protocol;
-	actual->ai_addrlen  = phost->ai_addrlen;
-	actual->ai_addr     = (struct sockaddr *) (void *) heap;
+	actual->ai_addrlen = phost->ai_addrlen;
+	actual->ai_addr = (struct sockaddr *) (void *) heap;
 
 	MemCpy(heap, phost->ai_addr, phost->ai_addrlen);
 	heap += phost->ai_addrlen;
