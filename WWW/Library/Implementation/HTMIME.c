@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTMIME.c,v 1.86 2013/05/03 20:52:54 tom Exp $
+ * $LynxId: HTMIME.c,v 1.87 2013/05/05 20:07:25 tom Exp $
  *
  *			MIME Message Parse			HTMIME.c
  *			==================
@@ -2447,7 +2447,7 @@ void HTmmdecode(char **target,
 	    }
 	    if (base64)
 		HTmmdec_base64(&m2buf, mmbuf);
-	    if (quote)
+	    else
 		HTmmdec_quote(&m2buf, mmbuf);
 	    for (t = m2buf; *t;)
 		*u++ = *t++;

@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMail.c,v 1.92 2013/05/03 20:29:37 tom Exp $
+ * $LynxId: LYMail.c,v 1.94 2013/05/05 21:41:23 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTParse.h>
@@ -108,7 +108,7 @@ static void extract_field(char **dst,
 	}
 	cp++;
     }
-    CTRACE((tfp, "extract_field(%s) = '%s'\n", keyword, NONNULL(*dst)));
+    CTRACE((tfp, "extract_field(%s) = '%s'\n", keyword, *dst));
 }
 
 /*
@@ -881,16 +881,16 @@ void mailform(const char *mailto_address,
     FREE(command);
     LYSleepAlert();
     start_curses();
-    LYRemoveTemp(my_tmpfile);
+    (void) LYRemoveTemp(my_tmpfile);
     if (isPMDF)
-	LYRemoveTemp(hdrfile);
+	(void) LYRemoveTemp(hdrfile);
 #else /* DOS */
     LYSendMailFile(address,
 		   my_tmpfile,
 		   subject,
 		   ccaddr,
 		   SENDING_FORM_CONTENT);
-    LYRemoveTemp(my_tmpfile);
+    (void) LYRemoveTemp(my_tmpfile);
 #endif /* USE_VMS_MAILER */
 #endif /* CAN_PIPE_TO_MAILER */
 
@@ -1095,9 +1095,9 @@ void mailmsg(int cur,
     LYSystem(command);		/* VMS */
     FREE(command);
     FREE(cmd);
-    LYRemoveTemp(my_tmpfile);
+    (void) LYRemoveTemp(my_tmpfile);
     if (isPMDF) {
-	LYRemoveTemp(hdrfile);
+	(void) LYRemoveTemp(hdrfile);
     }
 #else /* DOS */
     LYSendMailFile(address,
@@ -1105,7 +1105,7 @@ void mailmsg(int cur,
 		   subject,
 		   ccaddr,
 		   "");
-    LYRemoveTemp(my_tmpfile);
+    (void) LYRemoveTemp(my_tmpfile);
 #endif /* USE_VMS_MAILER */
 #endif /* CAN_PIPE_TO_MAILER */
 
@@ -1723,7 +1723,7 @@ void reply_by_mail(char *mail_address,
 			   the_subject,
 			   ccaddr,
 			   SENDING_COMMENT);
-	    LYRemoveTemp(tmpfile2);	/* Delete the tmpfile. */
+	    (void) LYRemoveTemp(tmpfile2);	/* Delete the tmpfile. */
 #endif /* CAN_PIPE_TO_MAILER */
 	    LYCloseInput(fd);	/* Close the tmpfile. */
 	}
@@ -1745,11 +1745,11 @@ void reply_by_mail(char *mail_address,
 #if USE_VMS_MAILER
     while (LYRemoveTemp(my_tmpfile) == 0) ;	/* Delete the tmpfile(s). */
     if (isPMDF) {
-	LYRemoveTemp(hdrfile);	/* Delete the hdrfile. */
+	(void) LYRemoveTemp(hdrfile);	/* Delete the hdrfile. */
     }
 #else
     FREE(header);
-    LYRemoveTemp(my_tmpfile);	/* Delete the tmpfile. */
+    (void) LYRemoveTemp(my_tmpfile);	/* Delete the tmpfile. */
 #endif /* VMS */
 
     FREE(from_address);

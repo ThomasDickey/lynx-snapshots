@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYReadCFG.c,v 1.171 2013/04/30 09:52:44 tom Exp $
+ * $LynxId: LYReadCFG.c,v 1.172 2013/05/04 12:24:06 tom Exp $
  */
 #ifndef NO_RULES
 #include <HTRules.h>
@@ -1969,8 +1969,12 @@ BOOL LYSetConfigValue(const char *name,
 #ifdef VMS
 		Define_VMSLogical(temp_name, value);
 #else
-		if (q->str_value == 0)
+		if (q->str_value == 0) {
 		    q->str_value = typecalloc(char *);
+
+		    if (q->str_value == 0)
+			outofmem(__FILE__, "LYSetConfigValue");
+		}
 
 		HTSprintf0(q->str_value, "%s=%s", temp_name, value);
 		putenv(*(q->str_value));

@@ -1,5 +1,5 @@
 /*
- * $LynxId: GridText.c,v 1.258 2013/05/03 20:29:37 tom Exp $
+ * $LynxId: GridText.c,v 1.264 2013/05/06 00:06:53 tom Exp $
  *
  *		Character grid hypertext object
  *		===============================
@@ -236,13 +236,13 @@ There are 3 functions - POOL_NEW, POOL_FREE, and ALLOC_IN_POOL.
 
 #define POOLallocstyles(ptr, n)     ptr = ALLOC_IN_POOL(&HTMainText->pool, (unsigned) ((n) * sizeof(pool_data)))
 #define POOLallocHTLine(ptr, size)  ptr = (HTLine*) ALLOC_IN_POOL(&HTMainText->pool, (unsigned) LINE_SIZE(size))
-#define POOLallocstring(ptr, len)   ptr = (char*) ALLOC_IN_POOL(&HTMainText->pool, (unsigned) (len + 1))
+#define POOLallocstring(ptr, len)   ptr = (char*) ALLOC_IN_POOL(&HTMainText->pool, (unsigned) ((len) + 1))
 #define POOLtypecalloc(T, ptr)      ptr = (T*) ALLOC_IN_POOL(&HTMainText->pool, (unsigned) sizeof(T))
 
 /**************************************************************************/
 /*
  * Allocates 'n' items in the pool of type 'HTPool' pointed by 'poolptr'.
- * Returns a pointer to the "allocated" memory or NULL if fails.
+ * Returns a pointer to the "allocated" memory if successful.
  * Updates 'poolptr' if necessary.
  */
 static void *ALLOC_IN_POOL(HTPool ** ppoolptr, unsigned request)
@@ -253,7 +253,7 @@ static void *ALLOC_IN_POOL(HTPool ** ppoolptr, unsigned request)
     unsigned j;
 
     if (!pool) {
-	ptr = NULL;
+	outofmem(__FILE__, "ALLOC_IN_POOL");
     } else {
 	n = request;
 	if (n == 0)
@@ -270,7 +270,7 @@ static void *ALLOC_IN_POOL(HTPool ** ppoolptr, unsigned request)
 	    HTPool *newpool = (HTPool *) LY_CALLOC((size_t) 1, sizeof(HTPool));
 
 	    if (!newpool) {
-		ptr = NULL;
+		outofmem(__FILE__, "ALLOC_IN_POOL");
 	    } else {
 		newpool->prev = pool;
 		newpool->used = n;
@@ -3517,7 +3517,7 @@ static void do_new_line(HText *text, const char *fn, int ln)
  */
 static void blank_lines(HText *text, int newlines)
 {
-    if (HText_LastLineEmpty(text, FALSE)) {	/* No text on current line */
+    if (HText_TrueEmptyLine(text->last_line, text, FALSE)) {	/* No text on current line */
 	HTLine *line = text->last_line->prev;
 	BOOL first = (BOOL) (line == text->last_line);
 
@@ -5758,26 +5758,26 @@ void HText_endAppend(HText *text)
     /*
      * Get the first line.
      */
-    line_ptr = FirstHTLine(text);
-
-    /*
-     * Remove the blank lines at the end of document.
-     */
-    while (text->last_line->data[0] == '\0' && text->Lines > 2) {
-	HTLine *next_to_the_last_line = text->last_line->prev;
-
-	CTRACE((tfp, "GridText: Removing bottom blank line: `%s'\n",
-		text->last_line->data));
+    if ((line_ptr = FirstHTLine(text)) != 0) {
 	/*
-	 * line_ptr points to the first line.
+	 * Remove the blank lines at the end of document.
 	 */
-	next_to_the_last_line->next = line_ptr;
-	line_ptr->prev = next_to_the_last_line;
-	freeHTLine(text, text->last_line);
-	text->last_line = next_to_the_last_line;
-	text->Lines--;
-	CTRACE((tfp, "GridText: New bottom line: `%s'\n",
-		text->last_line->data));
+	while (text->last_line->data[0] == '\0' && text->Lines > 2) {
+	    HTLine *next_to_the_last_line = text->last_line->prev;
+
+	    CTRACE((tfp, "GridText: Removing bottom blank line: `%s'\n",
+		    text->last_line->data));
+	    /*
+	     * line_ptr points to the first line.
+	     */
+	    next_to_the_last_line->next = line_ptr;
+	    line_ptr->prev = next_to_the_last_line;
+	    freeHTLine(text, text->last_line);
+	    text->last_line = next_to_the_last_line;
+	    text->Lines--;
+	    CTRACE((tfp, "GridText: New bottom line: `%s'\n",
+		    text->last_line->data));
+	}
     }
 
     /*
@@ -7949,6 +7949,8 @@ static AnchorIndex **allocAnchorIndex(unsigned *size)
     *size = countHTLines();
     if (*size != 0) {
 	result = typecallocn(AnchorIndex *, *size + 1);
+	if (result == NULL)
+	    outofmem(__FILE__, "allocAnchorIndex");
 
 	for (anchor = HTMainText->first_anchor;
 	     anchor != NULL;
@@ -8320,7 +8322,7 @@ void print_crawl_to_fd(FILE *fp, char *thelink,
 	    }
 	}
 
-	if (line == HTMainText->last_line) {
+	if (!HTMainText || (line == HTMainText->last_line)) {
 	    break;
 	}
     }
@@ -8769,6 +8771,20 @@ void HTuncache_current_document(void)
     }
 }
 
+/*
+ * This magic FREE(anchor->UCStages) call
+ * stolen from HTuncache_current_document() above.
+ */
+static void magicUncache(void)
+{
+    if (!(HTOutputFormat && HTOutputFormat == WWW_SOURCE)) {
+	FREE(HTMainAnchor->UCStages);
+    }
+    /* avoid null-reference later */
+    if (!HTOutputFormat)
+	HTOutputFormat = WWW_SOURCE;
+}
+
 #ifdef USE_SOURCE_CACHE
 
 /* dummy - kw */
@@ -8815,13 +8831,7 @@ BOOLEAN HTreparse_document(void)
 	CTRACE((tfp, "SourceCache: Reparsing file %s\n",
 		HTMainAnchor->source_cache_file));
 
-	/*
-	 * This magic FREE(anchor->UCStages) call
-	 * stolen from HTuncache_current_document() above.
-	 */
-	if (!(HTOutputFormat && HTOutputFormat == WWW_SOURCE)) {
-	    FREE(HTMainAnchor->UCStages);
-	}
+	magicUncache();
 
 	/*
 	 * This is more or less copied out of HTLoadFile(), except we don't
@@ -8876,13 +8886,7 @@ BOOLEAN HTreparse_document(void)
 	CTRACE((tfp, "SourceCache: Reparsing from memory chunk %p\n",
 		(void *) HTMainAnchor->source_cache_chunk));
 
-	/*
-	 * This magic FREE(anchor->UCStages) call
-	 * stolen from HTuncache_current_document() above.
-	 */
-	if (!(HTOutputFormat && HTOutputFormat == WWW_SOURCE)) {
-	    FREE(HTMainAnchor->UCStages);
-	}
+	magicUncache();
 
 	if (HTMainAnchor->content_type) {
 	    format = HTAtom_for(HTMainAnchor->content_type);
@@ -9265,10 +9269,11 @@ int HText_getCurrentColumn(HText *text)
     BOOL IgnoreSpaces = FALSE;
 
     if (text) {
-	column = (text->in_line_1 ?
-		  (int) text->style->indent1st : (int) text->style->leftIndent)
-	    + HText_LastLineSize(text, IgnoreSpaces)
-	    + (int) text->last_line->offset;
+	column = ((text->in_line_1
+		   ? (int) text->style->indent1st
+		   : (int) text->style->leftIndent)
+		  + (int) text->last_line->offset
+		  + HText_LastLineSize(text, IgnoreSpaces));
     }
     return column;
 }
@@ -12659,8 +12664,7 @@ static void insert_new_textarea_anchor(TextAnchor **curr_anchor, HTLine **exit_h
      * YAS (Yet Another Struct), but there are too many structs{}
      * floating around in here, as it is.  IMNSHO.]
      */
-    for (htline = FirstHTLine(HTMainText), i = 0;
-	 anchor->line_num != i; i++) {
+    for (htline = FirstHTLine(HTMainText), i = 0; anchor->line_num != i; i++) {
 	htline = htline->next;
 	if (htline == HTMainText->last_line)
 	    break;
@@ -13474,8 +13478,8 @@ int HText_InsertFile(LinkInfo * form_link)
     FormInfo *f = 0;
     HTLine *l = 0;
 
-    char *fbuf;
-    char *line;
+    char *fbuf = 0;
+    char *line = 0;
     char *lp;
     char *cp;
     int entry_line = form_link->anchor_line_num;
@@ -13568,6 +13572,8 @@ int HText_InsertFile(LinkInfo * form_link)
 
     if (anchor_ptr == NULL) {
 	CTRACE((tfp, "BUG: could not find anchor for TEXTAREA.\n"));
+	FREE(line);
+	FREE(fbuf);
 	return 0;
     }
 
@@ -13601,20 +13607,21 @@ int HText_InsertFile(LinkInfo * form_link)
 
     /*  Init all the fields in the new TextAnchor.                 */
     /*  [anything "special" needed based on ->show_anchor value ?] */
-    a->next = anchor_ptr;
-    a->number = anchor_ptr->number;
+    /* *INDENT-EQLS* */
+    a->next        = anchor_ptr;
+    a->number      = anchor_ptr->number;
     a->show_number = anchor_ptr->show_number;
-    a->line_pos = anchor_ptr->line_pos;
-    a->extent = anchor_ptr->extent;
+    a->line_pos    = anchor_ptr->line_pos;
+    a->extent      = anchor_ptr->extent;
     a->sgml_offset = SGML_offset();
-    a->line_num = anchor_ptr->line_num;
+    a->line_num    = anchor_ptr->line_num;
     LYCopyHiText(a, anchor_ptr);
-    a->link_type = anchor_ptr->link_type;
+    a->link_type   = anchor_ptr->link_type;
     a->input_field = f;
     a->show_anchor = anchor_ptr->show_anchor;
     a->inUnderline = anchor_ptr->inUnderline;
     a->expansion_anch = TRUE;
-    a->anchor = NULL;
+    a->anchor      = NULL;
 
     /*  Just the (seemingly) relevant fields in the new FormInfo.  */
     /*  [do we need to do anything "special" based on ->disabled]  */
@@ -14092,7 +14099,7 @@ static void move_to_glyph(int YP,
      */
     while ((i <= last_i) && data < end_of_data && (*data != '\0')) {
 
-	if (data && hightext && i >= XP && !incurlink) {
+	if (hightext && i >= XP && !incurlink) {
 
 	    /*
 	     * We reached the position of link itself, and hightext is

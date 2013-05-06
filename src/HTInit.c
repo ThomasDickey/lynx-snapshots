@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTInit.c,v 1.83 2013/05/03 19:47:08 tom Exp $
+ * $LynxId: HTInit.c,v 1.84 2013/05/05 19:49:29 tom Exp $
  *
  *		Configuration-specific Initialization		HTInit.c
  *		----------------------------------------
@@ -714,7 +714,7 @@ static int BuildCommand(HTChunk *cmd,
 			if ((value = LYGetContentType(name, params)) != 0) {
 			    HTChunkPuts(cmd, value);
 			    FREE(value);
-			} else {
+			} else if (name) {
 			    if (!strcmp(name, "charset")) {
 				HTChunkPuts(cmd, "ISO-8859-1");
 			    } else {

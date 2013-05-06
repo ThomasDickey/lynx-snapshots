@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFWriter.c,v 1.103 2013/05/02 11:05:53 tom Exp $
+ * $LynxId: HTFWriter.c,v 1.104 2013/05/04 13:52:11 tom Exp $
  *
  *		FILE WRITER				HTFWrite.h
  *		===========
@@ -1015,7 +1015,7 @@ HTStream *HTCompressed(HTPresentation *pres,
      * Deal with any inappropriate invocations of this function, or a download
      * request, in which case we won't bother to uncompress the file.  - FM
      */
-    if (!(anchor && anchor->content_encoding && anchor->content_type)) {
+    if (!(anchor->content_encoding && anchor->content_type)) {
 	/*
 	 * We have no idea what we're dealing with, so treat it as a binary
 	 * stream.  - FM

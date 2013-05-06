@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYPrint.c,v 1.97 2012/08/03 17:39:19 tom Exp $
+ * $LynxId: LYPrint.c,v 1.98 2013/05/04 13:15:47 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTAccess.h>
@@ -669,8 +669,8 @@ static void send_file_to_mail(DocInfo *newdoc,
     SetOutputMode(O_BINARY);
 
     if (isPMDF)
-	LYRemoveTemp(hdrfile);
-    LYRemoveTemp(my_temp);
+	(void) LYRemoveTemp(hdrfile);
+    (void) LYRemoveTemp(my_temp);
 #else /* !VMS (Unix or DOS) */
 
 #if CAN_PIPE_TO_MAILER
@@ -783,7 +783,7 @@ static void send_file_to_mail(DocInfo *newdoc,
 		   subject,
 		   "",
 		   "");
-    LYRemoveTemp(my_temp);	/* Delete the tmpfile. */
+    (void) LYRemoveTemp(my_temp);	/* Delete the tmpfile. */
 #endif /* CAN_PIPE_TO_MAILER */
 #endif /* USE_VMS_MAILER */
 
@@ -927,7 +927,7 @@ static void send_file_to_printer(DocInfo *newdoc,
 
     LYSystem(the_command);
     FREE(the_command);
-    LYRemoveTemp(my_temp);
+    (void) LYRemoveTemp(my_temp);
 
     /*
      * Remove the various LYNX_PRINT_xxxx logicals.  - KED

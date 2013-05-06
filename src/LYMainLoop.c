@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMainLoop.c,v 1.216 2013/05/03 20:29:37 tom Exp $
+ * $LynxId: LYMainLoop.c,v 1.217 2013/05/05 20:36:20 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTAccess.h>
@@ -1530,19 +1530,17 @@ static FormInfo *MakeFormAction(FormInfo * given, BOOLEAN submit)
 	    outofmem(__FILE__, "MakeFormAction");
 
 	*result = *given;
-	if (result != 0) {
-	    if (submit) {
-		if (result->submit_action == 0) {
-		    PerFormInfo *pfi = HText_PerFormInfo(result->number);
+	if (submit) {
+	    if (result->submit_action == 0) {
+		PerFormInfo *pfi = HText_PerFormInfo(result->number);
 
-		    *result = pfi->data;
-		}
-		result->type = F_SUBMIT_TYPE;
-	    } else {
-		result->type = F_RESET_TYPE;
+		*result = pfi->data;
 	    }
-	    result->number = given->number;
+	    result->type = F_SUBMIT_TYPE;
+	} else {
+	    result->type = F_RESET_TYPE;
 	}
+	result->number = given->number;
     }
     return result;
 }
@@ -3670,17 +3668,17 @@ static BOOLEAN handle_LYK_JUMP(int c,
 	    if (!LYTrimStartfile(ret)) {
 		LYRemoveBlanks((*user_input)->str);
 	    }
-	    if (!check_JUMP_param(&ret))
-		return FALSE;
-	    set_address(&newdoc, ret);
-	    StrAllocCopy(lynxjumpfile, ret);
-	    LYFreePostData(&newdoc);
-	    FREE(newdoc.bookmark);
-	    newdoc.isHEAD = FALSE;
-	    newdoc.safe = FALSE;
-	    newdoc.internal_link = FALSE;
+	    if (check_JUMP_param(&ret)) {
+		set_address(&newdoc, ret);
+		StrAllocCopy(lynxjumpfile, ret);
+		LYFreePostData(&newdoc);
+		FREE(newdoc.bookmark);
+		newdoc.isHEAD = FALSE;
+		newdoc.safe = FALSE;
+		newdoc.internal_link = FALSE;
+		LYUserSpecifiedURL = TRUE;
+	    }
 	    FREE(ret);
-	    LYUserSpecifiedURL = TRUE;
 	} else {
 	    LYJumpFileURL = FALSE;
 	}

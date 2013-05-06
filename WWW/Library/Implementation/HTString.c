@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTString.c,v 1.70 2013/05/03 09:44:08 tom Exp $
+ * $LynxId: HTString.c,v 1.71 2013/05/04 12:01:30 tom Exp $
  *
  *	Case-independent string comparison		HTString.c
  *
@@ -1194,11 +1194,18 @@ void HTEndParam(char **result,
  */
 void HTSABAlloc(bstring **dest, int len)
 {
-    if (*dest == 0)
+    if (*dest == 0) {
 	*dest = typecalloc(bstring);
+
+	if (*dest == 0)
+	    outofmem(__FILE__, "HTSABAlloc");
+    }
 
     if ((*dest)->len != len) {
 	(*dest)->str = typeRealloc(char, (*dest)->str, len);
+
+	if ((*dest)->str == 0)
+	    outofmem(__FILE__, "HTSABAlloc");
 
 	(*dest)->len = len;
     }

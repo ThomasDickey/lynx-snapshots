@@ -1,4 +1,4 @@
-/* $LynxId: LYStrings.c,v 1.212 2013/05/03 20:29:37 tom Exp $ */
+/* $LynxId: LYStrings.c,v 1.213 2013/05/04 12:21:36 tom Exp $ */
 #include <HTUtils.h>
 #include <HTCJK.h>
 #include <UCAux.h>
@@ -2951,8 +2951,14 @@ void LYSetupEdit(EDREC * edit, char *old_value, size_t buffer_limit, int display
     StrLen = strlen(old_value);
     Buf = typecallocn(char, MaxLen + 1);
 
+    if (Buf == 0)
+	outofmem(__FILE__, "LYSetupEdit");
+
     LYStrNCpy(Buf, old_value, buffer_limit);
     Offs2Col = typecallocn(int, MaxLen + 1);
+
+    if (Offs2Col == 0)
+	outofmem(__FILE__, "LYSetupEdit");
 }
 
 #ifdef SUPPORT_MULTIBYTE_EDIT

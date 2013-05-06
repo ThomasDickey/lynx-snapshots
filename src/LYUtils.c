@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYUtils.c,v 1.238 2013/05/03 20:21:20 tom Exp $
+ * $LynxId: LYUtils.c,v 1.239 2013/05/05 21:26:26 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTCP.h>
@@ -5466,7 +5466,7 @@ static char *FindLeadingTilde(char *pathname, int embedded)
  */
 char *LYAbsOrHomePath(char **fname)
 {
-    if (!LYisAbsPath(*fname)) {
+    if (*fname && !LYisAbsPath(*fname)) {
 	if (LYIsTilde((*fname)[0])) {
 	    LYTildeExpand(fname, FALSE);
 	} else {
@@ -5768,20 +5768,21 @@ int remove(char *name)
 static BOOL IsOurSymlink(const char *name)
 {
     BOOL result = FALSE;
-    int size = LY_MAXPATH;
-    int used;
+    size_t size = LY_MAXPATH;
+    size_t used;
     char *buffer = typeMallocn(char, (unsigned) size);
+    char *check;
 
     if (buffer != 0) {
-	while ((used = (int) readlink(name, buffer, (size_t) (size - 1))) == size
-	       - 1) {
-	    buffer = typeRealloc(char, buffer, (unsigned) (size *= 2));
+	while ((used = (size_t) readlink(name, buffer, (size - 1))) == size - 1) {
+	    check = typeRealloc(char, buffer, (unsigned) (size *= 2));
 
-	    if (buffer == 0)
+	    if (check == 0)
 		break;
+	    buffer = check;
 	}
 	if (buffer != 0) {
-	    if (used > 0) {
+	    if ((int) used > 0) {
 		buffer[used] = '\0';
 	    } else {
 		FREE(buffer);
@@ -6822,7 +6823,7 @@ void LYLocalFileToURL(char **target,
 	    LYAddHtmlSep(target);
 	StrAllocCat(*target, temp);
     }
-    if (!LYIsHtmlSep(*leaf))
+    if (leaf && !LYIsHtmlSep(*leaf))
 	LYAddHtmlSep(target);
     StrAllocCat(*target, leaf);
 }

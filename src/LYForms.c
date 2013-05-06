@@ -1,4 +1,4 @@
-/* $LynxId: LYForms.c,v 1.102 2013/05/01 09:19:14 tom Exp $ */
+/* $LynxId: LYForms.c,v 1.103 2013/05/04 12:58:54 tom Exp $ */
 #include <HTUtils.h>
 #include <HTCJK.h>
 #include <HTTP.h>
@@ -49,6 +49,9 @@ static char **options_list(OptionType * opt_ptr)
 	if (pass == 0) {
 	    len++;
 	    result = typecallocn(char *, len);
+
+	    if (result == 0)
+		outofmem(__FILE__, "options_list");
 	} else {
 	    result[len] = 0;
 	}
