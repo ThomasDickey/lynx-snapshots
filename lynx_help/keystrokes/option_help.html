@@ -1,10 +1,10 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 3.2//EN">
-<!-- $LynxId: option_help.html,v 1.24 2012/01/31 23:12:34 tom Exp $ -->
+<!-- $LynxId: option_help.html,v 1.25 2013/05/21 10:58:35 tom Exp $ -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN">
 
 <html>
 <head>
   <meta name="generator" content=
-  "HTML Tidy for Linux/x86 (vers 6 November 2007), see www.w3.org">
+  "HTML Tidy for Linux (vers 25 March 2009), see www.w3.org">
 
   <title>Form-based Options Menu : Help</title>
   <link rev="made" href="mailto:lynx-dev@nongnu.org">
@@ -116,13 +116,13 @@
     </li>
   </ul>
 
-  <h1><a name="CK">Cookies</a></h1>
+  <h1><a name="CK" id="CK">Cookies</a></h1>
 
   <p>This can be set to accept or reject all cookies or to ask each
   time. See the Users Guide for details of <a href=
   "../Lynx_users_guide.html#Cookies">cookie usage</a>.</p>
 
-  <h1><a name="ED">Editor</a></h1>
+  <h1><a name="ED" id="ED">Editor</a></h1>
 
   <p>This is the editor to be invoked when editing browsable files,
   sending mail or comments, or filling form's textarea (multiline
@@ -131,7 +131,7 @@
   the same character set you have for "display character set" in
   Lynx.</p>
 
-  <h1><a name="EM">Emacs keys</a></h1>
+  <h1><a name="EM" id="EM">Emacs keys</a></h1>
 
   <p>If set to 'ON' then the CTRL-P, CTRL-N, CTRL-F and CTRL-B keys
   will be mapped to up-arrow, down-arrow, right-arrow and
@@ -142,14 +142,14 @@
   <p>Note: setting emacs keys does not affect the line-editor
   bindings.</p>
 
-  <h1><a name="LL">Execution links</a></h1>
+  <h1><a name="LL" id="LL">Execution links</a></h1>
 
   <p>If set to 'ALWAYS ON', Lynx will locally execute commands
   contained inside any links. This can be HIGHLY DANGEROUS, so it
   is recommended that they remain 'ALWAYS OFF' or 'FOR LOCAL FILES
   ONLY'.</p>
 
-  <h1><a name="KM">Keypad mode</a></h1>
+  <h1><a name="KM" id="KM">Keypad mode</a></h1>
 
   <p>This gives the choice between navigating with the keypad (as
   arrows; see Lynx Navigation) and having every link numbered
@@ -157,21 +157,21 @@
   instead of moving to them with the arrow keys. You can also
   number form fields.</p>
 
-  <h1><a name="LE">Line edit style</a></h1>
+  <h1><a name="LE" id="LE">Line edit style</a></h1>
 
   <p>This allows you to set alternate key bindings for the built-in
   line editor, if <a href="alt_edit_help.html">Alternate
   Bindings</a> have been installed. Otherwise, Lynx uses the
   <a href="edit_help.html">Default Binding</a>.</p>
 
-  <h1><a name="PM">Personal Mail Address</a></h1>
+  <h1><a name="PM" id="PM">Personal Mail Address</a></h1>
 
   <p>You may set your mail address here so that when mailing
   messages to other people or mailing files to yourself, your email
   address can be automatically filled in. Your email address will
   also be sent to HTTP servers in a `from:' field.</p>
 
-  <h1><a name="PU">Pop-ups for select fields</a></h1>
+  <h1><a name="PU" id="PU">Pop-ups for select fields</a></h1>
 
   <p>Lynx normally uses a pop-up window for the OPTIONs in form
   SELECT fields when the field does not have the MULTIPLE attribute
@@ -182,13 +182,13 @@
   attribute specified, the OPTIONs always are rendered as a list of
   checkboxes.</p>
 
-  <h1><a name="ST">Searching type</a></h1>
+  <h1><a name="ST" id="ST">Searching type</a></h1>
 
   <p>If set to 'case sensitive', user searches invoked by '/' will
   be case-sensitive substring searches. Default is 'Case
   Insensitive'.</p>
 
-  <h1><a name="SC">Show color</a></h1>
+  <h1><a name="SC" id="SC">Show color</a></h1>
 
   <p>This will be present if color support is available.</p>
 
@@ -204,13 +204,16 @@
     saved to a '.lynxrc' file in non-anonymous accounts, ALWAYS
     will cause Lynx to set color mode on at startup if
     supported.</li>
-  </ul>If Lynx is built with slang, this is equivalent to having
+  </ul>
+
+  <p>If Lynx is built with slang, this is equivalent to having
   included the -color command line switch or having the COLORTERM
   environment variable set. If color support is provided by curses
   or ncurses, this is equivalent to the default behavior of using
   color when the terminal type supports it. If (n)curses color
   support is available but cannot be used for the current terminal
-  type, the preference can still be saved but will have no effect.
+  type, the preference can still be saved but will have no
+  effect.</p>
 
   <p>A saved value of NEVER will cause Lynx to assume a monochrome
   terminal at start-up. It is similar to the -nocolor switch, but
@@ -226,7 +229,8 @@
   color mode is incorrect for your terminal, set it appropriately
   on or off via this option.</p>
 
-  <h1><a name="CL">Show cursor for current link or option</a></h1>
+  <h1><a name="CL" id="CL">Show cursor for current link or
+  option</a></h1>
 
   <p>Lynx normally hides the cursor by positioning it to the right
   and if possible the very bottom of the screen, so that the
@@ -238,7 +242,7 @@
   character attributes used to distinguish the current link or
   OPTION from the others in the display.</p>
 
-  <h1><a name="UM">User Mode</a></h1>
+  <h1><a name="UM" id="UM">User Mode</a></h1>
 
   <dl>
     <dt><em>Novice</em>: Shows 2 extra lines of help at the bottom
@@ -251,7 +255,7 @@
     line.</dt>
   </dl>
 
-  <h1><a name="AD">Assumed document character set</a></h1>
+  <h1><a name="AD" id="AD">Assumed document character set</a></h1>
 
   <p>This changes the handling of documents which do not explicitly
   specify a charset. Normally Lynx assumes that 8-bit characters in
@@ -264,7 +268,7 @@
   they were encoded accordingly. Option is active when 'Raw 8-bit
   or CJK Mode' is OFF.</p>
 
-  <h1><a name="JK">Raw 8-bit or CJK mode</a></h1>
+  <h1><a name="JK" id="JK">Raw 8-bit or CJK mode</a></h1>
 
   <p>This is set automatically, but can be toggled manually in
   certain cases: it toggles whether 8-bit characters are assumed to
@@ -283,7 +287,7 @@
   setting can also be toggled via the RAW_TOGGLE command, normally
   mapped to '@', and at startup via the -raw switch.</p>
 
-  <h1><a name="tagsoup">HTML error recovery</a></h1>
+  <h1><a name="tagsoup" id="tagsoup">HTML error recovery</a></h1>
 
   <p>Lynx often has to deal with invalid HTML markup. It always
   tries to recover from errors, but there is no universally correct
@@ -329,7 +333,7 @@ Default recovery mode can also be switched with CTRL-V key,
 from lynx.cfg or command line switch.
 --></p>
 
-  <h1><a name="SI">Show Images</a></h1>
+  <h1><a name="SI" id="SI">Show Images</a></h1>
 
   <p>This option combines the effects of the `*' &amp; `[' keys as
   follows:</p>
@@ -343,16 +347,17 @@ from lynx.cfg or command line switch.
   <a href="../Lynx_users_guide.html#Images">Users Guide</a> &amp;
   <em>lynx.cfg</em> for more details.</p>
 
-  <h1><a name="VB">Verbose Images</a></h1>
+  <h1><a name="VB" id="VB">Verbose Images</a></h1>
 
-  <p>This allows you to replace [LINK], [INLINE] and [IMAGE] &mdash; for
-  images without ALT &mdash; with filenames: this can be helpful by
-  revealing which images are important &amp; which are merely
-  decoration, e.g. <em>button.gif</em>, <em>line.gif</em>. See
-  <a href="../Lynx_users_guide.html#Images">Users Guide</a> &amp;
+  <p>This allows you to replace [LINK], [INLINE] and [IMAGE]
+  &mdash; for images without ALT &mdash; with filenames: this can
+  be helpful by revealing which images are important &amp; which
+  are merely decoration, e.g. <em>button.gif</em>,
+  <em>line.gif</em>. See <a href=
+  "../Lynx_users_guide.html#Images">Users Guide</a> &amp;
   <em>lynx.cfg</em> for more details.</p>
 
-  <h1><a name="VI">VI keys</a></h1>
+  <h1><a name="VI" id="VI">VI keys</a></h1>
 
   <p>If set to 'ON' then the lowercase h, j, k and l keys will be
   mapped to left-arrow, down-arrow, up-arrow and right-arrow
@@ -365,7 +370,7 @@ from lynx.cfg or command line switch.
   <p>Note: setting vi keys does not affect the line-editor
   bindings.</p>
 
-  <h1><a name="DC">Display Character set</a></h1>
+  <h1><a name="DC" id="DC">Display Character set</a></h1>
 
   <p>This allows you to set up the default character set for your
   specific terminal. The display character set provides a mapping
@@ -379,14 +384,14 @@ from lynx.cfg or command line switch.
   computers, and windows-xxxx within native MS-Windows
   applications.</p>
 
-  <h1><a name="DV">X DISPLAY variable</a></h1>
+  <h1><a name="DV" id="DV">X DISPLAY variable</a></h1>
 
   <p>This option is only relevant to X Window users. It specifies
   the DISPLAY (Unix) or DECW$DISPLAY (VMS) variable. It is picked
   up automatically from the environment if it has been previously
   set.</p>
 
-  <h1><a name="MB">Multi-bookmarks</a></h1>
+  <h1><a name="MB" id="MB">Multi-bookmarks</a></h1>
 
   <p>Manage multiple bookmark files:</p>
 
@@ -405,7 +410,7 @@ from lynx.cfg or command line switch.
     file.</li>
   </ul>
 
-  <h1><a name="BF">Bookmark file</a></h1>
+  <h1><a name="BF" id="BF">Bookmark file</a></h1>
 
   <p>Manage the default bookmark file:</p>
 
@@ -416,14 +421,16 @@ from lynx.cfg or command line switch.
     <li>If multi-bookmarks is STANDARD or ADVANCED, entering 'B'
     will invoke a menu in which you can specify filepaths and
     descriptions of up to 26 bookmark files.</li>
-  </ul>The filepaths must be from your home directory and begin
-  with './' if subdirectories are included (e.g.,
-  './BM/lynx_bookmarks.html').
+  </ul>
+
+  <p>The filepaths must be from your home directory and begin with
+  './' if subdirectories are included (e.g.,
+  './BM/lynx_bookmarks.html').</p>
 
   <p>Lynx will create bookmark files when you first 'a'dd a link,
   but any subdirectories in the filepath must already exist.</p>
 
-  <h1><a name="VP">Visited Pages</a></h1>
+  <h1><a name="VP" id="VP">Visited Pages</a></h1>
 
   <p>This allows you to change the appearance of the <a href=
   "visited_help.html">Visited Links Page</a> Normally it shows a
@@ -459,13 +466,13 @@ from lynx.cfg or command line switch.
     bottom of the list.</dt>
   </dl>
 
-  <h1><a name="FT">FTP sort criteria</a></h1>
+  <h1><a name="FT" id="FT">FTP sort criteria</a></h1>
 
   <p>This allows you to specify how files will be sorted within FTP
   listings. The current options include `By&nbsp;Filename',
   `By&nbsp;Size', `By&nbsp;Type', `By&nbsp;Date'.</p>
 
-  <h1><a name="LD">List directory style</a></h1>
+  <h1><a name="LD" id="LD">List directory style</a></h1>
 
   <p>Applies to Directory Editing. Files and directories can be
   presented in the following ways:</p>
@@ -482,12 +489,12 @@ from lynx.cfg or command line switch.
     into 2 alphabetical lists: files are listed first.</dt>
   </dl>
 
-  <h1><a name="DF">Show dot files</a></h1>
+  <h1><a name="DF" id="DF">Show dot files</a></h1>
 
   <p>If display/creation of hidden (dot) files/directories is
   enabled, you can turn the feature on or off via this setting.</p>
 
-  <h1><a name="PC">Preferred Document Charset</a></h1>
+  <h1><a name="PC" id="PC">Preferred Document Charset</a></h1>
 
   <p>The character set you prefer if sets in addition to ISO-8859-1
   and US-ASCII are available from servers. Use MIME notation (e.g.,
@@ -499,7 +506,7 @@ from lynx.cfg or command line switch.
   protocol, for servers which understand it: e.g., <kbd>iso-8859-5,
   utf-8;q=0.8</kbd>.</p>
 
-  <h1><a name="PL">Preferred Document Language</a></h1>
+  <h1><a name="PL" id="PL">Preferred Document Language</a></h1>
 
   <p>The language you prefer if multi-language files are available
   from servers. Use RFC 1766 tags, e.g., `en' English, `fr' French.
@@ -507,7 +514,7 @@ from lynx.cfg or command line switch.
   previous help item): e.g., <kbd>da, en-gb;q=0.8, en;q=0.7</kbd>
   .</p>
 
-  <h1><a name="UA">User Agent</a></h1>
+  <h1><a name="UA" id="UA">User Agent</a></h1>
 
   <p>The header string which Lynx sends to servers to indicate the
   User-Agent is displayed here. Changes may be disallowed via the
