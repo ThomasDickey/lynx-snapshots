@@ -1,9 +1,10 @@
--- $LynxId: CHANGES,v 1.641 2013/05/06 00:18:03 tom Exp $
+-- $LynxId: CHANGES,v 1.642 2013/05/22 00:53:07 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2013-05-05 (2.8.8dev.16)
+2013-05-21 (2.8.8dev.16)
+* update doctype for html documentation to 4.01 strict -TD
 * correct handling of backslash in TrimCommand() function introduced in
   2.8.6dev.4, used to process the commands for "test=" in mime-types -TD
 * correct 2.8.3dev.13 check for permissible place to split UTF-8 encoded text,
