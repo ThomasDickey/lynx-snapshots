@@ -41,7 +41,7 @@
        line, Lynx will open only the last interactively.   All  of  the  names
        (local files and remote URLs) are added to the G)oto history.
 
-       Lynx  uses  only  long option names. Option names can begin with double
+       Lynx  uses  only long option names.  Option names can begin with double
        dash as well, underscores and dashes can be intermixed in option  names
        (in  the reference below options are with one dash before them and with
        underscores).
@@ -228,15 +228,20 @@
 
               lynx -dump http://www.subir.com/lynx.html
 
+              Files specified on the command line are  formatted  as  HTML  if
+              their  names  end  with one of the standard web suffixes such as
+              ".htm" or ".html".  Use the -force_html option to  format  files
+              whose names do not follow this convention.
+
        -editor=EDITOR
-              enable external editing, using the specified  EDITOR.  (vi,  ed,
+              enable  external  editing, using the specified EDITOR.  (vi, ed,
               emacs, etc.)
 
        -emacskeys
               enable emacs-like key movement.
 
        -enable_scrollback
-              toggles  compatibility  with  communication programs' scrollback
+              toggles compatibility with  communication  programs'  scrollback
               keys (may be incompatible with some curses packages).
 
        -error_file=FILE
@@ -249,15 +254,21 @@
 
        -find_leaks
               toggle memory leak-checking.  Normally this is not compiled-into
-              your  executable,  but  when  it  is,  it  can be disabled for a
+              your executable, but when it  is,  it  can  be  disabled  for  a
               session.
 
        -force_empty_hrefless_a
-              force HREF-less `A' elements to be empty (close them as soon  as
+              force  HREF-less `A' elements to be empty (close them as soon as
               they are seen).
 
        -force_html
-              forces the first document to be interpreted as HTML.
+              forces the first document to be interpreted as  HTML.   This  is
+              most  useful when processing files specified on the command line
+              which have an unrecognized suffix (or the suffix  is  associated
+              with  a  non-HTML  type,  such  as ".txt" for plain text files).
+              Lynx recognizes these file suffixes as HTML:
+              ".ht3", ".htm", ".html3", ".html",  ".htmlx",  ".php3",  ".php",
+              ".phtml", ".sht", and ".shtml".
 
        -force_secure
               toggles forcing of the secure flag for SSL cookies.
@@ -363,7 +374,7 @@
               -color flags, COLORTERM variable, and saved .lynxrc settings.
 
        -noexec
-              disable local program execution. (DEFAULT)
+              disable local program execution.  (DEFAULT)
 
        -nofilereferer
               disable transmissions of Referer headers for file URLs.
@@ -453,7 +464,7 @@
        -prettysrc
               show HTML source view with lexical elements and tags in color.
 
-       -print enable print functions. (default)
+       -print enable print functions.  (default)
 
        -pseudo_inlines
               toggles pseudo-ALTs for inline images with no ALT string.
@@ -471,9 +482,9 @@
               affected).
 
        -restrictions=[option][,option][,option]...
-              allows a list of services to be disabled selectively. Dashes and
-              underscores in option names can  be  intermixed.  The  following
-              list is printed if no options are specified.
+              allows  a  list  of services to be disabled selectively.  Dashes
+              and  underscores  in  option  names  can  be  intermixed.    The
+              following list is printed if no options are specified.
 
               all
                  restricts all options listed below.
