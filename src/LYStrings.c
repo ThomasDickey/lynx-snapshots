@@ -1,4 +1,4 @@
-/* $LynxId: LYStrings.c,v 1.213 2013/05/04 12:21:36 tom Exp $ */
+/* $LynxId: LYStrings.c,v 1.214 2013/05/28 23:38:17 tom Exp $ */
 #include <HTUtils.h>
 #include <HTCJK.h>
 #include <UCAux.h>
@@ -3038,15 +3038,19 @@ static int cell2char(char *s, int cells)
 
     CTRACE_EDIT((tfp, "cell2char(%d) %d:%s\n", cells, len, s));
     /* FIXME - make this a binary search */
-    for (pos = 0; pos <= len; ++pos) {
-	have = LYstrExtent2(s, pos);
-	CTRACE_EDIT((tfp, "  %2d:%2d:%.*s\n", pos, have, pos, s));
-	if (have >= cells) {
-	    break;
+    if (len != 0) {
+	for (pos = 0; pos <= len; ++pos) {
+	    have = LYstrExtent2(s, pos);
+	    CTRACE_EDIT((tfp, "  %2d:%2d:%.*s\n", pos, have, pos, s));
+	    if (have >= cells) {
+		break;
+	    }
 	}
+	if (pos > len)
+	    pos = len;
+    } else {
+	pos = 0;
     }
-    if (pos > len)
-	pos = len;
     result = mbcs_glyphs(s, pos);
     CTRACE_EDIT((tfp, "->%d\n", result));
     return result;
@@ -3830,7 +3834,7 @@ void LYRefreshEdit(EDREC * edit)
 	 * away a single cell for the right scroll-indicator, that would force
 	 * us to display fewer characters.  Check for that, and recompute.
 	 */
-	if (rgt_shift) {
+	if (rgt_shift && *str) {
 	    int old_cells = dpy_cells;
 
 	    dpy_cells = LYstrExtent2(str, dpy_bytes);

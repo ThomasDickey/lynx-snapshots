@@ -1,41 +1,41 @@
-.\" $LynxId: lynx.man,v 1.93 2012/11/15 00:56:24 tom Exp $
-.nr N -1
-.nr D 5
+.\" $LynxId: lynx.man,v 1.96 2013/05/29 01:04:13 tom Exp $
+.\" **************************************************************************
+.\" Escape single quotes in literal strings from groff's Unicode transform.
+.ie \n(.g .ds AQ \(aq
+.el       .ds AQ '
+.ie \n(.g .ds `` \(lq
+.el       .ds `` ``
+.ie \n(.g .ds '' \(rq
+.el       .ds '' ''
+.\" **************************************************************************
 .TH LYNX 1
 .SH NAME
 lynx \- a general purpose distributed information browser for the World Wide Web
 .SH SYNOPSIS
 .B lynx \fP[options] [path or URL]
 .sp
-.B lynx \fI[options] [path or URL]\fP \fB-get_data
+.B lynx \fI[options] [path or URL]\fP \fB\-get_data
 .br
 .I data
 .br
-.B --
+.B \-\-
 .sp
-.B lynx \fI[options] [path or URL]\fP \fB-post_data
+.B lynx \fI[options] [path or URL]\fP \fB\-post_data
 .br
 .I data
 .br
-.B --
+.B \-\-
 .PP
-Use "lynx -help" to display a complete list of current options.
+Use \*(``lynx \-help\*('' to display a complete list of current options.
 .SH DESCRIPTION
-.\" This defines appropriate quote strings for nroff and troff
-.ds lq \&"
-.ds rq \&"
-.if t .ds lq ``
-.if t .ds rq ''
-.\" Just in case these number registers aren't set yet...
-.if \nN==0 .nr N 10
-.if \nD==0 .nr D 5
 .hy 0
 .I
 Lynx
 is a fully-featured World Wide Web (WWW) client for users
 running cursor-addressable, character-cell display devices (e.g.,
 vt100 terminals, vt100 emulators running on Windows 95/NT or Macintoshes, or any
-other "curses-oriented" display).  It will display hypertext
+other \*(``curses-oriented\*('' display).
+It will display hypertext
 markup language (HTML) documents containing links to
 files residing on the local system, as well as files residing on
 remote systems running Gopher, HTTP, FTP, WAIS, and NNTP servers.
@@ -53,24 +53,25 @@ For example,
 .I
 Lynx
 has been used to build several Campus Wide
-Information Systems (CWIS).  In addition,
+Information Systems (CWIS).
+In addition,
 .I
 Lynx
 can be used to
 build systems isolated within a single LAN.
 .SH OPTIONS
 At start up, \fILynx\fR will load any local
-file or remote URL specified at the command
-line.  For help with URLs, press \fB"?"\fR
-or \fB"H"\fR while running \fILynx\fR.
-Then follow the link titled, "Help on URLs."
+file or remote URL specified at the command line.
+For help with URLs, press \*(``\fB?\fR\*(''
+or \*(``\fBH\fR\*('' while running \fILynx\fR.
+Then follow the link titled, \*(``Help on URLs.\*(''
 .PP
 If more than one local file or remote URL is listed on the command line,
 \fILynx\fP will open only the last interactively.
 All of the names (local files and remote URLs) are added to the G)oto history.
 .PP
-\fILynx\fR uses only long option names. Option
-names can begin with double dash as well,
+\fILynx\fR uses only long option names.
+Option names can begin with double dash as well,
 underscores and dashes can be intermixed in
 option names (in the reference below options
 are with one dash before them and with underscores).
@@ -87,27 +88,28 @@ forms to allow for operating system constraints,
 e.g.,
 .RS
 .nf
-\fB-center:off\fP
-\fB-center=off\fP
-\fB-center-\fP
+\fB\-center:off\fP
+\fB\-center=off\fP
+\fB\-center\-\fP
 .fi
 .RE
 \fILynx\fR recognizes
-"1", "+", "on" and "true" for true values, and
-"0", "-", "off" and "false" for false values.
+\*(``1\*('', \*(``+\*('', \*(``on\*('' and \*(``true\*('' for true values, and
+\*(``0\*('', \*(``\-\*('', \*(``off\*('' and \*(``false\*('' for false values.
 Other option-values are ignored.
 .PP
 The default boolean, number and string option values that are compiled
-into \fILynx\fP are displayed in the help-message provided by \fBlynx -help\fP.
+into \fILynx\fP are displayed in the help-message provided by \fBlynx \-help\fP.
 Some of those may differ according to how \fILynx\fP was built;
 see the help message itself for these values.
-The \fB-help\fP option is processed in the third pass of options-processing,
+The \fB\-help\fP option is processed in the third pass of options-processing,
 so any option which sets a value,
 as well as runtime configuration values are reflected in the help-message.
 .TP 7
 .B \-
-If the argument is only '-', then \fILynx\fP expects to receive
-the arguments from the standard input.  This is to allow for the
+If the argument is only '\-', then \fILynx\fP expects to receive
+the arguments from the standard input.
+This is to allow for the
 potentially very long command line that can be associated
 with the \fB\-get_data\fR or \fB\-post_data\fR arguments (see below).
 It can also be used to avoid having sensitive information
@@ -132,8 +134,8 @@ i.e., files which \fILynx\fP creates such as internal pages for the options menu
 use this instead of unrecognized charsets.
 .TP
 .B \-auth\fR=\fIID\fR:\fIPASSWD
-set authorization ID and password for protected documents
-at startup.  Be sure to protect any script files which use
+set authorization ID and password for protected documents at startup.
+Be sure to protect any script files which use
 this switch.
 .TP
 .B \-base
@@ -150,13 +152,15 @@ This applies to the \fBslang\fR library (for a few terminal emulators),
 or to OS/2 EMX with \fBncurses\fR.
 .TP
 .B \-book
-use the bookmark page as the startfile.  The default or command
+use the bookmark page as the startfile.
+The default or command
 line startfile is still set for the Main screen command, and will
 be used if the bookmark page is unavailable or blank.
 .TP
 .B \-buried_news
 toggles scanning of news articles for buried references, and
-converts them to news links.  Not recommended because email
+converts them to news links.
+Not recommended because email
 addresses enclosed in angle brackets will be converted to
 false news links, and uuencoded messages can be trashed.
 .TP
@@ -190,7 +194,7 @@ read keystroke commands from the specified file.
 You can use the data written using the \fB\-cmd_log\fR option.
 \fILynx\fP will ignore other information which the command-logging may have
 written to the logfile.
-Each line of the command script contains either a comment beginning with "#",
+Each line of the command script contains either a comment beginning with \*(``#\*('',
 or a keyword:
 .RS
 .TP 3
@@ -199,18 +203,19 @@ causes the script to stop, and forces \fILynx\fP to exit immediately.
 .TP
 .B key
 the character value, in printable form.
-Cursor and other special keys are given as names, e.g., "Down Arrow".
+Cursor and other special keys are given as names, e.g., \*(``Down Arrow\*(''.
 Printable 7-bit ASCII codes are given as-is,
 and hexadecimal values represent other 8-bit codes.
 .TP
 .B set
-followed by a "name=value" allows one to override values set in the
+followed by a \*(``name=value\*('' allows one to override values set in the
 lynx.cfg or .lynxrc files.
 \fILynx\fP tries the cfg-file setting first.
 .RE
 .TP
 .B \-color
-forces color mode on, if available.  Default color control sequences
+forces color mode on, if available.
+Default color control sequences
 which work for many terminal types are assumed if the terminal
 capability description does not specify how to handle color.
 \fILynx\fP needs to be compiled with the \fBslang\fR library for this flag,
@@ -220,7 +225,8 @@ library like \fBncurses\fR, \fILynx\fP relies completely on the terminal
 description to determine whether color mode is possible, and
 this flag is not needed and thus unavailable.)
 A saved show_color=always setting found in a .lynxrc file at
-startup has the same effect.  A saved show_color=never found
+startup has the same effect.
+A saved show_color=never found
 in .lynxrc on startup is overridden by this flag.
 .TP
 .B \-connect_timeout\fR=\fIN
@@ -249,11 +255,11 @@ with \fB\-dump\fR, format output as with \fB\-traversal\fR,
 but to the standard output.
 .TP
 .B \-curses_pads
-toggles the use of curses "pad" feature which supports
+toggles the use of curses \*(``pad\*('' feature which supports
 left/right scrolling of the display.
 The feature is normally available for curses configurations,
 but inactive.
-To activate it, use the "|" character or the LINEWRAP_TOGGLE command.
+To activate it, use the \*(``|\*('' character or the LINEWRAP_TOGGLE command.
 Toggling this option makes the feature altogether unavailable.
 .TP
 .B \-debug_partial
@@ -279,10 +285,17 @@ Unlike interactive mode, all documents are processed.
 This can be used in the following way:
 .sp
 lynx \fB\-dump\fR http://www.subir.com/lynx.html
+.IP
+Files specified on the command line are formatted as HTML if
+their names end with one of the standard web suffixes such
+as \*(``.htm\*('' or \*(``.html\*(''.
+Use the \fB\-force_html\fP option to format files whose names do not follow
+this convention.
 .TP
 .B \-editor\fR=\fIEDITOR
 enable external editing, using the specified
-EDITOR. (vi, ed, emacs, etc.)
+EDITOR.
+(vi, ed, emacs, etc.)
 .TP
 .B \-emacskeys
 enable emacs-like key movement.
@@ -311,6 +324,22 @@ force HREF-less 'A' elements to be empty (close them as soon as they are seen).
 .TP
 .B \-force_html
 forces the first document to be interpreted as HTML.
+This is most useful when processing files specified on the command line
+which have an unrecognized suffix (or the suffix is associated with a
+non-HTML type, such as \*(``.txt\*('' for plain text files).
+\fILynx\fP recognizes these file suffixes as HTML:
+.RS
+\*(``.ht3\*('',
+\*(``.htm\*('',
+\*(``.html3\*('',
+\*(``.html\*('',
+\*(``.htmlx\*('',
+\*(``.php3\*('',
+\*(``.php\*('',
+\*(``.phtml\*('',
+\*(``.sht\*('', and
+\*(``.shtml\*(''.
+.RE
 .TP
 .B \-force_secure
 toggles forcing of the secure flag for SSL cookies.
@@ -327,7 +356,7 @@ disable ftp access.
 .B \-get_data
 properly formatted data for a \fIget\fP form are read in from
 the standard input and passed to the form.
-Input is terminated by a line that starts with '---'.
+Input is terminated by a line that starts with '\-\-\-'.
 .TP
 .B \-head
 send a HEAD request for the mime headers.
@@ -355,7 +384,7 @@ hidden links do not appear even in listings.
 .RE
 .TP
 .B \-historical
-toggles use of '>' or '-->' as a terminator for comments.
+toggles use of '>' or '\-\->' as a terminator for comments.
 .TP
 .B \-homepage\fR=\fIURL
 set homepage separate from start page.
@@ -377,7 +406,7 @@ do justification of text.
 starting count for lnk#.dat files produced by \fB\-crawl\fR.
 .TP
 .B \-listonly
-for \fB-dump\fR, show only the list of links.
+for \fB\-dump\fR, show only the list of links.
 .TP
 .B \-localhost
 disable URLs that point to remote hosts.
@@ -415,8 +444,8 @@ disable bold video-attribute.
 disable directory browsing.
 .TP
 .B \-nocc
-disable Cc: prompts for self copies of mailings.  Note
-that this does not disable any CCs which are incorporated
+disable Cc: prompts for self copies of mailings.
+Note that this does not disable any CCs which are incorporated
 within a mailto URL or form ACTION.
 .TP
 .B \-nocolor
@@ -424,7 +453,8 @@ force color mode off, overriding terminal capabilities and any
 -color flags, COLORTERM variable, and saved .lynxrc settings.
 .TP
 .B \-noexec
-disable local program execution. (DEFAULT)
+disable local program execution.
+(DEFAULT)
 .TP
 .B \-nofilereferer
 disable transmissions of Referer headers for file URLs.
@@ -439,7 +469,7 @@ disable mailing of error messages to document owners.
 disable left/right margins in the default style sheet.
 .TP
 .B \-nomore
-disable -more- string in statusline messages.
+disable \-more\- string in statusline messages.
 .TP
 .B \-nonrestarting_sigwinch
 This flag is not available on all systems,
@@ -450,7 +480,7 @@ an \fBxterm\fR.
 .TP
 .B \-nonumbers
 disable link- and field-numbering.
-This overrides \fB-number_fields\fR and \fB-number_links\fR.
+This overrides \fB\-number_fields\fR and \fB\-number_links\fR.
 .TP
 .B \-nopause
 disable forced pauses for statusline messages.
@@ -497,9 +527,8 @@ with partial-display logic
 toggles passive ftp connections.
 .TP
 .B \-pauth\fR=\fIID\fR:\fIPASSWD
-set authorization ID and password for a protected proxy
-server at startup.  Be sure to protect any script files
-which use this switch.
+set authorization ID and password for a protected proxy server at startup.
+Be sure to protect any script files which use this switch.
 .TP
 .B \-popup
 toggles handling of single-choice SELECT options via
@@ -508,7 +537,7 @@ popup windows or as lists of radio buttons.
 .B \-post_data
 properly formatted data for a \fIpost\fP form are read in from
 the standard input and passed to the form.
-Input is terminated by a line that starts with '---'.
+Input is terminated by a line that starts with '\-\-\-'.
 .TP
 .B \-preparsed
 show HTML source preparsed and reformatted when used with \fB\-source\fR
@@ -518,7 +547,8 @@ or in source view.
 show HTML source view with lexical elements and tags in color.
 .TP
 .B \-print
-enable print functions. (default)
+enable print functions.
+(default)
 .TP
 .B \-pseudo_inlines
 toggles pseudo-ALTs for inline images with no ALT string.
@@ -538,10 +568,9 @@ flushes the cache on a proxy server
 (only the first document affected).
 .TP
 .B \-restrictions\fR=\fI[option][,option][,option]...
-allows a list of services to be disabled
-selectively. Dashes and underscores in option names
-can be intermixed. The following list is printed
-if no options are specified.
+allows a list of services to be disabled selectively.
+Dashes and underscores in option names can be intermixed.
+The following list is printed if no options are specified.
 .RS
 .TP 3
 .B all
@@ -598,7 +627,7 @@ disallow the user from changing the local
 execution option.
 .TP
 .B externals
-disallow some "EXTERNAL" configuration lines
+disallow some \*(``EXTERNAL\*('' configuration lines
 if support for passing URLs to external
 applications (with the EXTERN command) is
 compiled in.
@@ -648,9 +677,9 @@ domain (utmp required for selectivity).
 .B outside_news
 disallow USENET news reading and posting for people coming
 from outside your domain (utmp required for selectivity).
-This restriction applies to "news", "nntp", "newspost", and
-"newsreply" URLs, but not to "snews", "snewspost",
-or "snewsreply" in case they are supported.
+This restriction applies to \*(``news\*('', \*(``nntp\*('', \*(``newspost\*('', and
+\*(``newsreply\*('' URLs, but not to \*(``snews\*('', \*(``snewspost\*('',
+or \*(``snewsreply\*('' in case they are supported.
 .TP
 .B outside_rlogin
 disallow rlogins for people coming from outside
@@ -703,19 +732,19 @@ resumes session from specified file.
 saves session to specified file.
 .TP
 .B \-short_url
-show very long URLs in the status line with "..." to represent the
+show very long URLs in the status line with \*(``...\*('' to represent the
 portion which cannot be displayed.
 The beginning and end of the URL are displayed, rather than suppressing the end.
 .TP
 .B \-show_cfg
-Print the configuration settings, e.g., as read from "lynx.cfg", and exit.
+Print the configuration settings, e.g., as read from \*(``lynx.cfg\*('', and exit.
 .TP
 .B \-show_cursor
 If enabled the cursor will not be hidden in the right hand
 corner but will instead be positioned at the start of the
-currently selected link.  Show cursor is the default for
-systems without FANCY_CURSES capabilities.  The default
-configuration can be changed in userdefs.h or lynx.cfg.
+currently selected link.
+Show cursor is the default for systems without FANCY_CURSES capabilities.
+The default configuration can be changed in userdefs.h or lynx.cfg.
 The command line switch toggles the default.
 .TP
 .B \-show_rate
@@ -733,7 +762,7 @@ formatted text.
 For example
 .sp
 .RS
-lynx -source . >foo.html
+lynx \-source . >foo.html
 .RE
 .IP
 generates HTML source listing the files in the current directory.
@@ -741,7 +770,7 @@ Each file is marked by an HREF relative to the parent directory.
 Add a trailing slash to make the HREF's relative to the current directory:
 .sp
 .RS
-lynx -source ./ >foo.html
+lynx \-source ./ >foo.html
 .RE
 .TP
 .B \-stack_dump
@@ -764,7 +793,7 @@ read the startfile from standard input
 .B \-syslog\fR=\fItext
 information for syslog call.
 .TP
-.B \-syslog-urls
+.B \-syslog\-urls
 log requested URLs with syslog.
 .TP
 .B \-tagsoup
@@ -787,10 +816,11 @@ toggles between using a \fILynx\fP Trace Log and stderr for trace output
 from the session.
 .TP
 .B \-tna
-turns on "Textfields Need Activation" mode.
+turns on \*(``Textfields Need Activation\*('' mode.
 .TP
 .B \-trace
-turns on \fILynx\fP trace mode.  Destination of trace output depends
+turns on \fILynx\fP trace mode.
+Destination of trace output depends
 on \-tlog.
 .TP
 .B \-trace_mask\fR=\fIvalue
@@ -827,10 +857,11 @@ timing
 .RE
 .TP
 .B \-traversal
-traverse all http links derived from startfile.  When used with
--crawl, each link that begins with the same string as startfile
-is output to a file, intended for indexing.  See CRAWL.announce
-for more information.
+traverse all http links derived from startfile.
+When used with
+\fB\-crawl\fR, each link that begins with the same string as startfile
+is output to a file, intended for indexing.
+See CRAWL.announce for more information.
 .TP
 .B \-trim_input_fields
 trim input text/textarea fields in forms.
@@ -856,15 +887,16 @@ The first few positions in the top and bottom line may invoke
 additional functions.
 \fILynx\fP must be compiled with \fBncurses\fR or \fBslang\fR to support this feature.
 If \fBncurses\fR is used, clicking the middle mouse button pops up
-a simple menu.  Mouse clicks may only work reliably while \fILynx\fP is
+a simple menu.
+Mouse clicks may only work reliably while \fILynx\fP is
 idle waiting for input.
 .TP
 .B \-useragent=Name
 set alternate \fILynx\fP User-Agent header.
 .TP
 .B \-validate
-accept only http URLs (for validation).  Complete security
-restrictions also are implemented.
+accept only http URLs (for validation).
+Complete security restrictions also are implemented.
 .TP
 .B \-verbose
 toggle [LINK], [IMAGE] and [INLINE] comments with filenames of these images.
@@ -890,7 +922,7 @@ emit backspaces in output if \fB\-dump\fR'ing or \fB\-crawl\fR'ing (like 'man' d
 .B \-xhtml_parsing
 tells \fILynx\fP that it can ignore certain tags which have no content
 in an XHTML 1.0 document.
-For example "<p/>" will be discarded.
+For example \*(``<p/>\*('' will be discarded.
 .SH COMMANDS
 .TP 3
 .B o
@@ -903,34 +935,35 @@ Use \fBUp arrow\fR and \fBDown arrow\fR to scroll through hypertext links.
 \fBLeft Arrow\fR will retreat from a link.
 .TP
 .B o
-Type \fB"H"\fR or \fB"?"\fR for online help and descriptions
+Type \*(``\fBH\fR\*('' or \*(``\fB?\fR\*('' for online help and descriptions
 of key-stroke commands.
 .TP
 .B o
-Type \fB"K"\fR for a complete list of the current key-stroke
+Type \*(``\fBK\fR\*('' for a complete list of the current key-stroke
 command mappings.
 .SH ENVIRONMENT
-In addition to various "standard" environment variables such as
+In addition to various \*(``standard\*('' environment variables such as
 \fBHOME\fR, \fBPATH\fR, \fBUSER\fR, \fBDISPLAY\fR, \fBTMPDIR\fR, \fBetc\fR,
 \fILynx\fR utilizes several \fILynx\fP-specific environment variables, if they
 exist.
 .PP
 Others may be created or modified by \fILynx\fR to pass data to an external
-program, or for other reasons.  These are listed separately below.
+program, or for other reasons.
+These are listed separately below.
 .PP
 See also the sections on \fBSIMULATED CGI SUPPORT\fR and
 \fBNATIVE LANGUAGE SUPPORT\fR, below.
 .PP
 Note:  Not all environment variables apply to all types of platforms
-supported by \fILynx\fR, though most do.  Feedback on platform
-dependencies is solicited.
+supported by \fILynx\fR, though most do.
+Feedback on platform dependencies is solicited.
 .PP
 Environment Variables Used By \fILynx\fR:
 .TP 20
 .B COLORTERM
 If set, color capability for the terminal is forced on at startup time.
-The actual value assigned to the variable is ignored.  This variable is
-only meaningful if \fILynx\fR was built using the \fBslang\fR
+The actual value assigned to the variable is ignored.
+This variable is only meaningful if \fILynx\fR was built using the \fBslang\fR
 screen-handling library.
 .TP
 .B LYNX_CFG
@@ -949,7 +982,8 @@ locale directory which contains native language (NLS) message text.
 .TP
 .B LYNX_LSS
 This variable, if set, specifies the location of the default \fILynx\fR
-character style sheet file.  [Currently only meaningful if \fILynx\fR was
+character style sheet file.
+[Currently only meaningful if \fILynx\fR was
 built using experimental color style support.]
 .TP
 .B LYNX_SAVE_SPACE
@@ -968,7 +1002,8 @@ mail, if such checking is enabled in the \fBlynx.cfg\fR file.
 .TP
 .B NEWS_ORGANIZATION
 This variable, if set, provides the string used in the \fBOrganization:\fR
-header of \fBUSENET\fR news postings.  It will override the setting of the
+header of \fBUSENET\fR news postings.
+It will override the setting of the
 ORGANIZATION environment variable, if it is also set (and, on \fBUNIX\fR,
 the contents of an /etc/organization file, if present).
 .TP
@@ -978,16 +1013,19 @@ for \fBUSENET\fR news reading and posting with \fILynx\fR, via news: URL's.
 .TP
 .B ORGANIZATION
 This variable, if set, provides the string used in the \fBOrganization:\fR
-header of \fBUSENET\fR news postings.  On \fBUNIX\fR, it will override the
+header of \fBUSENET\fR news postings.
+On \fBUNIX\fR, it will override the
 contents of an /etc/organization file, if present.
 .TP
 .B PROTOCOL_proxy
 \fILynx\fR supports the use of proxy servers that can act as firewall
-gateways and caching servers.  They are preferable to the older gateway
-servers (see WWW_access_GATEWAY, below).  Each protocol used by \fILynx\fR,
+gateways and caching servers.
+They are preferable to the older gateway
+servers (see WWW_access_GATEWAY, below).
+Each protocol used by \fILynx\fR,
 (http, ftp, gopher, etc), can be mapped separately by setting environment
 variables of the form PROTOCOL_proxy (literally: http_proxy, ftp_proxy,
-gopher_proxy, etc), to "http://some.server.dom:port/".
+gopher_proxy, etc), to \*(``http://some.server.dom:port/\*(''.
 See \fBLynx Users Guide\fR for additional details and examples.
 .TP
 .B SSL_CERT_DIR
@@ -998,9 +1036,10 @@ Set to the full path and filename for your file of trusted certificates.
 .TP
 .B WWW_access_GATEWAY
 \fILynx\fR still supports use of gateway servers, with the servers specified
-via "WWW_access_GATEWAY" variables (where "access" is lower case and can be
-"http", "ftp", "gopher" or "wais"), however most gateway servers have been
-discontinued.  Note that you do not include a terminal '/' for gateways, but
+via \*(``WWW_access_GATEWAY\*('' variables (where \*(``access\*('' is lower case and can be
+\*(``http\*('', \*(``ftp\*('', \*(``gopher\*('' or \*(``wais\*(''), however most gateway servers have been
+discontinued.
+Note that you do not include a terminal '/' for gateways, but
 do for proxies specified by PROTOCOL_proxy environment variables.
 See \fBLynx Users Guide\fR for details.
 .TP
@@ -1013,63 +1052,65 @@ Environment Variables \fBSet\fR or \fBModified\fR By \fILynx\fR:
 .B LYNX_PRINT_DATE
 This variable is set by the \fILynx\fR p(rint) function, to the
 \fBDate:\fR
-string seen in the document's "\fBInformation about\fR" page (= cmd),
+string seen in the document's \*(``\fBInformation about\fR\*('' page (= cmd),
 if any.
 It is created for use by an external program, as defined in a
 \fBlynx.cfg PRINTER:\fR definition statement.
 If the field does not exist for the document, the variable is set to a
-null string under \fBUNIX\fR, or "No Date" under \fBVMS\fR.
+null string under \fBUNIX\fR, or \*(``No Date\*('' under \fBVMS\fR.
 .TP
 .B LYNX_PRINT_LASTMOD
 This variable is set by the \fILynx\fR p(rint) function, to the
 \fBLast Mod:\fR
-string seen in the document's "\fBInformation about\fR" page (= cmd),
+string seen in the document's \*(``\fBInformation about\fR\*('' page (= cmd),
 if any.
 It is created for use by an external program, as defined in a
 \fBlynx.cfg PRINTER:\fR definition statement.
 If the field does not exist for the document, the variable is set to a
-null string under \fBUNIX\fR, or "No LastMod" under \fBVMS\fR.
+null string under \fBUNIX\fR, or \*(``No LastMod\*('' under \fBVMS\fR.
 .TP
 .B LYNX_PRINT_TITLE
 This variable is set by the \fILynx\fR p(rint) function, to the
 \fBLinkname:\fR
-string seen in the document's "\fBInformation about\fR" page (= cmd),
+string seen in the document's \*(``\fBInformation about\fR\*('' page (= cmd),
 if any.
 It is created for use by an external program, as defined in a
 \fBlynx.cfg PRINTER:\fR definition statement.
 If the field does not exist for the document, the variable is set to a
-null string under \fBUNIX\fR, or "No Title" under \fBVMS\fR.
+null string under \fBUNIX\fR, or \*(``No Title\*('' under \fBVMS\fR.
 .TP
 .B LYNX_PRINT_URL
 This variable is set by the \fILynx\fR p(rint) function, to the
 \fBURL:\fR
-string seen in the document's "\fBInformation about\fR" page (= cmd),
+string seen in the document's \*(``\fBInformation about\fR\*('' page (= cmd),
 if any.
 It is created for use by an external program, as defined in a
 \fBlynx.cfg PRINTER:\fR definition statement.
 If the field does not exist for the document, the variable is set to a
-null string under \fBUNIX\fR, or "No URL" under \fBVMS\fR.
+null string under \fBUNIX\fR, or \*(``No URL\*('' under \fBVMS\fR.
 .TP
 .B LYNX_TRACE
-If set, causes \fILynx\fR to write a trace file as if the \fB-trace\fR
+If set, causes \fILynx\fR to write a trace file as if the \fB\-trace\fR
 option were supplied.
 .TP
 .B LYNX_TRACE_FILE
 If set, overrides the compiled-in name of the trace file,
-which is either Lynx.trace or LY-TRACE.LOG (the latter on the DOS platform).
+which is either Lynx.trace or LY\-TRACE.LOG (the latter on the DOS platform).
 The trace file is in either case relative to the home directory.
 .TP
 .B LYNX_VERSION
 This variable is always set by \fILynx\fR, and may be used by an external
-program to determine if it was invoked by \fILynx\fR.  See also the comments
+program to determine if it was invoked by \fILynx\fR.
+See also the comments
 in the distribution's sample \fBmailcap\fR file, for notes on usage in such
 a file.
 .TP
 .B TERM
 Normally, this variable is used by \fILynx\fR to determine the terminal type
-being used to invoke \fILynx\fR.  If, however, it is unset at startup time
-(or has the value "unknown"),
-or if the \fB-term\fR command-line option is used (see \fBOPTIONS\fR section
+being used to invoke \fILynx\fR.
+If, however, it is unset at startup time
+(or has the value \*(``unknown\*(''),
+or if the \fB\-term\fR command-line option is used (see \fBOPTIONS\fR section
 above), \fILynx\fR will set or modify its value to the user specified
 terminal type (for the \fILynx\fR execution environment).
 Note: If set/modified by \fILynx\fR, the values of the \fBLINES\fR and/or
@@ -1078,7 +1119,7 @@ Note: If set/modified by \fILynx\fR, the values of the \fBLINES\fR and/or
 If built with the \fBcgi-links\fR option enabled, \fILynx\fR allows access
 to a cgi script directly without the need for an http daemon.
 .PP
-When executing such "lynxcgi scripts" (if enabled), the following variables
+When executing such \*(``lynxcgi scripts\*('' (if enabled), the following variables
 may be set for simulating a CGI environment:
 .PP
 .B CONTENT_LENGTH
@@ -1117,16 +1158,18 @@ The CGI Specification, and other associated documentation, should be consulted
 for general information on CGI script programming.
 .SH NATIVE LANGUAGE SUPPORT
 If configured and installed with \fBNative Language Support\fR, \fILynx\fR
-will display status and other messages in your local language.  See the
+will display status and other messages in your local language.
+See the
 file \fBABOUT_NLS\fR in the source distribution, or at your local \fBGNU\fR
 site, for more information about internationalization.
 .PP
 The following environment variables may be used to alter default settings:
 .TP 20
 .B LANG
-This variable, if set, will override the default message language.  It
-is an \fBISO 639\fR two-letter code identifying the language.  Language
-codes are \fBNOT\fR the same as the country codes given in \fBISO 3166\fR.
+This variable, if set, will override the default message language.
+It is an \fBISO 639\fR two-letter code identifying the language.
+Language codes are \fBNOT\fR the same
+as the country codes given in \fBISO 3166\fR.
 .TP
 .B LANGUAGE
 This variable, if set, will override the default message language.
@@ -1138,12 +1181,14 @@ and
 .TP
 .B LC_MESSAGES
 These variables, if set, specify the notion of native language
-formatting style.  They are \fBPOSIXly\fR correct.
+formatting style.
+They are \fBPOSIXly\fR correct.
 .TP
 .B LINGUAS
 This variable, if set prior to configuration, limits the installed
-languages to specific values.  It is a space-separated list of two-letter
-codes.  Currently, it is hard-coded to a wish list.
+languages to specific values.
+It is a space-separated list of two-letter codes.
+Currently, it is hard-coded to a wish list.
 .TP
 .B NLSPATH
 This variable, if set, is used as the path prefix for message catalogs.
@@ -1151,15 +1196,16 @@ This variable, if set, is used as the path prefix for message catalogs.
 This is the \fILynx\fP v2.8.7 Release; development is in progress for 2.8.8.
 .PP
 If you wish to contribute to the further development
-of \fILynx\fR, subscribe to our mailing list.  Send email to
-<lynx-dev-request@nongnu.org> with "subscribe lynx-dev" as the only line
+of \fILynx\fR, subscribe to our mailing list.
+Send email to
+<lynx-dev-request@nongnu.org> with \*(``subscribe lynx-dev\*('' as the only line
 in the body of your message.
 .PP
 Send bug reports, comments, suggestions to <lynx-dev@nongnu.org>
 after subscribing.
 .PP
 Unsubscribe by sending email to <lynx-dev-request@nongnu.org> with
-"unsubscribe lynx-dev" as the only line in the body of your message.
+\*(``unsubscribe lynx-dev\*('' as the only line in the body of your message.
 Do not send the unsubscribe message to the lynx-dev list, itself.
 .SH SEE ALSO
 .hy 0
@@ -1183,7 +1229,7 @@ platform dependent, and may vary from the above references.
 .PP
 A section shown as (GNU), is intended to denote that the topic
 may be available via an info page, instead of a man page (i.e., try
-"info subject", rather than "man subject").
+\*(``info subject\*('', rather than \*(``man subject\*('').
 .PP
 A section shown as (?) denotes that documentation on the topic exists,
 but is not part of an established documentation retrieval system (see
@@ -1193,12 +1239,14 @@ System Administrator for further information).
 \fILynx\fP has incorporated code from a variety of sources along the way.
 The earliest versions of \fILynx\fP included code from Earl Fogel of Computing
 Services at the University of Saskatchewan, who implemented HYPERREZ
-in the Unix environment.  HYPERREZ was developed by Niel Larson of
+in the Unix environment.
+HYPERREZ was developed by Niel Larson of
 Think.com and served as the model for the early versions of \fILynx\fP.
 Those versions also incorporated libraries from the Unix Gopher clients
 developed at the University of Minnesota, and the later versions of
 \fILynx\fP rely on the WWW client library code developed by Tim Berners-Lee
-and the WWW community.  Also a special thanks to Foteos Macrides who ported
+and the WWW community.
+Also a special thanks to Foteos Macrides who ported
 much of \fILynx\fP to VMS and did or organized most of its development since the
 departures of Lou Montulli and Garrett Blythe from the University of Kansas
 in the summer of 1994 through the release of v2.7.2, and to everyone

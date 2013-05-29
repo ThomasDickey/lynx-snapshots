@@ -1,9 +1,15 @@
--- $LynxId: CHANGES,v 1.642 2013/05/22 00:53:07 tom Exp $
+-- $LynxId: CHANGES,v 1.645 2013/05/29 01:08:07 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2013-05-21 (2.8.8dev.16)
+2013-05-28 (2.8.8dev.16)
+* improve discussion of -dump and -force_html in manpage (Ubuntu #1112568) -TD
+* cleanup quoting and use of ASCII "-" versus hyphen in manpage -TD
+* add checks for zero-length strings in a few places to prevent infinite loop
+  when the focus moves to a text-field which is past the right margin due to
+  improper placement for the nested-tables configuration (report by Rajeev V
+  Pillai) -TD
 * update doctype for html documentation to 4.01 strict -TD
 * correct handling of backslash in TrimCommand() function introduced in
   2.8.6dev.4, used to process the commands for "test=" in mime-types -TD
