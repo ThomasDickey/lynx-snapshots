@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYGlobalDefs.h,v 1.134 2013/04/30 09:51:46 tom Exp $
+ * $LynxId: LYGlobalDefs.h,v 1.135 2013/05/30 00:00:31 tom Exp $
  *
  * global variable definitions
  */
@@ -211,9 +211,7 @@ extern "C" {
     extern BOOLEAN LYCursesON;	/* start_curses()->TRUE, stop_curses()->FALSE */
     extern BOOLEAN LYJumpFileURL;	/* URL from the jump file shortcuts? */
     extern BOOLEAN LYNewsPosting;	/* News posting supported if TRUE */
-#ifdef USE_SESSIONS
     extern BOOLEAN LYAutoSession;	/* Auto restore/save session? */
-#endif
     extern BOOLEAN LYShowCursor;	/* Show the cursor or hide it?      */
     extern BOOLEAN LYShowTransferRate;
     extern BOOLEAN LYUnderlineLinks;	/* Show the links underlined vs bold */
@@ -629,6 +627,7 @@ extern "C" {
 #endif				/* !VMS */
 
 #if defined(USE_COLOR_STYLE)
+    extern int LYuse_color_style;	/* color-style vs oldlynx */
     extern char *lynx_lss_file;
 #endif
 

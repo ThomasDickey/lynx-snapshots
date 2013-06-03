@@ -1,4 +1,4 @@
-/* $LynxId: LYOptions.c,v 1.150 2012/11/14 01:07:12 tom Exp $ */
+/* $LynxId: LYOptions.c,v 1.154 2013/06/02 19:37:05 tom Exp $ */
 #include <HTUtils.h>
 #include <HTFTP.h>
 #include <HTTP.h>		/* 'reloading' flag */
@@ -2205,6 +2205,14 @@ static OptValues show_color_values[] =
 };
 #endif
 
+#ifdef USE_COLOR_STYLE
+static const char *color_style_string = RC_COLOR_STYLE;
+#endif
+
+#ifdef USE_DEFAULT_COLORS
+static const char *default_colors_string = RC_DEFAULT_COLORS;
+#endif
+
 static const char *show_cursor_string = RC_SHOW_CURSOR;
 
 static const char *underline_links_string = RC_UNDERLINE_LINKS;
@@ -2638,6 +2646,9 @@ int postoptions(DocInfo *newdoc)
 #if defined(USE_SLANG) || defined(COLOR_CURSES)
     int CurrentShowColor = LYShowColor;
 #endif
+#ifdef USE_DEFAULT_COLORS
+    BOOLEAN current_default_colors = LYuse_default_colors;
+#endif
 
     /*-------------------------------------------------
      * kludge a link from mbm_menu, the URL was:
@@ -2887,12 +2898,41 @@ int postoptions(DocInfo *newdoc)
 	    if (CurrentShowColor != LYShowColor) {
 		lynx_force_repaint();
 	    }
-	    CurrentShowColor = LYShowColor;
 #ifdef USE_SLANG
 	    SLtt_Use_Ansi_Colors = (LYShowColor > SHOW_COLOR_OFF ? TRUE : FALSE);
 #endif
 	}
 #endif /* USE_SLANG || COLOR_CURSES */
+
+#ifdef USE_COLOR_STYLE
+	/* Color Style: ON/OFF */
+	if (!strcmp(data[i].tag, color_style_string)
+	    && GetOptValues(bool_values, data[i].value, &code)) {
+	    LYuse_color_style = (BOOLEAN) code;
+	    update_color_style();
+	    lynx_force_repaint();
+	}
+#endif
+
+#ifdef USE_DEFAULT_COLORS
+	/* Default Colors: ON/OFF */
+	if (!strcmp(data[i].tag, default_colors_string)
+	    && GetOptValues(bool_values, data[i].value, &code)) {
+	    LYuse_default_colors = (BOOLEAN) code;
+	    if (current_default_colors != LYuse_default_colors) {
+		CTRACE((tfp, "default_colors changed, updating colors...\n"));
+		if (has_colors()) {
+		    if (LYuse_default_colors) {
+			use_default_colors();
+		    } else {
+			restart_curses();
+		    }
+		    update_default_colors();
+		    lynx_force_repaint();
+		}
+	    }
+	}
+#endif
 
 	/* Show Cursor: ON/OFF */
 	if (!strcmp(data[i].tag, show_cursor_string)
@@ -3761,6 +3801,24 @@ static int gen_options(char **newfile)
     }
     EndSelect(fp0);
 #endif /* USE_SLANG || COLOR_CURSES */
+
+#ifdef USE_COLOR_STYLE
+    /* Color style: ON/OFF */
+    PutLabel(fp0, gettext("Color style"), color_style_string);
+    BeginSelect(fp0, color_style_string);
+    PutOptValues(fp0, LYuse_color_style, bool_values);
+    EndSelect(fp0);
+#endif
+
+#ifdef USE_DEFAULT_COLORS
+    /* Default colors: ON/OFF */
+    if (has_colors()) {
+	PutLabel(fp0, gettext("Default colors"), default_colors_string);
+	BeginSelect(fp0, default_colors_string);
+	PutOptValues(fp0, LYuse_default_colors, bool_values);
+	EndSelect(fp0);
+    }
+#endif
 
     /* Show cursor: ON/OFF */
     PutLabel(fp0, gettext("Show cursor"), show_cursor_string);

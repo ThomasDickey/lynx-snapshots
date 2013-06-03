@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYReadCFG.h,v 1.27 2012/08/13 00:09:50 tom Exp $
+ * $LynxId: LYReadCFG.h,v 1.28 2013/05/30 09:32:16 tom Exp $
  */
 #ifndef LYREADCFG_H
 #define LYREADCFG_H
@@ -46,6 +46,7 @@ extern "C" {
 
     extern int check_color(const char *color, int the_default);
     extern const char *lookup_color(int code);
+    extern void update_default_colors(void);
 #endif
 
     extern void read_cfg(const char *cfg_filename,

@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMain.c,v 1.241 2013/05/02 10:41:09 tom Exp $
+ * $LynxId: LYMain.c,v 1.243 2013/05/30 08:58:21 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTP.h>
@@ -685,8 +685,9 @@ static void FatalProblem(int sig);
 #endif /* !VMS */
 
 #if defined(USE_COLOR_STYLE)
-char *lynx_lss_file2 = NULL;	/* from command-line options */
+int LYuse_color_style = TRUE;
 char *lynx_lss_file = NULL;	/* from config-file, etc. */
+static char *lynx_lss_file2 = NULL;	/* from command-line options */
 #endif
 
 #ifdef USE_DEFAULT_COLORS
@@ -3475,6 +3476,12 @@ with -dump, format output as with -traversal, but to stdout"
    PARSE_SET(
       "debug_partial",	4|TOGGLE_ARG,		debug_display_partial,
       "incremental display stages with MessageSecs delay"
+   ),
+#endif
+#ifdef USE_DEFAULT_COLORS
+   PARSE_SET(
+      "default_colors",	4|TOGGLE_ARG,		LYuse_default_colors,
+      "use terminal default foreground/background colors"
    ),
 #endif
    PARSE_INT(
