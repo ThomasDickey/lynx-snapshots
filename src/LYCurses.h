@@ -1,4 +1,4 @@
-/* $LynxId: LYCurses.h,v 1.88 2011/06/05 19:19:26 tom Exp $ */
+/* $LynxId: LYCurses.h,v 1.90 2013/05/31 00:23:39 tom Exp $ */
 #ifndef LYCURSES_H
 #define LYCURSES_H
 
@@ -502,10 +502,11 @@ extern "C" {
 #if defined(USE_COLOR_STYLE)
     extern void curses_css(char *name, int dir);
     extern void curses_style(int style, int dir);
+    extern void curses_w_style(WINDOW * win, int style, int dir);
     extern void setHashStyle(int style, int color, int cattr, int mono, const char *element);
     extern void setStyle(int style, int color, int cattr, int mono);
+    extern void update_color_style(void);
     extern void wcurses_css(WINDOW * win, char *name, int dir);
-    extern void curses_w_style(WINDOW * win, int style, int dir);
 
 #  define LynxChangeStyle(style,dir) curses_style(style,dir)
 #  define LynxWChangeStyle(win,style,dir) curses_w_style(win,style,dir)
@@ -805,6 +806,8 @@ FANCY_CURSES.  Check your config.log to see why the FANCY_CURSES test failed.
     extern void lynx_stop_bold(void);
     extern void lynx_stop_reverse(void);
     extern void lynx_stop_underline(void);
+
+    extern void restart_curses(void);
 
 /*
  * To prevent corrupting binary data on DOS, MS-WINDOWS or OS/2 we open files

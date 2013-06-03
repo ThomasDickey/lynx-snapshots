@@ -1,9 +1,15 @@
--- $LynxId: CHANGES,v 1.645 2013/05/29 01:08:07 tom Exp $
+-- $LynxId: CHANGES,v 1.648 2013/06/02 20:03:10 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2013-05-28 (2.8.8dev.16)
+2013-06-02 (2.8.8dev.16)
+* add on/off toggles to options menu for the color-style and default-colors
+  features, to help deal with packages which enable default colors without
+  adjusting the color-style settings to avoid having yellow text on a white
+  background (report by Stephen Isard) -TD
+* add -default-colors command-line option to allow toggling the state of the
+  DEFAULT_COLORS setting from lynx.cfg -TD
 * improve discussion of -dump and -force_html in manpage (Ubuntu #1112568) -TD
 * cleanup quoting and use of ASCII "-" versus hyphen in manpage -TD
 * add checks for zero-length strings in a few places to prevent infinite loop

@@ -1,4 +1,4 @@
-.\" $LynxId: lynx.man,v 1.96 2013/05/29 01:04:13 tom Exp $
+.\" $LynxId: lynx.man,v 1.97 2013/06/02 20:34:05 tom Exp $
 .\" **************************************************************************
 .\" Escape single quotes in literal strings from groff's Unicode transform.
 .ie \n(.g .ds AQ \(aq
@@ -264,6 +264,9 @@ Toggling this option makes the feature altogether unavailable.
 .TP
 .B \-debug_partial
 separate incremental display stages with MessageSecs delay
+.TP
+.B \-default-colors
+toggles the default-colors feature which is normally set in the lynx.cfg file.
 .TP
 .B \-delay
 add DebugSecs delay after each progress-message

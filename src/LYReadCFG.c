@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYReadCFG.c,v 1.172 2013/05/04 12:24:06 tom Exp $
+ * $LynxId: LYReadCFG.c,v 1.176 2013/05/30 23:16:56 tom Exp $
  */
 #ifndef NO_RULES
 #include <HTRules.h>
@@ -634,16 +634,6 @@ static int assumed_color_fun(char *buffer)
 	if (default_fg == ERR_COLOR
 	    || default_bg == ERR_COLOR)
 	    exit_with_color_syntax(buffer);
-#ifdef USE_SLANG
-	/*
-	 * Sorry - the order of initialization of slang precludes setting the
-	 * default colors from the lynx.cfg file, since slang is already
-	 * initialized before the file is read, and there is no interface
-	 * defined for setting it from the application (that's one of the
-	 * problems with using environment variables rather than a programmable
-	 * interface) -TD
-	 */
-#endif
 	FREE(temp_fg);
     } else {
 	CTRACE((tfp, "...ignored since DEFAULT_COLORS:off\n"));
@@ -661,21 +651,33 @@ static int color_fun(char *value)
 #endif
 
 #ifdef USE_DEFAULT_COLORS
-static int default_colors_fun(char *value)
+void update_default_colors(void)
 {
-    LYuse_default_colors = is_true(value);
+    int old_fg = default_fg;
+    int old_bg = default_bg;
+
+    default_color_reset = !LYuse_default_colors;
     if (LYuse_default_colors) {
+	default_color_reset = FALSE;
 	default_fg = DEFAULT_COLOR;
 	default_bg = DEFAULT_COLOR;
     } else {
 	default_color_reset = TRUE;
-	if (default_fg == DEFAULT_COLOR ||
-	    default_bg == DEFAULT_COLOR) {
-	    default_fg = COLOR_WHITE;
-	    default_bg = COLOR_BLACK;
-	    lynx_setup_colors();
-	}
+	default_fg = COLOR_WHITE;
+	default_bg = COLOR_BLACK;
     }
+    if (old_fg != default_fg || old_bg != default_bg) {
+	lynx_setup_colors();
+#ifdef USE_COLOR_STYLE
+	update_color_style();
+#endif
+    }
+}
+
+static int default_colors_fun(char *value)
+{
+    LYuse_default_colors = is_true(value);
+    update_default_colors();
     return 0;
 }
 #endif

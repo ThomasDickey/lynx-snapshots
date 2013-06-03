@@ -1,4 +1,4 @@
-/* $LynxId: LYCurses.c,v 1.169 2013/05/03 23:19:18 tom Exp $ */
+/* $LynxId: LYCurses.c,v 1.173 2013/06/02 18:20:02 tom Exp $ */
 #include <HTUtils.h>
 #include <HTAlert.h>
 
@@ -914,12 +914,16 @@ void LYnoVideo(int a)
 }
 
 #define NEWTERM_NAME "newterm"
-#if       !defined(VMS) && !defined(USE_SLANG)
-/*
- * If newterm is not defined, assume a curses subset which
- * supports only initscr.  --gil
- */
-#if defined(HAVE_NEWTERM) && defined(HAVE_DELSCREEN) && !defined(PDCURSES) && !(defined(NCURSES) && defined(HAVE_RESIZETERM))
+
+#if !defined(VMS) && !defined(USE_SLANG)
+#if defined(NCURSES) && defined(HAVE_RESIZETERM)
+
+static SCREEN *LYscreen = NULL;
+
+#define LYDELSCR()		/* ncurses does not need this */
+
+#elif defined(HAVE_NEWTERM) && defined(HAVE_DELSCREEN) && !defined(PDCURSES)
+
 static SCREEN *LYscreen = NULL;
 
 #define LYDELSCR() { \
@@ -927,10 +931,13 @@ if (recent_sizechange) { \
     CTRACE((tfp, "Screen size: delscreen()\n")); \
     delscreen(LYscreen); \
     LYscreen = NULL; } }
-/*
- * Surrogates for newterm and delscreen
- */
+
 #else /* HAVE_NEWTERM   */
+
+    /*
+     * If newterm is not defined, assume a curses subset which
+     * supports only initscr.  --gil
+     */
 static WINDOW *LYscreen = NULL;
 
 #undef  NEWTERM_NAME
@@ -939,12 +946,14 @@ static WINDOW *LYscreen = NULL;
 #define newterm(type, out, in) (initscr())
 #define LYDELSCR()		/* nothing */
 #endif /* HAVE_NEWTERM   */
+
 #else /* !defined(VMS) && !defined(USE_SLANG) */
-/*
- * Provide last recourse definitions of LYscreen and LYDELSCR for
- * stop_curses, which only tests LYscreen for zero/nonzero but
- * never uses it as a pointer or L-value.
- */
+
+    /*
+     * Provide last recourse definitions of LYscreen and LYDELSCR for
+     * stop_curses, which only tests LYscreen for zero/nonzero but
+     * never uses it as a pointer or L-value.
+     */
 #define LYscreen TRUE
 #define LYDELSCR()		/* nothing */
 #endif /* !defined(VMS) && !defined(USE_SLANG) */
@@ -1140,6 +1149,39 @@ void recoverWindowSize(void)
     } else {
 	CTRACE((tfp, "scrsize_{xy} is not saved yet.\n"));
     }
+}
+#endif
+
+#if defined(USE_DEFAULT_COLORS)
+void restart_curses(void)
+{
+    SCREEN *oldscreen = LYscreen;
+
+    if (!(LYscreen = newterm(NULL, stdout, stdin))) {	/* start curses */
+	fprintf(tfp, "%s\n",
+		gettext("Terminal reinitialisation failed - unknown terminal type?"));
+	exit_immediately(EXIT_FAILURE);
+    }
+
+    /* force xterm mouse-mode off in the physical terminal */
+    lynx_enable_mouse(0);
+    keypad(LYwin, FALSE);
+    wrefresh(LYwin);
+
+    LYwin = stdscr;
+    /* reenable xterm mouse-mode in the new screen */
+    keypad(LYwin, TRUE);
+    lynx_enable_mouse(1);
+
+    if (-1 == lynx_initialize_keymaps()) {
+	endwin();
+	exit_immediately(EXIT_FAILURE);
+    }
+    if (has_colors()) {
+	start_color();
+    }
+
+    delscreen(oldscreen);
 }
 #endif
 
@@ -1400,6 +1442,7 @@ void start_curses(void)
 #endif
 
 #ifdef USE_DEFAULT_COLORS
+	    update_default_colors();
 	    if (LYuse_default_colors) {
 #if defined(EXP_ASSUMED_COLOR) && defined(USE_COLOR_TABLE)
 		/*

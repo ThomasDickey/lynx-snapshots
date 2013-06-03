@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYStyle.c,v 1.71 2012/02/10 01:24:18 tom Exp $
+ * $LynxId: LYStyle.c,v 1.73 2013/06/02 19:17:06 tom Exp $
  *
  * character level styles for Lynx
  * (c) 1996 Rob Partington -- donated to the Lyncei (if they want it :-)
@@ -561,7 +561,7 @@ static void style_initialiseHashTable(void)
 void parse_userstyles(void)
 {
     char *name;
-    HTList *cur = lss_styles;
+    HTList *cur = LYuse_color_style ? lss_styles : 0;
 
     colorPairs = 0;
     style_initialiseHashTable();
@@ -805,6 +805,16 @@ void FreeCachedStyles(void)
 	cached_styles_rows = 0;
 	cached_styles_cols = 0;
     }
+}
+
+/*
+ * Recompute the pairs associated with the color style.
+ */
+void update_color_style(void)
+{
+    CTRACE((tfp, "update_color_style %p\n", lss_styles));
+    memset(our_pairs, 0, sizeof(our_pairs));
+    parse_userstyles();
 }
 
 #endif /* USE_COLOR_STYLE */
