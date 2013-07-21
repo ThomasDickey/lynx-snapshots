@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTCP.c,v 1.125 2013/05/06 00:07:19 tom Exp $
+ * $LynxId: HTTCP.c,v 1.126 2013/07/21 00:22:52 tom Exp $
  *
  *			Generic Communication Code		HTTCP.c
  *			==========================
@@ -362,10 +362,12 @@ typedef struct _statuses {
  *  SIGKILL), but don't go through normal libc exit() processing, which
  *  would screw up parent's stdio.  -BL
  */
+#ifdef NSL_FORK
 static void quench(int sig GCC_UNUSED)
 {
     _exit(2);
 }
+#endif
 
 int lynx_nsl_status = HT_OK;
 
@@ -642,7 +644,7 @@ static unsigned long __stdcall _fork_func(void *arg)
 #endif
 
     if (gbl_phost) {
-	rehostentlen = fill_rehostent(&rehostent, gbl_phost);
+	rehostentlen = fill_rehostent((void **) &rehostent, gbl_phost);
 	if (rehostentlen == 0) {
 	    gbl_phost = (LYNX_HOSTENT *) NULL;
 	} else {

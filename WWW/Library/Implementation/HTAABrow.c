@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTAABrow.c,v 1.38 2013/04/30 09:11:00 tom Exp $
+ * $LynxId: HTAABrow.c,v 1.39 2013/07/21 00:14:39 tom Exp $
  *
  * MODULE							HTAABrow.c
  *		BROWSER SIDE ACCESS AUTHORIZATION MODULE
@@ -747,7 +747,7 @@ static HTAAScheme HTAA_selectScheme(HTAASetup * setup)
 
     if (setup && setup->valid_schemes) {
 	for (scheme = HTAA_BASIC; scheme < HTAA_MAX_SCHEMES; scheme++) {
-	    void *object = (void *) scheme;
+	    void *object = (void *) (intptr_t) scheme;
 
 	    if (-1 < HTList_indexOf(setup->valid_schemes, object))
 		return (HTAAScheme) scheme;

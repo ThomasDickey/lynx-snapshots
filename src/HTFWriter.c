@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFWriter.c,v 1.104 2013/05/04 13:52:11 tom Exp $
+ * $LynxId: HTFWriter.c,v 1.105 2013/07/21 00:41:24 tom Exp $
  *
  *		FILE WRITER				HTFWrite.h
  *		===========
@@ -159,7 +159,6 @@ static void HTFWriter_free(HTStream *me)
     BOOLEAN found = FALSE;
 
 #ifdef WIN_EX
-    int status;
     HANDLE cur_handle;
 
     cur_handle = GetForegroundWindow();
@@ -365,7 +364,7 @@ static void HTFWriter_free(HTStream *me)
 #ifdef WIN_EX
 			    if (focus_window) {
 				HTInfoMsg(gettext("Set focus1"));
-				status = SetForegroundWindow(cur_handle);
+				(void) SetForegroundWindow(cur_handle);
 			    }
 #else
 			    start_curses();
@@ -423,7 +422,7 @@ static void HTFWriter_free(HTStream *me)
 #ifdef WIN_EX
 		if (focus_window) {
 		    HTInfoMsg(gettext("Set focus2"));
-		    status = SetForegroundWindow(cur_handle);
+		    (void) SetForegroundWindow(cur_handle);
 		}
 #else
 		start_curses();
@@ -441,7 +440,7 @@ static void HTFWriter_free(HTStream *me)
 #ifdef WIN_EX
 		if (focus_window) {
 		    HTInfoMsg(gettext("Set focus3"));
-		    status = SetForegroundWindow(cur_handle);
+		    (void) SetForegroundWindow(cur_handle);
 		}
 #else
 		start_curses();
@@ -658,7 +657,7 @@ HTStream *HTSaveAndExecute(HTPresentation *pres,
 	if (!StrNCmp(anchor->address, "file://localhost", 16)) {
 
 	    /* 1998/01/23 (Fri) 17:38:26 */
-	    unsigned char *cp, *view_fname;
+	    char *cp, *view_fname;
 
 	    me->fp = NULL;
 
@@ -676,7 +675,7 @@ HTStream *HTSaveAndExecute(HTPresentation *pres,
 	    /* 1998/04/21 (Tue) 11:04:16 */
 	    cp = view_fname;
 	    while (*cp) {
-		if (IS_SJIS_HI1(*cp) || IS_SJIS_HI2(*cp)) {
+		if (IS_SJIS_HI1(UCH(*cp)) || IS_SJIS_HI2(UCH(*cp))) {
 		    cp += 2;
 		    continue;
 		} else if (*cp == '/') {
@@ -685,7 +684,7 @@ HTStream *HTSaveAndExecute(HTPresentation *pres,
 		cp++;
 	    }
 	    if (strchr(view_fname, ' '))
-		view_fname = (unsigned char *) quote_pathname(view_fname);
+		view_fname = quote_pathname(view_fname);
 
 	    StrAllocCopy(me->viewer_command, pres->command);
 

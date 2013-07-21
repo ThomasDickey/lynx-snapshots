@@ -1,4 +1,4 @@
-/* $LynxId: Xsystem.c,v 1.26 2011/06/06 00:42:29 tom Exp $
+/* $LynxId: Xsystem.c,v 1.27 2013/07/21 00:18:04 tom Exp $
  *	like system("cmd") but return with exit code of "cmd"
  *	for Turbo-C/MS-C/LSI-C
  *  This code is in the public domain.
@@ -294,17 +294,17 @@ static int NEAR try3(char *cnm, PRO * p, int flag)
     char cmdb[STR_MAX];
     int rc;
 
-    sprintf(cmdb, "%.*s.com", sizeof(cmdb) - 5, cnm);
+    sprintf(cmdb, "%.*s.com", (int) sizeof(cmdb) - 5, cnm);
     if ((rc = open(cmdb, O_RDONLY)) >= 0) {
 	close(rc);
 	return spawnl(flag, cmdb, cmdb, p->arg, (char *) 0);
     }
-    sprintf(cmdb, "%.*s.exe", sizeof(cmdb) - 5, cnm);
+    sprintf(cmdb, "%.*s.exe", (int) sizeof(cmdb) - 5, cnm);
     if ((rc = open(cmdb, O_RDONLY)) >= 0) {
 	close(rc);
 	return spawnl(flag, cmdb, cmdb, p->arg, (char *) 0);
     }
-    sprintf(cmdb, "%.*s.bat", sizeof(cmdb) - 5, cnm);
+    sprintf(cmdb, "%.*s.bat", (int) sizeof(cmdb) - 5, cnm);
     if ((rc = open(cmdb, O_RDONLY)) >= 0) {
 	close(rc);
 	return csystem(p, flag);

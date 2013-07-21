@@ -1,5 +1,5 @@
 /*
- * $LynxId: makeuctb.c,v 1.47 2012/07/04 20:58:29 tom Exp $
+ * $LynxId: makeuctb.c,v 1.48 2013/07/21 00:42:39 tom Exp $
  *
  *  makeuctb.c, derived from conmakehash.c   - kw
  *
@@ -30,7 +30,6 @@
 #define DONT_USE_SOCKS5
 #include <UCDefs.h>
 #include <UCkd.h>
-#include <ctype.h>
 
 /*
  *  Don't try to use LYexit() since this is a standalone file.
@@ -38,6 +37,10 @@
 #ifdef exit
 #undef exit
 #endif /* exit */
+
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
 
 #define MAX_FONTLEN 256
 

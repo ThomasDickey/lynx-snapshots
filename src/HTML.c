@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTML.c,v 1.159 2013/05/02 11:03:41 tom Exp $
+ * $LynxId: HTML.c,v 1.161 2013/06/12 09:18:40 tom Exp $
  *
  *		Structured stream to Rich hypertext converter
  *		============================================
@@ -2386,10 +2386,14 @@ static int HTML_start_element(HTStructured * me, int element_number,
 	break;
 
     case HTML_ADDRESS:
-	change_paragraph_style(me, styles[ElementNumber]);
-	UPDATE_STYLE;
-	if (me->sp->tag_number == (int) ElementNumber)
-	    LYEnsureDoubleSpace(me);
+	if (me->List_Nesting_Level < 0) {
+	    change_paragraph_style(me, styles[ElementNumber]);
+	    UPDATE_STYLE;
+	    if (me->sp->tag_number == (int) ElementNumber)
+		LYEnsureDoubleSpace(me);
+	} else {
+	    LYHandlePlike(me, present, value, include, -1, TRUE);
+	}
 	CHECK_ID(HTML_ADDRESS_ID);
 	break;
 
@@ -5614,10 +5618,6 @@ static int HTML_start_element(HTStructured * me, int element_number,
  *	stack for an element with a defined style. (In fact, the styles
  *	should be linked to the whole stack not just the top one.)
  *	TBL 921119
- *
- *	We don't turn on "CAREFUL" check because the parser produces
- *	(internal code errors apart) good nesting.  The parser checks
- *	incoming code errors, not this module.
  */
 static int HTML_end_element(HTStructured * me, int element_number,
 			    char **include)
@@ -5675,9 +5675,6 @@ static int HTML_end_element(HTStructured * me, int element_number,
 		(me->sp->tag_number < 0) ? "*invalid tag*" :
 		(me->sp->tag_number >= HTML_ELEMENTS) ? "special tag" :
 		HTML_dtd.tags[me->sp->tag_number].name));
-#ifdef CAREFUL			/* parser assumed to produce good nesting */
-	/* panic */
-#endif /* CAREFUL */
     }
 
     /*

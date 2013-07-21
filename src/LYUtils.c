@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYUtils.c,v 1.239 2013/05/05 21:26:26 tom Exp $
+ * $LynxId: LYUtils.c,v 1.240 2013/07/21 00:40:35 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTCP.h>
@@ -3472,7 +3472,7 @@ static int fmt_tempname(char *result,
      */
 #ifdef HAVE_RAND_TEMPNAME
     if (first) {
-	lynx_srand((unsigned) ((long) time((time_t *) 0) + (long) result));
+	lynx_srand((unsigned) ((long) time((time_t *) NULL) + (long) result));
 	first = FALSE;
     }
 
@@ -4527,13 +4527,12 @@ int win32_check_interrupt(void)
 void sleep(unsigned sec)
 {
     unsigned int i, j;
-    int c;
 
     for (j = 0; j < sec; j++) {
 	for (i = 0; i < 10; i++) {
 	    Sleep(100);
 	    if (kbhit()) {
-		c = LYgetch();
+		(void) LYgetch();
 		return;
 	    }
 	}
