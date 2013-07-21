@@ -1,5 +1,5 @@
 /*
- * $LynxId: GridText.c,v 1.264 2013/05/06 00:06:53 tom Exp $
+ * $LynxId: GridText.c,v 1.266 2013/06/12 21:03:36 tom Exp $
  *
  *		Character grid hypertext object
  *		===============================
@@ -44,15 +44,6 @@
 
 #include <LYexit.h>
 #include <LYLeaks.h>
-
-/*#define DEBUG_APPCH 1*/
-/*#define DEBUG_STYLE 1*/
-
-#ifdef DEBUG_STYLE
-#define CTRACE_STYLE(p) CTRACE2(TRACE_STYLE, p)
-#else
-#define CTRACE_STYLE(p)		/* nothing */
-#endif
 
 #ifdef USE_COLOR_STYLE
 #include <AttrList.h>
@@ -2535,14 +2526,6 @@ void HText_beginAppend(HText *text)
  *		the finished line is displayed.
  */
 
-/* #define DEBUG_SPLITLINE */
-
-#ifdef DEBUG_SPLITLINE
-#define CTRACE_SPLITLINE(p)	CTRACE(p)
-#else
-#define CTRACE_SPLITLINE(p)	/*nothing */
-#endif
-
 static int set_style_by_embedded_chars(char *s,
 				       char *e,
 				       unsigned start_c,
@@ -2749,6 +2732,12 @@ static HTLine *insert_blanks_in_line(HTLine *line, int line_number,
 }
 
 #if defined(USE_COLOR_STYLE)
+#define direction2s(d) ((d) == STACK_OFF \
+			? "OFF" \
+			: ((d) == STACK_ON \
+			   ? "ON" \
+			   : "*ON"))
+
 /*
  * Found an OFF change not part of an adjacent matched pair.
  *
@@ -2767,15 +2756,16 @@ static HTStyleChange *skip_matched_and_correct_offsets(HTStyleChange *end,
     int level = 0;
     HTStyleChange *tmp = end;
 
-    CTRACE_STYLE((tfp, "SKIP Style %d %d (%d)\n",
+    CTRACE_STYLE((tfp, "SKIP Style %d %d (%s), split %u\n",
 		  tmp->sc_horizpos,
 		  tmp->sc_style,
-		  tmp->sc_direction));
+		  direction2s(tmp->sc_direction),
+		  split_pos));
     for (; tmp >= start; tmp--) {
-	CTRACE_STYLE((tfp, "... %d %d (%d)\n",
+	CTRACE_STYLE((tfp, "... %d %d (%s)\n",
 		      tmp->sc_horizpos,
 		      tmp->sc_style,
-		      tmp->sc_direction));
+		      direction2s(tmp->sc_direction)));
 	if (tmp->sc_style == end->sc_style) {
 	    if (tmp->sc_direction == STACK_OFF) {
 		level--;
@@ -3097,7 +3087,7 @@ static void split_line(HText *text, unsigned split)
 		    CTRACE_STYLE((tfp,
 				  "split_line, %d:style[%d] %d (dir=%d)\n",
 				  s_pre,
-				  at_end - from,
+				  (int) (at_end - from),
 				  scan->sc_style,
 				  at_end->sc_direction));
 		}

@@ -1,5 +1,5 @@
 /*                System dependencies in the W3 library
- * $LynxId: www_tcp.h,v 1.53 2011/05/24 23:48:50 tom Exp $
+ * $LynxId: www_tcp.h,v 1.54 2013/07/20 14:08:29 tom Exp $
  *
                                    SYSTEM DEPENDENCIES
 
@@ -282,13 +282,28 @@ extern int ws_netread(int fd, char *buf, int len);
 #undef EAGAIN
 #endif /* _MSC_VER */
 
+#undef EINPROGRESS
 #define EINPROGRESS          (WSABASEERR+36)
+
+#undef EALREADY
 #define EALREADY             (WSABASEERR+37)
+
+#undef EISCONN
 #define EISCONN              (WSABASEERR+56)
+
+#undef EINTR
 #define EINTR                (WSABASEERR+4)
+
+#undef EAGAIN
 #define EAGAIN               (WSABASEERR+1002)
+
+#undef ENOTCONN
 #define ENOTCONN             (WSABASEERR+57)
+
+#undef ECONNRESET
 #define ECONNRESET           (WSABASEERR+54)
+
+#undef ETIMEDOUT
 #define ETIMEDOUT             WSAETIMEDOUT
 
 #endif /* USE_WINSOCK2_H */

@@ -1,9 +1,15 @@
--- $LynxId: CHANGES,v 1.648 2013/06/02 20:03:10 tom Exp $
+-- $LynxId: CHANGES,v 1.650 2013/07/20 14:20:17 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2013-06-02 (2.8.8dev.16)
+2013-07-20 (2.8.8dev.16)
+* protect redefined errno values for Windows port from redefinition warnings
+  when using MinGW build, since the WSAxxx values are what the configuration
+  actually uses -TD
+* modify <address> tag to treat it like <p> when used within a list -TD 
+* update fi.po from
+    http://translationproject.org/latest/lynx
 * add on/off toggles to options menu for the color-style and default-colors
   features, to help deal with packages which enable default colors without
   adjusting the color-style settings to avoid having yellow text on a white

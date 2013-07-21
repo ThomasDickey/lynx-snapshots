@@ -1,5 +1,5 @@
 /*
- * $LynxId: userdefs.h,v 1.273 2012/11/19 00:20:40 tom Exp $
+ * $LynxId: userdefs.h,v 1.274 2013/06/12 09:20:28 tom Exp $
  *
  * Lynx - Hypertext navigation system
  *
@@ -1826,5 +1826,26 @@
  *
  * This ends the section specific to anonymous accounts.
  */
+
+/*****************************
+ * These can be uncommmented to get more detail when debugging changes to
+ * the color-style and layout logic.
+ */
+/*#define DEBUG_APPCH 1*/
+/*#define DEBUG_STYLE 1*/
+
+#ifdef DEBUG_STYLE
+#define CTRACE_STYLE(p) CTRACE2(TRACE_STYLE, p)
+#else
+#define CTRACE_STYLE(p)		/* nothing */
+#endif
+
+/* #define DEBUG_SPLITLINE */
+
+#ifdef DEBUG_SPLITLINE
+#define CTRACE_SPLITLINE(p)	CTRACE(p)
+#else
+#define CTRACE_SPLITLINE(p)	/*nothing */
+#endif
 
 #endif /* USERDEFS_H */

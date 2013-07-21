@@ -1,4 +1,4 @@
-/* $LynxId: LYCurses.c,v 1.173 2013/06/02 18:20:02 tom Exp $ */
+/* $LynxId: LYCurses.c,v 1.174 2013/07/21 00:40:06 tom Exp $ */
 #include <HTUtils.h>
 #include <HTAlert.h>
 
@@ -1020,8 +1020,9 @@ static void moveWindowHXY(HWND hwnd, int x, int y)
 
     if ((x != winrect.left) || (y != winrect.top)) {
 	MoveWindow(hwnd, x, y, win_width, win_height, TRUE);
-	CTRACE((tfp, "move window from (%d,%d) to (%d,%d).\n", winrect.left,
-		winrect.top, x, y));
+	CTRACE((tfp, "move window from (%d,%d) to (%d,%d).\n",
+		(int) winrect.left,
+		(int) winrect.top, x, y));
     }
 }
 
@@ -1045,7 +1046,8 @@ static void adjustWindowPos(void)
     win_height = winrect.bottom - winrect.top;
     CTRACE((tfp, "Display Size: (%4d,%3d)\n", disp_width, disp_height));
     CTRACE((tfp, "Orig WinRect: (%4d,%4d,%3d,%3d), ",
-	    winrect.left, winrect.right, winrect.top, winrect.bottom));
+	    (int) winrect.left, (int) winrect.right,
+	    (int) winrect.top, (int) winrect.bottom));
     CTRACE((tfp, "Size: (%4d,%3d)\n", win_width, win_height));
 
     newwin_left = winrect.left;
@@ -1093,7 +1095,8 @@ void maxmizeWindowSize(void)
 	win_width = winrect.right - winrect.left;
 	win_height = winrect.bottom - winrect.top;
 	CTRACE((tfp, "Current Rect: (%4d,%4d,%3d,%3d), ",
-		winrect.left, winrect.right, winrect.top, winrect.bottom));
+		(int) winrect.left, (int) winrect.right,
+		(int) winrect.top, (int) winrect.bottom));
 	CTRACE((tfp, "Size: (%4d,%3d)\n", win_width, win_height));
 
 	if (scrsize_x == 0) {
