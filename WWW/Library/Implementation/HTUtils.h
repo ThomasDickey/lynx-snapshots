@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTUtils.h,v 1.113 2013/04/30 22:45:03 tom Exp $
+ * $LynxId: HTUtils.h,v 1.115 2013/07/28 23:04:57 tom Exp $
  *
  * Utility macros for the W3 code library
  * MACROS FOR GENERAL USE
@@ -178,6 +178,9 @@ extern int ignore_unused;
 #endif
 
 #if defined(__CYGWIN__)		/* 1998/12/31 (Thu) 16:13:46 */
+#ifdef USE_OPENSSL_INCL
+#define NOCRYPT			/* workaround for openssl 1.0.1e bug */
+#endif
 #include <windows.h>		/* #include "windef.h" */
 #define BOOLEAN_DEFINED
 #undef HAVE_POPEN		/* FIXME: does this not work, or is it missing */
@@ -223,8 +226,10 @@ extern off_t LYatoll(const char *value);
 #include <dos.h>
 #endif
 
+#if !defined(__MINGW32__)
 #undef sleep			/* 1998/06/23 (Tue) 16:54:53 */
 extern void sleep(unsigned __seconds);
+#endif
 
 #define popen _popen
 #define pclose _pclose

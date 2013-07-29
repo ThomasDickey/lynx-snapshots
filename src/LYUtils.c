@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYUtils.c,v 1.240 2013/07/21 00:40:35 tom Exp $
+ * $LynxId: LYUtils.c,v 1.242 2013/07/29 00:33:32 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTCP.h>
@@ -4524,6 +4524,7 @@ int win32_check_interrupt(void)
     return FALSE;
 }
 
+#if !defined(__MINGW32__)
 void sleep(unsigned sec)
 {
     unsigned int i, j;
@@ -4538,7 +4539,8 @@ void sleep(unsigned sec)
 	}
     }
 }
-#endif
+#endif /* !__MINGW32__ */
+#endif /* _WINDOWS */
 
 /*
  * This function rewrites and reallocates a previously allocated string so that
@@ -7321,7 +7323,7 @@ int Cygwin_Shell(void)
 			     0, 0, &startUpInfo, &procInfo);
 
 	if (!code) {
-	    printf("shell = [%s], code = %ld\n", shell, GetLastError());
+	    printf("shell = [%s], code = %ld\n", shell, (long) GetLastError());
 	}
 
 	/* wait for the child to return (this is not a requirement

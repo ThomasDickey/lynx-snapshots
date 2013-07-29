@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYGlobalDefs.h,v 1.135 2013/05/30 00:00:31 tom Exp $
+ * $LynxId: LYGlobalDefs.h,v 1.136 2013/07/29 00:29:14 tom Exp $
  *
  * global variable definitions
  */
@@ -666,9 +666,7 @@ extern "C" {
 #endif
 
 #if defined(__CYGWIN__)
-    extern void cygwin_conv_to_full_win32_path(char *posix, char *dos);
-    extern void cygwin_conv_to_full_posix_path(char *dos, char *posix);
-    extern int setmode(int handle, int amode);
+#include <io.h>
 #endif
 
 #if !defined(__CYGWIN__) && defined(__CYGWIN32__)
