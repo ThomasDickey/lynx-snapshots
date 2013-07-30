@@ -1,9 +1,9 @@
--- $LynxId: CHANGES,v 1.652 2013/07/29 00:56:09 tom Exp $
+-- $LynxId: CHANGES,v 1.653 2013/07/29 19:54:21 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2013-07-28 (2.8.8dev.16)
+2013-07-29 (2.8.8dev.16)
 * build-fix for setmode() definition on Cygwin -TD
 * modify HTUtils.h to work around header conflict with Cygwin w32api and
   openssl 1.0.1e (prompted by report/patch by Supriyo Biswas) -TD
