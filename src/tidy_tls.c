@@ -1,6 +1,6 @@
 /*
- * $LynxId: tidy_tls.c,v 1.11 2013/05/01 08:52:41 tom Exp $
- * Copyright 2008-2011,2011 Thomas E. Dickey
+ * $LynxId: tidy_tls.c,v 1.12 2013/09/29 23:38:30 tom Exp $
+ * Copyright 2008-2011,2013 Thomas E. Dickey
  * with fix Copyright 2008 by Thomas Viehmann
  *
  * Required libraries:

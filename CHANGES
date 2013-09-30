@@ -1,7 +1,25 @@
--- $LynxId: CHANGES,v 1.653 2013/07/29 19:54:21 tom Exp $
+-- $LynxId: CHANGES,v 1.654 2013/09/30 00:23:10 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
+
+2013-09-29 (2.8.8dev.17)
+* updates for configure macros -TD
+  + CF_ACVERSION_CHECK, fix from byacc for "newer" autoconf.
+  + CF_ADD_LIB_AFTER, fix from xterm for problem with -Wl,xxx options
+  + CF_CURSES_LIBS, modify to allow external script to set $cf_term_lib and/or
+    $cf_curs_lib
+  + CF_INTEL_COMPILER, $host_os needs AC_CANONICAL_HOST
+  + CF_MIXEDCASE_FILENAMES, add msys / msysdll to known host/platform types
+  + CF_RPATH_HACK, use sort and uniq rather than sort -u, to work with HPUX
+    11.11, etc.
+  + CF_TRY_PKG_CONFIG, set variables for consistent usage of this macro
+  + CF_XOPEN_SOURCE, add msys / msysdll to known host/platform types
+  + CF_X_ATHENA, trim extra X libraries after updating lists, to work with ld
+    --as-needed option which in effect uses only the first mention of the
+    library.  If that does not follow everything that depends on the library,
+    ld will silently fail to resolve symbols.
+* update config.guess (2013-06-10), config.sub (2013-09-05)
 
 2013-07-29 (2.8.8dev.16)
 * build-fix for setmode() definition on Cygwin -TD
