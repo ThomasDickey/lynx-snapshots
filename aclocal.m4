@@ -1,4 +1,4 @@
-dnl $LynxId: aclocal.m4,v 1.198 2012/11/09 10:48:49 tom Exp $
+dnl $LynxId: aclocal.m4,v 1.200 2013/09/30 00:42:07 tom Exp $
 dnl Macros for auto-configure script.
 dnl by T.E.Dickey <dickey@invisible-island.net>
 dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
@@ -13,7 +13,7 @@ dnl http://invisible-island.net/autoconf/autoconf.html
 dnl
 dnl ---------------------------------------------------------------------------
 dnl
-dnl Copyright 1997-2011,2012 by Thomas E. Dickey
+dnl Copyright 1997-2012,2013 by Thomas E. Dickey
 dnl
 dnl Permission to use, copy, modify, and distribute this software and its
 dnl documentation for any purpose and without fee is hereby granted,
@@ -597,7 +597,7 @@ changequote([,])dnl
   AC_SUBST(GENCAT)
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_ACVERSION_CHECK version: 3 updated: 2012/10/03 18:39:53
+dnl CF_ACVERSION_CHECK version: 4 updated: 2013/03/04 19:52:56
 dnl ------------------
 dnl Conditionally generate script according to whether we're using a given autoconf.
 dnl
@@ -606,6 +606,7 @@ dnl $2 = code to use if AC_ACVERSION is at least as high as $1.
 dnl $3 = code to use if AC_ACVERSION is older than $1.
 define([CF_ACVERSION_CHECK],
 [
+ifdef([AC_ACVERSION], ,[m4_copy([m4_PACKAGE_VERSION],[AC_ACVERSION])])dnl
 ifdef([m4_version_compare],
 [m4_if(m4_version_compare(m4_defn([AC_ACVERSION]), [$1]), -1, [$3], [$2])],
 [CF_ACVERSION_COMPARE(
@@ -819,7 +820,7 @@ dnl $1 = libraries to add, with the "-l", etc.
 dnl $2 = variable to update (default $LIBS)
 AC_DEFUN([CF_ADD_LIBS],[ifelse($2,,LIBS,[$2])="$1 [$]ifelse($2,,LIBS,[$2])"])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_ADD_LIB_AFTER version: 2 updated: 2010/11/08 20:33:46
+dnl CF_ADD_LIB_AFTER version: 3 updated: 2013/07/09 21:27:22
 dnl ----------------
 dnl Add a given library after another, e.g., following the one it satisfies a
 dnl dependency for.
@@ -828,7 +829,7 @@ dnl $1 = the first library
 dnl $2 = its dependency
 AC_DEFUN([CF_ADD_LIB_AFTER],[
 CF_VERBOSE(...before $LIBS)
-LIBS=`echo "$LIBS" | sed -e "s/[[ 	]][[ 	]]*/ /g" -e "s,$1 ,$1 $2 ," -e 's/  / /g'`
+LIBS=`echo "$LIBS" | sed -e "s/[[ 	]][[ 	]]*/ /g" -e "s%$1 %$1 $2 %" -e 's%  % %g'`
 CF_VERBOSE(...after  $LIBS)
 ])dnl
 dnl ---------------------------------------------------------------------------
@@ -1813,7 +1814,7 @@ fi
 AC_CHECK_HEADERS($cf_cv_ncurses_header)
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_CURSES_LIBS version: 36 updated: 2012/07/07 21:02:48
+dnl CF_CURSES_LIBS version: 37 updated: 2013/02/09 17:33:50
 dnl --------------
 dnl Look for the curses libraries.  Older curses implementations may require
 dnl termcap/termlib to be linked as well.  Call CF_CURSES_CPPFLAGS first.
@@ -1850,7 +1851,7 @@ hpux10.*) #(vi
 			ac_cv_func_initscr=yes
 			])])
 	fi
-    ;;
+	;;
 linux*)
 	case `arch 2>/dev/null` in
 	x86_64)
@@ -1865,7 +1866,7 @@ linux*)
 		CF_ADD_LIBDIR(/lib)
 		;;
 	esac
-    ;;
+	;;
 sunos3*|sunos4*)
 	if test "x$cf_cv_screen" = "xcurses_5lib"
 	then
@@ -1879,59 +1880,63 @@ sunos3*|sunos4*)
 esac
 
 if test ".$ac_cv_func_initscr" != .yes ; then
-    cf_save_LIBS="$LIBS"
-    cf_term_lib=""
-    cf_curs_lib=""
+	cf_save_LIBS="$LIBS"
 
-    if test ".${cf_cv_ncurses_version:-no}" != .no
-    then
-        cf_check_list="ncurses curses cursesX"
-    else
-        cf_check_list="cursesX curses ncurses"
-    fi
+	if test ".${cf_cv_ncurses_version:-no}" != .no
+	then
+		cf_check_list="ncurses curses cursesX"
+	else
+		cf_check_list="cursesX curses ncurses"
+	fi
 
-    # Check for library containing tgoto.  Do this before curses library
-    # because it may be needed to link the test-case for initscr.
-    AC_CHECK_FUNC(tgoto,[cf_term_lib=predefined],[
-        for cf_term_lib in $cf_check_list otermcap termcap tinfo termlib unknown
-        do
-            AC_CHECK_LIB($cf_term_lib,tgoto,[break])
-        done
-    ])
+	# Check for library containing tgoto.  Do this before curses library
+	# because it may be needed to link the test-case for initscr.
+	if test "x$cf_term_lib" = x
+	then
+		AC_CHECK_FUNC(tgoto,[cf_term_lib=predefined],[
+			for cf_term_lib in $cf_check_list otermcap termcap tinfo termlib unknown
+			do
+				AC_CHECK_LIB($cf_term_lib,tgoto,[break])
+			done
+		])
+	fi
 
-    # Check for library containing initscr
-    test "$cf_term_lib" != predefined && test "$cf_term_lib" != unknown && LIBS="-l$cf_term_lib $cf_save_LIBS"
- 	for cf_curs_lib in $cf_check_list xcurses jcurses pdcurses unknown
-    do
-        AC_CHECK_LIB($cf_curs_lib,initscr,[break])
-    done
-    test $cf_curs_lib = unknown && AC_MSG_ERROR(no curses library found)
+	# Check for library containing initscr
+	test "$cf_term_lib" != predefined && test "$cf_term_lib" != unknown && LIBS="-l$cf_term_lib $cf_save_LIBS"
+	if test "x$cf_curs_lib" = x
+	then
+		for cf_curs_lib in $cf_check_list xcurses jcurses pdcurses unknown
+		do
+			AC_CHECK_LIB($cf_curs_lib,initscr,[break])
+		done
+	fi
+	test $cf_curs_lib = unknown && AC_MSG_ERROR(no curses library found)
 
-    LIBS="-l$cf_curs_lib $cf_save_LIBS"
-    if test "$cf_term_lib" = unknown ; then
-        AC_MSG_CHECKING(if we can link with $cf_curs_lib library)
-        AC_TRY_LINK([#include <${cf_cv_ncurses_header:-curses.h}>],
-            [initscr()],
-            [cf_result=yes],
-            [cf_result=no])
-        AC_MSG_RESULT($cf_result)
-        test $cf_result = no && AC_MSG_ERROR(Cannot link curses library)
-    elif test "$cf_curs_lib" = "$cf_term_lib" ; then
-        :
-    elif test "$cf_term_lib" != predefined ; then
-        AC_MSG_CHECKING(if we need both $cf_curs_lib and $cf_term_lib libraries)
-        AC_TRY_LINK([#include <${cf_cv_ncurses_header:-curses.h}>],
-            [initscr(); tgoto((char *)0, 0, 0);],
-            [cf_result=no],
-            [
-            LIBS="-l$cf_curs_lib -l$cf_term_lib $cf_save_LIBS"
-            AC_TRY_LINK([#include <${cf_cv_ncurses_header:-curses.h}>],
-                [initscr()],
-                [cf_result=yes],
-                [cf_result=error])
-            ])
-        AC_MSG_RESULT($cf_result)
-    fi
+	LIBS="-l$cf_curs_lib $cf_save_LIBS"
+	if test "$cf_term_lib" = unknown ; then
+		AC_MSG_CHECKING(if we can link with $cf_curs_lib library)
+		AC_TRY_LINK([#include <${cf_cv_ncurses_header:-curses.h}>],
+			[initscr()],
+			[cf_result=yes],
+			[cf_result=no])
+		AC_MSG_RESULT($cf_result)
+		test $cf_result = no && AC_MSG_ERROR(Cannot link curses library)
+	elif test "$cf_curs_lib" = "$cf_term_lib" ; then
+		:
+	elif test "$cf_term_lib" != predefined ; then
+		AC_MSG_CHECKING(if we need both $cf_curs_lib and $cf_term_lib libraries)
+		AC_TRY_LINK([#include <${cf_cv_ncurses_header:-curses.h}>],
+			[initscr(); tgoto((char *)0, 0, 0);],
+			[cf_result=no],
+			[
+			LIBS="-l$cf_curs_lib -l$cf_term_lib $cf_save_LIBS"
+			AC_TRY_LINK([#include <${cf_cv_ncurses_header:-curses.h}>],
+				[initscr()],
+				[cf_result=yes],
+				[cf_result=error])
+			])
+		AC_MSG_RESULT($cf_result)
+	fi
 fi
 fi
 
@@ -3287,7 +3292,7 @@ else
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_INTEL_COMPILER version: 4 updated: 2010/05/26 05:38:42
+dnl CF_INTEL_COMPILER version: 5 updated: 2013/02/10 10:41:05
 dnl -----------------
 dnl Check if the given compiler is really the Intel compiler for Linux.  It
 dnl tries to imitate gcc, but does not return an error when it finds a mismatch
@@ -3301,6 +3306,7 @@ dnl $1 = GCC (default) or GXX
 dnl $2 = INTEL_COMPILER (default) or INTEL_CPLUSPLUS
 dnl $3 = CFLAGS (default) or CXXFLAGS
 AC_DEFUN([CF_INTEL_COMPILER],[
+AC_REQUIRE([AC_CANONICAL_HOST])
 ifelse([$2],,INTEL_COMPILER,[$2])=no
 
 if test "$ifelse([$1],,[$1],GCC)" = yes ; then
@@ -3591,7 +3597,7 @@ ifelse($1,,[
 fi
 ])
 dnl ---------------------------------------------------------------------------
-dnl CF_MIXEDCASE_FILENAMES version: 4 updated: 2012/10/02 20:55:03
+dnl CF_MIXEDCASE_FILENAMES version: 5 updated: 2013/09/07 13:54:05
 dnl ----------------------
 dnl Check if the file-system supports mixed-case filenames.  If we're able to
 dnl create a lowercase name and see it as uppercase, it doesn't support that.
@@ -3600,7 +3606,7 @@ AC_DEFUN([CF_MIXEDCASE_FILENAMES],
 AC_CACHE_CHECK(if filesystem supports mixed-case filenames,cf_cv_mixedcase,[
 if test "$cross_compiling" = yes ; then
 	case $target_alias in #(vi
-	*-os2-emx*|*-msdosdjgpp*|*-cygwin*|*-mingw32*|*-uwin*) #(vi
+	*-os2-emx*|*-msdosdjgpp*|*-cygwin*|*-msys*|*-mingw32*|*-uwin*) #(vi
 		cf_cv_mixedcase=no
 		;;
 	*)
@@ -4654,7 +4660,7 @@ $1=`echo "$2" | \
 		-e 's/-[[UD]]'"$3"'\(=[[^ 	]]*\)\?[$]//g'`
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_RPATH_HACK version: 9 updated: 2011/02/13 13:31:33
+dnl CF_RPATH_HACK version: 11 updated: 2013/09/01 13:02:00
 dnl -------------
 AC_DEFUN([CF_RPATH_HACK],
 [
@@ -4671,8 +4677,8 @@ if test -n "$LD_RPATH_OPT" ; then
 
 AC_TRY_LINK([#include <stdio.h>],
 		[printf("Hello");],
-		[cf_rpath_oops=`$cf_ldd_prog conftest$ac_exeext | fgrep ' not found' | sed -e 's% =>.*$%%' |sort -u`
-		 cf_rpath_list=`$cf_ldd_prog conftest$ac_exeext | fgrep / | sed -e 's%^.*[[ 	]]/%/%' -e 's%/[[^/]][[^/]]*$%%' |sort -u`])
+		[cf_rpath_oops=`$cf_ldd_prog conftest$ac_exeext | fgrep ' not found' | sed -e 's% =>.*$%%' |sort | uniq`
+		 cf_rpath_list=`$cf_ldd_prog conftest$ac_exeext | fgrep / | sed -e 's%^.*[[ 	]]/%/%' -e 's%/[[^/]][[^/]]*$%%' |sort | uniq`])
 
 		# If we passed the link-test, but get a "not found" on a given library,
 		# this could be due to inept reconfiguration of gcc to make it only
@@ -4705,6 +4711,8 @@ AC_TRY_LINK([#include <stdio.h>],
 	CF_RPATH_HACK_2(LIBS)
 
 	CF_VERBOSE(...checked EXTRA_LDFLAGS $EXTRA_LDFLAGS)
+else
+	AC_MSG_RESULT(no)
 fi
 AC_SUBST(EXTRA_LDFLAGS)
 ])dnl
@@ -5718,7 +5726,23 @@ AC_MSG_RESULT($cf_cv_tm_gmtoff)
 test $cf_cv_tm_gmtoff = no && AC_DEFINE(DONT_HAVE_TM_GMTOFF,1,[Define to 1 if the tm-struct defines .tm_gmtoff member])
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_TRY_PKG_CONFIG version: 4 updated: 2010/06/14 17:42:30
+dnl CF_TRIM_X_LIBS version: 2 updated: 2013/07/09 21:27:22
+dnl --------------
+dnl Trim extra base X libraries added as a workaround for inconsistent library
+dnl dependencies returned by "new" pkg-config files.
+AC_DEFUN([CF_TRIM_X_LIBS],[
+	for cf_trim_lib in Xmu Xt X11
+	do
+		case "$LIBS" in
+		*-l$cf_trim_lib\ *-l$cf_trim_lib*)
+			LIBS=`echo "$LIBS " | sed -e 's/  / /g' -e 's%-l'"$cf_trim_lib"' %%' -e 's/ $//'`
+			CF_VERBOSE(..trimmed $LIBS)
+			;;
+		esac
+	done
+])
+dnl ---------------------------------------------------------------------------
+dnl CF_TRY_PKG_CONFIG version: 5 updated: 2013/07/06 21:27:06
 dnl -----------------
 dnl This is a simple wrapper to use for pkg-config, for libraries which may be
 dnl available in that form.
@@ -5739,6 +5763,8 @@ if test "$PKG_CONFIG" != none && "$PKG_CONFIG" --exists $1; then
 	CF_ADD_LIBS($cf_pkgconfig_libs)
 	ifelse([$2],,:,[$2])
 else
+	cf_pkgconfig_incs=
+	cf_pkgconfig_libs=
 	ifelse([$3],,:,[$3])
 fi
 ])
@@ -6379,7 +6405,7 @@ AC_TRY_LINK([
 test $cf_cv_need_xopen_extension = yes && CPPFLAGS="$CPPFLAGS -D_XOPEN_SOURCE_EXTENDED"
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_XOPEN_SOURCE version: 42 updated: 2012/01/07 08:26:49
+dnl CF_XOPEN_SOURCE version: 45 updated: 2013/09/07 14:06:25
 dnl ---------------
 dnl Try to get _XOPEN_SOURCE defined properly that we can use POSIX functions,
 dnl or adapt to the vendor's definitions to get equivalent functionality,
@@ -6389,6 +6415,7 @@ dnl Parameters:
 dnl	$1 is the nominal value for _XOPEN_SOURCE
 dnl	$2 is the nominal value for _POSIX_C_SOURCE
 AC_DEFUN([CF_XOPEN_SOURCE],[
+AC_REQUIRE([AC_CANONICAL_HOST])
 
 cf_XOPEN_SOURCE=ifelse([$1],,500,[$1])
 cf_POSIX_C_SOURCE=ifelse([$2],,199506L,[$2])
@@ -6398,7 +6425,7 @@ case $host_os in #(vi
 aix[[4-7]]*) #(vi
 	cf_xopen_source="-D_ALL_SOURCE"
 	;;
-cygwin) #(vi
+cygwin|msys) #(vi
 	cf_XOPEN_SOURCE=600
 	;;
 darwin[[0-8]].*) #(vi
@@ -6497,7 +6524,7 @@ make an error
 fi
 ])
 dnl ---------------------------------------------------------------------------
-dnl CF_X_ATHENA version: 20 updated: 2010/11/09 05:18:02
+dnl CF_X_ATHENA version: 21 updated: 2013/07/06 21:27:06
 dnl -----------
 dnl Check for Xaw (Athena) libraries
 dnl
@@ -6556,6 +6583,8 @@ if test "$PKG_CONFIG" != none ; then
 			CF_UPPER(cf_x_athena_LIBS,HAVE_LIB_$cf_x_athena)
 			AC_DEFINE_UNQUOTED($cf_x_athena_LIBS)
 
+			CF_TRIM_X_LIBS
+
 AC_CACHE_CHECK(for usable $cf_x_athena/Xmu package,cf_cv_xaw_compat,[
 AC_TRY_LINK([
 #include <X11/Xmu/CharSet.h>
@@ -6571,7 +6600,15 @@ int check = XmuCompareISOLatin1("big", "small")
 					;;
 				*)
 					CF_VERBOSE(work around broken package)
-					CF_TRY_PKG_CONFIG(xmu,,[CF_ADD_LIB_AFTER(-lXt,-lXmu)])
+					cf_save_xmu="$LIBS"
+					cf_first_lib=`echo "$cf_save_xmu" | sed -e 's/^[ ][ ]*//' -e 's/ .*//'`
+					CF_TRY_PKG_CONFIG(xmu,[
+							LIBS="$cf_save_xmu"
+							CF_ADD_LIB_AFTER($cf_first_lib,$cf_pkgconfig_libs)
+						],[
+							CF_ADD_LIB_AFTER($cf_first_lib,-lXmu)
+						])
+					CF_TRIM_X_LIBS
 					;;
 				esac
 			fi
