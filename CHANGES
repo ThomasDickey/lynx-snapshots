@@ -1,9 +1,10 @@
--- $LynxId: CHANGES,v 1.655 2013/10/01 19:33:15 tom Exp $
+-- $LynxId: CHANGES,v 1.656 2013/10/01 22:01:16 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
 2013-10-01 (2.8.8dev.17)
+* improve warning message for GNUTLS_CERT_SIGNER_NOT_FOUND (Debian #695653) -TD
 * ignore non-fatal return codes from gnutls_handshake (Debian #724812,
   patch by Hans Wurst).
 * updates for configure macros -TD
