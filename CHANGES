@@ -1,9 +1,11 @@
--- $LynxId: CHANGES,v 1.654 2013/09/30 00:23:10 tom Exp $
+-- $LynxId: CHANGES,v 1.655 2013/10/01 19:33:15 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2013-09-29 (2.8.8dev.17)
+2013-10-01 (2.8.8dev.17)
+* ignore non-fatal return codes from gnutls_handshake (Debian #724812,
+  patch by Hans Wurst).
 * updates for configure macros -TD
   + CF_ACVERSION_CHECK, fix from byacc for "newer" autoconf.
   + CF_ADD_LIB_AFTER, fix from xterm for problem with -Wl,xxx options
