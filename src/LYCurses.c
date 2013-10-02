@@ -1,4 +1,4 @@
-/* $LynxId: LYCurses.c,v 1.174 2013/07/21 00:40:06 tom Exp $ */
+/* $LynxId: LYCurses.c,v 1.175 2013/10/02 14:35:56 tom Exp $ */
 #include <HTUtils.h>
 #include <HTAlert.h>
 
@@ -647,7 +647,7 @@ static int get_color_pair(int n)
 	&& lynx_color_pairs[n].bg == default_bg)
 	return 0;
 #endif
-    return COLOR_PAIR(n);
+    return (int) COLOR_PAIR(n);
 }
 
 /*
