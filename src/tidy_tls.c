@@ -1,5 +1,5 @@
 /*
- * $LynxId: tidy_tls.c,v 1.12 2013/09/29 23:38:30 tom Exp $
+ * $LynxId: tidy_tls.c,v 1.15 2013/10/01 20:56:17 tom Exp $
  * Copyright 2008-2011,2013 Thomas E. Dickey
  * with fix Copyright 2008 by Thomas Viehmann
  *
@@ -399,13 +399,29 @@ int SSL_connect(SSL * ssl)
 {
     X509_STORE_CTX *store;
     int rc;
+    gnutls_alert_description_t alert;
+    const char *aname;
 
     if (ssl->options & SSL_OP_NO_TLSv1)
 	RemoveProtocol(ssl, GNUTLS_TLS1);
     if (ssl->options & SSL_OP_NO_SSLv3)
 	RemoveProtocol(ssl, GNUTLS_SSL3);
 
-    rc = gnutls_handshake(ssl->gnutls_state);
+    while ((rc = gnutls_handshake(ssl->gnutls_state)) < 0 &&
+	   !gnutls_error_is_fatal(rc)) {
+	if (rc == GNUTLS_E_WARNING_ALERT_RECEIVED) {
+	    alert = gnutls_alert_get(ssl->gnutls_state);
+	    aname = gnutls_alert_get_name(alert);
+	    CTRACE((tfp, "SSL Alert: %s\n", NonNull(aname)));
+	    switch (gnutls_alert_get(ssl->gnutls_state)) {
+	    case GNUTLS_A_UNRECOGNIZED_NAME:
+		continue;	/* ignore */
+	    default:
+		break;
+	    }
+	    break;		/* treat all other alerts as fatal */
+	}
+    }
     ssl->last_error = rc;
 
     if (rc < 0) {
