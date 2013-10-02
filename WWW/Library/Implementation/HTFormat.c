@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFormat.c,v 1.80 2013/05/05 20:19:02 tom Exp $
+ * $LynxId: HTFormat.c,v 1.81 2013/10/01 23:43:39 tom Exp $
  *
  *		Manage different file formats			HTFormat.c
  *		=============================
@@ -870,7 +870,7 @@ int HTCopy(HTParentAnchor *anchor,
 #endif /* NOT_ASCII */
 
 	total = bytes + status;
-	if (limit == 0 || (total < limit)) {
+	if (limit == 0 || bytes == 0 || (total < limit)) {
 	    (*targetClass.put_block) (sink, input_buffer, status);
 	} else if (bytes < limit) {
 	    (*targetClass.put_block) (sink, input_buffer, (int) (limit - bytes));

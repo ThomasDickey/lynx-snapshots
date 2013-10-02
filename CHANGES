@@ -1,12 +1,14 @@
--- $LynxId: CHANGES,v 1.656 2013/10/01 22:01:16 tom Exp $
+-- $LynxId: CHANGES,v 1.657 2013/10/01 23:46:43 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
 2013-10-01 (2.8.8dev.17)
+* minor change to Content-Length logic from 2.8.8dev.13 to work with Amazon's
+  cookies (Debian #720541) -TD
 * improve warning message for GNUTLS_CERT_SIGNER_NOT_FOUND (Debian #695653) -TD
-* ignore non-fatal return codes from gnutls_handshake (Debian #724812,
-  patch by Hans Wurst).
+* ignore non-fatal return codes from gnutls_handshake introduced by SNI change
+  in 2.8.8dev.15 (Debian #724812, patch by Hans Wurst).
 * updates for configure macros -TD
   + CF_ACVERSION_CHECK, fix from byacc for "newer" autoconf.
   + CF_ADD_LIB_AFTER, fix from xterm for problem with -Wl,xxx options
