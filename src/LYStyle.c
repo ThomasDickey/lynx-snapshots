@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYStyle.c,v 1.73 2013/06/02 19:17:06 tom Exp $
+ * $LynxId: LYStyle.c,v 1.75 2013/10/02 14:47:09 tom Exp $
  *
  * character level styles for Lynx
  * (c) 1996 Rob Partington -- donated to the Lyncei (if they want it :-)
@@ -187,6 +187,7 @@ static void parse_attributes(const char *mono,
     int bA = default_bg;
     int cA = A_NORMAL;
     int newstyle = hash_code(element);
+    int colored_attr;
 
     CTRACE2(TRACE_STYLE, (tfp, "CSS(PA):style d=%d / h=%d, e=%s\n",
 			  style, newstyle, element));
@@ -254,9 +255,10 @@ static void parse_attributes(const char *mono,
 	    }
 	}
 	CTRACE2(TRACE_STYLE, (tfp, "CSS(CURPAIR):%d\n", curPair));
+	colored_attr = ((int) COLOR_PAIR(curPair)) | ((int) cA);
 	if (style < DSTYLE_ELEMENTS)
-	    setStyle(style, COLOR_PAIR(curPair) | cA, cA, mA);
-	setHashStyle(newstyle, COLOR_PAIR(curPair) | cA, cA, mA, element);
+	    setStyle(style, colored_attr, cA, mA);
+	setHashStyle(newstyle, colored_attr, cA, mA, element);
     } else {
 	if (lynx_has_color && fA != NO_COLOR) {
 	    CTRACE2(TRACE_STYLE,
@@ -812,7 +814,7 @@ void FreeCachedStyles(void)
  */
 void update_color_style(void)
 {
-    CTRACE((tfp, "update_color_style %p\n", lss_styles));
+    CTRACE((tfp, "update_color_style %p\n", (void *) lss_styles));
     memset(our_pairs, 0, sizeof(our_pairs));
     parse_userstyles();
 }
