@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTP.c,v 1.129 2013/10/01 15:09:29 tom Exp $
+ * $LynxId: HTTP.c,v 1.130 2013/10/01 21:58:37 tom Exp $
  *
  * HyperText Tranfer Protocol	- Client implementation		HTTP.c
  * ==========================
@@ -778,7 +778,7 @@ static int HTLoadHTTP(const char *arg,
 	    char *msg2;
 
 	    if (ret == 0 && tls_status & GNUTLS_CERT_SIGNER_NOT_FOUND) {
-		msg2 = gettext("self signed certificate");
+		msg2 = gettext("the certificate has no known issuer");
 	    } else if (tls_status & GNUTLS_CERT_SIGNER_NOT_FOUND) {
 		msg2 = gettext("no issuer was found");
 	    } else if (tls_status & GNUTLS_CERT_SIGNER_NOT_CA) {
