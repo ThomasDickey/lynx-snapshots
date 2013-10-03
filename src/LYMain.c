@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMain.c,v 1.243 2013/05/30 08:58:21 tom Exp $
+ * $LynxId: LYMain.c,v 1.244 2013/10/02 20:08:54 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTP.h>
@@ -212,6 +212,7 @@ BOOLEAN bold_name_anchors = FALSE;
 BOOLEAN LYcase_sensitive = CASE_SENSITIVE_ALWAYS_ON;
 BOOLEAN check_mail = CHECKMAIL;
 BOOLEAN child_lynx = FALSE;
+BOOLEAN dump_links_inline = FALSE;
 BOOLEAN dump_links_only = FALSE;
 BOOLEAN dump_output_immediately = FALSE;
 BOOLEAN dump_to_stderr = FALSE;
@@ -2191,6 +2192,7 @@ int main(int argc,
 		    i + 1, HTList_count(Goto_URLs), startfile));
 	    status = mainloop();
 	    if (!no_list &&
+		!dump_links_inline &&
 		!crawl)		/* For -crawl it has already been done! */
 		printlist(stdout, FALSE);
 	    if (i != 0)
@@ -2199,6 +2201,7 @@ int main(int argc,
 #else
 	status = mainloop();
 	if (!no_list &&
+	    !dump_links_inline &&
 	    !crawl &&		/* For -crawl it has already been done! */
 	    links_are_numbered())
 	    printlist(stdout, FALSE);
@@ -3620,6 +3623,10 @@ soon as they are seen)"
    PARSE_INT(
       "link",		4|NEED_INT_ARG,		crawl_count,
       "=NUMBER\nstarting count for lnk#.dat files produced by -crawl"
+   ),
+   PARSE_SET(
+      "list_inline",	4|TOGGLE_ARG,		dump_links_inline,
+      "with -dump, forces it to show links inline with text"
    ),
    PARSE_SET(
       "listonly",	4|TOGGLE_ARG,		dump_links_only,

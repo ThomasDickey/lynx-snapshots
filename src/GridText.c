@@ -1,5 +1,5 @@
 /*
- * $LynxId: GridText.c,v 1.266 2013/06/12 21:03:36 tom Exp $
+ * $LynxId: GridText.c,v 1.267 2013/10/02 20:09:49 tom Exp $
  *
  *		Character grid hypertext object
  *		===============================
@@ -5119,11 +5119,21 @@ static void add_link_number(HText *text, TextAnchor *a, int save_position)
 	&& links_are_numbered()) {
 	char saved_lastchar = text->LastChar;
 	int saved_linenum = text->Lines;
+	HTAnchor *link_dest;
+	char *link_text;
 
 	compute_show_number(a);
 
-	sprintf(marker, "[%d]", a->show_number);
-	HText_appendText(text, marker);
+	if (dump_links_inline
+	    && (link_dest = HTAnchor_followLink(a->anchor)) != 0
+	    && (link_text = HTAnchor_address(link_dest)) != 0) {
+	    HText_appendText(text, "[");
+	    HText_appendText(text, link_text);
+	    HText_appendText(text, "]");
+	} else {
+	    sprintf(marker, "[%d]", a->show_number);
+	    HText_appendText(text, marker);
+	}
 	if (saved_linenum && text->Lines && saved_lastchar != ' ')
 	    text->LastChar = ']';	/* if marker not after space caused split */
 	if (save_position) {
@@ -8322,6 +8332,7 @@ void print_crawl_to_fd(FILE *fp, char *thelink,
      * Add the References list if appropriate
      */
     if ((no_list == FALSE) &&
+	(dump_links_inline == FALSE) &&
 	links_are_numbered()) {
 	printlist(fp, FALSE);
     }

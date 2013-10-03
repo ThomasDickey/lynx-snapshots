@@ -1,4 +1,4 @@
-.\" $LynxId: lynx.man,v 1.105 2013/10/02 16:50:13 tom Exp $
+.\" $LynxId: lynx.man,v 1.106 2013/10/02 20:21:37 tom Exp $
 .\" **************************************************************************
 .\" Escape single quotes in literal strings from groff's Unicode transform.
 .ie \n(.g .ds AQ \(aq
@@ -418,6 +418,9 @@ do justification of text.
 .TP
 .B \-link\fR=\fINUMBER
 starting count for lnk#.dat files produced by \fB\-crawl\fR.
+.TP
+.B \-list_inline
+for \fB\-dump\fR, show the links inline with the text.
 .TP
 .B \-listonly
 for \fB\-dump\fR, show only the list of links.
