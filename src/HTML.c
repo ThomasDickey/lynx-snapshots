@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTML.c,v 1.161 2013/06/12 09:18:40 tom Exp $
+ * $LynxId: HTML.c,v 1.162 2013/10/02 22:22:06 tom Exp $
  *
  *		Structured stream to Rich hypertext converter
  *		============================================
@@ -253,18 +253,26 @@ BOOL LYBadHTML(HTStructured * me)
  */
 void LYShowBadHTML(const char *message)
 {
+    if (dump_output_immediately && dump_to_stderr)
+	fprintf(stderr, "%s", message);
+
     switch ((enumBadHtml) cfg_bad_html) {
     case BAD_HTML_IGNORE:
 	break;
     case BAD_HTML_TRACE:
-	CTRACE((tfp, "%s", message));
-	break;
     case BAD_HTML_MESSAGE:
-	CTRACE((tfp, "%s", message));
-	LYstore_message(message);
-	break;
     case BAD_HTML_WARN:
 	CTRACE((tfp, "%s", message));
+	break;
+    }
+
+    switch ((enumBadHtml) cfg_bad_html) {
+    case BAD_HTML_IGNORE:
+    case BAD_HTML_TRACE:
+    case BAD_HTML_WARN:
+	break;
+    case BAD_HTML_MESSAGE:
+	LYstore_message(message);
 	break;
     }
 }
