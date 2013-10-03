@@ -1,4 +1,4 @@
-/* $LynxId: LYStrings.c,v 1.214 2013/05/28 23:38:17 tom Exp $ */
+/* $LynxId: LYStrings.c,v 1.215 2013/10/02 23:58:20 tom Exp $ */
 #include <HTUtils.h>
 #include <HTCJK.h>
 #include <UCAux.h>
@@ -6170,7 +6170,7 @@ int LYReadCmdKey(int mode)
 	    switch ((unsigned) (tmp - src)) {
 	    case 4:
 		if (!strncasecomp(src, "exit", 4))
-		    exit_immediately(0);
+		    exit_immediately(EXIT_SUCCESS);
 		break;
 	    case 3:
 		if (!strncasecomp(src, "key", 3)) {
