@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYStructs.h,v 1.30 2010/12/08 23:30:08 tom Exp $
+ * $LynxId: LYStructs.h,v 1.31 2013/10/03 08:56:47 tom Exp $
  */
 #ifndef LYSTRUCTS_H
 #define LYSTRUCTS_H
@@ -26,8 +26,6 @@ extern "C" {
 	char *lname;
 	char *target;
 	char *l_hightext;
-	char *l_hightext2;
-	int l_hightext2_offset;
 	BOOL inUnderline;	/* TRUE when this link is in underlined context. */
 	int lx;
 	int ly;

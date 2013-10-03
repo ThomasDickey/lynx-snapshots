@@ -1,9 +1,12 @@
--- $LynxId: CHANGES,v 1.669 2013/10/03 08:21:55 tom Exp $
+-- $LynxId: CHANGES,v 1.670 2013/10/03 09:27:24 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
 2013-10-02 (2.8.8dev.17)
+* correct search logic to match links which are wrapped on the right margin.
+  Previous fixes to highlight arbitrarily long links overlooked this case
+  (Debian #546264) -TD
 * modify the INFO page, normally bound to "=", to show decoded strings for
   URLs, e.g., which use %xy hexadecimal encoding.  The decoded strings are
   shown on the line following the encoded URLs if the strings are different.
