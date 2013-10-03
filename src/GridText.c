@@ -1,5 +1,5 @@
 /*
- * $LynxId: GridText.c,v 1.267 2013/10/02 20:09:49 tom Exp $
+ * $LynxId: GridText.c,v 1.269 2013/10/03 12:13:18 tom Exp $
  *
  *		Character grid hypertext object
  *		===============================
@@ -36,6 +36,7 @@
 #include <LYEdit.h>
 #include <LYPrint.h>
 #include <LYPrettySrc.h>
+#include <LYSearch.h>
 #include <TRSTable.h>
 #include <LYHistory.h>
 #ifdef EXP_CHARTRANS_AUTOSWITCH
@@ -8410,94 +8411,33 @@ static void adjust_search_result(DocInfo *doc, int tentative_result,
     }
 }
 
+/*
+ * see also link_has_target
+ */
 static BOOL anchor_has_target(TextAnchor *a, char *target)
 {
-    OptionType *option;
-    char *stars = NULL, *sp;
-    const char *cp;
+    char *text = NULL;
+    const char *last = "?";
     int count;
 
     /*
-     * Search the hightext strings, taking the LYcase_sensitive setting into
-     * account.  -FM
+     * Combine the parts of the link's text using the highlighting information,
+     * and compare the target against that.
      */
-    for (count = 0;; ++count) {
-	if ((cp = LYGetHiTextStr(a, count)) == NULL)
+    for (count = 0; count < 10; ++count) {
+	const char *part = LYGetHiTextStr(a, count);
+
+	if (part == NULL || part == last) {
+	    if (text != NULL && LYno_attr_strstr(text, target)) {
+		return TRUE;
+	    }
 	    break;
-	if (LYno_attr_strstr(cp, target))
-	    return TRUE;
+	}
+	StrAllocCat(text, part);
+	last = part;
     }
 
-    /*
-     * Search the relevant form fields, taking the
-     * LYcase_sensitive setting into account.  -FM
-     */
-    if ((a->input_field != NULL && a->input_field->value != NULL) &&
-	a->input_field->type != F_HIDDEN_TYPE) {
-	if (a->input_field->type == F_PASSWORD_TYPE) {
-	    /*
-	     * Check the actual, hidden password, and then
-	     * the displayed string.  -FM
-	     */
-	    if (LYno_attr_strstr(a->input_field->value, target)) {
-		return TRUE;
-	    }
-	    StrAllocCopy(stars, a->input_field->value);
-	    for (sp = stars; *sp != '\0'; sp++)
-		*sp = '*';
-	    if (LYno_attr_strstr(stars, target)) {
-		FREE(stars);
-		return TRUE;
-	    }
-	    FREE(stars);
-	} else if (a->input_field->type == F_OPTION_LIST_TYPE) {
-	    /*
-	     * Search the option strings that are displayed
-	     * when the popup is invoked.  -FM
-	     */
-	    option = a->input_field->select_list;
-	    while (option != NULL) {
-		if (LYno_attr_strstr(option->name, target)) {
-		    return TRUE;
-		}
-		option = option->next;
-	    }
-	} else if (a->input_field->type == F_RADIO_TYPE) {
-	    /*
-	     * Search for checked or unchecked parens.  -FM
-	     */
-	    if (a->input_field->num_value) {
-		cp = checked_radio;
-	    } else {
-		cp = unchecked_radio;
-	    }
-	    if (LYno_attr_strstr(cp, target)) {
-		return TRUE;
-	    }
-	} else if (a->input_field->type == F_CHECKBOX_TYPE) {
-	    /*
-	     * Search for checked or unchecked square brackets.  -FM
-	     */
-	    if (a->input_field->num_value) {
-		cp = checked_box;
-	    } else {
-		cp = unchecked_box;
-	    }
-	    if (LYno_attr_strstr(cp, target)) {
-		return TRUE;
-	    }
-	} else {
-	    /*
-	     * Check the values intended for display.  May have been found
-	     * already via the hightext search, but make sure here that the
-	     * entire value is searched.  -FM
-	     */
-	    if (LYno_attr_strstr(a->input_field->value, target)) {
-		return TRUE;
-	    }
-	}
-    }
-    return FALSE;
+    return field_has_target(a->input_field, target);
 }
 
 static TextAnchor *line_num_to_anchor(int line_num)
@@ -8577,6 +8517,7 @@ static int www_search_forward(int start_line,
 	} else if (line == HTMainText->last_line) {
 	    count = 0;
 	    wrapped++;
+	    a = HTMainText->first_anchor;
 	}
 	line = line->next;
 	count++;
@@ -8619,6 +8560,7 @@ static int www_search_backward(int start_line,
 	} else if (line == FirstHTLine(HTMainText)) {
 	    count = line_num_in_text(HTMainText, LastHTLine(HTMainText)) + 1;
 	    wrapped++;
+	    a = HTMainText->last_anchor;
 	}
 	line = line->prev;
 	count--;

@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYUtils.c,v 1.242 2013/07/29 00:33:32 tom Exp $
+ * $LynxId: LYUtils.c,v 1.243 2013/10/03 08:58:05 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTCP.h>
@@ -1106,11 +1106,6 @@ void LYhighlight(int flag,
     BOOL utf_flag = (BOOL) IS_UTF8_TTY;
     BOOL hl1_drawn = NO;
 
-#ifdef USE_COLOR_STYLE
-    BOOL hl2_drawn = FALSE;	/* whether links[cur].l_hightext2 is already drawn
-
-				   properly */
-#endif
     tmp[0] = tmp[1] = tmp[2] = '\0';
 
     /*
@@ -1178,7 +1173,6 @@ void LYhighlight(int flag,
 
 #ifdef USE_COLOR_STYLE
 	} else if (flag == FALSE) {
-	    hl2_drawn = TRUE;
 	    redraw_lines_of_link(cur);
 	    CTRACE2(TRACE_STYLE,
 		    (tfp, "STYLE.highlight.off: NOFIX branch @(%d,%d).\n",
@@ -1200,50 +1194,45 @@ void LYhighlight(int flag,
 	/*
 	 * Display a second line as well.
 	 */
-#ifdef USE_COLOR_STYLE
-	if (hl2_drawn == FALSE)
-#endif
-	{
-	    for (hi_count = 1;
-		 (hi_string = LYGetHiliteStr(cur, hi_count)) != NULL
-		 && LYP + hi_count <= display_lines;
-		 ++hi_count) {
-		int row = LYP + hi_count + title_adjust;
+	for (hi_count = 1;
+	     (hi_string = LYGetHiliteStr(cur, hi_count)) != NULL
+	     && LYP + hi_count <= display_lines;
+	     ++hi_count) {
+	    int row = LYP + hi_count + title_adjust;
 
-		hi_offset = LYGetHilitePos(cur, hi_count);
-		if (hi_offset < 0)
-		    continue;
-		lynx_stop_link_color(flag == TRUE, links[cur].inUnderline);
-		LYmove(row, hi_offset);
+	    hi_offset = LYGetHilitePos(cur, hi_count);
+	    if (hi_offset < 0)
+		continue;
+	    lynx_stop_link_color(flag == TRUE, links[cur].inUnderline);
+	    LYmove(row, hi_offset);
 
 #ifdef USE_COLOR_STYLE
-		CTRACE2(TRACE_STYLE,
-			(tfp, "STYLE.highlight.line2: @(%d,%d), style=%d.\n",
-			 row, hi_offset,
-			 flag == TRUE ? s_alink : s_a));
-		LynxChangeStyle(flag == TRUE ? s_alink : s_a, ABS_ON);
+	    CTRACE2(TRACE_STYLE,
+		    (tfp, "STYLE.highlight.line2: @(%d,%d), style=%d.\n",
+		     row, hi_offset,
+		     flag == TRUE ? s_alink : s_a));
+	    LynxChangeStyle(flag == TRUE ? s_alink : s_a, ABS_ON);
 #else
-		lynx_start_link_color(flag == TRUE, links[cur].inUnderline);
+	    lynx_start_link_color(flag == TRUE, links[cur].inUnderline);
 #endif
 
-		for (i = 0; (tmp[0] = hi_string[i]) != '\0'
-		     && (i + hi_offset) < LYcols; i++) {
-		    if (!IsSpecialAttrChar(hi_string[i])) {
-			/*
-			 * For CJK strings, by Masanobu Kimura.
-			 */
-			if (IS_CJK_TTY && is8bits(tmp[0])) {
-			    tmp[1] = hi_string[++i];
-			    LYaddstr(tmp);
-			    tmp[1] = '\0';
-			} else {
-			    LYaddstr(tmp);
-			}
+	    for (i = 0; (tmp[0] = hi_string[i]) != '\0'
+		 && (i + hi_offset) < LYcols; i++) {
+		if (!IsSpecialAttrChar(hi_string[i])) {
+		    /*
+		     * For CJK strings, by Masanobu Kimura.
+		     */
+		    if (IS_CJK_TTY && is8bits(tmp[0])) {
+			tmp[1] = hi_string[++i];
+			LYaddstr(tmp);
+			tmp[1] = '\0';
+		    } else {
+			LYaddstr(tmp);
 		    }
 		}
 	    }
-	    lynx_stop_link_color(flag == TRUE, links[cur].inUnderline);
 	}
+	lynx_stop_link_color(flag == TRUE, links[cur].inUnderline);
 #ifdef SHOW_WHEREIS_TARGETS
 	for (hi_count = target1_drawn ? 1 : 0;
 	     LYGetHiliteStr(cur, hi_count) != NULL;
