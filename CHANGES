@@ -1,9 +1,13 @@
--- $LynxId: CHANGES,v 1.665 2013/10/02 23:30:51 tom Exp $
+-- $LynxId: CHANGES,v 1.666 2013/10/03 01:05:01 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
 2013-10-02 (2.8.8dev.17)
+* modify the INFO page, normally bound to "=", to show decoded strings for
+  URLs, e.g., which use %xy hexadecimal encoding.  The decoded strings are
+  shown on the line following the encoded URLs if the strings are different
+  (Debian #398274) -TD
 * simplify file-URLs shown in reference list of -dump by trimming unnecessary
   "localhost", e.g.,
     file://localhost/XXX

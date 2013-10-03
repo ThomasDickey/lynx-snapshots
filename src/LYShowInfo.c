@@ -1,4 +1,4 @@
-/* $LynxId: LYShowInfo.c,v 1.73 2013/01/04 01:20:17 tom Exp $ */
+/* $LynxId: LYShowInfo.c,v 1.76 2013/10/03 01:01:34 tom Exp $ */
 #include <HTUtils.h>
 #include <HTFile.h>
 #include <HTParse.h>
@@ -106,6 +106,25 @@ static void dt_Number(FILE *fp0,
     FREE(buffer);
 }
 
+static void dt_URL(FILE *fp0, const char *address)
+{
+    ADD_SS(gettext("URL:"), address);
+
+    /*
+     * If the display handles UTF-8, and if the address uses %xy formatted
+     * characters, show the decoded URL on the next line.
+     */
+    if (LYCharSet_UC[current_char_set].enc == UCT_ENC_UTF8) {
+	char *working = 0;
+
+	StrAllocCopy(working, address);
+	if (strcmp(HTUnEscape(working), address)) {
+	    fprintf(fp0, "\n<br>%s\n", working);
+	}
+	free(working);
+    }
+}
+
 /*
  * LYShowInfo prints a page of info about the current file and the link that
  * the cursor is on.
@@ -180,7 +199,7 @@ int LYShowInfo(DocInfo *doc,
 	ADD_SS(gettext("Name:"), temp);
 	FREE(temp);
 
-	ADD_SS(gettext("URL:"), doc->address);
+	dt_URL(fp0, doc->address);
 
 	END_DL();
 
@@ -321,7 +340,7 @@ int LYShowInfo(DocInfo *doc,
 	ADD_SS(gettext("Linkname:"), temp);
 	FREE(temp);
 
-	ADD_SS("URL:", doc->address);
+	dt_URL(fp0, doc->address);
 
 	if (HTLoadedDocumentCharset()) {
 	    ADD_SS(gettext("Charset:"),
@@ -449,8 +468,7 @@ int LYShowInfo(DocInfo *doc,
 			    LYEntifyTitle(&buffer, gettext("(Form field)")));
 		}
 	    } else {
-		ADD_SS("URL:",
-		       NonNull(links[doc->link].lname));
+		dt_URL(fp0, NonNull(links[doc->link].lname));
 	    }
 	    END_DL();
 
