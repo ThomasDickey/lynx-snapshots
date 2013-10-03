@@ -1,11 +1,13 @@
--- $LynxId: CHANGES,v 1.661 2013/10/02 16:51:58 tom Exp $
+-- $LynxId: CHANGES,v 1.663 2013/10/02 20:19:31 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
 2013-10-02 (2.8.8dev.17)
+* add -list_inline option, which modifies -dump output to put links inline with
+  the text rather than in a list at the end of the dump (Debian #584080) -TD
 * add clarification in manpage regarding -force_html option versus -dump or
-  -crawl (Debian #254603) -TD
+  -crawl (Debian #254603, Debian #295273) -TD
 * improve manpage descriptions of -reload, -get_data and -post_data (Debian
   #350853) -TD
 * modify manpage synopsis to make it clearer that Lynx accepts more than one
