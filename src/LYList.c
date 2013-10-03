@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYList.c,v 1.51 2013/04/30 22:09:43 tom Exp $
+ * $LynxId: LYList.c,v 1.52 2013/10/02 23:22:43 tom Exp $
  *
  *			Lynx Document Reference List Support	      LYList.c
  *			====================================
@@ -286,11 +286,16 @@ static int print_refs(FILE *fp, int titles, int refs)
 			continue;
 		    fprintf(fp, "%4d. ", value);
 		}
-		address = HTAnchor_address(dest);
-		fprintf(fp, "%s%s\n",
-			((HTAnchor *) parent != dest) && title ? "in " : "",
-			(title ? title : address));
-		FREE(address);
+		if (((HTAnchor *) parent != dest) && title) {
+		    fprintf(fp, "in ");
+		}
+		if (title) {
+		    fprintf(fp, "%s\n", title);
+		} else {
+		    address = HTAnchor_short_address(dest);
+		    fprintf(fp, "%s\n", address);
+		    FREE(address);
+		}
 	    }
 	}
 	if (counter > result)
