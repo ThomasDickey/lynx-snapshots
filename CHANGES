@@ -1,4 +1,4 @@
--- $LynxId: CHANGES,v 1.666 2013/10/03 01:05:01 tom Exp $
+-- $LynxId: CHANGES,v 1.669 2013/10/03 08:21:55 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
@@ -6,8 +6,12 @@ Changes since Lynx 2.8 release
 2013-10-02 (2.8.8dev.17)
 * modify the INFO page, normally bound to "=", to show decoded strings for
   URLs, e.g., which use %xy hexadecimal encoding.  The decoded strings are
-  shown on the line following the encoded URLs if the strings are different
-  (Debian #398274) -TD
+  shown on the line following the encoded URLs if the strings are different.
+  Also if display-charset is UTF-8, modify -dump "References" URLs to show
+  the corresponding decoded strings for consistency with the text which is
+  already in UTF-8.  Other URLs such as that shown in the status area are
+  shown in encoded form per previous discussion which recommending doing this
+  to address phishing attempts (Debian #398274) -TD
 * simplify file-URLs shown in reference list of -dump by trimming unnecessary
   "localhost", e.g.,
     file://localhost/XXX
