@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTAnchor.c,v 1.74 2013/05/05 19:25:16 tom Exp $
+ * $LynxId: HTAnchor.c,v 1.75 2013/10/02 23:24:34 tom Exp $
  *
  *	Hypertext "Anchor" Object				HTAnchor.c
  *	==========================
@@ -881,6 +881,22 @@ char *HTAnchor_address(HTAnchor * me)
 	}
     }
     return (addr);
+}
+
+char *HTAnchor_short_address(HTAnchor * me)
+{
+    const char chop[] = "file://localhost/";
+    char *addr = HTAnchor_address(me);
+
+    if (!strncmp(addr, chop, sizeof(chop) - 1)) {
+	char *a = addr + 7;
+	char *b = addr + sizeof(chop) - 2;
+
+	while ((*a++ = *b++) != '\0') {
+	    ;
+	}
+    }
+    return addr;
 }
 
 void HTAnchor_setFormat(HTParentAnchor *me,

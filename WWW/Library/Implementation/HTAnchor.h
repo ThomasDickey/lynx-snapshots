@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTAnchor.h,v 1.36 2012/08/15 10:48:24 tom Exp $
+ * $LynxId: HTAnchor.h,v 1.37 2013/10/02 23:21:55 tom Exp $
  *
  *	Hypertext "Anchor" Object				     HTAnchor.h
  *	==========================
@@ -223,6 +223,8 @@ extern "C" {
      * as a malloc'd string to be freed by the caller.
      */
     extern char *HTAnchor_address(HTAnchor * me);
+
+    extern char *HTAnchor_short_address(HTAnchor * me);
 
     extern void HTAnchor_setFormat(HTParentAnchor *me,
 				   HTFormat form);
