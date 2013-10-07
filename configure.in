@@ -1,4 +1,4 @@
-dnl $LynxId: configure.in,v 1.248 2013/07/29 21:38:35 tom Exp $
+dnl $LynxId: configure.in,v 1.250 2013/10/07 11:50:02 tom Exp $
 dnl
 dnl Process this file with autoconf to produce a configure script.
 dnl
@@ -549,8 +549,15 @@ ncursesw)
 	cf_wide_curses=yes
 	;;
 pdcurses)
-	cf_cv_ncurses_header=xcurses.h
-	# do this last, since it changes definition of main: CF_PDCURSES_X11
+	case $host_os in
+	mingw*)
+		cf_cv_ncurses_header=curses.h
+		;;
+	*) #(vi
+		cf_cv_ncurses_header=xcurses.h
+		# do this last, since it changes definition of main: CF_PDCURSES_X11
+		;;
+	esac
 	;;
 slang)
 	CF_SLANG_UNIX_DEFS
@@ -807,6 +814,14 @@ AC_REPLACE_FUNCS( \
 )
 
 CF_SRAND(lynx_)
+CF_CHECK_FUNCDECLS([
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+], sleep)
 CF_CHECK_FUNCDECLS([#include <string.h>], strstr)
 CF_CHECK_FUNCDECLS([
 #include <stdio.h>
@@ -1444,14 +1459,23 @@ AC_SUBST(COMPRESS_EXT)
 
 if test $cf_cv_screen = pdcurses ; then
 	CF_HELP_MESSAGE(Special Libraries for PDCurses X11:)
-	CF_PDCURSES_X11
+	case $host_os in #(vi
+	mingw*)
+		CF_PDCURSES_W32
+		;;
+	*) #(vi
+		CF_PDCURSES_X11
+		;;
+	esac
 else
 	CF_TERMIO_AND_CURSES(LYCurses.h)
 fi
 
 ### These tests must be run after establishing the curses library.
 if test $cf_cv_screen != slang ; then
-	AC_CHECK_HEADERS($cf_cv_screen/term.h term.h)
+	if test $cf_cv_screen != pdcurses ; then
+		AC_CHECK_HEADERS($cf_cv_screen/term.h term.h)
+	fi
 	CF_ALT_CHAR_SET
 	CF_FANCY_CURSES
 	CF_FUNC_CURSES_VERSION

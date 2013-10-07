@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYStyle.c,v 1.75 2013/10/02 14:47:09 tom Exp $
+ * $LynxId: LYStyle.c,v 1.76 2013/10/03 18:44:56 tom Exp $
  *
  * character level styles for Lynx
  * (c) 1996 Rob Partington -- donated to the Lyncei (if they want it :-)
@@ -452,17 +452,9 @@ static void initialise_default_stylesheet(void)
 	{ 4,	"strike" },
 	{ 4,	"strong" },
 	{ 4,	"u" },
-#if 0
-	{ 5,	"a.b" },
-	{ 5,	"b.a" },
-	{ 5,	"var.a" },
-#endif
+	{ 5,	"input" },
 	{ 6,	"alink" },
 	{ 7,	"whereis" },
-#if 0
-	{ 0,	"h2.link" },
-	{ 0,	"link.h2" },
-#endif
 #ifdef USE_PRETTYSRC
 	/* FIXME: HTL_tagspecs_defaults[] has similar info */
 	{ 4,	"span.htmlsrc_comment" },

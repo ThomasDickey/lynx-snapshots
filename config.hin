@@ -1,5 +1,5 @@
 /*
- * $LynxId: config.hin,v 1.129 2013/05/01 08:55:50 tom Exp $
+ * $LynxId: config.hin,v 1.131 2013/10/07 11:48:12 tom Exp $
  * vile:cmode
  *
  * The configure script translates "config.hin" into "lynx_cfg.h"
@@ -22,6 +22,7 @@
 #undef DECL_ERRNO
 #undef DECL_GETGRGID
 #undef DECL_GETGRNAM
+#undef DECL_SLEEP
 #undef DECL_STRSTR
 #undef DECL_SYS_ERRLIST
 #undef DIRED_SUPPORT		/* AC_ARG_WITH(dired) */
@@ -218,6 +219,8 @@
 #undef OK_INSTALL
 #undef OK_OVERRIDE		/* CF_ARG_DISABLE(dired-override) */
 #undef OK_PERMIT		/* CF_ARG_DISABLE(dired-permit) */
+#undef PDC_DLL_BUILD		/* CF_PDCURSES_W32 */
+#undef PDC_WIDE			/* CF_PDCURSES_W32 */
 #undef REAL_UNIX_SYSTEM		/* CF_SLANG_UNIX_DEFS */
 #undef RLOGIN_PATH		/* CF_PATH_PROG(rlogin) */
 #undef RM_PATH			/* CF_PATH_PROG(rm) */
