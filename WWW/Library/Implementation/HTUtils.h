@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTUtils.h,v 1.115 2013/07/28 23:04:57 tom Exp $
+ * $LynxId: HTUtils.h,v 1.116 2013/10/07 13:57:20 tom Exp $
  *
  * Utility macros for the W3 code library
  * MACROS FOR GENERAL USE
@@ -226,7 +226,7 @@ extern off_t LYatoll(const char *value);
 #include <dos.h>
 #endif
 
-#if !defined(__MINGW32__)
+#if defined(DECL_SLEEP)
 #undef sleep			/* 1998/06/23 (Tue) 16:54:53 */
 extern void sleep(unsigned __seconds);
 #endif

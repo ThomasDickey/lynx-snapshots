@@ -1,11 +1,10 @@
-dnl $LynxId: aclocal.m4,v 1.200 2013/09/30 00:42:07 tom Exp $
+dnl $LynxId: aclocal.m4,v 1.204 2013/10/07 12:08:47 tom Exp $
 dnl Macros for auto-configure script.
-dnl by T.E.Dickey <dickey@invisible-island.net>
+dnl by Thomas E. Dickey <dickey@invisible-island.net>
 dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
 dnl and Philippe De Muyter <phdm@macqel.be>
 dnl
 dnl Created: 1997/01/28
-dnl Updated: 2012/11/09
 dnl
 dnl The autoconf used in Lynx development is GNU autoconf 2.13 or 2.52, patched
 dnl by Thomas Dickey.  See your local GNU archives, and this URL:
@@ -3248,22 +3247,14 @@ dnl
 dnl FIXME: the inner cases will probably need work on the header files.
 AC_DEFUN([CF_INET_ADDR],[
 AC_CACHE_CHECK(for inet_aton function,cf_cv_have_inet_aton,[
-AC_TRY_LINK([#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-],[inet_aton(0, (struct in_addr *)0)],
+AC_TRY_LINK(CF__INET_HEAD,[inet_aton(0, (struct in_addr *)0)],
     [cf_cv_have_inet_aton=yes],
     [cf_cv_have_inet_aton=no])])
 if test "$cf_cv_have_inet_aton" = yes ; then
     AC_DEFINE(HAVE_INET_ATON,1,[Define to 1 if we have inet_aton])
 else
     AC_CACHE_CHECK(for inet_addr function,cf_cv_have_inet_addr,[
-    AC_TRY_LINK([#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-    ],[inet_addr(0)],
+    AC_TRY_LINK(CF__INET_HEAD,[inet_addr(0)],
 	[cf_cv_have_inet_addr=yes],
 	[cf_cv_have_inet_addr=no])])
     if test "$cf_cv_have_inet_addr" = no ; then
@@ -3606,7 +3597,7 @@ AC_DEFUN([CF_MIXEDCASE_FILENAMES],
 AC_CACHE_CHECK(if filesystem supports mixed-case filenames,cf_cv_mixedcase,[
 if test "$cross_compiling" = yes ; then
 	case $target_alias in #(vi
-	*-os2-emx*|*-msdosdjgpp*|*-cygwin*|*-msys*|*-mingw32*|*-uwin*) #(vi
+	*-os2-emx*|*-msdosdjgpp*|*-cygwin*|*-msys*|*-mingw*|*-uwin*) #(vi
 		cf_cv_mixedcase=no
 		;;
 	*)
@@ -4011,7 +4002,7 @@ cf_cv_netlibs=""
 cf_test_netlibs=yes
 
 case $host_os in #(vi
-mingw32) # (vi
+mingw*) # (vi
 	AC_CHECK_HEADERS( windows.h winsock.h winsock2.h )
 
 	if test "$ac_cv_header_winsock2_h" = "yes" ; then
@@ -4370,6 +4361,22 @@ case ".[$]$1" in #(vi
   ifelse([$2],,[AC_MSG_ERROR([expected a pathname, not \"[$]$1\"])],$2)
   ;;
 esac
+])dnl
+dnl ---------------------------------------------------------------------------
+dnl CF_PDCURSES_W32 version: 1 updated: 2013/10/07 06:13:11
+dnl ---------------
+dnl Configure for PDCurses' Win32 library, checking for definitions as well
+dnl which are needed to use its header file correctly.
+AC_DEFUN([CF_PDCURSES_W32],[
+
+AC_CHECK_LIB(pdcurses,initscr,[
+	CF_ADD_LIBS(-lpdcurses)
+	cf_cv_term_header=no
+	cf_cv_unctrl_header=no
+	AC_CHECK_FUNC(winwstr,[AC_DEFINE(PDC_WIDE)])
+	AC_CHECK_FUNC(pdcurses_dll_iname,[AC_DEFINE(PDC_DLL_BUILD)])
+])
+
 ])dnl
 dnl ---------------------------------------------------------------------------
 dnl CF_PDCURSES_X11 version: 13 updated: 2012/10/06 16:39:58
@@ -6867,6 +6874,32 @@ define([CF__ICONV_HEAD],[
 #include <stdlib.h>
 #include <iconv.h>]
 )dnl
+dnl ---------------------------------------------------------------------------
+dnl Header-files needed for inet.h compile-checks
+define([CF__INET_HEAD],[
+#if defined(__MINGW32__)
+
+#undef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+
+#ifdef HAVE_WINSOCK2_H
+#include <winsock2.h>
+#else
+#ifdef HAVE_WINSOCK_H
+#include <winsock.h>
+#endif
+#endif
+
+#else
+
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+
+#endif
+])dnl
 dnl ---------------------------------------------------------------------------
 dnl CF__INTL_BODY version: 1 updated: 2007/07/26 17:35:47
 dnl -------------

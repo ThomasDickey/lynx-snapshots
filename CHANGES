@@ -1,9 +1,16 @@
--- $LynxId: CHANGES,v 1.670 2013/10/03 09:27:24 tom Exp $
+-- $LynxId: CHANGES,v 1.674 2013/10/07 11:53:38 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2013-10-02 (2.8.8dev.17)
+2013-10-07 (2.8.8dev.17)
+* improve configure check for sleep, to work when cross-compiling to MinGW -TD
+* modify configure check for inet_addr to work when cross-compiling to
+  MinGW -TD
+* add configure check for Win32 flavor of PDCurses when cross-compiling to
+  MinGW using the "--with-screen=pdcurses" option -TD
+* improve color-style simulation of old color scheme by coloring input fields
+  with color #5 -TD
 * correct search logic to match links which are wrapped on the right margin.
   Previous fixes to highlight arbitrarily long links overlooked this case
   (Debian #546264) -TD
