@@ -7075,7 +7075,7 @@ if test -n "${CFLAGS}${CPPFLAGS}" ; then
 		-I*)
 			cf_header_path=`echo ".$cf_header_path" |sed -e 's/^...//' -e 's,/include$,,'`
 
-test "$cf_header_path" != "NONE" && \
+test "x$cf_header_path" != "xNONE" && \
 test -d "$cf_header_path" && \
  {
 	test -n "$verbose" && echo "	... testing for include-directories under $cf_header_path"
@@ -7096,9 +7096,9 @@ fi
 
 cf_search=
 
-test "/usr" != "$prefix" && \
+test "x/usr" != "x$prefix" && \
 test -d "/usr" && \
-(test $prefix = NONE || test "/usr" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x/usr" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for include-directories under /usr"
 	test -d /usr/include &&          cf_search="$cf_search /usr/include"
 	test -d /usr/include/iconv &&       cf_search="$cf_search /usr/include/iconv"
@@ -7107,7 +7107,7 @@ test -d "/usr" && \
 	test -d /usr/iconv/include/iconv &&    cf_search="$cf_search /usr/iconv/include/iconv"
 }
 
-test "$prefix" != "NONE" && \
+test "x$prefix" != "xNONE" && \
 test -d "$prefix" && \
  {
 	test -n "$verbose" && echo "	... testing for include-directories under $prefix"
@@ -7118,9 +7118,9 @@ test -d "$prefix" && \
 	test -d $prefix/iconv/include/iconv &&    cf_search="$cf_search $prefix/iconv/include/iconv"
 }
 
-test "/usr/local" != "$prefix" && \
+test "x/usr/local" != "x$prefix" && \
 test -d "/usr/local" && \
-(test $prefix = NONE || test "/usr/local" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x/usr/local" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for include-directories under /usr/local"
 	test -d /usr/local/include &&          cf_search="$cf_search /usr/local/include"
 	test -d /usr/local/include/iconv &&       cf_search="$cf_search /usr/local/include/iconv"
@@ -7129,9 +7129,9 @@ test -d "/usr/local" && \
 	test -d /usr/local/iconv/include/iconv &&    cf_search="$cf_search /usr/local/iconv/include/iconv"
 }
 
-test "/opt" != "$prefix" && \
+test "x/opt" != "x$prefix" && \
 test -d "/opt" && \
-(test $prefix = NONE || test "/opt" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x/opt" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for include-directories under /opt"
 	test -d /opt/include &&          cf_search="$cf_search /opt/include"
 	test -d /opt/include/iconv &&       cf_search="$cf_search /opt/include/iconv"
@@ -7140,9 +7140,9 @@ test -d "/opt" && \
 	test -d /opt/iconv/include/iconv &&    cf_search="$cf_search /opt/iconv/include/iconv"
 }
 
-test "$HOME" != "$prefix" && \
+test "x$HOME" != "x$prefix" && \
 test -d "$HOME" && \
-(test $prefix = NONE || test "$HOME" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x$HOME" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for include-directories under $HOME"
 	test -d $HOME/include &&          cf_search="$cf_search $HOME/include"
 	test -d $HOME/include/iconv &&       cf_search="$cf_search $HOME/include/iconv"
@@ -7243,7 +7243,7 @@ if test -n "${LDFLAGS}${LIBS}" ; then
 		-L*)
 			cf_library_path=`echo ".$cf_library_path" |sed -e 's/^...//' -e 's,/lib$,,'`
 
-test "$cf_library_path" != "NONE" && \
+test "x$cf_library_path" != "xNONE" && \
 test -d "$cf_library_path" && \
  {
 	test -n "$verbose" && echo "	... testing for lib-directories under $cf_library_path"
@@ -7262,9 +7262,9 @@ fi
 
 cf_search=
 
-test "/usr" != "$prefix" && \
+test "x/usr" != "x$prefix" && \
 test -d "/usr" && \
-(test $prefix = NONE || test "/usr" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x/usr" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for lib-directories under /usr"
 	test -d /usr/lib &&          cf_search="$cf_search /usr/lib"
 	test -d /usr/lib/iconv &&       cf_search="$cf_search /usr/lib/iconv"
@@ -7273,7 +7273,7 @@ test -d "/usr" && \
 	test -d /usr/iconv/lib/iconv &&    cf_search="$cf_search /usr/iconv/lib/iconv"
 }
 
-test "$prefix" != "NONE" && \
+test "x$prefix" != "xNONE" && \
 test -d "$prefix" && \
  {
 	test -n "$verbose" && echo "	... testing for lib-directories under $prefix"
@@ -7284,9 +7284,9 @@ test -d "$prefix" && \
 	test -d $prefix/iconv/lib/iconv &&    cf_search="$cf_search $prefix/iconv/lib/iconv"
 }
 
-test "/usr/local" != "$prefix" && \
+test "x/usr/local" != "x$prefix" && \
 test -d "/usr/local" && \
-(test $prefix = NONE || test "/usr/local" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x/usr/local" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for lib-directories under /usr/local"
 	test -d /usr/local/lib &&          cf_search="$cf_search /usr/local/lib"
 	test -d /usr/local/lib/iconv &&       cf_search="$cf_search /usr/local/lib/iconv"
@@ -7295,9 +7295,9 @@ test -d "/usr/local" && \
 	test -d /usr/local/iconv/lib/iconv &&    cf_search="$cf_search /usr/local/iconv/lib/iconv"
 }
 
-test "/opt" != "$prefix" && \
+test "x/opt" != "x$prefix" && \
 test -d "/opt" && \
-(test $prefix = NONE || test "/opt" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x/opt" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for lib-directories under /opt"
 	test -d /opt/lib &&          cf_search="$cf_search /opt/lib"
 	test -d /opt/lib/iconv &&       cf_search="$cf_search /opt/lib/iconv"
@@ -7306,9 +7306,9 @@ test -d "/opt" && \
 	test -d /opt/iconv/lib/iconv &&    cf_search="$cf_search /opt/iconv/lib/iconv"
 }
 
-test "$HOME" != "$prefix" && \
+test "x$HOME" != "x$prefix" && \
 test -d "$HOME" && \
-(test $prefix = NONE || test "$HOME" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x$HOME" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for lib-directories under $HOME"
 	test -d $HOME/lib &&          cf_search="$cf_search $HOME/lib"
 	test -d $HOME/lib/iconv &&       cf_search="$cf_search $HOME/lib/iconv"
@@ -7852,7 +7852,7 @@ if test -n "${CFLAGS}${CPPFLAGS}" ; then
 		-I*)
 			cf_header_path=`echo ".$cf_header_path" |sed -e 's/^...//' -e 's,/include$,,'`
 
-test "$cf_header_path" != "NONE" && \
+test "x$cf_header_path" != "xNONE" && \
 test -d "$cf_header_path" && \
  {
 	test -n "$verbose" && echo "	... testing for include-directories under $cf_header_path"
@@ -7873,9 +7873,9 @@ fi
 
 cf_search=
 
-test "/usr" != "$prefix" && \
+test "x/usr" != "x$prefix" && \
 test -d "/usr" && \
-(test $prefix = NONE || test "/usr" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x/usr" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for include-directories under /usr"
 	test -d /usr/include &&          cf_search="$cf_search /usr/include"
 	test -d /usr/include/intl &&       cf_search="$cf_search /usr/include/intl"
@@ -7884,7 +7884,7 @@ test -d "/usr" && \
 	test -d /usr/intl/include/intl &&    cf_search="$cf_search /usr/intl/include/intl"
 }
 
-test "$prefix" != "NONE" && \
+test "x$prefix" != "xNONE" && \
 test -d "$prefix" && \
  {
 	test -n "$verbose" && echo "	... testing for include-directories under $prefix"
@@ -7895,9 +7895,9 @@ test -d "$prefix" && \
 	test -d $prefix/intl/include/intl &&    cf_search="$cf_search $prefix/intl/include/intl"
 }
 
-test "/usr/local" != "$prefix" && \
+test "x/usr/local" != "x$prefix" && \
 test -d "/usr/local" && \
-(test $prefix = NONE || test "/usr/local" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x/usr/local" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for include-directories under /usr/local"
 	test -d /usr/local/include &&          cf_search="$cf_search /usr/local/include"
 	test -d /usr/local/include/intl &&       cf_search="$cf_search /usr/local/include/intl"
@@ -7906,9 +7906,9 @@ test -d "/usr/local" && \
 	test -d /usr/local/intl/include/intl &&    cf_search="$cf_search /usr/local/intl/include/intl"
 }
 
-test "/opt" != "$prefix" && \
+test "x/opt" != "x$prefix" && \
 test -d "/opt" && \
-(test $prefix = NONE || test "/opt" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x/opt" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for include-directories under /opt"
 	test -d /opt/include &&          cf_search="$cf_search /opt/include"
 	test -d /opt/include/intl &&       cf_search="$cf_search /opt/include/intl"
@@ -7917,9 +7917,9 @@ test -d "/opt" && \
 	test -d /opt/intl/include/intl &&    cf_search="$cf_search /opt/intl/include/intl"
 }
 
-test "$HOME" != "$prefix" && \
+test "x$HOME" != "x$prefix" && \
 test -d "$HOME" && \
-(test $prefix = NONE || test "$HOME" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x$HOME" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for include-directories under $HOME"
 	test -d $HOME/include &&          cf_search="$cf_search $HOME/include"
 	test -d $HOME/include/intl &&       cf_search="$cf_search $HOME/include/intl"
@@ -8021,7 +8021,7 @@ if test -n "${LDFLAGS}${LIBS}" ; then
 		-L*)
 			cf_library_path=`echo ".$cf_library_path" |sed -e 's/^...//' -e 's,/lib$,,'`
 
-test "$cf_library_path" != "NONE" && \
+test "x$cf_library_path" != "xNONE" && \
 test -d "$cf_library_path" && \
  {
 	test -n "$verbose" && echo "	... testing for lib-directories under $cf_library_path"
@@ -8040,9 +8040,9 @@ fi
 
 cf_search=
 
-test "/usr" != "$prefix" && \
+test "x/usr" != "x$prefix" && \
 test -d "/usr" && \
-(test $prefix = NONE || test "/usr" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x/usr" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for lib-directories under /usr"
 	test -d /usr/lib &&          cf_search="$cf_search /usr/lib"
 	test -d /usr/lib/intl &&       cf_search="$cf_search /usr/lib/intl"
@@ -8051,7 +8051,7 @@ test -d "/usr" && \
 	test -d /usr/intl/lib/intl &&    cf_search="$cf_search /usr/intl/lib/intl"
 }
 
-test "$prefix" != "NONE" && \
+test "x$prefix" != "xNONE" && \
 test -d "$prefix" && \
  {
 	test -n "$verbose" && echo "	... testing for lib-directories under $prefix"
@@ -8062,9 +8062,9 @@ test -d "$prefix" && \
 	test -d $prefix/intl/lib/intl &&    cf_search="$cf_search $prefix/intl/lib/intl"
 }
 
-test "/usr/local" != "$prefix" && \
+test "x/usr/local" != "x$prefix" && \
 test -d "/usr/local" && \
-(test $prefix = NONE || test "/usr/local" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x/usr/local" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for lib-directories under /usr/local"
 	test -d /usr/local/lib &&          cf_search="$cf_search /usr/local/lib"
 	test -d /usr/local/lib/intl &&       cf_search="$cf_search /usr/local/lib/intl"
@@ -8073,9 +8073,9 @@ test -d "/usr/local" && \
 	test -d /usr/local/intl/lib/intl &&    cf_search="$cf_search /usr/local/intl/lib/intl"
 }
 
-test "/opt" != "$prefix" && \
+test "x/opt" != "x$prefix" && \
 test -d "/opt" && \
-(test $prefix = NONE || test "/opt" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x/opt" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for lib-directories under /opt"
 	test -d /opt/lib &&          cf_search="$cf_search /opt/lib"
 	test -d /opt/lib/intl &&       cf_search="$cf_search /opt/lib/intl"
@@ -8084,9 +8084,9 @@ test -d "/opt" && \
 	test -d /opt/intl/lib/intl &&    cf_search="$cf_search /opt/intl/lib/intl"
 }
 
-test "$HOME" != "$prefix" && \
+test "x$HOME" != "x$prefix" && \
 test -d "$HOME" && \
-(test $prefix = NONE || test "$HOME" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x$HOME" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for lib-directories under $HOME"
 	test -d $HOME/lib &&          cf_search="$cf_search $HOME/lib"
 	test -d $HOME/lib/intl &&       cf_search="$cf_search $HOME/lib/intl"
@@ -10962,7 +10962,7 @@ if test -n "${CFLAGS}${CPPFLAGS}" ; then
 		-I*)
 			cf_header_path=`echo ".$cf_header_path" |sed -e 's/^...//' -e 's,/include$,,'`
 
-test "$cf_header_path" != "NONE" && \
+test "x$cf_header_path" != "xNONE" && \
 test -d "$cf_header_path" && \
  {
 	test -n "$verbose" && echo "	... testing for include-directories under $cf_header_path"
@@ -10983,9 +10983,9 @@ fi
 
 cf_search=
 
-test "/usr" != "$prefix" && \
+test "x/usr" != "x$prefix" && \
 test -d "/usr" && \
-(test $prefix = NONE || test "/usr" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x/usr" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for include-directories under /usr"
 	test -d /usr/include &&          cf_search="$cf_search /usr/include"
 	test -d /usr/include/socks &&       cf_search="$cf_search /usr/include/socks"
@@ -10994,7 +10994,7 @@ test -d "/usr" && \
 	test -d /usr/socks/include/socks &&    cf_search="$cf_search /usr/socks/include/socks"
 }
 
-test "$prefix" != "NONE" && \
+test "x$prefix" != "xNONE" && \
 test -d "$prefix" && \
  {
 	test -n "$verbose" && echo "	... testing for include-directories under $prefix"
@@ -11005,9 +11005,9 @@ test -d "$prefix" && \
 	test -d $prefix/socks/include/socks &&    cf_search="$cf_search $prefix/socks/include/socks"
 }
 
-test "/usr/local" != "$prefix" && \
+test "x/usr/local" != "x$prefix" && \
 test -d "/usr/local" && \
-(test $prefix = NONE || test "/usr/local" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x/usr/local" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for include-directories under /usr/local"
 	test -d /usr/local/include &&          cf_search="$cf_search /usr/local/include"
 	test -d /usr/local/include/socks &&       cf_search="$cf_search /usr/local/include/socks"
@@ -11016,9 +11016,9 @@ test -d "/usr/local" && \
 	test -d /usr/local/socks/include/socks &&    cf_search="$cf_search /usr/local/socks/include/socks"
 }
 
-test "/opt" != "$prefix" && \
+test "x/opt" != "x$prefix" && \
 test -d "/opt" && \
-(test $prefix = NONE || test "/opt" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x/opt" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for include-directories under /opt"
 	test -d /opt/include &&          cf_search="$cf_search /opt/include"
 	test -d /opt/include/socks &&       cf_search="$cf_search /opt/include/socks"
@@ -11027,9 +11027,9 @@ test -d "/opt" && \
 	test -d /opt/socks/include/socks &&    cf_search="$cf_search /opt/socks/include/socks"
 }
 
-test "$HOME" != "$prefix" && \
+test "x$HOME" != "x$prefix" && \
 test -d "$HOME" && \
-(test $prefix = NONE || test "$HOME" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x$HOME" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for include-directories under $HOME"
 	test -d $HOME/include &&          cf_search="$cf_search $HOME/include"
 	test -d $HOME/include/socks &&       cf_search="$cf_search $HOME/include/socks"
@@ -11127,7 +11127,7 @@ if test -n "${LDFLAGS}${LIBS}" ; then
 		-L*)
 			cf_library_path=`echo ".$cf_library_path" |sed -e 's/^...//' -e 's,/lib$,,'`
 
-test "$cf_library_path" != "NONE" && \
+test "x$cf_library_path" != "xNONE" && \
 test -d "$cf_library_path" && \
  {
 	test -n "$verbose" && echo "	... testing for lib-directories under $cf_library_path"
@@ -11146,9 +11146,9 @@ fi
 
 cf_search=
 
-test "/usr" != "$prefix" && \
+test "x/usr" != "x$prefix" && \
 test -d "/usr" && \
-(test $prefix = NONE || test "/usr" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x/usr" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for lib-directories under /usr"
 	test -d /usr/lib &&          cf_search="$cf_search /usr/lib"
 	test -d /usr/lib/socks &&       cf_search="$cf_search /usr/lib/socks"
@@ -11157,7 +11157,7 @@ test -d "/usr" && \
 	test -d /usr/socks/lib/socks &&    cf_search="$cf_search /usr/socks/lib/socks"
 }
 
-test "$prefix" != "NONE" && \
+test "x$prefix" != "xNONE" && \
 test -d "$prefix" && \
  {
 	test -n "$verbose" && echo "	... testing for lib-directories under $prefix"
@@ -11168,9 +11168,9 @@ test -d "$prefix" && \
 	test -d $prefix/socks/lib/socks &&    cf_search="$cf_search $prefix/socks/lib/socks"
 }
 
-test "/usr/local" != "$prefix" && \
+test "x/usr/local" != "x$prefix" && \
 test -d "/usr/local" && \
-(test $prefix = NONE || test "/usr/local" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x/usr/local" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for lib-directories under /usr/local"
 	test -d /usr/local/lib &&          cf_search="$cf_search /usr/local/lib"
 	test -d /usr/local/lib/socks &&       cf_search="$cf_search /usr/local/lib/socks"
@@ -11179,9 +11179,9 @@ test -d "/usr/local" && \
 	test -d /usr/local/socks/lib/socks &&    cf_search="$cf_search /usr/local/socks/lib/socks"
 }
 
-test "/opt" != "$prefix" && \
+test "x/opt" != "x$prefix" && \
 test -d "/opt" && \
-(test $prefix = NONE || test "/opt" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x/opt" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for lib-directories under /opt"
 	test -d /opt/lib &&          cf_search="$cf_search /opt/lib"
 	test -d /opt/lib/socks &&       cf_search="$cf_search /opt/lib/socks"
@@ -11190,9 +11190,9 @@ test -d "/opt" && \
 	test -d /opt/socks/lib/socks &&    cf_search="$cf_search /opt/socks/lib/socks"
 }
 
-test "$HOME" != "$prefix" && \
+test "x$HOME" != "x$prefix" && \
 test -d "$HOME" && \
-(test $prefix = NONE || test "$HOME" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x$HOME" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for lib-directories under $HOME"
 	test -d $HOME/lib &&          cf_search="$cf_search $HOME/lib"
 	test -d $HOME/lib/socks &&       cf_search="$cf_search $HOME/lib/socks"
@@ -13933,7 +13933,7 @@ if test -n "${CFLAGS}${CPPFLAGS}" ; then
 		-I*)
 			cf_header_path=`echo ".$cf_header_path" |sed -e 's/^...//' -e 's,/include$,,'`
 
-test "$cf_header_path" != "NONE" && \
+test "x$cf_header_path" != "xNONE" && \
 test -d "$cf_header_path" && \
  {
 	test -n "$verbose" && echo "	... testing for include-directories under $cf_header_path"
@@ -13954,9 +13954,9 @@ fi
 
 cf_search=
 
-test "/usr" != "$prefix" && \
+test "x/usr" != "x$prefix" && \
 test -d "/usr" && \
-(test $prefix = NONE || test "/usr" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x/usr" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for include-directories under /usr"
 	test -d /usr/include &&          cf_search="$cf_search /usr/include"
 	test -d /usr/include/openssl &&       cf_search="$cf_search /usr/include/openssl"
@@ -13965,7 +13965,7 @@ test -d "/usr" && \
 	test -d /usr/openssl/include/openssl &&    cf_search="$cf_search /usr/openssl/include/openssl"
 }
 
-test "$prefix" != "NONE" && \
+test "x$prefix" != "xNONE" && \
 test -d "$prefix" && \
  {
 	test -n "$verbose" && echo "	... testing for include-directories under $prefix"
@@ -13976,9 +13976,9 @@ test -d "$prefix" && \
 	test -d $prefix/openssl/include/openssl &&    cf_search="$cf_search $prefix/openssl/include/openssl"
 }
 
-test "/usr/local" != "$prefix" && \
+test "x/usr/local" != "x$prefix" && \
 test -d "/usr/local" && \
-(test $prefix = NONE || test "/usr/local" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x/usr/local" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for include-directories under /usr/local"
 	test -d /usr/local/include &&          cf_search="$cf_search /usr/local/include"
 	test -d /usr/local/include/openssl &&       cf_search="$cf_search /usr/local/include/openssl"
@@ -13987,9 +13987,9 @@ test -d "/usr/local" && \
 	test -d /usr/local/openssl/include/openssl &&    cf_search="$cf_search /usr/local/openssl/include/openssl"
 }
 
-test "/opt" != "$prefix" && \
+test "x/opt" != "x$prefix" && \
 test -d "/opt" && \
-(test $prefix = NONE || test "/opt" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x/opt" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for include-directories under /opt"
 	test -d /opt/include &&          cf_search="$cf_search /opt/include"
 	test -d /opt/include/openssl &&       cf_search="$cf_search /opt/include/openssl"
@@ -13998,9 +13998,9 @@ test -d "/opt" && \
 	test -d /opt/openssl/include/openssl &&    cf_search="$cf_search /opt/openssl/include/openssl"
 }
 
-test "$HOME" != "$prefix" && \
+test "x$HOME" != "x$prefix" && \
 test -d "$HOME" && \
-(test $prefix = NONE || test "$HOME" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x$HOME" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for include-directories under $HOME"
 	test -d $HOME/include &&          cf_search="$cf_search $HOME/include"
 	test -d $HOME/include/openssl &&       cf_search="$cf_search $HOME/include/openssl"
@@ -14168,7 +14168,7 @@ if test -n "${LDFLAGS}${LIBS}" ; then
 		-L*)
 			cf_library_path=`echo ".$cf_library_path" |sed -e 's/^...//' -e 's,/lib$,,'`
 
-test "$cf_library_path" != "NONE" && \
+test "x$cf_library_path" != "xNONE" && \
 test -d "$cf_library_path" && \
  {
 	test -n "$verbose" && echo "	... testing for lib-directories under $cf_library_path"
@@ -14187,9 +14187,9 @@ fi
 
 cf_search=
 
-test "/usr" != "$prefix" && \
+test "x/usr" != "x$prefix" && \
 test -d "/usr" && \
-(test $prefix = NONE || test "/usr" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x/usr" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for lib-directories under /usr"
 	test -d /usr/lib &&          cf_search="$cf_search /usr/lib"
 	test -d /usr/lib/ssl &&       cf_search="$cf_search /usr/lib/ssl"
@@ -14198,7 +14198,7 @@ test -d "/usr" && \
 	test -d /usr/ssl/lib/ssl &&    cf_search="$cf_search /usr/ssl/lib/ssl"
 }
 
-test "$prefix" != "NONE" && \
+test "x$prefix" != "xNONE" && \
 test -d "$prefix" && \
  {
 	test -n "$verbose" && echo "	... testing for lib-directories under $prefix"
@@ -14209,9 +14209,9 @@ test -d "$prefix" && \
 	test -d $prefix/ssl/lib/ssl &&    cf_search="$cf_search $prefix/ssl/lib/ssl"
 }
 
-test "/usr/local" != "$prefix" && \
+test "x/usr/local" != "x$prefix" && \
 test -d "/usr/local" && \
-(test $prefix = NONE || test "/usr/local" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x/usr/local" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for lib-directories under /usr/local"
 	test -d /usr/local/lib &&          cf_search="$cf_search /usr/local/lib"
 	test -d /usr/local/lib/ssl &&       cf_search="$cf_search /usr/local/lib/ssl"
@@ -14220,9 +14220,9 @@ test -d "/usr/local" && \
 	test -d /usr/local/ssl/lib/ssl &&    cf_search="$cf_search /usr/local/ssl/lib/ssl"
 }
 
-test "/opt" != "$prefix" && \
+test "x/opt" != "x$prefix" && \
 test -d "/opt" && \
-(test $prefix = NONE || test "/opt" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x/opt" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for lib-directories under /opt"
 	test -d /opt/lib &&          cf_search="$cf_search /opt/lib"
 	test -d /opt/lib/ssl &&       cf_search="$cf_search /opt/lib/ssl"
@@ -14231,9 +14231,9 @@ test -d "/opt" && \
 	test -d /opt/ssl/lib/ssl &&    cf_search="$cf_search /opt/ssl/lib/ssl"
 }
 
-test "$HOME" != "$prefix" && \
+test "x$HOME" != "x$prefix" && \
 test -d "$HOME" && \
-(test $prefix = NONE || test "$HOME" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x$HOME" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for lib-directories under $HOME"
 	test -d $HOME/lib &&          cf_search="$cf_search $HOME/lib"
 	test -d $HOME/lib/ssl &&       cf_search="$cf_search $HOME/lib/ssl"
@@ -15063,7 +15063,7 @@ if test -n "${CFLAGS}${CPPFLAGS}" ; then
 		-I*)
 			cf_header_path=`echo ".$cf_header_path" |sed -e 's/^...//' -e 's,/include$,,'`
 
-test "$cf_header_path" != "NONE" && \
+test "x$cf_header_path" != "xNONE" && \
 test -d "$cf_header_path" && \
  {
 	test -n "$verbose" && echo "	... testing for include-directories under $cf_header_path"
@@ -15084,9 +15084,9 @@ fi
 
 cf_search=
 
-test "/usr" != "$prefix" && \
+test "x/usr" != "x$prefix" && \
 test -d "/usr" && \
-(test $prefix = NONE || test "/usr" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x/usr" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for include-directories under /usr"
 	test -d /usr/include &&          cf_search="$cf_search /usr/include"
 	test -d /usr/include/gnutls &&       cf_search="$cf_search /usr/include/gnutls"
@@ -15095,7 +15095,7 @@ test -d "/usr" && \
 	test -d /usr/gnutls/include/gnutls &&    cf_search="$cf_search /usr/gnutls/include/gnutls"
 }
 
-test "$prefix" != "NONE" && \
+test "x$prefix" != "xNONE" && \
 test -d "$prefix" && \
  {
 	test -n "$verbose" && echo "	... testing for include-directories under $prefix"
@@ -15106,9 +15106,9 @@ test -d "$prefix" && \
 	test -d $prefix/gnutls/include/gnutls &&    cf_search="$cf_search $prefix/gnutls/include/gnutls"
 }
 
-test "/usr/local" != "$prefix" && \
+test "x/usr/local" != "x$prefix" && \
 test -d "/usr/local" && \
-(test $prefix = NONE || test "/usr/local" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x/usr/local" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for include-directories under /usr/local"
 	test -d /usr/local/include &&          cf_search="$cf_search /usr/local/include"
 	test -d /usr/local/include/gnutls &&       cf_search="$cf_search /usr/local/include/gnutls"
@@ -15117,9 +15117,9 @@ test -d "/usr/local" && \
 	test -d /usr/local/gnutls/include/gnutls &&    cf_search="$cf_search /usr/local/gnutls/include/gnutls"
 }
 
-test "/opt" != "$prefix" && \
+test "x/opt" != "x$prefix" && \
 test -d "/opt" && \
-(test $prefix = NONE || test "/opt" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x/opt" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for include-directories under /opt"
 	test -d /opt/include &&          cf_search="$cf_search /opt/include"
 	test -d /opt/include/gnutls &&       cf_search="$cf_search /opt/include/gnutls"
@@ -15128,9 +15128,9 @@ test -d "/opt" && \
 	test -d /opt/gnutls/include/gnutls &&    cf_search="$cf_search /opt/gnutls/include/gnutls"
 }
 
-test "$HOME" != "$prefix" && \
+test "x$HOME" != "x$prefix" && \
 test -d "$HOME" && \
-(test $prefix = NONE || test "$HOME" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x$HOME" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for include-directories under $HOME"
 	test -d $HOME/include &&          cf_search="$cf_search $HOME/include"
 	test -d $HOME/include/gnutls &&       cf_search="$cf_search $HOME/include/gnutls"
@@ -15241,7 +15241,7 @@ if test -n "${LDFLAGS}${LIBS}" ; then
 		-L*)
 			cf_library_path=`echo ".$cf_library_path" |sed -e 's/^...//' -e 's,/lib$,,'`
 
-test "$cf_library_path" != "NONE" && \
+test "x$cf_library_path" != "xNONE" && \
 test -d "$cf_library_path" && \
  {
 	test -n "$verbose" && echo "	... testing for lib-directories under $cf_library_path"
@@ -15260,9 +15260,9 @@ fi
 
 cf_search=
 
-test "/usr" != "$prefix" && \
+test "x/usr" != "x$prefix" && \
 test -d "/usr" && \
-(test $prefix = NONE || test "/usr" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x/usr" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for lib-directories under /usr"
 	test -d /usr/lib &&          cf_search="$cf_search /usr/lib"
 	test -d /usr/lib/gnutls &&       cf_search="$cf_search /usr/lib/gnutls"
@@ -15271,7 +15271,7 @@ test -d "/usr" && \
 	test -d /usr/gnutls/lib/gnutls &&    cf_search="$cf_search /usr/gnutls/lib/gnutls"
 }
 
-test "$prefix" != "NONE" && \
+test "x$prefix" != "xNONE" && \
 test -d "$prefix" && \
  {
 	test -n "$verbose" && echo "	... testing for lib-directories under $prefix"
@@ -15282,9 +15282,9 @@ test -d "$prefix" && \
 	test -d $prefix/gnutls/lib/gnutls &&    cf_search="$cf_search $prefix/gnutls/lib/gnutls"
 }
 
-test "/usr/local" != "$prefix" && \
+test "x/usr/local" != "x$prefix" && \
 test -d "/usr/local" && \
-(test $prefix = NONE || test "/usr/local" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x/usr/local" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for lib-directories under /usr/local"
 	test -d /usr/local/lib &&          cf_search="$cf_search /usr/local/lib"
 	test -d /usr/local/lib/gnutls &&       cf_search="$cf_search /usr/local/lib/gnutls"
@@ -15293,9 +15293,9 @@ test -d "/usr/local" && \
 	test -d /usr/local/gnutls/lib/gnutls &&    cf_search="$cf_search /usr/local/gnutls/lib/gnutls"
 }
 
-test "/opt" != "$prefix" && \
+test "x/opt" != "x$prefix" && \
 test -d "/opt" && \
-(test $prefix = NONE || test "/opt" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x/opt" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for lib-directories under /opt"
 	test -d /opt/lib &&          cf_search="$cf_search /opt/lib"
 	test -d /opt/lib/gnutls &&       cf_search="$cf_search /opt/lib/gnutls"
@@ -15304,9 +15304,9 @@ test -d "/opt" && \
 	test -d /opt/gnutls/lib/gnutls &&    cf_search="$cf_search /opt/gnutls/lib/gnutls"
 }
 
-test "$HOME" != "$prefix" && \
+test "x$HOME" != "x$prefix" && \
 test -d "$HOME" && \
-(test $prefix = NONE || test "$HOME" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x$HOME" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for lib-directories under $HOME"
 	test -d $HOME/lib &&          cf_search="$cf_search $HOME/lib"
 	test -d $HOME/lib/gnutls &&       cf_search="$cf_search $HOME/lib/gnutls"
@@ -16191,7 +16191,7 @@ if test -n "${CFLAGS}${CPPFLAGS}" ; then
 		-I*)
 			cf_header_path=`echo ".$cf_header_path" |sed -e 's/^...//' -e 's,/include$,,'`
 
-test "$cf_header_path" != "NONE" && \
+test "x$cf_header_path" != "xNONE" && \
 test -d "$cf_header_path" && \
  {
 	test -n "$verbose" && echo "	... testing for include-directories under $cf_header_path"
@@ -16212,9 +16212,9 @@ fi
 
 cf_search=
 
-test "/usr" != "$prefix" && \
+test "x/usr" != "x$prefix" && \
 test -d "/usr" && \
-(test $prefix = NONE || test "/usr" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x/usr" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for include-directories under /usr"
 	test -d /usr/include &&          cf_search="$cf_search /usr/include"
 	test -d /usr/include/gnutls &&       cf_search="$cf_search /usr/include/gnutls"
@@ -16223,7 +16223,7 @@ test -d "/usr" && \
 	test -d /usr/gnutls/include/gnutls &&    cf_search="$cf_search /usr/gnutls/include/gnutls"
 }
 
-test "$prefix" != "NONE" && \
+test "x$prefix" != "xNONE" && \
 test -d "$prefix" && \
  {
 	test -n "$verbose" && echo "	... testing for include-directories under $prefix"
@@ -16234,9 +16234,9 @@ test -d "$prefix" && \
 	test -d $prefix/gnutls/include/gnutls &&    cf_search="$cf_search $prefix/gnutls/include/gnutls"
 }
 
-test "/usr/local" != "$prefix" && \
+test "x/usr/local" != "x$prefix" && \
 test -d "/usr/local" && \
-(test $prefix = NONE || test "/usr/local" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x/usr/local" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for include-directories under /usr/local"
 	test -d /usr/local/include &&          cf_search="$cf_search /usr/local/include"
 	test -d /usr/local/include/gnutls &&       cf_search="$cf_search /usr/local/include/gnutls"
@@ -16245,9 +16245,9 @@ test -d "/usr/local" && \
 	test -d /usr/local/gnutls/include/gnutls &&    cf_search="$cf_search /usr/local/gnutls/include/gnutls"
 }
 
-test "/opt" != "$prefix" && \
+test "x/opt" != "x$prefix" && \
 test -d "/opt" && \
-(test $prefix = NONE || test "/opt" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x/opt" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for include-directories under /opt"
 	test -d /opt/include &&          cf_search="$cf_search /opt/include"
 	test -d /opt/include/gnutls &&       cf_search="$cf_search /opt/include/gnutls"
@@ -16256,9 +16256,9 @@ test -d "/opt" && \
 	test -d /opt/gnutls/include/gnutls &&    cf_search="$cf_search /opt/gnutls/include/gnutls"
 }
 
-test "$HOME" != "$prefix" && \
+test "x$HOME" != "x$prefix" && \
 test -d "$HOME" && \
-(test $prefix = NONE || test "$HOME" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x$HOME" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for include-directories under $HOME"
 	test -d $HOME/include &&          cf_search="$cf_search $HOME/include"
 	test -d $HOME/include/gnutls &&       cf_search="$cf_search $HOME/include/gnutls"
@@ -16369,7 +16369,7 @@ if test -n "${LDFLAGS}${LIBS}" ; then
 		-L*)
 			cf_library_path=`echo ".$cf_library_path" |sed -e 's/^...//' -e 's,/lib$,,'`
 
-test "$cf_library_path" != "NONE" && \
+test "x$cf_library_path" != "xNONE" && \
 test -d "$cf_library_path" && \
  {
 	test -n "$verbose" && echo "	... testing for lib-directories under $cf_library_path"
@@ -16388,9 +16388,9 @@ fi
 
 cf_search=
 
-test "/usr" != "$prefix" && \
+test "x/usr" != "x$prefix" && \
 test -d "/usr" && \
-(test $prefix = NONE || test "/usr" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x/usr" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for lib-directories under /usr"
 	test -d /usr/lib &&          cf_search="$cf_search /usr/lib"
 	test -d /usr/lib/gnutls &&       cf_search="$cf_search /usr/lib/gnutls"
@@ -16399,7 +16399,7 @@ test -d "/usr" && \
 	test -d /usr/gnutls/lib/gnutls &&    cf_search="$cf_search /usr/gnutls/lib/gnutls"
 }
 
-test "$prefix" != "NONE" && \
+test "x$prefix" != "xNONE" && \
 test -d "$prefix" && \
  {
 	test -n "$verbose" && echo "	... testing for lib-directories under $prefix"
@@ -16410,9 +16410,9 @@ test -d "$prefix" && \
 	test -d $prefix/gnutls/lib/gnutls &&    cf_search="$cf_search $prefix/gnutls/lib/gnutls"
 }
 
-test "/usr/local" != "$prefix" && \
+test "x/usr/local" != "x$prefix" && \
 test -d "/usr/local" && \
-(test $prefix = NONE || test "/usr/local" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x/usr/local" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for lib-directories under /usr/local"
 	test -d /usr/local/lib &&          cf_search="$cf_search /usr/local/lib"
 	test -d /usr/local/lib/gnutls &&       cf_search="$cf_search /usr/local/lib/gnutls"
@@ -16421,9 +16421,9 @@ test -d "/usr/local" && \
 	test -d /usr/local/gnutls/lib/gnutls &&    cf_search="$cf_search /usr/local/gnutls/lib/gnutls"
 }
 
-test "/opt" != "$prefix" && \
+test "x/opt" != "x$prefix" && \
 test -d "/opt" && \
-(test $prefix = NONE || test "/opt" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x/opt" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for lib-directories under /opt"
 	test -d /opt/lib &&          cf_search="$cf_search /opt/lib"
 	test -d /opt/lib/gnutls &&       cf_search="$cf_search /opt/lib/gnutls"
@@ -16432,9 +16432,9 @@ test -d "/opt" && \
 	test -d /opt/gnutls/lib/gnutls &&    cf_search="$cf_search /opt/gnutls/lib/gnutls"
 }
 
-test "$HOME" != "$prefix" && \
+test "x$HOME" != "x$prefix" && \
 test -d "$HOME" && \
-(test $prefix = NONE || test "$HOME" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x$HOME" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for lib-directories under $HOME"
 	test -d $HOME/lib &&          cf_search="$cf_search $HOME/lib"
 	test -d $HOME/lib/gnutls &&       cf_search="$cf_search $HOME/lib/gnutls"
@@ -17384,7 +17384,7 @@ if test -n "${CFLAGS}${CPPFLAGS}" ; then
 		-I*)
 			cf_header_path=`echo ".$cf_header_path" |sed -e 's/^...//' -e 's,/include$,,'`
 
-test "$cf_header_path" != "NONE" && \
+test "x$cf_header_path" != "xNONE" && \
 test -d "$cf_header_path" && \
  {
 	test -n "$verbose" && echo "	... testing for include-directories under $cf_header_path"
@@ -17405,9 +17405,9 @@ fi
 
 cf_search=
 
-test "/usr" != "$prefix" && \
+test "x/usr" != "x$prefix" && \
 test -d "/usr" && \
-(test $prefix = NONE || test "/usr" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x/usr" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for include-directories under /usr"
 	test -d /usr/include &&          cf_search="$cf_search /usr/include"
 	test -d /usr/include/$cf_ipv6dir &&       cf_search="$cf_search /usr/include/$cf_ipv6dir"
@@ -17416,7 +17416,7 @@ test -d "/usr" && \
 	test -d /usr/$cf_ipv6dir/include/$cf_ipv6dir &&    cf_search="$cf_search /usr/$cf_ipv6dir/include/$cf_ipv6dir"
 }
 
-test "$prefix" != "NONE" && \
+test "x$prefix" != "xNONE" && \
 test -d "$prefix" && \
  {
 	test -n "$verbose" && echo "	... testing for include-directories under $prefix"
@@ -17427,9 +17427,9 @@ test -d "$prefix" && \
 	test -d $prefix/$cf_ipv6dir/include/$cf_ipv6dir &&    cf_search="$cf_search $prefix/$cf_ipv6dir/include/$cf_ipv6dir"
 }
 
-test "/usr/local" != "$prefix" && \
+test "x/usr/local" != "x$prefix" && \
 test -d "/usr/local" && \
-(test $prefix = NONE || test "/usr/local" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x/usr/local" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for include-directories under /usr/local"
 	test -d /usr/local/include &&          cf_search="$cf_search /usr/local/include"
 	test -d /usr/local/include/$cf_ipv6dir &&       cf_search="$cf_search /usr/local/include/$cf_ipv6dir"
@@ -17438,9 +17438,9 @@ test -d "/usr/local" && \
 	test -d /usr/local/$cf_ipv6dir/include/$cf_ipv6dir &&    cf_search="$cf_search /usr/local/$cf_ipv6dir/include/$cf_ipv6dir"
 }
 
-test "/opt" != "$prefix" && \
+test "x/opt" != "x$prefix" && \
 test -d "/opt" && \
-(test $prefix = NONE || test "/opt" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x/opt" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for include-directories under /opt"
 	test -d /opt/include &&          cf_search="$cf_search /opt/include"
 	test -d /opt/include/$cf_ipv6dir &&       cf_search="$cf_search /opt/include/$cf_ipv6dir"
@@ -17449,9 +17449,9 @@ test -d "/opt" && \
 	test -d /opt/$cf_ipv6dir/include/$cf_ipv6dir &&    cf_search="$cf_search /opt/$cf_ipv6dir/include/$cf_ipv6dir"
 }
 
-test "$HOME" != "$prefix" && \
+test "x$HOME" != "x$prefix" && \
 test -d "$HOME" && \
-(test $prefix = NONE || test "$HOME" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x$HOME" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for include-directories under $HOME"
 	test -d $HOME/include &&          cf_search="$cf_search $HOME/include"
 	test -d $HOME/include/$cf_ipv6dir &&       cf_search="$cf_search $HOME/include/$cf_ipv6dir"
@@ -17683,7 +17683,7 @@ if test -n "${LDFLAGS}${LIBS}" ; then
 		-L*)
 			cf_library_path=`echo ".$cf_library_path" |sed -e 's/^...//' -e 's,/lib$,,'`
 
-test "$cf_library_path" != "NONE" && \
+test "x$cf_library_path" != "xNONE" && \
 test -d "$cf_library_path" && \
  {
 	test -n "$verbose" && echo "	... testing for lib-directories under $cf_library_path"
@@ -17702,9 +17702,9 @@ fi
 
 cf_search=
 
-test "/usr" != "$prefix" && \
+test "x/usr" != "x$prefix" && \
 test -d "/usr" && \
-(test $prefix = NONE || test "/usr" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x/usr" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for lib-directories under /usr"
 	test -d /usr/lib &&          cf_search="$cf_search /usr/lib"
 	test -d /usr/lib/$cf_ipv6dir &&       cf_search="$cf_search /usr/lib/$cf_ipv6dir"
@@ -17713,7 +17713,7 @@ test -d "/usr" && \
 	test -d /usr/$cf_ipv6dir/lib/$cf_ipv6dir &&    cf_search="$cf_search /usr/$cf_ipv6dir/lib/$cf_ipv6dir"
 }
 
-test "$prefix" != "NONE" && \
+test "x$prefix" != "xNONE" && \
 test -d "$prefix" && \
  {
 	test -n "$verbose" && echo "	... testing for lib-directories under $prefix"
@@ -17724,9 +17724,9 @@ test -d "$prefix" && \
 	test -d $prefix/$cf_ipv6dir/lib/$cf_ipv6dir &&    cf_search="$cf_search $prefix/$cf_ipv6dir/lib/$cf_ipv6dir"
 }
 
-test "/usr/local" != "$prefix" && \
+test "x/usr/local" != "x$prefix" && \
 test -d "/usr/local" && \
-(test $prefix = NONE || test "/usr/local" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x/usr/local" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for lib-directories under /usr/local"
 	test -d /usr/local/lib &&          cf_search="$cf_search /usr/local/lib"
 	test -d /usr/local/lib/$cf_ipv6dir &&       cf_search="$cf_search /usr/local/lib/$cf_ipv6dir"
@@ -17735,9 +17735,9 @@ test -d "/usr/local" && \
 	test -d /usr/local/$cf_ipv6dir/lib/$cf_ipv6dir &&    cf_search="$cf_search /usr/local/$cf_ipv6dir/lib/$cf_ipv6dir"
 }
 
-test "/opt" != "$prefix" && \
+test "x/opt" != "x$prefix" && \
 test -d "/opt" && \
-(test $prefix = NONE || test "/opt" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x/opt" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for lib-directories under /opt"
 	test -d /opt/lib &&          cf_search="$cf_search /opt/lib"
 	test -d /opt/lib/$cf_ipv6dir &&       cf_search="$cf_search /opt/lib/$cf_ipv6dir"
@@ -17746,9 +17746,9 @@ test -d "/opt" && \
 	test -d /opt/$cf_ipv6dir/lib/$cf_ipv6dir &&    cf_search="$cf_search /opt/$cf_ipv6dir/lib/$cf_ipv6dir"
 }
 
-test "$HOME" != "$prefix" && \
+test "x$HOME" != "x$prefix" && \
 test -d "$HOME" && \
-(test $prefix = NONE || test "$HOME" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x$HOME" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for lib-directories under $HOME"
 	test -d $HOME/lib &&          cf_search="$cf_search $HOME/lib"
 	test -d $HOME/lib/$cf_ipv6dir &&       cf_search="$cf_search $HOME/lib/$cf_ipv6dir"
@@ -19711,7 +19711,7 @@ if test -n "${CFLAGS}${CPPFLAGS}" ; then
 		-I*)
 			cf_header_path=`echo ".$cf_header_path" |sed -e 's/^...//' -e 's,/include$,,'`
 
-test "$cf_header_path" != "NONE" && \
+test "x$cf_header_path" != "xNONE" && \
 test -d "$cf_header_path" && \
  {
 	test -n "$verbose" && echo "	... testing for include-directories under $cf_header_path"
@@ -19732,9 +19732,9 @@ fi
 
 cf_search=
 
-test "/usr" != "$prefix" && \
+test "x/usr" != "x$prefix" && \
 test -d "/usr" && \
-(test $prefix = NONE || test "/usr" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x/usr" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for include-directories under /usr"
 	test -d /usr/include &&          cf_search="$cf_search /usr/include"
 	test -d /usr/include/$cf_ncuhdr_root &&       cf_search="$cf_search /usr/include/$cf_ncuhdr_root"
@@ -19743,7 +19743,7 @@ test -d "/usr" && \
 	test -d /usr/$cf_ncuhdr_root/include/$cf_ncuhdr_root &&    cf_search="$cf_search /usr/$cf_ncuhdr_root/include/$cf_ncuhdr_root"
 }
 
-test "$prefix" != "NONE" && \
+test "x$prefix" != "xNONE" && \
 test -d "$prefix" && \
  {
 	test -n "$verbose" && echo "	... testing for include-directories under $prefix"
@@ -19754,9 +19754,9 @@ test -d "$prefix" && \
 	test -d $prefix/$cf_ncuhdr_root/include/$cf_ncuhdr_root &&    cf_search="$cf_search $prefix/$cf_ncuhdr_root/include/$cf_ncuhdr_root"
 }
 
-test "/usr/local" != "$prefix" && \
+test "x/usr/local" != "x$prefix" && \
 test -d "/usr/local" && \
-(test $prefix = NONE || test "/usr/local" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x/usr/local" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for include-directories under /usr/local"
 	test -d /usr/local/include &&          cf_search="$cf_search /usr/local/include"
 	test -d /usr/local/include/$cf_ncuhdr_root &&       cf_search="$cf_search /usr/local/include/$cf_ncuhdr_root"
@@ -19765,9 +19765,9 @@ test -d "/usr/local" && \
 	test -d /usr/local/$cf_ncuhdr_root/include/$cf_ncuhdr_root &&    cf_search="$cf_search /usr/local/$cf_ncuhdr_root/include/$cf_ncuhdr_root"
 }
 
-test "/opt" != "$prefix" && \
+test "x/opt" != "x$prefix" && \
 test -d "/opt" && \
-(test $prefix = NONE || test "/opt" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x/opt" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for include-directories under /opt"
 	test -d /opt/include &&          cf_search="$cf_search /opt/include"
 	test -d /opt/include/$cf_ncuhdr_root &&       cf_search="$cf_search /opt/include/$cf_ncuhdr_root"
@@ -19776,9 +19776,9 @@ test -d "/opt" && \
 	test -d /opt/$cf_ncuhdr_root/include/$cf_ncuhdr_root &&    cf_search="$cf_search /opt/$cf_ncuhdr_root/include/$cf_ncuhdr_root"
 }
 
-test "$HOME" != "$prefix" && \
+test "x$HOME" != "x$prefix" && \
 test -d "$HOME" && \
-(test $prefix = NONE || test "$HOME" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x$HOME" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for include-directories under $HOME"
 	test -d $HOME/include &&          cf_search="$cf_search $HOME/include"
 	test -d $HOME/include/$cf_ncuhdr_root &&       cf_search="$cf_search $HOME/include/$cf_ncuhdr_root"
@@ -20549,7 +20549,7 @@ if test -n "${LDFLAGS}${LIBS}" ; then
 		-L*)
 			cf_library_path=`echo ".$cf_library_path" |sed -e 's/^...//' -e 's,/lib$,,'`
 
-test "$cf_library_path" != "NONE" && \
+test "x$cf_library_path" != "xNONE" && \
 test -d "$cf_library_path" && \
  {
 	test -n "$verbose" && echo "	... testing for lib-directories under $cf_library_path"
@@ -20568,9 +20568,9 @@ fi
 
 cf_search=
 
-test "/usr" != "$prefix" && \
+test "x/usr" != "x$prefix" && \
 test -d "/usr" && \
-(test $prefix = NONE || test "/usr" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x/usr" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for lib-directories under /usr"
 	test -d /usr/lib &&          cf_search="$cf_search /usr/lib"
 	test -d /usr/lib/$cf_nculib_root &&       cf_search="$cf_search /usr/lib/$cf_nculib_root"
@@ -20579,7 +20579,7 @@ test -d "/usr" && \
 	test -d /usr/$cf_nculib_root/lib/$cf_nculib_root &&    cf_search="$cf_search /usr/$cf_nculib_root/lib/$cf_nculib_root"
 }
 
-test "$prefix" != "NONE" && \
+test "x$prefix" != "xNONE" && \
 test -d "$prefix" && \
  {
 	test -n "$verbose" && echo "	... testing for lib-directories under $prefix"
@@ -20590,9 +20590,9 @@ test -d "$prefix" && \
 	test -d $prefix/$cf_nculib_root/lib/$cf_nculib_root &&    cf_search="$cf_search $prefix/$cf_nculib_root/lib/$cf_nculib_root"
 }
 
-test "/usr/local" != "$prefix" && \
+test "x/usr/local" != "x$prefix" && \
 test -d "/usr/local" && \
-(test $prefix = NONE || test "/usr/local" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x/usr/local" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for lib-directories under /usr/local"
 	test -d /usr/local/lib &&          cf_search="$cf_search /usr/local/lib"
 	test -d /usr/local/lib/$cf_nculib_root &&       cf_search="$cf_search /usr/local/lib/$cf_nculib_root"
@@ -20601,9 +20601,9 @@ test -d "/usr/local" && \
 	test -d /usr/local/$cf_nculib_root/lib/$cf_nculib_root &&    cf_search="$cf_search /usr/local/$cf_nculib_root/lib/$cf_nculib_root"
 }
 
-test "/opt" != "$prefix" && \
+test "x/opt" != "x$prefix" && \
 test -d "/opt" && \
-(test $prefix = NONE || test "/opt" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x/opt" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for lib-directories under /opt"
 	test -d /opt/lib &&          cf_search="$cf_search /opt/lib"
 	test -d /opt/lib/$cf_nculib_root &&       cf_search="$cf_search /opt/lib/$cf_nculib_root"
@@ -20612,9 +20612,9 @@ test -d "/opt" && \
 	test -d /opt/$cf_nculib_root/lib/$cf_nculib_root &&    cf_search="$cf_search /opt/$cf_nculib_root/lib/$cf_nculib_root"
 }
 
-test "$HOME" != "$prefix" && \
+test "x$HOME" != "x$prefix" && \
 test -d "$HOME" && \
-(test $prefix = NONE || test "$HOME" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x$HOME" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for lib-directories under $HOME"
 	test -d $HOME/lib &&          cf_search="$cf_search $HOME/lib"
 	test -d $HOME/lib/$cf_nculib_root &&       cf_search="$cf_search $HOME/lib/$cf_nculib_root"
@@ -20880,7 +20880,7 @@ if test -n "${CFLAGS}${CPPFLAGS}" ; then
 		-I*)
 			cf_header_path=`echo ".$cf_header_path" |sed -e 's/^...//' -e 's,/include$,,'`
 
-test "$cf_header_path" != "NONE" && \
+test "x$cf_header_path" != "xNONE" && \
 test -d "$cf_header_path" && \
  {
 	test -n "$verbose" && echo "	... testing for include-directories under $cf_header_path"
@@ -20901,9 +20901,9 @@ fi
 
 cf_search=
 
-test "/usr" != "$prefix" && \
+test "x/usr" != "x$prefix" && \
 test -d "/usr" && \
-(test $prefix = NONE || test "/usr" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x/usr" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for include-directories under /usr"
 	test -d /usr/include &&          cf_search="$cf_search /usr/include"
 	test -d /usr/include/utf8 &&       cf_search="$cf_search /usr/include/utf8"
@@ -20912,7 +20912,7 @@ test -d "/usr" && \
 	test -d /usr/utf8/include/utf8 &&    cf_search="$cf_search /usr/utf8/include/utf8"
 }
 
-test "$prefix" != "NONE" && \
+test "x$prefix" != "xNONE" && \
 test -d "$prefix" && \
  {
 	test -n "$verbose" && echo "	... testing for include-directories under $prefix"
@@ -20923,9 +20923,9 @@ test -d "$prefix" && \
 	test -d $prefix/utf8/include/utf8 &&    cf_search="$cf_search $prefix/utf8/include/utf8"
 }
 
-test "/usr/local" != "$prefix" && \
+test "x/usr/local" != "x$prefix" && \
 test -d "/usr/local" && \
-(test $prefix = NONE || test "/usr/local" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x/usr/local" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for include-directories under /usr/local"
 	test -d /usr/local/include &&          cf_search="$cf_search /usr/local/include"
 	test -d /usr/local/include/utf8 &&       cf_search="$cf_search /usr/local/include/utf8"
@@ -20934,9 +20934,9 @@ test -d "/usr/local" && \
 	test -d /usr/local/utf8/include/utf8 &&    cf_search="$cf_search /usr/local/utf8/include/utf8"
 }
 
-test "/opt" != "$prefix" && \
+test "x/opt" != "x$prefix" && \
 test -d "/opt" && \
-(test $prefix = NONE || test "/opt" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x/opt" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for include-directories under /opt"
 	test -d /opt/include &&          cf_search="$cf_search /opt/include"
 	test -d /opt/include/utf8 &&       cf_search="$cf_search /opt/include/utf8"
@@ -20945,9 +20945,9 @@ test -d "/opt" && \
 	test -d /opt/utf8/include/utf8 &&    cf_search="$cf_search /opt/utf8/include/utf8"
 }
 
-test "$HOME" != "$prefix" && \
+test "x$HOME" != "x$prefix" && \
 test -d "$HOME" && \
-(test $prefix = NONE || test "$HOME" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x$HOME" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for include-directories under $HOME"
 	test -d $HOME/include &&          cf_search="$cf_search $HOME/include"
 	test -d $HOME/include/utf8 &&       cf_search="$cf_search $HOME/include/utf8"
@@ -21042,7 +21042,7 @@ if test -n "${LDFLAGS}${LIBS}" ; then
 		-L*)
 			cf_library_path=`echo ".$cf_library_path" |sed -e 's/^...//' -e 's,/lib$,,'`
 
-test "$cf_library_path" != "NONE" && \
+test "x$cf_library_path" != "xNONE" && \
 test -d "$cf_library_path" && \
  {
 	test -n "$verbose" && echo "	... testing for lib-directories under $cf_library_path"
@@ -21061,9 +21061,9 @@ fi
 
 cf_search=
 
-test "/usr" != "$prefix" && \
+test "x/usr" != "x$prefix" && \
 test -d "/usr" && \
-(test $prefix = NONE || test "/usr" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x/usr" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for lib-directories under /usr"
 	test -d /usr/lib &&          cf_search="$cf_search /usr/lib"
 	test -d /usr/lib/utf8 &&       cf_search="$cf_search /usr/lib/utf8"
@@ -21072,7 +21072,7 @@ test -d "/usr" && \
 	test -d /usr/utf8/lib/utf8 &&    cf_search="$cf_search /usr/utf8/lib/utf8"
 }
 
-test "$prefix" != "NONE" && \
+test "x$prefix" != "xNONE" && \
 test -d "$prefix" && \
  {
 	test -n "$verbose" && echo "	... testing for lib-directories under $prefix"
@@ -21083,9 +21083,9 @@ test -d "$prefix" && \
 	test -d $prefix/utf8/lib/utf8 &&    cf_search="$cf_search $prefix/utf8/lib/utf8"
 }
 
-test "/usr/local" != "$prefix" && \
+test "x/usr/local" != "x$prefix" && \
 test -d "/usr/local" && \
-(test $prefix = NONE || test "/usr/local" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x/usr/local" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for lib-directories under /usr/local"
 	test -d /usr/local/lib &&          cf_search="$cf_search /usr/local/lib"
 	test -d /usr/local/lib/utf8 &&       cf_search="$cf_search /usr/local/lib/utf8"
@@ -21094,9 +21094,9 @@ test -d "/usr/local" && \
 	test -d /usr/local/utf8/lib/utf8 &&    cf_search="$cf_search /usr/local/utf8/lib/utf8"
 }
 
-test "/opt" != "$prefix" && \
+test "x/opt" != "x$prefix" && \
 test -d "/opt" && \
-(test $prefix = NONE || test "/opt" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x/opt" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for lib-directories under /opt"
 	test -d /opt/lib &&          cf_search="$cf_search /opt/lib"
 	test -d /opt/lib/utf8 &&       cf_search="$cf_search /opt/lib/utf8"
@@ -21105,9 +21105,9 @@ test -d "/opt" && \
 	test -d /opt/utf8/lib/utf8 &&    cf_search="$cf_search /opt/utf8/lib/utf8"
 }
 
-test "$HOME" != "$prefix" && \
+test "x$HOME" != "x$prefix" && \
 test -d "$HOME" && \
-(test $prefix = NONE || test "$HOME" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x$HOME" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for lib-directories under $HOME"
 	test -d $HOME/lib &&          cf_search="$cf_search $HOME/lib"
 	test -d $HOME/lib/utf8 &&       cf_search="$cf_search $HOME/lib/utf8"
@@ -21705,7 +21705,7 @@ if test -n "${CFLAGS}${CPPFLAGS}" ; then
 		-I*)
 			cf_header_path=`echo ".$cf_header_path" |sed -e 's/^...//' -e 's,/include$,,'`
 
-test "$cf_header_path" != "NONE" && \
+test "x$cf_header_path" != "xNONE" && \
 test -d "$cf_header_path" && \
  {
 	test -n "$verbose" && echo "	... testing for include-directories under $cf_header_path"
@@ -21726,9 +21726,9 @@ fi
 
 cf_search=
 
-test "/usr" != "$prefix" && \
+test "x/usr" != "x$prefix" && \
 test -d "/usr" && \
-(test $prefix = NONE || test "/usr" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x/usr" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for include-directories under /usr"
 	test -d /usr/include &&          cf_search="$cf_search /usr/include"
 	test -d /usr/include/$cf_ncuhdr_root &&       cf_search="$cf_search /usr/include/$cf_ncuhdr_root"
@@ -21737,7 +21737,7 @@ test -d "/usr" && \
 	test -d /usr/$cf_ncuhdr_root/include/$cf_ncuhdr_root &&    cf_search="$cf_search /usr/$cf_ncuhdr_root/include/$cf_ncuhdr_root"
 }
 
-test "$prefix" != "NONE" && \
+test "x$prefix" != "xNONE" && \
 test -d "$prefix" && \
  {
 	test -n "$verbose" && echo "	... testing for include-directories under $prefix"
@@ -21748,9 +21748,9 @@ test -d "$prefix" && \
 	test -d $prefix/$cf_ncuhdr_root/include/$cf_ncuhdr_root &&    cf_search="$cf_search $prefix/$cf_ncuhdr_root/include/$cf_ncuhdr_root"
 }
 
-test "/usr/local" != "$prefix" && \
+test "x/usr/local" != "x$prefix" && \
 test -d "/usr/local" && \
-(test $prefix = NONE || test "/usr/local" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x/usr/local" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for include-directories under /usr/local"
 	test -d /usr/local/include &&          cf_search="$cf_search /usr/local/include"
 	test -d /usr/local/include/$cf_ncuhdr_root &&       cf_search="$cf_search /usr/local/include/$cf_ncuhdr_root"
@@ -21759,9 +21759,9 @@ test -d "/usr/local" && \
 	test -d /usr/local/$cf_ncuhdr_root/include/$cf_ncuhdr_root &&    cf_search="$cf_search /usr/local/$cf_ncuhdr_root/include/$cf_ncuhdr_root"
 }
 
-test "/opt" != "$prefix" && \
+test "x/opt" != "x$prefix" && \
 test -d "/opt" && \
-(test $prefix = NONE || test "/opt" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x/opt" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for include-directories under /opt"
 	test -d /opt/include &&          cf_search="$cf_search /opt/include"
 	test -d /opt/include/$cf_ncuhdr_root &&       cf_search="$cf_search /opt/include/$cf_ncuhdr_root"
@@ -21770,9 +21770,9 @@ test -d "/opt" && \
 	test -d /opt/$cf_ncuhdr_root/include/$cf_ncuhdr_root &&    cf_search="$cf_search /opt/$cf_ncuhdr_root/include/$cf_ncuhdr_root"
 }
 
-test "$HOME" != "$prefix" && \
+test "x$HOME" != "x$prefix" && \
 test -d "$HOME" && \
-(test $prefix = NONE || test "$HOME" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x$HOME" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for include-directories under $HOME"
 	test -d $HOME/include &&          cf_search="$cf_search $HOME/include"
 	test -d $HOME/include/$cf_ncuhdr_root &&       cf_search="$cf_search $HOME/include/$cf_ncuhdr_root"
@@ -22543,7 +22543,7 @@ if test -n "${LDFLAGS}${LIBS}" ; then
 		-L*)
 			cf_library_path=`echo ".$cf_library_path" |sed -e 's/^...//' -e 's,/lib$,,'`
 
-test "$cf_library_path" != "NONE" && \
+test "x$cf_library_path" != "xNONE" && \
 test -d "$cf_library_path" && \
  {
 	test -n "$verbose" && echo "	... testing for lib-directories under $cf_library_path"
@@ -22562,9 +22562,9 @@ fi
 
 cf_search=
 
-test "/usr" != "$prefix" && \
+test "x/usr" != "x$prefix" && \
 test -d "/usr" && \
-(test $prefix = NONE || test "/usr" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x/usr" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for lib-directories under /usr"
 	test -d /usr/lib &&          cf_search="$cf_search /usr/lib"
 	test -d /usr/lib/$cf_nculib_root &&       cf_search="$cf_search /usr/lib/$cf_nculib_root"
@@ -22573,7 +22573,7 @@ test -d "/usr" && \
 	test -d /usr/$cf_nculib_root/lib/$cf_nculib_root &&    cf_search="$cf_search /usr/$cf_nculib_root/lib/$cf_nculib_root"
 }
 
-test "$prefix" != "NONE" && \
+test "x$prefix" != "xNONE" && \
 test -d "$prefix" && \
  {
 	test -n "$verbose" && echo "	... testing for lib-directories under $prefix"
@@ -22584,9 +22584,9 @@ test -d "$prefix" && \
 	test -d $prefix/$cf_nculib_root/lib/$cf_nculib_root &&    cf_search="$cf_search $prefix/$cf_nculib_root/lib/$cf_nculib_root"
 }
 
-test "/usr/local" != "$prefix" && \
+test "x/usr/local" != "x$prefix" && \
 test -d "/usr/local" && \
-(test $prefix = NONE || test "/usr/local" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x/usr/local" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for lib-directories under /usr/local"
 	test -d /usr/local/lib &&          cf_search="$cf_search /usr/local/lib"
 	test -d /usr/local/lib/$cf_nculib_root &&       cf_search="$cf_search /usr/local/lib/$cf_nculib_root"
@@ -22595,9 +22595,9 @@ test -d "/usr/local" && \
 	test -d /usr/local/$cf_nculib_root/lib/$cf_nculib_root &&    cf_search="$cf_search /usr/local/$cf_nculib_root/lib/$cf_nculib_root"
 }
 
-test "/opt" != "$prefix" && \
+test "x/opt" != "x$prefix" && \
 test -d "/opt" && \
-(test $prefix = NONE || test "/opt" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x/opt" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for lib-directories under /opt"
 	test -d /opt/lib &&          cf_search="$cf_search /opt/lib"
 	test -d /opt/lib/$cf_nculib_root &&       cf_search="$cf_search /opt/lib/$cf_nculib_root"
@@ -22606,9 +22606,9 @@ test -d "/opt" && \
 	test -d /opt/$cf_nculib_root/lib/$cf_nculib_root &&    cf_search="$cf_search /opt/$cf_nculib_root/lib/$cf_nculib_root"
 }
 
-test "$HOME" != "$prefix" && \
+test "x$HOME" != "x$prefix" && \
 test -d "$HOME" && \
-(test $prefix = NONE || test "$HOME" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x$HOME" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for lib-directories under $HOME"
 	test -d $HOME/lib &&          cf_search="$cf_search $HOME/lib"
 	test -d $HOME/lib/$cf_nculib_root &&       cf_search="$cf_search $HOME/lib/$cf_nculib_root"
@@ -22793,7 +22793,7 @@ if test -n "${CFLAGS}${CPPFLAGS}" ; then
 		-I*)
 			cf_header_path=`echo ".$cf_header_path" |sed -e 's/^...//' -e 's,/include$,,'`
 
-test "$cf_header_path" != "NONE" && \
+test "x$cf_header_path" != "xNONE" && \
 test -d "$cf_header_path" && \
  {
 	test -n "$verbose" && echo "	... testing for include-directories under $cf_header_path"
@@ -22814,9 +22814,9 @@ fi
 
 cf_search=
 
-test "/usr" != "$prefix" && \
+test "x/usr" != "x$prefix" && \
 test -d "/usr" && \
-(test $prefix = NONE || test "/usr" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x/usr" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for include-directories under /usr"
 	test -d /usr/include &&          cf_search="$cf_search /usr/include"
 	test -d /usr/include/slang &&       cf_search="$cf_search /usr/include/slang"
@@ -22825,7 +22825,7 @@ test -d "/usr" && \
 	test -d /usr/slang/include/slang &&    cf_search="$cf_search /usr/slang/include/slang"
 }
 
-test "$prefix" != "NONE" && \
+test "x$prefix" != "xNONE" && \
 test -d "$prefix" && \
  {
 	test -n "$verbose" && echo "	... testing for include-directories under $prefix"
@@ -22836,9 +22836,9 @@ test -d "$prefix" && \
 	test -d $prefix/slang/include/slang &&    cf_search="$cf_search $prefix/slang/include/slang"
 }
 
-test "/usr/local" != "$prefix" && \
+test "x/usr/local" != "x$prefix" && \
 test -d "/usr/local" && \
-(test $prefix = NONE || test "/usr/local" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x/usr/local" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for include-directories under /usr/local"
 	test -d /usr/local/include &&          cf_search="$cf_search /usr/local/include"
 	test -d /usr/local/include/slang &&       cf_search="$cf_search /usr/local/include/slang"
@@ -22847,9 +22847,9 @@ test -d "/usr/local" && \
 	test -d /usr/local/slang/include/slang &&    cf_search="$cf_search /usr/local/slang/include/slang"
 }
 
-test "/opt" != "$prefix" && \
+test "x/opt" != "x$prefix" && \
 test -d "/opt" && \
-(test $prefix = NONE || test "/opt" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x/opt" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for include-directories under /opt"
 	test -d /opt/include &&          cf_search="$cf_search /opt/include"
 	test -d /opt/include/slang &&       cf_search="$cf_search /opt/include/slang"
@@ -22858,9 +22858,9 @@ test -d "/opt" && \
 	test -d /opt/slang/include/slang &&    cf_search="$cf_search /opt/slang/include/slang"
 }
 
-test "$HOME" != "$prefix" && \
+test "x$HOME" != "x$prefix" && \
 test -d "$HOME" && \
-(test $prefix = NONE || test "$HOME" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x$HOME" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for include-directories under $HOME"
 	test -d $HOME/include &&          cf_search="$cf_search $HOME/include"
 	test -d $HOME/include/slang &&       cf_search="$cf_search $HOME/include/slang"
@@ -23494,7 +23494,7 @@ if test -n "${LDFLAGS}${LIBS}" ; then
 		-L*)
 			cf_library_path=`echo ".$cf_library_path" |sed -e 's/^...//' -e 's,/lib$,,'`
 
-test "$cf_library_path" != "NONE" && \
+test "x$cf_library_path" != "xNONE" && \
 test -d "$cf_library_path" && \
  {
 	test -n "$verbose" && echo "	... testing for lib-directories under $cf_library_path"
@@ -23513,9 +23513,9 @@ fi
 
 cf_search=
 
-test "/usr" != "$prefix" && \
+test "x/usr" != "x$prefix" && \
 test -d "/usr" && \
-(test $prefix = NONE || test "/usr" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x/usr" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for lib-directories under /usr"
 	test -d /usr/lib &&          cf_search="$cf_search /usr/lib"
 	test -d /usr/lib/video &&       cf_search="$cf_search /usr/lib/video"
@@ -23524,7 +23524,7 @@ test -d "/usr" && \
 	test -d /usr/video/lib/video &&    cf_search="$cf_search /usr/video/lib/video"
 }
 
-test "$prefix" != "NONE" && \
+test "x$prefix" != "xNONE" && \
 test -d "$prefix" && \
  {
 	test -n "$verbose" && echo "	... testing for lib-directories under $prefix"
@@ -23535,9 +23535,9 @@ test -d "$prefix" && \
 	test -d $prefix/video/lib/video &&    cf_search="$cf_search $prefix/video/lib/video"
 }
 
-test "/usr/local" != "$prefix" && \
+test "x/usr/local" != "x$prefix" && \
 test -d "/usr/local" && \
-(test $prefix = NONE || test "/usr/local" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x/usr/local" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for lib-directories under /usr/local"
 	test -d /usr/local/lib &&          cf_search="$cf_search /usr/local/lib"
 	test -d /usr/local/lib/video &&       cf_search="$cf_search /usr/local/lib/video"
@@ -23546,9 +23546,9 @@ test -d "/usr/local" && \
 	test -d /usr/local/video/lib/video &&    cf_search="$cf_search /usr/local/video/lib/video"
 }
 
-test "/opt" != "$prefix" && \
+test "x/opt" != "x$prefix" && \
 test -d "/opt" && \
-(test $prefix = NONE || test "/opt" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x/opt" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for lib-directories under /opt"
 	test -d /opt/lib &&          cf_search="$cf_search /opt/lib"
 	test -d /opt/lib/video &&       cf_search="$cf_search /opt/lib/video"
@@ -23557,9 +23557,9 @@ test -d "/opt" && \
 	test -d /opt/video/lib/video &&    cf_search="$cf_search /opt/video/lib/video"
 }
 
-test "$HOME" != "$prefix" && \
+test "x$HOME" != "x$prefix" && \
 test -d "$HOME" && \
-(test $prefix = NONE || test "$HOME" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x$HOME" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for lib-directories under $HOME"
 	test -d $HOME/lib &&          cf_search="$cf_search $HOME/lib"
 	test -d $HOME/lib/video &&       cf_search="$cf_search $HOME/lib/video"
@@ -23740,7 +23740,7 @@ if test -n "${LDFLAGS}${LIBS}" ; then
 		-L*)
 			cf_library_path=`echo ".$cf_library_path" |sed -e 's/^...//' -e 's,/lib$,,'`
 
-test "$cf_library_path" != "NONE" && \
+test "x$cf_library_path" != "xNONE" && \
 test -d "$cf_library_path" && \
  {
 	test -n "$verbose" && echo "	... testing for lib-directories under $cf_library_path"
@@ -23759,9 +23759,9 @@ fi
 
 cf_search=
 
-test "/usr" != "$prefix" && \
+test "x/usr" != "x$prefix" && \
 test -d "/usr" && \
-(test $prefix = NONE || test "/usr" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x/usr" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for lib-directories under /usr"
 	test -d /usr/lib &&          cf_search="$cf_search /usr/lib"
 	test -d /usr/lib/slang &&       cf_search="$cf_search /usr/lib/slang"
@@ -23770,7 +23770,7 @@ test -d "/usr" && \
 	test -d /usr/slang/lib/slang &&    cf_search="$cf_search /usr/slang/lib/slang"
 }
 
-test "$prefix" != "NONE" && \
+test "x$prefix" != "xNONE" && \
 test -d "$prefix" && \
  {
 	test -n "$verbose" && echo "	... testing for lib-directories under $prefix"
@@ -23781,9 +23781,9 @@ test -d "$prefix" && \
 	test -d $prefix/slang/lib/slang &&    cf_search="$cf_search $prefix/slang/lib/slang"
 }
 
-test "/usr/local" != "$prefix" && \
+test "x/usr/local" != "x$prefix" && \
 test -d "/usr/local" && \
-(test $prefix = NONE || test "/usr/local" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x/usr/local" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for lib-directories under /usr/local"
 	test -d /usr/local/lib &&          cf_search="$cf_search /usr/local/lib"
 	test -d /usr/local/lib/slang &&       cf_search="$cf_search /usr/local/lib/slang"
@@ -23792,9 +23792,9 @@ test -d "/usr/local" && \
 	test -d /usr/local/slang/lib/slang &&    cf_search="$cf_search /usr/local/slang/lib/slang"
 }
 
-test "/opt" != "$prefix" && \
+test "x/opt" != "x$prefix" && \
 test -d "/opt" && \
-(test $prefix = NONE || test "/opt" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x/opt" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for lib-directories under /opt"
 	test -d /opt/lib &&          cf_search="$cf_search /opt/lib"
 	test -d /opt/lib/slang &&       cf_search="$cf_search /opt/lib/slang"
@@ -23803,9 +23803,9 @@ test -d "/opt" && \
 	test -d /opt/slang/lib/slang &&    cf_search="$cf_search /opt/slang/lib/slang"
 }
 
-test "$HOME" != "$prefix" && \
+test "x$HOME" != "x$prefix" && \
 test -d "$HOME" && \
-(test $prefix = NONE || test "$HOME" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x$HOME" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for lib-directories under $HOME"
 	test -d $HOME/lib &&          cf_search="$cf_search $HOME/lib"
 	test -d $HOME/lib/slang &&       cf_search="$cf_search $HOME/lib/slang"
@@ -23965,7 +23965,7 @@ if test -n "${CFLAGS}${CPPFLAGS}" ; then
 		-I*)
 			cf_header_path=`echo ".$cf_header_path" |sed -e 's/^...//' -e 's,/include$,,'`
 
-test "$cf_header_path" != "NONE" && \
+test "x$cf_header_path" != "xNONE" && \
 test -d "$cf_header_path" && \
  {
 	test -n "$verbose" && echo "	... testing for include-directories under $cf_header_path"
@@ -23986,9 +23986,9 @@ fi
 
 cf_search=
 
-test "/usr" != "$prefix" && \
+test "x/usr" != "x$prefix" && \
 test -d "/usr" && \
-(test $prefix = NONE || test "/usr" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x/usr" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for include-directories under /usr"
 	test -d /usr/include &&          cf_search="$cf_search /usr/include"
 	test -d /usr/include/slang2 &&       cf_search="$cf_search /usr/include/slang2"
@@ -23997,7 +23997,7 @@ test -d "/usr" && \
 	test -d /usr/slang2/include/slang2 &&    cf_search="$cf_search /usr/slang2/include/slang2"
 }
 
-test "$prefix" != "NONE" && \
+test "x$prefix" != "xNONE" && \
 test -d "$prefix" && \
  {
 	test -n "$verbose" && echo "	... testing for include-directories under $prefix"
@@ -24008,9 +24008,9 @@ test -d "$prefix" && \
 	test -d $prefix/slang2/include/slang2 &&    cf_search="$cf_search $prefix/slang2/include/slang2"
 }
 
-test "/usr/local" != "$prefix" && \
+test "x/usr/local" != "x$prefix" && \
 test -d "/usr/local" && \
-(test $prefix = NONE || test "/usr/local" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x/usr/local" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for include-directories under /usr/local"
 	test -d /usr/local/include &&          cf_search="$cf_search /usr/local/include"
 	test -d /usr/local/include/slang2 &&       cf_search="$cf_search /usr/local/include/slang2"
@@ -24019,9 +24019,9 @@ test -d "/usr/local" && \
 	test -d /usr/local/slang2/include/slang2 &&    cf_search="$cf_search /usr/local/slang2/include/slang2"
 }
 
-test "/opt" != "$prefix" && \
+test "x/opt" != "x$prefix" && \
 test -d "/opt" && \
-(test $prefix = NONE || test "/opt" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x/opt" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for include-directories under /opt"
 	test -d /opt/include &&          cf_search="$cf_search /opt/include"
 	test -d /opt/include/slang2 &&       cf_search="$cf_search /opt/include/slang2"
@@ -24030,9 +24030,9 @@ test -d "/opt" && \
 	test -d /opt/slang2/include/slang2 &&    cf_search="$cf_search /opt/slang2/include/slang2"
 }
 
-test "$HOME" != "$prefix" && \
+test "x$HOME" != "x$prefix" && \
 test -d "$HOME" && \
-(test $prefix = NONE || test "$HOME" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x$HOME" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for include-directories under $HOME"
 	test -d $HOME/include &&          cf_search="$cf_search $HOME/include"
 	test -d $HOME/include/slang2 &&       cf_search="$cf_search $HOME/include/slang2"
@@ -24666,7 +24666,7 @@ if test -n "${LDFLAGS}${LIBS}" ; then
 		-L*)
 			cf_library_path=`echo ".$cf_library_path" |sed -e 's/^...//' -e 's,/lib$,,'`
 
-test "$cf_library_path" != "NONE" && \
+test "x$cf_library_path" != "xNONE" && \
 test -d "$cf_library_path" && \
  {
 	test -n "$verbose" && echo "	... testing for lib-directories under $cf_library_path"
@@ -24685,9 +24685,9 @@ fi
 
 cf_search=
 
-test "/usr" != "$prefix" && \
+test "x/usr" != "x$prefix" && \
 test -d "/usr" && \
-(test $prefix = NONE || test "/usr" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x/usr" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for lib-directories under /usr"
 	test -d /usr/lib &&          cf_search="$cf_search /usr/lib"
 	test -d /usr/lib/video &&       cf_search="$cf_search /usr/lib/video"
@@ -24696,7 +24696,7 @@ test -d "/usr" && \
 	test -d /usr/video/lib/video &&    cf_search="$cf_search /usr/video/lib/video"
 }
 
-test "$prefix" != "NONE" && \
+test "x$prefix" != "xNONE" && \
 test -d "$prefix" && \
  {
 	test -n "$verbose" && echo "	... testing for lib-directories under $prefix"
@@ -24707,9 +24707,9 @@ test -d "$prefix" && \
 	test -d $prefix/video/lib/video &&    cf_search="$cf_search $prefix/video/lib/video"
 }
 
-test "/usr/local" != "$prefix" && \
+test "x/usr/local" != "x$prefix" && \
 test -d "/usr/local" && \
-(test $prefix = NONE || test "/usr/local" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x/usr/local" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for lib-directories under /usr/local"
 	test -d /usr/local/lib &&          cf_search="$cf_search /usr/local/lib"
 	test -d /usr/local/lib/video &&       cf_search="$cf_search /usr/local/lib/video"
@@ -24718,9 +24718,9 @@ test -d "/usr/local" && \
 	test -d /usr/local/video/lib/video &&    cf_search="$cf_search /usr/local/video/lib/video"
 }
 
-test "/opt" != "$prefix" && \
+test "x/opt" != "x$prefix" && \
 test -d "/opt" && \
-(test $prefix = NONE || test "/opt" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x/opt" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for lib-directories under /opt"
 	test -d /opt/lib &&          cf_search="$cf_search /opt/lib"
 	test -d /opt/lib/video &&       cf_search="$cf_search /opt/lib/video"
@@ -24729,9 +24729,9 @@ test -d "/opt" && \
 	test -d /opt/video/lib/video &&    cf_search="$cf_search /opt/video/lib/video"
 }
 
-test "$HOME" != "$prefix" && \
+test "x$HOME" != "x$prefix" && \
 test -d "$HOME" && \
-(test $prefix = NONE || test "$HOME" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x$HOME" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for lib-directories under $HOME"
 	test -d $HOME/lib &&          cf_search="$cf_search $HOME/lib"
 	test -d $HOME/lib/video &&       cf_search="$cf_search $HOME/lib/video"
@@ -24912,7 +24912,7 @@ if test -n "${LDFLAGS}${LIBS}" ; then
 		-L*)
 			cf_library_path=`echo ".$cf_library_path" |sed -e 's/^...//' -e 's,/lib$,,'`
 
-test "$cf_library_path" != "NONE" && \
+test "x$cf_library_path" != "xNONE" && \
 test -d "$cf_library_path" && \
  {
 	test -n "$verbose" && echo "	... testing for lib-directories under $cf_library_path"
@@ -24931,9 +24931,9 @@ fi
 
 cf_search=
 
-test "/usr" != "$prefix" && \
+test "x/usr" != "x$prefix" && \
 test -d "/usr" && \
-(test $prefix = NONE || test "/usr" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x/usr" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for lib-directories under /usr"
 	test -d /usr/lib &&          cf_search="$cf_search /usr/lib"
 	test -d /usr/lib/slang2 &&       cf_search="$cf_search /usr/lib/slang2"
@@ -24942,7 +24942,7 @@ test -d "/usr" && \
 	test -d /usr/slang2/lib/slang2 &&    cf_search="$cf_search /usr/slang2/lib/slang2"
 }
 
-test "$prefix" != "NONE" && \
+test "x$prefix" != "xNONE" && \
 test -d "$prefix" && \
  {
 	test -n "$verbose" && echo "	... testing for lib-directories under $prefix"
@@ -24953,9 +24953,9 @@ test -d "$prefix" && \
 	test -d $prefix/slang2/lib/slang2 &&    cf_search="$cf_search $prefix/slang2/lib/slang2"
 }
 
-test "/usr/local" != "$prefix" && \
+test "x/usr/local" != "x$prefix" && \
 test -d "/usr/local" && \
-(test $prefix = NONE || test "/usr/local" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x/usr/local" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for lib-directories under /usr/local"
 	test -d /usr/local/lib &&          cf_search="$cf_search /usr/local/lib"
 	test -d /usr/local/lib/slang2 &&       cf_search="$cf_search /usr/local/lib/slang2"
@@ -24964,9 +24964,9 @@ test -d "/usr/local" && \
 	test -d /usr/local/slang2/lib/slang2 &&    cf_search="$cf_search /usr/local/slang2/lib/slang2"
 }
 
-test "/opt" != "$prefix" && \
+test "x/opt" != "x$prefix" && \
 test -d "/opt" && \
-(test $prefix = NONE || test "/opt" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x/opt" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for lib-directories under /opt"
 	test -d /opt/lib &&          cf_search="$cf_search /opt/lib"
 	test -d /opt/lib/slang2 &&       cf_search="$cf_search /opt/lib/slang2"
@@ -24975,9 +24975,9 @@ test -d "/opt" && \
 	test -d /opt/slang2/lib/slang2 &&    cf_search="$cf_search /opt/slang2/lib/slang2"
 }
 
-test "$HOME" != "$prefix" && \
+test "x$HOME" != "x$prefix" && \
 test -d "$HOME" && \
-(test $prefix = NONE || test "$HOME" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x$HOME" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for lib-directories under $HOME"
 	test -d $HOME/lib &&          cf_search="$cf_search $HOME/lib"
 	test -d $HOME/lib/slang2 &&       cf_search="$cf_search $HOME/lib/slang2"
@@ -31803,7 +31803,7 @@ if test -n "${CFLAGS}${CPPFLAGS}" ; then
 		-I*)
 			cf_header_path=`echo ".$cf_header_path" |sed -e 's/^...//' -e 's,/include$,,'`
 
-test "$cf_header_path" != "NONE" && \
+test "x$cf_header_path" != "xNONE" && \
 test -d "$cf_header_path" && \
  {
 	test -n "$verbose" && echo "	... testing for include-directories under $cf_header_path"
@@ -31824,9 +31824,9 @@ fi
 
 cf_search=
 
-test "/usr" != "$prefix" && \
+test "x/usr" != "x$prefix" && \
 test -d "/usr" && \
-(test $prefix = NONE || test "/usr" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x/usr" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for include-directories under /usr"
 	test -d /usr/include &&          cf_search="$cf_search /usr/include"
 	test -d /usr/include/iconv &&       cf_search="$cf_search /usr/include/iconv"
@@ -31835,7 +31835,7 @@ test -d "/usr" && \
 	test -d /usr/iconv/include/iconv &&    cf_search="$cf_search /usr/iconv/include/iconv"
 }
 
-test "$prefix" != "NONE" && \
+test "x$prefix" != "xNONE" && \
 test -d "$prefix" && \
  {
 	test -n "$verbose" && echo "	... testing for include-directories under $prefix"
@@ -31846,9 +31846,9 @@ test -d "$prefix" && \
 	test -d $prefix/iconv/include/iconv &&    cf_search="$cf_search $prefix/iconv/include/iconv"
 }
 
-test "/usr/local" != "$prefix" && \
+test "x/usr/local" != "x$prefix" && \
 test -d "/usr/local" && \
-(test $prefix = NONE || test "/usr/local" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x/usr/local" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for include-directories under /usr/local"
 	test -d /usr/local/include &&          cf_search="$cf_search /usr/local/include"
 	test -d /usr/local/include/iconv &&       cf_search="$cf_search /usr/local/include/iconv"
@@ -31857,9 +31857,9 @@ test -d "/usr/local" && \
 	test -d /usr/local/iconv/include/iconv &&    cf_search="$cf_search /usr/local/iconv/include/iconv"
 }
 
-test "/opt" != "$prefix" && \
+test "x/opt" != "x$prefix" && \
 test -d "/opt" && \
-(test $prefix = NONE || test "/opt" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x/opt" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for include-directories under /opt"
 	test -d /opt/include &&          cf_search="$cf_search /opt/include"
 	test -d /opt/include/iconv &&       cf_search="$cf_search /opt/include/iconv"
@@ -31868,9 +31868,9 @@ test -d "/opt" && \
 	test -d /opt/iconv/include/iconv &&    cf_search="$cf_search /opt/iconv/include/iconv"
 }
 
-test "$HOME" != "$prefix" && \
+test "x$HOME" != "x$prefix" && \
 test -d "$HOME" && \
-(test $prefix = NONE || test "$HOME" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x$HOME" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for include-directories under $HOME"
 	test -d $HOME/include &&          cf_search="$cf_search $HOME/include"
 	test -d $HOME/include/iconv &&       cf_search="$cf_search $HOME/include/iconv"
@@ -31971,7 +31971,7 @@ if test -n "${LDFLAGS}${LIBS}" ; then
 		-L*)
 			cf_library_path=`echo ".$cf_library_path" |sed -e 's/^...//' -e 's,/lib$,,'`
 
-test "$cf_library_path" != "NONE" && \
+test "x$cf_library_path" != "xNONE" && \
 test -d "$cf_library_path" && \
  {
 	test -n "$verbose" && echo "	... testing for lib-directories under $cf_library_path"
@@ -31990,9 +31990,9 @@ fi
 
 cf_search=
 
-test "/usr" != "$prefix" && \
+test "x/usr" != "x$prefix" && \
 test -d "/usr" && \
-(test $prefix = NONE || test "/usr" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x/usr" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for lib-directories under /usr"
 	test -d /usr/lib &&          cf_search="$cf_search /usr/lib"
 	test -d /usr/lib/iconv &&       cf_search="$cf_search /usr/lib/iconv"
@@ -32001,7 +32001,7 @@ test -d "/usr" && \
 	test -d /usr/iconv/lib/iconv &&    cf_search="$cf_search /usr/iconv/lib/iconv"
 }
 
-test "$prefix" != "NONE" && \
+test "x$prefix" != "xNONE" && \
 test -d "$prefix" && \
  {
 	test -n "$verbose" && echo "	... testing for lib-directories under $prefix"
@@ -32012,9 +32012,9 @@ test -d "$prefix" && \
 	test -d $prefix/iconv/lib/iconv &&    cf_search="$cf_search $prefix/iconv/lib/iconv"
 }
 
-test "/usr/local" != "$prefix" && \
+test "x/usr/local" != "x$prefix" && \
 test -d "/usr/local" && \
-(test $prefix = NONE || test "/usr/local" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x/usr/local" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for lib-directories under /usr/local"
 	test -d /usr/local/lib &&          cf_search="$cf_search /usr/local/lib"
 	test -d /usr/local/lib/iconv &&       cf_search="$cf_search /usr/local/lib/iconv"
@@ -32023,9 +32023,9 @@ test -d "/usr/local" && \
 	test -d /usr/local/iconv/lib/iconv &&    cf_search="$cf_search /usr/local/iconv/lib/iconv"
 }
 
-test "/opt" != "$prefix" && \
+test "x/opt" != "x$prefix" && \
 test -d "/opt" && \
-(test $prefix = NONE || test "/opt" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x/opt" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for lib-directories under /opt"
 	test -d /opt/lib &&          cf_search="$cf_search /opt/lib"
 	test -d /opt/lib/iconv &&       cf_search="$cf_search /opt/lib/iconv"
@@ -32034,9 +32034,9 @@ test -d "/opt" && \
 	test -d /opt/iconv/lib/iconv &&    cf_search="$cf_search /opt/iconv/lib/iconv"
 }
 
-test "$HOME" != "$prefix" && \
+test "x$HOME" != "x$prefix" && \
 test -d "$HOME" && \
-(test $prefix = NONE || test "$HOME" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x$HOME" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for lib-directories under $HOME"
 	test -d $HOME/lib &&          cf_search="$cf_search $HOME/lib"
 	test -d $HOME/lib/iconv &&       cf_search="$cf_search $HOME/lib/iconv"
@@ -32876,7 +32876,7 @@ if test -n "${CFLAGS}${CPPFLAGS}" ; then
 		-I*)
 			cf_header_path=`echo ".$cf_header_path" |sed -e 's/^...//' -e 's,/include$,,'`
 
-test "$cf_header_path" != "NONE" && \
+test "x$cf_header_path" != "xNONE" && \
 test -d "$cf_header_path" && \
  {
 	test -n "$verbose" && echo "	... testing for include-directories under $cf_header_path"
@@ -32897,9 +32897,9 @@ fi
 
 cf_search=
 
-test "/usr" != "$prefix" && \
+test "x/usr" != "x$prefix" && \
 test -d "/usr" && \
-(test $prefix = NONE || test "/usr" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x/usr" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for include-directories under /usr"
 	test -d /usr/include &&          cf_search="$cf_search /usr/include"
 	test -d /usr/include/idn &&       cf_search="$cf_search /usr/include/idn"
@@ -32908,7 +32908,7 @@ test -d "/usr" && \
 	test -d /usr/idn/include/idn &&    cf_search="$cf_search /usr/idn/include/idn"
 }
 
-test "$prefix" != "NONE" && \
+test "x$prefix" != "xNONE" && \
 test -d "$prefix" && \
  {
 	test -n "$verbose" && echo "	... testing for include-directories under $prefix"
@@ -32919,9 +32919,9 @@ test -d "$prefix" && \
 	test -d $prefix/idn/include/idn &&    cf_search="$cf_search $prefix/idn/include/idn"
 }
 
-test "/usr/local" != "$prefix" && \
+test "x/usr/local" != "x$prefix" && \
 test -d "/usr/local" && \
-(test $prefix = NONE || test "/usr/local" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x/usr/local" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for include-directories under /usr/local"
 	test -d /usr/local/include &&          cf_search="$cf_search /usr/local/include"
 	test -d /usr/local/include/idn &&       cf_search="$cf_search /usr/local/include/idn"
@@ -32930,9 +32930,9 @@ test -d "/usr/local" && \
 	test -d /usr/local/idn/include/idn &&    cf_search="$cf_search /usr/local/idn/include/idn"
 }
 
-test "/opt" != "$prefix" && \
+test "x/opt" != "x$prefix" && \
 test -d "/opt" && \
-(test $prefix = NONE || test "/opt" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x/opt" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for include-directories under /opt"
 	test -d /opt/include &&          cf_search="$cf_search /opt/include"
 	test -d /opt/include/idn &&       cf_search="$cf_search /opt/include/idn"
@@ -32941,9 +32941,9 @@ test -d "/opt" && \
 	test -d /opt/idn/include/idn &&    cf_search="$cf_search /opt/idn/include/idn"
 }
 
-test "$HOME" != "$prefix" && \
+test "x$HOME" != "x$prefix" && \
 test -d "$HOME" && \
-(test $prefix = NONE || test "$HOME" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x$HOME" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for include-directories under $HOME"
 	test -d $HOME/include &&          cf_search="$cf_search $HOME/include"
 	test -d $HOME/include/idn &&       cf_search="$cf_search $HOME/include/idn"
@@ -33043,7 +33043,7 @@ if test -n "${LDFLAGS}${LIBS}" ; then
 		-L*)
 			cf_library_path=`echo ".$cf_library_path" |sed -e 's/^...//' -e 's,/lib$,,'`
 
-test "$cf_library_path" != "NONE" && \
+test "x$cf_library_path" != "xNONE" && \
 test -d "$cf_library_path" && \
  {
 	test -n "$verbose" && echo "	... testing for lib-directories under $cf_library_path"
@@ -33062,9 +33062,9 @@ fi
 
 cf_search=
 
-test "/usr" != "$prefix" && \
+test "x/usr" != "x$prefix" && \
 test -d "/usr" && \
-(test $prefix = NONE || test "/usr" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x/usr" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for lib-directories under /usr"
 	test -d /usr/lib &&          cf_search="$cf_search /usr/lib"
 	test -d /usr/lib/idn &&       cf_search="$cf_search /usr/lib/idn"
@@ -33073,7 +33073,7 @@ test -d "/usr" && \
 	test -d /usr/idn/lib/idn &&    cf_search="$cf_search /usr/idn/lib/idn"
 }
 
-test "$prefix" != "NONE" && \
+test "x$prefix" != "xNONE" && \
 test -d "$prefix" && \
  {
 	test -n "$verbose" && echo "	... testing for lib-directories under $prefix"
@@ -33084,9 +33084,9 @@ test -d "$prefix" && \
 	test -d $prefix/idn/lib/idn &&    cf_search="$cf_search $prefix/idn/lib/idn"
 }
 
-test "/usr/local" != "$prefix" && \
+test "x/usr/local" != "x$prefix" && \
 test -d "/usr/local" && \
-(test $prefix = NONE || test "/usr/local" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x/usr/local" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for lib-directories under /usr/local"
 	test -d /usr/local/lib &&          cf_search="$cf_search /usr/local/lib"
 	test -d /usr/local/lib/idn &&       cf_search="$cf_search /usr/local/lib/idn"
@@ -33095,9 +33095,9 @@ test -d "/usr/local" && \
 	test -d /usr/local/idn/lib/idn &&    cf_search="$cf_search /usr/local/idn/lib/idn"
 }
 
-test "/opt" != "$prefix" && \
+test "x/opt" != "x$prefix" && \
 test -d "/opt" && \
-(test $prefix = NONE || test "/opt" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x/opt" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for lib-directories under /opt"
 	test -d /opt/lib &&          cf_search="$cf_search /opt/lib"
 	test -d /opt/lib/idn &&       cf_search="$cf_search /opt/lib/idn"
@@ -33106,9 +33106,9 @@ test -d "/opt" && \
 	test -d /opt/idn/lib/idn &&    cf_search="$cf_search /opt/idn/lib/idn"
 }
 
-test "$HOME" != "$prefix" && \
+test "x$HOME" != "x$prefix" && \
 test -d "$HOME" && \
-(test $prefix = NONE || test "$HOME" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x$HOME" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for lib-directories under $HOME"
 	test -d $HOME/lib &&          cf_search="$cf_search $HOME/lib"
 	test -d $HOME/lib/idn &&       cf_search="$cf_search $HOME/lib/idn"
@@ -34309,7 +34309,7 @@ if test -n "${CFLAGS}${CPPFLAGS}" ; then
 		-I*)
 			cf_header_path=`echo ".$cf_header_path" |sed -e 's/^...//' -e 's,/include$,,'`
 
-test "$cf_header_path" != "NONE" && \
+test "x$cf_header_path" != "xNONE" && \
 test -d "$cf_header_path" && \
  {
 	test -n "$verbose" && echo "	... testing for include-directories under $cf_header_path"
@@ -34330,9 +34330,9 @@ fi
 
 cf_search=
 
-test "/usr" != "$prefix" && \
+test "x/usr" != "x$prefix" && \
 test -d "/usr" && \
-(test $prefix = NONE || test "/usr" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x/usr" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for include-directories under /usr"
 	test -d /usr/include &&          cf_search="$cf_search /usr/include"
 	test -d /usr/include/bzlib &&       cf_search="$cf_search /usr/include/bzlib"
@@ -34341,7 +34341,7 @@ test -d "/usr" && \
 	test -d /usr/bzlib/include/bzlib &&    cf_search="$cf_search /usr/bzlib/include/bzlib"
 }
 
-test "$prefix" != "NONE" && \
+test "x$prefix" != "xNONE" && \
 test -d "$prefix" && \
  {
 	test -n "$verbose" && echo "	... testing for include-directories under $prefix"
@@ -34352,9 +34352,9 @@ test -d "$prefix" && \
 	test -d $prefix/bzlib/include/bzlib &&    cf_search="$cf_search $prefix/bzlib/include/bzlib"
 }
 
-test "/usr/local" != "$prefix" && \
+test "x/usr/local" != "x$prefix" && \
 test -d "/usr/local" && \
-(test $prefix = NONE || test "/usr/local" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x/usr/local" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for include-directories under /usr/local"
 	test -d /usr/local/include &&          cf_search="$cf_search /usr/local/include"
 	test -d /usr/local/include/bzlib &&       cf_search="$cf_search /usr/local/include/bzlib"
@@ -34363,9 +34363,9 @@ test -d "/usr/local" && \
 	test -d /usr/local/bzlib/include/bzlib &&    cf_search="$cf_search /usr/local/bzlib/include/bzlib"
 }
 
-test "/opt" != "$prefix" && \
+test "x/opt" != "x$prefix" && \
 test -d "/opt" && \
-(test $prefix = NONE || test "/opt" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x/opt" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for include-directories under /opt"
 	test -d /opt/include &&          cf_search="$cf_search /opt/include"
 	test -d /opt/include/bzlib &&       cf_search="$cf_search /opt/include/bzlib"
@@ -34374,9 +34374,9 @@ test -d "/opt" && \
 	test -d /opt/bzlib/include/bzlib &&    cf_search="$cf_search /opt/bzlib/include/bzlib"
 }
 
-test "$HOME" != "$prefix" && \
+test "x$HOME" != "x$prefix" && \
 test -d "$HOME" && \
-(test $prefix = NONE || test "$HOME" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x$HOME" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for include-directories under $HOME"
 	test -d $HOME/include &&          cf_search="$cf_search $HOME/include"
 	test -d $HOME/include/bzlib &&       cf_search="$cf_search $HOME/include/bzlib"
@@ -34520,7 +34520,7 @@ if test -n "${LDFLAGS}${LIBS}" ; then
 		-L*)
 			cf_library_path=`echo ".$cf_library_path" |sed -e 's/^...//' -e 's,/lib$,,'`
 
-test "$cf_library_path" != "NONE" && \
+test "x$cf_library_path" != "xNONE" && \
 test -d "$cf_library_path" && \
  {
 	test -n "$verbose" && echo "	... testing for lib-directories under $cf_library_path"
@@ -34539,9 +34539,9 @@ fi
 
 cf_search=
 
-test "/usr" != "$prefix" && \
+test "x/usr" != "x$prefix" && \
 test -d "/usr" && \
-(test $prefix = NONE || test "/usr" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x/usr" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for lib-directories under /usr"
 	test -d /usr/lib &&          cf_search="$cf_search /usr/lib"
 	test -d /usr/lib/bz2 &&       cf_search="$cf_search /usr/lib/bz2"
@@ -34550,7 +34550,7 @@ test -d "/usr" && \
 	test -d /usr/bz2/lib/bz2 &&    cf_search="$cf_search /usr/bz2/lib/bz2"
 }
 
-test "$prefix" != "NONE" && \
+test "x$prefix" != "xNONE" && \
 test -d "$prefix" && \
  {
 	test -n "$verbose" && echo "	... testing for lib-directories under $prefix"
@@ -34561,9 +34561,9 @@ test -d "$prefix" && \
 	test -d $prefix/bz2/lib/bz2 &&    cf_search="$cf_search $prefix/bz2/lib/bz2"
 }
 
-test "/usr/local" != "$prefix" && \
+test "x/usr/local" != "x$prefix" && \
 test -d "/usr/local" && \
-(test $prefix = NONE || test "/usr/local" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x/usr/local" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for lib-directories under /usr/local"
 	test -d /usr/local/lib &&          cf_search="$cf_search /usr/local/lib"
 	test -d /usr/local/lib/bz2 &&       cf_search="$cf_search /usr/local/lib/bz2"
@@ -34572,9 +34572,9 @@ test -d "/usr/local" && \
 	test -d /usr/local/bz2/lib/bz2 &&    cf_search="$cf_search /usr/local/bz2/lib/bz2"
 }
 
-test "/opt" != "$prefix" && \
+test "x/opt" != "x$prefix" && \
 test -d "/opt" && \
-(test $prefix = NONE || test "/opt" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x/opt" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for lib-directories under /opt"
 	test -d /opt/lib &&          cf_search="$cf_search /opt/lib"
 	test -d /opt/lib/bz2 &&       cf_search="$cf_search /opt/lib/bz2"
@@ -34583,9 +34583,9 @@ test -d "/opt" && \
 	test -d /opt/bz2/lib/bz2 &&    cf_search="$cf_search /opt/bz2/lib/bz2"
 }
 
-test "$HOME" != "$prefix" && \
+test "x$HOME" != "x$prefix" && \
 test -d "$HOME" && \
-(test $prefix = NONE || test "$HOME" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x$HOME" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for lib-directories under $HOME"
 	test -d $HOME/lib &&          cf_search="$cf_search $HOME/lib"
 	test -d $HOME/lib/bz2 &&       cf_search="$cf_search $HOME/lib/bz2"
@@ -35154,7 +35154,7 @@ if test -n "${CFLAGS}${CPPFLAGS}" ; then
 		-I*)
 			cf_header_path=`echo ".$cf_header_path" |sed -e 's/^...//' -e 's,/include$,,'`
 
-test "$cf_header_path" != "NONE" && \
+test "x$cf_header_path" != "xNONE" && \
 test -d "$cf_header_path" && \
  {
 	test -n "$verbose" && echo "	... testing for include-directories under $cf_header_path"
@@ -35175,9 +35175,9 @@ fi
 
 cf_search=
 
-test "/usr" != "$prefix" && \
+test "x/usr" != "x$prefix" && \
 test -d "/usr" && \
-(test $prefix = NONE || test "/usr" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x/usr" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for include-directories under /usr"
 	test -d /usr/include &&          cf_search="$cf_search /usr/include"
 	test -d /usr/include/zlib &&       cf_search="$cf_search /usr/include/zlib"
@@ -35186,7 +35186,7 @@ test -d "/usr" && \
 	test -d /usr/zlib/include/zlib &&    cf_search="$cf_search /usr/zlib/include/zlib"
 }
 
-test "$prefix" != "NONE" && \
+test "x$prefix" != "xNONE" && \
 test -d "$prefix" && \
  {
 	test -n "$verbose" && echo "	... testing for include-directories under $prefix"
@@ -35197,9 +35197,9 @@ test -d "$prefix" && \
 	test -d $prefix/zlib/include/zlib &&    cf_search="$cf_search $prefix/zlib/include/zlib"
 }
 
-test "/usr/local" != "$prefix" && \
+test "x/usr/local" != "x$prefix" && \
 test -d "/usr/local" && \
-(test $prefix = NONE || test "/usr/local" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x/usr/local" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for include-directories under /usr/local"
 	test -d /usr/local/include &&          cf_search="$cf_search /usr/local/include"
 	test -d /usr/local/include/zlib &&       cf_search="$cf_search /usr/local/include/zlib"
@@ -35208,9 +35208,9 @@ test -d "/usr/local" && \
 	test -d /usr/local/zlib/include/zlib &&    cf_search="$cf_search /usr/local/zlib/include/zlib"
 }
 
-test "/opt" != "$prefix" && \
+test "x/opt" != "x$prefix" && \
 test -d "/opt" && \
-(test $prefix = NONE || test "/opt" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x/opt" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for include-directories under /opt"
 	test -d /opt/include &&          cf_search="$cf_search /opt/include"
 	test -d /opt/include/zlib &&       cf_search="$cf_search /opt/include/zlib"
@@ -35219,9 +35219,9 @@ test -d "/opt" && \
 	test -d /opt/zlib/include/zlib &&    cf_search="$cf_search /opt/zlib/include/zlib"
 }
 
-test "$HOME" != "$prefix" && \
+test "x$HOME" != "x$prefix" && \
 test -d "$HOME" && \
-(test $prefix = NONE || test "$HOME" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x$HOME" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for include-directories under $HOME"
 	test -d $HOME/include &&          cf_search="$cf_search $HOME/include"
 	test -d $HOME/include/zlib &&       cf_search="$cf_search $HOME/include/zlib"
@@ -35363,7 +35363,7 @@ if test -n "${LDFLAGS}${LIBS}" ; then
 		-L*)
 			cf_library_path=`echo ".$cf_library_path" |sed -e 's/^...//' -e 's,/lib$,,'`
 
-test "$cf_library_path" != "NONE" && \
+test "x$cf_library_path" != "xNONE" && \
 test -d "$cf_library_path" && \
  {
 	test -n "$verbose" && echo "	... testing for lib-directories under $cf_library_path"
@@ -35382,9 +35382,9 @@ fi
 
 cf_search=
 
-test "/usr" != "$prefix" && \
+test "x/usr" != "x$prefix" && \
 test -d "/usr" && \
-(test $prefix = NONE || test "/usr" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x/usr" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for lib-directories under /usr"
 	test -d /usr/lib &&          cf_search="$cf_search /usr/lib"
 	test -d /usr/lib/z &&       cf_search="$cf_search /usr/lib/z"
@@ -35393,7 +35393,7 @@ test -d "/usr" && \
 	test -d /usr/z/lib/z &&    cf_search="$cf_search /usr/z/lib/z"
 }
 
-test "$prefix" != "NONE" && \
+test "x$prefix" != "xNONE" && \
 test -d "$prefix" && \
  {
 	test -n "$verbose" && echo "	... testing for lib-directories under $prefix"
@@ -35404,9 +35404,9 @@ test -d "$prefix" && \
 	test -d $prefix/z/lib/z &&    cf_search="$cf_search $prefix/z/lib/z"
 }
 
-test "/usr/local" != "$prefix" && \
+test "x/usr/local" != "x$prefix" && \
 test -d "/usr/local" && \
-(test $prefix = NONE || test "/usr/local" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x/usr/local" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for lib-directories under /usr/local"
 	test -d /usr/local/lib &&          cf_search="$cf_search /usr/local/lib"
 	test -d /usr/local/lib/z &&       cf_search="$cf_search /usr/local/lib/z"
@@ -35415,9 +35415,9 @@ test -d "/usr/local" && \
 	test -d /usr/local/z/lib/z &&    cf_search="$cf_search /usr/local/z/lib/z"
 }
 
-test "/opt" != "$prefix" && \
+test "x/opt" != "x$prefix" && \
 test -d "/opt" && \
-(test $prefix = NONE || test "/opt" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x/opt" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for lib-directories under /opt"
 	test -d /opt/lib &&          cf_search="$cf_search /opt/lib"
 	test -d /opt/lib/z &&       cf_search="$cf_search /opt/lib/z"
@@ -35426,9 +35426,9 @@ test -d "/opt" && \
 	test -d /opt/z/lib/z &&    cf_search="$cf_search /opt/z/lib/z"
 }
 
-test "$HOME" != "$prefix" && \
+test "x$HOME" != "x$prefix" && \
 test -d "$HOME" && \
-(test $prefix = NONE || test "$HOME" != "$prefix") && {
+(test -z "$prefix" || test x$prefix = xNONE || test "x$HOME" != "x$prefix") && {
 	test -n "$verbose" && echo "	... testing for lib-directories under $HOME"
 	test -d $HOME/lib &&          cf_search="$cf_search $HOME/lib"
 	test -d $HOME/lib/z &&       cf_search="$cf_search $HOME/lib/z"

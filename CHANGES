@@ -1,12 +1,13 @@
--- $LynxId: CHANGES,v 1.674 2013/10/07 11:53:38 tom Exp $
+-- $LynxId: CHANGES,v 1.676 2013/10/08 21:41:30 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2013-10-07 (2.8.8dev.17)
-* improve configure check for sleep, to work when cross-compiling to MinGW -TD
-* modify configure check for inet_addr to work when cross-compiling to
-  MinGW -TD
+2013-10-08 (2.8.8dev.17)
+* fixes to configure script and makefiles to work with empty $prefix, e.g.,
+  as used in MSYS -TD
+* improve configure check for sleep() for cross-compiling to MinGW -TD
+* modify configure check for inet_addr() for cross-compiling to MinGW -TD
 * add configure check for Win32 flavor of PDCurses when cross-compiling to
   MinGW using the "--with-screen=pdcurses" option -TD
 * improve color-style simulation of old color scheme by coloring input fields

@@ -1,5 +1,5 @@
 /*
- * $LynxId: userdefs.h,v 1.276 2013/09/30 00:37:25 tom Exp $
+ * $LynxId: userdefs.h,v 1.277 2013/10/09 12:27:54 tom Exp $
  *
  * Lynx - Hypertext navigation system
  *
@@ -1432,7 +1432,7 @@
  * the version definition with the Project Version on checkout.  Just
  * ignore it. - kw */
 /* $Format: "#define LYNX_VERSION \"$ProjectVersion$\""$ */
-#define LYNX_VERSION "2.8.8dev.16"
+#define LYNX_VERSION "2.8.8dev.17"
 #define LYNX_WWW_HOME "http://lynx.isc.org/"
 #define LYNX_WWW_DIST "http://lynx.isc.org/current/"
 /* $Format: "#define LYNX_DATE \"$ProjectDate$\""$ */
