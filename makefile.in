@@ -1,4 +1,4 @@
-# $LynxId: makefile.in,v 1.129 2013/07/29 21:38:35 tom Exp $
+# $LynxId: makefile.in,v 1.131 2013/10/09 12:27:54 tom Exp $
 ##makefile for lynx
 
 SHELL		= @CONFIG_SHELL@
@@ -38,7 +38,7 @@ TAR_UP		= $(TAR) @TAR_UP_OPTIONS@ @TAR_PIPE_OPTIONS@
 TAR_DOWN	= $(TAR) @TAR_DOWN_OPTIONS@ @TAR_PIPE_OPTIONS@
 
 # $Format: "LYNX_VERSION	= $ProjectVersion$"$
-LYNX_VERSION	= 2.8.8dev.16
+LYNX_VERSION	= 2.8.8dev.17
 
 ## This is the version which we are developing (or, upon release, make this
 ## the same).  Use no dots in the name, since it must work on VMS and MS-DOS.
@@ -338,7 +338,9 @@ install-doc : $(DOCDIR) $(HELPDIR)
 	fi'
 	$(SHELL) -c 'for name in COPYING COPYHEADER; do \
 		cd $(HELPDIR) && rm -f $$name ;\
-		cd $(HELPDIR) && ( $(LN_S) $(docdir)/$$name . || cp $(DOCDIR)/$$name . );\
+		r= ;\
+		test "$(LN_S)" = "ln -s" || r=`echo $(helpdir)|sed -e "s%[^/]\+%..%g" -e "s%^.%%"`; \
+		cd $(HELPDIR) && ( $(LN_S) $$r$(docdir)/$$name . || cp $(DOCDIR)/$$name . );\
 		done'
 	-$(SHELL) -c 'case `id|sed -e "s/(.*//"` in uid=0) chown -R root $(DOCDIR);; esac'
 
