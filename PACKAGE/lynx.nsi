@@ -1,4 +1,4 @@
-; $LynxId: lynx.nsi,v 1.1 2013/10/09 01:02:56 tom Exp $
+; $LynxId: lynx.nsi,v 1.3 2013/10/09 19:06:24 tom Exp $
 ; Script originally generated with the Venis Install Wizard, but customized.
 ; The Inno Setup script is preferred; but this can be built via cross-compiling.
 
@@ -19,7 +19,7 @@
 
 ; Main Install settings
 Name "${INSTALL}"
-InstallDir "$PROGRAMFILES\${SUBKEY}"
+InstallDir "$PROGRAMFILES\${INSTALL}"
 InstallDirRegKey HKLM "Software\${SUBKEY}" "$INSTDIR\bin"
 OutFile "NSIS-Output\${APPNAME}-${VERSION}-setup.exe"
 
@@ -73,30 +73,57 @@ Section "${APPNAME}" Section1
 	; Set Section Files and Shortcuts
 	SetOutPath "$INSTDIR"
 	File /oname=${EXENAME} ".\bin\*${EXENAME}"
+	File ".\bin\bzip2.exe"
+	File ".\bin\gzip.exe"
+	File ".\bin\*.dll"
 
 	; TODO: bzip2.exe, gzip.exe, *.dll
 
 	CreateShortCut "$DESKTOP\${APPNAME}.lnk" "$INSTDIR\${EXENAME}"
 	CreateShortCut "$SENDTO\${APPNAME}.lnk" "$INSTDIR\${EXENAME}"
 	CreateDirectory "$SMPROGRAMS\${INSTALL}"
-	CreateShortCut "$SMPROGRAMS\${INSTALL}\${APPNAME}.lnk" "$INSTDIR\${EXENAME}"
+	CreateShortCut "$SMPROGRAMS\${INSTALL}\${INSTALL}.lnk" "$INSTDIR\${EXENAME}"
 	CreateShortCut "$SMPROGRAMS\${INSTALL}\Uninstall.lnk" "$INSTDIR\uninstall.exe"
 
 	File ".\share\lynx_doc\samples\*.lss"
-	File ".\etc\${LYNX_CFG}"
 
-	!appendfile "${LYNX_CFG}" "HELPFILE:${INSTDIR}\help\Lynx_help_main.html.gz$\n"
-	!appendfile "${LYNX_CFG}" "COLOR_STYLE:${INSTDIR}\opaque.lss$\n"
+	; preinstall lynx.cfg as a temporary file
+	File /oname=config.tmp ".\etc\${LYNX_CFG}"
 
-	!appendfile "${LYNX_CFG}" "CHMOD_PATH:$\n"
-	!appendfile "${LYNX_CFG}" "COPY_PATH:$\n"
-	!appendfile "${LYNX_CFG}" "MKDIR_PATH:$\n"
-	!appendfile "${LYNX_CFG}" "MV_PATH:$\n"
-	!appendfile "${LYNX_CFG}" "RMDIR_PATH:$\n"
-	!appendfile "${LYNX_CFG}" "RM_PATH:$\n"
-	!appendfile "${LYNX_CFG}" "TOUCH_PATH:$\n"
+	; at install-time, append our customization
+	FileOpen $0 "config.tmp" r
+	FileOpen $1 ".\${LYNX_CFG}" w
+	loop:
+		FileRead $0 $2
+		IfErrors done
+		FileWrite $1 "$2"
+		goto loop
+	done:
+		FileWrite $1 "HELPFILE:$INSTDIR\help\Lynx_help_main.html.gz$\n"
+		FileWrite $1 "COLOR_STYLE:$INSTDIR\opaque.lss$\n"
+		FileWrite $1 "CHMOD_PATH:$\n"
+		FileWrite $1 "COPY_PATH:$\n"
+		FileWrite $1 "MKDIR_PATH:$\n"
+		FileWrite $1 "MV_PATH:$\n"
+		FileWrite $1 "RMDIR_PATH:$\n"
+		FileWrite $1 "RM_PATH:$\n"
+		FileWrite $1 "TOUCH_PATH:$\n"
+	FileClose $0
+	FileClose $1
 
-	!delfile "${LYNX_CFG}"
+	Delete "config.tmp"
+
+	File "..\samples\lynx.bat"
+	File "..\samples\lynx-demo.cfg"
+
+	File "..\samples\jumps.htm"
+	File "..\samples\home.htm"
+	File "..\samples\lynx_bookmarks.htm"
+
+	SetOutPath "$INSTDIR\icon"
+	File "..\samples\lynx.ico"
+
+	SetOutPath "$INSTDIR\tmp"
 
 SectionEnd
 
@@ -108,6 +135,9 @@ Section "documentation" Section2
 	SetOverwrite on
 
 	; Set Section Files and Shortcuts
+	SetOutPath "$INSTDIR"
+	File "..\lynx.man"
+
 	SetOutPath "$INSTDIR\doc"
 	File ".\share\lynx_doc\CHANGES*.*"
 	File ".\share\lynx_doc\COPY*.*"
@@ -139,6 +169,7 @@ Section "samples" Section3
 SectionEnd
 
 Section -FinishSection
+
 	WriteRegStr HKLM "Software\${SUBKEY}" "" "$INSTDIR"
 	WriteRegStr HKLM "Software\${SUBKEY}" "Environment" ""
 	WriteRegStr HKLM "Software\${SUBKEY}\Environment" "LYNX_CFG" "$INSTDIR\${LYNX_CFG}"
@@ -188,6 +219,7 @@ Section Uninstall
 	Delete "$INSTDIR\*.htm"
 	Delete "$INSTDIR\*.man"
 	Delete "$INSTDIR\*.lss"
+	Delete "$INSTDIR\*.tmp"
 
 	; Remove remaining directories
 	RMDir "$SMPROGRAMS\${INSTALL}"

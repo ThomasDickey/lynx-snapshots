@@ -1,6 +1,3 @@
--- $LynxId: COPYHEADER,v 1.6 2013/10/02 14:18:35 tom Exp $
--- vile:txtmode fc=72
-
 Copyright 1997-2012,2013 Thomas E. Dickey
 
 This copyright notice must be included in all copies or substantial
@@ -14,31 +11,33 @@ License (Version 2).  Note that the License text after the terms and
 conditions is advisory in nature, and contains neither terms nor
 conditions.  You may choose to follow that advice.
 
-The copyright owners and developers for Lynx grant their permission for
-using any version of these common libraries (which are known to have
-problematic licensing issues) with any operating system or platform:
+The copyright owners and developers for Lynx grant their express
+permission for using any version of these common libraries (which are
+known to have problematic licensing issues) with any operating system or
+platform, irregardless of the manner in which the libraries are
+connected to the Lynx program:
 
-	GNUTLS
+        GNUTLS
 
-	libbsd, e.g., from http://libbsd.freedesktop.org/releases/
+        libbsd               http://libbsd.freedesktop.org/releases/
 
-	libidn
+        libidn
 
-	libutf8
-
-	OpenSSL
+        OpenSSL              http://www.openssl.org
 
 Additionally, the developers understand that these additional libraries
 have no licensing issues.  Permission is in any case granted to use Lynx
 without restriction for these as well:
 
-	libiconv
+        libbz2               http://www.bzip.org/
 
-	nss_compat_ossl, e.g, http://fedoraproject.org/wiki/Nss_compat_ossl
+        libiconv
 
-	zlib, e.g., http://www.gzip.org/zlib/ 
+        libutf8              http://www.haible.de/bruno/packages-libutf8.html
 
-	libbz2, e.g., http://www.bzip.org/
+        nss_compat_ossl      http://fedoraproject.org/wiki/Nss_compat_ossl
+
+        zlib                 http://www.gzip.org/zlib/ 
 
 The list given is by no means exhaustive and may not be interpreted to
 limit the set of libraries with which Lynx can be used.
@@ -49,11 +48,11 @@ modifying, distributing modified versions.
 
 Any licensing questions should be directed to the mailing list:
 
-	lynx-dev@nongnu.org
+        lynx-dev@nongnu.org
 
 or to the developer/maintainer (Thomas E. Dickey):
 
-	dickey@invisible-island.net
+        dickey@invisible-island.net
 
 ------------------------------------------------------------------------------
 For reference, below is the original copyright notice for Lynx (2.4.2).
@@ -79,3 +78,7 @@ For reference, below is the original copyright notice for Lynx (2.4.2).
    Any licensing or usage questions should be directed to Michael
    Grobe <grobe@ukans.edu>.
 */
+------------------------------------------------------------------------------
+-- vile:txtmode fc=72 noti
+-- $LynxId: COPYHEADER,v 1.10 2013/10/09 23:18:10 tom Exp $
+------------------------------------------------------------------------------
