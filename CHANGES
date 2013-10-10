@@ -1,9 +1,10 @@
--- $LynxId: CHANGES,v 1.676 2013/10/08 21:41:30 tom Exp $
+-- $LynxId: CHANGES,v 1.677 2013/10/09 19:20:47 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2013-10-08 (2.8.8dev.17)
+2013-10-09 (2.8.8dev.17)
+* add NSIS script, to allow building Windows installer via cross-compiling -TD
 * fixes to configure script and makefiles to work with empty $prefix, e.g.,
   as used in MSYS -TD
 * improve configure check for sleep() for cross-compiling to MinGW -TD
