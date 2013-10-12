@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYStrings.h,v 1.88 2013/05/03 09:37:02 tom Exp $
+ * $LynxId: LYStrings.h,v 1.91 2013/10/12 00:06:34 tom Exp $
  */
 #ifndef LYSTRINGS_H
 #define LYSTRINGS_H
@@ -240,7 +240,8 @@ extern "C" {
 /* line-edit action encoding */
 
     typedef enum {
-	LYE_NOP = 0		/* Do Nothing            */
+	LYE_UNKNOWN = -1	/* no binding            */
+	,LYE_NOP = 0		/* Do Nothing            */
 	,LYE_CHAR		/* Insert printable char */
 	,LYE_ENTER		/* Input complete, return char/lynxkeycode */
 	,LYE_TAB		/* Input complete, return TAB  */
@@ -351,15 +352,27 @@ extern "C" {
 				 int disabled,
 				 int for_mouse);
 
-    typedef unsigned char LYEditCode;
+    typedef unsigned short LYEditCode;
+
+    typedef struct {
+	int code;
+	LYEditCode edit;
+    } LYEditInit;
+
+    typedef struct {
+	const char *name;
+	const LYEditInit *init;
+	LYEditCode *used;
+    } LYEditConfig;
 
     extern int current_lineedit;
     extern const char *LYLineeditNames[];
-    extern LYEditCode *LYLineEditors[];
+    extern LYEditConfig LYLineEditors[];
     extern const char *LYLineeditHelpURLs[];
 
-#define CurrentLineEditor() LYLineEditors[current_lineedit]
+#define CurrentLineEditor() LYLineEditors[current_lineedit].used
 
+    extern void LYinitEditmap(void);
     extern const char *LYLineeditHelpURL(void);
 
     extern int escape_bound;

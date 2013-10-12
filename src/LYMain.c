@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMain.c,v 1.244 2013/10/02 20:08:54 tom Exp $
+ * $LynxId: LYMain.c,v 1.245 2013/10/11 10:06:51 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTP.h>
@@ -1042,6 +1042,7 @@ int main(int argc,
     ftp_lasthost = typecalloc(char);
 #endif
 
+    LYinitEditmap();
 #ifdef USE_CHARSET_CHOICE
     memset((char *) charset_subsets, 0, sizeof(charset_subset_t) * MAXCHARSETS);
 #endif

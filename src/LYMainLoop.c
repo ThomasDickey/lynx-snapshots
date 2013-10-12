@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMainLoop.c,v 1.217 2013/05/05 20:36:20 tom Exp $
+ * $LynxId: LYMainLoop.c,v 1.219 2013/10/12 00:24:53 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTAccess.h>
@@ -2430,7 +2430,7 @@ static int handle_LYK_DWIMEDIT(int *cmd,
      */
     if (nlinks > 0 &&
 	LinkIsTextarea(curdoc.link)) {
-	*cmd = LYK_EDIT_TEXTAREA;
+	*cmd = LYK_EDITTEXTAREA;
 	return 2;
     }
 
@@ -7564,15 +7564,15 @@ int mainloop(void)
 		goto new_cmd;
 	    break;
 
-	case LYK_EDIT_TEXTAREA:	/* use external editor on a TEXTAREA - KED */
+	case LYK_EDITTEXTAREA:	/* use external editor on a TEXTAREA - KED */
 	    handle_LYK_EDIT_TEXTAREA(&refresh_screen, &old_c, real_c);
 	    break;
 
-	case LYK_GROW_TEXTAREA:	/* add new lines to bottom of TEXTAREA - KED */
+	case LYK_GROWTEXTAREA:	/* add new lines to bottom of TEXTAREA - KED */
 	    handle_LYK_GROW_TEXTAREA(&refresh_screen);
 	    break;
 
-	case LYK_INSERT_FILE:	/* insert file in TEXTAREA, above cursor - KED */
+	case LYK_INSERTFILE:	/* insert file in TEXTAREA, above cursor - KED */
 	    handle_LYK_INSERT_FILE(&refresh_screen, &old_c, real_c);
 	    break;
 
@@ -8009,8 +8009,8 @@ static void form_noviceline(int disabled)
     if (!disabled) {
 	LYaddstr(FORM_NOVICELINE_ONE);
     }
-    LYmove(LYlines - 1, 0);
-    LYclrtoeol();
+    LYParkCursor();
+
     if (disabled)
 	return;
     if (EditBinding(FROMASCII('\025')) == LYE_ERASE) {

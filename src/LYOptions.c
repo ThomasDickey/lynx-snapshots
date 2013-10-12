@@ -1,4 +1,4 @@
-/* $LynxId: LYOptions.c,v 1.154 2013/06/02 19:37:05 tom Exp $ */
+/* $LynxId: LYOptions.c,v 1.155 2013/10/10 23:29:51 tom Exp $ */
 #include <HTUtils.h>
 #include <HTFTP.h>
 #include <HTTP.h>		/* 'reloading' flag */
@@ -2034,8 +2034,7 @@ void edit_bookmarks(void)
 		if (MBM_A_subbookmark[a])
 		    LYaddstr(MBM_A_subbookmark[a]);
 		LYclrtoeol();
-		LYmove(LYlines - 1, 0);
-		LYclrtoeol();
+		LYParkCursor();
 		break;
 	    }
 	}			/* end for */

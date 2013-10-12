@@ -1,4 +1,4 @@
-/* $LynxId: LYCurses.h,v 1.90 2013/05/31 00:23:39 tom Exp $ */
+/* $LynxId: LYCurses.h,v 1.91 2013/10/10 23:28:33 tom Exp $ */
 #ifndef LYCURSES_H
 #define LYCURSES_H
 
@@ -838,6 +838,8 @@ FANCY_CURSES.  Check your config.log to see why the FANCY_CURSES test failed.
 #else
 #define LYHideCursor() LYmove((LYlines - 1), (LYcolLimit - 2))
 #endif
+
+#define LYParkCursor() LYmove((LYlines - 1), 0); LYclrtoeol()
 
     extern void LYstowCursor(WINDOW * win, int row, int col);
     extern void LYSetDisplayLines(void);

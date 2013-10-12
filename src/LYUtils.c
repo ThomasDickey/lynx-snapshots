@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYUtils.c,v 1.243 2013/10/03 08:58:05 tom Exp $
+ * $LynxId: LYUtils.c,v 1.244 2013/10/10 23:30:08 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTCP.h>
@@ -1593,8 +1593,7 @@ void noviceline(int more_flag GCC_UNUSED)
     LYclrtoeol();
     LYaddstr(NOVICE_LINE_ONE);
 
-    LYmove(LYlines - 1, 0);
-    LYclrtoeol();
+    LYParkCursor();
 #if defined(DIRED_SUPPORT ) && defined(OK_OVERRIDE)
     if (lynx_edit_mode && !no_dired_support)
 	LYaddstr(DIRED_NOVICELINE);

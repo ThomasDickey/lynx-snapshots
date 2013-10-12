@@ -1,9 +1,14 @@
--- $LynxId: CHANGES,v 1.677 2013/10/09 19:20:47 tom Exp $
+-- $LynxId: CHANGES,v 1.678 2013/10/11 09:47:44 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2013-10-09 (2.8.8dev.17)
+2013-10-11 (2.8.8dev.17)
+* modify tables for edit-bindings to allow them to be reloaded to their initial
+  values -TD
+* add check in get_connection() for ftp-connections to ensure that a password
+  from a URL is non-empty -TD
+* add samples/oldlynx.bat to demonstrate how to use non-color-style -TD
 * add NSIS script, to allow building Windows installer via cross-compiling -TD
 * fixes to configure script and makefiles to work with empty $prefix, e.g.,
   as used in MSYS -TD
