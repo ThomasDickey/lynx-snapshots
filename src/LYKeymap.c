@@ -1,4 +1,4 @@
-/* $LynxId: LYKeymap.c,v 1.85 2013/05/03 23:07:29 tom Exp $ */
+/* $LynxId: LYKeymap.c,v 1.86 2013/10/12 00:04:22 tom Exp $ */
 #include <HTUtils.h>
 #include <LYUtils.h>
 #include <LYGlobalDefs.h>
@@ -887,13 +887,13 @@ static Kcmd revmap[] = {
 	LYK_DWIMEDIT, "DWIMEDIT",
 	"use external editor for context-dependent purpose" ),
     DATA(
-	LYK_EDIT_TEXTAREA, "EDITTEXTAREA",
+	LYK_EDITTEXTAREA, "EDITTEXTAREA",
 	"use an external editor to edit a form's textarea" ),
     DATA(
-	LYK_GROW_TEXTAREA, "GROWTEXTAREA",
+	LYK_GROWTEXTAREA, "GROWTEXTAREA",
 	"add 5 new blank lines to the bottom of a textarea" ),
     DATA(
-	LYK_INSERT_FILE, "INSERTFILE",
+	LYK_INSERTFILE, "INSERTFILE",
 	"insert file into a textarea (just above cursorline)" ),
 #ifdef USE_ADDRLIST_PAGE
     DATA(

@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFTP.c,v 1.121 2013/05/06 00:09:50 tom Exp $
+ * $LynxId: HTFTP.c,v 1.124 2013/10/11 09:21:37 tom Exp $
  *
  *			File Transfer Protocol (FTP) Client
  *			for a WorldWideWeb browser
@@ -96,9 +96,8 @@
 
 typedef struct _connection {
     struct _connection *next;	/* Link on list         */
-    unsigned long addr;		/* IP address           */
     int socket;			/* Socket number for communication */
-    BOOL binary;		/* Binary mode? */
+    BOOL is_binary;		/* Binary mode? */
 } connection;
 
 /*		Hypertext object building machinery
@@ -812,20 +811,15 @@ static int get_connection(const char *arg,
 	firstuse = FALSE;
     }
 
-    if (control) {
-	/*
-	 * Reuse this object - KW, DW & FM
-	 */
+    if (control != 0) {
+	connection *next = control->next;
+
 	if (control->socket != -1) {
 	    NETCLOSE(control->socket);
 	}
-	con = control;
-	con->addr = 0;
-	con->binary = FALSE;
+	memset(con = control, 0, sizeof(*con));
+	con->next = next;
     } else {
-	/*
-	 * Allocate and init control struct.
-	 */
 	con = typecalloc(connection);
 	if (con == NULL)
 	    outofmem(__FILE__, "get_connection");
@@ -957,14 +951,11 @@ static int get_connection(const char *arg,
 	CheckForInterrupt("while sending username");
     }
     if (status == 3) {		/* Send password */
-	if (password) {
-	    /*
-	     * We have non-zero length password, so send it. - FM
-	     */
+	if (non_empty(password)) {
 	    HTSprintf0(&command, "PASS %s%c%c", password, CR, LF);
 	} else {
 	    /*
-	     * Create and send a mail address as the password. - FM
+	     * No password was given; use mail-address.
 	     */
 	    const char *the_address;
 	    char *user = NULL;
@@ -3650,7 +3641,7 @@ int HTFTPLoad(const char *name,
 	     */
 	    binary = FALSE;
 	}
-	if (binary != control->binary) {
+	if (binary != control->is_binary) {
 	    /*
 	     * Act on our setting if not already set.  - FM
 	     */
@@ -3661,7 +3652,7 @@ int HTFTPLoad(const char *name,
 		init_help_message_cache();	/* to free memory */
 		return ((status < 0) ? status : -status);
 	    }
-	    control->binary = binary;
+	    control->is_binary = binary;
 	}
 	switch (server_type) {
 	    /*
@@ -3965,7 +3956,7 @@ int HTFTPLoad(const char *name,
 	     * ftp servers which implement RFC 3659.  Knowing the size lets
 	     * us in turn display ETA in the progress message -TD
 	     */
-	    if (control->binary) {
+	    if (control->is_binary) {
 		int code;
 		off_t size;
 

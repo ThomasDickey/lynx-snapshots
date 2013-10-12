@@ -1,4 +1,4 @@
-; $LynxId: lynx.nsi,v 1.3 2013/10/09 19:06:24 tom Exp $
+; $LynxId: lynx.nsi,v 1.5 2013/10/10 09:34:22 tom Exp $
 ; Script originally generated with the Venis Install Wizard, but customized.
 ; The Inno Setup script is preferred; but this can be built via cross-compiling.
 
@@ -83,38 +83,31 @@ Section "${APPNAME}" Section1
 	CreateShortCut "$SENDTO\${APPNAME}.lnk" "$INSTDIR\${EXENAME}"
 	CreateDirectory "$SMPROGRAMS\${INSTALL}"
 	CreateShortCut "$SMPROGRAMS\${INSTALL}\${INSTALL}.lnk" "$INSTDIR\${EXENAME}"
+	CreateShortCut "$SMPROGRAMS\${INSTALL}\${APPNAME} - Help.lnk" "$INSTDIR\help\lynx_help_main.html"
 	CreateShortCut "$SMPROGRAMS\${INSTALL}\Uninstall.lnk" "$INSTDIR\uninstall.exe"
 
 	File ".\share\lynx_doc\samples\*.lss"
 
 	; preinstall lynx.cfg as a temporary file
-	File /oname=config.tmp ".\etc\${LYNX_CFG}"
+	File /oname=${LYNX_CFG} ".\etc\${LYNX_CFG}"
 
 	; at install-time, append our customization
-	FileOpen $0 "config.tmp" r
-	FileOpen $1 ".\${LYNX_CFG}" w
-	loop:
-		FileRead $0 $2
-		IfErrors done
-		FileWrite $1 "$2"
-		goto loop
-	done:
-		FileWrite $1 "HELPFILE:$INSTDIR\help\Lynx_help_main.html.gz$\n"
-		FileWrite $1 "COLOR_STYLE:$INSTDIR\opaque.lss$\n"
-		FileWrite $1 "CHMOD_PATH:$\n"
-		FileWrite $1 "COPY_PATH:$\n"
-		FileWrite $1 "MKDIR_PATH:$\n"
-		FileWrite $1 "MV_PATH:$\n"
-		FileWrite $1 "RMDIR_PATH:$\n"
-		FileWrite $1 "RM_PATH:$\n"
-		FileWrite $1 "TOUCH_PATH:$\n"
+	FileOpen $0 "${LYNX_CFG}" a
+	FileSeek $0 0 END
+	FileWrite $0 "HELPFILE:$INSTDIR\help\Lynx_help_main.html.gz$\n"
+	FileWrite $0 "COLOR_STYLE:$INSTDIR\opaque.lss$\n"
+	FileWrite $0 "CHMOD_PATH:$\n"
+	FileWrite $0 "COPY_PATH:$\n"
+	FileWrite $0 "MKDIR_PATH:$\n"
+	FileWrite $0 "MV_PATH:$\n"
+	FileWrite $0 "RMDIR_PATH:$\n"
+	FileWrite $0 "RM_PATH:$\n"
+	FileWrite $0 "TOUCH_PATH:$\n"
 	FileClose $0
-	FileClose $1
-
-	Delete "config.tmp"
 
 	File "..\samples\lynx.bat"
 	File "..\samples\lynx-demo.cfg"
+	File "..\samples\oldlynx.bat"
 
 	File "..\samples\jumps.htm"
 	File "..\samples\home.htm"
@@ -199,7 +192,8 @@ Section Uninstall
 	; Delete Shortcuts
 	Delete "$DESKTOP\${APPNAME}.lnk"
 	Delete "$SENDTO\${APPNAME}.lnk"
-	Delete "$SMPROGRAMS\${INSTALL}\${APPNAME}.lnk"
+	Delete "$SMPROGRAMS\${INSTALL}\${INSTALL}.lnk"
+	Delete "$SMPROGRAMS\${INSTALL}\${APPNAME} - Help.lnk"
 	Delete "$SMPROGRAMS\${INSTALL}\Uninstall.lnk"
 
 	; Clean up application

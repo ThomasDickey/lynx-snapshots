@@ -1,4 +1,4 @@
-/* $LynxId: LYForms.c,v 1.103 2013/05/04 12:58:54 tom Exp $ */
+/* $LynxId: LYForms.c,v 1.104 2013/10/12 00:03:00 tom Exp $ */
 #include <HTUtils.h>
 #include <HTCJK.h>
 #include <HTTP.h>
@@ -1029,7 +1029,7 @@ void show_formlink_statusline(const FormInfo * form,
 	    char *xkey_info = NULL;
 
 	    if (!no_editor && non_empty(editor)) {
-		xkey_info = key_for_func_ext(LYK_EDIT_TEXTAREA, for_what);
+		xkey_info = key_for_func_ext(LYK_EDITTEXTAREA, for_what);
 #ifdef TEXTAREA_AUTOEXTEDIT
 		if (!xkey_info)
 		    xkey_info = key_for_func_ext(LYK_DWIMEDIT, for_what);
