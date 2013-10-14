@@ -1,4 +1,4 @@
-/* $LynxId: LYGetFile.c,v 1.89 2013/05/01 00:21:02 tom Exp $ */
+/* $LynxId: LYGetFile.c,v 1.90 2013/10/12 14:51:18 tom Exp $ */
 #include <HTUtils.h>
 #include <HTTP.h>
 #include <HTAnchor.h>		/* Anchor class */
@@ -1138,7 +1138,7 @@ int follow_link_number(int c,
     /*
      * Get the number, possibly with a letter suffix, from the user.
      */
-    if (LYgetBString(&temp, VISIBLE, sizeof(temp), NORECALL) < 0 ||
+    if (LYgetBString(&temp, FALSE, sizeof(temp), NORECALL) < 0 ||
 	isBEmpty(temp)) {
 	HTInfoMsg(CANCELLED);
 	return (DO_NOTHING);

@@ -1,4 +1,4 @@
-; $LynxId: lynx.nsi,v 1.5 2013/10/10 09:34:22 tom Exp $
+; $LynxId: lynx.nsi,v 1.8 2013/10/13 21:28:18 tom Exp $
 ; Script originally generated with the Venis Install Wizard, but customized.
 ; The Inno Setup script is preferred; but this can be built via cross-compiling.
 
@@ -9,7 +9,7 @@
 !define VERSION_EPOCH "2"
 !define VERSION_MAJOR "8"
 !define VERSION_MINOR "8"
-!define VERSION_LEVEL "17"
+!define VERSION_LEVEL "1017"
 !define VERSION_PATCH "dev.17"
 
 !define SUBKEY "Lynx"
@@ -27,7 +27,7 @@ CRCCheck on
 SetCompressor /SOLID lzma
 
 VIAddVersionKey ProductName "${SUBKEY}"
-VIAddVersionKey CompanyName "Thomas E. Dickey"
+VIAddVersionKey CompanyName "http://lynx.isc.org"
 VIAddVersionKey LegalCopyright "© 1997-2012,2013, Thomas E. Dickey"
 VIAddVersionKey FileDescription "Lynx Installer (MinGW)"
 VIAddVersionKey FileVersion "${VERSION}"
@@ -36,6 +36,16 @@ VIAddVersionKey Comments "This installer was built with NSIS and cross-compiling
 VIAddVersionKey InternalName "setup-${APPNAME}-${VERSION}.exe"
 VIProductVersion "${VERSION_EPOCH}.${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_LEVEL}"
 
+; adapted from http://nsis.sourceforge.net/Readme_Page_Based_on_MUI_License_Page
+!macro MUI_EXTRAPAGE_README UN TheFile
+   !define MUI_LICENSEPAGE_BUTTON "$(^NextBtn)"
+   !insertmacro MUI_${UN}PAGE_LICENSE "${TheFile}"
+!macroend
+!define ReadmeRun "!insertmacro MUI_EXTRAPAGE_README"
+!macro MUI_PAGE_README TheFile
+    ${ReadmeRun} "" "${TheFile}"
+!macroend
+
 ; Modern interface settings
 !include "MUI.nsh"
 
@@ -43,8 +53,8 @@ VIProductVersion "${VERSION_EPOCH}.${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_L
 !define MUI_FINISHPAGE_RUN "$INSTDIR\${EXENAME}"
 
 !insertmacro MUI_PAGE_WELCOME
-; FIXME "..\README"
 !insertmacro MUI_PAGE_LICENSE "..\COPYHEADER"
+!insertmacro MUI_PAGE_README "..\README"
 !insertmacro MUI_PAGE_COMPONENTS
 !insertmacro MUI_PAGE_DIRECTORY
 !insertmacro MUI_PAGE_INSTFILES

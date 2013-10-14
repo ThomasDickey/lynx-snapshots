@@ -1,4 +1,4 @@
-/* $LynxId: LYForms.c,v 1.104 2013/10/12 00:03:00 tom Exp $ */
+/* $LynxId: LYForms.c,v 1.110 2013/10/13 18:39:48 tom Exp $ */
 #include <HTUtils.h>
 #include <HTCJK.h>
 #include <HTTP.h>
@@ -21,9 +21,9 @@
 #endif
 
 #if defined(VMS) && !defined(USE_SLANG)
-#define CTRL_W_HACK DO_NOTHING
+#define RepaintKey() 12		/* CTRL-L for repaint */
 #else
-#define CTRL_W_HACK 23		/* CTRL-W refresh without clearok */
+#define RepaintKey() ((!enable_scrollback) ? 23 : 12) /* CTRL-W or CTRL-L */
 #endif /* VMS && !USE_SLANG */
 
 static int form_getstr(int cur,
@@ -114,12 +114,7 @@ int change_form_link_ex(int cur,
 				     form->size_l,
 				     FormIsReadonly(form),
 				     FALSE);
-#if CTRL_W_HACK != DO_NOTHING
-	    if (!enable_scrollback)
-		c = CTRL_W_HACK;	/* CTRL-W refresh without clearok */
-	    else
-#endif
-		c = 12;		/* CTRL-L for repaint */
+	    c = RepaintKey();
 	    break;
 	}
 	form->num_value = LYhandlePopupList(form->num_value,
@@ -148,12 +143,7 @@ int change_form_link_ex(int cur,
 	     */
 	    form->value_cs = opt_ptr->value_cs;
 	}
-#if CTRL_W_HACK != DO_NOTHING
-	if (!enable_scrollback)
-	    c = CTRL_W_HACK;	/* CTRL-W refresh without clearok */
-	else
-#endif
-	    c = 12;		/* CTRL-L for repaint */
+	c = RepaintKey();
 	break;
 
     case F_RADIO_TYPE:
@@ -383,7 +373,7 @@ static int form_getstr(int cur,
     BOOL refresh_mb = TRUE;
 #endif
 
-    EditFieldData MyEdit, *edit = &MyEdit;
+    FieldEditor MyEdit, *edit = &MyEdit;
     BOOLEAN Edited = FALSE;	/* Value might be updated? */
 
     /*
@@ -424,26 +414,26 @@ static int form_getstr(int cur,
      * Print panned line
      */
     LYSetupEdit(edit, link_value, form->maxlength, (far_col - startcol));
-    edit->pad = '_';
-    edit->hidden = (BOOL) (form->type == F_PASSWORD_TYPE);
+    edit->efPadChar = '_';
+    edit->efIsMasked = (BOOL) (form->type == F_PASSWORD_TYPE);
     if (use_last_tfpos &&
 	LastTFPos >= 0 &&
-	LastTFPos < (int) edit->buffer_used) {
+	LastTFPos < (int) edit->efBufInUse) {
 #if defined(TEXTFIELDS_MAY_NEED_ACTIVATION) && defined(INACTIVE_INPUT_STYLE_VH)
 	if (redraw_only) {
-	    if (!(edit->buffer_used >= edit->dspwdth &&
-		  LastTFPos >= edit->dspwdth - edit->margin)) {
-		edit->pos = LastTFPos;
-		if (edit->buffer_used >= edit->dspwdth)
+	    if (!(edit->efBufInUse >= edit->efWide &&
+		  LastTFPos >= edit->efWide - edit->efPanMargin)) {
+		edit->efEditAt = LastTFPos;
+		if (edit->efBufInUse >= edit->efWide)
 		    textinput_redrawn = FALSE;
 	    }
 	} else
 #endif /* TEXTFIELDS_MAY_NEED_ACTIVATION && INACTIVE_INPUT_STYLE_VH */
-	    edit->pos = LastTFPos;
+	    edit->efEditAt = LastTFPos;
 #ifdef ENHANCED_LINEEDIT
-	if (edit->pos == 0)
+	if (edit->efEditAt == 0)
 	    /* Do not show the region. */
-	    edit->mark = -(int) (1 + edit->buffer_used);
+	    edit->efEditMark = -(int) (1 + edit->efBufInUse);
 #endif
     }
     /* Try to prepare for setting position based on the last mouse event */
@@ -451,7 +441,7 @@ static int form_getstr(int cur,
     if (!redraw_only) {
 	if (peek_mouse_levent()) {
 	    if (!use_last_tfpos && !textinput_redrawn) {
-		edit->pos = 0;
+		edit->efEditAt = 0;
 	    }
 	}
 	textinput_redrawn = FALSE;
@@ -459,7 +449,7 @@ static int form_getstr(int cur,
 #else
     if (peek_mouse_levent()) {
 	if (!use_last_tfpos)
-	    edit->pos = 0;
+	    edit->efEditAt = 0;
     }
 #endif /* TEXTFIELDS_MAY_NEED_ACTIVATION && INACTIVE_INPUT_STYLE_VH */
     LYRefreshEdit(edit);
@@ -537,7 +527,7 @@ static int form_getstr(int cur,
 		 * within a mouse menu.  Let's at least make sure here that the
 		 * cursor position gets restored.  - kw
 		 */
-		edit->dirty = TRUE;
+		edit->efIsDirty = TRUE;
 	    }
 	} else
 #  endif /* NCURSES || PDCURSES */
@@ -545,8 +535,8 @@ static int form_getstr(int cur,
 
 	{
 	    if (!(ch & LKC_ISLECLAC))
-		ch |= edit->current_modifiers;
-	    edit->current_modifiers = 0;
+		ch |= edit->efInputMods;
+	    edit->efInputMods = 0;
 	    if (last_xlkc != -1) {
 		if (ch == last_xlkc)
 		    ch |= LKC_MOD3;
@@ -568,14 +558,14 @@ static int form_getstr(int cur,
 	    /*
 	     * Set flag for modifier 1.
 	     */
-	    edit->current_modifiers |= LKC_MOD1;
+	    edit->efInputMods |= LKC_MOD1;
 	    continue;
 	}
 	if (action == LYE_SETM2) {
 	    /*
 	     * Set flag for modifier 2.
 	     */
-	    edit->current_modifiers |= LKC_MOD2;
+	    edit->efInputMods |= LKC_MOD2;
 	    continue;
 	}
 	/*
@@ -637,7 +627,7 @@ static int form_getstr(int cur,
 		    StrAllocCopy(buf, (char *) e1 + 1);		/* Survive _release() */
 		get_clip_release();
 		_statusline(ENTER_TEXT_ARROWS_OR_TAB);
-		if (strcmp(link_value, edit->buffer) != 0) {
+		if (strcmp(link_value, edit->efBuffer) != 0) {
 		    Edited = TRUE;
 		}
 		if (buf) {
@@ -678,9 +668,9 @@ static int form_getstr(int cur,
 	    break;
 #else
 #ifdef ENHANCED_LINEEDIT
-	    if (edit->mark >= 0)
+	    if (edit->efEditMark >= 0)
 		/* Disable. */
-		edit->mark = -(int) (1 + edit->buffer_used);
+		edit->efEditMark = -(int) (1 + edit->efBufInUse);
 #endif
 #endif
 	}
@@ -699,12 +689,12 @@ static int form_getstr(int cur,
 	     * Left arrow in column 0 deserves special treatment here, else
 	     * you can get trapped in a form without submit button!
 	     */
-	    if (action == LYE_BACK && edit->pos == 0 && repeat == -1) {
+	    if (action == LYE_BACK && edit->efEditAt == 0 && repeat == -1) {
 		int c = YES;	/* Go back immediately if no changes */
 
 		if (textfield_prompt_at_left_edge) {
 		    c = HTConfirmDefault(PREV_DOC_QUERY, NO);
-		} else if (strcmp(edit->buffer, link_value)) {
+		} else if (strcmp(edit->efBuffer, link_value)) {
 		    c = HTConfirmDefault(PREV_DOC_QUERY, NO);
 		}
 		if (c == YES) {
@@ -753,7 +743,7 @@ static int form_getstr(int cur,
 	    if (repeat < 0)
 		repeat = 1;
 	    while (repeat--) {
-		int rc = LYEdit1(edit, ch, action & ~LYE_DF, TRUE);
+		int rc = LYDoEdit(edit, ch, action & ~LYE_DF, TRUE);
 
 		if (rc < 0) {
 		    ch = -rc;
@@ -794,20 +784,20 @@ static int form_getstr(int cur,
 			refresh_mb = TRUE;
 		} else {
 		    if (!refresh_mb) {
-			LYEdit1(edit, 0, LYE_DELP, TRUE);
+			LYDoEdit(edit, 0, LYE_DELP, TRUE);
 		    }
 		}
 #endif /* SUPPORT_MULTIBYTE_EDIT */
 	    }
 	    _statusline(ENTER_TEXT_ARROWS_OR_TAB);
-	    if (strcmp(link_value, edit->buffer)) {
+	    if (strcmp(link_value, edit->efBuffer)) {
 		Edited = TRUE;
 	    }
 #ifdef SUPPORT_MULTIBYTE_EDIT
 	    if (refresh_mb)
 #endif
 		LYRefreshEdit(edit);
-	    LYSetLastTFPos(edit->pos);
+	    LYSetLastTFPos(edit->efEditAt);
 	}
     }
   breakfor:
@@ -821,7 +811,7 @@ static int form_getstr(int cur,
 	     * The previous value did fit in the line buffer, so replace it
 	     * with the new value.  - FM
 	     */
-	    StrAllocCopy(form->value, edit->buffer);
+	    StrAllocCopy(form->value, edit->efBuffer);
 	} else {
 	    int old_len = (int) strlen(form->value);
 	    int new_len = (int) strlen(link_value);
@@ -830,7 +820,7 @@ static int form_getstr(int cur,
 	     * Combine the modified tail with the unmodified head.  - FM
 	     */
 	    form->value[(old_len > new_len) ? (old_len - new_len) : 0] = '\0';
-	    StrAllocCat(form->value, edit->buffer);
+	    StrAllocCat(form->value, edit->efBuffer);
 	    HTUserMsg(FORM_TAIL_COMBINED_WITH_HEAD);
 	}
 

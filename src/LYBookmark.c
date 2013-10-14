@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYBookmark.c,v 1.74 2013/05/02 10:43:29 tom Exp $
+ * $LynxId: LYBookmark.c,v 1.75 2013/10/12 14:51:18 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTAlert.h>
@@ -298,7 +298,7 @@ void save_bookmark_link(const char *address,
 	}
 	LYReduceBlanks(string_data->str);
 	LYMBM_statusline(TITLE_PROMPT);
-	LYgetBString(&string_data, VISIBLE, 0, NORECALL);
+	LYgetBString(&string_data, FALSE, 0, NORECALL);
 	if (isBEmpty(string_data)) {
 	    LYMBM_statusline(CANCELLED);
 	    LYSleepMsg();

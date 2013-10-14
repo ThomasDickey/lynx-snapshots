@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMainLoop.c,v 1.219 2013/10/12 00:24:53 tom Exp $
+ * $LynxId: LYMainLoop.c,v 1.224 2013/10/13 20:23:07 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTAccess.h>
@@ -750,14 +750,14 @@ static BOOL do_check_recall(int ch,
 	 */
 	LYTrimAllStartfile((*user_input)->str);
 	if (isBEmpty(*user_input) &&
-	    !(recall && (ch == UPARROW || ch == DNARROW))) {
+	    !(recall && (ch == UPARROW_KEY || ch == DNARROW_KEY))) {
 	    BStrCopy0((*user_input), *old_user_input);
 	    FREE(*old_user_input);
 	    HTInfoMsg(CANCELLED);
 	    ret = FALSE;
 	    break;
 	}
-	if (recall && ch == UPARROW) {
+	if (recall && ch == UPARROW_KEY) {
 	    if (*FirstURLRecall) {
 		/*
 		 * Use last URL in the list.  - FM
@@ -788,7 +788,7 @@ static BOOL do_check_recall(int ch,
 		} else {
 		    _statusline(EDIT_A_PREV_GOTO);
 		}
-		if ((ch = LYgetBString(user_input, VISIBLE, 0, recall)) < 0) {
+		if ((ch = LYgetBString(user_input, FALSE, 0, recall)) < 0) {
 		    /*
 		     * User cancelled the Goto via ^G.  Restore
 		     * user_input and break.  - FM
@@ -801,7 +801,7 @@ static BOOL do_check_recall(int ch,
 		}
 		continue;
 	    }
-	} else if (recall && ch == DNARROW) {
+	} else if (recall && ch == DNARROW_KEY) {
 	    if (*FirstURLRecall) {
 		/*
 		 * Use the first URL in the list.  - FM
@@ -830,7 +830,7 @@ static BOOL do_check_recall(int ch,
 		} else {
 		    _statusline(EDIT_A_PREV_GOTO);
 		}
-		if ((ch = LYgetBString(user_input, VISIBLE, 0, recall)) < 0) {
+		if ((ch = LYgetBString(user_input, FALSE, 0, recall)) < 0) {
 		    /*
 		     * User cancelled the Goto via ^G.  Restore
 		     * user_input and break.  - FM
@@ -937,7 +937,7 @@ static int DoTraversal(int c,
 	if (lookup_link(links[curdoc.link].lname)) {
 	    if (more_links ||
 		(curdoc.link > -1 && curdoc.link < nlinks - 1)) {
-		c = DNARROW;
+		c = DNARROW_KEY;
 	    } else {
 		if (STREQ(curdoc.title, "Entry into main screen") ||
 		    (nhist <= 0)) {
@@ -947,7 +947,7 @@ static int DoTraversal(int c,
 		    }
 		    c = -1;
 		} else {
-		    c = LTARROW;
+		    c = LTARROW_KEY;
 		}
 	    }
 	} else {
@@ -955,7 +955,7 @@ static int DoTraversal(int c,
 			 links[curdoc.link].lname);
 	    if (!isLYNXIMGMAP(traversal_link_to_add))
 		*crawl_ok = TRUE;
-	    c = RTARROW;
+	    c = RTARROW_KEY;
 	}
     } else {			/* no good right link, so only down and left arrow ok */
 	if (rlink_exists /* && !rlink_rejected */ )
@@ -963,7 +963,7 @@ static int DoTraversal(int c,
 	    add_to_reject_list(links[curdoc.link].lname);
 	if (more_links ||
 	    (curdoc.link > -1 && curdoc.link < nlinks - 1)) {
-	    c = DNARROW;
+	    c = DNARROW_KEY;
 	} else {
 	    /*
 	     * curdoc.title doesn't always work, so bail out if the history
@@ -977,7 +977,7 @@ static int DoTraversal(int c,
 		}
 		c = -1;
 	    } else {
-		c = LTARROW;
+		c = LTARROW_KEY;
 	    }
 	}
     }
@@ -1806,7 +1806,7 @@ static int handle_LYK_COMMAND(bstring **user_input)
 
     BStrCopy0((*user_input), "");
     _statusline(": ");
-    if (LYgetBString(user_input, VISIBLE, 0, RECALL_CMD) >= 0) {
+    if (LYgetBString(user_input, FALSE, 0, RECALL_CMD) >= 0) {
 	src = LYSkipBlanks((*user_input)->str);
 	tmp = LYSkipNonBlanks(src);
 	*tmp = 0;
@@ -2510,7 +2510,7 @@ static int handle_LYK_ECGOTO(int *ch,
      * Offer the current document's URL for editing.  - FM
      */
     _statusline(EDIT_CURDOC_URL);
-    if (((*ch = LYgetBString(user_input, VISIBLE, 0, RECALL_URL)) >= 0) &&
+    if (((*ch = LYgetBString(user_input, FALSE, 0, RECALL_URL)) >= 0) &&
 	!isBEmpty(*user_input) &&
 	strcmp((*user_input)->str, curdoc.address)) {
 	LYTrimAllStartfile((*user_input)->str);
@@ -2753,7 +2753,7 @@ static int handle_LYK_ELGOTO(int *ch,
      * Offer the current link's URL for editing.  - FM
      */
     _statusline(EDIT_CURLINK_URL);
-    if (((*ch = LYgetBString(user_input, VISIBLE, 0, RECALL_URL)) >= 0) &&
+    if (((*ch = LYgetBString(user_input, FALSE, 0, RECALL_URL)) >= 0) &&
 	!isBEmpty(*user_input) &&
 	strcmp((*user_input)->str,
 	       ((links[curdoc.link].type == WWW_FORM_LINK_TYPE)
@@ -3006,7 +3006,7 @@ static BOOLEAN handle_LYK_GOTO(int *ch,
      * Ask the user.
      */
     _statusline(URL_TO_OPEN);
-    if ((*ch = LYgetBString(user_input, VISIBLE, 0, *recall)) < 0) {
+    if ((*ch = LYgetBString(user_input, FALSE, 0, *recall)) < 0) {
 	/*
 	 * User cancelled the Goto via ^G.  Restore user_input and
 	 * break.  - FM
@@ -3565,7 +3565,7 @@ static BOOLEAN check_JUMP_param(char **url_template)
 	if (encoded)
 	    FREE(encoded);
 
-	if (LYgetBString(&input, VISIBLE, 0, recall) < 0) {
+	if (LYgetBString(&input, FALSE, 0, recall) < 0) {
 	    /*
 	     * cancelled via ^G
 	     */
@@ -3651,7 +3651,7 @@ static BOOLEAN handle_LYK_JUMP(int c,
 		*FirstURLRecall = TRUE;
 		if (!strcasecomp(ret, "Go :")) {
 		    if (recall) {
-			*ch = UPARROW;
+			*ch = UPARROW_KEY;
 			return TRUE;
 		    }
 		    FREE(*old_user_input);
@@ -5247,7 +5247,7 @@ void handle_LYK_CHDIR(void)
     }
 
     _statusline(gettext("cd to:"));
-    if (LYgetBString(&buf, VISIBLE, 0, NORECALL) < 0 || isBEmpty(buf)) {
+    if (LYgetBString(&buf, FALSE, 0, NORECALL) < 0 || isBEmpty(buf)) {
 	HTInfoMsg(CANCELLED);
 	return;
     }

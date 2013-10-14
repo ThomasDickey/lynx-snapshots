@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMail.c,v 1.94 2013/05/05 21:41:23 tom Exp $
+ * $LynxId: LYMail.c,v 1.95 2013/10/12 14:51:18 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTParse.h>
@@ -266,7 +266,7 @@ static int header_prompt(const char *label,
 
     LYaddstr(gettext(label));
     LYaddstr(": ");
-    ok = (LYGetStr(buffer, VISIBLE, limit, NORECALL) >= 0
+    ok = (LYGetStr(buffer, FALSE, limit, NORECALL) >= 0
 	  && !term_letter);
     LYaddstr("\n");
 
@@ -698,7 +698,7 @@ void mailform(const char *mailto_address,
 	}
     }
     _statusline(SUBJECT_PROMPT);
-    if (LYGetStr(subject, VISIBLE, MAX_SUBJECT, NORECALL) < 0) {
+    if (LYGetStr(subject, FALSE, MAX_SUBJECT, NORECALL) < 0) {
 	/*
 	 * User cancelled via ^G. - FM
 	 */
@@ -713,7 +713,7 @@ void mailform(const char *mailto_address,
 	sprintf(self, "%.*s", MAX_SUBJECT,
 		isEmpty(personal_mail_address) ? "" : personal_mail_address);
 	_statusline("Cc: ");
-	if (LYGetStr(self, VISIBLE, MAX_SUBJECT, NORECALL) < 0) {
+	if (LYGetStr(self, FALSE, MAX_SUBJECT, NORECALL) < 0) {
 	    /*
 	     * User cancelled via ^G. - FM
 	     */
@@ -1565,7 +1565,7 @@ void reply_by_mail(char *mail_address,
 	LYaddstr("\n\n");
 	LYrefresh();
 	*user_input = '\0';
-	if (LYGetStr(user_input, VISIBLE, sizeof(user_input), NORECALL) < 0 ||
+	if (LYGetStr(user_input, FALSE, sizeof(user_input), NORECALL) < 0 ||
 	    term_letter || STREQ(user_input, ".")) {
 	    goto cancelled;
 	}
@@ -1575,7 +1575,7 @@ void reply_by_mail(char *mail_address,
 	    remove_tildes(user_input);
 	    fprintf(fd, "%s\n", user_input);
 	    *user_input = '\0';
-	    if (LYGetStr(user_input, VISIBLE,
+	    if (LYGetStr(user_input, FALSE,
 			 sizeof(user_input), NORECALL) < 0) {
 		goto cancelled;
 	    }

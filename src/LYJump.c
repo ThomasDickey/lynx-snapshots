@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYJump.c,v 1.45 2013/01/05 00:28:46 tom Exp $
+ * $LynxId: LYJump.c,v 1.48 2013/10/13 20:23:07 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTAlert.h>
@@ -234,7 +234,7 @@ char *LYJump(int key)
     }
 
     statusline(jtp->msg);
-    if ((ch = LYgetBString(&buf, VISIBLE, 0, recall)) < 0) {
+    if ((ch = LYgetBString(&buf, FALSE, 0, recall)) < 0) {
 	/*
 	 * User cancelled the Jump via ^G. - FM
 	 */
@@ -248,7 +248,7 @@ char *LYJump(int key)
 	bp++;
     bp = LYSkipBlanks(bp);
     if (*bp == '\0' &&
-	!(recall && (ch == UPARROW || ch == DNARROW))) {
+	!(recall && (ch == UPARROW_KEY || ch == DNARROW_KEY))) {
 	/*
 	 * User cancelled the Jump via a zero-length string. - FM
 	 */
@@ -275,7 +275,7 @@ char *LYJump(int key)
     }
 #endif /* PERMIT_GOTO_FROM_JUMP */
 
-    if (recall && ch == UPARROW) {
+    if (recall && ch == UPARROW_KEY) {
 	if (FirstShortcutRecall) {
 	    /*
 	     * Use last Shortcut in the list. - FM
@@ -305,7 +305,7 @@ char *LYJump(int key)
 	    } else {
 		_statusline(EDIT_A_PREV_SHORTCUT);
 	    }
-	    if ((ch = LYgetBString(&buf, VISIBLE, 0, recall)) < 0) {
+	    if ((ch = LYgetBString(&buf, FALSE, 0, recall)) < 0) {
 		/*
 		 * User cancelled the jump via ^G.
 		 */
@@ -314,7 +314,7 @@ char *LYJump(int key)
 	    }
 	    goto check_recall;
 	}
-    } else if (recall && ch == DNARROW) {
+    } else if (recall && ch == DNARROW_KEY) {
 	if (FirstShortcutRecall) {
 	    /*
 	     * Use the first Shortcut in the list. - FM
@@ -344,7 +344,7 @@ char *LYJump(int key)
 	    } else {
 		_statusline(EDIT_A_PREV_SHORTCUT);
 	    }
-	    if ((ch = LYgetBString(&buf, VISIBLE, 0, recall)) < 0) {
+	    if ((ch = LYgetBString(&buf, FALSE, 0, recall)) < 0) {
 		/*
 		 * User cancelled the jump via ^G.
 		 */

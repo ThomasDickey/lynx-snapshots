@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTCP.c,v 1.126 2013/07/21 00:22:52 tom Exp $
+ * $LynxId: HTTCP.c,v 1.127 2013/10/13 23:42:55 tom Exp $
  *
  *			Generic Communication Code		HTTCP.c
  *			==========================
@@ -1382,8 +1382,6 @@ static int HTParseInet(SockA * soc_in, const char *str)
 
 	    phost = LYGetHostByName(host);	/* See above */
 
-	    if (!phost)
-		goto failed;
 	    if (!phost)
 		goto failed;
 	    if (phost->h_length != sizeof soc_in->sin_addr) {
