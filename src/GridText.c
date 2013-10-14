@@ -1,5 +1,5 @@
 /*
- * $LynxId: GridText.c,v 1.269 2013/10/03 12:13:18 tom Exp $
+ * $LynxId: GridText.c,v 1.273 2013/10/13 20:23:07 tom Exp $
  *
  *		Character grid hypertext object
  *		===============================
@@ -6008,7 +6008,7 @@ static void HText_trimHightext(HText *text,
 
 		StrnAllocCopy(hi_string,
 			      line_ptr2->data,
-			      (actual_len - hilite_len));
+			      (size_t) (actual_len - hilite_len));
 		actual_len -= (int) strlen(hi_string);
 		/*handle LY_SOFT_NEWLINEs -VH */
 		hi_offset += remove_special_attr_chars(hi_string);
@@ -7697,12 +7697,12 @@ int do_www_search(DocInfo *doc)
     QueryNum = QueryTotal;
 
   get_query:
-    if ((ch = LYgetBString(&searchstring, VISIBLE, 0, recall)) < 0 ||
+    if ((ch = LYgetBString(&searchstring, FALSE, 0, recall)) < 0 ||
 	isBEmpty(searchstring) ||
-	ch == UPARROW ||
-	ch == DNARROW) {
+	ch == UPARROW_KEY ||
+	ch == DNARROW_KEY) {
 
-	if (recall && ch == UPARROW) {
+	if (recall && ch == UPARROW_KEY) {
 	    if (PreviousSearch) {
 		/*
 		 * Use the second to last query in the list.  -FM
@@ -7734,7 +7734,7 @@ int do_www_search(DocInfo *doc)
 		}
 		goto get_query;
 	    }
-	} else if (recall && ch == DNARROW) {
+	} else if (recall && ch == DNARROW_KEY) {
 	    if (PreviousSearch) {
 		/*
 		 * Use the first query in the list.  -FM

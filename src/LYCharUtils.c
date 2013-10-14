@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYCharUtils.c,v 1.123 2013/06/04 20:42:47 tom Exp $
+ * $LynxId: LYCharUtils.c,v 1.124 2013/10/13 14:26:51 tom Exp $
  *
  *  Functions associated with LYCharSets.c and the Lynx version of HTML.c - FM
  *  ==========================================================================
@@ -1992,7 +1992,7 @@ void LYParseRefreshURL(char *content,
 	cp1 = cp;
 	while (*cp1 && isdigit(UCH(*cp1)))
 	    cp1++;
-	StrnAllocCopy(Seconds, cp, (int) (cp1 - cp));
+	StrnAllocCopy(Seconds, cp, (size_t) (cp1 - cp));
     }
     *p_seconds = Seconds;
     *p_address = LYParseTagParam(content, "URL");

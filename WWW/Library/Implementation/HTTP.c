@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTP.c,v 1.131 2013/10/02 14:33:32 tom Exp $
+ * $LynxId: HTTP.c,v 1.132 2013/10/13 23:30:26 tom Exp $
  *
  * HyperText Tranfer Protocol	- Client implementation		HTTP.c
  * ==========================
@@ -1285,31 +1285,29 @@ static int HTLoadHTTP(const char *arg,
 
 		host2 = HTParse(docname, "", PARSE_HOST);
 		path2 = HTParse(docname, "", PARSE_PATH | PARSE_PUNCTUATION);
-		if (host2) {
-		    if ((colon = HTParsePort(host2, &port2)) != NULL) {
-			/* Use non-default port number */
-			*colon = '\0';
-		    }
+		if ((colon = HTParsePort(host2, &port2)) != NULL) {
+		    /* Use non-default port number */
+		    *colon = '\0';
 		}
+
 		/*
 		 * This composeAuth() does file access, i.e., for the ultimate
 		 * target of the request.  - AJL
 		 */
 		auth_proxy = NO;
-		if ((auth = HTAA_composeAuth(host2, port2, path2,
-					     auth_proxy)) != NULL &&
-		    *auth != '\0') {
+		auth = HTAA_composeAuth(host2, port2, path2, auth_proxy);
+		if (auth == NULL) {
+		    CTRACE((tfp, "HTTP: Not sending authorization (yet).\n"));
+		} else if (*auth != '\0') {
 		    /*
-		     * If auth is not NULL nor zero-length, it's an
-		     * Authorization header to be included.  - FM
+		     * We have an Authorization header to be included.
 		     */
 		    HTBprintf(&command, "%s%c%c", auth, CR, LF);
 		    CTRACE((tfp, "HTTP: Sending authorization: %s\n", auth));
-		} else if (auth && *auth == '\0') {
+		} else {
 		    /*
-		     * If auth is a zero-length string, the user either
-		     * cancelled or goofed at the username and password prompt.
-		     * - FM
+		     * The user either cancelled or made a mistake with the
+		     * username and password prompt.
 		     */
 		    if (!(traversal || dump_output_immediately) &&
 			HTConfirm(CONFIRM_WO_PASSWORD)) {
@@ -1330,8 +1328,6 @@ static int HTLoadHTTP(const char *arg,
 			status = HT_NOT_LOADED;
 			goto done;
 		    }
-		} else {
-		    CTRACE((tfp, "HTTP: Not sending authorization (yet).\n"));
 		}
 		/*
 		 * Add 'Cookie:' header, if it's HTTP or HTTPS document being

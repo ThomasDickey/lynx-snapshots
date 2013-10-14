@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYSearch.c,v 1.37 2013/10/03 12:27:55 tom Exp $
+ * $LynxId: LYSearch.c,v 1.40 2013/10/13 20:23:07 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTAlert.h>
@@ -197,7 +197,7 @@ BOOL textsearch(DocInfo *cur_doc,
 	 */
 	_statusline(ENTER_WHEREIS_QUERY);
 
-	ch = LYgetBString(prev_target, VISIBLE, 0, recall);
+	ch = LYgetBString(prev_target, FALSE, 0, recall);
 	if (ch < 0) {
 	    /*
 	     * User cancelled the search via ^G.  Restore prev_target and
@@ -211,7 +211,7 @@ BOOL textsearch(DocInfo *cur_doc,
 
   check_recall:
     if (strlen((*prev_target)->str) == 0 &&
-	!(recall && (ch == UPARROW || ch == DNARROW))) {
+	!(recall && (ch == UPARROW_KEY || ch == DNARROW_KEY))) {
 	/*
 	 * No entry.  Simply return, retaining the current buffer.  Because
 	 * prev_target is now reset, highlighting of the previous search string
@@ -222,7 +222,7 @@ BOOL textsearch(DocInfo *cur_doc,
 	return (FALSE);
     }
 
-    if (recall && ch == UPARROW) {
+    if (recall && ch == UPARROW_KEY) {
 	if (FirstRecall) {
 	    /*
 	     * Use the current string or last query in the list.  - FM
@@ -262,7 +262,7 @@ BOOL textsearch(DocInfo *cur_doc,
 	    } else {
 		_statusline(EDIT_A_PREV_QUERY);
 	    }
-	    ch = LYgetBString(prev_target, VISIBLE, 0, recall);
+	    ch = LYgetBString(prev_target, FALSE, 0, recall);
 	    if (ch < 0) {
 		/*
 		 * User canceled the search via ^G.  Restore prev_target and
@@ -274,7 +274,7 @@ BOOL textsearch(DocInfo *cur_doc,
 	    }
 	    goto check_recall;
 	}
-    } else if (recall && ch == DNARROW) {
+    } else if (recall && ch == DNARROW_KEY) {
 	if (FirstRecall) {
 	    /*
 	     * Use the current string or first query in the list.  - FM
@@ -314,7 +314,7 @@ BOOL textsearch(DocInfo *cur_doc,
 	    } else {
 		_statusline(EDIT_A_PREV_QUERY);
 	    }
-	    ch = LYgetBString(prev_target, VISIBLE, 0, recall);
+	    ch = LYgetBString(prev_target, FALSE, 0, recall);
 	    if (ch < 0) {
 		/*
 		 * User cancelled the search via ^G.  Restore prev_target and

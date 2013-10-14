@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYStrings.h,v 1.91 2013/10/12 00:06:34 tom Exp $
+ * $LynxId: LYStrings.h,v 1.110 2013/10/13 20:30:39 tom Exp $
  */
 #ifndef LYSTRINGS_H
 #define LYSTRINGS_H
@@ -53,13 +53,13 @@ extern "C" {
     extern int LYgetch_input(void);
     extern int LYgetch_single(void);
     extern int LYgetstr(char *inputline,
-			int hidden,
+			int masked,
 			size_t bufsize,
 			RecallType recall);
-#define LYGetStr(input,hidden,bufsize,recall) \
-	LYgetstr(input,hidden,(size_t)(bufsize),recall)
+#define LYGetStr(input,masked,bufsize,recall) \
+	LYgetstr(input,masked,(size_t)(bufsize),recall)
     extern int LYgetBString(bstring **inputline,
-			    int hidden,
+			    int masked,
 			    size_t max_cols,
 			    RecallType recall);
     extern int LYscanFloat(const char *source, float *result);
@@ -113,10 +113,10 @@ extern "C" {
 
     extern char *SNACopy(char **dest,
 			 const char *src,
-			 int n);
+			 size_t n);
     extern char *SNACat(char **dest,
 			const char *src,
-			int n);
+			size_t n);
 
 #define StrnAllocCopy(dest, src, n)  SNACopy (&(dest), src, n)
 #define StrnAllocCat(dest, src, n)   SNACat  (&(dest), src, n)
@@ -138,27 +138,44 @@ extern "C" {
 #endif
 
 /* values for LYgetch */
-/* The following are lynxkeycodes, not to be confused with
-   lynxactioncodes (LYK_*) to which they are often mapped.
-   The lynxkeycodes include all single-byte keys as a subset. - kw
-*/
-#define UPARROW		256	/* 0x100 */
-#define DNARROW		257	/* 0x101 */
-#define RTARROW		258	/* 0x102 */
-#define LTARROW		259	/* 0x103 */
-#define PGDOWN		260	/* 0x104 */
-#define PGUP		261	/* 0x105 */
-#define HOME		262	/* 0x106 */
-#define END_KEY		263	/* 0x107 */
-#define F1		264	/* 0x108 */
-#define DO_KEY		265	/* 0x109 */
-#define FIND_KEY	266	/* 0x10A */
-#define SELECT_KEY	267	/* 0x10B */
-#define INSERT_KEY	268	/* 0x10C */
-#define REMOVE_KEY	269	/* 0x10D */
-#define DO_NOTHING	270	/* 0x10E */
-#define BACKTAB_KEY	271	/* 0x10F */
-#define MOUSE_KEY	285	/* 0x11D */
+    /* The following are lynxkeycodes, not to be confused with
+     * lynxactioncodes (LYK_*) to which they are often mapped.
+     * The lynxkeycodes include all single-byte keys as a subset.
+     * These are "extra" keys which do not fit into a single byte.
+     */
+    typedef enum {
+	UPARROW_KEY = 256
+	,DNARROW_KEY
+	,RTARROW_KEY
+	,LTARROW_KEY
+	,PGDOWN_KEY
+	,PGUP_KEY
+	,HOME_KEY
+	,END_KEY
+	,F1_KEY
+	,DO_KEY
+	,FIND_KEY
+	,SELECT_KEY
+	,INSERT_KEY
+	,REMOVE_KEY
+	,DO_NOTHING
+	,BACKTAB_KEY
+	/* these should be referenced by name in keymap, e.g., "f2" */
+	,F2_KEY
+	,F3_KEY
+	,F4_KEY
+	,F5_KEY
+	,F6_KEY
+	,F7_KEY
+	,F8_KEY
+	,F9_KEY
+	,F10_KEY
+	,F11_KEY
+	,F12_KEY
+	/* this has known value */
+	,MOUSE_KEY = 285	/* 0x11D */
+    } LYExtraKeys;
+
 /*  ***** NOTES: *****
     If you add definitions for new lynxkeycodes to the above list that need to
     be mapped to LYK_* lynxactioncodes -
@@ -175,7 +192,7 @@ extern "C" {
       documented in lynx.cfg.
 
     - The DOS port uses its own native codes for some keys, unless they are
-      remapped by the code in LYgetch().  See *.key files in docs/ directory. 
+      remapped by the code in LYgetch().  See *.key files in docs/ directory.
       Adding new keys here may conflict with those codes (affecting DOS users),
       unless/until remapping is added or changed in LYgetch().  (N)curses
       keypad codes (KEY_* from curses.h) can also directly appear as
@@ -198,44 +215,42 @@ extern "C" {
 #  define FOR_PROMPT	3	/* string prompt editing */
 #  define FOR_SINGLEKEY	4	/* single key prompt, confirmation */
 
-#define VISIBLE  0
-#define HIDDEN   1
-
 #ifdef USE_ALT_BINDINGS
 /*  Enable code implementing additional, mostly emacs-like, line-editing
     functions. - kw */
 #define ENHANCED_LINEEDIT
 #endif
 
-/* EditFieldData preserves state between calls to LYEdit1
+/* FieldEditor preserves state between calls to LYDoEdit
  */
-    typedef struct _EditFieldData {
+    typedef struct {
 
-	int sx;			/* Origin of editfield                       */
-	int sy;
-	int dspwdth;		/* Screen real estate for editing            */
+	int efStartX;		/* Origin of edit-field                      */
+	int efStartY;
+	int efWidth;		/* Screen real estate for editing            */
 
-	size_t buffer_used;	/* current size of string.                   */
-	size_t buffer_size;	/* current buffer-size, excluding nul at end */
-	size_t buffer_limit;	/* buffer size limit, zero if indefinite     */
-	char pad;		/* Right padding  typically ' ' or '_'       */
-	BOOL hidden;		/* Masked password entry flag                */
+	char *efBuffer;		/* the buffer which is being edited */
+	size_t efBufInUse;	/* current size of string.                   */
+	size_t efBufAlloc;	/* current buffer-size, excluding nul at end */
+	size_t efBufLimit;	/* buffer size limit, zero if indefinite     */
 
-	BOOL dirty;		/* accumulate refresh requests               */
-	BOOL panon;		/* Need horizontal scroll indicator          */
-	int xpan;		/* Horizontal scroll offset                  */
-	int pos;		/* Insertion point in string                 */
-	int margin;		/* Number of columns look-ahead/look-back    */
-	int current_modifiers;	/* Modifiers for next input lynxkeycode */
+	char efPadChar;		/* Right padding  typically ' ' or '_'       */
+	BOOL efIsMasked;	/* Masked password entry flag                */
+
+	BOOL efIsDirty;		/* accumulate refresh requests               */
+	BOOL efIsPanned;	/* Need horizontal scroll indicator          */
+	int efDpyStart;		/* Horizontal scroll offset                  */
+	int efEditAt;		/* Insertion point in string                 */
+	int efPanMargin;	/* Number of columns look-ahead/look-back    */
+	int efInputMods;	/* Modifiers for next input lynxkeycode */
 #ifdef ENHANCED_LINEEDIT
-	int mark;		/* position of emacs-like mark, or -1-pos to denote
+	int efEditMark;		/* position of emacs-like mark, or -1-pos to denote
 				   unactive mark.  */
 #endif
 
-	char *buffer;		/* the buffer which is being edited */
-	int *offset2col;	/* fixups for multibyte characters */
+	int *efOffs2Col;	/* fixups for multibyte characters */
 
-    } EditFieldData;
+    } FieldEditor;
 
 /* line-edit action encoding */
 
@@ -311,48 +326,43 @@ extern "C" {
     extern int map_string_to_keysym(const char *src, int *lec);
 #endif
 
-    extern char *LYElideString(char *str,
-			       int cut_pos);
-    extern void LYEscapeStartfile(char **buffer);
-    extern void LYLowerCase(char *buffer);
-    extern void LYUpperCase(char *buffer);
+    extern BOOL LYRemapEditBinding(int xlkc, int lec, int select_edi);	/* in LYEditmap.c */
     extern BOOLEAN LYRemoveNewlines(char *buffer);
+    extern BOOLEAN LYTrimStartfile(char *buffer);
+    extern LYExtraKeys LYnameToExtraKeys(const char *name);
+    extern char *LYElideString(char *str, int cut_pos);
     extern char *LYReduceBlanks(char *buffer);
     extern char *LYRemoveBlanks(char *buffer);
     extern char *LYSkipBlanks(char *buffer);
     extern char *LYSkipNonBlanks(char *buffer);
+    extern char *LYTrimNewline(char *buffer);
     extern const char *LYSkipCBlanks(const char *buffer);
     extern const char *LYSkipCNonBlanks(const char *buffer);
-    extern void LYTrimLeading(char *buffer);
-    extern char *LYTrimNewline(char *buffer);
-    extern void LYTrimTrailing(char *buffer);
-    extern void LYTrimAllStartfile(char *buffer);
-    extern BOOLEAN LYTrimStartfile(char *buffer);
-    extern void LYFinishEdit(EditFieldData *edit);
-    extern void LYSetupEdit(EditFieldData *edit, char *old,
-			    size_t buffer_limit,
-			    int display_limit);
-    extern void LYRefreshEdit(EditFieldData *edit);
+    extern const char *LYextraKeysToName(LYExtraKeys code);
     extern int EditBinding(int ch);	/* in LYEditmap.c */
-    extern BOOL LYRemapEditBinding(int xlkc,
-				   int lec,
-				   int select_edi);	/* in LYEditmap.c */
-    extern int LYKeyForEditAction(int lec);	/* in LYEditmap.c */
+    extern int LYDoEdit(FieldEditor * edit, int ch, int action, int maxMessage);
     extern int LYEditKeyForAction(int lac, int *pmodkey);	/* LYEditmap.c */
-    extern int LYEdit1(EditFieldData *edit, int ch,
-		       int action,
-		       int maxMessage);
-    extern void LYCloseCloset(RecallType recall);
-    extern int LYhandlePopupList(int cur_choice,
-				 int ly,
-				 int lx,
+    extern int LYKeyForEditAction(int lec);	/* in LYEditmap.c */
+    extern int LYhandlePopupList(int cur_choice, int ly, int lx,
 				 STRING2PTR choices,
 				 int width,
 				 int i_length,
 				 int disabled,
 				 int for_mouse);
+    extern void LYCloseCloset(RecallType recall);
+    extern void LYEscapeStartfile(char **buffer);
+    extern void LYFinishEdit(FieldEditor * edit);
+    extern void LYLowerCase(char *buffer);
+    extern void LYRefreshEdit(FieldEditor * edit);
+    extern void LYSetupEdit(FieldEditor * edit, char *old,
+			    size_t buffer_limit,
+			    int display_limit);
+    extern void LYTrimAllStartfile(char *buffer);
+    extern void LYTrimLeading(char *buffer);
+    extern void LYTrimTrailing(char *buffer);
+    extern void LYUpperCase(char *buffer);
 
-    typedef unsigned short LYEditCode;
+    typedef short LYEditCode;
 
     typedef struct {
 	int code;
@@ -366,7 +376,7 @@ extern "C" {
     } LYEditConfig;
 
     extern int current_lineedit;
-    extern const char *LYLineeditNames[];
+    extern const char *LYEditorNames[];
     extern LYEditConfig LYLineEditors[];
     extern const char *LYLineeditHelpURLs[];
 
@@ -377,13 +387,12 @@ extern "C" {
 
     extern int escape_bound;
 
-#define LYLineEdit(e,c,m) LYEdit1(e, c, EditBinding(c) & ~LYE_DF, m)
+#define LYLineEdit(e,c,m) LYDoEdit(e, c, EditBinding(c) & ~LYE_DF, m)
 
 /* Dummy initializer for LYEditmap.c */
     extern int LYEditmapDeclared(void);
 
-    extern int LYEditInsert(EditFieldData *edit,
-			    unsigned const char *s,
+    extern int LYEditInsert(FieldEditor * edit, unsigned const char *s,
 			    int len, int map_active,
 			    int maxMessage);
 

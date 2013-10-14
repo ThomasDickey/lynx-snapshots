@@ -1,4 +1,4 @@
-# $LynxId: makefile.in,v 1.69 2012/08/12 23:54:35 tom Exp $
+# $LynxId: makefile.in,v 1.70 2013/10/13 22:58:41 tom Exp $
 # template-makefile for Lynx src directory
 
 SHELL		= @CONFIG_SHELL@
@@ -155,7 +155,7 @@ LYUtils$o :		$(top_srcdir)/userdefs.h
 LYmktime$o :		$(top_srcdir)/userdefs.h
 LYrcFile$o :		$(top_srcdir)/userdefs.h
 
-LYIcon$o:
+LYIcon$o: LYIcon.rc 
 	$(WINDRES) -i LYIcon.rc -o LYIcon$o -O coff
 
 CHRTR= chrtrans/

@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYNews.c,v 1.59 2013/05/04 13:15:30 tom Exp $
+ * $LynxId: LYNews.c,v 1.60 2013/10/12 14:51:18 tom Exp $
  */
 #include <HTUtils.h>
 #ifndef DISABLE_NEWS
@@ -195,7 +195,7 @@ char *LYNewsPost(char *newsgroups,
     LYaddstr(gettext("\n\n Please provide your mail address for the From: header\n"));
     sprintf(user_input, "From: %.*s", (int) sizeof(user_input) - 8,
 	    NonNull(personal_mail_address));
-    if (LYGetStr(user_input, VISIBLE,
+    if (LYGetStr(user_input, FALSE,
 		 sizeof(user_input), NORECALL) < 0 ||
 	term_message) {
 	HTInfoMsg(NEWS_POST_CANCELLED);
@@ -241,7 +241,7 @@ char *LYNewsPost(char *newsgroups,
 	LYStrNCpy(user_input + len, kp, (int) sizeof(user_input) - len - 1);
     }
     cp = NULL;
-    if (LYGetStr(user_input, VISIBLE,
+    if (LYGetStr(user_input, FALSE,
 		 sizeof(user_input), NORECALL) < 0 ||
 	term_message) {
 	HTInfoMsg(NEWS_POST_CANCELLED);
@@ -300,7 +300,7 @@ char *LYNewsPost(char *newsgroups,
     LYStrNCpy(user_input, cp, (sizeof(user_input) - 16));
     FREE(cp);
     LYaddstr(gettext("\n\n Please provide or edit the Organization: header\n"));
-    if (LYGetStr(user_input, VISIBLE,
+    if (LYGetStr(user_input, FALSE,
 		 sizeof(user_input), NORECALL) < 0 ||
 	term_message) {
 	HTInfoMsg(NEWS_POST_CANCELLED);
@@ -362,7 +362,7 @@ char *LYNewsPost(char *newsgroups,
 	LYaddstr("\n\n");
 	LYrefresh();
 	*user_input = '\0';
-	if (LYGetStr(user_input, VISIBLE,
+	if (LYGetStr(user_input, FALSE,
 		     sizeof(user_input), NORECALL) < 0 ||
 	    term_message) {
 	    HTInfoMsg(NEWS_POST_CANCELLED);
@@ -376,7 +376,7 @@ char *LYNewsPost(char *newsgroups,
 	    if (!nonempty && strlen(user_input))
 		nonempty = TRUE;
 	    *user_input = '\0';
-	    if (LYGetStr(user_input, VISIBLE,
+	    if (LYGetStr(user_input, FALSE,
 			 sizeof(user_input), NORECALL) < 0) {
 		HTInfoMsg(NEWS_POST_CANCELLED);
 		LYCloseTempFP(fd);	/* Close the temp file. */

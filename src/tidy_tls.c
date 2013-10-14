@@ -1,5 +1,5 @@
 /*
- * $LynxId: tidy_tls.c,v 1.15 2013/10/01 20:56:17 tom Exp $
+ * $LynxId: tidy_tls.c,v 1.16 2013/10/14 00:13:37 tom Exp $
  * Copyright 2008-2011,2013 Thomas E. Dickey
  * with fix Copyright 2008 by Thomas Viehmann
  *
@@ -219,8 +219,9 @@ SSL_CTX *SSL_CTX_new(SSL_METHOD * method)
 {
     SSL_CTX *ctx;
 
-    ctx = typeCalloc(SSL_CTX);
-    ctx->method = method;
+    if ((ctx = typeCalloc(SSL_CTX)) != 0) {
+	ctx->method = method;
+    }
 
     return ctx;
 }
@@ -430,6 +431,9 @@ int SSL_connect(SSL * ssl)
     }
 
     store = typeCalloc(X509_STORE_CTX);
+    if (store == 0)
+	outofmem(__FILE__, "SSL_connect");
+
     store->ssl = ssl;
     store->cert_list = SSL_get_peer_certificate(ssl);
 

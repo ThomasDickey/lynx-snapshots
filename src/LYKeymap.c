@@ -1,4 +1,4 @@
-/* $LynxId: LYKeymap.c,v 1.86 2013/10/12 00:04:22 tom Exp $ */
+/* $LynxId: LYKeymap.c,v 1.95 2013/10/13 20:23:07 tom Exp $ */
 #include <HTUtils.h>
 #include <LYUtils.h>
 #include <LYGlobalDefs.h>
@@ -1003,16 +1003,17 @@ static const struct {
     { ' ',		"<space>" },
     { '<',		"<" },
     { '>',		">" },
+    /* LYExtraKeys */
     { CH_DEL,		"<delete>" },
-    { UPARROW,		"Up Arrow" },
-    { DNARROW,		"Down Arrow" },
-    { RTARROW,		"Right Arrow" },
-    { LTARROW,		"Left Arrow" },
-    { PGDOWN,		"Page Down" },
-    { PGUP,		"Page Up" },
-    { HOME,		"Home" },
+    { UPARROW_KEY,	"Up Arrow" },
+    { DNARROW_KEY,	"Down Arrow" },
+    { RTARROW_KEY,	"Right Arrow" },
+    { LTARROW_KEY,	"Left Arrow" },
+    { PGDOWN_KEY,	"Page Down" },
+    { PGUP_KEY,		"Page Up" },
+    { HOME_KEY,		"Home" },
     { END_KEY,		"End" },
-    { F1,		"F1" },
+    { F1_KEY,		"F1" },
     { DO_KEY,		"Do key" },
     { FIND_KEY,		"Find key" },
     { SELECT_KEY,	"Select key" },

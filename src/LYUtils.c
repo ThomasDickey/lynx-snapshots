@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYUtils.c,v 1.244 2013/10/10 23:30:08 tom Exp $
+ * $LynxId: LYUtils.c,v 1.251 2013/10/13 20:23:07 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTCP.h>
@@ -3544,28 +3544,28 @@ int number2arrows(int number)
 	number = END_KEY;
 	break;
     case '2':
-	number = DNARROW;
+	number = DNARROW_KEY;
 	break;
     case '3':
-	number = PGDOWN;
+	number = PGDOWN_KEY;
 	break;
     case '4':
-	number = LTARROW;
+	number = LTARROW_KEY;
 	break;
     case '5':
 	number = DO_NOTHING;
 	break;
     case '6':
-	number = RTARROW;
+	number = RTARROW_KEY;
 	break;
     case '7':
-	number = HOME;
+	number = HOME_KEY;
 	break;
     case '8':
-	number = UPARROW;
+	number = UPARROW_KEY;
 	break;
     case '9':
-	number = PGUP;
+	number = PGUP_KEY;
 	break;
     }
 

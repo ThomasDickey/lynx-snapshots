@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYEditmap.c,v 1.42 2013/10/12 00:16:50 tom Exp $
+ * $LynxId: LYEditmap.c,v 1.54 2013/10/13 20:23:07 tom Exp $
  *
  * LYEditMap.c
  * Keybindings for line and form editing.
@@ -41,13 +41,8 @@ static LYEditCode DefaultEditBinding[KEYMAP_SIZE - 1];
 static LYEditCode BetterEditBinding[KEYMAP_SIZE - 1];
 static LYEditCode BashlikeEditBinding[KEYMAP_SIZE - 1];
 
-/* Oh no, not another one of those tables...
- *
- * If modifier bit is set in a lynxkeycode, it is first looked up here.  Note
- * the type different from the previous tables (short vs.  char), since we want
- * to hold larger values.  OTOH we can keep the size shorter, everything beyond
- * the end is effectively LYE_UNMOD (ignore modifier) by virtue of the
- * LKC_TO_LEC_M1 macro.
+/*
+ * If a modifier bit is set in a lynxkeycode, it is first looked up here.
  *
  * Currently this table isn't specific to the current_lineedit value, it is
  * shared by all alternative "Bindings" to save space.  However, if the
@@ -274,13 +269,13 @@ static const LYEditInit initMod1Binding[] =
     {253, LYE_UNMOD},
     {254, LYE_UNMOD},
     {255, LYE_UNMOD},
-    {256, LYE_UNMOD},		/* UPARROW */
-    {257, LYE_UNMOD},		/* DNARROW */
-    {258, LYE_UNMOD},		/* RTARROW */
-    {259, LYE_UNMOD},		/* LTARROW */
-    {260, LYE_UNMOD},		/* PGDOWN */
-    {261, LYE_UNMOD},		/* PGUP */
-    {262, LYE_FORM_PASS},	/* HOME */
+    {256, LYE_UNMOD},		/* UPARROW_KEY */
+    {257, LYE_UNMOD},		/* DNARROW_KEY */
+    {258, LYE_UNMOD},		/* RTARROW_KEY */
+    {259, LYE_UNMOD},		/* LTARROW_KEY */
+    {260, LYE_UNMOD},		/* PGDOWN_KEY */
+    {261, LYE_UNMOD},		/* PGUP_KEY */
+    {262, LYE_FORM_PASS},	/* HOME_KEY */
     {263, LYE_FORM_PASS},	/* END_KEY */
     {264, LYK_DWIMHELP | LYE_FORM_LAC},		/* F1 */
     {265, LYE_UNMOD},		/* DO_KEY */
@@ -565,15 +560,15 @@ static const LYEditInit initDefaultEditor[] =
     {253, LYE_CHAR},
     {254, LYE_CHAR},
     {255, LYE_CHAR},
-    {256, LYE_FORM_PASS},	/* UPARROW */
-    {257, LYE_FORM_PASS},	/* DNARROW */
-    {258, LYE_FORW},		/* RTARROW */
-    {259, LYE_BACK},		/* LTARROW */
-    {260, LYE_FORM_PASS},	/* PGDOWN */
-    {261, LYE_FORM_PASS},	/* PGUP */
-    {262, LYE_BOL},		/* HOME */
+    {256, LYE_FORM_PASS},	/* UPARROW_KEY */
+    {257, LYE_FORM_PASS},	/* DNARROW_KEY */
+    {258, LYE_FORW},		/* RTARROW_KEY */
+    {259, LYE_BACK},		/* LTARROW_KEY */
+    {260, LYE_FORM_PASS},	/* PGDOWN_KEY */
+    {261, LYE_FORM_PASS},	/* PGUP_KEY */
+    {262, LYE_BOL},		/* HOME_KEY */
     {263, LYE_EOL},		/* END_KEY */
-    {264, LYE_FORM_PASS},	/* F1 */
+    {264, LYE_FORM_PASS},	/* F1_KEY */
 #if !(defined(_WINDOWS) || defined(__DJGPP__))
     {265, LYE_TAB},		/* DO_KEY */
     {266, LYE_BOL},		/* FIND_KEY */
@@ -844,15 +839,15 @@ static const LYEditInit initBetterEditor[] =
     {253, LYE_CHAR},
     {254, LYE_CHAR},
     {255, LYE_CHAR},
-    {256, LYE_FORM_PASS},	/* UPARROW */
-    {257, LYE_FORM_PASS},	/* DNARROW */
-    {258, LYE_FORW},		/* RTARROW */
-    {259, LYE_BACK},		/* LTARROW */
-    {260, LYE_FORM_PASS},	/* PGDOWN */
-    {261, LYE_FORM_PASS},	/* PGUP */
-    {262, LYE_BOL},		/* HOME */
+    {256, LYE_FORM_PASS},	/* UPARROW_KEY */
+    {257, LYE_FORM_PASS},	/* DNARROW_KEY */
+    {258, LYE_FORW},		/* RTARROW_KEY */
+    {259, LYE_BACK},		/* LTARROW_KEY */
+    {260, LYE_FORM_PASS},	/* PGDOWN_KEY */
+    {261, LYE_FORM_PASS},	/* PGUP_KEY */
+    {262, LYE_BOL},		/* HOME_KEY */
     {263, LYE_EOL},		/* END_KEY */
-    {264, LYE_FORM_PASS},	/* F1 */
+    {264, LYE_FORM_PASS},	/* F1_KEY */
 #if !(defined(_WINDOWS) || defined(__DJGPP__))
     {265, LYE_TAB},		/* DO_KEY */
     {266, LYE_BOL},		/* FIND_KEY */
@@ -1124,15 +1119,15 @@ static const LYEditInit initBashlikeEditor[] =
     {253, LYE_CHAR},
     {254, LYE_CHAR},
     {255, LYE_CHAR},
-    {256, LYE_FORM_PASS},	/* UPARROW */
-    {257, LYE_FORM_PASS},	/* DNARROW */
-    {258, LYE_FORW},		/* RTARROW */
-    {259, LYE_BACK},		/* LTARROW */
-    {260, LYE_FORM_PASS},	/* PGDOWN */
-    {261, LYE_FORM_PASS},	/* PGUP */
-    {262, LYE_BOL},		/* HOME */
+    {256, LYE_FORM_PASS},	/* UPARROW_KEY */
+    {257, LYE_FORM_PASS},	/* DNARROW_KEY */
+    {258, LYE_FORW},		/* RTARROW_KEY */
+    {259, LYE_BACK},		/* LTARROW_KEY */
+    {260, LYE_FORM_PASS},	/* PGDOWN_KEY */
+    {261, LYE_FORM_PASS},	/* PGUP_KEY */
+    {262, LYE_BOL},		/* HOME_KEY */
     {263, LYE_EOL},		/* END_KEY */
-    {264, LYE_FORM_PASS},	/* F1 */
+    {264, LYE_FORM_PASS},	/* F1_KEY */
 #if !(defined(_WINDOWS) || defined(__DJGPP__))
     {265, LYE_TAB},		/* DO_KEY */
     {266, LYE_BOL},		/* FIND_KEY */
@@ -1157,7 +1152,7 @@ LYEditConfig LYLineEditors[] =
 #endif
 };
 
-const char *LYLineeditNames[TABLESIZE(LYLineEditors) + 1];
+const char *LYEditorNames[TABLESIZE(LYLineEditors) + 1];
 
 /*
  * Add the URL (relative to helpfilepath) used for context-dependent
@@ -1237,46 +1232,45 @@ BOOL LYRemapEditBinding(int xlkc,
     int c = xlkc & LKC_MASK;
     BOOLEAN success = FALSE;
 
-    if (xlkc < 0 || (xlkc & LKC_ISLAC) || c >= KEYMAP_SIZE + 1)
-	return FALSE;
+    if (xlkc >= 0 && !(xlkc & LKC_ISLAC) && (c < KEYMAP_SIZE + 1)) {
+	LYEditCode code = (LYEditCode) lec;
+
 #ifdef USE_ALT_BINDINGS
-    if (xlkc & LKC_MOD1) {
-	if (c > LAST_MOD1_LKC)
-	    return FALSE;
-	else
-	    Mod1Binding[c] = (short) lec;
-	return TRUE;
-    } else if (xlkc & LKC_MOD2) {
-	if (c > LAST_MOD2_LKC)
-	    return FALSE;
-	else
-	    Mod2Binding[c] = (short) lec;
-	return TRUE;
-    } else if (xlkc & LKC_MOD3) {
-	if (c > LAST_MOD3_LKC)
-	    return FALSE;
-	else
-	    Mod3Binding[c] = (short) lec;
-	return TRUE;
-    } else
+	if (xlkc & LKC_MOD1) {
+	    if (c <= LAST_MOD1_LKC) {
+		Mod1Binding[c] = code;
+		success = TRUE;
+	    }
+	} else if (xlkc & LKC_MOD2) {
+	    if (c <= LAST_MOD2_LKC) {
+		Mod2Binding[c] = code;
+		success = TRUE;
+	    }
+	} else if (xlkc & LKC_MOD3) {
+	    if (c <= LAST_MOD3_LKC) {
+		Mod3Binding[c] = code;
+		success = TRUE;
+	    }
+	} else
 #endif /* USE_ALT_BINDINGS */
-    {
+	{
 #ifndef UCHAR_MAX
 #define UCHAR_MAX 255
 #endif
-	if ((unsigned int) lec > UCHAR_MAX)
-	    return FALSE;	/* cannot do, doesn't fit in a char - kw */
-	if (select_edi > 0) {
-	    if ((unsigned int) select_edi < TABLESIZE(LYLineEditors)) {
-		LYLineEditors[select_edi - 1].used[c] = (LYEditCode) lec;
-		success = TRUE;
-	    }
-	} else {
-	    for (j = 0; j < (int) TABLESIZE(LYLineEditors); j++) {
-		success = TRUE;
-		if (select_edi < 0 && j + 1 + select_edi == 0)
-		    continue;
-		LYLineEditors[j].used[c] = (LYEditCode) lec;
+	    if ((unsigned int) lec <= UCHAR_MAX) {
+		if (select_edi > 0) {
+		    if ((unsigned int) select_edi < TABLESIZE(LYLineEditors)) {
+			LYLineEditors[select_edi - 1].used[c] = code;
+			success = TRUE;
+		    }
+		} else {
+		    for (j = 0; j < (int) TABLESIZE(LYLineEditors); j++) {
+			success = TRUE;
+			if ((select_edi < 0) && ((j + 1 + select_edi) == 0))
+			    continue;
+			LYLineEditors[j].used[c] = code;
+		    }
+		}
 	    }
 	}
     }
@@ -1505,7 +1499,11 @@ int LYEditmapDeclared(void)
 }
 
 #if 0
-static void printEditMap(LYEditConfig * table)
+/*
+ * This function was useful in converting the hand-crafted key-bindings to
+ * their reusable form in 2.8.8 -TD
+ */
+static void checkEditMap(LYEditConfig * table)
 {
     unsigned j, k;
     char comment[80];
@@ -1578,66 +1576,13 @@ static void printEditMap(LYEditConfig * table)
 		} else if (j < 127) {
 		    sprintf(comment, "\t/* %c */", j);
 		} else {
-		    const char *what;
+		    const char *what = LYextraKeysToName(j);
 
-		    switch (j) {
-		    case UPARROW:
-			what = "UPARROW";
-			break;
-		    case DNARROW:
-			what = "DNARROW";
-			break;
-		    case RTARROW:
-			what = "RTARROW";
-			break;
-		    case LTARROW:
-			what = "LTARROW";
-			break;
-		    case PGDOWN:
-			what = "PGDOWN";
-			break;
-		    case PGUP:
-			what = "PGUP";
-			break;
-		    case HOME:
-			what = "HOME";
-			break;
-		    case END_KEY:
-			what = "END_KEY";
-			break;
-		    case F1:
-			what = "F1";
-			break;
-		    case DO_KEY:
-			what = "DO_KEY";
-			break;
-		    case FIND_KEY:
-			what = "FIND_KEY";
-			break;
-		    case SELECT_KEY:
-			what = "SELECT_KEY";
-			break;
-		    case INSERT_KEY:
-			what = "INSERT_KEY";
-			break;
-		    case REMOVE_KEY:
-			what = "REMOVE_KEY";
-			break;
-		    case DO_NOTHING:
-			what = "DO_NOTHING";
-			break;
-		    case BACKTAB_KEY:
-			what = "BACKTAB_KEY";
-			break;
-		    case MOUSE_KEY:
-			what = "MOUSE_KEY";
-			break;
-		    default:
-			what = "";
-			break;
-		    }
-		    if (*what) {
-			sprintf(comment, "\t/* %s */", what);
+		    if (Non_Empty(what)) {
+			sprintf(comment, "\t/* %s%s */", what,
+				((strchr(what, '_') != 0)
+				 ? ""
+				 : "_KEY"));
 		    } else {
 			strcpy(comment, "");
 		    }
@@ -1661,7 +1606,7 @@ static void printEditMap(LYEditConfig * table)
 }
 
 #else
-#define printEditMap(table)	/* nothing */
+#define checkEditMap(table)	/* nothing */
 #endif
 
 static void initLineEditor(LYEditConfig * table)
@@ -1673,11 +1618,10 @@ static void initLineEditor(LYEditConfig * table)
     memset(used, 0, sizeof(LYEditCode) * (KEYMAP_SIZE - 1));
     for (k = 0; init[k].code >= 0; ++k) {
 	int code = init[k].code;
-	int edit = init[k].edit;
 
-	used[code] = edit;
+	used[code] = init[k].edit;
     }
-    printEditMap(table);
+    checkEditMap(table);
 }
 
 /*
@@ -1688,7 +1632,7 @@ void LYinitEditmap(void)
     unsigned j;
 
     for (j = 0; j < TABLESIZE(LYLineEditors); ++j) {
-	LYLineeditNames[j] = LYLineEditors[j].name;
+	LYEditorNames[j] = LYLineEditors[j].name;
 	initLineEditor(&LYLineEditors[j]);
     }
     for (j = 0; j < TABLESIZE(LYModifierBindings); ++j) {

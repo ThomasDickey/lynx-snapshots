@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTML.c,v 1.162 2013/10/02 22:22:06 tom Exp $
+ * $LynxId: HTML.c,v 1.163 2013/10/13 14:24:33 tom Exp $
  *
  *		Structured stream to Rich hypertext converter
  *		============================================
@@ -6385,7 +6385,7 @@ static int HTML_end_element(HTStructured * me, int element_number,
 		    HTChunkPuts(&me->object, "</OBJECT>");
 		    if (!include)	/* error, should not happen */
 			include = &me->xinclude;
-		    StrnAllocCat(*include, me->object.data, me->object.size);
+		    StrnAllocCat(*include, me->object.data, (size_t) me->object.size);
 		    clear_objectdata(me);
 		    /* an internal fake call to keep our stack happy: */
 		    HTML_start_element(me, HTML_OBJECT, NULL, NULL,

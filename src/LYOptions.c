@@ -1,4 +1,4 @@
-/* $LynxId: LYOptions.c,v 1.155 2013/10/10 23:29:51 tom Exp $ */
+/* $LynxId: LYOptions.c,v 1.157 2013/10/12 14:51:18 tom Exp $ */
 #include <HTUtils.h>
 #include <HTFTP.h>
 #include <HTTP.h>		/* 'reloading' flag */
@@ -548,7 +548,7 @@ void LYoptions(void)
 
     LYmove(L_Lineed, 5);
     addlbl("li(N)e edit style            : ");
-    LYaddstr(LYLineeditNames[current_lineedit]);
+    LYaddstr(LYEditorNames[current_lineedit]);
 
 #ifdef EXP_KEYBOARD_LAYOUT
     LYmove(L_Layout, 5);
@@ -651,7 +651,7 @@ void LYoptions(void)
 		_statusline(ACCEPT_DATA);
 		LYmove(L_EDITOR, COL_OPTION_VALUES);
 		lynx_start_bold();
-		ch = LYgetBString(&my_data, VISIBLE, 0, NORECALL);
+		ch = LYgetBString(&my_data, FALSE, 0, NORECALL);
 		lynx_stop_bold();
 		LYmove(L_EDITOR, COL_OPTION_VALUES);
 		if (term_options || ch == -1) {
@@ -686,7 +686,7 @@ void LYoptions(void)
 	    _statusline(ACCEPT_DATA);
 	    LYmove(L_DISPLAY, COL_OPTION_VALUES);
 	    lynx_start_bold();
-	    ch = LYgetBString(&my_data, VISIBLE, 0, NORECALL);
+	    ch = LYgetBString(&my_data, FALSE, 0, NORECALL);
 	    lynx_stop_bold();
 	    LYmove(L_DISPLAY, COL_OPTION_VALUES);
 
@@ -801,7 +801,7 @@ void LYoptions(void)
 		_statusline(ACCEPT_DATA);
 		LYmove(L_HOME, C_DEFAULT);
 		lynx_start_bold();
-		ch = LYgetBString(&my_data, VISIBLE, 0, NORECALL);
+		ch = LYgetBString(&my_data, FALSE, 0, NORECALL);
 		lynx_stop_bold();
 		LYmove(L_HOME, C_DEFAULT);
 		BStrAlloc(my_data, my_data->len + LY_MAXPATH);	/* lengthen */
@@ -867,7 +867,7 @@ void LYoptions(void)
 	    _statusline(ACCEPT_DATA);
 	    LYmove(L_MAIL_ADDRESS, COL_OPTION_VALUES);
 	    lynx_start_bold();
-	    ch = LYgetBString(&my_data, VISIBLE, 0, NORECALL);
+	    ch = LYgetBString(&my_data, FALSE, 0, NORECALL);
 	    lynx_stop_bold();
 	    LYmove(L_MAIL_ADDRESS, COL_OPTION_VALUES);
 	    if (term_options || ch == -1) {
@@ -1080,7 +1080,7 @@ void LYoptions(void)
 	    _statusline(ACCEPT_DATA);
 	    LYmove(L_LANGUAGE, COL_OPTION_VALUES);
 	    lynx_start_bold();
-	    ch = LYgetBString(&my_data, VISIBLE, 0, NORECALL);
+	    ch = LYgetBString(&my_data, FALSE, 0, NORECALL);
 	    lynx_stop_bold();
 	    LYmove(L_LANGUAGE, COL_OPTION_VALUES);
 	    if (term_options || ch == -1) {
@@ -1114,7 +1114,7 @@ void LYoptions(void)
 	    _statusline(ACCEPT_DATA);
 	    LYmove(L_PREF_CHARSET, COL_OPTION_VALUES);
 	    lynx_start_bold();
-	    ch = LYgetBString(&my_data, VISIBLE, 0, NORECALL);
+	    ch = LYgetBString(&my_data, FALSE, 0, NORECALL);
 	    lynx_stop_bold();
 	    LYmove(L_PREF_CHARSET, COL_OPTION_VALUES);
 	    if (term_options || ch == -1) {
@@ -1321,16 +1321,16 @@ void LYoptions(void)
 	    if (!LYSelectPopups) {
 		current_lineedit = LYChooseEnum(current_lineedit,
 						L_Lineed, -1,
-						LYLineeditNames);
+						LYEditorNames);
 	    } else {
 		current_lineedit = LYChoosePopup(current_lineedit,
 						 L_Lineed, -1,
-						 LYLineeditNames,
+						 LYEditorNames,
 						 0, FALSE, FALSE);
 #if defined(VMS) || defined(USE_SLANG)
 		LYmove(L_Lineed, COL_OPTION_VALUES);
 		LYclrtoeol();
-		LYaddstr(LYLineeditNames[current_lineedit]);
+		LYaddstr(LYEditorNames[current_lineedit]);
 #endif /* VMS || USE_SLANG */
 	    }
 	    response = ' ';
@@ -1445,7 +1445,7 @@ void LYoptions(void)
 		_statusline(ACCEPT_DATA_OR_DEFAULT);
 		LYmove(L_User_Agent, COL_OPTION_VALUES);
 		lynx_start_bold();
-		ch = LYgetBString(&my_data, VISIBLE, 0, NORECALL);
+		ch = LYgetBString(&my_data, FALSE, 0, NORECALL);
 		lynx_stop_bold();
 		LYmove(L_User_Agent, COL_OPTION_VALUES);
 		if (term_options || ch == -1) {
@@ -1969,7 +1969,7 @@ void edit_bookmarks(void)
 		    BStrCopy0(my_data,
 			      (!MBM_A_subdescript[a] ?
 			       "" : MBM_A_subdescript[a]));
-		    (void) LYgetBString(&my_data, VISIBLE, 0, NORECALL);
+		    (void) LYgetBString(&my_data, FALSE, 0, NORECALL);
 		    lynx_stop_bold();
 
 		    if (isBEmpty(my_data)) {
@@ -2003,7 +2003,7 @@ void edit_bookmarks(void)
 
 		lynx_start_bold();
 		BStrCopy0(my_data, NonNull(MBM_A_subbookmark[a]));
-		(void) LYgetBString(&my_data, VISIBLE, 0, NORECALL);
+		(void) LYgetBString(&my_data, FALSE, 0, NORECALL);
 		lynx_stop_bold();
 
 		if (isBEmpty(my_data)) {
@@ -2820,7 +2820,7 @@ int postoptions(DocInfo *newdoc)
 	    int j;
 
 	    /* prevent spoofing attempt */
-	    for (j = 0; LYLineeditNames[j]; j++) {
+	    for (j = 0; LYEditorNames[j]; j++) {
 		if (j == newval)
 		    current_lineedit = newval;
 	    }
@@ -3660,14 +3660,14 @@ static int gen_options(char **newfile)
     EndSelect(fp0);
 
     /* Line edit style: SELECT */
-    if (LYLineeditNames[1]) {	/* well, at least 2 line edit styles available */
+    if (LYEditorNames[1]) {	/* well, at least 2 line edit styles available */
 	PutLabel(fp0, gettext("Line edit style"), lineedit_mode_string);
 	BeginSelect(fp0, lineedit_mode_string);
-	for (i = 0; LYLineeditNames[i]; i++) {
+	for (i = 0; LYEditorNames[i]; i++) {
 	    char temp[16];
 
 	    sprintf(temp, "%d", i);
-	    PutOption(fp0, i == current_lineedit, temp, LYLineeditNames[i]);
+	    PutOption(fp0, i == current_lineedit, temp, LYEditorNames[i]);
 	}
 	EndSelect(fp0);
     }

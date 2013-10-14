@@ -1,4 +1,4 @@
-dnl $LynxId: aclocal.m4,v 1.205 2013/10/08 21:47:05 tom Exp $
+dnl $LynxId: aclocal.m4,v 1.206 2013/10/12 20:03:53 tom Exp $
 dnl Macros for auto-configure script.
 dnl by Thomas E. Dickey <dickey@invisible-island.net>
 dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
@@ -881,7 +881,7 @@ $2])
 done
 ])
 dnl ---------------------------------------------------------------------------
-dnl CF_ADD_SUBDIR_PATH version: 3 updated: 2010/07/03 20:58:12
+dnl CF_ADD_SUBDIR_PATH version: 4 updated: 2013/10/08 17:47:05
 dnl ------------------
 dnl Append to a search-list for a nonstandard header/lib-file
 dnl	$1 = the variable to return as result
@@ -3237,7 +3237,7 @@ AC_DEFUN([CF_HELP_MESSAGE],
 [AC_DIVERT_HELP([$1])dnl
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_INET_ADDR version: 6 updated: 2012/11/08 20:57:52
+dnl CF_INET_ADDR version: 7 updated: 2013/10/08 17:47:05
 dnl ------------
 dnl For Lynx, check if the libraries we have found give us inet_aton, or
 dnl inet_addr.  If not, try to find the latter function with -lbind or
@@ -3588,7 +3588,7 @@ ifelse($1,,[
 fi
 ])
 dnl ---------------------------------------------------------------------------
-dnl CF_MIXEDCASE_FILENAMES version: 5 updated: 2013/09/07 13:54:05
+dnl CF_MIXEDCASE_FILENAMES version: 6 updated: 2013/10/08 17:47:05
 dnl ----------------------
 dnl Check if the file-system supports mixed-case filenames.  If we're able to
 dnl create a lowercase name and see it as uppercase, it doesn't support that.
@@ -3978,7 +3978,7 @@ EOF
 test "$cf_cv_ncurses_version" = no || AC_DEFINE(NCURSES,1,[Define to 1 if we are using ncurses headers/libraries])
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_NETLIBS version: 9 updated: 2012/11/08 20:57:52
+dnl CF_NETLIBS version: 10 updated: 2013/10/08 17:47:05
 dnl ----------
 dnl After checking for functions in the default $LIBS, make a further check
 dnl for the functions that are netlib-related (these aren't always in the
@@ -6875,6 +6875,8 @@ define([CF__ICONV_HEAD],[
 #include <iconv.h>]
 )dnl
 dnl ---------------------------------------------------------------------------
+dnl CF__INET_HEAD version: 1 updated: 2013/10/08 17:47:05
+dnl -------------
 dnl Header-files needed for inet.h compile-checks
 define([CF__INET_HEAD],[
 #if defined(__MINGW32__)

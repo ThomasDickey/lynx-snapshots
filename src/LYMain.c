@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMain.c,v 1.245 2013/10/11 10:06:51 tom Exp $
+ * $LynxId: LYMain.c,v 1.246 2013/10/13 20:35:38 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTP.h>
@@ -2884,7 +2884,7 @@ static int nocolor_fun(char *next_arg GCC_UNUSED)
 {
     LYShowColor = SHOW_COLOR_NEVER;
 #ifdef USE_SLANG
-    Lynx_Color_Flags &= ~SL_LYNX_USE_COLOR;
+    Lynx_Color_Flags &= ~(unsigned) SL_LYNX_USE_COLOR;
     Lynx_Color_Flags |= SL_LYNX_OVERRIDE_COLOR;
 #endif
     return 0;

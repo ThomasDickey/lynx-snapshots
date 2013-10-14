@@ -1,4 +1,4 @@
-/* $LynxId: LYDownload.c,v 1.66 2012/02/09 18:55:26 tom Exp $ */
+/* $LynxId: LYDownload.c,v 1.69 2013/10/13 20:23:07 tom Exp $ */
 #include <HTUtils.h>
 #include <HTParse.h>
 #include <HTList.h>
@@ -140,12 +140,12 @@ void LYDownload(char *line)
 	}
 
       check_recall:
-	if ((ch = LYgetBString(&buffer, VISIBLE, 0, recall)) < 0 ||
+	if ((ch = LYgetBString(&buffer, FALSE, 0, recall)) < 0 ||
 	    isBEmpty(buffer) ||
-	    ch == UPARROW ||
-	    ch == DNARROW) {
+	    ch == UPARROW_KEY ||
+	    ch == DNARROW_KEY) {
 
-	    if (recall && ch == UPARROW) {
+	    if (recall && ch == UPARROW_KEY) {
 		if (FirstRecall) {
 		    FirstRecall = FALSE;
 		    /*
@@ -177,7 +177,7 @@ void LYDownload(char *line)
 		    }
 		    goto check_recall;
 		}
-	    } else if (recall && ch == DNARROW) {
+	    } else if (recall && ch == DNARROW_KEY) {
 		if (FirstRecall) {
 		    FirstRecall = FALSE;
 		    /*
@@ -306,12 +306,12 @@ void LYDownload(char *line)
 		}
 
 	      check_again:
-		if ((ch = LYgetBString(&buffer, VISIBLE, 0, recall)) < 0 ||
+		if ((ch = LYgetBString(&buffer, FALSE, 0, recall)) < 0 ||
 		    isBEmpty(buffer) ||
-		    ch == UPARROW ||
-		    ch == DNARROW) {
+		    ch == UPARROW_KEY ||
+		    ch == DNARROW_KEY) {
 
-		    if (recall && ch == UPARROW) {
+		    if (recall && ch == UPARROW_KEY) {
 			if (FirstRecall) {
 			    FirstRecall = FALSE;
 			    /*
@@ -344,7 +344,7 @@ void LYDownload(char *line)
 			    }
 			    goto check_again;
 			}
-		    } else if (recall && ch == DNARROW) {
+		    } else if (recall && ch == DNARROW_KEY) {
 			if (FirstRecall) {
 			    FirstRecall = FALSE;
 			    /*

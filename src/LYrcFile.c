@@ -1,4 +1,4 @@
-/* $LynxId: LYrcFile.c,v 1.90 2012/11/14 01:06:06 tom Exp $ */
+/* $LynxId: LYrcFile.c,v 1.91 2013/10/12 13:06:01 tom Exp $ */
 #include <HTUtils.h>
 #include <HTFTP.h>
 #include <LYUtils.h>
@@ -434,7 +434,7 @@ file lists such as FTP directories.  The options are:\n\
     PARSE_ARY(RC_KBLAYOUT,              current_layout,     LYKbLayoutNames, NULL),
 #endif
     PARSE_ENU(RC_KEYPAD_MODE,           keypad_mode,        tbl_keypad_mode, NULL),
-    PARSE_ARY(RC_LINEEDIT_MODE,         current_lineedit,   LYLineeditNames, N_("\
+    PARSE_ARY(RC_LINEEDIT_MODE,         current_lineedit,   LYEditorNames, N_("\
 lineedit_mode specifies the key binding used for inputting strings in\n\
 prompts and forms.  If lineedit_mode is set to \"Default Binding\" then\n\
 the following control characters are used for moving and deleting:\n\
