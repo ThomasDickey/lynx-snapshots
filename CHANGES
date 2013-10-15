@@ -1,9 +1,11 @@
--- $LynxId: CHANGES,v 1.682 2013/10/13 23:09:45 tom Exp $
+-- $LynxId: CHANGES,v 1.683 2013/10/15 08:32:47 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2013-10-13 (2.8.8dev.17)
+2013-10-15 (2.8.8dev.17)
+* modify logic in lkcstring_to_lkc() to allow named keys, e.g., from curses,
+  to be used consistently in a KEYMAP directive -TD
 * add version-info to LYIcon.rc -TD
 * add symbols in Keysym_Strings[] and table in setup_vtXXX_keymap() for
   function keys 2-12, to improve keymap-configurability -TD

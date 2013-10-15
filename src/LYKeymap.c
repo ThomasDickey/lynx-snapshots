@@ -1,4 +1,4 @@
-/* $LynxId: LYKeymap.c,v 1.95 2013/10/13 20:23:07 tom Exp $ */
+/* $LynxId: LYKeymap.c,v 1.97 2013/10/15 08:16:40 tom Exp $ */
 #include <HTUtils.h>
 #include <LYUtils.h>
 #include <LYGlobalDefs.h>
@@ -1014,6 +1014,17 @@ static const struct {
     { HOME_KEY,		"Home" },
     { END_KEY,		"End" },
     { F1_KEY,		"F1" },
+    { F2_KEY,		"F2" },
+    { F3_KEY,		"F3" },
+    { F4_KEY,		"F4" },
+    { F5_KEY,		"F5" },
+    { F6_KEY,		"F6" },
+    { F7_KEY,		"F7" },
+    { F8_KEY,		"F8" },
+    { F9_KEY,		"F9" },
+    { F10_KEY,		"F10" },
+    { F11_KEY,		"F11" },
+    { F12_KEY,		"F12" },
     { DO_KEY,		"Do key" },
     { FIND_KEY,		"Find key" },
     { SELECT_KEY,	"Select key" },
@@ -1414,9 +1425,8 @@ int lkcstring_to_lkc(const char *src)
 	map_string_to_keysym(src, &c);
 #ifndef USE_SLANG
 	if (c >= 0) {
-	    if ((c & LKC_MASK) > 255 && !(c & LKC_ISLKC))
-		c = (-1);	/* Don't accept untranslated curses KEY_* */
-	    else
+	    /* make curses-keys mapped from Keysym_Strings[] available here */
+	    if ((c & LKC_MASK) > 255)
 		c &= ~LKC_ISLKC;
 	}
 #endif
