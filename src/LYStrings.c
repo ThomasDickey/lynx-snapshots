@@ -1,4 +1,4 @@
-/* $LynxId: LYStrings.c,v 1.253 2013/10/13 20:47:25 tom Exp $ */
+/* $LynxId: LYStrings.c,v 1.255 2013/10/15 09:08:42 tom Exp $ */
 #include <HTUtils.h>
 #include <HTCJK.h>
 #include <UCAux.h>
@@ -980,7 +980,7 @@ static Keysym_String_List Keysym_Strings [] =
     INTERN_KEY( "INSERT_KEY",	INSERT_KEY,	KEY_IC ),
     INTERN_KEY( "REMOVE_KEY",	REMOVE_KEY,	KEY_DC ),
     INTERN_KEY( "DO_NOTHING",	DO_NOTHING,	DO_NOTHING|LKC_ISLKC ),
-    INTERN_KEY( NULL,		-1,		ERR )
+    INTERN_KEY( NULL,		UNKNOWN_KEY,	ERR )
 };
 /* *INDENT-ON* */
 
@@ -1214,8 +1214,7 @@ int map_string_to_keysym(const char *str, int *keysym)
 	    *keysym = LAC_TO_LKC0(*keysym);
 	    return (*keysym);
 	}
-    }
-    if (strncasecomp(str, "Meta-", 5) == 0) {
+    } else if (strncasecomp(str, "Meta-", 5) == 0) {
 	str += 5;
 	modifier = LKC_MOD2;
 	if (*str) {
@@ -1242,8 +1241,7 @@ int map_string_to_keysym(const char *str, int *keysym)
 		    return (*keysym = (UCH(buf[0])) | modifier);
 	    }
 	}
-    }
-    if (*str == SQUOTE) {
+    } else if (*str == SQUOTE) {
 	unescaped_char(str, keysym);
     } else if (isdigit(UCH(*str))) {
 	char *tmp;
@@ -1272,7 +1270,7 @@ int map_string_to_keysym(const char *str, int *keysym)
 LYExtraKeys LYnameToExtraKeys(const char *name)
 {
     Keysym_String_List *k = lookupKeysymByName(name);
-    LYExtraKeys result = -1;
+    LYExtraKeys result = UNKNOWN_KEY;
 
     if (k != 0)
 	result = k->internal;

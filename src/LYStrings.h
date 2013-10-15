@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYStrings.h,v 1.110 2013/10/13 20:30:39 tom Exp $
+ * $LynxId: LYStrings.h,v 1.111 2013/10/15 09:07:48 tom Exp $
  */
 #ifndef LYSTRINGS_H
 #define LYSTRINGS_H
@@ -144,7 +144,8 @@ extern "C" {
      * These are "extra" keys which do not fit into a single byte.
      */
     typedef enum {
-	UPARROW_KEY = 256
+	UNKNOWN_KEY = -1
+	,UPARROW_KEY = 256
 	,DNARROW_KEY
 	,RTARROW_KEY
 	,LTARROW_KEY
