@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYUtils.c,v 1.251 2013/10/13 20:23:07 tom Exp $
+ * $LynxId: LYUtils.c,v 1.253 2013/10/18 00:39:19 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTCP.h>
@@ -249,6 +249,35 @@ static int w32_get_reg_sz(HKEY hkey, const char *name, char *value, unsigned len
 	CTRACE((tfp, "->%s\n", value));
     }
     return result;
+}
+
+static char *w32_get_shell_folder(const char *name)
+{
+    static HKEY rootkey = HKEY_CURRENT_USER;
+
+    char *result = 0;
+    HKEY hkey;
+    char buffer[LY_MAXPATH];
+
+    if (RegOpenKeyEx(rootkey,
+		     W32_STRING("Software"
+				"\\Microsoft"
+				"\\Windows"
+				"\\CurrentVersion"
+				"\\Explorer"
+				"\\Shell Folders"),
+		     0,
+		     KEY_READ,
+		     &hkey) == ERROR_SUCCESS) {
+	if (w32_get_reg_sz(hkey, name, buffer, sizeof(buffer)) == ERROR_SUCCESS) {
+
+	    result = strdup(buffer);
+	    (void) RegCloseKey(hkey);
+	}
+
+	(void) RegCloseKey(hkey);
+    }
+    return non_empty(result) ? result : 0;
 }
 #endif
 
@@ -5119,6 +5148,7 @@ static char *CheckDir(char *path)
 	    || !S_ISDIR(stat_info.st_mode))) {
 	path = NULL;
     }
+    CTRACE((tfp, "CheckDir(%s) %s\n", path, path ? "OK" : "ERR"));
     return path;
 }
 
@@ -5135,10 +5165,18 @@ static char *HomeEnv(void)
 	char *leaf;
 	static char *temp = NULL;
 
-	/* Windows 2000 */
-	if ((result = LYGetEnv("USERPROFILE")) != 0) {
-	    HTSprintf0(&temp, "%s%sMy Documents", result, PATHSEP_STR);
-	    result = CheckDir(temp);
+	result = w32_get_shell_folder("Personal");
+	if (result == 0) {
+	    /* Windows Vista/7 */
+	    if ((head = LYGetEnv("USERPROFILE")) != 0) {
+		HTSprintf0(&temp, "%s%sDocuments", head, PATHSEP_STR);
+		result = CheckDir(temp);
+		if (result == 0) {
+		    /* Windows 2000 */
+		    HTSprintf0(&temp, "%s%sMy Documents", head, PATHSEP_STR);
+		    result = CheckDir(temp);
+		}
+	    }
 	}
 	/* NT4 */
 	if (result == 0) {

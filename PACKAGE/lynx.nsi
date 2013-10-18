@@ -1,4 +1,4 @@
-; $LynxId: lynx.nsi,v 1.8 2013/10/13 21:28:18 tom Exp $
+; $LynxId: lynx.nsi,v 1.9 2013/10/17 00:52:26 tom Exp $
 ; Script originally generated with the Venis Install Wizard, but customized.
 ; The Inno Setup script is preferred; but this can be built via cross-compiling.
 
@@ -22,6 +22,8 @@ Name "${INSTALL}"
 InstallDir "$PROGRAMFILES\${INSTALL}"
 InstallDirRegKey HKLM "Software\${SUBKEY}" "$INSTDIR\bin"
 OutFile "NSIS-Output\${APPNAME}-${VERSION}-setup.exe"
+
+RequestExecutionLevel highest
 
 CRCCheck on
 SetCompressor /SOLID lzma
