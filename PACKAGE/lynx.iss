@@ -1,4 +1,4 @@
-; $LynxId: lynx.iss,v 1.10 2013/09/30 00:34:08 tom Exp $
+; $LynxId: lynx.iss,v 1.11 2013/10/17 00:34:49 tom Exp $
 ; vile:ts=2 sw=2 notabinsert
 ;
 ; This is the BASE script for different flavors of the installer for Lynx.
@@ -103,6 +103,7 @@ OutputDir=..\PACKAGE\lynx-setup
 #emit 'OutputBaseFilename=' + SetupBaseName + LYNX_VERSION + '-setup'
 Compression=lzma
 SolidCompression=yes
+PrivilegesRequired=none
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"

@@ -1,9 +1,17 @@
--- $LynxId: CHANGES,v 1.683 2013/10/15 08:32:47 tom Exp $
+-- $LynxId: CHANGES,v 1.687 2013/10/17 10:43:28 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2013-10-15 (2.8.8dev.17)
+2013-10-17 (2.8.8dev.17)
+* improve DOSPATH-related logic in HomeEnv(), making this work properly with
+  Windows Vista and 7 (report by Manuel Nunez) -TD
+* modify samples/*.bat to work when running in a directory whose pathname
+  contains spaces -TD
+* reduce required privileges for installing in lynx.iss -TD
+* improve sed expression appended to help_files.sed to fix a case for the
+  edit-helpfiles which left a ".gz.gz" suffix for compressed filename URLs,
+  overlooked since 2.8.1pre.3 -TD
 * modify logic in lkcstring_to_lkc() to allow named keys, e.g., from curses,
   to be used consistently in a KEYMAP directive -TD
 * add version-info to LYIcon.rc -TD
