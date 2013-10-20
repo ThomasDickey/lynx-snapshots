@@ -1,4 +1,4 @@
-/* $LynxId: LYUtils.h,v 1.91 2012/02/09 18:55:26 tom Exp $ */
+/* $LynxId: LYUtils.h,v 1.92 2013/10/19 00:55:45 tom Exp $ */
 #ifndef LYUTILS_H
 #define LYUTILS_H
 
@@ -358,6 +358,7 @@ extern "C" {
 	LYNXCOOKIE_URL_TYPE,
 	LYNXDIRED_URL_TYPE,
 	LYNXDOWNLOAD_URL_TYPE,
+	LYNXEDITMAP_URL_TYPE,
 	LYNXHIST_URL_TYPE,
 	LYNXIMGMAP_URL_TYPE,
 	LYNXKEYMAP_URL_TYPE,
@@ -439,9 +440,13 @@ extern "C" {
 #define isWAIS_URL(addr)     !strncasecomp(addr, STR_WAIS_URL, LEN_WAIS_URL)
 
 /* internal URLs */
+#ifdef USE_CACHEJAR
 #define STR_LYNXCACHE        "LYNXCACHE:"
 #define LEN_LYNXCACHE        10
 #define isLYNXCACHE(addr)    !strncasecomp(addr, STR_LYNXCACHE, LEN_LYNXCACHE)
+#else
+#define isLYNXCACHE(addr)    FALSE
+#endif
 
 #define STR_LYNXCFG          "LYNXCFG:"
 #define LEN_LYNXCFG          8
@@ -472,6 +477,10 @@ extern "C" {
 #define STR_LYNXDOWNLOAD     "LYNXDOWNLOAD:"
 #define LEN_LYNXDOWNLOAD     13
 #define isLYNXDOWNLOAD(addr) !strncasecomp(addr, STR_LYNXDOWNLOAD, LEN_LYNXDOWNLOAD)
+
+#define STR_LYNXEDITMAP      "LYNXEDITMAP:"
+#define LEN_LYNXEDITMAP      11
+#define isLYNXEDITMAP(addr)  !strncasecomp(addr, STR_LYNXEDITMAP, LEN_LYNXEDITMAP)
 
 #define STR_LYNXHIST         "LYNXHIST:"
 #define LEN_LYNXHIST         9

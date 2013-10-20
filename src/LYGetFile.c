@@ -1,4 +1,4 @@
-/* $LynxId: LYGetFile.c,v 1.90 2013/10/12 14:51:18 tom Exp $ */
+/* $LynxId: LYGetFile.c,v 1.91 2013/10/19 01:08:57 tom Exp $ */
 #include <HTUtils.h>
 #include <HTTP.h>
 #include <HTAnchor.h>		/* Anchor class */
@@ -189,6 +189,7 @@ int getfile(DocInfo *doc, int *target)
 	    if (!(url_type == HTTP_URL_TYPE ||
 		  url_type == HTTPS_URL_TYPE ||
 		  url_type == LYNXHIST_URL_TYPE ||
+		  url_type == LYNXEDITMAP_URL_TYPE ||
 		  url_type == LYNXKEYMAP_URL_TYPE ||
 		  url_type == LYNXIMGMAP_URL_TYPE ||
 		  url_type == LYNXCOOKIE_URL_TYPE ||
@@ -225,6 +226,7 @@ int getfile(DocInfo *doc, int *target)
 	    if (!(0 == StrNCmp(startrealm, WWWDoc.address,
 			       strlen(startrealm)) ||
 		  url_type == LYNXHIST_URL_TYPE ||
+		  url_type == LYNXEDITMAP_URL_TYPE ||
 		  url_type == LYNXKEYMAP_URL_TYPE ||
 		  url_type == LYNXIMGMAP_URL_TYPE ||
 		  url_type == LYNXCOOKIE_URL_TYPE ||
@@ -560,6 +562,7 @@ int getfile(DocInfo *doc, int *target)
 	     * allowed.
 	     */
 	} else if (local_host_only &&
+		   url_type != LYNXEDITMAP_URL_TYPE &&
 		   url_type != LYNXKEYMAP_URL_TYPE &&
 		   url_type != LYNXIMGMAP_URL_TYPE &&
 		   url_type != LYNXCOOKIE_URL_TYPE &&

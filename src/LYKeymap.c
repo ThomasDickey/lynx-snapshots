@@ -1,4 +1,4 @@
-/* $LynxId: LYKeymap.c,v 1.97 2013/10/15 08:16:40 tom Exp $ */
+/* $LynxId: LYKeymap.c,v 1.100 2013/10/19 13:51:38 tom Exp $ */
 #include <HTUtils.h>
 #include <LYUtils.h>
 #include <LYGlobalDefs.h>
@@ -845,6 +845,9 @@ static Kcmd revmap[] = {
 	LYK_JUMP, "JUMP",
 	"go directly to a target document or action" ),
     DATA(
+	LYK_EDITMAP, "EDITMAP",
+	"display the current edit-key map" ),
+    DATA(
 	LYK_KEYMAP, "KEYMAP",
 	"display the current key map" ),
     DATA(
@@ -1033,67 +1036,6 @@ static const struct {
     { DO_NOTHING,	"(DO_NOTHING)" },
     { BACKTAB_KEY,	"Back Tab" },
     { MOUSE_KEY,	"mouse pseudo key" },
-};
-
-struct emap {
-    const char *name;
-    const int   code;
-    const char *descr;
-};
-
-static struct emap ekmap[] = {
-  {"NOP",	LYE_NOP,	"Do Nothing"},
-  {"CHAR",	LYE_CHAR,	"Insert printable char"},
-  {"ENTER",	LYE_ENTER,	"Input complete, return char/lynxkeycode"},
-  {"TAB",	LYE_TAB,	"Input complete, return TAB"},
-  {"STOP",	LYE_STOP,	"Input deactivated"},
-  {"ABORT",	LYE_ABORT,	"Input cancelled"},
-
-  {"PASS",	LYE_FORM_PASS,  "In fields: input complete, or Do Nothing"},
-
-  {"DELN",	LYE_DELN,	"Delete next/curr char"},
-  {"DELP",	LYE_DELP,	"Delete prev      char"},
-  {"DELNW",	LYE_DELNW,	"Delete next word"},
-  {"DELPW",	LYE_DELPW,	"Delete prev word"},
-
-  {"ERASE",	LYE_ERASE,	"Erase the line"},
-
-  {"BOL",	LYE_BOL,	"Go to begin of line"},
-  {"EOL",	LYE_EOL,	"Go to end   of line"},
-  {"FORW",	LYE_FORW,	"Cursor forwards"},
-  {"FORW_RL",	LYE_FORW_RL,	"Cursor forwards or right link"},
-  {"BACK",	LYE_BACK,	"Cursor backwards"},
-  {"BACK_LL",	LYE_BACK_LL,	"Cursor backwards or left link"},
-  {"FORWW",	LYE_FORWW,	"Word forward"},
-  {"BACKW",	LYE_BACKW,	"Word back"},
-
-  {"LOWER",	LYE_LOWER,	"Lower case the line"},
-  {"UPPER",	LYE_UPPER,	"Upper case the line"},
-
-  {"LKCMD",	LYE_LKCMD,	"Invoke command prompt"},
-
-  {"AIX",	LYE_AIX,	"Hex 97"},
-
-  {"DELBL",	LYE_DELBL,	"Delete back to BOL"},
-  {"DELEL",	LYE_DELEL,	"Delete thru EOL"},
-
-  {"SWMAP",	LYE_SWMAP,	"Switch input keymap"},
-
-  {"TPOS",	LYE_TPOS,	"Transpose characters"},
-
-  {"SETM1",	LYE_SETM1,	"Set modifier 1 flag"},
-  {"SETM2",	LYE_SETM2,	"Set modifier 2 flag"},
-  {"UNMOD",	LYE_UNMOD,	"Fall back to no-modifier command"},
-
-  {"C1CHAR",	LYE_C1CHAR,	"Insert C1 char if printable"},
-
-  {"SETMARK",	LYE_SETMARK,	"emacs-like set-mark-command"},
-  {"XPMARK",	LYE_XPMARK,	"emacs-like exchange-point-and-mark"},
-  {"KILLREG",	LYE_KILLREG,	"emacs-like kill-region"},
-  {"YANK",	LYE_YANK,	"emacs-like yank"},
-#ifdef CAN_CUT_AND_PASTE
-  {"PASTE",	LYE_PASTE,	"ClipBoard to Lynx"},
-#endif
 };
 /* *INDENT-ON* */
 
@@ -1361,42 +1303,6 @@ int lacname_to_lac(const char *func)
     Kcmd *mp = LYStringToKcmd(func);
 
     return (mp != 0) ? (int) mp->code : -1;
-}
-
-/*
- * Return editactioncode whose name is the string func.  func must be present
- * in the ekmap table.  returns -1 if not found.  - kw
- */
-int lecname_to_lec(const char *func)
-{
-    int i;
-    struct emap *mp;
-    int result = -1;
-
-    if (non_empty(func)) {
-	for (i = 0, mp = ekmap; (*mp).name != NULL; mp++, i++) {
-	    if (strcmp((*mp).name, func) == 0) {
-		result = (*mp).code;
-		break;
-	    }
-	}
-    }
-    return result;
-}
-
-const char *lec_to_lecname(int code)
-{
-    struct emap *mp;
-    int i;
-    const char *result = 0;
-
-    for (i = 0, mp = ekmap; (*mp).name != NULL; mp++, i++) {
-	if ((*mp).code == code) {
-	    result = (*mp).name;
-	    break;
-	}
-    }
-    return result;
 }
 
 /*

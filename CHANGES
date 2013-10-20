@@ -1,11 +1,14 @@
--- $LynxId: CHANGES,v 1.687 2013/10/17 10:43:28 tom Exp $
+-- $LynxId: CHANGES,v 1.689 2013/10/19 12:11:03 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2013-10-17 (2.8.8dev.17)
+2013-10-19 (2.8.8dev.17)
+* add internal URL "LYNXEDITMAP:", which is (like "LYNXKEYMAP:") generated,
+  making that the primary page for field-editing help -TD
 * improve DOSPATH-related logic in HomeEnv(), making this work properly with
-  Windows Vista and 7 (report by Manuel Nunez) -TD
+  Windows Vista and 7.  The feature is needed to read Lynx's bookmarks file
+  from the user's "Personal" shell-folder (report by Manuel Nunez) -TD
 * modify samples/*.bat to work when running in a directory whose pathname
   contains spaces -TD
 * reduce required privileges for installing in lynx.iss -TD

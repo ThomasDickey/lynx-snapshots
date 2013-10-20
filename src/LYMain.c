@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMain.c,v 1.246 2013/10/13 20:35:38 tom Exp $
+ * $LynxId: LYMain.c,v 1.247 2013/10/19 01:22:25 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTP.h>
@@ -2262,6 +2262,7 @@ int main(int argc,
  *    LYNXKEYMAP, lynxcgi, LYNXIMGMAP, LYNXCOOKIE, LYNXCACHE, LYNXMESSAGES
  */
 #ifdef GLOBALREF_IS_MACRO
+extern GLOBALREF (HTProtocol, LYLynxEditmap);
 extern GLOBALREF (HTProtocol, LYLynxKeymap);
 extern GLOBALREF (HTProtocol, LYLynxCGI);
 extern GLOBALREF (HTProtocol, LYLynxIMGmap);
@@ -2273,6 +2274,7 @@ extern GLOBALREF (HTProtocol, LYLynxCache);
 extern GLOBALREF (HTProtocol, LYLynxStatusMessages);
 
 #else
+GLOBALREF HTProtocol LYLynxEditmap;
 GLOBALREF HTProtocol LYLynxKeymap;
 GLOBALREF HTProtocol LYLynxCGI;
 GLOBALREF HTProtocol LYLynxIMGmap;
@@ -2286,6 +2288,7 @@ GLOBALREF HTProtocol LYLynxStatusMessages;
 
 void LYRegisterLynxProtocols(void)
 {
+    HTRegisterProtocol(&LYLynxEditmap);
     HTRegisterProtocol(&LYLynxKeymap);
     HTRegisterProtocol(&LYLynxCGI);
     HTRegisterProtocol(&LYLynxIMGmap);

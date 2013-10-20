@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMainLoop.c,v 1.224 2013/10/13 20:23:07 tom Exp $
+ * $LynxId: LYMainLoop.c,v 1.226 2013/10/19 13:06:29 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTAccess.h>
@@ -1101,9 +1101,7 @@ static int handle_LYK_ACTIVATE(int *c,
 		 * FM
 		 */
 		if (isLYNXCOOKIE(links[curdoc.link].l_form->submit_action) ||
-#ifdef USE_CACHEJAR
 		    isLYNXCACHE(links[curdoc.link].l_form->submit_action) ||
-#endif
 #ifdef DIRED_SUPPORT
 #ifdef OK_PERMIT
 		    (isLYNXDIRED(links[curdoc.link].l_form->submit_action) &&
@@ -1118,6 +1116,7 @@ static int handle_LYK_ACTIVATE(int *c,
 #endif /* DIRED_SUPPORT */
 		    isLYNXDOWNLOAD(links[curdoc.link].l_form->submit_action) ||
 		    isLYNXHIST(links[curdoc.link].l_form->submit_action) ||
+		    isLYNXEDITMAP(links[curdoc.link].l_form->submit_action) ||
 		    isLYNXKEYMAP(links[curdoc.link].l_form->submit_action) ||
 		    isLYNXIMGMAP(links[curdoc.link].l_form->submit_action) ||
 		    isLYNXPRINT(links[curdoc.link].l_form->submit_action) ||
@@ -1275,13 +1274,10 @@ static int handle_LYK_ACTIVATE(int *c,
 	     */
 	    if (no_file_url && isFILE_URL(links[curdoc.link].lname)) {
 		if (!isFILE_URL(curdoc.address) &&
-		    !((isLYNXKEYMAP(curdoc.address) ||
-#ifndef USE_CACHEJAR
-		       isLYNXCOOKIE(curdoc.address)) &&
-#else
+		    !((isLYNXEDITMAP(curdoc.address) ||
+		       isLYNXKEYMAP(curdoc.address) ||
 		       isLYNXCOOKIE(curdoc.address) ||
 		       isLYNXCACHE(curdoc.address)) &&
-#endif
 		      !StrNCmp(links[curdoc.link].lname,
 			       helpfilepath,
 			       strlen(helpfilepath)))) {
@@ -1476,10 +1472,7 @@ static int handle_LYK_ACTIVATE(int *c,
 	    }
 #endif /* DIRED_SUPPORT  && !__DJGPP__ */
 	    if (isLYNXCOOKIE(curdoc.address)
-#ifdef USE_CACHEJAR
-		|| isLYNXCACHE(curdoc.address)
-#endif
-		) {
+		|| isLYNXCACHE(curdoc.address)) {
 		HTuncache_current_document();
 	    }
 	}
@@ -1649,9 +1642,7 @@ static void handle_LYK_ADD_BOOKMARK(BOOLEAN *refresh_screen,
 #endif /* DIRED_SUPPORT */
 	!LYIsUIPage(curdoc.address, UIP_DOWNLOAD_OPTIONS) &&
 	!isLYNXCOOKIE(curdoc.address) &&
-#ifdef USE_CACHEJAR
 	!isLYNXCACHE(curdoc.address) &&
-#endif
 	!LYIsUIPage(curdoc.address, UIP_OPTIONS_MENU) &&
 	((nlinks <= 0) ||
 	 (links[curdoc.link].lname != NULL &&
@@ -1660,9 +1651,7 @@ static void handle_LYK_ADD_BOOKMARK(BOOLEAN *refresh_screen,
 	  !isLYNXDIRED(links[curdoc.link].lname) &&
 	  !isLYNXDOWNLOAD(links[curdoc.link].lname) &&
 	  !isLYNXCOOKIE(links[curdoc.link].lname) &&
-#ifdef USE_CACHEJAR
 	  !isLYNXCACHE(links[curdoc.link].lname) &&
-#endif
 	  !isLYNXPRINT(links[curdoc.link].lname)))) {
 	if (nlinks > 0) {
 	    if (curdoc.post_data == NULL &&
@@ -2276,9 +2265,7 @@ static int handle_LYK_DOWNLOAD(int *cmd,
 	    }
 
 	} else if (isLYNXCOOKIE(links[curdoc.link].lname) ||
-#ifdef USE_CACHEJAR
 		   isLYNXCACHE(links[curdoc.link].lname) ||
-#endif
 		   isLYNXDIRED(links[curdoc.link].lname) ||
 		   isLYNXDOWNLOAD(links[curdoc.link].lname) ||
 		   isLYNXPRINT(links[curdoc.link].lname) ||
@@ -2625,6 +2612,43 @@ static void handle_LYK_DWIMHELP(const char **cshelpfile)
 	!FormIsReadonly(links[curdoc.link].l_form) &&
 	LinkIsTextLike(curdoc.link)) {
 	*cshelpfile = LYLineeditHelpURL();
+    }
+}
+
+static void handle_LYK_EDITMAP(BOOLEAN *vi_keys_flag,
+			       BOOLEAN *emacs_keys_flag,
+			       int *old_c,
+			       int real_c)
+{
+    if (*old_c != real_c) {
+	*old_c = real_c;
+	set_address(&newdoc, STR_LYNXEDITMAP);
+	StrAllocCopy(newdoc.title, CURRENT_EDITMAP_TITLE);
+	LYFreePostData(&newdoc);
+	FREE(newdoc.bookmark);
+	newdoc.isHEAD = FALSE;
+	newdoc.safe = FALSE;
+	newdoc.internal_link = FALSE;
+	/*
+	 * If vi_keys changed, the keymap did too, so force no cache, and reset
+	 * the flag.  - FM
+	 */
+	if (*vi_keys_flag != vi_keys ||
+	    *emacs_keys_flag != emacs_keys) {
+	    LYforce_no_cache = TRUE;
+	    *vi_keys_flag = vi_keys;
+	    *emacs_keys_flag = emacs_keys;
+	}
+#if defined(DIRED_SUPPORT) && defined(OK_OVERRIDE)
+	/*
+	 * Remember whether we are in dired menu so we can display the right
+	 * keymap.
+	 */
+	if (!no_dired_support) {
+	    prev_lynx_edit_mode = lynx_edit_mode;
+	}
+#endif /* DIRED_SUPPORT && OK_OVERRIDE */
+	LYforce_no_cache = TRUE;
     }
 }
 
@@ -5885,9 +5909,7 @@ int mainloop(void)
 			HTMainText &&
 			nlinks > 0 && curdoc.link < nlinks &&
 			!isLYNXHIST(NonNull(newdoc.address)) &&
-#ifdef USE_CACHEJAR
 			!isLYNXCACHE(NonNull(newdoc.address)) &&
-#endif
 			!isLYNXCOOKIE(NonNull(newdoc.address))) {
 			char *mail_owner = NULL;
 
@@ -7673,6 +7695,10 @@ int mainloop(void)
 
 	case LYK_TOGGLE_HELP:
 	    handle_LYK_TOGGLE_HELP();
+	    break;
+
+	case LYK_EDITMAP:
+	    handle_LYK_EDITMAP(&vi_keys_flag, &emacs_keys_flag, &old_c, real_c);
 	    break;
 
 	case LYK_KEYMAP:

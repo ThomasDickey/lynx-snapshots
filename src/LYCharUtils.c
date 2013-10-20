@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYCharUtils.c,v 1.124 2013/10/13 14:26:51 tom Exp $
+ * $LynxId: LYCharUtils.c,v 1.126 2013/10/19 19:12:09 tom Exp $
  *
  *  Functions associated with LYCharSets.c and the Lynx version of HTML.c - FM
  *  ==========================================================================
@@ -46,17 +46,31 @@
 int OL_CONTINUE = -29999;	/* flag for whether CONTINUE is set */
 int OL_VOID = -29998;		/* flag for whether a count is set */
 
-/*
- *  This function converts any ampersands in allocated
- *  strings to "&amp;".  If isTITLE is TRUE, it also
- *  converts any angle-brackets to "&lt;" or "&gt;". - FM
- */
-void LYEntify(char **str,
-	      int isTITLE)
+static size_t count_char(const char *value, int ch)
 {
-    char *p = *str;
-    char *q = NULL, *cp = NULL;
-    int amps = 0, lts = 0, gts = 0;
+    const char *found;
+    size_t result = 0;
+
+    while ((*value != '\0') && (found = strchr(value, ch)) != NULL) {
+	++result;
+	value = (found + 1);
+    }
+    return result;
+}
+
+/*
+ * This function converts any ampersands in a pre-allocated string to "&amp;". 
+ * If brackets is TRUE, it also converts any angle-brackets to "&lt;" or "&gt;".
+ */
+void LYEntify(char **in_out,
+	      int brackets)
+{
+    char *source = *in_out;
+    char *target;
+    char *result = NULL;
+    size_t count_AMPs = 0;
+    size_t count_LTs = 0;
+    size_t count_GTs = 0;
 
 #ifdef CJK_EX
     enum _state {
@@ -70,166 +84,133 @@ void LYEntify(char **str,
     int in_sjis = 0;
 #endif
 
-    if (isEmpty(p))
-	return;
-
-    /*
-     * Count the ampersands.  - FM
-     */
-    while ((*p != '\0') && (q = strchr(p, '&')) != NULL) {
-	amps++;
-	p = (q + 1);
-    }
-
-    /*
-     * Count the left-angle-brackets, if needed.  - FM
-     */
-    if (isTITLE == TRUE) {
-	p = *str;
-	while ((*p != '\0') && (q = strchr(p, '<')) != NULL) {
-	    lts++;
-	    p = (q + 1);
+    if (non_empty(source)) {
+	count_AMPs = count_char(*in_out, '&');
+	if (brackets) {
+	    count_LTs = count_char(*in_out, '<');
+	    count_GTs = count_char(*in_out, '>');
 	}
-    }
 
-    /*
-     * Count the right-angle-brackets, if needed.  - FM
-     */
-    if (isTITLE == TRUE) {
-	p = *str;
-	while ((*p != '\0') && (q = strchr(p, '>')) != NULL) {
-	    gts++;
-	    p = (q + 1);
-	}
-    }
+	if (count_AMPs != 0 || count_LTs != 0 || count_GTs != 0) {
 
-    /*
-     * Check whether we need to convert anything.  - FM
-     */
-    if (amps == 0 && lts == 0 && gts == 0)
-	return;
+	    target = typecallocn(char,
+				   (strlen(*in_out)
+				    + (4 * count_AMPs)
+				    + (3 * count_LTs)
+				    + (3 * count_GTs) + 1));
 
-    /*
-     * Allocate space and convert.  - FM
-     */
-    q = typecallocn(char,
-		    (strlen(*str)
-		     + (unsigned)(4 * amps)
-		     + (unsigned)(3 * lts)
-		     + (unsigned)(3 * gts) + 1));
-    if ((cp = q) == NULL)
-	outofmem(__FILE__, "LYEntify");
+	    if ((result = target) == NULL)
+		outofmem(__FILE__, "LYEntify");
 
-    assert(cp != NULL);
-    assert(q != NULL);
-
-    for (p = *str; *p; p++) {
+	    for (source = *in_out; *source; source++) {
 #ifdef CJK_EX
-	if (IS_CJK_TTY) {
-	    switch (state) {
-	    case S_text:
-		if (*p == '\033') {
-		    state = S_esc;
-		    *q++ = *p;
-		    continue;
+		if (IS_CJK_TTY) {
+		    switch (state) {
+		    case S_text:
+			if (*source == '\033') {
+			    state = S_esc;
+			    *target++ = *source;
+			    continue;
+			}
+			break;
+
+		    case S_esc:
+			if (*source == '$') {
+			    state = S_dollar;
+			} else if (*source == '(') {
+			    state = S_paren;
+			} else {
+			    state = S_text;
+			}
+			*target++ = *source;
+			continue;
+
+		    case S_dollar:
+			if (*source == '@' || *source == 'B' || *source == 'A') {
+			    state = S_nonascii_text;
+			} else if (*source == '(') {
+			    state = S_dollar_paren;
+			} else {
+			    state = S_text;
+			}
+			*target++ = *source;
+			continue;
+
+		    case S_dollar_paren:
+			if (*source == 'C') {
+			    state = S_nonascii_text;
+			} else {
+			    state = S_text;
+			}
+			*target++ = *source;
+			continue;
+
+		    case S_paren:
+			if (*source == 'B' || *source == 'J' || *source == 'T') {
+			    state = S_text;
+			} else if (*source == 'I') {
+			    state = S_nonascii_text;
+			} else if (*source == '\033') {
+			    state = S_esc;
+			}
+			*target++ = *source;
+			continue;
+
+		    case S_nonascii_text:
+			if (*source == '\033')
+			    state = S_esc;
+			*target++ = *source;
+			continue;
+
+		    default:
+			break;
+		    }
+		    if (*(source + 1) != '\0' &&
+			(IS_EUC(UCH(*source), UCH(*(source + 1))) ||
+			 IS_SJIS(UCH(*source), UCH(*(source + 1)), in_sjis) ||
+			 IS_BIG5(UCH(*source), UCH(*(source + 1))))) {
+			*target++ = *source++;
+			*target++ = *source;
+			continue;
+		    }
 		}
-		break;
-
-	    case S_esc:
-		if (*p == '$') {
-		    state = S_dollar;
-		    *q++ = *p;
-		    continue;
-		} else if (*p == '(') {
-		    state = S_paren;
-		    *q++ = *p;
-		    continue;
-		} else {
-		    state = S_text;
-		    *q++ = *p;
-		    continue;
-		}
-
-	    case S_dollar:
-		if (*p == '@' || *p == 'B' || *p == 'A') {
-		    state = S_nonascii_text;
-		    *q++ = *p;
-		    continue;
-		} else if (*p == '(') {
-		    state = S_dollar_paren;
-		    *q++ = *p;
-		    continue;
-		} else {
-		    state = S_text;
-		    *q++ = *p;
-		    continue;
-		}
-
-	    case S_dollar_paren:
-		if (*p == 'C') {
-		    state = S_nonascii_text;
-		    *q++ = *p;
-		    continue;
-		} else {
-		    state = S_text;
-		    *q++ = *p;
-		    continue;
-		}
-
-	    case S_paren:
-		if (*p == 'B' || *p == 'J' || *p == 'T') {
-		    state = S_text;
-		    *q++ = *p;
-		    continue;
-		} else if (*p == 'I') {
-		    state = S_nonascii_text;
-		    *q++ = *p;
-		    continue;
-		}
-		/* FALLTHRU */
-
-	    case S_nonascii_text:
-		if (*p == '\033')
-		    state = S_esc;
-		*q++ = *p;
-		continue;
-
-	    default:
-		break;
-	    }
-	    if (*(p + 1) != '\0' &&
-		(IS_EUC(UCH(*p), UCH(*(p + 1))) ||
-		 IS_SJIS(UCH(*p), UCH(*(p + 1)), in_sjis) ||
-		 IS_BIG5(UCH(*p), UCH(*(p + 1))))) {
-		*q++ = *p++;
-		*q++ = *p;
-		continue;
-	    }
-	}
 #endif
-	if (*p == '&') {
-	    *q++ = '&';
-	    *q++ = 'a';
-	    *q++ = 'm';
-	    *q++ = 'p';
-	    *q++ = ';';
-	} else if (isTITLE && *p == '<') {
-	    *q++ = '&';
-	    *q++ = 'l';
-	    *q++ = 't';
-	    *q++ = ';';
-	} else if (isTITLE && *p == '>') {
-	    *q++ = '&';
-	    *q++ = 'g';
-	    *q++ = 't';
-	    *q++ = ';';
-	} else {
-	    *q++ = *p;
+		switch (*source) {
+		case '&':
+		    *target++ = '&';
+		    *target++ = 'a';
+		    *target++ = 'm';
+		    *target++ = 'p';
+		    *target++ = ';';
+		    break;
+		case '<':
+		    if (brackets) {
+			*target++ = '&';
+			*target++ = 'l';
+			*target++ = 't';
+			*target++ = ';';
+			break;
+		    }
+		    /* FALLTHRU */
+		case '>':
+		    if (brackets) {
+			*target++ = '&';
+			*target++ = 'g';
+			*target++ = 't';
+			*target++ = ';';
+			break;
+		    }
+		    /* FALLTHRU */
+		default:
+		    *target++ = *source;
+		    break;
+		}
+	    }
+	    *target = '\0';
+	    FREE(*in_out);
+	    *in_out = result;
 	}
     }
-    *q = '\0';
-    FREE(*str);
-    *str = cp;
 }
 
 /*
