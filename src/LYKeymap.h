@@ -1,4 +1,4 @@
-/* $LynxId: LYKeymap.h,v 1.49 2013/10/12 00:04:22 tom Exp $ */
+/* $LynxId: LYKeymap.h,v 1.50 2013/10/19 12:59:21 tom Exp $ */
 #ifndef LYKEYMAP_H
 #define LYKEYMAP_H
 
@@ -185,6 +185,7 @@ extern "C" {
 	,LYK_DO_NOTHING
 	,LYK_TOGGLE_HELP
 	,LYK_JUMP
+	,LYK_EDITMAP
 	,LYK_KEYMAP
 	,LYK_LIST
 	,LYK_TOOLBAR

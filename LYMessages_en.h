@@ -1,10 +1,11 @@
 /*
- * $LynxId: LYMessages_en.h,v 1.73 2012/02/12 23:59:14 tom Exp $
+ * $LynxId: LYMessages_en.h,v 1.74 2013/10/19 13:02:24 tom Exp $
  *
  * Lynx - Hypertext navigation system
  *
- *   (c) Copyright 1992, 1993, 1994 University of Kansas
- *	 1995-1999: GNU General Public License
+ *   Copyright 1997-2013 Thomas E. Dickey
+ *   Copyright 1992, 1993, 1994 University of Kansas
+ *   Released 1995 using GNU General Public License
  */
 
 #ifndef LYMESSAGES_EN_H
@@ -818,6 +819,7 @@
 #define BOOKMARK_TITLE		gettext("Bookmark file")
 #define CONFIG_DEF_TITLE	gettext("Configuration Definitions")
 #define COOKIE_JAR_TITLE	gettext("Cookie Jar")
+#define CURRENT_EDITMAP_TITLE	gettext("Current Edit-Key Map")
 #define CURRENT_KEYMAP_TITLE	gettext("Current Key Map")
 #define DIRED_MENU_TITLE	gettext("File Management Options")
 #define DOWNLOAD_OPTIONS_TITLE	gettext("Download Options")

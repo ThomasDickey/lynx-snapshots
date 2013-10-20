@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYUtils.c,v 1.253 2013/10/18 00:39:19 tom Exp $
+ * $LynxId: LYUtils.c,v 1.254 2013/10/19 00:59:45 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTCP.h>
@@ -2292,16 +2292,14 @@ static BOOLEAN compare_type(char *tst,
 	&& CompareType(tst, cmp, len))
 
 /*
- *  Must recognize a URL and return the type.
- *  If recognized, based on a case-insensitive
- *  analysis of the scheme field, ensures that
- *  the scheme field has the expected case.
+ * Must recognize a URL and return the type.  If recognized, based on a
+ * case-insensitive analysis of the scheme field, ensures that the scheme field
+ * has the expected case.
  *
- *  Returns 0 (not a URL) for a NULL argument,
- *  one which lacks a colon.
+ * Returns 0 (not a URL) for a NULL argument, one which lacks a colon.
  *
- *  Chains to LYCheckForProxyURL() if a colon
- *  is present but the type is not recognized.
+ * Chains to LYCheckForProxyURL() if a colon is present but the type is not
+ * recognized.
  */
 UrlTypes is_url(char *filename)
 {
@@ -2357,92 +2355,56 @@ UrlTypes is_url(char *filename)
 	    } else if (CompareType(cp, STR_LYNXPROG, LEN_LYNXPROG)) {
 		/*
 		 * Special External Lynx type to handle execution of commands,
-		 * scripts or programs with do not require a pause to read
+		 * scripts or programs which do not require a pause to read
 		 * screen upon completion.
 		 */
 		result = LYNXPROG_URL_TYPE;
 
 	    } else if (CompareType(cp, STR_LYNXCGI, LEN_LYNXCGI)) {
-		/*
-		 * Special External Lynx type to handle cgi scripts.
-		 */
 		result = LYNXCGI_URL_TYPE;
 
 	    } else if (CompareType(cp, STR_LYNXPRINT, LEN_LYNXPRINT)) {
-		/*
-		 * Special Internal Lynx type.
-		 */
 		result = LYNXPRINT_URL_TYPE;
 
 	    } else if (CompareType(cp, STR_LYNXOPTIONS, LEN_LYNXOPTIONS)) {
-		/*
-		 * Special Internal Lynx type.
-		 */
 		result = LYNXOPTIONS_URL_TYPE;
 
 	    } else if (CompareType(cp, STR_LYNXCFG, LEN_LYNXCFG)) {
-		/*
-		 * Special Internal Lynx type.
-		 */
 		result = LYNXCFG_URL_TYPE;
 
 	    } else if (CompareType(cp, STR_LYNXMESSAGES, LEN_LYNXMESSAGES)) {
-		/*
-		 * Special Internal Lynx type.
-		 */
 		result = LYNXMESSAGES_URL_TYPE;
 
 	    } else if (CompareType(cp, STR_LYNXCFLAGS, LEN_LYNXCFLAGS)) {
-		/*
-		 * Special Internal Lynx type.
-		 */
 		result = LYNXCOMPILE_OPTS_URL_TYPE;
 
 	    } else if (CompareType(cp, STR_LYNXDOWNLOAD, LEN_LYNXDOWNLOAD)) {
-		/*
-		 * Special Internal Lynx type.
-		 */
 		result = LYNXDOWNLOAD_URL_TYPE;
 
 	    } else if (CompareType(cp, STR_LYNXDIRED, LEN_LYNXDIRED)) {
-		/*
-		 * Special Internal Lynx type.
-		 */
 		result = LYNXDIRED_URL_TYPE;
 
+	    } else if (CompareType(cp, STR_LYNXEDITMAP, LEN_LYNXEDITMAP)) {
+		result = LYNXEDITMAP_URL_TYPE;
+
 	    } else if (CompareType(cp, STR_LYNXHIST, LEN_LYNXHIST)) {
-		/*
-		 * Special Internal Lynx type.
-		 */
 		result = LYNXHIST_URL_TYPE;
 
 #ifdef USE_CACHEJAR
 	    } else if (CompareType(cp, STR_LYNXCACHE, LEN_LYNXCACHE)) {
-		/* 
-		 * Special Internal Lynx type.
-		 */
 		result = LYNXCACHE_URL_TYPE;
 #endif
-
 	    } else if (CompareType(cp, STR_LYNXKEYMAP, LEN_LYNXKEYMAP)) {
-		/*
-		 * Special Internal Lynx type.
-		 */
 		result = LYNXKEYMAP_URL_TYPE;
 
 	    } else if (CompareType(cp, STR_LYNXIMGMAP, LEN_LYNXIMGMAP)) {
-		/*
-		 * Special Internal Lynx type.
-		 */
 		/* force lower/uppercase of next part */
 		(void) is_url(&cp[LEN_LYNXIMGMAP]);
 		result = LYNXIMGMAP_URL_TYPE;
 
 	    } else if (CompareType(cp, STR_LYNXCOOKIE, LEN_LYNXCOOKIE)) {
-		/*
-		 * Special Internal Lynx type.
-		 */
 		result = LYNXCOOKIE_URL_TYPE;
+
 	    }
 	    break;
 #ifndef DISABLE_NEWS
@@ -6586,34 +6548,37 @@ BOOL LYIsUIPage3(const char *url,
 {
     unsigned int i;
     size_t l;
+    BOOL result = NO;
 
-    if (!url)
-	return NO;
-    for (i = 0; i < TABLESIZE(ly_uip); i++) {
-	if (ly_uip[i].type == type) {
-	    if (!ly_uip[i].url) {
-		return NO;
-	    } else if ((flagparam & UIP_P_FRAG) ?
-		       (!StrNCmp(ly_uip[i].url, url, (l = strlen(ly_uip[i].url)))
-			&& (url[l] == '\0' || url[l] == '#')) :
-		       !strcmp(ly_uip[i].url, url)) {
-		return YES;
-	    } else if (ly_uip[i].flags & UIP_F_MULTI) {
-		char *p;
-		HTList *l0 = ly_uip[i].alturls;
+    if (url) {
+	for (i = 0; i < TABLESIZE(ly_uip); i++) {
+	    if (ly_uip[i].type == type) {
+		if (!ly_uip[i].url) {
+		    break;
+		} else if ((flagparam & UIP_P_FRAG) ?
+			   (!StrNCmp(ly_uip[i].url, url, (l = strlen(ly_uip[i].url)))
+			    && (url[l] == '\0' || url[l] == '#')) :
+			   !strcmp(ly_uip[i].url, url)) {
+		    result = YES;
+		} else if (ly_uip[i].flags & UIP_F_MULTI) {
+		    char *p;
+		    HTList *l0 = ly_uip[i].alturls;
 
-		while ((p = (char *) HTList_nextObject(l0)) != NULL) {
-		    if ((flagparam & UIP_P_FRAG) ?
-			(!StrNCmp(p, url, (l = strlen(p)))
-			 && (url[l] == '\0' || url[l] == '#')) :
-			!strcmp(p, url))
-			return YES;
+		    while ((p = (char *) HTList_nextObject(l0)) != NULL) {
+			if ((flagparam & UIP_P_FRAG)
+			    ? (!StrNCmp(p, url, (l = strlen(p))) &&
+			       (url[l] == '\0' || url[l] == '#'))
+			    : !strcmp(p, url)) {
+			    result = YES;
+			    break;
+			}
+		    }
 		}
+		break;
 	    }
-	    return NO;
 	}
     }
-    return NO;
+    return result;
 }
 
 void LYRegisterUIPage(const char *url,

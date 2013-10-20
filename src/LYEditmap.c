@@ -1,14 +1,19 @@
 /*
- * $LynxId: LYEditmap.c,v 1.54 2013/10/13 20:23:07 tom Exp $
+ * $LynxId: LYEditmap.c,v 1.68 2013/10/19 20:04:16 tom Exp $
  *
  * LYEditMap.c
  * Keybindings for line and form editing.
  */
 
 #include <HTUtils.h>
+#include <HTAlert.h>
+#include <HTFile.h>
 #include <LYGlobalDefs.h>
+#include <LYCharUtils.h>
 #include <LYStrings.h>
 #include <LYKeymap.h>		/* KEYMAP_SIZE, LKC_*, LYK_* - kw */
+
+#define PUTS(buf)    (*target->isa->put_string)(target, buf)
 
 /* * * * * LynxEditactionCodes * * * * */
 #ifdef USE_ALT_BINDINGS
@@ -35,6 +40,72 @@ int escape_bound = 0;		/* User wanted Escape to perform actions?  */
 /*
  * See LYStrings.h for the LYE definitions.
  */
+/* *INDENT-OFF* */
+struct emap {
+    const char *name;
+    const int   code;
+    const char *descr;
+};
+
+#define SEPARATOR {"", -1, ""}
+
+static struct emap ekmap[] = {
+  {"NOP",	LYE_NOP,	"Do Nothing"},
+  {"CHAR",	LYE_CHAR,	"Insert printable char"},
+  SEPARATOR,
+  {"ENTER",	LYE_ENTER,	"Input complete, return char"},
+  {"TAB",	LYE_TAB,	"Input complete, return TAB"},
+  {"STOP",	LYE_STOP,	"Input deactivated"},
+  {"ABORT",	LYE_ABORT,	"Input cancelled"},
+  SEPARATOR,
+  {"PASS",	LYE_FORM_PASS,  "Fields only: input complete"},
+  SEPARATOR,
+  {"DELBL",	LYE_DELBL,	"Delete back to BOL"},
+  {"DELEL",	LYE_DELEL,	"Delete thru EOL"},
+  {"DELN",	LYE_DELN,	"Delete next/curr char"},
+  {"DELP",	LYE_DELP,	"Delete prev      char"},
+  {"DELNW",	LYE_DELNW,	"Delete next word"},
+  {"DELPW",	LYE_DELPW,	"Delete prev word"},
+  SEPARATOR,
+
+  {"ERASE",	LYE_ERASE,	"Erase the line"},
+  SEPARATOR,
+  {"BOL",	LYE_BOL,	"Go to begin of line"},
+  {"EOL",	LYE_EOL,	"Go to end   of line"},
+  {"FORW",	LYE_FORW,	"Cursor forwards"},
+  {"FORW_RL",	LYE_FORW_RL,	"Cursor forwards or right link"},
+  {"BACK",	LYE_BACK,	"Cursor backwards"},
+  {"BACK_LL",	LYE_BACK_LL,	"Cursor backwards or left link"},
+  {"FORWW",	LYE_FORWW,	"Word forward"},
+  {"BACKW",	LYE_BACKW,	"Word back"},
+  SEPARATOR,
+  {"LOWER",	LYE_LOWER,	"Lower case the line"},
+  {"UPPER",	LYE_UPPER,	"Upper case the line"},
+  SEPARATOR,
+  {"LKCMD",	LYE_LKCMD,	"Invoke command prompt"},
+  {"SWMAP",	LYE_SWMAP,	"Switch input keymap"},
+  SEPARATOR,
+  {"C1CHAR",	LYE_C1CHAR,	"Insert C1 char if printable"},
+  {"SETM1",	LYE_SETM1,	"Set modifier 1 flag"},
+  {"SETM2",	LYE_SETM2,	"Set modifier 2 flag"},
+  {"UNMOD",	LYE_UNMOD,	"Fall back to no-modifier command"},
+  SEPARATOR,
+  {"TPOS",	LYE_TPOS,	"Transpose characters"},
+  {"SETMARK",	LYE_SETMARK,	"emacs-like set-mark-command"},
+  {"XPMARK",	LYE_XPMARK,	"emacs-like exchange-point-and-mark"},
+  {"KILLREG",	LYE_KILLREG,	"emacs-like kill-region"},
+  {"YANK",	LYE_YANK,	"emacs-like yank"},
+#ifdef CAN_CUT_AND_PASTE
+  SEPARATOR,
+  {"PASTE",	LYE_PASTE,	"ClipBoard to Lynx"},
+#endif
+  SEPARATOR,
+  {"AIX",	LYE_AIX,	"Hex 97"},
+  {0,           -1,             0},
+};
+#undef SEPARATOR
+/* *INDENT-ON* */
+
 static LYEditCode DefaultEditBinding[KEYMAP_SIZE - 1];
 
 #ifdef USE_ALT_BINDINGS
@@ -1170,6 +1241,62 @@ const char *LYLineeditHelpURLs[] =
     (char *) 0
 };
 
+static struct emap *name2emap(const char *name)
+{
+    struct emap *mp;
+    struct emap *result = 0;
+
+    if (non_empty(name)) {
+	for (mp = ekmap; mp->name != NULL; mp++) {
+	    if (strcmp(mp->name, name) == 0) {
+		result = mp;
+		break;
+	    }
+	}
+    }
+    return result;
+}
+
+static struct emap *code2emap(int code)
+{
+    struct emap *mp;
+    struct emap *result = 0;
+
+    for (mp = ekmap; mp->name != NULL; mp++) {
+	if (mp->code == code) {
+	    result = mp;
+	    break;
+	}
+    }
+    return result;
+}
+
+/*
+ * Return editactioncode whose name is the string func.  func must be present
+ * in the ekmap table.  returns -1 if not found.  - kw
+ */
+int lecname_to_lec(const char *func)
+{
+    struct emap *mp;
+    int result = -1;
+
+    if ((mp = name2emap(func)) != 0) {
+	result = mp->code;
+    }
+    return result;
+}
+
+const char *lec_to_lecname(int code)
+{
+    struct emap *mp;
+    const char *result = 0;
+
+    if ((mp = code2emap(code)) != 0) {
+	result = mp->name;
+    }
+    return result;
+}
+
 int EditBinding(int xlkc)
 {
     int editaction, xleac = LYE_UNMOD;
@@ -1639,3 +1766,174 @@ void LYinitEditmap(void)
 	initLineEditor(&LYModifierBindings[j]);
     }
 }
+
+static char *showRanges(int *state)
+{
+    char *result = 0;
+    int range[2];
+    int i;
+
+    range[0] = range[1] = -1;
+    for (i = 0; i < KEYMAP_SIZE - 1; ++i) {
+	if (!state[i]) {
+	    int code = CurrentLineEditor()[i];
+
+	    if (code == LYE_CHAR) {
+		if (range[0] < 0)
+		    range[0] = i;
+		range[1] = i;
+		state[i] = 3;
+	    } else if (range[0] >= 0) {
+		if (non_empty(result))
+		    StrAllocCat(result, ", ");
+		HTSprintf(&result, "%d-%d", range[0], range[1]);
+		range[0] = range[1] = -1;
+	    }
+	}
+    }
+    return result;
+}
+
+static int LYLoadEditmap(const char *arg GCC_UNUSED,
+			 HTParentAnchor *anAnchor,
+			 HTFormat format_out,
+			 HTStream *sink)
+{
+#define FORMAT "  %-*s  %-*s  -  %s\n"
+    HTFormat format_in = WWW_HTML;
+    HTStream *target;
+    int state[KEYMAP_SIZE - 1];
+    int width[2];
+    char *buf = 0;
+    char *ranges = 0;
+    struct emap *mp;
+    int i;
+    int hanging;
+    int wrapped;
+    int had_output = FALSE;
+    int result;
+
+    if ((target = HTStreamStack(format_in, format_out, sink, anAnchor)) != 0) {
+	anAnchor->no_cache = TRUE;
+
+	HTSprintf0(&buf,
+		   "<html>\n<head>\n<title>%s</title>\n</head>\n<body>\n",
+		   CURRENT_EDITMAP_TITLE);
+	PUTS(buf);
+	HTSprintf0(&buf, "<pre>\n");
+	PUTS(buf);
+
+	/* determine the column-widths we will use for showing bindings */
+	width[0] = 0;
+	width[1] = 0;
+	for (i = 0; i < KEYMAP_SIZE - 1; ++i) {
+	    int code = CurrentLineEditor()[i];
+
+	    if (code == LYE_NOP) {
+		state[i] = 1;
+	    } else {
+		int need;
+
+		if ((mp = code2emap(code)) != 0) {
+		    state[i] = 0;
+		    if ((need = (int) strlen(mp->name)) > width[0])
+			width[0] = need;
+		    if ((need = (int) strlen(mp->descr)) > width[1])
+			width[1] = need;
+		} else {
+		    state[i] = 2;
+		}
+	    }
+	}
+	hanging = 2 + width[0] + 2 + width[1] + 5;
+	wrapped = hanging;
+
+	/*
+	 * Tell which set of bindings we are showing, and link to the
+	 * handcrafted page, which adds explanations.
+	 */
+	PUTS(gettext("These are the current edit-bindings:"));
+	HTSprintf0(&buf,
+		   " <a href=\"%s\">%s</a>\n\n",
+		   LYLineeditHelpURL(),
+		   LYEditorNames[current_lineedit]);
+	PUTS(buf);
+
+	/* Show by groups to match the arrangement in the handmade files. */
+	for (mp = ekmap; mp->name != 0; ++mp) {
+	    if (isEmpty(mp->name)) {
+		if (had_output) {
+		    PUTS("\n");
+		    had_output = FALSE;
+		}
+	    } else if (mp->code == LYE_CHAR) {
+		ranges = showRanges(state);
+		HTSprintf0(&buf, FORMAT,
+			   width[0], mp->name,
+			   width[1], mp->descr,
+			   ranges);
+		FREE(ranges);
+		PUTS(buf);
+		had_output = TRUE;
+	    } else {
+		for (i = 0; i < KEYMAP_SIZE - 1; ++i) {
+		    int code = CurrentLineEditor()[i];
+
+		    if ((code == mp->code) && !state[i]) {
+			char *value = LYKeycodeToString(i, (i >= 160 &&
+							    i <= 255));
+			int before = wrapped + (ranges ? ((int)
+							  strlen(ranges)) : 0);
+			int after = before;
+
+			if (non_empty(ranges)) {
+			    StrAllocCat(ranges, ", ");
+			    after += 2;
+			}
+			after += (int) strlen(value) + 2;
+			if ((before / LYcols) != (after / LYcols)) {
+			    wrapped += (LYcols - (before % LYcols));
+			    HTSprintf(&ranges, "\n%-*s", hanging, " ");
+			}
+			StrAllocCat(ranges, value);
+		    }
+		}
+		if (non_empty(ranges)) {
+		    LYEntify(&ranges, TRUE);
+		    HTSprintf0(&buf, FORMAT,
+			       width[0], mp->name,
+			       width[1], mp->descr,
+			       ranges);
+		    PUTS(buf);
+		    FREE(ranges);
+		    had_output = TRUE;
+		}
+	    }
+	}
+
+	HTSprintf0(&buf, "</pre>\n</body>\n</html>\n");
+	PUTS(buf);
+
+	(*target->isa->_free) (target);
+	result = HT_LOADED;
+    } else {
+	HTSprintf0(&buf, CANNOT_CONVERT_I_TO_O,
+		   HTAtom_name(format_in), HTAtom_name(format_out));
+	HTAlert(buf);
+	result = HT_NOT_LOADED;
+    }
+    FREE(ranges);
+    FREE(buf);
+    return result;
+#undef FORMAT
+}
+
+#ifdef GLOBALDEF_IS_MACRO
+#define _LYEDITMAP_C_GLOBALDEF_1_INIT { "LYNXEDITMAP", LYLoadEditmap, 0}
+GLOBALDEF(HTProtocol, LYLynxEditmap, _LYEDITMAP_C_GLOBALDEF_1_INIT);
+#else
+GLOBALDEF HTProtocol LYLynxEditmap =
+{
+    "LYNXEDITMAP", LYLoadEditmap, 0
+};
+#endif /* GLOBALDEF_IS_MACRO */
