@@ -1,9 +1,11 @@
--- $LynxId: CHANGES,v 1.689 2013/10/19 12:11:03 tom Exp $
+-- $LynxId: CHANGES,v 1.692 2013/10/20 21:59:40 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2013-10-19 (2.8.8dev.17)
+2013-10-20 (2.8.8dev.17)
+* updates for lynx_help_main.html -TD
+* update URLs in about_lynx.html -TD
 * add internal URL "LYNXEDITMAP:", which is (like "LYNXKEYMAP:") generated,
   making that the primary page for field-editing help -TD
 * improve DOSPATH-related logic in HomeEnv(), making this work properly with
@@ -22,8 +24,8 @@ Changes since Lynx 2.8 release
   function keys 2-12, to improve keymap-configurability -TD
 * change extra-key #define's in LYStrings.h to enum -TD
 * cleanup pre-2.7 debris from LYStrings.c and LYStrings.h -TD
-* modify tables for edit-bindings to allow them to be reloaded to their initial
-  values -TD
+* modify tables for key-bindings and edit-bindings to allow them to be reloaded
+  to their initial values -TD
 * add check in get_connection() for ftp-connections to ensure that a password
   from a URL is non-empty -TD
 * add samples/oldlynx.bat to demonstrate how to use non-color-style -TD
