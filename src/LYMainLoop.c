@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMainLoop.c,v 1.226 2013/10/19 13:06:29 tom Exp $
+ * $LynxId: LYMainLoop.c,v 1.229 2013/10/20 21:14:17 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTAccess.h>
@@ -2611,13 +2611,11 @@ static void handle_LYK_DWIMHELP(const char **cshelpfile)
     if (curdoc.link >= 0 && curdoc.link < nlinks &&
 	!FormIsReadonly(links[curdoc.link].l_form) &&
 	LinkIsTextLike(curdoc.link)) {
-	*cshelpfile = LYLineeditHelpURL();
+	*cshelpfile = STR_LYNXEDITMAP;
     }
 }
 
-static void handle_LYK_EDITMAP(BOOLEAN *vi_keys_flag,
-			       BOOLEAN *emacs_keys_flag,
-			       int *old_c,
+static void handle_LYK_EDITMAP(int *old_c,
 			       int real_c)
 {
     if (*old_c != real_c) {
@@ -2629,16 +2627,6 @@ static void handle_LYK_EDITMAP(BOOLEAN *vi_keys_flag,
 	newdoc.isHEAD = FALSE;
 	newdoc.safe = FALSE;
 	newdoc.internal_link = FALSE;
-	/*
-	 * If vi_keys changed, the keymap did too, so force no cache, and reset
-	 * the flag.  - FM
-	 */
-	if (*vi_keys_flag != vi_keys ||
-	    *emacs_keys_flag != emacs_keys) {
-	    LYforce_no_cache = TRUE;
-	    *vi_keys_flag = vi_keys;
-	    *emacs_keys_flag = emacs_keys;
-	}
 #if defined(DIRED_SUPPORT) && defined(OK_OVERRIDE)
 	/*
 	 * Remember whether we are in dired menu so we can display the right
@@ -7154,7 +7142,7 @@ int mainloop(void)
 	    handle_LYK_SOURCE(&ownerS_address);
 	    break;
 
-	case LYK_CHG_CENTER:	/* ^Q */
+	case LYK_CHANGE_CENTER:	/* ^Q */
 
 	    if (no_table_center) {
 		no_table_center = FALSE;
@@ -7698,7 +7686,7 @@ int mainloop(void)
 	    break;
 
 	case LYK_EDITMAP:
-	    handle_LYK_EDITMAP(&vi_keys_flag, &emacs_keys_flag, &old_c, real_c);
+	    handle_LYK_EDITMAP(&old_c, real_c);
 	    break;
 
 	case LYK_KEYMAP:

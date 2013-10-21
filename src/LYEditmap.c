@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYEditmap.c,v 1.68 2013/10/19 20:04:16 tom Exp $
+ * $LynxId: LYEditmap.c,v 1.71 2013/10/20 20:03:24 tom Exp $
  *
  * LYEditMap.c
  * Keybindings for line and form editing.
@@ -106,11 +106,11 @@ static struct emap ekmap[] = {
 #undef SEPARATOR
 /* *INDENT-ON* */
 
-static LYEditCode DefaultEditBinding[KEYMAP_SIZE - 1];
+static LYEditCode DefaultEditBinding[KEYMAP_SIZE];
 
 #ifdef USE_ALT_BINDINGS
-static LYEditCode BetterEditBinding[KEYMAP_SIZE - 1];
-static LYEditCode BashlikeEditBinding[KEYMAP_SIZE - 1];
+static LYEditCode BetterEditBinding[KEYMAP_SIZE];
+static LYEditCode BashlikeEditBinding[KEYMAP_SIZE];
 
 /*
  * If a modifier bit is set in a lynxkeycode, it is first looked up here.
@@ -121,7 +121,7 @@ static LYEditCode BashlikeEditBinding[KEYMAP_SIZE - 1];
  * effect only for those Bindings that map a lynxkeycode to LYE_SETMn.  ( This
  * doesn't apply if the modifier is already being set in LYgetch().  ) - kw
  */
-static LYEditCode Mod1Binding[KEYMAP_SIZE - 1];
+static LYEditCode Mod1Binding[KEYMAP_SIZE];
 
 /*  Two more tables here, but currently they are all the same.
     In other words, we are cheating to save space, until there
@@ -1248,7 +1248,7 @@ static struct emap *name2emap(const char *name)
 
     if (non_empty(name)) {
 	for (mp = ekmap; mp->name != NULL; mp++) {
-	    if (strcmp(mp->name, name) == 0) {
+	    if (strcasecomp(mp->name, name) == 0) {
 		result = mp;
 		break;
 	    }
@@ -1359,7 +1359,7 @@ BOOL LYRemapEditBinding(int xlkc,
     int c = xlkc & LKC_MASK;
     BOOLEAN success = FALSE;
 
-    if (xlkc >= 0 && !(xlkc & LKC_ISLAC) && (c < KEYMAP_SIZE + 1)) {
+    if (xlkc >= 0 && !(xlkc & LKC_ISLAC) && (c < KEYMAP_SIZE)) {
 	LYEditCode code = (LYEditCode) lec;
 
 #ifdef USE_ALT_BINDINGS
@@ -1422,7 +1422,7 @@ int LYKeyForEditAction(int lec)
 {
     int editaction, i;
 
-    for (i = FIRST_I; i >= 0; i = NEXT_I(i, KEYMAP_SIZE - 2)) {
+    for (i = FIRST_I; i >= 0; i = NEXT_I(i, KEYMAP_SIZE - 1)) {
 	editaction = CurrentLineEditor()[i];
 	if (editaction == lec) {
 #ifdef NOT_ASCII
@@ -1457,7 +1457,7 @@ int LYEditKeyForAction(int lac,
 
     if (pmodkey)
 	*pmodkey = -1;
-    for (i = FIRST_I; i >= 0; i = NEXT_I(i, KEYMAP_SIZE - 2)) {
+    for (i = FIRST_I; i >= 0; i = NEXT_I(i, KEYMAP_SIZE - 1)) {
 	editaction = CurrentLineEditor()[i];
 #ifdef NOT_ASCII
 	if (i < 256) {
@@ -1613,18 +1613,6 @@ int LYEditKeyForAction(int lac,
     return (-1);
 }
 
-/*
- * Dummy initializer to ensure this module is linked
- * if the external model is common block, and the
- * module is ever placed in a library. - FM
- */
-int LYEditmapDeclared(void)
-{
-    int status = 1;
-
-    return status;
-}
-
 #if 0
 /*
  * This function was useful in converting the hand-crafted key-bindings to
@@ -1650,7 +1638,7 @@ static void checkEditMap(LYEditConfig * table)
 		   table->used[code]);
 	}
     }
-    for (j = 0; j < KEYMAP_SIZE - 1; ++j) {
+    for (j = 0; j < KEYMAP_SIZE; ++j) {
 	int code = (int) j;
 	BOOL found = FALSE;
 
@@ -1716,7 +1704,7 @@ static void checkEditMap(LYEditConfig * table)
 		}
 		if (name == 0) {
 		    name = "XXX";
-		} else if (!strcmp(name, "PASS")) {
+		} else if (!strcasecomp(name, "PASS")) {
 		    name = "FORM_PASS";
 		}
 		if (first) {
@@ -1742,7 +1730,7 @@ static void initLineEditor(LYEditConfig * table)
     LYEditCode *used = table->used;
     const LYEditInit *init = table->init;
 
-    memset(used, 0, sizeof(LYEditCode) * (KEYMAP_SIZE - 1));
+    memset(used, 0, sizeof(LYEditCode) * KEYMAP_SIZE);
     for (k = 0; init[k].code >= 0; ++k) {
 	int code = init[k].code;
 
@@ -1774,7 +1762,7 @@ static char *showRanges(int *state)
     int i;
 
     range[0] = range[1] = -1;
-    for (i = 0; i < KEYMAP_SIZE - 1; ++i) {
+    for (i = 0; i < KEYMAP_SIZE; ++i) {
 	if (!state[i]) {
 	    int code = CurrentLineEditor()[i];
 
@@ -1802,7 +1790,7 @@ static int LYLoadEditmap(const char *arg GCC_UNUSED,
 #define FORMAT "  %-*s  %-*s  -  %s\n"
     HTFormat format_in = WWW_HTML;
     HTStream *target;
-    int state[KEYMAP_SIZE - 1];
+    int state[KEYMAP_SIZE];
     int width[2];
     char *buf = 0;
     char *ranges = 0;
@@ -1826,7 +1814,7 @@ static int LYLoadEditmap(const char *arg GCC_UNUSED,
 	/* determine the column-widths we will use for showing bindings */
 	width[0] = 0;
 	width[1] = 0;
-	for (i = 0; i < KEYMAP_SIZE - 1; ++i) {
+	for (i = 0; i < KEYMAP_SIZE; ++i) {
 	    int code = CurrentLineEditor()[i];
 
 	    if (code == LYE_NOP) {
@@ -1876,7 +1864,7 @@ static int LYLoadEditmap(const char *arg GCC_UNUSED,
 		PUTS(buf);
 		had_output = TRUE;
 	    } else {
-		for (i = 0; i < KEYMAP_SIZE - 1; ++i) {
+		for (i = 0; i < KEYMAP_SIZE; ++i) {
 		    int code = CurrentLineEditor()[i];
 
 		    if ((code == mp->code) && !state[i]) {

@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYStrings.h,v 1.111 2013/10/15 09:07:48 tom Exp $
+ * $LynxId: LYStrings.h,v 1.113 2013/10/20 20:33:23 tom Exp $
  */
 #ifndef LYSTRINGS_H
 #define LYSTRINGS_H
@@ -384,14 +384,12 @@ extern "C" {
 #define CurrentLineEditor() LYLineEditors[current_lineedit].used
 
     extern void LYinitEditmap(void);
+    extern void LYinitKeymap(void);
     extern const char *LYLineeditHelpURL(void);
 
     extern int escape_bound;
 
 #define LYLineEdit(e,c,m) LYDoEdit(e, c, EditBinding(c) & ~LYE_DF, m)
-
-/* Dummy initializer for LYEditmap.c */
-    extern int LYEditmapDeclared(void);
 
     extern int LYEditInsert(FieldEditor * edit, unsigned const char *s,
 			    int len, int map_active,

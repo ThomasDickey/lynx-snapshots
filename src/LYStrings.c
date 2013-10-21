@@ -1,4 +1,4 @@
-/* $LynxId: LYStrings.c,v 1.255 2013/10/15 09:08:42 tom Exp $ */
+/* $LynxId: LYStrings.c,v 1.256 2013/10/20 21:31:45 tom Exp $ */
 #include <HTUtils.h>
 #include <HTCJK.h>
 #include <UCAux.h>
@@ -980,6 +980,7 @@ static Keysym_String_List Keysym_Strings [] =
     INTERN_KEY( "INSERT_KEY",	INSERT_KEY,	KEY_IC ),
     INTERN_KEY( "REMOVE_KEY",	REMOVE_KEY,	KEY_DC ),
     INTERN_KEY( "DO_NOTHING",	DO_NOTHING,	DO_NOTHING|LKC_ISLKC ),
+    INTERN_KEY( "BACKTAB_KEY",	BACKTAB_KEY,	BACKTAB_KEY ),
     INTERN_KEY( NULL,		UNKNOWN_KEY,	ERR )
 };
 /* *INDENT-ON* */

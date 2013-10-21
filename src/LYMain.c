@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMain.c,v 1.247 2013/10/19 01:22:25 tom Exp $
+ * $LynxId: LYMain.c,v 1.249 2013/10/20 20:35:23 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTP.h>
@@ -1043,6 +1043,7 @@ int main(int argc,
 #endif
 
     LYinitEditmap();
+    LYinitKeymap();
 #ifdef USE_CHARSET_CHOICE
     memset((char *) charset_subsets, 0, sizeof(charset_subset_t) * MAXCHARSETS);
 #endif
@@ -1529,13 +1530,6 @@ int main(int argc,
     StrAllocCopy(UCAssume_MIMEcharset,
 		 LYCharSet_UC[UCLYhndl_for_unspec].MIMEname);
 
-    /*
-     * Make sure we have the edit map declared.  - FM
-     */
-    if (!LYEditmapDeclared()) {
-	fprintf(stderr, gettext("\nLynx edit map not declared.\n\n"));
-	exit_immediately(EXIT_FAILURE);
-    }
 #ifdef USE_COLOR_TABLE
     /*
      * Set up default foreground and background colors.

@@ -1,4 +1,4 @@
-/* $LynxId: LYCurses.c,v 1.175 2013/10/02 14:35:56 tom Exp $ */
+/* $LynxId: LYCurses.c,v 1.177 2013/10/20 16:24:43 tom Exp $ */
 #include <HTUtils.h>
 #include <HTAlert.h>
 
@@ -56,6 +56,10 @@ int lynx_has_color = FALSE;
 
 #ifdef HAVE_XCURSES
 char *XCursesProgramName = "Lynx";
+#endif
+
+#ifdef PDCURSES
+#undef HAVE_NEWTERM		/* not needed, since /dev/tty is unused */
 #endif
 
 #if defined(USE_COLOR_STYLE) && !defined(USE_COLOR_TABLE)
@@ -922,7 +926,7 @@ static SCREEN *LYscreen = NULL;
 
 #define LYDELSCR()		/* ncurses does not need this */
 
-#elif defined(HAVE_NEWTERM) && defined(HAVE_DELSCREEN) && !defined(PDCURSES)
+#elif defined(HAVE_NEWTERM) && defined(HAVE_DELSCREEN)
 
 static SCREEN *LYscreen = NULL;
 
@@ -1407,7 +1411,7 @@ void start_curses(void)
 	    endwin();
 	    exit_immediately(EXIT_FAILURE);
 	}
-#endif
+#endif /* ncurses-keymaps */
 
 	/*
 	 * This is a workaround for a bug in SVr4 curses, observed on Solaris
