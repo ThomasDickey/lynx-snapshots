@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYUtils.c,v 1.254 2013/10/19 00:59:45 tom Exp $
+ * $LynxId: LYUtils.c,v 1.256 2013/10/23 09:12:22 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTCP.h>
@@ -2816,13 +2816,14 @@ BOOLEAN LYCanWriteFile(const char *filename)
 BOOLEAN LYCanReadFile(const char *filename)
 {
     FILE *fp;
+    BOOLEAN result = FALSE;
 
     if (non_empty(filename)) {
 	if ((fp = fopen(filename, "r")) != 0) {
-	    return LYCloseInput(fp);
+	    result = LYCloseInput(fp);
 	}
     }
-    return FALSE;
+    return result;
 }
 
 /*
@@ -7414,6 +7415,7 @@ void LYsetXDisplay(char *new_display)
 #else
 	static char *display_putenv_command;
 
+	display_putenv_command = NULL;	/* yes, this is a leak - cannot fix */
 	HTSprintf0(&display_putenv_command, "DISPLAY=%s", new_display);
 	putenv(display_putenv_command);
 #endif /* VMS */

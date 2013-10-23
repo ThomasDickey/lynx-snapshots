@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYReadCFG.c,v 1.176 2013/05/30 23:16:56 tom Exp $
+ * $LynxId: LYReadCFG.c,v 1.177 2013/10/21 23:13:30 tom Exp $
  */
 #ifndef NO_RULES
 #include <HTRules.h>
@@ -673,6 +673,13 @@ void update_default_colors(void)
 #endif
     }
 }
+#ifdef USE_COLOR_STYLE
+static int lynx_lss_file_fun(char *value)
+{
+    add_to_lss_list(value, NULL);
+    return 0;
+}
+#endif
 
 static int default_colors_fun(char *value)
 {
@@ -1463,7 +1470,7 @@ static Config_Type Config_Table [] =
      PARSE_FUN(RC_COLOR,                color_fun),
 #endif
 #ifdef USE_COLOR_STYLE
-     PARSE_STR(RC_COLOR_STYLE,          lynx_lss_file),
+     PARSE_FUN(RC_COLOR_STYLE,          lynx_lss_file_fun),
 #endif
      PARSE_PRG(RC_COMPRESS_PATH,        ppCOMPRESS),
      PARSE_PRG(RC_COPY_PATH,            ppCOPY),

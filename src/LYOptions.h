@@ -1,4 +1,4 @@
-/* $LynxId: LYOptions.h,v 1.30 2012/02/10 18:39:49 tom Exp $ */
+/* $LynxId: LYOptions.h,v 1.31 2013/10/22 00:37:32 tom Exp $ */
 #ifndef LYOPTIONS_H
 #define LYOPTIONS_H
 
@@ -31,6 +31,10 @@ extern "C" {
 #ifndef NO_OPTION_MENU
     extern void LYoptions(void);
 #endif				/* !NO_OPTION_MENU */
+
+#ifdef USE_COLOR_STYLE
+    extern void build_lss_enum(HTList *);
+#endif
 
 #ifdef __cplusplus
 }

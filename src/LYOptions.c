@@ -1,4 +1,4 @@
-/* $LynxId: LYOptions.c,v 1.157 2013/10/12 14:51:18 tom Exp $ */
+/* $LynxId: LYOptions.c,v 1.161 2013/10/22 08:10:03 tom Exp $ */
 #include <HTUtils.h>
 #include <HTFTP.h>
 #include <HTTP.h>		/* 'reloading' flag */
@@ -24,6 +24,10 @@
 #include <LYPrettySrc.h>
 #include <HTFile.h>
 #include <LYCharUtils.h>
+
+#ifdef USE_COLOR_STYLE
+#include <LYStyle.h>
+#endif
 
 #include <LYLeaks.h>
 
@@ -2206,6 +2210,8 @@ static OptValues show_color_values[] =
 
 #ifdef USE_COLOR_STYLE
 static const char *color_style_string = RC_COLOR_STYLE;
+static OptValues *color_style_values;
+static HTList *color_style_list;
 #endif
 
 #ifdef USE_DEFAULT_COLORS
@@ -2490,6 +2496,54 @@ static BOOLEAN GetOptValues(OptValues * table, char *value,
     return FALSE;
 }
 
+#ifdef USE_COLOR_STYLE
+void build_lss_enum(HTList *list)
+{
+    int count = HTList_count(list);
+
+    FREE(color_style_values);
+    if (count != 0) {
+	LSS_NAMES *obj;
+	int position = 0;
+
+	color_style_values = typecallocn(OptValues, count + 2);
+
+	if (color_style_values == NULL)
+	    outofmem(__FILE__, "build_lss_enum");
+
+	color_style_values[position++] = bool_values[0];
+	while ((obj = HTList_objectAt(list, position - 1)) != 0) {
+	    color_style_values[position].value = position;
+	    color_style_values[position].LongName = obj->given;
+	    color_style_values[position].HtmlName = obj->given;
+	    position++;
+	}
+    }
+    color_style_list = list;
+}
+
+static int get_color_style_value(void)
+{
+    int result = 0;
+
+    if (LYuse_color_style && non_empty(lynx_lss_file)) {
+	LSS_NAMES *obj;
+	int position = 1;
+
+	while ((obj = HTList_objectAt(color_style_list, position - 1)) != 0) {
+	    if (obj->actual != 0 && !strcmp(obj->actual, lynx_lss_file)) {
+		result = position;
+		break;
+	    } else if (!strcmp(obj->given, lynx_lss_file)) {
+		result = position;
+		break;
+	    }
+	    ++position;
+	}
+    }
+    return result;
+}
+#endif
 /*
  * Break cgi line into array of pairs of pointers.  Don't bother trying to
  * be efficient.  We're not called all that often.
@@ -2906,8 +2960,14 @@ int postoptions(DocInfo *newdoc)
 #ifdef USE_COLOR_STYLE
 	/* Color Style: ON/OFF */
 	if (!strcmp(data[i].tag, color_style_string)
-	    && GetOptValues(bool_values, data[i].value, &code)) {
-	    LYuse_color_style = (BOOLEAN) code;
+	    && GetOptValues(color_style_values, data[i].value, &code)) {
+	    if (code) {
+		LYuse_color_style = TRUE;
+		StrAllocCopy(lynx_lss_file, color_style_values[code].LongName);
+		reinit_color_styles();
+	    } else {
+		LYuse_color_style = FALSE;
+	    }
 	    update_color_style();
 	    lynx_force_repaint();
 	}
@@ -3805,7 +3865,7 @@ static int gen_options(char **newfile)
     /* Color style: ON/OFF */
     PutLabel(fp0, gettext("Color style"), color_style_string);
     BeginSelect(fp0, color_style_string);
-    PutOptValues(fp0, LYuse_color_style, bool_values);
+    PutOptValues(fp0, get_color_style_value(), color_style_values);
     EndSelect(fp0);
 #endif
 
@@ -4093,4 +4153,5 @@ static int gen_options(char **newfile)
     LYCloseTempFP(fp0);
     return (NORMAL);
 }
+
 #endif /* !NO_OPTION_FORMS */
