@@ -1,9 +1,12 @@
--- $LynxId: CHANGES,v 1.692 2013/10/20 21:59:40 tom Exp $
+-- $LynxId: CHANGES,v 1.694 2013/10/23 09:13:01 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2013-10-20 (2.8.8dev.17)
+2013-10-23 (2.8.8dev.17)
+* modify configuration of COLOR_STYLE value in lynx.cfg, allowing multiple
+  filenames to be specified and providing those as choices in the O'ptions
+  menu (Debian #404893) -TD
 * updates for lynx_help_main.html -TD
 * update URLs in about_lynx.html -TD
 * add internal URL "LYNXEDITMAP:", which is (like "LYNXKEYMAP:") generated,

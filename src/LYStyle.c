@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYStyle.c,v 1.76 2013/10/03 18:44:56 tom Exp $
+ * $LynxId: LYStyle.c,v 1.85 2013/10/23 09:23:57 tom Exp $
  *
  * character level styles for Lynx
  * (c) 1996 Rob Partington -- donated to the Lyncei (if they want it :-)
@@ -21,6 +21,9 @@
 #include <LYHash.h>
 #include <LYStyle.h>
 
+#include <LYOptions.h>
+#include <LYPrettySrc.h>
+
 #include <LYexit.h>
 #include <LYLeaks.h>
 #include <LYStrings.h>
@@ -30,7 +33,8 @@
 
 #ifdef USE_COLOR_STYLE
 
-static void style_initialiseHashTable(void);
+static HTList *list_of_lss_files;
+static char default_lss_file[] = LYNX_LSS_FILE;
 
 /* because curses isn't started when we parse the config file, we
  * need to remember the STYLE: lines we encounter and parse them
@@ -408,6 +412,40 @@ static void style_deleteStyleList(void)
     lss_styles = NULL;
 }
 
+/* Set all the buckets in the hash table to be empty */
+static void style_initialiseHashTable(void)
+{
+    int i;
+    static int firsttime = 1;
+
+    for (i = 0; i < CSHASHSIZE; i++) {
+	if (firsttime)
+	    hashStyles[i].name = NULL;
+	else
+	    FREE(hashStyles[i].name);
+	hashStyles[i].color = 0;
+	hashStyles[i].cattr = 0;
+	hashStyles[i].mono = 0;
+    }
+    if (firsttime) {
+	firsttime = 0;
+#ifdef LY_FIND_LEAKS
+	atexit(free_colorstylestuff);
+#endif
+    }
+    s_alink = hash_code("alink");
+    s_a = hash_code("a");
+    s_status = hash_code("status");
+    s_alert = hash_code("alert");
+    s_title = hash_code("title");
+#ifdef USE_SCROLLBAR
+    s_sb_bar = hash_code("scroll.bar");
+    s_sb_bg = hash_code("scroll.back");
+    s_sb_aa = hash_code("scroll.arrow");
+    s_sb_naa = hash_code("scroll.noarrow");
+#endif
+}
+
 static void free_colorstylestuff(void)
 {
     style_initialiseHashTable();
@@ -516,40 +554,6 @@ static void initialise_default_stylesheet(void)
     }
     FREE(normal);
     FREE(strong);
-}
-
-/* Set all the buckets in the hash table to be empty */
-static void style_initialiseHashTable(void)
-{
-    int i;
-    static int firsttime = 1;
-
-    for (i = 0; i < CSHASHSIZE; i++) {
-	if (firsttime)
-	    hashStyles[i].name = NULL;
-	else
-	    FREE(hashStyles[i].name);
-	hashStyles[i].color = 0;
-	hashStyles[i].cattr = 0;
-	hashStyles[i].mono = 0;
-    }
-    if (firsttime) {
-	firsttime = 0;
-#ifdef LY_FIND_LEAKS
-	atexit(free_colorstylestuff);
-#endif
-    }
-    s_alink = hash_code("alink");
-    s_a = hash_code("a");
-    s_status = hash_code("status");
-    s_alert = hash_code("alert");
-    s_title = hash_code("title");
-#ifdef USE_SCROLLBAR
-    s_sb_bar = hash_code("scroll.bar");
-    s_sb_bg = hash_code("scroll.back");
-    s_sb_aa = hash_code("scroll.arrow");
-    s_sb_naa = hash_code("scroll.noarrow");
-#endif
 }
 
 void parse_userstyles(void)
@@ -809,6 +813,177 @@ void update_color_style(void)
     CTRACE((tfp, "update_color_style %p\n", (void *) lss_styles));
     memset(our_pairs, 0, sizeof(our_pairs));
     parse_userstyles();
+}
+
+static char *find_lss_file(const char *nominal)
+{
+    char *result = 0;
+
+    if (non_empty(nominal)) {
+	StrAllocCopy(result, nominal);
+	/*
+	 * Look for it in the home directory - if there is a tilde to expand.
+	 */
+	LYTildeExpand(&result, TRUE);
+	if (!LYCanReadFile(result)) {
+	    char *dftfile = default_lss_file;
+	    char *leaf;
+
+	    /*
+	     * If not, try finding it in the same directory as the compiled-in
+	     * location of the default lss-file.
+	     */
+	    if (strcmp(nominal, dftfile) &&
+		(leaf = LYPathLeaf(dftfile)) != dftfile) {
+		char *head = 0;
+
+		StrAllocCopy(head, dftfile);
+		head[leaf - dftfile] = '\0';
+		StrAllocCopy(result, head);
+		StrAllocCat(result, nominal);
+		FREE(head);
+
+		if (!LYCanReadFile(result)) {
+		    FREE(result);
+		}
+	    }
+#ifdef USE_PROGRAM_DIR
+	    else {
+		/*
+		 * Finally, try in the same directory as the executable.
+		 */
+		StrAllocCopy(result, program_dir);
+		LYAddPathSep(&result);
+		StrAllocCat(result, nominal);
+		LYTildeExpand(&result, TRUE);
+		if (!LYCanReadFile(result)) {
+		    FREE(result);
+		}
+	    }
+#endif
+	}
+
+    }
+    return result;
+}
+
+/*
+ * Add an entry to the lss-list, and cache the resolved filename if known.
+ */
+void add_to_lss_list(const char *source, const char *resolved)
+{
+    LSS_NAMES *obj;
+    LSS_NAMES *chk;
+    BOOLEAN found = FALSE;
+    int position = 0;
+
+    CTRACE((tfp, "add_to_lss_list(\"%s\", \"%s\")\n",
+	    NonNull(source),
+	    NonNull(resolved)));
+
+    obj = typecalloc(LSS_NAMES);
+    if (obj == NULL)
+	outofmem(__FILE__, "add_to_lss_list");
+
+    StrAllocCopy(obj->given, source);
+    StrAllocCopy(obj->actual, resolved);
+    if (list_of_lss_files == 0) {
+	list_of_lss_files = HTList_new();
+    }
+
+    while ((chk = HTList_objectAt(list_of_lss_files, position++)) != 0) {
+	if (!strcmp(source, chk->given)) {
+	    found = TRUE;
+	    if (resolved && !chk->actual) {
+		StrAllocCopy(chk->actual, resolved);
+	    }
+	    break;
+	}
+    }
+
+    if (!found) {
+	HTList_appendObject(list_of_lss_files, obj);
+    }
+}
+
+/*
+ * This is called after reading lynx.cfg, to set the initial value for the
+ * lss-file, and read its data.
+ */
+void init_color_styles(char **from_cmdline, const char *default_styles)
+{
+    char *cp;
+
+    /*
+     * If we read no COLOR_STYLE data from lynx.cfg, build a default list now.
+     */
+    if (list_of_lss_files == 0) {
+	char *source = 0;
+
+	StrAllocCopy(source, default_styles);
+	while ((cp = strtok(source, ";")) != 0) {
+	    add_to_lss_list(cp, NULL);
+	    source = 0;
+	}
+	FREE(source);
+    }
+
+    /*
+     * A command-line "-lss" always overrides the config-file, even if it is
+     * an empty string such as -lss="".
+     */
+    if (*from_cmdline != 0) {
+	FREE(lynx_lss_file);
+	lynx_lss_file = find_lss_file(cp = *from_cmdline);
+	*from_cmdline = 0;
+    } else if (((cp = LYGetEnv("LYNX_LSS")) != NULL) ||
+	       (cp = LYGetEnv("lynx_lss")) != NULL) {
+	lynx_lss_file = find_lss_file(cp);
+    } else {
+	lynx_lss_file = find_lss_file(cp = default_lss_file);
+    }
+    CTRACE1((tfp, "init_color_styles(%s)\n", NonNull(lynx_lss_file)));
+
+    /*
+     * If the lynx-style file is not available, inform the user and exit.
+     */
+    if (isEmpty(lynx_lss_file) || !LYCanReadFile(lynx_lss_file)) {
+	fprintf(stderr, gettext("\nLynx file \"%s\" is not available.\n\n"),
+		NonNull(cp));
+	exit_immediately(EXIT_FAILURE);
+    }
+
+    /*
+     * Otherwise, load the initial lss-file and add it to the list for the
+     * options menu.
+     */
+    style_readFromFile(lynx_lss_file);
+    add_to_lss_list(LYPathLeaf(lynx_lss_file), lynx_lss_file);
+    build_lss_enum(list_of_lss_files);
+}
+
+void reinit_color_styles(void)
+{
+    int cs;
+
+    for (cs = 0; cs < CSHASHSIZE; ++cs) {
+	bucket *style = &hashStyles[cs];
+
+	while (style != 0) {
+	    bucket *next = style->next;
+
+	    if (next != 0) {
+		hashStyles[cs] = *next;
+		free(next);
+	    }
+	    style = hashStyles[cs].next;
+	}
+    }
+    for (cs = 0; cs < HTL_num_lexemes; ++cs) {
+	html_src_clean_item(cs);
+    }
+    free_colorstylestuff();
+    style_readFromFile(lynx_lss_file);
 }
 
 #endif /* USE_COLOR_STYLE */

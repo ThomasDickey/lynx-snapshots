@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMain.c,v 1.249 2013/10/20 20:35:23 tom Exp $
+ * $LynxId: LYMain.c,v 1.250 2013/10/21 20:25:19 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTP.h>
@@ -689,6 +689,14 @@ static void FatalProblem(int sig);
 int LYuse_color_style = TRUE;
 char *lynx_lss_file = NULL;	/* from config-file, etc. */
 static char *lynx_lss_file2 = NULL;	/* from command-line options */
+const char *default_color_styles = "\
+lynx.lss;\
+blue-background.lss;\
+bright-blue.lss;\
+midnight.lss;\
+mild-colors.lss;\
+opaque.lss\
+";
 #endif
 
 #ifdef USE_DEFAULT_COLORS
@@ -1572,49 +1580,7 @@ int main(int argc,
 
 #if defined(USE_COLOR_STYLE)
     if (!dump_output_immediately) {
-	/*
-	 * A command-line "-lss" always overrides the config-file, even if it is
-	 * an empty string such as -lss="".
-	 */
-	if (lynx_lss_file2 != 0) {
-	    FREE(lynx_lss_file);
-	    lynx_lss_file = lynx_lss_file2;
-	    lynx_lss_file2 = 0;
-	}
-
-	/*
-	 * If no alternate lynx-style file was specified on the command line, see
-	 * if it's in the environment.
-	 */
-	if (!lynx_lss_file) {
-	    if (((cp = LYGetEnv("LYNX_LSS")) != NULL) ||
-		(cp = LYGetEnv("lynx_lss")) != NULL)
-		StrAllocCopy(lynx_lss_file, cp);
-	}
-
-	/*
-	 * If we still don't have a lynx-style file, use the userdefs.h definition.
-	 */
-	if (!lynx_lss_file)
-	    StrAllocCopy(lynx_lss_file, LYNX_LSS_FILE);
-
-	LYTildeExpand(&lynx_lss_file, TRUE);
-#ifdef USE_PROGRAM_DIR
-	if (!isEmpty(lynx_lss_file) && !LYCanReadFile(lynx_lss_file)) {
-	    HTSprintf0(&lynx_lss_file, "%s\\lynx.lss", program_dir);
-	}
-#endif
-
-	/*
-	 * If the lynx-style file is not available, inform the user and exit.
-	 */
-	if (non_empty(lynx_lss_file) && !LYCanReadFile(lynx_lss_file)) {
-	    fprintf(stderr, gettext("\nLynx file \"%s\" is not available.\n\n"),
-		    lynx_lss_file);
-	    exit_immediately(EXIT_FAILURE);
-	} else {
-	    style_readFromFile(lynx_lss_file);
-	}
+	init_color_styles(&lynx_lss_file2, default_color_styles);
     }
 #endif /* USE_COLOR_STYLE */
 
