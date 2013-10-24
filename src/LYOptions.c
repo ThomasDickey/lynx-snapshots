@@ -1,4 +1,4 @@
-/* $LynxId: LYOptions.c,v 1.161 2013/10/22 08:10:03 tom Exp $ */
+/* $LynxId: LYOptions.c,v 1.163 2013/10/24 00:08:39 tom Exp $ */
 #include <HTUtils.h>
 #include <HTFTP.h>
 #include <HTTP.h>		/* 'reloading' flag */
@@ -2522,6 +2522,10 @@ void build_lss_enum(HTList *list)
     color_style_list = list;
 }
 
+/*
+ * Find the current lss-file in the list, to get the default value for the
+ * form.
+ */
 static int get_color_style_value(void)
 {
     int result = 0;
@@ -2543,7 +2547,25 @@ static int get_color_style_value(void)
     }
     return result;
 }
+
+/*
+ * Return the pathname found in the given list-item.
+ */
+static char *get_color_style_config(int code)
+{
+    char *result = 0;
+
+    if (LYuse_color_style) {
+	LSS_NAMES *obj;
+
+	if ((obj = HTList_objectAt(color_style_list, code - 1)) != 0) {
+	    result = obj->actual;
+	}
+    }
+    return result;
+}
 #endif
+
 /*
  * Break cgi line into array of pairs of pointers.  Don't bother trying to
  * be efficient.  We're not called all that often.
@@ -2963,7 +2985,7 @@ int postoptions(DocInfo *newdoc)
 	    && GetOptValues(color_style_values, data[i].value, &code)) {
 	    if (code) {
 		LYuse_color_style = TRUE;
-		StrAllocCopy(lynx_lss_file, color_style_values[code].LongName);
+		StrAllocCopy(lynx_lss_file, get_color_style_config(code));
 		reinit_color_styles();
 	    } else {
 		LYuse_color_style = FALSE;

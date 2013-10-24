@@ -586,7 +586,14 @@ II. Compile instructions -- UNIX
   --with-cfg-file			(define LYNX_CFG_FILE)
 	Specify the default configuration file's name.  Use --without-cfg-file
 	to force the user to specify the configuration file on the command
-	line.
+	line.  The filename can be overridden by using the LYNX_CFG environment
+	variable.
+
+  --with-cfg-path			(define LYNX_CFG_PATH)
+	Specify the default configuration file(s) directory search-list.  Use
+	--without-cfg-path to limit this to the location of the lynx.cfg file.
+	The search-list can be overridden using the LYNX_CFG_PATH environment
+	variable.
 
   --with-curses-dir
 	Specify directory under which curses/ncurses is installed.  This
@@ -1455,4 +1462,4 @@ VIII. Acknowledgment
 
 -- 1999/04/24 - H. Nelson <lynx-admin@irm.nara.kindai.ac.jp>
 -- vile:txtmode
--- $LynxId: INSTALLATION,v 1.121 2013/04/30 09:47:15 tom Exp $
+-- $LynxId: INSTALLATION,v 1.122 2013/10/23 22:36:07 tom Exp $

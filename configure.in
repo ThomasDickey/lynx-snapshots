@@ -1,4 +1,4 @@
-dnl $LynxId: configure.in,v 1.251 2013/10/09 12:27:54 tom Exp $
+dnl $LynxId: configure.in,v 1.252 2013/10/23 22:31:51 tom Exp $
 dnl
 dnl Process this file with autoconf to produce a configure script.
 dnl
@@ -619,12 +619,27 @@ LYNX_CFG_FILE,
 SYSCONFDIR/lynx.cfg,
 $sysconfdir/lynx.cfg)
 
-dnl --------------------------------------------------------------------------
-
 AC_MSG_RESULT($LYNX_CFG_FILE)
 
 test "$LYNX_CFG_FILE" = no && LYNX_CFG_FILE=
 AC_DEFINE_UNQUOTED(LYNX_CFG_FILE,"$LYNX_CFG_FILE",[Define to default path for Lynx cfg-file])
+
+dnl --------------------------------------------------------------------------
+
+AC_MSG_CHECKING(for the default configuration-path)
+
+CF_WITH_PATH(cfg-path,
+[  --with-cfg-path{=path}  specify the default configuration directories
+                         ],
+LYNX_CFG_PATH,
+SYSCONFDIR,
+$sysconfdir)
+
+AC_MSG_RESULT($LYNX_CFG_PATH)
+
+test -z "$LYNX_CFG_PATH" && `echo "$LYNX_CFG_FILE" | sed -e 's%/[[^/]]*$%%'`
+test "x$LYNX_CFG_PATH" = xno && LYNX_CFG_PATH=
+AC_DEFINE_UNQUOTED(LYNX_CFG_PATH,"$LYNX_CFG_PATH",[Define to default path for Lynx config-files])
 
 dnl --------------------------------------------------------------------------
 AC_MSG_CHECKING(if htmlized lynx.cfg should be built)

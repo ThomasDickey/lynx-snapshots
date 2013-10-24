@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYStyle.c,v 1.85 2013/10/23 09:23:57 tom Exp $
+ * $LynxId: LYStyle.c,v 1.87 2013/10/23 23:58:52 tom Exp $
  *
  * character level styles for Lynx
  * (c) 1996 Rob Partington -- donated to the Lyncei (if they want it :-)
@@ -817,53 +817,81 @@ void update_color_style(void)
 
 static char *find_lss_file(const char *nominal)
 {
+    const char *dftfile = default_lss_file;
     char *result = 0;
+    char *path = 0;
+    char *head = 0;
+    char *leaf;
+    char *item;
 
     if (non_empty(nominal)) {
 	StrAllocCopy(result, nominal);
+
 	/*
-	 * Look for it in the home directory - if there is a tilde to expand.
+	 * Look for it in as-is - first expanding any tilde.
 	 */
 	LYTildeExpand(&result, TRUE);
 	if (!LYCanReadFile(result)) {
-	    char *dftfile = default_lss_file;
-	    char *leaf;
+	    const char *cfg_path;
+	    char *list = 0;
+	    BOOLEAN found = FALSE;
 
 	    /*
-	     * If not, try finding it in the same directory as the compiled-in
-	     * location of the default lss-file.
+	     * Now try in the config-path.
 	     */
-	    if (strcmp(nominal, dftfile) &&
-		(leaf = LYPathLeaf(dftfile)) != dftfile) {
-		char *head = 0;
+	    if ((cfg_path = LYGetEnv("LYNX_CFG_PATH")) == NULL)
+		cfg_path = LYNX_CFG_PATH;
 
-		StrAllocCopy(head, dftfile);
-		head[leaf - dftfile] = '\0';
-		StrAllocCopy(result, head);
-		StrAllocCat(result, nominal);
-		FREE(head);
-
-		if (!LYCanReadFile(result)) {
-		    FREE(result);
-		}
-	    }
-#ifdef USE_PROGRAM_DIR
-	    else {
-		/*
-		 * Finally, try in the same directory as the executable.
-		 */
-		StrAllocCopy(result, program_dir);
-		LYAddPathSep(&result);
-		StrAllocCat(result, nominal);
+	    StrAllocCopy(list, cfg_path);
+	    path = list;
+	    while ((item = LYstrsep(&path, PATH_SEPARATOR)) != 0) {
+		if (isEmpty(item))
+		    continue;
+		HTSprintf0(&result, "%s%s%s", item, FILE_SEPARATOR, nominal);
 		LYTildeExpand(&result, TRUE);
-		if (!LYCanReadFile(result)) {
-		    FREE(result);
+		if (LYCanReadFile(result)) {
+		    found = TRUE;
+		    break;
 		}
 	    }
+	    FREE(list);
+
+	    if (!found) {
+		/*
+		 * If not, try finding it in the same directory as the
+		 * compiled-in location of the default file.
+		 */
+		StrAllocCopy(head, dftfile);
+		if (strcmp(nominal, dftfile) &&
+		    (leaf = LYPathLeaf(head)) != head) {
+
+		    head[leaf - head] = '\0';
+		    StrAllocCopy(result, head);
+		    StrAllocCat(result, nominal);
+
+		    if (!LYCanReadFile(result)) {
+			FREE(result);
+		    }
+		}
+#ifdef USE_PROGRAM_DIR
+		else {
+		    /*
+		     * Finally, try in the same directory as the executable.
+		     */
+		    StrAllocCopy(result, program_dir);
+		    LYAddPathSep(&result);
+		    StrAllocCat(result, nominal);
+		    LYTildeExpand(&result, TRUE);
+		    if (!LYCanReadFile(result)) {
+			FREE(result);
+		    }
+		}
 #endif
+	    }
 	}
 
     }
+    FREE(head);
     return result;
 }
 
@@ -919,11 +947,16 @@ void init_color_styles(char **from_cmdline, const char *default_styles)
      */
     if (list_of_lss_files == 0) {
 	char *source = 0;
+	char *config;
 
 	StrAllocCopy(source, default_styles);
-	while ((cp = strtok(source, ";")) != 0) {
-	    add_to_lss_list(cp, NULL);
-	    source = 0;
+	config = source;
+	while ((cp = LYstrsep(&config, ";")) != 0) {
+	    char *target;
+
+	    target = find_lss_file(LYPathLeaf(cp));
+	    if (target != 0)
+		add_to_lss_list(cp, target);
 	}
 	FREE(source);
     }
@@ -980,7 +1013,7 @@ void reinit_color_styles(void)
 	}
     }
     for (cs = 0; cs < HTL_num_lexemes; ++cs) {
-	html_src_clean_item(cs);
+	html_src_clean_item((HTlexeme) cs);
     }
     free_colorstylestuff();
     style_readFromFile(lynx_lss_file);

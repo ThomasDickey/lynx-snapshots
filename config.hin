@@ -1,5 +1,5 @@
 /*
- * $LynxId: config.hin,v 1.131 2013/10/07 11:48:12 tom Exp $
+ * $LynxId: config.hin,v 1.132 2013/10/23 22:23:59 tom Exp $
  * vile:cmode
  *
  * The configure script translates "config.hin" into "lynx_cfg.h"
@@ -194,6 +194,7 @@
 #undef LONG_LIST		/* CF_ARG_DISABLE(long-list) */
 #undef LYNXCGI_LINKS		/* CF_ARG_ENABLE(cgi-links) */
 #undef LYNX_CFG_FILE		/* $sysconfdir/lynx.cfg */
+#undef LYNX_CFG_PATH		/* $sysconfdir */
 #undef LYNX_LSS_FILE		/* $sysconfdir/lynx.lss */
 #undef LYNX_RAND_MAX		/* CF_SRAND */
 #undef LY_FIND_LEAKS		/* CF_ARG_ENABLE(find-leaks) */

@@ -1,4 +1,4 @@
-.\" $LynxId: lynx.man,v 1.106 2013/10/02 20:21:37 tom Exp $
+.\" $LynxId: lynx.man,v 1.108 2013/10/23 22:49:39 tom Exp $
 .\" **************************************************************************
 .\" Escape single quotes in literal strings from groff's Unicode transform.
 .ie \n(.g .ds AQ \(aq
@@ -994,6 +994,12 @@ the global configuration file (normally, \fBlynx.cfg\fR) that was defined
 by the LYNX_CFG_FILE constant in the userdefs.h file, during installation.
 See the userdefs.h file for more information.
 .TP
+.B LYNX_CFG_PATH
+If set, this variable overrides the compiled-in search-list of directories
+used to find the configuration files, e.g., \fBlynx.cfg\fP and \fBlynx.lss\fP.
+The list is delimited with ":" (or ";" for Windows) like the \fBPATH\fP
+environment variable.
+.TP
 .B LYNX_HELPFILE
 If set, this variable overrides the compiled-in URL and configuration
 file URL for the \fILynx\fP help file.
@@ -1006,7 +1012,7 @@ locale directory which contains native language (NLS) message text.
 This variable, if set, specifies the location of the default \fILynx\fR
 character style sheet file.
 [Currently only meaningful if \fILynx\fR was
-built using experimental color style support.]
+built using curses color style support.]
 .TP
 .B LYNX_SAVE_SPACE
 This variable, if set, will override the default path prefix for files
