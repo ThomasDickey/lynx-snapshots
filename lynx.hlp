@@ -876,6 +876,12 @@
                            during installation.  See the userdefs.h  file  for
                            more information.
 
+       LYNX_CFG_PATH       If  set,  this  variable  overrides the compiled-in
+                           search-list  of  directories  used  to   find   the
+                           configuration  files,  e.g., lynx.cfg and lynx.lss.
+                           The list is delimited with ":" (or ";" for Windows)
+                           like the PATH environment variable.
+
        LYNX_HELPFILE       If set, this variable overrides the compiled-in URL
                            and configuration file URL for the Lynx help file.
 
@@ -886,7 +892,7 @@
        LYNX_LSS            This variable, if set, specifies  the  location  of
                            the   default  Lynx  character  style  sheet  file.
                            [Currently only meaningful if Lynx was built  using
-                           experimental color style support.]
+                           curses color style support.]
 
        LYNX_SAVE_SPACE     This  variable,  if  set, will override the default
                            path prefix for files saved to disk that is defined

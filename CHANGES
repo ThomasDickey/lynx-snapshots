@@ -1,9 +1,12 @@
--- $LynxId: CHANGES,v 1.694 2013/10/23 09:13:01 tom Exp $
+-- $LynxId: CHANGES,v 1.696 2013/10/24 00:10:05 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
 2013-10-23 (2.8.8dev.17)
+* install the sample-files in the dpkg test-script -TD
+* add configure option --with-cfg-path and environment variables LYNX_CFG_PATH
+  to provide search-list capability for the ".cfg" and ".lss" files -TD
 * modify configuration of COLOR_STYLE value in lynx.cfg, allowing multiple
   filenames to be specified and providing those as choices in the O'ptions
   menu (Debian #404893) -TD

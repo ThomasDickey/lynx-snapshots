@@ -1,5 +1,5 @@
 /*
- * $LynxId: userdefs.h,v 1.277 2013/10/09 12:27:54 tom Exp $
+ * $LynxId: userdefs.h,v 1.278 2013/10/23 22:26:08 tom Exp $
  *
  * Lynx - Hypertext navigation system
  *
@@ -107,6 +107,10 @@
 #ifndef LYNX_CFG_FILE
 #define LYNX_CFG_FILE "Lynx_Dir:lynx.cfg"
 #endif /* LYNX_CFG_FILE */
+
+#ifndef LYNX_CFG_PATH
+#define LYNX_CFG_PATH "Lynx_Dir"
+#endif /* LYNX_CFG_PATH */
 
 /**************************
  * The EXTENSION_MAP file allows you to map file suffixes to
@@ -293,8 +297,10 @@
 #ifndef HAVE_CONFIG_H
 #ifndef LYNX_CFG_FILE
 #ifdef DOSPATH
+#define LYNX_CFG_PATH "."
 #define LYNX_CFG_FILE "./lynx.cfg"
 #else
+#define LYNX_CFG_PATH "/usr/local/lib"
 #define LYNX_CFG_FILE "/usr/local/lib/lynx.cfg"
 #endif /* DOSPATH */
 #endif /* LYNX_CFG_FILE */

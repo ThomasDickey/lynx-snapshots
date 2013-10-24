@@ -42,6 +42,7 @@ endif
 # This package adds the following not in Debian lynx-cur:
 # --enable-htmlized-cfg
 # --enable-local-docs
+# --with-cfg-path
 
 configure: configure-stamp
 configure-stamp:
@@ -61,6 +62,7 @@ configure-stamp:
 		--libexecdir=\$${prefix}/lib \
 		--mandir=\$${prefix}/share/man \
 		--sysconfdir=/etc/$(PACKAGE) \
+		--with-cfg-path=/etc/$(PACKAGE):$(docdir)/samples \
 		--localstatedir=/var \
 		--libdir=/etc/$(PACKAGE) \
 		--enable-8bit-toupper \
@@ -151,7 +153,6 @@ install-arch:
 		docdir=$(docdir) \
 		helpdir=$(helpdir)
 
-	cd $(DOCDIR) && rm -rf samples test
 	cd $(DOCDIR) && rm -f COPY*.asc CHANGES 
 
 # Build architecture-independent files here.
@@ -171,7 +172,7 @@ binary-arch: build install
 	dh_install
 	dh_link
 	dh_strip
-	dh_compress -XCOPY
+	dh_compress -XCOPY -X.lss
 	dh_fixperms
 	dh_installdeb
 	dh_shlibdeps

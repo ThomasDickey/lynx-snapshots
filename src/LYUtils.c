@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYUtils.c,v 1.256 2013/10/23 09:12:22 tom Exp $
+ * $LynxId: LYUtils.c,v 1.257 2013/10/23 22:14:03 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTCP.h>
@@ -5132,11 +5132,11 @@ static char *HomeEnv(void)
 	if (result == 0) {
 	    /* Windows Vista/7 */
 	    if ((head = LYGetEnv("USERPROFILE")) != 0) {
-		HTSprintf0(&temp, "%s%sDocuments", head, PATHSEP_STR);
+		HTSprintf0(&temp, "%s%sDocuments", head, FILE_SEPARATOR);
 		result = CheckDir(temp);
 		if (result == 0) {
 		    /* Windows 2000 */
-		    HTSprintf0(&temp, "%s%sMy Documents", head, PATHSEP_STR);
+		    HTSprintf0(&temp, "%s%sMy Documents", head, FILE_SEPARATOR);
 		    result = CheckDir(temp);
 		}
 	    }
@@ -5145,7 +5145,7 @@ static char *HomeEnv(void)
 	if (result == 0) {
 	    if ((head = LYGetEnv("HOMEDRIVE")) != 0) {
 		if ((leaf = LYGetEnv("HOMEPATH")) != 0) {
-		    HTSprintf0(&temp, "%s%s%s", head, PATHSEP_STR, leaf);
+		    HTSprintf0(&temp, "%s%s%s", head, FILE_SEPARATOR, leaf);
 		    result = CheckDir(temp);
 		}
 	    }
@@ -5161,12 +5161,12 @@ static char *HomeEnv(void)
 	    result = CheckDir(LYGetEnv("TMP"));
 	if (result == 0) {
 	    if ((head = LYGetEnv("SystemDrive")) != 0) {
-		HTSprintf0(&temp, "%s%s", head, PATHSEP_STR);
+		HTSprintf0(&temp, "%s%s", head, FILE_SEPARATOR);
 		result = CheckDir(temp);
 	    }
 	}
 	if (result == 0)
-	    result = CheckDir("C:" PATHSEP_STR);
+	    result = CheckDir("C:" FILE_SEPARATOR);
     }
 #endif
 
@@ -5787,7 +5787,7 @@ static BOOL IsOurSymlink(const char *name)
 	    if (cutoff != 0) {
 		HTSprintf0(&clone, "%.*s%s%s",
 			   (int) (cutoff - name),
-			   name, PATHSEP_STR, buffer);
+			   name, FILE_SEPARATOR, buffer);
 		FREE(buffer);
 		buffer = clone;
 	    }
@@ -6950,7 +6950,7 @@ void LYAddPathSep(char **path)
 	&& ((temp = *path) != 0)
 	&& (len = strlen(temp)) != 0
 	&& !LYIsPathSep(temp[len - 1])) {
-	StrAllocCat(*path, PATHSEP_STR);
+	StrAllocCat(*path, FILE_SEPARATOR);
     }
 }
 
@@ -6966,7 +6966,7 @@ void LYAddPathSep0(char *path)
 	&& (len = strlen(path)) != 0
 	&& (len < LY_MAXPATH - 2)
 	&& !LYIsPathSep(path[len - 1])) {
-	strcat(path, PATHSEP_STR);
+	strcat(path, FILE_SEPARATOR);
     }
 }
 
