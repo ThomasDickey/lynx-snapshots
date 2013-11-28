@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTAnchor.c,v 1.75 2013/10/02 23:24:34 tom Exp $
+ * $LynxId: HTAnchor.c,v 1.76 2013/11/28 11:34:24 tom Exp $
  *
  *	Hypertext "Anchor" Object				HTAnchor.c
  *	==========================
@@ -239,7 +239,7 @@ static HTChildAnchor *HTAnchor_findNamedChild(HTParentAnchor0 *parent,
 	     */
 	    HTChildAnchor sample;
 
-	    sample.tag = (char *) tag;	/* for compare_anchors() only */
+	    sample.tag = DeConst(tag);	/* for compare_anchors() only */
 
 	    child = (HTChildAnchor *) HTBTree_search(parent->children, &sample);
 	    if (child != NULL) {
@@ -511,7 +511,7 @@ HTParentAnchor *HTAnchor_findSimpleAddress(const char *url)
 {
     DocAddress urldoc;
 
-    urldoc.address = (char *) url;	/* ignore warning, it IS treated like const - kw */
+    urldoc.address = DeConst(url);	/* ignore warning, it IS treated like const - kw */
     urldoc.post_data = NULL;
     urldoc.post_content_type = NULL;
     urldoc.bookmark = NULL;

@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMainLoop.c,v 1.229 2013/10/20 21:14:17 tom Exp $
+ * $LynxId: LYMainLoop.c,v 1.230 2013/11/28 11:20:34 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTAccess.h>
@@ -1845,7 +1845,7 @@ static void handle_LYK_COMMENT(BOOLEAN *refresh_screen,
 			/*
 			 * It's a ~user URL so guess user@host.  - FM
 			 */
-			if ((cp = strchr((temp + 1), '/')) != NULL)
+			if ((cp = StrChr((temp + 1), '/')) != NULL)
 			    *cp = '\0';
 			StrAllocCopy(address, STR_MAILTO_URL);
 			StrAllocCat(address, (temp + 1));
@@ -1896,11 +1896,11 @@ static void handle_LYK_COMMENT(BOOLEAN *refresh_screen,
 		    }
 		}
 
-		if (strchr(*owner_address_p, ':') != NULL)
+		if (StrChr(*owner_address_p, ':') != NULL)
 		    /*
 		     * Send a reply.  The address is after the colon.
 		     */
-		    reply_by_mail(strchr(*owner_address_p, ':') + 1,
+		    reply_by_mail(StrChr(*owner_address_p, ':') + 1,
 				  curdoc.address,
 				  NonNull(kp), id);
 		else
@@ -3535,7 +3535,7 @@ static char *urlencode(char *str)
 		*ptr = '+';
 		ptr++;
 	    } else if (ch > 127 ||
-		       strchr(":/?#[]@!$&'()*+,;=", ch) != 0) {
+		       StrChr(":/?#[]@!$&'()*+,;=", ch) != 0) {
 		*ptr++ = '%';
 		*ptr++ = HEX(ch >> 4);
 		*ptr++ = HEX(ch);
@@ -6123,7 +6123,7 @@ int mainloop(void)
 			 */
 			cp = NULL;
 			if (temp[len] == '/') {
-			    if (strchr(&temp[(len + 1)], '/')) {
+			    if (StrChr(&temp[(len + 1)], '/')) {
 				HTSprintf0(&cp, ".%s", &temp[len]);
 			    } else {
 				StrAllocCopy(cp, &temp[(len + 1)]);
@@ -6724,7 +6724,7 @@ int mainloop(void)
 
 		if (strlen(p) < (sizeof(sjis_buff) / 10)) {
 		    strcpy(temp_buff, p);
-		    if (strchr(temp_buff, '%')) {
+		    if (StrChr(temp_buff, '%')) {
 			HTUnEscape(temp_buff);
 		    }
 		    str_sjis(sjis_buff, temp_buff);
@@ -7251,9 +7251,9 @@ int mainloop(void)
 		    break;
 		len2 = (int) strlen((const char *) s);
 		e = s + len2;
-		while (s < e && strchr(" \t\n\r", *s))
+		while (s < e && StrChr(" \t\n\r", *s))
 		    s++;
-		while (s < e && strchr(" \t\n\r", e[-1]))
+		while (s < e && StrChr(" \t\n\r", e[-1]))
 		    e--;
 		if (s[0] == '<' && e > s && e[-1] == '>') {
 		    s++;
@@ -7274,11 +7274,11 @@ int mainloop(void)
 		t = (unsigned char *) buf;
 
 		while (s < e) {
-		    if (strchr(" \t\n\r", *s)) {
+		    if (StrChr(" \t\n\r", *s)) {
 			int nl2 = 0;	/* Keep whitespace without NL - file names! */
 			unsigned char *s1 = s;
 
-			while (strchr(" \t\n\r", *s)) {
+			while (StrChr(" \t\n\r", *s)) {
 			    if (!nl2 && *s == '\n')
 				nl2 = 1;
 			    s++;

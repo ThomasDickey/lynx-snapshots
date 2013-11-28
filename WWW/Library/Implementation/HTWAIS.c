@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTWAIS.c,v 1.37 2013/05/03 20:53:27 tom Exp $
+ * $LynxId: HTWAIS.c,v 1.38 2013/11/28 11:16:03 tom Exp $
  *
  *	WorldWideWeb - Wide Area Informaion Server Access	HTWAIS.c
  *	==================================================
@@ -239,7 +239,7 @@ static char *WWW_from_archie(char *file)
 	return result;		/* Malloc error */
     strcpy(result, "file://");
     StrNCat(result, file, end - file);
-    colon = strchr(result + 7, ':');	/* Expect colon after host */
+    colon = StrChr(result + 7, ':');	/* Expect colon after host */
     if (colon) {
 	for (; colon[0]; colon[0] = colon[1], colon++) ;	/* move down */
     }
@@ -360,11 +360,7 @@ static any *WAIS_from_WWW(any *docid, char *docname)
 	    return 0;
 	q = p;
 
-/*	  *z++ = *p++ - '0';
-	q = strchr(p , '=');
-	if (!q) return 0;
-*/
-	s = strchr(q, ';');	/* (Check only) */
+	s = StrChr(q, ';');	/* (Check only) */
 	if (!s)
 	    return 0;		/* Bad! No ';'; */
 	sor = z;		/* Remember where the size field was */
@@ -649,7 +645,7 @@ int HTLoadWAIS(const char *arg,
      * First we remove the "wais:" if it was specified.  920110
      */
     names = HTParse(arg, "", PARSE_HOST | PARSE_PATH | PARSE_PUNCTUATION);
-    key = strchr(names, '?');
+    key = StrChr(names, '?');
 
     if (key) {
 	char *p;
@@ -664,20 +660,20 @@ int HTLoadWAIS(const char *arg,
 	the_server_name = names + 1;
 	if ((as_gate = (*the_server_name == '/')) != 0)
 	    the_server_name++;	/* Accept one or two */
-	www_database = strchr(the_server_name, '/');
+	www_database = StrChr(the_server_name, '/');
 	if (www_database) {
 	    *www_database++ = 0;	/* Separate database name */
-	    doctype = strchr(www_database, '/');
+	    doctype = StrChr(www_database, '/');
 	    if (key)
 		ok = YES;	/* Don't need doc details */
 	    else if (doctype) {	/* If not search parse doc details */
 		*doctype++ = 0;	/* Separate rest of doc address */
-		doclength = strchr(doctype, '/');
+		doclength = StrChr(doctype, '/');
 		if (doclength) {
 		    *doclength++ = 0;
 		    document_length = atol(doclength);
 		    if (document_length) {
-			docname = strchr(doclength, '/');
+			docname = StrChr(doclength, '/');
 			if (docname) {
 			    *docname++ = 0;
 			    ok = YES;	/* To avoid a goto! */
@@ -697,7 +693,7 @@ int HTLoadWAIS(const char *arg,
 
     CTRACE((tfp, "HTWAIS: Parsed OK\n"));
 
-    service = strchr(names, ':');
+    service = StrChr(names, ':');
     if (service)
 	*service++ = 0;
     else
@@ -819,7 +815,7 @@ int HTLoadWAIS(const char *arg,
 	HTStructured *target;
 
 	LYStrNCpy(keywords, key, MAX_KEYWORDS_LENGTH);
-	while ((p = strchr(keywords, '+')) != 0)
+	while ((p = StrChr(keywords, '+')) != 0)
 	    *p = ' ';
 
 	/*

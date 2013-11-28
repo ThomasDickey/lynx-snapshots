@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTString.c,v 1.71 2013/05/04 12:01:30 tom Exp $
+ * $LynxId: HTString.c,v 1.72 2013/11/28 11:14:49 tom Exp $
  *
  *	Case-independent string comparison		HTString.c
  *
@@ -467,9 +467,9 @@ char *HTNextTok(char **pstr,
     if (!bracks)
 	bracks = "<\"";
 
-    get_blanks = (BOOL) (!strchr(delims, ' ') && !strchr(bracks, ' '));
-    get_comments = (BOOL) (strchr(bracks, '(') != NULL);
-    skip_comments = (BOOL) (!get_comments && !strchr(delims, '(') && !get_blanks);
+    get_blanks = (BOOL) (!StrChr(delims, ' ') && !StrChr(bracks, ' '));
+    get_comments = (BOOL) (StrChr(bracks, '(') != NULL);
+    skip_comments = (BOOL) (!get_comments && !StrChr(delims, '(') && !get_blanks);
 #define skipWHITE(c) (!get_blanks && WHITE(c))
 
     while (*p && skipWHITE(*p))
@@ -482,7 +482,7 @@ char *HTNextTok(char **pstr,
     }
     while (1) {
 	/* Strip white space and other delimiters */
-	while (*p && (skipWHITE(*p) || strchr(delims, *p)))
+	while (*p && (skipWHITE(*p) || StrChr(delims, *p)))
 	    p++;
 	if (!*p) {
 	    *pstr = p;
@@ -514,12 +514,12 @@ char *HTNextTok(char **pstr,
 	    if (*p)
 		p++;
 	    if (get_closing_char_too) {
-		if (!*p || (!strchr(bracks, *p) && strchr(delims, *p))) {
+		if (!*p || (!StrChr(bracks, *p) && StrChr(delims, *p))) {
 		    break;
 		} else
-		    get_closing_char_too = (BOOL) (strchr(bracks, *p) != NULL);
+		    get_closing_char_too = (BOOL) (StrChr(bracks, *p) != NULL);
 	    }
-	} else if (strchr(bracks, *p)) {	/* quoted or bracketed field */
+	} else if (StrChr(bracks, *p)) {	/* quoted or bracketed field */
 	    switch (*p) {
 	    case '<':
 		closer = '>';
@@ -543,19 +543,19 @@ char *HTNextTok(char **pstr,
 		    p++;	/* Skip escaped chars */
 	    if (get_closing_char_too) {
 		p++;
-		if (!*p || (!strchr(bracks, *p) && strchr(delims, *p))) {
+		if (!*p || (!StrChr(bracks, *p) && StrChr(delims, *p))) {
 		    break;
 		} else
-		    get_closing_char_too = (BOOL) (strchr(bracks, *p) != NULL);
+		    get_closing_char_too = (BOOL) (StrChr(bracks, *p) != NULL);
 	    } else
 		break;		/* kr95-10-9: needs to stop here */
 	} else {		/* Spool field */
 	    if (!start)
 		start = p;
-	    while (*p && !skipWHITE(*p) && !strchr(bracks, *p) &&
-		   !strchr(delims, *p))
+	    while (*p && !skipWHITE(*p) && !StrChr(bracks, *p) &&
+		   !StrChr(delims, *p))
 		p++;
-	    if (*p && strchr(bracks, *p)) {
+	    if (*p && StrChr(bracks, *p)) {
 		get_closing_char_too = TRUE;
 	    } else {
 		if (*p == '(' && skip_comments) {
@@ -965,7 +965,7 @@ char *HTQuoteParameter(const char *parameter)
 
     last = strlen(parameter);
     for (i = 0; i < last; ++i)
-	if (strchr("\\&#$^*?(){}<>\"';`|", parameter[i]) != 0
+	if (StrChr("\\&#$^*?(){}<>\"';`|", parameter[i]) != 0
 	    || isspace(UCH(parameter[i])))
 	    ++quoted;
 

@@ -1,4 +1,4 @@
-/* $LynxId: LYSession.c,v 1.8 2012/02/09 20:00:59 tom Exp $ */
+/* $LynxId: LYSession.c,v 1.9 2013/11/28 11:21:22 tom Exp $ */
 
 #include <LYSession.h>
 
@@ -93,7 +93,7 @@ void RestoreSession(void)
 	    LYTrimNewline(buffer);
 	    if (*buffer == '/') {
 #ifdef SEARCH_OUT_SESSION
-		if ((value1 = strchr(buffer, ' ')) == 0) {
+		if ((value1 = StrChr(buffer, ' ')) == 0) {
 		    continue;
 		} else {
 		    value1++;
@@ -102,7 +102,7 @@ void RestoreSession(void)
 #endif /* SEARCH_OUT_SESSION */
 	    } else if (*buffer == 'g') {
 #ifdef GOTOURL_OUT_SESSION
-		if ((value1 = strchr(buffer, ' ')) == 0)
+		if ((value1 = StrChr(buffer, ' ')) == 0)
 		    continue;
 		else {
 		    value1++;
@@ -111,19 +111,19 @@ void RestoreSession(void)
 #endif /* GOTOURL_OUT_SESSION */
 	    } else if (*buffer == 'h') {
 #ifdef HISTORY_OUT_SESSION
-		if ((rsline = strchr(buffer, ' ')) == 0)
+		if ((rsline = StrChr(buffer, ' ')) == 0)
 		    continue;
 		else {
 		    rsline++;
-		    if ((linktext = strchr(rsline, ' ')) == 0)
+		    if ((linktext = StrChr(rsline, ' ')) == 0)
 			continue;
 		    else
 			*linktext++ = 0;
-		    if ((value1 = strchr(linktext, ' ')) == 0)
+		    if ((value1 = StrChr(linktext, ' ')) == 0)
 			continue;
 		    else
 			*value1++ = 0;
-		    if ((value2 = strchr(value1, '\t')) != 0) {
+		    if ((value2 = StrChr(value1, '\t')) != 0) {
 			*value2++ = 0;
 			doc.line = atoi(rsline);
 			doc.link = atoi(linktext);
@@ -135,15 +135,15 @@ void RestoreSession(void)
 #endif /* HISTORY_OUT_SESSION */
 	    } else if (*buffer == 'V') {
 #ifdef VLINK_OUT_SESSION
-		if ((rslevel = strchr(buffer, ' ')) == 0)
+		if ((rslevel = StrChr(buffer, ' ')) == 0)
 		    continue;
 		else {
 		    rslevel++;
-		    if ((value1 = strchr(rslevel, ' ')) == 0)
+		    if ((value1 = StrChr(rslevel, ' ')) == 0)
 			continue;
 		    else
 			*value1++ = 0;
-		    if ((value2 = strchr(value1, '\t')) != 0) {
+		    if ((value2 = StrChr(value1, '\t')) != 0) {
 			*value2++ = 0;
 			StrAllocCopy(doc.address, value1);
 			StrAllocCopy(doc.title, value2);

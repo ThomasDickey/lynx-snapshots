@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTAABrow.c,v 1.39 2013/07/21 00:14:39 tom Exp $
+ * $LynxId: HTAABrow.c,v 1.40 2013/11/28 11:11:05 tom Exp $
  *
  * MODULE							HTAABrow.c
  *		BROWSER SIDE ACCESS AUTHORIZATION MODULE
@@ -1079,7 +1079,7 @@ BOOL HTAA_shouldRetryWithAuth(char *start_of_headers,
     while (NULL != (line = HTAA_getUnfoldedLine()) && *line != '\0') {
 	CTRACE((tfp, "%s\n", line));
 
-	if (strchr(line, ':')) {	/* Valid header line */
+	if (StrChr(line, ':')) {	/* Valid header line */
 
 	    char *p = line;
 	    char *fieldname = HTNextField(&p);

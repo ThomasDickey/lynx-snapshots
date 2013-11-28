@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFinger.c,v 1.30 2013/01/04 21:40:19 tom Exp $
+ * $LynxId: HTFinger.c,v 1.31 2013/11/28 11:27:50 tom Exp $
  *
  *			FINGER ACCESS				HTFinger.c
  *			=============
@@ -219,7 +219,7 @@ static int response(char *command,
 		else {
 		    StrAllocCopy(href, l);
 		    start_anchor(strtok(href, " \r\n\t,>)\""));
-		    while (*l && !strchr(" \r\n\t,>)\"", *l))
+		    while (*l && !StrChr(" \r\n\t,>)\"", *l))
 			PUTC(*l++);
 		    END(HTML_A);
 		    FREE(href);
@@ -289,7 +289,7 @@ int HTLoadFinger(const char *arg,
     if (param == 0) {
 	HTAlert(COULD_NOT_LOAD_DATA);
 	return HT_NOT_LOADED;
-    } else if ((slash = strchr(sitename, '/')) != NULL) {
+    } else if ((slash = StrChr(sitename, '/')) != NULL) {
 	*slash++ = '\0';
 	HTUnEscape(slash);
 	if (IsGopherURL) {
@@ -301,7 +301,7 @@ int HTLoadFinger(const char *arg,
 	}
     }
 
-    if ((at_sign = strchr(sitename, '@')) != NULL) {
+    if ((at_sign = StrChr(sitename, '@')) != NULL) {
 	if (IsGopherURL) {
 	    HTAlert(COULD_NOT_LOAD_DATA);
 	    return HT_NOT_LOADED;	/* FAIL */
@@ -345,7 +345,7 @@ int HTLoadFinger(const char *arg,
 	} else if (at_sign) {
 	    HTSprintf0(&command, "%s%c%c", username, CR, LF);
 	} else if (*username == '/') {
-	    if ((slash = strchr((username + 1), '/')) != NULL) {
+	    if ((slash = StrChr((username + 1), '/')) != NULL) {
 		*slash = ' ';
 	    }
 	    HTSprintf0(&command, "%s%c%c", username, CR, LF);
@@ -360,7 +360,7 @@ int HTLoadFinger(const char *arg,
 	} else if ((*username == 'w' || *username == 'W') &&
 		   *(username + 1) == '\0') {
 	    HTSprintf0(&command, "/%s%c%c", username, CR, LF);
-	} else if ((slash = strchr(username, '/')) != NULL) {
+	} else if ((slash = StrChr(username, '/')) != NULL) {
 	    *slash++ = '\0';
 	    if (*slash == 'w' || *slash == 'W') {
 		HTSprintf0(&command, "/w %s%c%c", username, CR, LF);

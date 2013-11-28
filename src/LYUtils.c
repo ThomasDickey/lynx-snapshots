@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYUtils.c,v 1.257 2013/10/23 22:14:03 tom Exp $
+ * $LynxId: LYUtils.c,v 1.261 2013/11/28 11:35:34 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTCP.h>
@@ -407,7 +407,7 @@ void LYFreeHilites(int first, int last)
 void LYSetHilite(int cur,
 		 const char *text)
 {
-    links[cur].list.hl_base.hl_text = (char *) text;
+    links[cur].list.hl_base.hl_text = DeConst(text);
     links[cur].list.hl_len = (short) ((text != NULL) ? 1 : 0);
     FREE(links[cur].list.hl_info);
 }
@@ -1415,7 +1415,7 @@ void statusline(const char *text)
 
     /* "LYNXDOWNLOAD://Method=-1/File=%s/SugFile=%s%s\">Save to disk</a>\n" */
     LYStrNCpy(text_buff, text, sizeof(text_buff) - 1);
-    p = strchr(text_buff, '\n');
+    p = StrChr(text_buff, '\n');
     if (p)
 	*p = '\0';
 
@@ -2069,7 +2069,7 @@ BOOLEAN LYisLocalFile(const char *filename)
 	return NO;
     }
 
-    if ((cp = strchr(host, ':')) != NULL)
+    if ((cp = StrChr(host, ':')) != NULL)
 	*cp = '\0';
 
     if ((acc_method = HTParse(filename, "", PARSE_ACCESS))) {
@@ -2105,7 +2105,7 @@ BOOLEAN LYisLocalHost(const char *filename)
 	return NO;
     }
 
-    if ((cp = strchr(host, ':')) != NULL)
+    if ((cp = StrChr(host, ':')) != NULL)
 	*cp = '\0';
 
     if ((LYSameFilename(host, "localhost") ||
@@ -2187,7 +2187,7 @@ BOOLEAN LYisLocalAlias(const char *filename)
 	return NO;
     }
 
-    if ((cp = strchr(host, ':')) != NULL)
+    if ((cp = StrChr(host, ':')) != NULL)
 	*cp = '\0';
 
     while (NULL != (alias = (char *) HTList_nextObject(cur))) {
@@ -2231,8 +2231,8 @@ UrlTypes LYCheckForProxyURL(char *filename)
      * Check for a colon, and if present,
      * see if we have proxying set up.
      */
-    if ((cp1 = strchr((cp + 1), ':')) != NULL) {
-	if ((cp2 = strchr((cp + 1), '/')) != NULL && cp2 < cp1)
+    if ((cp1 = StrChr((cp + 1), ':')) != NULL) {
+	if ((cp2 = StrChr((cp + 1), '/')) != NULL && cp2 < cp1)
 	    return (NOT_A_URL_TYPE);
 	*cp1 = '\0';
 	cp2 = NULL;
@@ -2318,7 +2318,7 @@ UrlTypes is_url(char *filename)
      * Can't be a URL if it lacks a colon and if it starts with '[' it's
      * probably IPv6 adress.
      */
-    if (NULL == strchr(cp, ':') || cp[0] == '[')
+    if (NULL == StrChr(cp, ':') || cp[0] == '[')
 	return (result);
 
     /*
@@ -2501,7 +2501,7 @@ UrlTypes is_url(char *filename)
 
 	default:
 	    if (limit >= 3
-		&& ((cp1 = strchr(cp + 3, ':')) == NULL
+		&& ((cp1 = StrChr(cp + 3, ':')) == NULL
 		    || !DoubleHtmlSep(cp1 + 1))) {
 		/*
 		 * If it doesn't contain "://", and it's not one of the the
@@ -2532,7 +2532,7 @@ UrlTypes is_url(char *filename)
 		case 'g':
 		    if (CompareType(cp, STR_GOPHER_URL, LEN_GOPHER_URL)) {
 			if (strlen(cp) >= 11
-			    && (cp1 = strchr(cp + 11, '/')) != NULL) {
+			    && (cp1 = StrChr(cp + 11, '/')) != NULL) {
 
 			    if (TOUPPER(*(cp1 + 1)) == 'H' || *(cp1 + 1) == 'w')
 				/* if this is a gopher html type */
@@ -2650,7 +2650,7 @@ BOOLEAN LYFixCursesOnForAccess(const char *addr,
 	     isRLOGIN_URL(addr) ||
 	     isTN3270_URL(addr) ||
 	     (!isGOPHER_URL(addr) &&
-	      (cp1 = strchr(addr + 11, '/')) != NULL &&
+	      (cp1 = StrChr(addr + 11, '/')) != NULL &&
 	      (*(cp1 + 1) == 'T' || *(cp1 + 1) == '8')))) {
 	    /*
 	     * If actual access that will be done is ok with curses off, then
@@ -2704,12 +2704,12 @@ BOOLEAN LYCanDoHEAD(const char *address)
 	char *temp = HTParse(address, "", PARSE_PATH);
 	char *cp = strrchr(temp, '/');
 
-	if (strchr((cp ? cp : temp), '@') != NULL) {
+	if (StrChr((cp ? cp : temp), '@') != NULL) {
 	    FREE(temp0);
 	    FREE(temp);
 	    return TRUE;
 	}
-	if (cp && isdigit(UCH(cp[1])) && strchr(cp, '-') == NULL) {
+	if (cp && isdigit(UCH(cp[1])) && StrChr(cp, '-') == NULL) {
 	    FREE(temp0);
 	    FREE(temp);
 	    return TRUE;
@@ -2823,6 +2823,85 @@ BOOLEAN LYCanReadFile(const char *filename)
 	    result = LYCloseInput(fp);
 	}
     }
+    return result;
+}
+
+char *LYFindConfigFile(const char *nominal, const char *dftfile)
+{
+    char *result = 0;
+    char *path = 0;
+    char *head = 0;
+    char *leaf;
+    char *item;
+
+    if (non_empty(nominal)) {
+	StrAllocCopy(result, nominal);
+
+	/*
+	 * Look for it in as-is - first expanding any tilde.
+	 */
+	LYTildeExpand(&result, TRUE);
+	if (!LYCanReadFile(result)) {
+	    const char *cfg_path;
+	    char *list = 0;
+	    BOOLEAN found = FALSE;
+
+	    /*
+	     * Now try in the config-path.
+	     */
+	    if ((cfg_path = LYGetEnv("LYNX_CFG_PATH")) == NULL)
+		cfg_path = LYNX_CFG_PATH;
+
+	    StrAllocCopy(list, cfg_path);
+	    path = list;
+	    while ((item = LYstrsep(&path, PATH_SEPARATOR)) != 0) {
+		if (isEmpty(item))
+		    continue;
+		HTSprintf0(&result, "%s%s%s", item, FILE_SEPARATOR, nominal);
+		LYTildeExpand(&result, TRUE);
+		if (LYCanReadFile(result)) {
+		    found = TRUE;
+		    break;
+		}
+	    }
+	    FREE(list);
+
+	    if (!found) {
+		/*
+		 * If not found, try finding it in the same directory as the
+		 * compiled-in location of the default file.
+		 */
+		StrAllocCopy(head, dftfile);
+		if (strcmp(nominal, dftfile) &&
+		    (leaf = LYPathLeaf(head)) != head) {
+
+		    head[leaf - head] = '\0';
+		    StrAllocCopy(result, head);
+		    StrAllocCat(result, nominal);
+
+		    if (!LYCanReadFile(result)) {
+			FREE(result);
+		    }
+		}
+#ifdef USE_PROGRAM_DIR
+		else {
+		    /*
+		     * Finally, try in the same directory as the executable.
+		     */
+		    StrAllocCopy(result, program_dir);
+		    LYAddPathSep(&result);
+		    StrAllocCat(result, nominal);
+		    LYTildeExpand(&result, TRUE);
+		    if (!LYCanReadFile(result)) {
+			FREE(result);
+		    }
+		}
+#endif
+	    }
+	}
+
+    }
+    FREE(head);
     return result;
 }
 
@@ -3228,7 +3307,7 @@ void change_sug_filename(char *fname)
     /*
      * Trim off VMS device and/or directory specs, if present.
      */
-    if ((cp = strchr(fname, '[')) != NULL &&
+    if ((cp = StrChr(fname, '[')) != NULL &&
 	(cp1 = strrchr(cp, ']')) != NULL && strlen(cp1) > 1) {
 	cp1++;
 	for (cp = fname; *cp1 != '\0'; cp1++) {
@@ -3321,18 +3400,18 @@ void change_sug_filename(char *fname)
     if ((dot = strrchr(fname, '.')) != NULL) {
 	if (TOUPPER(fname[j]) == 'Z') {
 	    if ((fname[j - 1] == '.') &&
-		(((cp = strchr(fname, '.')) != NULL) && cp < dot)) {
+		(((cp = StrChr(fname, '.')) != NULL) && cp < dot)) {
 		*dot = '_';
 		dot = strrchr(fname, '.');
 	    } else if (((TOUPPER(fname[j - 1]) == 'G') &&
 			fname[j - 2] == '.') &&
-		       (((cp = strchr(fname, '.')) != NULL) && cp < dot)) {
+		       (((cp = StrChr(fname, '.')) != NULL) && cp < dot)) {
 		*dot = '-';
 		dot = strrchr(fname, '.');
 	    }
 	}
 	cp = fname;
-	while ((cp = strchr(cp, '.')) != NULL && cp < dot) {
+	while ((cp = StrChr(cp, '.')) != NULL && cp < dot) {
 	    *cp = '_';
 	}
 
@@ -3501,7 +3580,7 @@ static int fmt_tempname(char *result,
     if (strlen(leaf) > 8)
 	leaf[8] = 0;
     if (strlen(suffix) > 4 || *suffix != '.') {
-	const char *tail = strchr(suffix, '.');
+	const char *tail = StrChr(suffix, '.');
 
 	if (tail == 0)
 	    tail = suffix + strlen(suffix);
@@ -4070,7 +4149,7 @@ void LYConvertToURL(char **AllocatedString,
 	     * assume the rest of the path, if any, has SHELL syntax.
 	     */
 	    StrAllocCat(*AllocatedString, HTVMS_wwwName(Home_Dir()));
-	    if ((cp = strchr(old_string, '/')) != NULL) {
+	    if ((cp = StrChr(old_string, '/')) != NULL) {
 		/*
 		 * Append rest of path, if present, skipping "user" if "~user"
 		 * was entered, simplifying, and eliminating any residual
@@ -4092,12 +4171,12 @@ void LYConvertToURL(char **AllocatedString,
 	    /*
 	     * We found the file.  Convert to a URL pathspec.
 	     */
-	    if ((cp = strchr(file_name, ';')) != NULL) {
+	    if ((cp = StrChr(file_name, ';')) != NULL) {
 		*cp = '\0';
 	    }
 	    LYLowerCase(file_name);
 	    StrAllocCat(*AllocatedString, HTVMS_wwwName(file_name));
-	    if ((cp = strchr(old_string, ';')) != NULL) {
+	    if ((cp = StrChr(old_string, ';')) != NULL) {
 		StrAllocCat(*AllocatedString, cp);
 	    }
 	    if (fragment != NULL) {
@@ -4128,8 +4207,8 @@ void LYConvertToURL(char **AllocatedString,
 		 * if we can't rule out a bad VMS path.
 		 */
 		fragment = NULL;
-		if (strchr(old_string, '[') ||
-		    ((cp = strchr(old_string, ':')) != NULL &&
+		if (StrChr(old_string, '[') ||
+		    ((cp = StrChr(old_string, ':')) != NULL &&
 		     !isdigit(UCH(cp[1]))) ||
 		    !LYExpandHostForURL(&old_string,
 					URLDomainPrefixes,
@@ -4165,8 +4244,8 @@ void LYConvertToURL(char **AllocatedString,
 	    restorePoundSelector(fragment);
 	    fragment = NULL;
 
-	    if (strchr(old_string, '[') ||
-		((cp = strchr(old_string, ':')) != NULL &&
+	    if (StrChr(old_string, '[') ||
+		((cp = StrChr(old_string, ':')) != NULL &&
 		 !isdigit(UCH(cp[1]))) ||
 		!LYExpandHostForURL(&old_string,
 				    URLDomainPrefixes,
@@ -4288,7 +4367,7 @@ void LYConvertToURL(char **AllocatedString,
 		/* especially when we really have file://localhost/   */
 		/* at the beginning.  To avoid any confusion we allow */
 		/* escaping the path if URL specials % or # present.  */
-		if (strchr(temp, '#') == NULL && strchr(temp, '%') == NULL)
+		if (StrChr(temp, '#') == NULL && StrChr(temp, '%') == NULL)
 		    StrAllocCopy(cp, temp);
 		else
 		    cp = HTEscape(temp, URL_PATH);
@@ -4345,8 +4424,8 @@ void LYConvertToURL(char **AllocatedString,
 			    old_string, *AllocatedString));
 		    is_local = TRUE;
 
-		} else if (strchr(curdir, '#') != NULL ||
-			   strchr(curdir, '%') != NULL) {
+		} else if (StrChr(curdir, '#') != NULL ||
+			   StrChr(curdir, '%') != NULL) {
 		    /*
 		     * If PWD has some unusual characters, construct a filename
 		     * in temp where those are escaped.  This is mostly to
@@ -4459,7 +4538,7 @@ void LYConvertToURL(char **AllocatedString,
 	     * lead slash.  - FM
 	     */
 	    StrAllocCat(*AllocatedString, wwwName(Home_Dir()));
-	    if ((cp = strchr((old_string + 1), '/')) != NULL) {
+	    if ((cp = StrChr((old_string + 1), '/')) != NULL) {
 		/*
 		 * Append rest of path, if present, skipping "user" if "~user"
 		 * was entered, simplifying, and eliminating any residual
@@ -4583,7 +4662,7 @@ BOOLEAN LYExpandHostForURL(char **AllocatedString,
      * filling in the Host[:port] field.  - FM
      */
     StrAllocCopy(Str, *AllocatedString);
-    if ((Path = strchr(Str, '/')) != NULL) {
+    if ((Path = StrChr(Str, '/')) != NULL) {
 	/*
 	 * Have a path.  Any fragment should already be included in Path.  - FM
 	 */
@@ -4602,7 +4681,7 @@ BOOLEAN LYExpandHostForURL(char **AllocatedString,
      * field after filling in the host field.  - FM
      */
     if ((StrColon = strrchr(Str, ':')) != NULL &&
-	isdigit(UCH(StrColon[1])) && strchr(StrColon, ']') == NULL) {
+	isdigit(UCH(StrColon[1])) && StrChr(StrColon, ']') == NULL) {
 	if (StrColon == Str) {
 	    goto cleanup;
 	}
@@ -4803,7 +4882,7 @@ BOOLEAN LYExpandHostForURL(char **AllocatedString,
      * the original string with the expanded Host[:port] field included.  - FM
      */
     if (GotHost) {
-	if (StrColon && strchr(Host, ':') == NULL) {
+	if (StrColon && StrChr(Host, ':') == NULL) {
 	    *StrColon = ':';
 	    StrAllocCat(Host, StrColon);
 	}
@@ -5244,7 +5323,7 @@ char *LYPathLeaf(char *pathname)
     int n;
 
     for (leaf = 0, n = strlen(pathname) - 1; n >= 0; n--) {
-	if (strchr("\\/:", pathname[n]) != 0) {
+	if (StrChr("\\/:", pathname[n]) != 0) {
 	    leaf = pathname + n + 1;
 	    break;
 	}
@@ -5308,7 +5387,7 @@ BOOLEAN LYPathOffHomeOK(char *fbuffer,
     if (LYIsTilde(cp[0])) {
 	if (LYIsPathSep(cp[1])) {
 	    if (cp[2] != '\0') {
-		if (strchr((cp + 2), '/') != NULL) {
+		if (StrChr((cp + 2), '/') != NULL) {
 		    /*
 		     * Convert "~/subdir(s)/file" to "./subdir(s)/file".  - FM
 		     */
@@ -5327,10 +5406,10 @@ BOOLEAN LYPathOffHomeOK(char *fbuffer,
 		return (FALSE);
 	    }
 	} else if ((*(cp + 1) != '\0') &&
-		   (cp1 = strchr((cp + 1), '/')) != NULL) {
+		   (cp1 = StrChr((cp + 1), '/')) != NULL) {
 	    cp = (cp1 - 1);
 	    if (*(cp + 2) != '\0') {
-		if (strchr((cp + 2), '/') != NULL) {
+		if (StrChr((cp + 2), '/') != NULL) {
 		    /*
 		     * Convert "~user/subdir(s)/file" to "./subdir(s)/file". 
 		     * If user is someone else, we covered a spoof.  Otherwise,
@@ -5362,7 +5441,7 @@ BOOLEAN LYPathOffHomeOK(char *fbuffer,
     /*
      * Check for VMS path specs, and reject if still present.  - FM
      */
-    if (strchr(cp, ':') != NULL || strchr(cp, ']') != NULL) {
+    if (StrChr(cp, ':') != NULL || StrChr(cp, ']') != NULL) {
 	FREE(file);
 	return (FALSE);
     }
@@ -5385,7 +5464,7 @@ BOOLEAN LYPathOffHomeOK(char *fbuffer,
      * Check if it has a pointless "./".  - FM
      */
     if (!StrNCmp(cp, "./", 2)) {
-	if (strchr((cp + 2), '/') == NULL) {
+	if (StrChr((cp + 2), '/') == NULL) {
 	    cp += 2;
 	}
     }
@@ -5406,7 +5485,7 @@ BOOLEAN LYPathOffHomeOK(char *fbuffer,
      * Load what we have at this point into fbuffer, trimming if too long, and
      * claim it's OK.  - FM
      */
-    if (fbuffer_size > 3 && StrNCmp(cp, "./", 2) && strchr(cp, '/')) {
+    if (fbuffer_size > 3 && StrNCmp(cp, "./", 2) && StrChr(cp, '/')) {
 	/*
 	 * We have a subdirectory and no lead "./", so prefix it to make the
 	 * situation clear.  - FM
@@ -5694,7 +5773,7 @@ extern char **environ;
  */
 int putenv(const char *string)
 {
-    char *name_end = strchr(string, '=');
+    char *name_end = StrChr(string, '=');
     register size_t size;
     register char **ep;
 
@@ -5880,7 +5959,7 @@ static FILE *OpenHiddenFile(const char *name, const char *mode)
 {
     FILE *fp = 0;
     struct stat data;
-    BOOLEAN binary = (BOOLEAN) (strchr(mode, 'b') != 0);
+    BOOLEAN binary = (BOOLEAN) (StrChr(mode, 'b') != 0);
 
 #if defined(O_CREAT) && defined(O_EXCL)		/* we have fcntl.h or kindred? */
     /*
@@ -6696,14 +6775,14 @@ BOOLEAN LYValidateFilename(bstring **result,
 	    FREE(cp1);
 	}
 #ifdef VMS
-	if (strchr((*given)->str, '/') != NULL) {
+	if (StrChr((*given)->str, '/') != NULL) {
 	    BStrCopy0(*result, HTVMS_name("", (*given)->str));
 	    BStrCopy(*given, *result);
 	}
 	if ((*given)->str[0] != '/'
-	    && strchr((*given)->str, ':') == NULL) {
+	    && StrChr((*given)->str, ':') == NULL) {
 	    BStrCopy0(*result, "sys$disk:");
-	    if (strchr((*given)->str, ']') == NULL)
+	    if (StrChr((*given)->str, ']') == NULL)
 		BStrCat0(*result, "[]");
 	    BStrCat(*result, (*given));
 	} else {
@@ -6714,7 +6793,7 @@ BOOLEAN LYValidateFilename(bstring **result,
 #ifndef __EMX__
 	if (!LYisAbsPath((*given)->str)) {
 #if defined(__DJGPP__) || defined(_WINDOWS)
-	    if (strchr((*result)->str, ':') != NULL)
+	    if (StrChr((*result)->str, ':') != NULL)
 		cp = NULL;
 	    else
 #endif /*  __DJGPP__ || _WINDOWS */
@@ -6871,7 +6950,7 @@ void WriteInternalTitle(FILE *fp0, const char *Title)
     fprintf(fp0, "<html>\n<head>\n");
     LYAddMETAcharsetToFD(fp0, -1);
     if (LYIsListpageTitle(Title)) {
-	if (strchr(HTLoadedDocumentURL(), '"') == NULL) {
+	if (StrChr(HTLoadedDocumentURL(), '"') == NULL) {
 	    char *Address = NULL;
 
 	    /*
@@ -7204,7 +7283,7 @@ int LYSystem(char *command)
 	while (*p == ' ')
 	    p++;
 
-	if (strchr(p, '\\') == NULL) {
+	if (StrChr(p, '\\') == NULL) {
 	    /* for Windows Application */
 	    cygwin_conv_to_full_win32_path(p, win32_name);
 	    sprintf(new_command, "%.*s \"%.*s\"",
@@ -7604,8 +7683,8 @@ char *get_clip_grab(void)
 	paste_buf[off + len] = '\0';
 	if (len < PASTE_BUFFER - 1)
 	    break;
-	if (strchr(paste_buf + off, '\r')
-	    || strchr(paste_buf + off, '\n'))
+	if (StrChr(paste_buf + off, '\r')
+	    || StrChr(paste_buf + off, '\n'))
 	    break;
 	paste_buf = typeRealloc(char, paste_buf, size += PASTE_BUFFER - 1);
 
@@ -7877,10 +7956,10 @@ void LYSyslog(char *arg)
 
 	if (is_url(arg)) {	/* proto://user:password@host/path:port */
 	    /*      ^this colon                 */
-	    if ((colon1 = strchr(arg, ':')) != 0
+	    if ((colon1 = StrChr(arg, ':')) != 0
 		&& !StrNCmp(colon1, "://", 3)
-		&& (colon2 = strchr(colon1 + 3, ':')) != 0
-		&& (atsign = strchr(colon1, '@')) != 0
+		&& (colon2 = StrChr(colon1 + 3, ':')) != 0
+		&& (atsign = StrChr(colon1, '@')) != 0
 		&& (colon2 < atsign)
 		&& looks_like_password(colon2 + 1, atsign - 1)) {
 		char *buf = NULL;
@@ -8002,7 +8081,7 @@ int unsafe_filename(const char *fname)
 	} else {
 	    char *q;
 
-	    q = strchr(cp, '.');
+	    q = StrChr(cp, '.');
 	    if (q)
 		*q = '\0';
 	    if (is_device(cp)) {

@@ -1,5 +1,5 @@
 /*
- * $LynxId: makeuctb.c,v 1.48 2013/07/21 00:42:39 tom Exp $
+ * $LynxId: makeuctb.c,v 1.49 2013/11/28 11:28:53 tom Exp $
  *
  *  makeuctb.c, derived from conmakehash.c   - kw
  *
@@ -365,7 +365,7 @@ int main(int argc, char **argv)
      *  Now we comes to the tricky part.  Parse the input table.
      */
     while (fgets(buffer, (int) sizeof(buffer), ctbl) != NULL) {
-	if ((p = strchr(buffer, '\n')) != NULL) {
+	if ((p = StrChr(buffer, '\n')) != NULL) {
 	    *p = '\0';
 	} else {
 	    fprintf(stderr,
@@ -749,7 +749,7 @@ int main(int argc, char **argv)
 	StrNCpy(this_MIMEcharset, argv[3], UC_MAXLEN_MIMECSNAME);
     } else if (this_MIMEcharset[0] == '\0') {
 	StrNCpy(this_MIMEcharset, tblname, UC_MAXLEN_MIMECSNAME);
-	if ((p = strchr(this_MIMEcharset, '.')) != 0) {
+	if ((p = StrChr(this_MIMEcharset, '.')) != 0) {
 	    *p = '\0';
 	}
     }

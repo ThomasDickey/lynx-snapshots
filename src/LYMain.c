@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMain.c,v 1.250 2013/10/21 20:25:19 tom Exp $
+ * $LynxId: LYMain.c,v 1.251 2013/11/28 11:20:21 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTP.h>
@@ -955,9 +955,9 @@ static void append_ssl_version(char **target,
     if (*separator == ' ')
 	StrAllocCat(*target, ",");
     LYStrNCpy(SSLLibraryVersion, LYNX_SSL_VERSION, sizeof(SSLLibraryVersion) - 1);
-    if ((SSLcp = strchr(SSLLibraryVersion, ' ')) != NULL) {
+    if ((SSLcp = StrChr(SSLLibraryVersion, ' ')) != NULL) {
 	*SSLcp++ = *separator;
-	if ((SSLcp = strchr(SSLcp, ' ')) != NULL) {
+	if ((SSLcp = StrChr(SSLcp, ' ')) != NULL) {
 	    *SSLcp = '\0';
 	    StrAllocCat(*target, " ");
 	    StrAllocCat(*target, SSLLibraryVersion);
@@ -1282,7 +1282,7 @@ int main(int argc,
     }
 #ifdef VMS
     LYLowerCase(lynx_temp_space);
-    if (strchr(lynx_temp_space, '/') != NULL) {
+    if (StrChr(lynx_temp_space, '/') != NULL) {
 	if (strlen(lynx_temp_space) == 1) {
 	    StrAllocCopy(lynx_temp_space, "sys$scratch:");
 	} else {
@@ -1292,8 +1292,8 @@ int main(int argc,
 	    FREE(temp);
 	}
     }
-    if (strchr(lynx_temp_space, ':') == NULL &&
-	strchr(lynx_temp_space, ']') == NULL) {
+    if (StrChr(lynx_temp_space, ':') == NULL &&
+	StrChr(lynx_temp_space, ']') == NULL) {
 	StrAllocCat(lynx_temp_space, ":");
     }
 #else
@@ -1780,7 +1780,7 @@ int main(int argc,
 	LYTildeExpand(&lynx_save_space, TRUE);
 #ifdef VMS
 	LYLowerCase(lynx_save_space);
-	if (strchr(lynx_save_space, '/') != NULL) {
+	if (StrChr(lynx_save_space, '/') != NULL) {
 	    if (strlen(lynx_save_space) == 1) {
 		StrAllocCopy(lynx_save_space, "sys$login:");
 	    } else {
@@ -1790,8 +1790,8 @@ int main(int argc,
 		FREE(temp);
 	    }
 	}
-	if (strchr(lynx_save_space, ':') == NULL &&
-	    strchr(lynx_save_space, ']') == NULL) {
+	if (StrChr(lynx_save_space, ':') == NULL &&
+	    StrChr(lynx_save_space, ']') == NULL) {
 	    StrAllocCat(lynx_save_space, ":");
 	}
 #else
@@ -2471,7 +2471,7 @@ static int parse_authentication(char *next_arg,
     if (auth_info != 0) {
 	char *cp;
 
-	if ((cp = strchr(auth_info, ':')) != 0) {	/* Pw */
+	if ((cp = StrChr(auth_info, ':')) != 0) {	/* Pw */
 	    *cp++ = '\0';	/* Terminate ID */
 	    HTUnEscape(cp);
 	    StrAllocCopy(result[1], cp);
@@ -2600,7 +2600,7 @@ static int convert_to_fun(char *next_arg)
 	StrAllocCopy(outformat, next_arg);
 	/* not lowercased, to allow for experimentation - kw */
 	/*LYLowerCase(outformat); */
-	if ((cp1 = strchr(outformat, ';')) != NULL) {
+	if ((cp1 = StrChr(outformat, ';')) != NULL) {
 	    if ((cp2 = LYstrstr(cp1, "charset")) != NULL) {
 		cp2 += 7;
 		while (*cp2 == ' ' || *cp2 == '=' || *cp2 == '"')
@@ -3279,7 +3279,7 @@ static int scrsize_fun(char *next_arg)
     if (next_arg != 0) {
 	char *cp;
 
-	if ((cp = strchr(next_arg, ',')) != 0) {
+	if ((cp = StrChr(next_arg, ',')) != 0) {
 	    *cp++ = '\0';	/* Terminate ID */
 	    scrsize_x = atoi(next_arg);
 	    scrsize_y = atoi(cp);
@@ -4052,7 +4052,7 @@ static void print_help_strings(const char *name,
 	first = pad;
     }
 
-    if (strchr(help, '\n') == 0) {
+    if (StrChr(help, '\n') == 0) {
 	fprintf(stdout, "%s", help);
     } else {
 	while ((c = *help) != 0) {

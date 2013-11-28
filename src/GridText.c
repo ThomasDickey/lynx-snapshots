@@ -1,5 +1,5 @@
 /*
- * $LynxId: GridText.c,v 1.273 2013/10/13 20:23:07 tom Exp $
+ * $LynxId: GridText.c,v 1.274 2013/11/28 11:16:50 tom Exp $
  *
  *		Character grid hypertext object
  *		===============================
@@ -7657,7 +7657,7 @@ int do_www_search(DocInfo *doc)
     /*
      * Load the default query buffer
      */
-    if ((cp = strchr(doc->address, '?')) != NULL) {
+    if ((cp = StrChr(doc->address, '?')) != NULL) {
 	/*
 	 * This is an index from a previous search.
 	 * Use its query as the default.
@@ -7799,7 +7799,7 @@ int do_www_search(DocInfo *doc)
 	    /*
 	     * Show the URL with the new query.
 	     */
-	    if ((cp = strchr(doc->address, '?')) != NULL)
+	    if ((cp = StrChr(doc->address, '?')) != NULL)
 		*cp = '\0';
 	    StrAllocCopy(tmpaddress, doc->address);
 	    StrAllocCat(tmpaddress, "?");
@@ -10495,7 +10495,7 @@ static double get_trans_q(int cs_from,
 
     if (!givenmime || !(*givenmime))
 	return 0.0;
-    if ((p = strchr(givenmime, ';')) != NULL) {
+    if ((p = StrChr(givenmime, ';')) != NULL) {
 	*p++ = '\0';
     }
     if (!strcmp(givenmime, "*"))
@@ -11624,7 +11624,7 @@ int HText_SubmitForm(FormInfo * submit_item, DocInfo *doc,
 		     * default.  -FM
 		     */
 		    if (Boundary) {
-			*(strchr(escaped1, '=') + 1) = '\0';
+			*(StrChr(escaped1, '=') + 1) = '\0';
 			HTBprintf(&my_query,
 				  "%s\"%s.x\"\r\n\r\n0\r\n--%s\r\n%s\"%s.y\"\r\n\r\n0",
 				  escaped1,
@@ -12517,7 +12517,7 @@ static int increment_tagged_htline(HTLine *ht, TextAnchor *a, int *lx_val,
 			val += incr;
 			sprintf(lx, "%d", val);
 			new_n = (int) strlen(lx);
-			if ((r = strchr(ht->next->data, ']')) == 0) {
+			if ((r = StrChr(ht->next->data, ']')) == 0) {
 			    r = "";
 			}
 			strcat(lx, r);
@@ -12995,7 +12995,7 @@ static int finish_ExtEditForm(LinkInfo * form_link, TextAnchor *start_anchor,
 	}
 	line[len0] = '\0';
 
-	if ((cp = strchr(lp, '\n')) != 0)
+	if ((cp = StrChr(lp, '\n')) != 0)
 	    len = (int) (cp - lp);
 	else
 	    len = (int) strlen(lp);
@@ -13003,7 +13003,7 @@ static int finish_ExtEditForm(LinkInfo * form_link, TextAnchor *start_anchor,
 	if (wanted_fieldlen_wrap < 0 &&
 	    !wrapalert &&
 	    len0 + len >= display_size &&
-	    (cp = strchr(lp, ' ')) != NULL &&
+	    (cp = StrChr(lp, ' ')) != NULL &&
 	    (cp - lp) < display_size - 1) {
 
 	    LYFixCursesOn("ask for confirmation:");
@@ -13637,7 +13637,7 @@ int HText_InsertFile(LinkInfo * form_link)
 
     while (*lp) {
 
-	if ((cp = strchr(lp, '\n')) != 0)
+	if ((cp = StrChr(lp, '\n')) != 0)
 	    len = (int) (cp - lp);
 	else
 	    len = (int) strlen(lp);

@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMap.c,v 1.47 2013/05/06 00:53:46 tom Exp $
+ * $LynxId: LYMap.c,v 1.48 2013/11/28 11:21:09 tom Exp $
  *			Lynx Client-side Image MAP Support	       LYMap.c
  *			==================================
  *
@@ -417,7 +417,7 @@ static int LYLoadIMGmap(const char *arg,
     if (isLYNXIMGMAP(arg)) {
 	address = (arg + LEN_LYNXIMGMAP);
     }
-    if (!(address && strchr(address, ':'))) {
+    if (!(address && StrChr(address, ':'))) {
 	HTAlert(MISDIRECTED_MAP_REQUEST);
 	return (HT_NOT_LOADED);
     }
@@ -537,7 +537,7 @@ static int LYLoadIMGmap(const char *arg,
     } else if (non_empty(LYRequestTitle) &&
 	       strcasecomp(LYRequestTitle, NO_MAP_TITLE)) {
 	StrAllocCopy(MapTitle, LYRequestTitle);
-    } else if ((cp = strchr(address, '#')) != NULL) {
+    } else if ((cp = StrChr(address, '#')) != NULL) {
 	StrAllocCopy(MapTitle, (cp + 1));
     }
     if (isEmpty(MapTitle)) {

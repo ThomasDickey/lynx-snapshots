@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYStyle.c,v 1.87 2013/10/23 23:58:52 tom Exp $
+ * $LynxId: LYStyle.c,v 1.94 2013/11/28 11:37:02 tom Exp $
  *
  * character level styles for Lynx
  * (c) 1996 Rob Partington -- donated to the Lyncei (if they want it :-)
@@ -34,7 +34,6 @@
 #ifdef USE_COLOR_STYLE
 
 static HTList *list_of_lss_files;
-static char default_lss_file[] = LYNX_LSS_FILE;
 
 /* because curses isn't started when we parse the config file, we
  * need to remember the STYLE: lines we encounter and parse them
@@ -113,6 +112,8 @@ static unsigned char our_pairs[2]
 [MAX_COLOR + 1]
 [MAX_COLOR + 1];
 
+static void style_initialiseHashTable(void);
+
 static bucket *new_bucket(const char *name)
 {
     bucket *result = typecalloc(bucket);
@@ -157,7 +158,7 @@ static void parse_either(const char *attrs,
 	char *to_free = temp_attrs;
 
 	while (*temp_attrs != '\0') {
-	    char *next = strchr(temp_attrs, '+');
+	    char *next = StrChr(temp_attrs, '+');
 	    char save = (char) ((next != NULL) ? *next : '\0');
 
 	    if (next == NULL)
@@ -333,7 +334,7 @@ static void parse_style(char *param)
 	return;
 
     TrimLowercase(buffer);
-    if ((tmp = strchr(buffer, ':')) == 0) {
+    if ((tmp = StrChr(buffer, ':')) == 0) {
 	fprintf(stderr, gettext("\
 Syntax Error parsing style in lss file:\n\
 [%s]\n\
@@ -346,7 +347,7 @@ where OBJECT is one of EM,STRONG,B,I,U,BLINK etc.\n\n"), buffer);
     element = buffer;
 
     mono = tmp + 1;
-    tmp = strchr(mono, ':');
+    tmp = StrChr(mono, ':');
 
     if (!tmp) {
 	fg = "nocolor";
@@ -354,7 +355,7 @@ where OBJECT is one of EM,STRONG,B,I,U,BLINK etc.\n\n"), buffer);
     } else {
 	*tmp = '\0';
 	fg = tmp + 1;
-	tmp = strchr(fg, ':');
+	tmp = StrChr(fg, ':');
 	if (!tmp)
 	    bg = "default";
 	else {
@@ -412,6 +413,32 @@ static void style_deleteStyleList(void)
     lss_styles = NULL;
 }
 
+#ifdef LY_FIND_LEAKS
+static void free_colorstyle_leaks(void)
+{
+    LSS_NAMES *obj;
+
+    while ((obj = HTList_objectAt(list_of_lss_files, 0)) != 0) {
+	if (HTList_unlinkObject(list_of_lss_files, obj)) {
+	    FREE(obj->given);
+	    FREE(obj->actual);
+	    FREE(obj);
+	} else {
+	    break;
+	}
+    }
+    HTList_delete(list_of_lss_files);
+}
+#endif
+
+static void free_colorstylestuff(void)
+{
+    style_initialiseHashTable();
+    style_deleteStyleList();
+    memset(our_pairs, 0, sizeof(our_pairs));
+    FreeCachedStyles();
+}
+
 /* Set all the buckets in the hash table to be empty */
 static void style_initialiseHashTable(void)
 {
@@ -431,6 +458,7 @@ static void style_initialiseHashTable(void)
 	firsttime = 0;
 #ifdef LY_FIND_LEAKS
 	atexit(free_colorstylestuff);
+	atexit(free_colorstyle_leaks);
 #endif
     }
     s_alink = hash_code("alink");
@@ -444,14 +472,6 @@ static void style_initialiseHashTable(void)
     s_sb_aa = hash_code("scroll.arrow");
     s_sb_naa = hash_code("scroll.noarrow");
 #endif
-}
-
-static void free_colorstylestuff(void)
-{
-    style_initialiseHashTable();
-    style_deleteStyleList();
-    memset(our_pairs, 0, sizeof(our_pairs));
-    FreeCachedStyles();
 }
 
 /*
@@ -817,82 +837,7 @@ void update_color_style(void)
 
 static char *find_lss_file(const char *nominal)
 {
-    const char *dftfile = default_lss_file;
-    char *result = 0;
-    char *path = 0;
-    char *head = 0;
-    char *leaf;
-    char *item;
-
-    if (non_empty(nominal)) {
-	StrAllocCopy(result, nominal);
-
-	/*
-	 * Look for it in as-is - first expanding any tilde.
-	 */
-	LYTildeExpand(&result, TRUE);
-	if (!LYCanReadFile(result)) {
-	    const char *cfg_path;
-	    char *list = 0;
-	    BOOLEAN found = FALSE;
-
-	    /*
-	     * Now try in the config-path.
-	     */
-	    if ((cfg_path = LYGetEnv("LYNX_CFG_PATH")) == NULL)
-		cfg_path = LYNX_CFG_PATH;
-
-	    StrAllocCopy(list, cfg_path);
-	    path = list;
-	    while ((item = LYstrsep(&path, PATH_SEPARATOR)) != 0) {
-		if (isEmpty(item))
-		    continue;
-		HTSprintf0(&result, "%s%s%s", item, FILE_SEPARATOR, nominal);
-		LYTildeExpand(&result, TRUE);
-		if (LYCanReadFile(result)) {
-		    found = TRUE;
-		    break;
-		}
-	    }
-	    FREE(list);
-
-	    if (!found) {
-		/*
-		 * If not, try finding it in the same directory as the
-		 * compiled-in location of the default file.
-		 */
-		StrAllocCopy(head, dftfile);
-		if (strcmp(nominal, dftfile) &&
-		    (leaf = LYPathLeaf(head)) != head) {
-
-		    head[leaf - head] = '\0';
-		    StrAllocCopy(result, head);
-		    StrAllocCat(result, nominal);
-
-		    if (!LYCanReadFile(result)) {
-			FREE(result);
-		    }
-		}
-#ifdef USE_PROGRAM_DIR
-		else {
-		    /*
-		     * Finally, try in the same directory as the executable.
-		     */
-		    StrAllocCopy(result, program_dir);
-		    LYAddPathSep(&result);
-		    StrAllocCat(result, nominal);
-		    LYTildeExpand(&result, TRUE);
-		    if (!LYCanReadFile(result)) {
-			FREE(result);
-		    }
-		}
-#endif
-	    }
-	}
-
-    }
-    FREE(head);
-    return result;
+    return LYFindConfigFile(nominal, LYNX_LSS_FILE);
 }
 
 /*
@@ -905,16 +850,14 @@ void add_to_lss_list(const char *source, const char *resolved)
     BOOLEAN found = FALSE;
     int position = 0;
 
+#ifdef LY_FIND_LEAKS
+    atexit(free_colorstyle_leaks);
+#endif
+
     CTRACE((tfp, "add_to_lss_list(\"%s\", \"%s\")\n",
 	    NonNull(source),
 	    NonNull(resolved)));
 
-    obj = typecalloc(LSS_NAMES);
-    if (obj == NULL)
-	outofmem(__FILE__, "add_to_lss_list");
-
-    StrAllocCopy(obj->given, source);
-    StrAllocCopy(obj->actual, resolved);
     if (list_of_lss_files == 0) {
 	list_of_lss_files = HTList_new();
     }
@@ -930,6 +873,12 @@ void add_to_lss_list(const char *source, const char *resolved)
     }
 
     if (!found) {
+	obj = typecalloc(LSS_NAMES);
+	if (obj == NULL)
+	    outofmem(__FILE__, "add_to_lss_list");
+
+	StrAllocCopy(obj->given, source);
+	StrAllocCopy(obj->actual, resolved);
 	HTList_appendObject(list_of_lss_files, obj);
     }
 }
@@ -973,7 +922,7 @@ void init_color_styles(char **from_cmdline, const char *default_styles)
 	       (cp = LYGetEnv("lynx_lss")) != NULL) {
 	lynx_lss_file = find_lss_file(cp);
     } else {
-	lynx_lss_file = find_lss_file(cp = default_lss_file);
+	lynx_lss_file = find_lss_file(cp = DeConst(LYNX_LSS_FILE));
     }
     CTRACE1((tfp, "init_color_styles(%s)\n", NonNull(lynx_lss_file)));
 

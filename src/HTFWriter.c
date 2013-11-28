@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFWriter.c,v 1.105 2013/07/21 00:41:24 tom Exp $
+ * $LynxId: HTFWriter.c,v 1.106 2013/11/28 11:17:04 tom Exp $
  *
  *		FILE WRITER				HTFWrite.h
  *		===========
@@ -665,7 +665,7 @@ HTStream *HTSaveAndExecute(HTPresentation *pres,
 	    LYStrNCpy(view_fname, anchor->address + 17, sizeof(fnam) - 5);
 	    HTUnEscape(view_fname);
 
-	    if (strchr(view_fname, ':') == NULL) {
+	    if (StrChr(view_fname, ':') == NULL) {
 		fnam[0] = windows_drive[0];
 		fnam[1] = windows_drive[1];
 		fnam[2] = '/';
@@ -683,7 +683,7 @@ HTStream *HTSaveAndExecute(HTPresentation *pres,
 		}
 		cp++;
 	    }
-	    if (strchr(view_fname, ' '))
+	    if (StrChr(view_fname, ' '))
 		view_fname = quote_pathname(view_fname);
 
 	    StrAllocCopy(me->viewer_command, pres->command);
@@ -803,7 +803,7 @@ HTStream *HTSaveToFile(HTPresentation *pres,
 	    return (NULL);
 	}
 
-	if (((cp = strchr(pres->rep->name, ';')) != NULL) &&
+	if (((cp = StrChr(pres->rep->name, ';')) != NULL) &&
 	    strstr((cp + 1), "charset") != NULL) {
 	    _user_message(MSG_DOWNLOAD_OR_CANCEL, pres->rep->name);
 	} else if (*(pres->rep->name) != '\0') {
@@ -1090,7 +1090,7 @@ HTStream *HTCompressed(HTPresentation *pres,
     }
     if (can_present == FALSE ||	/* no presentation mapping */
 	uncompress_mask == NULL ||	/* not gzip or compress */
-	strchr(anchor->content_type, ';') ||	/* wrong charset */
+	StrChr(anchor->content_type, ';') ||	/* wrong charset */
 	HTOutputFormat == HTAtom_for("www/download") ||		/* download */
 	!strcasecomp(pres->rep_out->name, "www/download") ||	/* download */
 	(traversal &&		/* only handle html or plain text for traversals */
@@ -1100,7 +1100,7 @@ HTStream *HTCompressed(HTPresentation *pres,
 	 * Cast the Content-Encoding to a Content-Type and pass it back to be
 	 * handled as that type.  - FM
 	 */
-	if (strchr(anchor->content_encoding, '/') == NULL) {
+	if (StrChr(anchor->content_encoding, '/') == NULL) {
 	    /*
 	     * Use "x-" prefix, none of the types we are likely to construct
 	     * here are official.  That is we generate "application/x-gzip" and
@@ -1164,7 +1164,7 @@ HTStream *HTCompressed(HTPresentation *pres,
 		HTFileSuffix(HTAtom_for(anchor->content_type), NULL)) &&
 	       *suffix == '.') {
 #if defined(VMS) || defined(FNAMES_8_3)
-	if (strchr(suffix + 1, '.') == NULL)
+	if (StrChr(suffix + 1, '.') == NULL)
 #endif
 	    middle = suffix + 1;
     }

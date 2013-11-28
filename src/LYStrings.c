@@ -1,4 +1,4 @@
-/* $LynxId: LYStrings.c,v 1.256 2013/10/20 21:31:45 tom Exp $ */
+/* $LynxId: LYStrings.c,v 1.258 2013/11/28 11:57:39 tom Exp $ */
 #include <HTUtils.h>
 #include <HTCJK.h>
 #include <UCAux.h>
@@ -908,8 +908,8 @@ void ena_csi(int flag)
 #if SLANG_VERSION < 20000
 #define expand_substring(target, first, last, final) \
  	(SLexpand_escaped_string(target, \
-				 (char *)first, \
-				 (char *)last), 1)
+				 DeConst(first), \
+				 DeConst(last), 1)
 static int SLang_get_error(void)
 {
     return SLang_Error;
@@ -919,8 +919,8 @@ int LY_Slang_UTF8_Mode = 0;
 
 #define expand_substring(target, first, last, final) \
 	(SLexpand_escaped_string(target, \
-				 (char *)first, \
-				 (char *)last, \
+				 DeConst(first), \
+				 DeConst(last), \
 				 LY_Slang_UTF8_Mode), 1)
 #endif
 
@@ -1104,7 +1104,7 @@ static BOOLEAN expand_substring(char *target,
 	case '^':
 	    ch = *first++;
 	    if (ch == LPAREN) {
-		const char *s = strchr(first, RPAREN);
+		const char *s = StrChr(first, RPAREN);
 		char *was = target;
 
 		if (s == 0)
@@ -1195,7 +1195,7 @@ int map_string_to_keysym(const char *str, int *keysym)
     *keysym = -1;
 
     if (strncasecomp(str, "LAC:", 4) == 0) {
-	char *other = strchr(str + 4, ':');
+	char *other = StrChr(str + 4, ':');
 
 	if (other) {
 	    int othersym = lecname_to_lec(other + 1);
@@ -5399,7 +5399,7 @@ int LYscanFloat2(const char **source, float *result)
 
     src = LYSkipCBlanks(src);
     *result = 0.0;
-    if (strchr(src, '.') != 0) {
+    if (StrChr(src, '.') != 0) {
 	long frc_part = 0;
 	float scale = 1.0;
 
@@ -5424,7 +5424,7 @@ int LYscanFloat2(const char **source, float *result)
 		src = temp;
 	    }
 	}
-	if (src != 0 && *src != '\0' && strchr(" \t+", *src) == 0) {
+	if (src != 0 && *src != '\0' && StrChr(" \t+", *src) == 0) {
 	    char *extra = (char *) malloc(2 + strlen(src));
 
 	    if (extra != 0) {
@@ -6042,7 +6042,7 @@ char *LYSafeGets(char **target,
     while (fgets(buffer, (int) sizeof(buffer), fp) != NULL) {
 	if (*buffer)
 	    result = StrAllocCat(result, buffer);
-	if (strchr(buffer, '\n') != 0)
+	if (StrChr(buffer, '\n') != 0)
 	    break;
     }
     if (ferror(fp)) {

@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYPrint.c,v 1.101 2013/10/13 20:23:07 tom Exp $
+ * $LynxId: LYPrint.c,v 1.102 2013/11/28 11:21:09 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTAccess.h>
@@ -548,10 +548,10 @@ static void send_file_to_mail(DocInfo *newdoc,
 	StrAllocCat(subject, newdoc->address);
     }
 #if USE_VMS_MAILER
-    if (strchr(user_response->str, '@') &&
-	!strchr(user_response->str, ':') &&
-	!strchr(user_response->str, '%') &&
-	!strchr(user_response->str, '"')) {
+    if (StrChr(user_response->str, '@') &&
+	!StrChr(user_response->str, ':') &&
+	!StrChr(user_response->str, '%') &&
+	!StrChr(user_response->str, '"')) {
 	char *temp = 0;
 
 	HTSprintf0(&temp, mail_adrs, user_response->str);

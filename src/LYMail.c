@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMail.c,v 1.95 2013/10/12 14:51:18 tom Exp $
+ * $LynxId: LYMail.c,v 1.96 2013/11/28 11:23:37 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTParse.h>
@@ -94,7 +94,7 @@ static void extract_field(char **dst,
 	if ((*(cp - 1) == '?' || *(cp - 1) == '&') &&
 	    !strncasecomp(cp, keyword, len)) {
 	    cp += len;
-	    if ((cp1 = strchr(cp, '&')) != NULL) {
+	    if ((cp1 = StrChr(cp, '&')) != NULL) {
 		*cp1 = '\0';
 	    }
 	    comma_append(dst, cp);
@@ -130,7 +130,7 @@ static void extract_subject(char *dst,
     }
     if (*cp) {
 	cp += len;
-	if ((cp1 = strchr(cp, '&')) != NULL) {
+	if ((cp1 = StrChr(cp, '&')) != NULL) {
 	    *cp1 = '\0';
 	}
 	if (*cp) {
@@ -161,7 +161,7 @@ static void extract_body(char **dst,
 	if ((*(cp - 1) == '?' || *(cp - 1) == '&') &&
 	    !strncasecomp(cp, keyword, len)) {
 	    cp += len;
-	    if ((cp1 = strchr(cp, '&')) != NULL) {
+	    if ((cp1 = StrChr(cp, '&')) != NULL) {
 		*cp1 = '\0';
 	    }
 	    if (*cp) {
@@ -172,7 +172,7 @@ static void extract_body(char **dst,
 		StrAllocCopy(temp, cp);
 		HTUnEscape(temp);
 		cp0 = temp;
-		while ((cp = strchr(cp0, '\n')) != NULL) {
+		while ((cp = StrChr(cp0, '\n')) != NULL) {
 		    *cp = '\0';
 		    if (cp > cp0) {
 			if (*(cp - 1) == '\r') {
@@ -233,9 +233,9 @@ static BOOLEAN convert_explorer(char *address)
     char *cp0;
     char *cp1;
 
-    while ((cp1 = strchr(cp, '@')) != NULL) {
+    while ((cp1 = StrChr(cp, '@')) != NULL) {
 	cp1++;
-	if ((cp0 = strchr(cp1, ';')) != NULL) {
+	if ((cp0 = StrChr(cp1, ';')) != NULL) {
 	    *cp0 = ',';
 	    cp1 = cp0 + 1;
 	}
@@ -283,7 +283,7 @@ static void show_addresses(char *addresses)
     char *cp = addresses;
     char *cp1;
 
-    while ((cp1 = strchr(cp, ',')) != NULL) {
+    while ((cp1 = StrChr(cp, ',')) != NULL) {
 	*cp1 = '\0';
 	while (*cp == ' ')
 	    cp++;
@@ -457,7 +457,7 @@ static void vms_append_addrs(char **cmd, char *address, char *option)
 
     address_ptr1 = address;
     do {
-	if ((cp = strchr(address_ptr1, ',')) != NULL) {
+	if ((cp = StrChr(address_ptr1, ',')) != NULL) {
 	    address_ptr2 = (cp + 1);
 	    *cp = '\0';
 	} else {
@@ -485,7 +485,7 @@ static void vms_append_addrs(char **cmd, char *address, char *option)
 static void remove_quotes(char *string)
 {
     while (*string != 0) {
-	if (strchr("\"&|", *string) != 0)
+	if (StrChr("\"&|", *string) != 0)
 	    *string = ' ';
 	string++;
     }
@@ -622,14 +622,14 @@ void mailform(const char *mailto_address,
     subject[0] = '\0';
     self[0] = '\0';
 
-    if ((cp = (char *) strchr(mailto_address, '\n')) != NULL)
+    if ((cp = StrChr(mailto_address, '\n')) != NULL)
 	*cp = '\0';
     StrAllocCopy(address, mailto_address);
 
     /*
      * Check for a ?searchpart.  - FM
      */
-    if ((cp = strchr(address, '?')) != NULL) {
+    if ((cp = StrChr(address, '?')) != NULL) {
 	StrAllocCopy(searchpart, cp);
 	*cp = '\0';
 	cp = (searchpart + 1);
@@ -811,7 +811,7 @@ void mailform(const char *mailto_address,
      * into account.  Otherwise, the actual newline characters in the content
      * are hex escaped.  - FM
      */
-    while ((cp = strchr(mailto_content, '\n')) != NULL) {
+    while ((cp = StrChr(mailto_content, '\n')) != NULL) {
 	*cp = '\0';
 	i = 0;
 	len = (int) strlen(mailto_content);
@@ -947,7 +947,7 @@ void mailmsg(int cur,
 
     if (isEmpty(owner_address))
 	return;
-    if ((cp = (char *) strchr(owner_address, '\n')) != NULL) {
+    if ((cp = StrChr(owner_address, '\n')) != NULL) {
 #ifdef ALERTMAIL
 	if (skip_parsing)
 	    return;		/* invalidly defined - ignore - kw */
@@ -975,7 +975,7 @@ void mailmsg(int cur,
 	/*
 	 * Check for a ?searchpart.  - FM
 	 */
-	if ((cp = strchr(address, '?')) != NULL) {
+	if ((cp = StrChr(address, '?')) != NULL) {
 	    StrAllocCopy(searchpart, cp);
 	    *cp = '\0';
 	    cp = (searchpart + 1);
@@ -1203,7 +1203,7 @@ void reply_by_mail(char *mail_address,
     /*
      * Check for a ?searchpart.  - FM
      */
-    if ((cp = strchr(to_address, '?')) != NULL) {
+    if ((cp = StrChr(to_address, '?')) != NULL) {
 	StrAllocCopy(searchpart, cp);
 	*cp = '\0';
 	cp = (searchpart + 1);
@@ -1355,7 +1355,7 @@ void reply_by_mail(char *mail_address,
 	   (isPMDF == TRUE) &&
 #endif /* VMS */
 	   (cp = ccaddr) != NULL) {
-	if (strchr(cp, ',') != NULL) {
+	if (StrChr(cp, ',') != NULL) {
 	    LYaddstr(WITH_COPIES_TO);
 	} else {
 	    LYaddstr(WITH_COPY_TO);
@@ -1489,7 +1489,7 @@ void reply_by_mail(char *mail_address,
 
 	if (body) {
 	    cp1 = body;
-	    while ((cp = strchr(cp1, '\n')) != NULL) {
+	    while ((cp = StrChr(cp1, '\n')) != NULL) {
 		*cp++ = '\0';
 		fprintf(fd, "%s\n", cp1);
 		cp1 = cp;
@@ -1528,7 +1528,7 @@ void reply_by_mail(char *mail_address,
 	LYrefresh();
 	cp1 = body;
 	i = (LYlines - 5);
-	while ((cp = strchr(cp1, '\n')) != NULL) {
+	while ((cp = StrChr(cp1, '\n')) != NULL) {
 	    if (i <= 0) {
 		LYaddstr(RETURN_TO_CONTINUE);
 		LYrefresh();

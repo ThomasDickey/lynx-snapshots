@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYCookie.c,v 1.127 2011/06/11 12:35:50 tom Exp $
+ * $LynxId: LYCookie.c,v 1.128 2013/11/28 11:18:12 tom Exp $
  *
  *			       Lynx Cookie Support		   LYCookie.c
  *			       ===================
@@ -215,7 +215,7 @@ static void LYCookieJar_free(void)
 static BOOLEAN has_embedded_dot(char *value)
 {
     BOOLEAN result = NO;
-    char *first_dot = strchr(value, '.');
+    char *first_dot = StrChr(value, '.');
 
     if (first_dot != NULL && first_dot[1] != '\0') {
 	result = YES;
@@ -438,7 +438,7 @@ static void store_cookie(cookie * co, const char *hostname,
 	/*
 	 * The hostname does not contain a dot.
 	 */
-	if (strchr(hostname, '.') == NULL) {
+	if (StrChr(hostname, '.') == NULL) {
 	    CTrace((tfp, "store_cookie: Rejecting because '%s' has no dot.\n",
 		    hostname));
 	    freeCookie(co);
@@ -500,7 +500,7 @@ static void store_cookie(cookie * co, const char *hostname,
 	 * INVCHECK_QUERY.
 	 */
 	ptr = ((hostname + strlen(hostname)) - strlen(co->domain));
-	if (strchr(hostname, '.') < ptr) {
+	if (StrChr(hostname, '.') < ptr) {
 	    invcheck_behaviour_t invcheck_bv = (de ? de->invcheck_bv
 						: DEFAULT_INVCHECK_BV);
 
@@ -982,7 +982,7 @@ static unsigned parse_attribute(unsigned flags,
 	     */
 	    if (value[0] != '.' && value[0] != '\0' &&
 		value[1] != '\0' && strcasecomp(value, hostname)) {
-		char *ptr = strchr(value, '.');
+		char *ptr = StrChr(value, '.');
 
 		if (ptr != NULL && ptr[1] != '\0') {
 		    ptr = value;
@@ -1779,7 +1779,7 @@ void LYSetCookie(const char *SetCookie,
      * cookie(s) only if LYSetCookies is TRUE.  - FM
      */
     if (((hostname = HTParse(address, "", PARSE_HOST)) != NULL) &&
-	(ptr = strchr(hostname, ':')) != NULL) {
+	(ptr = StrChr(hostname, ':')) != NULL) {
 	/*
 	 * Replace default port number.
 	 */
@@ -1798,7 +1798,7 @@ void LYSetCookie(const char *SetCookie,
 	 * Trim off any parameters to provide something that we can compare
 	 * against the cookie's path for verifying if it has the proper prefix.
 	 */
-	if ((ptr = strchr(path, '?')) != NULL) {
+	if ((ptr = StrChr(path, '?')) != NULL) {
 	    CTrace((tfp, "discarding params \"%s\" in request URI\n", ptr));
 	    *ptr = '\0';
 	}

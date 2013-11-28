@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFile.c,v 1.136 2013/05/01 10:48:11 tom Exp $
+ * $LynxId: HTFile.c,v 1.139 2013/11/28 11:33:56 tom Exp $
  *
  *			File Access				HTFile.c
  *			===========
@@ -816,8 +816,8 @@ const char *HTFileSuffix(HTAtom *rep,
 	   has more dots or asterisks after that, for
 	   these systems - kw */
 	    (!suff->suffix || !suff->suffix[0] || suff->suffix[0] != '.' ||
-	     (strchr(suff->suffix + 1, '.') == NULL &&
-	      strchr(suff->suffix + 1, '*') == NULL)) &&
+	     (StrChr(suff->suffix + 1, '.') == NULL &&
+	      StrChr(suff->suffix + 1, '*') == NULL)) &&
 #endif
 	    ((trivial_enc && IsUnityEnc(suff->encoding)) ||
 	     (!trivial_enc && !IsUnityEnc(suff->encoding) &&
@@ -851,7 +851,7 @@ const char *HTFileSuffix(HTAtom *rep,
 static const char *VMS_trim_version(const char *filename)
 {
     const char *result = filename;
-    const char *version = strchr(filename, ';');
+    const char *version = StrChr(filename, ';');
 
     if (version != 0) {
 	static char *stripped;
@@ -944,7 +944,7 @@ HTFormat HTFileFormat(const char *filename,
 
     /* defaults tree */
 
-    suff = (strchr(filename, '.')
+    suff = (StrChr(filename, '.')
 	    ? (unknown_suffix.rep
 	       ? &unknown_suffix
 	       : &no_suffix)
@@ -980,7 +980,7 @@ HTFormat HTCharsetFormat(HTFormat format,
     FREE(anchor->charset);
     StrAllocCopy(cp, format->name);
     LYLowerCase(cp);
-    if (((cp1 = strchr(cp, ';')) != NULL) &&
+    if (((cp1 = StrChr(cp, ';')) != NULL) &&
 	(cp2 = strstr(cp1, "charset")) != NULL) {
 	CTRACE((tfp, "HTCharsetFormat: Extended MIME Content-Type is %s\n",
 		format->name));
@@ -1247,22 +1247,22 @@ CompressFileType HTCompressFileType(const char *filename,
 
     if ((len > 4)
 	&& !strcasecomp((ftype - 3), "bz2")
-	&& strchr(dots, ftype[-4]) != 0) {
+	&& StrChr(dots, ftype[-4]) != 0) {
 	result = cftBzip2;
 	ftype -= 4;
     } else if ((len > 3)
 	       && !strcasecomp((ftype - 2), "gz")
-	       && strchr(dots, ftype[-3]) != 0) {
+	       && StrChr(dots, ftype[-3]) != 0) {
 	result = cftGzip;
 	ftype -= 3;
     } else if ((len > 3)
 	       && !strcasecomp((ftype - 2), "zz")
-	       && strchr(dots, ftype[-3]) != 0) {
+	       && StrChr(dots, ftype[-3]) != 0) {
 	result = cftDeflate;
 	ftype -= 3;
     } else if ((len > 2)
 	       && !strcmp((ftype - 1), "Z")
-	       && strchr(dots, ftype[-2]) != 0) {
+	       && StrChr(dots, ftype[-2]) != 0) {
 	result = cftCompress;
 	ftype -= 2;
     }
@@ -1663,10 +1663,10 @@ BOOL HTDirTitles(HTStructured * target, HTParentAnchor *anchor,
 	PUTC('\n');
 #endif /* DIRED_SUPPORT */
 	if (((0 == strncasecomp(printable, "vmsysu:", 7)) &&
-	     (cp = strchr(printable, '.')) != NULL &&
-	     strchr(cp, '/') == NULL) ||
+	     (cp = StrChr(printable, '.')) != NULL &&
+	     StrChr(cp, '/') == NULL) ||
 	    (0 == strncasecomp(printable, "anonymou.", 9) &&
-	     strchr(printable, '/') == NULL)) {
+	     StrChr(printable, '/') == NULL)) {
 	    FREE(printable);
 	    FREE(path);
 	    return (need_parent_link);
@@ -1831,7 +1831,7 @@ static const char *file_type(const char *path)
 
     while (*path == '.')
 	++path;
-    type = strchr(path, '.');
+    type = StrChr(path, '.');
     if (type == NULL)
 	type = "";
     return type;
@@ -2318,17 +2318,37 @@ static BOOL isGzipStream(FILE *fp)
     return result;
 }
 
+/*
+ * Strictly speaking, DEFLATE has no header bytes.  But decode what we can,
+ * (to eliminate the one "reserved" pattern) and provide a trace.  See RFC-1951
+ * discussion of BFINAL and BTYPE.
+ */
 static BOOL isDeflateStream(FILE *fp)
 {
     char buffer[3];
-    BOOL result;
+    BOOL result = FALSE;
 
-    if (sniffStream(fp, buffer, sizeof(buffer))
-	&& !MemCmp(buffer, "\170\234", sizeof(buffer) - 1)) {
-	result = TRUE;
-    } else {
-	CTRACE((tfp, "not a deflate-stream\n"));
-	result = FALSE;
+    if (sniffStream(fp, buffer, sizeof(buffer))) {
+	int bit1 = ((buffer[0] >> 0) & 1);
+	int bit2 = ((buffer[0] >> 1) & 1);
+	int bit3 = ((buffer[0] >> 2) & 1);
+	int btype = ((bit3 << 1) + bit2);
+
+	if (!MemCmp(buffer, "\170\234", sizeof(buffer) - 1)) {
+	    result = TRUE;
+	    CTRACE((tfp, "isDeflate: assume zlib-wrapped deflate\n"));
+	} else if (btype == 3) {
+	    CTRACE((tfp, "isDeflate: not a deflate-stream\n"));
+	} else {
+	    CTRACE((tfp, "isDeflate: %send block, %s compression\n",
+		    (bit1 ? "" : "non-"),
+		    (btype == 0
+		     ? "no"
+		     : (btype == 1
+			? "static Huffman"
+			: "dynamic Huffman"))));
+	    result = TRUE;
+	}
     }
     return result;
 }
@@ -2394,7 +2414,7 @@ static int decompressAndParse(HTParentAnchor *anchor,
      * Assume that the file is in Unix-style syntax if it contains a '/' after
      * the leading one.  @@
      */
-    localname = (strchr(localname + 1, '/')
+    localname = (StrChr(localname + 1, '/')
 		 ? HTVMS_name(nodename, localname)
 		 : localname + 1);
 #endif /* VMS */
@@ -3244,7 +3264,7 @@ void HTInitProgramPaths(BOOL init)
 	}
 	test = HTGetProgramPath(code);
 	if (test != NULL && test != path) {
-	    free((char *) test);
+	    free(DeConst(test));
 	}
 	if (init) {
 	    HTSetProgramPath(code, path);

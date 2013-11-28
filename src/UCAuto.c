@@ -1,5 +1,5 @@
 /*
- * $LynxId: UCAuto.c,v 1.51 2013/05/04 13:14:39 tom Exp $
+ * $LynxId: UCAuto.c,v 1.52 2013/11/28 11:22:53 tom Exp $
  *
  *  This file contains code for changing the Linux console mode.
  *  Currently some names for font files are hardwired in here.
@@ -600,7 +600,7 @@ int Find_Best_Display_Charset(int ord)
     if (!lowercase++)
 	LYLowerCase(charset_switch_rules);
     while (1) {
-	while (*s && strchr(" \t,", *s))
+	while (*s && StrChr(" \t,", *s))
 	    s++;		/* Go to start of a name or ':' */
 	if (!*s && source)
 	    return ord;		/* OK to find nothing */
@@ -613,23 +613,23 @@ int Find_Best_Display_Charset(int ord)
 	}
 	if (*s == ':') {
 	    /* Before the replacement name */
-	    while (*s && strchr(" \t:", *s))
+	    while (*s && StrChr(" \t:", *s))
 		s++;		/* Go to the replacement */
 	    /* At start of the replacement name */
 	    r = s;
-	    while (*s && !strchr(" \t,:", *s))
+	    while (*s && !StrChr(" \t,:", *s))
 		s++;		/* Skip the replacement */
 	    if (source)
 		continue;
 	    break;
 	}
 	/* At start of the source name */
-	if (source && !strnicmp(name, s, n) && strchr(" \t,", s[n])) {	/* Found! */
+	if (source && !strnicmp(name, s, n) && StrChr(" \t,", s[n])) {	/* Found! */
 	    source = 0;
 	    s += n;
 	    continue;		/* Look for the replacement */
 	}
-	while (*s && !strchr(" \t,:", *s))
+	while (*s && !StrChr(" \t,:", *s))
 	    s++;		/* Skip the other source names */
     }
     /* Here r point to the replacement, s to the end of the replacement. */
