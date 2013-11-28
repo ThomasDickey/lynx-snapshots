@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTUtils.h,v 1.118 2013/10/10 00:06:59 tom Exp $
+ * $LynxId: HTUtils.h,v 1.119 2013/11/28 11:33:20 tom Exp $
  *
  * Utility macros for the W3 code library
  * MACROS FOR GENERAL USE
@@ -346,6 +346,8 @@ Standard C library for malloc() etc
 #ifndef NULL
 #define NULL ((void *)0)
 #endif
+
+#define DeConst(p)   (void *)(intptr_t)(p)
 
 #define isEmpty(s)   ((s) == 0 || *(s) == 0)
 #define non_empty(s) !isEmpty(s)

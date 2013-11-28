@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTDOS.c,v 1.39 2011/06/04 18:45:09 tom Exp $
+ * $LynxId: HTDOS.c,v 1.40 2013/11/28 11:11:05 tom Exp $
  *							DOS specific routines
  */
 
@@ -170,7 +170,7 @@ char *HTDOS_short_name(const char *path)
     char *ret;
     DWORD r;
 
-    if (strchr(path, '/'))
+    if (StrChr(path, '/'))
 	path = HTDOS_name(path);
     r = GetShortPathName(path, sbuf, sizeof sbuf);
     if (r >= sizeof(sbuf) || r == 0) {

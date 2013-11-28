@@ -1,4 +1,4 @@
-/* $LynxId: LYUtils.h,v 1.94 2013/10/23 22:14:03 tom Exp $ */
+/* $LynxId: LYUtils.h,v 1.96 2013/11/28 11:22:53 tom Exp $ */
 #ifndef LYUTILS_H
 #define LYUTILS_H
 
@@ -118,7 +118,7 @@ extern "C" {
 
 #define LYIsTilde(ch)     ((ch) == '~')
 #define LYIsHtmlSep(ch) ((ch) == '/')
-#define findPoundSelector(address) strchr(address, '#')
+#define findPoundSelector(address) StrChr(address, '#')
 #define restorePoundSelector(pound) if ((pound) != NULL) *(pound) = '#'
 
     extern BOOL strn_dash_equ(const char *p1, const char *p2, int len);
@@ -151,6 +151,7 @@ extern "C" {
     extern char *Current_Dir(char *pathname);
     extern char *LYAbsOrHomePath(char **fname);
     extern char *LYAddPathToSave(char *fname);
+    extern char *LYFindConfigFile(const char *nominal, const char *dftfile);
     extern char *LYGetEnv(const char *name);
     extern char *LYLastPathSep(const char *path);
     extern char *LYPathLeaf(char *pathname);

@@ -1,4 +1,4 @@
-/* $LynxId: LYOptions.c,v 1.163 2013/10/24 00:08:39 tom Exp $ */
+/* $LynxId: LYOptions.c,v 1.164 2013/10/25 01:10:17 tom Exp $ */
 #include <HTUtils.h>
 #include <HTFTP.h>
 #include <HTTP.h>		/* 'reloading' flag */
@@ -2497,9 +2497,20 @@ static BOOLEAN GetOptValues(OptValues * table, char *value,
 }
 
 #ifdef USE_COLOR_STYLE
+#ifdef LY_FIND_LEAKS
+static void free_colorstyle_leaks(void)
+{
+    FREE(color_style_values);
+}
+#endif
+
 void build_lss_enum(HTList *list)
 {
     int count = HTList_count(list);
+
+#ifdef LY_FIND_LEAKS
+    atexit(free_colorstyle_leaks);
+#endif
 
     FREE(color_style_values);
     if (count != 0) {

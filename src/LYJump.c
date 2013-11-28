@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYJump.c,v 1.48 2013/10/13 20:23:07 tom Exp $
+ * $LynxId: LYJump.c,v 1.49 2013/11/28 11:19:08 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTAlert.h>
@@ -258,7 +258,7 @@ char *LYJump(int key)
 	return NULL;
     }
 #ifdef PERMIT_GOTO_FROM_JUMP
-    if (strchr(bp, ':') || strchr(bp, '/')) {
+    if (StrChr(bp, ':') || StrChr(bp, '/')) {
 	char *temp = NULL;
 
 	LYJumpFileURL = FALSE;
@@ -448,7 +448,7 @@ static unsigned LYRead_Jumpfile(struct JumpTable *jtp)
     /* quick scan for approximate number of entries */
     nel = 0;
     cp = mp;
-    while ((cp = strchr(cp, '\n')) != NULL) {
+    while ((cp = StrChr(cp, '\n')) != NULL) {
 	nel++;
 	cp++;
     }
@@ -463,7 +463,7 @@ static unsigned LYRead_Jumpfile(struct JumpTable *jtp)
     cp = jtp->mp = mp;
     for (i = 0; i < nel;) {
 	if (StrNCmp(cp, "<!--", 4) == 0 || StrNCmp(cp, "<dl>", 4) == 0) {
-	    cp = strchr(cp, '\n');
+	    cp = StrChr(cp, '\n');
 	    if (cp == NULL)
 		break;
 	    cp++;
@@ -484,12 +484,12 @@ static unsigned LYRead_Jumpfile(struct JumpTable *jtp)
 	    break;
 	cp += 6;
 	jtp->table[i].url = cp;
-	cp = strchr(cp, '"');
+	cp = StrChr(cp, '"');
 	if (cp == NULL)
 	    break;
 	*cp = '\0';
 	cp++;
-	cp = strchr(cp, '\n');
+	cp = StrChr(cp, '\n');
 	if (cp == NULL)
 	    break;
 	cp++;

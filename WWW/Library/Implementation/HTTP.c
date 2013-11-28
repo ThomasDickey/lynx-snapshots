@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTP.c,v 1.132 2013/10/13 23:30:26 tom Exp $
+ * $LynxId: HTTP.c,v 1.133 2013/11/28 11:15:11 tom Exp $
  *
  * HyperText Tranfer Protocol	- Client implementation		HTTP.c
  * ==========================
@@ -416,7 +416,7 @@ int ws_netread(int fd, char *buf, int len)
 static void strip_userid(char *host)
 {
     char *p1 = host;
-    char *p2 = strchr(host, '@');
+    char *p2 = StrChr(host, '@');
     char *fake;
 
     if (p2 != 0) {
@@ -846,7 +846,7 @@ static int HTLoadHTTP(const char *arg,
 	    /* start of CommonName */
 	    cert_host += 4;
 	    /* find next part of DistinguishedName */
-	    if ((p = strchr(cert_host, '/')) != NULL) {
+	    if ((p = StrChr(cert_host, '/')) != NULL) {
 		*p = '\0';
 		ssl_dn_start = p;	/* yes this points to the NUL byte */
 	    } else
@@ -1642,7 +1642,7 @@ static int HTLoadHTTP(const char *arg,
 #endif
 	    }
 
-	    eol = strchr(line_buffer + length, LF);
+	    eol = StrChr(line_buffer + length, LF);
 	    /* Do we *really* want to do this? */
 	    if (eol && eol != line_buffer && *(eol - 1) == CR)
 		*(eol - 1) = ' ';

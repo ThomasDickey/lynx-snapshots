@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTString.h,v 1.37 2012/02/07 23:41:25 tom Exp $
+ * $LynxId: HTString.h,v 1.38 2013/11/28 11:09:55 tom Exp $
  *						String handling for libwww
  *                                         STRINGS
  *                                            
@@ -39,6 +39,11 @@ extern "C" {
 
 #define MemCpy(a,b,c)  memcpy((a),(b),(size_t)(c))
 #define MemCmp(a,b,c)  memcmp((a),(b),(size_t)(c))
+
+    /*
+     * Workaround for glibc header defect combined with -Wlogical-op warnings
+     */
+#define StrChr (strchr)
 
     /*
      * Case-insensitive string comparison

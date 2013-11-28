@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTMIME.c,v 1.87 2013/05/05 20:07:25 tom Exp $
+ * $LynxId: HTMIME.c,v 1.88 2013/11/28 11:12:52 tom Exp $
  *
  *			MIME Message Parse			HTMIME.c
  *			==================
@@ -278,7 +278,7 @@ static int pumpData(HTStream *me)
 	me->format = HTAtom_for(me->value);
     }
 
-    if (strchr(HTAtom_name(me->format), ';') != NULL) {
+    if (StrChr(HTAtom_name(me->format), ';') != NULL) {
 	char *cp = NULL, *cp1, *cp2, *cp3 = NULL, *cp4;
 
 	CTRACE((tfp, "HTMIME: Extended MIME Content-Type is %s\n",
@@ -294,7 +294,7 @@ static int pumpData(HTStream *me)
 	 * charset parameter we check.  - FM
 	 */
 	LYLowerCase(cp);
-	if ((cp1 = strchr(cp, ';')) != NULL) {
+	if ((cp1 = StrChr(cp, ';')) != NULL) {
 	    BOOL chartrans_ok = NO;
 
 	    if ((cp2 = strstr(cp1, "charset")) != NULL) {
@@ -727,7 +727,7 @@ static int dispatchField(HTStream *me)
 	    break;
 	StrAllocCopy(me->anchor->SugFname, cp);
 	if (*me->anchor->SugFname == '"') {
-	    if ((cp = strchr((me->anchor->SugFname + 1),
+	    if ((cp = StrChr((me->anchor->SugFname + 1),
 			     '"')) != NULL) {
 		*(cp + 1) = '\0';
 		HTMIME_TrimDoubleQuotes(me->anchor->SugFname);
@@ -2331,7 +2331,7 @@ static void HTmmdec_base64(char **t,
 	    count = 3;
 
 	for (j = 0; j <= count; j++) {
-	    if (!(p = strchr(HTmm64, s[j]))) {
+	    if (!(p = StrChr(HTmm64, s[j]))) {
 		FREE(buf);
 		return;
 	    }
@@ -2368,13 +2368,13 @@ static void HTmmdec_quote(char **t,
     for (bp = buf; *s;) {
 	if (*s == '=') {
 	    cval = 0;
-	    if (s[1] && (p = strchr(HTmmquote, s[1]))) {
+	    if (s[1] && (p = StrChr(HTmmquote, s[1]))) {
 		cval = (char) (cval + (char) (p - HTmmquote));
 	    } else {
 		*bp++ = *s++;
 		continue;
 	    }
-	    if (s[2] && (p = strchr(HTmmquote, s[2]))) {
+	    if (s[2] && (p = StrChr(HTmmquote, s[2]))) {
 		cval = (char) (cval << 4);
 		cval = (char) (cval + (p - HTmmquote));
 		*bp++ = cval;
@@ -2477,7 +2477,7 @@ int HTrjis(char **t,
     char *buf = NULL;
     int kanji = 0;
 
-    if (strchr(s, CH_ESC) || !strchr(s, '$')) {
+    if (StrChr(s, CH_ESC) || !StrChr(s, '$')) {
 	if (s != *t)
 	    StrAllocCopy(*t, s);
 	return 1;

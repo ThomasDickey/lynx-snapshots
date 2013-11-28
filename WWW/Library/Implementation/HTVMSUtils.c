@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTVMSUtils.c,v 1.38 2013/05/03 20:32:37 tom Exp $
+ * $LynxId: HTVMSUtils.c,v 1.39 2013/11/28 11:15:31 tom Exp $
  *
  * MODULE							HTVMSUtil.c
  *		VMS Utility Routines
@@ -168,7 +168,7 @@ BOOL HTVMS_checkAccess(const char *FileName,
 	return (NO);
 
     /* check Filename and convert */
-    colon = strchr(FileName, ':');
+    colon = StrChr(FileName, ':');
     if (colon)
 	VmsName = HTVMS_name("", colon + 1);
     else
@@ -245,7 +245,7 @@ const char *HTVMS_wwwName(const char *vmsname)
     dst = wwwname;
     src = vmsname;
     dir = 0;
-    if (strchr(src, ':'))
+    if (StrChr(src, ':'))
 	*(dst++) = '/';
     for (; *src != '\0'; src++) {
 	switch (*src) {
@@ -342,13 +342,13 @@ int HTStat(const char *filename,
 	Name[Len - 1] = '\0';
 
     /* fail in case of device */
-    Ptr = strchr(Name + 1, '/');
+    Ptr = StrChr(Name + 1, '/');
     if ((Ptr == NULL) && (Name[0] == '/')) {	/* device only... */
 	StrAllocCat(Name, "/000000/000000");
     }
 
     if (Ptr != NULL) {		/* correct filename in case of toplevel dir */
-	Ptr2 = strchr(Ptr + 1, '/');
+	Ptr2 = StrChr(Ptr + 1, '/');
 	if ((Ptr2 == NULL) && (Name[0] == '/')) {
 	    char End[256];
 
@@ -527,9 +527,9 @@ static struct dirent *HTVMSreaddir(DIR *dirp)
 	if (!(status & 0x01))
 	    return (0);
 	if (HTVMSFileVersions)
-	    space = strchr(VMSentry, ' ');
+	    space = StrChr(VMSentry, ' ');
 	else
-	    space = strchr(VMSentry, ';');
+	    space = StrChr(VMSentry, ';');
 	if (space)
 	    *space = '\0';
 
@@ -747,7 +747,7 @@ int HTVMSBrowseDir(const char *address,
      * /sys$sysroot/syshlp) before calling this routine.
      */
     if (((*pathname != '/') ||
-	 (cp = strchr(pathname + 1, '/')) == NULL ||
+	 (cp = StrChr(pathname + 1, '/')) == NULL ||
 	 *(cp + 1) == '\0' ||
 	 0 == StrNCmp((cp + 1), "000000", 6)) ||
 	(dp = HTVMSopendir(pathname)) == NULL) {

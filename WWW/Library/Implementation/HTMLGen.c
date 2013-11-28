@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTMLGen.c,v 1.39 2013/05/03 20:53:46 tom Exp $
+ * $LynxId: HTMLGen.c,v 1.40 2013/11/28 11:13:46 tom Exp $
  *
  *		HTML Generator
  *		==============
@@ -214,7 +214,7 @@ static void HTMLGen_put_character(HTStructured * me, int c)
 	    char *p;
 
 	    strcpy(delims, ",;:.");	/* @@ english bias */
-	    p = strchr(delims, me->write_pointer[-2]);
+	    p = StrChr(delims, me->write_pointer[-2]);
 	    if (p)
 		new_cleanness = (int) (p - delims + 6);
 	    if (!me->in_attrval)
@@ -417,11 +417,11 @@ static int HTMLGen_start_element(HTStructured * me, int element_number,
 		if (value[i]) {
 		    me->preformatted = was_preformatted;
 		    me->in_attrval = YES;
-		    if (strchr(value[i], '"') == NULL) {
+		    if (StrChr(value[i], '"') == NULL) {
 			HTMLGen_put_string(me, "=\"");
 			HTMLGen_put_string(me, value[i]);
 			HTMLGen_put_character(me, '"');
-		    } else if (strchr(value[i], '\'') == NULL) {
+		    } else if (StrChr(value[i], '\'') == NULL) {
 			HTMLGen_put_string(me, "='");
 			HTMLGen_put_string(me, value[i]);
 			HTMLGen_put_character(me, '\'');

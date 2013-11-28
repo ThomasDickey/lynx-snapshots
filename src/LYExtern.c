@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYExtern.c,v 1.52 2013/05/04 13:01:06 tom Exp $
+ * $LynxId: LYExtern.c,v 1.53 2013/11/28 11:18:33 tom Exp $
  *
  External application support.
  This feature allows lynx to pass a given URL to an external program.
@@ -78,7 +78,7 @@ static void delete_danger_characters(char *src)
     char *dst;
 
     for (dst = src; *src != '\0'; src++) {
-	if (strchr("<>|%\"", *src) == NULL) {
+	if (StrChr("<>|%\"", *src) == NULL) {
 	    *dst = *src;
 	    dst++;
 	}
@@ -99,14 +99,14 @@ static char *escapeParameter(CONST char *parameter)
     char *needs_escaped_NT = "%&^";
 
     for (i = 0; i < last; ++i) {
-	if (strchr(needs_encoded, parameter[i]) != NULL) {
+	if (StrChr(needs_encoded, parameter[i]) != NULL) {
 	    ++encoded;
 	}
 	if (system_is_NT) {
-	    if (strchr(needs_escaped_NT, parameter[i]) != NULL) {
+	    if (StrChr(needs_escaped_NT, parameter[i]) != NULL) {
 		++escaped;
 	    }
-	} else if (strchr(needs_escaped, parameter[i]) != NULL) {
+	} else if (StrChr(needs_escaped, parameter[i]) != NULL) {
 	    ++escaped;
 	}
     }
@@ -117,18 +117,18 @@ static char *escapeParameter(CONST char *parameter)
 
     n = 0;
     for (i = 0; i < last; i++) {
-	if (strchr(needs_encoded, parameter[i]) != NULL) {
+	if (StrChr(needs_encoded, parameter[i]) != NULL) {
 	    sprintf(result + n, "%%%02X", (unsigned char) parameter[i]);
 	    n += 3;
 	    continue;
 	}
 	if (system_is_NT) {
-	    if (strchr(needs_escaped_NT, parameter[i]) != NULL) {
+	    if (StrChr(needs_escaped_NT, parameter[i]) != NULL) {
 		result[n++] = '^';
 		result[n++] = parameter[i];
 		continue;
 	    }
-	} else if (strchr(needs_escaped, parameter[i]) != NULL) {
+	} else if (StrChr(needs_escaped, parameter[i]) != NULL) {
 	    result[n++] = '%';	/* parameter[i] is '%' */
 	    result[n++] = parameter[i];
 	    continue;
@@ -197,7 +197,7 @@ static char *format_command(char *command,
 	p = param + 17;
 	delete_danger_characters(p);
 	*e_buff = 0;
-	if (strchr(p, ':') == NULL) {
+	if (StrChr(p, ':') == NULL) {
 	    sprintf(e_buff, "%.3s/", windows_drive);
 	}
 	strncat(e_buff, p, sizeof(e_buff) - strlen(e_buff) - 1);

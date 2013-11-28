@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTGopher.c,v 1.60 2013/05/01 22:20:13 tom Exp $
+ * $LynxId: HTGopher.c,v 1.61 2013/11/28 11:12:32 tom Exp $
  *
  *			GOPHER ACCESS				HTGopher.c
  *			=============
@@ -284,7 +284,7 @@ static void parse_menu(const char *arg GCC_UNUSED,
 
 	    if (gtype && *p) {
 		name = p;
-		selector = strchr(name, TAB);
+		selector = StrChr(name, TAB);
 		if (selector) {
 		    *selector++ = '\0';		/* Terminate name */
 		    /*
@@ -296,15 +296,15 @@ static void parse_menu(const char *arg GCC_UNUSED,
 		    if (gtype == GOPHER_TEXT && (*selector == GOPHER_BINARY ||
 						 *selector == GOPHER_PCBINARY))
 			gtype = *selector;
-		    host = strchr(selector, TAB);
+		    host = StrChr(selector, TAB);
 		    if (host) {
 			*host++ = '\0';		/* Terminate selector */
-			port = strchr(host, TAB);
+			port = StrChr(host, TAB);
 			if (port) {
 			    char *junk;
 
 			    port[0] = ':';	/* delimit host a la W3 */
-			    junk = strchr(port, TAB);
+			    junk = StrChr(port, TAB);
 			    if (junk)
 				*junk = '\0';	/* Chop port */
 			    if ((port[1] == '0') && (!port[2]))
@@ -532,9 +532,9 @@ static void parse_cso(const char *arg,
 		 * Find the second_colon.
 		 */
 		second_colon = NULL;
-		first_colon = strchr(p, ':');
+		first_colon = StrChr(p, ':');
 		if (first_colon != NULL) {
-		    second_colon = strchr(first_colon + 1, ':');
+		    second_colon = StrChr(first_colon + 1, ':');
 		}
 
 		if (second_colon != NULL) {	/* error check */
@@ -1366,7 +1366,7 @@ static int generate_cso_report(HTStream *Target)
 				StrAllocCopy(href, l);
 				StrAllocCat(buf, strtok(href, " \r\n\t,>)\""));
 				StrAllocCat(buf, "\">");
-				while (*l && !strchr(" \r\n\t,>)\"", *l)) {
+				while (*l && !StrChr(" \r\n\t,>)\"", *l)) {
 				    HTSprintf(&buf, "%c", *l++);
 				}
 				StrAllocCat(buf, "</a>");
@@ -1410,7 +1410,7 @@ static int generate_cso_report(HTStream *Target)
 			    StrAllocCopy(href, l);
 			    StrAllocCat(buf, strtok(href, " \r\n\t,>)\""));
 			    StrAllocCat(buf, "\">");
-			    while (*l && !strchr(" \r\n\t,>)\"", *l)) {
+			    while (*l && !StrChr(" \r\n\t,>)\"", *l)) {
 				HTSprintf(&buf, "%c", *l++);
 			    }
 			    StrAllocCat(buf, "</a>");
@@ -1761,7 +1761,7 @@ static int HTLoadGopher(const char *arg,
 	     * Search is allowed.
 	     */
 	    HTAnchor_setIndex(anAnchor, anAnchor->address);
-	    query = strchr(selector, '?');	/* Look for search string */
+	    query = StrChr(selector, '?');	/* Look for search string */
 	    if (!query || !query[1]) {	/* No search required */
 		target = HTML_new(anAnchor, format_out, sink);
 		targetClass = *target->isa;
@@ -1796,7 +1796,7 @@ static int HTLoadGopher(const char *arg,
 	    /*
 	     * Search is allowed.
 	     */
-	    query = strchr(selector, '?');	/* Look for search string */
+	    query = StrChr(selector, '?');	/* Look for search string */
 	    if (!query || !query[1]) {	/* No search required */
 		target = HTML_new(anAnchor, format_out, sink);
 		targetClass = *target->isa;

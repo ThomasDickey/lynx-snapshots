@@ -1,4 +1,4 @@
-/* $LynxId: LYCurses.c,v 1.177 2013/10/20 16:24:43 tom Exp $ */
+/* $LynxId: LYCurses.c,v 1.178 2013/11/28 11:52:34 tom Exp $ */
 #include <HTUtils.h>
 #include <HTAlert.h>
 
@@ -1750,13 +1750,15 @@ void stop_curses(void)
 
 /* ifdef's for non-Unix curses or slang */
 #if defined(__MINGW32__)
-    chtype bb;
+    {
+	chtype bb;
 
-    bb = getbkgd(stdscr);
-    bkgdset(0);
-    clear();
-    refresh();
-    bkgdset(bb);
+	bb = getbkgd(stdscr);
+	bkgdset(0);
+	clear();
+	refresh();
+	bkgdset(bb);
+    }
 #if defined(PDCURSES)
     endwin();
 #endif /* PDCURSES */

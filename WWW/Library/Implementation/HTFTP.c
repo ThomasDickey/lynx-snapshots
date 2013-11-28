@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFTP.c,v 1.124 2013/10/11 09:21:37 tom Exp $
+ * $LynxId: HTFTP.c,v 1.125 2013/11/28 11:11:05 tom Exp $
  *
  *			File Transfer Protocol (FTP) Client
  *			for a WorldWideWeb browser
@@ -324,7 +324,7 @@ char *HTVMS_name(const char *nn,
 		char *r;
 
 		strcpy(nodename, nn);
-		r = strchr(nodename, '.');	/* Mismatch */
+		r = StrChr(nodename, '.');	/* Mismatch */
 		if (r)
 		    *r = '\0';	/* Chop domain */
 		strcat(nodename, "::");		/* Try decnet anyway */
@@ -333,7 +333,7 @@ char *HTVMS_name(const char *nn,
 	}
     }
 
-    second = strchr(filename + 1, '/');		/* 2nd slash */
+    second = StrChr(filename + 1, '/');		/* 2nd slash */
     last = strrchr(filename, '/');	/* last slash */
 
     if (!second) {		/* Only one slash */
@@ -350,7 +350,7 @@ char *HTVMS_name(const char *nn,
 	HTSprintf0(&vmsname, "%s%s:[%s]%s",
 		   nodename, filename + 1, second + 1, last + 1);
 	*second = *last = '/';	/* restore filename */
-	if ((p = strchr(vmsname, '[')) != 0) {
+	if ((p = StrChr(vmsname, '[')) != 0) {
 	    while (*p != '\0' && *p != ']') {
 		if (*p == '/')
 		    *p = '.';	/* Convert dir sep.  to dots */
@@ -689,7 +689,7 @@ static void get_ftp_pwd(eServerType *ServerType, BOOLEAN *UseList)
     if (status < 0) {
 	return;
     } else {
-	cp = strchr(response_text + 5, '"');
+	cp = StrChr(response_text + 5, '"');
 	if (cp)
 	    *cp = '\0';
 	if (*ServerType == TCPC_SERVER) {
@@ -845,7 +845,7 @@ static int get_connection(const char *arg,
 	    username = p1;
 	    *p2 = '\0';		/* terminate */
 	    p1 = p2 + 1;	/* point to host */
-	    pw = strchr(username, ':');
+	    pw = StrChr(username, ':');
 	    if (pw != NULL) {
 		*pw++ = '\0';
 		password = HTUnEscape(pw);
@@ -971,7 +971,7 @@ static int get_connection(const char *arg,
 		the_address = "WWWuser";
 
 	    StrAllocCopy(user, the_address);
-	    if ((cp = strchr(user, '@')) != NULL) {
+	    if ((cp = StrChr(user, '@')) != NULL) {
 		*cp++ = '\0';
 		if (*cp == '\0')
 		    host = HTHostName();
@@ -985,7 +985,7 @@ static int get_connection(const char *arg,
 	     * If host is not fully qualified, suppress it
 	     * as ftp.uu.net prefers a blank to a bad name
 	     */
-	    if (!(host) || strchr(host, '.') == NULL)
+	    if (!(host) || StrChr(host, '.') == NULL)
 		host = "";
 
 	    HTSprintf0(&command, "PASS %s@%s%c%c", user, host, CR, LF);
@@ -1664,7 +1664,7 @@ static void parse_ls_line(char *line,
     /*
      * Extract the file-permissions, as a string.
      */
-    if ((cp = strchr(line, ' ')) != 0) {
+    if ((cp = StrChr(line, ' ')) != 0) {
 	if ((cp - line) == 10) {
 	    *cp = '\0';
 	    StrAllocCopy(entry->file_mode, line);
@@ -1687,7 +1687,7 @@ static void parse_ls_line(char *line,
 	 */
 	while (isspace(UCH(*cp)))
 	    ++cp;
-	if ((next = strchr(cp, ' ')) != 0)
+	if ((next = StrChr(cp, ' ')) != 0)
 	    *next = '\0';
 	if (*cp != '\0')
 	    StrAllocCopy(entry->file_user, cp);
@@ -1698,7 +1698,7 @@ static void parse_ls_line(char *line,
 	    cp = (next + 1);
 	    while (isspace(UCH(*cp)))
 		++cp;
-	    if ((next = strchr(cp, ' ')) != 0)
+	    if ((next = StrChr(cp, ' ')) != 0)
 		*next = '\0';
 	    if (*cp != '\0')
 		StrAllocCopy(entry->file_group, cp);
@@ -1827,7 +1827,7 @@ static void parse_vms_dir_entry(char *line,
     /* Get rid of blank lines, and information lines.  Valid lines have the ';'
      * version number token.
      */
-    if (!strlen(line) || (cp = strchr(line, ';')) == NULL) {
+    if (!strlen(line) || (cp = StrChr(line, ';')) == NULL) {
 	entry_info->display = FALSE;
 	return;
     }
@@ -1866,7 +1866,7 @@ static void parse_vms_dir_entry(char *line,
 
     /* Convert any tabs in rest of line to spaces. */
     cps = cp - 1;
-    while ((cps = strchr(cps + 1, '\t')) != NULL)
+    while ((cps = StrChr(cps + 1, '\t')) != NULL)
 	*cps = ' ';
 
     /* Collapse serial spaces. */
@@ -1887,7 +1887,7 @@ static void parse_vms_dir_entry(char *line,
     }
 
     /* Track down the date. */
-    if ((cpd = strchr(cp, '-')) != NULL &&
+    if ((cpd = StrChr(cp, '-')) != NULL &&
 	strlen(cpd) > 9 && isdigit(UCH(*(cpd - 1))) &&
 	isalpha(UCH(*(cpd + 1))) && *(cpd + 4) == '-') {
 
@@ -1914,7 +1914,7 @@ static void parse_vms_dir_entry(char *line,
     }
 
     /* Track down the size */
-    if ((cpd = strchr(cp, '/')) != NULL) {
+    if ((cpd = StrChr(cp, '/')) != NULL) {
 	/* Appears be in used/allocated format */
 	cps = cpd;
 	while (isdigit(UCH(*(cps - 1))))
@@ -2153,7 +2153,7 @@ static void parse_cms_dir_entry(char *line,
     cps = LYSkipNonBlanks(cp);
     *cps++ = '\0';
     StrAllocCopy(entry_info->filename, cp);
-    if (strchr(entry_info->filename, '.') != NULL)
+    if (StrChr(entry_info->filename, '.') != NULL)
 	/* If we already have a dot, we did an NLST. */
 	return;
     cp = LYSkipBlanks(cps);
@@ -2220,7 +2220,7 @@ static void parse_cms_dir_entry(char *line,
     /* Track down the date. */
     cpd = cps;
     if (((cps < end) &&
-	 (cps = strchr(cpd, ':')) != NULL) &&
+	 (cps = StrChr(cpd, ':')) != NULL) &&
 	(cps < (end - 3) &&
 	 isdigit(UCH(*(cps + 1))) && isdigit(UCH(*(cps + 2))) && *(cps + 3) == ':')) {
 	cps += 3;
@@ -2301,7 +2301,7 @@ static EntryInfo *parse_dir_entry(char *entry,
 	    len = (int) strlen(entry);
 	    if (!len || entry[0] == ' ' ||
 		(len >= 24 && entry[23] != ' ') ||
-		(len < 24 && strchr(entry, ' '))) {
+		(len < 24 && StrChr(entry, ' '))) {
 		server_type = UNIX_SERVER;
 		CTRACE((tfp,
 			"HTFTP: Falling back to treating as Unix server.\n"));
@@ -3564,7 +3564,7 @@ int HTFTPLoad(const char *name,
 	    char *cp2 = NULL;
 	    char *fn = NULL;
 
-	    if ((cp2 = strchr((filename + 1), '/')) != NULL) {
+	    if ((cp2 = StrChr((filename + 1), '/')) != NULL) {
 		*cp2 = '\0';
 	    }
 	    status = send_cmd_1("PWD");
@@ -3667,8 +3667,8 @@ int HTFTPLoad(const char *name,
 		BOOL found_tilde = FALSE;
 
 		/* Accept only Unix-style filename */
-		if (strchr(filename, ':') != NULL ||
-		    strchr(filename, '[') != NULL) {
+		if (StrChr(filename, ':') != NULL ||
+		    StrChr(filename, '[') != NULL) {
 		    FREE(fname);
 		    init_help_message_cache();	/* to free memory */
 		    NETCLOSE(control->socket);
@@ -3696,7 +3696,7 @@ int HTFTPLoad(const char *name,
 			if (status != 2) {
 			    char *dotslash = 0;
 
-			    if ((cp1 = strchr(cp, '[')) != NULL) {
+			    if ((cp1 = StrChr(cp, '[')) != NULL) {
 				*cp1++ = '\0';
 				status = send_cwd(cp);
 				if (status != 2) {
@@ -3724,9 +3724,9 @@ int HTFTPLoad(const char *name,
 				return ((status < 0) ? status : -status);
 			    }
 			}
-		    } else if ((cp1 = strchr(cp, ':')) != NULL &&
-			       strchr(cp, '[') == NULL &&
-			       strchr(cp, ']') == NULL) {
+		    } else if ((cp1 = StrChr(cp, ':')) != NULL &&
+			       StrChr(cp, '[') == NULL &&
+			       StrChr(cp, ']') == NULL) {
 			cp1++;
 			if (*cp1 != '\0') {
 			    int cplen = (int) (cp1 - cp);
@@ -3787,13 +3787,13 @@ int HTFTPLoad(const char *name,
 			return ((status < 0) ? status : -status);
 		    }
 		    /* Go to the VMS account's top directory */
-		    if ((cp = strchr(response_text, '[')) != NULL &&
+		    if ((cp = StrChr(response_text, '[')) != NULL &&
 			(cp1 = strrchr(response_text, ']')) != NULL) {
 			char *tmp = 0;
 			unsigned len = 4;
 
 			StrAllocCopy(tmp, cp);
-			if ((cp2 = strchr(cp, '.')) != NULL && cp2 < cp1) {
+			if ((cp2 = StrChr(cp, '.')) != NULL && cp2 < cp1) {
 			    len += (cp2 - cp);
 			} else {
 			    len += (cp1 - cp);
@@ -3839,7 +3839,7 @@ int HTFTPLoad(const char *name,
 		}
 		CTRACE((tfp, "check '%s' to translate x/y/ to [.x.y]\n", filename));
 		if (!included_device &&
-		    (cp = strchr(filename, '/')) != NULL &&
+		    (cp = StrChr(filename, '/')) != NULL &&
 		    (cp1 = strrchr(cp, '/')) != NULL &&
 		    (cp1 - cp) > 1) {
 		    char *tmp = 0;
@@ -3878,10 +3878,10 @@ int HTFTPLoad(const char *name,
 		 */
 		if ((strlen(filename) == 1 && *filename == '/') ||
 		    ((0 == strncasecomp((filename + 1), "vmsysu:", 7)) &&
-		     (cp = strchr((filename + 1), '.')) != NULL &&
-		     strchr(cp, '/') == NULL) ||
+		     (cp = StrChr((filename + 1), '.')) != NULL &&
+		     StrChr(cp, '/') == NULL) ||
 		    (0 == strncasecomp(filename + 1, "anonymou.", 9) &&
-		     strchr(filename + 1, '/') == NULL)) {
+		     StrChr(filename + 1, '/') == NULL)) {
 		    if (filename[1] != '\0') {
 			status = send_cwd(filename + 1);
 			if (status != 2) {
@@ -3911,7 +3911,7 @@ int HTFTPLoad(const char *name,
 		filename++;
 
 		/* Otherwise, go to appropriate directory and adjust filename */
-		while ((cp = strchr(filename, '/')) != NULL) {
+		while ((cp = StrChr(filename, '/')) != NULL) {
 		    *cp++ = '\0';
 		    status = send_cwd(filename);
 		    if (status == 2) {

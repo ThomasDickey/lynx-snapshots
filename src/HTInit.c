@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTInit.c,v 1.84 2013/05/05 19:49:29 tom Exp $
+ * $LynxId: HTInit.c,v 1.85 2013/11/28 11:17:21 tom Exp $
  *
  *		Configuration-specific Initialization		HTInit.c
  *		----------------------------------------
@@ -382,7 +382,7 @@ static int ProcessMailcapEntry(FILE *fp, struct MailcapEntry *mc, AcceptMedia me
 	FREE(rawentry);
 	return (0);
     }
-    s = strchr(rawentry, ';');
+    s = StrChr(rawentry, ';');
     if (s == NULL) {
 	CTrace((tfp,
 		"ProcessMailcapEntry: Ignoring invalid mailcap entry: %s\n",
@@ -423,7 +423,7 @@ static int ProcessMailcapEntry(FILE *fp, struct MailcapEntry *mc, AcceptMedia me
 
 	t = GetCommand(s, &mallocd_string);
 	arg = mallocd_string;
-	eq = strchr(arg, '=');
+	eq = StrChr(arg, '=');
 	if (eq) {
 	    *eq++ = '\0';
 	    eq = LYSkipBlanks(eq);
@@ -518,7 +518,7 @@ static const char *LYSkipToken(const char *s)
 {
     static const char tspecials[] = "\"()<>@,;:\\/[]?.=";
 
-    while (*s != '\0' && !WHITE(*s) && strchr(tspecials, *s) == 0) {
+    while (*s != '\0' && !WHITE(*s) && StrChr(tspecials, *s) == 0) {
 	++s;
     }
     return s;
@@ -573,7 +573,7 @@ static char *LYGetContentType(const char *name,
     if (params != 0) {
 	if (name != 0) {
 	    size_t length = strlen(name);
-	    const char *test = strchr(params, ';');	/* skip type/subtype */
+	    const char *test = StrChr(params, ';');	/* skip type/subtype */
 	    const char *next;
 
 	    while (test != 0) {
@@ -639,7 +639,7 @@ BOOL LYMailcapUsesPctS(const char *controlstring)
 		result = TRUE;
 		break;
 	    case L_CURL:
-		next = strchr(from, R_CURL);
+		next = StrChr(from, R_CURL);
 		if (next != 0) {
 		    from = next;
 		    break;
@@ -705,7 +705,7 @@ static int BuildCommand(HTChunk *cmd,
 		}
 		break;
 	    case L_CURL:
-		next = strchr(from, R_CURL);
+		next = StrChr(from, R_CURL);
 		if (next != 0) {
 		    if (params != 0) {
 			++from;

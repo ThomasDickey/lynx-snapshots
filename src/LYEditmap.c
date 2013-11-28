@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYEditmap.c,v 1.71 2013/10/20 20:03:24 tom Exp $
+ * $LynxId: LYEditmap.c,v 1.72 2013/11/28 11:18:33 tom Exp $
  *
  * LYEditMap.c
  * Keybindings for line and form editing.
@@ -1695,7 +1695,7 @@ static void checkEditMap(LYEditConfig * table)
 
 		    if (Non_Empty(what)) {
 			sprintf(comment, "\t/* %s%s */", what,
-				((strchr(what, '_') != 0)
+				((StrChr(what, '_') != 0)
 				 ? ""
 				 : "_KEY"));
 		    } else {

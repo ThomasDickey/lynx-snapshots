@@ -531,9 +531,9 @@ static BOOL ip_number_match(const char *ctemplate,
     for (cnt = 0; cnt < 4; cnt++) {
 	if (!tcur || !icur || !part_match(tcur, icur))
 	    return NO;
-	if (NULL != (tcur = strchr(tcur, '.')))
+	if (NULL != (tcur = StrChr(tcur, '.')))
 	    tcur++;
-	if (NULL != (icur = strchr(icur, '.')))
+	if (NULL != (icur = StrChr(icur, '.')))
 	    icur++;
     }
     return YES;

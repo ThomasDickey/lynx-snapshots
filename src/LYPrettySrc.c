@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYPrettySrc.c,v 1.28 2013/05/06 00:53:30 tom Exp $
+ * $LynxId: LYPrettySrc.c,v 1.29 2013/11/28 11:21:09 tom Exp $
  *
  * HTML source syntax highlighting
  * by Vlad Harchev <hvv@hippo.ru>
@@ -424,7 +424,7 @@ void HTMLSRC_init_caches(int dont_exit)
 
 	CTRACE2(TRACE_CFG, (tfp, "parsing lexeme %d: %s\n", i + 1, buf));
 
-	if ((p = strchr(buf, ':')) != 0)
+	if ((p = StrChr(buf, ':')) != 0)
 	    *p = '\0';
 	if (!html_src_parse_tagspec(buf,
 				    (HTlexeme) i,

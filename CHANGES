@@ -1,9 +1,11 @@
--- $LynxId: CHANGES,v 1.696 2013/10/24 00:10:05 tom Exp $
+-- $LynxId: CHANGES,v 1.699 2013/11/28 11:38:14 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2013-10-23 (2.8.8dev.17)
+2013-11-28 (2.8.8dev.17)
+* amend check for magic header bytes from 2.8.8dev.3 for "deflate" to limit it
+  to the 3-bit block header described in RFC-1951 -TD
 * install the sample-files in the dpkg test-script -TD
 * add configure option --with-cfg-path and environment variables LYNX_CFG_PATH
   to provide search-list capability for the ".cfg" and ".lss" files -TD

@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFormat.c,v 1.81 2013/10/01 23:43:39 tom Exp $
+ * $LynxId: HTFormat.c,v 1.82 2013/11/28 11:12:32 tom Exp $
  *
  *		Manage different file formats			HTFormat.c
  *		=============================
@@ -328,7 +328,7 @@ int HTGetSSLCharacter(void *handle)
  */
 static int half_match(char *trial_type, char *target)
 {
-    char *cp = strchr(trial_type, '/');
+    char *cp = StrChr(trial_type, '/');
 
     /* if no '/' or no '*' */
     if (!cp || *(cp + 1) != '*')

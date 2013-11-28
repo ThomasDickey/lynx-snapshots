@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTAccess.c,v 1.78 2013/04/30 22:59:03 tom Exp $
+ * $LynxId: HTAccess.c,v 1.79 2013/11/28 11:11:05 tom Exp $
  *
  *		Access Manager					HTAccess.c
  *		==============
@@ -267,7 +267,7 @@ BOOL override_proxy(const char *addr)
 	FREE(host);
 	return NO;
     }
-    Host = (((at = strchr(host, '@')) != NULL) ? (at + 1) : host);
+    Host = (((at = StrChr(host, '@')) != NULL) ? (at + 1) : host);
 
     if ((acc_method = HTParse(addr, "", PARSE_ACCESS))) {
 	if (!strcmp("file", acc_method) &&
@@ -1310,7 +1310,7 @@ BOOL HTSearch(const char *keywords,
 	}
     }				/* Loop over string */
     *q = '\0';			/* Terminate escaped string */
-    u = strchr(address, '?');	/* Find old search string */
+    u = StrChr(address, '?');	/* Find old search string */
     if (u != NULL)
 	*u = '\0';		/* Chop old search off */
 

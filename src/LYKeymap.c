@@ -1,4 +1,4 @@
-/* $LynxId: LYKeymap.c,v 1.108 2013/10/20 22:26:42 tom Exp $ */
+/* $LynxId: LYKeymap.c,v 1.109 2013/11/28 11:19:31 tom Exp $ */
 #include <HTUtils.h>
 #include <LYUtils.h>
 #include <LYGlobalDefs.h>
@@ -1361,7 +1361,7 @@ BOOLEAN LYisNonAlnumKeyname(int ch,
 
     if (ch >= 0 && (ch + 1) < KEYMAP_SIZE) {
 	if ((ch <= 0
-	     || strchr("0123456789"
+	     || StrChr("0123456789"
 		       "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 		       "abcdefghijklmnopqrstuvwxyz", ch) == NULL)
 	    && (keymap[ch + 1] == KeyName)) {
@@ -1484,7 +1484,7 @@ static void checkKeyMap(LYEditConfig * table)
 
 		    if (non_empty(what)) {
 			sprintf(comment, "\t/* %s%s */", what,
-				((strchr(what, '_') != 0)
+				((StrChr(what, '_') != 0)
 				 ? ""
 				 : "_KEY"));
 		    } else {

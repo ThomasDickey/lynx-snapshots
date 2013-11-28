@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTAtom.c,v 1.18 2010/09/25 11:43:12 tom Exp $
+ * $LynxId: HTAtom.c,v 1.19 2013/11/28 11:11:05 tom Exp $
  *
  *			Atoms: Names to numbers			HTAtom.c
  *			=======================
@@ -146,7 +146,7 @@ static BOOL mime_match(const char *name,
 	StrAllocCopy(n1, name);	/* These also free the ones */
 	StrAllocCopy(t1, templ);	/* from previous call.  */
 
-	if (!(n2 = strchr(n1, '/')) || !(t2 = strchr(t1, '/')))
+	if (!(n2 = StrChr(n1, '/')) || !(t2 = StrChr(t1, '/')))
 	    return NO;
 
 	*(n2++) = (char) 0;

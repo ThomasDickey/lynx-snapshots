@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYCharUtils.c,v 1.126 2013/10/19 19:12:09 tom Exp $
+ * $LynxId: LYCharUtils.c,v 1.127 2013/11/28 11:17:59 tom Exp $
  *
  *  Functions associated with LYCharSets.c and the Lynx version of HTML.c - FM
  *  ==========================================================================
@@ -51,7 +51,7 @@ static size_t count_char(const char *value, int ch)
     const char *found;
     size_t result = 0;
 
-    while ((*value != '\0') && (found = strchr(value, ch)) != NULL) {
+    while ((*value != '\0') && (found = StrChr(value, ch)) != NULL) {
 	++result;
 	value = (found + 1);
     }
@@ -223,7 +223,7 @@ static BOOL MustEntify(const char *source)
     BOOL result;
 
 #ifdef CJK_EX
-    if (IS_CJK_TTY && strchr(source, '\033') != 0) {
+    if (IS_CJK_TTY && StrChr(source, '\033') != 0) {
 	result = TRUE;
     } else
 #endif
@@ -352,7 +352,7 @@ char *LYFindEndOfComment(char *str)
 	 */
 	return cp;
 
-    if ((cp1 = strchr(cp, '>')) == NULL)
+    if ((cp1 = StrChr(cp, '>')) == NULL)
 	/*
 	 * We don't have an end character, so return the beginning of the
 	 * string.  - FM
@@ -508,7 +508,7 @@ void LYFillLocalFileURL(char **href,
 	 * Check for pathological cases - current dir has chars which MUST BE
 	 * URL-escaped - kw
 	 */
-	if (strchr(temp2, '%') != NULL || strchr(temp2, '#') != NULL) {
+	if (StrChr(temp2, '%') != NULL || StrChr(temp2, '#') != NULL) {
 	    FREE(temp);
 	    temp = HTEscape(temp2, URL_PATH);
 	    StrAllocCat(*href, temp);
@@ -1152,7 +1152,7 @@ char **LYUCFullyTranslateString(char **str,
     /*
      * Save malloc/calloc overhead in simple case - kw
      */
-    if (do_ent && hidden && (stype != st_URL) && (strchr(*str, '&') == NULL))
+    if (do_ent && hidden && (stype != st_URL) && (StrChr(*str, '&') == NULL))
 	do_ent = FALSE;
 
     /* Can't do, caller should figure out what to do... */
@@ -1923,7 +1923,7 @@ char *LYParseTagParam(char *from,
     char *string = from;
 
     do {
-	if ((string = strchr(string, ';')) == NULL)
+	if ((string = StrChr(string, ';')) == NULL)
 	    return NULL;
 	while (*string != '\0' && (*string == ';' || isspace(UCH(*string)))) {
 	    string++;
@@ -2426,7 +2426,7 @@ void LYHandleMETA(HTStructured * me, const BOOL *present,
 	       not that it matters much.  avoid setting it here. - kw */
 	    if (track_internal_links &&
 		(StrNCmp(href, "http", 4) == 0) &&
-		(cp = strchr(href, '#')) != NULL) {
+		(cp = StrChr(href, '#')) != NULL) {
 		StrAllocCopy(id_string, cp);
 		*cp = '\0';
 	    }
@@ -2493,7 +2493,7 @@ void LYHandleMETA(HTStructured * me, const BOOL *present,
 	    if (*cp != '\0') {
 		StrAllocCopy(me->node_anchor->SugFname, cp);
 		if (*me->node_anchor->SugFname == '"') {
-		    if ((cp = strchr((me->node_anchor->SugFname + 1),
+		    if ((cp = StrChr((me->node_anchor->SugFname + 1),
 				     '"')) != NULL) {
 			*(cp + 1) = '\0';
 			HTMIME_TrimDoubleQuotes(me->node_anchor->SugFname);
@@ -2694,7 +2694,7 @@ void LYHandleSELECT(HTStructured * me, const BOOL *present,
 	if (!(present && present[HTML_SELECT_NAME] &&
 	      non_empty(value[HTML_SELECT_NAME]))) {
 	    StrAllocCopy(name, "");
-	} else if (strchr(value[HTML_SELECT_NAME], '&') == NULL) {
+	} else if (StrChr(value[HTML_SELECT_NAME], '&') == NULL) {
 	    StrAllocCopy(name, value[HTML_SELECT_NAME]);
 	} else {
 	    StrAllocCopy(name, value[HTML_SELECT_NAME]);
@@ -2894,12 +2894,12 @@ int LYLegitimizeHREF(HTStructured * me, char **href,
 		 * it may actually have blanks in the name.
 		 * Try to accommodate. See also HTParse().
 		 */
-		if (LYRemoveNewlines(p) || strchr(p, '\t') != 0) {
+		if (LYRemoveNewlines(p) || StrChr(p, '\t') != 0) {
 		    LYRemoveBlanks(p);	/* a compromise... */
 		}
 
 		if (pound != NULL) {
-		    p = strchr(p, '\0');
+		    p = StrChr(p, '\0');
 		    *pound = '#';	/* restore */
 		    convert_to_spaces(pound, FALSE);
 		    if (p < pound)
@@ -3300,7 +3300,7 @@ BOOLEAN LYCommentHacks(HTParentAnchor *anchor,
 	    FREE(messageid);
 	    return FALSE;
 	}
-	if ((p = strchr(messageid, '@')) == NULL || p[1] == '\0') {
+	if ((p = StrChr(messageid, '@')) == NULL || p[1] == '\0') {
 	    FREE(messageid);
 	    return FALSE;
 	}

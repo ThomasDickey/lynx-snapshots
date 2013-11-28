@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTParse.c,v 1.70 2012/02/09 19:57:37 tom Exp $
+ * $LynxId: HTParse.c,v 1.71 2013/11/28 11:14:12 tom Exp $
  *
  *		Parse HyperText Document Address		HTParse.c
  *		================================
@@ -138,12 +138,12 @@ static void scan(char *name,
 	if (p[1] == '/') {
 	    parts->host = (p + 2);	/* host has been specified    */
 	    *p = '\0';		/* Terminate access           */
-	    p = strchr(parts->host, '/');	/* look for end of host name if any */
+	    p = StrChr(parts->host, '/');	/* look for end of host name if any */
 	    if (p != NULL) {
 		*p = '\0';	/* Terminate host */
 		parts->absolute = (p + 1);	/* Root has been found */
 	    } else {
-		p = strchr(parts->host, '?');
+		p = StrChr(parts->host, '?');
 		if (p != NULL) {
 		    *p = '\0';	/* Terminate host */
 		    parts->search = (p + 1);
@@ -161,7 +161,7 @@ static void scan(char *name,
      * Check schemes that commonly have unescaped hashes.
      */
     if (parts->access && parts->anchor &&
-    /* optimize */ strchr("lnsdLNSD", *parts->access) != NULL) {
+    /* optimize */ StrChr("lnsdLNSD", *parts->access) != NULL) {
 	if ((!parts->host && strcasecomp(parts->access, "lynxcgi")) ||
 	    !strcasecomp(parts->access, "nntp") ||
 	    !strcasecomp(parts->access, "snews") ||
@@ -193,7 +193,7 @@ static void scan(char *name,
 
 static char *strchr_or_end(char *string, int ch)
 {
-    char *result = strchr(string, ch);
+    char *result = StrChr(string, ch);
 
     if (result == 0) {
 	result = string + strlen(string);
@@ -483,7 +483,7 @@ char *HTParse(const char *aName,
 		char *p2, *h;
 		int portnumber;
 
-		if ((p2 = strchr(result, '@')) != NULL)
+		if ((p2 = StrChr(result, '@')) != NULL)
 		    tail = (p2 + 1);
 		p2 = HTParsePort(result, &portnumber);
 		if (p2 != NULL && acc_method != NULL) {
@@ -627,7 +627,7 @@ char *HTParse(const char *aName,
 		}
 		/* otherwise fall through to RFC 1808 part 4 step 6 */
 		else {
-		    p = strchr(tail, '?');	/* Search part? */
+		    p = StrChr(tail, '?');	/* Search part? */
 		    if (p == NULL)
 			p = (tail + strlen(tail) - 1);
 		    for (; *p != '/'; p--) ;	/* last / */
@@ -657,7 +657,7 @@ char *HTParse(const char *aName,
 	    CTRACE((tfp, "HTParse: (No inheritance)\n"));
 	}
 	if (want_detail) {
-	    p = strchr(tail, '?');	/* Search part? */
+	    p = StrChr(tail, '?');	/* Search part? */
 	    if (p) {
 		if (PARSE_STRICTPATH) {
 		    *p = '\0';
@@ -691,7 +691,7 @@ char *HTParse(const char *aName,
      * If there are any blanks remaining in the string, escape them as needed.
      * See the discussion in LYLegitimizeHREF() for example.
      */
-    if ((p = strchr(result, ' ')) != 0) {
+    if ((p = StrChr(result, ' ')) != 0) {
 	switch (is_url(result)) {
 	case UNKNOWN_URL_TYPE:
 	    CTRACE((tfp, "HTParse:      ignore:`%s'\n", result));
@@ -726,7 +726,7 @@ char *HTParse(const char *aName,
 		p[0] = HEX_ESCAPE;
 		p[1] = '2';
 		p[2] = '0';
-	    } while ((p = strchr(result, ' ')) != 0);
+	    } while ((p = StrChr(result, ' ')) != 0);
 	    break;
 	}
     }
@@ -820,7 +820,7 @@ void HTSimplify(char *filename)
 	filename[0] == '?' || filename[1] == '?' || filename[2] == '?')
 	return;
 
-    if (strchr(filename, '/') != NULL) {
+    if (StrChr(filename, '/') != NULL) {
 	for (p = (filename + 2); *p; p++) {
 	    if (*p == '?') {
 		/*
@@ -1246,7 +1246,7 @@ char *HTUnEscapeSome(char *str,
 	    isxdigit(UCH(p[2])) &&
 	    (testcode = (char) FROMASCII(from_hex(p[1]) * 16 +
 					 from_hex(p[2]))) &&	/* %00 no good */
-	    strchr(do_trans, testcode)) {	/* it's one of the ones we want */
+	    StrChr(do_trans, testcode)) {	/* it's one of the ones we want */
 	    *q++ = testcode;
 	    p += 3;
 	} else {

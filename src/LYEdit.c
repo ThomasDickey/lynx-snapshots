@@ -1,4 +1,4 @@
-/* $LynxId: LYEdit.c,v 1.41 2010/09/24 00:07:26 tom Exp $ */
+/* $LynxId: LYEdit.c,v 1.42 2013/11/28 11:18:19 tom Exp $ */
 #include <HTUtils.h>
 #include <HTParse.h>
 #include <HTAlert.h>
@@ -119,7 +119,7 @@ int edit_current_file(char *newfile,
     if (StrNCmp(newfile, "file://localhost/", 16) == 0)
 	colon = newfile + 16;
     else
-	colon = strchr(newfile, ':');
+	colon = StrChr(newfile, ':');
     StrAllocCopy(filename, (colon + 1));
     HTUnEscape(filename);
     if (!LYCanReadFile(filename)) {
@@ -230,7 +230,7 @@ void edit_temporary_file(char *filename,
 #endif
     else {
 #ifdef _WINDOWS
-	if (strchr(editor, ' '))
+	if (StrChr(editor, ' '))
 	    HTAddXpand(&command, format, params++, HTDOS_short_name(editor));
 	else
 	    HTAddXpand(&command, format, params++, editor);

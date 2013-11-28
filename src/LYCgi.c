@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYCgi.c,v 1.65 2013/01/04 09:44:59 tom Exp $
+ * $LynxId: LYCgi.c,v 1.67 2013/11/28 11:35:56 tom Exp $
  *                   Lynx CGI support                              LYCgi.c
  *                   ================
  *
@@ -117,7 +117,7 @@ static void add_environment_value(const char *env_value)
 	assert(env != NULL);
     }
 
-    env[envc++] = (char *) env_value;
+    env[envc++] = DeConst(env_value);
     env[envc] = NULL;		/* Make sure it is always properly terminated */
 }
 
@@ -213,7 +213,7 @@ static int LYLoadCGI(const char *arg,
 	} else {
 	    StrAllocCopy(pgm, arg + 8);
 	}
-	if ((cp = strchr(pgm, '?')) != NULL) {	/* Need to terminate executable */
+	if ((cp = StrChr(pgm, '?')) != NULL) {	/* Need to terminate executable */
 	    *cp++ = '\0';
 	    pgm_args = cp;
 	}

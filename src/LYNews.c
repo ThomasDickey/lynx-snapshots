@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYNews.c,v 1.60 2013/10/12 14:51:18 tom Exp $
+ * $LynxId: LYNews.c,v 1.61 2013/11/28 11:21:09 tom Exp $
  */
 #include <HTUtils.h>
 #ifndef DISABLE_NEWS
@@ -160,7 +160,7 @@ char *LYNewsPost(char *newsgroups,
 	    StrAllocCat(References, ">");
 	}
 	HTUnEscape(References);
-	if (!((cp = strchr(References, '@')) && cp > References + 1 &&
+	if (!((cp = StrChr(References, '@')) && cp > References + 1 &&
 	      isalnum(UCH(cp[1])))) {
 	    FREE(References);
 	}
@@ -284,7 +284,7 @@ char *LYNewsPost(char *newsgroups,
 	    strcpy(p + 1, "LYNX_ETC.TXT");
 	    if ((fp = fopen(fname, TXT_R)) != NULL) {
 		if (fgets(user_input, (int) sizeof(user_input), fp) != NULL) {
-		    if ((org = strchr(user_input, '\n')) != NULL) {
+		    if ((org = StrChr(user_input, '\n')) != NULL) {
 			*org = '\0';
 		    }
 		    if (user_input[0] != '\0') {

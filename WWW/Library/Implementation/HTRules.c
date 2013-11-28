@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTRules.c,v 1.44 2013/05/03 09:42:04 tom Exp $
+ * $LynxId: HTRules.c,v 1.45 2013/11/28 11:14:29 tom Exp $
  *
  *	Configuration manager for Hypertext Daemon		HTRules.c
  *	==========================================
@@ -296,7 +296,7 @@ char *HTTranslate(const char *required)
 	case HT_AlwaysAlert:
 	    pMsg = r->equiv ? r->equiv :
 		(r->op == HT_AlwaysAlert) ? "%s" : "Rule: %s";
-	    if (strchr(pMsg, '%')) {
+	    if (StrChr(pMsg, '%')) {
 		HTSprintf0(&msgtmp, pMsg, current);
 		pMsg = msgtmp;
 	    }
@@ -346,7 +346,7 @@ char *HTTranslate(const char *required)
 		CTRACE((tfp, "For `%s' using `%s'\n", current, r->equiv));
 		StrAllocCopy(current, r->equiv);	/* use entire translation */
 	    } else {
-		char *ins = strchr(r->equiv, '*');	/* Insertion point */
+		char *ins = StrChr(r->equiv, '*');	/* Insertion point */
 
 		if (ins) {	/* Consistent rule!!! */
 		    char *temp = NULL;
@@ -468,7 +468,7 @@ int HTSetConfiguration(char *config)
 	char *p = line;
 
 	/* Chop off comments */
-	while ((p = strchr(p, '#'))) {
+	while ((p = StrChr(p, '#'))) {
 	    if (p == line || isspace(UCH(*(p - 1)))) {
 		*p = 0;
 		break;
@@ -620,7 +620,7 @@ int HTSetConfiguration(char *config)
 		    const char *cp = word3;
 		    char *cp1, *cp2;
 
-		    while ((cp1 = strchr(cp, '%'))) {
+		    while ((cp1 = StrChr(cp, '%'))) {
 			if (cp1[1] == '\0') {
 			    *cp1 = '\0';
 			    break;
@@ -628,7 +628,7 @@ int HTSetConfiguration(char *config)
 			    cp = cp1 + 2;
 			    continue;
 			} else
-			    while ((cp2 = strchr(cp1 + 2, '%'))) {
+			    while ((cp2 = StrChr(cp1 + 2, '%'))) {
 				if (cp2[1] == '\0') {
 				    *cp2 = '\0';
 				    break;

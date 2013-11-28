@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYBookmark.c,v 1.75 2013/10/12 14:51:18 tom Exp $
+ * $LynxId: LYBookmark.c,v 1.76 2013/11/28 11:17:59 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTAlert.h>
@@ -40,7 +40,7 @@ int LYMBM2index(int ch)
 {
     if ((ch = TOUPPER(ch)) > 0) {
 	const char *letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-	const char *result = strchr(letters, ch);
+	const char *result = StrChr(letters, ch);
 
 	if (result != 0
 	    && (result - letters) <= MBM_V_MAXFILES)

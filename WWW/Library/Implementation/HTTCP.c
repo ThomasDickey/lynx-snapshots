@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTCP.c,v 1.127 2013/10/13 23:42:55 tom Exp $
+ * $LynxId: HTTCP.c,v 1.128 2013/11/28 11:14:59 tom Exp $
  *
  *			Generic Communication Code		HTTCP.c
  *			==========================
@@ -1285,7 +1285,7 @@ static int HTParseInet(SockA * soc_in, const char *str)
     /*
      * Parse port number if present.
      */
-    if ((port = strchr(host, ':')) != NULL) {
+    if ((port = StrChr(host, ':')) != NULL) {
 	*port++ = 0;		/* Chop off port */
 	strptr = port;
 	if (port[0] >= '0' && port[0] <= '9') {
@@ -1603,7 +1603,7 @@ static LYNX_ADDRINFO *HTGetAddrInfo(const char *str,
 
     StrAllocCopy(s, str);
 
-    if (s[0] == '[' && (p = strchr(s, ']')) != NULL) {
+    if (s[0] == '[' && (p = StrChr(s, ']')) != NULL) {
 	*p++ = '\0';
 	host = s + 1;
     } else {
@@ -1692,7 +1692,7 @@ static void get_host_details(void)
      * UCX doesn't give the complete domain name.  Get rest from UCX$BIND_DOM
      * logical.
      */
-    if (strchr(hostname, '.') == NULL) {	/* Not full address */
+    if (StrChr(hostname, '.') == NULL) {	/* Not full address */
 	domain_name = LYGetEnv("UCX$BIND_DOMAIN");
 	if (domain_name == NULL)
 	    domain_name = LYGetEnv("TCPIP$BIND_DOMAIN");
@@ -1814,7 +1814,7 @@ int HTDoConnect(const char *url,
      * Get node name and optional port number.
      */
     p1 = HTParse(url, "", PARSE_HOST);
-    if ((at_sign = strchr(p1, '@')) != NULL) {
+    if ((at_sign = StrChr(p1, '@')) != NULL) {
 	/*
 	 * If there's an @ then use the stuff after it as a hostname.
 	 */

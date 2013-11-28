@@ -1,4 +1,4 @@
-/* $LynxId: LYrcFile.c,v 1.91 2013/10/12 13:06:01 tom Exp $ */
+/* $LynxId: LYrcFile.c,v 1.92 2013/11/28 11:22:53 tom Exp $ */
 #include <HTUtils.h>
 #include <HTFTP.h>
 #include <LYUtils.h>
@@ -731,7 +731,7 @@ BOOL LYsetRcValue(const char *name, const char *param)
 	    sprintf(MBM_line, "multi_bookmark%c", LYindex2MBM(n));
 
 	    if (!strcasecomp(name, MBM_line)) {
-		if ((notes = strchr(value, ',')) != 0) {
+		if ((notes = StrChr(value, ',')) != 0) {
 		    *notes++ = '\0';
 		    LYTrimTrailing(value);
 		    notes = LYSkipBlanks(notes);
@@ -798,7 +798,7 @@ void read_rc(FILE *fp)
 	/*
 	 * Parse the "name=value" strings.
 	 */
-	if ((value = strchr(name, '=')) == 0) {
+	if ((value = StrChr(name, '=')) == 0) {
 	    CTRACE((tfp, "LYrcFile: missing '=' %s\n", name));
 	    continue;
 	}
@@ -1054,7 +1054,7 @@ BOOL will_save_rc(const char *name)
 int enable_lynxrc(char *value)
 {
     Config_Type *tbl;
-    char *colon = strchr(value, ':');
+    char *colon = StrChr(value, ':');
 
     if (colon != 0) {
 	*colon++ = 0;
