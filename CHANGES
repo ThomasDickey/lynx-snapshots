@@ -1,8 +1,9 @@
--- $LynxId: CHANGES,v 1.700 2013/11/28 19:19:29 tom Exp $
+-- $LynxId: CHANGES,v 1.701 2013/11/29 01:16:04 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
+2013-11-28 (2.8.8pre.1)
 2013-11-28 (2.8.8dev.17)
 * revise/update counts in README.metrics, using a script replacing a manual
   procedure -TD
