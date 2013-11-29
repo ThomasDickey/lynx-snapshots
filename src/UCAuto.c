@@ -1,5 +1,5 @@
 /*
- * $LynxId: UCAuto.c,v 1.52 2013/11/28 11:22:53 tom Exp $
+ * $LynxId: UCAuto.c,v 1.53 2013/11/29 00:22:00 tom Exp $
  *
  *  This file contains code for changing the Linux console mode.
  *  Currently some names for font files are hardwired in here.
@@ -624,7 +624,7 @@ int Find_Best_Display_Charset(int ord)
 	    break;
 	}
 	/* At start of the source name */
-	if (source && !strnicmp(name, s, n) && StrChr(" \t,", s[n])) {	/* Found! */
+	if (source && !strncasecomp(name, s, n) && StrChr(" \t,", s[n])) {	/* Found! */
 	    source = 0;
 	    s += n;
 	    continue;		/* Look for the replacement */

@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYReadCFG.c,v 1.181 2013/11/28 11:21:09 tom Exp $
+ * $LynxId: LYReadCFG.c,v 1.182 2013/11/29 00:21:45 tom Exp $
  */
 #ifndef NO_RULES
 #include <HTRules.h>
@@ -586,8 +586,8 @@ static int character_set_fun(char *value)
     if (i < 0) {
 #ifdef CAN_AUTODETECT_DISPLAY_CHARSET
 	if (auto_display_charset >= 0
-	    && (!strnicmp(value, "AutoDetect ", 11)
-		|| !strnicmp(value, "AutoDetect-2 ", 13)))
+	    && (!strncasecomp(value, "AutoDetect ", 11)
+		|| !strncasecomp(value, "AutoDetect-2 ", 13)))
 	    current_char_set = auto_display_charset;
 #endif
 	/* do nothing here: so fallback to userdefs.h */

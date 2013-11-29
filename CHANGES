@@ -1,9 +1,11 @@
--- $LynxId: CHANGES,v 1.699 2013/11/28 11:38:14 tom Exp $
+-- $LynxId: CHANGES,v 1.700 2013/11/28 19:19:29 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
 2013-11-28 (2.8.8dev.17)
+* revise/update counts in README.metrics, using a script replacing a manual
+  procedure -TD
 * amend check for magic header bytes from 2.8.8dev.3 for "deflate" to limit it
   to the 3-bit block header described in RFC-1951 -TD
 * install the sample-files in the dpkg test-script -TD

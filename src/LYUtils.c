@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYUtils.c,v 1.261 2013/11/28 11:35:34 tom Exp $
+ * $LynxId: LYUtils.c,v 1.262 2013/11/29 00:04:25 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTCP.h>
@@ -8009,7 +8009,7 @@ static int is_device(char *fname)
 
     i = 0;
     while (black_list[i] != NULL) {
-	if (stricmp(fname, black_list[i]) == 0) {
+	if (strcasecomp(fname, black_list[i]) == 0) {
 	    return 1;		/* device file */
 	}
 	i++;
@@ -8055,7 +8055,7 @@ int unsafe_filename(const char *fname)
 
     i = 0;
     while (device_list[i] != NULL) {
-	if (stricmp(fname, device_list[i]) == 0) {
+	if (strcasecomp(fname, device_list[i]) == 0) {
 	    return 0;		/* device file (open OK) */
 	}
 	i++;
