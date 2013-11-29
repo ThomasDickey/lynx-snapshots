@@ -1,4 +1,4 @@
-/* $LynxId: Xsystem.c,v 1.27 2013/07/21 00:18:04 tom Exp $
+/* $LynxId: Xsystem.c,v 1.28 2013/11/29 00:22:00 tom Exp $
  *	like system("cmd") but return with exit code of "cmd"
  *	for Turbo-C/MS-C/LSI-C
  *  This code is in the public domain.
@@ -123,7 +123,7 @@ static int NEAR is_builtin_command(char *s)
 	if (strcasecomp(s, cmdtab[i]) == 0)
 	    return 1;
 	lc = strlen(cmdtab[i]);
-	if (lc < l && strnicmp(s, cmdtab[i], lc) == 0 && issep2(s[lc]))
+	if (lc < l && strncasecomp(s, cmdtab[i], lc) == 0 && issep2(s[lc]))
 	    return 1;
     }
     return 0;

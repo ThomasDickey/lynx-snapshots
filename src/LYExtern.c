@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYExtern.c,v 1.53 2013/11/28 11:18:33 tom Exp $
+ * $LynxId: LYExtern.c,v 1.54 2013/11/29 00:21:20 tom Exp $
  *
  External application support.
  This feature allows lynx to pass a given URL to an external program.
@@ -167,7 +167,7 @@ static char *format_command(char *command,
     char pram_string[LY_MAXPATH];
     char *escaped = NULL;
 
-    if (strnicmp("file://localhost/", param, 17) == 0) {
+    if (strncasecomp("file://localhost/", param, 17) == 0) {
 	/* decode local path parameter for programs to be
 	   able to interpret - TH */
 	LYStrNCpy(pram_string, param, sizeof(pram_string) - 1);
@@ -181,7 +181,7 @@ static char *format_command(char *command,
 
     if (isMAILTO_URL(param)) {
 	format(&cmdbuf, command, param + 7);
-    } else if (strnicmp("telnet://", param, 9) == 0) {
+    } else if (strncasecomp("telnet://", param, 9) == 0) {
 	char host[sizeof(pram_string)];
 	int last_pos;
 
@@ -191,7 +191,7 @@ static char *format_command(char *command,
 	    host[last_pos] = '\0';
 
 	format(&cmdbuf, command, host);
-    } else if (strnicmp("file://localhost/", param, 17) == 0) {
+    } else if (strncasecomp("file://localhost/", param, 17) == 0) {
 	char e_buff[LY_MAXPATH], *p;
 
 	p = param + 17;
@@ -388,7 +388,7 @@ BOOL run_external(char *param,
 	    }
 	}
 
-	if (strnicmp(cmdbuf, "start ", 6) == 0)
+	if (strncasecomp(cmdbuf, "start ", 6) == 0)
 	    redraw_flag = FALSE;
 	else
 	    redraw_flag = TRUE;
