@@ -1,5 +1,5 @@
 /*
- * $LynxId: userdefs.h,v 1.280 2013/11/29 00:52:56 tom Exp $
+ * $LynxId: userdefs.h,v 1.281 2013/12/01 01:12:55 tom Exp $
  *
  * Lynx - Hypertext navigation system
  *
@@ -457,7 +457,11 @@
  * -lss command line switch will override these definitions.
  */
 #ifndef LYNX_LSS_FILE
+#ifdef DOSPATH
+#define LYNX_LSS_FILE "lynx.lss"
+#else
 #define LYNX_LSS_FILE "/usr/local/lib/lynx.lss"
+#endif
 #endif /* LYNX_LSS_FILE */
 
 #endif /* VMS OR UNIX */
@@ -1438,7 +1442,7 @@
  * the version definition with the Project Version on checkout.  Just
  * ignore it. - kw */
 /* $Format: "#define LYNX_VERSION \"$ProjectVersion$\""$ */
-#define LYNX_VERSION "2.8.8pre.1"
+#define LYNX_VERSION "2.8.8pre.2"
 #define LYNX_WWW_HOME "http://lynx.isc.org/"
 #define LYNX_WWW_DIST "http://lynx.isc.org/current/"
 /* $Format: "#define LYNX_DATE \"$ProjectDate$\""$ */
