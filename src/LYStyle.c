@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYStyle.c,v 1.94 2013/11/28 11:37:02 tom Exp $
+ * $LynxId: LYStyle.c,v 1.95 2013/12/01 19:22:44 tom Exp $
  *
  * character level styles for Lynx
  * (c) 1996 Rob Partington -- donated to the Lyncei (if they want it :-)
@@ -941,7 +941,9 @@ void init_color_styles(char **from_cmdline, const char *default_styles)
      */
     style_readFromFile(lynx_lss_file);
     add_to_lss_list(LYPathLeaf(lynx_lss_file), lynx_lss_file);
+#ifndef NO_OPTION_FORMS
     build_lss_enum(list_of_lss_files);
+#endif
 }
 
 void reinit_color_styles(void)
