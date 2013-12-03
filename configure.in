@@ -1,4 +1,4 @@
-dnl $LynxId: configure.in,v 1.254 2013/12/01 01:12:55 tom Exp $
+dnl $LynxId: configure.in,v 1.255 2013/12/02 22:56:08 tom Exp $
 dnl
 dnl Process this file with autoconf to produce a configure script.
 dnl
@@ -290,9 +290,6 @@ msdosdjgpp*)
 	;;
 next*)
 	TRY_CFLAGS="$TRY_CFLAGS -DNEXT"
-	;;
-openbsd* | ekkobsd* | mirbsd*)
-	LIBS="$LIBS -lcompat"
 	;;
 osf4*)
 	# The -Olimit flag (see below) is no longer available with
