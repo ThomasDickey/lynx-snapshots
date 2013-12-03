@@ -1,9 +1,11 @@
--- $LynxId: CHANGES,v 1.704 2013/12/01 19:23:40 tom Exp $
+-- $LynxId: CHANGES,v 1.705 2013/12/02 22:58:30 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2013-12-01 (2.8.8pre.2)
+2013-12-02 (2.8.8pre.2)
+* remove special case in configure.in which added "-lcompat" to $LIBS
+  for OpenBSD, MirBSD and EkkoBSD (Christian Weisberber, Thorsten Glaser).
 * build-fix for --disable-forms-options -TD
 * omit request for admin-access in NullSoft installer, since lynx could be
   installed in user's directory -TD
