@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYLeaks.c,v 1.36 2012/02/10 00:33:39 tom Exp $
+ * $LynxId: LYLeaks.c,v 1.37 2013/12/07 13:46:58 tom Exp $
  *
  *	Copyright (c) 1994, University of Kansas, All Rights Reserved
  *	(this file was rewritten twice - 1998/1999 and 2003/2004)
@@ -912,7 +912,7 @@ void LYLeakSABCat(bstring **dest,
 	    t->str = (char *) LYLeakRealloc(t->str, length, cp_File, ssi_Line);
 	} else {
 	    if ((t = (bstring *) LYLeakCalloc(1, sizeof(bstring), cp_File,
-		ssi_Line)) == NULL)
+					      ssi_Line)) == NULL)
 		  outofmem(__FILE__, "HTSACat");
 
 	    assert(t != NULL);

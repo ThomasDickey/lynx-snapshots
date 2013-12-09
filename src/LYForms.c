@@ -1,4 +1,4 @@
-/* $LynxId: LYForms.c,v 1.110 2013/10/13 18:39:48 tom Exp $ */
+/* $LynxId: LYForms.c,v 1.111 2013/12/07 13:46:58 tom Exp $ */
 #include <HTUtils.h>
 #include <HTCJK.h>
 #include <HTTP.h>
@@ -23,7 +23,7 @@
 #if defined(VMS) && !defined(USE_SLANG)
 #define RepaintKey() 12		/* CTRL-L for repaint */
 #else
-#define RepaintKey() ((!enable_scrollback) ? 23 : 12) /* CTRL-W or CTRL-L */
+#define RepaintKey() ((!enable_scrollback) ? 23 : 12)	/* CTRL-W or CTRL-L */
 #endif /* VMS && !USE_SLANG */
 
 static int form_getstr(int cur,
