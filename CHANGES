@@ -1,12 +1,13 @@
--- $LynxId: CHANGES,v 1.706 2013/12/09 11:21:42 tom Exp $
+-- $LynxId: CHANGES,v 1.709 2013/12/16 00:12:22 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2013-12-09 (2.8.8pre.2)
+2013-12-15 (2.8.8pre.2)
+* typographical fixes for manpage (Bjarni I. Gislason, Debian #732236).
 * allow fallback sleep() function to be used for MinGW -GV
 * remove special case in configure.in which added "-lcompat" to $LIBS
-  for OpenBSD, MirBSD and EkkoBSD (Christian Weisberber, Thorsten Glaser).
+  for OpenBSD, MirBSD and EkkoBSD (Christian Weisgerber, Thorsten Glaser).
 * build-fix for --disable-forms-options -TD
 * omit request for admin-access in NullSoft installer, since lynx could be
   installed in user's directory -TD
