@@ -1,4 +1,4 @@
-.\" $LynxId: lynx.man,v 1.108 2013/10/23 22:49:39 tom Exp $
+.\" $LynxId: lynx.man,v 1.109 2013/12/15 23:20:40 Bjarni.I.Gislason Exp $
 .\" **************************************************************************
 .\" Escape single quotes in literal strings from groff's Unicode transform.
 .ie \n(.g .ds AQ \(aq
@@ -210,7 +210,7 @@ and hexadecimal values represent other 8-bit codes.
 .TP
 .B set
 followed by a \*(``name=value\*('' allows one to override values set in the
-lynx.cfg or .lynxrc files.
+lynx.cfg or \&.lynxrc files.
 \fILynx\fP tries the cfg-file setting first.
 .RE
 .TP
@@ -225,10 +225,10 @@ it is equivalent to setting the \fBCOLORTERM\fR environment variable.
 library like \fBncurses\fR, \fILynx\fP relies completely on the terminal
 description to determine whether color mode is possible, and
 this flag is not needed and thus unavailable.)
-A saved show_color=always setting found in a .lynxrc file at
+A saved show_color=always setting found in a \&.lynxrc file at
 startup has the same effect.
 A saved show_color=never found
-in .lynxrc on startup is overridden by this flag.
+in \&.lynxrc on startup is overridden by this flag.
 .TP
 .B \-connect_timeout\fR=\fIN
 Sets the connection timeout, where N is given in seconds.
@@ -241,7 +241,7 @@ for most systems, but ~/cookies for MS-DOS.
 .B \-cookie_save_file\fR=\fIFILENAME
 specifies a file to use to store cookies.
 If none is specified, the value given by
-\fB-cookie_file\fR is used.
+\fB\-cookie_file\fR is used.
 .TP
 .B \-cookies
 toggles handling of Set-Cookie headers.
@@ -467,7 +467,7 @@ within a mailto URL or form ACTION.
 .TP
 .B \-nocolor
 force color mode off, overriding terminal capabilities and any
--color flags, COLORTERM variable, and saved .lynxrc settings.
+\-color flags, COLORTERM variable, and saved \&.lynxrc settings.
 .TP
 .B \-noexec
 disable local program execution.
@@ -690,7 +690,7 @@ disallow mail.
 disallow USENET News posting.
 .TP
 .B options_save
-disallow saving options in .lynxrc.
+disallow saving options in \&.lynxrc.
 .TP
 .B outside_ftp
 disallow ftps for people coming from outside your
@@ -742,7 +742,7 @@ toggles showing scrollbar.
 toggles showing arrows at ends of the scrollbar.
 .TP
 .B \-selective
-require .www_browsable files to browse directories.
+require \&.www_browsable files to browse directories.
 .TP
 .B \-session\fR=\fIFILENAME
 resumes from specified file on startup and saves session to that file on exit.
@@ -860,7 +860,7 @@ color-style
 TRST (table layout)
 .TP
 .B 8
-configuration (lynx.cfg, .lynxrc, .lynx-keymaps, mime.types and mailcap contents)
+configuration (lynx.cfg, \&.lynxrc, \&.lynx-keymaps, mime.types and mailcap contents)
 .TP
 .B 16
 binary string copy/append, used in form data construction.
@@ -1297,6 +1297,6 @@ Worcester Foundation for Biomedical Research
 .br
 Shrewsbury, Massachusetts 01545
 .PP
-Thomas E. Dickey
+Thomas E.\& Dickey
 .br
 <dickey@invisible-island.net>

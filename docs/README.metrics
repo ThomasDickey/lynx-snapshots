@@ -1,4 +1,4 @@
--- $LynxId: README.metrics,v 1.6 2013/11/28 20:01:44 tom Exp $
+-- $LynxId: README.metrics,v 1.8 2013/12/16 00:14:10 tom Exp $
 
 This is a short summary of code metrics showing how lynx has grown from
 release to release.  It also shows how the original codebase has
@@ -23,8 +23,8 @@ Release         Current                 Original
                                         15573   13587     3.9     8.0
 2.8.7           441453  180674          25064   23101     5.7    12.8
                                         15436   13473     3.5     7.5
-2.8.8dev.17     464771  184804          24028   22288     5.2    12.1
-                                        14604   12864     3.1     7.0
+2.8.8pre.2      464871  184810          24027   22288     5.2    12.1
+                                        14603   12864     3.1     7.0
 
 Beginning with 2.8.6, the percentage of the remaining original codebase is
 shown on two lines (i.e., comparing against 2.4.2 indented to use the current
@@ -66,7 +66,7 @@ start of the 2.8 series:
     1   Chris Adams
     1   Christian Hudon
     1   Christian Jensen
-    2.5 Christian Weisgerber
+    3   Christian Weisgerber
     1   Christoph J Gartmann
     1   Chuck Houpt
     1   Crouton
@@ -90,7 +90,7 @@ start of the 2.8 series:
     1   Frederick P Herrmann
     1   Georg Drenkhahn
     1   George Lindholm
-   21   Gisle Vanem
+   22   Gisle Vanem
     1   Glenn Nielsen
     1   Hans Wurst
    26.5 Hataguchi Takeshi
@@ -174,10 +174,10 @@ start of the 2.8 series:
     1   Tadayoshi Okuma
     1   Takao Fujiwara
     1   Thomas Braun
- 2027.3 Thomas E Dickey
+ 2030.3 Thomas E Dickey
     0.5 Thomas Klausner
     1   Thomas Viehmann
-   16.5 Thorsten Glaser
+   17   Thorsten Glaser
     1   Tim Chase
     4   Tim Larson
     1   Timur Birsh
@@ -190,7 +190,7 @@ start of the 2.8 series:
     1   Wesley Morgan
     1   Zdenek Prikryl
     1.5 nsh@horae.dti.ne.jp
- 4349   Total
+ 4355   Total
 
 -------------------------------------------------------------------------------
 
