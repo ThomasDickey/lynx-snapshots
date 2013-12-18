@@ -1,5 +1,5 @@
 /*
- * $LynxId: userdefs.h,v 1.281 2013/12/01 01:12:55 tom Exp $
+ * $LynxId: userdefs.h,v 1.283 2013/12/18 01:56:13 tom Exp $
  *
  * Lynx - Hypertext navigation system
  *
@@ -502,12 +502,12 @@
  *   for this distribution (use SHELL syntax including the device
  *   on VMS systems).
  * The default HELPFILE is:
- * http://lynx.isc.org/release/lynx2-8-7/lynx_help/lynx_help_main.html
+ * http://lynx.isc.org/release/breakout/lynx_help/lynx_help_main.html
  *   This should be changed here or in lynx.cfg to the local path.
  * The definition here can be overridden at run time by defining a
  * "LYNX_HELPFILE" environment variable.
  */
-#define HELPFILE "http://lynx.isc.org/release/lynx2-8-7/lynx_help/lynx_help_main.html"
+#define HELPFILE "http://lynx.isc.org/release/breakout/lynx_help/lynx_help_main.html"
 /* #define HELPFILE "file://localhost/PATH_TO/lynx_help/lynx_help_main.html" */
 
 /*****************************
@@ -1446,7 +1446,7 @@
 #define LYNX_WWW_HOME "http://lynx.isc.org/"
 #define LYNX_WWW_DIST "http://lynx.isc.org/current/"
 /* $Format: "#define LYNX_DATE \"$ProjectDate$\""$ */
-#define LYNX_DATE "Thu, 28 Nov 2013 17:17:12 -0800"
+#define LYNX_DATE "Tue, 17 Dec 2013 17:56:13 -0800"
 #define LYNX_DATE_OFF 5		/* truncate the automatically-generated date */
 #define LYNX_DATE_LEN 11	/* truncate the automatically-generated date */
 

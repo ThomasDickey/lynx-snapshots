@@ -1,4 +1,4 @@
-# $LynxId: makefile.msc,v 1.28 2012/07/12 09:16:02 tom Exp $
+# $LynxId: makefile.msc,v 1.29 2013/12/17 23:01:31 tom Exp $
 #
 # Makefile for `Lynx' browser for Microsoft Visual C++ 4.2 or later
 #
@@ -56,7 +56,7 @@ SSL_LIBS = "$(SSL_DIR)\lib\ssleay32.lib" "$(SSL_DIR)\lib\libeay32.lib"
 SCREEN_DEFS = /D "PDCURSES" /D "COLOR_CURSES" /D "FANCY_CURSES" /D "WIDE_CURSES"
 SCREEN_LIB  = pdcurses
 !else
-SCREEN_DEFS = /D "USE_SLANG"
+SCREEN_DEFS = /D "USE_SLANG" /D "SLANG_DLL"
 SCREEN_LIB  = wslang32
 !endif
 

@@ -1,4 +1,4 @@
-; $LynxId: lynx-slang.iss,v 1.1 2008/12/29 13:28:38 tom Exp $
+; $LynxId: lynx-slang.iss,v 1.2 2013/12/17 23:04:59 tom Exp $
 ;
 ; This is an installer for the "color-style" flavor of Lynx.
 ;
@@ -7,6 +7,6 @@
 
 #define SetupBaseName "lynx-sl"
 #define SourceExeName "lynx-slang.exe"
-#define NoScreenDll
+#define ScreenDllName "wslang32.dll"
 
 #include "lynx.iss"
