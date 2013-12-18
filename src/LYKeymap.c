@@ -1,4 +1,4 @@
-/* $LynxId: LYKeymap.c,v 1.109 2013/11/28 11:19:31 tom Exp $ */
+/* $LynxId: LYKeymap.c,v 1.110 2013/12/17 00:27:55 tom Exp $ */
 #include <HTUtils.h>
 #include <LYUtils.h>
 #include <LYGlobalDefs.h>
@@ -80,6 +80,7 @@ static const LYEditInit initKeymapData[] =
     {23, LYK_SWITCH_DTD},	/* ^W */
     {24, LYK_REFRESH},		/* ^X */
     {25, LYK_CACHE_JAR},	/* ^Y */
+    {27, LYK_MAXSCREEN_TOGGLE},	/* ^Z */
     {33, LYK_NEXT_PAGE},	/*   */
     {34, LYK_SHELL},		/* ! */
     {35, LYK_SOFT_DQUOTES},	/* " */

@@ -1,4 +1,4 @@
-# $LynxId: makefile.in,v 1.134 2013/12/01 01:12:55 tom Exp $
+# $LynxId: makefile.in,v 1.135 2013/12/17 00:45:35 tom Exp $
 ##makefile for lynx
 
 SHELL		= @CONFIG_SHELL@
@@ -350,7 +350,7 @@ install-doc : $(DOCDIR) $(HELPDIR)
 # So we limit sed delimiters to '!' and '%', depending on the expected text.
 FIX_SED = tr '=' '"'
 
-LYNX_URL='http://lynx.isc.org/release/lynx2-8-7'
+LYNX_URL='http://lynx.isc.org/release/breakout'
 LYNXDOCS_URL='$(LYNX_URL)/docs/'
 LYNXHELP_URL='$(LYNX_URL)/lynx_help/'
 
