@@ -1,4 +1,4 @@
-<!-- $LynxId: lynx_url_support.html,v 1.31 2013/05/21 10:50:42 tom Exp $ -->
+<!-- $LynxId: lynx_url_support.html,v 1.32 2014/01/06 22:54:03 tom Exp $ -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN">
 
 <html>
@@ -10,7 +10,9 @@
   <link rev="made" href="mailto:lynx-dev@nongnu.org">
   <meta http-equiv="Content-Type" content=
   "text/html; charset=us-ascii">
-</head>
+  <meta name="description" content=
+  " Enumerate, describe and provide examples of Lynx's URL support on Unix and VMS. Lynx supports both Web standards and extensions.">
+  </head>
 
 <body>
   <blockquote>
@@ -31,9 +33,9 @@
 
   <h1><em>URL Schemes Supported in Lynx</em></h1>
 
-  <p>Lynx handles a number of URL types, that are enumerated below.
-  For more details about URLs (Uniform Resource Locators) see
-  <em>RFC1738</em>:</p>
+  <p><strong>Lynx</strong> handles a number of URL types, that are
+  enumerated below. For more details about URLs (Uniform Resource
+  Locators) see <em>RFC1738</em>:</p>
 
   <ul>
     <li><a href=
@@ -43,10 +45,10 @@
     "ftp://ftp.rfc-editor.org/in-notes/rfc1738.txt">ftp://ftp.rfc-editor.org/in-notes/rfc1738.txt</a></li>
   </ul>
 
-  <p>Lynx resolves partial or relative URLs in documents with
-  respect to the BASE if one was specified, otherwise with respect
-  to the document's absolute URL, using the rules described in
-  <em>RFC1808</em>:</p>
+  <p><strong>Lynx</strong> resolves partial or relative URLs in
+  documents with respect to the BASE if one was specified,
+  otherwise with respect to the document's absolute URL, using the
+  rules described in <em>RFC1808</em>:</p>
 
   <ul>
     <li><a href=
@@ -68,9 +70,9 @@
   a partial host field can be used and the scheme field can be
   omitted if the scheme and fully qualified domain name can be
   constructed internally by using the URL_DOMAIN_PREFIXES and
-  URL_DOMAIN_SUFFIXES definitions in the Lynx configuration file.
-  See the explanation of those definitions and their use in your
-  <em>lynx.cfg</em>.</p>
+  URL_DOMAIN_SUFFIXES definitions in the <strong>Lynx</strong>
+  configuration file. See the explanation of those definitions and
+  their use in your <em>lynx.cfg</em>.</p>
 
   <p>For example, <em>wfbr</em> will be treated as
   <em>http://www.wfbr.edu/</em>, and <em>wfbr/dir/lynx</em> will be
@@ -84,9 +86,9 @@
   <em>file://localhost/your/login/directory/foo</em>. The tilde
   expansion is done homologously on Unix and VMS.</p>
 
-  <p>On VMS, Lynx also will expand any file or directory spec
-  recognizable to DCL into a valid URL, e.g., <em>[]</em> will be
-  expanded to
+  <p>On VMS, <strong>Lynx</strong> also will expand any file or
+  directory spec recognizable to DCL into a valid URL, e.g.,
+  <em>[]</em> will be expanded to
   <em>file://localhost/current/default/directory</em>.</p>
 
   <p>These expansions are <em>SOLELY</em> for <em>startfile</em> or
@@ -98,8 +100,8 @@
   <h2><a name="http_url" id="http_url">The <em>http</em> and
   <em>https</em> URLs:</a></h2>
 
-  <p>Lynx handles http URLs exactly as specified in RFC1738. The
-  format is:</p>
+  <p><strong>Lynx</strong> handles http URLs exactly as specified
+  in RFC1738. The format is:</p>
   <pre>
       <em>http://host:port/path?searchpart#fragment</em>
 </pre>
@@ -111,9 +113,10 @@
   <em>#fragment</em> field if present indicates a location in the
   document to seek for display, based on a NAME-ed anchor or an ID
   attribute within the document, and is technically an instruction
-  rather than part of the URL. Lynx will treat ID attributes as
-  NAME-ed anchors for all tags in the BODY of a document which can
-  correspond to positions in the rendering of the document.</p>
+  rather than part of the URL. <strong>Lynx</strong> will treat ID
+  attributes as NAME-ed anchors for all tags in the BODY of a
+  document which can correspond to positions in the rendering of
+  the document.</p>
 
   <p>The https URL has the same format, but the default port is
   <em>:443</em>.</p>
@@ -122,8 +125,9 @@
   <h2><a name="telnet_url" id="telnet_url">The <em>telnet</em>,
   <em>tn3270</em>, and <em>rlogin</em> URLs:</a></h2>
 
-  <p>A <em>telnet</em> URL generally results in Lynx spawning a
-  telnet session. Lynx implements the complete telnet URL scheme,
+  <p>A <em>telnet</em> URL generally results in
+  <strong>Lynx</strong> spawning a telnet session.
+  <strong>Lynx</strong> implements the complete telnet URL scheme,
   i.e.:</p>
   <pre>
       <em>telnet://user:password@host:port</em>
@@ -164,26 +168,28 @@
   for a search, or <em>1</em> for a directory), followed by a
   platform-specific <em>selector</em>. Any reserved characters in
   the selector should be hex escaped (<em>%hh</em>), including
-  slashes, although hex escaping of slashes is not required by Lynx
-  in gopher URLs.</p>
+  slashes, although hex escaping of slashes is not required by
+  <strong>Lynx</strong> in gopher URLs.</p>
 
-  <p>Lynx does not overtly support the gopher+ protocol, and does
-  not represent itself as gopher+ capable when communicating with
-  gopher servers. Lynx might transmit any
-  (hex-escaped-tab-separated) extended gopher+ fields in a URL if
-  an author included them in a document, but is likely to mishandle
-  what the gopher server returns in such cases, and would not
-  generate and transmit them itself. For pre-formed URLs to submit
-  gopher searches, it may be better to use a <em>?</em> rather than
-  hex-escaped tab (<em>%09</em>) as the separator for the
-  <em>searchpart</em> in the <em>selector</em>, e.g.:<br>
+  <p><strong>Lynx</strong> does not overtly support the gopher+
+  protocol, and does not represent itself as gopher+ capable when
+  communicating with gopher servers. <strong>Lynx</strong> might
+  transmit any (hex-escaped-tab-separated) extended gopher+ fields
+  in a URL if an author included them in a document, but is likely
+  to mishandle what the gopher server returns in such cases, and
+  would not generate and transmit them itself. For pre-formed URLs
+  to submit gopher searches, it may be better to use a <em>?</em>
+  rather than hex-escaped tab (<em>%09</em>) as the separator for
+  the <em>searchpart</em> in the <em>selector</em>, e.g.:<br>
   <em>gopher://gopher.wfbr.edu/77/_shell/search.shell%20/_shell/walker?lynx*</em>
-  Lynx will handle the <em>%09</em> if you use that instead of
-  <em>?</em>, but other WWW clients may mishandle it.</p>
+  <strong>Lynx</strong> will handle the <em>%09</em> if you use
+  that instead of <em>?</em>, but other WWW clients may mishandle
+  it.</p>
 
   <p>For the <em>gophertype</em> which signifies HTML (<em>h</em>),
-  if the <em>selector</em> begins with <em>GET%20/</em> Lynx will
-  convert the gopher URL to an http URL, e.g.:<br></p>
+  if the <em>selector</em> begins with <em>GET%20/</em>
+  <strong>Lynx</strong> will convert the gopher URL to an http URL,
+  e.g.:<br></p>
   <pre>
 <em>gopher://www.wfbr.edu:80/hGET%20/</em>
 </pre>
@@ -213,8 +219,8 @@
 </pre>
 
   <p>If you do not use <em>localhost</em> or a domain name for the
-  local host, Lynx will substitute <em>ftp://</em> for
-  <em>file://</em> and treat it as an ftp URL.</p>
+  local host, <strong>Lynx</strong> will substitute <em>ftp://</em>
+  for <em>file://</em> and treat it as an ftp URL.</p>
 
   <p>The <em>/path</em> is treated as originating at the root,
   unless you include a tilde (<em>~</em>), e.g.:</p>
@@ -225,7 +231,7 @@
 
   <p>The latter feature is a Lynxism, is done homologously on Unix
   and VMS, and should be used ONLY in local documents intended for
-  Lynx.</p>
+  <strong>Lynx</strong>.</p>
 
   <p>On VMS, the first element of the path, if not a tilde, is
   assumed to be a device, e.g.:</p>
@@ -236,10 +242,10 @@
   <p>should be used for:
   <em>www_root:[directory]filename.suffix</em><br>
   If you are unsure how to specify a file URL in local documents on
-  VMS, invoke Lynx with the desired file or directory as the
-  <em>startfile</em> using any spec acceptable to DCL, and then use
-  the <em>showinfo</em> command (<em>=</em>) to see the file URL
-  which Lynx created for it.</p>
+  VMS, invoke <strong>Lynx</strong> with the desired file or
+  directory as the <em>startfile</em> using any spec acceptable to
+  DCL, and then use the <em>showinfo</em> command (<em>=</em>) to
+  see the file URL which <strong>Lynx</strong> created for it.</p>
   <hr>
 
   <h2><a name="ftp_url" id="ftp_url">The <em>ftp</em> URL:</a></h2>
@@ -252,26 +258,28 @@
 
   <p>The default port is <em>:21</em> and the default
   <em>username</em> is <em>anonymous</em>. If <em>username</em> is
-  included, Lynx will prompt you for the password. For anonymous
-  ftp, Lynx uses your <em>personal_mail_address</em> (user@host) as
-  the <em>password</em> if it has been defined via the
-  '<em>o</em>'ptions menu. Otherwise, Lynx uses the dummy password
-  <em>WWWUser</em>. (A password can also be embedded in the URL, by
-  replacing <em>username</em> with <em>username:password</em>. This
-  is strongly discouraged for 'real' passwords that must be kept
-  secret, since URLs with the completely unencrypted
-  <em>password</em> may show up on the screen, in HISTORY and LIST
-  pages etc., and may even become visible to remote sites for
-  example through Referer headers.) Do not include the <em>@</em>
-  if neither <em>username</em> nor <em>:password</em> is
-  included.</p>
+  included, <strong>Lynx</strong> will prompt you for the password.
+  For anonymous ftp, <strong>Lynx</strong> uses your
+  <em>personal_mail_address</em> (user@host) as the
+  <em>password</em> if it has been defined via the
+  '<em>o</em>'ptions menu. Otherwise, <strong>Lynx</strong> uses
+  the dummy password <em>WWWUser</em>. (A password can also be
+  embedded in the URL, by replacing <em>username</em> with
+  <em>username:password</em>. This is strongly discouraged for
+  'real' passwords that must be kept secret, since URLs with the
+  completely unencrypted <em>password</em> may show up on the
+  screen, in HISTORY and LIST pages etc., and may even become
+  visible to remote sites for example through Referer headers.) Do
+  not include the <em>@</em> if neither <em>username</em> nor
+  <em>:password</em> is included.</p>
 
   <p>The <em>;type=</em> parameter can be used with value
   <em>D</em>, <em>I</em>, or <em>A</em> to force handling of the
   URL as, respectively, a directory listing, binary file, or ASCII
-  file. The Lynx ftp gateway normally determines this itself, but
-  the parameter can be used if the internal procedure draws an
-  incorrect inference about the nature of the ftp URL.</p>
+  file. The <strong>Lynx</strong> ftp gateway normally determines
+  this itself, but the parameter can be used if the internal
+  procedure draws an incorrect inference about the nature of the
+  ftp URL.</p>
 
   <p>The <em>/path</em> is treated according to RFC1738 for VMS and
   VM/CMS ftp servers. The lead slash (<em>/</em>) is treated purely
@@ -320,14 +328,14 @@
 
   <p>where <em>:port</em> defaults to <em>:210</em></p>
 
-  <p>Direct wais support is built into Lynx for VMS, and can be
-  compiled into Lynx on Unix.</p>
+  <p>Direct wais support is built into <strong>Lynx</strong> for
+  VMS, and can be compiled into <strong>Lynx</strong> on Unix.</p>
 
-  <p>If only a <em>database</em> is indicated in the URL, Lynx
-  returns an ISINDEX cover page for searching that
-  <em>database</em>, and will submit your search with the
-  <em>wais_query</em> appended. Lynx will convert the server's
-  reply into a hit list with URLs that include the
+  <p>If only a <em>database</em> is indicated in the URL,
+  <strong>Lynx</strong> returns an ISINDEX cover page for searching
+  that <em>database</em>, and will submit your search with the
+  <em>wais_query</em> appended. <strong>Lynx</strong> will convert
+  the server's reply into a hit list with URLs that include the
   <em>wais_type</em> and <em>wais_path</em> for retrieving items
   from the hit list.</p>
   <hr>
@@ -335,22 +343,23 @@
   <h2><a name="news_url" id="news_url">The <em>news</em>,
   <em>nntp</em>, and <em>snews</em> URLs:</a></h2>
 
-  <p>The news and nntp URLs are handled by Lynx as specified in
-  RFC1738, but for compatibility with other clients, Lynx allows
-  inclusion of host and port fields in news URLs, which properly
-  should be used <em>only</em> in nntp and snews URLs. If not
-  included in news URLs, Lynx will use the nntp server pointed to
-  by the NNTPSERVER environment variable or configuration symbol
-  (see lynx.cfg), with default port <em>:119</em>. A host field
-  must be included in nntp URLs, and the port field is optional
-  with the same default.</p>
+  <p>The news and nntp URLs are handled by <strong>Lynx</strong> as
+  specified in RFC1738, but for compatibility with other clients,
+  <strong>Lynx</strong> allows inclusion of host and port fields in
+  news URLs, which properly should be used <em>only</em> in nntp
+  and snews URLs. If not included in news URLs,
+  <strong>Lynx</strong> will use the nntp server pointed to by the
+  NNTPSERVER environment variable or configuration symbol (see
+  lynx.cfg), with default port <em>:119</em>. A host field must be
+  included in nntp URLs, and the port field is optional with the
+  same default.</p>
 
-  <p>If the URL requires authentication, lynx will prompt you for
-  the username and password. These are cached during a session, for
-  reuse on the same host. If $HOME/.newsauth exists, lynx
-  initializes its cache from this file. The .newsauth file contents
-  are one line per entry: hostname, password and username (in that
-  order) separated by a space.</p>
+  <p>If the URL requires authentication, <strong>Lynx</strong> will
+  prompt you for the username and password. These are cached during
+  a session, for reuse on the same host. If $HOME/.newsauth exists,
+  <strong>Lynx</strong> initializes its cache from this file. The
+  .newsauth file contents are one line per entry: hostname,
+  password and username (in that order) separated by a space.</p>
 
   <p>The formats are:<br></p>
   <pre>
@@ -369,8 +378,9 @@
   consisting of an identification string and the host of origin for
   the message (<em>ident_string@origin_host</em>).</p>
 
-  <p>Lynx also supports wildcarding via an asterisk for listings of
-  news hierarchies or sub-hierarchies, e.g.:</p>
+  <p><strong>Lynx</strong> also supports wildcarding via an
+  asterisk for listings of news hierarchies or sub-hierarchies,
+  e.g.:</p>
   <pre>
       <em>news:comp.infosystems.*</em>
       <em>nntp://host:port/comp.infosystems.*</em>
@@ -381,18 +391,18 @@
   This is not in RFC1738 and may not be supported by all other
   clients.</p>
 
-  <p>Lynx allows you both to <em>reply</em> to the author of a news
-  message via email, and, if news posting has been enabled, to send
-  a <em>followup</em> message to the newsgroup (see <a href=
-  "#newspost_url">newspost, newsreply, snewspost,
+  <p><strong>Lynx</strong> allows you both to <em>reply</em> to the
+  author of a news message via email, and, if news posting has been
+  enabled, to send a <em>followup</em> message to the newsgroup
+  (see <a href="#newspost_url">newspost, newsreply, snewspost,
   snewsreply</a>).</p>
 
-  <p>Lynx converts any strings in news messages which appear to be
-  a URL with a supported scheme into a link for accessing that
-  URL.</p>
+  <p><strong>Lynx</strong> converts any strings in news messages
+  which appear to be a URL with a supported scheme into a link for
+  accessing that URL.</p>
 
-  <p>Lynx also supports the newsgroup and message number URL
-  scheme:<br></p>
+  <p><strong>Lynx</strong> also supports the newsgroup and message
+  number URL scheme:<br></p>
   <pre>
       <em>news:newsgroup/startNo-endNo</em> (lists message range in newsgroup)
       <em>news:newsgroup/messageNo</em>     (retrieves the message by number)
@@ -411,18 +421,20 @@
   <em>newspost</em>, <em>newsreply</em>, <em>snewspost</em>, and
   <em>snewsreply</em> URLs:</a></h2>
 
-  <p>When Lynx receives group listings or articles via
-  <em>news</em>, <em>nntp</em> or <em>snews</em> URLs, it also
-  checks whether the nntp server supports posting from the Lynx
-  user's site, and if so, includes links for posting new messages
-  to that server, or for posting followups (replies) to previously
-  posted messages. RFC1738, and IETF URL drafts through this
-  release of Lynx, do not include any schemes for posting to news
-  groups. Lynx has long supported newspost and newreply URL schemes
-  for posting new messages or sending followups, respectively, to
-  standard nntp servers, with default port <em>:119</em>. Lynx now
-  also supports homologous snewspost and snewsreply URLs for use
-  with SSL capable nntp servers.</p>
+  <p>When <strong>Lynx</strong> receives group listings or articles
+  via <em>news</em>, <em>nntp</em> or <em>snews</em> URLs, it also
+  checks whether the nntp server supports posting from the
+  <strong>Lynx</strong> user's site, and if so, includes links for
+  posting new messages to that server, or for posting followups
+  (replies) to previously posted messages. RFC1738, and IETF URL
+  drafts through this release of <strong>Lynx</strong>, do not
+  include any schemes for posting to news groups.
+  <strong>Lynx</strong> has long supported newspost and newreply
+  URL schemes for posting new messages or sending followups,
+  respectively, to standard nntp servers, with default port
+  <em>:119</em>. <strong>Lynx</strong> now also supports homologous
+  snewspost and snewsreply URLs for use with SSL capable nntp
+  servers.</p>
 
   <p>The formats are:</p>
   <pre>
@@ -448,12 +460,12 @@
   followup message are retained.</p>
 
   <p>These URLs can be used as command line startfiles (in which
-  case, Lynx will exit after posting the message, and the newreply
-  or snewsreply URLs degrade to newspost or snewpost URLs,
-  respectively). They also can be used as HREF attribute values in
-  any HTML document homologously to <a href=
+  case, <strong>Lynx</strong> will exit after posting the message,
+  and the newreply or snewsreply URLs degrade to newspost or
+  snewpost URLs, respectively). They also can be used as HREF
+  attribute values in any HTML document homologously to <a href=
   "#mailto_url">mailto</a> URLs, with the qualification that they
-  presently are supported only by Lynx.</p>
+  presently are supported only by <strong>Lynx</strong>.</p>
   <hr>
 
   <h2><a name="mailto_url" id="mailto_url">The <em>mailto</em>
@@ -467,20 +479,21 @@
 </pre>
 
   <p>The description of the mailto URL in RFC1738 has been
-  interpreted by some as allowing only a single recipient, but Lynx
-  invented the mailto URL, has always supported a series of
-  user@host addresses as a comma-separated list, and still does.
-  For compatibility with Explorer, Lynx also accepts a
-  semi-colon-separated list.</p>
+  interpreted by some as allowing only a single recipient, but
+  <strong>Lynx</strong> invented the mailto URL, has always
+  supported a series of user@host addresses as a comma-separated
+  list, and still does. For compatibility with Explorer,
+  <strong>Lynx</strong> also accepts a semi-colon-separated
+  list.</p>
 
-  <p>For compatibility with Netscape, Lynx parses any
-  <em>?subject=The%20Subject</em> appended to the URL, trims the
-  URL at the <em>?</em>, and uses the value as the default Subject:
-  for the message or FORM content mailing. This is not recommended
-  practice. The preferred way to indicate the default Subject: for
-  a LINK or Anchor with a mailto HREF, or a FORM with a mailto
-  ACTION, is via a TITLE attribute with the subject string as its
-  value, e.g.:</p>
+  <p>For compatibility with Netscape, <strong>Lynx</strong> parses
+  any <em>?subject=The%20Subject</em> appended to the URL, trims
+  the URL at the <em>?</em>, and uses the value as the default
+  Subject: for the message or FORM content mailing. This is not
+  recommended practice. The preferred way to indicate the default
+  Subject: for a LINK or Anchor with a mailto HREF, or a FORM with
+  a mailto ACTION, is via a TITLE attribute with the subject string
+  as its value, e.g.:</p>
   <pre>
       <em>&lt;LINK REV="made"
             HREF="mailto:me@myhost,her@herhost" TITLE="The Subject"&gt;</em>
@@ -495,25 +508,25 @@
 
   <p>Note that a TITLE attribute for FORM is now included in the
   HTML specifications. Some clients use a SUBJECT attribute for
-  this purpose in FORM tags, and Lynx recognizes that as a synonym
-  for TITLE.</p>
+  this purpose in FORM tags, and <strong>Lynx</strong> recognizes
+  that as a synonym for TITLE.</p>
 
-  <p>Lynx also will process any <em>to=address(es)</em>,
-  <em>cc=address(es)</em>, <em>keywords=word_list</em> and/or
-  <em>body=message</em> fields in <em>?searchpart</em> tack-ons to
-  mailto URLs. The <em>to</em> and/or <em>cc</em> values can be
-  single addresses, or comma- or semi-colon-separated lists of
-  addresses. All addresses, and any <em>body</em> values, will be
-  offered for approval by the user before proceeding with a
-  mailing. Any other name=value pairs in the <em>?searchpart</em>
-  will be ignored. Also, if the mailto URL is the ACTION for a
-  FORM, any <em>body</em> in a <em>?searchpart</em> tack-on will be
-  ignored, because the body of the mailing must be constructed
-  solely from the the FORM's content. Lynx expects multiple
-  name=value pairs in a <em>?searchpart</em> tack-on to be
-  separated by ampersands, as in the original Netscape
-  implementation, and in an equally ill-advised IETF draft of that
-  implementation (<a href=
+  <p><strong>Lynx</strong> also will process any
+  <em>to=address(es)</em>, <em>cc=address(es)</em>,
+  <em>keywords=word_list</em> and/or <em>body=message</em> fields
+  in <em>?searchpart</em> tack-ons to mailto URLs. The <em>to</em>
+  and/or <em>cc</em> values can be single addresses, or comma- or
+  semi-colon-separated lists of addresses. All addresses, and any
+  <em>body</em> values, will be offered for approval by the user
+  before proceeding with a mailing. Any other name=value pairs in
+  the <em>?searchpart</em> will be ignored. Also, if the mailto URL
+  is the ACTION for a FORM, any <em>body</em> in a
+  <em>?searchpart</em> tack-on will be ignored, because the body of
+  the mailing must be constructed solely from the the FORM's
+  content. <strong>Lynx</strong> expects multiple name=value pairs
+  in a <em>?searchpart</em> tack-on to be separated by ampersands,
+  as in the original Netscape implementation, and in an equally
+  ill-advised IETF draft of that implementation (<a href=
   "ftp://ftp.isi.edu/internet-drafts/draft-hoffman-mailto-url-03.txt">draft-hoffman-mailto-url-03.txt</a>).
   These should be represented as entities (<em>&amp;amp;</em>) in
   the HTML markup. This functionality is generally desired, but the
@@ -522,11 +535,12 @@
   rather than breaking <em>mailto:</em> implementations.</p>
 
   <p>If <em>ENCTYPE="text/plain"</em> is specified for a FORM with
-  a mailto ACTION, Lynx will not hex escape the name=value pairs of
-  the FORM's content, and will use physical newlines instead of
-  '<em>&amp;</em>' or '<em>;</em>' to separate the pairs, so that
-  the content will be readable directly. Otherwise, Lynx will mail
-  the content with the default:</p>
+  a mailto ACTION, <strong>Lynx</strong> will not hex escape the
+  name=value pairs of the FORM's content, and will use physical
+  newlines instead of '<em>&amp;</em>' or '<em>;</em>' to separate
+  the pairs, so that the content will be readable directly.
+  Otherwise, <strong>Lynx</strong> will mail the content with the
+  default:</p>
   <pre>
       <em>ENCTYPE="application/x-www-form-urlencoded"</em> ('<em>&amp;</em>' separates pairs)
 </pre>
@@ -538,13 +552,13 @@
 
   <p>if the latter was indicated.</p>
 
-  <p>Note that when mailing FORM content Lynx wraps any lines
-  longer than 78 characters, to avoid buffer overflows in mail
-  software and to ensure reliable transmission across gateways. If
-  the ENCTYPE was not <em>text/plain</em>, any script which decodes
-  the mailed content should ignore the physical newlines and
-  recognize only hex escaped newline characters as intended to be
-  present in the decoded content.</p>
+  <p>Note that when mailing FORM content <strong>Lynx</strong>
+  wraps any lines longer than 78 characters, to avoid buffer
+  overflows in mail software and to ensure reliable transmission
+  across gateways. If the ENCTYPE was not <em>text/plain</em>, any
+  script which decodes the mailed content should ignore the
+  physical newlines and recognize only hex escaped newline
+  characters as intended to be present in the decoded content.</p>
 
   <p>If the mailto URL is not the ACTION for a FORM, and if an
   external editor has been defined via the <em>Options Menu</em>,
@@ -558,10 +572,11 @@
   <h2><a name="finger_url" id="finger_url">The <em>finger</em>
   URL:</a></h2>
 
-  <p>Lynx has full support for the finger protocol, but a format
-  for finger URLs has not yet been adopted by the IETF. The formats
-  supported by Lynx therefore include every possibility not
-  inconsistent with RFC1738, including:</p>
+  <p><strong>Lynx</strong> has full support for the finger
+  protocol, but a format for finger URLs has not yet been adopted
+  by the IETF. The formats supported by <strong>Lynx</strong>
+  therefore include every possibility not inconsistent with
+  RFC1738, including:</p>
   <pre>
       finger://host                         finger://@host
       finger://host/                        finger://@host/
@@ -587,9 +602,9 @@
   with port 79 and the plain text (<em>0</em>) <em>gophertype</em>
   specified:<br>
   <em>gopher://host:79/0</em><br>
-  Lynx will handle such URLs equivalently to overt finger URLs,
-  including creation of links for any strings which appear to be
-  supported URLs.</p>
+  <strong>Lynx</strong> will handle such URLs equivalently to overt
+  finger URLs, including creation of links for any strings which
+  appear to be supported URLs.</p>
   <hr>
 
   <h2><a name="cso_url" id="cso_url">The <em>cso</em> URL:</a></h2>
@@ -607,34 +622,35 @@
       <em>gopher://host:105/2</em>
 </pre>
 
-  <p>Lynx will parse the stream returned by the server for the
-  above URLs and create a FORM for submitting additional requests
-  (searches) to the server. Any strings in the reports returned for
-  these requests (searches) which appear to be a URL with a
-  supported scheme will be converted into a link for accessing that
-  URL.</p>
+  <p><strong>Lynx</strong> will parse the stream returned by the
+  server for the above URLs and create a FORM for submitting
+  additional requests (searches) to the server. Any strings in the
+  reports returned for these requests (searches) which appear to be
+  a URL with a supported scheme will be converted into a link for
+  accessing that URL.</p>
   <hr>
 
   <h2><a name="bibp_url" id="bibp_url">The <em>bibp</em>
   URL:</a></h2>
 
-  <p>Lynx provides built-in support for bibliographic protocol
-  (BibP). BibP links are links to published works such as books or
-  journal articles, without a predefined server. BibP links are
-  intended for resolution by a local bibhost server
-  (http://bibhost/) if it exists. Otherwise, resolution is
+  <p><strong>Lynx</strong> provides built-in support for
+  bibliographic protocol (BibP). BibP links are links to published
+  works such as books or journal articles, without a predefined
+  server. BibP links are intended for resolution by a local bibhost
+  server (http://bibhost/) if it exists. Otherwise, resolution is
   performed by a document-specified server or a known global
   server.</p>
 
   <h2><a name="exec_url" id="exec_url">The <em>lynxexec</em> and
   <em>lynxprog</em> URLs:</a></h2>
 
-  <p>If execution of spawned commands has been enabled in your Lynx
-  image, the lynxexec and lynxprog URLs can be used to execute
-  arbitrary system commands or invoke system utilities. Any system
-  command and associated switches or qualifiers can be used, with
-  the syntax appropriate for a shell running Lynx on Unix, or for
-  DCL on VMS, e.g.:</p>
+  <p>If execution of spawned commands has been enabled in your
+  <strong>Lynx</strong> image, the lynxexec and lynxprog URLs can
+  be used to execute arbitrary system commands or invoke system
+  utilities. Any system command and associated switches or
+  qualifiers can be used, with the syntax appropriate for a shell
+  running <strong>Lynx</strong> on Unix, or for DCL on VMS,
+  e.g.:</p>
   <pre>
       <em>lynxexec:dir/date/size foo:[blah]</em> (VMS)
       <em>lynxexec:ls -l /foo/blah</em>          (Unix)
@@ -647,43 +663,45 @@
   <p>You optionally can include <em>//localhost/</em> in the URL,
   between the scheme field and the command, but that is always
   implied. The lynxexec and lynxprog URLs differ only in that with
-  lynxexec you are prompted to enter <em>RETURN</em> before Lynx
-  clears the screen and restores the previously displayed document,
-  so that you can read any screen output generated by the spawned
-  command, whereas no such pause is imposed upon exit from the
-  utility invoked via lynxprog.</p>
+  lynxexec you are prompted to enter <em>RETURN</em> before
+  <strong>Lynx</strong> clears the screen and restores the
+  previously displayed document, so that you can read any screen
+  output generated by the spawned command, whereas no such pause is
+  imposed upon exit from the utility invoked via lynxprog.</p>
 
   <p>These are Lynxisms and should be used only in local documents
-  intended solely for Lynx.</p>
+  intended solely for <strong>Lynx</strong>.</p>
   <hr>
 
   <h2><a name="cgi_url" id="cgi_url">The <em>lynxcgi</em>
   URL:</a></h2>
 
   <p>The lynxcgi URL is implemented only on Unix, can be used as
-  the ACTION for a FORM, and if enabled in your Lynx image has the
-  format:</p>
+  the ACTION for a FORM, and if enabled in your
+  <strong>Lynx</strong> image has the format:</p>
   <pre>
       <em>lynxcgi://localhost/path_to_CGI_script</em>
 </pre>
 
   <p>where <em>//localhost</em> is optional and always implied; the
   full path should be specified, as `~' is not recognized; if the
-  script is in the directory Lynx was started from, the simple file
-  name is adequate. The output of the script should be text/html
-  and is rendered and displayed by Lynx. Restrictions on use of
-  lynxcgi and on acceptable paths can be imposed in
-  <em>userdefs.h</em> and <em>lynx.cfg</em>, qv.</p>
+  script is in the directory <strong>Lynx</strong> was started
+  from, the simple file name is adequate. The output of the script
+  should be text/html and is rendered and displayed by
+  <strong>Lynx</strong>. Restrictions on use of lynxcgi and on
+  acceptable paths can be imposed in <em>userdefs.h</em> and
+  <em>lynx.cfg</em>, qv.</p>
 
   <p>This is a Lynxism and should be used only in local documents
-  intended solely for Lynx, or for limited local testing of CGI
-  scripts without an http server.</p>
+  intended solely for <strong>Lynx</strong>, or for limited local
+  testing of CGI scripts without an http server.</p>
   <hr>
 
   <h2><a name="ncftp_url" id="ncftp_url">The <em>NcFTP</em>
   URL:</a></h2>
 
-  <p>Lynx recognizes the NcFTP-style ftp URL, e.g.,</p>
+  <p><strong>Lynx</strong> recognizes the NcFTP-style ftp URL,
+  e.g.,</p>
   <pre>
         <cite>ftpHost</cite>:<cite>fileSpecification</cite>
 </pre>
@@ -699,10 +717,11 @@
   <h2><a name="internal_url" id="internal_url">The <em>LYNXfoo</em>
   internal URLs:</a></h2>
 
-  <p>Lynx uses a variety of private URL schemes for communication
-  among its internal modules. They start with uppercase letters
-  <code>LYNX</code> by convention, although, as input, URL schemes
-  are recognized in a case-insensitive manner.</p>
+  <p><strong>Lynx</strong> uses a variety of private URL schemes
+  for communication among its internal modules. They start with
+  uppercase letters <code>LYNX</code> by convention, although, as
+  input, URL schemes are recognized in a case-insensitive
+  manner.</p>
 
   <p>As you discover what they are, and are tempted to use them
   externally in documents, you should <em>resist</em> that
@@ -712,8 +731,8 @@
     <li>There already is too much browser-specific markup
     around...</li>
 
-    <li>The schemes, or their meanings, may change between Lynx
-    versions.</li>
+    <li>The schemes, or their meanings, may change between
+    <strong>Lynx</strong> versions.</li>
 
     <li>Even if a scheme stays the same, some aspect of its
     behavior may be modified without notice, or the context in
@@ -739,9 +758,9 @@
       <em>lynx LYNXKEYMAP:</em>
 </pre>
 
-  <p>But within Lynx, use the '<em>K</em>' keystroke command.
-  Sometimes it may be convenient to use a private scheme with
-  '<em>g</em>'oto, as in:</p>
+  <p>But within <strong>Lynx</strong>, use the '<em>K</em>'
+  keystroke command. Sometimes it may be convenient to use a
+  private scheme with '<em>g</em>'oto, as in:</p>
   <pre>
       <em>g LYNXMESSAGES:</em>
       <em>g LYNXCOMPILEOPTS:</em>

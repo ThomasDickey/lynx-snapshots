@@ -1,4 +1,4 @@
-<!-- $LynxId: Lynx_users_guide.html,v 1.121 2013/12/17 00:47:51 tom Exp $ -->
+<!-- $LynxId: Lynx_users_guide.html,v 1.123 2014/01/09 00:17:56 tom Exp $ -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN">
 
 <html>
@@ -10,7 +10,9 @@
   <link rev="made" href="mailto:lynx-dev@nongnu.org">
   <meta http-equiv="Content-Type" content=
   "text/html; charset=us-ascii">
-</head>
+  <meta name="description" content=
+  "This is the user's guide to Lynx, giving detailed information on how to use the program, and how to change its configuration using the options menu.">
+  </head>
 
 <body>
   <h1>Lynx Users Guide v2.8.7</h1>
@@ -28,7 +30,7 @@
   <em>tn3270</em> or <em>rlogin</em> accounts (see <a href=
   "lynx_url_support.html">URL Schemes Supported by Lynx</a>).
   <a href="#Hist">Current</a> versions of Lynx run on Unix, VMS,
-  Windows3.x/9x/NT, 386DOS and OS/2 EMX.</p>
+  Windows3.x/9x/NT and later, 386DOS and OS/2 EMX.</p>
 
   <p>Lynx can be used to access information on the <em>WWW</em>, or
   to build information systems intended primarily for local access.
@@ -36,8 +38,8 @@
   Information Systems</em> (<em>CWIS</em>). In addition, Lynx can
   be used to build systems isolated within a single LAN.</p>
 
-  <h2 id="TOC"><a name="Contents" id="Contents"><em>Table of
-  Contents</em></a></h2>
+  <h2 id="TOC"><a name="Contents" id="Contents">Table of
+  Contents</a></h2>
 
   <ul>
     <li><a href="#Help" name="ToC-Help" id="ToC-Help">Lynx online
@@ -155,8 +157,8 @@
     development history</a></li>
   </ul>
 
-  <h2 id="id-Help"><a name="Help" id="Help"><em>Lynx online
-  help</em></a></h2>
+  <h2 id="id-Help"><a name="Help" id="Help">Lynx online
+  help</a></h2>
 
   <p>Online help is available while viewing any document. Press the
   '<em>?</em>' or '<em>H</em>' key (or the '<em>h</em>' key if
@@ -175,8 +177,8 @@
 
   <p>[<a href="#ToC-Help">ToC</a>]</p>
 
-  <h2 id="id-Local"><a name="Local" id="Local"><em>Viewing local
-  files with Lynx</em></a></h2>
+  <h2 id="id-Local"><a name="Local" id="Local">Viewing local files
+  with Lynx</a></h2>
 
   <p>Lynx can be started by entering the Lynx command along with
   the name of a file to display. For example these commands could
@@ -277,8 +279,8 @@
 
   <p>[<a href="#ToC-Local">ToC</a>]</p>
 
-  <h2 id="id-Leaving"><a name="Leaving" id="Leaving"><em>Leaving
-  Lynx</em></a></h2>
+  <h2 id="id-Leaving"><a name="Leaving" id="Leaving">Leaving
+  Lynx</a></h2>
 
   <p>To exit Lynx use the '<em>q</em>' command. You will be asked
   whether you really want to quit. Answering '<em>y</em>' will exit
@@ -288,8 +290,8 @@
 
   <p>[<a href="#ToC-Leaving">ToC</a>]</p>
 
-  <h2 id="id-Remote"><a name="Remote" id="Remote"><em>Starting Lynx
-  with a Remote File</em></a></h2>
+  <h2 id="id-Remote"><a name="Remote" id="Remote">Starting Lynx
+  with a Remote File</a></h2>
 
   <p>If you wish to view a remote file (that is, a file residing on
   some computer system other than the one upon which you are
@@ -362,8 +364,8 @@
 
   <p>[<a href="#ToC-Remote">ToC</a>]</p>
 
-  <h2 id="id-EnVar"><a name="EnVar" id="EnVar"><em>Starting Lynx
-  with the WWW_HOME environment variable.</em></a></h2>
+  <h2 id="id-EnVar"><a name="EnVar" id="EnVar">Starting Lynx with
+  the WWW_HOME environment variable.</a></h2>
 
   <p>You may also specify a starting file for Lynx using the
   WWW_HOME environment variable,</p>
@@ -399,8 +401,7 @@
   <p>[<a href="#ToC-EnVar">ToC</a>]</p>
 
   <h2 id="id-IntraDocNav"><a name="IntraDocNav" id=
-  "IntraDocNav"><em>Navigating hypertext documents with
-  Lynx</em></a></h2>
+  "IntraDocNav">Navigating hypertext documents with Lynx</a></h2>
 
   <p>The process of moving within a hypertext web, selecting and
   displaying links is known as "navigation." With Lynx almost all
@@ -462,8 +463,8 @@
   <p>[<a href="#ToC-IntraDocNav">ToC</a>]</p>
 
   <h2 id="id-Disposing"><a name="Disposing" id=
-  "Disposing"><em>Printing, Mailing, and Saving rendered files to
-  disk.</em></a></h2>
+  "Disposing">Printing, Mailing, and Saving rendered files to
+  disk.</a></h2>
 
   <p>Rendered HTML documents, and plain text files, may be printed
   using the '<em>p</em>' command while viewing the document. After
@@ -498,8 +499,8 @@
   <p>[<a href="#ToC-Disposing">ToC</a>]</p>
 
   <h2 id="id-LocalSource"><a name="LocalSource" id=
-  "LocalSource"><em>Viewing the HTML document source and editing
-  documents</em></a></h2>
+  "LocalSource">Viewing the HTML document source and editing
+  documents</a></h2>
 
   <p>When viewing HTML documents it is possible to retrieve and
   display the unrendered (i.e., the original HTML) source of the
@@ -546,8 +547,7 @@
   <p>[<a href="#ToC-LocalSource">ToC</a>]</p>
 
   <h2 id="id-RemoteSource"><a name="RemoteSource" id=
-  "RemoteSource"><em>Downloading and Saving source
-  files.</em></a></h2>
+  "RemoteSource">Downloading and Saving source files.</a></h2>
 
   <p>If the DOWNLOAD keystroke command ('<em>d</em>' or <em>D</em>)
   is used when positioned on a link for an HTML, plain text, or
@@ -586,8 +586,8 @@
 
   <p>[<a href="#ToC-RemoteSource">ToC</a>]</p>
 
-  <h2 id="id-ReDo"><a name="ReDo" id="ReDo"><em>Reloading files and
-  refreshing the display</em></a></h2>
+  <h2 id="id-ReDo"><a name="ReDo" id="ReDo">Reloading files and
+  refreshing the display</a></h2>
 
   <p>The RELOAD (<em>Control-R</em>) command will reload and
   re-render the file that you are currently viewing. The REFRESH
@@ -608,8 +608,8 @@
 
   <p>[<a href="#ToC-ReDo">ToC</a>]</p>
 
-  <h2 id="id-Search"><a name="Search" id="Search"><em>Lynx
-  searching commands</em></a></h2>
+  <h2 id="id-Search"><a name="Search" id="Search">Lynx searching
+  commands</a></h2>
 
   <p>Two commands activate searching in Lynx: '<em>/</em>' and
   '<em>s</em>'.</p>
@@ -667,7 +667,7 @@
   <p>[<a href="#ToC-Search">ToC</a>]</p>
 
   <h2 id="id-InteractiveOptions"><a name="InteractiveOptions" id=
-  "InteractiveOptions"><em>Lynx Options Menu</em></a></h2>
+  "InteractiveOptions">Lynx Options Menu</a></h2>
 
   <p>The Lynx <em>Options Menu</em> may be accessed by pressing the
   '<em>o</em>' key. It allows you to change options at runtime, if
@@ -1228,8 +1228,9 @@
     RAW_TOGGLE command, normally mapped to '<em>@</em>', and at
     startup via the <em>-raw</em> switch.</dd>
 
-    <dt>Send User-Agent header Controls whether the user-agent
-    string will be sent.</dt>
+    <dt>Send User-Agent header</dt>
+
+    <dd>Controls whether the user-agent string will be sent.</dd>
 
     <dt>Session file</dt>
 
@@ -1473,8 +1474,8 @@
 
   <p>[<a href="#ToC-InteractiveOptions">ToC</a>]</p>
 
-  <h2 id="id-Mail"><a name="Mail" id="Mail"><em>Comments and
-  mailto: links</em></a></h2>
+  <h2 id="id-Mail"><a name="Mail" id="Mail">Comments and mailto:
+  links</a></h2>
 
   <p>At any time while viewing documents within Lynx, you may use
   the '<em>c</em>' command to send a mail message to the owner of
@@ -1525,8 +1526,8 @@
 
   <p>[<a href="#ToC-Mail">ToC</a>]</p>
 
-  <h2 id="id-News"><a name="News" id="News"><em>USENET News
-  posting</em></a></h2>
+  <h2 id="id-News"><a name="News" id="News">USENET News
+  posting</a></h2>
 
   <p>While reading <a href=
   "http://www.w3.org/LineMode/User/AboutNewsServers.html">news</a>
@@ -1563,8 +1564,8 @@
   <p>See also <a href=
   "http://www.w3.org/Protocols/rfc977/rfc977">RFC 977</a>.</p>
 
-  <h2 id="id-Bookmarks"><a name="Bookmarks" id="Bookmarks"><em>Lynx
-  bookmarks</em></a></h2>
+  <h2 id="id-Bookmarks"><a name="Bookmarks" id="Bookmarks">Lynx
+  bookmarks</a></h2>
 
   <p>Bookmarks are entries in your <em>bookmark file</em>, which
   record the URL of a document you may want to return to easily,
@@ -1630,8 +1631,8 @@
   <em>RETURN</em> for the default bookmark file. [<a href=
   "#ToC-Bookmarks">ToC</a>]</p>
 
-  <h2 id="id-Jumps"><a name="Jumps" id="Jumps"><em>Jump
-  Command</em></a></h2>
+  <h2 id="id-Jumps"><a name="Jumps" id="Jumps">Jump
+  Command</a></h2>
 
   <p>Similar to the bookmarks file is the jumps file: for an
   example, look in the <em>samples</em> subdirectory in the
@@ -1668,8 +1669,8 @@
 
   <p>[<a href="#ToC-Jumps">ToC</a>]</p>
 
-  <h2 id="id-DirEd"><a name="DirEd" id="DirEd"><em>Directory
-  Editing</em></a></h2>
+  <h2 id="id-DirEd"><a name="DirEd" id="DirEd">Directory
+  Editing</a></h2>
 
   <p>Lynx offers extended DIRED support on Unix (on VMS the more
   powerful CSwing program is recommended for character cell
@@ -1730,15 +1731,15 @@
 
   <p>[<a href="#ToC-DirEd">ToC</a>]</p>
 
-  <h2 id="id-ColorMouse"><a name="ColorMouse" id=
-  "ColorMouse"><em>Using Color &amp; the Mouse</em></a></h2>
+  <h2 id="id-ColorMouse"><a name="ColorMouse" id="ColorMouse">Using
+  Color &amp; the Mouse</a></h2>
 
   <p>A limited range of colors &amp; mouse commands are available,
   if the user chooses: see <em>lynx.cfg</em> for details. [<a href=
   "#ToC-ColorMouse">ToC</a>]</p>
 
-  <h2 id="id-MiscKeys"><a name="MiscKeys" id=
-  "MiscKeys"><em>Scrolling and Other useful commands</em></a></h2>
+  <h2 id="id-MiscKeys"><a name="MiscKeys" id="MiscKeys">Scrolling
+  and Other useful commands</a></h2>
 
   <p>A summary of all the keystroke commands and their key bindings
   can be invoked via the KEYMAP command, normally mapped to
@@ -1970,8 +1971,8 @@
 
   <p>[<a href="#ToC-MiscKeys">ToC</a>]</p>
 
-  <h2 id="id-Forms"><a name="Forms" id="Forms"><em>Lynx and HTML
-  Forms</em></a></h2>
+  <h2 id="id-Forms"><a name="Forms" id="Forms">Lynx and HTML
+  Forms</a></h2>
 
   <p>This section describes the Lynx Forms Interface. HTML gives
   document providers the ability to create on-line forms which may
@@ -2364,8 +2365,8 @@
 
   <p>[<a href="#ToC-Forms">ToC</a>]</p>
 
-  <h2 id="id-Images"><a name="Images" id="Images"><em>Lynx and HTML
-  Images</em></a></h2>
+  <h2 id="id-Images"><a name="Images" id="Images">Lynx and HTML
+  Images</a></h2>
 
   <p>As a text browser, Lynx does not display images as such -- you
   need to define a viewer in <em>lynx.cfg</em>: see there -- , but
@@ -2401,8 +2402,8 @@ the other two cannot be saved between sessions.
      As links    clickable_images = TRUE,  pseudo_inline_alts = unchanged
 </pre>
 
-  <h2 id="id-Tables"><a name="Tables" id="Tables"><em>Lynx and HTML
-  Tables</em></a></h2>
+  <h2 id="id-Tables"><a name="Tables" id="Tables">Lynx and HTML
+  Tables</a></h2>
 
   <p>HTML includes markup for creating <em>tables</em> structured
   as arrays of cells aligned by columns and rows on the displayed
@@ -2483,8 +2484,8 @@ the other two cannot be saved between sessions.
 
   <p>[<a href="#ToC-Tables">ToC</a>]</p>
 
-  <h2 id="id-Tabs"><a name="Tabs" id="Tabs"><em>Lynx and HTML
-  Tabs</em></a></h2>
+  <h2 id="id-Tabs"><a name="Tabs" id="Tabs">Lynx and HTML
+  Tabs</a></h2>
 
   <p>Lynx implements the <a href=
   "http://www.w3.org/MarkUp/html3/Contents.html">HTML 3.0</a> TAB
@@ -2511,8 +2512,8 @@ the other two cannot be saved between sessions.
 
   <p>[<a href="#ToC-Tabs">ToC</a>]</p>
 
-  <h2 id="id-Frames"><a name="Frames" id="Frames"><em>Lynx and HTML
-  Frames</em></a></h2>
+  <h2 id="id-Frames"><a name="Frames" id="Frames">Lynx and HTML
+  Frames</a></h2>
 
   <p>Some implementations of HTML include markup, primarily
   designed for graphic clients, that is intended to create an array
@@ -2540,8 +2541,8 @@ the other two cannot be saved between sessions.
   Navigator". You can simply ignore such warnings and access the
   frames via the Lynx-generated links as above.</p>
 
-  <h2 id="id-Banners"><a name="Banners" id="Banners"><em>Lynx and
-  HTML Banners</em></a></h2>
+  <h2 id="id-Banners"><a name="Banners" id="Banners">Lynx and HTML
+  Banners</a></h2>
 
   <p>Some implementations of HTML markup include provisions for
   creating a non-scrolling window to be positioned at the top of
@@ -2620,8 +2621,8 @@ the other two cannot be saved between sessions.
 
   <p>[<a href="#ToC-Banners">ToC</a>]</p>
 
-  <h2 id="id-Footnotes"><a name="Footnotes" id="Footnotes"><em>Lynx
-  and HTML Footnotes</em></a></h2>
+  <h2 id="id-Footnotes"><a name="Footnotes" id="Footnotes">Lynx and
+  HTML Footnotes</a></h2>
 
   <p>Lynx implements the <a href=
   "http://www.w3.org/MarkUp/html3/Contents.html">HTML 3.0</a> FN
@@ -2653,8 +2654,8 @@ the other two cannot be saved between sessions.
 
   <p>[<a href="#ToC-Footnotes">ToC</a>]</p>
 
-  <h2 id="id-Notes"><a name="Notes" id="Notes"><em>Lynx and HTML
-  Notes</em></a></h2>
+  <h2 id="id-Notes"><a name="Notes" id="Notes">Lynx and HTML
+  Notes</a></h2>
 
   <p>Lynx implements the <a href=
   "http://www.w3.org/MarkUp/html3/Contents.html">HTML 3.0</a> NOTE
@@ -2685,8 +2686,8 @@ the other two cannot be saved between sessions.
 
   <p>[<a href="#ToC-Notes">ToC</a>]</p>
 
-  <h2 id="id-Lists"><a name="Lists" id="Lists"><em>Lynx and HTML
-  Lists</em></a></h2>
+  <h2 id="id-Lists"><a name="Lists" id="Lists">Lynx and HTML
+  Lists</a></h2>
 
   <p>Lynx implements the <a href=
   "http://www.w3.org/MarkUp/html3/Contents.html">HTML 3.0</a> list
@@ -2755,8 +2756,8 @@ the other two cannot be saved between sessions.
 
   <p>[<a href="#ToC-Lists">ToC</a>]</p>
 
-  <h2 id="id-Quotes"><a name="Quotes" id="Quotes"><em>Lynx and HTML
-  Quotes</em></a></h2>
+  <h2 id="id-Quotes"><a name="Quotes" id="Quotes">Lynx and HTML
+  Quotes</a></h2>
 
   <p>The <a href=
   "http://www.w3.org/MarkUp/html3/Contents.html">HTML 3.0</a> and
@@ -2788,8 +2789,8 @@ the other two cannot be saved between sessions.
 
   <p>[<a href="#ToC-Quotes">ToC</a>]</p>
 
-  <h2 id="id-Eightbit"><a name="Eightbit" id="Eightbit"><em>Lynx
-  and HTML Internationalization: 8bit, UNICODE, etc.</em></a></h2>
+  <h2 id="id-Eightbit"><a name="Eightbit" id="Eightbit">Lynx and
+  HTML Internationalization: 8bit, UNICODE, etc.</a></h2>
 
   <p>Lynx has superior support for HTML 4.0/I18N
   internationalization issues. However, to see the characters other
@@ -2801,8 +2802,8 @@ the other two cannot be saved between sessions.
 
   <p>[<a href="#ToC-Eightbit">ToC</a>]</p>
 
-  <h2 id="id-USEMAP"><a name="USEMAP" id="USEMAP"><em>Lynx and
-  Client-Side-Image-Maps</em></a></h2>
+  <h2 id="id-USEMAP"><a name="USEMAP" id="USEMAP">Lynx and
+  Client-Side-Image-Maps</a></h2>
 
   <p>HTML includes markup, designed primarily for graphic clients,
   that treats inlined images as maps, such that areas of the image
@@ -2881,8 +2882,8 @@ the other two cannot be saved between sessions.
 
   <p>[<a href="#ToC-USEMAP">ToC</a>]</p>
 
-  <h2 id="id-Refresh"><a name="Refresh" id="Refresh"><em>Lynx and
-  Client-Side-Pull</em></a></h2>
+  <h2 id="id-Refresh"><a name="Refresh" id="Refresh">Lynx and
+  Client-Side-Pull</a></h2>
 
   <p>HTML includes provision for passing instructions to clients
   via directives in META elements, and one such instruction, via
@@ -2917,8 +2918,8 @@ the other two cannot be saved between sessions.
 
   <p>[<a href="#ToC-Refresh">ToC</a>]</p>
 
-  <h2 id="id-Cookies"><a name="Cookies" id="Cookies"><em>Lynx State
-  Management</em></a> (Me want <em>cookie</em>!)</h2>
+  <h2 id="id-Cookies"><a name="Cookies" id="Cookies">Lynx State
+  Management</a> (Me want <em>cookie</em>!)</h2>
 
   <p>HTTP provides a means to carry state information across
   successive connections between a browser and an http server.
@@ -2999,8 +3000,8 @@ the other two cannot be saved between sessions.
 
   <p>[<a href="#ToC-Cookies">ToC</a>]</p>
 
-  <h2 id="id-Cache"><a name="Cache" id="Cache"><em>Cached
-  Documents</em></a></h2>
+  <h2 id="id-Cache"><a name="Cache" id="Cache">Cached
+  Documents</a></h2>
 
   <p>A list of documents which are in lynx's internal cache is
   accessible through hypothetical <em>Cache Jar</em> which can be
@@ -3103,8 +3104,8 @@ the other two cannot be saved between sessions.
 
   <p>[<a href="#ToC-Sessions">ToC</a>]</p>
 
-  <h2 id="id-Invoking"><a name="Invoking" id="Invoking"><em>The
-  Lynx command line</em></a></h2>
+  <h2 id="id-Invoking"><a name="Invoking" id="Invoking">The Lynx
+  command line</a></h2>
 
   <p>A summary of the Lynx command line options (switches) is
   returned to stdout if Lynx is invoked with the <em>-help</em>
@@ -3191,12 +3192,13 @@ the other two cannot be saved between sessions.
       substitution must be made. These are the options:</p>
 
       <dl>
-        <dt><code>-</code></dt>
+        <dt><code><strong>-</strong></code></dt>
 
-        <dd>If the argument is only '<code>-</code>' (dash), then
-        Lynx expects to receive the arguments from stdin. This is
-        to allow for the potentially very long command line that
-        can be associated with the <em>-get_data</em> or
+        <dd>If the argument is only
+        '<code><strong>-</strong></code>' (dash), then Lynx expects
+        to receive the arguments from stdin. This is to allow for
+        the potentially very long command line that can be
+        associated with the <em>-get_data</em> or
         <em>-post_data</em> arguments (see below). It can also be
         used to avoid having sensitive information in the invoking
         command line (which would be visible to other processes on
@@ -3208,60 +3210,64 @@ the other two cannot be saved between sessions.
         On Unix, the keyboard input terminator is
         <em>Control-D</em>. On Win32, [???].</dd>
 
-        <dt><code>-accept_all_cookies</code></dt>
+        <dt><code><strong>-accept_all_cookies</strong></code></dt>
 
         <dd>accept all cookies.</dd>
 
-        <dt><code>-anonymous</code></dt>
+        <dt><code><strong>-anonymous</strong></code></dt>
 
         <dd>apply restrictions appropriate for an anonymous
         account, see <em>-restrictions</em> below for some
         details.</dd>
 
-        <dt><code>-assume_charset=MIMENAME</code></dt>
+        <dt>
+        <code><strong>-assume_charset=</strong><em>MIMENAME</em></code></dt>
 
         <dd>charset for documents that don't specify it.</dd>
 
-        <dt><code>-assume_local_charset=MIMENAME</code></dt>
+        <dt>
+        <code><strong>-assume_local_charset=</strong><em>MIMENAME</em></code></dt>
 
         <dd>charset assumed for local files, i.e., files which lynx
         creates such as internal pages for the options menu.</dd>
 
-        <dt><code>-assume_unrec_charset=MIMENAME</code></dt>
+        <dt>
+        <code><strong>-assume_unrec_charset=</strong><em>MIMENAME</em></code></dt>
 
         <dd>use this instead of unrecognized charsets.</dd>
 
-        <dt><code>-auth=ID:PW</code></dt>
+        <dt><code><strong>-auth=</strong><em>ID:PW</em></code></dt>
 
-        <dd>set authorization ID and password for protected
-        documents at startup. Be sure to protect any script files
-        which use this switch.</dd>
+        <dd>set authorization <em>identifier</em> and
+        <em>password</em> for protected documents at startup. Be
+        sure to protect any script files which use this
+        switch.</dd>
 
-        <dt><code>-base</code></dt>
+        <dt><code><strong>-base</strong></code></dt>
 
         <dd>prepend a request URL comment and BASE tag to text/html
         outputs for -source dumps.</dd>
 
-        <dt><code>-bibp=URL</code></dt>
+        <dt><code><strong>-bibp=</strong><em>URL</em></code></dt>
 
         <dd>specify a local bibp server (default
         http://bibhost/).</dd>
 
-        <dt><code>-blink</code></dt>
+        <dt><code><strong>-blink</strong></code></dt>
 
         <dd>forces high intensity background colors for color mode,
         if available and supported by the terminal. This applies to
         the slang library (for a few terminal emulators), or to
         OS/2 EMX with ncurses.</dd>
 
-        <dt><code>-book</code></dt>
+        <dt><code><strong>-book</strong></code></dt>
 
         <dd>use the bookmark page as the startfile. The default or
         command line startfile is still set for the Main screen
         command, and will be used if the bookmark page is
         unavailable or blank.</dd>
 
-        <dt><code>-buried_news</code></dt>
+        <dt><code><strong>-buried_news</strong></code></dt>
 
         <dd>toggles scanning of news articles for buried
         references, and converts them to news links. Not
@@ -3269,40 +3275,44 @@ the other two cannot be saved between sessions.
         brackets will be converted to false news links, and
         uuencoded messages can be trashed.</dd>
 
-        <dt><code>-cache=NUMBER</code></dt>
+        <dt>
+        <code><strong>-cache=</strong><em>NUMBER</em></code></dt>
 
         <dd>set the <em>NUMBER</em> of documents cached in memory.
         The default is 10.</dd>
 
-        <dt><code>-center</code></dt>
+        <dt><code><strong>-center</strong></code></dt>
 
         <dd>Toggle center alignment in HTML TABLE.</dd>
 
-        <dt><code>-case</code></dt>
+        <dt><code><strong>-case</strong></code></dt>
 
         <dd>enable case-sensitive string searching.</dd>
 
-        <dt><code>-cfg=FILENAME</code></dt>
+        <dt>
+        <code><strong>-cfg=</strong><em>FILENAME</em></code></dt>
 
         <dd>specifies a Lynx configuration file other than the
         default <a href="#lynx.cfg">lynx.cfg</a>.</dd>
 
-        <dt><code>-child</code></dt>
+        <dt><code><strong>-child</strong></code></dt>
 
         <dd>exit on left-arrow in startfile, and disable save to
         disk.</dd>
 
-        <dt><code>-child_relaxed</code></dt>
+        <dt><code><strong>-child_relaxed</strong></code></dt>
 
         <dd>exit on left-arrow in startfile, but allow save to disk
         and associated print/mail options.</dd>
 
-        <dt><code>-cmd_log=FILENAME</code></dt>
+        <dt>
+        <code><strong>-cmd_log=</strong><em>FILENAME</em></code></dt>
 
         <dd>write keystroke commands and related information to the
         specified file.</dd>
 
-        <dt><code>-cmd_script=FILENAME</code></dt>
+        <dt>
+        <code><strong>-cmd_script=</strong><em>FILENAME</em></code></dt>
 
         <dd>
           read keystroke commands from the specified file. You can
@@ -3313,27 +3323,27 @@ the other two cannot be saved between sessions.
           beginning with "#", or a keyword:
 
           <dl>
-            <dt><code>exit</code></dt>
+            <dt><code><strong>exit</strong></code></dt>
 
             <dd>causes the script to stop, and forces lynx to exit
             immediately.</dd>
 
-            <dt><code>key</code></dt>
+            <dt><code><strong>key</strong></code></dt>
 
             <dd>the character value, in printable form. Cursor and
-            other special keys are given as names, e.g., <code>Down
-            Arrow</code>. Printable 7-bit ASCII codes are given
-            as-is, and hexadecimal values represent other 8-bit
-            codes.</dd>
+            other special keys are given as names, e.g.,
+            <code><strong>Down Arrow</strong></code>. Printable
+            7-bit ASCII codes are given as-is, and hexadecimal
+            values represent other 8-bit codes.</dd>
 
-            <dt><code>set</code></dt>
+            <dt><code><strong>set</strong></code></dt>
 
             <dd>followed by a "name=value" allows one to override
             values set in the lynx.cfg file.</dd>
           </dl>
         </dd>
 
-        <dt><code>-color</code></dt>
+        <dt><code><strong>-color</strong></code></dt>
 
         <dd>forces color mode on, if available. Default color
         control sequences which work for many terminal types are
@@ -3350,229 +3360,242 @@ the other two cannot be saved between sessions.
         show_color=always found in .lynxrc on startup is overridden
         by this flag.</dd>
 
-        <dt><code>-connect_timeout=N</code></dt>
+        <dt>
+        <code><strong>-connect_timeout</strong>=<em>N</em></code></dt>
 
-        <dd>Sets the connection timeout, where N is given in
-        seconds.</dd>
+        <dd>Sets the connection timeout, where <em>N</em> is given
+        in seconds.</dd>
 
-        <dt><code>-cookie_file=FILENAME</code></dt>
+        <dt>
+        <code><strong>-cookie_file=</strong><em>FILENAME</em></code></dt>
 
         <dd>specifies a file to use to read cookies. If none is
         specified, the default value is ~/.lynx_cookies for most
         systems, but ~/cookies for MS-DOS.</dd>
 
-        <dt><code>-cookie_save_file=FILENAME</code></dt>
+        <dt>
+        <code><strong>-cookie_save_file=</strong><em>FILENAME</em></code></dt>
 
         <dd>specifies a file to use to store cookies. If none is
-        specified, the value given by <code>-cookie_file</code> is
-        used.</dd>
+        specified, the value given by
+        <code><strong>-cookie_file</strong></code> is used.</dd>
 
-        <dt><code>-cookies</code></dt>
+        <dt><code><strong>-cookies</strong></code></dt>
 
         <dd>toggles handling of Set-Cookie headers.</dd>
 
-        <dt><code>-core</code></dt>
+        <dt><code><strong>-core</strong></code></dt>
 
         <dd>toggles forced core dumps on fatal errors. (Unix
         only)</dd>
 
-        <dt><code>-crawl</code></dt>
+        <dt><code><strong>-crawl</strong></code></dt>
 
         <dd>with <em>-traversal</em>, output each page to a
         file.<br>
         with <em>-dump</em>, format output as with
         <em>-traversal</em>, but to stdout.</dd>
 
-        <dt><code>-curses_pads</code></dt>
+        <dt><code><strong>-curses_pads</strong></code></dt>
 
         <dd>toggles the use of curses "pad" feature which supports
         left/right scrolling of the display.</dd>
 
-        <dt><code>-debug_partial</code></dt>
+        <dt><code><strong>-debug_partial</strong></code></dt>
 
         <dd>separate incremental display stages with MessageSecs
         delay</dd>
 
-        <dt><code>-display=DISPLAY</code></dt>
+        <dt>
+        <code><strong>-display=</strong><em>DISPLAY</em></code></dt>
 
         <dd>set the display variable for X rexe-ced programs.</dd>
 
-        <dt><code>-display_charset=MIMEname</code></dt>
+        <dt>
+        <code><strong>-display_charset=</strong><em>MIMEname</em></code></dt>
 
         <dd>set the charset for the terminal output.</dd>
 
-        <dt><code>-dont_wrap_pre</code></dt>
+        <dt><code><strong>-dont_wrap_pre</strong></code></dt>
 
         <dd>inhibit wrapping of text in &lt;pre&gt; when -dump'ing
         and -crawl'ing, mark wrapped lines in interactive
         session.</dd>
 
-        <dt><code>-dump</code></dt>
+        <dt><code><strong>-dump</strong></code></dt>
 
         <dd>dumps the formatted output of the default document or
         one specified on the command line to standard out. This can
         be used in the following way:<br>
         <em>lynx -dump http://www.w3.org/</em></dd>
 
-        <dt><code>-editor=EDITOR</code></dt>
+        <dt>
+        <code><strong>-editor=</strong><em>EDITOR</em></code></dt>
 
         <dd>enable external editing using the specified
         <em>EDITOR</em>. (vi, ed, emacs, etc.)</dd>
 
-        <dt><code>-emacskeys</code></dt>
+        <dt><code><strong>-emacskeys</strong></code></dt>
 
         <dd>enable emacs-like key movement.</dd>
 
-        <dt><code>-enable_scrollback</code></dt>
+        <dt><code><strong>-enable_scrollback</strong></code></dt>
 
         <dd>toggles behavior compatible with the scrollback keys in
         some communications software (may be incompatible with some
         curses packages).</dd>
 
-        <dt><code>-error_file=FILENAME</code></dt>
+        <dt>
+        <code><strong>-error_file=</strong><em>FILENAME</em></code></dt>
 
         <dd>the status code from the HTTP request is placed in this
         file.</dd>
 
-        <dt><code>-exec</code></dt>
+        <dt><code><strong>-exec</strong></code></dt>
 
         <dd>enable local program execution (normally not
         configured).</dd>
 
-        <dt><code>-fileversions</code></dt>
+        <dt><code><strong>-fileversions</strong></code></dt>
 
         <dd>include all versions of files in local VMS directory
         listings.</dd>
 
-        <dt><code>-find_leaks</code></dt>
+        <dt><code><strong>-find_leaks</strong></code></dt>
 
         <dd>toggles the memory leak checking off. Normally this is
         not compiled-into your executable, but when it is, it can
         be disabled for a session.</dd>
 
-        <dt><code>-force_empty_hrefless_a</code></dt>
+        <dt>
+        <code><strong>-force_empty_hrefless_a</strong></code></dt>
 
         <dd>force HREF-less 'A' elements to be empty (close them as
         soon as they are seen).</dd>
 
-        <dt><code>-force_html</code></dt>
+        <dt><code><strong>-force_html</strong></code></dt>
 
         <dd>forces the first document to be interpreted as
         HTML.</dd>
 
-        <dt><code>-force_secure</code></dt>
+        <dt><code><strong>-force_secure</strong></code></dt>
 
         <dd>toggles forcing of the secure flag for SSL
         cookies.</dd>
 
-        <dt><code>-forms_options</code></dt>
+        <dt><code><strong>-forms_options</strong></code></dt>
 
         <dd>toggles whether the Options Menu is key-based or
         form-based.</dd>
 
-        <dt><code>-from</code></dt>
+        <dt><code><strong>-from</strong></code></dt>
 
         <dd>toggles transmissions of From headers to HTTP or HTTPS
         servers.</dd>
 
-        <dt><code>-ftp</code></dt>
+        <dt><code><strong>-ftp</strong></code></dt>
 
         <dd>disable ftp access.</dd>
 
-        <dt><code>-get_data</code></dt>
+        <dt><code><strong>-get_data</strong></code></dt>
 
         <dd>properly formatted data for a get form are read in from
         stdin and passed to the form. Input is terminated by a line
         that starts with '---'.</dd>
 
-        <dt><code>-head</code></dt>
+        <dt><code><strong>-head</strong></code></dt>
 
         <dd>send a HEAD request for the mime headers.</dd>
 
-        <dt><code>-help</code></dt>
+        <dt><code><strong>-help</strong></code></dt>
 
         <dd>print this Lynx command syntax usage message.</dd>
 
-        <dt><code>-hiddenlinks=<em>option</em></code></dt>
+        <dt>
+        <code><strong>-hiddenlinks=</strong><em>option</em></code></dt>
 
         <dd>
           control the display of hidden links. Option values are:
 
           <dl>
-            <dt><code>merge</code></dt>
+            <dt><code><strong>merge</strong></code></dt>
 
             <dd>hidden links show up as bracketed numbers and are
             numbered together with other links in the sequence of
             their occurrence in the document.</dd>
 
-            <dt><code>listonly</code></dt>
+            <dt><code><strong>listonly</strong></code></dt>
 
             <dd>hidden links are shown only on <em>L</em>ist
-            screens and listings generated by <code>-dump</code> or
-            from the <em>P</em>rint menu, but appear separately at
-            the end of those lists. This is the default
-            behavior.</dd>
+            screens and listings generated by
+            <code><strong>-dump</strong></code> or from the
+            <em>P</em>rint menu, but appear separately at the end
+            of those lists. This is the default behavior.</dd>
 
-            <dt><code>ignore</code></dt>
+            <dt><code><strong>ignore</strong></code></dt>
 
             <dd>hidden links do not appear even in listings.</dd>
           </dl>
         </dd>
 
-        <dt><code>-historical</code></dt>
+        <dt><code><strong>-historical</strong></code></dt>
 
         <dd>toggles use of '&gt;' or '--&gt;' as a terminator for
         comments.</dd>
 
-        <dt><code>-homepage=URL</code></dt>
+        <dt>
+        <code><strong>-homepage=</strong><em>URL</em></code></dt>
 
         <dd>set homepage separate from start page. Will be used if
         a fetch of the start page fails or if it is a script which
-        does not return a document, and as the <code>URL</code> for
-        the '<em>m</em>'ain menu command.</dd>
+        does not return a document, and as the
+        <code><em>URL</em></code> for the '<em>m</em>'ain menu
+        command.</dd>
 
-        <dt><code>-image_links</code></dt>
+        <dt><code><strong>-image_links</strong></code></dt>
 
         <dd>toggles inclusion of links for all images.</dd>
 
-        <dt><code>-ismap</code></dt>
+        <dt><code><strong>-ismap</strong></code></dt>
 
         <dd>toggles inclusion of ISMAP links when client-side MAPs
         are present.</dd>
 
-        <dt><code>-index=URL</code></dt>
+        <dt><code><strong>-index=</strong><em>URL</em></code></dt>
 
         <dd>set the default index file to the specified
         <em>URL</em></dd>
 
-        <dt><code>-justify</code></dt>
+        <dt><code><strong>-justify</strong></code></dt>
 
         <dd>do justification of text.</dd>
 
-        <dt><code>-link=NUMBER</code></dt>
+        <dt>
+        <code><strong>-link=</strong><em>NUMBER</em></code></dt>
 
         <dd>starting count for lnk#.dat files produced by
         <em>-crawl</em>.</dd>
 
-        <dt><code>-localhost</code></dt>
+        <dt><code><strong>-localhost</strong></code></dt>
 
         <dd>disable URLs that point to remote hosts.</dd>
 
-        <dt><code>-locexec</code></dt>
+        <dt><code><strong>-locexec</strong></code></dt>
 
         <dd>enable local program execution from local files only
         (if lynx was compiled with local execution enabled).</dd>
 
-        <dt><code>-lss=FILENAME</code></dt>
+        <dt>
+        <code><strong>-lss=</strong><em>FILENAME</em></code></dt>
 
         <dd>specify filename containing color-style information.
         The default is lynx.lss.</dd>
 
-        <dt><code>-mime_header</code></dt>
+        <dt><code><strong>-mime_header</strong></code></dt>
 
         <dd>include mime headers and force source dump.</dd>
 
-        <dt><code>-minimal</code></dt>
+        <dt><code><strong>-minimal</strong></code></dt>
 
         <dd>toggles minimal versus valid comment parsing. When
         minimal, any '--&gt;' serves as a terminator for a comment
@@ -3581,66 +3604,69 @@ the other two cannot be saved between sessions.
         comment element. If historical is set, that overrides
         minimal or valid comment parsing.</dd>
 
-        <dt><code>-nested_tables</code></dt>
+        <dt><code><strong>-nested_tables</strong></code></dt>
 
         <dd>toggles nested-tables logic (for debugging).</dd>
 
-        <dt><code>-newschunksize=NUMBER</code></dt>
+        <dt>
+        <code><strong>-newschunksize=</strong><em>NUMBER</em></code></dt>
 
         <dd>number of articles in chunked news listings.</dd>
 
-        <dt><code>-newsmaxchunk=NUMBER</code></dt>
+        <dt>
+        <code><strong>-newsmaxchunk=</strong><em>NUMBER</em></code></dt>
 
         <dd>maximum news articles in listings before chunking.</dd>
 
-        <dt><code>-nobold</code></dt>
+        <dt><code><strong>-nobold</strong></code></dt>
 
         <dd>disable bold video-attribute.</dd>
 
-        <dt><code>-nobrowse</code></dt>
+        <dt><code><strong>-nobrowse</strong></code></dt>
 
         <dd>disable directory browsing.</dd>
 
-        <dt><code>-nocc</code></dt>
+        <dt><code><strong>-nocc</strong></code></dt>
 
         <dd>disable Cc: prompts for self copies of mailings. Note
         that this does not disable any CCs which are incorporated
         within a mailto URL or form ACTION.</dd>
 
-        <dt><code>-nocolor</code></dt>
+        <dt><code><strong>-nocolor</strong></code></dt>
 
         <dd>force color mode off, overriding terminal capabilities
         and any <em>-color</em> flags, <em>COLORTERM</em> variable,
         and saved .lynxrc settings.</dd>
 
-        <dt><code>-noexec</code></dt>
+        <dt><code><strong>-noexec</strong></code></dt>
 
         <dd>disable local program execution. (DEFAULT)</dd>
 
-        <dt><code>-nofilereferer</code></dt>
+        <dt><code><strong>-nofilereferer</strong></code></dt>
 
         <dd>disable transmissions of Referer headers for file
         URLs.</dd>
 
-        <dt><code>-nolist</code></dt>
+        <dt><code><strong>-nolist</strong></code></dt>
 
         <dd>disable the link list feature in dumps.</dd>
 
-        <dt><code>-nolog</code></dt>
+        <dt><code><strong>-nolog</strong></code></dt>
 
         <dd>disable mailing of error messages to document
         owners.</dd>
 
-        <dt><code>-nomargins</code></dt>
+        <dt><code><strong>-nomargins</strong></code></dt>
 
         <dd>disable left/right margins in the default style
         sheet.</dd>
 
-        <dt><code>-nomore</code></dt>
+        <dt><code><strong>-nomore</strong></code></dt>
 
         <dd>disable -more- string in statusline messages.</dd>
 
-        <dt><code>-nonrestarting_sigwinch</code></dt>
+        <dt>
+        <code><strong>-nonrestarting_sigwinch</strong></code></dt>
 
         <dd>make window size change handler non-restarting. This
         flag is not available on all systems, Lynx needs to be
@@ -3648,67 +3674,70 @@ the other two cannot be saved between sessions.
         flag <em>may</em> cause Lynx to react more immediately to
         window changes when run within an xterm.</dd>
 
-        <dt><code>-nopause</code></dt>
+        <dt><code><strong>-nopause</strong></code></dt>
 
         <dd>disable forced pauses for statusline messages.</dd>
 
-        <dt><code>-noprint</code></dt>
+        <dt><code><strong>-noprint</strong></code></dt>
 
         <dd>disable most print functions.</dd>
 
-        <dt><code>-noredir</code></dt>
+        <dt><code><strong>-noredir</strong></code></dt>
 
         <dd>don't follow URL redirections</dd>
 
-        <dt><code>-noreferer</code></dt>
+        <dt><code><strong>-noreferer</strong></code></dt>
 
         <dd>disable transmissions of Referer headers.</dd>
 
-        <dt><code>-noreverse</code></dt>
+        <dt><code><strong>-noreverse</strong></code></dt>
 
         <dd>disable reverse video-attribute.</dd>
 
-        <dt><code>-nosocks</code></dt>
+        <dt><code><strong>-nosocks</strong></code></dt>
 
         <dd>disable SOCKS proxy usage by a SOCKSified Lynx.</dd>
 
-        <dt><code>-nostatus</code></dt>
+        <dt><code><strong>-nostatus</strong></code></dt>
 
         <dd>disable the retrieval status messages.</dd>
 
-        <dt><code>-notitle</code></dt>
+        <dt><code><strong>-notitle</strong></code></dt>
 
         <dd>disable title and blank line from top of page.</dd>
 
-        <dt><code>-nounderline</code></dt>
+        <dt><code><strong>-nounderline</strong></code></dt>
 
         <dd>disable underline video-attribute.</dd>
 
-        <dt><code>-number_fields</code></dt>
+        <dt><code><strong>-number_fields</strong></code></dt>
 
         <dd>force numbering of links as well as form input
         fields.</dd>
 
-        <dt><code>-number_links</code></dt>
+        <dt><code><strong>-number_links</strong></code></dt>
 
         <dd>force numbering of links.</dd>
 
-        <dt><code>-partial</code></dt>
+        <dt><code><strong>-partial</strong></code></dt>
 
         <dd>toggles displaying of partial pages while loading.</dd>
 
-        <dt><code>-partial_thres=<em>NUMBER</em></code></dt>
+        <dt>
+        <code><strong>-partial_thres=</strong><em>NUMBER</em></code></dt>
 
         <dd>number of lines to render before repainting display
         with partial-display logic.</dd>
 
-        <dt><code>-pauth=ID:PW</code></dt>
+        <dt>
+        <code><strong>-pauth=</strong><em>ID:PW</em></code></dt>
 
-        <dd>set authorization ID and password for a protected proxy
-        server at startup. Be sure to protect any script files
-        which use this switch.</dd>
+        <dd>set authorization <em>identifier</em> and
+        <em>password</em> for a protected proxy server at startup.
+        Be sure to protect any script files which use this
+        switch.</dd>
 
-        <dt><code>-popup</code></dt>
+        <dt><code><strong>-popup</strong></code></dt>
 
         <dd>toggles handling of single-choice SELECT options via
         popup windows or as lists of radio buttons. The default
@@ -3717,13 +3746,13 @@ the other two cannot be saved between sessions.
         the 'o'ptions menu. The command line switch toggles the
         default.</dd>
 
-        <dt><code>-post_data</code></dt>
+        <dt><code><strong>-post_data</strong></code></dt>
 
         <dd>properly formatted data for a post form are read in
         from stdin and passed to the form. Input is terminated by a
         line that starts with '---'.</dd>
 
-        <dt><code>-preparsed</code></dt>
+        <dt><code><strong>-preparsed</strong></code></dt>
 
         <dd>show source preparsed and reformatted when used with
         -source or in source view ('<em>\</em>'). May be useful for
@@ -3732,35 +3761,35 @@ the other two cannot be saved between sessions.
         "keystrokes/option_help.html#tagsoup">recovery modes</a>,
         switched by '<em>^V</em>'.</dd>
 
-        <dt><code>-prettysrc</code></dt>
+        <dt><code><strong>-prettysrc</strong></code></dt>
 
         <dd>do syntax highlighting and hyperlink handling in source
         view.</dd>
 
-        <dt><code>-print</code></dt>
+        <dt><code><strong>-print</strong></code></dt>
 
         <dd>enable print functions. (default)</dd>
 
-        <dt><code>-pseudo_inlines</code></dt>
+        <dt><code><strong>-pseudo_inlines</strong></code></dt>
 
         <dd>toggles pseudo-ALTs for inline images with no ALT
         string.</dd>
 
-        <dt><code>-raw</code></dt>
+        <dt><code><strong>-raw</strong></code></dt>
 
         <dd>toggles default setting of 8-bit character translations
         or CJK mode for the startup character set.</dd>
 
-        <dt><code>-realm</code></dt>
+        <dt><code><strong>-realm</strong></code></dt>
 
         <dd>restricts access to URLs in the starting realm.</dd>
 
-        <dt><code>-reload</code></dt>
+        <dt><code><strong>-reload</strong></code></dt>
 
         <dd>flushes the cache on a proxy server (only the first
         document affected).</dd>
 
-        <dt><code>-restrictions</code></dt>
+        <dt><code><strong>-restrictions</strong></code></dt>
 
         <dd>allows a list of services to be disabled selectively
         and takes the following form:</dd>
@@ -3975,51 +4004,54 @@ the other two cannot be saved between sessions.
           </dl>
         </dd>
 
-        <dt><code>-resubmit_posts</code></dt>
+        <dt><code><strong>-resubmit_posts</strong></code></dt>
 
         <dd>toggles forced resubmissions (no-cache) of forms with
         method POST when the documents they returned are sought
         with the PREV_DOC (<em>left-arrow</em>) command or from the
         <em>History Page</em>.</dd>
 
-        <dt><code>-rlogin</code></dt>
+        <dt><code><strong>-rlogin</strong></code></dt>
 
         <dd>disable recognition of rlogin commands.</dd>
 
-        <dt><code>-scrollbar</code></dt>
+        <dt><code><strong>-scrollbar</strong></code></dt>
 
         <dd>toggles showing scrollbar.</dd>
 
-        <dt><code>-scrollbar_arrow</code></dt>
+        <dt><code><strong>-scrollbar_arrow</strong></code></dt>
 
         <dd>toggles showing arrows at ends of the scrollbar.</dd>
 
-        <dt><code>-selective</code></dt>
+        <dt><code><strong>-selective</strong></code></dt>
 
         <dd>require .www_browsable files to browse
         directories.</dd>
 
-        <dt><code>-session=FILENAME</code></dt>
+        <dt>
+        <code><strong>-session=</strong><em>FILENAME</em></code></dt>
 
         <dd>resumes from specified file on startup and saves
         session to that file on exit.</dd>
 
-        <dt><code>-sessionin=FILENAME</code></dt>
+        <dt>
+        <code><strong>-sessionin=</strong><em>FILENAME</em></code></dt>
 
         <dd>resumes session from specified file.</dd>
 
-        <dt><code>-sessionout=FILENAME</code></dt>
+        <dt>
+        <code><strong>-sessionout=</strong><em>FILENAME</em></code></dt>
 
         <dd>saves session to specified file.</dd>
 
-        <dt><code>-short_url</code></dt>
+        <dt><code><strong>-short_url</strong></code></dt>
 
         <dd>show very long URLs in the status line with "..." to
         represent the portion which cannot be displayed. The
         beginning and end of the URL are displayed, rather than
         suppressing the end.</dd>
 
-        <dt><code>-show_cursor</code></dt>
+        <dt><code><strong>-show_cursor</strong></code></dt>
 
         <dd>If enabled the cursor will not be hidden in the right
         hand corner but will instead be positioned at the start of
@@ -4030,19 +4062,19 @@ the other two cannot be saved between sessions.
         the 'o'ptions menu. The command line switch toggles the
         default.</dd>
 
-        <dt><code>-show_rate</code></dt>
+        <dt><code><strong>-show_rate</strong></code></dt>
 
         <dd>If enabled the transfer rate is shown in bytes/second.
         If disabled, no transfer rate is shown. Use lynx.cfg or the
         options menu to select KiB/second and/or ETA.</dd>
 
-        <dt><code>-soft_dquotes</code></dt>
+        <dt><code><strong>-soft_dquotes</strong></code></dt>
 
         <dd>toggles emulation of the old Netscape and Mosaic bug
         which treated '<em>&gt;</em>' as a co-terminator for
         double-quotes and tags.</dd>
 
-        <dt><code>-source</code></dt>
+        <dt><code><strong>-source</strong></code></dt>
 
         <dd>
           works the same as dump but outputs HTML source instead of
@@ -4064,59 +4096,62 @@ the other two cannot be saved between sessions.
 </pre>
         </dd>
 
-        <dt><code>-stack_dump</code></dt>
+        <dt><code><strong>-stack_dump</strong></code></dt>
 
         <dd>disable SIGINT cleanup handler.</dd>
 
-        <dt><code>-startfile_ok</code></dt>
+        <dt><code><strong>-startfile_ok</strong></code></dt>
 
         <dd>allow non-http startfile and homepage with
         <em>-validate</em>.</dd>
 
-        <dt><code>-stderr</code></dt>
+        <dt><code><strong>-stderr</strong></code></dt>
 
-        <dd>When dumping a document using <code>-dump</code> or
-        <code>-source</code>, Lynx normally does not display alert
-        (error) messages that you see on the screen in the status
-        line. Use the <code>-stderr</code> option to tell Lynx to
-        write these messages to the standard error.</dd>
+        <dd>When dumping a document using
+        <code><strong>-dump</strong></code> or
+        <code><strong>-source</strong></code>, Lynx normally does
+        not display alert (error) messages that you see on the
+        screen in the status line. Use the
+        <code><strong>-stderr</strong></code> option to tell Lynx
+        to write these messages to the standard error.</dd>
 
-        <dt><code>-stdin</code></dt>
+        <dt><code><strong>-stdin</strong></code></dt>
 
         <dd>read the startfile from standard input (UNIX
         only).</dd>
 
-        <dt><code>-syslog=<em>text</em></code></dt>
+        <dt>
+        <code><strong>-syslog=</strong><em>text</em></code></dt>
 
         <dd>information for syslog call.</dd>
 
-        <dt><code>-syslog-urls</code></dt>
+        <dt><code><strong>-syslog-urls</strong></code></dt>
 
         <dd>log requested URLs with syslog.</dd>
 
-        <dt><code>-tagsoup</code></dt>
+        <dt><code><strong>-tagsoup</strong></code></dt>
 
         <dd>initialize DTD with "TagSoup" tables, <a href=
         "keystrokes/option_help.html#tagsoup">more
         details</a>.</dd>
 
-        <dt><code>-telnet</code></dt>
+        <dt><code><strong>-telnet</strong></code></dt>
 
         <dd>disable recognition of telnet commands.</dd>
 
-        <dt><code>-term=TERM</code></dt>
+        <dt><code><strong>-term=</strong><em>TERM</em></code></dt>
 
-        <dd>tell Lynx what terminal type to assume its talking to.
-        (This may be useful for remote execution, when, for
+        <dd>tell Lynx what terminal type to assume it is talking
+        to. (This may be useful for remote execution, when, for
         example, Lynx connects to a remote TCP/IP port that starts
         a script that, in turn, starts another Lynx process.)</dd>
 
-        <dt><code>-timeout=<em>N</em></code></dt>
+        <dt><code><strong>-timeout=</strong><em>N</em></code></dt>
 
-        <dd>For win32, sets the network read-timeout, where N is
-        given in seconds.</dd>
+        <dd>For win32, sets the network read-timeout, where
+        <em>N</em> is given in seconds.</dd>
 
-        <dt><code>-tlog</code></dt>
+        <dt><code><strong>-tlog</strong></code></dt>
 
         <dd>toggles use of a <em>Lynx Trace Log</em> for the
         session. The log is named <em>Lynx.trace</em> and is
@@ -4130,12 +4165,12 @@ the other two cannot be saved between sessions.
         command. If use of a Lynx Trace Log is turned off, any
         trace output will go to the standard error stream.</dd>
 
-        <dt><code>-tna</code></dt>
+        <dt><code><strong>-tna</strong></code></dt>
 
         <dd>turns on <a href="#tna">"Textfields Need
         Activation"</a> mode.</dd>
 
-        <dt><code>-trace</code></dt>
+        <dt><code><strong>-trace</strong></code></dt>
 
         <dd>turns on Lynx trace mode. If a Lynx Trace Log
         (<em>Lynx.trace</em> in the home directory) has been
@@ -4144,7 +4179,8 @@ the other two cannot be saved between sessions.
         via the TRACE_LOG (normally, '<em>;</em>') command. If no
         Trace Log file is in use, trace messages go to stderr.</dd>
 
-        <dt><code>-trace_mask=<em>value</em></code></dt>
+        <dt>
+        <code><strong>-trace_mask=</strong><em>value</em></code></dt>
 
         <dd>
           turn on optional traces, which may result in very large
@@ -4174,33 +4210,34 @@ the other two cannot be saved between sessions.
           </dl>
         </dd>
 
-        <dt><code>-traversal</code></dt>
+        <dt><code><strong>-traversal</strong></code></dt>
 
         <dd>traverse all http links derived from startfile. When
         used with <em>-crawl</em>, each link that begins with the
         same string as startfile is output to a file, intended for
         indexing. See CRAWL.announce for more information.</dd>
 
-        <dt><code>-trim_input_fields</code></dt>
+        <dt><code><strong>-trim_input_fields</strong></code></dt>
 
         <dd>trim input text/textarea fields in forms.</dd>
 
-        <dt><code>-underscore</code></dt>
+        <dt><code><strong>-underscore</strong></code></dt>
 
         <dd>toggles use of _underline_ format in dumps.</dd>
 
-        <dt><code>-use_mouse</code></dt>
+        <dt><code><strong>-use_mouse</strong></code></dt>
 
         <dd>turn on mouse support, if available.</dd>
 
-        <dt><code>-useragent=STRING</code></dt>
+        <dt>
+        <code><strong>-useragent=</strong><em>STRING</em></code></dt>
 
         <dd>set different Lynx User-Agent header. Lynx produces a
-        warning on startup if the STRING does not contain "Lynx" or
-        "L_y_n_x", see the <a href="#noteUA">note</a> in the
-        Options Menu section for rationale.</dd>
+        warning on startup if the <em>STRING</em> does not contain
+        "Lynx" or "L_y_n_x", see the <a href="#noteUA">note</a> in
+        the Options Menu section for rationale.</dd>
 
-        <dt><code>-validate</code></dt>
+        <dt><code><strong>-validate</strong></code></dt>
 
         <dd>accept only http URLs (meant for validation).</dd>
 
@@ -4218,31 +4255,32 @@ the other two cannot be saved between sessions.
         accounts is with an explicit
         <em>-restrictions=default</em>.</dd>
 
-        <dt><code>-verbose</code></dt>
+        <dt><code><strong>-verbose</strong></code></dt>
 
         <dd>toggles [LINK], [IMAGE] and [INLINE] comments with
         filenames of these images.</dd>
 
-        <dt><code>-version</code></dt>
+        <dt><code><strong>-version</strong></code></dt>
 
         <dd>print version information.</dd>
 
-        <dt><code>-vikeys</code></dt>
+        <dt><code><strong>-vikeys</strong></code></dt>
 
         <dd>enable vi-like key movement.</dd>
 
-        <dt><code>-wdebug</code></dt>
+        <dt><code><strong>-wdebug</strong></code></dt>
 
         <dd>enable Waterloo tcp/ip packet debug (print to watt
         debugfile). This applies only to DOS versions compiled with
         WATTCP or WATT-32.</dd>
 
-        <dt><code>-width=NUMBER</code></dt>
+        <dt>
+        <code><strong>-width=</strong><em>NUMBER</em></code></dt>
 
         <dd>number of columns for formatting of dumps, default is
         80.</dd>
 
-        <dt><code>-with_backspaces</code></dt>
+        <dt><code><strong>-with_backspaces</strong></code></dt>
 
         <dd>emit backspaces in output if -dumping or -crawling
         (like <code>man</code> does).</dd>
@@ -4270,8 +4308,8 @@ the other two cannot be saved between sessions.
 
   <p>[<a href="#ToC-Environment">ToC</a>]</p>
 
-  <h2 id="id-lynx.cfg"><a name="lynx.cfg" id="lynx.cfg"><em>Main
-  configuration file lynx.cfg</em></a></h2>
+  <h2 id="id-lynx.cfg"><a name="lynx.cfg" id="lynx.cfg">Main
+  configuration file lynx.cfg</a></h2>
 
   <p>Lynx has several levels of customization: from the Options
   Menu (accessible on-line, and possibly stored in your local
@@ -4311,8 +4349,8 @@ the other two cannot be saved between sessions.
 
   <p>[<a href="#ToC-lynx.cfg">ToC</a>]</p>
 
-  <h2 id="id-Hist"><a name="Hist" id="Hist"><em>Lynx development
-  history</em></a></h2>
+  <h2 id="id-Hist"><a name="Hist" id="Hist">Lynx development
+  history</a></h2>
 
   <p>Lynx grew out of efforts to build a campus-wide information
   system at The University of Kansas. The earliest versions of Lynx
