@@ -1,7 +1,13 @@
--- $LynxId: CHANGES,v 1.713 2013/12/17 23:20:50 tom Exp $
+-- $LynxId: CHANGES,v 1.717 2014/01/09 00:25:13 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
+
+2014-01-08 (2.8.8pre.3)
+* review/improve html helpfiles -TD
+* ensure that $(sysconfdir) exists in makefile as dependency of install-help
+  rule -TD
+* update config.guess (2014-01-01), config.sub (2014-01-01)
 
 2013-12-17 (2.8.8pre.2)
 * change makefile.msc and lynx-slang.iss to use dll for slang -TD

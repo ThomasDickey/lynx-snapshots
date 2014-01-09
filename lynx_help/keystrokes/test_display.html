@@ -1,4 +1,4 @@
-<!-- $LynxId: test_display.html,v 1.8 2013/05/21 10:56:48 tom Exp $ -->
+<!-- $LynxId: test_display.html,v 1.9 2014/01/08 00:05:32 tom Exp $ -->
 <!-- do not use tidy for this page -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN">
 
@@ -11,21 +11,26 @@
   <link rev="made" href="mailto:lynx-dev@nongnu.org">
   <meta http-equiv="Content-Type" content=
   "text/html; charset=us-ascii">
-</head>
+  <meta name="description" content=
+  "Display a test-page for common problems with Lynx's display character set and/or locale problems.">
+  </head>
 
 <body>
-  <h1>Try this page with Lynx 2.7.2 or above:</h1>
+  <p>If you see several letters instead of a single &ndash; your
+  promised display charset does not support this character so "7
+  bit approximation" is in effect. If you see any single letter
+  which is unexpected, you have incorrect <strong>Lynx</strong>
+  settings.</p>
 
-  <p>If you see several letters instead of a single - your promised
-  display charset does not support this character so "7 bit
-  approximation" is in effect. If you see any single letter which
-  definitely far from being supposed you have a wrong lynx
-  settings. <em>Press 'o' for Options menu and change "Display
-  character set"</em>. Try again if necessary.<br>
-  When you are satisfied save your changes in Options menu,
+  <blockquote>
+    <p><em>Press 'o' for Options menu and change "Display character
+    set"</em>.<br>
+    Try again if necessary.</p>
+  </blockquote>
+
+  <p>When you are satisfied save your changes in Options menu,
   thanks.</p>
   <pre>
-
 
 0x00A9    &copy;           # COPYRIGHT SIGN
 
@@ -38,7 +43,6 @@
 0x0107    &#263;           # LATIN SMALL LETTER C WITH ACUTE
 0x0108    &#264;           # LATIN CAPITAL LETTER C WITH CIRCUMFLEX
 0x010C    &#268;           # LATIN CAPITAL LETTER C WITH CARON
-
 
 0x03BB    &lambda;           # GREEK SMALL LETTER LAMDA
 
@@ -54,9 +58,6 @@
 0x255E    &#9566;           # BOX DRAWINGS VERTICAL SINGLE AND RIGHT DOUBLE
 
 0xFB01    &#64257;           # LATIN SMALL LIGATURE FI
-
-
-
 </pre>
 
   <p>This is only a quick test to see obvious problems.</p>
