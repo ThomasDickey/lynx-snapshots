@@ -1,6 +1,6 @@
 /*
- * $LynxId: tidy_tls.c,v 1.16 2013/10/14 00:13:37 tom Exp $
- * Copyright 2008-2011,2013 Thomas E. Dickey
+ * $LynxId: tidy_tls.c,v 1.22 2014/01/11 17:34:51 tom Exp $
+ * Copyright 2008-2013,2014 Thomas E. Dickey
  * with fix Copyright 2008 by Thomas Viehmann
  *
  * Required libraries:
@@ -627,45 +627,59 @@ SSL_METHOD *SSLv23_client_method(void)
     SSL_METHOD *m;
 
     if ((m = typeCalloc(SSL_METHOD)) != 0) {
+	int n;
 
 	/*
 	 * List the protocols in decreasing order of priority.
 	 */
-	m->priority.protocol[0] = GNUTLS_TLS1;
-	m->priority.protocol[1] = GNUTLS_SSL3;
-	m->priority.protocol[2] = 0;
+	n = 0;
+#if GNUTLS_VERSION_NUMBER >= 0x030000
+	m->priority.protocol[n++] = GNUTLS_SSL3;
+	m->priority.protocol[n++] = GNUTLS_TLS1_2;
+#endif
+	m->priority.protocol[n++] = GNUTLS_TLS1_1;
+	m->priority.protocol[n++] = GNUTLS_TLS1_0;
+	m->priority.protocol[n] = 0;
 
 	/*
 	 * List the cipher algorithms in decreasing order of priority.
 	 */
-	m->priority.encrypts[0] = GNUTLS_CIPHER_AES_128_CBC;
-	m->priority.encrypts[1] = GNUTLS_CIPHER_3DES_CBC;
-	m->priority.encrypts[2] = GNUTLS_CIPHER_AES_256_CBC;
-	m->priority.encrypts[3] = GNUTLS_CIPHER_ARCFOUR_128;
-	m->priority.encrypts[4] = 0;
+	n = 0;
+#if GNUTLS_VERSION_NUMBER >= 0x030000
+	m->priority.encrypts[n++] = GNUTLS_CIPHER_AES_256_GCM;
+	m->priority.encrypts[n++] = GNUTLS_CIPHER_AES_128_GCM;
+#endif
+	m->priority.encrypts[n++] = GNUTLS_CIPHER_AES_256_CBC;
+	m->priority.encrypts[n++] = GNUTLS_CIPHER_AES_128_CBC;
+	m->priority.encrypts[n++] = GNUTLS_CIPHER_CAMELLIA_256_CBC;
+	m->priority.encrypts[n++] = GNUTLS_CIPHER_CAMELLIA_128_CBC;
+	m->priority.encrypts[n++] = GNUTLS_CIPHER_3DES_CBC;
+	m->priority.encrypts[n] = 0;
 
 	/*
 	 * List the compression algorithms in decreasing order of priority.
 	 */
-	m->priority.compress[0] = GNUTLS_COMP_ZLIB;
-	m->priority.compress[1] = GNUTLS_COMP_NULL;
-	m->priority.compress[2] = 0;
+	n = 0;
+	m->priority.compress[n++] = GNUTLS_COMP_NULL;
+	m->priority.compress[n] = 0;
 
 	/*
 	 * List the key exchange algorithms in decreasing order of priority.
 	 */
-	m->priority.key_xchg[0] = GNUTLS_KX_DHE_RSA;
-	m->priority.key_xchg[1] = GNUTLS_KX_RSA;
-	m->priority.key_xchg[2] = GNUTLS_KX_DHE_DSS;
-	m->priority.key_xchg[3] = 0;
+	n = 0;
+	m->priority.key_xchg[n++] = GNUTLS_KX_DHE_RSA;
+	m->priority.key_xchg[n++] = GNUTLS_KX_RSA;
+	m->priority.key_xchg[n++] = GNUTLS_KX_DHE_DSS;
+	m->priority.key_xchg[n] = 0;
 
 	/*
 	 * List message authentication code (MAC) algorithms in decreasing
 	 * order of priority to specify via gnutls_mac_set_priority().
 	 */
-	m->priority.msg_code[0] = GNUTLS_MAC_SHA1;
-	m->priority.msg_code[1] = GNUTLS_MAC_MD5;
-	m->priority.msg_code[2] = 0;
+	n = 0;
+	m->priority.msg_code[n++] = GNUTLS_MAC_SHA1;
+	m->priority.msg_code[n++] = GNUTLS_MAC_MD5;
+	m->priority.msg_code[n] = 0;
 
 	/*
 	 * For gnutls_init, says we're a client.

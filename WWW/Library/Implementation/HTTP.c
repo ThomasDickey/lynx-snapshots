@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTP.c,v 1.133 2013/11/28 11:15:11 tom Exp $
+ * $LynxId: HTTP.c,v 1.135 2014/01/11 16:52:29 tom Exp $
  *
  * HyperText Tranfer Protocol	- Client implementation		HTTP.c
  * ==========================
@@ -119,7 +119,13 @@ SSL *HTGetSSLHandle(void)
 #else
 	SSLeay_add_ssl_algorithms();
 	ssl_ctx = SSL_CTX_new(SSLv23_client_method());
-	SSL_CTX_set_options(ssl_ctx, SSL_OP_ALL);
+	SSL_CTX_set_options(ssl_ctx, SSL_OP_ALL | SSL_OP_NO_SSLv2);
+#ifdef SSL_OP_NO_COMPRESSION
+	SSL_CTX_set_options(ssl_ctx, SSL_OP_NO_COMPRESSION);
+#endif
+#ifdef SSL_MODE_RELEASE_BUFFERS
+	SSL_CTX_set_mode(ssl_ctx, SSL_MODE_RELEASE_BUFFERS);
+#endif
 	SSL_CTX_set_default_verify_paths(ssl_ctx);
 	SSL_CTX_set_verify(ssl_ctx, SSL_VERIFY_PEER, HTSSLCallback);
 #endif /* SSLEAY_VERSION_NUMBER < 0x0800 */
@@ -887,7 +893,7 @@ static int HTLoadHTTP(const char *arg,
 	if (status_sslcertcheck < 2) {
 	    int i;
 	    size_t size;
-	    gnutls_x509_crt cert;
+	    gnutls_x509_crt_t cert;
 	    static char buf[2048];
 
 	    /* import the certificate to the x509_crt format */

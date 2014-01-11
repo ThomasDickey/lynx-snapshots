@@ -1,4 +1,4 @@
-dnl $LynxId: configure.in,v 1.257 2014/01/09 00:20:59 tom Exp $
+dnl $LynxId: configure.in,v 1.258 2014/01/09 20:06:38 tom Exp $
 dnl
 dnl Process this file with autoconf to produce a configure script.
 dnl
@@ -679,7 +679,7 @@ AC_DEFINE_UNQUOTED(MIME_LIBDIR,"$MIME_LIBDIR",[Define to default path for MIME l
 
 dnl --------------------------------------------------------------------------
 AC_MSG_CHECKING(if locale-charset selection logic should be used)
-CF_ARG_ENABLE(locale-charset,
+CF_ARG_DISABLE(locale-charset,
 [  --enable-locale-charset use locale-charset selection logic],
 	[use_locale_charset=$enableval],
 	[use_locale_charset=yes])

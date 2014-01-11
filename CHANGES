@@ -1,9 +1,19 @@
--- $LynxId: CHANGES,v 1.717 2014/01/09 00:25:13 tom Exp $
+-- $LynxId: CHANGES,v 1.723 2014/01/11 16:26:24 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2014-01-08 (2.8.8pre.3)
+2014-01-11 (2.8.8pre.3)
+* apply analogous changes to tidytls.c interface -TD
+* apply openssl patch from openSUSE package for Lynx to modify the SSL options
+  to omit the SSLv2 and compression features (report by BJP) -TD
+* add check for alternate package "libssl" also used with Fedora20 -TD
+* fix a check in configure-script for openssl subdirectory in includes. It
+  happened to work in most cases due to a spurious blank in the pkg-config
+  file; this was removed recently, e.g., for Fedora20 -TD
+* fill-in some dangling links in test-files -TD
+* build-fix for --disable-prettysrc (reported by Don Hsi-Yun Yang aka
+  "omoikane") -TD
 * review/improve html helpfiles -TD
 * ensure that $(sysconfdir) exists in makefile as dependency of install-help
   rule -TD
