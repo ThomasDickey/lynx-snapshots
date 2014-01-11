@@ -324,6 +324,10 @@ II. Compile instructions -- UNIX
 	Use this option to disable the compiler and linker options that
 	provide largefile interfaces.
 
+  --disable-locale-charset		(define USE_LOCALE_CHARSET)
+  	Use nl_langinfo(CODESET) to determine initial value for display
+	charset, overrides character_set value in .lynxrc file.
+
   --disable-long-list			(prevent defining LONG_LIST)
 	Use this option to disable long "ls -l" directory listings (when
 	enabled, the actual directory style is configurable from lynx.cfg).
@@ -489,10 +493,6 @@ II. Compile instructions -- UNIX
 	On install, modify link from help-page to point to the local
 	doc-directory, e.g., with README files.  Normally this points
 	to the current release directory.
-
-  --enable-locale-charset		(define USE_LOCALE_CHARSET)
-  	Use nl_langinfo(CODESET) to determine initial value for display
-	charset, overrides character_set value in .lynxrc file.
 
   --enable-nested-tables		(define EXP_NESTED_TABLES)
 	Extends TRST to format nested tables, as well as be smarter about
@@ -1462,4 +1462,4 @@ VIII. Acknowledgment
 
 -- 1999/04/24 - H. Nelson <lynx-admin@irm.nara.kindai.ac.jp>
 -- vile:txtmode
--- $LynxId: INSTALLATION,v 1.122 2013/10/23 22:36:07 tom Exp $
+-- $LynxId: INSTALLATION,v 1.123 2014/01/09 20:07:01 tom Exp $

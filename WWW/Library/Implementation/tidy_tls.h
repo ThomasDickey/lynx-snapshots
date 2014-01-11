@@ -1,6 +1,6 @@
 /*
- * $LynxId: tidy_tls.h,v 1.3 2011/05/11 10:53:36 tom Exp $
- * Copyright 2008,2011 Thomas E. Dickey
+ * $LynxId: tidy_tls.h,v 1.4 2014/01/11 17:09:33 tom Exp $
+ * Copyright 2008-2011,2014 Thomas E. Dickey
  */
 #ifndef TIDY_TLS_H
 #define TIDY_TLS_H
@@ -41,7 +41,7 @@ typedef struct _SSL SSL;
 typedef gnutls_datum_t X509;
 
 typedef struct {
-    gnutls_connection_end_t connend;
+    unsigned connend;
     struct {
 	int protocol[GNUTLS_MAX_ALGORITHM_NUM];
 	int encrypts[GNUTLS_MAX_ALGORITHM_NUM];

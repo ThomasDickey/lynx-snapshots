@@ -1,4 +1,4 @@
-dnl $LynxId: aclocal.m4,v 1.207 2013/11/28 01:20:16 tom Exp $
+dnl $LynxId: aclocal.m4,v 1.210 2014/01/11 17:09:11 tom Exp $
 dnl Macros for auto-configure script.
 dnl by Thomas E. Dickey <dickey@invisible-island.net>
 dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
@@ -12,7 +12,7 @@ dnl http://invisible-island.net/autoconf/autoconf.html
 dnl
 dnl ---------------------------------------------------------------------------
 dnl
-dnl Copyright 1997-2012,2013 by Thomas E. Dickey
+dnl Copyright 1997-2013,2014 by Thomas E. Dickey
 dnl
 dnl Permission to use, copy, modify, and distribute this software and its
 dnl documentation for any purpose and without fee is hereby granted,
@@ -5285,7 +5285,7 @@ define([CF_SRAND_PARSE],[
 	esac
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_SSL version: 23 updated: 2012/11/08 20:57:52
+dnl CF_SSL version: 24 updated: 2014/01/11 12:06:14
 dnl ------
 dnl Check for ssl library
 dnl $1 = [optional] directory in which the library may be found, set by AC_ARG_WITH
@@ -5302,12 +5302,24 @@ AC_DEFUN([CF_SSL],[
 		no) #(vi
 			;;
 		yes) # if no explicit directory given, try pkg-config
-			if "$PKG_CONFIG" --exists openssl ; then
+			cf_cv_pkg_ssl=
+			for cf_try_package in openssl libssl
+			do
+				AC_MSG_CHECKING(pkg-config for $cf_try_package)
+				if "$PKG_CONFIG" --exists $cf_try_package ; then
+					cf_cv_pkg_ssl=$cf_try_package
+					AC_MSG_RESULT(yes)
+					break
+				else
+					AC_MSG_RESULT(no)
+				fi
+			done
+			if test -n "$cf_cv_pkg_ssl" ; then
 				cf_cv_have_ssl=yes
 				cf_cv_pkg_config_ssl=yes
 
-				cf_cflags_ssl=`$PKG_CONFIG --cflags openssl`
-				cf_libs_ssl=`$PKG_CONFIG --libs openssl`
+				cf_cflags_ssl=`$PKG_CONFIG --cflags $cf_cv_pkg_ssl`
+				cf_libs_ssl=`$PKG_CONFIG --libs $cf_cv_pkg_ssl`
 
 				if test -n "$cf_cflags_ssl" ; then
 					case "$cf_cflags_ssl" in #(vi
@@ -5318,9 +5330,6 @@ AC_DEFUN([CF_SSL],[
 						cf_cv_header_path_ssl=/usr/include
 						;;
 					esac
-					if test -d $cf_cv_header_path_ssl/openssl ; then
-						cf_cv_header_path_ssl=$cf_cv_header_path_ssl/openssl
-					fi
 					CF_ADD_CFLAGS($cf_cflags_ssl)
 
 					# workaround for broken openssl package using kerberos
@@ -5329,6 +5338,12 @@ AC_DEFUN([CF_SSL],[
 						cf_cv_have_ssl=maybe
 						;;
 					esac
+				else
+					cf_cv_header_path_ssl=/usr/include
+				fi
+
+				if test -d $cf_cv_header_path_ssl/openssl ; then
+					cf_cv_header_path_ssl=$cf_cv_header_path_ssl/openssl
 				fi
 
 				if test -n "$cf_libs_ssl" ; then
@@ -5397,6 +5412,7 @@ AC_DEFUN([CF_SSL],[
 	if test "$cf_cv_have_ssl" = yes ; then
 		AC_DEFINE(USE_SSL,1,[Define to 1 if we are using SSL])
 		if test -n "$cf_cv_header_path_ssl" ; then
+			CF_VERBOSE(checking ssl header-path $cf_cv_header_path_ssl)
 			case $cf_cv_header_path_ssl in #(vi
 			*/openssl)
 				AC_DEFINE(USE_OPENSSL_INCL,1,[Define to 1 if we are using OpenSSL headers])

@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYStyle.c,v 1.95 2013/12/01 19:22:44 tom Exp $
+ * $LynxId: LYStyle.c,v 1.96 2014/01/09 21:01:22 tom Exp $
  *
  * character level styles for Lynx
  * (c) 1996 Rob Partington -- donated to the Lyncei (if they want it :-)
@@ -963,9 +963,11 @@ void reinit_color_styles(void)
 	    style = hashStyles[cs].next;
 	}
     }
+#ifdef USE_PRETTYSRC
     for (cs = 0; cs < HTL_num_lexemes; ++cs) {
 	html_src_clean_item((HTlexeme) cs);
     }
+#endif
     free_colorstylestuff();
     style_readFromFile(lynx_lss_file);
 }

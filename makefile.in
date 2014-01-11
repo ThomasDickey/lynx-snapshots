@@ -1,4 +1,4 @@
-# $LynxId: makefile.in,v 1.136 2014/01/04 15:27:33 tom Exp $
+# $LynxId: makefile.in,v 1.137 2014/01/09 22:26:18 tom Exp $
 ##makefile for lynx
 
 SHELL		= @CONFIG_SHELL@
@@ -367,7 +367,7 @@ help_files.sed : makefile $(srcdir)/lynx_help/help_files.txt
 	@echo Constructing sed-script $@
 	@-rm -f $@ help_files.tmp
 	@cat $(srcdir)/lynx_help/help_files.txt > help_files.tmp
-@LYNXDOC_MAKE@	@ECHO_CC@echo 's!$(LYNXDOCS_URL)!file://$(docdir)!g' >> help_files.tmp
+@LYNXDOC_MAKE@	@ECHO_CC@echo 's!$(LYNXDOCS_URL)!file://$(docdir)/!g' >> help_files.tmp
 @LYNXCFG_MAKE@	@ECHO_CC@echo 's!$(LYNXHELP_URL)alphatoc.html!alphatoc.html!g' >> help_files.tmp
 @LYNXCFG_MAKE@	@ECHO_CC@echo 's!$(LYNXHELP_URL)cattoc.html!cattoc.html!g' >> help_files.tmp
 @LYNXCFG_MAKE@	@ECHO_CC@echo 's!alphatoc\.html!alphatoc.html$(COMPRESS_EXT)!g' >> help_files.tmp
