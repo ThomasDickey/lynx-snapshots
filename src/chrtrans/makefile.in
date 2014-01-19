@@ -1,4 +1,4 @@
-# $LynxId: makefile.in,v 1.38 2012/08/12 23:54:57 tom Exp $
+# $LynxId: makefile.in,v 1.39 2014/01/19 14:42:43 tom Exp $
 #
 # Makefile for the makeuctb and unicode tables.
 #
@@ -117,7 +117,7 @@ TABLES= \
 
 default: $(FONTMAP_INC)
 
-tables: $(TABLES)
+all tables: $(TABLES)
 
 OBJS		= makeuctb$o
 C_SRC		= $(OBJS:$o=.c)

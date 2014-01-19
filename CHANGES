@@ -1,7 +1,16 @@
--- $LynxId: CHANGES,v 1.723 2014/01/11 16:26:24 tom Exp $
+-- $LynxId: CHANGES,v 1.727 2014/01/19 15:21:18 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
+
+2014-01-19 (2.8.8pre.4)
+* disable EXP_JAPANESEUTF8_SUPPORT if the system has no iconv support -TD
+* modify makefiles to perform the src/chrtrans rules from the top-level rather
+  than via the src-level, solving the issue of "makefile races" -TD
+* reviewed minor fixes from OpenBSD CVS for these issues:
+  - fix makefile races [espie]
+  - read/write result checking fixes to avoid unsigned comparisons vs -1 [krw]
+  However, the former is not an improvement; kept only the latter -TD
 
 2014-01-11 (2.8.8pre.3)
 * apply analogous changes to tidytls.c interface -TD

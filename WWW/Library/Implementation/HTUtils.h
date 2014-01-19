@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTUtils.h,v 1.119 2013/11/28 11:33:20 tom Exp $
+ * $LynxId: HTUtils.h,v 1.120 2014/01/19 15:18:01 tom Exp $
  *
  * Utility macros for the W3 code library
  * MACROS FOR GENERAL USE
@@ -134,6 +134,10 @@ char *alloca();
 #undef HAVE_GETTEXT
 #undef HAVE_LIBGETTEXT_H
 #undef HAVE_LIBINTL_H
+#endif
+
+#ifndef HAVE_ICONV
+#undef EXP_JAPANESEUTF8_SUPPORT
 #endif
 
 #ifndef lynx_srand
