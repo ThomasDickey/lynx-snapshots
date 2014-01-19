@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYJump.c,v 1.49 2013/11/28 11:19:08 tom Exp $
+ * $LynxId: LYJump.c,v 1.50 2014/01/19 11:43:21 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTAlert.h>
@@ -419,7 +419,7 @@ static unsigned LYRead_Jumpfile(struct JumpTable *jtp)
     if (IsStream_LF) {
     /** Handle as a stream. **/
 #endif /* VMS */
-	if (read(fd, mp, (size_t) st.st_size) < st.st_size) {
+	if (read(fd, mp, (size_t) st.st_size) != st.st_size) {
 	    HTAlert(ERROR_READING_JUMP_FILE);
 	    FREE(mp);
 	    close(fd);

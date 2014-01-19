@@ -1,4 +1,4 @@
-# $LynxId: makefile.in,v 1.70 2013/10/13 22:58:41 tom Exp $
+# $LynxId: makefile.in,v 1.73 2014/01/19 14:41:13 tom Exp $
 # template-makefile for Lynx src directory
 
 SHELL		= @CONFIG_SHELL@
@@ -34,6 +34,8 @@ BUILD_CPP	= @BUILD_CPP@
 BUILD_CFLAGS	= @BUILD_CFLAGS@
 BUILD_CPPFLAGS	= @BUILD_CPPFLAGS@ @DEFS@
 BUILD_EXEEXT	= @BUILD_EXEEXT@
+BUILD_LDFLAGS	= @BUILD_LDFLAGS@
+BUILD_LIBS	= @BUILD_LIBS@
 
 MAKE_RECUR	= $(MAKE) @cf_cv_makeflags@ DESTDIR="$(DESTDIR)" CC="$(CC)"
 
@@ -104,7 +106,7 @@ all: lynx$x
 	@RULE_CC@
 	@ECHO_CC@$(CPP) -C $(CPP_OPTS) $< >$@
 
-lynx$x:   message do_chartrans_stuff $(top_builddir)/LYHelp.h $(OBJS) $(WWWLIB)
+lynx$x:   message $(top_builddir)/LYHelp.h $(OBJS) $(WWWLIB)
 	@echo "Linking and creating Lynx executable"
 	$(CC) $(CC_OPTS) $(LDFLAGS) -o $@  $(OBJS) $(WWWLIB) $(LIBS) $(INTLLIB)
 	@echo "Copying Lynx executable into top-level directory"
@@ -155,7 +157,7 @@ LYUtils$o :		$(top_srcdir)/userdefs.h
 LYmktime$o :		$(top_srcdir)/userdefs.h
 LYrcFile$o :		$(top_srcdir)/userdefs.h
 
-LYIcon$o: LYIcon.rc 
+LYIcon$o: LYIcon.rc
 	$(WINDRES) -i LYIcon.rc -o LYIcon$o -O coff
 
 CHRTR= chrtrans/
@@ -230,7 +232,7 @@ test_mktime: test_mktime.o parsdate.o LYebcdic.o
 
 # update generated source (may be in ".", or srcdir)
 parsdate.c : $(srcdir)/parsdate.y
-	$(YACC)  $(srcdir)/parsdate.y 
+	$(YACC)  $(srcdir)/parsdate.y
 	-rm -f $@
 	mv y.tab.c $@
 
