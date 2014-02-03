@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYPrint.c,v 1.102 2013/11/28 11:21:09 tom Exp $
+ * $LynxId: LYPrint.c,v 1.103 2014/02/03 00:17:07 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTAccess.h>
@@ -137,16 +137,18 @@ static void SetupFilename(bstring **filename,
 {
     HTFormat format;
     HTAtom *encoding;
+    char *cp;
 
     BStrCopy0(*filename, sug_filename);		/* add suggestion info */
     BStrAlloc(*filename, LY_MAXPATH);	/* FIXME */
     change_sug_filename((*filename)->str);
     if (!(HTisDocumentSource())
-	&& strrchr((*filename)->str, '.') != NULL) {
+	&& (cp = strrchr((*filename)->str, '.')) != NULL) {
 	format = HTFileFormat((*filename)->str, &encoding, NULL);
 	CTRACE((tfp, "... format %s\n", format->name));
 	if (!strcasecomp(format->name, "text/html") ||
 	    !IsUnityEnc(encoding)) {
+	    (*filename)->len = (cp - (*filename)->str);
 	    BStrCat0(*filename, TEXT_SUFFIX);
 	}
     }
@@ -181,7 +183,7 @@ static int RecallFilename(bstring **filename,
     recall = ((*total >= 1) ? RECALL_URL : NORECALL);
 
     if ((ch = LYgetBString(filename, FALSE, 0, recall)) < 0 ||
-	*filename == '\0' || ch == UPARROW_KEY || ch == DNARROW_KEY) {
+	isBEmpty(*filename) || ch == UPARROW_KEY || ch == DNARROW_KEY) {
 	if (recall && ch == UPARROW_KEY) {
 	    if (*first) {
 		*first = FALSE;

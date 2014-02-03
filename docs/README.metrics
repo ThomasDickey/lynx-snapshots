@@ -1,4 +1,4 @@
--- $LynxId: README.metrics,v 1.8 2013/12/16 00:14:10 tom Exp $
+-- $LynxId: README.metrics,v 1.9 2014/02/03 00:34:01 tom Exp $
 
 This is a short summary of code metrics showing how lynx has grown from
 release to release.  It also shows how the original codebase has
@@ -23,8 +23,8 @@ Release         Current                 Original
                                         15573   13587     3.9     8.0
 2.8.7           441453  180674          25064   23101     5.7    12.8
                                         15436   13473     3.5     7.5
-2.8.8pre.2      464871  184810          24027   22288     5.2    12.1
-                                        14603   12864     3.1     7.0
+2.8.8pre.4      465760  184841          24026   22288     5.2    12.1
+                                        14602   12864     3.1     7.0
 
 Beginning with 2.8.6, the percentage of the remaining original codebase is
 shown on two lines (i.e., comparing against 2.4.2 indented to use the current
@@ -205,34 +205,34 @@ resolve these issues.
 However, some information can be gleaned from the existing change-logs
 to show the principal contributors for each release:
 
-** credits from CHANGES docs/CHANGES2.8 (4297.6 changes)
+** credits from CHANGES docs/CHANGES2.8 (4319.6 changes)
   1.1 Brian J Pardy
   3.0 Doug Kaufman
   6.5 Foteos Macrides
   2.0 Ilya Zakharevich
  16.4 Klaus Weide
-  8.0 Leonid Pauzner
+  7.9 Leonid Pauzner
   1.2 Paul Gilmartin
- 47.2 Thomas E Dickey
+ 47.4 Thomas E Dickey
   2.0 Vlad Harchev
-** credits from CHANGES docs/CHANGES* (5764.6 changes)
+** credits from CHANGES docs/CHANGES* (5786.6 changes)
   2.3 Doug Kaufman
- 23.7 Foteos Macrides
+ 23.6 Foteos Macrides
   1.5 Ilya Zakharevich
  12.5 Klaus Weide
   5.9 Leonid Pauzner
- 35.2 Thomas E Dickey
+ 35.4 Thomas E Dickey
   1.5 Vlad Harchev
   3.6 unknown
-** credits from CHANGES (3377.6 changes)
+** credits from CHANGES (3399.6 changes)
   1.4 Brian J Pardy
   3.5 Doug Kaufman
   2.5 Ilya Zakharevich
   1.0 John Bley
- 13.0 Klaus Weide
-  9.3 Leonid Pauzner
-  1.6 Paul Gilmartin
- 52.5 Thomas E Dickey
+ 12.9 Klaus Weide
+  9.2 Leonid Pauzner
+  1.5 Paul Gilmartin
+ 52.8 Thomas E Dickey
   2.5 Vlad Harchev
 ** credits from docs/CHANGES2.8 (920 changes)
   1.2 Doug Kaufman
