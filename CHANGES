@@ -1,9 +1,13 @@
--- $LynxId: CHANGES,v 1.727 2014/01/19 15:21:18 tom Exp $
+-- $LynxId: CHANGES,v 1.729 2014/02/03 00:28:12 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2014-01-19 (2.8.8pre.4)
+2014-02-02 (2.8.8pre.4)
+* fix two bugs in print-to-file from 2.8.8dev.10 changes -TD
+  + suggested filename suffix for text/html was ".html" rather than ".txt"
+  + using ^U to clear the filename to print to did not cancel the prompt
+  (report by Klaus-Peter Wegge)
 * disable EXP_JAPANESEUTF8_SUPPORT if the system has no iconv support -TD
 * modify makefiles to perform the src/chrtrans rules from the top-level rather
   than via the src-level, solving the issue of "makefile races" -TD

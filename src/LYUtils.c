@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYUtils.c,v 1.263 2013/12/09 11:21:42 tom Exp $
+ * $LynxId: LYUtils.c,v 1.264 2014/02/03 00:17:39 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTCP.h>
@@ -6838,6 +6838,8 @@ BOOLEAN LYValidateFilename(bstring **result,
 int LYValidateOutput(char *filename)
 {
     int c;
+
+    CTRACE((tfp, "LYValidateOutput '%s'\n", filename));
 
     /*
      * Assume we can write to a pipe
