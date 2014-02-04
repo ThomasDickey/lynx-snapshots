@@ -1,5 +1,5 @@
 /*
- * $LynxId: UCdomap.c,v 1.95 2012/02/23 01:05:42 tom Exp $
+ * $LynxId: UCdomap.c,v 1.96 2014/02/04 01:29:44 tom Exp $
  *
  *  UCdomap.c
  *  =========
@@ -1529,7 +1529,7 @@ int UCGetLYhndl_byMIME(const char *value)
     int i;
     int LYhndl = -1;
 
-    if (!value || !(*value)) {
+    if (isEmpty(value)) {
 	CTRACE((tfp,
 		"UCGetLYhndl_byMIME: NULL argument instead of MIME name.\n"));
 	return ucError;
@@ -2468,7 +2468,6 @@ static char *nl_langinfo(nl_item item)
  */
 void LYFindLocaleCharset(void)
 {
-    BOOL found = FALSE;
     char *name;
 
     CTRACE((tfp, "LYFindLocaleCharset(%d)\n", LYLocaleCharset));
@@ -2478,18 +2477,34 @@ void LYFindLocaleCharset(void)
 	int value = UCGetLYhndl_byMIME(name);
 
 	if (value >= 0) {
-	    found = TRUE;
 	    linedrawing_char_set = value;
 	    CTRACE((tfp, "Found name \"%s\" -> %d\n", name, value));
+	    /*
+	     * If no locale was set, we will get the POSIX character set, which
+	     * in Lynx is treated as US-ASCII.  However, Lynx's longstanding
+	     * behavior has been to default to ISO-8859-1.  So we treat that
+	     * encoding specially.  Otherwise, if LOCALE_CHARSET is set, then
+	     * we will use the locale encoding -- unless overridden by the
+	     * ASSUME_CHARSET value and/or command-line option.
+	     */
+	    if (LYLocaleCharset) {
+		CTRACE((tfp, "...prior LocaleCharset '%s'\n", NonNull(UCAssume_MIMEcharset)));
+		if (value == US_ASCII) {
+		    CTRACE((tfp, "...prefer existing charset to ASCII\n"));
+		} else if (assumed_charset) {
+		    CTRACE((tfp, "...already assumed-charset\n"));
+		} else {
+		    current_char_set = linedrawing_char_set;
+		    UCLYhndl_for_unspec = current_char_set;
+		    StrAllocCopy(UCAssume_MIMEcharset, name);
+		    CTRACE((tfp, "...using LocaleCharset '%s'\n", NonNull(UCAssume_MIMEcharset)));
+		}
+	    }
 	} else {
 	    CTRACE((tfp, "Cannot find a handle for MIME name \"%s\"\n", name));
 	}
     } else {
 	CTRACE((tfp, "Cannot find a MIME name for locale\n"));
-    }
-
-    if (found && LYLocaleCharset) {
-	current_char_set = linedrawing_char_set;
     }
 }
 #endif /* USE_LOCALE_CHARSET */

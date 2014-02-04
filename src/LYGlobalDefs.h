@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYGlobalDefs.h,v 1.137 2013/10/02 19:03:07 tom Exp $
+ * $LynxId: LYGlobalDefs.h,v 1.138 2014/02/04 01:25:39 tom Exp $
  *
  * global variable definitions
  */
@@ -586,6 +586,7 @@ extern "C" {
 #ifdef USE_LOCALE_CHARSET
     extern BOOLEAN LYLocaleCharset;
 #endif
+    extern BOOLEAN assumed_charset;
 
 #ifndef NO_DUMP_WITH_BACKSPACES
     extern BOOLEAN with_backspaces;
