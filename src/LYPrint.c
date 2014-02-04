@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYPrint.c,v 1.103 2014/02/03 00:17:07 tom Exp $
+ * $LynxId: LYPrint.c,v 1.104 2014/02/04 01:58:51 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTAccess.h>
@@ -148,7 +148,7 @@ static void SetupFilename(bstring **filename,
 	CTRACE((tfp, "... format %s\n", format->name));
 	if (!strcasecomp(format->name, "text/html") ||
 	    !IsUnityEnc(encoding)) {
-	    (*filename)->len = (cp - (*filename)->str);
+	    (*filename)->len = (int) (cp - (*filename)->str);
 	    BStrCat0(*filename, TEXT_SUFFIX);
 	}
     }

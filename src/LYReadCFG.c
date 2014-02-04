@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYReadCFG.c,v 1.182 2013/11/29 00:21:45 tom Exp $
+ * $LynxId: LYReadCFG.c,v 1.183 2014/02/04 01:39:32 tom Exp $
  */
 #ifndef NO_RULES
 #include <HTRules.h>
@@ -557,13 +557,14 @@ typedef struct {
 
 static int assume_charset_fun(char *value)
 {
+    assumed_charset = TRUE;
     UCLYhndl_for_unspec = safeUCGetLYhndl_byMIME(value);
     StrAllocCopy(UCAssume_MIMEcharset,
 		 LYCharSet_UC[UCLYhndl_for_unspec].MIMEname);
-/*    this may be a memory for bogus typo -
-    StrAllocCopy(UCAssume_MIMEcharset, value);
-    LYLowerCase(UCAssume_MIMEcharset);    */
-
+    CTRACE((tfp, "assume_charset_fun %s ->%d ->%s\n",
+	    NonNull(value),
+	    UCLYhndl_for_unspec,
+	    UCAssume_MIMEcharset));
     return 0;
 }
 
@@ -591,8 +592,9 @@ static int character_set_fun(char *value)
 	    current_char_set = auto_display_charset;
 #endif
 	/* do nothing here: so fallback to userdefs.h */
-    } else
+    } else {
 	current_char_set = i;
+    }
 
     return 0;
 }

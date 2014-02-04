@@ -1,9 +1,11 @@
--- $LynxId: CHANGES,v 1.729 2014/02/03 00:28:12 tom Exp $
+-- $LynxId: CHANGES,v 1.730 2014/02/04 01:45:19 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2014-02-02 (2.8.8pre.4)
+2014-02-04 (2.8.8pre.4)
+* modify the LOCALE_CHARSET feature to provide a default value for the
+  ASSUMED_CHARSET feature aka "display-charset" (Debian #737416) -TD
 * fix two bugs in print-to-file from 2.8.8dev.10 changes -TD
   + suggested filename suffix for text/html was ".html" rather than ".txt"
   + using ^U to clear the filename to print to did not cancel the prompt

@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMain.c,v 1.251 2013/11/28 11:20:21 tom Exp $
+ * $LynxId: LYMain.c,v 1.252 2014/02/04 01:25:16 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTP.h>
@@ -594,6 +594,7 @@ int justify_max_void_percent = 35;
 #ifdef USE_LOCALE_CHARSET
 BOOLEAN LYLocaleCharset = FALSE;
 #endif
+BOOLEAN assumed_charset = FALSE;
 
 #ifndef NO_DUMP_WITH_BACKSPACES
 BOOLEAN with_backspaces = FALSE;
@@ -2497,13 +2498,14 @@ static int anonymous_fun(char *next_arg GCC_UNUSED)
 /* -assume_charset */
 static int assume_charset_fun(char *next_arg)
 {
+    assumed_charset = TRUE;
     UCLYhndl_for_unspec = safeUCGetLYhndl_byMIME(next_arg);
     StrAllocCopy(UCAssume_MIMEcharset,
 		 LYCharSet_UC[UCLYhndl_for_unspec].MIMEname);
-/*	   this may be a memory for bogus typo -
-    StrAllocCopy(UCAssume_MIMEcharset, next_arg);
-    LYLowerCase(UCAssume_MIMEcharset);   */
-
+    CTRACE((tfp, "assume_charset_fun %s ->%d ->%s\n",
+	    NonNull(next_arg),
+	    UCLYhndl_for_unspec,
+	    UCAssume_MIMEcharset));
     return 0;
 }
 
