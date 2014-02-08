@@ -1,4 +1,4 @@
-dnl $LynxId: configure.in,v 1.259 2014/01/19 11:47:17 tom Exp $
+dnl $LynxId: configure.in,v 1.263 2014/02/08 01:36:12 tom Exp $
 dnl
 dnl Process this file with autoconf to produce a configure script.
 dnl
@@ -29,7 +29,7 @@ dnl ---------------------------------------------------------------------------
 dnl
 dnl ask PRCS to plug-in the project-version for the configure-script.
 dnl $Format: "AC_REVISION($ProjectVersion$)"$
-AC_REVISION(2.8.8pre.4)
+AC_REVISION(2.8.8pre.5)
 
 # Save the original $CFLAGS so we can distinguish whether the user set those
 # in the environment, or whether autoconf added -O and -g options:
@@ -64,7 +64,7 @@ AC_ARG_PROGRAM
 PACKAGE=lynx
 dnl ask PRCS to plug-in the project-version for the packages.
 # $Format: "VERSION=$ProjectVersion$"$
-VERSION=2.8.8pre.4
+VERSION=2.8.8pre.5
 
 AC_SUBST(PACKAGE)
 AC_SUBST(VERSION)
@@ -680,7 +680,7 @@ AC_DEFINE_UNQUOTED(MIME_LIBDIR,"$MIME_LIBDIR",[Define to default path for MIME l
 dnl --------------------------------------------------------------------------
 AC_MSG_CHECKING(if locale-charset selection logic should be used)
 CF_ARG_DISABLE(locale-charset,
-[  --enable-locale-charset use locale-charset selection logic],
+[  --disable-locale-charset use locale-charset selection logic],
 	[use_locale_charset=$enableval],
 	[use_locale_charset=yes])
 AC_MSG_RESULT($use_locale_charset)
@@ -998,7 +998,7 @@ Miscellaneous Options:)
 
 dnl --------------------------------------------------------------------------
 AC_MSG_CHECKING(if alternative line-edit bindings should be used)
-CF_ARG_ENABLE(alt-bindings,
+CF_ARG_DISABLE(alt-bindings,
 [  --disable-alt-bindings  disable alternative line-edit bindings],
 	[use_alt_bindings=$enableval],
 	[use_alt_bindings=yes])
@@ -1042,6 +1042,8 @@ AC_MSG_RESULT($use_idna)
 
 if test "$use_idna" = yes ; then
 	CF_WITH_IDNA($use_idna)
+	AC_CHECK_HEADERS(idn-free.h)
+	AC_CHECK_FUNCS(idn_free)
 fi
 
 dnl --------------------------------------------------------------------------
