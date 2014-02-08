@@ -1,7 +1,13 @@
--- $LynxId: CHANGES,v 1.730 2014/02/04 01:45:19 tom Exp $
+-- $LynxId: CHANGES,v 1.732 2014/02/08 01:11:57 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
+
+2014-02-07 (2.8.8pre.5)
+* use idn_free() rather than ordinary free (patch by GV)
+* build-fix when alt-bindings are disabled (patch by GV)
+* correct sense of --disable-alt-bindings option in configure script (prompted
+  by report by GV) -TD
 
 2014-02-04 (2.8.8pre.4)
 * modify the LOCALE_CHARSET feature to provide a default value for the

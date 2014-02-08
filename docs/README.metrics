@@ -1,4 +1,4 @@
--- $LynxId: README.metrics,v 1.9 2014/02/03 00:34:01 tom Exp $
+-- $LynxId: README.metrics,v 1.10 2014/02/08 01:04:41 tom Exp $
 
 This is a short summary of code metrics showing how lynx has grown from
 release to release.  It also shows how the original codebase has
@@ -203,7 +203,8 @@ There is neither a source repository nor a mailing-list archive to consult to
 resolve these issues.
 
 However, some information can be gleaned from the existing change-logs
-to show the principal contributors for each release:
+to show the principal contributors for each release (i.e., not listing those
+with less than 1%):
 
 ** credits from CHANGES docs/CHANGES2.8 (4319.6 changes)
   1.1 Brian J Pardy

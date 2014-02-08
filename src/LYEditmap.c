@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYEditmap.c,v 1.72 2013/11/28 11:18:33 tom Exp $
+ * $LynxId: LYEditmap.c,v 1.73 2014/02/08 01:12:58 Gisle.Vanem Exp $
  *
  * LYEditMap.c
  * Keybindings for line and form editing.
@@ -1750,9 +1750,11 @@ void LYinitEditmap(void)
 	LYEditorNames[j] = LYLineEditors[j].name;
 	initLineEditor(&LYLineEditors[j]);
     }
+#ifdef USE_ALT_BINDINGS
     for (j = 0; j < TABLESIZE(LYModifierBindings); ++j) {
 	initLineEditor(&LYModifierBindings[j]);
     }
+#endif
 }
 
 static char *showRanges(int *state)
