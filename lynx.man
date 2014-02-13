@@ -1,4 +1,4 @@
-.\" $LynxId: lynx.man,v 1.109 2013/12/15 23:20:40 Bjarni.I.Gislason Exp $
+.\" $LynxId: lynx.man,v 1.110 2014/02/13 13:32:15 tom Exp $
 .\" **************************************************************************
 .\" Escape single quotes in literal strings from groff's Unicode transform.
 .ie \n(.g .ds AQ \(aq
@@ -1222,7 +1222,7 @@ Currently, it is hard-coded to a wish list.
 .B NLSPATH
 This variable, if set, is used as the path prefix for message catalogs.
 .SH NOTES
-This is the \fILynx\fP v2.8.7 Release; development is in progress for 2.8.8.
+This is the \fILynx\fP v2.8.8 Release; development is in progress for 2.8.9.
 .PP
 If you wish to contribute to the further development
 of \fILynx\fR, subscribe to our mailing list.
