@@ -1,9 +1,13 @@
--- $LynxId: CHANGES,v 1.732 2014/02/08 01:11:57 tom Exp $
+-- $LynxId: CHANGES,v 1.733 2014/02/13 00:07:35 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2014-02-07 (2.8.8pre.5)
+2014-02-12 (2.8.8pre.5)
+* reviewed command-line options which were not provided in lynx.cfg; added
+  others which could be useful for dumps (i.e., force_html, hiddenlinks,
+  listonly, list_inline, localhost, short_url, with_backspaces) -TD:
+* add dont_wrap_pre to lynx.cfg (request by GV) -TD
 * use idn_free() rather than ordinary free (patch by GV)
 * build-fix when alt-bindings are disabled (patch by GV)
 * correct sense of --disable-alt-bindings option in configure script (prompted

@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYReadCFG.h,v 1.28 2013/05/30 09:32:16 tom Exp $
+ * $LynxId: LYReadCFG.h,v 1.29 2014/02/12 23:58:37 tom Exp $
  */
 #ifndef LYREADCFG_H
 #define LYREADCFG_H
@@ -58,6 +58,7 @@ extern "C" {
 
     extern FILE *LYOpenCFG(const char *cfg_filename, const char
 			   *parent_filename, const char *dft_filename);
+    extern int hiddenlinks_fun(char *next_arg);
     extern int lynx_cfg_infopage(DocInfo *newdoc);
     extern int lynx_compile_opts(DocInfo *newdoc);
     extern int match_item_by_name(lynx_list_item_type *ptr, const char *name, int only_overriders);

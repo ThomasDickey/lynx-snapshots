@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYReadCFG.c,v 1.183 2014/02/04 01:39:32 tom Exp $
+ * $LynxId: LYReadCFG.c,v 1.184 2014/02/12 23:59:11 tom Exp $
  */
 #ifndef NO_RULES
 #include <HTRules.h>
@@ -1514,6 +1514,7 @@ static Config_Type Config_Table [] =
 #ifdef USE_CHARSET_CHOICE
      PARSE_FUN(RC_DISPLAY_CHARSET_CHOICE, parse_display_charset_choice),
 #endif
+     PARSE_SET(RC_DONT_WRAP_PRE,        dont_wrap_pre),
      PARSE_ADD(RC_DOWNLOADER,           downloaders),
      PARSE_SET(RC_EMACS_KEYS_ALWAYS_ON, emacs_keys),
      PARSE_FUN(RC_ENABLE_LYNXRC,        enable_lynxrc),
@@ -1529,6 +1530,7 @@ static Config_Type Config_Table [] =
      PARSE_SET(RC_FORCE_8BIT_TOUPPER,   UCForce8bitTOUPPER),
      PARSE_ENU(RC_FORCE_COOKIE_PROMPT,  cookie_noprompt, tbl_force_prompt),
      PARSE_SET(RC_FORCE_EMPTY_HREFLESS_A, force_empty_hrefless_a),
+     PARSE_SET(RC_FORCE_HTML,           LYforce_HTML_mode),
      PARSE_SET(RC_FORCE_SSL_COOKIES_SECURE, LYForceSSLCookiesSecure),
 #ifdef USE_SSL
      PARSE_ENU(RC_FORCE_SSL_PROMPT,     ssl_noprompt, tbl_force_prompt),
@@ -1547,6 +1549,7 @@ static Config_Type Config_Table [] =
      PARSE_SET(RC_GOTOBUFFER,           goto_buffer),
      PARSE_PRG(RC_GZIP_PATH,            ppGZIP),
      PARSE_STR(RC_HELPFILE,             helpfile),
+     PARSE_FUN(RC_HIDDENLINKS,          hiddenlinks_fun),
 #ifdef MARK_HIDDEN_LINKS
      PARSE_STR(RC_HIDDEN_LINK_MARKER,   hidden_link_marker),
 #endif
@@ -1574,9 +1577,11 @@ static Config_Type Config_Table [] =
 #endif
      PARSE_FUN(RC_KEYMAP,               keymap_fun),
      PARSE_SET(RC_LEFTARROW_IN_TEXTFLD_PROMPT, textfield_prompt_at_left_edge),
+     PARSE_SET(RC_LISTONLY,             dump_links_only),
 #ifndef VMS
      PARSE_STR(RC_LIST_FORMAT,          list_format),
 #endif
+     PARSE_SET(RC_LIST_INLINE,          dump_links_inline),
 #ifndef DISABLE_NEWS
      PARSE_SET(RC_LIST_NEWS_DATES,      LYListNewsDates),
      PARSE_SET(RC_LIST_NEWS_NUMBERS,    LYListNewsNumbers),
@@ -1585,6 +1590,7 @@ static Config_Type Config_Table [] =
      PARSE_SET(RC_LOCALE_CHARSET,       LYLocaleCharset),
 #endif
      PARSE_STR(RC_LOCAL_DOMAIN,         LYLocalDomain),
+     PARSE_SET(RC_LOCALHOST,            local_host_only),
      PARSE_FUN(RC_LOCALHOST_ALIAS,      localhost_alias_fun),
 #if defined(EXEC_LINKS) || defined(EXEC_SCRIPTS)
      PARSE_SET(RC_LOCAL_EXECUTION_LINKS_ALWAYS, local_exec),
@@ -1700,6 +1706,7 @@ static Config_Type Config_Table [] =
      PARSE_FUN(RC_SESSION_LIMIT,        session_limit_fun),
 #endif
      PARSE_SET(RC_SET_COOKIES,          LYSetCookies),
+     PARSE_SET(RC_SHORT_URL,            long_url_ok),
      PARSE_SET(RC_SHOW_CURSOR,          LYShowCursor),
      PARSE_STR(RC_SHOW_KB_NAME,         LYTransferName),
      PARSE_ENU(RC_SHOW_KB_RATE,         LYTransferRate, tbl_transfer_rate),
@@ -1766,6 +1773,7 @@ static Config_Type Config_Table [] =
      PARSE_FUN(RC_VIEWER,               viewer_fun),
      PARSE_Env(RC_WAIS_PROXY,           0),
      PARSE_SET(RC_WAIT_VIEWER_TERMINATION, wait_viewer_termination),
+     PARSE_SET(RC_WITH_BACKSPACES,      with_backspaces),
      PARSE_STR(RC_XLOADIMAGE_COMMAND,   XLoadImageCommand),
      PARSE_SET(RC_XHTML_PARSING,        LYxhtml_parsing),
      PARSE_PRG(RC_ZCAT_PATH,            ppZCAT),

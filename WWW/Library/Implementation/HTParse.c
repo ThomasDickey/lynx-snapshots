@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTParse.c,v 1.74 2014/02/12 22:15:21 tom Exp $
+ * $LynxId: HTParse.c,v 1.75 2014/02/12 23:15:42 tom Exp $
  *
  *		Parse HyperText Document Address		HTParse.c
  *		================================
@@ -24,6 +24,7 @@
 
 #ifdef USE_IDNA
 #include <idna.h>
+#include <idn-free.h>
 #endif
 
 #define HEX_ESCAPE '%'
