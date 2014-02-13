@@ -1,6 +1,6 @@
                              Lynx README file
 
-Lynx Version 2.8.7 is the latest release (July 2009).
+Lynx Version 2.8.8 is the latest release (February 2014).
 See the CHANGES file for a complete record of all changes and bug fixes.
 New releases are announced on the lynx-dev mailing list (see below).
 
@@ -150,5 +150,5 @@ LYNX-DEV MAILING LIST
 
 ------------------------------------------------------------------------------
 -- vile:txtmode fc=72 noti
--- $LynxId: README,v 1.29 2013/10/13 17:33:49 tom Exp $
+-- $LynxId: README,v 1.30 2014/02/13 13:25:42 tom Exp $
 ------------------------------------------------------------------------------

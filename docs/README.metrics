@@ -1,4 +1,4 @@
--- $LynxId: README.metrics,v 1.10 2014/02/08 01:04:41 tom Exp $
+-- $LynxId: README.metrics,v 1.11 2014/02/13 13:25:56 tom Exp $
 
 This is a short summary of code metrics showing how lynx has grown from
 release to release.  It also shows how the original codebase has
@@ -23,7 +23,7 @@ Release         Current                 Original
                                         15573   13587     3.9     8.0
 2.8.7           441453  180674          25064   23101     5.7    12.8
                                         15436   13473     3.5     7.5
-2.8.8pre.4      465760  184841          24026   22288     5.2    12.1
+2.8.8           465760  184841          24026   22288     5.2    12.1
                                         14602   12864     3.1     7.0
 
 Beginning with 2.8.6, the percentage of the remaining original codebase is
