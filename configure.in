@@ -1,4 +1,4 @@
-dnl $LynxId: configure.in,v 1.263 2014/02/08 01:36:12 tom Exp $
+dnl $LynxId: configure.in,v 1.264 2014/02/12 22:17:21 tom Exp $
 dnl
 dnl Process this file with autoconf to produce a configure script.
 dnl
@@ -1042,8 +1042,6 @@ AC_MSG_RESULT($use_idna)
 
 if test "$use_idna" = yes ; then
 	CF_WITH_IDNA($use_idna)
-	AC_CHECK_HEADERS(idn-free.h)
-	AC_CHECK_FUNCS(idn_free)
 fi
 
 dnl --------------------------------------------------------------------------

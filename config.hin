@@ -1,5 +1,5 @@
 /*
- * $LynxId: config.hin,v 1.134 2014/02/08 01:35:30 tom Exp $
+ * $LynxId: config.hin,v 1.135 2014/02/12 22:14:34 tom Exp $
  * vile:cmode
  *
  * The configure script translates "config.hin" into "lynx_cfg.h"
@@ -83,8 +83,6 @@
 #undef HAVE_GNUTLS_PRIORITY_SET_DIRECT
 #undef HAVE_H_ERRNO
 #undef HAVE_ICONV		/* AM_ICONV */
-#undef HAVE_IDN_FREE		/* --with-idna */
-#undef HAVE_IDN_FREE_H		/* --with-idna */
 #undef HAVE_INET_ATON		/* CF_INET_ADDR */
 #undef HAVE_INTTYPES_H
 #undef HAVE_JCURSES_H
