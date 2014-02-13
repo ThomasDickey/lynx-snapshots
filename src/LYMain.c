@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMain.c,v 1.252 2014/02/04 01:25:16 tom Exp $
+ * $LynxId: LYMain.c,v 1.253 2014/02/12 23:48:36 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTP.h>
@@ -2753,7 +2753,7 @@ static int help_fun(char *next_arg GCC_UNUSED)
 }
 
 /* -hiddenlinks */
-static int hiddenlinks_fun(char *next_arg)
+int hiddenlinks_fun(char *next_arg)
 {
     /* *INDENT-OFF* */
     static Config_Enum table[] = {

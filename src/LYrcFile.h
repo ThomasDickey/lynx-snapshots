@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYrcFile.h,v 1.44 2013/04/30 09:53:05 tom Exp $
+ * $LynxId: LYrcFile.h,v 1.45 2014/02/12 23:42:24 tom Exp $
  */
 #ifndef LYRCFILE_H
 #define LYRCFILE_H
@@ -72,6 +72,7 @@
 #define RC_DIR_LIST_STYLE               "dir_list_style"
 #define RC_DISPLAY                      "display"
 #define RC_DISPLAY_CHARSET_CHOICE       "display_charset_choice"
+#define RC_DONT_WRAP_PRE                "dont_wrap_pre"
 #define RC_DOWNLOADER                   "downloader"
 #define RC_EMACS_KEYS                   "emacs_keys"
 #define RC_EMACS_KEYS_ALWAYS_ON         "emacs_keys_always_on"
@@ -86,6 +87,7 @@
 #define RC_FORCE_8BIT_TOUPPER           "force_8bit_toupper"
 #define RC_FORCE_COOKIE_PROMPT          "force_cookie_prompt"
 #define RC_FORCE_EMPTY_HREFLESS_A       "force_empty_hrefless_a"
+#define RC_FORCE_HTML                   "force_html"
 #define RC_FORCE_SSL_COOKIES_SECURE     "force_ssl_cookies_secure"
 #define RC_FORCE_SSL_PROMPT             "force_ssl_prompt"
 #define RC_FORMS_OPTIONS                "forms_options"
@@ -98,6 +100,7 @@
 #define RC_GOTOBUFFER                   "gotobuffer"
 #define RC_GZIP_PATH                    "gzip_path"
 #define RC_HELPFILE                     "helpfile"
+#define RC_HIDDENLINKS                  "hiddenlinks"
 #define RC_HIDDEN_LINK_MARKER           "hidden_link_marker"
 #define RC_HISTORICAL_COMMENTS          "historical_comments"
 #define RC_HTML5_CHARSETS               "html5_charsets"
@@ -120,10 +123,13 @@
 #define RC_KEYPAD_MODE                  "keypad_mode"
 #define RC_LEFTARROW_IN_TEXTFLD_PROMPT  "leftarrow_in_textfield_prompt"
 #define RC_LINEEDIT_MODE                "lineedit_mode"
+#define RC_LISTONLY                     "listonly"
 #define RC_LIST_FORMAT                  "list_format"
+#define RC_LIST_INLINE                  "list_inline"
 #define RC_LIST_NEWS_DATES              "list_news_dates"
 #define RC_LIST_NEWS_NUMBERS            "list_news_numbers"
 #define RC_LOCALE_CHARSET               "locale_charset"
+#define RC_LOCALHOST                    "localhost"
 #define RC_LOCALHOST_ALIAS              "localhost_alias"
 #define RC_LOCAL_DOMAIN                 "local_domain"
 #define RC_LOCAL_EXECUTION_LINKS_ALWAYS "local_execution_links_always_on"
@@ -215,6 +221,7 @@
 #define RC_SESSION_FILE                 "session_file"
 #define RC_SESSION_LIMIT                "session_limit"
 #define RC_SET_COOKIES                  "set_cookies"
+#define RC_SHORT_URL                    "short_url"
 #define RC_SHOW_COLOR                   "show_color"
 #define RC_SHOW_CURSOR                  "show_cursor"
 #define RC_SHOW_DOTFILES                "show_dotfiles"
@@ -270,6 +277,7 @@
 #define RC_VI_KEYS_ALWAYS_ON            "vi_keys_always_on"
 #define RC_WAIS_PROXY                   "wais_proxy"
 #define RC_WAIT_VIEWER_TERMINATION      "wait_viewer_termination"
+#define RC_WITH_BACKSPACES              "with_backspaces"
 #define RC_XHTML_PARSING                "xhtml_parsing"
 #define RC_XLOADIMAGE_COMMAND           "xloadimage_command"
 #define RC_ZCAT_PATH                    "zcat_path"
