@@ -1,8 +1,9 @@
--- $LynxId: CHANGES,v 1.738 2014/02/14 00:35:10 tom Exp $
+-- $LynxId: CHANGES,v 1.739 2014/02/14 13:32:54 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
+2014-02-14 (2.8.8rel.1)
 2014-02-14 (2.8.8pre.5)
 * change quoting for fixup to help_files.sed in 2.8.8dev.17 to work around
   bug in cygwin's make/sed programs -TD
