@@ -1,10 +1,10 @@
 ; version used for Inno Setup files.
 
 ; $Format: "#define LYNX_VERSION \"$ProjectVersion$\""$
-#define LYNX_VERSION "2.8.8pre.5"
+#define LYNX_VERSION "2.8.8rel.1"
 
 ; most-recent full release and target
-#define LYNX_RELEASE "2.8.7"
+#define LYNX_RELEASE "2.8.8"
 #define LYNX_TARGETS "2.8.8"
 
 #define MyAppName "Lynx - web browser"

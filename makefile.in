@@ -1,4 +1,4 @@
-# $LynxId: makefile.in,v 1.142 2014/02/14 00:30:43 tom Exp $
+# $LynxId: makefile.in,v 1.143 2014/02/14 13:36:45 tom Exp $
 ##makefile for lynx
 
 SHELL		= @CONFIG_SHELL@
@@ -46,7 +46,7 @@ TAR_UP		= $(TAR) @TAR_UP_OPTIONS@ @TAR_PIPE_OPTIONS@
 TAR_DOWN	= $(TAR) @TAR_DOWN_OPTIONS@ @TAR_PIPE_OPTIONS@
 
 # $Format: "LYNX_VERSION	= $ProjectVersion$"$
-LYNX_VERSION	= 2.8.8pre.5
+LYNX_VERSION	= 2.8.8rel.1
 
 ## This is the version which we are developing (or, upon release, make this
 ## the same).  Use no dots in the name, since it must work on VMS and MS-DOS.
