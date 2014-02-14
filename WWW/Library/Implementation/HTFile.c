@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFile.c,v 1.139 2013/11/28 11:33:56 tom Exp $
+ * $LynxId: HTFile.c,v 1.142 2014/02/13 18:30:01 tom Exp $
  *
  *			File Access				HTFile.c
  *			===========
@@ -172,6 +172,16 @@ static HTSuffix unknown_suffix =
 #ifdef LY_FIND_LEAKS
 static void free_suffixes(void);
 #endif
+
+static char *FindSearch(const char *filename)
+{
+    char *result = 0;
+
+    if ((result = strchr(filename, '?')) == 0) {
+	result = strstr(filename, "%3F");
+    }
+    return result;
+}
 
 #ifdef LONG_LIST
 static char *FormatStr(char **bufp,
@@ -886,8 +896,20 @@ HTFormat HTFileFormat(const char *filename,
     int n;
     int i;
     int lf;
+    char *search;
 
     VMS_DEL_VERSION(filename);
+
+    if ((search = FindSearch(filename)) != 0) {
+	char *newname = NULL;
+	HTFormat result;
+
+	StrAllocCopy(newname, filename);
+	*(FindSearch(newname)) = '\0';
+	result = HTFileFormat(newname, pencoding, pdesc);
+	free(newname);
+	return result;
+    }
 
     if (pencoding)
 	*pencoding = NULL;
@@ -1240,37 +1262,50 @@ CompressFileType HTCompressFileType(const char *filename,
 				    int *rootlen)
 {
     CompressFileType result = cftNone;
-    size_t len = strlen(filename);
-    const char *ftype = filename + len;
+    char *search;
 
-    VMS_DEL_VERSION(filename);
+    if ((search = FindSearch(filename)) != 0) {
+	char *newname = NULL;
 
-    if ((len > 4)
-	&& !strcasecomp((ftype - 3), "bz2")
-	&& StrChr(dots, ftype[-4]) != 0) {
-	result = cftBzip2;
-	ftype -= 4;
-    } else if ((len > 3)
-	       && !strcasecomp((ftype - 2), "gz")
-	       && StrChr(dots, ftype[-3]) != 0) {
-	result = cftGzip;
-	ftype -= 3;
-    } else if ((len > 3)
-	       && !strcasecomp((ftype - 2), "zz")
-	       && StrChr(dots, ftype[-3]) != 0) {
-	result = cftDeflate;
-	ftype -= 3;
-    } else if ((len > 2)
-	       && !strcmp((ftype - 1), "Z")
-	       && StrChr(dots, ftype[-2]) != 0) {
-	result = cftCompress;
-	ftype -= 2;
+	StrAllocCopy(newname, filename);
+	newname[((const char *) search) - filename] = '\0';
+	result = HTCompressFileType(newname, dots, rootlen);
+	free(newname);
+    } else {
+	size_t len;
+	const char *ftype;
+
+	VMS_DEL_VERSION(filename);
+	len = strlen(filename);
+	ftype = filename + len;
+
+	if ((len > 4)
+	    && !strcasecomp((ftype - 3), "bz2")
+	    && StrChr(dots, ftype[-4]) != 0) {
+	    result = cftBzip2;
+	    ftype -= 4;
+	} else if ((len > 3)
+		   && !strcasecomp((ftype - 2), "gz")
+		   && StrChr(dots, ftype[-3]) != 0) {
+	    result = cftGzip;
+	    ftype -= 3;
+	} else if ((len > 3)
+		   && !strcasecomp((ftype - 2), "zz")
+		   && StrChr(dots, ftype[-3]) != 0) {
+	    result = cftDeflate;
+	    ftype -= 3;
+	} else if ((len > 2)
+		   && !strcmp((ftype - 1), "Z")
+		   && StrChr(dots, ftype[-2]) != 0) {
+	    result = cftCompress;
+	    ftype -= 2;
+	}
+
+	*rootlen = (int) (ftype - filename);
+
+	CTRACE((tfp, "HTCompressFileType(%s) returns %d:%s\n",
+		filename, (int) result, filename + *rootlen));
     }
-
-    *rootlen = (int) (ftype - filename);
-
-    CTRACE((tfp, "HTCompressFileType(%s) returns %d:%s\n",
-	    filename, (int) result, filename + *rootlen));
     return result;
 }
 

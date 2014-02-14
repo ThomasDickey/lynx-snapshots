@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYUtils.c,v 1.264 2014/02/03 00:17:39 tom Exp $
+ * $LynxId: LYUtils.c,v 1.265 2014/02/13 19:35:39 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTCP.h>
@@ -2857,6 +2857,7 @@ char *LYFindConfigFile(const char *nominal, const char *dftfile)
 	    while ((item = LYstrsep(&path, PATH_SEPARATOR)) != 0) {
 		if (isEmpty(item))
 		    continue;
+		FREE(result);
 		HTSprintf0(&result, "%s%s%s", item, FILE_SEPARATOR, nominal);
 		LYTildeExpand(&result, TRUE);
 		if (LYCanReadFile(result)) {
