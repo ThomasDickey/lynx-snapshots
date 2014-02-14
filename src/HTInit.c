@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTInit.c,v 1.85 2013/11/28 11:17:21 tom Exp $
+ * $LynxId: HTInit.c,v 1.88 2014/02/13 21:39:04 tom Exp $
  *
  *		Configuration-specific Initialization		HTInit.c
  *		----------------------------------------
@@ -115,15 +115,13 @@ void HTFormatInit(void)
     SET_INTERNL("www/compressed", "www/dump", HTCompressed, 1.0);
 
     /*
-     * Added the following to support some content types beginning to surface.
+     * The following support some content types seen here/there:
      */
     SET_INTERNL("application/html", "text/x-c", HTMLToC, 0.5);
     SET_INTERNL("application/html", "text/plain", HTMLToPlain, 0.5);
-    SET_INTERNL("text/css", "text/plain", HTMLToPlain, 0.5);
     SET_INTERNL("application/html", "www/present", HTMLPresent, 2.0);
-    SET_INTERNL("application/xhtml+xml", "www/present", HTMLPresent, 2.0);
-    SET_INTERNL("application/xml", "www/present", HTMLPresent, 2.0);
     SET_INTERNL("application/html", "www/source", HTPlainPresent, 1.0);
+    SET_INTERNL("application/xml", "www/present", HTMLPresent, 2.0);
     SET_INTERNL("application/x-wais-source", "www/source", HTPlainPresent, 1.0);
     SET_INTERNL("application/x-wais-source", "www/present", HTWSRCConvert, 2.0);
     SET_INTERNL("application/x-wais-source", "www/download", HTWSRCConvert, 1.0);
@@ -143,19 +141,49 @@ void HTFormatInit(void)
     SET_EXTERNL("www/source", "www/dump", HTDumpToStdout, 1.0);
 
     /*
-     * Now add our basic conversions.
+     * Other internal types, which must precede the "www/present" entries
+     * below (otherwise, they will be filtered out in HTFilterPresentations()).
      */
-    SET_INTERNL("text/x-sgml", "www/source", HTPlainPresent, 1.0);
-    SET_INTERNL("text/x-sgml", "www/present", HTMLPresent, 2.0);
-    SET_INTERNL("text/sgml", "www/source", HTPlainPresent, 1.0);
-    SET_INTERNL("text/sgml", "www/present", HTMLPresent, 1.0);
-    SET_INTERNL("text/css", "www/present", HTPlainPresent, 1.0);
-    SET_INTERNL("text/plain", "www/present", HTPlainPresent, 1.0);
-    SET_INTERNL("text/plain", "www/source", HTPlainPresent, 1.0);
-    SET_INTERNL("text/html", "www/source", HTPlainPresent, 1.0);
-    SET_INTERNL("text/html", "text/x-c", HTMLToC, 0.5);
+    SET_INTERNL("text/css", "text/plain", HTMLToPlain, 0.5);
     SET_INTERNL("text/html", "text/plain", HTMLToPlain, 0.5);
+    SET_INTERNL("text/html", "text/x-c", HTMLToC, 0.5);
+    SET_INTERNL("text/html", "www/source", HTPlainPresent, 1.0);
+    SET_INTERNL("text/plain", "www/source", HTPlainPresent, 1.0);
+    SET_INTERNL("text/sgml", "www/source", HTPlainPresent, 1.0);
+    SET_INTERNL("text/x-sgml", "www/source", HTPlainPresent, 1.0);
+
+    /*
+     * Now add our basic conversions.  These include the types which will
+     * be listed in a "Accept:" line sent to a server.  These criteria are
+     * used in HTFilterPresentations() to select acceptable types:
+     *
+     * a) input is not "www/mime" or "www/compressed"
+     * b) output is "www/present"
+     * c) quality is in the range 0.0 to 1.0, i.e., excludes the 2.0's.
+     *
+     * For reference:
+     * RFC 1874 - text/sgml
+     * RFC 2046 - text/plain
+     * RFC 2318 - text/css
+     * RFC 3023 - text/xml
+     * obsolete - text/x-sgml
+     *
+     * as well as
+     * http://www.iana.org/assignments/media-types/media-types.xhtml
+     *
+     * and
+     * http://www.w3.org/TR/xhtml-media-types/
+     *
+     * which describes
+     * application/xhtml+xml
+     * text/html
+     */
+    SET_INTERNL("application/xhtml+xml", "www/present", HTMLPresent, 1.0);
+    SET_INTERNL("text/css", "www/present", HTPlainPresent, 1.0);
     SET_INTERNL("text/html", "www/present", HTMLPresent, 1.0);
+    SET_INTERNL("text/plain", "www/present", HTPlainPresent, 1.0);
+    SET_INTERNL("text/sgml", "www/present", HTMLPresent, 1.0);
+    SET_INTERNL("text/x-sgml", "www/present", HTMLPresent, 2.0);
     SET_INTERNL("text/xml", "www/present", HTMLPresent, 2.0);
 
     if (LYisAbsPath(global_type_map)) {

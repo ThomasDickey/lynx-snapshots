@@ -1,9 +1,12 @@
--- $LynxId: CHANGES,v 1.736 2014/02/13 19:39:36 tom Exp $
+-- $LynxId: CHANGES,v 1.737 2014/02/13 21:35:29 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
 2014-02-14 (2.8.8pre.5)
+* change quality value for application/xhtml+xml mime type added for Debian
+  #184482, to ensure that it is offered as one of Lynx's internal types on
+  an "Accept:" line sent to the server (Debian #725178) -TD
 * trim unexpected query-parameters from file: URIs when checking for their
   presentation and compression types.  Not all browsers do this, etc. -TD
 * modify forms-submit to trim query-parameters from the action URI if it
