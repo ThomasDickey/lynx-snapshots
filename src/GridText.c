@@ -1,5 +1,5 @@
 /*
- * $LynxId: GridText.c,v 1.274 2013/11/28 11:16:50 tom Exp $
+ * $LynxId: GridText.c,v 1.277 2014/02/13 19:32:01 tom Exp $
  *
  *		Character grid hypertext object
  *		===============================
@@ -11114,6 +11114,7 @@ int HText_SubmitForm(FormInfo * submit_item, DocInfo *doc,
 	 */
 	StrAllocCat(temp, "?");
 	BStrCat0(my_query, temp);
+	free(temp);
     } else {
 	/*
 	 * We are submitting POST content to a server,
@@ -11797,6 +11798,20 @@ int HText_SubmitForm(FormInfo * submit_item, DocInfo *doc,
     } else {
 	_statusline(SUBMITTING_FORM);
 
+	/*
+	 * File-URLs (whether via GET or POST) cannot provide search queries. 
+	 * The relevant RFCs 1630, 1738 are silent on what to do with
+	 * unexpected query parameters in a file-URL.
+	 *
+	 * Internet Explorer trims the query string here (after all, a "?" is
+	 * not a legal part of a Windows filename), and other browsers copy the
+	 * behavior.  We do this for compatibility, in case someone cares.
+	 */
+	if (my_query != 0 &&
+	    my_query->len > 5 &&
+	    !strncmp(my_query->str, "file:", 5)) {
+	    strtok(my_query->str, "?");
+	}
 	if (submit_item->submit_method == URL_POST_METHOD || Boundary) {
 	    LYFreePostData(doc);
 	    doc->post_data = my_query;
@@ -11805,9 +11820,10 @@ int HText_SubmitForm(FormInfo * submit_item, DocInfo *doc,
 	    StrAllocCopy(doc->address, submit_item->submit_action);
 	} else {		/* GET_METHOD */
 	    HTSABCat(&my_query, "", 1);		/* append null */
-	    StrAllocCopy(doc->address, BStrData(my_query));	/* FIXME? */
+	    StrAllocCopy(doc->address, BStrData(my_query));
 	    LYFreePostData(doc);
 	    FREE(content_type_out);
+	    HTSABFree(&my_query);
 	}
 	result = 1;
     }
