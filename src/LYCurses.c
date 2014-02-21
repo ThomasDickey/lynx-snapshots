@@ -1,4 +1,4 @@
-/* $LynxId: LYCurses.c,v 1.178 2013/11/28 11:52:34 tom Exp $ */
+/* $LynxId: LYCurses.c,v 1.179 2014/02/20 23:14:31 Thomas.Klausner Exp $ */
 #include <HTUtils.h>
 #include <HTAlert.h>
 
@@ -1180,10 +1180,12 @@ void restart_curses(void)
     keypad(LYwin, TRUE);
     lynx_enable_mouse(1);
 
+#if defined(USE_KEYMAPS)  
     if (-1 == lynx_initialize_keymaps()) {
 	endwin();
 	exit_immediately(EXIT_FAILURE);
     }
+#endif
     if (has_colors()) {
 	start_color();
     }
