@@ -1,9 +1,13 @@
--- $LynxId: CHANGES,v 1.740 2014/02/21 01:20:21 Thomas.Klausner Exp $
+-- $LynxId: CHANGES,v 1.741 2014/03/09 12:41:10 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2014-02-14 (2.8.8rel.2)
+2014-03-09 (2.8.8rel.2)
+* drop unused save/compress rules from makefile.in, because fixing umask for
+  these is pointless -TD
+* modify makefile.in to establish sane umask value in the "install-doc" rule
+  (report by Rajeev V Pillai) -TD
 * build-fix for NetBSD, whose curses library provides use_default_colors(),
   but the package turns off the keymap feature (patch by Thomas Klausner).
 
