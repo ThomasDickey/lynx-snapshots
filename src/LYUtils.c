@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYUtils.c,v 1.265 2014/02/13 19:35:39 tom Exp $
+ * $LynxId: LYUtils.c,v 1.266 2014/03/09 14:27:06 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTCP.h>
@@ -4584,7 +4584,7 @@ int win32_check_interrupt(void)
     return FALSE;
 }
 
-#if !defined(sleep)
+#if (!defined(__MINGW32__) && !defined(sleep)) || (defined(__MINGW32__) && !HAVE_SLEEP)
 void sleep(unsigned sec)
 {
     unsigned int i, j;

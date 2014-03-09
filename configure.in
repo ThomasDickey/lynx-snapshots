@@ -1,4 +1,4 @@
-dnl $LynxId: configure.in,v 1.266 2014/02/21 01:18:50 tom Exp $
+dnl $LynxId: configure.in,v 1.267 2014/03/09 14:09:50 tom Exp $
 dnl
 dnl Process this file with autoconf to produce a configure script.
 dnl
@@ -816,7 +816,7 @@ AC_CHECK_FUNCS( \
 	truncate \
 	ttyname \
 	unsetenv \
-	usleep \
+	sleep usleep \
 	vasprintf \
 	waitpid \
 )

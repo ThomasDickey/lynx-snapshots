@@ -1,5 +1,5 @@
 /*
- * $LynxId: config.hin,v 1.135 2014/02/12 22:14:34 tom Exp $
+ * $LynxId: config.hin,v 1.136 2014/03/09 14:08:59 tom Exp $
  * vile:cmode
  *
  * The configure script translates "config.hin" into "lynx_cfg.h"
@@ -124,6 +124,7 @@
 #undef HAVE_SETUID
 #undef HAVE_SIGACTION		/* CF_FUNC_SIGACTION */
 #undef HAVE_SIZECHANGE		/* CF_SIZECHANGE */
+#undef HAVE_SLEEP
 #undef HAVE_STDARG_H		/* CF_VARARGS */
 #undef HAVE_STDLIB_H
 #undef HAVE_STPCPY		/* AM_GNU_GETTEXT */
