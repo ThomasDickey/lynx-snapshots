@@ -1,4 +1,4 @@
-# $LynxId: makefile.in,v 1.144 2014/02/21 01:18:50 tom Exp $
+# $LynxId: makefile.in,v 1.145 2014/03/09 12:42:50 tom Exp $
 ##makefile for lynx
 
 SHELL		= @CONFIG_SHELL@
@@ -238,10 +238,8 @@ help:
 	@echo "Please run make with one of the following arguments"
 	@echo "all        -- to make the executable, put it in this directory"
 	@echo "clean      -- removes all '$o' and 'core' files"
+	@echo "distclean  -- removes all generated files"
 	@echo "depend     -- use makedepend to generate header-dependencies"
-	@echo "tar        -- runs clean, removes executable, and tars the whole directory"
-	@echo "compress   -- runs tar, then compresses the result"
-	@echo "zip        -- runs clean, removes executable, and zips the whole directory"
 	@echo
 
 ##Miscellaneous actions
@@ -282,29 +280,6 @@ maintainer-clean: distclean
 	-find . -type f -name '*.orig' -exec rm -f {} \;
 	-rm -rf WWW/Library/*/obsolete
 	-rm -f Lynx.prj .*_aux
-
-tar:  clean
-	rm -f lynx$x
-	$(MAKE) save
-
-turnover:	clean
-	$(MAKE) save
-
-zipcompress: compress zip
-	echo "done!"
-
-zip:  clean
-	rm -f $(SRC_DIR)/lynx$x
-	rm -f lynx$x
-	rm -f $(SRC_DIR)/a.out
-	rm -f ../$(lynxname).zip
-	cd ..; rm -f $(lynxname).zip; zip -r $(lynxname).zip $(lynxdir)
-
-save:
-	cd ..; rm -f $(lynxname).tar; $(TAR_UP) $(lynxdir) > $(lynxname).tar
-
-compress: tar
-	cd ..; rm -f $(lynxname).tar.Z; compress -f -v $(lynxname).tar
 
 # Directory containing reference source for patch generation,
 #     either absolute or relative to $(top_srcdir)/..
@@ -348,8 +323,13 @@ install-man : $(MANDIR)
 
 install-doc : $(DOCDIR) $(HELPDIR)
 	@echo Copying sample files
-	(cd $(srcdir) && $(TAR_UP) C[HO]* PROBLEMS README docs samples test ) | \
-			       ( cd $(DOCDIR) && chmod -R u+w . && $(TAR_DOWN) )
+	$(SHELL) -c '\
+		( umask 022; \
+		  cd $(srcdir) && \
+		  $(TAR_UP) C[HO]* PROBLEMS README docs samples test ) | \
+		( umask 022; \
+		  cd $(DOCDIR) && \
+		  chmod -R u+w . && $(TAR_DOWN) )'
 	$(SHELL) -c 'if test "$(COMPRESS_PROG)" != "" ; then \
 		(cd $(DOCDIR) && $(COMPRESS_PROG) -f docs/CHANGES*.[0-9] docs/*.announce ) \
 	fi'
