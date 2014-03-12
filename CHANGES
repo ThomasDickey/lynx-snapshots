@@ -1,7 +1,9 @@
--- $LynxId: CHANGES,v 1.743 2014/03/09 19:34:21 tom Exp $
+-- $LynxId: CHANGES,v 1.746 2014/03/12 18:39:52 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
+
+2014-03-12 (2.8.9dev.1)
 
 2014-03-09 (2.8.8rel.2)
 * correct errata in test-files which cause broken links in break-out directory
