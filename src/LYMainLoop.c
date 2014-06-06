@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMainLoop.c,v 1.230 2013/11/28 11:20:34 tom Exp $
+ * $LynxId: LYMainLoop.c,v 1.231 2014/06/06 00:13:03 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTAccess.h>
@@ -1549,21 +1549,23 @@ static void handle_LYK_SUBMIT(int cur, DocInfo *doc, BOOLEAN *refresh_screen)
 	form = make;
     }
 
-    StrAllocCopy(save_submit_action, form->submit_action);
-    form->submit_action = HTPrompt(EDIT_SUBMIT_URL, form->submit_action);
+    if (form != 0) {
+	StrAllocCopy(save_submit_action, form->submit_action);
+	form->submit_action = HTPrompt(EDIT_SUBMIT_URL, form->submit_action);
 
-    if (isEmpty(form->submit_action) ||
-	(!isLYNXCGI(form->submit_action) &&
-	 StrNCmp(form->submit_action, "http", 4))) {
-	HTUserMsg(FORM_ACTION_NOT_HTTP_URL);
-    } else {
-	HTInfoMsg(SUBMITTING_FORM);
-	HText_SubmitForm(form, doc, form->name, form->value);
-	*refresh_screen = TRUE;
+	if (isEmpty(form->submit_action) ||
+	    (!isLYNXCGI(form->submit_action) &&
+	     StrNCmp(form->submit_action, "http", 4))) {
+	    HTUserMsg(FORM_ACTION_NOT_HTTP_URL);
+	} else {
+	    HTInfoMsg(SUBMITTING_FORM);
+	    HText_SubmitForm(form, doc, form->name, form->value);
+	    *refresh_screen = TRUE;
+	}
+
+	StrAllocCopy(form->submit_action, save_submit_action);
+	FREE(make);
     }
-
-    StrAllocCopy(form->submit_action, save_submit_action);
-    FREE(make);
 }
 
 static void handle_LYK_RESET(int cur, BOOLEAN *refresh_screen)
