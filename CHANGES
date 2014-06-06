@@ -1,7 +1,11 @@
--- $LynxId: CHANGES,v 1.746 2014/03/12 18:39:52 tom Exp $
+-- $LynxId: CHANGES,v 1.748 2014/06/06 00:18:12 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
+
+2014-06-05 (2.8.9dev.2)
+* add check to ensure that "submit" command from 2.8.8dev.10 is performed
+  in a form (report by Karen Lewellen) -TD
 
 2014-03-12 (2.8.9dev.1)
 
