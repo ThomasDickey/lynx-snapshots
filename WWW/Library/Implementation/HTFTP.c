@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFTP.c,v 1.125 2013/11/28 11:11:05 tom Exp $
+ * $LynxId: HTFTP.c,v 1.126 2014/07/24 22:08:24 tom Exp $
  *
  *			File Transfer Protocol (FTP) Client
  *			for a WorldWideWeb browser
@@ -159,7 +159,7 @@ typedef struct _connection {
 	    tag, \
 	    entry_info->filename, \
 	    NonNull(entry_info->date), \
-	    entry_info->size))
+	    CAST_off_t(entry_info->size)))
 
 struct _HTStructured {
     const HTStructuredClass *isa;
@@ -2717,7 +2717,7 @@ static char *FormatSize(char **bufp,
 
 	HTSprintf(bufp, fmt, value);
     } else {
-	sprintf(fmt, "%" PRI_off_t, value);
+	sprintf(fmt, "%" PRI_off_t, CAST_off_t (value));
 
 	StrAllocCat(*bufp, fmt);
     }

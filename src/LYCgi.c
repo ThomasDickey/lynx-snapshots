@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYCgi.c,v 1.67 2013/11/28 11:35:56 tom Exp $
+ * $LynxId: LYCgi.c,v 1.68 2014/07/24 22:02:26 tom Exp $
  *                   Lynx CGI support                              LYCgi.c
  *                   ================
  *
@@ -145,6 +145,10 @@ static int LYLoadCGI(const char *arg,
 		     HTFormat format_out,
 		     HTStream *sink)
 {
+    (void) arg;
+    (void) anAnchor;
+    (void) format_out;
+    (void) sink;
     return -1;
 }
 #else
@@ -510,7 +514,7 @@ static int LYLoadCGI(const char *arg,
 		    status = HT_LOADED;
 		}
 
-#if !HAVE_WAITPID
+#ifndef HAVE_WAITPID
 		while (wait(&wstatus) != pid) ;		/* do nothing */
 #else
 		while (-1 == waitpid(pid, &wstatus, 0)) {	/* wait for child */
