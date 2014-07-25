@@ -1,4 +1,4 @@
-/* $LynxId: LYUtils.h,v 1.96 2013/11/28 11:22:53 tom Exp $ */
+/* $LynxId: LYUtils.h,v 1.98 2014/07/24 22:10:20 tom Exp $ */
 #ifndef LYUTILS_H
 #define LYUTILS_H
 
@@ -304,7 +304,7 @@ extern "C" {
     extern void Define_VMSLogical(char *LogicalName, char *LogicalValue);
 #endif				/* VMS */
 
-#if ! HAVE_PUTENV
+#if !defined(HAVE_PUTENV)
     extern int putenv(const char *string);
 #endif				/* HAVE_PUTENV */
 
@@ -317,6 +317,11 @@ extern "C" {
 
 #if defined(_WINDOWS)
     extern int win32_check_interrupt(void);
+
+#if (defined(__MINGW32__) && !defined(HAVE_SLEEP))
+#undef sleep
+    void sleep(unsigned sec);
+#endif
 #endif
 
     /*

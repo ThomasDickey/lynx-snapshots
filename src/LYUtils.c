@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYUtils.c,v 1.266 2014/03/09 14:27:06 tom Exp $
+ * $LynxId: LYUtils.c,v 1.268 2014/07/24 22:30:44 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTCP.h>
@@ -42,6 +42,8 @@ extern int kbhit(void);		/* FIXME: use conio.h */
 #if !defined(kbhit) && defined(_WCONIO_DEFINED)
 #define kbhit() _kbhit()	/* reasonably recent conio.h */
 #endif
+#elif defined(__minix)
+#include <termios.h>		/* for struct winsize */
 
 #endif /* __MINGW32__ */
 
@@ -4584,7 +4586,7 @@ int win32_check_interrupt(void)
     return FALSE;
 }
 
-#if (!defined(__MINGW32__) && !defined(sleep)) || (defined(__MINGW32__) && !HAVE_SLEEP)
+#if (defined(__MINGW32__) && !defined(HAVE_SLEEP))
 void sleep(unsigned sec)
 {
     unsigned int i, j;
@@ -7856,7 +7858,7 @@ void get_clip_release()
 char *w32_strerror(DWORD ercode)
 {
 /*  __declspec(thread) necessary if you will use multiple threads */
-#ifdef __CYGWIN__
+#if defined(__CYGWIN__) || defined(__MINGW32__)
     static char msg_buff[256];
 
 #else

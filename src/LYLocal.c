@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYLocal.c,v 1.127 2013/11/28 11:19:31 tom Exp $
+ * $LynxId: LYLocal.c,v 1.128 2014/07/24 22:06:43 tom Exp $
  *
  *  Routines to manipulate the local filesystem.
  *  Written by: Rick Mallett, Carleton University
@@ -424,6 +424,7 @@ static int LYExecv(const char *path,
     char *tmpbuf = 0;
 
 #if defined(__DJGPP__) || defined(_WINDOWS)
+    (void) msg;
     stop_curses();
     HTSprintf0(&tmpbuf, "%s", path);
     for (n = 1; argv[n] != 0; n++)
@@ -466,7 +467,7 @@ static int LYExecv(const char *path,
 	/*NOTREACHED */
 
     default:			/* parent */
-#if !HAVE_WAITPID
+#ifndef HAVE_WAITPID
 	while (wait(&wstatus) != pid) ;		/* do nothing */
 #else
 	while (-1 == waitpid(pid, &wstatus, 0)) {	/* wait for child */

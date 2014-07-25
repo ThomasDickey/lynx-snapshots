@@ -1,4 +1,4 @@
-/* $LynxId: LYCurses.c,v 1.179 2014/02/20 23:14:31 Thomas.Klausner Exp $ */
+/* $LynxId: LYCurses.c,v 1.180 2014/07/24 22:08:24 tom Exp $ */
 #include <HTUtils.h>
 #include <HTAlert.h>
 
@@ -980,6 +980,7 @@ static int CALLBACK EnumWindowsProc(HWND hwnd, LPARAM lParam)
 {
     char this_title[256];
 
+    (void) lParam;
     if (GetWindowText(hwnd, this_title, sizeof(this_title) - 1) &&
 	(strncmp(dummyWindowTitle, this_title, 256) == 0)) {
 	currentWindowHandle = hwnd;
@@ -1180,7 +1181,7 @@ void restart_curses(void)
     keypad(LYwin, TRUE);
     lynx_enable_mouse(1);
 
-#if defined(USE_KEYMAPS)  
+#if defined(USE_KEYMAPS)
     if (-1 == lynx_initialize_keymaps()) {
 	endwin();
 	exit_immediately(EXIT_FAILURE);
@@ -1402,7 +1403,7 @@ void start_curses(void)
 #endif
 
 #if defined(USE_KEYMAPS) && defined(NCURSES_VERSION)
-#  if HAVE_KEYPAD
+#  ifdef HAVE_KEYPAD
 	/* Need to switch keypad on before initializing keymaps, otherwise
 	   when the keypad is switched on, some keybindings may be overriden. */
 	keypad(LYwin, TRUE);

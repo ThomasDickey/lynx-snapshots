@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTMIME.c,v 1.88 2013/11/28 11:12:52 tom Exp $
+ * $LynxId: HTMIME.c,v 1.89 2014/07/24 22:08:24 tom Exp $
  *
  *			MIME Message Parse			HTMIME.c
  *			==================
@@ -580,8 +580,8 @@ static int pumpData(HTStream *me)
     CTRACE((tfp, "...end of pumpData, copied %"
 	    PRI_off_t " vs %"
 	    PRI_off_t "\n",
-	    me->anchor->actual_length,
-	    me->anchor->content_length));
+	    CAST_off_t (me->anchor->actual_length),
+	    CAST_off_t (me->anchor->content_length)));
     me->anchor->actual_length = 0;
     return HT_OK;
 }
@@ -800,7 +800,7 @@ static int dispatchField(HTStream *me)
 	if (me->anchor->content_length < 0)
 	    me->anchor->content_length = 0;
 	CTRACE((tfp, "        Converted to integer: '%" PRI_off_t "'\n",
-		me->anchor->content_length));
+		CAST_off_t (me->anchor->content_length)));
 	break;
     case miCONTENT_LOCATION:
 	HTMIME_TrimDoubleQuotes(me->value);

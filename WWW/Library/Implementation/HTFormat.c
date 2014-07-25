@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFormat.c,v 1.82 2013/11/28 11:12:32 tom Exp $
+ * $LynxId: HTFormat.c,v 1.83 2014/07/24 22:08:24 tom Exp $
  *
  *		Manage different file formats			HTFormat.c
  *		=============================
@@ -884,7 +884,7 @@ int HTCopy(HTParentAnchor *anchor,
     if (anchor != 0) {
 	CTRACE((tfp, "HTCopy copied %"
 		PRI_off_t " actual, %"
-		PRI_off_t " limit\n", bytes, limit));
+		PRI_off_t " limit\n", CAST_off_t (bytes), CAST_off_t (limit)));
 	anchor->actual_length = bytes;
     }
 
