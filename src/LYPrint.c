@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYPrint.c,v 1.104 2014/02/04 01:58:51 tom Exp $
+ * $LynxId: LYPrint.c,v 1.105 2014/08/24 10:41:17 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTAccess.h>
@@ -140,7 +140,14 @@ static void SetupFilename(bstring **filename,
     char *cp;
 
     BStrCopy0(*filename, sug_filename);		/* add suggestion info */
-    BStrAlloc(*filename, LY_MAXPATH);	/* FIXME */
+    /*
+     * FIXME: the history-recall still uses fixed-size buffers
+     */
+    if ((*filename)->len >= LY_MAXPATH) {
+	(*filename)->str[LY_MAXPATH - 1] = '\0';
+    } else {
+	BStrAlloc(*filename, LY_MAXPATH);
+    }
     change_sug_filename((*filename)->str);
     if (!(HTisDocumentSource())
 	&& (cp = strrchr((*filename)->str, '.')) != NULL) {

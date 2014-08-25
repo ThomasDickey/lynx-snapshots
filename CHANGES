@@ -1,12 +1,15 @@
--- $LynxId: CHANGES,v 1.751 2014/07/24 21:53:38 tom Exp $
+-- $LynxId: CHANGES,v 1.753 2014/08/25 00:34:35 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2014-07-24 (2.8.9dev.2)
-+ fix a few inconsistencies between #if / #ifdef, including one for sleep()
+2014-08-24 (2.8.9dev.2)
+* update eo.po, id.po from
+    http://translationproject.org/latest/lynx
+* improve workaround for too-long pathnames in LYPrint.c SetupFilename() -TD
+* fix a few inconsistencies between #if / #ifdef, including one for sleep()
   which broke cross-compiles for MinGW -TD
-+ updated/improved configure script macros (TD):
+* updated/improved configure script macros (TD):
   + CF_ACVERSION_CHECK:  work around another gratuitous incompatibility
     introduced in 2.69 (reported by Ross Burton, openembedded.org)
   + CF_ADD_CFLAGS:  workaround for ash-shell
@@ -214,7 +217,7 @@ Changes since Lynx 2.8 release
 * protect redefined errno values for Windows port from redefinition warnings
   when using MinGW build, since the WSAxxx values are what the configuration
   actually uses -TD
-* modify <address> tag to treat it like <p> when used within a list -TD 
+* modify <address> tag to treat it like <p> when used within a list -TD
 * update fi.po from
     http://translationproject.org/latest/lynx
 * add on/off toggles to options menu for the color-style and default-colors
@@ -663,7 +666,7 @@ Changes since Lynx 2.8 release
 * promote some experimental options to normal, tidy up related EXP_xxx vs
   USE_xxx symbols -TD
   EXP_ASCII_CTYPES is now USE_ASCII_CTYPES
-  EXP_JUSTIFY_ELTS is now USE_JUSTIFY_ELTS 
+  EXP_JUSTIFY_ELTS is now USE_JUSTIFY_ELTS
   EXP_CHARSET_CHOICE is now USE_CHARSET_CHOICE
   The scrollbar, progressbar, sessions and session-cache options are now
   enabled by default.
@@ -691,7 +694,7 @@ Changes since Lynx 2.8 release
 * add <sys/types.h> include in socklen_t configure check (from OpenBSD CVS)
 * eliminate UCPutUtf8ToBuffer() - redundant -TD
 * use memset's to simplify some initialization in HTML.c, extending a change
-  made in 2.8.7dev.10 (prompted by issue in OpenBSD) -TD 
+  made in 2.8.7dev.10 (prompted by issue in OpenBSD) -TD
 * add optional support for IDNA using GNU libidn (Debian #352596) -TD
 * ignore LEFT-TO-RIGHT-MARK (U+200E) in HTML files (Debian #408835) -TD
 * correct check for return-value from gnutls_certificate_verify_peers2(), which
