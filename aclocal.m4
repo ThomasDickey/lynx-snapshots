@@ -1,4 +1,4 @@
-dnl $LynxId: aclocal.m4,v 1.211 2014/07/24 08:25:17 tom Exp $
+dnl $LynxId: aclocal.m4,v 1.214 2014/11/30 23:23:25 tom Exp $
 dnl Macros for auto-configure script.
 dnl by Thomas E. Dickey <dickey@invisible-island.net>
 dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
@@ -1583,13 +1583,18 @@ if test "${ac_cv_type_$1:+set}" = set; then
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_CHECK_SSL_X509 version: 4 updated: 2008/12/11 19:00:39
+dnl CF_CHECK_SSL_X509 version: 5 updated: 2014/11/30 18:19:56
 dnl -----------------
 dnl Check for X509 support in the SSL library.
 define([CF_CHECK_SSL_X509],[
 AC_MSG_CHECKING(for X509 support)
 AC_TRY_LINK(CF__SSL_HEAD [
-#include <openssl/x509.h>],
+#if defined(USE_GNUTLS_INCL)
+#include <gnutls/x509.h>
+#else
+#include <openssl/x509.h>
+#endif
+],
 	[X509_verify_cert_error_string(X509_STORE_CTX_get_error(NULL))],
 	[cf_x509_support=yes],
 	[cf_x509_support=no])
@@ -3067,7 +3072,7 @@ rm -rf conftest*
 AC_SUBST(EXTRA_CFLAGS)
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_GNUTLS version: 22 updated: 2012/11/08 20:57:52
+dnl CF_GNUTLS version: 23 updated: 2014/11/30 18:19:56
 dnl ---------
 dnl Check for gnutls library (TLS "is" SSL)
 dnl $1 = the [optional] directory in which the library may be found
@@ -3143,7 +3148,7 @@ AC_DEFUN([CF_GNUTLS],[
 			cf_cv_have_gnutls=yes,
 			cf_cv_have_gnutls=no,
 			,
-			ifelse([$2],,[-lgnutls-openssl -lgnutls-extra -lgnutls -lgcrypt],[-lgnutls -lgcrypt]))
+			ifelse([$2],,[-lgnutls-openssl]))
 
 		CPPFLAGS=$cf_gnutls_CPPFLAGS
 	fi
@@ -3162,7 +3167,10 @@ AC_DEFUN([CF_GNUTLS],[
 		if test -n "$cf_cv_library_path_gnutls" ; then
 			CF_ADD_LIBDIR($cf_cv_library_path_gnutls)
 		fi
-		CF_ADD_LIBS(-lgnutls -lgcrypt)
+		CF_ADD_LIBS(-lgnutls)
+		AC_CHECK_FUNC(gnutls_rnd,
+				[AC_DEFINE(HAVE_GNUTLS_RND)],
+				[CF_ADD_LIBS(-lgcrypt)])
 
 		ifelse([$2],,
 			[if test "$cf_pkg_gnutls" = none ; then
@@ -6451,7 +6459,7 @@ AC_TRY_LINK([
 test $cf_cv_need_xopen_extension = yes && CPPFLAGS="$CPPFLAGS -D_XOPEN_SOURCE_EXTENDED"
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_XOPEN_SOURCE version: 47 updated: 2014/07/23 17:11:49
+dnl CF_XOPEN_SOURCE version: 48 updated: 2014/09/01 12:29:14
 dnl ---------------
 dnl Try to get _XOPEN_SOURCE defined properly that we can use POSIX functions,
 dnl or adapt to the vendor's definitions to get equivalent functionality,
@@ -6533,6 +6541,10 @@ sco*) #(vi
 solaris2.*) #(vi
 	cf_xopen_source="-D__EXTENSIONS__"
 	cf_cv_xopen_source=broken
+	;;
+sysv4.2uw2.*) # Novell/SCO UnixWare 2.x (tested on 2.1.2)
+	cf_XOPEN_SOURCE=
+	cf_POSIX_C_SOURCE=
 	;;
 *)
 	CF_TRY_XOPEN_SOURCE

@@ -1,9 +1,15 @@
--- $LynxId: CHANGES,v 1.753 2014/08/25 00:34:35 tom Exp $
+-- $LynxId: CHANGES,v 1.758 2014/11/30 23:25:52 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2014-08-24 (2.8.9dev.2)
+2014-11-30 (2.8.9dev.2)
+* drop libgnutls-extra when using --with-gnutls-compat option -TD
+* drop libgcrypt dependency when building with gnutls, using gnutls_rnd()
+  rather than gcry_randomize() (adapted from patch by Andreas Metzler,
+  Debian #753699) -TD
+* fix a reference-after-free in scan_cookie_sublist(), probably fixing RedHat
+  #1120925 (patch by Mike Gorse).
 * update eo.po, id.po from
     http://translationproject.org/latest/lynx
 * improve workaround for too-long pathnames in LYPrint.c SetupFilename() -TD
@@ -26,12 +32,13 @@ Changes since Lynx 2.8 release
   + CF_XOPEN_SOURCE:  Minix3.2 ifdef's the POSIX.1-2001 functions inside
     _NETBSD_SOURCE, even though it was released 2012-02-29 - appease it.  At
     the same time, turn on the verbose flag to show that most platforms need
-    platform-specific define's to get POSIX (sic).
+    platform-specific define's to get POSIX (sic).  Also, add case for UnixWare
+    (report/discussion with Mark Ryan).
   + CF_X_ATHENA:  add --with-Xaw3dxft option
   + CF_X_TOOLKIT:  add workaround for breakage in XQuartz upgrades
 * add check to ensure that "submit" command from 2.8.8dev.10 is performed
   in a form (report by Karen Lewellen) -TD
-* update config.guess (2014-03-23), config.sub (2014-04-03)
+* update config.guess (2014-03-23), config.sub (2014-07-28)
 
 2014-03-12 (2.8.9dev.1)
 

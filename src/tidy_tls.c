@@ -1,5 +1,5 @@
 /*
- * $LynxId: tidy_tls.c,v 1.22 2014/01/11 17:34:51 tom Exp $
+ * $LynxId: tidy_tls.c,v 1.24 2014/11/30 23:28:13 tom Exp $
  * Copyright 2008-2013,2014 Thomas E. Dickey
  * with fix Copyright 2008 by Thomas Viehmann
  *
@@ -11,7 +11,11 @@
 #include <tidy_tls.h>
 
 #include <gnutls/x509.h>
+#ifdef HAVE_GNUTLS_RND
+#include <gnutls/crypto.h>
+#else
 #include <gcrypt.h>
+#endif
 #include <libtasn1.h>		/* ASN1_SUCCESS,etc */
 #include <string.h>
 
@@ -95,8 +99,15 @@ unsigned long ERR_get_error(void)
  */
 int RAND_bytes(unsigned char *buffer, int num)
 {
+    int rc;
+
+#ifdef HAVE_GNUTLS_RND
+    rc = gnutls_rnd(GNUTLS_RND_KEY, buffer, num);
+#else
     gcry_randomize(buffer, num, GCRY_VERY_STRONG_RANDOM);
-    return 1;
+    rc = 1;
+#endif
+    return rc;
 }
 
 /*

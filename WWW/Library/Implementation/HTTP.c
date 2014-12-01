@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTP.c,v 1.135 2014/01/11 16:52:29 tom Exp $
+ * $LynxId: HTTP.c,v 1.136 2014/11/30 22:51:30 tom Exp $
  *
  * HyperText Tranfer Protocol	- Client implementation		HTTP.c
  * ==========================
@@ -119,7 +119,11 @@ SSL *HTGetSSLHandle(void)
 #else
 	SSLeay_add_ssl_algorithms();
 	ssl_ctx = SSL_CTX_new(SSLv23_client_method());
+#ifdef SSL_OP_NO_SSLv2
 	SSL_CTX_set_options(ssl_ctx, SSL_OP_ALL | SSL_OP_NO_SSLv2);
+#else
+	SSL_CTX_set_options(ssl_ctx, SSL_OP_ALL);
+#endif
 #ifdef SSL_OP_NO_COMPRESSION
 	SSL_CTX_set_options(ssl_ctx, SSL_OP_NO_COMPRESSION);
 #endif
