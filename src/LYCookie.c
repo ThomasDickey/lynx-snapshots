@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYCookie.c,v 1.128 2013/11/28 11:18:12 tom Exp $
+ * $LynxId: LYCookie.c,v 1.129 2014/11/29 15:28:10 Mike.Gorse Exp $
  *
  *			       Lynx Cookie Support		   LYCookie.c
  *			       ===================
@@ -716,13 +716,14 @@ static char *scan_cookie_sublist(char *hostname,
 				 char *header,
 				 int secure)
 {
-    HTList *hl;
+    HTList *hl, *next;
     cookie *co;
     time_t now = time(NULL);
     char crlftab[8];
 
     sprintf(crlftab, "%c%c%c", CR, LF, '\t');
-    for (hl = sublist; hl != NULL; hl = hl->next) {
+    for (hl = sublist; hl != NULL; hl = next) {
+	next = hl->next;
 	co = (cookie *) hl->object;
 
 	if (co == NULL) {
