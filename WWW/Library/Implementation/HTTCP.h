@@ -1,8 +1,10 @@
-/*                               /Net/dxcern/userd/timbl/hypertext/WWW/Library/src/HTTCP.html
-                               GENERIC TCP/IP COMMUNICATION
-
-   This module has the common code for handling TCP/IP connections etc.
-
+/*
+ * $LynxId: HTTCP.h,v 1.24 2014/12/03 00:27:57 tom Exp $
+ *
+ *                               /Net/dxcern/userd/timbl/hypertext/WWW/Library/src/HTTCP.html
+ *                             GENERIC TCP/IP COMMUNICATION
+ *
+ * This module has the common code for handling TCP/IP connections etc.
  */
 #ifndef HTTCP_H
 #define HTTCP_H
@@ -86,7 +88,18 @@ extern "C" {
  */
     extern int lynx_nsl_status;
 
-    extern struct hostent *LYGetHostByName(char *str);
+#ifndef LYNX_HOSTENT
+#define LYNX_HOSTENT void
+#endif
+
+    extern LYNX_HOSTENT *LYGetHostByName(char *host);
+
+#ifdef INET6
+#ifndef LYNX_ADDRINFO
+#define LYNX_ADDRINFO void
+#endif
+    extern LYNX_ADDRINFO *HTGetAddrInfo(const char *str, const int defport);
+#endif
 
 /*      Get Name of This Machine
  *      ------------------------

@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTCP.c,v 1.129 2013/12/07 15:36:55 tom Exp $
+ * $LynxId: HTTCP.c,v 1.134 2014/12/03 01:00:40 tom Exp $
  *
  *			Generic Communication Code		HTTCP.c
  *			==========================
@@ -18,6 +18,9 @@
  *	17 Nov 94  Andy Harper	Added support for SOCKETSHR transport
  *	16 Jul 95  S. Bjorndahl added kluge to deal with LIBCMU bug
  */
+
+#define LYNX_ADDRINFO	struct addrinfo
+#define LYNX_HOSTENT	struct hostent
 
 #include <HTUtils.h>
 #include <HTParse.h>
@@ -38,9 +41,6 @@
 #ifdef __DJGPP__
 #include <netdb.h>
 #endif /* __DJGPP__ */
-
-#define LYNX_ADDRINFO	struct addrinfo
-#define LYNX_HOSTENT	struct hostent
 
 #define OK_HOST(p) ((p) != 0 && ((p)->h_length) != 0)
 
@@ -380,7 +380,7 @@ int lynx_nsl_status = HT_OK;
  *  addresses, in a format inspired by gdb's print format. - kw
  */
 static void dump_hostent(const char *msgprefix,
-			 void *data)
+			 const void *data)
 {
     if (TRACE) {
 	int i;
@@ -537,6 +537,8 @@ typedef struct {
 static size_t fill_rehostent(void **rehostent,
 			     const LYNX_HOSTENT *phost)
 {
+    static const char *this_func = "fill_rehostent";
+
     LYNX_HOSTENT *data = 0;
     int num_addrs = 0;
     int num_aliases = 0;
@@ -570,7 +572,7 @@ static size_t fill_rehostent(void **rehostent,
     }
 
     if ((result = calloc(need, sizeof(char))) == 0)
-	  outofmem(__FILE__, "fill_rehostent");
+	  outofmem(__FILE__, this_func);
 
     *rehostent = result;
 
@@ -671,13 +673,18 @@ extern int h_errno;
 #endif
 #endif
 
-static BOOL setup_nsl_fork(void (*really) (char *, char *, STATUSES *, void **),
+static BOOL setup_nsl_fork(void (*really) (const char *,
+					   const char *,
+					   STATUSES *,
+					   void **),
 			   unsigned (*readit) (int, char *, size_t),
-			   void (*dumpit) (const char *, void *),
-			   char *host,
-			   char *port,
+			   void (*dumpit) (const char *, const void *),
+			   const char *host,
+			   const char *port,
 			   void **rehostent)
 {
+    static const char *this_func = "setup_nsl_fork";
+
     STATUSES statuses;
 
     /*
@@ -933,7 +940,7 @@ static BOOL setup_nsl_fork(void (*really) (char *, char *, STATUSES *, void **),
 		     * Then get the full reorganized hostent.  -BL, kw
 		     */
 		    if ((*rehostent = malloc(statuses.rehostentlen)) == 0)
-			outofmem(__FILE__, "setup_nsl_fork");
+			outofmem(__FILE__, this_func);
 		    readret = (*readit) (pfd[0], *rehostent, statuses.rehostentlen);
 #ifdef DEBUG_HOSTENT
 		    dumpit("Read from pipe", *rehostent);
@@ -984,7 +991,7 @@ static BOOL setup_nsl_fork(void (*really) (char *, char *, STATUSES *, void **),
 	 * Abort if interrupt key pressed.
 	 */
 	if (HTCheckForInterrupt()) {
-	    CTRACE((tfp, "LYGetHostByName: INTERRUPTED gethostbyname.\n"));
+	    CTRACE((tfp, "%s: INTERRUPTED gethostbyname.\n", this_func));
 	    kill(fpid, SIGTERM);
 	    waitpid(fpid, NULL, WNOHANG);
 	    close(pfd[0]);
@@ -1000,23 +1007,23 @@ static BOOL setup_nsl_fork(void (*really) (char *, char *, STATUSES *, void **),
     if (waitret > 0) {
 	if (WIFEXITED(waitstat)) {
 	    CTRACE((tfp,
-		    "LYGetHostByName: NSL_FORK child %d exited, status 0x%x.\n",
-		    (int) waitret, WEXITSTATUS(waitstat)));
+		    "%s: NSL_FORK child %d exited, status 0x%x.\n",
+		    this_func, (int) waitret, WEXITSTATUS(waitstat)));
 	} else if (WIFSIGNALED(waitstat)) {
 	    CTRACE((tfp,
-		    "LYGetHostByName: NSL_FORK child %d got signal, status 0x%x!\n",
-		    (int) waitret, WTERMSIG(waitstat)));
+		    "%s: NSL_FORK child %d got signal, status 0x%x!\n",
+		    this_func, (int) waitret, WTERMSIG(waitstat)));
 #ifdef WCOREDUMP
 	    if (WCOREDUMP(waitstat)) {
 		CTRACE((tfp,
-			"LYGetHostByName: NSL_FORK child %d dumped core!\n",
-			(int) waitret));
+			"%s: NSL_FORK child %d dumped core!\n",
+			this_func, (int) waitret));
 	    }
 #endif /* WCOREDUMP */
 	} else if (WIFSTOPPED(waitstat)) {
 	    CTRACE((tfp,
-		    "LYGetHostByName: NSL_FORK child %d is stopped, status 0x%x!\n",
-		    (int) waitret, WSTOPSIG(waitstat)));
+		    "%s: NSL_FORK child %d is stopped, status 0x%x!\n",
+		    this_func, (int) waitret, WSTOPSIG(waitstat)));
 	}
     }
     if (!got_rehostent) {
@@ -1030,8 +1037,8 @@ static BOOL setup_nsl_fork(void (*really) (char *, char *, STATUSES *, void **),
 /*
  * This is called via the child-side of the fork.
  */
-static void really_gethostbyname(char *host,
-				 char *port GCC_UNUSED,
+static void really_gethostbyname(const char *host,
+				 const char *port GCC_UNUSED,
 				 STATUSES * statuses,
 				 void **rehostent)
 {
@@ -1110,6 +1117,7 @@ static void really_gethostbyname(char *host,
  */
 LYNX_HOSTENT *LYGetHostByName(char *host)
 {
+    static const char *this_func = "LYGetHostByName";
 
 #ifdef NSL_FORK
     /* for transfer of result between from child to parent: */
@@ -1123,15 +1131,15 @@ LYNX_HOSTENT *LYGetHostByName(char *host)
 #endif
 
     if (!host) {
-	CTRACE((tfp, "LYGetHostByName: Can't parse `NULL'.\n"));
+	CTRACE((tfp, "%s: Can't parse `NULL'.\n", this_func));
 	lynx_nsl_status = HT_INTERNAL;
 	return NULL;
     }
-    CTRACE((tfp, "LYGetHostByName: parsing `%s'.\n", host));
+    CTRACE((tfp, "%s: parsing `%s'.\n", this_func, host));
 
     /*  Could disable this if all our callers already check - kw */
     if (HTCheckForInterrupt()) {
-	CTRACE((tfp, "LYGetHostByName: INTERRUPTED for '%s'.\n", host));
+	CTRACE((tfp, "%s: INTERRUPTED for '%s'.\n", this_func, host));
 	lynx_nsl_status = HT_INTERRUPTED;
 	return NULL;
     }
@@ -1148,7 +1156,7 @@ LYNX_HOSTENT *LYGetHostByName(char *host)
 	return NULL;
     }
 #ifdef MVS			/* Outstanding problem with crash in MVS gethostbyname */
-    CTRACE((tfp, "LYGetHostByName: Calling gethostbyname(%s)\n", host));
+    CTRACE((tfp, "%s: Calling gethostbyname(%s)\n", this_func, host));
 #endif /* MVS */
 
     CTRACE_FLUSH(tfp);		/* so child messages will not mess up parent log */
@@ -1226,7 +1234,7 @@ LYNX_HOSTENT *LYGetHostByName(char *host)
 
 	phost = gethostbyname(host);	/* See netdb.h */
 #ifdef MVS
-	CTRACE((tfp, "LYGetHostByName: gethostbyname() returned %d\n", phost));
+	CTRACE((tfp, "%s: gethostbyname() returned %d\n", this_func, phost));
 #endif /* MVS */
 	if (phost) {
 	    lynx_nsl_status = HT_OK;
@@ -1240,15 +1248,14 @@ LYNX_HOSTENT *LYGetHostByName(char *host)
 #endif /* !NSL_FORK */
 
 #ifdef DEBUG_HOSTENT
-    dump_hostent("LYGetHostByName", result_phost);
-    CTRACE((tfp, "LYGetHostByName: Resolved name to a hostent.\n"));
+    dump_hostent(this_func, result_phost);
+    CTRACE((tfp, "%s: Resolved name to a hostent.\n", this_func));
 #endif
 
     return result_phost;	/* OK */
 
   failed:
-    CTRACE((tfp, "LYGetHostByName: Can't find internet node name `%s'.\n",
-	    host));
+    CTRACE((tfp, "%s: Can't find internet node name `%s'.\n", this_func, host));
     return NULL;
 }
 
@@ -1267,18 +1274,20 @@ LYNX_HOSTENT *LYGetHostByName(char *host)
 #ifndef INET6
 static int HTParseInet(SockA * soc_in, const char *str)
 {
+    static const char *this_func = "HTParseInet";
+
     char *port;
     int dotcount_ip = 0;	/* for dotted decimal IP addr */
     char *strptr;
     char *host = NULL;
 
     if (!str) {
-	CTRACE((tfp, "HTParseInet: Can't parse `NULL'.\n"));
+	CTRACE((tfp, "%s: Can't parse `NULL'.\n", this_func));
 	return -1;
     }
-    CTRACE((tfp, "HTParseInet: parsing `%s'.\n", str));
+    CTRACE((tfp, "%s: parsing `%s'.\n", this_func, str));
     if (HTCheckForInterrupt()) {
-	CTRACE((tfp, "HTParseInet: INTERRUPTED for '%s'.\n", str));
+	CTRACE((tfp, "%s: INTERRUPTED for '%s'.\n", this_func, str));
 	return -1;
     }
     StrAllocCopy(host, str);	/* Make a copy we can mutilate */
@@ -1368,7 +1377,7 @@ static int HTParseInet(SockA * soc_in, const char *str)
     } else {			/* Alphanumeric node name: */
 
 #ifdef MVS			/* Outstanding problem with crash in MVS gethostbyname */
-	CTRACE((tfp, "HTParseInet: Calling LYGetHostByName(%s)\n", host));
+	CTRACE((tfp, "%s: Calling LYGetHostByName(%s)\n", this_func, host));
 #endif /* MVS */
 
 #ifdef _WINDOWS_NSL
@@ -1395,7 +1404,8 @@ static int HTParseInet(SockA * soc_in, const char *str)
     }				/* Alphanumeric node name */
 
     CTRACE((tfp,
-	    "HTParseInet: Parsed address as port %d, IP address %d.%d.%d.%d\n",
+	    "%s: Parsed address as port %d, IP address %d.%d.%d.%d\n",
+	    this_func,
 	    (int) ntohs(soc_in->sin_port),
 	    (int) *((unsigned char *) (&soc_in->sin_addr) + 0),
 	    (int) *((unsigned char *) (&soc_in->sin_addr) + 1),
@@ -1406,8 +1416,8 @@ static int HTParseInet(SockA * soc_in, const char *str)
     return 0;			/* OK */
 
   failed:
-    CTRACE((tfp, "HTParseInet: Can't find internet node name `%s'.\n",
-	    host));
+    CTRACE((tfp, "%s: Can't find internet node name `%s'.\n",
+	    this_func, host));
     FREE(host);
     switch (lynx_nsl_status) {
     case HT_NOT_ACCEPTABLE:
@@ -1421,13 +1431,13 @@ static int HTParseInet(SockA * soc_in, const char *str)
 
 #ifdef INET6
 
-static void dump_addrinfo(const char *tag, void *data)
+static void dump_addrinfo(const char *tag, const void *data)
 {
-    LYNX_ADDRINFO *res;
+    const LYNX_ADDRINFO *res;
     int count = 0;
 
     CTRACE((tfp, "dump_addrinfo %s:\n", tag));
-    for (res = (LYNX_ADDRINFO *) data; res; res = res->ai_next) {
+    for (res = (const LYNX_ADDRINFO *) data; res; res = res->ai_next) {
 	char hostbuf[1024], portbuf[1024];
 
 	++count;
@@ -1457,6 +1467,8 @@ static void dump_addrinfo(const char *tag, void *data)
 static size_t fill_addrinfo(void **buffer,
 			    const LYNX_ADDRINFO *phost)
 {
+    static const char *this_func = "fill_addinfo";
+
     const LYNX_ADDRINFO *q;
     LYNX_ADDRINFO *actual;
     LYNX_ADDRINFO *result;
@@ -1474,7 +1486,7 @@ static size_t fill_addrinfo(void **buffer,
     CTRACE((tfp, "...fill_addrinfo %d:%lu\n", limit, (unsigned long) need));
 
     if ((result = (LYNX_ADDRINFO *) calloc(1, need)) == 0)
-	outofmem(__FILE__, "fill_addrinfo");
+	outofmem(__FILE__, this_func);
 
     *buffer = actual = result;
     heap = ((char *) actual) + ((size_t) limit * sizeof(LYNX_ADDRINFO));
@@ -1545,8 +1557,8 @@ static unsigned read_addrinfo(int fd, char *buffer, size_t length)
 /*
  * This is called via the child-side of the fork.
  */
-static void really_getaddrinfo(char *host,
-			       char *port,
+static void really_getaddrinfo(const char *host,
+			       const char *port,
 			       STATUSES * statuses,
 			       void **result)
 {
@@ -1572,7 +1584,7 @@ static void really_getaddrinfo(char *host,
 #endif
 	statuses->rehostentlen = fill_addrinfo(result, res);
 #ifdef DEBUG_HOSTENT_CHILD
-	dump_addrinfo("CHILD fill_addrinfo", (LYNX_ADDRINFO *) (*result));
+	dump_addrinfo("CHILD fill_addrinfo", (const LYNX_ADDRINFO *) (*result));
 #endif
 	if (statuses->rehostentlen <= sizeof(LYNX_ADDRINFO)) {
 	    statuses->rehostentlen = 0;
@@ -1584,8 +1596,8 @@ static void really_getaddrinfo(char *host,
 }
 #endif /* NSL_FORK */
 
-static LYNX_ADDRINFO *HTGetAddrInfo(const char *str,
-				    const int defport)
+LYNX_ADDRINFO *HTGetAddrInfo(const char *str,
+			     const int defport)
 {
 #ifdef NSL_FORK
     /* for transfer of result between from child to parent: */

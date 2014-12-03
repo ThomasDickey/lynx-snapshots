@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYUtils.c,v 1.268 2014/07/24 22:30:44 tom Exp $
+ * $LynxId: LYUtils.c,v 1.270 2014/12/03 00:30:11 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTCP.h>
@@ -1784,7 +1784,8 @@ static int DontCheck(void)
 	struct timeval tv;
 
 	gettimeofday(&tv, (struct timezone *) 0);
-	next = tv.tv_usec / 100000L;	/* 0.1 seconds is a compromise */
+	next = (tv.tv_sec * 10);
+	next += (tv.tv_usec / 100000L);		/* 0.1 seconds is a compromise */
     }
 #else
     next = time((time_t *) 0);
@@ -4635,13 +4636,6 @@ BOOLEAN LYExpandHostForURL(char **AllocatedString,
     BOOLEAN GotHost = FALSE;
     BOOLEAN Startup = (BOOL) (helpfilepath == NULL);
 
-#ifdef INET6
-    struct addrinfo hints, *res;
-    int error;
-    char *begin;
-    char *end = NULL;
-#endif /* INET6 */
-
     /*
      * If it's a NULL or zero-length string, or if it begins with a slash or
      * hash, don't continue pointlessly.  - FM
@@ -4705,22 +4699,7 @@ BOOLEAN LYExpandHostForURL(char **AllocatedString,
 	fprintf(stdout, "%s '%s'%s\r\n", WWW_FIND_MESSAGE, host, FIRST_SEGMENT);
     }
 #ifdef INET6
-    begin = host;
-    if (host[0] == '[' && ((end = strrchr(host, ']')))) {
-	/*
-	 * cut '[' and ']' from the IPv6 address, e.g. [::1]
-	 */
-	begin = host + 1;
-	*end = '\0';
-    }
-    memset(&hints, 0, sizeof(hints));
-    hints.ai_family = PF_UNSPEC;
-    hints.ai_socktype = SOCK_STREAM;
-    error = getaddrinfo(begin, "80", &hints, &res);
-    if (end)
-	*end = ']';
-
-    if (!error && res)
+    if (HTGetAddrInfo(host, 80) != NULL)
 #else
     if (LYGetHostByName(host) != NULL)
 #endif /* INET6 */

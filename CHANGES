@@ -1,9 +1,12 @@
--- $LynxId: CHANGES,v 1.758 2014/11/30 23:25:52 tom Exp $
+-- $LynxId: CHANGES,v 1.760 2014/12/03 00:42:32 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
 2014-11-30 (2.8.9dev.2)
+* modify LYExpandHostForURL() to call HTGetAddrInfo(), allowing DNS lookups
+  for IPv6 to be interrupted, e.g., by typing ^G.  This was a path overlooked
+  in 2.8.8dev.13 (reports by Chad Kline, etc.) -TD
 * drop libgnutls-extra when using --with-gnutls-compat option -TD
 * drop libgcrypt dependency when building with gnutls, using gnutls_rnd()
   rather than gcry_randomize() (adapted from patch by Andreas Metzler,
