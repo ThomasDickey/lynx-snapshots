@@ -1,4 +1,4 @@
--- $LynxId: CHANGES,v 1.760 2014/12/03 00:42:32 tom Exp $
+-- $LynxId: CHANGES,v 1.761 2014/12/04 11:28:52 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
@@ -32,6 +32,8 @@ Changes since Lynx 2.8 release
     testing - prcs does not build with this option.
   + CF_MAKEFLAGS:  workaround for GNU make 4.0 incompatibility with previous
     releases.
+  + CF_SUBDIR_PATH:  add /usr/pkg and /opt/local to help configuring with
+    pkgsrc and macports -TD
   + CF_XOPEN_SOURCE:  Minix3.2 ifdef's the POSIX.1-2001 functions inside
     _NETBSD_SOURCE, even though it was released 2012-02-29 - appease it.  At
     the same time, turn on the verbose flag to show that most platforms need
