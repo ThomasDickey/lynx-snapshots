@@ -1,5 +1,5 @@
 /*
- * $LynxId: UCdomap.c,v 1.96 2014/02/04 01:29:44 tom Exp $
+ * $LynxId: UCdomap.c,v 1.98 2014/12/07 14:45:38 tom Exp $
  *
  *  UCdomap.c
  *  =========
@@ -381,7 +381,7 @@ static void UC_con_set_trans(int UC_charset_in_hndl,
 		p++;
 	    }
 	} else {
-	    ptrans[i] = 0xfffd;
+	    ptrans[i] = UCS_REPL;
 	}
     }
     if (update_flag) {
@@ -475,7 +475,7 @@ static int con_insert_unipair(unsigned unicode, unsigned fontpos, int fordefault
 	    return ucError;
 
 	for (i = 0; i < 64; i++) {
-	    p2[i] = 0xffff;	/* No glyph for this character (yet) */
+	    p2[i] = UCS_HIDE;	/* No glyph for this character (yet) */
 	}
     }
 
@@ -718,7 +718,7 @@ static int conv_uni_to_pc(long ucs,
 	/*
 	 * U+FFFD:  REPLACEMENT CHARACTER.
 	 */
-	ucs = 0xfffd;
+	ucs = UCS_REPL;
     } else if (ucs < 0x20 || ucs >= 0xfffe) {
 	/*
 	 * Not a printable character.
@@ -779,7 +779,7 @@ static int conv_uni_to_str(char *outbuf,
 	/*
 	 * U+FFFD:  REPLACEMENT CHARACTER.
 	 */
-	ucs = 0xfffd;
+	ucs = UCS_REPL;
 	/*
 	 * Maybe the following two cases should be allowed here??  - KW
 	 */
@@ -881,10 +881,10 @@ int UCTransUniChar(UCode_t unicode,
 	}
     }
     if (!isdefault && (rc == ucNotFound)) {
-	rc = conv_uni_to_pc(0xfffdL, 0);
+	rc = conv_uni_to_pc(UCS_REPL, 0);
     }
     if ((isdefault || trydefault) && (rc == ucNotFound)) {
-	rc = conv_uni_to_pc(0xfffdL, 1);
+	rc = conv_uni_to_pc(UCS_REPL, 1);
     }
     return rc;
 }
@@ -1018,17 +1018,17 @@ int UCTransUniCharStr(char *outbuf,
     }
     if (rc == ucNotFound) {
 	if (!isdefault)
-	    rc = conv_uni_to_str(outbuf, buflen, 0xfffdL, 0);
+	    rc = conv_uni_to_str(outbuf, buflen, UCS_REPL, 0);
 	if ((rc == ucNotFound) && (isdefault || trydefault))
-	    rc = conv_uni_to_str(outbuf, buflen, 0xfffdL, 1);
+	    rc = conv_uni_to_str(outbuf, buflen, UCS_REPL, 1);
 	if (rc >= 0)
 	    return (int) strlen(outbuf);
     }
     if (chk_single_flag && src == ucNotFound) {
 	if (!isdefault)
-	    rc = conv_uni_to_pc(0xfffdL, 0);
+	    rc = conv_uni_to_pc(UCS_REPL, 0);
 	if ((rc == ucNotFound) && (isdefault || trydefault))
-	    rc = conv_uni_to_pc(0xfffdL, 1);
+	    rc = conv_uni_to_pc(UCS_REPL, 1);
 	if (rc >= 32) {
 	    outbuf[0] = (char) rc;
 	    outbuf[1] = '\0';
@@ -1140,10 +1140,10 @@ int UCTransChar(int ch_in,
 	rc = conv_uni_to_pc(unicode, 1);
     }
     if ((rc == ucNotFound) && !isdefault) {
-	rc = conv_uni_to_pc(0xfffdL, 0);
+	rc = conv_uni_to_pc(UCS_REPL, 0);
     }
     if ((rc == ucNotFound) && (isdefault || trydefault)) {
-	rc = conv_uni_to_pc(0xfffdL, 1);
+	rc = conv_uni_to_pc(UCS_REPL, 1);
     }
     return rc;
 }
@@ -1453,17 +1453,17 @@ int UCTransCharStr(char *outbuf,
     }
     if (rc == ucNotFound) {
 	if (!isdefault)
-	    rc = conv_uni_to_str(outbuf, buflen, 0xfffdL, 0);
+	    rc = conv_uni_to_str(outbuf, buflen, UCS_REPL, 0);
 	if ((rc == ucNotFound) && (isdefault || trydefault))
-	    rc = conv_uni_to_str(outbuf, buflen, 0xfffdL, 1);
+	    rc = conv_uni_to_str(outbuf, buflen, UCS_REPL, 1);
 	if (rc >= 0)
 	    return (int) strlen(outbuf);
     }
     if (chk_single_flag && src == ucNotFound) {
 	if (!isdefault)
-	    rc = conv_uni_to_pc(0xfffdL, 0);
+	    rc = conv_uni_to_pc(UCS_REPL, 0);
 	if ((rc == ucNotFound) && (isdefault || trydefault))
-	    rc = conv_uni_to_pc(0xfffdL, 1);
+	    rc = conv_uni_to_pc(UCS_REPL, 1);
 	if (rc >= 32) {
 	    outbuf[0] = (char) rc;
 	    outbuf[1] = '\0';

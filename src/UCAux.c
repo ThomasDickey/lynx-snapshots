@@ -1,5 +1,5 @@
 /*
- * $LynxId: UCAux.c,v 1.44 2010/11/07 21:21:09 tom Exp $
+ * $LynxId: UCAux.c,v 1.49 2014/12/08 01:10:30 tom Exp $
  */
 #include <HTUtils.h>
 
@@ -31,10 +31,6 @@ BOOL UCCanTranslateUniTo(int to)
 {
     if (to < 0)
 	return NO;
-/*???
-    if (!strcmp(LYCharSet_UC[to].MIMEname, "x-transparent"))
-       return NO;
-*/
 
     return YES;			/* well at least some characters... */
 }
@@ -626,4 +622,145 @@ UCode_t UCGetUniFromUtf8String(char **ppuni)
     }
     *ppuni = p + utf_count;
     return uc_out;
+}
+
+/*
+ * Combine UTF-8 into Unicode.  Incomplete characters are either ignored, or
+ * returned as the UCS replacement character.
+ */
+dUTF8 HTDecodeUTF8(UTFDecodeState * me, int *c_in_out, UCode_t *result)
+{
+    dUTF8 rc = dUTF8_ok;
+    int c = *c_in_out;
+    unsigned uc = UCH(c);
+
+    if (TOASCII(uc) > 127) {
+	/*
+	 * continue a multibyte character...
+	 */
+	if (me->utf_count > 0 && (TOASCII(c) & 0xc0) == 0x80) {
+	    if (me->utf_count <= 0) {
+		me->utf_char = UCS_REPL;
+	    } else if (me->utf_count == 1) {
+		int limit = (int) (me->utf_buf_p - me->utf_buf) + 1;
+		int maybe = 0;
+
+		/*
+		 * Check for overlong sequences (from comment in xterm):
+		 *   1100000x 10xxxxxx
+		 *   11100000 100xxxxx 10xxxxxx
+		 *   11110000 1000xxxx 10xxxxxx 10xxxxxx
+		 *   11111000 10000xxx 10xxxxxx 10xxxxxx 10xxxxxx
+		 *   11111100 100000xx 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx
+		 */
+		switch (limit) {
+		case 2:
+		    maybe = (UCH(me->utf_buf[0]) & 0xfe) == 0xc0;
+		    break;
+		case 3:
+		    maybe = ((UCH(me->utf_buf[0]) == 0xe0) &&
+			     (UCH(me->utf_buf[1]) & 0xf0) == 0x80);
+		    break;
+		case 4:
+		    maybe = ((UCH(me->utf_buf[0]) == 0xf0) &&
+			     (UCH(me->utf_buf[1]) & 0xf8) == 0x80);
+		    break;
+		case 5:
+		    maybe = ((UCH(me->utf_buf[0]) == 0xf8) &&
+			     (UCH(me->utf_buf[1]) & 0xfd) == 0x80);
+		    break;
+		}
+		if (maybe) {
+		    while (limit-- > 2) {
+			if ((UCH(me->utf_buf[limit]) & 0xc0) != 0x80) {
+			    maybe = 0;
+			    break;
+			}
+		    }
+		    if (maybe) {
+			me->utf_char = UCS_REPL;
+		    }
+		}
+	    }
+	    if (me->utf_char == UCS_REPL) {
+		rc = dUTF8_err;
+	    } else if (me->utf_char || ((uc & 0x7f) >> (7 - me->utf_count))) {
+		me->utf_char = (me->utf_char << 6) | (TOASCII(c) & 0x3f);
+		if ((me->utf_char >= 0xd800 &&
+		     me->utf_char <= 0xdfff) ||
+		    (me->utf_char == 0xfffe) ||
+		    (me->utf_char == UCS_HIDE)) {
+		    me->utf_char = UCS_REPL;
+		    rc = dUTF8_err;
+		}
+	    } else {
+		me->utf_char = UCS_REPL;
+		rc = dUTF8_err;
+	    }
+	    me->utf_count--;
+	    *(me->utf_buf_p) = (char) c;
+	    (me->utf_buf_p)++;
+
+	    if (me->utf_count == 0) {
+		*(me->utf_buf_p) = '\0';
+		*result = me->utf_char;
+		if (*result < 256) {
+		    *c_in_out = UCH(*result & 0xff);
+		}
+		/* lynx does not use left-to-right */
+		if (*result == 0x200e)
+		    rc = dUTF8_err;
+	    } else {
+		rc = dUTF8_more;
+	    }
+	} else {
+	    /*
+	     * begin a multibyte character
+	     */
+	    rc = dUTF8_more;
+	    me->utf_buf_p = me->utf_buf;
+	    *(me->utf_buf_p) = (char) c;
+	    (me->utf_buf_p)++;
+	    if ((uc & 0xe0) == 0xc0) {
+		me->utf_count = 1;
+		me->utf_char = (uc & 0x1f);
+	    } else if ((uc & 0xf0) == 0xe0) {
+		me->utf_count = 2;
+		me->utf_char = (uc & 0x0f);
+	    } else if ((uc & 0xf8) == 0xf0) {
+		me->utf_count = 3;
+		me->utf_char = (uc & 0x07);
+	    } else if ((uc & 0xfc) == 0xf8) {
+		me->utf_count = 4;
+		me->utf_char = (uc & 0x03);
+	    } else if ((uc & 0xfe) == 0xfc) {
+		me->utf_count = 5;
+		me->utf_char = (uc & 0x01);
+	    } else {
+		me->utf_count = 0;
+		me->utf_buf_p = me->utf_buf;
+		*(me->utf_buf_p) = '\0';
+		rc = dUTF8_err;
+	    }
+	}
+    } else {
+	me->utf_count = 0;
+	me->utf_buf_p = me->utf_buf;
+	*(me->utf_buf_p) = '\0';
+    }
+
+#if 0
+    if (rc != dUTF8_ok) {
+	CTRACE((tfp, "UTF8 %#x ->%#x %s\n",
+		uc, UCH(*c_in_out),
+		(rc == dUTF8_err) ? "err" : "more"));
+    } else {
+	if (*result > 127) {
+	    CTRACE((tfp, "UTF8 %#x == %#x\n", uc, (int) *result));
+	} else if (c != UCS_REPL && !isspace(c)) {
+	    CTRACE((tfp, "CHAR %#x == %c (%#x)\n", uc, uc, (int) *result));
+	}
+    }
+#endif
+    return rc;
 }
