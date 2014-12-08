@@ -1,5 +1,5 @@
 /*
- * $LynxId: UCMap.h,v 1.27 2011/12/01 02:00:57 tom Exp $
+ * $LynxId: UCMap.h,v 1.28 2014/12/07 14:40:40 tom Exp $
  */
 #ifndef UCMAP_H
 #define UCMAP_H
@@ -11,6 +11,10 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#define UCS_HIDE 0xffff
+#define UCS_REPL 0xfffd
+
     typedef enum {
 	ucError = -1,
 	ucZeroWidth = -2,

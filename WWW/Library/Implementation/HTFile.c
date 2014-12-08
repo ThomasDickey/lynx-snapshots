@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFile.c,v 1.143 2014/07/24 22:08:24 tom Exp $
+ * $LynxId: HTFile.c,v 1.144 2014/12/08 01:38:05 tom Exp $
  *
  *			File Access				HTFile.c
  *			===========
@@ -905,7 +905,7 @@ HTFormat HTFileFormat(const char *filename,
 	HTFormat result;
 
 	StrAllocCopy(newname, filename);
-	*(FindSearch(newname)) = '\0';
+	newname[((const char *) search) - filename] = '\0';
 	result = HTFileFormat(newname, pencoding, pdesc);
 	free(newname);
 	return result;

@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYCharSets.c,v 1.68 2013/01/04 21:47:16 tom Exp $
+ * $LynxId: LYCharSets.c,v 1.69 2014/12/07 14:42:48 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTCJK.h>
@@ -1091,7 +1091,7 @@ UCode_t LYcp1252ToUnicode(UCode_t code)
 	    /*
 	     * Undefined (by convention, use the replacement character).
 	     */
-	    code = 0xfffd;
+	    code = UCS_REPL;
 	    break;
 	}
     }

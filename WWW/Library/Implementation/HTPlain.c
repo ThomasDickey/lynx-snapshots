@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTPlain.c,v 1.51 2013/05/02 11:09:30 tom Exp $
+ * $LynxId: HTPlain.c,v 1.59 2014/12/08 01:11:15 tom Exp $
  *
  *		Plain text object		HTWrite.c
  *		=================
@@ -55,16 +55,8 @@ struct _HTStream {
      */
     LYUCcharset *outUCI;
     int outUCLYhndl;
-    /*
-     * Counter, value, buffer and pointer for UTF-8 handling.  - FM
-     */
-    char utf_count;
-    UCode_t utf_char;
-    char utf_buf[8];
-    char *utf_buf_p;
-    /*
-     * The charset transformation structure.  - FM
-     */
+
+    UTFDecodeState U;
     UCTransParams T;
 };
 
@@ -193,11 +185,11 @@ static void HTPlain_write(HTStream *me, const char *s, int l)
 {
     const char *p;
     const char *e = s + l;
-    char c;
+    int c;
     unsigned c_unsign;
     BOOL chk;
     UCode_t code, uck = -1;
-    char saved_char_in = '\0';
+    int saved_char_in = '\0';
 
     for (p = s; p < e; p++) {
 #ifdef REMOVE_CR_ONLY
@@ -227,12 +219,6 @@ static void HTPlain_write(HTStream *me, const char *s, int l)
 		HTPlain_bs_pending = 2;
 		HTPlain_lastraw = UCH(*p);
 		continue;
-#if 0
-	    } else if (HTPlain_bs_pending != 2) {
-		HTPlain_bs_pending--;	/* 1 -> 0, 3 -> 2 */
-		HTPlain_lastraw = UCH(*p);
-		continue;
-#endif
 	    }
 	}
 
@@ -288,91 +274,23 @@ static void HTPlain_write(HTStream *me, const char *s, int l)
 	saved_char_in = '\0';
 	/*
 	 * Combine any UTF-8 multibytes into Unicode to check for special
-	 * characters.  - FM
+	 * characters. - FM, TD
 	 */
 	if (me->T.decode_utf8) {
-	    /*
-	     * Combine UTF-8 into Unicode.  Incomplete characters silently
-	     * ignored.  from Linux kernel's console.c - KW
-	     */
-	    if (TOASCII(c_unsign) > 127) {	/* S/390 -- gil -- 0371 */
-		/*
-		 * We have an octet from a multibyte character.  - FM
-		 */
-		if (me->utf_count > 0 && (c & 0xc0) == 0x80) {
-		    /*
-		     * Adjust the UCode_t value, add the octet to the buffer,
-		     * and decrement the byte count.  - FM
-		     */
-		    me->utf_char = (me->utf_char << 6) | (c & 0x3f);
-		    me->utf_count--;
-		    *(me->utf_buf_p) = c;
-		    (me->utf_buf_p)++;
-		    if (me->utf_count == 0) {
-			/*
-			 * Got a complete multibyte character.
-			 */
-			*(me->utf_buf_p) = '\0';
-			code = me->utf_char;
-			if (code > 0 && code < 256) {
-			    c = FROMASCII((char) code);
-			    c_unsign = UCH(c);
-			}
-		    } else {
-			/*
-			 * Get the next byte.  - FM
-			 */
-			continue;
-		    }
-		} else {
-		    /*
-		     * Start handling a new multibyte character.  - FM
-		     */
-		    me->utf_buf_p[0] = c;
-		    me->utf_buf_p = &me->utf_buf[1];
-		    if ((*p & 0xe0) == 0xc0) {
-			me->utf_count = 1;
-			me->utf_char = (c & 0x1f);
-		    } else if ((*p & 0xf0) == 0xe0) {
-			me->utf_count = 2;
-			me->utf_char = (c & 0x0f);
-		    } else if ((*p & 0xf8) == 0xf0) {
-			me->utf_count = 3;
-			me->utf_char = (c & 0x07);
-		    } else if ((*p & 0xfc) == 0xf8) {
-			me->utf_count = 4;
-			me->utf_char = (c & 0x03);
-		    } else if ((*p & 0xfe) == 0xfc) {
-			me->utf_count = 5;
-			me->utf_char = (c & 0x01);
-		    } else {
-			/*
-			 * We got garbage, so ignore it.  - FM
-			 */
-			me->utf_count = 0;
-			me->utf_buf_p[0] = '\0';
-			me->utf_buf_p = me->utf_buf;
-		    }
-		    /*
-		     * Get the next byte.  - FM
-		     */
-		    continue;
+	    switch (HTDecodeUTF8(&(me->U), &c, &code)) {
+	    case dUTF8_ok:
+		if (code < 256) {
+		    c = FROMASCII((char) code);
+		    c_unsign = UCH(c);
 		}
-	    } else if (me->utf_count > 0) {
-		/*
-		 * Got an ASCII character when expecting UTF-8 multibytes, so
-		 * ignore the buffered multibye characters and fall through
-		 * with the current ASCII character.  - FM
-		 */
-		me->utf_count = 0;
-		me->utf_buf[0] = '\0';
-		me->utf_buf_p = me->utf_buf;
-		code = (UCode_t) c_unsign;
-	    } else {
-		/*
-		 * Got a valid ASCII character, so fall through with it.  - FM
-		 */
-		code = (UCode_t) c_unsign;
+		break;
+	    case dUTF8_err:
+		code = UCS_REPL;
+		strcpy(me->U.utf_buf, "\357\277\275");
+		me->U.utf_buf_p = (me->U.utf_buf + 3);
+		break;
+	    case dUTF8_more:
+		continue;
 	    }
 	}
 	/*
@@ -381,10 +299,6 @@ static void HTPlain_write(HTStream *me, const char *s, int l)
 	 */
 	if (!(me->T.decode_utf8 &&
 	      UCH(*p) > 127)) {
-#ifdef NOTDEFINED
-	    if (me->T.strip_raw_char_in)
-		saved_char_in = c;
-#endif /* NOTDEFINED */
 	    if (me->T.trans_to_uni &&
 		(TOASCII(code) >= LYlowest_eightbit[me->inUCLYhndl] ||	/* S/390 -- gil -- 0389 */
 		 (code < ' ' && code != 0 &&
@@ -430,7 +344,7 @@ static void HTPlain_write(HTStream *me, const char *s, int l)
 		    if (uck == 0) {
 			continue;
 		    } else if (uck < 0) {
-			me->utf_buf[0] = '\0';
+			me->U.utf_buf[0] = '\0';
 		    } else {
 			c = replace_buf[0];
 			if (c && replace_buf[1]) {
@@ -438,11 +352,11 @@ static void HTPlain_write(HTStream *me, const char *s, int l)
 			    continue;
 			}
 		    }
-		    me->utf_buf[0] = '\0';
+		    me->U.utf_buf[0] = '\0';
 		    code = UCH(c);
 		}		/*  Next line end of ugly stuff for C0. - KW */
 	    } else {
-		me->utf_buf[0] = '\0';
+		me->U.utf_buf[0] = '\0';
 		code = UCH(c);
 	    }
 	}
@@ -498,7 +412,7 @@ static void HTPlain_write(HTStream *me, const char *s, int l)
 	    /*
 	     * If we get to here, pass the displayable ASCII characters.  - FM
 	     */
-	} else if ((code >= ' ' && TOASCII(code) < 127) ||
+	} else if ((code >= ' ' && code != UCS_REPL && TOASCII(code) < 127) ||
 		   (PASSHI8BIT &&
 		    c >= LYlowest_eightbit[me->outUCLYhndl]) ||
 		   *p == '\n' || *p == '\t') {
@@ -545,10 +459,10 @@ static void HTPlain_write(HTStream *me, const char *s, int l)
 	    /*
 	     * We want UTF-8 output, so do it now.  - FM
 	     */
-	    if (*me->utf_buf) {
-		HText_appendText(me->text, me->utf_buf);
-		me->utf_buf[0] = '\0';
-		me->utf_buf_p = me->utf_buf;
+	    if (*me->U.utf_buf) {
+		HText_appendText(me->text, me->U.utf_buf);
+		me->U.utf_buf[0] = '\0';
+		me->U.utf_buf_p = me->U.utf_buf;
 	    } else if (UCConvertUniToUtf8(code, replace_buf)) {
 		HText_appendText(me->text, replace_buf);
 	    } else {
@@ -559,15 +473,6 @@ static void HTPlain_write(HTStream *me, const char *s, int l)
 		sprintf(replace_buf, "U%.2lX", (unsigned long) TOASCII(code));
 		HText_appendText(me->text, replace_buf);
 	    }
-#ifdef NOTDEFINED
-	} else if (me->T.strip_raw_char_in &&
-		   UCH(*p) >= 192 &&
-		   UCH(*p) < 255) {
-	    /*
-	     * KOI special:  strip high bit, gives (somewhat) readable ASCII.
-	     */
-	    HText_appendCharacter(me->text, (char) (*p & 0x7f));
-#endif /* NOTDEFINED */
 	    /*
 	     * If we don't actually want the character, make it safe and output
 	     * that now.  - FM
@@ -678,10 +583,10 @@ HTStream *HTPlainPresent(HTPresentation *pres GCC_UNUSED, HTParentAnchor *anchor
 
     HTPlain_lastraw = -1;
 
-    me->utf_count = 0;
-    me->utf_char = 0;
-    me->utf_buf[0] = me->utf_buf[6] = me->utf_buf[7] = '\0';
-    me->utf_buf_p = me->utf_buf;
+    me->U.utf_count = 0;
+    me->U.utf_char = 0;
+    me->U.utf_buf[0] = me->U.utf_buf[6] = me->U.utf_buf[7] = '\0';
+    me->U.utf_buf_p = me->U.utf_buf;
     me->outUCLYhndl = HTAnchor_getUCLYhndl(anchor, UCT_STAGE_HTEXT);
     me->inUCLYhndl = HTAnchor_getUCLYhndl(anchor, UCT_STAGE_PARSER);
     HTPlain_getChartransInfo(me, anchor);
