@@ -1,4 +1,4 @@
-/* $LynxId: LYStrings.c,v 1.258 2013/11/28 11:57:39 tom Exp $ */
+/* $LynxId: LYStrings.c,v 1.260 2014/12/09 01:49:18 tom Exp $ */
 #include <HTUtils.h>
 #include <HTCJK.h>
 #include <UCAux.h>
@@ -1188,7 +1188,7 @@ static Keysym_String_List *lookupKeysymByName(const char *name)
     return result;
 }
 
-int map_string_to_keysym(const char *str, int *keysym)
+int map_string_to_keysym(const char *str, int *keysym, int internal)
 {
     int modifier = 0;
 
@@ -1259,7 +1259,9 @@ int map_string_to_keysym(const char *str, int *keysym)
 	Keysym_String_List *k = lookupKeysymByName(str);
 
 	if (k != 0) {
-	    *keysym = k->value;
+	    *keysym = (internal
+		       ? k->internal
+		       : k->value);
 	}
     }
 
@@ -1347,7 +1349,7 @@ static int setkey_cmd(char *parse)
 	    }
 	    if (t != s)
 		*t = '\0';
-	    if (map_string_to_keysym(s, &keysym) >= 0) {
+	    if (map_string_to_keysym(s, &keysym, FALSE) >= 0) {
 		if (!unescape_string(parse, buf, buf + sizeof(buf) - 1)) {
 		    MY_TRACE((tfp, "KEYMAP(SKIP) could unescape key\n"));
 		    return 0;	/* Trace the failure and continue. */
@@ -1386,7 +1388,7 @@ static int unsetkey_cmd(char *parse)
 	{
 	    int keysym;
 
-	    if (map_string_to_keysym(parse, &keysym) >= 0)
+	    if (map_string_to_keysym(parse, &keysym, FALSE) >= 0)
 		define_key((char *) 0, keysym);
 	}
 #endif
@@ -1432,6 +1434,7 @@ static int read_keymap_file(void)
     if ((fp = fopen(file, "r")) == 0)
 	return 0;
 
+    CTRACE((tfp, "read_keymap_file %s\n", file));
     linenum = 0;
     while (LYSafeGets(&line, fp) != 0) {
 	char *s = LYSkipBlanks(line);

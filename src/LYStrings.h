@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYStrings.h,v 1.113 2013/10/20 20:33:23 tom Exp $
+ * $LynxId: LYStrings.h,v 1.114 2014/12/09 01:49:51 tom Exp $
  */
 #ifndef LYSTRINGS_H
 #define LYSTRINGS_H
@@ -324,7 +324,7 @@ extern "C" {
 
 #if defined(USE_KEYMAPS)
     extern int lynx_initialize_keymaps(void);
-    extern int map_string_to_keysym(const char *src, int *lec);
+    extern int map_string_to_keysym(const char *src, int *lec, int internal);
 #endif
 
     extern BOOL LYRemapEditBinding(int xlkc, int lec, int select_edi);	/* in LYEditmap.c */
