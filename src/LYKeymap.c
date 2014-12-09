@@ -1,4 +1,4 @@
-/* $LynxId: LYKeymap.c,v 1.110 2013/12/17 00:27:55 tom Exp $ */
+/* $LynxId: LYKeymap.c,v 1.113 2014/12/09 01:48:50 tom Exp $ */
 #include <HTUtils.h>
 #include <LYUtils.h>
 #include <LYGlobalDefs.h>
@@ -967,7 +967,7 @@ int lkcstring_to_lkc(const char *src)
 	    c = (-1);
 #ifdef USE_KEYMAPS
     } else {
-	map_string_to_keysym(src, &c);
+	map_string_to_keysym(src, &c, TRUE);
 #ifndef USE_SLANG
 	if (c >= 0) {
 	    /* make curses-keys mapped from Keysym_Strings[] available here */
@@ -1059,39 +1059,37 @@ int remap(char *key,
 {
     Kcmd *mp;
     int c;
+    int result = 0;
 
 #if !defined(DIRED_SUPPORT) || !defined(OK_OVERRIDE)
-    if (for_dired)
-	return 0;
-#endif
-    if (func == NULL)
-	return 0;
-    c = lkcstring_to_lkc(key);
-    if (c <= -1)
-	return 0;
-    else if (c >= 0) {
-	/* Remapping of key actions is supported only for basic
-	 * lynxkeycodes, without modifiers etc.!  If we get somehow
-	 * called for an invalid lynxkeycode, fail or silently ignore
-	 * modifiers. - kw
-	 */
-	if (c & (LKC_ISLECLAC | LKC_ISLAC))
-	    return 0;
-	if ((c & LKC_MASK) != c)
-	    c &= LKC_MASK;
+    if (for_dired) {
+	return result;
     }
-    if (c + 1 >= KEYMAP_SIZE)
-	return 0;
-    if ((mp = LYStringToKcmd(func)) != 0) {
+#endif
+    if (func != NULL) {
+	c = lkcstring_to_lkc(key);
+	if ((c >= 0) && (c < KEYMAP_SIZE)) {
+	    /* Remapping of key actions is supported only for basic
+	     * lynxkeycodes, without modifiers etc.!  If we get somehow
+	     * called for an invalid lynxkeycode, fail or silently ignore
+	     * modifiers -KW
+	     */
+	    if (!(c & (LKC_ISLECLAC | LKC_ISLAC))) {
+		c &= LKC_MASK;
+		if ((mp = LYStringToKcmd(func)) != 0) {
 #if defined(DIRED_SUPPORT) && defined(OK_OVERRIDE)
-	if (for_dired)
-	    key_override[c + 1] = mp->code;
-	else
+		    if (for_dired)
+			key_override[c + 1] = mp->code;
+		    else
 #endif
-	    keymap[c + 1] = (LYKeymap_t) mp->code;
-	return (c ? c : (int) LAC_TO_LKC0(mp->code));	/* don't return 0, successful */
+			keymap[c + 1] = (LYKeymap_t) mp->code;
+		    /* don't return 0, successful */
+		    result = (c ? c : (int) LAC_TO_LKC0(mp->code));
+		}
+	    }
+	}
     }
-    return 0;
+    return result;
 }
 
 typedef struct {
@@ -1529,6 +1527,7 @@ static void initKeyMap(LYEditConfig * table)
  */
 void LYinitKeymap(void)
 {
+    CTRACE((tfp, "LYinitKeymap\n"));
     initKeyMap(&myKeymapData);
 #if defined(DIRED_SUPPORT) && defined(OK_OVERRIDE)
     initKeyMap(&myOverrideData);
