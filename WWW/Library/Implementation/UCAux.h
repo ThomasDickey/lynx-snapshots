@@ -1,5 +1,5 @@
 /*
- * $LynxId: UCAux.h,v 1.21 2014/12/07 16:20:49 tom Exp $
+ * $LynxId: UCAux.h,v 1.22 2014/12/10 09:48:41 tom Exp $
  */
 #ifndef UCAUX_H
 #define UCAUX_H
@@ -84,7 +84,7 @@ extern "C" {
     extern BOOL UCConvertUniToUtf8(UCode_t code,
 				   char *buffer);
 
-    extern UCode_t UCGetUniFromUtf8String(char **ppuni);
+    extern UCode_t UCGetUniFromUtf8String(const char **ppuni);
 
 #ifdef __cplusplus
 }
