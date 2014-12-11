@@ -1,5 +1,5 @@
 /*
- * $LynxId: SGML.c,v 1.154 2014/12/08 00:13:02 tom Exp $
+ * $LynxId: SGML.c,v 1.155 2014/12/10 09:48:35 tom Exp $
  *
  *			General SGML Parser code		SGML.c
  *			========================
@@ -4181,7 +4181,7 @@ static void SGML_character(HTStream *me, int c_in)
 		 * in UTF-8 form, too.  This won't be always true for all uses
 		 * of the include buffer, but it's a start.  - kw
 		 */
-		char *puni = me->active_include + me->include_index;
+		const char *puni = me->active_include + me->include_index;
 
 		c = UCH(*puni);
 		clong = UCGetUniFromUtf8String(&puni);

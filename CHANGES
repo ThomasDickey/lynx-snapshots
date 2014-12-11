@@ -1,9 +1,11 @@
--- $LynxId: CHANGES,v 1.763 2014/12/09 01:43:47 tom Exp $
+-- $LynxId: CHANGES,v 1.764 2014/12/11 09:41:33 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2014-12-08 (2.8.9dev.2)
+2014-12-11 (2.8.9dev.2)
+* improve overlay of field contents in form for "-dump" option; the change
+  in 2.8.8dev.3 did not take into account UTF-8 values (Debian #770011) -TD
 * correct a bug in the map_string_to_keysym() function introduced in
   2.8.8dev.17:  as used via the remap() function, this returns the curses
   code for a special key rather than Lynx's internal code (Debian #769601) -TD

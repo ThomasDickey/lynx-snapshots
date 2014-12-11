@@ -1,5 +1,5 @@
 /*
- * $LynxId: UCAux.c,v 1.49 2014/12/08 01:10:30 tom Exp $
+ * $LynxId: UCAux.c,v 1.50 2014/12/10 09:48:57 tom Exp $
  */
 #include <HTUtils.h>
 
@@ -560,10 +560,10 @@ BOOL UCConvertUniToUtf8(UCode_t code, char *buffer)
  * returns the UCS value
  * returns negative value on error (invalid UTF-8 sequence)
  */
-UCode_t UCGetUniFromUtf8String(char **ppuni)
+UCode_t UCGetUniFromUtf8String(const char **ppuni)
 {
     UCode_t uc_out = 0;
-    char *p = *ppuni;
+    const char *p = *ppuni;
     int utf_count, i;
 
     if (!(**ppuni & 0x80))

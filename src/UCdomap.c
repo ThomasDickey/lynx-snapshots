@@ -1,5 +1,5 @@
 /*
- * $LynxId: UCdomap.c,v 1.98 2014/12/07 14:45:38 tom Exp $
+ * $LynxId: UCdomap.c,v 1.99 2014/12/10 09:47:34 tom Exp $
  *
  *  UCdomap.c
  *  =========
@@ -1199,7 +1199,7 @@ UCode_t UCTransToUni(int ch_in,
     } else if (charset_in == UTF8_handle) {
 	if (is8bits(ch_iu)) {
 	    unsigned need;
-	    char *ptr;
+	    const char *ptr;
 
 	    buffer[inx++] = (char) ch_iu;
 	    buffer[inx] = '\0';

@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYCharUtils.c,v 1.127 2013/11/28 11:17:59 tom Exp $
+ * $LynxId: LYCharUtils.c,v 1.128 2014/12/10 10:30:58 tom Exp $
  *
  *  Functions associated with LYCharSets.c and the Lynx version of HTML.c - FM
  *  ==========================================================================
@@ -1081,7 +1081,7 @@ char **LYUCFullyTranslateString(char **str,
     BOOLEAN no_bytetrans;
     UCTransParams T;
     BOOL from_is_utf8 = FALSE;
-    char *puni;
+    char *puni = 0;
     enum _state {
 	S_text,
 	S_esc,
@@ -1416,12 +1416,15 @@ char **LYUCFullyTranslateString(char **str,
 
 	    if (from_is_utf8) {
 		if (((*p) & 0xc0) == 0xc0) {
+		    const char *pq = p;
+
 		    puni = p;
-		    code = UCGetUniFromUtf8String(&puni);
+		    code = UCGetUniFromUtf8String(&pq);
 		    if (code <= 0) {
 			code = UCH(*p);
 		    } else {
 			what = P_utf8;
+			puni += (pq - (const char *) p);
 		    }
 		}
 	    } else if (use_lynx_specials && !Back &&
