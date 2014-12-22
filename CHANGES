@@ -1,9 +1,13 @@
--- $LynxId: CHANGES,v 1.764 2014/12/11 09:41:33 tom Exp $
+-- $LynxId: CHANGES,v 1.766 2014/12/21 21:30:08 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2014-12-11 (2.8.9dev.2)
+2014-12-21 (2.8.9dev.2)
+* correct an inconsistent check for reload using isLYNXCGI() in the
+  options-screen -TD
+* add script after using msginit to create en.po, to work around renaming in
+  Cygwin environment -TD
 * improve overlay of field contents in form for "-dump" option; the change
   in 2.8.8dev.3 did not take into account UTF-8 values (Debian #770011) -TD
 * correct a bug in the map_string_to_keysym() function introduced in

@@ -1,4 +1,4 @@
-# $LynxId: makefile.inn,v 1.19 2010/09/19 18:34:55 tom Exp $
+# $LynxId: makefile.inn,v 1.21 2014/12/22 00:09:52 tom Exp $
 #
 # Makefile for program source directory in GNU NLS utilities package.
 # Copyright (C) 1995, 1996, 1997 by Ulrich Drepper <drepper@gnu.ai.mit.edu>
@@ -97,6 +97,15 @@ all-no:
 
 en.po :	
 	msginit --no-translator -l en -i $(PACKAGE).pot
+	# cygwin's msginit 1.19.3 creates "en_US.po" rather than "en.po"...
+	@$(SHELL) -c 'for n in en*.po; \
+		do \
+		if test -f $$n; \
+		then \
+			test $$n != $@ && mv -vf $$n $@; \
+			break; \
+		fi \
+		done'
 
 $(srcdir)/$(PACKAGE).pot: $(POTFILES)
 	$(XGETTEXT) --default-domain=$(NLS_TEXTDOMAIN) --directory=$(top_srcdir) \

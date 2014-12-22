@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTML.c,v 1.164 2013/11/28 11:17:39 tom Exp $
+ * $LynxId: HTML.c,v 1.165 2014/12/16 01:21:32 tom Exp $
  *
  *		Structured stream to Rich hypertext converter
  *		============================================
@@ -5301,7 +5301,9 @@ static int HTML_start_element(HTStructured * me, int element_number,
 #ifdef EXP_NESTED_TABLES
 	if (!nested_tables)
 #endif
+	{
 	    HText_cancelStbl(me->text);
+	}
 
 	if (me->inA) {
 	    SET_SKIP_STACK(HTML_A);
@@ -5393,7 +5395,6 @@ static int HTML_start_element(HTStructured * me, int element_number,
 	if (me->sp->style->id == ST_Preformatted) {
 	    CHECK_ID(HTML_TR_ID);
 	    me->inP = FALSE;
-/*	    HText_cancelStbl(me->text);  seems unnecessary here - kw */
 	    break;
 	}
 	if (LYoverride_default_alignment(me)) {

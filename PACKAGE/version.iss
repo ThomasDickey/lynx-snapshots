@@ -4,8 +4,8 @@
 #define LYNX_VERSION "2.8.9dev.2"
 
 ; most-recent full release and target
-#define LYNX_RELEASE "2.8.8"
-#define LYNX_TARGETS "2.8.8"
+#define LYNX_RELEASE "2.8.9"
+#define LYNX_TARGETS "2.8.9"
 
 #define MyAppName "Lynx - web browser"
 #define MyAppPublisher "Thomas E Dickey"

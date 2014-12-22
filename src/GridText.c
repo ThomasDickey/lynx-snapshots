@@ -1,5 +1,5 @@
 /*
- * $LynxId: GridText.c,v 1.285 2014/12/11 10:07:02 tom Exp $
+ * $LynxId: GridText.c,v 1.286 2014/12/16 01:23:52 tom Exp $
  *
  *		Character grid hypertext object
  *		===============================
@@ -3257,7 +3257,7 @@ static void split_line(HText *text, unsigned split)
     }				/* switch */
     previous->offset = (unsigned short) ((new_offset < 0) ? 0 : new_offset);
 
-    if (text->stbl)
+    if (text->stbl) {
 	/*
 	 * Notify simple table stuff of line split, so that it can
 	 * set the last cell's length.  The last cell should and
@@ -3273,6 +3273,7 @@ static void split_line(HText *text, unsigned split)
 		       text->Lines - 1,
 		       previous->offset,
 		       previous->size - ctrl_chars_on_previous_line);
+    }
 
     text->in_line_1 = NO;	/* unless caller sets it otherwise */
 
@@ -4876,8 +4877,9 @@ void HText_startStblTABLE(HText *me, int alignment)
 	} else
 #endif
 	{
-	    if (me->stbl)
+	    if (me->stbl) {
 		HText_cancelStbl(me);	/* auto cancel previously open table */
+	    }
 	}
 
 	me->stbl = Stbl_startTABLE(alignment);
@@ -4978,8 +4980,9 @@ void HText_startStblTR(HText *me, int alignment)
 {
     if (!me || !me->stbl)
 	return;
-    if (Stbl_addRowToTable(me->stbl, alignment, me->Lines) < 0)
+    if (Stbl_addRowToTable(me->stbl, alignment, me->Lines) < 0) {
 	HText_cancelStbl(me);	/* give up */
+    }
 }
 
 /*	Finish simple table row
@@ -5013,8 +5016,9 @@ void HText_startStblTD(HText *me, int colspan,
     if (Stbl_addCellToTable(me->stbl, colspan, rowspan, alignment, isheader,
 			    me->Lines,
 			    HText_LastLineOffset(me),
-			    HText_LastLineSize(me, FALSE)) < 0)
+			    HText_LastLineSize(me, FALSE)) < 0) {
 	HText_cancelStbl(me);	/* give up */
+    }
 }
 
 /*	Finish simple table cell
@@ -5026,8 +5030,9 @@ void HText_endStblTD(HText *me)
     if (Stbl_finishCellInTable(me->stbl, TRST_ENDCELL_ENDTD,
 			       me->Lines,
 			       HText_LastLineOffset(me),
-			       HText_LastLineSize(me, FALSE)) < 0)
+			       HText_LastLineSize(me, FALSE)) < 0) {
 	HText_cancelStbl(me);	/* give up */
+    }
 }
 
 /*	Remember COL info / Start a COLGROUP and remember info
@@ -5044,8 +5049,9 @@ void HText_startStblCOL(HText *me, int span,
 	CTRACE((tfp, "*** SPAN=%d is too large, ignored!\n", span));
 	span = 1;
     }
-    if (Stbl_addColInfo(me->stbl, span, alignment, isgroup) < 0)
+    if (Stbl_addColInfo(me->stbl, span, alignment, isgroup) < 0) {
 	HText_cancelStbl(me);	/* give up */
+    }
 }
 
 /*	Finish a COLGROUP
@@ -5054,8 +5060,9 @@ void HText_endStblCOLGROUP(HText *me)
 {
     if (!me || !me->stbl)
 	return;
-    if (Stbl_finishColGroup(me->stbl) < 0)
+    if (Stbl_finishColGroup(me->stbl) < 0) {
 	HText_cancelStbl(me);	/* give up */
+    }
 }
 
 /*	Start a THEAD / TFOOT / TBODY - remember its alignment info
@@ -5064,8 +5071,9 @@ void HText_startStblRowGroup(HText *me, int alignment)
 {
     if (!me || !me->stbl)
 	return;
-    if (Stbl_addRowGroup(me->stbl, alignment) < 0)
+    if (Stbl_addRowGroup(me->stbl, alignment) < 0) {
 	HText_cancelStbl(me);	/* give up */
+    }
 }
 
 static void compute_show_number(TextAnchor *a)
@@ -5739,8 +5747,9 @@ void HText_endAppend(HText *text)
     new_line(text);
 
     if (text->halted) {
-	if (text->stbl)
+	if (text->stbl) {
 	    HText_cancelStbl(text);
+	}
 	/*
 	 * If output was stopped because memory was low, and we made
 	 * it to the end of the document, reset those flags and hope

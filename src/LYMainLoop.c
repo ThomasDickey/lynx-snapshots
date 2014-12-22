@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMainLoop.c,v 1.231 2014/06/06 00:13:03 tom Exp $
+ * $LynxId: LYMainLoop.c,v 1.232 2014/12/21 21:27:23 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTAccess.h>
@@ -3957,7 +3957,7 @@ static BOOLEAN handle_LYK_OPTIONS(int *cmd,
 		      strcmp(CurrentNegoLanguage, NonNull(language)) ||
 		      strcmp(CurrentNegoCharset, NonNull(pref_charset))) &&
 		     (StrNCmp(curdoc.address, "http", 4) == 0 ||
-		      !isLYNXCGI(curdoc.address) == 0))) {
+		      isLYNXCGI(curdoc.address)))) {
 		    /*
 		     * An option has changed which may influence content
 		     * negotiation, and the resource is from a http or https or
