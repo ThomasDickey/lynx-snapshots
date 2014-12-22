@@ -1,4 +1,4 @@
-# $LynxId: makefile.in,v 1.73 2014/01/19 14:41:13 tom Exp $
+# $LynxId: makefile.in,v 1.74 2014/12/16 01:10:39 tom Exp $
 # template-makefile for Lynx src directory
 
 SHELL		= @CONFIG_SHELL@
@@ -140,6 +140,7 @@ distclean: clean
 
 CMN=$(top_srcdir)/WWW/Library/Implementation/
 
+GridText$o :		$(top_srcdir)/userdefs.h
 HTFWriter$o :		$(top_srcdir)/userdefs.h
 HTInit$o :		$(top_srcdir)/userdefs.h
 LYCharSets$o :		$(top_srcdir)/userdefs.h

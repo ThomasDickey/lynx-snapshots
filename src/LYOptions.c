@@ -1,4 +1,4 @@
-/* $LynxId: LYOptions.c,v 1.164 2013/10/25 01:10:17 tom Exp $ */
+/* $LynxId: LYOptions.c,v 1.165 2014/12/21 21:27:45 tom Exp $ */
 #include <HTUtils.h>
 #include <HTFTP.h>
 #include <HTTP.h>		/* 'reloading' flag */
@@ -3404,7 +3404,7 @@ int postoptions(DocInfo *newdoc)
      */
     if ((need_end_reload == TRUE &&
 	 (StrNCmp(newdoc->address, "http", 4) == 0 ||
-	  isLYNXCGI(newdoc->address) == 0))) {
+	  isLYNXCGI(newdoc->address)))) {
 	/*
 	 * An option has changed which may influence content negotiation, and
 	 * the resource is from a http or https or lynxcgi URL (the only

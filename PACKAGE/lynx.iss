@@ -1,4 +1,4 @@
-; $LynxId: lynx.iss,v 1.12 2014/01/09 00:26:08 tom Exp $
+; $LynxId: lynx.iss,v 1.13 2014/12/22 00:44:43 tom Exp $
 ; vile:ts=2 sw=2 notabinsert
 ;
 ; This is the BASE script for different flavors of the installer for Lynx.
@@ -87,7 +87,7 @@ AppName={#MyAppName}
 #define LYNX_TARGET0 StringChange(LYNX_VERSION,LYNX_RELEASE + "rel.",LYNX_RELEASE + ".00")
 #define LYNX_TARGET1 StringChange(LYNX_TARGET0,LYNX_TARGETS + "dev.",LYNX_RELEASE + ".10")
 #define LYNX_TARGET2 StringChange(LYNX_TARGET1,LYNX_TARGETS + "pre.",LYNX_RELEASE + ".20")
-#emit 'VersionInfoVersion=' + LYNX_TARGET2
+#emit 'VersionInfoVersion=' + LYNX_TARGET1
 AppVerName={#MyAppVerName}
 AppPublisher={#MyAppPublisher}
 AppCopyright=© 1997-2013,2014, Thomas E. Dickey
@@ -139,8 +139,8 @@ Name: "{app}\tmp"
 #emit 'Source: "' + DllsSrcDir + '\' + BzipExeName + '"; DestDir: "{app}"; DestName: ' + BzipExeName + '; Flags: ignoreversion'
 #emit 'Source: "' + DllsSrcDir + '\' + GzipExeName + '"; DestDir: "{app}"; DestName: ' + GzipExeName + '; Flags: ignoreversion'
 #emit 'Source: "' + DocsSrcDir + '\*.*"; DestDir: "{app}\doc"; Flags: '
-#emit 'Source: "' + DocsSrcDir + '\samples\*.*"; DestDir: "{app}\doc\samples"; Flags: '
-#emit 'Source: "' + DocsSrcDir + '\test\*.*"; DestDir: "{app}\doc\test"; Flags: '
+#emit 'Source: "' + DocsSrcDir + '\..\samples\*.*"; DestDir: "{app}\doc\samples"; Flags: '
+#emit 'Source: "' + DocsSrcDir + '\..\test\*.*"; DestDir: "{app}\doc\test"; Flags: '
 #emit 'Source: "' + HelpSrcDir + '\*.*"; DestDir: "{app}\help"; Flags: '
 #emit 'Source: "' + HelpSrcDir + '\keystrokes\*.*"; DestDir: "{app}\help\keystrokes"; Flags: '
 
