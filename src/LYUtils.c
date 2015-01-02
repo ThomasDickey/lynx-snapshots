@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYUtils.c,v 1.272 2014/12/22 00:22:55 tom Exp $
+ * $LynxId: LYUtils.c,v 1.273 2014/12/30 22:16:41 Gisle.Vanem Exp $
  */
 #include <HTUtils.h>
 #include <HTTCP.h>
@@ -5183,7 +5183,7 @@ static char *HomeEnv(void)
 {
     char *result = CheckDir(LYGetEnv("HOME"));
 
-#if defined (USE_DOS_DRIVES)
+#if defined (USE_DOS_DRIVES) && defined(_WIN32)
     if (result == 0) {
 	char *head;
 	char *leaf;

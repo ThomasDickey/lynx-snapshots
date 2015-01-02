@@ -1,12 +1,12 @@
 /*
- * $LynxId: userdefs.h,v 1.298 2014/12/22 01:39:40 tom Exp $
+ * $LynxId: userdefs.h,v 1.300 2015/01/02 12:27:07 tom Exp $
  *
  * Lynx - Hypertext navigation system
  *
  *   (c) Copyright 1992, 1993, 1994 University of Kansas
  *	 1995, 1996: GNU General Public License
  *
- *   Copyright 1996-2013,2014 Thomas E. Dickey and Lynx Developers Group
+ *   Copyright 1996-2014,2015 Thomas E. Dickey and Lynx Developers Group
  *   Note: GNU General Public License is not a copyright.
  */
 
@@ -1442,7 +1442,7 @@
  * the version definition with the Project Version on checkout.  Just
  * ignore it. - kw */
 /* $Format: "#define LYNX_VERSION \"$ProjectVersion$\""$ */
-#define LYNX_VERSION "2.8.9dev.2"
+#define LYNX_VERSION "2.8.9dev.3"
 #define LYNX_WWW_HOME "http://lynx.isc.org/"
 #define LYNX_WWW_DIST "http://lynx.isc.org/current/"
 /* $Format: "#define LYNX_DATE \"$ProjectDate$\""$ */
