@@ -47,7 +47,7 @@ For reference, below is the original copyright notice for Lynx (2.4.2).
 
 Files: aclocal.m4
 Licence: other-BSD
-Copyright: 1997-2013,2014 by Thomas E. Dickey
+Copyright: 1997-2014,2015 by Thomas E. Dickey
     Permission to use, copy, modify, and distribute this software and its
     documentation for any purpose and without fee is hereby granted,
     provided that the above copyright notice appear in all copies and that
@@ -101,7 +101,7 @@ Licence: other-BSD
     shared with many OS's install programs.
 
 Files: debian/*
-Copyright:  2010-2013,2014 Thomas E. Dickey
+Copyright:  2010-2014,2015 Thomas E. Dickey
 Licence: other-BSD
     Permission to use, copy, modify, and distribute this software and its
     documentation for any purpose and without fee is hereby granted,

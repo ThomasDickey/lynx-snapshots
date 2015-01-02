@@ -1,4 +1,4 @@
-; $LynxId: lynx.nsi,v 1.19 2014/03/16 15:03:40 tom Exp $
+; $LynxId: lynx.nsi,v 1.21 2015/01/02 12:27:30 tom Exp $
 ; Script originally generated with the Venis Install Wizard, but customized.
 ; The Inno Setup script is preferred; but this can be built via cross-compiling.
 
@@ -9,8 +9,8 @@
 !define VERSION_EPOCH "2"
 !define VERSION_MAJOR "8"
 !define VERSION_MINOR "9"
-!define VERSION_LEVEL "1002"
-!define VERSION_PATCH "dev.2"
+!define VERSION_LEVEL "1003"
+!define VERSION_PATCH "dev.3"
 
 !define SUBKEY "Lynx"
 
@@ -28,7 +28,7 @@ SetCompressor /SOLID lzma
 
 VIAddVersionKey ProductName "${SUBKEY}"
 VIAddVersionKey CompanyName "http://lynx.isc.org"
-VIAddVersionKey LegalCopyright "© 1997-2013,2014, Thomas E. Dickey"
+VIAddVersionKey LegalCopyright "© 1997-2014,2015, Thomas E. Dickey"
 VIAddVersionKey FileDescription "Lynx Installer (MinGW)"
 VIAddVersionKey FileVersion "${VERSION}"
 VIAddVersionKey ProductVersion "${VERSION}"

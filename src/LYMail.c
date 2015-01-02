@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMail.c,v 1.96 2013/11/28 11:23:37 tom Exp $
+ * $LynxId: LYMail.c,v 1.97 2014/12/30 22:16:41 Gisle.Vanem Exp $
  */
 #include <HTUtils.h>
 #include <HTParse.h>
@@ -534,7 +534,6 @@ int LYSendMailFile(char *the_address,
 #endif
 #ifdef __DJGPP__
     if (LYGetEnv("SHELL")) {
-	extern int dj_is_bash;
 	extern char *shell;
 	const char *c_option;
 	const char *format = "%s %s %s -t %s -F %s";
