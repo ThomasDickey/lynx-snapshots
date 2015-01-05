@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYLocal.c,v 1.128 2014/07/24 22:06:43 tom Exp $
+ * $LynxId: LYLocal.c,v 1.129 2015/01/05 01:28:10 Thorsten.Glaser Exp $
  *
  *  Routines to manipulate the local filesystem.
  *  Written by: Rick Mallett, Carleton University
@@ -80,7 +80,7 @@
 #endif /* OK_INSTALL */
 
 static int get_filename(const char *prompt,
-			bstring *buf);
+			bstring **buf);
 
 #ifdef OK_PERMIT
 static int permit_location(char *destpath,
@@ -911,7 +911,7 @@ static int modify_name(char *testpath)
 	}
 
 	BStrCopy0(tmpbuf, LYPathLeaf(testpath));
-	if (get_filename(cp, tmpbuf)) {
+	if (get_filename(cp, &tmpbuf)) {
 
 	    /*
 	     * Do not allow the user to also change the location at this time.
@@ -976,7 +976,7 @@ static int modify_location(char *testpath)
 
     BStrCopy0(tmpbuf, testpath);
     *LYPathLeaf(tmpbuf->str) = '\0';
-    if (get_filename(cp, tmpbuf)) {
+    if (get_filename(cp, &tmpbuf)) {
 	if (strlen(tmpbuf->str)) {
 	    StrAllocCopy(savepath, testpath);
 	    StrAllocCopy(newpath, testpath);
@@ -1110,7 +1110,7 @@ static int create_file(char *current_location)
     char *testpath = NULL;
 
     BStrCopy0(tmpbuf, "");
-    if (get_filename(gettext("Enter name of file to create: "), tmpbuf)) {
+    if (get_filename(gettext("Enter name of file to create: "), &tmpbuf)) {
 
 	if (strstr(tmpbuf->str, "//") != NULL) {
 	    HTAlert(gettext("Illegal redirection \"//\" found! Request ignored."));
@@ -1147,7 +1147,7 @@ static int create_directory(char *current_location)
     char *testpath = NULL;
 
     BStrCopy0(tmpbuf, "");
-    if (get_filename(gettext("Enter name for new directory: "), tmpbuf)) {
+    if (get_filename(gettext("Enter name for new directory: "), &tmpbuf)) {
 
 	if (strstr(tmpbuf->str, "//") != NULL) {
 	    HTAlert(gettext("Illegal redirection \"//\" found! Request ignored."));
@@ -2205,28 +2205,28 @@ int dired_options(DocInfo *doc, char **newfile)
  * Check DIRED filename, return true on success
  */
 static int get_filename(const char *prompt,
-			bstring *buf)
+			bstring **bufp)
 {
     char *cp;
 
     _statusline(prompt);
 
-    (void) LYgetBString(&buf, FALSE, 0, NORECALL);
-    if (strstr(buf->str, "../") != NULL) {
+    (void) LYgetBString(bufp, FALSE, 0, NORECALL);
+    if (strstr((*bufp)->str, "../") != NULL) {
 	HTAlert(gettext("Illegal filename; request ignored."));
 	return FALSE;
     } else if (no_dotfiles || !show_dotfiles) {
-	cp = LYLastPathSep(buf->str);	/* find last slash */
+	cp = LYLastPathSep((*bufp)->str);	/* find last slash */
 	if (cp)
 	    cp += 1;
 	else
-	    cp = buf->str;
+	    cp = (*bufp)->str;
 	if (*cp == '.') {
 	    HTAlert(gettext("Illegal filename; request ignored."));
 	    return FALSE;
 	}
     }
-    return !isBEmpty(buf);
+    return !isBEmpty((*bufp));
 }
 
 #ifdef OK_INSTALL

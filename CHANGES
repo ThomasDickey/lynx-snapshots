@@ -1,9 +1,12 @@
--- $LynxId: CHANGES,v 1.769 2015/01/02 12:32:23 tom Exp $
+-- $LynxId: CHANGES,v 1.770 2015/01/05 01:26:44 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
 2015-01-02 (2.8.9dev.3)
+* amend change made in 2.8.8dev.10 to LYLocal.c get_filename(), ensuring that
+  the bstring parameter can be (re)allocated within that function's call to 
+  LYgetBString() (report by Raoul Megelas) -TG
 * build-fixes for djgpp 2.04 and gcc 4.8.4 using Watt-32 -GV
 
 2014-12-21 (2.8.9dev.2)
