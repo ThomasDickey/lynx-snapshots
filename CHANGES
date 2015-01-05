@@ -1,9 +1,11 @@
--- $LynxId: CHANGES,v 1.770 2015/01/05 01:26:44 tom Exp $
+-- $LynxId: CHANGES,v 1.771 2015/01/05 09:17:08 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2015-01-02 (2.8.9dev.3)
+2015-01-05 (2.8.9dev.3)
+* correct shortcut for "Send To" link used in Inno Setup script, broken in
+  2.8.8dev.15 -TD
 * amend change made in 2.8.8dev.10 to LYLocal.c get_filename(), ensuring that
   the bstring parameter can be (re)allocated within that function's call to 
   LYgetBString() (report by Raoul Megelas) -TG

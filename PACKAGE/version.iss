@@ -7,6 +7,7 @@
 #define LYNX_RELEASE "2.8.9"
 #define LYNX_TARGETS "2.8.9"
 
+#define MyAppProg "Lynx"
 #define MyAppName "Lynx - web browser"
 #define MyAppPublisher "Thomas E Dickey"
 #define MyAppURL "http://lynx.isc.org"
