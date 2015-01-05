@@ -1,4 +1,4 @@
-; $LynxId: lynx.iss,v 1.14 2015/01/02 12:27:21 tom Exp $
+; $LynxId: lynx.iss,v 1.15 2015/01/05 09:15:38 tom Exp $
 ; vile:ts=2 sw=2 notabinsert
 ;
 ; This is the BASE script for different flavors of the installer for Lynx.
@@ -172,7 +172,7 @@ Type: dirifempty; Name: {app}
 #emit 'Type: files; Name: ' + myQuickLaunch
 
 [Code]
-#emit 'const MY_APP_NAME = ''{app}\' + myAppName + '.exe'';'
+#emit 'const MY_APP_NAME = ''{app}\' + myAppProg + '.exe'';'
 
 function isGuru(): Boolean;
 begin
