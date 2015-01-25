@@ -1,7 +1,13 @@
--- $LynxId: CHANGES,v 1.771 2015/01/05 09:17:08 tom Exp $
+-- $LynxId: CHANGES,v 1.775 2015/01/25 17:33:17 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
+
+2015-01-25 (2.8.9dev.4)
+* modify check after gnutls_certificate_verify_peers2() to use
+  gnutls_certificate_verification_status_print() when available, to give
+  potentially more details on certficate revocation (patch by Andreas Metzler,
+  Debian #745835, Debian #752610)
 
 2015-01-05 (2.8.9dev.3)
 * correct shortcut for "Send To" link used in Inno Setup script, broken in

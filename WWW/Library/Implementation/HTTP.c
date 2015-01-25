@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTP.c,v 1.136 2014/11/30 22:51:30 tom Exp $
+ * $LynxId: HTTP.c,v 1.137 2015/01/25 16:58:33 tom Exp $
  *
  * HyperText Tranfer Protocol	- Client implementation		HTTP.c
  * ==========================
@@ -782,9 +782,24 @@ static int HTLoadHTTP(const char *arg,
 					    GNUTLS_VERIFY_DO_NOT_ALLOW_SAME |
 					    GNUTLS_VERIFY_ALLOW_X509_V1_CA_CRT);
 	ret = gnutls_certificate_verify_peers2(handle->gnutls_state, &tls_status);
-	if (ret < 0 || (ret == 0 &&
-			tls_status & GNUTLS_CERT_SIGNER_NOT_FOUND)) {
+	if (ret < 0 || tls_status != 0) {
 	    int flag_continue = 1;
+
+#if GNUTLS_VERSION_NUMBER >= 0x030104
+	    int type;
+	    gnutls_datum_t out;
+
+	    if (ret < 0) {
+		HTSprintf0(&msg, SSL_FORCED_PROMPT,
+			   gettext("GnuTLS error when trying to verify certificate."));
+	    } else {
+		type = gnutls_certificate_type_get(handle->gnutls_state);
+		ret = gnutls_certificate_verification_status_print(tls_status,
+								   type, &out, 0);
+		HTSprintf0(&msg, SSL_FORCED_PROMPT, out.data);
+		gnutls_free(out.data);
+	    }
+#else
 	    char *msg2;
 
 	    if (ret == 0 && tls_status & GNUTLS_CERT_SIGNER_NOT_FOUND) {
@@ -799,6 +814,7 @@ static int HTLoadHTTP(const char *arg,
 		msg2 = gettext("the certificate is not trusted");
 	    }
 	    HTSprintf0(&msg, SSL_FORCED_PROMPT, msg2);
+#endif
 	    CTRACE((tfp, "HTLoadHTTP: %s\n", msg));
 	    if (!ssl_noprompt) {
 		if (!HTForcedPrompt(ssl_noprompt, msg, YES)) {
