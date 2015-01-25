@@ -1,4 +1,4 @@
-dnl $LynxId: configure.in,v 1.270 2014/12/30 21:37:40 tom Exp $
+dnl $LynxId: configure.in,v 1.272 2015/01/25 17:34:39 tom Exp $
 dnl
 dnl Process this file with autoconf to produce a configure script.
 dnl
@@ -7,7 +7,7 @@ dnl by T.E.Dickey <dickey@invisible-island.net>
 dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
 dnl
 dnl ---------------------------------------------------------------------------
-dnl Copyright 1997-2013,2014 by Thomas E. Dickey
+dnl Copyright 1997-2014,2015 by Thomas E. Dickey
 dnl 
 dnl Permission to use, copy, modify, and distribute this software and its
 dnl documentation for any purpose and without fee is hereby granted,
@@ -29,7 +29,7 @@ dnl ---------------------------------------------------------------------------
 dnl
 dnl ask PRCS to plug-in the project-version for the configure-script.
 dnl $Format: "AC_REVISION($ProjectVersion$)"$
-AC_REVISION(2.8.9dev.3)
+AC_REVISION(2.8.9dev.4)
 
 # Save the original $CFLAGS so we can distinguish whether the user set those
 # in the environment, or whether autoconf added -O and -g options:
@@ -64,7 +64,7 @@ AC_ARG_PROGRAM
 PACKAGE=lynx
 dnl ask PRCS to plug-in the project-version for the packages.
 # $Format: "VERSION=$ProjectVersion$"$
-VERSION=2.8.9dev.3
+VERSION=2.8.9dev.4
 
 AC_SUBST(PACKAGE)
 AC_SUBST(VERSION)
