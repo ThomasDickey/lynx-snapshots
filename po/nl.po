@@ -1,17 +1,17 @@
-# Dutch translations for lynx-2.8.7-dev9.
+# Dutch translations for lynx.
 # This file is distributed under the same license as the lynx package.
 #
 # Tijs van Bakel <smoke@casema.net>, 1999, 2000.
 # Luk Claes <luk.claes@ugent.be>, 2004.
-# Benno Schulenberg <benno@vertaalt.nl>, 2008.
+# Benno Schulenberg <benno@vertaalt.nl>, 2008, 2015.
 # Erwin Poeze <erwin.poeze@gmail.com>, 2012
 msgid ""
 msgstr ""
 "Project-Id-Version: lynx-2.8.8-dev9\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2012-02-12 19:13-0500\n"
-"PO-Revision-Date: 2012-08-25 16:49+0200\n"
-"Last-Translator: Erwin Poeze <erwin.poeze@gmail.com>\n"
+"PO-Revision-Date: 2015-03-22 12:57+0100\n"
+"Last-Translator: Benno Schulenberg <benno@vertaalt.nl>\n"
 "Language-Team: Dutch <vertaling@vrijschrift.org>\n"
 "Language: nl\n"
 "MIME-Version: 1.0\n"
@@ -2198,7 +2198,7 @@ msgstr ""
 #: LYMessages.c:699
 #, c-format
 msgid "%s cookie: %.*s=%.*s  Allow? (Y/N/Always/neVer)"
-msgstr "%s koekje: %.*s=%.*s  Toestaan? (Ja, Nee, Altijd, nOoit)"
+msgstr "%s koekje: %.*s=%.*s  Toestaan? (Ja, Nee, Altijd, noOit)"
 
 #. #define INVALID_COOKIE_DOMAIN_CONFIRMATION
 #: LYMessages.c:701
@@ -3625,7 +3625,7 @@ msgstr "nee"
 #.
 #: src/HTAlert.c:913
 msgid "Y/N/A/V"
-msgstr "(J/N/A/V)"
+msgstr "(J/N/A/O)"
 
 #: src/HTML.c:5915
 msgid "Description:"
