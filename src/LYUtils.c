@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYUtils.c,v 1.273 2014/12/30 22:16:41 Gisle.Vanem Exp $
+ * $LynxId: LYUtils.c,v 1.274 2015/03/22 15:38:23 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTCP.h>
@@ -5862,9 +5862,9 @@ static BOOL IsOurSymlink(const char *name)
 #endif
 
 /*
- * Verify if this is really a file, not accessed by a link, except for the
- * special case of its directory being pointed to by a link from a directory
- * owned by root and not writable by other users.
+ * Verify if this is really a file which is not accessed by a symbolic link,
+ * except for the special case of its directory being pointed to by a link from
+ * a directory owned by root and not writable by other users.
  */
 BOOL IsOurFile(const char *name)
 {
@@ -5875,7 +5875,6 @@ BOOL IsOurFile(const char *name)
 	&& lstat(name, &data) == 0
 	&& ((S_ISREG(data.st_mode)
 	     && (data.st_mode & (S_IWOTH | S_IWGRP)) == 0
-	     && data.st_nlink == 1
 	     && data.st_uid == getuid())
 #if defined(HAVE_LSTAT) && defined(S_IFLNK)
 	    || (S_ISLNK(data.st_mode) && IsOurSymlink(name))
@@ -5915,6 +5914,10 @@ BOOL IsOurFile(const char *name)
 		     * uid we can count on is 0.  It would be nice to add a
 		     * check for the gid also, but that wouldn't be
 		     * portable.
+		     *
+		     * Likewise, the t-bit would be nice to rely upon.  However
+		     * it is marked as an extension in POSIX, rather than
+		     * required.
 		     */
 		    if (data.st_uid != 0
 			|| (data.st_mode & S_IWOTH) != 0) {
