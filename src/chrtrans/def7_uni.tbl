@@ -1,4 +1,4 @@
-# $LynxId: def7_uni.tbl,v 1.30 2012/08/13 09:49:49 Ralph.Babel Exp $
+# $LynxId: def7_uni.tbl,v 1.31 2015/04/06 10:45:42 tom Exp $
 # Default 7bit replacements.
 #
 # This table is very important and should not be excluded from the distribution
@@ -1346,7 +1346,7 @@ U+1fed:!:
 U+1fef:!*
 U+1ffe:;;
 # General punctuation:
-0x20	U+2000 U+2002	U+2004-U+2009	U+205F	# spaces
+0x20	U+2000 U+2002	U+2004-U+200A	U+205F	# spaces
 U+2001 "  "
 U+2003 "  "
 U+200e:(->)
@@ -1376,6 +1376,7 @@ U+202c:
 # LEFT-TO-RIGHT OVERRIDE  202D
 U+202d:
 
+U+202b ""
 U+202f ""
 U+2030: 0/00
 U+2031: 0/000
