@@ -2206,7 +2206,7 @@ msgstr ""
 #: LYMessages.c:699
 #, c-format
 msgid "%s cookie: %.*s=%.*s  Allow? (Y/N/Always/neVer)"
-msgstr "Eväste: %s: %.*s=%.*s Sallitaanko? (Y/N/Aina/V ei koskaan)"
+msgstr "Eväste: %s: %.*s=%.*s Sallitaanko? (K/E/Aina/ei koSkaan)"
 
 #. #define INVALID_COOKIE_DOMAIN_CONFIRMATION
 #: LYMessages.c:701
@@ -3631,7 +3631,7 @@ msgstr "ei"
 #.
 #: src/HTAlert.c:913
 msgid "Y/N/A/V"
-msgstr "Y/N/A/V"
+msgstr "K/E/A/S"
 
 #: src/HTML.c:5915
 msgid "Description:"

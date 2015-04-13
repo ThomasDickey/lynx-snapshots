@@ -2195,7 +2195,7 @@ msgstr ""
 #: LYMessages.c:699
 #, c-format
 msgid "%s cookie: %.*s=%.*s  Allow? (Y/N/Always/neVer)"
-msgstr "%s cookie: %.*s=%.*s  Ijinkan? (Y/N/Always/NeVer)"
+msgstr "%s cookie: %.*s=%.*s  Ijinkan? (Y/T/Selalu/tidak Pernah)"
 
 #. #define INVALID_COOKIE_DOMAIN_CONFIRMATION
 #: LYMessages.c:701
@@ -3623,7 +3623,7 @@ msgstr "tidak"
 #.
 #: src/HTAlert.c:913
 msgid "Y/N/A/V"
-msgstr "Y/N/A/V"
+msgstr "Y/T/S/P"
 
 #: src/HTML.c:5915
 msgid "Description:"
@@ -4571,7 +4571,7 @@ msgstr "OFF"
 
 #: src/LYOptions.c:2122
 msgid "NEVER"
-msgstr "NEVER"
+msgstr "TIDAK PERNAH"
 
 #: src/LYOptions.c:2123
 msgid "ALWAYS"
