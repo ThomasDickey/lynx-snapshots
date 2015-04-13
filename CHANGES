@@ -1,9 +1,9 @@
--- $LynxId: CHANGES,v 1.782 2015/04/06 10:48:57 tom Exp $
+-- $LynxId: CHANGES,v 1.784 2015/04/13 00:00:14 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2015-04-06 (2.8.9dev.5)
+2015-04-12 (2.8.9dev.5)
 * add codes U+200A, U+200B to def7_uni.tbl (prompted by report by Sven
   Hartrumpf, as well as referring to
   https://www.cs.tut.fi/~jkorpela/chars/spaces.html) -TD
@@ -11,7 +11,8 @@ Changes since Lynx 2.8 release
   2.8.8dev.10 changes to use LYgetBString() (Debian #699068) -TD, -TG
 * loosen the check in IsOurFile() to permit hard-linked files
   (Debian #429606) -TD
-* update et.po, fr.po, nl.po, ru.po, vi.po from
+* update ca.po, cs.po, et.po, fi.po, fr.po, id.po, nl.po, pt_BR.po, ru.po,
+  sl.po, tr.po, vi.po from
     http://translationproject.org/latest/lynx
 
 2015-01-25 (2.8.9dev.4)

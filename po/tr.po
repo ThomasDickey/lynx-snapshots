@@ -2197,7 +2197,7 @@ msgstr ""
 #: LYMessages.c:699
 #, c-format
 msgid "%s cookie: %.*s=%.*s  Allow? (Y/N/Always/neVer)"
-msgstr "%s çerez: %.*s=%.*s  İzin verir misiniz? Evet(Y)/Hayır(N)/Her zaman(A)/Asla(V)"
+msgstr "%s çerez: %.*s=%.*s  İzin verir misiniz? (E/H/Daima/Asla)"
 
 #. #define INVALID_COOKIE_DOMAIN_CONFIRMATION
 #: LYMessages.c:701
@@ -3625,7 +3625,7 @@ msgstr "hayır"
 #.
 #: src/HTAlert.c:913
 msgid "Y/N/A/V"
-msgstr "(E/H/Daima/Asla)"
+msgstr "(E/H/D/A)"
 
 #: src/HTML.c:5915
 msgid "Description:"
