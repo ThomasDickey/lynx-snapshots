@@ -1,7 +1,12 @@
--- $LynxId: CHANGES,v 1.784 2015/04/13 00:00:14 tom Exp $
+-- $LynxId: CHANGES,v 1.787 2015/04/15 00:56:28 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
+
+2015-04-14 (2.8.9dev.6)
+* regenerated lynx.pot, sent to translation project -TD
+* update da.po from
+    http://translationproject.org/latest/lynx
 
 2015-04-12 (2.8.9dev.5)
 * add codes U+200A, U+200B to def7_uni.tbl (prompted by report by Sven
