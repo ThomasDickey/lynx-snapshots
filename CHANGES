@@ -1,9 +1,11 @@
--- $LynxId: CHANGES,v 1.789 2015/04/15 10:31:37 tom Exp $
+-- $LynxId: CHANGES,v 1.790 2015/04/23 09:20:52 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2015-04-15 (2.8.9dev.6)
+2015-04-23 (2.8.9dev.6)
+* modify configure script to accept a release-number for the ncurses/ncursesw
+  values of the "--with-screen" option, e.g., "--with-screen=ncursesw6" -TD
 * cosmetic fixes for autoconf macros to avoid vi-workaround -TD
 * da.po, et.po, fr.po, vi.po from
     http://translationproject.org/latest/lynx

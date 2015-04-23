@@ -1,4 +1,4 @@
-dnl $LynxId: configure.in,v 1.275 2015/04/15 23:03:19 tom Exp $
+dnl $LynxId: configure.in,v 1.276 2015/04/23 09:26:06 tom Exp $
 dnl
 dnl Process this file with autoconf to produce a configure script.
 dnl
@@ -515,10 +515,10 @@ AC_ARG_WITH(screen,
                           ncurses, ncursesw, pdcurses or slang)],
 	[
 case $withval in
-(curses|ncurses|ncursesw|pdcurses|slang)
+(curses|ncurses*|pdcurses|slang)
 	cf_cv_screen=$withval
 	;;
-(*)	AC_ERROR(Unexpected value)
+(*)	AC_ERROR(Unexpected value $withval)
 	;;
 esac],
 	[cf_cv_screen=curses])])
@@ -537,13 +537,13 @@ case $cf_cv_screen in
 	CF_CURS_PERFORMANCE
 	CF_CURS_TOUCHLINE
 	;;
-(ncurses)
-	CF_NCURSES_CONFIG
-	;;
-(ncursesw)
+(ncursesw*)
 	CF_UTF8_LIB
-	CF_NCURSES_CONFIG(ncursesw)
+	CF_NCURSES_CONFIG($cf_cv_screen)
 	cf_wide_curses=yes
+	;;
+(ncurses*)
+	CF_NCURSES_CONFIG($cf_cv_screen)
 	;;
 (pdcurses)
 	case $host_os in
