@@ -692,6 +692,10 @@ II. Compile instructions -- UNIX
 	the curses library.  The variant ncursesw is the wide-character
 	version of ncurses.  See also the --enable-widec option.
 
+	For the ncurses/ncursesw options, the script also accepts variants
+	such as "ncursesw6", which helps it to find a specific ncurses config
+	script.
+
 	The pdcurses selection supported by the configure script is a UNIX-only
 	library which uses X11.  If you are configuring with DJGPP, the likely
 	choice is "curses", since that is how PDCurses is normally installed.
@@ -1462,4 +1466,4 @@ VIII. Acknowledgment
 
 -- 1999/04/24 - H. Nelson <lynx-admin@irm.nara.kindai.ac.jp>
 -- vile:txtmode
--- $LynxId: INSTALLATION,v 1.123 2014/01/09 20:07:01 tom Exp $
+-- $LynxId: INSTALLATION,v 1.124 2015/04/23 09:22:32 tom Exp $
