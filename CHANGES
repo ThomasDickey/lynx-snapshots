@@ -1,9 +1,11 @@
--- $LynxId: CHANGES,v 1.790 2015/04/23 09:20:52 tom Exp $
+-- $LynxId: CHANGES,v 1.791 2015/04/25 01:07:46 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2015-04-23 (2.8.9dev.6)
+2015-04-24 (2.8.9dev.6)
+* modify configure script to check for ncurses ".pc" files first before looking
+  for the "ncurses*-config" scripts -TD
 * modify configure script to accept a release-number for the ncurses/ncursesw
   values of the "--with-screen" option, e.g., "--with-screen=ncursesw6" -TD
 * cosmetic fixes for autoconf macros to avoid vi-workaround -TD
