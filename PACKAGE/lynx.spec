@@ -1,4 +1,4 @@
-# $LynxId: lynx.spec,v 1.31 2015/04/15 00:19:14 tom Exp $
+# $LynxId: lynx.spec,v 1.32 2015/05/04 10:37:30 tom Exp $
 Summary: A text-based Web browser
 Name: lynx
 Version: 2.8.9
@@ -80,7 +80,7 @@ CPPFLAGS="-DMISC_EXP -DEXP_HTTP_HEADERS" \
 	--enable-syslog \
 	--enable-warnings \
 	--with-bzlib \
-	--with-screen=ncursesw \
+	--with-screen=ncursesw6 \
 	--with-ssl \
 	--with-zlib
 make \

@@ -90,7 +90,7 @@ configure-stamp:
 		--enable-source-cache \
 		--enable-syslog \
 		--with-gnutls=/usr \
-		--with-screen=ncursesw \
+		--with-screen=ncursesw6 \
 		--with-textdomain=$(PACKAGE) \
 		--with-zlib \
 		--without-included-gettext \

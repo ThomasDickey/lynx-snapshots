@@ -1,17 +1,19 @@
--- $LynxId: CHANGES,v 1.791 2015/04/25 01:07:46 tom Exp $
+-- $LynxId: CHANGES,v 1.794 2015/05/04 10:37:55 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2015-04-24 (2.8.9dev.6)
+2015-05-04 (2.8.9dev.6)
+* update test-packages to use ncurses6 test-packages -TD
 * modify configure script to check for ncurses ".pc" files first before looking
   for the "ncurses*-config" scripts -TD
 * modify configure script to accept a release-number for the ncurses/ncursesw
   values of the "--with-screen" option, e.g., "--with-screen=ncursesw6" -TD
 * cosmetic fixes for autoconf macros to avoid vi-workaround -TD
-* da.po, et.po, fr.po, vi.po from
+* da.po, et.po, fr.po, nl.po, vi.po from
     http://translationproject.org/latest/lynx
 * regenerated lynx.pot, sent to translation project -TD
+* update config.guess (2015-03-04), config.sub (2015-03-08)
 
 2015-04-12 (2.8.9dev.5)
 * add codes U+200A, U+200B to def7_uni.tbl (prompted by report by Sven
