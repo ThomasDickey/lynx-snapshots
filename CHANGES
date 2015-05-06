@@ -1,9 +1,12 @@
--- $LynxId: CHANGES,v 1.794 2015/05/04 10:37:55 tom Exp $
+-- $LynxId: CHANGES,v 1.795 2015/05/06 10:46:03 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2015-05-04 (2.8.9dev.6)
+2015-05-06 (2.8.9dev.6)
+* if an SSL error message is too long for the screen-width, trim it with an
+  ellipsis so that the "(y)" part of the prompt for continuing will be visible
+  (Debian #783476) -TD
 * update test-packages to use ncurses6 test-packages -TD
 * modify configure script to check for ncurses ".pc" files first before looking
   for the "ncurses*-config" scripts -TD

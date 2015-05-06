@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTP.c,v 1.137 2015/01/25 16:58:33 tom Exp $
+ * $LynxId: HTTP.c,v 1.141 2015/05/06 10:44:09 tom Exp $
  *
  * HyperText Tranfer Protocol	- Client implementation		HTTP.c
  * ==========================
@@ -45,6 +45,7 @@
 #include <LYUtils.h>
 #include <LYrcFile.h>
 #include <LYLeaks.h>
+#include <LYCurses.h>
 
 #ifdef USE_SSL
 #ifdef USE_OPENSSL_INCL
@@ -71,6 +72,60 @@ static void free_ssl_ctx(void)
 	SSL_CTX_free(ssl_ctx);
 }
 
+static BOOL needs_limit(const char *actual)
+{
+    return ((int) strlen(actual) > LYcols - 7) ? TRUE : FALSE;
+}
+
+static char *limited_string(const char *source, const char *actual)
+{
+    int limit = ((int) strlen(source)
+		 - ((int) strlen(actual) - (LYcols - 10)));
+    char *temp = NULL;
+
+    StrAllocCopy(temp, source);
+    if (limit < 0)
+	limit = 0;
+    strcpy(temp + limit, "...");
+    return temp;
+}
+
+/*
+ * If the error message is too long to fit in the line, truncate that to fit
+ * within the limits for prompting.
+ */
+static void SSL_single_prompt(char **target, const char *source)
+{
+    HTSprintf0(target, SSL_FORCED_PROMPT, source);
+    if (needs_limit(*target)) {
+	char *temp = limited_string(source, *target);
+
+	*target = NULL;
+	HTSprintf0(target, SSL_FORCED_PROMPT, temp);
+	free(temp);
+    }
+}
+
+static void SSL_double_prompt(char **target, const char *format, const char
+			      *arg1, const char *arg2)
+{
+    HTSprintf0(target, format, arg1, arg2);
+    if (needs_limit(*target)) {
+	char *parg2 = limited_string(arg2, *target);
+
+	*target = NULL;
+	HTSprintf0(target, format, arg1, parg2);
+	if (needs_limit(*target)) {
+	    char *parg1 = limited_string(arg1, *target);
+
+	    *target = NULL;
+	    HTSprintf0(target, format, parg1, parg2);
+	    free(parg1);
+	}
+	free(parg2);
+    }
+}
+
 static int HTSSLCallback(int preverify_ok, X509_STORE_CTX * x509_ctx GCC_UNUSED)
 {
     char *msg = NULL;
@@ -88,9 +143,9 @@ static int HTSSLCallback(int preverify_ok, X509_STORE_CTX * x509_ctx GCC_UNUSED)
 #ifndef USE_NSS_COMPAT_INCL
     if (!(preverify_ok || ssl_okay || ssl_noprompt)) {
 #ifdef USE_X509_SUPPORT
-	HTSprintf0(&msg, SSL_FORCED_PROMPT,
-		   X509_verify_cert_error_string((long)
-						 X509_STORE_CTX_get_error(x509_ctx)));
+	SSL_single_prompt(&msg,
+			  X509_verify_cert_error_string((long)
+							X509_STORE_CTX_get_error(x509_ctx)));
 	if (HTForcedPrompt(ssl_noprompt, msg, YES))
 	    ssl_okay = 1;
 	else
@@ -790,13 +845,13 @@ static int HTLoadHTTP(const char *arg,
 	    gnutls_datum_t out;
 
 	    if (ret < 0) {
-		HTSprintf0(&msg, SSL_FORCED_PROMPT,
-			   gettext("GnuTLS error when trying to verify certificate."));
+		SSL_single_prompt(&msg,
+				  gettext("GnuTLS error when trying to verify certificate."));
 	    } else {
 		type = gnutls_certificate_type_get(handle->gnutls_state);
 		ret = gnutls_certificate_verification_status_print(tls_status,
 								   type, &out, 0);
-		HTSprintf0(&msg, SSL_FORCED_PROMPT, out.data);
+		SSL_single_prompt(&msg, out.data);
 		gnutls_free(out.data);
 	    }
 #else
@@ -813,7 +868,7 @@ static int HTLoadHTTP(const char *arg,
 	    } else {
 		msg2 = gettext("the certificate is not trusted");
 	    }
-	    HTSprintf0(&msg, SSL_FORCED_PROMPT, msg2);
+	    SSL_single_prompt(&msg, msg2);
 #endif
 	    CTRACE((tfp, "HTLoadHTTP: %s\n", msg));
 	    if (!ssl_noprompt) {
@@ -1005,25 +1060,27 @@ static int HTLoadHTTP(const char *arg,
 
 	/* if an error occurred, format the appropriate message */
 	if (status_sslcertcheck == 0) {
-	    HTSprintf0(&msg, SSL_FORCED_PROMPT,
-		       gettext("Can't find common name in certificate"));
+	    SSL_single_prompt(&msg,
+			      gettext("Can't find common name in certificate"));
 	} else if (status_sslcertcheck == 1) {
-	    HTSprintf0(&msg,
-		       gettext("SSL error:host(%s)!=cert(%s)-Continue?"),
-		       ssl_host, ssl_all_cns);
+	    SSL_double_prompt(&msg,
+			      gettext("SSL error:host(%s)!=cert(%s)-Continue?"),
+			      ssl_host, ssl_all_cns);
 	}
 
 	/* if an error occurred, let the user decide how much he trusts */
 	if (status_sslcertcheck < 2) {
+	    if (msg == NULL)
+		StrAllocCopy(msg, gettext("SSL error"));
 	    if (!HTForcedPrompt(ssl_noprompt, msg, YES)) {
 		status = HT_NOT_LOADED;
 		FREE(msg);
 		FREE(ssl_all_cns);
 		goto done;
 	    }
-	    HTSprintf0(&msg,
-		       gettext("UNVERIFIED connection to %s (cert=%s)"),
-		       ssl_host, ssl_all_cns ? ssl_all_cns : "NONE");
+	    SSL_double_prompt(&msg,
+			      gettext("UNVERIFIED connection to %s (cert=%s)"),
+			      ssl_host, ssl_all_cns ? ssl_all_cns : "NONE");
 	    _HTProgress(msg);
 	    FREE(msg);
 	}
