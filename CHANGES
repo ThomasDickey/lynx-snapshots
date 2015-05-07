@@ -1,9 +1,12 @@
--- $LynxId: CHANGES,v 1.795 2015/05/06 10:46:03 tom Exp $
+-- $LynxId: CHANGES,v 1.797 2015/05/07 00:18:31 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
 2015-05-06 (2.8.9dev.6)
+* add a note about OCSP to url-support documentation (Debian #745835) -TD
+* change defaults for SSL prompts when a problem is detected to "no" (Debian
+  #783477) -TD
 * if an SSL error message is too long for the screen-width, trim it with an
   ellipsis so that the "(y)" part of the prompt for continuing will be visible
   (Debian #783476) -TD
