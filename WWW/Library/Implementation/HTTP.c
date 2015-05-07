@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTP.c,v 1.141 2015/05/06 10:44:09 tom Exp $
+ * $LynxId: HTTP.c,v 1.142 2015/05/06 23:34:07 tom Exp $
  *
  * HyperText Tranfer Protocol	- Client implementation		HTTP.c
  * ==========================
@@ -146,7 +146,7 @@ static int HTSSLCallback(int preverify_ok, X509_STORE_CTX * x509_ctx GCC_UNUSED)
 	SSL_single_prompt(&msg,
 			  X509_verify_cert_error_string((long)
 							X509_STORE_CTX_get_error(x509_ctx)));
-	if (HTForcedPrompt(ssl_noprompt, msg, YES))
+	if (HTForcedPrompt(ssl_noprompt, msg, NO))
 	    ssl_okay = 1;
 	else
 	    result = 0;
@@ -872,7 +872,7 @@ static int HTLoadHTTP(const char *arg,
 #endif
 	    CTRACE((tfp, "HTLoadHTTP: %s\n", msg));
 	    if (!ssl_noprompt) {
-		if (!HTForcedPrompt(ssl_noprompt, msg, YES)) {
+		if (!HTForcedPrompt(ssl_noprompt, msg, NO)) {
 		    flag_continue = 0;
 		}
 	    } else if (ssl_noprompt == FORCE_PROMPT_NO) {
@@ -1072,7 +1072,7 @@ static int HTLoadHTTP(const char *arg,
 	if (status_sslcertcheck < 2) {
 	    if (msg == NULL)
 		StrAllocCopy(msg, gettext("SSL error"));
-	    if (!HTForcedPrompt(ssl_noprompt, msg, YES)) {
+	    if (!HTForcedPrompt(ssl_noprompt, msg, NO)) {
 		status = HT_NOT_LOADED;
 		FREE(msg);
 		FREE(ssl_all_cns);

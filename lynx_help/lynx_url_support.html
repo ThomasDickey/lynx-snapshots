@@ -1,4 +1,4 @@
-<!-- $LynxId: lynx_url_support.html,v 1.33 2014/01/10 20:48:52 tom Exp $ -->
+<!-- $LynxId: lynx_url_support.html,v 1.34 2015/05/07 00:18:49 tom Exp $ -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN">
 
 <html>
@@ -121,6 +121,15 @@
 
   <p>The https URL has the same format, but the default port is
   <em>:443</em>.</p>
+
+  <p><strong>Lynx</strong> relies for https support on external
+  libraries (OpenSSL or GnuTLS) whose capabilities have evolved
+  over time. In turn, those libraries may depend upon external
+  resources for verifying SSL certificates. For instance,
+  certification revocation may be provided via the Online
+  Certificate Status Protocol (OCSP) which is an external service.
+  Without this facility, <strong>Lynx</strong> may not warn about
+  websites using revoked SSL certificates.</p>
   <hr>
 
   <h2><a name="telnet_url" id="telnet_url">The <em>telnet</em>,
