@@ -1,4 +1,4 @@
-dnl $LynxId: aclocal.m4,v 1.225 2015/04/27 00:38:54 tom Exp $
+dnl $LynxId: aclocal.m4,v 1.226 2015/05/09 15:05:27 tom Exp $
 dnl Macros for auto-configure script.
 dnl by Thomas E. Dickey <dickey@invisible-island.net>
 dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
@@ -1562,7 +1562,7 @@ fi
 
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_CHECK_SIZEOF version: 1 updated: 2012/08/10 11:32:08
+dnl CF_CHECK_SIZEOF version: 2 updated: 2015/05/09 11:00:10
 dnl ---------------
 dnl Improve on AC_CHECK_SIZEOF for cases when the build-environment is
 dnl deficient, e.g., if someone tries to build in busybox.  Use the second
@@ -1573,8 +1573,8 @@ dnl can detect; the former includes only stdio.h for types while the latter
 dnl includes several header files.
 AC_DEFUN([CF_CHECK_SIZEOF],[
 AC_CHECK_SIZEOF([$1],[$2])
-if test "${ac_cv_type_$1:+set}" = set; then
-	if test "${ac_cv_sizeof_$1:+set}" != set; then
+if test "${ac_cv_type_$1+set}" = set; then
+	if test "${ac_cv_sizeof_$1+set}" != set; then
 		AC_MSG_WARN(using $2 for sizeof $1)
 		ac_cv_sizeof_$1=$2
 	elif test "x${ac_cv_sizeof_$1}" = x0; then
