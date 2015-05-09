@@ -27850,8 +27850,8 @@ cat >>confdefs.h <<EOF
 #define SIZEOF_INT $ac_cv_sizeof_int
 EOF
 
-if test "${ac_cv_type_int:+set}" = set; then
-	if test "${ac_cv_sizeof_int:+set}" != set; then
+if test "${ac_cv_type_int+set}" = set; then
+	if test "${ac_cv_sizeof_int+set}" != set; then
 		{ echo "$as_me:27855: WARNING: using 4 for sizeof int" >&5
 echo "$as_me: WARNING: using 4 for sizeof int" >&2;}
 		ac_cv_sizeof_int=4
@@ -28099,8 +28099,8 @@ cat >>confdefs.h <<EOF
 #define SIZEOF_LONG $ac_cv_sizeof_long
 EOF
 
-if test "${ac_cv_type_long:+set}" = set; then
-	if test "${ac_cv_sizeof_long:+set}" != set; then
+if test "${ac_cv_type_long+set}" = set; then
+	if test "${ac_cv_sizeof_long+set}" != set; then
 		{ echo "$as_me:28104: WARNING: using 4 for sizeof long" >&5
 echo "$as_me: WARNING: using 4 for sizeof long" >&2;}
 		ac_cv_sizeof_long=4
@@ -28348,8 +28348,8 @@ cat >>confdefs.h <<EOF
 #define SIZEOF_OFF_T $ac_cv_sizeof_off_t
 EOF
 
-if test "${ac_cv_type_off_t:+set}" = set; then
-	if test "${ac_cv_sizeof_off_t:+set}" != set; then
+if test "${ac_cv_type_off_t+set}" = set; then
+	if test "${ac_cv_sizeof_off_t+set}" != set; then
 		{ echo "$as_me:28353: WARNING: using 4 for sizeof off_t" >&5
 echo "$as_me: WARNING: using 4 for sizeof off_t" >&2;}
 		ac_cv_sizeof_off_t=4
@@ -28597,8 +28597,8 @@ cat >>confdefs.h <<EOF
 #define SIZEOF_TIME_T $ac_cv_sizeof_time_t
 EOF
 
-if test "${ac_cv_type_time_t:+set}" = set; then
-	if test "${ac_cv_sizeof_time_t:+set}" != set; then
+if test "${ac_cv_type_time_t+set}" = set; then
+	if test "${ac_cv_sizeof_time_t+set}" != set; then
 		{ echo "$as_me:28602: WARNING: using 4 for sizeof time_t" >&5
 echo "$as_me: WARNING: using 4 for sizeof time_t" >&2;}
 		ac_cv_sizeof_time_t=4

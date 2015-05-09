@@ -1,7 +1,11 @@
--- $LynxId: CHANGES,v 1.797 2015/05/07 00:18:31 tom Exp $
+-- $LynxId: CHANGES,v 1.798 2015/05/09 16:14:59 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
+
+2015-05-09 (2.8.9dev.7)
+* fix CF_CHECK_SIZEOF autoconf macro to work when its working variables have
+  been preset to an empty value (report by Andrew Arensburger) -TD
 
 2015-05-06 (2.8.9dev.6)
 * add a note about OCSP to url-support documentation (Debian #745835) -TD
