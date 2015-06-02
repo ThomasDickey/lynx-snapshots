@@ -1,4 +1,4 @@
-/* $LynxId: LYrcFile.c,v 1.92 2013/11/28 11:22:53 tom Exp $ */
+/* $LynxId: LYrcFile.c,v 1.93 2015/05/28 00:19:00 Ruda.Moura Exp $ */
 #include <HTUtils.h>
 #include <HTFTP.h>
 #include <LYUtils.h>
@@ -661,8 +661,10 @@ BOOL LYsetRcValue(const char *name, const char *param)
     ParseUnionPtr q;
     BOOL changed = TRUE;
     char *value = NULL;
+    char *orig_value = NULL;
 
     StrAllocCopy(value, param);
+    orig_value = value;
     value = LYSkipBlanks(value);
     CTRACE2(TRACE_CFG, (tfp, "LYrcFile %s:%s\n", name, value));
 
@@ -754,7 +756,7 @@ BOOL LYsetRcValue(const char *name, const char *param)
 	changed = FALSE;
 	break;
     }
-    FREE(value);
+    FREE(orig_value);
 
     return changed;
 }

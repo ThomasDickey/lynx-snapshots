@@ -1,4 +1,4 @@
-dnl $LynxId: configure.in,v 1.277 2015/05/09 15:06:14 tom Exp $
+dnl $LynxId: configure.in,v 1.278 2015/05/28 00:47:06 tom Exp $
 dnl
 dnl Process this file with autoconf to produce a configure script.
 dnl
@@ -487,7 +487,6 @@ if test "x$cf_cv_use_libssl"  != xno ; then
 elif test "x$cf_cv_use_libgnutls" != xno ; then
     if test "x$cf_cv_gnutls_compat" = xno ; then
         CF_GNUTLS($cf_cv_use_libgnutls,tidy_tls\$o)
-		AC_CHECK_FUNCS(gnutls_priority_set_direct)
     else
         CF_GNUTLS($cf_cv_use_libgnutls)
     fi

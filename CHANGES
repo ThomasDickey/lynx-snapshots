@@ -1,9 +1,16 @@
--- $LynxId: CHANGES,v 1.798 2015/05/09 16:14:59 tom Exp $
+-- $LynxId: CHANGES,v 1.801 2015/06/02 00:32:43 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2015-05-09 (2.8.9dev.7)
+2015-05-27 (2.8.9dev.7)
+* update sv.po from
+    http://translationproject.org/latest/lynx
+* use gnutls_set_default_priority() to simplify algorithm priorities in the
+  gnutls configuration as well as track occassional changes in that library
+  (patch by Andreas Metzler).
+* correct logic in LYsetRcValue() from 2.8.8dev.13, which would free the wrong
+  pointer if the input had leading blanks (patch by Ruda Moura).
 * fix CF_CHECK_SIZEOF autoconf macro to work when its working variables have
   been preset to an empty value (report by Andrew Arensburger) -TD
 
@@ -20,7 +27,7 @@ Changes since Lynx 2.8 release
 * modify configure script to accept a release-number for the ncurses/ncursesw
   values of the "--with-screen" option, e.g., "--with-screen=ncursesw6" -TD
 * cosmetic fixes for autoconf macros to avoid vi-workaround -TD
-* da.po, et.po, fr.po, nl.po, vi.po from
+* update da.po, et.po, fr.po, nl.po, vi.po from
     http://translationproject.org/latest/lynx
 * regenerated lynx.pot, sent to translation project -TD
 * update config.guess (2015-03-04), config.sub (2015-03-08)
