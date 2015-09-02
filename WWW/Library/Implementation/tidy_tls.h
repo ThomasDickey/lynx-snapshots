@@ -1,6 +1,6 @@
 /*
- * $LynxId: tidy_tls.h,v 1.4 2014/01/11 17:09:33 tom Exp $
- * Copyright 2008-2011,2014 Thomas E. Dickey
+ * $LynxId: tidy_tls.h,v 1.6 2015/09/02 01:16:04 tom Exp $
+ * Copyright 2008-2013,2015 Thomas E. Dickey
  */
 #ifndef TIDY_TLS_H
 #define TIDY_TLS_H
@@ -98,6 +98,9 @@ struct _SSL {
 
     gnutls_transport_ptr_t rfd;
     gnutls_transport_ptr_t wfd;
+
+    void *sendbuffer;
+    int bytes_sent;
 };
 
 /* use either SSL_VERIFY_NONE or SSL_VERIFY_PEER, the last 2 options
