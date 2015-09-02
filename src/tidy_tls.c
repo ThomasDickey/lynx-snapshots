@@ -1,5 +1,5 @@
 /*
- * $LynxId: tidy_tls.c,v 1.27 2015/06/02 00:39:46 tom Exp $
+ * $LynxId: tidy_tls.c,v 1.28 2015/09/02 00:16:04 Simon.Kainz Exp $
  * Copyright 2008-2014,2015 Thomas E. Dickey
  * with fix Copyright 2008 by Thomas Viehmann
  *
@@ -443,6 +443,9 @@ SSL *SSL_new(SSL_CTX * ctx)
 	    ssl->wfd = (gnutls_transport_ptr_t) (-1);
 	}
     }
+    ssl->bytes_sent = 0;
+    ssl->sendbuffer = 0;
+
     return ssl;
 }
 
@@ -455,6 +458,15 @@ int SSL_read(SSL * ssl, void *buffer, int length)
     int rc;
 
     rc = gnutls_record_recv(ssl->gnutls_state, buffer, length);
+
+    if (rc < 0 && gnutls_error_is_fatal(rc) == 0) {
+	if (rc == GNUTLS_E_REHANDSHAKE) {
+	    rc = gnutls_handshake(ssl->gnutls_state);
+	    gnutls_record_send(ssl->gnutls_state, ssl->sendbuffer, ssl->bytes_sent);
+	    rc = gnutls_record_recv(ssl->gnutls_state, buffer, length);
+	}
+    }
+
     ssl->last_error = rc;
 
     if (rc < 0) {
@@ -489,6 +501,12 @@ int SSL_write(SSL * ssl, const void *buffer, int length)
     if (rc < 0) {
 	last_error = rc;
 	rc = 0;
+    } else {
+	if (ssl->sendbuffer) {
+	    free(ssl->sendbuffer);
+	}
+	ssl->sendbuffer = malloc(rc);
+	ssl->bytes_sent = rc;
     }
 
     return rc;
