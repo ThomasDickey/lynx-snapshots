@@ -1,5 +1,5 @@
 /*
- * $LynxId: userdefs.h,v 1.308 2015/05/09 15:06:14 tom Exp $
+ * $LynxId: userdefs.h,v 1.309 2015/09/13 23:08:27 tom Exp $
  *
  * Lynx - Hypertext navigation system
  *
@@ -483,7 +483,7 @@
  * Normally we expect you will connect to a remote site, e.g., the Lynx starting
  * site:
  */
-#define STARTFILE "http://lynx.isc.org/"
+#define STARTFILE "http://invisible-island.net/lynx/"
 /*
  * As an alternative, you may want to use a local URL.  A good choice for this
  * is the user's home directory:
@@ -502,12 +502,12 @@
  *   for this distribution (use SHELL syntax including the device
  *   on VMS systems).
  * The default HELPFILE is:
- * http://lynx.isc.org/release/breakout/lynx_help/lynx_help_main.html
+ * http://invisible-island.net/lynx/release/breakout/lynx_help/lynx_help_main.html
  *   This should be changed here or in lynx.cfg to the local path.
  * The definition here can be overridden at run time by defining a
  * "LYNX_HELPFILE" environment variable.
  */
-#define HELPFILE "http://lynx.isc.org/release/breakout/lynx_help/lynx_help_main.html"
+#define HELPFILE "http://invisible-island.net/lynx/release/breakout/lynx_help/lynx_help_main.html"
 /* #define HELPFILE "file://localhost/PATH_TO/lynx_help/lynx_help_main.html" */
 
 /*****************************
@@ -1443,8 +1443,8 @@
  * ignore it. - kw */
 /* $Format: "#define LYNX_VERSION \"$ProjectVersion$\""$ */
 #define LYNX_VERSION "2.8.9dev.7"
-#define LYNX_WWW_HOME "http://lynx.isc.org/"
-#define LYNX_WWW_DIST "http://lynx.isc.org/current/"
+#define LYNX_WWW_HOME "http://invisible-island.net/lynx/"
+#define LYNX_WWW_DIST "http://invisible-island.net/lynx/current/"
 /* $Format: "#define LYNX_DATE \"$ProjectDate$\""$ */
 #define LYNX_DATE "Wed, 06 May 2015 17:56:19 -0700"
 #define LYNX_DATE_OFF 5		/* truncate the automatically-generated date */

@@ -1,9 +1,14 @@
--- $LynxId: CHANGES,v 1.802 2015/09/02 00:16:04 tom Exp $
+-- $LynxId: CHANGES,v 1.803 2015/09/13 23:11:16 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2015-09-01 (2.8.9dev.7)
+2015-09-13 (2.8.9dev.7)
+* move homepage for Lynx from
+    http://lynx.isc.org
+  to
+    http://invisible-island.net/lynx
+  because ISC is ending support -TD
 * fix for gnutls logic to support rehandshake on negotiation for optional
   client certificate, e.g., for https://contributors.debian.org (patch by
   Simon Kainz, Debian #797059).
