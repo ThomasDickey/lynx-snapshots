@@ -934,7 +934,8 @@ Simplified:
 ----------
 
 Sources:
-    Download the current sources (choose a zip-file) from http://lynx.isc.org
+    Download the current sources (choose a zip-file) from
+	http://invisible-island.net/lynx/
     and unzip them into a directory where you will build Lynx.
 
 Compiler:
@@ -1466,4 +1467,4 @@ VIII. Acknowledgment
 
 -- 1999/04/24 - H. Nelson <lynx-admin@irm.nara.kindai.ac.jp>
 -- vile:txtmode
--- $LynxId: INSTALLATION,v 1.124 2015/04/23 09:22:32 tom Exp $
+-- $LynxId: INSTALLATION,v 1.125 2015/09/13 22:13:53 tom Exp $
