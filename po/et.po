@@ -2201,7 +2201,7 @@ msgstr "%s präänik: %.*s=%.*s  Luban? (J/E/Alati/Mitte kunagi)"
 #: LYMessages.c:702
 #, c-format
 msgid "Accept invalid cookie domain=%s for '%s'?"
-msgstr "Aktsepteerin vogast prääniku doomenit=%s, server '%s'?"
+msgstr "Aktsepteerin vigast prääniku doomenit=%s, server '%s'?"
 
 #. #define INVALID_COOKIE_PATH_CONFIRMATION
 #: LYMessages.c:704

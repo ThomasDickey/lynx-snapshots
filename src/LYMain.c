@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMain.c,v 1.253 2014/02/12 23:48:36 tom Exp $
+ * $LynxId: LYMain.c,v 1.255 2015/09/19 17:40:20 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTP.h>
@@ -3245,7 +3245,7 @@ static int version_fun(char *next_arg GCC_UNUSED)
     puts(gettext("Copyrights held by the Lynx Developers Group,"));
     puts(gettext("the University of Kansas, CERN, and other contributors."));
     puts(gettext("Distributed under the GNU General Public License (Version 2)."));
-    puts(gettext("See http://lynx.isc.org/ and the online help for more information."));
+    puts(gettext("See http://lynx.invisible-island.net/ and the online help for more information."));
     puts("");
 #ifdef USE_SSL
 #if defined(OPENSSL_VERSION_TEXT) && !defined(LIBGNUTLS_VERSION)

@@ -1,9 +1,9 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: lynx 2.8.9dev.5\n"
+"Project-Id-Version: lynx 2.8.9dev.7\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-04-14 20:53-0400\n"
+"POT-Creation-Date: 2015-09-17 18:56-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -455,8 +455,8 @@ msgstr ""
 #. #define NOVICE_LINE_TWO_A
 #: LYMessages.c:172
 msgid ""
-"  O)ther cmds  H)elp  K)eymap  G)oto  P)rint  M)ain screen  o)ptions  "
-"Q)uit  \n"
+"  O)ther cmds  H)elp  K)eymap  G)oto  P)rint  M)ain screen  o)ptions  Q)"
+"uit  \n"
 msgstr ""
 
 #. #define NOVICE_LINE_TWO_B
@@ -469,8 +469,8 @@ msgstr ""
 #. #define NOVICE_LINE_TWO_C
 #: LYMessages.c:176
 msgid ""
-"O)ther cmds  C)omment  History: <backspace>  Bookmarks: V)iew, A)dd, "
-"R)emove \n"
+"O)ther cmds  C)omment  History: <backspace>  Bookmarks: V)iew, A)dd, R)"
+"emove \n"
 msgstr ""
 
 #. #define FORM_NOVICELINE_ONE
@@ -2725,8 +2725,8 @@ msgstr ""
 #. #define DIRED_NOVICELINE
 #: LYMessages.c:858
 msgid ""
-"  C)reate  D)ownload  E)dit  F)ull menu  M)odify  R)emove  T)ag  "
-"U)pload     \n"
+"  C)reate  D)ownload  E)dit  F)ull menu  M)odify  R)emove  T)ag  U)"
+"pload     \n"
 msgstr ""
 
 #: LYMessages.c:859
@@ -3084,100 +3084,105 @@ msgstr ""
 msgid "Socket read failed (too many tries)."
 msgstr ""
 
-#: WWW/Library/Implementation/HTTP.c:81
+#: WWW/Library/Implementation/HTTP.c:136
 #, c-format
 msgid "SSL callback:%s, preverify_ok=%d, ssl_okay=%d"
 msgstr ""
 
-#: WWW/Library/Implementation/HTTP.c:438
+#: WWW/Library/Implementation/HTTP.c:493
 #, c-format
 msgid "Address contains a username: %s"
 msgstr ""
 
-#: WWW/Library/Implementation/HTTP.c:492
+#: WWW/Library/Implementation/HTTP.c:547
 #, c-format
 msgid "Certificate issued by: %s"
 msgstr ""
 
-#: WWW/Library/Implementation/HTTP.c:679
+#: WWW/Library/Implementation/HTTP.c:734
 msgid "This client does not contain support for HTTPS URLs."
 msgstr ""
 
-#: WWW/Library/Implementation/HTTP.c:704
+#: WWW/Library/Implementation/HTTP.c:759
 msgid "Unable to connect to remote host."
 msgstr ""
 
-#: WWW/Library/Implementation/HTTP.c:744
+#: WWW/Library/Implementation/HTTP.c:799
 msgid "Retrying connection without TLS."
 msgstr ""
 
-#: WWW/Library/Implementation/HTTP.c:794
+#: WWW/Library/Implementation/HTTP.c:849
 msgid "GnuTLS error when trying to verify certificate."
 msgstr ""
 
-#: WWW/Library/Implementation/HTTP.c:806
+#: WWW/Library/Implementation/HTTP.c:861
 msgid "the certificate has no known issuer"
 msgstr ""
 
-#: WWW/Library/Implementation/HTTP.c:808
+#: WWW/Library/Implementation/HTTP.c:863
 msgid "no issuer was found"
 msgstr ""
 
-#: WWW/Library/Implementation/HTTP.c:810
+#: WWW/Library/Implementation/HTTP.c:865
 msgid "issuer is not a CA"
 msgstr ""
 
-#: WWW/Library/Implementation/HTTP.c:812
+#: WWW/Library/Implementation/HTTP.c:867
 msgid "the certificate has been revoked"
 msgstr ""
 
-#: WWW/Library/Implementation/HTTP.c:814
+#: WWW/Library/Implementation/HTTP.c:869
 msgid "the certificate is not trusted"
 msgstr ""
 
-#: WWW/Library/Implementation/HTTP.c:889
+#: WWW/Library/Implementation/HTTP.c:944
 #, c-format
 msgid "Verified connection to %s (cert=%s)"
 msgstr ""
 
-#: WWW/Library/Implementation/HTTP.c:937 WWW/Library/Implementation/HTTP.c:979
+#: WWW/Library/Implementation/HTTP.c:992
+#: WWW/Library/Implementation/HTTP.c:1034
 #, c-format
 msgid "Verified connection to %s (subj=%s)"
 msgstr ""
 
-#: WWW/Library/Implementation/HTTP.c:1009
+#: WWW/Library/Implementation/HTTP.c:1064
 msgid "Can't find common name in certificate"
 msgstr ""
 
-#: WWW/Library/Implementation/HTTP.c:1012
+#: WWW/Library/Implementation/HTTP.c:1067
 #, c-format
 msgid "SSL error:host(%s)!=cert(%s)-Continue?"
 msgstr ""
 
-#: WWW/Library/Implementation/HTTP.c:1025
+#: WWW/Library/Implementation/HTTP.c:1074
+msgid "SSL error"
+msgstr ""
+
+#: WWW/Library/Implementation/HTTP.c:1082
 #, c-format
 msgid "UNVERIFIED connection to %s (cert=%s)"
 msgstr ""
 
-#: WWW/Library/Implementation/HTTP.c:1034
+#: WWW/Library/Implementation/HTTP.c:1091
 #, c-format
 msgid "Secure %d-bit %s (%s) HTTP connection"
 msgstr ""
 
-#: WWW/Library/Implementation/HTTP.c:1497
+#: WWW/Library/Implementation/HTTP.c:1554
 msgid "Sending HTTP request."
 msgstr ""
 
-#: WWW/Library/Implementation/HTTP.c:1539
+#: WWW/Library/Implementation/HTTP.c:1596
 msgid "Unexpected network write error; connection aborted."
 msgstr ""
 
-#: WWW/Library/Implementation/HTTP.c:1545
+#: WWW/Library/Implementation/HTTP.c:1602
 msgid "HTTP request sent; waiting for response."
 msgstr ""
 
-#: WWW/Library/Implementation/HTTP.c:1618
-#: WWW/Library/Implementation/HTTP.c:1628
+#: WWW/Library/Implementation/HTTP.c:1675
+#: WWW/Library/Implementation/HTTP.c:1685
 msgid "Unexpected network read error; connection aborted."
 msgstr ""
 
@@ -3190,7 +3195,7 @@ msgstr ""
 #. * line and possibly other headers, so we'll deal with them by
 #. * showing the full header to the user as text/plain.  - FM
 #.
-#: WWW/Library/Implementation/HTTP.c:1830
+#: WWW/Library/Implementation/HTTP.c:1887
 msgid "Got unexpected Informational Status."
 msgstr ""
 
@@ -3200,7 +3205,7 @@ msgstr ""
 #. * content.  We'll instruct the user to do that, and
 #. * restore the current document.  - FM
 #.
-#: WWW/Library/Implementation/HTTP.c:1864
+#: WWW/Library/Implementation/HTTP.c:1921
 msgid "Request fulfilled.  Reset Content."
 msgstr ""
 
@@ -3210,27 +3215,27 @@ msgstr ""
 #. * status is inappropriate.  We'll deal with it by showing
 #. * the full header to the user as text/plain.  - FM
 #.
-#: WWW/Library/Implementation/HTTP.c:1979
+#: WWW/Library/Implementation/HTTP.c:2036
 msgid "Got unexpected 304 Not Modified status."
 msgstr ""
 
-#: WWW/Library/Implementation/HTTP.c:2042
+#: WWW/Library/Implementation/HTTP.c:2099
 msgid "Redirection of POST content requires user approval."
 msgstr ""
 
-#: WWW/Library/Implementation/HTTP.c:2057
+#: WWW/Library/Implementation/HTTP.c:2114
 msgid "Have POST content.  Treating Permanent Redirection as Temporary.\n"
 msgstr ""
 
-#: WWW/Library/Implementation/HTTP.c:2101
+#: WWW/Library/Implementation/HTTP.c:2158
 msgid "Retrying with access authorization information."
 msgstr ""
 
-#: WWW/Library/Implementation/HTTP.c:2113
+#: WWW/Library/Implementation/HTTP.c:2170
 msgid "Show the 401 message body?"
 msgstr ""
 
-#: WWW/Library/Implementation/HTTP.c:2157
+#: WWW/Library/Implementation/HTTP.c:2214
 msgid "Show the 407 message body?"
 msgstr ""
 
@@ -3238,7 +3243,7 @@ msgstr ""
 #. * Bad or unknown server_status number.  Take a chance and hope
 #. * there is something to display.  - FM
 #.
-#: WWW/Library/Implementation/HTTP.c:2257
+#: WWW/Library/Implementation/HTTP.c:2314
 msgid "Unknown status reply from server!"
 msgstr ""
 
@@ -4300,7 +4305,9 @@ msgid "Distributed under the GNU General Public License (Version 2)."
 msgstr ""
 
 #: src/LYMain.c:3248
-msgid "See http://lynx.isc.org/ and the online help for more information."
+msgid ""
+"See http://lynx.invisible-island.net/ and the online help for more "
+"information."
 msgstr ""
 
 #: src/LYMain.c:4091
@@ -5809,7 +5816,7 @@ msgid ""
 "in the Visited Links Page.\n"
 msgstr ""
 
-#: src/LYrcFile.c:861
+#: src/LYrcFile.c:863
 msgid ""
 "If keypad_mode is set to \"NUMBERS_AS_ARROWS\", then the numbers on\n"
 "your keypad when the numlock is on will act as arrow keys:\n"
@@ -5820,13 +5827,13 @@ msgid ""
 "regardless of whether numlock is on.\n"
 msgstr ""
 
-#: src/LYrcFile.c:870
+#: src/LYrcFile.c:872
 msgid ""
 "If keypad_mode is set to \"LINKS_ARE_NUMBERED\", then numbers will\n"
 "appear next to each link and numbers are used to select links.\n"
 msgstr ""
 
-#: src/LYrcFile.c:874
+#: src/LYrcFile.c:876
 msgid ""
 "If keypad_mode is set to \"LINKS_AND_FORM_FIELDS_ARE_NUMBERED\", then\n"
 "numbers will appear next to each link and visible form input field.\n"
@@ -5837,33 +5844,33 @@ msgid ""
 "lists and output from the list command also enumerate form inputs.\n"
 msgstr ""
 
-#: src/LYrcFile.c:883
+#: src/LYrcFile.c:885
 msgid ""
 "NOTE: Some fixed format documents may look disfigured when\n"
 "\"LINKS_ARE_NUMBERED\" or \"LINKS_AND_FORM_FIELDS_ARE_NUMBERED\" are\n"
 "enabled.\n"
 msgstr ""
 
-#: src/LYrcFile.c:915
+#: src/LYrcFile.c:917
 msgid ""
 "Lynx User Defaults File\n"
 "\n"
 msgstr ""
 
-#: src/LYrcFile.c:924
+#: src/LYrcFile.c:926
 msgid ""
 "This file contains options saved from the Lynx Options Screen (normally\n"
 "with the 'o' key).  To save options with that screen, you must select the\n"
 "checkbox:\n"
 msgstr ""
 
-#: src/LYrcFile.c:931
+#: src/LYrcFile.c:933
 msgid ""
 "You must then save the settings using the link on the line above the\n"
 "checkbox:\n"
 msgstr ""
 
-#: src/LYrcFile.c:938
+#: src/LYrcFile.c:940
 msgid ""
 "You may also use the command-line option \"-forms_options\", which displays\n"
 "the simpler Options Menu instead.  Save options with that using the '>' "
@@ -5871,14 +5878,14 @@ msgid ""
 "\n"
 msgstr ""
 
-#: src/LYrcFile.c:945
+#: src/LYrcFile.c:947
 msgid ""
 "This file contains options saved from the Lynx Options Screen (normally\n"
 "with the '>' key).\n"
 "\n"
 msgstr ""
 
-#: src/LYrcFile.c:952
+#: src/LYrcFile.c:954
 msgid ""
 "There is normally no need to edit this file manually, since the defaults\n"
 "here can be controlled from the Options Screen, and the next time options\n"

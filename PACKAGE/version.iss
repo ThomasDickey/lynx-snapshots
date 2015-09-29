@@ -10,5 +10,5 @@
 #define MyAppProg "Lynx"
 #define MyAppName "Lynx - web browser"
 #define MyAppPublisher "Thomas E Dickey"
-#define MyAppURL "http://lynx.isc.org"
+#define MyAppURL "http://invisible-island.net/lynx"
 #define MyAppVerName "Lynx " + LYNX_VERSION

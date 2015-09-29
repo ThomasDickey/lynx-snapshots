@@ -1,4 +1,4 @@
-; $LynxId: lynx.nsi,v 1.25 2015/05/09 15:06:14 tom Exp $
+; $LynxId: lynx.nsi,v 1.26 2015/09/17 22:43:49 tom Exp $
 ; Script originally generated with the Venis Install Wizard, but customized.
 ; The Inno Setup script is preferred; but this can be built via cross-compiling.
 
@@ -27,7 +27,7 @@ CRCCheck on
 SetCompressor /SOLID lzma
 
 VIAddVersionKey ProductName "${SUBKEY}"
-VIAddVersionKey CompanyName "http://lynx.isc.org"
+VIAddVersionKey CompanyName "http://invisible-island.net/lynx"
 VIAddVersionKey LegalCopyright "© 1997-2014,2015, Thomas E. Dickey"
 VIAddVersionKey FileDescription "Lynx Installer (MinGW)"
 VIAddVersionKey FileVersion "${VERSION}"
