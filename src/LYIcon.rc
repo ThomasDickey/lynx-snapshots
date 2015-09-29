@@ -1,4 +1,4 @@
-// $LynxId: LYIcon.rc,v 1.19 2015/05/09 15:06:15 tom Exp $
+// $LynxId: LYIcon.rc,v 1.20 2015/09/17 22:43:49 tom Exp $
 
 #include <windows.h>
 
@@ -17,7 +17,7 @@ BEGIN
   BEGIN
     BLOCK "040904B0"
     BEGIN
-      VALUE "CompanyName",      "http://lynx.isc.org"
+      VALUE "CompanyName",      "http://invisible-island.net/lynx"
       VALUE "FileDescription",  "Lynx - web browser"
       VALUE "FileVersion",      "2.8.9.1007"
       VALUE "InternalName",     "Lynx"

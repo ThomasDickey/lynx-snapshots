@@ -1,18 +1,19 @@
--- $LynxId: CHANGES,v 1.803 2015/09/13 23:11:16 tom Exp $
+-- $LynxId: CHANGES,v 1.807 2015/09/29 09:23:14 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2015-09-13 (2.8.9dev.7)
+2015-09-29 (2.8.9dev.7)
 * move homepage for Lynx from
     http://lynx.isc.org
   to
-    http://invisible-island.net/lynx
+    http://lynx.invisible-island.net
   because ISC is ending support -TD
+* updates for configure macros from ncurses and xterm -TD
 * fix for gnutls logic to support rehandshake on negotiation for optional
   client certificate, e.g., for https://contributors.debian.org (patch by
   Simon Kainz, Debian #797059).
-* update sv.po from
+* update sv.po, et.po from
     http://translationproject.org/latest/lynx
 * use gnutls_set_default_priority() to simplify algorithm priorities in the
   gnutls configuration as well as track occassional changes in that library
