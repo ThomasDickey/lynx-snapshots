@@ -1,4 +1,4 @@
--- $LynxId: CHANGES,v 1.807 2015/09/29 09:23:14 tom Exp $
+-- $LynxId: CHANGES,v 1.810 2015/10/02 11:25:01 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
@@ -9,6 +9,9 @@ Changes since Lynx 2.8 release
   to
     http://lynx.invisible-island.net
   because ISC is ending support -TD
+* change "GNU Public License" to "GNU General Public License" for consistency
+  (report by Axel Beckert) -TD
+* free a use-after-free in scan_cookie_sublist (Redhat #1120925) -TG
 * updates for configure macros from ncurses and xterm -TD
 * fix for gnutls logic to support rehandshake on negotiation for optional
   client certificate, e.g., for https://contributors.debian.org (patch by

@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYCookie.c,v 1.129 2014/11/29 15:28:10 Mike.Gorse Exp $
+ * $LynxId: LYCookie.c,v 1.131 2015/09/30 22:05:41 tom Exp $
  *
  *			       Lynx Cookie Support		   LYCookie.c
  *			       ===================
@@ -753,10 +753,13 @@ static char *scan_cookie_sublist(char *hostname,
 	 */
 	if ((co->flags & COOKIE_FLAG_EXPIRES_SET) &&
 	    co->expires <= now) {
+	    next = hl->next;
 	    HTList_removeObject(sublist, co);
 	    freeCookie(co);
 	    total_cookies--;
-	    continue;
+	    if (next)
+		continue;
+	    break;
 	}
 
 	/*
