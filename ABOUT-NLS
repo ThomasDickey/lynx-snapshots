@@ -270,9 +270,10 @@ Using `gettext' in new packages
 
    If you are writing a freely available program and want to
 internationalize it you are welcome to use GNU `gettext' in your
-package.  Of course the GNU Public License applies to your sources from
-then if you include `gettext' directly in your distribution on but
-since you are writing free software anyway this is no restriction.
+package.  Of course the GNU General Public License applies to your
+sources from then if you include `gettext' directly in your distribution
+on but since you are writing free software anyway this is no
+restriction.
 
    Once the sources are change appropriately and the setup can handle to
 use of `gettext' the only thing missing are the translations.  The Free

@@ -6,9 +6,9 @@ Current maintainer: Thomas Dickey <dickey@invisible-island.net>
 
 Most of the content of the lynx release (and corresponding copyright) is
 the work of developers on the lynx-dev mailing list, who have agreed to
-distribute their work under the terms and conditions of the GNU Public
-License (Version 2).  Note that the License text after the terms and
-conditions is advisory in nature, and contains neither terms nor
+distribute their work under the terms and conditions of the GNU General
+Public License (Version 2).  Note that the License text after the terms
+and conditions is advisory in nature, and contains neither terms nor
 conditions.  You may choose to follow that advice.
 
 Any licensing questions should be directed to the mailing list:
@@ -46,7 +46,7 @@ For reference, below is the original copyright notice for Lynx (2.4.2).
 -------------------------------------------------------------------------------
 
 Files: aclocal.m4
-Licence: other-BSD
+License: other-BSD
 Copyright: 1997-2014,2015 by Thomas E. Dickey
     Permission to use, copy, modify, and distribute this software and its
     documentation for any purpose and without fee is hereby granted,
@@ -67,7 +67,7 @@ Copyright: 1997-2014,2015 by Thomas E. Dickey
 
 Files: install-sh
 Copyright:  1994 X Consortium
-Licence: other-BSD
+License: other-BSD
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"), to
     deal in the Software without restriction, including without limitation the
@@ -102,7 +102,7 @@ Licence: other-BSD
 
 Files: debian/*
 Copyright:  2010-2014,2015 Thomas E. Dickey
-Licence: other-BSD
+License: other-BSD
     Permission to use, copy, modify, and distribute this software and its
     documentation for any purpose and without fee is hereby granted,
     provided that the above copyright notice appear in all copies and that

@@ -1,5 +1,5 @@
 /*
- * $LynxId: UCdomap.c,v 1.99 2014/12/10 09:47:34 tom Exp $
+ * $LynxId: UCdomap.c,v 1.101 2015/10/02 11:25:55 tom Exp $
  *
  *  UCdomap.c
  *  =========
@@ -7,9 +7,10 @@
  * This is a Lynx chartrans engine, its external calls are in UCMap.h
  *
  * Derived from code in the Linux kernel console driver.
- * The GNU Public Licence therefore applies, see
- * the file COPYING in the top-level directory
- * which should come with every Lynx distribution.
+ *
+ * The GNU General Public License therefore applies, see the file
+ * COPYING in the top-level directory which should come with every Lynx
+ * distribution.
  *
  *  [ original comment: - KW ]
  *
