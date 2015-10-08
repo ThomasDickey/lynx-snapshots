@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTP.c,v 1.142 2015/05/06 23:34:07 tom Exp $
+ * $LynxId: HTTP.c,v 1.143 2015/10/08 08:52:00 Simon.Kainz Exp $
  *
  * HyperText Tranfer Protocol	- Client implementation		HTTP.c
  * ==========================
@@ -162,6 +162,9 @@ SSL *HTGetSSLHandle(void)
 {
 #ifdef USE_GNUTLS_INCL
     static char *certfile = NULL;
+    static char *client_keyfile = NULL;
+    static char *client_certfile = NULL;
+
 #endif
 
     if (ssl_ctx == NULL) {
@@ -204,6 +207,7 @@ SSL *HTGetSSLHandle(void)
 	}
 #endif
 #ifdef USE_GNUTLS_INCL
+
 	if ((certfile = LYGetEnv("SSL_CERT_FILE")) != NULL) {
 	    CTRACE((tfp,
 		    "HTGetSSLHandle: certfile is set to %s by SSL_CERT_FILE\n",
@@ -225,10 +229,31 @@ SSL *HTGetSSLHandle(void)
 	}
 #endif
 	atexit(free_ssl_ctx);
+
     }
 #ifdef USE_GNUTLS_INCL
+
+    if (non_empty(SSL_client_key_file)) {
+	client_keyfile = SSL_client_key_file;
+	CTRACE((tfp,
+		"HTGetSSLHandle: client key file is set to %s by config SSL_CLIENT_KEY_FILE\n",
+		client_keyfile));
+    }
+
+    if (non_empty(SSL_client_cert_file)) {
+	client_certfile = SSL_client_cert_file;
+	CTRACE((tfp,
+		"HTGetSSLHandle: client cert file is set to %s by config SSL_CLIENT_CERT_FILE\n",
+		client_certfile));
+    }
+
     ssl_ctx->certfile = certfile;
     ssl_ctx->certfile_type = GNUTLS_X509_FMT_PEM;
+    ssl_ctx->client_keyfile = client_keyfile;
+    ssl_ctx->client_keyfile_type = GNUTLS_X509_FMT_PEM;
+    ssl_ctx->client_certfile = client_certfile;
+    ssl_ctx->client_certfile_type = GNUTLS_X509_FMT_PEM;
+
 #endif
     ssl_okay = 0;
     return (SSL_new(ssl_ctx));

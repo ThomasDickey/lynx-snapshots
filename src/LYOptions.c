@@ -1,4 +1,4 @@
-/* $LynxId: LYOptions.c,v 1.165 2014/12/21 21:27:45 tom Exp $ */
+/* $LynxId: LYOptions.c,v 1.166 2015/10/08 08:52:00 Simon.Kainz Exp $ */
 #include <HTUtils.h>
 #include <HTFTP.h>
 #include <HTTP.h>		/* 'reloading' flag */
@@ -2444,6 +2444,9 @@ static const char *preferred_doc_lang_string = RC_PREFERRED_LANGUAGE;
 static const char *send_user_agent_string = RC_SEND_USERAGENT;
 static const char *user_agent_string = RC_USERAGENT;
 
+static const char *ssl_client_certificate_file = RC_SSL_CLIENT_CERT_FILE;
+static const char *ssl_client_key_file = RC_SSL_CLIENT_KEY_FILE;
+
 #define PutHeader(fp, Name) \
 	fprintf(fp, "\n%s<em>%s</em>\n", MARGIN_STR, LYEntifyTitle(&buffer, Name));
 
@@ -3260,6 +3263,16 @@ int postoptions(DocInfo *newdoc)
 	    LYSendUserAgent = (BOOLEAN) !strcasecomp(data[i].value, "ON");
 	}
 
+	if (!strcmp(data[i].tag, ssl_client_certificate_file)) {
+	    FREE(SSL_client_cert_file);
+	    StrAllocCopy(SSL_client_cert_file, data[i].value);
+	}
+
+	if (!strcmp(data[i].tag, ssl_client_key_file)) {
+	    FREE(SSL_client_key_file);
+	    StrAllocCopy(SSL_client_key_file, data[i].value);
+	}
+
 	/* User Agent: INPUT */
 	if (!strcmp(data[i].tag, user_agent_string) && (!no_useragent)) {
 	    if (strcmp(LYUserAgent, data[i].value)) {
@@ -3729,6 +3742,15 @@ static int gen_options(char **newfile)
     BeginSelect(fp0, ssl_prompt_string);
     PutOptValues(fp0, ssl_noprompt, prompt_values);
     EndSelect(fp0);
+
+    PutLabel(fp0, gettext("SSL client certificate file"), ssl_client_certificate_file);
+    PutTextInput(fp0, ssl_client_certificate_file,
+		 NonNull(SSL_client_cert_file), text_len, "");
+
+    PutLabel(fp0, gettext("SSL client key file"), ssl_client_key_file);
+    PutTextInput(fp0, ssl_client_key_file,
+		 NonNull(SSL_client_key_file), text_len, "");
+
 #endif
 
     PutHeader(fp0, gettext("Keyboard Input"));

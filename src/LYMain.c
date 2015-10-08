@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMain.c,v 1.256 2015/10/08 00:41:48 tom Exp $
+ * $LynxId: LYMain.c,v 1.258 2015/10/08 09:24:13 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTP.h>
@@ -553,7 +553,9 @@ char *XLoadImageCommand = NULL;	/* Default image viewer for X */
 BOOLEAN LYNoISMAPifUSEMAP = FALSE;	/* Omit ISMAP link if MAP present? */
 int LYHiddenLinks = HIDDENLINKS_SEPARATE;	/* Show hidden links? */
 
-char *SSL_cert_file = NULL;	/* Default CA CERT file */
+char *SSL_cert_file = NULL;	/*y Default CA CERT file */
+char *SSL_client_cert_file = NULL;
+char *SSL_client_key_file = NULL;
 
 int Old_DTD = NO;
 static BOOLEAN DTD_recovery = NO;
@@ -1578,6 +1580,26 @@ int main(int argc,
      * Process the configuration file.
      */
     read_cfg(lynx_cfg_file, "main program", 1, (FILE *) 0);
+
+    {
+	static char *client_keyfile = NULL;
+	static char *client_certfile = NULL;
+
+	if ((client_keyfile = LYGetEnv("SSL_CLIENT_KEY_FILE")) != NULL) {
+	    CTRACE((tfp,
+		    "HTGetSSLHandle: client keyfile is set to %s by SSL_CLIENT_KEY_FILE\n",
+		    client_keyfile));
+	    StrAllocCopy(SSL_client_key_file, client_keyfile);
+
+	}
+
+	if ((client_certfile = LYGetEnv("SSL_CLIENT_CERT_FILE")) != NULL) {
+	    CTRACE((tfp,
+		    "HTGetSSLHandle: client certfile is set to %s by SSL_CLIENT_CERT_FILE\n",
+		    client_certfile));
+	    StrAllocCopy(SSL_client_cert_file, client_certfile);
+	}
+    }
 
 #if defined(USE_COLOR_STYLE)
     if (!dump_output_immediately) {
