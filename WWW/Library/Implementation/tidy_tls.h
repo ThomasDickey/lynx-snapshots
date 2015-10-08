@@ -1,5 +1,5 @@
 /*
- * $LynxId: tidy_tls.h,v 1.6 2015/09/02 01:16:04 tom Exp $
+ * $LynxId: tidy_tls.h,v 1.7 2015/10/08 08:51:26 Simon.Kainz Exp $
  * Copyright 2008-2013,2015 Thomas E. Dickey
  */
 #ifndef TIDY_TLS_H
@@ -77,6 +77,11 @@ typedef struct _SSL_CTX {
 
     int (*verify_callback) (int, X509_STORE_CTX *);
     int verify_mode;
+
+    char *client_certfile;
+    int client_certfile_type;
+    char *client_keyfile;
+    int client_keyfile_type;
 
 } SSL_CTX;
 

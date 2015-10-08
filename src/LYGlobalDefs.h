@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYGlobalDefs.h,v 1.138 2014/02/04 01:25:39 tom Exp $
+ * $LynxId: LYGlobalDefs.h,v 1.139 2015/10/08 08:51:26 Simon.Kainz Exp $
  *
  * global variable definitions
  */
@@ -536,6 +536,8 @@ extern "C" {
     extern int LYHiddenLinks;
 
     extern char *SSL_cert_file;	/* Default CA CERT file */
+    extern char *SSL_client_cert_file;	/* Default client CERT file */
+    extern char *SSL_client_key_file;	/* Default client key file */
 
     extern int Old_DTD;
 

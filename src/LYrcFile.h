@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYrcFile.h,v 1.45 2014/02/12 23:42:24 tom Exp $
+ * $LynxId: LYrcFile.h,v 1.46 2015/10/08 08:51:26 Simon.Kainz Exp $
  */
 #ifndef LYRCFILE_H
 #define LYRCFILE_H
@@ -234,6 +234,8 @@
 #define RC_SOURCE_CACHE                 "source_cache"
 #define RC_SOURCE_CACHE_FOR_ABORTED     "source_cache_for_aborted"
 #define RC_SSL_CERT_FILE                "ssl_cert_file"
+#define RC_SSL_CLIENT_CERT_FILE         "ssl_client_cert_file"
+#define RC_SSL_CLIENT_KEY_FILE          "ssl_client_key_file"
 #define RC_STARTFILE                    "startfile"
 #define RC_STATUS_BUFFER_SIZE           "status_buffer_size"
 #define RC_STRIP_DOTDOT_URLS            "strip_dotdot_urls"

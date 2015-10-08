@@ -1,5 +1,5 @@
 /*
- * $LynxId: tidy_tls.c,v 1.28 2015/09/02 00:16:04 Simon.Kainz Exp $
+ * $LynxId: tidy_tls.c,v 1.29 2015/10/08 08:51:26 Simon.Kainz Exp $
  * Copyright 2008-2014,2015 Thomas E. Dickey
  * with fix Copyright 2008 by Thomas Viehmann
  *
@@ -429,11 +429,11 @@ SSL *SSL_new(SSL_CTX * ctx)
 		gnutls_certificate_set_x509_trust_file(ssl->gnutls_cred,
 						       ctx->certfile,
 						       ctx->certfile_type);
-	    if (ctx->keyfile)
+	    if (ctx->client_keyfile)
 		gnutls_certificate_set_x509_key_file(ssl->gnutls_cred,
-						     ctx->certfile,
-						     ctx->keyfile,
-						     ctx->keyfile_type);
+						     ctx->client_certfile,
+						     ctx->client_keyfile,
+						     ctx->client_keyfile_type);
 	    ssl->verify_mode = ctx->verify_mode;
 	    ssl->verify_callback = ctx->verify_callback;
 
