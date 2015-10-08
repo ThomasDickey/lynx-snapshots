@@ -1,4 +1,4 @@
-/* $LynxId: LYKeymap.h,v 1.53 2013/10/20 22:11:03 tom Exp $ */
+/* $LynxId: LYKeymap.h,v 1.55 2015/10/07 23:34:55 tom Exp $ */
 #ifndef LYKEYMAP_H
 #define LYKEYMAP_H
 
@@ -51,6 +51,11 @@ extern "C" {
 #if defined(DIRED_SUPPORT) && defined(OK_OVERRIDE)
     extern LYKeymap_t key_override[];
 #endif
+
+/* readable mapping for characters in edit- and key-maps */
+#define CTL(c)		((c) & 0x1f)
+#define KHR(c)		((c) + 1)
+#define KTL(c)		(CTL(c) + 1)
 
 /* * *  LynxKeyCodes  * * */
 #define LKC_ISLECLAC	0x8000	/* flag: contains lynxaction + editaction */

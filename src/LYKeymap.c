@@ -1,4 +1,4 @@
-/* $LynxId: LYKeymap.c,v 1.113 2014/12/09 01:48:50 tom Exp $ */
+/* $LynxId: LYKeymap.c,v 1.115 2015/10/07 23:24:24 tom Exp $ */
 #include <HTUtils.h>
 #include <LYUtils.h>
 #include <LYGlobalDefs.h>
@@ -58,146 +58,146 @@ LYKeymap_t keymap[KEYMAP_SIZE];
 
 static const LYEditInit initKeymapData[] =
 {
-    {1, LYK_DO_NOTHING},	/* nul */
-    {2, LYK_HOME},		/* ^B */
-    {3, LYK_PREV_PAGE},		/* ^C */
-    {5, LYK_ABORT},		/* ^E */
-    {6, LYK_END},		/* ^F */
-    {7, LYK_NEXT_PAGE},		/* ^G */
-    {9, LYK_HISTORY},		/* ^I */
-    {10, LYK_FASTFORW_LINK},	/* ^J */
-    {11, LYK_ACTIVATE},		/* ^K */
-    {12, LYK_COOKIE_JAR},	/* ^L */
-    {13, LYK_REFRESH},		/* ^M */
-    {14, LYK_ACTIVATE},		/* ^N */
-    {15, LYK_DOWN_TWO},		/* ^O */
-    {17, LYK_UP_TWO},		/* ^Q */
-    {18, LYK_CHANGE_CENTER},	/* XON */
-    {19, LYK_RELOAD},		/* ^S */
-    {20, LYK_TO_CLIPBOARD},	/* XOFF */
-    {21, LYK_TRACE_TOGGLE},	/* ^U */
-    {22, LYK_NEXT_DOC},		/* ^V */
-    {23, LYK_SWITCH_DTD},	/* ^W */
-    {24, LYK_REFRESH},		/* ^X */
-    {25, LYK_CACHE_JAR},	/* ^Y */
-    {27, LYK_MAXSCREEN_TOGGLE},	/* ^Z */
-    {33, LYK_NEXT_PAGE},	/*   */
-    {34, LYK_SHELL},		/* ! */
-    {35, LYK_SOFT_DQUOTES},	/* " */
-    {36, LYK_TOOLBAR},		/* # */
-    {37, LYK_LAST_LINK},	/* $ */
-    {40, LYK_HISTORICAL},	/* ' */
-    {41, LYK_UP_HALF},		/* ( */
-    {42, LYK_DOWN_HALF},	/* ) */
-    {43, LYK_IMAGE_TOGGLE},	/* * */
-    {44, LYK_NEXT_PAGE},	/* + */
-    {45, LYK_EXTERN_PAGE},	/* , */
-    {46, LYK_PREV_PAGE},	/* - */
-    {47, LYK_EXTERN_LINK},	/* . */
-    {48, LYK_WHEREIS},		/* / */
-    {49, LYK_F_LINK_NUM},	/* 0 */
-    {50, LYK_1},		/* 1 */
-    {51, LYK_2},		/* 2 */
-    {52, LYK_3},		/* 3 */
-    {53, LYK_4},		/* 4 */
-    {54, LYK_5},		/* 5 */
-    {55, LYK_6},		/* 6 */
-    {56, LYK_7},		/* 7 */
-    {57, LYK_8},		/* 8 */
-    {58, LYK_9},		/* 9 */
-    {59, LYK_COMMAND},		/* : */
-    {60, LYK_TRACE_LOG},	/* ; */
-    {61, LYK_UP_LINK},		/* < */
-    {62, LYK_INFO},		/* = */
-    {63, LYK_DOWN_LINK},	/* > */
-    {64, LYK_HELP},		/* ? */
-    {65, LYK_RAW_TOGGLE},	/* @ */
-    {66, LYK_ADDRLIST},		/* A */
-    {67, LYK_PREV_PAGE},	/* B */
+    {KTL('@'), LYK_DO_NOTHING},
+    {KTL('A'), LYK_HOME},
+    {KTL('B'), LYK_PREV_PAGE},
+    {KTL('D'), LYK_ABORT},
+    {KTL('E'), LYK_END},
+    {KTL('F'), LYK_NEXT_PAGE},
+    {KTL('H'), LYK_HISTORY},
+    {KTL('I'), LYK_FASTFORW_LINK},
+    {KTL('J'), LYK_ACTIVATE},
+    {KTL('K'), LYK_COOKIE_JAR},
+    {KTL('L'), LYK_REFRESH},
+    {KTL('M'), LYK_ACTIVATE},
+    {KTL('N'), LYK_DOWN_TWO},
+    {KTL('P'), LYK_UP_TWO},
+    {KTL('Q'), LYK_CHANGE_CENTER},
+    {KTL('R'), LYK_RELOAD},
+    {KTL('S'), LYK_TO_CLIPBOARD},
+    {KTL('T'), LYK_TRACE_TOGGLE},
+    {KTL('U'), LYK_NEXT_DOC},
+    {KTL('V'), LYK_SWITCH_DTD},
+    {KTL('W'), LYK_REFRESH},
+    {KTL('X'), LYK_CACHE_JAR},
+    {KTL('Z'), LYK_MAXSCREEN_TOGGLE},
+    {KHR(' '), LYK_NEXT_PAGE},
+    {KHR('!'), LYK_SHELL},
+    {KHR('"'), LYK_SOFT_DQUOTES},
+    {KHR('#'), LYK_TOOLBAR},
+    {KHR('$'), LYK_LAST_LINK},
+    {KHR('\''), LYK_HISTORICAL},
+    {KHR('('), LYK_UP_HALF},
+    {KHR(')'), LYK_DOWN_HALF},
+    {KHR('*'), LYK_IMAGE_TOGGLE},
+    {KHR('+'), LYK_NEXT_PAGE},
+    {KHR(','), LYK_EXTERN_PAGE},
+    {KHR('-'), LYK_PREV_PAGE},
+    {KHR('.'), LYK_EXTERN_LINK},
+    {KHR('/'), LYK_WHEREIS},
+    {KHR('0'), LYK_F_LINK_NUM},
+    {KHR('1'), LYK_1},
+    {KHR('2'), LYK_2},
+    {KHR('3'), LYK_3},
+    {KHR('4'), LYK_4},
+    {KHR('5'), LYK_5},
+    {KHR('6'), LYK_6},
+    {KHR('7'), LYK_7},
+    {KHR('8'), LYK_8},
+    {KHR('9'), LYK_9},
+    {KHR(':'), LYK_COMMAND},
+    {KHR(';'), LYK_TRACE_LOG},
+    {KHR('<'), LYK_UP_LINK},
+    {KHR('='), LYK_INFO},
+    {KHR('>'), LYK_DOWN_LINK},
+    {KHR('?'), LYK_HELP},
+    {KHR('@'), LYK_RAW_TOGGLE},
+    {KHR('A'), LYK_ADDRLIST},
+    {KHR('B'), LYK_PREV_PAGE},
 #ifdef SUPPORT_CHDIR
-    {68, LYK_CHDIR},		/* C */
+    {KHR('C'), LYK_CHDIR},
 #else
-    {68, LYK_COMMENT},		/* C */
+    {KHR('C'), LYK_COMMENT},
 #endif
-    {69, LYK_DOWNLOAD},		/* D */
-    {70, LYK_ELGOTO},		/* E */
-    {71, LYK_DIRED_MENU},	/* F */
-    {72, LYK_ECGOTO},		/* G */
-    {73, LYK_HELP},		/* H */
-    {74, LYK_INDEX},		/* I */
+    {KHR('D'), LYK_DOWNLOAD},
+    {KHR('E'), LYK_ELGOTO},
+    {KHR('F'), LYK_DIRED_MENU},
+    {KHR('G'), LYK_ECGOTO},
+    {KHR('H'), LYK_HELP},
+    {KHR('I'), LYK_INDEX},
 #ifdef KANJI_CODE_OVERRIDE
-    {75, LYK_CHANGE_KCODE},	/* J */
+    {KHR('J'), LYK_CHANGE_KCODE},
 #else
-    {75, LYK_JUMP},		/* J */
+    {KHR('J'), LYK_JUMP},
 #endif
-    {76, LYK_KEYMAP},		/* K */
-    {77, LYK_LIST},		/* L */
-    {78, LYK_MAIN_MENU},	/* M */
-    {79, LYK_PREV},		/* N */
-    {80, LYK_OPTIONS},		/* O */
-    {81, LYK_PRINT},		/* P */
-    {82, LYK_ABORT},		/* Q */
-    {83, LYK_DEL_BOOKMARK},	/* R */
-    {84, LYK_INDEX_SEARCH},	/* S */
-    {85, LYK_TAG_LINK},		/* T */
-    {86, LYK_PREV_DOC},		/* U */
-    {87, LYK_VLINKS},		/* V */
-    {89, LYK_NOCACHE},		/* X */
-    {91, LYK_INTERRUPT},	/* Z */
-    {92, LYK_INLINE_TOGGLE},	/* [ */
-    {93, LYK_SOURCE},		/* \ */
-    {94, LYK_HEAD},		/* ] */
-    {95, LYK_FIRST_LINK},	/* ^ */
-    {96, LYK_CLEAR_AUTH},	/* _ */
-    {97, LYK_MINIMAL},		/* ` */
-    {98, LYK_ADD_BOOKMARK},	/* a */
-    {99, LYK_PREV_PAGE},	/* b */
-    {100, LYK_COMMENT},		/* c */
-    {101, LYK_DOWNLOAD},	/* d */
-    {102, LYK_EDIT},		/* e */
-    {103, LYK_DIRED_MENU},	/* f */
-    {104, LYK_GOTO},		/* g */
-    {105, LYK_HELP},		/* h */
-    {106, LYK_INDEX},		/* i */
-    {107, LYK_JUMP},		/* j */
-    {108, LYK_KEYMAP},		/* k */
-    {109, LYK_LIST},		/* l */
-    {110, LYK_MAIN_MENU},	/* m */
-    {111, LYK_NEXT},		/* n */
-    {112, LYK_OPTIONS},		/* o */
-    {113, LYK_PRINT},		/* p */
-    {114, LYK_QUIT},		/* q */
-    {115, LYK_DEL_BOOKMARK},	/* r */
-    {116, LYK_INDEX_SEARCH},	/* s */
-    {117, LYK_TAG_LINK},	/* t */
-    {118, LYK_PREV_DOC},	/* u */
-    {119, LYK_VIEW_BOOKMARK},	/* v */
-    {121, LYK_NOCACHE},		/* x */
-    {123, LYK_INTERRUPT},	/* z */
-    {124, LYK_SHIFT_LEFT},	/* { */
-    {125, LYK_LINEWRAP_TOGGLE},	/* | */
-    {126, LYK_SHIFT_RIGHT},	/* } */
-    {127, LYK_NESTED_TABLES},	/* ~ */
-    {128, LYK_HISTORY},		/* DEL */
-    {257, LYK_PREV_LINK},	/* UPARROW_KEY */
-    {258, LYK_NEXT_LINK},	/* DNARROW_KEY */
-    {259, LYK_ACTIVATE},	/* RTARROW_KEY */
-    {260, LYK_PREV_DOC},	/* LTARROW_KEY */
-    {261, LYK_NEXT_PAGE},	/* PGDOWN_KEY */
-    {262, LYK_PREV_PAGE},	/* PGUP_KEY */
-    {263, LYK_HOME},		/* HOME_KEY */
-    {264, LYK_END},		/* END_KEY */
-    {265, LYK_DWIMHELP},	/* F1_KEY */
+    {KHR('K'), LYK_KEYMAP},
+    {KHR('L'), LYK_LIST},
+    {KHR('M'), LYK_MAIN_MENU},
+    {KHR('N'), LYK_PREV},
+    {KHR('O'), LYK_OPTIONS},
+    {KHR('P'), LYK_PRINT},
+    {KHR('Q'), LYK_ABORT},
+    {KHR('R'), LYK_DEL_BOOKMARK},
+    {KHR('S'), LYK_INDEX_SEARCH},
+    {KHR('T'), LYK_TAG_LINK},
+    {KHR('U'), LYK_PREV_DOC},
+    {KHR('V'), LYK_VLINKS},
+    {KHR('X'), LYK_NOCACHE},
+    {KHR('Z'), LYK_INTERRUPT},
+    {KHR('['), LYK_INLINE_TOGGLE},
+    {KHR('\\'), LYK_SOURCE},
+    {KHR(']'), LYK_HEAD},
+    {KHR('^'), LYK_FIRST_LINK},
+    {KHR('_'), LYK_CLEAR_AUTH},
+    {KHR('`'), LYK_MINIMAL},
+    {KHR('a'), LYK_ADD_BOOKMARK},
+    {KHR('b'), LYK_PREV_PAGE},
+    {KHR('c'), LYK_COMMENT},
+    {KHR('d'), LYK_DOWNLOAD},
+    {KHR('e'), LYK_EDIT},
+    {KHR('f'), LYK_DIRED_MENU},
+    {KHR('g'), LYK_GOTO},
+    {KHR('h'), LYK_HELP},
+    {KHR('i'), LYK_INDEX},
+    {KHR('j'), LYK_JUMP},
+    {KHR('k'), LYK_KEYMAP},
+    {KHR('l'), LYK_LIST},
+    {KHR('m'), LYK_MAIN_MENU},
+    {KHR('n'), LYK_NEXT},
+    {KHR('o'), LYK_OPTIONS},
+    {KHR('p'), LYK_PRINT},
+    {KHR('q'), LYK_QUIT},
+    {KHR('r'), LYK_DEL_BOOKMARK},
+    {KHR('s'), LYK_INDEX_SEARCH},
+    {KHR('t'), LYK_TAG_LINK},
+    {KHR('u'), LYK_PREV_DOC},
+    {KHR('v'), LYK_VIEW_BOOKMARK},
+    {KHR('x'), LYK_NOCACHE},
+    {KHR('z'), LYK_INTERRUPT},
+    {KHR('{'), LYK_SHIFT_LEFT},
+    {KHR('|'), LYK_LINEWRAP_TOGGLE},
+    {KHR('}'), LYK_SHIFT_RIGHT},
+    {KHR('~'), LYK_NESTED_TABLES},
+    {KHR(DEL_KEY), LYK_HISTORY},
+    {KHR(UPARROW_KEY), LYK_PREV_LINK},
+    {KHR(DNARROW_KEY), LYK_NEXT_LINK},
+    {KHR(RTARROW_KEY), LYK_ACTIVATE},
+    {KHR(LTARROW_KEY), LYK_PREV_DOC},
+    {KHR(PGDOWN_KEY), LYK_NEXT_PAGE},
+    {KHR(PGUP_KEY), LYK_PREV_PAGE},
+    {KHR(HOME_KEY), LYK_HOME},
+    {KHR(END_KEY), LYK_END},
+    {KHR(F1_KEY), LYK_DWIMHELP},
 #if !(defined(_WINDOWS) || defined(__DJGPP__))
-    {266, LYK_ACTIVATE},	/* DO_KEY */
-    {267, LYK_HOME},		/* FIND_KEY */
-    {268, LYK_END},		/* SELECT_KEY */
+    {KHR(DO_KEY), LYK_ACTIVATE},
+    {KHR(FIND_KEY), LYK_HOME},
+    {KHR(SELECT_KEY), LYK_END},
 #endif
-    {269, LYK_UP_TWO},		/* INSERT_KEY */
-    {270, LYK_DOWN_TWO},	/* REMOVE_KEY */
-    {271, LYK_DO_NOTHING},	/* DO_NOTHING */
-    {272, LYK_FASTBACKW_LINK},	/* BACKTAB_KEY */
-    {282, LYK_DO_NOTHING},	/* F11_KEY */
+    {KHR(INSERT_KEY), LYK_UP_TWO},
+    {KHR(REMOVE_KEY), LYK_DOWN_TWO},
+    {KHR(DO_NOTHING), LYK_DO_NOTHING},
+    {KHR(BACKTAB_KEY), LYK_FASTBACKW_LINK},
+    {KHR(F11_KEY), LYK_DO_NOTHING},
 #ifdef DJGPP_KEYHANDLER
     {302, LYK_ABORT},
 #endif				/* DJGPP_KEYHANDLER */

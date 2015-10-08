@@ -1,14 +1,24 @@
--- $LynxId: CHANGES,v 1.810 2015/10/02 11:25:01 tom Exp $
+-- $LynxId: CHANGES,v 1.816 2015/10/08 00:49:51 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2015-09-29 (2.8.9dev.7)
+2015-10-07 (2.8.9dev.7)
+* correct description used for "K" vs "k" key binding in manpage -TD
+* adopt some of the patches from Debian lynx package:
+  + add Delete key usage to manpage (patch by Denis Briand, Debian #74358)
+  + add $(LDFLAGS) when building makeuctb (patch by Atsuhito Kohda).
+  + add NO_BUILDSTAMP symbol to appease
+    https://wiki.debian.org/ReproducibleBuilds/TimestampsFromCPPMacros
+  + add -n option to gzip when making gzip'd helpfiles (patch by Andreas
+    Metzler).
+* use POSIX locale when sorting entries in cfg_defs.h (patch by Reiner Hermann,
+  Debian #792770).
 * move homepage for Lynx from
     http://lynx.isc.org
   to
     http://lynx.invisible-island.net
-  because ISC is ending support -TD
+  because ISC has ended support -TD
 * change "GNU Public License" to "GNU General Public License" for consistency
   (report by Axel Beckert) -TD
 * free a use-after-free in scan_cookie_sublist (Redhat #1120925) -TG

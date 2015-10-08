@@ -1,4 +1,4 @@
-dnl $LynxId: configure.in,v 1.278 2015/05/28 00:47:06 tom Exp $
+dnl $LynxId: configure.in,v 1.279 2015/10/08 00:48:41 Andreas.Metzler Exp $
 dnl
 dnl Process this file with autoconf to produce a configure script.
 dnl
@@ -1462,7 +1462,7 @@ fi
 COMPRESS_PROG=
 COMPRESS_EXT=
 if test $use_gzip_help = yes ; then
-	COMPRESS_PROG="$ac_cv_path_GZIP -9"
+	COMPRESS_PROG="$ac_cv_path_GZIP -9 -n"
 	COMPRESS_EXT=.gz
 fi
 AC_SUBST(COMPRESS_PROG)

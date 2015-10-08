@@ -7,7 +7,7 @@
 # Append a '=' if none present'
 # Break into two strings at '='
 # Prefix ' { "' and suffix '" },'
-sort |
+LC_ALL=C sort |
 sed	-e 's!^[ 	]*!!' -e 's![ 	]*$!!' \
 	-e 's!\\!\\\\!g'        \
 	-e 's!"!\\"!g'          \
