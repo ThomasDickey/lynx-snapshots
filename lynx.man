@@ -1,4 +1,4 @@
-.\" $LynxId: lynx.man,v 1.110 2014/02/13 13:32:15 tom Exp $
+.\" $LynxId: lynx.man,v 1.112 2015/10/08 00:19:45 tom Exp $
 .\" **************************************************************************
 .\" Escape single quotes in literal strings from groff's Unicode transform.
 .ie \n(.g .ds AQ \(aq
@@ -946,6 +946,9 @@ tells \fILynx\fP that it can ignore certain tags which have no content
 in an XHTML 1.0 document.
 For example \*(``<p/>\*('' will be discarded.
 .SH COMMANDS
+.PP
+More than one key can be mapped to a given command.
+Here are some of the most useful:
 .TP 3
 .B o
 Use \fBUp arrow\fR and \fBDown arrow\fR to scroll through hypertext links.
@@ -954,15 +957,21 @@ Use \fBUp arrow\fR and \fBDown arrow\fR to scroll through hypertext links.
 \fBRight arrow\fR or \fBReturn\fR will follow a highlighted hypertext link.
 .TP
 .B o
-\fBLeft Arrow\fR will retreat from a link.
+\fBLeft Arrow\fR or \*(``\fBu\fR\*('' will retreat from a link.
 .TP
 .B o
-Type \*(``\fBH\fR\*('' or \*(``\fB?\fR\*('' for online help and descriptions
+Type \*(``\fBH\fR\*('', \*(``\fB?\fR\*('', or \fBF1\fR for online help and descriptions
 of key-stroke commands.
 .TP
 .B o
-Type \*(``\fBK\fR\*('' for a complete list of the current key-stroke
+Type \*(``\fBk\fR\*('' or \*(``\fBK\fR\*('' for a list of the current key-stroke
 command mappings.
+.IP
+If the same command is mapped to the same letter differing only
+by upper/lowercase only the lowercase mapping is shown.
+.TP
+.B o
+Type \fBDelete\fR to view history list.
 .SH ENVIRONMENT
 In addition to various \*(``standard\*('' environment variables such as
 \fBHOME\fR, \fBPATH\fR, \fBUSER\fR, \fBDISPLAY\fR, \fBTMPDIR\fR, \fBetc\fR,

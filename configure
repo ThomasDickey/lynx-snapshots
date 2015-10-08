@@ -38250,7 +38250,7 @@ fi
 COMPRESS_PROG=
 COMPRESS_EXT=
 if test $use_gzip_help = yes ; then
-	COMPRESS_PROG="$ac_cv_path_GZIP -9"
+	COMPRESS_PROG="$ac_cv_path_GZIP -9 -n"
 	COMPRESS_EXT=.gz
 fi
 

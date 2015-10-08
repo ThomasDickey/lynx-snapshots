@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMain.c,v 1.255 2015/09/19 17:40:20 tom Exp $
+ * $LynxId: LYMain.c,v 1.256 2015/10/08 00:41:48 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTP.h>
@@ -3208,11 +3208,14 @@ static int version_fun(char *next_arg GCC_UNUSED)
     printf("%s\n", result);
     free(result);
 
-#ifndef __DATE__
-#define __DATE__ ""
-#endif
-#ifndef __TIME__
-#define __TIME__ ""
+/*
+ * Define NO_BUILDSTAMP if you really want an executable with no timestamp in
+ * the -version message.
+ */
+#ifdef NO_BUILDSTAMP
+#define BUILDSTAMP ""
+#else
+#define BUILDSTAMP " (" __DATE__ " " __TIME__ ")"
 #endif
 
 /*
@@ -3220,25 +3223,17 @@ static int version_fun(char *next_arg GCC_UNUSED)
  * systems, according to predefined compiler symbols.
  */
 #ifdef SYSTEM_NAME
-    printf(gettext("Built on %s %s %s\n"), SYSTEM_NAME, __DATE__, __TIME__);
-#else
-#ifdef __CYGWIN__
-    printf("Compiled by CYGWIN (%s %s).\n", __DATE__, __TIME__);
-#else
-#ifdef __BORLANDC__
-    printf("Compiled by Borland C++ (%s %s).\n", __DATE__, __TIME__);
-#else
-#ifdef _MSC_VER
-    printf("Compiled by Microsoft Visual C++ (%s %s).\n", __DATE__, __TIME__);
-#else
-#ifdef __DJGPP__
-    printf("Compiled by DJGPP (%s %s).\n", __DATE__, __TIME__);
-#else
-    printf("Compiled at (%s %s).\n", __DATE__, __TIME__);
-#endif /* __DJGPP__ */
-#endif /* _MSC_VER */
-#endif /* __BORLANDC__ */
-#endif /* __CYGWIN__ */
+    printf(gettext("Built on %s%s.\n"), SYSTEM_NAME, BUILDSTAMP);
+#elif defined(__CYGWIN__)
+    printf("Compiled by CYGWIN%s.\n", BUILDSTAMP);
+#elif defined(__BORLANDC__)
+    printf("Compiled by Borland C++%s.\n", BUILDSTAMP);
+#elif defined(_MSC_VER)
+    printf("Compiled by Microsoft Visual C++%s.\n", BUILDSTAMP);
+#elif defined(__DJGPP__)
+    printf("Compiled by DJGPP%s.\n", BUILDSTAMP);
+#elif !defined(NO_BUILDSTAMP)
+    printf("Compiled at %s %s.\n", __DATE__, __TIME__);
 #endif
 
     puts("");

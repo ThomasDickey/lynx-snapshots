@@ -1,4 +1,4 @@
-# $LynxId: makefile.in,v 1.39 2014/01/19 14:42:43 tom Exp $
+# $LynxId: makefile.in,v 1.40 2015/10/08 00:26:34 Atsuhito.Kohda Exp $
 #
 # Makefile for the makeuctb and unicode tables.
 #
@@ -123,7 +123,7 @@ OBJS		= makeuctb$o
 C_SRC		= $(OBJS:$o=.c)
 
 $(MAKEUCTB) : $(OBJS)
-	$(BUILD_CC) $(CC_OPTS) $(BUILD_LDFLAGS) -o $@ $(OBJS) $(INTLLIB) $(BUILD_LIBS)
+	$(BUILD_CC) $(CC_OPTS) $(LDFLAGS) $(BUILD_LDFLAGS) -o $@ $(OBJS) $(INTLLIB) $(BUILD_LIBS)
 
 makeuctb$o : $(srcdir)/UCkd.h $(srcdir)/makeuctb.c
 

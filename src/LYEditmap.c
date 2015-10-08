@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYEditmap.c,v 1.73 2014/02/08 01:12:58 Gisle.Vanem Exp $
+ * $LynxId: LYEditmap.c,v 1.74 2015/10/08 00:17:28 tom Exp $
  *
  * LYEditMap.c
  * Keybindings for line and form editing.
@@ -131,119 +131,119 @@ static LYEditCode *Mod3Binding = Mod1Binding;
 
 static const LYEditInit initMod1Binding[] =
 {
-    {1, LYE_BOL},		/* ^B */
-    {2, LYE_BACKW},		/* ^C */
-    {3, LYE_UNMOD},		/* ^D */
-    {4, LYK_NEXT_LINK | LYE_FORM_LAC},	/* ^E */
-    {5, LYK_EDITTEXTAREA | LYE_FORM_LAC},	/* ^F */
-    {6, LYE_FORWW},		/* ^G */
-    {7, LYE_ABORT},		/* ^H */
-    {8, LYE_DELPW},		/* ^I */
-    {9, LYE_UNMOD},		/* ^J */
-    {10, LYE_ENTER},		/* ^K */
-    {11, LYK_LPOS_NEXT_LINK | LYE_FORM_LAC},	/* ^L */
-    {12, LYE_FORM_PASS},	/* ^M */
-    {13, LYE_ENTER},		/* ^N */
-    {14, LYE_FORWW},		/* ^O */
-    {15, LYE_UNMOD},		/* ^P */
-    {16, LYE_BACKW},		/* ^Q */
-    {18, LYE_BACKW},		/* ^S */
-    {21, LYE_FORM_PASS},	/* ^V */
-    {23, LYE_KILLREG},		/* ^X */
-    {24, LYE_XPMARK},		/* ^Y */
-    {25, LYE_UNMOD},		/* ^Z */
-    {26, LYE_FORM_PASS},	/* ^[ */
-    {28, LYE_FORM_PASS},	/* ^] */
-    {29, LYE_FORM_PASS},	/* ^^ */
-    {30, LYE_UNMOD},		/* ^_ */
-    {32, LYE_UNMOD},		/*   */
-    {33, LYE_UNMOD},		/* ! */
-    {34, LYE_UNMOD},		/* " */
-    {35, LYE_UNMOD},		/* # */
-    {36, LYE_UNMOD},		/* $ */
-    {37, LYE_UNMOD},		/* % */
-    {38, LYE_UNMOD},		/* & */
-    {39, LYE_UNMOD},		/* ' */
-    {40, LYE_UNMOD},		/* ( */
-    {41, LYE_UNMOD},		/* ) */
-    {42, LYE_UNMOD},		/* * */
-    {43, LYE_UNMOD},		/* + */
-    {44, LYE_UNMOD},		/* , */
-    {45, LYE_UNMOD},		/* - */
-    {46, LYE_UNMOD},		/* . */
-    {47, LYE_FORM_PASS},	/* / */
-    {48, LYE_UNMOD},		/* 0 */
-    {49, LYE_UNMOD},		/* 1 */
-    {50, LYE_UNMOD},		/* 2 */
-    {51, LYE_UNMOD},		/* 3 */
-    {52, LYE_UNMOD},		/* 4 */
-    {53, LYE_UNMOD},		/* 5 */
-    {54, LYE_UNMOD},		/* 6 */
-    {55, LYE_UNMOD},		/* 7 */
-    {56, LYE_UNMOD},		/* 8 */
-    {57, LYE_UNMOD},		/* 9 */
-    {58, LYE_UNMOD},		/* : */
-    {59, LYE_UNMOD},		/* ; */
-    {60, LYK_HOME | LYE_FORM_LAC},	/* < */
-    {61, LYE_UNMOD},		/* = */
-    {62, LYK_END | LYE_FORM_LAC},	/* > */
-    {63, LYE_UNMOD},		/* ? */
-    {64, LYE_C1CHAR},		/* @ */
-    {65, LYE_C1CHAR},		/* A */
-    {66, LYE_C1CHAR},		/* B */
-    {67, LYE_C1CHAR},		/* C */
-    {68, LYE_C1CHAR},		/* D */
-    {69, LYE_C1CHAR},		/* E */
-    {70, LYE_C1CHAR},		/* F */
-    {71, LYE_C1CHAR},		/* G */
-    {72, LYE_C1CHAR},		/* H */
-    {73, LYE_C1CHAR},		/* I */
-    {74, LYE_C1CHAR},		/* J */
-    {75, LYE_C1CHAR},		/* K */
-    {76, LYE_C1CHAR},		/* L */
-    {77, LYE_C1CHAR},		/* M */
-    {78, LYE_C1CHAR},		/* N */
-    {79, LYE_C1CHAR},		/* O */
-    {80, LYE_C1CHAR},		/* P */
-    {81, LYE_C1CHAR},		/* Q */
-    {82, LYE_C1CHAR},		/* R */
-    {83, LYE_C1CHAR},		/* S */
-    {84, LYE_C1CHAR},		/* T */
-    {85, LYE_C1CHAR},		/* U */
-    {86, LYE_C1CHAR},		/* V */
-    {87, LYE_C1CHAR},		/* W */
-    {88, LYE_C1CHAR},		/* X */
-    {89, LYE_C1CHAR},		/* Y */
-    {90, LYE_C1CHAR},		/* Z */
-    {91, LYE_C1CHAR},		/* [ */
-    {92, LYE_C1CHAR},		/* \ */
-    {93, LYE_C1CHAR},		/* ] */
-    {94, LYE_C1CHAR},		/* ^ */
-    {95, LYE_C1CHAR},		/* _ */
-    {96, LYE_UNMOD},		/* ` */
-    {97, LYE_BOL},		/* a */
-    {98, LYE_BACKW},		/* b */
-    {99, LYE_UNMOD},		/* c */
-    {100, LYE_DELNW},		/* d */
-    {101, LYK_EDITTEXTAREA | LYE_FORM_LAC},	/* e */
-    {102, LYE_FORWW},		/* f */
-    {103, LYK_GROWTEXTAREA | LYE_FORM_LAC},	/* g */
-    {104, LYE_CHAR},		/* h */
-    {105, LYK_INSERTFILE | LYE_FORM_LAC},	/* i */
-    {106, LYE_CHAR},		/* j */
-    {107, LYE_ERASE},		/* k */
-    {108, LYE_LOWER},		/* l */
-    {109, LYE_CHAR},		/* m */
-    {110, LYE_FORM_PASS},	/* n */
-    {111, LYE_UNMOD},		/* o */
-    {112, LYE_CHAR},		/* p */
-    {117, LYE_UPPER},		/* u */
-    {122, LYE_UNMOD},		/* z */
-    {123, LYE_UNMOD},		/* { */
-    {124, LYE_UNMOD},		/* | */
-    {125, LYE_UNMOD},		/* } */
-    {126, LYE_UNMOD},		/* ~ */
-    {127, LYE_DELPW},
+    {CTL('A'), LYE_BOL},
+    {CTL('B'), LYE_BACKW},
+    {CTL('C'), LYE_UNMOD},
+    {CTL('D'), LYK_NEXT_LINK | LYE_FORM_LAC},
+    {CTL('E'), LYK_EDITTEXTAREA | LYE_FORM_LAC},
+    {CTL('F'), LYE_FORWW},
+    {CTL('G'), LYE_ABORT},
+    {CTL('H'), LYE_DELPW},
+    {CTL('I'), LYE_UNMOD},
+    {CTL('J'), LYE_ENTER},
+    {CTL('K'), LYK_LPOS_NEXT_LINK | LYE_FORM_LAC},
+    {CTL('L'), LYE_FORM_PASS},
+    {CTL('M'), LYE_ENTER},
+    {CTL('N'), LYE_FORWW},
+    {CTL('O'), LYE_UNMOD},
+    {CTL('P'), LYE_BACKW},
+    {CTL('R'), LYE_BACKW},
+    {CTL('U'), LYE_FORM_PASS},
+    {CTL('W'), LYE_KILLREG},
+    {CTL('X'), LYE_XPMARK},
+    {CTL('Y'), LYE_UNMOD},
+    {CTL('Z'), LYE_FORM_PASS},
+    {CTL('\\'), LYE_FORM_PASS},
+    {CTL(']'), LYE_FORM_PASS},
+    {CTL('^'), LYE_UNMOD},
+    {' ', LYE_UNMOD},
+    {'!', LYE_UNMOD},
+    {'"', LYE_UNMOD},
+    {'#', LYE_UNMOD},
+    {'$', LYE_UNMOD},
+    {'%', LYE_UNMOD},
+    {'&', LYE_UNMOD},
+    {'\'', LYE_UNMOD},
+    {'(', LYE_UNMOD},
+    {')', LYE_UNMOD},
+    {'*', LYE_UNMOD},
+    {'+', LYE_UNMOD},
+    {',', LYE_UNMOD},
+    {'-', LYE_UNMOD},
+    {'.', LYE_UNMOD},
+    {'/', LYE_FORM_PASS},
+    {'0', LYE_UNMOD},
+    {'1', LYE_UNMOD},
+    {'2', LYE_UNMOD},
+    {'3', LYE_UNMOD},
+    {'4', LYE_UNMOD},
+    {'5', LYE_UNMOD},
+    {'6', LYE_UNMOD},
+    {'7', LYE_UNMOD},
+    {'8', LYE_UNMOD},
+    {'9', LYE_UNMOD},
+    {':', LYE_UNMOD},
+    {';', LYE_UNMOD},
+    {'<', LYK_HOME | LYE_FORM_LAC},
+    {'=', LYE_UNMOD},
+    {'>', LYK_END | LYE_FORM_LAC},
+    {'?', LYE_UNMOD},
+    {'@', LYE_C1CHAR},
+    {'A', LYE_C1CHAR},
+    {'B', LYE_C1CHAR},
+    {'C', LYE_C1CHAR},
+    {'D', LYE_C1CHAR},
+    {'E', LYE_C1CHAR},
+    {'F', LYE_C1CHAR},
+    {'G', LYE_C1CHAR},
+    {'H', LYE_C1CHAR},
+    {'I', LYE_C1CHAR},
+    {'J', LYE_C1CHAR},
+    {'K', LYE_C1CHAR},
+    {'L', LYE_C1CHAR},
+    {'M', LYE_C1CHAR},
+    {'N', LYE_C1CHAR},
+    {'O', LYE_C1CHAR},
+    {'P', LYE_C1CHAR},
+    {'Q', LYE_C1CHAR},
+    {'R', LYE_C1CHAR},
+    {'S', LYE_C1CHAR},
+    {'T', LYE_C1CHAR},
+    {'U', LYE_C1CHAR},
+    {'V', LYE_C1CHAR},
+    {'W', LYE_C1CHAR},
+    {'X', LYE_C1CHAR},
+    {'Y', LYE_C1CHAR},
+    {'Z', LYE_C1CHAR},
+    {'[', LYE_C1CHAR},
+    {'\\', LYE_C1CHAR},
+    {']', LYE_C1CHAR},
+    {'^', LYE_C1CHAR},
+    {'_', LYE_C1CHAR},
+    {'`', LYE_UNMOD},
+    {'a', LYE_BOL},
+    {'b', LYE_BACKW},
+    {'c', LYE_UNMOD},
+    {'d', LYE_DELNW},
+    {'e', LYK_EDITTEXTAREA | LYE_FORM_LAC},
+    {'f', LYE_FORWW},
+    {'g', LYK_GROWTEXTAREA | LYE_FORM_LAC},
+    {'h', LYE_CHAR},
+    {'i', LYK_INSERTFILE | LYE_FORM_LAC},
+    {'j', LYE_CHAR},
+    {'k', LYE_ERASE},
+    {'l', LYE_LOWER},
+    {'m', LYE_CHAR},
+    {'n', LYE_FORM_PASS},
+    {'o', LYE_UNMOD},
+    {'p', LYE_CHAR},
+    {'u', LYE_UPPER},
+    {'z', LYE_UNMOD},
+    {'{', LYE_UNMOD},
+    {'|', LYE_UNMOD},
+    {'}', LYE_UNMOD},
+    {'~', LYE_UNMOD},
+    {DEL_KEY, LYE_DELPW},
     {160, LYE_UNMOD},
     {161, LYE_UNMOD},
     {162, LYE_UNMOD},
@@ -340,26 +340,26 @@ static const LYEditInit initMod1Binding[] =
     {253, LYE_UNMOD},
     {254, LYE_UNMOD},
     {255, LYE_UNMOD},
-    {256, LYE_UNMOD},		/* UPARROW_KEY */
-    {257, LYE_UNMOD},		/* DNARROW_KEY */
-    {258, LYE_UNMOD},		/* RTARROW_KEY */
-    {259, LYE_UNMOD},		/* LTARROW_KEY */
-    {260, LYE_UNMOD},		/* PGDOWN_KEY */
-    {261, LYE_UNMOD},		/* PGUP_KEY */
-    {262, LYE_FORM_PASS},	/* HOME_KEY */
-    {263, LYE_FORM_PASS},	/* END_KEY */
-    {264, LYK_DWIMHELP | LYE_FORM_LAC},		/* F1 */
-    {265, LYE_UNMOD},		/* DO_KEY */
+    {UPARROW_KEY, LYE_UNMOD},
+    {DNARROW_KEY, LYE_UNMOD},
+    {RTARROW_KEY, LYE_UNMOD},
+    {LTARROW_KEY, LYE_UNMOD},
+    {PGDOWN_KEY, LYE_UNMOD},
+    {PGUP_KEY, LYE_UNMOD},
+    {HOME_KEY, LYE_FORM_PASS},
+    {END_KEY, LYE_FORM_PASS},
+    {F1_KEY, LYK_DWIMHELP | LYE_FORM_LAC},
+    {DO_KEY, LYE_UNMOD},
 #if (defined(_WINDOWS) || defined(__DJGPP__))
-    {266, LYE_UNMOD},		/* FIND_KEY */
-    {267, LYE_UNMOD},		/* SELECT_KEY */
+    {FIND_KEY, LYE_UNMOD},
+    {SELECT_KEY, LYE_UNMOD},
 #else
-    {266, LYK_WHEREIS | LYE_FORM_LAC},	/* FIND_KEY */
-    {267, LYK_NEXT | LYE_FORM_LAC},	/* SELECT_KEY */
+    {FIND_KEY, LYK_WHEREIS | LYE_FORM_LAC},
+    {SELECT_KEY, LYK_NEXT | LYE_FORM_LAC},
 #endif
-    {268, LYE_UNMOD},		/* INSERT_KEY */
-    {270, LYE_UNMOD},		/* DO_NOTHING */
-    {271, LYE_UNMOD},		/* BACKTAB_KEY */
+    {INSERT_KEY, LYE_UNMOD},
+    {DO_NOTHING, LYE_UNMOD},
+    {BACKTAB_KEY, LYE_UNMOD},
 #if (defined(_WINDOWS) || defined(__DJGPP__)) && defined(USE_SLANG) && !defined(DJGPP_KEYHANDLER)
     {272, LYE_DELPW},
 #else
@@ -378,127 +378,127 @@ LYEditConfig LYModifierBindings[] =
 
 static const LYEditInit initDefaultEditor[] =
 {
-    {1, LYE_BOL},		/* ^B */
-    {2, LYE_DELPW},		/* ^C */
-    {3, LYE_ABORT},		/* ^D */
-    {4, LYE_DELN},		/* ^E */
-    {5, LYE_EOL},		/* ^F */
-    {6, LYE_DELNW},		/* ^G */
-    {7, LYE_ABORT},		/* ^H */
-    {8, LYE_DELP},		/* ^I */
-    {9, LYE_TAB},		/* ^J */
-    {10, LYE_ENTER},		/* ^K */
-    {11, LYE_LOWER},		/* ^L */
-    {13, LYE_ENTER},		/* ^N */
-    {14, LYE_FORWW},		/* ^O */
-    {15, LYE_ABORT},		/* ^P */
-    {16, LYE_BACKW},		/* ^Q */
-    {18, LYE_DELN},		/* ^S */
-    {20, LYE_UPPER},		/* ^U */
-    {21, LYE_ERASE},		/* ^V */
-    {22, LYE_LKCMD},		/* ^W */
+    {CTL('A'), LYE_BOL},
+    {CTL('B'), LYE_DELPW},
+    {CTL('C'), LYE_ABORT},
+    {CTL('D'), LYE_DELN},
+    {CTL('E'), LYE_EOL},
+    {CTL('F'), LYE_DELNW},
+    {CTL('G'), LYE_ABORT},
+    {CTL('H'), LYE_DELP},
+    {CTL('I'), LYE_TAB},
+    {CTL('J'), LYE_ENTER},
+    {CTL('K'), LYE_LOWER},
+    {CTL('M'), LYE_ENTER},
+    {CTL('N'), LYE_FORWW},
+    {CTL('O'), LYE_ABORT},
+    {CTL('P'), LYE_BACKW},
+    {CTL('R'), LYE_DELN},
+    {CTL('T'), LYE_UPPER},
+    {CTL('U'), LYE_ERASE},
+    {CTL('V'), LYE_LKCMD},
 #ifdef CAN_CUT_AND_PASTE
-    {23, LYE_PASTE},		/* ^X */
+    {CTL('W'), LYE_PASTE},
 #endif
-    {24, LYE_SETM1},		/* ^Y */
-    {30, LYE_SWMAP},		/* ^_ */
-    {31, LYE_DELEL},		/* ^` */
-    {32, LYE_CHAR},		/*   */
-    {33, LYE_CHAR},		/* ! */
-    {34, LYE_CHAR},		/* " */
-    {35, LYE_CHAR},		/* # */
-    {36, LYE_CHAR},		/* $ */
-    {37, LYE_CHAR},		/* % */
-    {38, LYE_CHAR},		/* & */
-    {39, LYE_CHAR},		/* ' */
-    {40, LYE_CHAR},		/* ( */
-    {41, LYE_CHAR},		/* ) */
-    {42, LYE_CHAR},		/* * */
-    {43, LYE_CHAR},		/* + */
-    {44, LYE_CHAR},		/* , */
-    {45, LYE_CHAR},		/* - */
-    {46, LYE_CHAR},		/* . */
-    {47, LYE_CHAR},		/* / */
-    {48, LYE_CHAR},		/* 0 */
-    {49, LYE_CHAR},		/* 1 */
-    {50, LYE_CHAR},		/* 2 */
-    {51, LYE_CHAR},		/* 3 */
-    {52, LYE_CHAR},		/* 4 */
-    {53, LYE_CHAR},		/* 5 */
-    {54, LYE_CHAR},		/* 6 */
-    {55, LYE_CHAR},		/* 7 */
-    {56, LYE_CHAR},		/* 8 */
-    {57, LYE_CHAR},		/* 9 */
-    {58, LYE_CHAR},		/* : */
-    {59, LYE_CHAR},		/* ; */
-    {60, LYE_CHAR},		/* < */
-    {61, LYE_CHAR},		/* = */
-    {62, LYE_CHAR},		/* > */
-    {63, LYE_CHAR},		/* ? */
-    {64, LYE_CHAR},		/* @ */
-    {65, LYE_CHAR},		/* A */
-    {66, LYE_CHAR},		/* B */
-    {67, LYE_CHAR},		/* C */
-    {68, LYE_CHAR},		/* D */
-    {69, LYE_CHAR},		/* E */
-    {70, LYE_CHAR},		/* F */
-    {71, LYE_CHAR},		/* G */
-    {72, LYE_CHAR},		/* H */
-    {73, LYE_CHAR},		/* I */
-    {74, LYE_CHAR},		/* J */
-    {75, LYE_CHAR},		/* K */
-    {76, LYE_CHAR},		/* L */
-    {77, LYE_CHAR},		/* M */
-    {78, LYE_CHAR},		/* N */
-    {79, LYE_CHAR},		/* O */
-    {80, LYE_CHAR},		/* P */
-    {81, LYE_CHAR},		/* Q */
-    {82, LYE_CHAR},		/* R */
-    {83, LYE_CHAR},		/* S */
-    {84, LYE_CHAR},		/* T */
-    {85, LYE_CHAR},		/* U */
-    {86, LYE_CHAR},		/* V */
-    {87, LYE_CHAR},		/* W */
-    {88, LYE_CHAR},		/* X */
-    {89, LYE_CHAR},		/* Y */
-    {90, LYE_CHAR},		/* Z */
-    {91, LYE_CHAR},		/* [ */
-    {92, LYE_CHAR},		/* \ */
-    {93, LYE_CHAR},		/* ] */
-    {94, LYE_CHAR},		/* ^ */
-    {95, LYE_CHAR},		/* _ */
-    {96, LYE_CHAR},		/* ` */
-    {97, LYE_CHAR},		/* a */
-    {98, LYE_CHAR},		/* b */
-    {99, LYE_CHAR},		/* c */
-    {100, LYE_CHAR},		/* d */
-    {101, LYE_CHAR},		/* e */
-    {102, LYE_CHAR},		/* f */
-    {103, LYE_CHAR},		/* g */
-    {104, LYE_CHAR},		/* h */
-    {105, LYE_CHAR},		/* i */
-    {106, LYE_CHAR},		/* j */
-    {107, LYE_CHAR},		/* k */
-    {108, LYE_CHAR},		/* l */
-    {109, LYE_CHAR},		/* m */
-    {110, LYE_CHAR},		/* n */
-    {111, LYE_CHAR},		/* o */
-    {112, LYE_CHAR},		/* p */
-    {113, LYE_CHAR},		/* q */
-    {114, LYE_CHAR},		/* r */
-    {115, LYE_CHAR},		/* s */
-    {116, LYE_CHAR},		/* t */
-    {117, LYE_CHAR},		/* u */
-    {118, LYE_CHAR},		/* v */
-    {119, LYE_CHAR},		/* w */
-    {120, LYE_CHAR},		/* x */
-    {121, LYE_CHAR},		/* y */
-    {122, LYE_CHAR},		/* z */
-    {123, LYE_CHAR},		/* { */
-    {124, LYE_CHAR},		/* | */
-    {125, LYE_CHAR},		/* } */
-    {126, LYE_CHAR},		/* ~ */
-    {127, LYE_DELP},
+    {CTL('X'), LYE_SETM1},
+    {CTL('^'), LYE_SWMAP},
+    {CTL('_'), LYE_DELEL},
+    {' ', LYE_CHAR},
+    {'!', LYE_CHAR},
+    {'"', LYE_CHAR},
+    {'#', LYE_CHAR},
+    {'$', LYE_CHAR},
+    {'%', LYE_CHAR},
+    {'&', LYE_CHAR},
+    {'\'', LYE_CHAR},
+    {'(', LYE_CHAR},
+    {')', LYE_CHAR},
+    {'*', LYE_CHAR},
+    {'+', LYE_CHAR},
+    {',', LYE_CHAR},
+    {'-', LYE_CHAR},
+    {'.', LYE_CHAR},
+    {'/', LYE_CHAR},
+    {'0', LYE_CHAR},
+    {'1', LYE_CHAR},
+    {'2', LYE_CHAR},
+    {'3', LYE_CHAR},
+    {'4', LYE_CHAR},
+    {'5', LYE_CHAR},
+    {'6', LYE_CHAR},
+    {'7', LYE_CHAR},
+    {'8', LYE_CHAR},
+    {'9', LYE_CHAR},
+    {':', LYE_CHAR},
+    {';', LYE_CHAR},
+    {'<', LYE_CHAR},
+    {'=', LYE_CHAR},
+    {'>', LYE_CHAR},
+    {'?', LYE_CHAR},
+    {'@', LYE_CHAR},
+    {'A', LYE_CHAR},
+    {'B', LYE_CHAR},
+    {'C', LYE_CHAR},
+    {'D', LYE_CHAR},
+    {'E', LYE_CHAR},
+    {'F', LYE_CHAR},
+    {'G', LYE_CHAR},
+    {'H', LYE_CHAR},
+    {'I', LYE_CHAR},
+    {'J', LYE_CHAR},
+    {'K', LYE_CHAR},
+    {'L', LYE_CHAR},
+    {'M', LYE_CHAR},
+    {'N', LYE_CHAR},
+    {'O', LYE_CHAR},
+    {'P', LYE_CHAR},
+    {'Q', LYE_CHAR},
+    {'R', LYE_CHAR},
+    {'S', LYE_CHAR},
+    {'T', LYE_CHAR},
+    {'U', LYE_CHAR},
+    {'V', LYE_CHAR},
+    {'W', LYE_CHAR},
+    {'X', LYE_CHAR},
+    {'Y', LYE_CHAR},
+    {'Z', LYE_CHAR},
+    {'[', LYE_CHAR},
+    {'\\', LYE_CHAR},
+    {']', LYE_CHAR},
+    {'^', LYE_CHAR},
+    {'_', LYE_CHAR},
+    {'`', LYE_CHAR},
+    {'a', LYE_CHAR},
+    {'b', LYE_CHAR},
+    {'c', LYE_CHAR},
+    {'d', LYE_CHAR},
+    {'e', LYE_CHAR},
+    {'f', LYE_CHAR},
+    {'g', LYE_CHAR},
+    {'h', LYE_CHAR},
+    {'i', LYE_CHAR},
+    {'j', LYE_CHAR},
+    {'k', LYE_CHAR},
+    {'l', LYE_CHAR},
+    {'m', LYE_CHAR},
+    {'n', LYE_CHAR},
+    {'o', LYE_CHAR},
+    {'p', LYE_CHAR},
+    {'q', LYE_CHAR},
+    {'r', LYE_CHAR},
+    {'s', LYE_CHAR},
+    {'t', LYE_CHAR},
+    {'u', LYE_CHAR},
+    {'v', LYE_CHAR},
+    {'w', LYE_CHAR},
+    {'x', LYE_CHAR},
+    {'y', LYE_CHAR},
+    {'z', LYE_CHAR},
+    {'{', LYE_CHAR},
+    {'|', LYE_CHAR},
+    {'}', LYE_CHAR},
+    {'~', LYE_CHAR},
+    {DEL_KEY, LYE_DELP},
     {128, LYE_CHAR},
     {129, LYE_CHAR},
     {130, LYE_CHAR},
@@ -631,22 +631,22 @@ static const LYEditInit initDefaultEditor[] =
     {253, LYE_CHAR},
     {254, LYE_CHAR},
     {255, LYE_CHAR},
-    {256, LYE_FORM_PASS},	/* UPARROW_KEY */
-    {257, LYE_FORM_PASS},	/* DNARROW_KEY */
-    {258, LYE_FORW},		/* RTARROW_KEY */
-    {259, LYE_BACK},		/* LTARROW_KEY */
-    {260, LYE_FORM_PASS},	/* PGDOWN_KEY */
-    {261, LYE_FORM_PASS},	/* PGUP_KEY */
-    {262, LYE_BOL},		/* HOME_KEY */
-    {263, LYE_EOL},		/* END_KEY */
-    {264, LYE_FORM_PASS},	/* F1_KEY */
+    {UPARROW_KEY, LYE_FORM_PASS},
+    {DNARROW_KEY, LYE_FORM_PASS},
+    {RTARROW_KEY, LYE_FORW},
+    {LTARROW_KEY, LYE_BACK},
+    {PGDOWN_KEY, LYE_FORM_PASS},
+    {PGUP_KEY, LYE_FORM_PASS},
+    {HOME_KEY, LYE_BOL},
+    {END_KEY, LYE_EOL},
+    {F1_KEY, LYE_FORM_PASS},
 #if !(defined(_WINDOWS) || defined(__DJGPP__))
-    {265, LYE_TAB},		/* DO_KEY */
-    {266, LYE_BOL},		/* FIND_KEY */
-    {267, LYE_EOL},		/* SELECT_KEY */
+    {DO_KEY, LYE_TAB},
+    {FIND_KEY, LYE_BOL},
+    {SELECT_KEY, LYE_EOL},
 #endif
-    {269, LYE_DELP},		/* REMOVE_KEY */
-    {271, LYE_FORM_PASS},	/* BACKTAB_KEY */
+    {REMOVE_KEY, LYE_DELP},
+    {BACKTAB_KEY, LYE_FORM_PASS},
 #if (defined(_WINDOWS) || defined(__DJGPP__)) && defined(USE_SLANG) && !defined(DJGPP_KEYHANDLER)
     {272, LYE_DELP},
     {273, LYE_ENTER},
@@ -657,127 +657,127 @@ static const LYEditInit initDefaultEditor[] =
 #ifdef USE_ALT_BINDINGS
 static const LYEditInit initBetterEditor[] =
 {
-    {1, LYE_BOL},		/* ^B */
-    {2, LYE_BACK},		/* ^C */
-    {3, LYE_ABORT},		/* ^D */
-    {4, LYE_DELN},		/* ^E */
-    {5, LYE_EOL},		/* ^F */
-    {6, LYE_FORW},		/* ^G */
-    {7, LYE_ABORT},		/* ^H */
-    {8, LYE_DELP},		/* ^I */
-    {9, LYE_ENTER},		/* ^J */
-    {10, LYE_ENTER},		/* ^K */
-    {11, LYE_DELEL},		/* ^L */
-    {13, LYE_ENTER},		/* ^N */
-    {14, LYE_FORWW},		/* ^O */
-    {15, LYE_ABORT},		/* ^P */
-    {16, LYE_BACKW},		/* ^Q */
-    {18, LYE_DELPW},		/* ^S */
-    {20, LYE_DELNW},		/* ^U */
-    {21, LYE_ERASE},		/* ^V */
-    {22, LYE_LKCMD},		/* ^W */
+    {CTL('A'), LYE_BOL},
+    {CTL('B'), LYE_BACK},
+    {CTL('C'), LYE_ABORT},
+    {CTL('D'), LYE_DELN},
+    {CTL('E'), LYE_EOL},
+    {CTL('F'), LYE_FORW},
+    {CTL('G'), LYE_ABORT},
+    {CTL('H'), LYE_DELP},
+    {CTL('I'), LYE_ENTER},
+    {CTL('J'), LYE_ENTER},
+    {CTL('K'), LYE_DELEL},
+    {CTL('M'), LYE_ENTER},
+    {CTL('N'), LYE_FORWW},
+    {CTL('O'), LYE_ABORT},
+    {CTL('P'), LYE_BACKW},
+    {CTL('R'), LYE_DELPW},
+    {CTL('T'), LYE_DELNW},
+    {CTL('U'), LYE_ERASE},
+    {CTL('V'), LYE_LKCMD},
 #ifdef CAN_CUT_AND_PASTE
-    {23, LYE_PASTE},		/* ^X */
+    {CTL('W'), LYE_PASTE},
 #endif
-    {24, LYE_SETM1},		/* ^Y */
-    {30, LYE_UPPER},		/* ^_ */
-    {31, LYE_LOWER},		/* ^` */
-    {32, LYE_CHAR},		/*   */
-    {33, LYE_CHAR},		/* ! */
-    {34, LYE_CHAR},		/* " */
-    {35, LYE_CHAR},		/* # */
-    {36, LYE_CHAR},		/* $ */
-    {37, LYE_CHAR},		/* % */
-    {38, LYE_CHAR},		/* & */
-    {39, LYE_CHAR},		/* ' */
-    {40, LYE_CHAR},		/* ( */
-    {41, LYE_CHAR},		/* ) */
-    {42, LYE_CHAR},		/* * */
-    {43, LYE_CHAR},		/* + */
-    {44, LYE_CHAR},		/* , */
-    {45, LYE_CHAR},		/* - */
-    {46, LYE_CHAR},		/* . */
-    {47, LYE_CHAR},		/* / */
-    {48, LYE_CHAR},		/* 0 */
-    {49, LYE_CHAR},		/* 1 */
-    {50, LYE_CHAR},		/* 2 */
-    {51, LYE_CHAR},		/* 3 */
-    {52, LYE_CHAR},		/* 4 */
-    {53, LYE_CHAR},		/* 5 */
-    {54, LYE_CHAR},		/* 6 */
-    {55, LYE_CHAR},		/* 7 */
-    {56, LYE_CHAR},		/* 8 */
-    {57, LYE_CHAR},		/* 9 */
-    {58, LYE_CHAR},		/* : */
-    {59, LYE_CHAR},		/* ; */
-    {60, LYE_CHAR},		/* < */
-    {61, LYE_CHAR},		/* = */
-    {62, LYE_CHAR},		/* > */
-    {63, LYE_CHAR},		/* ? */
-    {64, LYE_CHAR},		/* @ */
-    {65, LYE_CHAR},		/* A */
-    {66, LYE_CHAR},		/* B */
-    {67, LYE_CHAR},		/* C */
-    {68, LYE_CHAR},		/* D */
-    {69, LYE_CHAR},		/* E */
-    {70, LYE_CHAR},		/* F */
-    {71, LYE_CHAR},		/* G */
-    {72, LYE_CHAR},		/* H */
-    {73, LYE_CHAR},		/* I */
-    {74, LYE_CHAR},		/* J */
-    {75, LYE_CHAR},		/* K */
-    {76, LYE_CHAR},		/* L */
-    {77, LYE_CHAR},		/* M */
-    {78, LYE_CHAR},		/* N */
-    {79, LYE_CHAR},		/* O */
-    {80, LYE_CHAR},		/* P */
-    {81, LYE_CHAR},		/* Q */
-    {82, LYE_CHAR},		/* R */
-    {83, LYE_CHAR},		/* S */
-    {84, LYE_CHAR},		/* T */
-    {85, LYE_CHAR},		/* U */
-    {86, LYE_CHAR},		/* V */
-    {87, LYE_CHAR},		/* W */
-    {88, LYE_CHAR},		/* X */
-    {89, LYE_CHAR},		/* Y */
-    {90, LYE_CHAR},		/* Z */
-    {91, LYE_CHAR},		/* [ */
-    {92, LYE_CHAR},		/* \ */
-    {93, LYE_CHAR},		/* ] */
-    {94, LYE_CHAR},		/* ^ */
-    {95, LYE_CHAR},		/* _ */
-    {96, LYE_CHAR},		/* ` */
-    {97, LYE_CHAR},		/* a */
-    {98, LYE_CHAR},		/* b */
-    {99, LYE_CHAR},		/* c */
-    {100, LYE_CHAR},		/* d */
-    {101, LYE_CHAR},		/* e */
-    {102, LYE_CHAR},		/* f */
-    {103, LYE_CHAR},		/* g */
-    {104, LYE_CHAR},		/* h */
-    {105, LYE_CHAR},		/* i */
-    {106, LYE_CHAR},		/* j */
-    {107, LYE_CHAR},		/* k */
-    {108, LYE_CHAR},		/* l */
-    {109, LYE_CHAR},		/* m */
-    {110, LYE_CHAR},		/* n */
-    {111, LYE_CHAR},		/* o */
-    {112, LYE_CHAR},		/* p */
-    {113, LYE_CHAR},		/* q */
-    {114, LYE_CHAR},		/* r */
-    {115, LYE_CHAR},		/* s */
-    {116, LYE_CHAR},		/* t */
-    {117, LYE_CHAR},		/* u */
-    {118, LYE_CHAR},		/* v */
-    {119, LYE_CHAR},		/* w */
-    {120, LYE_CHAR},		/* x */
-    {121, LYE_CHAR},		/* y */
-    {122, LYE_CHAR},		/* z */
-    {123, LYE_CHAR},		/* { */
-    {124, LYE_CHAR},		/* | */
-    {125, LYE_CHAR},		/* } */
-    {126, LYE_CHAR},		/* ~ */
-    {127, LYE_DELP},
+    {CTL('X'), LYE_SETM1},
+    {CTL('^'), LYE_UPPER},
+    {CTL('_'), LYE_LOWER},
+    {' ', LYE_CHAR},
+    {'!', LYE_CHAR},
+    {'"', LYE_CHAR},
+    {'#', LYE_CHAR},
+    {'$', LYE_CHAR},
+    {'%', LYE_CHAR},
+    {'&', LYE_CHAR},
+    {'\'', LYE_CHAR},
+    {'(', LYE_CHAR},
+    {')', LYE_CHAR},
+    {'*', LYE_CHAR},
+    {'+', LYE_CHAR},
+    {',', LYE_CHAR},
+    {'-', LYE_CHAR},
+    {'.', LYE_CHAR},
+    {'/', LYE_CHAR},
+    {'0', LYE_CHAR},
+    {'1', LYE_CHAR},
+    {'2', LYE_CHAR},
+    {'3', LYE_CHAR},
+    {'4', LYE_CHAR},
+    {'5', LYE_CHAR},
+    {'6', LYE_CHAR},
+    {'7', LYE_CHAR},
+    {'8', LYE_CHAR},
+    {'9', LYE_CHAR},
+    {':', LYE_CHAR},
+    {';', LYE_CHAR},
+    {'<', LYE_CHAR},
+    {'=', LYE_CHAR},
+    {'>', LYE_CHAR},
+    {'?', LYE_CHAR},
+    {'@', LYE_CHAR},
+    {'A', LYE_CHAR},
+    {'B', LYE_CHAR},
+    {'C', LYE_CHAR},
+    {'D', LYE_CHAR},
+    {'E', LYE_CHAR},
+    {'F', LYE_CHAR},
+    {'G', LYE_CHAR},
+    {'H', LYE_CHAR},
+    {'I', LYE_CHAR},
+    {'J', LYE_CHAR},
+    {'K', LYE_CHAR},
+    {'L', LYE_CHAR},
+    {'M', LYE_CHAR},
+    {'N', LYE_CHAR},
+    {'O', LYE_CHAR},
+    {'P', LYE_CHAR},
+    {'Q', LYE_CHAR},
+    {'R', LYE_CHAR},
+    {'S', LYE_CHAR},
+    {'T', LYE_CHAR},
+    {'U', LYE_CHAR},
+    {'V', LYE_CHAR},
+    {'W', LYE_CHAR},
+    {'X', LYE_CHAR},
+    {'Y', LYE_CHAR},
+    {'Z', LYE_CHAR},
+    {'[', LYE_CHAR},
+    {'\\', LYE_CHAR},
+    {']', LYE_CHAR},
+    {'^', LYE_CHAR},
+    {'_', LYE_CHAR},
+    {'`', LYE_CHAR},
+    {'a', LYE_CHAR},
+    {'b', LYE_CHAR},
+    {'c', LYE_CHAR},
+    {'d', LYE_CHAR},
+    {'e', LYE_CHAR},
+    {'f', LYE_CHAR},
+    {'g', LYE_CHAR},
+    {'h', LYE_CHAR},
+    {'i', LYE_CHAR},
+    {'j', LYE_CHAR},
+    {'k', LYE_CHAR},
+    {'l', LYE_CHAR},
+    {'m', LYE_CHAR},
+    {'n', LYE_CHAR},
+    {'o', LYE_CHAR},
+    {'p', LYE_CHAR},
+    {'q', LYE_CHAR},
+    {'r', LYE_CHAR},
+    {'s', LYE_CHAR},
+    {'t', LYE_CHAR},
+    {'u', LYE_CHAR},
+    {'v', LYE_CHAR},
+    {'w', LYE_CHAR},
+    {'x', LYE_CHAR},
+    {'y', LYE_CHAR},
+    {'z', LYE_CHAR},
+    {'{', LYE_CHAR},
+    {'|', LYE_CHAR},
+    {'}', LYE_CHAR},
+    {'~', LYE_CHAR},
+    {DEL_KEY, LYE_DELP},
     {128, LYE_CHAR},
     {129, LYE_CHAR},
     {130, LYE_CHAR},
@@ -910,22 +910,22 @@ static const LYEditInit initBetterEditor[] =
     {253, LYE_CHAR},
     {254, LYE_CHAR},
     {255, LYE_CHAR},
-    {256, LYE_FORM_PASS},	/* UPARROW_KEY */
-    {257, LYE_FORM_PASS},	/* DNARROW_KEY */
-    {258, LYE_FORW},		/* RTARROW_KEY */
-    {259, LYE_BACK},		/* LTARROW_KEY */
-    {260, LYE_FORM_PASS},	/* PGDOWN_KEY */
-    {261, LYE_FORM_PASS},	/* PGUP_KEY */
-    {262, LYE_BOL},		/* HOME_KEY */
-    {263, LYE_EOL},		/* END_KEY */
-    {264, LYE_FORM_PASS},	/* F1_KEY */
+    {UPARROW_KEY, LYE_FORM_PASS},
+    {DNARROW_KEY, LYE_FORM_PASS},
+    {RTARROW_KEY, LYE_FORW},
+    {LTARROW_KEY, LYE_BACK},
+    {PGDOWN_KEY, LYE_FORM_PASS},
+    {PGUP_KEY, LYE_FORM_PASS},
+    {HOME_KEY, LYE_BOL},
+    {END_KEY, LYE_EOL},
+    {F1_KEY, LYE_FORM_PASS},
 #if !(defined(_WINDOWS) || defined(__DJGPP__))
-    {265, LYE_TAB},		/* DO_KEY */
-    {266, LYE_BOL},		/* FIND_KEY */
-    {267, LYE_EOL},		/* SELECT_KEY */
+    {DO_KEY, LYE_TAB},
+    {FIND_KEY, LYE_BOL},
+    {SELECT_KEY, LYE_EOL},
 #endif
-    {269, LYE_DELP},		/* REMOVE_KEY */
-    {271, LYE_FORM_PASS},	/* BACKTAB_KEY */
+    {REMOVE_KEY, LYE_DELP},
+    {BACKTAB_KEY, LYE_FORM_PASS},
 #if (defined(_WINDOWS) || defined(__DJGPP__)) && defined(USE_SLANG) && !defined(DJGPP_KEYHANDLER)
     {272, LYE_DELP},
     {273, LYE_ENTER},
@@ -935,133 +935,133 @@ static const LYEditInit initBetterEditor[] =
 
 static const LYEditInit initBashlikeEditor[] =
 {
-    {0, LYE_SETMARK},		/* nul */
-    {1, LYE_BOL},		/* ^B */
-    {2, LYE_BACK},		/* ^C */
-    {3, LYE_ABORT},		/* ^D */
-    {4, LYE_DELN},		/* ^E */
-    {5, LYE_EOL | LYE_DF},	/* ^F */
-    {6, LYE_FORW},		/* ^G */
-    {7, LYE_ABORT},		/* ^H */
-    {8, LYE_DELP},		/* ^I */
-    {9, LYE_TAB},		/* ^J */
-    {10, LYE_ENTER},		/* ^K */
-    {11, LYE_DELEL | LYE_DF},	/* ^L */
-    {12, LYE_FORM_PASS},	/* ^M */
-    {13, LYE_ENTER},		/* ^N */
-    {14, LYE_FORM_PASS},	/* ^O */
-    {15, LYE_FORM_PASS},	/* ^P */
-    {16, LYE_FORM_PASS},	/* ^Q */
-    {18, LYE_BACKW},		/* ^S */
-    {19, LYE_FORWW},		/* XOFF */
-    {20, LYE_TPOS},		/* ^U */
-    {21, LYE_DELBL},		/* ^V */
-    {22, LYE_LKCMD},		/* ^W */
-    {23, LYE_DELPW},		/* ^X */
-    {24, LYE_SETM1},		/* ^Y */
-    {25, LYE_YANK},		/* ^Z */
-    {26, LYE_FORM_PASS},	/* ^[ */
-    {27, LYE_SETM2},		/* ^\ */
-    {28, LYE_FORM_PASS},	/* ^] */
-    {29, LYE_FORM_PASS},	/* ^^ */
-    {30, LYE_SWMAP},		/* ^_ */
-    {31, LYE_ABORT},		/* ^` */
-    {32, LYE_CHAR},		/*   */
-    {33, LYE_CHAR},		/* ! */
-    {34, LYE_CHAR},		/* " */
-    {35, LYE_CHAR},		/* # */
-    {36, LYE_CHAR},		/* $ */
-    {37, LYE_CHAR},		/* % */
-    {38, LYE_CHAR},		/* & */
-    {39, LYE_CHAR},		/* ' */
-    {40, LYE_CHAR},		/* ( */
-    {41, LYE_CHAR},		/* ) */
-    {42, LYE_CHAR},		/* * */
-    {43, LYE_CHAR},		/* + */
-    {44, LYE_CHAR},		/* , */
-    {45, LYE_CHAR},		/* - */
-    {46, LYE_CHAR},		/* . */
-    {47, LYE_CHAR},		/* / */
-    {48, LYE_CHAR},		/* 0 */
-    {49, LYE_CHAR},		/* 1 */
-    {50, LYE_CHAR},		/* 2 */
-    {51, LYE_CHAR},		/* 3 */
-    {52, LYE_CHAR},		/* 4 */
-    {53, LYE_CHAR},		/* 5 */
-    {54, LYE_CHAR},		/* 6 */
-    {55, LYE_CHAR},		/* 7 */
-    {56, LYE_CHAR},		/* 8 */
-    {57, LYE_CHAR},		/* 9 */
-    {58, LYE_CHAR},		/* : */
-    {59, LYE_CHAR},		/* ; */
-    {60, LYE_CHAR},		/* < */
-    {61, LYE_CHAR},		/* = */
-    {62, LYE_CHAR},		/* > */
-    {63, LYE_CHAR},		/* ? */
-    {64, LYE_CHAR},		/* @ */
-    {65, LYE_CHAR},		/* A */
-    {66, LYE_CHAR},		/* B */
-    {67, LYE_CHAR},		/* C */
-    {68, LYE_CHAR},		/* D */
-    {69, LYE_CHAR},		/* E */
-    {70, LYE_CHAR},		/* F */
-    {71, LYE_CHAR},		/* G */
-    {72, LYE_CHAR},		/* H */
-    {73, LYE_CHAR},		/* I */
-    {74, LYE_CHAR},		/* J */
-    {75, LYE_CHAR},		/* K */
-    {76, LYE_CHAR},		/* L */
-    {77, LYE_CHAR},		/* M */
-    {78, LYE_CHAR},		/* N */
-    {79, LYE_CHAR},		/* O */
-    {80, LYE_CHAR},		/* P */
-    {81, LYE_CHAR},		/* Q */
-    {82, LYE_CHAR},		/* R */
-    {83, LYE_CHAR},		/* S */
-    {84, LYE_CHAR},		/* T */
-    {85, LYE_CHAR},		/* U */
-    {86, LYE_CHAR},		/* V */
-    {87, LYE_CHAR},		/* W */
-    {88, LYE_CHAR},		/* X */
-    {89, LYE_CHAR},		/* Y */
-    {90, LYE_CHAR},		/* Z */
-    {91, LYE_CHAR},		/* [ */
-    {92, LYE_CHAR},		/* \ */
-    {93, LYE_CHAR},		/* ] */
-    {94, LYE_CHAR},		/* ^ */
-    {95, LYE_CHAR},		/* _ */
-    {96, LYE_CHAR},		/* ` */
-    {97, LYE_CHAR},		/* a */
-    {98, LYE_CHAR},		/* b */
-    {99, LYE_CHAR},		/* c */
-    {100, LYE_CHAR},		/* d */
-    {101, LYE_CHAR},		/* e */
-    {102, LYE_CHAR},		/* f */
-    {103, LYE_CHAR},		/* g */
-    {104, LYE_CHAR},		/* h */
-    {105, LYE_CHAR},		/* i */
-    {106, LYE_CHAR},		/* j */
-    {107, LYE_CHAR},		/* k */
-    {108, LYE_CHAR},		/* l */
-    {109, LYE_CHAR},		/* m */
-    {110, LYE_CHAR},		/* n */
-    {111, LYE_CHAR},		/* o */
-    {112, LYE_CHAR},		/* p */
-    {113, LYE_CHAR},		/* q */
-    {114, LYE_CHAR},		/* r */
-    {115, LYE_CHAR},		/* s */
-    {116, LYE_CHAR},		/* t */
-    {117, LYE_CHAR},		/* u */
-    {118, LYE_CHAR},		/* v */
-    {119, LYE_CHAR},		/* w */
-    {120, LYE_CHAR},		/* x */
-    {121, LYE_CHAR},		/* y */
-    {122, LYE_CHAR},		/* z */
-    {123, LYE_CHAR},		/* { */
-    {124, LYE_CHAR},		/* | */
-    {125, LYE_CHAR},		/* } */
-    {126, LYE_CHAR},		/* ~ */
-    {127, LYE_DELP},
+    {CTL('@'), LYE_SETMARK},
+    {CTL('A'), LYE_BOL},
+    {CTL('B'), LYE_BACK},
+    {CTL('C'), LYE_ABORT},
+    {CTL('D'), LYE_DELN},
+    {CTL('E'), LYE_EOL | LYE_DF},
+    {CTL('F'), LYE_FORW},
+    {CTL('G'), LYE_ABORT},
+    {CTL('H'), LYE_DELP},
+    {CTL('I'), LYE_TAB},
+    {CTL('J'), LYE_ENTER},
+    {CTL('K'), LYE_DELEL | LYE_DF},
+    {CTL('L'), LYE_FORM_PASS},
+    {CTL('M'), LYE_ENTER},
+    {CTL('N'), LYE_FORM_PASS},
+    {CTL('O'), LYE_FORM_PASS},
+    {CTL('P'), LYE_FORM_PASS},
+    {CTL('R'), LYE_BACKW},
+    {CTL('S'), LYE_FORWW},
+    {CTL('T'), LYE_TPOS},
+    {CTL('U'), LYE_DELBL},
+    {CTL('V'), LYE_LKCMD},
+    {CTL('W'), LYE_DELPW},
+    {CTL('X'), LYE_SETM1},
+    {CTL('Y'), LYE_YANK},
+    {CTL('Z'), LYE_FORM_PASS},
+    {CTL('['), LYE_SETM2},
+    {CTL('\\'), LYE_FORM_PASS},
+    {CTL(']'), LYE_FORM_PASS},
+    {CTL('^'), LYE_SWMAP},
+    {CTL('_'), LYE_ABORT},
+    {' ', LYE_CHAR},
+    {'!', LYE_CHAR},
+    {'"', LYE_CHAR},
+    {'#', LYE_CHAR},
+    {'$', LYE_CHAR},
+    {'%', LYE_CHAR},
+    {'&', LYE_CHAR},
+    {'\'', LYE_CHAR},
+    {'(', LYE_CHAR},
+    {')', LYE_CHAR},
+    {'*', LYE_CHAR},
+    {'+', LYE_CHAR},
+    {',', LYE_CHAR},
+    {'-', LYE_CHAR},
+    {'.', LYE_CHAR},
+    {'/', LYE_CHAR},
+    {'0', LYE_CHAR},
+    {'1', LYE_CHAR},
+    {'2', LYE_CHAR},
+    {'3', LYE_CHAR},
+    {'4', LYE_CHAR},
+    {'5', LYE_CHAR},
+    {'6', LYE_CHAR},
+    {'7', LYE_CHAR},
+    {'8', LYE_CHAR},
+    {'9', LYE_CHAR},
+    {':', LYE_CHAR},
+    {';', LYE_CHAR},
+    {'<', LYE_CHAR},
+    {'=', LYE_CHAR},
+    {'>', LYE_CHAR},
+    {'?', LYE_CHAR},
+    {'@', LYE_CHAR},
+    {'A', LYE_CHAR},
+    {'B', LYE_CHAR},
+    {'C', LYE_CHAR},
+    {'D', LYE_CHAR},
+    {'E', LYE_CHAR},
+    {'F', LYE_CHAR},
+    {'G', LYE_CHAR},
+    {'H', LYE_CHAR},
+    {'I', LYE_CHAR},
+    {'J', LYE_CHAR},
+    {'K', LYE_CHAR},
+    {'L', LYE_CHAR},
+    {'M', LYE_CHAR},
+    {'N', LYE_CHAR},
+    {'O', LYE_CHAR},
+    {'P', LYE_CHAR},
+    {'Q', LYE_CHAR},
+    {'R', LYE_CHAR},
+    {'S', LYE_CHAR},
+    {'T', LYE_CHAR},
+    {'U', LYE_CHAR},
+    {'V', LYE_CHAR},
+    {'W', LYE_CHAR},
+    {'X', LYE_CHAR},
+    {'Y', LYE_CHAR},
+    {'Z', LYE_CHAR},
+    {'[', LYE_CHAR},
+    {'\\', LYE_CHAR},
+    {']', LYE_CHAR},
+    {'^', LYE_CHAR},
+    {'_', LYE_CHAR},
+    {'`', LYE_CHAR},
+    {'a', LYE_CHAR},
+    {'b', LYE_CHAR},
+    {'c', LYE_CHAR},
+    {'d', LYE_CHAR},
+    {'e', LYE_CHAR},
+    {'f', LYE_CHAR},
+    {'g', LYE_CHAR},
+    {'h', LYE_CHAR},
+    {'i', LYE_CHAR},
+    {'j', LYE_CHAR},
+    {'k', LYE_CHAR},
+    {'l', LYE_CHAR},
+    {'m', LYE_CHAR},
+    {'n', LYE_CHAR},
+    {'o', LYE_CHAR},
+    {'p', LYE_CHAR},
+    {'q', LYE_CHAR},
+    {'r', LYE_CHAR},
+    {'s', LYE_CHAR},
+    {'t', LYE_CHAR},
+    {'u', LYE_CHAR},
+    {'v', LYE_CHAR},
+    {'w', LYE_CHAR},
+    {'x', LYE_CHAR},
+    {'y', LYE_CHAR},
+    {'z', LYE_CHAR},
+    {'{', LYE_CHAR},
+    {'|', LYE_CHAR},
+    {'}', LYE_CHAR},
+    {'~', LYE_CHAR},
+    {DEL_KEY, LYE_DELP},
     {128, LYE_CHAR},
     {129, LYE_CHAR},
     {130, LYE_CHAR},
@@ -1190,22 +1190,22 @@ static const LYEditInit initBashlikeEditor[] =
     {253, LYE_CHAR},
     {254, LYE_CHAR},
     {255, LYE_CHAR},
-    {256, LYE_FORM_PASS},	/* UPARROW_KEY */
-    {257, LYE_FORM_PASS},	/* DNARROW_KEY */
-    {258, LYE_FORW},		/* RTARROW_KEY */
-    {259, LYE_BACK},		/* LTARROW_KEY */
-    {260, LYE_FORM_PASS},	/* PGDOWN_KEY */
-    {261, LYE_FORM_PASS},	/* PGUP_KEY */
-    {262, LYE_BOL},		/* HOME_KEY */
-    {263, LYE_EOL},		/* END_KEY */
-    {264, LYE_FORM_PASS},	/* F1_KEY */
+    {UPARROW_KEY, LYE_FORM_PASS},
+    {DNARROW_KEY, LYE_FORM_PASS},
+    {RTARROW_KEY, LYE_FORW},
+    {LTARROW_KEY, LYE_BACK},
+    {PGDOWN_KEY, LYE_FORM_PASS},
+    {PGUP_KEY, LYE_FORM_PASS},
+    {HOME_KEY, LYE_BOL},
+    {END_KEY, LYE_EOL},
+    {F1_KEY, LYE_FORM_PASS},
 #if !(defined(_WINDOWS) || defined(__DJGPP__))
-    {265, LYE_TAB},		/* DO_KEY */
-    {266, LYE_BOL},		/* FIND_KEY */
-    {267, LYE_EOL},		/* SELECT_KEY */
+    {DO_KEY, LYE_TAB},
+    {FIND_KEY, LYE_BOL},
+    {SELECT_KEY, LYE_EOL},
 #endif
-    {269, LYE_DELN},		/* REMOVE_KEY */
-    {271, LYE_FORM_PASS},	/* BACKTAB_KEY */
+    {REMOVE_KEY, LYE_DELN},
+    {BACKTAB_KEY, LYE_FORM_PASS},
 #if (defined(_WINDOWS) || defined(__DJGPP__)) && defined(USE_SLANG) && !defined(DJGPP_KEYHANDLER)
     {272, LYE_DELP},
     {273, LYE_ENTER},
