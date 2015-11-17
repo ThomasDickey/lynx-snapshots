@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTP.c,v 1.143 2015/10/08 08:52:00 Simon.Kainz Exp $
+ * $LynxId: HTTP.c,v 1.147 2015/11/17 01:29:09 tom Exp $
  *
  * HyperText Tranfer Protocol	- Client implementation		HTTP.c
  * ==========================
@@ -161,10 +161,9 @@ static int HTSSLCallback(int preverify_ok, X509_STORE_CTX * x509_ctx GCC_UNUSED)
 SSL *HTGetSSLHandle(void)
 {
 #ifdef USE_GNUTLS_INCL
-    static char *certfile = NULL;
-    static char *client_keyfile = NULL;
-    static char *client_certfile = NULL;
-
+    char *certfile = NULL;
+    char *client_keyfile = NULL;
+    char *client_certfile = NULL;
 #endif
 
     if (ssl_ctx == NULL) {
@@ -184,6 +183,9 @@ SSL *HTGetSSLHandle(void)
 #endif
 #ifdef SSL_OP_NO_COMPRESSION
 	SSL_CTX_set_options(ssl_ctx, SSL_OP_NO_COMPRESSION);
+#endif
+#ifdef SSL_MODE_AUTO_RETRY
+	SSL_CTX_set_mode(ssl_ctx, SSL_MODE_AUTO_RETRY);
 #endif
 #ifdef SSL_MODE_RELEASE_BUFFERS
 	SSL_CTX_set_mode(ssl_ctx, SSL_MODE_RELEASE_BUFFERS);
@@ -207,7 +209,6 @@ SSL *HTGetSSLHandle(void)
 	}
 #endif
 #ifdef USE_GNUTLS_INCL
-
 	if ((certfile = LYGetEnv("SSL_CERT_FILE")) != NULL) {
 	    CTRACE((tfp,
 		    "HTGetSSLHandle: certfile is set to %s by SSL_CERT_FILE\n",
@@ -229,10 +230,8 @@ SSL *HTGetSSLHandle(void)
 	}
 #endif
 	atexit(free_ssl_ctx);
-
     }
 #ifdef USE_GNUTLS_INCL
-
     if (non_empty(SSL_client_key_file)) {
 	client_keyfile = SSL_client_key_file;
 	CTRACE((tfp,
@@ -253,7 +252,6 @@ SSL *HTGetSSLHandle(void)
     ssl_ctx->client_keyfile_type = GNUTLS_X509_FMT_PEM;
     ssl_ctx->client_certfile = client_certfile;
     ssl_ctx->client_certfile_type = GNUTLS_X509_FMT_PEM;
-
 #endif
     ssl_okay = 0;
     return (SSL_new(ssl_ctx));
@@ -679,7 +677,7 @@ static int HTLoadHTTP(const char *arg,
     unsigned tls_status;
 #endif
 
-#if SSLEAY_VERSION_NUMBER >= 0x0900
+#if (SSLEAY_VERSION_NUMBER >= 0x0900) && !defined(USE_GNUTLS_FUNCS)
     BOOL try_tls = TRUE;
 #endif /* SSLEAY_VERSION_NUMBER >= 0x0900 */
     SSL_handle = NULL;
@@ -805,28 +803,33 @@ static int HTLoadHTTP(const char *arg,
 #ifndef USE_NSS_COMPAT_INCL
 	if (!try_tls) {
 	    handle->options |= SSL_OP_NO_TLSv1;
+	    CTRACE((tfp, "...adding SSL_OP_NO_TLSv1\n"));
+	}
 #if OPENSSL_VERSION_NUMBER >= 0x0090806fL && !defined(OPENSSL_NO_TLSEXT)
-	} else {
+	else {
 	    int ret = (int) SSL_set_tlsext_host_name(handle, ssl_host);
 
 	    CTRACE((tfp, "...called SSL_set_tlsext_host_name(%s) ->%d\n",
 		    ssl_host, ret));
-#endif
 	}
+#endif
 #endif
 #endif /* SSLEAY_VERSION_NUMBER >= 0x0900 */
 	HTSSLInitPRNG();
 	status = SSL_connect(handle);
 
 	if (status <= 0) {
-#if SSLEAY_VERSION_NUMBER >= 0x0900
+#if (SSLEAY_VERSION_NUMBER >= 0x0900)
+#if !defined(USE_GNUTLS_FUNCS)
 	    if (try_tls) {
 		_HTProgress(gettext("Retrying connection without TLS."));
 		try_tls = FALSE;
 		if (did_connect)
 		    HTTP_NETCLOSE(s, handle);
 		goto try_again;
-	    } else {
+	    } else
+#endif
+	    {
 		CTRACE((tfp,
 			"HTTP: Unable to complete SSL handshake for '%s', SSL_connect=%d, SSL error stack dump follows\n",
 			url, status));
@@ -912,7 +915,7 @@ static int HTLoadHTTP(const char *arg,
 	}
 #endif
 
-	peer_cert = SSL_get_peer_certificate(handle);
+	peer_cert = (X509 *) SSL_get_peer_certificate(handle);
 #if defined(USE_OPENSSL_INCL) || defined(USE_GNUTLS_FUNCS)
 	X509_NAME_oneline(X509_get_subject_name(peer_cert),
 			  ssl_dn, (int) sizeof(ssl_dn));
@@ -1008,8 +1011,10 @@ static int HTLoadHTTP(const char *arg,
 		ret = 0;
 		for (i = 0; !(ret < 0); i++) {
 		    size = sizeof(buf);
-		    ret = gnutls_x509_crt_get_subject_alt_name(cert, i, buf,
-							       &size, NULL);
+		    ret = gnutls_x509_crt_get_subject_alt_name(cert,
+							       (unsigned) i,
+							       buf, &size,
+							       NULL);
 
 		    if (strcasecomp_asterisk(ssl_host, buf) == 0) {
 			status_sslcertcheck = 2;
