@@ -1,5 +1,5 @@
 /*
- * $LynxId: tidy_tls.c,v 1.29 2015/10/08 08:51:26 Simon.Kainz Exp $
+ * $LynxId: tidy_tls.c,v 1.31 2015/10/12 00:31:21 tom Exp $
  * Copyright 2008-2014,2015 Thomas E. Dickey
  * with fix Copyright 2008 by Thomas Viehmann
  *
@@ -70,7 +70,7 @@ static int ExtractCertificate(const gnutls_datum_t *cert, X509_NAME * result, in
 const char *ERR_error_string(unsigned long e, char *buffer)
 {
     (void) buffer;
-    return gnutls_strerror(-e);
+    return gnutls_strerror((int) -e);
 }
 
 /*
@@ -82,7 +82,7 @@ unsigned long ERR_get_error(void)
 {
     unsigned long rc;
 
-    rc = -last_error;
+    rc = (unsigned long) (-last_error);
     last_error = 0;
 
     return rc;
@@ -96,7 +96,7 @@ int RAND_bytes(unsigned char *buffer, int num)
     int rc;
 
 #ifdef HAVE_GNUTLS_RND
-    rc = gnutls_rnd(GNUTLS_RND_KEY, buffer, num);
+    rc = gnutls_rnd(GNUTLS_RND_KEY, buffer, (size_t) num);
 #else
     gcry_randomize(buffer, num, GCRY_VERY_STRONG_RANDOM);
     rc = 1;
@@ -125,7 +125,7 @@ const char *RAND_file_name(char *buffer, size_t len)
 int RAND_load_file(const char *name, long maxbytes)
 {
     (void) name;
-    return maxbytes;
+    return (int) maxbytes;
 }
 
 /*
@@ -168,7 +168,7 @@ int SSL_CIPHER_get_bits(SSL_CIPHER * cipher, int *bits)
     int result = 0;
 
     if (cipher) {
-	result = (8 * gnutls_cipher_get_key_size(cipher->encrypts));
+	result = (8 * (int) gnutls_cipher_get_key_size(cipher->encrypts));
     }
 
     if (bits)
@@ -457,13 +457,13 @@ int SSL_read(SSL * ssl, void *buffer, int length)
 {
     int rc;
 
-    rc = gnutls_record_recv(ssl->gnutls_state, buffer, length);
+    rc = (int) gnutls_record_recv(ssl->gnutls_state, buffer, (size_t) length);
 
     if (rc < 0 && gnutls_error_is_fatal(rc) == 0) {
 	if (rc == GNUTLS_E_REHANDSHAKE) {
 	    rc = gnutls_handshake(ssl->gnutls_state);
-	    gnutls_record_send(ssl->gnutls_state, ssl->sendbuffer, ssl->bytes_sent);
-	    rc = gnutls_record_recv(ssl->gnutls_state, buffer, length);
+	    gnutls_record_send(ssl->gnutls_state, ssl->sendbuffer, (size_t) ssl->bytes_sent);
+	    rc = (int) gnutls_record_recv(ssl->gnutls_state, buffer, (size_t) length);
 	}
     }
 
@@ -495,18 +495,18 @@ int SSL_write(SSL * ssl, const void *buffer, int length)
 {
     int rc;
 
-    rc = gnutls_record_send(ssl->gnutls_state, buffer, length);
+    rc = (int) gnutls_record_send(ssl->gnutls_state, buffer, (size_t) length);
     ssl->last_error = rc;
 
     if (rc < 0) {
 	last_error = rc;
 	rc = 0;
     } else {
-	if (ssl->sendbuffer) {
-	    free(ssl->sendbuffer);
-	}
-	ssl->sendbuffer = malloc(rc);
-	ssl->bytes_sent = rc;
+	size_t need = (size_t) rc;
+
+	free(ssl->sendbuffer);
+	ssl->sendbuffer = malloc(need);
+	ssl->bytes_sent = need;
     }
 
     return rc;
@@ -587,7 +587,7 @@ SSL_METHOD *SSLv23_client_method(void)
 static int add_name(char *target, int len, const char *tag, const char *data)
 {
     if (*data != '\0') {
-	int need = strlen(tag) + 2;
+	int need = (int) strlen(tag) + 2;
 
 	target += strlen(target);
 	if (need < len) {
@@ -597,10 +597,10 @@ static int add_name(char *target, int len, const char *tag, const char *data)
 	    len -= need;
 	    target += need;
 	}
-	need = strlen(data);
+	need = (int) strlen(data);
 	if (need >= len - 1)
 	    need = len - 1;
-	strncat(target, data, need)[need] = '\0';
+	strncat(target, data, (size_t) need)[need] = '\0';
     }
     return len;
 }

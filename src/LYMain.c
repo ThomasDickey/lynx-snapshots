@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMain.c,v 1.258 2015/10/08 09:24:13 tom Exp $
+ * $LynxId: LYMain.c,v 1.259 2015/10/12 00:23:00 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTP.h>
@@ -553,7 +553,7 @@ char *XLoadImageCommand = NULL;	/* Default image viewer for X */
 BOOLEAN LYNoISMAPifUSEMAP = FALSE;	/* Omit ISMAP link if MAP present? */
 int LYHiddenLinks = HIDDENLINKS_SEPARATE;	/* Show hidden links? */
 
-char *SSL_cert_file = NULL;	/*y Default CA CERT file */
+char *SSL_cert_file = NULL;	/* Default CA CERT file */
 char *SSL_client_cert_file = NULL;
 char *SSL_client_key_file = NULL;
 
@@ -1590,7 +1590,6 @@ int main(int argc,
 		    "HTGetSSLHandle: client keyfile is set to %s by SSL_CLIENT_KEY_FILE\n",
 		    client_keyfile));
 	    StrAllocCopy(SSL_client_key_file, client_keyfile);
-
 	}
 
 	if ((client_certfile = LYGetEnv("SSL_CLIENT_CERT_FILE")) != NULL) {
