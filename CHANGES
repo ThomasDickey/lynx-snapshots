@@ -1,9 +1,12 @@
--- $LynxId: CHANGES,v 1.819 2015/10/12 00:08:33 tom Exp $
+-- $LynxId: CHANGES,v 1.821 2015/12/10 15:38:45 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2015-10-07 (2.8.9dev.7)
+2015-12-10 (2.8.9dev.7)
+* improve configure check for extended curses functions, needed for compiling
+  with ncursesw on OSX, in particular when configuring with ncurses6 (report
+  by Tom Wyant) -TD
 * set SSL_MODE_AUTO_RETRY in OpenSSL configuration, completing work needed for
   Debian #707059 -TD
 * correct description used for "K" vs "k" key binding in manpage -TD
@@ -38,6 +41,7 @@ Changes since Lynx 2.8 release
   pointer if the input had leading blanks (patch by Ruda Moura).
 * fix CF_CHECK_SIZEOF autoconf macro to work when its working variables have
   been preset to an empty value (report by Andrew Arensburger) -TD
+* update config.guess (2015-10-21), config.sub (2015-08-20)
 
 2015-05-06 (2.8.9dev.6)
 * add a note about OCSP to url-support documentation (Debian #745835) -TD

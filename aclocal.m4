@@ -1,4 +1,4 @@
-dnl $LynxId: aclocal.m4,v 1.228 2015/10/11 21:16:46 tom Exp $
+dnl $LynxId: aclocal.m4,v 1.230 2015/12/10 15:28:43 tom Exp $
 dnl Macros for auto-configure script.
 dnl by Thomas E. Dickey <dickey@invisible-island.net>
 dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
@@ -6484,7 +6484,7 @@ AC_CHECK_FUNCS( \
 )
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_XOPEN_CURSES version: 11 updated: 2011/01/18 18:15:30
+dnl CF_XOPEN_CURSES version: 12 updated: 2015/12/10 10:25:50
 dnl ---------------
 dnl Test if we should define X/Open source for curses, needed on Digital Unix
 dnl 4.x, to see the extended functions, but breaks on IRIX 6.x.
@@ -6494,7 +6494,8 @@ dnl as getbegy().  The latter is better design, but the former is standard.
 AC_DEFUN([CF_XOPEN_CURSES],
 [
 AC_REQUIRE([CF_CURSES_CPPFLAGS])dnl
-AC_CACHE_CHECK(if we must define _XOPEN_SOURCE_EXTENDED,cf_cv_need_xopen_extension,[
+AC_CACHE_CHECK(definition to turn on extended curses functions,cf_cv_need_xopen_extension,[
+cf_cv_need_xopen_extension=unknown
 AC_TRY_LINK([
 #include <stdlib.h>
 #include <${cf_cv_ncurses_header:-curses.h}>],[
@@ -6503,14 +6504,6 @@ AC_TRY_LINK([
 	make an error
 #endif
 #endif
-	long x = winnstr(stdscr, "", 0);
-	int x1, y1;
-	getbegyx(stdscr, y1, x1)],
-	[cf_cv_need_xopen_extension=no],
-	[AC_TRY_LINK([
-#define _XOPEN_SOURCE_EXTENDED
-#include <stdlib.h>
-#include <${cf_cv_ncurses_header:-curses.h}>],[
 #ifdef NCURSES_VERSION
 	cchar_t check;
 	int check2 = curs_set((int)sizeof(check));
@@ -6518,12 +6511,35 @@ AC_TRY_LINK([
 	long x = winnstr(stdscr, "", 0);
 	int x1, y1;
 	getbegyx(stdscr, y1, x1)],
-	[cf_cv_need_xopen_extension=yes],
-	[cf_cv_need_xopen_extension=unknown])])])
-test $cf_cv_need_xopen_extension = yes && CPPFLAGS="$CPPFLAGS -D_XOPEN_SOURCE_EXTENDED"
+	[cf_cv_need_xopen_extension=none],
+	[
+	for cf_try_xopen_extension in _XOPEN_SOURCE_EXTENDED NCURSES_WIDECHAR
+	do
+		AC_TRY_LINK([
+#define $cf_try_xopen_extension 1
+#include <stdlib.h>
+#include <${cf_cv_ncurses_header:-curses.h}>],[
+#ifdef NCURSES_VERSION
+		cchar_t check;
+		int check2 = curs_set((int)sizeof(check));
+#endif
+		long x = winnstr(stdscr, "", 0);
+		int x1, y1;
+		getbegyx(stdscr, y1, x1)],
+		[cf_cv_need_xopen_extension=$cf_try_xopen_extension; break])
+	done
+	])
+])
+
+case $cf_cv_need_xopen_extension in
+(*_*)
+	CPPFLAGS="$CPPFLAGS -Dcf_cv_need_xopen_extension"
+	;;
+esac
+
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_XOPEN_SOURCE version: 49 updated: 2015/04/12 15:39:00
+dnl CF_XOPEN_SOURCE version: 50 updated: 2015/10/17 19:03:33
 dnl ---------------
 dnl Try to get _XOPEN_SOURCE defined properly that we can use POSIX functions,
 dnl or adapt to the vendor's definitions to get equivalent functionality,
@@ -6592,6 +6608,9 @@ case $host_os in
 	;;
 (openbsd*)
 	# setting _XOPEN_SOURCE breaks xterm on OpenBSD 2.8, is not needed for ncursesw
+	;;
+(os2*)
+	cf_XOPEN_SOURCE=
 	;;
 (osf[[45]]*)
 	cf_xopen_source="-D_OSF_SOURCE"
