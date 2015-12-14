@@ -1,4 +1,4 @@
-/* $LynxId: LYKeymap.c,v 1.115 2015/10/07 23:24:24 tom Exp $ */
+/* $LynxId: LYKeymap.c,v 1.117 2015/12/14 00:13:39 Axel.Beckert Exp $ */
 #include <HTUtils.h>
 #include <LYUtils.h>
 #include <LYGlobalDefs.h>
@@ -424,10 +424,10 @@ static Kcmd revmap[] =
 	    "search within the current document"),
     DATA(
 	    LYK_PREV, "PREV",
-	    "search for the previous occurence"),
+	    "search for the previous occurrence"),
     DATA(
 	    LYK_NEXT, "NEXT",
-	    "search for the next occurence"),
+	    "search for the next occurrence"),
     DATA(
 	    LYK_COMMENT, "COMMENT",
 	    "send a comment to the author of the current document"),
@@ -852,7 +852,7 @@ static char *pretty_html(int c)
 	    for (n = 0; n < TABLESIZE(table); n++) {
 		if (c == table[n].code) {
 		    found = TRUE;
-		    LYStrNCpy(dst, table[n].name, sizeof(dst) - 1);
+		    LYStrNCpy(dst, table[n].name, sizeof(buf) - (dst - buf) - 1);
 		    adj += (int) strlen(dst) - 1;
 		    dst += (int) strlen(dst);
 		    break;
