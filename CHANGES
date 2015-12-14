@@ -1,9 +1,9 @@
--- $LynxId: CHANGES,v 1.821 2015/12/10 15:38:45 tom Exp $
+-- $LynxId: CHANGES,v 1.822 2015/12/13 22:54:20 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2015-12-10 (2.8.9dev.7)
+2015-12-13 (2.8.9dev.7)
 * improve configure check for extended curses functions, needed for compiling
   with ncursesw on OSX, in particular when configuring with ncurses6 (report
   by Tom Wyant) -TD
@@ -32,7 +32,7 @@ Changes since Lynx 2.8 release
 * fix for gnutls logic to support rehandshake on negotiation for optional
   client certificate, e.g., for https://contributors.debian.org (patch by
   Simon Kainz, Debian #797059).
-* update sv.po, et.po from
+* update ca.po, sv.po, et.po from
     http://translationproject.org/latest/lynx
 * use gnutls_set_default_priority() to simplify algorithm priorities in the
   gnutls configuration as well as track occassional changes in that library
