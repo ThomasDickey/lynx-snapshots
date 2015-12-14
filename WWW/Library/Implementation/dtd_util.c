@@ -1,5 +1,5 @@
 /*
- * $LynxId: dtd_util.c,v 1.76 2010/09/25 00:30:23 tom Exp $
+ * $LynxId: dtd_util.c,v 1.78 2015/12/13 23:22:17 tom Exp $
  *
  * Given a SGML_dtd structure, write a corresponding flat file, or "C" source.
  * Given the flat-file, write the "C" source.
@@ -267,6 +267,8 @@ static const char *NameOfAttrs(const SGML_dtd * dtd, int which)
     /* special cases to match existing headers */
     if (!strcmp(result, "ABBR"))
 	result = "GEN";
+    else if (!strcmp(result, "ARTICLE"))
+	result = "GEN5";
     else if (!strcmp(result, "BLOCKQUOTE"))
 	result = "BQ";
     else if (!strcmp(result, "BASEFONT"))
@@ -1300,8 +1302,8 @@ static SGML_dtd *load_flatfile(FILE *input)
     AttrType *attr_types = 0;
     SGML_dtd *result = 0;
     size_t n;
-    size_t number_of_attrs = 0;
-    size_t number_of_tags = 0;
+    int number_of_attrs = 0;
+    int number_of_tags = 0;
     HTTag *tag;
     int code;
 
@@ -1309,7 +1311,7 @@ static SGML_dtd *load_flatfile(FILE *input)
     if (code
 	&& number_of_attrs
 	&& (attr_types = typecallocn(AttrType, number_of_attrs + 1)) != 0) {
-	for (n = 0; n < number_of_attrs; ++n) {
+	for (n = 0; n < (size_t) number_of_attrs; ++n) {
 	    if (!load_flat_AttrType(input, attr_types + n, n)) {
 		break;
 	    }
@@ -1320,7 +1322,7 @@ static SGML_dtd *load_flatfile(FILE *input)
     if (code == 1) {
 	if ((result = typecalloc(SGML_dtd)) != 0
 	    && (result->tags = typecallocn(HTTag, (number_of_tags + 2))) != 0) {
-	    for (n = 0; n < number_of_tags; ++n) {
+	    for (n = 0; n < (size_t) number_of_tags; ++n) {
 		if (load_flat_HTTag(input, n, &(result->tags[n]), attr_types)) {
 		    result->number_of_tags = (n + 1);
 		} else {
@@ -1328,7 +1330,7 @@ static SGML_dtd *load_flatfile(FILE *input)
 		}
 	    }
 	    tag = 0;
-	    for (n = 0; n < number_of_tags; ++n) {
+	    for (n = 0; n < (size_t) number_of_tags; ++n) {
 		if (result->tags[n].name != 0
 		    && !strcmp(result->tags[n].name, "OBJECT")) {
 		    tag = result->tags + number_of_tags;

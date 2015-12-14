@@ -1,4 +1,4 @@
-/* $LynxId: hdr_HTMLDTD.h,v 1.22 2011/10/07 00:54:36 Kihara.Hideto Exp $ */
+/* $LynxId: hdr_HTMLDTD.h,v 1.23 2015/12/13 23:08:45 Kihara.Hideto Exp $ */
 #ifndef hdr_HTMLDTD_H
 #define hdr_HTMLDTD_H 1
 
@@ -21,6 +21,8 @@ extern "C" {
 	HTML_ADDRESS,
 	HTML_APPLET,
 	HTML_AREA,
+	HTML_ARTICLE,
+	HTML_ASIDE,
 	HTML_AU,
 	HTML_AUTHOR,
 	HTML_B,
@@ -57,8 +59,10 @@ extern "C" {
 	HTML_EMBED,
 	HTML_FIELDSET,
 	HTML_FIG,
+	HTML_FIGURE,
 	HTML_FN,
 	HTML_FONT,
+	HTML_FOOTER,
 	HTML_FORM,
 	HTML_FRAME,
 	HTML_FRAMESET,
@@ -69,6 +73,7 @@ extern "C" {
 	HTML_H5,
 	HTML_H6,
 	HTML_HEAD,
+	HTML_HEADER,
 	HTML_HR,
 	HTML_HTML,
 	HTML_HY,
@@ -86,11 +91,13 @@ extern "C" {
 	HTML_LI,
 	HTML_LINK,
 	HTML_LISTING,
+	HTML_MAIN,
 	HTML_MAP,
 	HTML_MARQUEE,
 	HTML_MATH,
 	HTML_MENU,
 	HTML_META,
+	HTML_NAV,
 	HTML_NEXTID,
 	HTML_NOFRAMES,
 	HTML_NOTE,
@@ -106,6 +113,7 @@ extern "C" {
 	HTML_S,
 	HTML_SAMP,
 	HTML_SCRIPT,
+	HTML_SECTION,
 	HTML_SELECT,
 	HTML_SHY,
 	HTML_SMALL,
@@ -148,10 +156,10 @@ extern "C" {
  */
 
 /* # of elements generally visible to Lynx code */
-#define HTML_ELEMENTS 118
+#define HTML_ELEMENTS 126
 
 /* # of elements visible to SGML parser */
-#define HTML_ALL_ELEMENTS 119
+#define HTML_ALL_ELEMENTS 127
 
 /*
 
@@ -476,6 +484,15 @@ extern "C" {
 #define HTML_GEN_STYLE            5
 #define HTML_GEN_TITLE            6
 #define HTML_GEN_ATTRIBUTES       7
+
+#define HTML_GEN5_CLASS           0
+#define HTML_GEN5_DIR             1
+#define HTML_GEN5_ID              2
+#define HTML_GEN5_LANG            3
+#define HTML_GEN5_ROLE            4
+#define HTML_GEN5_STYLE           5
+#define HTML_GEN5_TITLE           6
+#define HTML_GEN5_ATTRIBUTES      7
 
 #define HTML_H_ALIGN              0
 #define HTML_H_CLASS              1

@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTML.c,v 1.165 2014/12/16 01:21:32 tom Exp $
+ * $LynxId: HTML.c,v 1.166 2015/12/13 23:08:45 Kihara.Hideto Exp $
  *
  *		Structured stream to Rich hypertext converter
  *		============================================
@@ -1679,6 +1679,22 @@ static int HTML_start_element(HTStructured * me, int element_number,
 	CHECK_ID(HTML_BODY_ID);
 	if (HText_hasToolbar(me->text))
 	    HText_appendParagraph(me->text);
+	break;
+
+    case HTML_SECTION:
+    case HTML_ARTICLE:
+    case HTML_MAIN:
+    case HTML_ASIDE:
+    case HTML_HEADER:
+    case HTML_FOOTER:
+    case HTML_NAV:
+	CHECK_ID(HTML_GEN5_ID);
+	if (HText_hasToolbar(me->text))
+	    HText_appendParagraph(me->text);
+	break;
+
+    case HTML_FIGURE:
+	CHECK_ID(HTML_GEN5_ID);
 	break;
 
     case HTML_FRAMESET:
