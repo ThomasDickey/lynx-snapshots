@@ -1,4 +1,4 @@
-/* $LynxId: src1_HTMLDTD.h,v 1.45 2011/10/07 00:54:36 Kihara.Hideto Exp $ */
+/* $LynxId: src1_HTMLDTD.h,v 1.46 2015/12/13 23:08:45 Kihara.Hideto Exp $ */
 #ifndef src_HTMLDTD_H1
 #define src_HTMLDTD_H1 1
 
@@ -11,6 +11,8 @@
 #define T_ADDRESS       0x00200,0x0F14F,0x8FFFF,0x36680,0xB6FAF,0x80317,0x00000
 #define T_APPLET        0x02000,0x0B0CF,0x8FFFF,0x37F9F,0xB7FBF,0x8300F,0x00000
 #define T_AREA          0x08000,0x00000,0x00000,0x08000,0x3FFFF,0x00F1F,0x00001
+#define T_ARTICLE       0x00200,0x8FBCF,0x8FFFF,0xB66A0,0xB7FFF,0x8031F,0x00004
+#define T_ASIDE         0x00200,0x8FBCF,0x8FFFF,0xB66A0,0xB7FFF,0x8031F,0x00004
 #define T_AU            0x00002,0x8B04F,0x8FFFF,0xA778F,0xF7FBF,0x00003,0x00000
 #define T_AUTHOR        0x00002,0x8B04F,0x8FFFF,0xA778F,0xF7FBF,0x00003,0x00000
 #define T_B             0x00001,0x8B04F,0xAFFFF,0xA778F,0xF7FBF,0x00001,0x00014
@@ -47,8 +49,10 @@
 #define T_EMBED         0x02000,0x8F107,0x8FFF7,0xB6FBF,0xB7FBF,0x1FF7F,0x00001
 #define T_FIELDSET      0x00200,0x8FB4F,0x8FF7F,0x86787,0xB7FF7,0x8805F,0x00000
 #define T_FIG           0x00200,0x0FB00,0x8FFFF,0x36680,0xB6FBF,0x8834F,0x00000
+#define T_FIGURE        0x00200,0x8FBCF,0x8FFFF,0xB66A0,0xB7FFF,0x8031F,0x00004
 #define T_FN            0x00200,0x8FBCF,0x8FFFF,0xB6680,0xB7EBF,0x8114F,0x00000
 #define T_FONT          0x00001,0x8B04F,0x8FFFF,0xB778F,0xF7FBF,0x00001,0x00014
+#define T_FOOTER        0x00200,0x8FBCF,0x8FFFF,0xB66A0,0xB7FFF,0x8031F,0x00004
 #define T_FORM          0x00080,0x0FF6F,0x0FF7F,0x36E07,0x32F07,0x88DFF,0x00000
 #define T_FRAME         0x10000,0x00000,0x00000,0x10000,0x10000,0x9FFFF,0x00001
 #define T_FRAMESET      0x10000,0x90000,0x90000,0x90000,0x93000,0x9FFFF,0x00000
@@ -59,6 +63,7 @@
 #define T_H5            0x00100,0x0B04F,0x0B05F,0x36680,0x37FAF,0x80117,0x00000
 #define T_H6            0x00100,0x0B04F,0x0B05F,0x36680,0x37FAF,0x80117,0x00000
 #define T_HEAD          0x40000,0x4F000,0x47000,0x10000,0x10000,0x9FF7F,0x00007
+#define T_HEADER        0x00200,0x8FBCF,0x8FFFF,0xB66A0,0xB7FFF,0x8031F,0x00004
 #define T_HR            0x04000,0x00000,0x00000,0x3FE80,0x3FFBF,0x87F37,0x00001
 #define T_HTML          0x10000,0x7FB8F,0x7FFFF,0x00000,0x00000,0x1FFFF,0x00003
 #define T_HY            0x01000,0x00000,0x00000,0x3779F,0x77FBF,0x8101F,0x00001
@@ -76,11 +81,13 @@
 #define T_LI            0x00400,0x0BBFF,0x8FFFF,0x00800,0x97FFF,0x8071F,0x00001
 #define T_LINK          0x08000,0x00000,0x00000,0x50000,0x50000,0x0FF7F,0x00001
 #define T_LISTING       0x00800,0x00000,0x00000,0x36600,0x36F00,0x80F1F,0x00000
+#define T_MAIN          0x00200,0x8FBCF,0x8FFFF,0xB66A0,0xB7FFF,0x8031F,0x00004
 #define T_MAP           0x08000,0x08000,0x08000,0x37FCF,0x37FBF,0x0051F,0x00000
 #define T_MARQUEE       0x04000,0x0000F,0x8F01F,0x37787,0xB7FA7,0x8301C,0x00000
 #define T_MATH          0x00004,0x0B05F,0x8FFFF,0x2778F,0xF7FBF,0x0001F,0x00000
 #define T_MENU          0x00800,0x0B400,0x0F75F,0x17680,0x36FB7,0x88F7F,0x00000
 #define T_META          0x08000,0x00000,0x00000,0x50000,0x50000,0x0FF7F,0x00001
+#define T_NAV           0x00200,0x8FBCF,0x8FFFF,0xB66A0,0xB7FFF,0x8031F,0x00004
 #define T_NEXTID        0x01000,0x00000,0x00000,0x50000,0x1FFF7,0x00001,0x00001
 #define T_NOFRAMES      0x20000,0x2FB8F,0x0FFFF,0x17000,0x17000,0x0CF5F,0x00000
 #define T_NOTE          0x00200,0x0BBAF,0x8FFFF,0x376B0,0xB7FFF,0x8031F,0x00000
@@ -96,6 +103,7 @@
 #define T_S             0x00001,0x8B04F,0x8FFFF,0xA778F,0xF7FBF,0x00001,0x00000
 #define T_SAMP          0x00002,0x8B04F,0x8FFFF,0xA778F,0xF7FBF,0x00002,0x00010
 #define T_SCRIPT        0x02000,0x00000,0x00000,0x77F9F,0x77FFF,0x87D5F,0x00000
+#define T_SECTION       0x00200,0x8FBCF,0x8FFFF,0xB66A0,0xB7FFF,0x8031F,0x00004
 #define T_SELECT        0x00040,0x08000,0x08000,0x03FAF,0x33FBF,0x80D5F,0x00008
 #define T_SHY           0x01000,0x00000,0x00000,0x3779F,0x77FBF,0x8101F,0x00001
 #define T_SMALL         0x00001,0x8B04F,0x8FFFF,0xA778F,0xF7FBF,0x00001,0x00014
@@ -607,6 +615,19 @@ static const AttrType GEN_attr_type[] = {
 	{ ATTR_TYPE(events) },
 	{ ATTR_TYPE(i18n) },
 	{ ATTR_TYPE(GEN) },
+	{ 0, 0 },
+};
+
+static const attr GEN5_attr_list[] = {
+	{ "ROLE"          T(N) },
+	{ 0               T(N) }	/* Terminate list */
+};
+
+static const AttrType GEN5_attr_type[] = {
+	{ ATTR_TYPE(core) },
+	{ ATTR_TYPE(events) },
+	{ ATTR_TYPE(i18n) },
+	{ ATTR_TYPE(GEN5) },
 	{ 0, 0 },
 };
 
@@ -1577,6 +1598,17 @@ static const attr GEN_attr[] = {        /* ABBR attributes */
 	{ 0               T(N) }	/* Terminate list */
 };
 
+static const attr GEN5_attr[] = {       /* ARTICLE attributes */
+	{ "CLASS"         T(c) },
+	{ "DIR"           T(N) },
+	{ "ID"            T(i) },
+	{ "LANG"          T(N) },
+	{ "ROLE"          T(N) },
+	{ "STYLE"         T(N) },
+	{ "TITLE"         T(N) },
+	{ 0               T(N) }	/* Terminate list */
+};
+
 static const attr H_attr[] = {          /* H1 attributes */
 	{ "ALIGN"         T(N) },
 	{ "CLASS"         T(c) },
@@ -2154,6 +2186,8 @@ static const attr UL_attr[] = {         /* DIR attributes */
 #undef ADDRESS
 #undef APPLET
 #undef AREA
+#undef ARTICLE
+#undef ASIDE
 #undef AU
 #undef AUTHOR
 #undef B
@@ -2190,8 +2224,10 @@ static const attr UL_attr[] = {         /* DIR attributes */
 #undef EMBED
 #undef FIELDSET
 #undef FIG
+#undef FIGURE
 #undef FN
 #undef FONT
+#undef FOOTER
 #undef FORM
 #undef FRAME
 #undef FRAMESET
@@ -2202,6 +2238,7 @@ static const attr UL_attr[] = {         /* DIR attributes */
 #undef H5
 #undef H6
 #undef HEAD
+#undef HEADER
 #undef HR
 #undef HTML
 #undef HY
@@ -2219,11 +2256,13 @@ static const attr UL_attr[] = {         /* DIR attributes */
 #undef LI
 #undef LINK
 #undef LISTING
+#undef MAIN
 #undef MAP
 #undef MARQUEE
 #undef MATH
 #undef MENU
 #undef META
+#undef NAV
 #undef NEXTID
 #undef NOFRAMES
 #undef NOTE
@@ -2239,6 +2278,7 @@ static const attr UL_attr[] = {         /* DIR attributes */
 #undef S
 #undef SAMP
 #undef SCRIPT
+#undef SECTION
 #undef SELECT
 #undef SHY
 #undef SMALL
@@ -2300,6 +2340,8 @@ static const HTTag tags_table1[HTML_ALL_ELEMENTS] = {
  { P(ADDRESS),     ATTR_DATA(ADDRESS),     SGML_MIXED,   T_ADDRESS},
  { P(APPLET),      ATTR_DATA(APPLET),      SGML_MIXED,   T_APPLET},
  { P(AREA),        ATTR_DATA(AREA),        SGML_EMPTY,   T_AREA},
+ { P(ARTICLE),     ATTR_DATA(GEN5),        SGML_MIXED,   T_ARTICLE},
+ { P(ASIDE),       ATTR_DATA(GEN5),        SGML_MIXED,   T_ASIDE},
  { P(AU),          ATTR_DATA(GEN),         SGML_MIXED,   T_AU},
  { P(AUTHOR),      ATTR_DATA(GEN),         SGML_MIXED,   T_AUTHOR},
  { P(B),           ATTR_DATA(GEN),         SGML_MIXED,   T_B},
@@ -2336,8 +2378,10 @@ static const HTTag tags_table1[HTML_ALL_ELEMENTS] = {
  { P(EMBED),       ATTR_DATA(EMBED),       SGML_EMPTY,   T_EMBED},
  { P(FIELDSET),    ATTR_DATA(GEN),         SGML_MIXED,   T_FIELDSET},
  { P(FIG),         ATTR_DATA(FIG),         SGML_MIXED,   T_FIG},
+ { P(FIGURE),      ATTR_DATA(GEN5),        SGML_MIXED,   T_FIGURE},
  { P(FN),          ATTR_DATA(GEN),         SGML_MIXED,   T_FN},
  { P(FONT),        ATTR_DATA(FONT),        SGML_MIXED,   T_FONT},
+ { P(FOOTER),      ATTR_DATA(GEN5),        SGML_MIXED,   T_FOOTER},
  { P(FORM),        ATTR_DATA(FORM),        SGML_MIXED,   T_FORM},
  { P(FRAME),       ATTR_DATA(FRAME),       SGML_EMPTY,   T_FRAME},
  { P(FRAMESET),    ATTR_DATA(FRAMESET),    SGML_ELEMENT, T_FRAMESET},
@@ -2348,6 +2392,7 @@ static const HTTag tags_table1[HTML_ALL_ELEMENTS] = {
  { P0(H5),         ATTR_DATA(H),           SGML_MIXED,   T_H5},
  { P0(H6),         ATTR_DATA(H),           SGML_MIXED,   T_H6},
  { P(HEAD),        ATTR_DATA(GEN),         SGML_ELEMENT, T_HEAD},
+ { P(HEADER),      ATTR_DATA(GEN5),        SGML_MIXED,   T_HEADER},
  { P(HR),          ATTR_DATA(HR),          SGML_EMPTY,   T_HR},
  { P(HTML),        ATTR_DATA(GEN),         SGML_MIXED,   T_HTML},
  { P(HY),          ATTR_DATA(GEN),         SGML_EMPTY,   T_HY},
@@ -2365,11 +2410,13 @@ static const HTTag tags_table1[HTML_ALL_ELEMENTS] = {
  { P(LI),          ATTR_DATA(LI),          SGML_MIXED,   T_LI},
  { P(LINK),        ATTR_DATA(LINK),        SGML_EMPTY,   T_LINK},
  { P(LISTING),     ATTR_DATA(GEN),         SGML_LITTERAL,T_LISTING},
+ { P(MAIN),        ATTR_DATA(GEN5),        SGML_MIXED,   T_MAIN},
  { P(MAP),         ATTR_DATA(MAP),         SGML_ELEMENT, T_MAP},
  { P(MARQUEE),     ATTR_DATA(GEN),         SGML_MIXED,   T_MARQUEE},
  { P(MATH),        ATTR_DATA(MATH),        SGML_PCDATA,  T_MATH},
  { P(MENU),        ATTR_DATA(UL),          SGML_MIXED,   T_MENU},
  { P(META),        ATTR_DATA(META),        SGML_EMPTY,   T_META},
+ { P(NAV),         ATTR_DATA(GEN5),        SGML_MIXED,   T_NAV},
  { P(NEXTID),      ATTR_DATA(NEXTID),      SGML_EMPTY,   T_NEXTID},
  { P(NOFRAMES),    ATTR_DATA(GEN),         SGML_MIXED,   T_NOFRAMES},
  { P(NOTE),        ATTR_DATA(NOTE),        SGML_MIXED,   T_NOTE},
@@ -2385,6 +2432,7 @@ static const HTTag tags_table1[HTML_ALL_ELEMENTS] = {
  { P(S),           ATTR_DATA(GEN),         SGML_MIXED,   T_S},
  { P(SAMP),        ATTR_DATA(GEN),         SGML_MIXED,   T_SAMP},
  { P(SCRIPT),      ATTR_DATA(SCRIPT),      SGML_SCRIPT,  T_SCRIPT},
+ { P(SECTION),     ATTR_DATA(GEN5),        SGML_MIXED,   T_SECTION},
  { P(SELECT),      ATTR_DATA(SELECT),      SGML_ELEMENT, T_SELECT},
  { P(SHY),         ATTR_DATA(GEN),         SGML_EMPTY,   T_SHY},
  { P(SMALL),       ATTR_DATA(GEN),         SGML_MIXED,   T_SMALL},
