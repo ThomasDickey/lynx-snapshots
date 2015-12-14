@@ -1,4 +1,4 @@
-dnl $LynxId: aclocal.m4,v 1.230 2015/12/10 15:28:43 tom Exp $
+dnl $LynxId: aclocal.m4,v 1.231 2015/12/13 02:00:51 tom Exp $
 dnl Macros for auto-configure script.
 dnl by Thomas E. Dickey <dickey@invisible-island.net>
 dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
@@ -6484,7 +6484,7 @@ AC_CHECK_FUNCS( \
 )
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_XOPEN_CURSES version: 12 updated: 2015/12/10 10:25:50
+dnl CF_XOPEN_CURSES version: 13 updated: 2015/12/12 20:59:52
 dnl ---------------
 dnl Test if we should define X/Open source for curses, needed on Digital Unix
 dnl 4.x, to see the extended functions, but breaks on IRIX 6.x.
@@ -6533,7 +6533,7 @@ AC_TRY_LINK([
 
 case $cf_cv_need_xopen_extension in
 (*_*)
-	CPPFLAGS="$CPPFLAGS -Dcf_cv_need_xopen_extension"
+	CPPFLAGS="$CPPFLAGS -D$cf_cv_need_xopen_extension"
 	;;
 esac
 

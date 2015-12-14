@@ -43285,7 +43285,7 @@ echo "${ECHO_T}$cf_cv_need_xopen_extension" >&6
 
 case $cf_cv_need_xopen_extension in
 (*_*)
-	CPPFLAGS="$CPPFLAGS -Dcf_cv_need_xopen_extension"
+	CPPFLAGS="$CPPFLAGS -D$cf_cv_need_xopen_extension"
 	;;
 esac
 
