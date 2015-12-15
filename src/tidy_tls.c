@@ -1,5 +1,5 @@
 /*
- * $LynxId: tidy_tls.c,v 1.31 2015/10/12 00:31:21 tom Exp $
+ * $LynxId: tidy_tls.c,v 1.32 2015/12/15 01:41:06 tom Exp $
  * Copyright 2008-2014,2015 Thomas E. Dickey
  * with fix Copyright 2008 by Thomas Viehmann
  *
@@ -441,10 +441,10 @@ SSL *SSL_new(SSL_CTX * ctx)
 
 	    ssl->rfd = (gnutls_transport_ptr_t) (-1);
 	    ssl->wfd = (gnutls_transport_ptr_t) (-1);
+	    ssl->bytes_sent = 0;
+	    ssl->sendbuffer = 0;
 	}
     }
-    ssl->bytes_sent = 0;
-    ssl->sendbuffer = 0;
 
     return ssl;
 }

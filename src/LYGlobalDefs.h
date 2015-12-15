@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYGlobalDefs.h,v 1.139 2015/10/08 08:51:26 Simon.Kainz Exp $
+ * $LynxId: LYGlobalDefs.h,v 1.140 2015/12/14 09:52:22 tom Exp $
  *
  * global variable definitions
  */
@@ -141,6 +141,8 @@ extern "C" {
 #define fields_are_numbered() \
 	    (keypad_mode == FIELDS_ARE_NUMBERED || \
 	     keypad_mode == LINKS_AND_FIELDS_ARE_NUMBERED)
+#define fields_are_named() \
+	    (user_mode == ADVANCED_MODE)
 
 #define HIDDENLINKS_MERGE	0
 #define HIDDENLINKS_SEPARATE	1
