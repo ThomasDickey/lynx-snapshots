@@ -1,4 +1,4 @@
-/* $LynxId: LYStrings.c,v 1.260 2014/12/09 01:49:18 tom Exp $ */
+/* $LynxId: LYStrings.c,v 1.262 2015/12/14 09:52:43 tom Exp $ */
 #include <HTUtils.h>
 #include <HTCJK.h>
 #include <UCAux.h>
@@ -4126,6 +4126,32 @@ static void draw_option(WINDOW * win, int entry,
 #endif /* USE_SLANG */
 }
 
+static void show_popup_status(int cur_choice,
+			      STRING2PTR choices,
+			      int disabled,
+			      int for_mouse)
+{
+    if (disabled) {
+	_statusline(CHOICE_LIST_UNM_MSG);
+    } else if (!for_mouse) {
+	if (fields_are_named()) {
+	    char *status_msg = NULL;
+
+	    HTSprintf0(&status_msg, CHOICE_LIST_ADV_MSG, choices[cur_choice]);
+	    _statusline(status_msg);
+	    FREE(status_msg);
+	} else {
+	    _statusline(CHOICE_LIST_MESSAGE);
+	}
+#if defined(USE_MOUSE) && (defined(NCURSES) || defined(PDCURSES))
+    } else {
+	_statusline(MOUSE_CHOICE_MESSAGE);
+#endif
+    }
+}
+
+#define SHOW_POPUP_STATUS() show_popup_status(cur_choice, choices, disabled, for_mouse)
+
 /*
  * This function offers the choices for values of an option via a popup window
  * which functions like that for selection of options in a form.  - FM
@@ -4165,7 +4191,6 @@ int LYhandlePopupList(int cur_choice,
     BOOLEAN ReDraw = FALSE;
     int number;
     char buffer[MAX_LINE];
-    const char *popup_status_msg = NULL;
     STRING2PTR Cptr = NULL;
 
 #define CAN_SCROLL_DOWN	1
@@ -4327,20 +4352,7 @@ int LYhandlePopupList(int cur_choice,
     width -= Lnum;
     bottom += top;
 
-    /*
-     * Clear the command line and write the popup statusline.  - FM
-     */
-    if (disabled) {
-	popup_status_msg = CHOICE_LIST_UNM_MSG;
-    } else if (!for_mouse) {
-	popup_status_msg = CHOICE_LIST_MESSAGE;
-#if defined(USE_MOUSE) && (defined(NCURSES) || defined(PDCURSES))
-    } else {
-	popup_status_msg =
-	    gettext("Left mouse button or return to select, arrow keys to scroll.");
-#endif
-    }
-    _statusline(popup_status_msg);
+    SHOW_POPUP_STATUS();
 
     /*
      * Set up the window_offset for choices.
@@ -4487,12 +4499,12 @@ int LYhandlePopupList(int cur_choice,
 		if (number <= 1) {
 		    if (window_offset == 0) {
 			HTUserMsg(ALREADY_AT_OPTION_BEGIN);
-			_statusline(popup_status_msg);
+			SHOW_POPUP_STATUS();
 			break;
 		    }
 		    window_offset = 0;
 		    cur_choice = 0;
-		    _statusline(popup_status_msg);
+		    SHOW_POPUP_STATUS();
 		    goto redraw;
 		}
 
@@ -4503,7 +4515,7 @@ int LYhandlePopupList(int cur_choice,
 		if (number >= npages) {
 		    if (window_offset >= ((num_choices - length) + 1)) {
 			HTUserMsg(ALREADY_AT_OPTION_END);
-			_statusline(popup_status_msg);
+			SHOW_POPUP_STATUS();
 			break;
 		    }
 		    window_offset = ((npages - 1) * length);
@@ -4512,7 +4524,7 @@ int LYhandlePopupList(int cur_choice,
 		    }
 		    if (cur_choice < window_offset)
 			cur_choice = window_offset;
-		    _statusline(popup_status_msg);
+		    SHOW_POPUP_STATUS();
 		    goto redraw;
 		}
 
@@ -4525,11 +4537,11 @@ int LYhandlePopupList(int cur_choice,
 		    HTSprintf0(&msg, ALREADY_AT_OPTION_PAGE, number);
 		    HTUserMsg(msg);
 		    FREE(msg);
-		    _statusline(popup_status_msg);
+		    SHOW_POPUP_STATUS();
 		    break;
 		}
 		cur_choice = window_offset = ((number - 1) * length);
-		_statusline(popup_status_msg);
+		SHOW_POPUP_STATUS();
 		goto redraw;
 
 	    }
@@ -4569,7 +4581,7 @@ int LYhandlePopupList(int cur_choice,
 			HTSprintf0(&msg, OPTION_ALREADY_CURRENT, (number + 1));
 			HTUserMsg(msg);
 			FREE(msg);
-			_statusline(popup_status_msg);
+			SHOW_POPUP_STATUS();
 			break;
 		    }
 
@@ -4590,7 +4602,7 @@ int LYhandlePopupList(int cur_choice,
 			    if (window_offset < 0)
 				window_offset = 0;
 			}
-			_statusline(popup_status_msg);
+			SHOW_POPUP_STATUS();
 			goto redraw;
 		    }
 
@@ -4604,7 +4616,7 @@ int LYhandlePopupList(int cur_choice,
 	    /*
 	     * Restore the popup statusline.  - FM
 	     */
-	    _statusline(popup_status_msg);
+	    SHOW_POPUP_STATUS();
 	    break;
 
 	case LYK_PREV_LINK:
@@ -5028,7 +5040,7 @@ int LYhandlePopupList(int cur_choice,
 	     * Restore the popup statusline and reset the search variables.  -
 	     * FM
 	     */
-	    _statusline(popup_status_msg);
+	    SHOW_POPUP_STATUS();
 	    BStrCopy0(prev_target, "");
 	    QueryTotal = (search_queries ? HTList_count(search_queries)
 			  : 0);

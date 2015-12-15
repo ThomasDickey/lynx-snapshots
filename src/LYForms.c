@@ -1,4 +1,4 @@
-/* $LynxId: LYForms.c,v 1.111 2013/12/07 13:46:58 tom Exp $ */
+/* $LynxId: LYForms.c,v 1.117 2015/12/15 01:32:45 tom Exp $ */
 #include <HTUtils.h>
 #include <HTCJK.h>
 #include <HTTP.h>
@@ -855,6 +855,12 @@ static int form_getstr(int cur,
     return (ch);
 }
 
+#ifdef TEXTFIELDS_MAY_NEED_ACTIVATION
+#define TMA_PANEL(fp,np) ((for_what == FOR_PANEL) ? fp : np)
+#else
+#define TMA_PANEL(fp,np) np
+#endif
+
 /*
  * Display statusline info tailored for the current form field.
  */
@@ -866,30 +872,47 @@ void show_formlink_statusline(const FormInfo * form,
 	if (FormIsReadonly(form))
 	    statusline(FORM_LINK_PASSWORD_UNM_MSG);
 	else
-#ifdef TEXTFIELDS_MAY_NEED_ACTIVATION
-	if (for_what == FOR_PANEL)
-	    statusline(FORM_LINK_PASSWORD_MESSAGE_INA);
-	else
-#endif
-	    statusline(FORM_LINK_PASSWORD_MESSAGE);
+	    statusline(TMA_PANEL(FORM_LINK_PASSWORD_MESSAGE_INA,
+				 FORM_LINK_PASSWORD_MESSAGE));
 	break;
     case F_OPTION_LIST_TYPE:
-	if (FormIsReadonly(form))
+	if (FormIsReadonly(form)) {
 	    statusline(FORM_LINK_OPTION_LIST_UNM_MSG);
-	else
+	} else if (fields_are_named()) {
+	    char *submit_str = NULL;
+
+	    HTSprintf0(&submit_str, FORM_LINK_OPTION_LIST_ADV_MSG, form->name);
+	    statusline(submit_str);
+	    FREE(submit_str);
+	} else {
 	    statusline(FORM_LINK_OPTION_LIST_MESSAGE);
+	}
 	break;
     case F_CHECKBOX_TYPE:
-	if (FormIsReadonly(form))
+	if (FormIsReadonly(form)) {
 	    statusline(FORM_LINK_CHECKBOX_UNM_MSG);
-	else
+	} else if (fields_are_named()) {
+	    char *submit_str = NULL;
+
+	    HTSprintf0(&submit_str, FORM_LINK_CHECKBOX_ADV_MSG, form->name);
+	    statusline(submit_str);
+	    FREE(submit_str);
+	} else {
 	    statusline(FORM_LINK_CHECKBOX_MESSAGE);
+	}
 	break;
     case F_RADIO_TYPE:
-	if (FormIsReadonly(form))
+	if (FormIsReadonly(form)) {
 	    statusline(FORM_LINK_RADIO_UNM_MSG);
-	else
+	} else if (fields_are_named()) {
+	    char *submit_str = NULL;
+
+	    HTSprintf0(&submit_str, FORM_LINK_RADIO_ADV_MSG, form->name);
+	    statusline(submit_str);
+	    FREE(submit_str);
+	} else {
 	    statusline(FORM_LINK_RADIO_MESSAGE);
+	}
 	break;
     case F_TEXT_SUBMIT_TYPE:
 	if (FormIsReadonly(form)) {
@@ -899,41 +922,25 @@ void show_formlink_statusline(const FormInfo * form,
 	    if (no_mail)
 		statusline(FORM_LINK_TEXT_SUBMIT_MAILTO_DIS_MSG);
 	    else
-#ifdef TEXTFIELDS_MAY_NEED_ACTIVATION
-	    if (for_what == FOR_PANEL)
-		statusline(FORM_TEXT_SUBMIT_MAILTO_MSG_INA);
-	    else
-#endif
-		statusline(FORM_LINK_TEXT_SUBMIT_MAILTO_MSG);
+		statusline(TMA_PANEL(FORM_TEXT_SUBMIT_MAILTO_MSG_INA,
+				     FORM_LINK_TEXT_SUBMIT_MAILTO_MSG));
 	} else if (form->no_cache) {
-#ifdef TEXTFIELDS_MAY_NEED_ACTIVATION
-	    if (for_what == FOR_PANEL)
-		statusline(FORM_TEXT_RESUBMIT_MESSAGE_INA);
-	    else
-#endif
-		statusline(FORM_LINK_TEXT_RESUBMIT_MESSAGE);
+	    statusline(TMA_PANEL(FORM_TEXT_RESUBMIT_MESSAGE_INA,
+				 FORM_LINK_TEXT_RESUBMIT_MESSAGE));
 	} else {
 	    char *submit_str = NULL;
 	    char *xkey_info = key_for_func_ext(LYK_NOCACHE, for_what);
 
 	    if (non_empty(xkey_info)) {
-#ifdef TEXTFIELDS_MAY_NEED_ACTIVATION
-		if (for_what == FOR_PANEL)
-		    HTSprintf0(&submit_str, FORM_TEXT_SUBMIT_MESSAGE_INA_X,
-			       xkey_info);
-		else
-#endif
-		    HTSprintf0(&submit_str, FORM_LINK_TEXT_SUBMIT_MESSAGE_X,
-			       xkey_info);
+		HTSprintf0(&submit_str,
+			   TMA_PANEL(FORM_TEXT_SUBMIT_MESSAGE_INA_X,
+				     FORM_LINK_TEXT_SUBMIT_MESSAGE_X),
+			   xkey_info);
 		statusline(submit_str);
 		FREE(submit_str);
 	    } else {
-#ifdef TEXTFIELDS_MAY_NEED_ACTIVATION
-		if (for_what == FOR_PANEL)
-		    statusline(FORM_LINK_TEXT_SUBMIT_MESSAGE_INA);
-		else
-#endif
-		    statusline(FORM_LINK_TEXT_SUBMIT_MESSAGE);
+		statusline(TMA_PANEL(FORM_LINK_TEXT_SUBMIT_MESSAGE_INA,
+				     FORM_LINK_TEXT_SUBMIT_MESSAGE));
 	    }
 	    FREE(xkey_info);
 	}
@@ -989,10 +996,17 @@ void show_formlink_statusline(const FormInfo * form,
 	    statusline(FORM_LINK_RESET_MESSAGE);
 	break;
     case F_BUTTON_TYPE:
-	if (FormIsReadonly(form))
+	if (FormIsReadonly(form)) {
 	    statusline(FORM_LINK_BUTTON_DIS_MSG);
-	else
+	} else if (fields_are_named()) {
+	    char *submit_str = NULL;
+
+	    HTSprintf0(&submit_str, FORM_LINK_BUTTON_ADV_MSG, form->name);
+	    statusline(submit_str);
+	    FREE(submit_str);
+	} else {
 	    statusline(FORM_LINK_BUTTON_MESSAGE);
+	}
 	break;
     case F_FILE_TYPE:
 	if (FormIsReadonly(form))
@@ -1001,15 +1015,21 @@ void show_formlink_statusline(const FormInfo * form,
 	    statusline(FORM_LINK_FILE_MESSAGE);
 	break;
     case F_TEXT_TYPE:
-	if (FormIsReadonly(form))
+	if (FormIsReadonly(form)) {
 	    statusline(FORM_LINK_TEXT_UNM_MSG);
-	else
-#ifdef TEXTFIELDS_MAY_NEED_ACTIVATION
-	if (for_what == FOR_PANEL)
-	    statusline(FORM_LINK_TEXT_MESSAGE_INA);
-	else
-#endif
-	    statusline(FORM_LINK_TEXT_MESSAGE);
+	} else if (fields_are_named()) {
+	    char *submit_str = NULL;
+
+	    HTSprintf0(&submit_str,
+		       TMA_PANEL(FORM_LINK_TEXT_ADV_MSG_INA,
+				 FORM_LINK_TEXT_ADV_MSG),
+		       form->name);
+	    statusline(submit_str);
+	    FREE(submit_str);
+	} else {
+	    statusline(TMA_PANEL(FORM_LINK_TEXT_MESSAGE_INA,
+				 FORM_LINK_TEXT_MESSAGE));
+	}
 	break;
     case F_TEXTAREA_TYPE:
 	if (FormIsReadonly(form)) {
@@ -1026,23 +1046,32 @@ void show_formlink_statusline(const FormInfo * form,
 #endif
 	    }
 	    if (non_empty(xkey_info)) {
-#ifdef TEXTFIELDS_MAY_NEED_ACTIVATION
-		if (for_what == FOR_PANEL)
-		    HTSprintf0(&submit_str, FORM_LINK_TEXTAREA_MESSAGE_INA_E,
+		if (fields_are_named()) {
+		    HTSprintf0(&submit_str,
+			       TMA_PANEL(FORM_LINK_TEXTAREA_ADV_MSG_INA_E,
+					 FORM_LINK_TEXTAREA_ADV_MSG_E),
+			       form->name,
 			       xkey_info);
-		else
-#endif
-		    HTSprintf0(&submit_str, FORM_LINK_TEXTAREA_MESSAGE_E,
+		} else {
+		    HTSprintf0(&submit_str,
+			       TMA_PANEL(FORM_LINK_TEXTAREA_MESSAGE_INA_E,
+					 FORM_LINK_TEXTAREA_MESSAGE_E),
 			       xkey_info);
+		}
 		statusline(submit_str);
 		FREE(submit_str);
 	    } else {
-#ifdef TEXTFIELDS_MAY_NEED_ACTIVATION
-		if (for_what == FOR_PANEL)
-		    statusline(FORM_LINK_TEXTAREA_MESSAGE_INA);
-		else
-#endif
-		    statusline(FORM_LINK_TEXTAREA_MESSAGE);
+		if (fields_are_named()) {
+		    HTSprintf0(&submit_str,
+			       TMA_PANEL(FORM_LINK_TEXTAREA_ADV_MSG_INA,
+					 FORM_LINK_TEXTAREA_ADV_MSG),
+			       form->name);
+		    statusline(submit_str);
+		    FREE(submit_str);
+		} else {
+		    statusline(TMA_PANEL(FORM_LINK_TEXTAREA_MESSAGE_INA,
+					 FORM_LINK_TEXTAREA_MESSAGE));
+		}
 	    }
 	    FREE(xkey_info);
 	}

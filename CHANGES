@@ -1,9 +1,12 @@
--- $LynxId: CHANGES,v 1.826 2015/12/14 00:14:24 Axel.Beckert Exp $
+-- $LynxId: CHANGES,v 1.828 2015/12/15 01:42:54 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2015-12-13 (2.8.9dev.7)
+2015-12-14 (2.8.9dev.7)
+* fix a potential null dereference in tidy_tls.c reported by Coverity -TD
+* extend advanced mode by showing field names in forms in the status line
+  (suggested by TG) -TD
 * fix some typos found by lintian -Axel Beckert
 * correct buffer size in pretty_html() function of LYKeymap.c -TG
 * add support for some HTML5 elements -Kihara Hideto 
