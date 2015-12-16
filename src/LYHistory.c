@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYHistory.c,v 1.86 2013/10/19 00:46:43 tom Exp $
+ * $LynxId: LYHistory.c,v 1.87 2015/12/16 01:45:14 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTP.h>
@@ -627,7 +627,7 @@ int LYhist_next(DocInfo *doc, DocInfo *newdoc)
 void LYpop_num(int number,
 	       DocInfo *doc)
 {
-    if (number >= 0 && nhist + nhist_extra > number) {
+    if (number >= 0 && (nhist + nhist_extra) > number) {
 	doc->link = HDOC(number).link;
 	doc->line = HDOC(number).line;
 	StrAllocCopy(doc->title, HDOC(number).title);

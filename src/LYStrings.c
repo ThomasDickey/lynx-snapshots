@@ -1,4 +1,4 @@
-/* $LynxId: LYStrings.c,v 1.262 2015/12/14 09:52:43 tom Exp $ */
+/* $LynxId: LYStrings.c,v 1.263 2015/12/16 01:18:53 tom Exp $ */
 #include <HTUtils.h>
 #include <HTCJK.h>
 #include <UCAux.h>
@@ -5149,7 +5149,7 @@ int LYgetBString(bstring **inputline,
 	    LYFinishEdit(edit);
 	    result = ch;
 	    done = TRUE;
-	    break;
+	    continue;
 	}
 	ch |= InputMods;
 	InputMods = 0;
@@ -5238,7 +5238,7 @@ int LYgetBString(bstring **inputline,
 	    LYFinishEdit(edit);
 	    result = ch;
 	    done = TRUE;
-	    break;
+	    continue;
 
 #ifdef CAN_CUT_AND_PASTE
 	case LYE_PASTE:
@@ -5291,7 +5291,7 @@ int LYgetBString(bstring **inputline,
 	    LYFinishEdit(edit);
 	    BStrCopy0(*inputline, "");
 	    done = TRUE;
-	    break;
+	    continue;
 
 	case LYE_STOP:
 	    CTRACE((tfp, "LYgetstr LYE_STOP\n"));
@@ -5300,7 +5300,7 @@ int LYgetBString(bstring **inputline,
 	    LYFinishEdit(edit);
 	    BStrCopy0(*inputline, "");
 	    done = TRUE;
-	    break;
+	    continue;
 #else
 #ifdef ENHANCED_LINEEDIT
 	    disableEditMark();

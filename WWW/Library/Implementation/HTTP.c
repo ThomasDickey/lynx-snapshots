@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTP.c,v 1.147 2015/11/17 01:29:09 tom Exp $
+ * $LynxId: HTTP.c,v 1.148 2015/12/16 01:54:03 tom Exp $
  *
  * HyperText Tranfer Protocol	- Client implementation		HTTP.c
  * ==========================
@@ -877,9 +877,10 @@ static int HTLoadHTTP(const char *arg,
 				  gettext("GnuTLS error when trying to verify certificate."));
 	    } else {
 		type = gnutls_certificate_type_get(handle->gnutls_state);
-		ret = gnutls_certificate_verification_status_print(tls_status,
-								   type, &out, 0);
-		SSL_single_prompt(&msg, out.data);
+		(void) gnutls_certificate_verification_status_print(tls_status,
+								    type,
+								    &out, 0);
+		SSL_single_prompt(&msg, (const char *) out.data);
 		gnutls_free(out.data);
 	    }
 #else

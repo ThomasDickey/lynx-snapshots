@@ -1,4 +1,4 @@
-/* $LynxId: LYOptions.c,v 1.166 2015/10/08 08:52:00 Simon.Kainz Exp $ */
+/* $LynxId: LYOptions.c,v 1.167 2015/12/16 01:51:08 tom Exp $ */
 #include <HTUtils.h>
 #include <HTFTP.h>
 #include <HTTP.h>		/* 'reloading' flag */
@@ -1593,9 +1593,13 @@ static int widest_choice(STRING2PTR choices)
 static void show_choice(const char *choice,
 			int width)
 {
-    int len = (int) strlen(choice);
+    int len = 0;
 
-    LYaddstr(choice);
+    if (choice != 0) {
+	len = (int) strlen(choice);
+
+	LYaddstr(choice);
+    }
     while (len++ < width)
 	LYaddch(' ');
 }
