@@ -1,5 +1,5 @@
 /*
- * $LynxId: tidy_tls.c,v 1.32 2015/12/15 01:41:06 tom Exp $
+ * $LynxId: tidy_tls.c,v 1.33 2015/12/16 01:23:11 tom Exp $
  * Copyright 2008-2014,2015 Thomas E. Dickey
  * with fix Copyright 2008 by Thomas Viehmann
  *
@@ -461,7 +461,7 @@ int SSL_read(SSL * ssl, void *buffer, int length)
 
     if (rc < 0 && gnutls_error_is_fatal(rc) == 0) {
 	if (rc == GNUTLS_E_REHANDSHAKE) {
-	    rc = gnutls_handshake(ssl->gnutls_state);
+	    (void) gnutls_handshake(ssl->gnutls_state);
 	    gnutls_record_send(ssl->gnutls_state, ssl->sendbuffer, (size_t) ssl->bytes_sent);
 	    rc = (int) gnutls_record_recv(ssl->gnutls_state, buffer, (size_t) length);
 	}

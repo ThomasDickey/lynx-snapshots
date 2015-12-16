@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTGopher.c,v 1.61 2013/11/28 11:12:32 tom Exp $
+ * $LynxId: HTGopher.c,v 1.62 2015/12/16 01:17:53 tom Exp $
  *
  *			GOPHER ACCESS				HTGopher.c
  *			=============
@@ -1227,7 +1227,7 @@ static int generate_cso_report(HTStream *Target)
     char line[BIG];
     char *buf = 0;
     char *p = line, *href = NULL;
-    int len, i, prev_ndx, ndx;
+    int i, prev_ndx, ndx;
     char *rcode, *ndx_str, *fname, *fvalue, *l;
     CSOfield_info *fld;
     BOOL stop = FALSE;
@@ -1263,16 +1263,14 @@ static int generate_cso_report(HTStream *Target)
 	    }
 	    rcode = (p[0] == '-') ? &p[1] : p;
 	    ndx_str = fname = NULL;
-	    len = (int) strlen(p);
-	    for (i = 0; i < len; i++) {
+	    for (i = 0; p[i] != '\0'; i++) {
 		if (p[i] == ':') {
 		    p[i] = '\0';
-		    if (!ndx_str) {
-			fname = ndx_str = &p[i + 1];
-		    } else {
-			fname = &p[i + 1];
+		    fname = &p[i + 1];
+		    if (ndx_str) {
 			break;
 		    }
+		    ndx_str = fname;
 		}
 	    }
 	    if (ndx_str) {

@@ -1,5 +1,5 @@
 /*
- * $LynxId: GridText.c,v 1.286 2014/12/16 01:23:52 tom Exp $
+ * $LynxId: GridText.c,v 1.287 2015/12/16 01:20:01 tom Exp $
  *
  *		Character grid hypertext object
  *		===============================
@@ -8226,7 +8226,6 @@ void print_wwwfile_to_fd(FILE *fp,
 
 		if (off2 >= 0 && off2 < cur->length) {
 		    temp_ptr = &(cur->value[off2]);
-		    temp_len = 1;
 		    try_utf8 = temp_ptr;
 		    temp_chr = (int) UCGetUniFromUtf8String(&try_utf8);
 		    if (temp_chr > 127) {
