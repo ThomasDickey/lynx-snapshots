@@ -1,9 +1,14 @@
--- $LynxId: CHANGES,v 1.831 2015/12/17 01:38:55 tom Exp $
+-- $LynxId: CHANGES,v 1.832 2015/12/17 02:00:24 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
 2015-12-16 (2.8.9dev.7)
+* switch HTTP version to 1.1, adding an explicit "close" to work around
+  the pitfall of persistent connections.  This is to work around a selective
+  reading of RFC 2068 by duckduckgo.com - see
+    http://lists.nongnu.org/archive/html/lynx-dev/2015-12/index.html
+  -Axel Beckert
 * fix a potential null dereference in tidy_tls.c reported by Coverity -TD
 * extend advanced mode by showing field names in forms in the status line
   (suggested by TG) -TD
