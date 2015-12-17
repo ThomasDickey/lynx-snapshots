@@ -1,4 +1,4 @@
-/* $LynxId: LYKeymap.c,v 1.117 2015/12/14 00:13:39 Axel.Beckert Exp $ */
+/* $LynxId: LYKeymap.c,v 1.118 2015/12/17 01:27:51 tom Exp $ */
 #include <HTUtils.h>
 #include <LYUtils.h>
 #include <LYGlobalDefs.h>
@@ -852,7 +852,9 @@ static char *pretty_html(int c)
 	    for (n = 0; n < TABLESIZE(table); n++) {
 		if (c == table[n].code) {
 		    found = TRUE;
-		    LYStrNCpy(dst, table[n].name, sizeof(buf) - (dst - buf) - 1);
+		    LYStrNCpy(dst,
+			      table[n].name,
+			      sizeof(buf) - (size_t) ((dst - buf) - 1));
 		    adj += (int) strlen(dst) - 1;
 		    dst += (int) strlen(dst);
 		    break;
