@@ -1,5 +1,5 @@
 /*
- * $LynxId: userdefs.h,v 1.310 2015/09/19 17:40:20 tom Exp $
+ * $LynxId: userdefs.h,v 1.312 2015/12/17 01:38:55 tom Exp $
  *
  * Lynx - Hypertext navigation system
  *
@@ -1446,7 +1446,7 @@
 #define LYNX_WWW_HOME "http://lynx.invisible-island.net/"
 #define LYNX_WWW_DIST "http://lynx.invisible-island.net/current/"
 /* $Format: "#define LYNX_DATE \"$ProjectDate$\""$ */
-#define LYNX_DATE "Wed, 06 May 2015 17:56:19 -0700"
+#define LYNX_DATE "Wed, 16 Dec 2015 20:38:55 -0500"
 #define LYNX_DATE_OFF 5		/* truncate the automatically-generated date */
 #define LYNX_DATE_LEN 11	/* truncate the automatically-generated date */
 

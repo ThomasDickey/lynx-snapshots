@@ -1,9 +1,9 @@
--- $LynxId: CHANGES,v 1.830 2015/12/16 01:24:04 tom Exp $
+-- $LynxId: CHANGES,v 1.831 2015/12/17 01:38:55 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2015-12-15 (2.8.9dev.7)
+2015-12-16 (2.8.9dev.7)
 * fix a potential null dereference in tidy_tls.c reported by Coverity -TD
 * extend advanced mode by showing field names in forms in the status line
   (suggested by TG) -TD
