@@ -1,4 +1,4 @@
-/* $LynxId: LYrcFile.c,v 1.94 2015/12/18 00:55:15 tom Exp $ */
+/* $LynxId: LYrcFile.c,v 1.95 2015/12/18 01:57:45 tom Exp $ */
 #include <HTUtils.h>
 #include <HTFTP.h>
 #include <LYUtils.h>
@@ -309,7 +309,7 @@ static void put_editor(FILE *fp, struct config_type *tbl)
     fprintf(fp, "%s=%s\n\n", tbl->name, NonNull(editor));
 }
 
-static int get_http_protocol(char *value)
+int get_http_protocol(char *value)
 {
     int found = HTprotocolLevel;
 

@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYReadCFG.c,v 1.186 2015/10/10 00:31:57 tom Exp $
+ * $LynxId: LYReadCFG.c,v 1.187 2015/12/18 01:58:34 tom Exp $
  */
 #ifndef NO_RULES
 #include <HTRules.h>
@@ -1559,6 +1559,7 @@ static Config_Type Config_Table [] =
      PARSE_FUN(RC_HTMLSRC_ATTRNAME_XFORM, read_htmlsrc_attrname_xform),
      PARSE_FUN(RC_HTMLSRC_TAGNAME_XFORM, read_htmlsrc_tagname_xform),
 #endif
+     PARSE_FUN(RC_HTTP_PROTOCOL,        get_http_protocol),
      PARSE_Env(RC_HTTP_PROXY,           0),
      PARSE_Env(RC_HTTPS_PROXY,          0),
      PARSE_REQ(RC_INCLUDE,              0),
