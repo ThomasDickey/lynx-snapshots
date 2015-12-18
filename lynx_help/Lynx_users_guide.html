@@ -1,4 +1,4 @@
-<!-- $LynxId: Lynx_users_guide.html,v 1.127 2015/10/09 21:42:12 tom Exp $ -->
+<!-- $LynxId: Lynx_users_guide.html,v 1.128 2015/12/18 10:24:31 tom Exp $ -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN">
 
 <html>
@@ -733,6 +733,7 @@
   Preferred encoding (!)           : [All_____]
   Preferred document character set : _________________________________
   Preferred document language      : en_______________________________
+  HTTP protocol (!)                : [HTTP 1.0]
   Send User-Agent header (!)       : [X]
   User-Agent header (!)            : Lynx/2.8.8pre.2 libwww-FM/2.14 SSL-MM/1.4.
 
@@ -986,6 +987,15 @@
     <dd>Select the <a href=
     "keystrokes/option_help.html#tagsoup">recovery mode</a> used by
     Lynx.</dd>
+
+    <dt>HTTP protocol</dt>
+
+    <dd>Normally Lynx negotiates HTTP/1.0, because it does not
+    support chunked transfer (a requirement for all HTTP/1.1
+    clients), although it supports several other features of
+    HTTP/1.1. You may encounter a server which does not support
+    HTTP/1.0 which can be used by switching to the later
+    protocol.</dd>
 
     <dt>Invalid-Cookie Prompting</dt>
 
