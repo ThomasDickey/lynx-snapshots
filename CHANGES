@@ -1,9 +1,11 @@
--- $LynxId: CHANGES,v 1.832 2015/12/17 02:00:24 tom Exp $
+-- $LynxId: CHANGES,v 1.833 2015/12/18 01:42:15 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2015-12-16 (2.8.9dev.7)
+2015-12-17 (2.8.9dev.7)
+* make the HTTP version configurable, defaulting to "1.0" (HTTP/1.0) as
+  HTTP_PROTOCOL, and make it changeable in the options menu -TD
 * switch HTTP version to 1.1, adding an explicit "close" to work around
   the pitfall of persistent connections.  This is to work around a selective
   reading of RFC 2068 by duckduckgo.com - see

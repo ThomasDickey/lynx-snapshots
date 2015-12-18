@@ -1,4 +1,4 @@
-/* $LynxId: LYOptions.c,v 1.167 2015/12/16 01:51:08 tom Exp $ */
+/* $LynxId: LYOptions.c,v 1.168 2015/12/18 01:01:21 tom Exp $ */
 #include <HTUtils.h>
 #include <HTFTP.h>
 #include <HTTP.h>		/* 'reloading' flag */
@@ -2443,6 +2443,14 @@ static OptValues encoding_values[] =
 /*
  * Headers transferred to remote server
  */
+static const char *http_protocol_string = RC_HTTP_PROTOCOL;
+static OptValues http_protocol_values[] =
+{
+    {HTTP_1_0, N_("HTTP 1.0"), "HTTP_1_0"},
+    {HTTP_1_1, N_("HTTP 1.1"), "HTTP_1_1"},
+    {0, 0, 0}
+};
+
 static const char *preferred_doc_char_string = RC_PREFERRED_CHARSET;
 static const char *preferred_doc_lang_string = RC_PREFERRED_LANGUAGE;
 static const char *send_user_agent_string = RC_SEND_USERAGENT;
@@ -3262,6 +3270,13 @@ int postoptions(DocInfo *newdoc)
 	    }
 	}
 
+	/*
+	 * HTTP protocol: SELECT
+	 */
+	if (!strcmp(data[i].tag, http_protocol_string)) {
+	    GetOptValues(http_protocol_values, data[i].value, &HTprotocolLevel);
+	}
+
 	/* Send User Agent: INPUT */
 	if (!strcmp(data[i].tag, send_user_agent_string)) {
 	    LYSendUserAgent = (BOOLEAN) !strcasecomp(data[i].value, "ON");
@@ -4041,6 +4056,12 @@ static int gen_options(char **newfile)
     PutLabel(fp0, gettext("Preferred document language"), preferred_doc_lang_string);
     PutTextInput(fp0, preferred_doc_lang_string,
 		 NonNull(language), cset_len + 2, "");
+
+    /* HTTP protocol SELECT */
+    PutLabel(fp0, gettext("HTTP protocol"), http_protocol_string);
+    BeginSelect(fp0, http_protocol_string);
+    PutOptValues(fp0, HTprotocolLevel, http_protocol_values);
+    EndSelect(fp0);
 
     /* User Agent: INPUT */
     if (!no_useragent) {

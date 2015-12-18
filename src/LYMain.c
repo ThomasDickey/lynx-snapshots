@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMain.c,v 1.259 2015/10/12 00:23:00 tom Exp $
+ * $LynxId: LYMain.c,v 1.260 2015/12/18 00:34:45 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTP.h>
@@ -556,6 +556,8 @@ int LYHiddenLinks = HIDDENLINKS_SEPARATE;	/* Show hidden links? */
 char *SSL_cert_file = NULL;	/* Default CA CERT file */
 char *SSL_client_cert_file = NULL;
 char *SSL_client_key_file = NULL;
+
+int HTprotocolLevel = HTTP_1_0;
 
 int Old_DTD = NO;
 static BOOLEAN DTD_recovery = NO;
