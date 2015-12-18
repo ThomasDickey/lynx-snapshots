@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYrcFile.h,v 1.46 2015/10/08 08:51:26 Simon.Kainz Exp $
+ * $LynxId: LYrcFile.h,v 1.47 2015/12/18 00:31:43 tom Exp $
  */
 #ifndef LYRCFILE_H
 #define LYRCFILE_H
@@ -107,6 +107,7 @@
 #define RC_HTMLSRC_ATTRNAME_XFORM       "htmlsrc_attrname_xform"
 #define RC_HTMLSRC_TAGNAME_XFORM        "htmlsrc_tagname_xform"
 #define RC_HTTPS_PROXY                  "https_proxy"
+#define RC_HTTP_PROTOCOL                "http_protocol"
 #define RC_HTTP_PROXY                   "http_proxy"
 #define RC_INCLUDE                      "include"
 #define RC_INFLATE_PATH                 "inflate_path"

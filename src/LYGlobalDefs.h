@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYGlobalDefs.h,v 1.140 2015/12/14 09:52:22 tom Exp $
+ * $LynxId: LYGlobalDefs.h,v 1.141 2015/12/18 00:35:49 tom Exp $
  *
  * global variable definitions
  */
@@ -540,6 +540,13 @@ extern "C" {
     extern char *SSL_cert_file;	/* Default CA CERT file */
     extern char *SSL_client_cert_file;	/* Default client CERT file */
     extern char *SSL_client_key_file;	/* Default client key file */
+
+    typedef enum {
+	HTTP_1_0
+	,HTTP_1_1
+    } HTTP_LEVEL;
+
+    extern int HTprotocolLevel;
 
     extern int Old_DTD;
 

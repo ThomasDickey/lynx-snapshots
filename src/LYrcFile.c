@@ -1,4 +1,4 @@
-/* $LynxId: LYrcFile.c,v 1.93 2015/05/28 00:19:00 Ruda.Moura Exp $ */
+/* $LynxId: LYrcFile.c,v 1.94 2015/12/18 00:55:15 tom Exp $ */
 #include <HTUtils.h>
 #include <HTFTP.h>
 #include <LYUtils.h>
@@ -23,6 +23,12 @@ static Config_Enum tbl_DTD_recovery[] = {
     { "off",		FALSE },
     { "sortasgml",	TRUE },
     { "tagsoup",	FALSE },
+    { NULL,		-1 },
+};
+
+static Config_Enum tbl_HTTP_protocol[] = {
+    { "1.0",		HTTP_1_0 },
+    { "1.1",		HTTP_1_1 },
     { NULL,		-1 },
 };
 
@@ -303,6 +309,22 @@ static void put_editor(FILE *fp, struct config_type *tbl)
     fprintf(fp, "%s=%s\n\n", tbl->name, NonNull(editor));
 }
 
+static int get_http_protocol(char *value)
+{
+    int found = HTprotocolLevel;
+
+    if (LYgetEnum(tbl_HTTP_protocol, value, &found)
+	&& HTprotocolLevel != found) {
+	HTprotocolLevel = found;
+    }
+    return 0;
+}
+
+static void put_http_protocol(FILE *fp, struct config_type *tbl)
+{
+    fprintf(fp, "%s=%s\n\n", tbl->name, LYputEnum(tbl_HTTP_protocol, HTprotocolLevel));
+}
+
 int get_tagsoup(char *value)
 {
     int found = Old_DTD;
@@ -430,6 +452,8 @@ file lists such as FTP directories.  The options are:\n\
     MAYBE_SET(RC_FTP_PASSIVE,           ftp_passive,        MSG_ENABLE_LYNXRC),
 #endif
     MAYBE_SET(RC_HTML5_CHARSETS,        html5_charsets,     MSG_ENABLE_LYNXRC),
+    MAYBE_FUN(RC_HTTP_PROTOCOL,         get_http_protocol,  put_http_protocol,
+	      MSG_ENABLE_LYNXRC),
 #ifdef EXP_KEYBOARD_LAYOUT
     PARSE_ARY(RC_KBLAYOUT,              current_layout,     LYKbLayoutNames, NULL),
 #endif

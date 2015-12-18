@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTP.c,v 1.149 2015/12/17 02:00:47 tom Exp $
+ * $LynxId: HTTP.c,v 1.150 2015/12/18 01:20:22 tom Exp $
  *
  * HyperText Tranfer Protocol	- Client implementation		HTTP.c
  * ==========================
@@ -16,8 +16,6 @@
 #ifdef USE_SSL
 #include <HTNews.h>
 #endif
-
-#define HTTP_VERSION	"HTTP/1.1"
 
 #define HTTP_PORT   80
 #define HTTPS_PORT  443
@@ -1172,7 +1170,9 @@ static int HTLoadHTTP(const char *arg,
     }
     if (extensions) {
 	BStrCat0(command, " ");
-	BStrCat0(command, HTTP_VERSION);
+	BStrCat0(command, ((HTprotocolLevel == HTTP_1_0)
+			   ? "HTTP/1.0"
+			   : "HTTP/1.1"));
     }
 
     BStrCat0(command, crlf);	/* CR LF, as in rfc 977 */
@@ -1186,7 +1186,9 @@ static int HTLoadHTTP(const char *arg,
 	    HTBprintf(&command, "Host: %s%c%c", host, CR, LF);
 	    FREE(host);
 	}
-	HTBprintf(&command, "Connection: close%c%c", CR, LF);
+	if (HTprotocolLevel >= HTTP_1_1) {
+	    HTBprintf(&command, "Connection: close%c%c", CR, LF);
+	}
 
 	if (!HTPresentations)
 	    HTFormatInit();
