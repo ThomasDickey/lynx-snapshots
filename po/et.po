@@ -5,10 +5,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: lynx 2.8.9-dev5\n"
+"Project-Id-Version: lynx 2.8.9-dev7\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-04-14 20:53-0400\n"
-"PO-Revision-Date: 2015-04-15 11:13+0300\n"
+"POT-Creation-Date: 2015-12-14 20:39-0500\n"
+"PO-Revision-Date: 2015-12-19 19:43+0200\n"
 "Last-Translator: Toomas Soome <tsoome@me.com>\n"
 "Language-Team: Estonian <linux-ee@lists.eenet.ee>\n"
 "Language: et\n"
@@ -114,1936 +114,2003 @@ msgid "URL too long"
 msgstr "URL on liiga pikk"
 
 #. Inactive input fields, messages used with -tna option - kw
-#. #define FORM_LINK_TEXT_MESSAGE_INA
+#. #define FORM_LINK_TEXT_ADV_MSG_INA
 #: LYMessages.c:57
+#, c-format
+msgid "(Textfield \"%s\"); Inactive.  Press <return> to activate."
+msgstr "(Tekstiväli \"%s\"); Pole aktiivne. Aktiveerimiseks vajutage <return>."
+
+#. #define FORM_LINK_TEXT_MESSAGE_INA
+#: LYMessages.c:59
 msgid "(Text entry field) Inactive.  Press <return> to activate."
 msgstr "(Tekstiväli) Pole aktiivne. Aktiveerimiseks vajutage <return>."
 
+#. #define FORM_LINK_TEXTAREA_ADV_MSG_INA
+#: LYMessages.c:61
+#, c-format
+msgid "(Textarea \"%s\"); Inactive.  Press <return> to activate."
+msgstr "(Tekstiala \"%s\"); Pole aktiivne. Aktiveerimiseks vajutage <return>."
+
 #. #define FORM_LINK_TEXTAREA_MESSAGE_INA
-#: LYMessages.c:59
+#: LYMessages.c:63
 msgid "(Textarea) Inactive.  Press <return> to activate."
 msgstr "(Tekstiala) Pole aktiivne. Aktiveerimiseks vajutage <return>."
 
+#. #define FORM_LINK_TEXTAREA_ADV_MSG_INA_E
+#: LYMessages.c:65
+#, c-format
+msgid "(Textarea \"%s\"); Inactive.  Press <return> to activate (%s for editor)."
+msgstr "(Tekstiala \"%s\"); Pole aktiivne. Aktiveerimiseks vajutage <return> (%s toimeti)."
+
 #. #define FORM_LINK_TEXTAREA_MESSAGE_INA_E
-#: LYMessages.c:61
+#: LYMessages.c:67
 #, c-format
 msgid "(Textarea) Inactive.  Press <return> to activate (%s for editor)."
 msgstr "(Tekstiala) Pole aktiivne. Aktiveerimiseks vajutage <return> (%s toimeti)."
 
 #. #define FORM_LINK_TEXT_SUBMIT_MESSAGE_INA
-#: LYMessages.c:63
+#: LYMessages.c:69
 msgid "(Form field) Inactive.  Use <return> to edit."
 msgstr "(Vormiväli) Pole aktiivne. Toimetamiseks vajutage <return>."
 
 #. #define FORM_TEXT_SUBMIT_MESSAGE_INA_X
-#: LYMessages.c:65
+#: LYMessages.c:71
 #, c-format
 msgid "(Form field) Inactive.  Use <return> to edit (%s to submit with no cache)."
 msgstr "(Vormiväli) Pole aktiivne. Toimetamiseks <return> (%s saada puhverdamata)."
 
 #. #define FORM_TEXT_RESUBMIT_MESSAGE_INA
-#: LYMessages.c:67
+#: LYMessages.c:73
 msgid "(Form field) Inactive. Press <return> to edit, press <return> twice to submit."
 msgstr "(Vormiväli) Pole aktiivne. Toimetamiseks <return>, saatmiseks topelt."
 
 #. #define FORM_TEXT_SUBMIT_MAILTO_MSG_INA
-#: LYMessages.c:69
+#: LYMessages.c:75
 msgid "(mailto form field) Inactive.  Press <return> to change."
 msgstr "(mailto vormi väli) Pole aktiivne. Muutmiseks vajutage <return>."
 
 #. #define FORM_LINK_PASSWORD_MESSAGE_INA
-#: LYMessages.c:71
+#: LYMessages.c:77
 msgid "(Password entry field) Inactive.  Press <return> to activate."
 msgstr "(Parooliväli) Pole aktiivne. Aktiveerimiseks vajutage <return>."
 
 #. #define FORM_LINK_FILE_UNM_MSG
-#: LYMessages.c:74
+#: LYMessages.c:80
 msgid "UNMODIFIABLE file entry field.  Use UP or DOWN arrows or tab to move off."
 msgstr "MITTEMUUDETAV failiväli. Väljalt lahkumiseks kasutage ÜLES, ALLA või TAB."
 
 #. #define FORM_LINK_FILE_MESSAGE
-#: LYMessages.c:76
+#: LYMessages.c:82
 msgid "(File entry field) Enter filename.  Use UP or DOWN arrows or tab to move off."
 msgstr "(Failiväli) Sisestage faili nimi. Väljalt lahkumiseks ÜLES, ALLA või TAB."
 
+#. #define FORM_LINK_TEXT_ADV_MSG
 #. #define FORM_LINK_TEXT_MESSAGE
-#: LYMessages.c:78
-msgid "(Text entry field) Enter text.  Use UP or DOWN arrows or tab to move off."
-msgstr "(Tekstiväli) Sisestage tekst. Väljalt lahkumiseks ÜLES, ALLA või TAB."
+#: LYMessages.c:84 LYMessages.c:86
+#, c-format
+msgid "(Textfield \"%s\"); Enter text.  Use UP or DOWN arrows or tab to move off."
+msgstr "(Tekstiväli \"%s\"); Sisestage tekst. Väljalt lahkumiseks ÜLES, ALLA või TAB."
+
+#. #define FORM_LINK_TEXTAREA_ADV_MSG
+#: LYMessages.c:88
+#, c-format
+msgid "(Textarea \"%s\"); Enter text. Use UP/DOWN arrows or TAB to move off."
+msgstr "(Tekstiala \"%s\"); Sisestage tekst. Lahkumiseks kasutage ÜLES, ALLA või TAB."
 
 #. #define FORM_LINK_TEXTAREA_MESSAGE
-#: LYMessages.c:80
+#: LYMessages.c:90
 msgid "(Textarea) Enter text. Use UP/DOWN arrows or TAB to move off."
 msgstr "(Tekstiala) Sisestage tekst. Lahkumiseks kasutage ÜLES, ALLA või TAB."
 
+#. #define FORM_LINK_TEXTAREA_ADV_MSG_E
+#: LYMessages.c:92
+#, c-format
+msgid "(Textarea \"%s\"); Enter text. Use UP/DOWN arrows or TAB to move off (%s for editor)."
+msgstr "(Tekstiala \"%s\"); Sisestage tekst. Lahkumiseks ÜLES, ALLA või TAB (%s toimeti)."
+
 #. #define FORM_LINK_TEXTAREA_MESSAGE_E
-#: LYMessages.c:82
+#: LYMessages.c:94
 #, c-format
 msgid "(Textarea) Enter text. Use UP/DOWN arrows or TAB to move off (%s for editor)."
 msgstr "(Tekstiala) Sisestage tekst. Lahkumiseks ÜLES, ALLA või TAB (%s toimeti)."
 
 #. #define FORM_LINK_TEXT_UNM_MSG
-#: LYMessages.c:84
+#: LYMessages.c:96
 msgid "UNMODIFIABLE form text field.  Use UP or DOWN arrows or tab to move off."
 msgstr "MITTEMUUDETAV vormi tekst. Väljalt lahkumiseks ÜLES, ALLA või TAB."
 
 #. #define FORM_LINK_TEXT_SUBMIT_MESSAGE
-#: LYMessages.c:86
+#: LYMessages.c:98
 msgid "(Form field) Enter text.  Use <return> to submit."
 msgstr "(Vormi väli) Sisestage tekst. Saatmiseks vajutage <return>."
 
 #. #define FORM_LINK_TEXT_SUBMIT_MESSAGE_X
-#: LYMessages.c:88
+#: LYMessages.c:100
 #, c-format
 msgid "(Form field) Enter text.  Use <return> to submit (%s for no cache)."
 msgstr "(Vormi väli) Sisestage tekst. Saatmiseks vajutage <return> (%s puhverdamata)."
 
 #. #define FORM_LINK_TEXT_RESUBMIT_MESSAGE
-#: LYMessages.c:90
+#: LYMessages.c:102
 msgid "(Form field) Enter text.  Use <return> to submit, arrows or tab to move off."
 msgstr "(Vormi väli) Sisestage tekst. Saatmiseks <return>, lahkumiseks nooled/tab."
 
 #. #define FORM_LINK_TEXT_SUBMIT_UNM_MSG
-#: LYMessages.c:92
+#: LYMessages.c:104
 msgid "UNMODIFIABLE form field.  Use UP or DOWN arrows or tab to move off."
 msgstr "MITTEMUUDETAV vormi väli. Lahkumiseks nooled või tab."
 
 #. #define FORM_LINK_TEXT_SUBMIT_MAILTO_MSG
-#: LYMessages.c:94
+#: LYMessages.c:106
 msgid "(mailto form field) Enter text.  Use <return> to submit, arrows to move off."
 msgstr "(mailto vorm) Sisestage tekst. Postitamiseks <return>, lahkumiseks nooled."
 
 #. #define FORM_LINK_TEXT_SUBMIT_MAILTO_DIS_MSG
-#: LYMessages.c:96
+#: LYMessages.c:108
 msgid "(mailto form field) Mail is disallowed so you cannot submit."
 msgstr "(mailto vorm) E-post on blokeeritud, seega postitada ei saa."
 
 #. #define FORM_LINK_PASSWORD_MESSAGE
-#: LYMessages.c:98
+#: LYMessages.c:110
 msgid "(Password entry field) Enter text.  Use UP or DOWN arrows or tab to move off."
 msgstr "(Parooliväli) Sisestage tekst. Lahkumiseks nooled või tab."
 
 #. #define FORM_LINK_PASSWORD_UNM_MSG
-#: LYMessages.c:100
+#: LYMessages.c:112
 msgid "UNMODIFIABLE form password.  Use UP or DOWN arrows or tab to move off."
 msgstr "MITTEMUUDETAV vormi parool. Lahkumiseks nooled või tab."
 
+#. #define FORM_LINK_CHECKBOX_ADV_MSG
+#: LYMessages.c:114
+#, c-format
+msgid "(Checkbox \"%s\");   Use right-arrow or <return> to toggle."
+msgstr "(Märkeruut \"%s\"); Valimiseks kasutage nool paremale või <return>."
+
 #. #define FORM_LINK_CHECKBOX_MESSAGE
-#: LYMessages.c:102
+#: LYMessages.c:116
 msgid "(Checkbox Field)   Use right-arrow or <return> to toggle."
 msgstr "(Märkeruut) Valimiseks kasutage nool paremale või <return>."
 
 #. #define FORM_LINK_CHECKBOX_UNM_MSG
-#: LYMessages.c:104
+#: LYMessages.c:118
 msgid "UNMODIFIABLE form checkbox.  Use UP or DOWN arrows or tab to move off."
 msgstr "MITTEMUUDETAV märkeruut. Lahkumiseks nooled või tab."
 
+#. #define FORM_LINK_RADIO_ADV_MSG
+#: LYMessages.c:120
+#, c-format
+msgid "(Radio Button \"%s\");   Use right-arrow or <return> to toggle."
+msgstr "(Raadionupp \"%s\"); Valimiseks kasutage nool paremale või <return>."
+
 #. #define FORM_LINK_RADIO_MESSAGE
-#: LYMessages.c:106
+#: LYMessages.c:122
 msgid "(Radio Button)   Use right-arrow or <return> to toggle."
 msgstr "(Raadionupp) Valimiseks kasutage nool paremale või <return>."
 
 #. #define FORM_LINK_RADIO_UNM_MSG
-#: LYMessages.c:108
+#: LYMessages.c:124
 msgid "UNMODIFIABLE form radio button.  Use UP or DOWN arrows or tab to move off."
 msgstr "MITTEMUUDETAV raadionupp. Lahkumiseks nooled või tab."
 
 #. #define FORM_LINK_SUBMIT_PREFIX
-#: LYMessages.c:110
+#: LYMessages.c:126
 msgid "Submit ('x' for no cache) to "
 msgstr "postita ('x' puhverdamata): "
 
 #. #define FORM_LINK_RESUBMIT_PREFIX
-#: LYMessages.c:112
+#: LYMessages.c:128
 msgid "Submit to "
 msgstr "Postita: "
 
 #. #define FORM_LINK_SUBMIT_MESSAGE
-#: LYMessages.c:114
+#: LYMessages.c:130
 msgid "(Form submit button) Use right-arrow or <return> to submit ('x' for no cache)."
 msgstr "(Vormi postitamine) Täitmiseks nool paremale või <return> ('x' ei puhverda)."
 
 #. #define FORM_LINK_RESUBMIT_MESSAGE
-#: LYMessages.c:116
+#: LYMessages.c:132
 msgid "(Form submit button) Use right-arrow or <return> to submit."
 msgstr "(Vormi postitamine) Täitmiseks nool paremale või <return>."
 
 #. #define FORM_LINK_SUBMIT_DIS_MSG
-#: LYMessages.c:118
+#: LYMessages.c:134
 msgid "DISABLED form submit button.  Use UP or DOWN arrows or tab to move off."
 msgstr "BLOKEERITUD vormi postitamine. Kasutage tab või nool üles või alla."
 
 #. #define FORM_LINK_SUBMIT_MAILTO_PREFIX
-#: LYMessages.c:120
+#: LYMessages.c:136
 msgid "Submit mailto form to "
 msgstr "Postita mailto vorm aadressil "
 
 #. #define FORM_LINK_SUBMIT_MAILTO_MSG
-#: LYMessages.c:122
+#: LYMessages.c:138
 msgid "(mailto form submit button) Use right-arrow or <return> to submit."
 msgstr "(mailto vormi postitamine) Täitmiseks nool paremale või <return>."
 
 #. #define FORM_LINK_SUBMIT_MAILTO_DIS_MSG
-#: LYMessages.c:124
+#: LYMessages.c:140
 msgid "(mailto form submit button) Mail is disallowed so you cannot submit."
 msgstr "(mailto vormi postitamine) E-post on keelatud, seda ei saa kasutada."
 
 #. #define FORM_LINK_RESET_MESSAGE
-#: LYMessages.c:126
+#: LYMessages.c:142
 msgid "(Form reset button)   Use right-arrow or <return> to reset form to defaults."
 msgstr "(Vormi algväärtustamise nupp)  Nool paremale või <return> algväärtustab. "
 
 #. #define FORM_LINK_RESET_DIS_MSG
-#: LYMessages.c:128
+#: LYMessages.c:144
 msgid "DISABLED form reset button.  Use UP or DOWN arrows or tab to move off."
 msgstr "BLOKEERITUD vormi algväärtustamine) Kasutage tab või nool üles või alla."
 
 #. #define FORM_LINK_BUTTON_MESSAGE
-#: LYMessages.c:130
+#: LYMessages.c:146
 msgid "(Script button)   Use UP or DOWN arrows or tab to move off."
 msgstr "(Skripti nupp)    Kasutage tab või nool üles või alla."
 
+#. #define FORM_LINK_BUTTON_ADV_MSG
+#: LYMessages.c:148
+#, c-format
+msgid "(Script button \"%s\");   Use UP or DOWN arrows or tab to move off."
+msgstr "(Skripti nupp \"%s\"); Kasutage tab või nool üles või alla."
+
 #. #define FORM_LINK_BUTTON_DIS_MSG
-#: LYMessages.c:132
+#: LYMessages.c:150
 msgid "DISABLED Script button.  Use UP or DOWN arrows or tab to move off."
 msgstr "BLOKEERITUD skripti nupp. Kasutage tab või nool üles või alla."
 
+#. #define FORM_LINK_OPTION_LIST_ADV_MSG
+#: LYMessages.c:152
+#, c-format
+msgid "(Option list \"%s\"); Hit return to select option."
+msgstr "(Seadete loend \"%s\"); Vajutage return ja valige noolte ja return klahviga seade."
+
 #. #define FORM_LINK_OPTION_LIST_MESSAGE
-#: LYMessages.c:134
+#: LYMessages.c:154
 msgid "(Option list) Hit return and use arrow keys and return to select option."
 msgstr "(Seadete loend) Vajutage return ja valige noolte ja return klahviga seade."
 
+#. #define CHOICE_LIST_ADV_MSG
+#: LYMessages.c:156
+#, c-format
+msgid "(Choice entry \"%s\"); Use arrow keys and return to select option."
+msgstr "(Valiku loend \"%s\"); Vajutage return ja valige noolte ja return klahviga seade."
+
 #. #define CHOICE_LIST_MESSAGE
-#: LYMessages.c:136
+#: LYMessages.c:158
 msgid "(Choice list) Hit return and use arrow keys and return to select option."
 msgstr "(Valiku loend) Vajutage return ja valige noolte ja return klahviga seade."
 
+#. #define MOUSE_CHOICE_MESSAGE
+#: LYMessages.c:160
+msgid "Left mouse button or return to select, arrow keys to scroll."
+msgstr "Vasak hiire nupp või reavahetus valimiseks, nooled kerivad."
+
 #. #define FORM_LINK_OPTION_LIST_UNM_MSG
-#: LYMessages.c:138
+#: LYMessages.c:162
 msgid "UNMODIFIABLE option list.  Use return or arrow keys to review or leave."
 msgstr "MITTEMUUDETAVAD seaded. Vaatamiseks või liikumiseks nooled või <return>."
 
 #. #define CHOICE_LIST_UNM_MSG
-#: LYMessages.c:140
+#: LYMessages.c:164
 msgid "UNMODIFIABLE choice list.  Use return or arrow keys to review or leave."
 msgstr "MITTEMUUDETAVAD valikud. Vaatamiseks või liikumiseks nooled või <return>."
 
-#: LYMessages.c:141
+#: LYMessages.c:165
 msgid "Submitting form..."
 msgstr "Saadan vormi..."
 
-#: LYMessages.c:142
+#: LYMessages.c:166
 msgid "Resetting form..."
 msgstr "Algväärtustan vormi..."
 
 #. #define RELOADING_FORM
-#: LYMessages.c:144
+#: LYMessages.c:168
 msgid "Reloading document.  Any form entries will be lost!"
 msgstr "Laen dokumendi uuesti. Kõik vormi väljad lähevad kaotsi!"
 
 #. #define LINK_NOT_IN_FORM
-#: LYMessages.c:146
+#: LYMessages.c:170
 msgid "The current link is not in a FORM"
 msgstr "Praegune viide ei ole VORMIS"
 
-#: LYMessages.c:147
+#: LYMessages.c:171
 #, c-format
 msgid "Warning: Cannot transcode form data to charset %s!"
 msgstr "Hoiatus: Vormi andmeid ei õnnestu teisendada kooditabelisse %s!"
 
 #. #define NORMAL_LINK_MESSAGE
-#: LYMessages.c:150
+#: LYMessages.c:174
 msgid "(NORMAL LINK)   Use right-arrow or <return> to activate."
 msgstr "(TAVALINE VIIDE) Aktiveerimiseks kasutage nool paremale või <return>."
 
-#: LYMessages.c:151
+#: LYMessages.c:175
 msgid "The resource requested is not available at this time."
 msgstr "Ressurss, mida soovisite, ei ole hetkel kättesaadav."
 
-#: LYMessages.c:152
+#: LYMessages.c:176
 msgid "Enter Lynx keystroke command: "
 msgstr "Sisestage Lynxi klahvikäsklus: "
 
-#: LYMessages.c:153
+#: LYMessages.c:177
 msgid "Looking up "
 msgstr "Otsin serverit "
 
-#: LYMessages.c:154
+#: LYMessages.c:178
 #, c-format
 msgid "Getting %s"
 msgstr "Laen %s"
 
-#: LYMessages.c:155
+#: LYMessages.c:179
 #, c-format
 msgid "Skipping %s"
 msgstr "Jätan %s vahele"
 
-#: LYMessages.c:156
+#: LYMessages.c:180
 #, c-format
 msgid "Using %s"
 msgstr "Kasutan %s"
 
-#: LYMessages.c:157
+#: LYMessages.c:181
 #, c-format
 msgid "Illegal URL: %s"
 msgstr "Vigane URL: %s"
 
-#: LYMessages.c:158
+#: LYMessages.c:182
 #, c-format
 msgid "Badly formed address %s"
 msgstr "Vigaselt vormitud aadress %s"
 
-#: LYMessages.c:159
+#: LYMessages.c:183
 #, c-format
 msgid "URL: %s"
 msgstr "URL: %s"
 
-#: LYMessages.c:160
+#: LYMessages.c:184
 msgid "Unable to access WWW file!!!"
 msgstr "WWW failile pole juurdepääsu!!!"
 
-#: LYMessages.c:161
+#: LYMessages.c:185
 #, c-format
 msgid "This is a searchable index.  Use %s to search."
 msgstr "See on otsitav indeks. Otsimiseks kasutage %s."
 
 #. #define WWW_INDEX_MORE_MESSAGE
-#: LYMessages.c:163
+#: LYMessages.c:187
 #, c-format
 msgid "--More--  This is a searchable index.  Use %s to search."
 msgstr "--Veel-- See on otsitav indeks. Otsimiseks kasutage %s."
 
-#: LYMessages.c:164
+#: LYMessages.c:188
 msgid "You have entered an invalid link number."
 msgstr "Te sisestasite vigase viitenumbri."
 
 #. #define SOURCE_HELP
-#: LYMessages.c:166
+#: LYMessages.c:190
 msgid "Currently viewing document source.  Press '\\' to return to rendered version."
 msgstr "Dokumendi algtekst. Renderdatud versiooni vaatamiseks vajutage '\\'."
 
 #. #define NOVICE_LINE_ONE
-#: LYMessages.c:168
+#: LYMessages.c:192
 msgid "  Arrow keys: Up and Down to move.  Right to follow a link; Left to go back.  \n"
 msgstr "  Nooleklahvid: liikumiseks üles ja alla. Parem järgib viidet, vasakuga tagasi.\n"
 
 #. #define NOVICE_LINE_TWO
-#: LYMessages.c:170
+#: LYMessages.c:194
 msgid " H)elp O)ptions P)rint G)o M)ain screen Q)uit /=search [delete]=history list \n"
 msgstr " H=appi O=seaded P=trüki G=mine M=põhiaken Q=välju /=otsing [delete]=ajalugu\n"
 
 #. #define NOVICE_LINE_TWO_A
-#: LYMessages.c:172
+#: LYMessages.c:196
 msgid "  O)ther cmds  H)elp  K)eymap  G)oto  P)rint  M)ain screen  o)ptions  Q)uit  \n"
 msgstr "O=muud  H=abiinfo  K)lahvid  G=mine  P)rindi  M=põhiekraan  o=seaded  Q=välju\n"
 
 #. #define NOVICE_LINE_TWO_B
-#: LYMessages.c:174
+#: LYMessages.c:198
 msgid "  O)ther cmds  B)ack  E)dit  D)ownload ^R)eload ^W)ipe screen  search doc: / \n"
 msgstr "O=muud  B=tagasi  toim'E'ta  D=lae alla ^R=lae uuesti ^W=pühi ekraan /=otsing\n"
 
 #. #define NOVICE_LINE_TWO_C
-#: LYMessages.c:176
+#: LYMessages.c:200
 msgid "O)ther cmds  C)omment  History: <backspace>  Bookmarks: V)iew, A)dd, R)emove \n"
 msgstr "O=muud käsud C=kommentaar  Ajalugu: <bsp>  Järjed: V)aata, A=lisa, R=eemalda \n"
 
 #. #define FORM_NOVICELINE_ONE
-#: LYMessages.c:178
+#: LYMessages.c:202
 msgid "            Enter text into the field by typing on the keyboard              "
 msgstr "            Sisestage väljale tekst                                          "
 
 #. #define FORM_NOVICELINE_TWO
-#: LYMessages.c:180
+#: LYMessages.c:204
 msgid "    Ctrl-U to delete all text in field, [Backspace] to delete a character    "
 msgstr "    Ctrl-U kustutab väljalt kogu teksti, [Backspace] kustutab sümboli        "
 
 #. #define FORM_NOVICELINE_TWO_DELBL
-#: LYMessages.c:182
+#: LYMessages.c:206
 msgid "      Ctrl-U to delete text in field, [Backspace] to delete a character    "
 msgstr "      Ctrl-U kustutab väljalt teksti, [Backspace] kustutab sümboli         "
 
 #. #define FORM_NOVICELINE_TWO_VAR
-#: LYMessages.c:184
+#: LYMessages.c:208
 #, c-format
 msgid "    %s to delete all text in field, [Backspace] to delete a character    "
 msgstr "    %s kustutab väljalt kogu teksti, [Backspace] kustutab sümboli        "
 
 #. #define FORM_NOVICELINE_TWO_DELBL_VAR
-#: LYMessages.c:186
+#: LYMessages.c:210
 #, c-format
 msgid "      %s to delete text in field, [Backspace] to delete a character    "
 msgstr "      %s kustutab väljalt teksti, [Backspace] kustutab sümboli         "
 
 #. mailto
-#: LYMessages.c:189
+#: LYMessages.c:213
 msgid "Malformed mailto form submission!  Cancelled!"
 msgstr "Vigane mailto vormi edastamine! Katkestasin!"
 
-#: LYMessages.c:190
+#: LYMessages.c:214
 msgid "Warning!  Control codes in mail address replaced by ?"
 msgstr "Hoiatus! Asendasin kontrollkoodid kirja aadressis küsimärkidega"
 
-#: LYMessages.c:191
+#: LYMessages.c:215
 msgid "Mail disallowed!  Cannot submit."
 msgstr "Kirjad ei ole lubatud! Ei saa postitada."
 
-#: LYMessages.c:192
+#: LYMessages.c:216
 msgid "Mailto form submission failed!"
 msgstr "Mailto vormi andmete edastamine ebaõnnestus!"
 
-#: LYMessages.c:193
+#: LYMessages.c:217
 msgid "Mailto form submission Cancelled!!!"
 msgstr "Mailto vormi andmete edastamine katkestati!!!"
 
-#: LYMessages.c:194
+#: LYMessages.c:218
 msgid "Sending form content..."
 msgstr "Saadan vormi sisu..."
 
-#: LYMessages.c:195
+#: LYMessages.c:219
 msgid "No email address is present in mailto URL!"
 msgstr "mailto URLis puudub e-posti aadress!"
 
 #. #define MAILTO_URL_TEMPOPEN_FAILED
-#: LYMessages.c:197
+#: LYMessages.c:221
 msgid "Unable to open temporary file for mailto URL!"
 msgstr "mailto URLile ei õnnestu avada ajutist faili!"
 
 #. #define INC_ORIG_MSG_PROMPT
-#: LYMessages.c:199
+#: LYMessages.c:223
 msgid "Do you wish to include the original message?"
 msgstr "Kas te soovite kaasata originaalteadet?"
 
 #. #define INC_PREPARSED_MSG_PROMPT
-#: LYMessages.c:201
+#: LYMessages.c:225
 msgid "Do you wish to include the preparsed source?"
 msgstr "Kas soovite kaasata eelnevalt töödeldud teksti?"
 
 #. #define SPAWNING_EDITOR_FOR_MAIL
-#: LYMessages.c:203
+#: LYMessages.c:227
 msgid "Spawning your selected editor to edit mail message"
 msgstr "Käivitan kirja toimetamiseks teie poolt valitud toimeti"
 
 #. #define ERROR_SPAWNING_EDITOR
-#: LYMessages.c:205
+#: LYMessages.c:229
 msgid "Error spawning editor, check your editor definition in the options menu"
 msgstr "Viga toimeti käivitamisel, kontrollige toimeti definitsiooni seadete menüüs"
 
-#: LYMessages.c:206
+#: LYMessages.c:230
 msgid "Send this comment?"
 msgstr "Saata teie kommentaar?"
 
-#: LYMessages.c:207
+#: LYMessages.c:231
 msgid "Send this message?"
 msgstr "Saata teie teade?"
 
-#: LYMessages.c:208
+#: LYMessages.c:232
 msgid "Sending your message..."
 msgstr "Saadan teie teadet..."
 
-#: LYMessages.c:209
+#: LYMessages.c:233
 msgid "Sending your comment:"
 msgstr "Saadan teie kommentaari:"
 
 #. textarea
-#: LYMessages.c:212
+#: LYMessages.c:236
 msgid "Not in a TEXTAREA; cannot use external editor."
 msgstr "Pole TEXTAREA, välist toimetit ei saa kasutada."
 
-#: LYMessages.c:213
+#: LYMessages.c:237
 msgid "Not in a TEXTAREA; cannot use command."
 msgstr "Pole TEXTAREA, käsku ei saa kasutada."
 
-#: LYMessages.c:215
+#: LYMessages.c:239
 msgid "file: ACTIONs are disallowed!"
 msgstr "file: TEGEVUSed ei ole lubatud!"
 
 #. #define FILE_SERVED_LINKS_DISALLOWED
-#: LYMessages.c:217
+#: LYMessages.c:241
 msgid "file: URLs via served links are disallowed!"
 msgstr "file: URLid teeninduslikest viidetest ei ole lubatud! "
 
-#: LYMessages.c:218
+#: LYMessages.c:242
 msgid "Access to local files denied."
 msgstr "Juurdepääs lokaalsetele failidele on keelatud."
 
-#: LYMessages.c:219
+#: LYMessages.c:243
 msgid "file: URLs via bookmarks are disallowed!"
 msgstr "faile: URLE ei lubata järgedes kasutada!"
 
 #. #define SPECIAL_VIA_EXTERNAL_DISALLOWED
-#: LYMessages.c:221
+#: LYMessages.c:245
 msgid "This special URL is not allowed in external documents!"
 msgstr "See spetsiaal URL ei ole välistes dokumentides lubatud!"
 
-#: LYMessages.c:222
+#: LYMessages.c:246
 msgid "Press <return> to return to Lynx."
 msgstr "Lynxi tagasi pääsemiseks vajutage <return>."
 
 #. #define SPAWNING_MSG
-#: LYMessages.c:225
+#: LYMessages.c:249
 msgid "Spawning DCL subprocess.  Use 'logout' to return to Lynx.\n"
 msgstr "Loon DCL alamprotsessi.  Tagasi Lynxi saamiseks kasutage 'logout'.\n"
 
 #. #define SPAWNING_MSG
-#: LYMessages.c:229
+#: LYMessages.c:253
 msgid "Type EXIT to return to Lynx.\n"
 msgstr "Lynxi tagasi pääsemiseks sisestage exit.\n"
 
 #. #define SPAWNING_MSG
-#: LYMessages.c:232
+#: LYMessages.c:256
 msgid "Spawning your default shell.  Use 'exit' to return to Lynx.\n"
 msgstr "Käivitan teie vaikimisi shelli.  Tagasi Lynxi saamiseks kasutage 'exit'.\n"
 
-#: LYMessages.c:235
+#: LYMessages.c:259
 msgid "Spawning is currently disabled."
 msgstr "Alamprotsessi loomine on hetkel blokeeritud."
 
-#: LYMessages.c:236
+#: LYMessages.c:260
 msgid "The 'd'ownload command is currently disabled."
 msgstr "Allalaa'd'imise käsklus on praegu blokeeritud."
 
-#: LYMessages.c:237
+#: LYMessages.c:261
 msgid "You cannot download an input field."
 msgstr "Sisendvälja ei saa alla laadida."
 
-#: LYMessages.c:238
+#: LYMessages.c:262
 msgid "Form has a mailto action!  Cannot download."
 msgstr "Vormil on mailto tegevus! Ei saa alla laadida."
 
-#: LYMessages.c:239
+#: LYMessages.c:263
 msgid "You cannot download a mailto: link."
 msgstr "mailto: viidet ei saa alla laadida."
 
-#: LYMessages.c:240
+#: LYMessages.c:264
 msgid "You cannot download cookies."
 msgstr "Präänikuid ei saa alla laadida."
 
-#: LYMessages.c:241
+#: LYMessages.c:265
 msgid "You cannot download a printing option."
 msgstr "Trükkimise seadeid ei saa alla laadida."
 
-#: LYMessages.c:242
+#: LYMessages.c:266
 msgid "You cannot download an upload option."
 msgstr "Üleslaadimise seadeid ei saa alla laadida."
 
-#: LYMessages.c:243
+#: LYMessages.c:267
 msgid "You cannot download an permit option."
 msgstr "lubamise seadeid ei saa alla laadida."
 
-#: LYMessages.c:244
+#: LYMessages.c:268
 msgid "This special URL cannot be downloaded!"
 msgstr "Seda spetsiaal URLi ei saa alla laadida!"
 
-#: LYMessages.c:245
+#: LYMessages.c:269
 msgid "Nothing to download."
 msgstr "Pole midagi alla laadida."
 
-#: LYMessages.c:246
+#: LYMessages.c:270
 msgid "Trace ON!"
 msgstr "Trasseerimine sees!"
 
-#: LYMessages.c:247
+#: LYMessages.c:271
 msgid "Trace OFF!"
 msgstr "Trasseerimine väljas!"
 
 #. #define CLICKABLE_IMAGES_ON
-#: LYMessages.c:249
+#: LYMessages.c:273
 msgid "Links will be included for all images!  Reloading..."
 msgstr "Viiteid kasutatakse kõikide piltidega! Laen uuesti..."
 
 #. #define CLICKABLE_IMAGES_OFF
-#: LYMessages.c:251
+#: LYMessages.c:275
 msgid "Standard image handling restored!  Reloading..."
 msgstr "Standartne piltide käsitlemine taastatud! Laen uuesti..."
 
 #. #define PSEUDO_INLINE_ALTS_ON
-#: LYMessages.c:253
+#: LYMessages.c:277
 msgid "Pseudo_ALTs will be inserted for inlines without ALT strings!  Reloading..."
 msgstr "Lisan ALT sõnedeta piltidele pseudo_ALTid! Laen uuesti..."
 
 #. #define PSEUDO_INLINE_ALTS_OFF
-#: LYMessages.c:255
+#: LYMessages.c:279
 msgid "Inlines without an ALT string specified will be ignored!  Reloading..."
 msgstr "Ignoreerin ALT sõnedeta pilte! Laen uuesti..."
 
-#: LYMessages.c:256
+#: LYMessages.c:280
 msgid "Raw 8-bit or CJK mode toggled OFF!  Reloading..."
 msgstr "Puhas 8-bit või CJK mood on välja lülitatud! Laen uuesti..."
 
-#: LYMessages.c:257
+#: LYMessages.c:281
 msgid "Raw 8-bit or CJK mode toggled ON!  Reloading..."
 msgstr "Puhas 8-bit või CJK mood on sisse lülitatud! Laen uuesti..."
 
 #. #define HEAD_D_L_OR_CANCEL
-#: LYMessages.c:259
+#: LYMessages.c:283
 msgid "Send HEAD request for D)ocument or L)ink, or C)ancel? (d,l,c): "
 msgstr "Saada HEAD päring D)okumendile või L=viitele või C=katkesta? (d,l,c): "
 
 #. #define HEAD_D_OR_CANCEL
-#: LYMessages.c:261
+#: LYMessages.c:285
 msgid "Send HEAD request for D)ocument, or C)ancel? (d,c): "
 msgstr "Saada HEAD päring D)okumendile või C=katkesta? (d,c): "
 
-#: LYMessages.c:262
+#: LYMessages.c:286
 msgid "Sorry, the document is not an http URL."
 msgstr "Vabandust, dokument ei ole http URL."
 
-#: LYMessages.c:263
+#: LYMessages.c:287
 msgid "Sorry, the link is not an http URL."
 msgstr "Vabandust, viide ei ole http URL."
 
-#: LYMessages.c:264
+#: LYMessages.c:288
 msgid "Sorry, the ACTION for this form is disabled."
 msgstr "Vabandust, sellel vormil on tegevus keelatud."
 
 #. #define FORM_ACTION_NOT_HTTP_URL
-#: LYMessages.c:266
+#: LYMessages.c:290
 msgid "Sorry, the ACTION for this form is not an http URL."
 msgstr "Vabandust, selle vormi tegevus ei ole http URL."
 
-#: LYMessages.c:267
+#: LYMessages.c:291
 msgid "Not an http URL or form ACTION!"
 msgstr "Ei ole http URL ega vormi tegevus!"
 
-#: LYMessages.c:268
+#: LYMessages.c:292
 msgid "This special URL cannot be a form ACTION!"
 msgstr "Vormi tegevus ei saa olla see spetsiaal URL!"
 
-#: LYMessages.c:269
+#: LYMessages.c:293
 msgid "URL is not in starting realm!"
 msgstr "URL ei ole startfailis!"
 
-#: LYMessages.c:270
+#: LYMessages.c:294
 msgid "News posting is disabled!"
 msgstr "Artiklite postitamine on blokeeritud!"
 
-#: LYMessages.c:271
+#: LYMessages.c:295
 msgid "File management support is disabled!"
 msgstr "Failide haldamine on blokeeritud!"
 
-#: LYMessages.c:272
+#: LYMessages.c:296
 msgid "No jump file is currently available."
 msgstr "Hüpete fail ei ole praegu kasutatav."
 
-#: LYMessages.c:273
+#: LYMessages.c:297
 msgid "Jump to (use '?' for list): "
 msgstr "Hüppa aadressil (nimekirjaks '?'): "
 
-#: LYMessages.c:274
+#: LYMessages.c:298
 msgid "Jumping to a shortcut URL is disallowed!"
 msgstr "Lühiurlile hüppamine ei ole lubatud!"
 
-#: LYMessages.c:275
+#: LYMessages.c:299
 msgid "Random URL is disallowed!  Use a shortcut."
 msgstr "Juhuslik URL ei ole lubatud! Kasutage lühiurli."
 
-#: LYMessages.c:276
+#: LYMessages.c:300
 msgid "No random URLs have been used thus far."
 msgstr "Seni ei ole juhuslikke urle kasutatud."
 
-#: LYMessages.c:277
+#: LYMessages.c:301
 msgid "Bookmark features are currently disabled."
 msgstr "Järgede kasutamine on praegu blokeeritud."
 
-#: LYMessages.c:278
+#: LYMessages.c:302
 msgid "Execution via bookmarks is disabled."
 msgstr "Järgede kaudu täitmine on blokeeritud."
 
 #. #define BOOKMARK_FILE_NOT_DEFINED
-#: LYMessages.c:280
+#: LYMessages.c:304
 #, c-format
 msgid "Bookmark file is not defined. Use %s to see options."
 msgstr "Järgede faili ei ole defineeritud. Seadete vaatamiseks kasutage %s."
 
 #. #define NO_TEMP_FOR_HOTLIST
-#: LYMessages.c:282
+#: LYMessages.c:306
 msgid "Unable to open tempfile for X Mosaic hotlist conversion."
 msgstr "X Mosaic hotlist teisendamiseks ei õnnestu avada ajutist faili."
 
-#: LYMessages.c:283
+#: LYMessages.c:307
 msgid "ERROR - unable to open bookmark file."
 msgstr "VIGA - järgede faili ei saa avada."
 
 #. #define BOOKMARK_OPEN_FAILED_FOR_DEL
-#: LYMessages.c:285
+#: LYMessages.c:309
 msgid "Unable to open bookmark file for deletion of link."
 msgstr "Järgede faili ei õnnestu viite kustutamiseks avada."
 
 #. #define BOOKSCRA_OPEN_FAILED_FOR_DEL
-#: LYMessages.c:287
+#: LYMessages.c:311
 msgid "Unable to open scratch file for deletion of link."
 msgstr "Viite kustutamiseks ei õnnestu avada ajutist faili."
 
-#: LYMessages.c:289
+#: LYMessages.c:313
 msgid "Error renaming scratch file."
 msgstr "Viga ajutise faili ümber nimetamisel."
 
-#: LYMessages.c:291
+#: LYMessages.c:315
 msgid "Error renaming temporary file."
 msgstr "Viga ajutise faili ümbernimetamisel."
 
 #. #define BOOKTEMP_COPY_FAIL
-#: LYMessages.c:293
+#: LYMessages.c:317
 msgid "Unable to copy temporary file for deletion of link."
 msgstr "Viite kustutamiseks ei õnnestu ajutist faili kopeerida."
 
 #. #define BOOKTEMP_REOPEN_FAIL_FOR_DEL
-#: LYMessages.c:295
+#: LYMessages.c:319
 msgid "Unable to reopen temporary file for deletion of link."
 msgstr "Viite kustutamiseks ei õnnestu ajutist faili uuesti avada."
 
 #. #define BOOKMARK_LINK_NOT_ONE_LINE
-#: LYMessages.c:298
+#: LYMessages.c:322
 msgid "Link is not by itself all on one line in bookmark file."
 msgstr "Viide järgede failis ei ole ühel real."
 
-#: LYMessages.c:299
+#: LYMessages.c:323
 msgid "Bookmark deletion failed."
 msgstr "Järje kustutamine ebaõnnestus."
 
 #. #define BOOKMARKS_NOT_TRAVERSED
-#: LYMessages.c:301
+#: LYMessages.c:325
 msgid "Bookmark files cannot be traversed (only http URLs)."
 msgstr "Järgede faile ei saa läbida (ainult http URLe)."
 
 #. #define BOOKMARKS_NOT_OPEN
-#: LYMessages.c:303
+#: LYMessages.c:327
 msgid "Unable to open bookmark file, use 'a' to save a link first"
 msgstr "Järgede faili ei saa avada, salvestage viide kõigepealt käsuga 'a'"
 
-#: LYMessages.c:304
+#: LYMessages.c:328
 msgid "There are no links in this bookmark file!"
 msgstr "Selles järgede failis pole viiteid!"
 
 #. #define CACHE_D_OR_CANCEL
-#: LYMessages.c:306
+#: LYMessages.c:330
 msgid "D)elete cached document or C)ancel? (d,c): "
 msgstr "D=kustuta puhverdatud dokument või C=katkesta? (d,c): "
 
 #. #define BOOK_D_L_OR_CANCEL
-#: LYMessages.c:308
+#: LYMessages.c:332
 msgid "Save D)ocument or L)ink to bookmark file or C)ancel? (d,l,c): "
 msgstr "Salvesta D)okument, L=viide järgede faili või C=katkesta? (d,l,c): "
 
-#: LYMessages.c:309
+#: LYMessages.c:333
 msgid "Save D)ocument to bookmark file or C)ancel? (d,c): "
 msgstr "Salvesta D)okument järgede faili või C=katkesta? (d,c): "
 
-#: LYMessages.c:310
+#: LYMessages.c:334
 msgid "Save L)ink to bookmark file or C)ancel? (l,c): "
 msgstr "Salvesta L=viide järgede faili või C=katkesta? (l,c): "
 
 #. #define NOBOOK_POST_FORM
-#: LYMessages.c:312
+#: LYMessages.c:336
 msgid "Documents from forms with POST content cannot be saved as bookmarks."
 msgstr "Dokumente vormidelt POST sisuga ei saa järgedena salvestada."
 
-#: LYMessages.c:313
+#: LYMessages.c:337
 msgid "Cannot save form fields/links"
 msgstr "Vormide välju/viiteid ei saa salvestada"
 
 #. #define NOBOOK_HSML
-#: LYMessages.c:315
+#: LYMessages.c:339
 msgid "History, showinfo, menu and list files cannot be saved as bookmarks."
 msgstr "Ajaloo, info, menüü ja loendi faile ei saa järgedena salvestada."
 
 #. #define CONFIRM_BOOKMARK_DELETE
-#: LYMessages.c:317
+#: LYMessages.c:341
 msgid "Do you really want to delete this link from your bookmark file?"
 msgstr "Kas te tõesti soovite kustutada seda viidet oma järgede failist?"
 
-#: LYMessages.c:318
+#: LYMessages.c:342
 msgid "Malformed address."
 msgstr "Vigane aadress."
 
 #. #define HISTORICAL_ON_MINIMAL_OFF
-#: LYMessages.c:320
+#: LYMessages.c:344
 msgid "Historical comment parsing ON (Minimal is overridden)!"
 msgstr "Ajalooline kommentaaride parsimine sees (minimaalne on kõrvale lükatud)!"
 
 #. #define HISTORICAL_OFF_MINIMAL_ON
-#: LYMessages.c:322
+#: LYMessages.c:346
 msgid "Historical comment parsing OFF (Minimal is in effect)!"
 msgstr "Ajalooline kommentaaride parsimine väljas (kasutatakse minimaalset)!"
 
 #. #define HISTORICAL_ON_VALID_OFF
-#: LYMessages.c:324
+#: LYMessages.c:348
 msgid "Historical comment parsing ON (Valid is overridden)!"
 msgstr "Ajalooline kommentaaride parsimine sees (kehtiv on kõrvale lükatud)!"
 
 #. #define HISTORICAL_OFF_VALID_ON
-#: LYMessages.c:326
+#: LYMessages.c:350
 msgid "Historical comment parsing OFF (Valid is in effect)!"
 msgstr "Ajalooline kommentaaride parsimine väljas (kasutatakse kehtivat)!"
 
 #. #define MINIMAL_ON_IN_EFFECT
-#: LYMessages.c:328
+#: LYMessages.c:352
 msgid "Minimal comment parsing ON (and in effect)!"
 msgstr "Minimaalne kommentaaride parsimine sees (kasutatakse kehtivat)!"
 
 #. #define MINIMAL_OFF_VALID_ON
-#: LYMessages.c:330
+#: LYMessages.c:354
 msgid "Minimal comment parsing OFF (Valid is in effect)!"
 msgstr "Minimaalne kommentaaride parsimine väljas (kasutatakse kehtivat)!"
 
 #. #define MINIMAL_ON_BUT_HISTORICAL
-#: LYMessages.c:332
+#: LYMessages.c:356
 msgid "Minimal comment parsing ON (but Historical is in effect)!"
 msgstr "Minimaalne kommentaaride parsimine sees (kasutatakse ajaloolist)!"
 
 #. #define MINIMAL_OFF_HISTORICAL_ON
-#: LYMessages.c:334
+#: LYMessages.c:358
 msgid "Minimal comment parsing OFF (Historical is in effect)!"
 msgstr "Minimaalne kommentaaride parsimine väljas (kasutatakse ajaloolist)!"
 
-#: LYMessages.c:335
+#: LYMessages.c:359
 msgid "Soft double-quote parsing ON!"
 msgstr "Pehme jutumärkide parsmine sees (ON)!"
 
-#: LYMessages.c:336
+#: LYMessages.c:360
 msgid "Soft double-quote parsing OFF!"
 msgstr "Pehme jutumärkide parsmine väljas (OFF)!"
 
-#: LYMessages.c:337
+#: LYMessages.c:361
 msgid "Now using TagSoup parsing of HTML."
 msgstr "Kasutan nüüd HTML TagSoup parsimist."
 
-#: LYMessages.c:338
+#: LYMessages.c:362
 msgid "Now using SortaSGML parsing of HTML!"
 msgstr "Kasutan nüüd HTML SortaSGML parsimist!"
 
-#: LYMessages.c:339
+#: LYMessages.c:363
 msgid "You are already at the end of this document."
 msgstr "Te olete juba selle dokumendi lõpus."
 
-#: LYMessages.c:340
+#: LYMessages.c:364
 msgid "You are already at the beginning of this document."
 msgstr "Te olete juba selle dokumendi alguses."
 
-#: LYMessages.c:341
+#: LYMessages.c:365
 #, c-format
 msgid "You are already at page %d of this document."
 msgstr "Te olete juba selle dokumendi leheküljel %d."
 
-#: LYMessages.c:342
+#: LYMessages.c:366
 #, c-format
 msgid "Link number %d already is current."
 msgstr "Viide number %d on juba jooksev viide."
 
-#: LYMessages.c:343
+#: LYMessages.c:367
 msgid "You are already at the first document"
 msgstr "Te vaatate juba esimest dokumenti"
 
-#: LYMessages.c:344
+#: LYMessages.c:368
 msgid "There are no links above this line of the document."
 msgstr "Ülalpool seda rida ei ole dokumendis enam viiteid."
 
-#: LYMessages.c:345
+#: LYMessages.c:369
 msgid "There are no links below this line of the document."
 msgstr "Allpool seda rida ei ole dokumendis enam viiteid."
 
 #. #define MAXLEN_REACHED_DEL_OR_MOV
-#: LYMessages.c:347
+#: LYMessages.c:371
 msgid "Maximum length reached!  Delete text or move off field."
 msgstr "Maksimaalne pikkus on saavutatud! Kustutage teksti või lahkuge väljalt."
 
 #. #define NOT_ON_SUBMIT_OR_LINK
-#: LYMessages.c:349
+#: LYMessages.c:373
 msgid "You are not on a form submission button or normal link."
 msgstr "Te pole vormi postitamise nupul ega viitel."
 
 #. #define NEED_CHECKED_RADIO_BUTTON
-#: LYMessages.c:351
+#: LYMessages.c:375
 msgid "One radio button must be checked at all times!"
 msgstr "Üks raadionupp peab olema valitud!"
 
-#: LYMessages.c:352
+#: LYMessages.c:376
 msgid "No submit button for this form, submit single text field?"
 msgstr "Sellel vormil puudub postitamise nupp, postitan ühe tekstivälja?"
 
-#: LYMessages.c:353
+#: LYMessages.c:377
 msgid "Do you want to go back to the previous document?"
 msgstr "Kas te soovite minna tagasi eelmisele dokumendile?"
 
-#: LYMessages.c:354
+#: LYMessages.c:378
 msgid "Use arrows or tab to move off of field."
 msgstr "Väljalt lahkumiseks kasutage nooli või tabulaatorit."
 
 #. #define ENTER_TEXT_ARROWS_OR_TAB
-#: LYMessages.c:356
+#: LYMessages.c:380
 msgid "Enter text.  Use arrows or tab to move off of field."
 msgstr "Sisestage tekst. Väljalt lahkumiseks kasutage nooli või tabulaatorit."
 
-#: LYMessages.c:357
+#: LYMessages.c:381
 msgid "** Bad HTML!!  No form action defined. **"
 msgstr "** Vigane HTML!! Vormil pole tegevust defineeritud. **"
 
-#: LYMessages.c:358
+#: LYMessages.c:382
 msgid "Bad HTML!!  Unable to create popup window!"
 msgstr "Vigane HTML!! Ei saa luua hüpikakent!"
 
-#: LYMessages.c:359
+#: LYMessages.c:383
 msgid "Unable to create popup window!"
 msgstr "Ei saa luua hüpikakent!"
 
-#: LYMessages.c:360
+#: LYMessages.c:384
 msgid "Goto a random URL is disallowed!"
 msgstr "Juhuslikule URLile minek on blokeeritud!"
 
-#: LYMessages.c:361
+#: LYMessages.c:385
 msgid "Goto a non-http URL is disallowed!"
 msgstr "Mitte-http URLile minek on blokeeritud!"
 
-#: LYMessages.c:362
+#: LYMessages.c:386
 #, c-format
 msgid "You are not allowed to goto \"%s\" URLs"
 msgstr "Teil ei ole lubatud minna \"%s\" URLile"
 
-#: LYMessages.c:363
+#: LYMessages.c:387
 msgid "URL to open: "
 msgstr "URL, mida avada: "
 
-#: LYMessages.c:364
+#: LYMessages.c:388
 msgid "Edit the current Goto URL: "
 msgstr "Toimeta jooksvat Goto URLi: "
 
-#: LYMessages.c:365
+#: LYMessages.c:389
 msgid "Edit the previous Goto URL: "
 msgstr "Toimeta eelmist Goto URLi: "
 
-#: LYMessages.c:366
+#: LYMessages.c:390
 msgid "Edit a previous Goto URL: "
 msgstr "Toimeta eelmist Goto URLi: "
 
-#: LYMessages.c:367
+#: LYMessages.c:391
 msgid "Current document has POST data."
 msgstr "Jooksev dokument sisaldab POST andmeid."
 
-#: LYMessages.c:368
+#: LYMessages.c:392
 msgid "Edit this document's URL: "
 msgstr "Toimeta selle dokumendi URLi: "
 
-#: LYMessages.c:369
+#: LYMessages.c:393
 msgid "Edit the current link's URL: "
 msgstr "Toimeta selle viite URLi: "
 
-#: LYMessages.c:370
+#: LYMessages.c:394
 msgid "Edit the form's submit-URL: "
 msgstr "Toimeta selle vormi postitamise URLi: "
 
-#: LYMessages.c:371
+#: LYMessages.c:395
 msgid "You cannot edit File Management URLs"
 msgstr "Failide haldamise URLe ei saa toimetada"
 
-#: LYMessages.c:372
+#: LYMessages.c:396
 msgid "Enter a database query: "
 msgstr "Sisestage andmebaasi päring: "
 
-#: LYMessages.c:373
+#: LYMessages.c:397
 msgid "Enter a whereis query: "
 msgstr "Sisestage kus-on päring: "
 
-#: LYMessages.c:374
+#: LYMessages.c:398
 msgid "Edit the current query: "
 msgstr "Toimetage jooksvat päringut: "
 
-#: LYMessages.c:375
+#: LYMessages.c:399
 msgid "Edit the previous query: "
 msgstr "Toimetage eelmist päringut: "
 
-#: LYMessages.c:376
+#: LYMessages.c:400
 msgid "Edit a previous query: "
 msgstr "Toimetage eelmist päringut: "
 
 #. #define USE_C_R_TO_RESUB_CUR_QUERY
-#: LYMessages.c:378
+#: LYMessages.c:402
 msgid "Use Control-R to resubmit the current query."
 msgstr "Päringu uuesti postitamiseks kasutage Control-R."
 
-#: LYMessages.c:379
+#: LYMessages.c:403
 msgid "Edit the current shortcut: "
 msgstr "Toimeta jooksvat lühiurli: "
 
-#: LYMessages.c:380
+#: LYMessages.c:404
 msgid "Edit the previous shortcut: "
 msgstr "Toimeta eelmist lühiurli: "
 
-#: LYMessages.c:381
+#: LYMessages.c:405
 msgid "Edit a previous shortcut: "
 msgstr "Toimeta eelmist lühiurli: "
 
-#: LYMessages.c:382
+#: LYMessages.c:406
 #, c-format
 msgid "Key '%c' is not mapped to a jump file!"
 msgstr "Klahv '%c' ei ole seotud hüpete failiga!"
 
-#: LYMessages.c:383
+#: LYMessages.c:407
 msgid "Cannot locate jump file!"
 msgstr "Ei leia hüpete faili!"
 
-#: LYMessages.c:384
+#: LYMessages.c:408
 msgid "Cannot open jump file!"
 msgstr "Hüpete faili ei saa avada!"
 
-#: LYMessages.c:385
+#: LYMessages.c:409
 msgid "Error reading jump file!"
 msgstr "Viga hüpete failist lugemisel!"
 
-#: LYMessages.c:386
+#: LYMessages.c:410
 msgid "Out of memory reading jump file!"
 msgstr "Hüpete failist lugemisel sai mälu otsa!"
 
-#: LYMessages.c:387
+#: LYMessages.c:411
 msgid "Out of memory reading jump table!"
 msgstr "Hüpete tabeli lugemisel sai mälu otsa!"
 
-#: LYMessages.c:388
+#: LYMessages.c:412
 msgid "No index is currently available."
 msgstr "Indeksid ei ole praegu kasutatavad."
 
 #. #define CONFIRM_MAIN_SCREEN
-#: LYMessages.c:390
+#: LYMessages.c:414
 msgid "Do you really want to go to the Main screen?"
 msgstr "Kas te soovite tõesti minne põhiekraanile?"
 
-#: LYMessages.c:391
+#: LYMessages.c:415
 msgid "You are already at main screen!"
 msgstr "Te olete juba põhiekraanil!"
 
 #. #define NOT_ISINDEX
-#: LYMessages.c:393
+#: LYMessages.c:417
 msgid "Not a searchable indexed document -- press '/' to search for a text string"
 msgstr "Pole otsimiseks indekseeritud dokument -- teksti otsimiseks vajutage '/'"
 
 #. #define NO_OWNER
-#: LYMessages.c:395
+#: LYMessages.c:419
 msgid "No owner is defined for this file so you cannot send a comment"
 msgstr "Sellel failil ei ole omanikku defineeritud, seega ei saa kommentaari saata"
 
-#: LYMessages.c:396
+#: LYMessages.c:420
 #, c-format
 msgid "No owner is defined. Use %s?"
 msgstr "Omanikku ei ole defineeritud. Kasutan %s?"
 
-#: LYMessages.c:397
+#: LYMessages.c:421
 msgid "Do you wish to send a comment?"
 msgstr "Kas te soovite saata kommentaari?"
 
-#: LYMessages.c:398
+#: LYMessages.c:422
 msgid "Mail is disallowed so you cannot send a comment"
 msgstr "E-post pole lubatud, seega ei saa kommentaare saata"
 
-#: LYMessages.c:399
+#: LYMessages.c:423
 msgid "The 'e'dit command is currently disabled."
 msgstr "Toim'e'ta käsklus on praegu blokeeritud."
 
-#: LYMessages.c:400
+#: LYMessages.c:424
 msgid "External editing is currently disabled."
 msgstr "Väline toimeti on praegu blokeeritud."
 
-#: LYMessages.c:401
+#: LYMessages.c:425
 msgid "System error - failure to get status."
 msgstr "Süsteemi viga - olekut ei õnnestu lugeda."
 
-#: LYMessages.c:402
+#: LYMessages.c:426
 msgid "No editor is defined!"
 msgstr "Tekstitoimetit ei ole määratud!"
 
-#: LYMessages.c:403
+#: LYMessages.c:427
 msgid "The 'p'rint command is currently disabled."
 msgstr "Trükkimise käsklus 'p' on praegu blokeeritud."
 
-#: LYMessages.c:404
+#: LYMessages.c:428
 msgid "Document has no Toolbar links or Banner."
 msgstr "Dokumendis puuduvad Toolbar viited või Banner."
 
-#: LYMessages.c:405
+#: LYMessages.c:429
 msgid "Unable to open traversal file."
 msgstr "Ei saa avada läbimise faili."
 
-#: LYMessages.c:406
+#: LYMessages.c:430
 msgid "Unable to open traversal found file."
 msgstr "Ei saa avada läbimise leidude faili."
 
-#: LYMessages.c:407
+#: LYMessages.c:431
 msgid "Unable to open reject file."
 msgstr "Ei saa avada keeldumiste faili."
 
-#: LYMessages.c:408
+#: LYMessages.c:432
 msgid "Unable to open traversal errors output file"
 msgstr "Ei õnnestu avada läbimise vigade väljundfaili"
 
-#: LYMessages.c:409
+#: LYMessages.c:433
 msgid "TRAVERSAL WAS INTERRUPTED"
 msgstr "LÄBIMINE KATKESTATI"
 
-#: LYMessages.c:410
+#: LYMessages.c:434
 msgid "Follow link (or goto link or page) number: "
 msgstr "Järgne viitele (või mine viitele või lehele) number: "
 
-#: LYMessages.c:411
+#: LYMessages.c:435
 msgid "Select option (or page) number: "
 msgstr "Valige seade (või lehe) number: "
 
-#: LYMessages.c:412
+#: LYMessages.c:436
 #, c-format
 msgid "Option number %d already is current."
 msgstr "Seade numbriga %d on juba jooksev."
 
 #. #define ALREADY_AT_OPTION_END
-#: LYMessages.c:414
+#: LYMessages.c:438
 msgid "You are already at the end of this option list."
 msgstr "Te olete juba nende seadete loendi lõpus."
 
 #. #define ALREADY_AT_OPTION_BEGIN
-#: LYMessages.c:416
+#: LYMessages.c:440
 msgid "You are already at the beginning of this option list."
 msgstr "Te olete juba nende seadete loendi alguses."
 
 #. #define ALREADY_AT_OPTION_PAGE
-#: LYMessages.c:418
+#: LYMessages.c:442
 #, c-format
 msgid "You are already at page %d of this option list."
 msgstr "Te olete juba nende seadete loendi lehel %d."
 
-#: LYMessages.c:419
+#: LYMessages.c:443
 msgid "You have entered an invalid option number."
 msgstr "Te sisestasite vigase seade numbri."
 
-#: LYMessages.c:420
+#: LYMessages.c:444
 msgid "** Bad HTML!!  Use -trace to diagnose. **"
 msgstr "** Vigane HTML!! Diagnoosimiseks kasutage võtit -trace. **"
 
-#: LYMessages.c:421
+#: LYMessages.c:445
 msgid "Give name of file to save in"
 msgstr "Andke faili nimi, kuhu salvestada"
 
-#: LYMessages.c:422
+#: LYMessages.c:446
 msgid "Can't save data to file -- please run WWW locally"
 msgstr "Andmete salvestamine faili ebaõnnestus -- palun käivitage WWW lokaalselt"
 
-#: LYMessages.c:423
+#: LYMessages.c:447
 msgid "Can't open temporary file!"
 msgstr "Ajutist faili ei saa avada!"
 
-#: LYMessages.c:424
+#: LYMessages.c:448
 msgid "Can't open output file!  Cancelling!"
 msgstr "Väljundfaili ei saa avada! katkestan!"
 
-#: LYMessages.c:425
+#: LYMessages.c:449
 msgid "Execution is disabled."
 msgstr "Käivitamine ei ole lubatud."
 
 #. #define EXECUTION_DISABLED_FOR_FILE
-#: LYMessages.c:427
+#: LYMessages.c:451
 #, c-format
 msgid "Execution is not enabled for this file.  See the Options menu (use %s)."
 msgstr "Selle faili täitmine ei ole lubatud. Vaadake omaduste menüüd (kasutage %s)."
 
 #. #define EXECUTION_NOT_COMPILED
-#: LYMessages.c:429
+#: LYMessages.c:453
 msgid "Execution capabilities are not compiled into this version."
 msgstr "Täitmise omadus ei ole selle sellesse versiooni kompileeritud."
 
-#: LYMessages.c:430
+#: LYMessages.c:454
 msgid "This file cannot be displayed on this terminal."
 msgstr "Seda faili ei saa sellel terminalil näidata."
 
 #. #define CANNOT_DISPLAY_FILE_D_OR_C
-#: LYMessages.c:432
+#: LYMessages.c:456
 msgid "This file cannot be displayed on this terminal:  D)ownload, or C)ancel"
 msgstr "Seda faili ei saa sellel terminalil näidata: D=allalaadimine, C=katkesta"
 
-#: LYMessages.c:433
+#: LYMessages.c:457
 #, c-format
 msgid "%s  D)ownload, or C)ancel"
 msgstr "%s D=allalaadimine, C=katkesta"
 
-#: LYMessages.c:434
+#: LYMessages.c:458
 msgid "Cancelling file."
 msgstr "Katkestan faili."
 
-#: LYMessages.c:435
+#: LYMessages.c:459
 msgid "Retrieving file.  - PLEASE WAIT -"
 msgstr "Laen faili. - PALUN OODAKE -"
 
-#: LYMessages.c:436
+#: LYMessages.c:460
 msgid "Enter a filename: "
 msgstr "Sisestage failinimi: "
 
-#: LYMessages.c:437
+#: LYMessages.c:461
 msgid "Edit the previous filename: "
 msgstr "Toimetage eelmist failinime: "
 
-#: LYMessages.c:438
+#: LYMessages.c:462
 msgid "Edit a previous filename: "
 msgstr "Toimetage eelmist failinime: "
 
-#: LYMessages.c:439
+#: LYMessages.c:463
 msgid "Enter a new filename: "
 msgstr "Sisestage uus failinimi: "
 
-#: LYMessages.c:440
+#: LYMessages.c:464
 msgid "File name may not begin with a dot."
 msgstr "Faili nimi ei või alata punktiga."
 
-#: LYMessages.c:442
+#: LYMessages.c:466
 msgid "File exists.  Create higher version?"
 msgstr "Fail on olemas. Loon uuema versioni?"
 
-#: LYMessages.c:444
+#: LYMessages.c:468
 msgid "File exists.  Overwrite?"
 msgstr "Fail on olemas. Kirjutan üle?"
 
-#: LYMessages.c:446
+#: LYMessages.c:470
 msgid "Cannot write to file."
 msgstr "Faili ei õnnestu kirjutada."
 
-#: LYMessages.c:447
+#: LYMessages.c:471
 msgid "ERROR! - download command is misconfigured."
 msgstr "VIGA! - allalaadimise käsk on vigaste seadetega."
 
-#: LYMessages.c:448
+#: LYMessages.c:472
 msgid "Unable to download file."
 msgstr "Faili ei saa alla laadida."
 
-#: LYMessages.c:449
+#: LYMessages.c:473
 msgid "Reading directory..."
 msgstr "Loen kataloogi..."
 
-#: LYMessages.c:450
+#: LYMessages.c:474
 msgid "Building directory listing..."
 msgstr "Ehitan kataloogi nimiekirja..."
 
-#: LYMessages.c:451
+#: LYMessages.c:475
 msgid "Saving..."
 msgstr "Salvestan..."
 
-#: LYMessages.c:452
+#: LYMessages.c:476
 #, c-format
 msgid "Could not edit file '%s'."
 msgstr "Faili '%s' ei saa toimetada."
 
-#: LYMessages.c:453
+#: LYMessages.c:477
 msgid "Unable to access document!"
 msgstr "Dokumendi ei saa kasutada!"
 
-#: LYMessages.c:454
+#: LYMessages.c:478
 msgid "Could not access file."
 msgstr "Faili kasutamiseks pole õiguseid."
 
-#: LYMessages.c:455
+#: LYMessages.c:479
 msgid "Could not access directory."
 msgstr "Kataloogi kasutamiseks pole õiguseid."
 
-#: LYMessages.c:456
+#: LYMessages.c:480
 msgid "Could not load data."
 msgstr "Andmeid ei õnnestu laadida."
 
 #. #define CANNOT_EDIT_REMOTE_FILES
-#: LYMessages.c:458
+#: LYMessages.c:482
 msgid "Lynx cannot currently (e)dit remote WWW files."
 msgstr "Lynx ei saa praegu toim'e'tada faile WWW serveritel."
 
 #. #define CANNOT_EDIT_FIELD
-#: LYMessages.c:460
+#: LYMessages.c:484
 msgid "This field cannot be (e)dited with an external editor."
 msgstr "Seda välja ei saa välise toimetiga toim'e'tada."
 
-#: LYMessages.c:461
+#: LYMessages.c:485
 msgid "Bad rule"
 msgstr "Vigane reegel"
 
-#: LYMessages.c:462
+#: LYMessages.c:486
 msgid "Insufficient operands:"
 msgstr "Puuduvad operandid: "
 
-#: LYMessages.c:463
+#: LYMessages.c:487
 msgid "You are not authorized to edit this file."
 msgstr "Teil ei ole lubatud seda faili muuta."
 
-#: LYMessages.c:464
+#: LYMessages.c:488
 msgid "Title: "
 msgstr "Tiitel: "
 
-#: LYMessages.c:465
+#: LYMessages.c:489
 msgid "Subject: "
 msgstr "Teema: "
 
-#: LYMessages.c:466
+#: LYMessages.c:490
 msgid "Username: "
 msgstr "Kasutaja: "
 
-#: LYMessages.c:467
+#: LYMessages.c:491
 msgid "Password: "
 msgstr "Parool: "
 
-#: LYMessages.c:468
+#: LYMessages.c:492
 msgid "lynx: Username and Password required!!!"
 msgstr "lynx: Nõutakse kasutajanime ja parooli!!!"
 
-#: LYMessages.c:469
+#: LYMessages.c:493
 msgid "lynx: Password required!!!"
 msgstr "lynx: nõutakse parooli!!!"
 
-#: LYMessages.c:470
+#: LYMessages.c:494
 msgid "Clear all authorization info for this session?"
 msgstr "Tühjendan selle sessiooni kogu autoriseerimise info?"
 
-#: LYMessages.c:471
+#: LYMessages.c:495
 msgid "Authorization info cleared."
 msgstr "Autoriseerimisinfo eemaldatud."
 
-#: LYMessages.c:472
+#: LYMessages.c:496
 msgid "Authorization failed.  Retry?"
 msgstr "Autoriseerimine ebaõnnestus. Kordan?"
 
-#: LYMessages.c:473
+#: LYMessages.c:497
 msgid "cgi support has been disabled."
 msgstr "cgi tugi on blokeeritud."
 
 #. #define CGI_NOT_COMPILED
-#: LYMessages.c:475
+#: LYMessages.c:499
 msgid "Lynxcgi capabilities are not compiled into this version."
 msgstr "Lynxcgi võimalused ei ole sellesse versiooni kompileeritud."
 
-#: LYMessages.c:476
+#: LYMessages.c:500
 #, c-format
 msgid "Sorry, no known way of converting %s to %s."
 msgstr "Kahjuks ei tunne ühtegi meetodit teisendamaks %s -> %s."
 
-#: LYMessages.c:477
+#: LYMessages.c:501
 msgid "Unable to set up connection."
 msgstr "Ühendust ei õnnestu luua."
 
-#: LYMessages.c:478
+#: LYMessages.c:502
 msgid "Unable to make connection"
 msgstr "Ühendust ei õnnestu tekitada"
 
 #. #define MALFORMED_EXEC_REQUEST
-#: LYMessages.c:480
+#: LYMessages.c:504
 msgid "Executable link rejected due to malformed request."
 msgstr "Vigase päringu tõttu keeldutakse viidet täitmast."
 
 #. #define BADCHAR_IN_EXEC_LINK
-#: LYMessages.c:482
+#: LYMessages.c:506
 #, c-format
 msgid "Executable link rejected due to `%c' character."
 msgstr "Sümboli `%c' tõttu keeldutakse viidet täitmast."
 
 #. #define RELPATH_IN_EXEC_LINK
-#: LYMessages.c:484
+#: LYMessages.c:508
 msgid "Executable link rejected due to relative path string ('../')."
 msgstr "Suhtelise tee ('../') tõttu keeldutakse viidet täitmast."
 
 #. #define BADLOCPATH_IN_EXEC_LINK
-#: LYMessages.c:486
+#: LYMessages.c:510
 msgid "Executable link rejected due to location or path."
 msgstr "Asukoha või tee tõttu keeldutakse viidet täitmast."
 
-#: LYMessages.c:487
+#: LYMessages.c:511
 msgid "Mail access is disabled!"
 msgstr "E-posti kasutamine on blokeeritud!"
 
 #. #define ACCESS_ONLY_LOCALHOST
-#: LYMessages.c:489
+#: LYMessages.c:513
 msgid "Only files and servers on the local host can be accessed."
 msgstr "Kasutada saab ainult lokaalse serveri faile või teenuseid."
 
-#: LYMessages.c:490
+#: LYMessages.c:514
 msgid "Telnet access is disabled!"
 msgstr "Telneti kasutamine on blokeeritud!"
 
 #. #define TELNET_PORT_SPECS_DISABLED
-#: LYMessages.c:492
+#: LYMessages.c:516
 msgid "Telnet port specifications are disabled."
 msgstr "Telneti pordi määramine on blokeeritud."
 
-#: LYMessages.c:493
+#: LYMessages.c:517
 msgid "USENET news access is disabled!"
 msgstr "USENET uudisegruppide kasutamine on blokeeritud!"
 
-#: LYMessages.c:494
+#: LYMessages.c:518
 msgid "Rlogin access is disabled!"
 msgstr "Rlogin kasutamine on blokeeritud!"
 
-#: LYMessages.c:495
+#: LYMessages.c:519
 msgid "Ftp access is disabled!"
 msgstr "Ftp kasutamine on blokeeritud!"
 
-#: LYMessages.c:496
+#: LYMessages.c:520
 msgid "There are no references from this document."
 msgstr "Sellest dokumendist ei ole viiteid."
 
-#: LYMessages.c:497
+#: LYMessages.c:521
 msgid "There are only hidden links from this document."
 msgstr "Selles dokumendis on ainult peidetud viited."
 
-#: LYMessages.c:499
+#: LYMessages.c:523
 msgid "Unable to open command file."
 msgstr "Käskude faili ei saa avada."
 
-#: LYMessages.c:501
+#: LYMessages.c:525
 msgid "News Post Cancelled!!!"
 msgstr "Artikli postitamine katkestatud!!!"
 
 #. #define SPAWNING_EDITOR_FOR_NEWS
-#: LYMessages.c:503
+#: LYMessages.c:527
 msgid "Spawning your selected editor to edit news message"
 msgstr "Käivitan uudise artikli toimetamiseks teie poolt valitud toimeti"
 
-#: LYMessages.c:504
+#: LYMessages.c:528
 msgid "Post this message?"
 msgstr "Postitan selle teate?"
 
-#: LYMessages.c:505
+#: LYMessages.c:529
 #, c-format
 msgid "Append '%s'?"
 msgstr "Lisan '%s'?"
 
-#: LYMessages.c:506
+#: LYMessages.c:530
 msgid "Posting to newsgroup(s)..."
 msgstr "Postitan gruppi(desse)..."
 
-#: LYMessages.c:508
+#: LYMessages.c:532
 msgid "*** You have unread mail. ***"
 msgstr "*** Teil on lugemata teateid. ***"
 
-#: LYMessages.c:510
+#: LYMessages.c:534
 msgid "*** You have mail. ***"
 msgstr "*** Teil on kiri. ***"
 
-#: LYMessages.c:512
+#: LYMessages.c:536
 msgid "*** You have new mail. ***"
 msgstr "*** Teil on uus kiri. ***"
 
-#: LYMessages.c:513
+#: LYMessages.c:537
 msgid "File insert cancelled!!!"
 msgstr "Faili lisamine katkestati!!!"
 
-#: LYMessages.c:514
+#: LYMessages.c:538
 msgid "Not enough memory for file!"
 msgstr "Faili jaoks napib mälu!"
 
-#: LYMessages.c:515
+#: LYMessages.c:539
 msgid "Can't open file for reading."
 msgstr "Faili ei õnnestu lugemiseks avada."
 
-#: LYMessages.c:516
+#: LYMessages.c:540
 msgid "File does not exist."
 msgstr "Faili ei ole."
 
-#: LYMessages.c:517
+#: LYMessages.c:541
 msgid "File does not exist - reenter or cancel:"
 msgstr "Faili pole - sisestage uuesti või katkestage:"
 
-#: LYMessages.c:518
+#: LYMessages.c:542
 msgid "File is not readable."
 msgstr "Fail ei ole loetav."
 
-#: LYMessages.c:519
+#: LYMessages.c:543
 msgid "File is not readable - reenter or cancel:"
 msgstr "Fail pole loetav - sisestage uuesti või katkestage:"
 
-#: LYMessages.c:520
+#: LYMessages.c:544
 msgid "Nothing to insert - file is 0-length."
 msgstr "Midagi pole lisada - fail on pikkusega null."
 
-#: LYMessages.c:521
+#: LYMessages.c:545
 msgid "Save request cancelled!!!"
 msgstr "Salvestamine katkestati!!!"
 
-#: LYMessages.c:522
+#: LYMessages.c:546
 msgid "Mail request cancelled!!!"
 msgstr "Postitamine katkestati!!!"
 
 #. #define CONFIRM_MAIL_SOURCE_PREPARSED
-#: LYMessages.c:524
+#: LYMessages.c:548
 msgid "Viewing preparsed source.  Are you sure you want to mail it?"
 msgstr "Vaatan eeltöödeldud lähteteksti. Olete kindel, et soovite seda postitada?"
 
-#: LYMessages.c:525
+#: LYMessages.c:549
 msgid "Please wait..."
 msgstr "Palun oodake..."
 
-#: LYMessages.c:526
+#: LYMessages.c:550
 msgid "Mailing file.  Please wait..."
 msgstr "Saadan faili.  Palun oodake..."
 
-#: LYMessages.c:527
+#: LYMessages.c:551
 msgid "ERROR - Unable to mail file"
 msgstr "VIGA - Faili saatmine ebaõnnestus"
 
 #. #define CONFIRM_LONG_SCREEN_PRINT
-#: LYMessages.c:529
+#: LYMessages.c:553
 #, c-format
 msgid "File is %d screens long.  Are you sure you want to print?"
 msgstr "Faili pikkus on %d ekraanitäit. Olete kindel, et soovite seda trükkida?"
 
-#: LYMessages.c:530
+#: LYMessages.c:554
 msgid "Print request cancelled!!!"
 msgstr "Trükkimise päring katkestati!!!"
 
-#: LYMessages.c:531
+#: LYMessages.c:555
 msgid "Press <return> to begin: "
 msgstr "Vajutage alustamiseks <return>: "
 
-#: LYMessages.c:532
+#: LYMessages.c:556
 msgid "Press <return> to finish: "
 msgstr "Vajutage lõpetamiseks <return>: "
 
 #. #define CONFIRM_LONG_PAGE_PRINT
-#: LYMessages.c:534
+#: LYMessages.c:558
 #, c-format
 msgid "File is %d pages long.  Are you sure you want to print?"
 msgstr "Faili pikkus on %d lehekülge. Olete kinde, et soovite seda trükkida?"
 
 #. #define CHECK_PRINTER
-#: LYMessages.c:536
+#: LYMessages.c:560
 msgid "Be sure your printer is on-line.  Press <return> to start printing:"
 msgstr "Kontrollige printerit. Trükkimise alustamiseks vajutage <return>:"
 
-#: LYMessages.c:537
+#: LYMessages.c:561
 msgid "ERROR - Unable to allocate file space!!!"
 msgstr "VIGA - Ei õnnestu reserveerida faili ruumi!!!"
 
-#: LYMessages.c:538
+#: LYMessages.c:562
 msgid "Unable to open tempfile"
 msgstr "Ajutist faili ei õnnestu avada"
 
-#: LYMessages.c:539
+#: LYMessages.c:563
 msgid "Unable to open print options file"
 msgstr "Ei õnnestu avada trükiseadete faili"
 
-#: LYMessages.c:540
+#: LYMessages.c:564
 msgid "Printing file.  Please wait..."
 msgstr "Trükin faili. Palun oodake..."
 
-#: LYMessages.c:541
+#: LYMessages.c:565
 msgid "Please enter a valid internet mail address: "
 msgstr "palun sisestage kehtiv interneti postiaadress: "
 
-#: LYMessages.c:542
+#: LYMessages.c:566
 msgid "ERROR! - printer is misconfigured!"
 msgstr "VIGA! - trükkal on vigaselt seadistatud!"
 
-#: LYMessages.c:543
+#: LYMessages.c:567
 msgid "Image map from POST response not available!"
 msgstr "Hüperpilt POST vastusest ei ole kasutatav!"
 
-#: LYMessages.c:544
+#: LYMessages.c:568
 msgid "Misdirected client-side image MAP request!"
 msgstr "Vigaselt suunatud kliendi-poolse hüperpildi päring!"
 
-#: LYMessages.c:545
+#: LYMessages.c:569
 msgid "Client-side image MAP is not accessible!"
 msgstr "Kliendi-poolne hüperpilt ei ole kasutatav!"
 
-#: LYMessages.c:546
+#: LYMessages.c:570
 msgid "No client-side image MAPs are available!"
 msgstr "Kliendi-poolseid hüperpilte pole!"
 
-#: LYMessages.c:547
+#: LYMessages.c:571
 msgid "Client-side image MAP is not available!"
 msgstr "Kliendi-poolne hüperpilt ei ole kätte saadav!"
 
 #. #define OPTION_SCREEN_NEEDS_24
-#: LYMessages.c:550
+#: LYMessages.c:574
 msgid "Screen height must be at least 24 lines for the Options menu!"
 msgstr "Seadete menüü nõuab vähemalt 24 rida ekraanile!"
 
 #. #define OPTION_SCREEN_NEEDS_23
-#: LYMessages.c:552
+#: LYMessages.c:576
 msgid "Screen height must be at least 23 lines for the Options menu!"
 msgstr "Seadete menüü nõuab vähemalt 23 rida ekraanile!"
 
 #. #define OPTION_SCREEN_NEEDS_22
-#: LYMessages.c:554
+#: LYMessages.c:578
 msgid "Screen height must be at least 22 lines for the Options menu!"
 msgstr "Seadete menüü nõuab vähemalt 22 rida ekraanile!"
 
-#: LYMessages.c:556
+#: LYMessages.c:580
 msgid "That key requires Advanced User mode."
 msgstr "See klahv nõuab \"advanced\" kasutaja moodi."
 
-#: LYMessages.c:557
+#: LYMessages.c:581
 #, c-format
 msgid "Content-type: %s"
 msgstr "Sisu tüüp: %s"
 
-#: LYMessages.c:558
+#: LYMessages.c:582
 msgid "Command: "
 msgstr "Käsk: "
 
-#: LYMessages.c:559
+#: LYMessages.c:583
 msgid "Unknown or ambiguous command"
 msgstr "Tundmatu või segane käsklus"
 
-#: LYMessages.c:560
+#: LYMessages.c:584
 msgid " Version "
 msgstr " Versioon "
 
-#: LYMessages.c:561
+#: LYMessages.c:585
 msgid " first"
 msgstr " esimene"
 
-#: LYMessages.c:562
+#: LYMessages.c:586
 msgid ", guessing..."
 msgstr ", arvan..."
 
-#: LYMessages.c:563
+#: LYMessages.c:587
 msgid "Permissions for "
 msgstr "Õigused failile "
 
-#: LYMessages.c:564
+#: LYMessages.c:588
 msgid "Select "
 msgstr "Valige "
 
-#: LYMessages.c:565
+#: LYMessages.c:589
 msgid "capital letter"
 msgstr "suurtäht"
 
-#: LYMessages.c:566
+#: LYMessages.c:590
 msgid " of option line,"
 msgstr " valiku rida,"
 
-#: LYMessages.c:567
+#: LYMessages.c:591
 msgid " to save,"
 msgstr " salvestamiseks"
 
-#: LYMessages.c:568
+#: LYMessages.c:592
 msgid " to "
 msgstr " et "
 
-#: LYMessages.c:569
+#: LYMessages.c:593
 msgid " or "
 msgstr " või "
 
-#: LYMessages.c:570
+#: LYMessages.c:594
 msgid " index"
 msgstr " indeks"
 
-#: LYMessages.c:571
+#: LYMessages.c:595
 msgid " to return to Lynx."
 msgstr " viib tagasi Lynxi."
 
-#: LYMessages.c:572
+#: LYMessages.c:596
 msgid "Accept Changes"
 msgstr "Arvesta muutuseid"
 
-#: LYMessages.c:573
+#: LYMessages.c:597
 msgid "Reset Changes"
 msgstr "Algväärtusta"
 
-#: LYMessages.c:574
+#: LYMessages.c:598
 msgid "Left Arrow cancels changes"
 msgstr "Nool vasakule tühistab muutused"
 
-#: LYMessages.c:575
+#: LYMessages.c:599
 msgid "Save options to disk"
 msgstr "Salvesta seaded kettale"
 
-#: LYMessages.c:576
+#: LYMessages.c:600
 msgid "Hit RETURN to accept entered data."
 msgstr "Sisestatud andmete kasutamiseks vajutage RETURN."
 
 #. #define ACCEPT_DATA_OR_DEFAULT
-#: LYMessages.c:578
+#: LYMessages.c:602
 msgid "Hit RETURN to accept entered data.  Delete data to invoke the default."
 msgstr "Andmete kasutamiseks vajutage RETURN. Kustutades andmed saate vaikeväärtuse."
 
-#: LYMessages.c:579
+#: LYMessages.c:603
 msgid "Value accepted!"
 msgstr "Väärtus aktsepteeritud!"
 
 #. #define VALUE_ACCEPTED_WARNING_X
-#: LYMessages.c:581
+#: LYMessages.c:605
 msgid "Value accepted! -- WARNING: Lynx is configured for XWINDOWS!"
 msgstr "Väärtus vastu võetud! -- HOIATUS: Lynx on seadistatud XWINDOWSi kasutamiseks!"
 
 #. #define VALUE_ACCEPTED_WARNING_NONX
-#: LYMessages.c:583
+#: LYMessages.c:607
 msgid "Value accepted! -- WARNING: Lynx is NOT configured for XWINDOWS!"
 msgstr "Väärtus vastu võetud! -- HOIATUS: Lynx ei ole XWINDOWSi jaoks seadistatud!"
 
-#: LYMessages.c:584
+#: LYMessages.c:608
 msgid "You are not allowed to change which editor to use!"
 msgstr "Teil ei ole lubatud toimetit vahetada!"
 
-#: LYMessages.c:585
+#: LYMessages.c:609
 msgid "Failed to set DISPLAY variable!"
 msgstr "DISPLAY muutuja seadmine ebaõnnestus!"
 
-#: LYMessages.c:586
+#: LYMessages.c:610
 msgid "Failed to clear DISPLAY variable!"
 msgstr "DISPLAY muutuja tühjendamine ebaõnnestus!"
 
 #. #define BOOKMARK_CHANGE_DISALLOWED
-#: LYMessages.c:588
+#: LYMessages.c:612
 msgid "You are not allowed to change the bookmark file!"
 msgstr "Teil ei ole lubatud järgede faili muuta!"
 
-#: LYMessages.c:589
+#: LYMessages.c:613
 msgid "Terminal does not support color"
 msgstr "Terminal ei toeta värve"
 
-#: LYMessages.c:590
+#: LYMessages.c:614
 #, c-format
 msgid "Your '%s' terminal does not support color."
 msgstr "Teie '%s' terminal ei toeta värve."
 
-#: LYMessages.c:591
+#: LYMessages.c:615
 msgid "Access to dot files is disabled!"
 msgstr "Punktiga algavaid faile ei ole lubatud kasutada!"
 
 #. #define UA_NO_LYNX_WARNING
-#: LYMessages.c:593
+#: LYMessages.c:617
 msgid "User-Agent string does not contain \"Lynx\" or \"L_y_n_x\""
 msgstr "User-Agent sõne ei sisalda \"Lynx\" ega \"L_y_n_x\""
 
 #. #define UA_PLEASE_USE_LYNX
-#: LYMessages.c:595
+#: LYMessages.c:619
 msgid "Use \"L_y_n_x\" or \"Lynx\" in User-Agent, or it looks like intentional deception!"
 msgstr "Kasutage User-Agent sees sõnu \"L_y_n_x\" või \"Lynx\", muidu paistab tegu olevat sihiliku pettusena!"
 
 #. #define UA_CHANGE_DISABLED
-#: LYMessages.c:597
+#: LYMessages.c:621
 msgid "Changing of the User-Agent string is disabled!"
 msgstr "User-Agent väärtuse muutmine ei ole lubatud!"
 
 #. #define CHANGE_OF_SETTING_DISALLOWED
-#: LYMessages.c:599
+#: LYMessages.c:623
 msgid "You are not allowed to change this setting."
 msgstr "Teil ei ole lubatud seda seadet muuta."
 
-#: LYMessages.c:600
+#: LYMessages.c:624
 msgid "Saving Options..."
 msgstr "Salvestan seaded..."
 
-#: LYMessages.c:601
+#: LYMessages.c:625
 msgid "Options saved!"
 msgstr "Seaded salvestatud!"
 
-#: LYMessages.c:602
+#: LYMessages.c:626
 msgid "Unable to save Options!"
 msgstr "Seadeid ei õnnestu salvestada!"
 
-#: LYMessages.c:603
+#: LYMessages.c:627
 msgid " 'r' to return to Lynx "
 msgstr " 'r' laseb Lynxi tagasi "
 
-#: LYMessages.c:604
+#: LYMessages.c:628
 msgid " '>' to save, or 'r' to return to Lynx "
 msgstr " '>' salvestamiseks, 'r' laseb Lynxi tagasi "
 
 #. #define ANY_KEY_CHANGE_RET_ACCEPT
-#: LYMessages.c:606
+#: LYMessages.c:630
 msgid "Hit any key to change value; RETURN to accept."
 msgstr "Väärtuse muutmiseks vajutage mõnd klahvi; RETURN aktsepteerimiseks."
 
-#: LYMessages.c:607
+#: LYMessages.c:631
 msgid "Error uncompressing temporary file!"
 msgstr "Viga ajutise faili lahtipakkimisel!"
 
-#: LYMessages.c:608
+#: LYMessages.c:632
 msgid "Unsupported URL scheme!"
 msgstr "Mittetoetatud URL skeem!"
 
-#: LYMessages.c:609
+#: LYMessages.c:633
 msgid "Unsupported data: URL!  Use SHOWINFO, for now."
 msgstr "Mittetoetatud andmed: URL! Kasutage praegu SHOWINFO."
 
-#: LYMessages.c:610
+#: LYMessages.c:634
 msgid "Redirection limit of 10 URL's reached."
 msgstr "Saavutati ümbersuunamiste piirang, 10 URLi."
 
-#: LYMessages.c:611
+#: LYMessages.c:635
 msgid "Illegal redirection URL received from server!"
 msgstr "Server saatis vigase ümbersuunamise URLi!"
 
 #. #define SERVER_ASKED_FOR_REDIRECTION
-#: LYMessages.c:613
+#: LYMessages.c:637
 #, c-format
 msgid "Server asked for %d redirection of POST content to"
 msgstr "Server palus %d POST sisu ümbersuunamist aadressil"
 
-#: LYMessages.c:616
+#: LYMessages.c:640
 msgid "P)roceed, use G)ET or C)ancel "
 msgstr "P=jätka, kasuta G)ET või C=katkesta "
 
-#: LYMessages.c:617
+#: LYMessages.c:641
 msgid "P)roceed, or C)ancel "
 msgstr "P=jätka või C=katkesta "
 
 #. #define ADVANCED_POST_GET_REDIRECT
-#: LYMessages.c:619
+#: LYMessages.c:643
 msgid "Redirection of POST content.  P)roceed, see U)RL, use G)ET or C)ancel"
 msgstr "POST sisu ümbersuunamine. P=jätka, vaata U)RL, kasuta G)ET või C=katkesta"
 
 #. #define ADVANCED_POST_REDIRECT
-#: LYMessages.c:621
+#: LYMessages.c:645
 msgid "Redirection of POST content.  P)roceed, see U)RL, or C)ancel"
 msgstr "POST sisu ümbersuunamine. P=jätka, vaata U)RL või C=katkesta"
 
 #. #define CONFIRM_POST_RESUBMISSION
-#: LYMessages.c:623
+#: LYMessages.c:647
 msgid "Document from Form with POST content.  Resubmit?"
 msgstr "Dokument vormist POST sisuga. Postitan uuesti?"
 
 #. #define CONFIRM_POST_RESUBMISSION_TO
-#: LYMessages.c:625
+#: LYMessages.c:649
 #, c-format
 msgid "Resubmit POST content to %s ?"
 msgstr "Postitan uuesti POST sisu aadressil %s ?"
 
 #. #define CONFIRM_POST_LIST_RELOAD
-#: LYMessages.c:627
+#: LYMessages.c:651
 #, c-format
 msgid "List from document with POST data.  Reload %s ?"
 msgstr "Loend dokumendist POST andmetega. Laen %s uuesti?"
 
 #. #define CONFIRM_POST_DOC_HEAD
-#: LYMessages.c:629
+#: LYMessages.c:653
 msgid "Document from POST action, HEAD may not be understood.  Proceed?"
 msgstr "Dokument POST tegevusest, HEAD ei pruugi olla arusaadav. Jätkan?"
 
 #. #define CONFIRM_POST_LINK_HEAD
-#: LYMessages.c:631
+#: LYMessages.c:655
 msgid "Form submit action is POST, HEAD may not be understood.  Proceed?"
 msgstr "Vormi postitamise tegevus on POST, HEAD ei pruugi olla arusaadav. Jätkan?"
 
-#: LYMessages.c:632
+#: LYMessages.c:656
 msgid "Proceed without a username and password?"
 msgstr "Jätkan kasutaja ja paroolita?"
 
-#: LYMessages.c:633
+#: LYMessages.c:657
 #, c-format
 msgid "Proceed (%s)?"
 msgstr "Jätkan (%s)?"
 
-#: LYMessages.c:634
+#: LYMessages.c:658
 msgid "Cannot POST to this host."
 msgstr "POST ei saa sellele serverile saata."
 
-#: LYMessages.c:635
+#: LYMessages.c:659
 msgid "POST not supported for this URL - ignoring POST data!"
 msgstr "Selle URLiga POST ei toetata - ignoreerin POST andmeid!"
 
-#: LYMessages.c:636
+#: LYMessages.c:660
 msgid "Discarding POST data..."
 msgstr "Loobun POST andmetest..."
 
-#: LYMessages.c:637
+#: LYMessages.c:661
 msgid "Document will not be reloaded!"
 msgstr "Dokumenti ei laeta uuesti!"
 
-#: LYMessages.c:638
+#: LYMessages.c:662
 msgid "Location: "
 msgstr "Asukoht: "
 
-#: LYMessages.c:639
+#: LYMessages.c:663
 #, c-format
 msgid "'%s' not found!"
 msgstr "'%s' ei leidu!"
 
-#: LYMessages.c:640
+#: LYMessages.c:664
 msgid "Default Bookmark File"
 msgstr "Vaikimisi järgede fail"
 
-#: LYMessages.c:641
+#: LYMessages.c:665
 msgid "Screen too small! (8x35 min)"
 msgstr "Ekraan on liiga väike! (min on 8x35)"
 
-#: LYMessages.c:642
+#: LYMessages.c:666
 msgid "Select destination or ^G to Cancel: "
 msgstr "Valige sihtkoht või katkestamiseks ^G: "
 
 #. #define MULTIBOOKMARKS_SELECT
-#: LYMessages.c:644
+#: LYMessages.c:668
 msgid "Select subbookmark, '=' for menu, or ^G to cancel: "
 msgstr "Valige alamjärg, '=' annab menüü, ^G katkestab: "
 
 #. #define MULTIBOOKMARKS_SELF
-#: LYMessages.c:646
+#: LYMessages.c:670
 msgid "Reproduce L)ink in this bookmark file or C)ancel? (l,c): "
 msgstr "L=Uuenda viide selles järgede failis või C=katkesta? (l,c):  "
 
-#: LYMessages.c:647
+#: LYMessages.c:671
 msgid "Multiple bookmark support is not available."
 msgstr "Mitut järgede faili ei toetata."
 
-#: LYMessages.c:648
+#: LYMessages.c:672
 #, c-format
 msgid " Select Bookmark (screen %d of %d)"
 msgstr " Valige järg (ekraan %d/%d)"
 
-#: LYMessages.c:649
+#: LYMessages.c:673
 msgid "       Select Bookmark"
 msgstr "       Valige järg"
 
 #. #define MULTIBOOKMARKS_EHEAD_MASK
-#: LYMessages.c:651
+#: LYMessages.c:675
 #, c-format
 msgid "Editing Bookmark DESCRIPTION and FILEPATH (%d of 2)"
 msgstr "Järgede kirjelduste ja failiteede toimetamine (%d/2)"
 
 #. #define MULTIBOOKMARKS_EHEAD
-#: LYMessages.c:653
+#: LYMessages.c:677
 msgid "         Editing Bookmark DESCRIPTION and FILEPATH"
 msgstr "         Järje kirjelduse ja failitee toimetamine"
 
-#: LYMessages.c:654
+#: LYMessages.c:678
 msgid "Letter: "
 msgstr "Täht: "
 
 #. #define USE_PATH_OFF_HOME
-#: LYMessages.c:657
+#: LYMessages.c:681
 msgid "Use a filepath off your login directory in SHELL syntax!"
 msgstr "Kasutage failiteed oma kodukataloogis ja shelli süntaksiga!"
 
-#: LYMessages.c:659
+#: LYMessages.c:683
 msgid "Use a filepath off your home directory!"
 msgstr "Kasutage failiteed oma kodukataloogis!"
 
 #. #define MAXLINKS_REACHED
-#: LYMessages.c:662
+#: LYMessages.c:686
 msgid "Maximum links per page exceeded!  Use half-page or two-line scrolling."
 msgstr "Viidete maksimum lehel ületatud! Kasutage poolt lehte või kahe-rea skrolli."
 
-#: LYMessages.c:663
+#: LYMessages.c:687
 msgid "No previously visited links available!"
 msgstr "Varem külastatud viiteid pole!"
 
-#: LYMessages.c:664
+#: LYMessages.c:688
 msgid "Memory exhausted!  Program aborted!"
 msgstr "Mälu on otsas! Programm katkestab töö!"
 
-#: LYMessages.c:665
+#: LYMessages.c:689
 msgid "Memory exhausted!  Aborting..."
 msgstr "Mälu on otsas! Katkestan töö..."
 
-#: LYMessages.c:666
+#: LYMessages.c:690
 msgid "Not enough memory!"
 msgstr "Mälu on otsas!"
 
-#: LYMessages.c:667
+#: LYMessages.c:691
 msgid "Directory/File Manager not available"
 msgstr "Kataloogi/faili haldur ei ole kasutatav"
 
-#: LYMessages.c:668
+#: LYMessages.c:692
 msgid "HREF in BASE tag is not an absolute URL."
 msgstr "HREF BASE silt ei ole absoluutne URL."
 
-#: LYMessages.c:669
+#: LYMessages.c:693
 msgid "Location URL is not absolute."
 msgstr "Asukoha URL ei ole absoluutne."
 
-#: LYMessages.c:670
+#: LYMessages.c:694
 msgid "Refresh URL is not absolute."
 msgstr "Uuendatud URL ei ole absoluutne."
 
 #. #define SENDING_MESSAGE_WITH_BODY_TO
-#: LYMessages.c:672
+#: LYMessages.c:696
 msgid ""
 "You are sending a message with body to:\n"
 "  "
@@ -2051,7 +2118,7 @@ msgstr ""
 "Te olete saatmas pikemat teadet aadressil:\n"
 "  "
 
-#: LYMessages.c:673
+#: LYMessages.c:697
 msgid ""
 "You are sending a comment to:\n"
 "  "
@@ -2059,7 +2126,7 @@ msgstr ""
 "Te olete saatmas kommentaari aadressil:\n"
 "  "
 
-#: LYMessages.c:674
+#: LYMessages.c:698
 msgid ""
 "\n"
 " With copy to:\n"
@@ -2069,7 +2136,7 @@ msgstr ""
 "Koopia aadressile:\n"
 "  "
 
-#: LYMessages.c:675
+#: LYMessages.c:699
 msgid ""
 "\n"
 " With copies to:\n"
@@ -2080,7 +2147,7 @@ msgstr ""
 "  "
 
 #. #define CTRL_G_TO_CANCEL_SEND
-#: LYMessages.c:677
+#: LYMessages.c:701
 msgid ""
 "\n"
 "\n"
@@ -2091,7 +2158,7 @@ msgstr ""
 "Kui te ei soovi teadet saata, vajutage katkestamiseks Ctrl-G\n"
 
 #. #define ENTER_NAME_OR_BLANK
-#: LYMessages.c:679
+#: LYMessages.c:703
 msgid ""
 "\n"
 " Please enter your name, or leave it blank to remain anonymous\n"
@@ -2100,7 +2167,7 @@ msgstr ""
 " Palun sisestage oma nimi või jätke tühjaks, kui soovite jääda anonüümseks\n"
 
 #. #define ENTER_MAIL_ADDRESS_OR_OTHER
-#: LYMessages.c:681
+#: LYMessages.c:705
 msgid ""
 "\n"
 " Please enter a mail address or some other\n"
@@ -2109,11 +2176,11 @@ msgstr ""
 " Kui soovite vastust, sisestage palun e-posti\n"
 
 #. #define MEANS_TO_CONTACT_FOR_RESPONSE
-#: LYMessages.c:683
+#: LYMessages.c:707
 msgid " means to contact you, if you desire a response.\n"
 msgstr " aadress või muu kontakti info.\n"
 
-#: LYMessages.c:684
+#: LYMessages.c:708
 msgid ""
 "\n"
 " Please enter a subject line.\n"
@@ -2122,7 +2189,7 @@ msgstr ""
 " Palun sisestage teemarida.\n"
 
 #. #define ENTER_ADDRESS_FOR_CC
-#: LYMessages.c:686
+#: LYMessages.c:710
 msgid ""
 "\n"
 " Enter a mail address for a CC of your message.\n"
@@ -2130,11 +2197,11 @@ msgstr ""
 "\n"
 " Sisestage palun aadress, millele saata teate koopia.\n"
 
-#: LYMessages.c:687
+#: LYMessages.c:711
 msgid " (Leave blank if you don't want a copy.)\n"
 msgstr " (Jätke tühjaks, kui te ei soovi koopiat.)\n"
 
-#: LYMessages.c:688
+#: LYMessages.c:712
 msgid ""
 "\n"
 " Please review the message body:\n"
@@ -2144,7 +2211,7 @@ msgstr ""
 " Palun vaadake teade üle:\n"
 "\n"
 
-#: LYMessages.c:689
+#: LYMessages.c:713
 msgid ""
 "\n"
 "Press RETURN to continue: "
@@ -2152,7 +2219,7 @@ msgstr ""
 "\n"
 "Jätkamiseks vajutage RETURN: "
 
-#: LYMessages.c:690
+#: LYMessages.c:714
 msgid ""
 "\n"
 "Press RETURN to clean up: "
@@ -2160,11 +2227,11 @@ msgstr ""
 "\n"
 "Puhastamiseks vajutage RETURN: "
 
-#: LYMessages.c:691
+#: LYMessages.c:715
 msgid " Use Control-U to erase the default.\n"
 msgstr " Vaikeväärtuse kustutamiseks vajutage Control-U.\n"
 
-#: LYMessages.c:692
+#: LYMessages.c:716
 msgid ""
 "\n"
 " Please enter your message below."
@@ -2173,7 +2240,7 @@ msgstr ""
 " Palun sisestage all oma teade."
 
 #. #define ENTER_PERIOD_WHEN_DONE_A
-#: LYMessages.c:694 src/LYNews.c:360
+#: LYMessages.c:718 src/LYNews.c:360
 msgid ""
 "\n"
 " When you are done, press enter and put a single period (.)"
@@ -2182,7 +2249,7 @@ msgstr ""
 "Kui te olete valmis, vajutage enter ja kirjutage punkt (.)"
 
 #. #define ENTER_PERIOD_WHEN_DONE_B
-#: LYMessages.c:696 src/LYNews.c:361
+#: LYMessages.c:720 src/LYNews.c:361
 msgid ""
 "\n"
 " on a line and press enter again."
@@ -2192,257 +2259,257 @@ msgstr ""
 
 #. Cookies messages
 #. #define ADVANCED_COOKIE_CONFIRMATION
-#: LYMessages.c:700
+#: LYMessages.c:724
 #, c-format
 msgid "%s cookie: %.*s=%.*s  Allow? (Y/N/Always/neVer)"
 msgstr "%s präänik: %.*s=%.*s  Luban? (J/E/Alati/Mitte kunagi)"
 
 #. #define INVALID_COOKIE_DOMAIN_CONFIRMATION
-#: LYMessages.c:702
+#: LYMessages.c:726
 #, c-format
 msgid "Accept invalid cookie domain=%s for '%s'?"
 msgstr "Aktsepteerin vigast prääniku doomenit=%s, server '%s'?"
 
 #. #define INVALID_COOKIE_PATH_CONFIRMATION
-#: LYMessages.c:704
+#: LYMessages.c:728
 #, c-format
 msgid "Accept invalid cookie path=%s as a prefix of '%s'?"
 msgstr "Aktsepteerin vigast prääniku teed=%s '%s' prefiksina?"
 
-#: LYMessages.c:705
+#: LYMessages.c:729
 msgid "Allowing this cookie."
 msgstr "Luban seda präänikut."
 
-#: LYMessages.c:706
+#: LYMessages.c:730
 msgid "Rejecting this cookie."
 msgstr "Keeldun sellest präänikust."
 
-#: LYMessages.c:707
+#: LYMessages.c:731
 msgid "The Cookie Jar is empty."
 msgstr "Prääniku Jar on tühi."
 
-#: LYMessages.c:708
+#: LYMessages.c:732
 msgid "The Cache Jar is empty."
 msgstr "Puhvri Jar on tühi."
 
 #. #define ACTIVATE_TO_GOBBLE
-#: LYMessages.c:710
+#: LYMessages.c:734
 msgid "Activate links to gobble up cookies or entire domains,"
 msgstr "Präänikute või tervete doomenite neelamiseks aktiveerige viited "
 
-#: LYMessages.c:711
+#: LYMessages.c:735
 msgid "or to change a domain's 'allow' setting."
 msgstr "või muutke doomeni 'allow' seadet."
 
-#: LYMessages.c:712
+#: LYMessages.c:736
 msgid "(Cookies never allowed.)"
 msgstr "(Präänikuid ei lubata kunagi.)"
 
-#: LYMessages.c:713
+#: LYMessages.c:737
 msgid "(Cookies always allowed.)"
 msgstr "(Präänikuid lubatakse alati.)"
 
-#: LYMessages.c:714
+#: LYMessages.c:738
 msgid "(Cookies allowed via prompt.)"
 msgstr "(präänikute lubamist küsitakse.)"
 
-#: LYMessages.c:715
+#: LYMessages.c:739
 msgid "(Persistent Cookies.)"
 msgstr "(Püsivad präänikud.)"
 
-#: LYMessages.c:716
+#: LYMessages.c:740
 msgid "(No title.)"
 msgstr "(Tiitlita.)"
 
-#: LYMessages.c:717
+#: LYMessages.c:741
 msgid "(No name.)"
 msgstr "(Nimeta.)"
 
-#: LYMessages.c:718
+#: LYMessages.c:742
 msgid "(No value.)"
 msgstr "(Väärtuseta.)"
 
-#: LYMessages.c:719 src/LYOptions.c:2424
+#: LYMessages.c:743 src/LYOptions.c:2424
 msgid "None"
 msgstr "Puudub"
 
-#: LYMessages.c:720
+#: LYMessages.c:744
 msgid "(End of session.)"
 msgstr "(Sessiooni lõpp.)"
 
-#: LYMessages.c:721
+#: LYMessages.c:745
 msgid "Delete this cookie?"
 msgstr "Kustutan selle prääniku?"
 
-#: LYMessages.c:722
+#: LYMessages.c:746
 msgid "The cookie has been eaten!"
 msgstr "Präänik on söödud!"
 
-#: LYMessages.c:723
+#: LYMessages.c:747
 msgid "Delete this empty domain?"
 msgstr "Kustutan selle tühja doomeni?"
 
-#: LYMessages.c:724
+#: LYMessages.c:748
 msgid "The domain has been eaten!"
 msgstr "Doomen on söödud!"
 
 #. #define DELETE_COOKIES_SET_ALLOW_OR_CANCEL
-#: LYMessages.c:726
+#: LYMessages.c:750
 msgid "D)elete domain's cookies, set allow A)lways/P)rompt/neV)er, or C)ancel? "
 msgstr "D=kustuta doomeni präänikud, sea luba A)lati/P=küsi/V=ei või C=katkesta? "
 
 #. #define DELETE_DOMAIN_SET_ALLOW_OR_CANCEL
-#: LYMessages.c:728
+#: LYMessages.c:752
 msgid "D)elete domain, set allow A)lways/P)rompt/neV)er, or C)ancel? "
 msgstr "D=Kustuta doomen, sea luba A)lati/P=küsi/V=ei või C=katkesta? "
 
-#: LYMessages.c:729
+#: LYMessages.c:753
 msgid "All cookies in the domain have been eaten!"
 msgstr "Doomeni kõik präänikud on söödud!"
 
-#: LYMessages.c:730
+#: LYMessages.c:754
 #, c-format
 msgid "'A'lways allowing from domain '%s'."
 msgstr "'A'lati luban doomenist '%s'."
 
-#: LYMessages.c:731
+#: LYMessages.c:755
 #, c-format
 msgid "ne'V'er allowing from domain '%s'."
 msgstr "'V'=ei luba kunagi doomenist '%s'."
 
-#: LYMessages.c:732
+#: LYMessages.c:756
 #, c-format
 msgid "'P'rompting to allow from domain '%s'."
 msgstr "'P'=küsi, et lubada doomenist '%s'."
 
-#: LYMessages.c:733
+#: LYMessages.c:757
 msgid "Delete all cookies in this domain?"
 msgstr "Kustutan kõik selle doomeni präänikud?"
 
-#: LYMessages.c:734
+#: LYMessages.c:758
 msgid "All of the cookies in the jar have been eaten!"
 msgstr "Kõik jari küpsised on söödud!"
 
-#: LYMessages.c:736
+#: LYMessages.c:760
 msgid "Port 19 not permitted in URLs."
 msgstr "Porti 19 ei ole lubatud URLis kasutada."
 
-#: LYMessages.c:737
+#: LYMessages.c:761
 msgid "Port 25 not permitted in URLs."
 msgstr "Porti 25 ei ole lubatud URLis kasutada."
 
-#: LYMessages.c:738
+#: LYMessages.c:762
 #, c-format
 msgid "Port %lu not permitted in URLs."
 msgstr "Porti %lu ei ole lubatud URLis kasutada."
 
-#: LYMessages.c:739
+#: LYMessages.c:763
 msgid "URL has a bad port field."
 msgstr "Port urlis on vigane."
 
-#: LYMessages.c:740
+#: LYMessages.c:764
 msgid "Maximum nesting of HTML elements exceeded."
 msgstr "Üksteises sisalduvate HTML elementide maksimum ületatud."
 
-#: LYMessages.c:741
+#: LYMessages.c:765
 msgid "Bad partial reference!  Stripping lead dots."
 msgstr "Vigane osaline viide! Eemaldan esimesed punktid."
 
-#: LYMessages.c:742
+#: LYMessages.c:766
 msgid "Trace Log open failed.  Trace off!"
 msgstr "Trasseerimise logi avamine ebaõnnestus. Ei trasseeri!"
 
-#: LYMessages.c:743
+#: LYMessages.c:767
 msgid "Lynx Trace Log"
 msgstr "Lynx trasseerimise logi"
 
-#: LYMessages.c:744
+#: LYMessages.c:768
 msgid "No trace log has been started for this session."
 msgstr "Selle sessiooniga ei ole trasseerimist alustatud."
 
 #. #define MAX_TEMPCOUNT_REACHED
-#: LYMessages.c:746
+#: LYMessages.c:770
 msgid "The maximum temporary file count has been reached!"
 msgstr "Maksimaalne ajutiste failide arv on ületatud!"
 
 #. #define FORM_VALUE_TOO_LONG
-#: LYMessages.c:748
+#: LYMessages.c:772
 msgid "Form field value exceeds buffer length!  Trim the tail."
 msgstr "Vormi väärtuse pikkus ületab puhvri pikkust! Eemaldan ülejäägi."
 
 #. #define FORM_TAIL_COMBINED_WITH_HEAD
-#: LYMessages.c:750
+#: LYMessages.c:774
 msgid "Modified tail combined with head of form field value."
 msgstr "Muudetud lõpp kombineeriti vormi välja väärtuse päisega."
 
 #. HTFile.c
-#: LYMessages.c:753
+#: LYMessages.c:777
 msgid "Directory"
 msgstr "Kataloog"
 
-#: LYMessages.c:754
+#: LYMessages.c:778
 msgid "Directory browsing is not allowed."
 msgstr "Kataloogide prausimine ei ole lubatud."
 
-#: LYMessages.c:755
+#: LYMessages.c:779
 msgid "Selective access is not enabled for this directory"
 msgstr "Valikuline lubamine ei ole selles kataloogis lubatud"
 
-#: LYMessages.c:756
+#: LYMessages.c:780
 msgid "Multiformat: directory scan failed."
 msgstr "Multiformat: kataloogi skaneerimine ebaõnnestus."
 
-#: LYMessages.c:757
+#: LYMessages.c:781
 msgid "This directory is not readable."
 msgstr "See kataloog ei ole loetav."
 
-#: LYMessages.c:758
+#: LYMessages.c:782
 msgid "Can't access requested file."
 msgstr "Soovitud faili ei saa kasutada."
 
-#: LYMessages.c:759
+#: LYMessages.c:783
 msgid "Could not find suitable representation for transmission."
 msgstr "Ei leia ülekandeks sobivat esitusviisi."
 
-#: LYMessages.c:760
+#: LYMessages.c:784
 msgid "Could not open file for decompression!"
 msgstr "Faili ei õnnestu lahtipakkimiseks avada!"
 
-#: LYMessages.c:761
+#: LYMessages.c:785
 msgid "Files:"
 msgstr "Failid:"
 
-#: LYMessages.c:762
+#: LYMessages.c:786
 msgid "Subdirectories:"
 msgstr "Alamkataloogid:"
 
-#: LYMessages.c:763
+#: LYMessages.c:787
 msgid " directory"
 msgstr " kataloog"
 
-#: LYMessages.c:764
+#: LYMessages.c:788
 msgid "Up to "
 msgstr "Tagasi "
 
-#: LYMessages.c:765
+#: LYMessages.c:789
 msgid "Current directory is "
 msgstr "Jooksev kataloog on "
 
 #. HTFTP.c
-#: LYMessages.c:768
+#: LYMessages.c:792
 msgid "Symbolic Link"
 msgstr "Nimeviide"
 
 #. HTGopher.c
-#: LYMessages.c:771
+#: LYMessages.c:795
 msgid "No response from server!"
 msgstr "Server ei vasta!"
 
-#: LYMessages.c:772
+#: LYMessages.c:796
 msgid "CSO index"
 msgstr "CSO indeks"
 
-#: LYMessages.c:773
+#: LYMessages.c:797
 msgid ""
 "\n"
 "This is a searchable index of a CSO database.\n"
@@ -2450,16 +2517,16 @@ msgstr ""
 "\n"
 "See on CSO andmebaasi otsingu indeks.\n"
 
-#: LYMessages.c:774
+#: LYMessages.c:798
 msgid "CSO Search Results"
 msgstr "CSO otsingu tulemused"
 
-#: LYMessages.c:775
+#: LYMessages.c:799
 #, c-format
 msgid "Seek fail on %s\n"
 msgstr "%s positsioneerimine ebaõnnestus\n"
 
-#: LYMessages.c:776
+#: LYMessages.c:800
 msgid ""
 "\n"
 "Press the 's' key and enter search keywords.\n"
@@ -2467,7 +2534,7 @@ msgstr ""
 "\n"
 "Vajutage klahvi 's' ja sisestage otsingu võtmesõnad.\n"
 
-#: LYMessages.c:777
+#: LYMessages.c:801
 msgid ""
 "\n"
 "This is a searchable Gopher index.\n"
@@ -2475,35 +2542,35 @@ msgstr ""
 "\n"
 "See on Gopheri otsingu indeks.\n"
 
-#: LYMessages.c:778
+#: LYMessages.c:802
 msgid "Gopher index"
 msgstr "Gopher indeks"
 
-#: LYMessages.c:779
+#: LYMessages.c:803
 msgid "Gopher Menu"
 msgstr "Gopher Menüü"
 
-#: LYMessages.c:780
+#: LYMessages.c:804
 msgid " Search Results"
 msgstr " Otsingu tulemused"
 
-#: LYMessages.c:781
+#: LYMessages.c:805
 msgid "Sending CSO/PH request."
 msgstr "Saadan CSO/PH päringu."
 
-#: LYMessages.c:782
+#: LYMessages.c:806
 msgid "Sending Gopher request."
 msgstr "Saadan Gopher päringu."
 
-#: LYMessages.c:783
+#: LYMessages.c:807
 msgid "CSO/PH request sent; waiting for response."
 msgstr "CSO/PH päring saadetud; ootan vastust."
 
-#: LYMessages.c:784
+#: LYMessages.c:808
 msgid "Gopher request sent; waiting for response."
 msgstr "Gopher päring saadetud; ootan vastust."
 
-#: LYMessages.c:785
+#: LYMessages.c:809
 msgid ""
 "\n"
 "Please enter search keywords.\n"
@@ -2511,7 +2578,7 @@ msgstr ""
 "\n"
 "Palun sisestage otsitavad võtmesõnad.\n"
 
-#: LYMessages.c:786
+#: LYMessages.c:810
 msgid ""
 "\n"
 "The keywords that you enter will allow you to search on a"
@@ -2519,205 +2586,205 @@ msgstr ""
 "\n"
 "Sisestatavate võtmesõnadega otsitakse"
 
-#: LYMessages.c:787
+#: LYMessages.c:811
 msgid " person's name in the database.\n"
 msgstr " andmebaasist inimeste nimesid.\n"
 
 #. HTNews.c
-#: LYMessages.c:790
+#: LYMessages.c:814
 msgid "Connection closed ???"
 msgstr "Ühendus suleti ???"
 
-#: LYMessages.c:791
+#: LYMessages.c:815
 msgid "Cannot open temporary file for news POST."
 msgstr "Uudisegruppi postitamiseks ei õnnestu avada ajutist faili."
 
-#: LYMessages.c:792
+#: LYMessages.c:816
 msgid "This client does not contain support for posting to news with SSL."
 msgstr "See klient ei toeta SSL vahendusel uudisegruppi postitamist."
 
 #. HTStyle.c
-#: LYMessages.c:795
+#: LYMessages.c:819
 #, c-format
 msgid "Style %d `%s' SGML:%s.  Font %s %.1f point.\n"
 msgstr "Stiil %d `%s' SGML:%s.  Kiri %s %.1f punkti.\n"
 
-#: LYMessages.c:797
+#: LYMessages.c:821
 #, c-format
 msgid "\tAlign=%d, %d tabs. (%.0f before, %.0f after)\n"
 msgstr "\tJoondus=%d, %d tab. (%.0f enen, %.0f peale)\n"
 
-#: LYMessages.c:798
+#: LYMessages.c:822
 #, c-format
 msgid "\t\tTab kind=%d at %.0f\n"
 msgstr "\t\tTab tüüp=%d kohal %.0f\n"
 
 #. HTTP.c
-#: LYMessages.c:801
+#: LYMessages.c:825
 msgid "Can't proceed without a username and password."
 msgstr "Kasutajanime ja paroolita ei saa jätkata."
 
-#: LYMessages.c:802
+#: LYMessages.c:826
 msgid "Can't retry with authorization!  Contact the server's WebMaster."
 msgstr "Autoriseerimisega ei õnnestu jätkata! Võtke ühendust serveri haldajaga."
 
-#: LYMessages.c:803
+#: LYMessages.c:827
 msgid "Can't retry with proxy authorization!  Contact the server's WebMaster."
 msgstr "Proksi autoriseerimisega ei õnnestu jätkata! Kontakteeruge serveri haldajaga."
 
-#: LYMessages.c:804
+#: LYMessages.c:828
 msgid "Retrying with proxy authorization information."
 msgstr "Proovin uuesti proksi autoriseerimise infoga."
 
-#: LYMessages.c:805
+#: LYMessages.c:829
 #, c-format
 msgid "SSL error:%s-Continue?"
 msgstr "SSL viga:%s-Jätkan?"
 
 #. HTWAIS.c
-#: LYMessages.c:808
+#: LYMessages.c:832
 msgid "HTWAIS: Return message too large."
 msgstr "HTWAIS: Tagastatav teade on liiga pikk."
 
-#: LYMessages.c:809
+#: LYMessages.c:833
 msgid "Enter WAIS query: "
 msgstr "Sisestage WAIS päring: "
 
 #. Miscellaneous status
-#: LYMessages.c:812
+#: LYMessages.c:836
 msgid "Retrying as HTTP0 request."
 msgstr "Proovin uuesti HTTP0 päringuna."
 
-#: LYMessages.c:813
+#: LYMessages.c:837
 #, c-format
 msgid "Transferred %d bytes"
 msgstr "Laetud %d baiti"
 
-#: LYMessages.c:814
+#: LYMessages.c:838
 msgid "Data transfer complete"
 msgstr "Andmed laetud"
 
-#: LYMessages.c:815
+#: LYMessages.c:839
 #, c-format
 msgid "Error processing line %d of %s\n"
 msgstr "Viga rea %d töötlemisel (%s)\n"
 
 #. Lynx internal page titles
-#: LYMessages.c:818
+#: LYMessages.c:842
 msgid "Address List Page"
 msgstr "Aadressi loendi leht"
 
-#: LYMessages.c:819
+#: LYMessages.c:843
 msgid "Bookmark file"
 msgstr "Järgede fail"
 
-#: LYMessages.c:820
+#: LYMessages.c:844
 msgid "Configuration Definitions"
 msgstr "Seadete definitsioonid"
 
-#: LYMessages.c:821
+#: LYMessages.c:845
 msgid "Cookie Jar"
 msgstr "Präänikute Jar"
 
-#: LYMessages.c:822
+#: LYMessages.c:846
 msgid "Current Edit-Key Map"
 msgstr "Jooksev redigeerimise-klahvi tabel"
 
-#: LYMessages.c:823
+#: LYMessages.c:847
 msgid "Current Key Map"
 msgstr "Jooksev klahvitabel"
 
-#: LYMessages.c:824
+#: LYMessages.c:848
 msgid "File Management Options"
 msgstr "Failide haldamise seaded"
 
-#: LYMessages.c:825
+#: LYMessages.c:849
 msgid "Download Options"
 msgstr "Allalaadimise võimalused"
 
-#: LYMessages.c:826
+#: LYMessages.c:850
 msgid "History Page"
 msgstr "Ajaloo leht"
 
-#: LYMessages.c:827
+#: LYMessages.c:851
 msgid "Cache Jar"
 msgstr "Puhvi Jar"
 
-#: LYMessages.c:828
+#: LYMessages.c:852
 msgid "List Page"
 msgstr "Lehe info"
 
-#: LYMessages.c:829
+#: LYMessages.c:853
 msgid "Lynx.cfg Information"
 msgstr "Lynx.cfg Informatsioon"
 
-#: LYMessages.c:830
+#: LYMessages.c:854
 msgid "Converted Mosaic Hotlist"
 msgstr "Teisendatud Mosaic Hotlist"
 
-#: LYMessages.c:831
+#: LYMessages.c:855
 msgid "Options Menu"
 msgstr "Omaduste menüü"
 
-#: LYMessages.c:832
+#: LYMessages.c:856
 msgid "File Permission Options"
 msgstr "Failiõiguste seaded"
 
-#: LYMessages.c:833
+#: LYMessages.c:857
 msgid "Printing Options"
 msgstr "Trükkimise võimalused"
 
-#: LYMessages.c:834
+#: LYMessages.c:858
 msgid "Information about the current document"
 msgstr "Info jooksvast dokumendist"
 
-#: LYMessages.c:835
+#: LYMessages.c:859
 msgid "Your recent statusline messages"
 msgstr "Viimased olekurea teated"
 
-#: LYMessages.c:836
+#: LYMessages.c:860
 msgid "Upload Options"
 msgstr "Üleslaadimise seaded"
 
-#: LYMessages.c:837
+#: LYMessages.c:861
 msgid "Visited Links Page"
 msgstr "Külastatud viidete leht"
 
 #. CONFIG_DEF_TITLE subtitles
-#: LYMessages.c:840
+#: LYMessages.c:864
 msgid "See also"
 msgstr "Vaadake ka"
 
-#: LYMessages.c:841
+#: LYMessages.c:865
 msgid "your"
 msgstr "teie"
 
-#: LYMessages.c:842
+#: LYMessages.c:866
 msgid "for runtime options"
 msgstr "töö-aja seaded"
 
-#: LYMessages.c:843
+#: LYMessages.c:867
 msgid "compile time options"
 msgstr "kompileerimise aegsed seaded"
 
-#: LYMessages.c:844
+#: LYMessages.c:868
 msgid "color-style configuration"
 msgstr "värvistiili seaded"
 
-#: LYMessages.c:845
+#: LYMessages.c:869
 msgid "latest release"
 msgstr "viimane versioon"
 
-#: LYMessages.c:846
+#: LYMessages.c:870
 msgid "pre-release version"
 msgstr "eelversioon"
 
-#: LYMessages.c:847
+#: LYMessages.c:871
 msgid "development version"
 msgstr "arendusversioon"
 
 #. #define AUTOCONF_CONFIG_CACHE
-#: LYMessages.c:849
+#: LYMessages.c:873
 msgid ""
 "The following data were derived during the automatic configuration/build\n"
 "process of this copy of Lynx.  When reporting a bug, please include a copy\n"
@@ -2728,7 +2795,7 @@ msgstr ""
 "lehest."
 
 #. #define AUTOCONF_LYNXCFG_H
-#: LYMessages.c:853
+#: LYMessages.c:877
 msgid ""
 "The following data were used as automatically-configured compile-time\n"
 "definitions when this copy of Lynx was built."
@@ -2737,53 +2804,53 @@ msgstr ""
 "kompileerimise aegsete definitsioonidena."
 
 #. #define DIRED_NOVICELINE
-#: LYMessages.c:858
+#: LYMessages.c:882
 msgid "  C)reate  D)ownload  E)dit  F)ull menu  M)odify  R)emove  T)ag  U)pload     \n"
 msgstr "  C=loo D=lae alla E=toimeta F=kogu menüü M)uuda R=eemalda T=märgi U=lae üles\n"
 
-#: LYMessages.c:859
+#: LYMessages.c:883
 msgid "Failed to obtain status of current link!"
 msgstr "Jooksva viite oleku lugemine ebaõnnestus!"
 
 #. #define INVALID_PERMIT_URL
-#: LYMessages.c:862
+#: LYMessages.c:886
 msgid "Special URL only valid from current File Permission menu!"
 msgstr "Spetsiaal URL on lubatud ainult faili õiguste menüüs!"
 
-#: LYMessages.c:866
+#: LYMessages.c:890
 msgid "External support is currently disabled."
 msgstr "Väline tugi on hetkel blokeeritud."
 
 #. new with 2.8.4dev.21
-#: LYMessages.c:870
+#: LYMessages.c:894
 msgid "Changing working-directory is currently disabled."
 msgstr "Töökataloogi muutmine on hetkel blokeeritud."
 
-#: LYMessages.c:871
+#: LYMessages.c:895
 msgid "Linewrap OFF!"
 msgstr "Reamurdmine väljas!"
 
-#: LYMessages.c:872
+#: LYMessages.c:896
 msgid "Linewrap ON!"
 msgstr "Reamurdmine sees!"
 
-#: LYMessages.c:873
+#: LYMessages.c:897
 msgid "Parsing nested-tables toggled OFF!  Reloading..."
 msgstr "Tabelid tabelites töötlemine on välja lülitatud! Laen uuesti..."
 
-#: LYMessages.c:874
+#: LYMessages.c:898
 msgid "Parsing nested-tables toggled ON!  Reloading..."
 msgstr "Tabelid tabelites töötlemine on sisse lülitatud! Laen uuesti..."
 
-#: LYMessages.c:875
+#: LYMessages.c:899
 msgid "Shifting is disabled while line-wrap is in effect"
 msgstr "Kui kasutatakse reamurdmist, on nihutamine blokeeritud"
 
-#: LYMessages.c:876
+#: LYMessages.c:900
 msgid "Trace not supported"
 msgstr "Trasseerimine ei ole toetatud"
 
-#: LYMessages.c:796
+#: LYMessages.c:820
 #, c-format
 msgid "\tIndents: first=%.0f others=%.0f, Height=%.1f Desc=%.1f\n"
 msgstr "\tTaanded: esimene=%.0f teised=%.0f, Kõrgus=%.1f Kirj=%.1f\n"
@@ -3098,100 +3165,105 @@ msgstr "Pistikul ei õnnestu taastada blokeerivat moodi."
 msgid "Socket read failed (too many tries)."
 msgstr "Pistikust lugemine ebaõnnestus (liiga palju katseid)."
 
-#: WWW/Library/Implementation/HTTP.c:81
+#: WWW/Library/Implementation/HTTP.c:136
 #, c-format
 msgid "SSL callback:%s, preverify_ok=%d, ssl_okay=%d"
 msgstr "SSL callback:%s, preverify_ok=%d, ssl_okay=%d"
 
-#: WWW/Library/Implementation/HTTP.c:438
+#: WWW/Library/Implementation/HTTP.c:516
 #, c-format
 msgid "Address contains a username: %s"
 msgstr "Aadress sisaldab kasutajanime: %s"
 
-#: WWW/Library/Implementation/HTTP.c:492
+#: WWW/Library/Implementation/HTTP.c:570
 #, c-format
 msgid "Certificate issued by: %s"
 msgstr "Sertifikaadi väljastaja: %s"
 
-#: WWW/Library/Implementation/HTTP.c:679
+#: WWW/Library/Implementation/HTTP.c:757
 msgid "This client does not contain support for HTTPS URLs."
 msgstr "See klient ei toeta HTTPS URLe."
 
-#: WWW/Library/Implementation/HTTP.c:704
+#: WWW/Library/Implementation/HTTP.c:782
 msgid "Unable to connect to remote host."
 msgstr "Serveriga ühenduse loomine ebaõnnestus."
 
-#: WWW/Library/Implementation/HTTP.c:744
+#: WWW/Library/Implementation/HTTP.c:825
 msgid "Retrying connection without TLS."
 msgstr "Üritan ühendust uuesti luua TLS kasutamata."
 
-#: WWW/Library/Implementation/HTTP.c:794
+#: WWW/Library/Implementation/HTTP.c:877
 msgid "GnuTLS error when trying to verify certificate."
 msgstr "GnuTLS viga sertifikaadi kontrollimisel."
 
-#: WWW/Library/Implementation/HTTP.c:806
+#: WWW/Library/Implementation/HTTP.c:889
 msgid "the certificate has no known issuer"
 msgstr "sertifikaadil puudub tuntud väljaandja"
 
-#: WWW/Library/Implementation/HTTP.c:808
+#: WWW/Library/Implementation/HTTP.c:891
 msgid "no issuer was found"
 msgstr "väljaandja puudub"
 
-#: WWW/Library/Implementation/HTTP.c:810
+#: WWW/Library/Implementation/HTTP.c:893
 msgid "issuer is not a CA"
 msgstr "väljaandja pole CA"
 
-#: WWW/Library/Implementation/HTTP.c:812
+#: WWW/Library/Implementation/HTTP.c:895
 msgid "the certificate has been revoked"
 msgstr "sertifikaat on kehtivuse kaotanud"
 
-#: WWW/Library/Implementation/HTTP.c:814
+#: WWW/Library/Implementation/HTTP.c:897
 msgid "the certificate is not trusted"
 msgstr "sertifikaat pole usaldusväärne"
 
-#: WWW/Library/Implementation/HTTP.c:889
+#: WWW/Library/Implementation/HTTP.c:972
 #, c-format
 msgid "Verified connection to %s (cert=%s)"
 msgstr "Kontrollitud ühendus serveriga %s (sertifikaat=%s)"
 
-#: WWW/Library/Implementation/HTTP.c:937 WWW/Library/Implementation/HTTP.c:979
+#: WWW/Library/Implementation/HTTP.c:1022
+#: WWW/Library/Implementation/HTTP.c:1064
 #, c-format
 msgid "Verified connection to %s (subj=%s)"
 msgstr "Kontrollitud ühendus serveriga %s (subj=%s)"
 
-#: WWW/Library/Implementation/HTTP.c:1009
+#: WWW/Library/Implementation/HTTP.c:1094
 msgid "Can't find common name in certificate"
 msgstr "Sertifikaadis puudub ühine nimi"
 
-#: WWW/Library/Implementation/HTTP.c:1012
+#: WWW/Library/Implementation/HTTP.c:1097
 #, c-format
 msgid "SSL error:host(%s)!=cert(%s)-Continue?"
 msgstr "SSL viga:host(%s)!=sert(%s)-Jätkan?"
 
-#: WWW/Library/Implementation/HTTP.c:1025
+#: WWW/Library/Implementation/HTTP.c:1104
+msgid "SSL error"
+msgstr "SSL viga"
+
+#: WWW/Library/Implementation/HTTP.c:1112
 #, c-format
 msgid "UNVERIFIED connection to %s (cert=%s)"
 msgstr "KONTROLLIMATA ühendus serveriga %s (sertifikaat=%s)"
 
-#: WWW/Library/Implementation/HTTP.c:1034
+#: WWW/Library/Implementation/HTTP.c:1121
 #, c-format
 msgid "Secure %d-bit %s (%s) HTTP connection"
 msgstr "Turvaline %d-bitti %s (%s) HTTP ühendus"
 
-#: WWW/Library/Implementation/HTTP.c:1497
+#: WWW/Library/Implementation/HTTP.c:1584
 msgid "Sending HTTP request."
 msgstr "Saadan HTTP päringu."
 
-#: WWW/Library/Implementation/HTTP.c:1539
+#: WWW/Library/Implementation/HTTP.c:1626
 msgid "Unexpected network write error; connection aborted."
 msgstr "Ootamatu tõrge võrku kirjutamisel; ühendus katkestati."
 
-#: WWW/Library/Implementation/HTTP.c:1545
+#: WWW/Library/Implementation/HTTP.c:1632
 msgid "HTTP request sent; waiting for response."
 msgstr "HTTP päring on saadetud; ootan vastust."
 
-#: WWW/Library/Implementation/HTTP.c:1618
-#: WWW/Library/Implementation/HTTP.c:1628
+#: WWW/Library/Implementation/HTTP.c:1705
+#: WWW/Library/Implementation/HTTP.c:1715
 msgid "Unexpected network read error; connection aborted."
 msgstr "Ootamatu tõrge võrgust lugemisel; ühendus katkestati."
 
@@ -3204,7 +3276,7 @@ msgstr "Ootamatu tõrge võrgust lugemisel; ühendus katkestati."
 #. * line and possibly other headers, so we'll deal with them by
 #. * showing the full header to the user as text/plain.  - FM
 #.
-#: WWW/Library/Implementation/HTTP.c:1830
+#: WWW/Library/Implementation/HTTP.c:1917
 msgid "Got unexpected Informational Status."
 msgstr "Sain ootamatu informatiivse oleku."
 
@@ -3214,7 +3286,7 @@ msgstr "Sain ootamatu informatiivse oleku."
 #. * content.  We'll instruct the user to do that, and
 #. * restore the current document.  - FM
 #.
-#: WWW/Library/Implementation/HTTP.c:1864
+#: WWW/Library/Implementation/HTTP.c:1951
 msgid "Request fulfilled.  Reset Content."
 msgstr "Päring täidetud. Algväärtusta sisu."
 
@@ -3224,27 +3296,27 @@ msgstr "Päring täidetud. Algväärtusta sisu."
 #. * status is inappropriate.  We'll deal with it by showing
 #. * the full header to the user as text/plain.  - FM
 #.
-#: WWW/Library/Implementation/HTTP.c:1979
+#: WWW/Library/Implementation/HTTP.c:2066
 msgid "Got unexpected 304 Not Modified status."
 msgstr "Sain ootamatu oleku, 304 Pole muudetud."
 
-#: WWW/Library/Implementation/HTTP.c:2042
+#: WWW/Library/Implementation/HTTP.c:2129
 msgid "Redirection of POST content requires user approval."
 msgstr "POST sisu ümbersuunamine nõuab kasutaja kinnitust."
 
-#: WWW/Library/Implementation/HTTP.c:2057
+#: WWW/Library/Implementation/HTTP.c:2144
 msgid "Have POST content.  Treating Permanent Redirection as Temporary.\n"
 msgstr "Oman POST sisu. Käsitlen püsivat ümbersuunamist ajutisena.\n"
 
-#: WWW/Library/Implementation/HTTP.c:2101
+#: WWW/Library/Implementation/HTTP.c:2188
 msgid "Retrying with access authorization information."
 msgstr "Proovin uuesti kasutades autoriseerimise infot."
 
-#: WWW/Library/Implementation/HTTP.c:2113
+#: WWW/Library/Implementation/HTTP.c:2200
 msgid "Show the 401 message body?"
 msgstr "Näitan teate 401 keha?"
 
-#: WWW/Library/Implementation/HTTP.c:2157
+#: WWW/Library/Implementation/HTTP.c:2244
 msgid "Show the 407 message body?"
 msgstr "Näitan teate 407 keha?"
 
@@ -3252,7 +3324,7 @@ msgstr "Näitan teate 407 keha?"
 #. * Bad or unknown server_status number.  Take a chance and hope
 #. * there is something to display.  - FM
 #.
-#: WWW/Library/Implementation/HTTP.c:2257
+#: WWW/Library/Implementation/HTTP.c:2344
 msgid "Unknown status reply from server!"
 msgstr "Tundmatu oleku vastus serverilt!"
 
@@ -3633,31 +3705,31 @@ msgstr "ei"
 msgid "Y/N/A/V"
 msgstr "J/E/A/M"
 
-#: src/HTML.c:5915
+#: src/HTML.c:5931
 msgid "Description:"
 msgstr "Kirjeldus:"
 
-#: src/HTML.c:5920
+#: src/HTML.c:5936
 msgid "(none)"
 msgstr "(puudub)"
 
-#: src/HTML.c:5924
+#: src/HTML.c:5940
 msgid "Filepath:"
 msgstr "Failitee:"
 
-#: src/HTML.c:5930
+#: src/HTML.c:5946
 msgid "(unknown)"
 msgstr "(tundmatu)"
 
-#: src/HTML.c:7370
+#: src/HTML.c:7386
 msgid "Document has only hidden links.  Use the 'l'ist command."
 msgstr "Dokumendis on ainult peidetud viited. Kasuta käsklust 'l'ist."
 
-#: src/HTML.c:7869
+#: src/HTML.c:7885
 msgid "Source cache error - disk full?"
 msgstr "Lähtefaili puhvri viga - ketas on täis?"
 
-#: src/HTML.c:7882
+#: src/HTML.c:7898
 msgid "Source cache error - not enough memory!"
 msgstr "Lähtefaili puhvri viga - mälu on otsas?"
 
@@ -3750,19 +3822,19 @@ msgstr "See pakub korralikku CGI skriptide tuge.\n"
 msgid "Exiting via interrupt:"
 msgstr "Lõpetan katkestuse tõttu:"
 
-#: src/LYCookie.c:2538
+#: src/LYCookie.c:2541
 msgid "(from a previous session)"
 msgstr "(eelmisest sessioonist)"
 
-#: src/LYCookie.c:2599
+#: src/LYCookie.c:2602
 msgid "Maximum Gobble Date:"
 msgstr "Maksimaalne söömise aeg: "
 
-#: src/LYCookie.c:2638
+#: src/LYCookie.c:2641
 msgid "Internal"
 msgstr "Sisemine"
 
-#: src/LYCookie.c:2639
+#: src/LYCookie.c:2642
 msgid "cookie_domain_flag_set error, aborting program"
 msgstr "cookie_domain_flag_set viga, katkestan programmi töö"
 
@@ -4273,19 +4345,19 @@ msgstr "See teade on automaatselt loodud"
 msgid "No system mailer configured"
 msgstr "Süsteemset e-posti programmi ei ole seadistatud"
 
-#: src/LYMain.c:1069
+#: src/LYMain.c:1071
 msgid "No Winsock found, sorry."
 msgstr "Winsock puudub, kahju."
 
-#: src/LYMain.c:1260
+#: src/LYMain.c:1262
 msgid "You MUST define a valid TMP or TEMP area!"
 msgstr "Te PEATE defineerima kehtiva TMP või TEMP piirkonna!"
 
-#: src/LYMain.c:1313 src/LYMainLoop.c:5283
+#: src/LYMain.c:1315 src/LYMainLoop.c:5283
 msgid "No such directory"
 msgstr "Sellist kataloogi ei ole"
 
-#: src/LYMain.c:1507
+#: src/LYMain.c:1509
 #, c-format
 msgid ""
 "\n"
@@ -4296,7 +4368,7 @@ msgstr ""
 "Seadete faili \"%s\" ei ole.\n"
 "\n"
 
-#: src/LYMain.c:1517
+#: src/LYMain.c:1519
 #, c-format
 msgid ""
 "\n"
@@ -4307,66 +4379,66 @@ msgstr ""
 "Lynx kooditabeleid ei ole deklareeritud.\n"
 "\n"
 
-#: src/LYMain.c:1654
+#: src/LYMain.c:1675
 #, c-format
 msgid "Ignored %d characters from standard input.\n"
 msgstr "Ignoreerisin %d sümbolit standard sisendist.\n"
 
-#: src/LYMain.c:1656
+#: src/LYMain.c:1677
 #, c-format
 msgid "Use \"-stdin\" or \"-\" to tell how to handle piped input.\n"
 msgstr "Toruga suunatud sisendi määramiseks kasutage \"-stdin\" või \"-\".\n"
 
-#: src/LYMain.c:1814
+#: src/LYMain.c:1835
 msgid "Warning:"
 msgstr "Hoiatus:"
 
-#: src/LYMain.c:2384
+#: src/LYMain.c:2405
 msgid "persistent cookies state will be changed in next session only."
 msgstr "püsivate präänikute olekut muudetakse alles järgmise sessiooniga."
 
-#: src/LYMain.c:2621 src/LYMain.c:2666
+#: src/LYMain.c:2642 src/LYMain.c:2687
 #, c-format
 msgid "Lynx: ignoring unrecognized charset=%s\n"
 msgstr "Lynx: ignoreerin tundmatut kooditabelit %s\n"
 
-#: src/LYMain.c:3185
+#: src/LYMain.c:3206
 #, c-format
 msgid "%s Version %s (%s)"
 msgstr "%s Versioon %s (%s)"
 
-#: src/LYMain.c:3223
+#: src/LYMain.c:3247
 #, c-format
-msgid "Built on %s %s %s\n"
-msgstr "Ehitatud %s masinal %s %s\n"
+msgid "Built on %s%s.\n"
+msgstr "Ehitatud %s%s.\n"
 
-#: src/LYMain.c:3245
+#: src/LYMain.c:3261
 msgid "Copyrights held by the Lynx Developers Group,"
 msgstr "Autoriõiguseid hoiavad Lynx Developers Group,"
 
-#: src/LYMain.c:3246
+#: src/LYMain.c:3262
 msgid "the University of Kansas, CERN, and other contributors."
 msgstr "University of Kansas, CERN ja teised."
 
-#: src/LYMain.c:3247
+#: src/LYMain.c:3263
 msgid "Distributed under the GNU General Public License (Version 2)."
 msgstr "Levitatakse GNU üldise avaliku litsensiga (Versioon 2)."
 
-#: src/LYMain.c:3248
-msgid "See http://lynx.isc.org/ and the online help for more information."
-msgstr "Abi ja muud infot leiate aadressil http://lynx.isc.org/."
+#: src/LYMain.c:3264
+msgid "See http://lynx.invisible-island.net/ and the online help for more information."
+msgstr "Abi ja muud infot leiate aadressil http://lynx.invisible-island.net/."
 
-#: src/LYMain.c:4091
+#: src/LYMain.c:4107
 #, c-format
 msgid "USAGE: %s [options] [file]\n"
 msgstr "KASUTAMINE: %s [võtmed] [fail]\n"
 
-#: src/LYMain.c:4092
+#: src/LYMain.c:4108
 #, c-format
 msgid "Options are:\n"
 msgstr "Võtmed on:\n"
 
-#: src/LYMain.c:4395
+#: src/LYMain.c:4411
 #, c-format
 msgid "%s: Invalid Option: %s\n"
 msgstr "%s: Vigane võti: %s\n"
@@ -4807,108 +4879,116 @@ msgstr "bzip2"
 msgid "All"
 msgstr "Kõik"
 
-#: src/LYOptions.c:2798 src/LYOptions.c:2827
+#: src/LYOptions.c:2801 src/LYOptions.c:2830
 #, c-format
 msgid "Use %s to invoke the Options menu!"
 msgstr "Seadete menüü saamiseks kasutage %s!"
 
-#: src/LYOptions.c:3675
+#: src/LYOptions.c:3688
 msgid "(options marked with (!) will not be saved)"
 msgstr "((!) märgitud seadeid ei salvestata)"
 
-#: src/LYOptions.c:3683
+#: src/LYOptions.c:3696
 msgid "General Preferences"
 msgstr "Üldised seaded"
 
 #. ***************************************************************
 #. User Mode: SELECT
-#: src/LYOptions.c:3687
+#: src/LYOptions.c:3700
 msgid "User mode"
 msgstr "Kasutaja mood"
 
 #. Editor: INPUT
-#: src/LYOptions.c:3693
+#: src/LYOptions.c:3706
 msgid "Editor"
 msgstr "Toimeti"
 
 #. Search Type: SELECT
-#: src/LYOptions.c:3698
+#: src/LYOptions.c:3711
 msgid "Type of Search"
 msgstr "Otsingutüüp"
 
-#: src/LYOptions.c:3703
+#: src/LYOptions.c:3716
 msgid "Security and Privacy"
 msgstr "Turvalisus ja privaatsus"
 
 #. ***************************************************************
 #. Cookies: SELECT
-#: src/LYOptions.c:3707
+#: src/LYOptions.c:3720
 msgid "Cookies"
 msgstr "Präänikud"
 
 #. Cookie Prompting: SELECT
-#: src/LYOptions.c:3721
+#: src/LYOptions.c:3734
 msgid "Invalid-Cookie Prompting"
 msgstr "Vigase prääniku küsimine"
 
 #. SSL Prompting: SELECT
-#: src/LYOptions.c:3728
+#: src/LYOptions.c:3741
 msgid "SSL Prompting"
 msgstr "SSL küsimine"
 
-#: src/LYOptions.c:3734
+#: src/LYOptions.c:3746
+msgid "SSL client certificate file"
+msgstr "SSL kliendi sertifikaadi fail"
+
+#: src/LYOptions.c:3750
+msgid "SSL client key file"
+msgstr "SSL kliendi võtme fail"
+
+#: src/LYOptions.c:3756
 msgid "Keyboard Input"
 msgstr "Sisend klaviatuurilt"
 
 #. ***************************************************************
 #. Keypad Mode: SELECT
-#: src/LYOptions.c:3738
+#: src/LYOptions.c:3760
 msgid "Keypad mode"
 msgstr "Klahvistiku mood"
 
 #. Emacs keys: ON/OFF
-#: src/LYOptions.c:3744
+#: src/LYOptions.c:3766
 msgid "Emacs keys"
 msgstr "Emacs klahvid"
 
 #. VI Keys: ON/OFF
-#: src/LYOptions.c:3750
+#: src/LYOptions.c:3772
 msgid "VI keys"
 msgstr "VI klahvid"
 
 #. Line edit style: SELECT
 #. well, at least 2 line edit styles available
-#: src/LYOptions.c:3757
+#: src/LYOptions.c:3779
 msgid "Line edit style"
 msgstr "Reatoimeti mood"
 
 #. Keyboard layout: SELECT
-#: src/LYOptions.c:3769
+#: src/LYOptions.c:3791
 msgid "Keyboard layout"
 msgstr "Klaviatuuri asetus"
 
 #.
 #. * Display and Character Set
 #.
-#: src/LYOptions.c:3783
+#: src/LYOptions.c:3805
 msgid "Display and Character Set"
 msgstr "Ekraan ja kooditabel"
 
 #. Use locale-based character set: ON/OFF
-#: src/LYOptions.c:3788
+#: src/LYOptions.c:3810
 msgid "Use locale-based character set"
 msgstr "Kasuta lokaadi põhist kooditabelit"
 
-#: src/LYOptions.c:3795
+#: src/LYOptions.c:3817
 msgid "Use HTML5 charset replacements"
 msgstr "Kasuta HTML5 tähestiku asendusi"
 
 #. Display Character Set: SELECT
-#: src/LYOptions.c:3801
+#: src/LYOptions.c:3823
 msgid "Display character set"
 msgstr "Ekraani kooditabel"
 
-#: src/LYOptions.c:3832
+#: src/LYOptions.c:3854
 msgid "Assumed document character set"
 msgstr "Eeldatav dokumendi kooditabel"
 
@@ -4917,211 +4997,211 @@ msgstr "Eeldatav dokumendi kooditabel"
 #. * we split the header to make it more readable:
 #. * "CJK mode" for CJK display charsets, and "Raw 8-bit" for others.
 #.
-#: src/LYOptions.c:3852
+#: src/LYOptions.c:3874
 msgid "CJK mode"
 msgstr "CJK mood"
 
-#: src/LYOptions.c:3854
+#: src/LYOptions.c:3876
 msgid "Raw 8-bit"
 msgstr "Puhas 8-bitti"
 
 #. X Display: INPUT
-#: src/LYOptions.c:3862
+#: src/LYOptions.c:3884
 msgid "X Display"
 msgstr "X Ekraan"
 
 #.
 #. * Document Appearance
 #.
-#: src/LYOptions.c:3868
+#: src/LYOptions.c:3890
 msgid "Document Appearance"
 msgstr "Dokumendi esitamine"
 
-#: src/LYOptions.c:3874
+#: src/LYOptions.c:3896
 msgid "Show color"
 msgstr "Näita värve"
 
 #. Color style: ON/OFF
-#: src/LYOptions.c:3899
+#: src/LYOptions.c:3921
 msgid "Color style"
 msgstr "Värvi stiil"
 
-#: src/LYOptions.c:3908
+#: src/LYOptions.c:3930
 msgid "Default colors"
 msgstr "Vaikimisi värvid"
 
 #. Show cursor: ON/OFF
-#: src/LYOptions.c:3916
+#: src/LYOptions.c:3938
 msgid "Show cursor"
 msgstr "Näita kursorit"
 
 #. Underline links: ON/OFF
-#: src/LYOptions.c:3922
+#: src/LYOptions.c:3944
 msgid "Underline links"
 msgstr "Jooni viited"
 
 #. Show scrollbar: ON/OFF
-#: src/LYOptions.c:3929
+#: src/LYOptions.c:3951
 msgid "Show scrollbar"
 msgstr "Näita kerimisriba"
 
 #. Select Popups: ON/OFF
-#: src/LYOptions.c:3936
+#: src/LYOptions.c:3958
 msgid "Popups for select fields"
 msgstr "Hüpikud valikuväljadele"
 
 #. HTML error recovery: SELECT
-#: src/LYOptions.c:3942
+#: src/LYOptions.c:3964
 msgid "HTML error recovery"
 msgstr "HTML veatöötlus"
 
 #. Bad HTML messages: SELECT
-#: src/LYOptions.c:3948
+#: src/LYOptions.c:3970
 msgid "Bad HTML messages"
 msgstr "Halvad HTML teated"
 
 #. Show Images: SELECT
-#: src/LYOptions.c:3954
+#: src/LYOptions.c:3976
 msgid "Show images"
 msgstr "Näita pilte"
 
 #. Verbose Images: ON/OFF
-#: src/LYOptions.c:3968
+#: src/LYOptions.c:3990
 msgid "Verbose images"
 msgstr "Verbaalsed pildid"
 
 #.
 #. * Headers Transferred to Remote Servers
 #.
-#: src/LYOptions.c:3976
+#: src/LYOptions.c:3998
 msgid "Headers Transferred to Remote Servers"
 msgstr "Serverile saadetavad päised"
 
 #. ***************************************************************
 #. Mail Address: INPUT
-#: src/LYOptions.c:3980
+#: src/LYOptions.c:4002
 msgid "Personal mail address"
 msgstr "Isiklik e-posti aadress"
 
-#: src/LYOptions.c:3985
+#: src/LYOptions.c:4007
 msgid "Personal name for mail"
 msgstr "Teie nimi e-postituses"
 
-#: src/LYOptions.c:3992
+#: src/LYOptions.c:4014
 msgid "Password for anonymous ftp"
 msgstr "Anonüümse ftp parool"
 
 #. Preferred media type: SELECT
-#: src/LYOptions.c:3998
+#: src/LYOptions.c:4020
 msgid "Preferred media type"
 msgstr "Eelistatud meedia tüüp"
 
 #. Preferred encoding: SELECT
-#: src/LYOptions.c:4004
+#: src/LYOptions.c:4026
 msgid "Preferred encoding"
 msgstr "Eelistatud kodeering"
 
 #. Preferred Document Character Set: INPUT
-#: src/LYOptions.c:4010
+#: src/LYOptions.c:4032
 msgid "Preferred document character set"
 msgstr "Eelistatuim dokumendi kooditabel"
 
 #. Preferred Document Language: INPUT
-#: src/LYOptions.c:4015
+#: src/LYOptions.c:4037
 msgid "Preferred document language"
 msgstr "Eelistatuim dokumendi keel"
 
-#: src/LYOptions.c:4021
+#: src/LYOptions.c:4043
 msgid "Send User-Agent header"
 msgstr "Saada User-Agent päis"
 
-#: src/LYOptions.c:4023
+#: src/LYOptions.c:4045
 msgid "User-Agent header"
 msgstr "User-Agent päis"
 
 #.
 #. * Listing and Accessing Files
 #.
-#: src/LYOptions.c:4031
+#: src/LYOptions.c:4053
 msgid "Listing and Accessing Files"
 msgstr "Failide näitamine ja kasutamine"
 
 #. FTP sort: SELECT
-#: src/LYOptions.c:4036
+#: src/LYOptions.c:4058
 msgid "Use Passive FTP"
 msgstr "Kasuta Passive FTP"
 
 #. FTP sort: SELECT
-#: src/LYOptions.c:4042
+#: src/LYOptions.c:4064
 msgid "FTP sort criteria"
 msgstr "FTP järjestamine"
 
 #. Local Directory Sort: SELECT
-#: src/LYOptions.c:4050
+#: src/LYOptions.c:4072
 msgid "Local directory sort criteria"
 msgstr "Lokaalse kataloogi järjestamine"
 
 #. Local Directory Order: SELECT
-#: src/LYOptions.c:4056
+#: src/LYOptions.c:4078
 msgid "Local directory sort order"
 msgstr "Lokaalse kataloogi järjestamine"
 
-#: src/LYOptions.c:4065
+#: src/LYOptions.c:4087
 msgid "Show dot files"
 msgstr "Näita punktiga faile"
 
-#: src/LYOptions.c:4073
+#: src/LYOptions.c:4095
 msgid "Execution links"
 msgstr "Täidetavad viited"
 
-#: src/LYOptions.c:4091
+#: src/LYOptions.c:4113
 msgid "Pause when showing message"
 msgstr "Peatu teate näitamisel"
 
 #. Show transfer rate: SELECT
-#: src/LYOptions.c:4098
+#: src/LYOptions.c:4120
 msgid "Show transfer rate"
 msgstr "Näita laadimise kiirust"
 
 #.
 #. * Special Files and Screens
 #.
-#: src/LYOptions.c:4118
+#: src/LYOptions.c:4140
 msgid "Special Files and Screens"
 msgstr "Spetsiaalfailid ja ekraanid"
 
-#: src/LYOptions.c:4123
+#: src/LYOptions.c:4145
 msgid "Multi-bookmarks"
 msgstr "Järgede failid"
 
-#: src/LYOptions.c:4131
+#: src/LYOptions.c:4153
 msgid "Review/edit Bookmarks files"
 msgstr "vaata/toimeta järgede faile"
 
-#: src/LYOptions.c:4134
+#: src/LYOptions.c:4156
 msgid "Goto multi-bookmark menu"
 msgstr "Mine mitme-järje menüüsse"
 
-#: src/LYOptions.c:4136
+#: src/LYOptions.c:4158
 msgid "Bookmarks file"
 msgstr "Järgede fail"
 
 #. Auto Session: ON/OFF
-#: src/LYOptions.c:4143
+#: src/LYOptions.c:4165
 msgid "Auto Session"
 msgstr "Auto Sessioon"
 
 #. Session File Menu: INPUT
-#: src/LYOptions.c:4149
+#: src/LYOptions.c:4171
 msgid "Session file"
 msgstr "Sessiooni fail"
 
 #. Visited Pages: SELECT
-#: src/LYOptions.c:4155
+#: src/LYOptions.c:4177
 msgid "Visited Pages"
 msgstr "Külastatud lehed"
 
-#: src/LYOptions.c:4160
+#: src/LYOptions.c:4182
 msgid "View the file "
 msgstr "Vaata faili"
 
@@ -5241,38 +5321,38 @@ msgstr "Lynx: ei saa startida, CERN reeglite fail %s ei ole kasutatav\n"
 msgid "(no name)"
 msgstr "(nimetu)"
 
-#: src/LYReadCFG.c:2073
+#: src/LYReadCFG.c:2075
 #, c-format
 msgid "More than %d nested lynx.cfg includes -- perhaps there is a loop?!?\n"
 msgstr "Rohkem kui %d lynx.cfg kaasamist -- vahest on tekkinud tsükkel?!?\n"
 
-#: src/LYReadCFG.c:2075
+#: src/LYReadCFG.c:2077
 #, c-format
 msgid "Last attempted include was '%s',\n"
 msgstr "Viimane kaasata üritatud fail oli '%s',\n"
 
-#: src/LYReadCFG.c:2076
+#: src/LYReadCFG.c:2078
 #, c-format
 msgid "included from '%s'.\n"
 msgstr "kaasatud failist '%s'.\n"
 
-#: src/LYReadCFG.c:2479 src/LYReadCFG.c:2492 src/LYReadCFG.c:2550
+#: src/LYReadCFG.c:2481 src/LYReadCFG.c:2494 src/LYReadCFG.c:2552
 msgid "The following is read from your lynx.cfg file."
 msgstr "Järgnev on loetud teie lynx.cfg failist."
 
-#: src/LYReadCFG.c:2480 src/LYReadCFG.c:2493
+#: src/LYReadCFG.c:2482 src/LYReadCFG.c:2495
 msgid "Please read the distribution"
 msgstr "Lisainfo jaoks lugege palun"
 
-#: src/LYReadCFG.c:2486 src/LYReadCFG.c:2496
+#: src/LYReadCFG.c:2488 src/LYReadCFG.c:2498
 msgid "for more comments."
 msgstr "paketis olevat faili."
 
-#: src/LYReadCFG.c:2532
+#: src/LYReadCFG.c:2534
 msgid "RELOAD THE CHANGES"
 msgstr "MUUTUSTE LAADIMINE"
 
-#: src/LYReadCFG.c:2540
+#: src/LYReadCFG.c:2542
 msgid "Your primary configuration"
 msgstr "Teie primaarsed seaded"
 
@@ -6058,7 +6138,7 @@ msgstr ""
 "visited_links seade kontrollib, kuidas Lynx organiseerib infot külastatud\n"
 "viidete lehel.\n"
 
-#: src/LYrcFile.c:861
+#: src/LYrcFile.c:863
 msgid ""
 "If keypad_mode is set to \"NUMBERS_AS_ARROWS\", then the numbers on\n"
 "your keypad when the numlock is on will act as arrow keys:\n"
@@ -6076,7 +6156,7 @@ msgstr ""
 "ning ka vastavad klaviatuuri numbrid toimivad nooltena sõltumata\n"
 "numlock seadest.\n"
 
-#: src/LYrcFile.c:870
+#: src/LYrcFile.c:872
 msgid ""
 "If keypad_mode is set to \"LINKS_ARE_NUMBERED\", then numbers will\n"
 "appear next to each link and numbers are used to select links.\n"
@@ -6084,7 +6164,7 @@ msgstr ""
 "Kui keypad_mode väärtus on \"LINKS_ARE_NUMBERED\", ilmuvad iga viite\n"
 "kõrvale numbrid ja viidete valimiseks kasutatakse numbreid.\n"
 
-#: src/LYrcFile.c:874
+#: src/LYrcFile.c:876
 msgid ""
 "If keypad_mode is set to \"LINKS_AND_FORM_FIELDS_ARE_NUMBERED\", then\n"
 "numbers will appear next to each link and visible form input field.\n"
@@ -6103,7 +6183,7 @@ msgstr ""
 "Viidete nimekirjad ja loendikäskude väljundid nummerdavad samuti\n"
 "vormide sisendeid.\n"
 
-#: src/LYrcFile.c:883
+#: src/LYrcFile.c:885
 msgid ""
 "NOTE: Some fixed format documents may look disfigured when\n"
 "\"LINKS_ARE_NUMBERED\" or \"LINKS_AND_FORM_FIELDS_ARE_NUMBERED\" are\n"
@@ -6113,7 +6193,7 @@ msgstr ""
 "\"LINKS_ARE_NUMBERED\" või \"LINKS_AND_FORM_FIELDS_ARE_NUMBERED\"\n"
 "kasutamisel segane.\n"
 
-#: src/LYrcFile.c:915
+#: src/LYrcFile.c:917
 msgid ""
 "Lynx User Defaults File\n"
 "\n"
@@ -6121,7 +6201,7 @@ msgstr ""
 "Lynx Kasutaja Seadete Fail\n"
 "\n"
 
-#: src/LYrcFile.c:924
+#: src/LYrcFile.c:926
 msgid ""
 "This file contains options saved from the Lynx Options Screen (normally\n"
 "with the 'o' key).  To save options with that screen, you must select the\n"
@@ -6130,13 +6210,13 @@ msgstr ""
 "See fail sisaldab seadeid Lynx seadete ekraanilt (tavaliselt klahviga 'o').\n"
 "Selle ekraaniga määratud seadete salvestamiseks valige:\n"
 
-#: src/LYrcFile.c:931
+#: src/LYrcFile.c:933
 msgid ""
 "You must then save the settings using the link on the line above the\n"
 "checkbox:\n"
 msgstr "Seejärel peate salvestama seaded kasutades viidet valikukasti kohal:\n"
 
-#: src/LYrcFile.c:938
+#: src/LYrcFile.c:940
 msgid ""
 "You may also use the command-line option \"-forms_options\", which displays\n"
 "the simpler Options Menu instead.  Save options with that using the '>' key.\n"
@@ -6146,7 +6226,7 @@ msgstr ""
 "seadete menüüd. Seadete salvestamiseks seal kasutage klahvi '>'.\n"
 "\n"
 
-#: src/LYrcFile.c:945
+#: src/LYrcFile.c:947
 msgid ""
 "This file contains options saved from the Lynx Options Screen (normally\n"
 "with the '>' key).\n"
@@ -6156,7 +6236,7 @@ msgstr ""
 "salvestatud klahviga '>').\n"
 "\n"
 
-#: src/LYrcFile.c:952
+#: src/LYrcFile.c:954
 msgid ""
 "There is normally no need to edit this file manually, since the defaults\n"
 "here can be controlled from the Options Screen, and the next time options\n"
