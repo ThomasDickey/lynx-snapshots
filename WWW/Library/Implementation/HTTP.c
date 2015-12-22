@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTP.c,v 1.150 2015/12/18 01:20:22 tom Exp $
+ * $LynxId: HTTP.c,v 1.151 2015/12/22 01:55:31 tom Exp $
  *
  * HyperText Tranfer Protocol	- Client implementation		HTTP.c
  * ==========================
@@ -159,9 +159,9 @@ static int HTSSLCallback(int preverify_ok, X509_STORE_CTX * x509_ctx GCC_UNUSED)
 SSL *HTGetSSLHandle(void)
 {
 #ifdef USE_GNUTLS_INCL
-    char *certfile = NULL;
-    char *client_keyfile = NULL;
-    char *client_certfile = NULL;
+    static char *certfile = NULL;
+    static char *client_keyfile = NULL;
+    static char *client_certfile = NULL;
 #endif
 
     if (ssl_ctx == NULL) {
