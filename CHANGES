@@ -1,4 +1,4 @@
--- $LynxId: CHANGES,v 1.841 2016/04/11 00:51:09 tom Exp $
+-- $LynxId: CHANGES,v 1.842 2016/04/11 08:48:54 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
@@ -11,6 +11,8 @@ Changes since Lynx 2.8 release
 * add null-pointer checks for ssl_ctx in HTTP.c in case of error from calls
   on SSL_CTX_new (report by Yuan Jochen Kang) -TD
 * update config.guess (2016-01-01), config.sub (2016-01-01)
+* update da.po, fi.po, tr.po from
+    http://translationproject.org/latest/lynx
 
 2015-12-18 (2.8.9dev.8)
 * fix regression in SSL support (report by Axel Beckert) -TD
