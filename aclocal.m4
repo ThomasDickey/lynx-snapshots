@@ -1,4 +1,4 @@
-dnl $LynxId: aclocal.m4,v 1.231 2015/12/13 02:00:51 tom Exp $
+dnl $LynxId: aclocal.m4,v 1.232 2016/04/11 00:51:33 tom Exp $
 dnl Macros for auto-configure script.
 dnl by Thomas E. Dickey <dickey@invisible-island.net>
 dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
@@ -12,7 +12,7 @@ dnl http://invisible-island.net/autoconf/autoconf.html
 dnl
 dnl ---------------------------------------------------------------------------
 dnl
-dnl Copyright 1997-2014,2015 by Thomas E. Dickey
+dnl Copyright 1997-2015,2016 by Thomas E. Dickey
 dnl
 dnl Permission to use, copy, modify, and distribute this software and its
 dnl documentation for any purpose and without fee is hereby granted,
@@ -3423,7 +3423,7 @@ AC_TRY_COMPILE([
 test $cf_cv_path_lastlog != no && AC_DEFINE(USE_LASTLOG,1,[Define to 1 if we can define lastlog pathname])
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_LD_RPATH_OPT version: 6 updated: 2015/04/12 15:39:00
+dnl CF_LD_RPATH_OPT version: 7 updated: 2016/02/20 18:01:19
 dnl ---------------
 dnl For the given system and compiler, find the compiler flags to pass to the
 dnl loader to use the "rpath" feature.
@@ -3441,13 +3441,13 @@ case $cf_cv_system_name in
 		LD_RPATH_OPT="-rpath "
 	fi
 	;;
-(linux*|gnu*|k*bsd*-gnu)
+(linux*|gnu*|k*bsd*-gnu|freebsd*)
 	LD_RPATH_OPT="-Wl,-rpath,"
 	;;
 (openbsd[[2-9]].*|mirbsd*)
 	LD_RPATH_OPT="-Wl,-rpath,"
 	;;
-(dragonfly*|freebsd*)
+(dragonfly*)
 	LD_RPATH_OPT="-rpath "
 	;;
 (netbsd*)

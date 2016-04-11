@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTP.c,v 1.151 2015/12/22 01:55:31 tom Exp $
+ * $LynxId: HTTP.c,v 1.153 2016/04/11 00:40:38 tom Exp $
  *
  * HyperText Tranfer Protocol	- Client implementation		HTTP.c
  * ==========================
@@ -169,30 +169,32 @@ SSL *HTGetSSLHandle(void)
 	 * First time only.
 	 */
 #if SSLEAY_VERSION_NUMBER < 0x0800
-	ssl_ctx = SSL_CTX_new();
-	X509_set_default_verify_paths(ssl_ctx->cert);
+	if ((ssl_ctx = SSL_CTX_new()) != NULL) {
+	    X509_set_default_verify_paths(ssl_ctx->cert);
+	}
 #else
 	SSLeay_add_ssl_algorithms();
-	ssl_ctx = SSL_CTX_new(SSLv23_client_method());
+	if ((ssl_ctx = SSL_CTX_new(SSLv23_client_method())) != NULL) {
 #ifdef SSL_OP_NO_SSLv2
-	SSL_CTX_set_options(ssl_ctx, SSL_OP_ALL | SSL_OP_NO_SSLv2);
+	    SSL_CTX_set_options(ssl_ctx, SSL_OP_ALL | SSL_OP_NO_SSLv2);
 #else
-	SSL_CTX_set_options(ssl_ctx, SSL_OP_ALL);
+	    SSL_CTX_set_options(ssl_ctx, SSL_OP_ALL);
 #endif
 #ifdef SSL_OP_NO_COMPRESSION
-	SSL_CTX_set_options(ssl_ctx, SSL_OP_NO_COMPRESSION);
+	    SSL_CTX_set_options(ssl_ctx, SSL_OP_NO_COMPRESSION);
 #endif
 #ifdef SSL_MODE_AUTO_RETRY
-	SSL_CTX_set_mode(ssl_ctx, SSL_MODE_AUTO_RETRY);
+	    SSL_CTX_set_mode(ssl_ctx, SSL_MODE_AUTO_RETRY);
 #endif
 #ifdef SSL_MODE_RELEASE_BUFFERS
-	SSL_CTX_set_mode(ssl_ctx, SSL_MODE_RELEASE_BUFFERS);
+	    SSL_CTX_set_mode(ssl_ctx, SSL_MODE_RELEASE_BUFFERS);
 #endif
-	SSL_CTX_set_default_verify_paths(ssl_ctx);
-	SSL_CTX_set_verify(ssl_ctx, SSL_VERIFY_PEER, HTSSLCallback);
+	    SSL_CTX_set_default_verify_paths(ssl_ctx);
+	    SSL_CTX_set_verify(ssl_ctx, SSL_VERIFY_PEER, HTSSLCallback);
+	}
 #endif /* SSLEAY_VERSION_NUMBER < 0x0800 */
 #if defined(USE_PROGRAM_DIR) & !defined(USE_GNUTLS_INCL)
-	{
+	if (ssl_ctx != NULL) {
 	    X509_LOOKUP *lookup;
 
 	    lookup = X509_STORE_add_lookup(ssl_ctx->cert_store,
