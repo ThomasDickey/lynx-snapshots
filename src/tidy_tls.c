@@ -1,6 +1,6 @@
 /*
- * $LynxId: tidy_tls.c,v 1.33 2015/12/16 01:23:11 tom Exp $
- * Copyright 2008-2014,2015 Thomas E. Dickey
+ * $LynxId: tidy_tls.c,v 1.34 2016/04/17 15:15:06 tom Exp $
+ * Copyright 2008-2015,2016 Thomas E. Dickey
  * with fix Copyright 2008 by Thomas Viehmann
  *
  * Required libraries:
@@ -262,6 +262,7 @@ void SSL_CTX_set_verify(SSL_CTX * ctx, int verify_mode,
     ctx->verify_callback = verify_callback;
 }
 
+#ifdef HAVE_GNUTLS_PROTOCOL_SET_PRIORITY
 static void RemoveProtocol(SSL * ssl, int protocol)
 {
     int j, k;
@@ -282,6 +283,7 @@ static void RemoveProtocol(SSL * ssl, int protocol)
 	gnutls_protocol_set_priority(ssl->gnutls_state, protocols);
     }
 }
+#endif
 
 /*
  * Initiate the TLS/SSL handshake with an TLS/SSL server.
@@ -293,10 +295,13 @@ int SSL_connect(SSL * ssl)
     gnutls_alert_description_t alert;
     const char *aname;
 
-    if (ssl->options & SSL_OP_NO_TLSv1)
+    if (ssl->options & SSL_OP_NO_TLSv1) {
+#ifdef HAVE_GNUTLS_PROTOCOL_SET_PRIORITY
 	RemoveProtocol(ssl, GNUTLS_TLS1);
-    if (ssl->options & SSL_OP_NO_SSLv3)
-	RemoveProtocol(ssl, GNUTLS_SSL3);
+#else
+	gnutls_priority_set_direct(ssl->gnutls_state, "NORMAL:-VERS-TLS1.0", NULL);
+#endif
+    }
 
     while ((rc = gnutls_handshake(ssl->gnutls_state)) < 0 &&
 	   !gnutls_error_is_fatal(rc)) {

@@ -1,4 +1,4 @@
-dnl $LynxId: aclocal.m4,v 1.232 2016/04/11 00:51:33 tom Exp $
+dnl $LynxId: aclocal.m4,v 1.233 2016/04/16 00:48:40 tom Exp $
 dnl Macros for auto-configure script.
 dnl by Thomas E. Dickey <dickey@invisible-island.net>
 dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
@@ -3173,6 +3173,7 @@ AC_DEFUN([CF_GNUTLS],[
 			CF_ADD_LIBDIR($cf_cv_library_path_gnutls)
 		fi
 		CF_ADD_LIBS(-lgnutls)
+		AC_CHECK_FUNCS(gnutls_protocol_set_priority)
 		AC_CHECK_FUNC(gnutls_rnd,
 				[AC_DEFINE(HAVE_GNUTLS_RND)],
 				[CF_ADD_LIBS(-lgcrypt)])
