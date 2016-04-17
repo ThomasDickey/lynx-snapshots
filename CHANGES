@@ -1,9 +1,12 @@
--- $LynxId: CHANGES,v 1.842 2016/04/11 08:48:54 tom Exp $
+-- $LynxId: CHANGES,v 1.843 2016/04/17 15:33:04 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2016-04-10 (2.8.9dev.9)
+2016-04-17 (2.8.9dev.9)
+* fix build for current gnutls configuration which dropped the
+  gnutls_protocol_set_priority function (reported by Axel Beckert, Andreas
+  Metzler) -TD
 * modify CF_LD_RPATH_OPT configure macro, changing FreeBSD case to use
   -Wl,-rpath rather than -rpath option.  According to FreeBSD #178732, either
   works since FreeBSD 4.x; however scons does not accept anything except the
