@@ -1,5 +1,5 @@
 /*
- * $LynxId: UCAux.c,v 1.50 2014/12/10 09:48:57 tom Exp $
+ * $LynxId: UCAux.c,v 1.51 2016/04/17 22:18:15 tom Exp $
  */
 #include <HTUtils.h>
 
@@ -707,9 +707,13 @@ dUTF8 HTDecodeUTF8(UTFDecodeState * me, int *c_in_out, UCode_t *result)
 		if (*result < 256) {
 		    *c_in_out = UCH(*result & 0xff);
 		}
-		/* lynx does not use left-to-right */
-		if (*result == 0x200e)
-		    rc = dUTF8_err;
+		switch (*result) {
+		case 0x200e:	/* left-to-right mark */
+		case 0x200f:	/* right-to-left mark */
+		    /* lynx does not use these */
+		    *result = '\0';
+		    break;
+		}
 	    } else {
 		rc = dUTF8_more;
 	    }

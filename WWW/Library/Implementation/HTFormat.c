@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFormat.c,v 1.83 2014/07/24 22:08:24 tom Exp $
+ * $LynxId: HTFormat.c,v 1.84 2016/04/26 09:11:03 tom Exp $
  *
  *		Manage different file formats			HTFormat.c
  *		=============================
@@ -776,7 +776,6 @@ int HTCopy(HTParentAnchor *anchor,
 #else
 	status = NETREAD(file_number, input_buffer, INPUT_BUFFER_SIZE);
 #endif /* USE_SSL */
-
 	if (status <= 0) {
 	    if (status == 0) {
 		break;
@@ -880,6 +879,11 @@ int HTCopy(HTParentAnchor *anchor,
 	    HTReadProgress(bytes, limit);
 	HTDisplayPartial();
 
+	/* a few buggy implementations do not close the connection properly
+	 * and will hang if we try to read past the declared content-length.
+	 */
+	if (limit > 0 && bytes == limit)
+	    break;
     }				/* next bufferload */
     if (anchor != 0) {
 	CTRACE((tfp, "HTCopy copied %"
