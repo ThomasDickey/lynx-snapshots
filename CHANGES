@@ -1,7 +1,11 @@
--- $LynxId: CHANGES,v 1.845 2016/04/26 09:25:09 tom Exp $
+-- $LynxId: CHANGES,v 1.847 2016/09/14 01:09:14 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
+
+2016-09-13 (2.8.9dev.10)
+* add a limit-check in case colspan is given as zero for non-nested-table case
+  (report by Sami Liedes) -TD
 
 2016-04-26 (2.8.9dev.9)
 * add workaround for servers such as https://www.xing.com which fail to close

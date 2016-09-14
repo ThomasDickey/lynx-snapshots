@@ -1,5 +1,5 @@
 /*
- * $LynxId: TRSTable.c,v 1.32 2014/12/16 01:30:48 tom Exp $
+ * $LynxId: TRSTable.c,v 1.34 2016/09/14 01:02:44 tom Exp $
  *		Simple table object
  *		===================
  * Authors
@@ -515,8 +515,9 @@ static int Stbl_reserveCellsInRow(STable_rowinfo *me, int icell,
     int growby = 1 + icell + colspan - me->allocated;
 
     CTRACE2(TRACE_TRST,
-	    (tfp, "TRST:Stbl_reserveCellsInRow(icell=%d, colspan=%d\n",
-	     icell, colspan));
+	    (tfp,
+	     "TRST:Stbl_reserveCellsInRow(icell=%d, colspan=%d) growby=%d\n",
+	     icell, colspan, growby));
     if (growby > 0) {
 	cells = typeRealloc(STable_cellinfo, me->cells,
 			      (unsigned) (me->allocated + growby));
@@ -1242,12 +1243,14 @@ static int get_remaining_colspan(STable_rowinfo *me,
 				 int ncols_sofar)
 {
     int i;
-    int last_colspan = me->ncells ?
-    me->cells[me->ncells - 1].colspan : 1;
+    int last_colspan = (me->ncells
+			? me->cells[me->ncells - 1].colspan
+			: 1);
 
     if (ncolinfo == 0 || me->ncells + last_colspan > ncolinfo) {
 	colspan = HTMIN(TRST_MAXCOLSPAN,
 			ncols_sofar - (me->ncells + last_colspan - 1));
+	colspan = HTMAX(colspan, 0);
     } else {
 	for (i = me->ncells + last_colspan - 1; i < ncolinfo - 1; i++)
 	    if (colinfo[i].cLine == EOCOLG)
