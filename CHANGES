@@ -1,9 +1,12 @@
--- $LynxId: CHANGES,v 1.848 2016/10/10 09:19:40 tom Exp $
+-- $LynxId: CHANGES,v 1.850 2016/10/11 09:00:29 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2016-10-10 (2.8.9dev.10)
+2016-10-11 (2.8.9dev.10)
+* correct ifdef so that if the "news" parsing is disabled at compile time,
+  HTTP.c interprets https:// links correctly when a https_proxy is set up
+  (patch by Al Walker).
 * add a limit-check in case colspan is given as zero for non-nested-table case
   (report by Sami Liedes) -TD
 * update nl.po from
@@ -5923,7 +5926,7 @@ recently, FreeBSD 4.1, NetBSD 1.5 and OpenBSD 2.8 (curses/ncurses).
 * remove a couple of duplicate includes -JB (John Bley <jbley@cs.cmu.edu>)
 * fix some missing ifdef's for win32 versus DOS, as well as change calls to
   strcasecomp() to strncasecmp() -SH
-* undo spurious change from win32 integration in dev.5 to HTSprint0() which
+* undo spurious change from win32 integration in dev.5 to HTSprintf0() which
   causes a memory leak (reported by John Bley, analysis KW) -TD
 * prevent embedded "%s" in generated messages from causing a core dump in
   exit_immediately_with_error_message by using fputs rather than fprintf/printf
@@ -7929,7 +7932,7 @@ recently, FreeBSD 4.1, NetBSD 1.5 and OpenBSD 2.8 (curses/ncurses).
   autoconf 2.13 - TD
 
 1999-01-18 (2.8.2dev.14)
-* use HTSprint0 in LYCurses.c, LYForms.c, LYGetFile.c, LYJump.c - TD
+* use HTSprintf0 in LYCurses.c, LYForms.c, LYGetFile.c, LYJump.c - TD
 * modify LYCheckMail so it does not continue to report new mail when the mail
   file's modification time differs from its access time (reported by LV) - TD
 * add check for inet_addr function, and (preferred) inet_aton.  The first
