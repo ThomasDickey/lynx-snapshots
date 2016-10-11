@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTP.c,v 1.153 2016/04/11 00:40:38 tom Exp $
+ * $LynxId: HTTP.c,v 1.154 2016/10/11 08:57:05 Al.Walker Exp $
  *
  * HyperText Tranfer Protocol	- Client implementation		HTTP.c
  * ==========================
@@ -1979,7 +1979,7 @@ static int HTLoadHTTP(const char *arg,
 		     * > 206 is unknown.
 		     * All should return something to display.
 		     */
-#if defined(USE_SSL) && !defined(DISABLE_NEWS)
+#if defined(USE_SSL)		/* && !defined(DISABLE_NEWS)  _H */
 		    if (do_connect) {
 			CTRACE((tfp,
 				"HTTP: Proxy tunnel to '%s' established.\n",
@@ -1988,6 +1988,7 @@ static int HTLoadHTTP(const char *arg,
 			url = connect_url;
 			FREE(line_buffer);
 			FREE(line_kept_clean);
+#ifndef DISABLE_NEWS
 			if (!StrNCmp(connect_url, "snews", 5)) {
 			    CTRACE((tfp,
 				    "      Will attempt handshake and snews connection.\n"));
@@ -1995,6 +1996,7 @@ static int HTLoadHTTP(const char *arg,
 							format_out, sink);
 			    goto done;
 			}
+#endif /* DISABLE_NEWS */
 			did_connect = TRUE;
 			already_retrying = TRUE;
 			eol = 0;
