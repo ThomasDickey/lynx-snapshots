@@ -1,9 +1,17 @@
--- $LynxId: CHANGES,v 1.850 2016/10/11 09:00:29 tom Exp $
+-- $LynxId: CHANGES,v 1.852 2016/10/12 01:51:06 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
 2016-10-11 (2.8.9dev.10)
+* modify samples/oldlynx to provide an empty ".lss" file as a better default
+  than providing an empty "-lss" option -TD
+* amend change made in 2.8.8dev.17 to permit multiple COLOR_STYLE items to
+  restore the ability to cancel the color-style by providing an explicitly
+  empty configuration item (in lynx.cfg, -lss or $LYNX_LSS).  In lynx.cfg, it
+  is possible to follow the empty COLOR_STYLE with other data, but the -lss
+  option overrides everything, and if that is not found, $LYNX_LSS overrides
+  lynx.cfg -TD
 * correct ifdef so that if the "news" parsing is disabled at compile time,
   HTTP.c interprets https:// links correctly when a https_proxy is set up
   (patch by Al Walker).

@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYStyle.c,v 1.96 2014/01/09 21:01:22 tom Exp $
+ * $LynxId: LYStyle.c,v 1.97 2016/10/12 00:50:05 tom Exp $
  *
  * character level styles for Lynx
  * (c) 1996 Rob Partington -- donated to the Lyncei (if they want it :-)
@@ -47,6 +47,7 @@ static HTList *lss_styles = NULL;
 static unsigned *cached_styles_ptr = NULL;
 static int cached_styles_rows = 0;
 static int cached_styles_cols = 0;
+static BOOL empty_lss_list = FALSE;	/* true if list explicitly emptied */
 
 /* stack of attributes during page rendering */
 int last_styles[MAX_LAST_STYLES + 1] =
@@ -413,8 +414,7 @@ static void style_deleteStyleList(void)
     lss_styles = NULL;
 }
 
-#ifdef LY_FIND_LEAKS
-static void free_colorstyle_leaks(void)
+static void free_lss_list(void)
 {
     LSS_NAMES *obj;
 
@@ -429,7 +429,6 @@ static void free_colorstyle_leaks(void)
     }
     HTList_delete(list_of_lss_files);
 }
-#endif
 
 static void free_colorstylestuff(void)
 {
@@ -840,6 +839,13 @@ static char *find_lss_file(const char *nominal)
     return LYFindConfigFile(nominal, LYNX_LSS_FILE);
 }
 
+void clear_lss_list(void)
+{
+    CTRACE((tfp, "clear_lss_list()\n"));
+    free_lss_list();
+    empty_lss_list = TRUE;
+}
+
 /*
  * Add an entry to the lss-list, and cache the resolved filename if known.
  */
@@ -880,6 +886,7 @@ void add_to_lss_list(const char *source, const char *resolved)
 	StrAllocCopy(obj->given, source);
 	StrAllocCopy(obj->actual, resolved);
 	HTList_appendObject(list_of_lss_files, obj);
+	empty_lss_list = FALSE;
     }
 }
 
@@ -889,12 +896,27 @@ void add_to_lss_list(const char *source, const char *resolved)
  */
 void init_color_styles(char **from_cmdline, const char *default_styles)
 {
+    char *user_lss_file = *from_cmdline;
     char *cp;
 
     /*
-     * If we read no COLOR_STYLE data from lynx.cfg, build a default list now.
+     * If a command-line "-lss" option was given, or if an environment variable
+     * is found, use that in preference to data from lynx.cfg
      */
-    if (list_of_lss_files == 0) {
+    if (user_lss_file == 0)
+	user_lss_file = LYGetEnv("LYNX_LSS");
+    if (user_lss_file == 0)
+	user_lss_file = LYGetEnv("lynx_lss");
+    if (user_lss_file != 0)
+	empty_lss_list = (*user_lss_file == '\0');
+
+    /*
+     * If the color-style is explicitly emptied, go no further.
+     */
+    if (empty_lss_list) {
+	CTRACE((tfp, "init_color_styles: overridden/empty\n"));
+	return;
+    } else if (list_of_lss_files == 0) {
 	char *source = 0;
 	char *config;
 
@@ -910,17 +932,10 @@ void init_color_styles(char **from_cmdline, const char *default_styles)
 	FREE(source);
     }
 
-    /*
-     * A command-line "-lss" always overrides the config-file, even if it is
-     * an empty string such as -lss="".
-     */
-    if (*from_cmdline != 0) {
+    if (user_lss_file != 0) {
 	FREE(lynx_lss_file);
-	lynx_lss_file = find_lss_file(cp = *from_cmdline);
+	lynx_lss_file = find_lss_file(cp = user_lss_file);
 	*from_cmdline = 0;
-    } else if (((cp = LYGetEnv("LYNX_LSS")) != NULL) ||
-	       (cp = LYGetEnv("lynx_lss")) != NULL) {
-	lynx_lss_file = find_lss_file(cp);
     } else {
 	lynx_lss_file = find_lss_file(cp = DeConst(LYNX_LSS_FILE));
     }

@@ -1,4 +1,4 @@
-/* $LynxId: LYCurses.h,v 1.94 2013/10/22 08:10:43 tom Exp $ */
+/* $LynxId: LYCurses.h,v 1.95 2016/10/11 23:43:51 tom Exp $ */
 #ifndef LYCURSES_H
 #define LYCURSES_H
 
@@ -501,6 +501,7 @@ extern "C" {
 
 #if defined(USE_COLOR_STYLE)
     extern void add_to_lss_list(const char *source, const char *resolved);
+    extern void clear_lss_list(void);
     extern void curses_css(char *name, int dir);
     extern void curses_style(int style, int dir);
     extern void curses_w_style(WINDOW * win, int style, int dir);
