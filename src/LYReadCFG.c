@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYReadCFG.c,v 1.187 2015/12/18 01:58:34 tom Exp $
+ * $LynxId: LYReadCFG.c,v 1.188 2016/10/11 23:44:06 tom Exp $
  */
 #ifndef NO_RULES
 #include <HTRules.h>
@@ -655,7 +655,12 @@ static int color_fun(char *value)
 #ifdef USE_COLOR_STYLE
 static int lynx_lss_file_fun(char *value)
 {
-    add_to_lss_list(value, NULL);
+    CTRACE((tfp, "lynx_lss_file_fun '%s'\n", NonNull(value)));
+    if (isEmpty(value)) {
+	clear_lss_list();
+    } else {
+	add_to_lss_list(value, NULL);
+    }
     return 0;
 }
 #endif
