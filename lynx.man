@@ -1,4 +1,4 @@
-.\" $LynxId: lynx.man,v 1.112 2015/10/08 00:19:45 tom Exp $
+.\" $LynxId: lynx.man,v 1.113 2016/10/14 08:59:24 tom Exp $
 .\" **************************************************************************
 .\" Escape single quotes in literal strings from groff's Unicode transform.
 .ie \n(.g .ds AQ \(aq
@@ -346,9 +346,6 @@ non-HTML type, such as \*(``.txt\*('' for plain text files).
 \*(``.sht\*('', and
 \*(``.shtml\*(''.
 .RE
-.IP
-The \fB\-force_html\fP option does not apply to non-interactive
-options such as \fB\-dump\fP or \fB\-crawl\fP.
 .TP
 .B \-force_secure
 toggles forcing of the secure flag for SSL cookies.

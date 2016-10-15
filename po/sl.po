@@ -1,8 +1,7 @@
 # Slovenian translation of Lynx WWW browser.
 # Copyright (C) 1999 Free Software Foundation, Inc.
 # Roman Maurer <roman.maurer@hermes.si>, 1999.
-# $Id: sl.po,v 1.42 2015/04/09 20:37:00 tom Exp $
-# $Source: /usr/build/VCS/lynx/po/RCS/sl.po,v $
+# $Id: sl.po,v 1.43 2016/10/14 23:33:23 tom Exp $
 #
 msgid ""
 msgstr ""
