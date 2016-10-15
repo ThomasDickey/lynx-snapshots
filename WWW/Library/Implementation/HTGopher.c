@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTGopher.c,v 1.62 2015/12/16 01:17:53 tom Exp $
+ * $LynxId: HTGopher.c,v 1.63 2016/10/15 01:11:44 tom Exp $
  *
  *			GOPHER ACCESS				HTGopher.c
  *			=============
@@ -1688,6 +1688,36 @@ static int HTLoadCSO(const char *arg,
     return HT_LOADED;
 }
 
+static char *link_to_URL(const char *arg)
+{
+    char *result;
+    char *next;
+    char *temp = 0;
+
+    StrAllocCopy(temp, arg);
+    HTUnEscape(temp);
+    result = temp;
+
+    /* skip past method://host */
+    if ((next = strstr(result, "://")) != 0) {
+	result = next + 3;
+    }
+    if ((next = strchr(result, '/')) != 0) {
+	result = next + 1;
+    }
+    /* check if the selector is the special html one */
+    if (!strncmp(result, "hURL:", 5)) {
+	result += 5;
+	next = result;
+	result = temp;
+	while ((*temp++ = *next++) != 0) ;
+    } else {
+	FREE(temp);
+	result = 0;
+    }
+    return result;
+}
+
 /*	Load by name.						HTLoadGopher
  *	=============
  *
@@ -1697,6 +1727,7 @@ static int HTLoadGopher(const char *arg,
 			HTFormat format_out,
 			HTStream *sink)
 {
+    char *hURL;
     char *command;		/* The whole command */
     int status;			/* tcp return */
     char gtype;			/* Gopher Node type */
@@ -1842,6 +1873,13 @@ static int HTLoadGopher(const char *arg,
 	*p++ = CR;		/* Macros to be correct on Mac */
 	*p++ = LF;
 	*p = '\0';
+    }
+    /*
+     * Check for link to URL
+     */
+    if ((hURL = link_to_URL(arg)) != 0) {
+	CTRACE((tfp, "gopher found link to URL '%s'\n", hURL));
+	free(hURL);
     }
 
     /*
