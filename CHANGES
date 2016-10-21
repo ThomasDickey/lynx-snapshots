@@ -1,9 +1,10 @@
--- $LynxId: CHANGES,v 1.854 2016/10/15 01:11:44 tom Exp $
+-- $LynxId: CHANGES,v 1.855 2016/10/20 21:04:44 Kamil.Dudka Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2016-10-14 (2.8.9dev.10)
+2016-10-20 (2.8.9dev.10)
+* build-fix for OpenSSL 1.1 (Kamil Dudka)
 * begin work to parse gopher extension "link to URL" -TD
 * remove an obsolete comment in the manual page about -dump versus -force_html
   (report by Peter Schmitt).

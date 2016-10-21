@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTP.c,v 1.154 2016/10/11 08:57:05 Al.Walker Exp $
+ * $LynxId: HTTP.c,v 1.155 2016/10/20 21:04:44 Kamil.Dudka Exp $
  *
  * HyperText Tranfer Protocol	- Client implementation		HTTP.c
  * ==========================
@@ -802,7 +802,7 @@ static int HTLoadHTTP(const char *arg,
 #elif SSLEAY_VERSION_NUMBER >= 0x0900
 #ifndef USE_NSS_COMPAT_INCL
 	if (!try_tls) {
-	    handle->options |= SSL_OP_NO_TLSv1;
+	    SSL_set_options(handle, SSL_OP_NO_TLSv1);
 	    CTRACE((tfp, "...adding SSL_OP_NO_TLSv1\n"));
 	}
 #if OPENSSL_VERSION_NUMBER >= 0x0090806fL && !defined(OPENSSL_NO_TLSEXT)
