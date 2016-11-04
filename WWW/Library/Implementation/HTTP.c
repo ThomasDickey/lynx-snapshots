@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTP.c,v 1.155 2016/10/20 21:04:44 Kamil.Dudka Exp $
+ * $LynxId: HTTP.c,v 1.156 2016/11/04 13:27:29 tom Exp $
  *
  * HyperText Tranfer Protocol	- Client implementation		HTTP.c
  * ==========================
@@ -499,27 +499,107 @@ int ws_netread(int fd, char *buf, int len)
 #endif /* _WINDOWS */
 
 /*
+ * RFC-1738 says we can have user/password using these ASCII characters
+ *    safe           = "$" | "-" | "_" | "." | "+"
+ *    extra          = "!" | "*" | "'" | "(" | ")" | ","
+ *    hex            = digit | "A" | "B" | "C" | "D" | "E" | "F" |
+ *                             "a" | "b" | "c" | "d" | "e" | "f"
+ *    escape         = "%" hex hex
+ *    unreserved     = alpha | digit | safe | extra
+ *    uchar          = unreserved | escape
+ *    user           = *[ uchar | ";" | "?" | "&" | "=" ]
+ *    password       = *[ uchar | ";" | "?" | "&" | "=" ]
+ * and we cannot have a password without user, i.e., no leading ":"
+ * and ":", "@", "/" must be encoded, i.e., will not appear as such.
+ *
+ * However, in a URL
+ *    //<user>:<password>@<host>:<port>/<url-path>
+ * valid characters in the host are different, not allowing most of those
+ * punctuation characters.
+ */
+static char *skip_user_passwd(char *host)
+{
+    char *result = 0;
+    char *s = host;
+    int pass = 0;
+    int ch;
+    int last = -1;
+
+    while ((ch = UCH(*s)) != '\0') {
+	if (ch == '\0') {
+	    break;
+	} else if (ch == ':') {
+	    if (pass++)
+		break;
+	} else if (ch == '@') {
+	    if (s != host && last != ':')
+		result = s;
+	    break;
+	} else if (ch == '/') {
+	    break;
+	} else if (ch == '%') {
+	    if (!(isxdigit(UCH(s[1])) && isxdigit(UCH(s[2]))))
+		break;
+	} else if (!(isalnum(ch) || strchr(";?&=!*'(),$-_.+", ch))) {
+	    break;
+	}
+	++s;
+	last = ch;
+    }
+    return result;
+}
+
+/*
  * Strip any username from the given string so we retain only the host.
  */
 static void strip_userid(char *host)
 {
     char *p1 = host;
-    char *p2 = StrChr(host, '@');
+    char *p2 = skip_user_passwd(host);
     char *fake;
 
     if (p2 != 0) {
-	*p2++ = '\0';
-	if ((fake = HTParse(host, "", PARSE_HOST)) != NULL) {
-	    char *msg = NULL;
+	char *msg = NULL;
+	char *auth = NULL;
+	char *save = NULL;
+	char *p3 = p2;
 
-	    CTRACE((tfp, "parsed:%s\n", fake));
-	    HTSprintf0(&msg, gettext("Address contains a username: %s"), host);
-	    HTAlert(msg);
-	    FREE(msg);
+	*p2++ = '\0';
+
+	StrAllocCopy(auth, host);
+
+	/*
+	 * Trim trailing characters that can be in a user name, but not in
+	 * a host name, to improve the warning.  For instance "?????" is
+	 * literally a legal user name.
+	 */
+	while ((p3 != host) && strchr(":;?&=!*'(),", p3[-1])) {
+	    *(--p3) = '\0';
 	}
+	CTRACE((tfp, "trimmed:%s\n", host));
+	StrAllocCopy(save, host);
+
+	if (*host == '\0') {
+	    HTSprintf0(&msg,
+		       gettext("User/password contains only punctuation: %s"),
+		       auth);
+	} else if ((fake = HTParse(host, "", PARSE_HOST)) != NULL && *fake) {
+	    HTSprintf0(&msg,
+		       gettext("User/password may be confused with hostname: '%s' (e.g, '%s')"),
+		       auth, fake);
+	} else if (strcmp(save, auth)) {
+	    HTSprintf0(&msg,
+		       gettext("User/password may appear to be a hostname: '%s' (e.g, '%s')"),
+		       auth, save);
+	}
+	if (msg != 0)
+	    HTAlert(msg);
 	while ((*p1++ = *p2++) != '\0') {
 	    ;
 	}
+	FREE(save);
+	FREE(auth);
+	FREE(msg);
     }
 }
 
