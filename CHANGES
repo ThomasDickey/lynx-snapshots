@@ -1,9 +1,10 @@
--- $LynxId: CHANGES,v 1.856 2016/11/04 17:10:16 tom Exp $
+-- $LynxId: CHANGES,v 1.857 2016/11/04 18:43:49 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
 2016-11-04 (2.8.9dev.10)
+* improved for OpenSSL 1.1 (Taketo Kabe).
 * improve warning message when stripping user/password from URL; report on
   http://seclists.org/oss-sec/2016/q4/322 treated as a Lynx parsing error the
   punctuation such as "?" which is permitted by RFC-1738 in a user or password
@@ -66,7 +67,7 @@ Changes since Lynx 2.8 release
   (suggested by TG) -TD
 * fix some typos found by lintian -Axel Beckert
 * correct buffer size in pretty_html() function of LYKeymap.c -TG
-* add support for some HTML5 elements -Kihara Hideto 
+* add support for some HTML5 elements -Kihara Hideto
   Using this change, you can jump to <section id="speakers">.
   (The addition in src{0,1}_HTMLDTD.txt is copied from DIV.)
   <section>, <article>, <main>, <aside>, <header>, <footer>, <nav>, <figure>
@@ -149,7 +150,7 @@ Changes since Lynx 2.8 release
 * correct shortcut for "Send To" link used in Inno Setup script, broken in
   2.8.8dev.15 -TD
 * amend change made in 2.8.8dev.10 to LYLocal.c get_filename(), ensuring that
-  the bstring parameter can be (re)allocated within that function's call to 
+  the bstring parameter can be (re)allocated within that function's call to
   LYgetBString() (report by Raoul Megelas) -TG
 * build-fixes for djgpp 2.04 and gcc 4.8.4 using Watt-32 -GV
 
