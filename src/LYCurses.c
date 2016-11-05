@@ -1,4 +1,4 @@
-/* $LynxId: LYCurses.c,v 1.180 2014/07/24 22:08:24 tom Exp $ */
+/* $LynxId: LYCurses.c,v 1.181 2016/11/04 21:54:57 tom Exp $ */
 #include <HTUtils.h>
 #include <HTAlert.h>
 
@@ -3232,7 +3232,7 @@ long LYgetattrs(WINDOW * win)
      * FIXME: this ignores the color-pair, which for most implementations is
      * not stored in the attribute value.
      */
-    (void) wattr_get(win, &attrs, &pair, NULL);
+    (void) (wattr_get) (win, &attrs, &pair, NULL);
     result = (long) attrs;
 #endif
     return result;
