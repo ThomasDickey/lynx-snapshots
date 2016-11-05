@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTP.c,v 1.157 2016/11/04 18:42:10 Taketo.Kabe Exp $
+ * $LynxId: HTTP.c,v 1.158 2016/11/05 16:18:13 tom Exp $
  *
  * HyperText Tranfer Protocol	- Client implementation		HTTP.c
  * ==========================
@@ -516,7 +516,22 @@ int ws_netread(int fd, char *buf, int len)
  *    //<user>:<password>@<host>:<port>/<url-path>
  * valid characters in the host are different, not allowing most of those
  * punctuation characters.
+ *
+ * RFC-3986 amends this, using
+ *     userinfo    = *( unreserved / pct-encoded / sub-delims / ":" )
+ *     unreserved    = ALPHA / DIGIT / "-" / "." / "_" / "~"
+ *     reserved      = gen-delims / sub-delims
+ *     gen-delims    = ":" / "/" / "?" / "#" / "[" / "]" / "@"
+ *     sub-delims    = "!" / "$" / "&" / "'" / "(" / ")"
+ *                     / "*" / "+" / "," / ";" / "="
+ * and
+ *     host          = IP-literal / IPv4address / reg-name
+ *     reg-name      = *( unreserved / pct-encoded / sub-delims )
  */
+#define RFC_3986_UNRESERVED(c) (isalnum(UCH(c)) || strchr("-._~", UCH(c)) != 0)
+#define RFC_3986_GEN_DELIMS(c) ((c) != 0 && strchr(":/?#[]@", UCH(c)) != 0)
+#define RFC_3986_SUB_DELIMS(c) ((c) != 0 && strchr("!$&'()*+,;=", UCH(c)) != 0)
+
 static char *skip_user_passwd(char *host)
 {
     char *result = 0;
@@ -535,12 +550,14 @@ static char *skip_user_passwd(char *host)
 	    if (s != host && last != ':')
 		result = s;
 	    break;
-	} else if (ch == '/') {
-	    break;
+	} else if (RFC_3986_GEN_DELIMS(ch)) {
+	    if (!RFC_3986_GEN_DELIMS(s[1]))
+		break;
 	} else if (ch == '%') {
 	    if (!(isxdigit(UCH(s[1])) && isxdigit(UCH(s[2]))))
 		break;
-	} else if (!(isalnum(ch) || strchr(";?&=!*'(),$-_.+", ch))) {
+	} else if (!(RFC_3986_UNRESERVED(ch) ||
+		     RFC_3986_SUB_DELIMS(ch))) {
 	    break;
 	}
 	++s;
@@ -563,23 +580,38 @@ static void strip_userid(char *host)
 	char *auth = NULL;
 	char *save = NULL;
 	char *p3 = p2;
+	int gen_delims = 0;
+	int sub_delims = 0;
+	int my_delimit = UCH(*p2);
+	int do_trimming = (my_delimit == '@');
 
 	*p2++ = '\0';
 
 	StrAllocCopy(auth, host);
 
 	/*
-	 * Trim trailing characters that can be in a user name, but not in
-	 * a host name, to improve the warning.  For instance "?????" is
-	 * literally a legal user name.
+	 * Trailing "gen-delims" demonstrates that there is no user/password.
 	 */
-	while ((p3 != host) && strchr(":;?&=!*'(),", p3[-1])) {
+	while ((p3 != host) && RFC_3986_GEN_DELIMS(p3[-1])) {
+	    ++gen_delims;
+	    *(--p3) = '\0';
+	}
+	/*
+	 * While legal, punctuation-only user/password is questionable.
+	 */
+	while ((p3 != host) && RFC_3986_SUB_DELIMS(p3[-1])) {
+	    ++sub_delims;
 	    *(--p3) = '\0';
 	}
 	CTRACE((tfp, "trimmed:%s\n", host));
 	StrAllocCopy(save, host);
 
-	if (*host == '\0') {
+	if (gen_delims) {
+	    HTSprintf0(&msg,
+		       gettext("User/password may appear to be a hostname: '%s' (e.g, '%s')"),
+		       auth, save);
+	    do_trimming = 0;
+	} else if (*host == '\0' && sub_delims) {
 	    HTSprintf0(&msg,
 		       gettext("User/password contains only punctuation: %s"),
 		       auth);
@@ -594,8 +626,10 @@ static void strip_userid(char *host)
 	}
 	if (msg != 0)
 	    HTAlert(msg);
-	while ((*p1++ = *p2++) != '\0') {
-	    ;
+	if (do_trimming) {
+	    while ((*p1++ = *p2++) != '\0') {
+		;
+	    }
 	}
 	FREE(save);
 	FREE(auth);

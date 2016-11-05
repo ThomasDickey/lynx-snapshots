@@ -1,15 +1,15 @@
--- $LynxId: CHANGES,v 1.857 2016/11/04 18:43:49 tom Exp $
+-- $LynxId: CHANGES,v 1.858 2016/11/05 12:56:41 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2016-11-04 (2.8.9dev.10)
-* improved for OpenSSL 1.1 (Taketo Kabe).
+2016-11-05 (2.8.9dev.10)
+* improved fix for OpenSSL 1.1 (Taketo Kabe).
 * improve warning message when stripping user/password from URL; report on
   http://seclists.org/oss-sec/2016/q4/322 treated as a Lynx parsing error the
   punctuation such as "?" which is permitted by RFC-1738 in a user or password
-  field.  The improved message points out the possible confusion by users when
-  these fields contain punctuation -TD
+  field.  RFC-3986 subsequently modified this.  The improved message points out
+  the possible confusion by users when these fields contain punctuation -TD
 * build-fix for OpenSSL 1.1 (Kamil Dudka)
 * begin work to parse gopher extension "link to URL" -TD
 * remove an obsolete comment in the manual page about -dump versus -force_html
