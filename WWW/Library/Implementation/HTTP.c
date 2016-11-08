@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTP.c,v 1.158 2016/11/05 16:18:13 tom Exp $
+ * $LynxId: HTTP.c,v 1.159 2016/11/08 09:38:27 tom Exp $
  *
  * HyperText Tranfer Protocol	- Client implementation		HTTP.c
  * ==========================
@@ -566,6 +566,19 @@ static char *skip_user_passwd(char *host)
     return result;
 }
 
+static char *fake_hostname(char *auth)
+{
+    char *result = NULL;
+    char *colon = NULL;
+
+    StrAllocCopy(result, auth);
+    if ((colon = strchr(result, ':')) != 0)
+	*colon = '\0';
+    if (strchr(result, '.') == 0)
+	FREE(result);
+    return result;
+}
+
 /*
  * Strip any username from the given string so we retain only the host.
  */
@@ -573,12 +586,12 @@ static void strip_userid(char *host)
 {
     char *p1 = host;
     char *p2 = skip_user_passwd(host);
-    char *fake;
 
     if (p2 != 0) {
 	char *msg = NULL;
 	char *auth = NULL;
 	char *save = NULL;
+	char *fake = NULL;
 	char *p3 = p2;
 	int gen_delims = 0;
 	int sub_delims = 0;
@@ -606,23 +619,19 @@ static void strip_userid(char *host)
 	CTRACE((tfp, "trimmed:%s\n", host));
 	StrAllocCopy(save, host);
 
-	if (gen_delims) {
+	if (gen_delims || strcmp(save, auth)) {
 	    HTSprintf0(&msg,
 		       gettext("User/password may appear to be a hostname: '%s' (e.g, '%s')"),
 		       auth, save);
-	    do_trimming = 0;
+	    do_trimming = !gen_delims;
 	} else if (*host == '\0' && sub_delims) {
 	    HTSprintf0(&msg,
 		       gettext("User/password contains only punctuation: %s"),
 		       auth);
-	} else if ((fake = HTParse(host, "", PARSE_HOST)) != NULL && *fake) {
+	} else if ((fake = fake_hostname(host)) != NULL) {
 	    HTSprintf0(&msg,
 		       gettext("User/password may be confused with hostname: '%s' (e.g, '%s')"),
 		       auth, fake);
-	} else if (strcmp(save, auth)) {
-	    HTSprintf0(&msg,
-		       gettext("User/password may appear to be a hostname: '%s' (e.g, '%s')"),
-		       auth, save);
 	}
 	if (msg != 0)
 	    HTAlert(msg);
@@ -631,6 +640,7 @@ static void strip_userid(char *host)
 		;
 	    }
 	}
+	FREE(fake);
 	FREE(save);
 	FREE(auth);
 	FREE(msg);
