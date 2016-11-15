@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTP.c,v 1.159 2016/11/08 09:38:27 tom Exp $
+ * $LynxId: HTTP.c,v 1.160 2016/11/15 09:31:41 tom Exp $
  *
  * HyperText Tranfer Protocol	- Client implementation		HTTP.c
  * ==========================
@@ -582,7 +582,7 @@ static char *fake_hostname(char *auth)
 /*
  * Strip any username from the given string so we retain only the host.
  */
-static void strip_userid(char *host)
+void strip_userid(char *host, int parse_only)
 {
     char *p1 = host;
     char *p2 = skip_user_passwd(host);
@@ -633,7 +633,7 @@ static void strip_userid(char *host)
 		       gettext("User/password may be confused with hostname: '%s' (e.g, '%s')"),
 		       auth, fake);
 	}
-	if (msg != 0)
+	if (msg != 0 && !parse_only)
 	    HTAlert(msg);
 	if (do_trimming) {
 	    while ((*p1++ = *p2++) != '\0') {
@@ -1312,7 +1312,7 @@ static int HTLoadHTTP(const char *arg,
 	char *host = NULL;
 
 	if ((host = HTParse(anAnchor->address, "", PARSE_HOST)) != NULL) {
-	    strip_userid(host);
+	    strip_userid(host, TRUE);
 	    HTBprintf(&command, "Host: %s%c%c", host, CR, LF);
 	    FREE(host);
 	}

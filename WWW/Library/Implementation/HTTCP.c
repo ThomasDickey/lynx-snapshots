@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTCP.c,v 1.134 2014/12/03 01:00:40 tom Exp $
+ * $LynxId: HTTCP.c,v 1.135 2016/11/15 09:31:58 tom Exp $
  *
  *			Generic Communication Code		HTTCP.c
  *			==========================
@@ -1804,7 +1804,6 @@ int HTDoConnect(const char *url,
     int status = 0;
     char *line = NULL;
     char *p1 = NULL;
-    char *at_sign = NULL;
     char *host = NULL;
 
 #ifdef INET6
@@ -1826,14 +1825,8 @@ int HTDoConnect(const char *url,
      * Get node name and optional port number.
      */
     p1 = HTParse(url, "", PARSE_HOST);
-    if ((at_sign = StrChr(p1, '@')) != NULL) {
-	/*
-	 * If there's an @ then use the stuff after it as a hostname.
-	 */
-	StrAllocCopy(host, (at_sign + 1));
-    } else {
-	StrAllocCopy(host, p1);
-    }
+    StrAllocCopy(host, p1);
+    strip_userid(host, FALSE);
     FREE(p1);
 
     HTSprintf0(&line, "%s%s", WWW_FIND_MESSAGE, host);

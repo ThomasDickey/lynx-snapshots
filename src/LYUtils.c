@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYUtils.c,v 1.274 2015/03/22 15:38:23 tom Exp $
+ * $LynxId: LYUtils.c,v 1.275 2016/11/15 09:34:30 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTCP.h>
@@ -4689,6 +4689,7 @@ BOOLEAN LYExpandHostForURL(char **AllocatedString,
      * Do a DNS test on the potential host field as presently trimmed.  - FM
      */
     StrAllocCopy(host, Str);
+    strip_userid(host, FALSE);
     HTUnEscape(host);
     if (LYCursesON) {
 	StrAllocCopy(MsgStr, WWW_FIND_MESSAGE);
