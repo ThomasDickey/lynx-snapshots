@@ -1,11 +1,12 @@
--- $LynxId: CHANGES,v 1.861 2016/11/15 09:36:45 tom Exp $
+-- $LynxId: CHANGES,v 1.862 2016/11/16 00:35:39 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
 2016-11-15 (2.8.9dev.11)
 * amend fix for stripping user/password to ensure that the stripped value is
-  used when connecting to the host (prompted by discussion of CVE-2016-9179) -TD
+  used when connecting to the host (prompted by discussion of CVE-2016-9179
+  at https://lists.debian.org/debian-lts/2016/11/threads.html#00072) -TD
 
 2016-11-08 (2.8.9dev.10)
 * improved fix for OpenSSL 1.1 (Taketo Kabe).
