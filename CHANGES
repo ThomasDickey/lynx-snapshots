@@ -1,9 +1,11 @@
--- $LynxId: CHANGES,v 1.864 2016/11/24 12:25:14 tom Exp $
+-- $LynxId: CHANGES,v 1.865 2016/11/24 14:30:28 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
 2016-11-24 (2.8.9dev.12)
+* when converting host+params to idna, temporarily separate the params to
+  avoid a warning from idna_to_ascii_8z() -TD
 * improve warning messages from 2.8.9dev.11 fixes when stripping user/password,
   dropping an unnecessary message and fixing a case where all-punctuation
   user name was not logged (report by Axel Beckert) -TD
