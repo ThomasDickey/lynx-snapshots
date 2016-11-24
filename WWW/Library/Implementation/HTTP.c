@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTP.c,v 1.160 2016/11/15 09:31:41 tom Exp $
+ * $LynxId: HTTP.c,v 1.161 2016/11/24 12:20:07 tom Exp $
  *
  * HyperText Tranfer Protocol	- Client implementation		HTTP.c
  * ==========================
@@ -528,11 +528,7 @@ int ws_netread(int fd, char *buf, int len)
  *     host          = IP-literal / IPv4address / reg-name
  *     reg-name      = *( unreserved / pct-encoded / sub-delims )
  */
-#define RFC_3986_UNRESERVED(c) (isalnum(UCH(c)) || strchr("-._~", UCH(c)) != 0)
-#define RFC_3986_GEN_DELIMS(c) ((c) != 0 && strchr(":/?#[]@", UCH(c)) != 0)
-#define RFC_3986_SUB_DELIMS(c) ((c) != 0 && strchr("!$&'()*+,;=", UCH(c)) != 0)
-
-static char *skip_user_passwd(char *host)
+char *HTSkipToAt(char *host, int *gen_delims)
 {
     char *result = 0;
     char *s = host;
@@ -540,6 +536,7 @@ static char *skip_user_passwd(char *host)
     int ch;
     int last = -1;
 
+    *gen_delims = 0;
     while ((ch = UCH(*s)) != '\0') {
 	if (ch == '\0') {
 	    break;
@@ -551,6 +548,7 @@ static char *skip_user_passwd(char *host)
 		result = s;
 	    break;
 	} else if (RFC_3986_GEN_DELIMS(ch)) {
+	    *gen_delims += 1;
 	    if (!RFC_3986_GEN_DELIMS(s[1]))
 		break;
 	} else if (ch == '%') {
@@ -584,16 +582,15 @@ static char *fake_hostname(char *auth)
  */
 void strip_userid(char *host, int parse_only)
 {
+    int gen_delims = 0;
     char *p1 = host;
-    char *p2 = skip_user_passwd(host);
+    char *p2 = HTSkipToAt(host, &gen_delims);
 
     if (p2 != 0) {
 	char *msg = NULL;
 	char *auth = NULL;
-	char *save = NULL;
 	char *fake = NULL;
 	char *p3 = p2;
-	int gen_delims = 0;
 	int sub_delims = 0;
 	int my_delimit = UCH(*p2);
 	int do_trimming = (my_delimit == '@');
@@ -606,7 +603,6 @@ void strip_userid(char *host, int parse_only)
 	 * Trailing "gen-delims" demonstrates that there is no user/password.
 	 */
 	while ((p3 != host) && RFC_3986_GEN_DELIMS(p3[-1])) {
-	    ++gen_delims;
 	    *(--p3) = '\0';
 	}
 	/*
@@ -616,15 +612,21 @@ void strip_userid(char *host, int parse_only)
 	    ++sub_delims;
 	    *(--p3) = '\0';
 	}
-	CTRACE((tfp, "trimmed:%s\n", host));
-	StrAllocCopy(save, host);
+	/*
+	 * Trim trailing "gen-delims" from the real hostname.
+	 */
+	for (p3 = p2; *p3 != '\0'; ++p3) {
+	    if (RFC_3986_GEN_DELIMS(*p3)) {
+		*p3 = '\0';
+		break;
+	    }
+	}
+	CTRACE((tfp, "trim auth:    result:`%s'\n", host));
 
-	if (gen_delims || strcmp(save, auth)) {
-	    HTSprintf0(&msg,
-		       gettext("User/password may appear to be a hostname: '%s' (e.g, '%s')"),
-		       auth, save);
+	if (gen_delims || strcmp(host, auth)) {
 	    do_trimming = !gen_delims;
-	} else if (*host == '\0' && sub_delims) {
+	}
+	if (*host == '\0' && sub_delims) {
 	    HTSprintf0(&msg,
 		       gettext("User/password contains only punctuation: %s"),
 		       auth);
@@ -639,9 +641,9 @@ void strip_userid(char *host, int parse_only)
 	    while ((*p1++ = *p2++) != '\0') {
 		;
 	    }
+	    CTRACE((tfp, "trim host:    result:`%s'\n", host));
 	}
 	FREE(fake);
-	FREE(save);
 	FREE(auth);
 	FREE(msg);
     }

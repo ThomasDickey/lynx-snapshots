@@ -1,8 +1,8 @@
-# $LynxId: lynx.spec,v 1.38 2016/11/15 09:04:25 tom Exp $
+# $LynxId: lynx.spec,v 1.39 2016/11/23 18:22:52 tom Exp $
 Summary: A text-based Web browser
 Name: lynx
 Version: 2.8.9
-Release: dev.11
+Release: dev.12
 License: GPLv2
 Group: Applications/Internet
 Source: lynx%{version}%{release}.tgz
