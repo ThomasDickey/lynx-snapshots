@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTParse.c,v 1.75 2014/02/12 23:15:42 tom Exp $
+ * $LynxId: HTParse.c,v 1.76 2016/11/24 12:25:45 tom Exp $
  *
  *		Parse HyperText Document Address		HTParse.c
  *		================================
@@ -302,7 +302,7 @@ static void convert_to_idna(char *host)
 			idna_strerror((Idna_rc) code)));
 	    }
 	    if (output)
-		idn_free (output);
+		idn_free(output);
 	}
 	free(buffer);
     }
@@ -473,8 +473,6 @@ char *HTParse(const char *aName,
 		*tail++ = '/';
 	    }
 	    strcpy(tail, given.host ? given.host : related.host);
-#define CLEAN_URLS
-#ifdef CLEAN_URLS
 	    /*
 	     * Ignore default port numbers, and trailing dots on FQDNs, which
 	     * will only cause identical addresses to look different.  (related
@@ -483,9 +481,12 @@ char *HTParse(const char *aName,
 	    {
 		char *p2, *h;
 		int portnumber;
+		int gen_delims = 0;
 
-		if ((p2 = StrChr(result, '@')) != NULL)
+		if ((p2 = HTSkipToAt(result, &gen_delims)) != NULL
+		    && gen_delims == 0) {
 		    tail = (p2 + 1);
+		}
 		p2 = HTParsePort(result, &portnumber);
 		if (p2 != NULL && acc_method != NULL) {
 		    /*
@@ -539,7 +540,6 @@ char *HTParse(const char *aName,
 	     */
 	    convert_to_idna(tail);
 #endif
-#endif /* CLEAN_URLS */
 	}
     }
 

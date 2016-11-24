@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTUtils.h,v 1.121 2016/11/15 09:26:37 tom Exp $
+ * $LynxId: HTUtils.h,v 1.122 2016/11/23 22:16:51 tom Exp $
  *
  * Utility macros for the W3 code library
  * MACROS FOR GENERAL USE
@@ -801,6 +801,7 @@ extern "C" {
 
     extern FILE *TraceFP(void);
 
+    extern char *HTSkipToAt(char *host, int *gen_delims);
     extern void strip_userid(char *host, int warn);
 
 #ifdef USE_SSL
