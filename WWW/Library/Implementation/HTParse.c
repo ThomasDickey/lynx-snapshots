@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTParse.c,v 1.76 2016/11/24 12:25:45 tom Exp $
+ * $LynxId: HTParse.c,v 1.77 2016/11/24 14:32:41 tom Exp $
  *
  *		Parse HyperText Document Address		HTParse.c
  *		================================
@@ -265,17 +265,23 @@ static void convert_to_idna(char *host)
     size_t length = strlen(host);
     char *endhost = host + length;
     char *buffer = malloc(length + 1);
+    char *params = malloc(length + 1);
     char *output = NULL;
     char *src, *dst;
     int code;
     int hi, lo;
 
-    if (buffer != 0) {
+    if (buffer != NULL && params != NULL) {
 	code = TRUE;
+	*params = '\0';
 	for (dst = buffer, src = host; src < endhost; ++dst) {
 	    int ch = *src++;
 
-	    if (ch == HEX_ESCAPE) {
+	    if (RFC_3986_GEN_DELIMS(ch)) {
+		strcpy(params, src - 1);
+		*dst = '\0';
+		break;
+	    } else if (ch == HEX_ESCAPE) {
 		if ((src + 1) < endhost
 		    && (hi = hex_decode(src[0])) >= 0
 		    && (lo = hex_decode(src[1])) >= 0) {
@@ -296,6 +302,7 @@ static void convert_to_idna(char *host)
 	    code = idna_to_ascii_8z(buffer, &output, IDNA_USE_STD3_ASCII_RULES);
 	    if (code == IDNA_SUCCESS) {
 		strcpy(host, output);
+		strcat(host, params);
 	    } else {
 		CTRACE((tfp, "convert_to_idna: `%s': %s\n",
 			buffer,
@@ -304,8 +311,9 @@ static void convert_to_idna(char *host)
 	    if (output)
 		idn_free(output);
 	}
-	free(buffer);
     }
+    free(buffer);
+    free(params);
 }
 #define MIN_PARSE 80
 #else
