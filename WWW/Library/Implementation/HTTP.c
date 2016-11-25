@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTP.c,v 1.162 2016/11/24 18:25:32 tom Exp $
+ * $LynxId: HTTP.c,v 1.163 2016/11/24 23:56:50 tom Exp $
  *
  * HyperText Tranfer Protocol	- Client implementation		HTTP.c
  * ==========================
@@ -2308,7 +2308,9 @@ static int HTLoadHTTP(const char *arg,
 						 length, s, NO)) {
 
 			HTTP_NETCLOSE(s, handle);
-			if (dump_output_immediately && !authentication_info[0]) {
+			if (dump_output_immediately &&
+			    !HTAA_HaveUserinfo(HTParse(arg, "", PARSE_HOST)) &&
+			    !authentication_info[0]) {
 			    fprintf(stderr,
 				    "HTTP: Access authorization required.\n");
 			    fprintf(stderr,

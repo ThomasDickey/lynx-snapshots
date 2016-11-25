@@ -1,9 +1,12 @@
--- $LynxId: CHANGES,v 1.868 2016/11/24 20:42:26 tom Exp $
+-- $LynxId: CHANGES,v 1.869 2016/11/24 23:47:53 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
 2016-11-24 (2.8.9dev.12)
+* accept userinfo in a URL, subject to override by -auth option or -pauth
+  options.  According to RFC-3986, this is deprecated, but testing shows other
+  clients support it -TD
 * fix several minor warnings reported by Coverity -TD
 * remove redundant asserts which follow a check that leads to outofmem(),
   added in 2.8.8dev.4 to appease clang 2.6, since clang 3.x understands

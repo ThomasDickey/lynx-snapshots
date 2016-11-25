@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFTP.c,v 1.127 2016/11/24 16:22:50 tom Exp $
+ * $LynxId: HTFTP.c,v 1.128 2016/11/24 23:43:55 tom Exp $
  *
  *			File Transfer Protocol (FTP) Client
  *			for a WorldWideWeb browser
@@ -870,7 +870,7 @@ static int get_connection(const char *arg,
 		    HTSprintf0(&tmp, gettext("Enter password for user %s@%s:"),
 			       username, p1);
 		    FREE(user_entered_password);
-		    user_entered_password = HTPromptPassword(tmp);
+		    user_entered_password = HTPromptPassword(tmp, NULL);
 
 		}		/* else we already know the password */
 		password = user_entered_password;

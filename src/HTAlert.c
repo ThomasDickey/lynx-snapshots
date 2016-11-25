@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTAlert.c,v 1.101 2013/11/28 11:17:04 tom Exp $
+ * $LynxId: HTAlert.c,v 1.102 2016/11/24 23:56:05 tom Exp $
  *
  *	Displaying messages and getting input for Lynx Browser
  *	==========================================================
@@ -668,20 +668,22 @@ char *HTPrompt(const char *Msg, const char *deflt)
  *	Prompt for password without echoing the reply.	HTPromptPassword()
  *	----------------------------------------------
  */
-char *HTPromptPassword(const char *Msg)
+char *HTPromptPassword(const char *Msg, const char *given)
 {
     char *result = NULL;
     bstring *data = NULL;
 
+    if (isEmpty(given))
+	given = "";
     if (!dump_output_immediately) {
 	_statusline(Msg ? Msg : PASSWORD_PROMPT);
-	BStrCopy0(data, "");
+	BStrCopy0(data, given);
 	(void) LYgetBString(&data, TRUE, 0, NORECALL);
 	StrAllocCopy(result, data->str);
 	BStrFree(data);
     } else {
 	printf("\n%s\n", PASSWORD_REQUIRED);
-	StrAllocCopy(result, "");
+	StrAllocCopy(result, given);
     }
     return result;
 }
@@ -755,7 +757,7 @@ void HTPromptUsernameAndPassword(const char *Msg,
 	    } else {
 		FREE(authentication_info[0]);
 	    }
-	} else {
+	} else if (isEmpty(*username)) {
 	    /*
 	     * Default to "WWWuser".  - FM
 	     */
@@ -773,7 +775,7 @@ void HTPromptUsernameAndPassword(const char *Msg,
 	    } else {
 		FREE(authentication_info[1]);
 	    }
-	} else {
+	} else if (isEmpty(*password)) {
 	    /*
 	     * Default to a zero-length string.  - FM
 	     */
@@ -822,11 +824,7 @@ void HTPromptUsernameAndPassword(const char *Msg,
 		FREE(authentication_info[1]);
 	    }
 	} else if (non_empty(*username)) {
-	    /*
-	     * We have a non-zero length username,
-	     * so prompt for the password.  - FM
-	     */
-	    *password = HTPromptPassword(PASSWORD_PROMPT);
+	    *password = HTPromptPassword(PASSWORD_PROMPT, *password);
 	} else {
 	    /*
 	     * Return a zero-length password.  - FM

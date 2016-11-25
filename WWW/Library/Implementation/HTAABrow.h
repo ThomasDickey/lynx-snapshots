@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTAABrow.h,v 1.16 2010/10/27 00:13:53 tom Exp $
+ * $LynxId: HTAABrow.h,v 1.17 2016/11/24 23:32:22 tom Exp $
  *
  *                          BROWSER SIDE ACCESS AUTHORIZATION MODULE
 
@@ -115,6 +115,11 @@ extern "C" {
  *  via a browser command. - FM
  */
     extern void HTClearHTTPAuthInfo(void);
+
+/*
+ * Check if a hostname-string contains user information.
+ */
+    extern BOOL HTAA_HaveUserinfo(const char *hostname);
 
 /*
 
