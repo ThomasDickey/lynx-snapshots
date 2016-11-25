@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTAABrow.c,v 1.41 2016/11/24 15:14:00 tom Exp $
+ * $LynxId: HTAABrow.c,v 1.42 2016/11/24 23:57:57 tom Exp $
  *
  * MODULE							HTAABrow.c
  *		BROWSER SIDE ACCESS AUTHORIZATION MODULE
@@ -532,6 +532,72 @@ static HTAARealm *HTAARealm_new(HTList *realm_table,
     return realm;
 }
 
+BOOL HTAA_HaveUserinfo(const char *hostname)
+{
+    int gen_delims = 0;
+    char *my_info = NULL;
+    char *at_sign = HTSkipToAt(StrAllocCopy(my_info, hostname), &gen_delims);
+
+    free(my_info);
+    return (at_sign != NULL && gen_delims == 0) ? TRUE : FALSE;
+}
+
+/*
+ * If there is userinfo in the hostname string, update the realm to use that
+ * information.  The command-line "-auth" option will override this.
+ */
+static void fill_in_userinfo(HTAARealm *realm, const char *hostname)
+{
+    int gen_delims = 0;
+    char *my_info = NULL;
+    char *at_sign = HTSkipToAt(StrAllocCopy(my_info, hostname), &gen_delims);
+
+    if (at_sign != NULL && gen_delims == 0) {
+	char *colon;
+
+	*at_sign = '\0';
+	if ((colon = StrChr(my_info, ':')) != 0) {
+	    *colon++ = '\0';
+	}
+	if (non_empty(my_info)) {
+	    char *msg;
+	    BOOL prior = non_empty(realm->username);
+
+	    if (prior && strcmp(realm->username, my_info)) {
+		msg = 0;
+		HTSprintf0(&msg,
+			   gettext("username for realm %s changed from %s to %s"),
+			   realm->realmname,
+			   realm->username,
+			   my_info);
+		HTAlert(msg);
+		free(msg);
+		FREE(realm->username);
+		StrAllocCopy(realm->username, my_info);
+	    } else if (!prior) {
+		StrAllocCopy(realm->username, my_info);
+	    }
+	    if (non_empty(colon)) {
+		prior = non_empty(realm->password);
+		if (prior && strcmp(realm->password, colon)) {
+		    msg = 0;
+		    HTSprintf0(&msg,
+			       gettext("password for realm %s user %s changed"),
+			       realm->realmname,
+			       realm->username);
+		    HTAlert(msg);
+		    free(msg);
+		    FREE(realm->password);
+		    StrAllocCopy(realm->password, colon);
+		} else if (!prior) {
+		    StrAllocCopy(realm->password, colon);
+		}
+	    }
+	}
+    }
+    free(my_info);
+}
+
 /***************** Basic and Pubkey Authentication ************************/
 
 /* static						compose_auth_string()
@@ -540,6 +606,7 @@ static HTAARealm *HTAARealm_new(HTList *realm_table,
  *		PROMPTS FOR USERNAME AND PASSWORD IF NEEDED
  *
  * ON ENTRY:
+ *	hostname	may include user- and password information
  *	scheme		is either HTAA_BASIC or HTAA_PUBKEY.
  *	setup		is the current server setup.
  *	IsProxy		should be TRUE if this is a proxy.
@@ -555,7 +622,10 @@ static HTAARealm *HTAARealm_new(HTList *realm_table,
  *	returned by AA package needs to (or should) be freed.
  *
  */
-static char *compose_auth_string(HTAAScheme scheme, HTAASetup * setup, int IsProxy)
+static char *compose_auth_string(const char *hostname,
+				 HTAAScheme scheme,
+				 HTAASetup * setup,
+				 int IsProxy)
 {
     char *cleartext = NULL;	/* Cleartext presentation */
     char *ciphertext = NULL;	/* Encrypted presentation */
@@ -573,9 +643,12 @@ static char *compose_auth_string(HTAAScheme scheme, HTAASetup * setup, int IsPro
 
     FREE(compose_auth_stringResult);	/* From previous call */
 
-    if ((scheme != HTAA_BASIC && scheme != HTAA_PUBKEY) || !setup ||
-	!setup->scheme_specifics || !setup->scheme_specifics[scheme] ||
-	!setup->server || !setup->server->realms)
+    if ((scheme != HTAA_BASIC && scheme != HTAA_PUBKEY) ||
+	!(setup &&
+	  setup->scheme_specifics &&
+	  setup->scheme_specifics[scheme] &&
+	  setup->server &&
+	  setup->server->realms))
 	return NULL;
 
     realmname = HTAssocList_lookup(setup->scheme_specifics[scheme], "realm");
@@ -583,9 +656,11 @@ static char *compose_auth_string(HTAAScheme scheme, HTAASetup * setup, int IsPro
 	return NULL;
 
     realm = HTAARealm_lookup(setup->server->realms, realmname);
+    setup->retry |= HTAA_HaveUserinfo(hostname);
+
     if (!(realm &&
-	  realm->username && *realm->username &&
-	  realm->password) || setup->retry) {
+	  non_empty(realm->username) &&
+	  non_empty(realm->password)) || setup->retry) {
 	if (!realm) {
 	    CTRACE((tfp, "%s `%s' %s\n",
 		    "compose_auth_string: realm:", realmname,
@@ -593,6 +668,7 @@ static char *compose_auth_string(HTAAScheme scheme, HTAASetup * setup, int IsPro
 	    realm = HTAARealm_new(setup->server->realms,
 				  realmname, NULL, NULL);
 	}
+	fill_in_userinfo(realm, hostname);
 	/*
 	 * The template should be either the '*' global for everything on the
 	 * server (always true for proxy authorization setups), or a path for
@@ -617,12 +693,7 @@ static char *compose_auth_string(HTAAScheme scheme, HTAASetup * setup, int IsPro
 	    setup->server->portnumber != 80) {
 	    HTSprintf0(&thePort, ":%d", setup->server->portnumber);
 	}
-	/*
-	 * Set up the message for the username prompt, and then issue the
-	 * prompt.  The default username is included in the call to the
-	 * prompting function, but the password is NULL-ed and always replaced. 
-	 * - FM
-	 */
+
 	HTSprintf0(&msg, gettext("Username for '%s' at %s '%s%s':"),
 		   realm->realmname,
 		   (IsProxy ? "proxy" : "server"),
@@ -630,13 +701,18 @@ static char *compose_auth_string(HTAAScheme scheme, HTAASetup * setup, int IsPro
 		   NonNull(thePort));
 	FREE(proxiedHost);
 	FREE(thePort);
-	StrAllocCopy(username, realm->username);
-	password = NULL;
+	if (non_empty(realm->username)) {
+	    StrAllocCopy(username, realm->username);
+	}
+	if (non_empty(realm->password)) {
+	    StrAllocCopy(password, realm->password);
+	}
 	HTPromptUsernameAndPassword(msg, &username, &password, IsProxy);
 
 	FREE(msg);
 	FREE(realm->username);
 	FREE(realm->password);
+
 	realm->username = username;
 	realm->password = password;
 
@@ -882,7 +958,7 @@ char *HTAA_composeAuth(const char *hostname,
 	switch (scheme = HTAA_selectScheme(proxy_setup)) {
 	case HTAA_BASIC:
 	case HTAA_PUBKEY:
-	    auth_string = compose_auth_string(scheme, proxy_setup, IsProxy);
+	    auth_string = compose_auth_string(hostname, scheme, proxy_setup, IsProxy);
 	    break;
 	case HTAA_KERBEROS_V4:
 	    /* OTHER AUTHENTICATION ROUTINES ARE CALLED HERE */
@@ -959,7 +1035,7 @@ char *HTAA_composeAuth(const char *hostname,
 	switch (scheme = HTAA_selectScheme(current_setup)) {
 	case HTAA_BASIC:
 	case HTAA_PUBKEY:
-	    auth_string = compose_auth_string(scheme, current_setup, IsProxy);
+	    auth_string = compose_auth_string(hostname, scheme, current_setup, IsProxy);
 	    break;
 	case HTAA_KERBEROS_V4:
 	    /* OTHER AUTHENTICATION ROUTINES ARE CALLED HERE */

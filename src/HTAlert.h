@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTAlert.h,v 1.34 2010/09/26 16:36:38 tom Exp $
+ * $LynxId: HTAlert.h,v 1.35 2016/11/24 23:44:49 tom Exp $
  *
  *      Displaying messages and getting input for WWW Library
  *      =====================================================
@@ -90,7 +90,7 @@ extern "C" {
 
 /*      Prompt for password without echoing the reply
  */
-    extern char *HTPromptPassword(const char *Msg);
+    extern char *HTPromptPassword(const char *Msg, const char *given);
 
 /*      Prompt both username and password       HTPromptUsernameAndPassword()
  *      ---------------------------------

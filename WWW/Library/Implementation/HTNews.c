@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTNews.c,v 1.70 2013/11/28 11:13:46 tom Exp $
+ * $LynxId: HTNews.c,v 1.71 2016/11/24 23:43:38 tom Exp $
  *
  *			NEWS ACCESS				HTNews.c
  *			===========
@@ -501,7 +501,7 @@ static NNTPAuthResult HTHandleAuthInfo(char *host)
 	while (tries) {
 	    if (PassWord == NULL) {
 		HTSprintf0(&msg, gettext("Password for news host '%s':"), host);
-		PassWord = HTPromptPassword(msg);
+		PassWord = HTPromptPassword(msg, NULL);
 		FREE(msg);
 		if (!(PassWord && *PassWord)) {
 		    FREE(PassWord);
