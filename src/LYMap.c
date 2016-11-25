@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMap.c,v 1.48 2013/11/28 11:21:09 tom Exp $
+ * $LynxId: LYMap.c,v 1.49 2016/11/24 16:38:22 tom Exp $
  *			Lynx Client-side Image MAP Support	       LYMap.c
  *			==================================
  *
@@ -522,7 +522,7 @@ static int LYLoadIMGmap(const char *arg,
 			   format_out,
 			   sink, anAnchor);
 
-    if (!target || target == NULL) {
+    if (target == NULL) {
 	HTSprintf0(&buf, CANNOT_CONVERT_I_TO_O,
 		   HTAtom_name(format_in), HTAtom_name(format_out));
 	HTAlert(buf);

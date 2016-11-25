@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTMLGen.c,v 1.40 2013/11/28 11:13:46 tom Exp $
+ * $LynxId: HTMLGen.c,v 1.41 2016/11/24 15:29:50 tom Exp $
  *
  *		HTML Generator
  *		==============
@@ -630,8 +630,6 @@ HTStructured *HTMLGenerator(HTStream *output)
     if (me == NULL)
 	outofmem(__FILE__, "HTMLGenerator");
 
-    assert(me != NULL);
-
     me->isa = &HTMLGeneration;
 
     me->target = output;
@@ -714,8 +712,6 @@ HTStream *HTPlainToHTML(HTPresentation *pres GCC_UNUSED,
 
     if (me == NULL)
 	outofmem(__FILE__, "PlainToHTML");
-
-    assert(me != NULL);
 
     me->isa = (const HTStructuredClass *) &PlainToHTMLConversion;
 

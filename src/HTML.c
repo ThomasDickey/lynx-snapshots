@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTML.c,v 1.166 2015/12/13 23:08:45 Kihara.Hideto Exp $
+ * $LynxId: HTML.c,v 1.168 2016/11/24 18:18:18 tom Exp $
  *
  *		Structured stream to Rich hypertext converter
  *		============================================
@@ -762,7 +762,6 @@ static void addClassName(const char *prefix,
 	}
 	if (Style_className == NULL)
 	    outofmem(__FILE__, "addClassName");
-	assert(Style_className != NULL);
 	Style_className_end = Style_className + have;
     }
     if (offset)
@@ -4384,6 +4383,7 @@ static int HTML_start_element(HTStructured * me, int element_number,
 		     * Ugh, it's a button for a script.  - FM
 		     */
 		    I.type = value[HTML_BUTTON_TYPE];
+		    CTRACE((tfp, "found button for a script\n"));
 		}
 	    } else {
 		/* default, if no type given, is a submit button */
@@ -7674,7 +7674,6 @@ HTStructured *HTML_new(HTParentAnchor *anchor,
     me = typecalloc(HTStructured);
     if (me == NULL)
 	outofmem(__FILE__, "HTML_new");
-    assert(me != NULL);
 
     /*
      * This used to call 'get_styles()' only on the first time through this
@@ -8033,8 +8032,6 @@ static HTStream *CacheThru_new(HTParentAnchor *anchor,
     stream = (HTStream *) malloc(sizeof(*stream));
     if (!stream)
 	outofmem(__FILE__, "CacheThru_new");
-
-    assert(stream != NULL);
 
     stream->isa = &PassThruCache;
     stream->anchor = anchor;

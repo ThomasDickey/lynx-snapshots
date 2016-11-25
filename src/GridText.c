@@ -1,5 +1,5 @@
 /*
- * $LynxId: GridText.c,v 1.287 2015/12/16 01:20:01 tom Exp $
+ * $LynxId: GridText.c,v 1.290 2016/11/24 18:10:02 tom Exp $
  *
  *		Character grid hypertext object
  *		===============================
@@ -1000,13 +1000,7 @@ HText *HText_new(HTParentAnchor *anchor)
      * the previous object may become invalid.  - kw
      */
     if (HTMainText) {
-	if (HText_hasUTF8OutputSet(HTMainText) &&
-	    HTLoadedDocumentEightbit() &&
-	    IS_UTF8_TTY) {
-	    self->had_utf8 = HTMainText->has_utf8;
-	} else {
-	    self->had_utf8 = HTMainText->has_utf8;
-	}
+	self->had_utf8 = HTMainText->has_utf8;
 	HTMainText->has_utf8 = NO;
     }
 
@@ -3136,8 +3130,6 @@ static void split_line(HText *text, unsigned split)
 	if (!temp)
 	    outofmem(__FILE__, "split_line_2");
 
-	assert(temp != NULL);
-
 	memcpy(temp, previous, LINE_SIZE(previous->size));
 #if defined(USE_COLOR_STYLE)
 	POOLallocstyles(temp->styles, previous->numstyles);
@@ -5163,8 +5155,6 @@ int HText_beginAnchor(HText *text, int underline,
 
     if (a == NULL)
 	outofmem(__FILE__, "HText_beginAnchor");
-
-    assert(a != NULL);
 
     a->inUnderline = (BOOLEAN) underline;
 
@@ -7997,7 +7987,6 @@ static AnchorIndex **allocAnchorIndex(unsigned *size)
 		    if (p == NULL)
 			outofmem(__FILE__, "allocAnchorIndex");
 
-		    assert(p != NULL);
 		    p->type = input->type;
 		    p->size = input->size;
 		    p->offset = anchor->line_pos;
@@ -9322,7 +9311,6 @@ void HText_setTabID(HText *text, const char *name)
 	StrAllocCopy(Tab->name, name);
     }
 
-    assert(Tab != NULL);
     Tab->column = HText_getCurrentColumn(text);
     return;
 }
@@ -9536,8 +9524,6 @@ void HText_beginForm(char *action,
     newform = typecalloc(PerFormInfo);
     if (newform == NULL)
 	outofmem(__FILE__, "HText_beginForm");
-
-    assert(newform != NULL);
 
     PerFormInfo_free(HTCurrentForm);	/* shouldn't happen here - kw */
     HTCurrentForm = newform;
@@ -9862,7 +9848,6 @@ char *HText_setLastOptionValue(HText *text, char *value,
 		outofmem(__FILE__, "HText_setLastOptionValue");
 	}
 
-	assert(new_ptr != NULL);
 	new_ptr->name = NULL;
 	new_ptr->cp_submit_value = NULL;
 	new_ptr->next = NULL;
@@ -10032,9 +10017,6 @@ int HText_beginInput(HText *text,
     POOLtypecalloc(FormInfo, f);
     if (a == NULL || f == NULL)
 	outofmem(__FILE__, "HText_beginInput");
-
-    assert(a != NULL);
-    assert(f != NULL);
 
     a->sgml_offset = SGML_offset();
     a->inUnderline = (BOOLEAN) underline;
@@ -10714,9 +10696,6 @@ static void UpdateBoundary(char **Boundary,
     char *text = BStrData(data);
     char *want = *Boundary;
 
-    assert(want != NULL);
-    assert(text != NULL);
-
     for (j = 0; (long) j <= (long) (last - have); ++j) {
 	if (want[0] == text[j]
 	    && !memcmp(want, text + j, have)) {
@@ -10766,7 +10745,6 @@ static char *convert_to_base64(const char *src,
     if ((dest = (char *) malloc(rlen + 1)) == NULL) {
 	outofmem(__FILE__, "convert_to_base64");
     }
-    assert(dest != NULL);
     r = dest;
 
     /* encode */
@@ -11135,7 +11113,6 @@ int HText_SubmitForm(FormInfo * submit_item, DocInfo *doc,
 	my_data = typecallocn(PostData, (size_t) anchor_limit);
 	if (my_data == 0)
 	    outofmem(__FILE__, "HText_SubmitForm");
-	assert(my_data != NULL);
     }
 
     if (target_csname == NULL) {
@@ -12626,14 +12603,12 @@ static int increment_tagged_htline(HTLine *ht, TextAnchor *a, int *lx_val,
 	allocHTLine(temp, strlen(buf));
 	if (!temp)
 	    outofmem(__FILE__, "increment_tagged_htline");
-	assert(temp != NULL);
 
 	memcpy(temp, ht, LINE_SIZE(0));
 #if defined(USE_COLOR_STYLE)
 	POOLallocstyles(temp->styles, ht->numstyles);
 	if (!temp->styles)
 	    outofmem(__FILE__, "increment_tagged_htline");
-	assert(temp->styles != NULL);
 	memcpy(temp->styles, ht->styles, sizeof(HTStyleChange) * ht->numstyles);
 #endif
 	ht = temp;
@@ -12694,10 +12669,6 @@ static void insert_new_textarea_anchor(TextAnchor **curr_anchor, HTLine **exit_h
     POOLtypecalloc(FormInfo, f);
     if (a == NULL || l == NULL || f == NULL)
 	outofmem(__FILE__, "insert_new_textarea_anchor");
-
-    assert(a != NULL);
-    assert(f != NULL);
-    assert(l != NULL);
 
     /*  Init all the fields in the new TextAnchor.                 */
     /*  [anything "special" needed based on ->show_anchor value ?] */
@@ -12963,8 +12934,6 @@ static char *readEditedFile(char *ed_temp)
 
 	if (!ebuf)
 	    outofmem(__FILE__, "HText_EditTextArea");
-
-	assert(ebuf != NULL);
     } else {
 	ebuf = typecallocn(char, size + 1);
 
@@ -12978,7 +12947,6 @@ static char *readEditedFile(char *ed_temp)
 	    HTAlwaysAlert(NULL, MEMORY_EXHAUSTED_FILE);
 	    return 0;
 	}
-	assert(ebuf != NULL);
 
 	if ((fp = fopen(ed_temp, "r")) != 0) {
 	    size = fread(ebuf, (size_t) 1, size, fp);
@@ -13039,8 +13007,6 @@ static int finish_ExtEditForm(LinkInfo * form_link, TextAnchor *start_anchor,
      */
     if ((line = typeMallocn(char, line_used)) == 0)
 	  outofmem(__FILE__, "HText_EditTextArea");
-
-    assert(line != NULL);
 
     anchor_ptr = start_anchor;
     display_size = anchor_ptr->input_field->size;
@@ -13615,10 +13581,6 @@ int HText_InsertFile(LinkInfo * form_link)
     if (a == NULL || l == NULL || f == NULL)
 	outofmem(__FILE__, "HText_InsertFile");
 
-    assert(a != NULL);
-    assert(f != NULL);
-    assert(l != NULL);
-
     /*  Init all the fields in the new TextAnchor.                 */
     /*  [anything "special" needed based on ->show_anchor value ?] */
     /* *INDENT-EQLS* */
@@ -13699,8 +13661,6 @@ int HText_InsertFile(LinkInfo * form_link)
      */
     if ((line = typeMallocn(char, MAX_LINE)) == 0)
 	  outofmem(__FILE__, "HText_InsertFile");
-
-    assert(line != NULL);
 
     match_tag = anchor_ptr->number;
 
@@ -14702,7 +14662,7 @@ static int LYHandleCache(const char *arg,
     target = HTStreamStack(format_in,
 			   format_out,
 			   sink, anAnchor);
-    if (!target || target == NULL) {
+    if (target == NULL) {
 	HTSprintf0(&buf, CANNOT_CONVERT_I_TO_O,
 		   HTAtom_name(format_in), HTAtom_name(format_out));
 	HTAlert(buf);

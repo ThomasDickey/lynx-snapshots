@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTInit.c,v 1.88 2014/02/13 21:39:04 tom Exp $
+ * $LynxId: HTInit.c,v 1.89 2016/11/24 15:35:29 tom Exp $
  *
  *		Configuration-specific Initialization		HTInit.c
  *		----------------------------------------
@@ -275,8 +275,6 @@ static char *GetCommand(char *s, char **t)
     if (!s2)
 	ExitWithError(MEMORY_EXHAUSTED_ABORT);
 
-    assert(s2 != NULL);
-
     *t = s2;
     while (non_empty(s)) {
 	if (quoted) {
@@ -376,8 +374,6 @@ static int ProcessMailcapEntry(FILE *fp, struct MailcapEntry *mc, AcceptMedia me
     if (!rawentry)
 	ExitWithError(MEMORY_EXHAUSTED_ABORT);
 
-    assert(rawentry != NULL);
-
     *rawentry = '\0';
     while (LYSafeGets(&LineBuf, fp) != 0) {
 	LYTrimNewline(LineBuf);
@@ -391,8 +387,6 @@ static int ProcessMailcapEntry(FILE *fp, struct MailcapEntry *mc, AcceptMedia me
 
 	    if (!rawentry)
 		ExitWithError(MEMORY_EXHAUSTED_ABORT);
-
-	    assert(rawentry != NULL);
 	}
 	if (len > 0 && LineBuf[len - 1] == ESCAPE) {
 	    LineBuf[len - 1] = '\0';
@@ -861,8 +855,6 @@ static int RememberTestResult(int mode, char *cmd, int result)
 
 	if (cur == NULL)
 	    outofmem(__FILE__, "RememberTestResult");
-
-	assert(cur != NULL);
 
 	cur->next = cmdlist;
 	StrAllocCopy(cur->cmd, cmd);

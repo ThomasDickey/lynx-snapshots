@@ -24,8 +24,6 @@ HTBTree *HTBTree_new(HTComparer comp)
     if (tree == NULL)
 	outofmem(__FILE__, "HTBTree_new");
 
-    assert(tree != NULL);
-
     tree->compare = comp;
     tree->top = NULL;
 
@@ -146,8 +144,6 @@ void HTBTree_add(HTBTree *tree,
 	if (tree->top == NULL)
 	    outofmem(__FILE__, "HTBTree_add");
 
-	assert(tree->top != NULL);
-
 	tree->top->up = NULL;
 	tree->top->object = object;
 	tree->top->left = NULL;
@@ -173,8 +169,6 @@ void HTBTree_add(HTBTree *tree,
 		    if (father_of_element->left == NULL)
 			outofmem(__FILE__, "HTBTree_add");
 
-		    assert(father_of_element->left != NULL);
-
 		    added_element = father_of_element->left;
 		    added_element->up = father_of_element;
 		    added_element->object = object;
@@ -192,7 +186,6 @@ void HTBTree_add(HTBTree *tree,
 
 		    if (father_of_element->right == NULL)
 			outofmem(__FILE__, "HTBTree_add");
-		    assert(father_of_element->right != NULL);
 
 		    added_element = father_of_element->right;
 		    added_element->up = father_of_element;

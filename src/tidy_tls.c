@@ -1,5 +1,5 @@
 /*
- * $LynxId: tidy_tls.c,v 1.34 2016/04/17 15:15:06 tom Exp $
+ * $LynxId: tidy_tls.c,v 1.35 2016/11/24 18:48:02 tom Exp $
  * Copyright 2008-2015,2016 Thomas E. Dickey
  * with fix Copyright 2008 by Thomas Viehmann
  *
@@ -637,8 +637,9 @@ char *X509_NAME_oneline(X509_NAME * source, char *target, int len)
  */
 X509_NAME *X509_get_issuer_name(const X509 * cert)
 {
-    X509_NAME *result;
+    static X509_NAME *result;
 
+    free(result);
     if ((result = typeCalloc(X509_NAME)) != 0) {
 	if (ExtractCertificate(cert, result, 1) < 0) {
 	    free(result);
@@ -653,8 +654,9 @@ X509_NAME *X509_get_issuer_name(const X509 * cert)
  */
 X509_NAME *X509_get_subject_name(const X509 * cert)
 {
-    X509_NAME *result;
+    static X509_NAME *result;
 
+    free(result);
     if ((result = typeCalloc(X509_NAME)) != 0) {
 	if (ExtractCertificate(cert, result, 0) < 0) {
 	    free(result);

@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTAtom.c,v 1.19 2013/11/28 11:11:05 tom Exp $
+ * $LynxId: HTAtom.c,v 1.20 2016/11/24 15:29:50 tom Exp $
  *
  *			Atoms: Names to numbers			HTAtom.c
  *			=======================
@@ -82,13 +82,9 @@ HTAtom *HTAtom_for(const char *string)
     if (a == NULL)
 	outofmem(__FILE__, "HTAtom_for");
 
-    assert(a != NULL);
-
     a->name = (char *) malloc(strlen(string) + 1);
     if (a->name == NULL)
 	outofmem(__FILE__, "HTAtom_for");
-
-    assert(a->name != NULL);
 
     strcpy(a->name, string);
     a->next = hash_table[hash];	/* Put onto the head of list */

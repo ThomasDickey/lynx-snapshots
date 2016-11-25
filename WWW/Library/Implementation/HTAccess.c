@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTAccess.c,v 1.79 2013/11/28 11:11:05 tom Exp $
+ * $LynxId: HTAccess.c,v 1.80 2016/11/24 15:29:50 tom Exp $
  *
  *		Access Manager					HTAccess.c
  *		==============
@@ -1282,8 +1282,6 @@ BOOL HTSearch(const char *keywords,
 
     if (escaped == NULL)
 	outofmem(__FILE__, "HTSearch");
-
-    assert(escaped != NULL);
 
     StrAllocCopy(address, here->isIndexAction);
 

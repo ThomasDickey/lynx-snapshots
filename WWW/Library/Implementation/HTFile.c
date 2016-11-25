@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFile.c,v 1.144 2014/12/08 01:38:05 tom Exp $
+ * $LynxId: HTFile.c,v 1.145 2016/11/24 15:29:50 tom Exp $
  *
  *			File Access				HTFile.c
  *			===========
@@ -555,8 +555,6 @@ void HTSetSuffix5(const char *suffix,
 	    suff = typecalloc(HTSuffix);
 	    if (suff == NULL)
 		outofmem(__FILE__, "HTSetSuffix");
-
-	    assert(suff != NULL);
 
 	    if (!HTSuffixes) {
 		HTSuffixes = HTList_new();

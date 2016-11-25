@@ -1,4 +1,4 @@
-/* $LynxId: LYStrings.c,v 1.263 2015/12/16 01:18:53 tom Exp $ */
+/* $LynxId: LYStrings.c,v 1.264 2016/11/24 15:35:29 tom Exp $ */
 #include <HTUtils.h>
 #include <HTCJK.h>
 #include <UCAux.h>
@@ -3995,8 +3995,6 @@ static char **sortedList(HTList *list, int ignorecase)
     if (result == 0)
 	outofmem(__FILE__, "sortedList");
 
-    assert(result != 0);
-
     while (!HTList_isEmpty(list))
 	result[j++] = (char *) HTList_nextObject(list);
 
@@ -5913,7 +5911,6 @@ char *SNACopy(char **target,
 	if (*target == NULL) {
 	    CTRACE((tfp, "Tried to malloc %lu bytes\n", (unsigned long) n));
 	    outofmem(__FILE__, "SNACopy");
-	    assert(*target != NULL);
 	}
 	LYStrNCpy(*target, source, n);
     }
@@ -5936,14 +5933,12 @@ char *SNACat(char **target,
 
 	    if (*target == NULL)
 		outofmem(__FILE__, "SNACat");
-	    assert(*target != NULL);
 	    LYStrNCpy(*target + length, source, n);
 	} else {
 	    *target = typeMallocn(char, n + 1);
 
 	    if (*target == NULL)
 		outofmem(__FILE__, "SNACat");
-	    assert(*target != NULL);
 	    MemCpy(*target, source, n);
 	    (*target)[n] = '\0';	/* terminate */
 	}

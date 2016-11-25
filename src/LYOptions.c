@@ -1,4 +1,4 @@
-/* $LynxId: LYOptions.c,v 1.168 2015/12/18 01:01:21 tom Exp $ */
+/* $LynxId: LYOptions.c,v 1.170 2016/11/24 18:30:48 tom Exp $ */
 #include <HTUtils.h>
 #include <HTFTP.h>
 #include <HTTP.h>		/* 'reloading' flag */
@@ -981,7 +981,7 @@ void LYoptions(void)
 		    if (!LYSelectPopups)
 #endif /* !VMS && !USE_SLANG */
 		    {
-			LYmove(L_Rawmode, COL_OPTION_VALUES);
+			LYmove(L_RAWMODE + 1, COL_OPTION_VALUES);
 			LYclrtoeol();
 			ShowBool(LYRawMode);
 		    }
@@ -2617,8 +2617,6 @@ static PostPair *break_data(bstring *data)
     if (q == NULL)
 	outofmem(__FILE__, "break_data(calloc)");
 
-    assert(q != NULL);
-
     do {
 	/*
 	 * First, break up on '&', sliding 'p' on down the line.
@@ -2672,8 +2670,6 @@ static PostPair *break_data(bstring *data)
 	q = typeRealloc(PostPair, q, (unsigned) (count + 1));
 	if (q == NULL)
 	    outofmem(__FILE__, "break_data(realloc)");
-
-	assert(q != NULL);
 
 	q[count].tag = NULL;
     } while (p != NULL && p[0] != '\0');

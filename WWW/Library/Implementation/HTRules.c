@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTRules.c,v 1.45 2013/11/28 11:14:29 tom Exp $
+ * $LynxId: HTRules.c,v 1.46 2016/11/24 15:29:50 tom Exp $
  *
  *	Configuration manager for Hypertext Daemon		HTRules.c
  *	==========================================
@@ -90,8 +90,6 @@ int HTAddRule(HTRuleOp op, const char *pattern,
     temp = typecalloc(rule);
     if (temp == NULL)
 	outofmem(__FILE__, "HTAddRule");
-
-    assert(temp != NULL);
 
     if (equiv) {		/* Two operands */
 	char *pEquiv = NULL;

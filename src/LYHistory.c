@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYHistory.c,v 1.87 2015/12/16 01:45:14 tom Exp $
+ * $LynxId: LYHistory.c,v 1.89 2016/11/24 16:38:22 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTP.h>
@@ -181,8 +181,6 @@ void LYAddVisitedLink(DocInfo *doc)
     if ((tmp = typecalloc(VisitedLink)) == NULL)
 	outofmem(__FILE__, "LYAddVisitedLink");
 
-    assert(tmp != NULL);
-
     StrAllocCopy(tmp->address, doc->address);
     LYformTitle(&(tmp->title), title);
 
@@ -357,8 +355,6 @@ void LYAllocHistory(int entries)
 	}
 	if (history == 0)
 	    outofmem(__FILE__, "LYAllocHistory");
-
-	assert(history != NULL);
 
 	while (save < size_history) {
 	    memset(&history[save++], 0, sizeof(history[0]));
@@ -1100,7 +1096,7 @@ static int LYLoadMESSAGES(const char *arg GCC_UNUSED,
      */
     target = HTStreamStack(format_in, format_out, sink, anAnchor);
 
-    if (!target || target == NULL) {
+    if (target == NULL) {
 	HTSprintf0(&buf, CANNOT_CONVERT_I_TO_O,
 		   HTAtom_name(format_in), HTAtom_name(format_out));
 	HTAlert(buf);

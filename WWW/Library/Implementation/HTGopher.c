@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTGopher.c,v 1.63 2016/10/15 01:11:44 tom Exp $
+ * $LynxId: HTGopher.c,v 1.65 2016/11/24 16:38:54 tom Exp $
  *
  *			GOPHER ACCESS				HTGopher.c
  *			=============
@@ -692,8 +692,6 @@ static void de_escape(char *command, const char *selector)
     if (command == NULL)
 	outofmem(__FILE__, "HTLoadGopher");
 
-    assert(command != NULL);
-
     q = command;
     while (*p) {		/* Decode hex */
 	if (*p == HEX_ESCAPE) {
@@ -1029,8 +1027,6 @@ static int parse_cso_fields(char *buf,
 			if (!newf) {
 			    outofmem(__FILE__, "HTLoadCSO");
 			}
-
-			assert(newf != NULL);
 
 			if (last)
 			    last->next = newf;
@@ -1517,7 +1513,7 @@ static int HTLoadCSO(const char *arg,
     Target = HTStreamStack(format_in,
 			   format_out,
 			   sink, anAnchor);
-    if (!Target || Target == NULL) {
+    if (Target == NULL) {
 	char *temp = 0;
 
 	HTSprintf0(&temp, CANNOT_CONVERT_I_TO_O,
@@ -1803,8 +1799,6 @@ static int HTLoadGopher(const char *arg,
 	    if (command == NULL)
 		outofmem(__FILE__, "HTLoadGopher");
 
-	    assert(command != NULL);
-
 	    de_escape(command, selector);	/* Bug fix TBL 921208 */
 
 	    strcat(command, "\t");
@@ -1839,8 +1833,6 @@ static int HTLoadGopher(const char *arg,
 	    if (command == NULL)
 		outofmem(__FILE__, "HTLoadGopher");
 
-	    assert(command != NULL);
-
 	    de_escape(command, selector);	/* Bug fix TBL 921208 */
 
 	    strcpy(command, "query ");
@@ -1859,8 +1851,6 @@ static int HTLoadGopher(const char *arg,
 	    command = (char *) malloc(strlen(selector) + 2 + 1);
 	    if (command == NULL)
 		outofmem(__FILE__, "HTLoadGopher");
-
-	    assert(command != NULL);
 
 	    de_escape(command, selector);
 	}

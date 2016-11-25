@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYCookie.c,v 1.131 2015/09/30 22:05:41 tom Exp $
+ * $LynxId: LYCookie.c,v 1.134 2016/11/24 17:24:12 tom Exp $
  *
  *			       Lynx Cookie Support		   LYCookie.c
  *			       ===================
@@ -147,8 +147,6 @@ static cookie *newCookie(void)
 
     if (p == NULL)
 	outofmem(__FILE__, "newCookie");
-
-    assert(p != NULL);
 
     HTSprintf0(&(p->lynxID), "%p", (void *) p);
     p->port = 80;
@@ -571,8 +569,6 @@ static void store_cookie(cookie * co, const char *hostname,
 	if (de == NULL)
 	    outofmem(__FILE__, "store_cookie");
 
-	assert(de != NULL);
-
 	de->bv = QUERY_USER;
 	de->invcheck_bv = DEFAULT_INVCHECK_BV;	/* should this go here? */
 	cookie_list = de->cookie_list = HTList_new();
@@ -676,7 +672,7 @@ static void store_cookie(cookie * co, const char *hostname,
 	 * If it's a replacement for a cookie that had not expired, and never
 	 * allow has not been set, add it again without confirmation.  - FM
 	 */
-    } else if ((Replacement == TRUE && de) && de->bv != REJECT_ALWAYS) {
+    } else if ((Replacement == TRUE) && de->bv != REJECT_ALWAYS) {
 	HTList_insertObjectAt(cookie_list, co, pos);
 	total_cookies++;
 
@@ -2444,7 +2440,7 @@ static int LYHandleCookies(const char *arg,
     target = HTStreamStack(format_in,
 			   format_out,
 			   sink, anAnchor);
-    if (!target || target == NULL) {
+    if (target == NULL) {
 	HTSprintf0(&buf, CANNOT_CONVERT_I_TO_O,
 		   HTAtom_name(format_in), HTAtom_name(format_out));
 	HTAlert(buf);
@@ -2675,8 +2671,6 @@ static void cookie_domain_flag_set(char *domainstr,
 	    de = typecalloc(domain_entry);
 	    if (de == NULL)
 		outofmem(__FILE__, "cookie_domain_flag_set");
-
-	    assert(de != NULL);
 
 	    de->bv = ACCEPT_ALWAYS;
 	    de->invcheck_bv = INVCHECK_QUERY;

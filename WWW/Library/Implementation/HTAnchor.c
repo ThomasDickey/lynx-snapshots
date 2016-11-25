@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTAnchor.c,v 1.76 2013/11/28 11:34:24 tom Exp $
+ * $LynxId: HTAnchor.c,v 1.77 2016/11/24 15:29:50 tom Exp $
  *
  *	Hypertext "Anchor" Object				HTAnchor.c
  *	==========================
@@ -86,8 +86,6 @@ static HTParentAnchor0 *HTParentAnchor0_new(const char *address,
     if (newAnchor == NULL)
 	outofmem(__FILE__, "HTParentAnchor0_new");
 
-    assert(newAnchor != NULL);
-
     newAnchor->parent = newAnchor;	/* self */
     StrAllocCopy(newAnchor->address, address);
     newAnchor->adult_hash = (HASH_TYPE) hash;
@@ -101,8 +99,6 @@ static HTParentAnchor *HTParentAnchor_new(HTParentAnchor0 *parent)
 
     if (newAnchor == NULL)
 	outofmem(__FILE__, "HTParentAnchor_new");
-
-    assert(newAnchor != NULL);
 
     newAnchor->parent = parent;	/* cross reference */
     parent->info = newAnchor;	/* cross reference */
@@ -124,8 +120,6 @@ static HTChildAnchor *HTChildAnchor_new(HTParentAnchor0 *parent)
     if (p == NULL)
 	outofmem(__FILE__, "HTChildAnchor_new");
 
-    assert(p != NULL);
-
     p->parent = parent;		/* parent reference */
     return p;
 }
@@ -137,8 +131,6 @@ static HTChildAnchor *HText_pool_ChildAnchor_new(HTParentAnchor *parent)
 
     if (p == NULL)
 	outofmem(__FILE__, "HText_pool_ChildAnchor_new");
-
-    assert(p != NULL);
 
     p->parent = parent->parent;	/* parent reference */
     return p;
@@ -1314,8 +1306,6 @@ LYUCcharset *HTAnchor_getUCInfoStage(HTParentAnchor *me,
 
 	    if (stages == NULL)
 		outofmem(__FILE__, "HTAnchor_getUCInfoStage");
-
-	    assert(stages != NULL);
 
 	    for (i = 0; i < UCT_STAGEMAX; i++) {
 		stages->s[i].C.MIMEname = "";

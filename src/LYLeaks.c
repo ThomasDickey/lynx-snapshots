@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYLeaks.c,v 1.37 2013/12/07 13:46:58 tom Exp $
+ * $LynxId: LYLeaks.c,v 1.38 2016/11/24 15:35:29 tom Exp $
  *
  *	Copyright (c) 1994, University of Kansas, All Rights Reserved
  *	(this file was rewritten twice - 1998/1999 and 2003/2004)
@@ -858,12 +858,8 @@ void LYLeakSABCopy(bstring **dest,
 	    == NULL)
 	      outofmem(__FILE__, "HTSABCopy");
 
-	assert(t != NULL);
-
 	if ((t->str = (char *) LYLeakMalloc(need, cp_File, ssi_Line)) == NULL)
 	    outofmem(__FILE__, "HTSABCopy");
-
-	assert(t->str != NULL);
 
 	MemCpy(t->str, src, len);
 	t->len = len;
@@ -915,14 +911,10 @@ void LYLeakSABCat(bstring **dest,
 					      ssi_Line)) == NULL)
 		  outofmem(__FILE__, "HTSACat");
 
-	    assert(t != NULL);
-
 	    t->str = (char *) LYLeakMalloc(need, cp_File, ssi_Line);
 	}
 	if (t->str == NULL)
 	    outofmem(__FILE__, "HTSACat");
-
-	assert(t->str != NULL);
 
 	MemCpy(t->str + t->len, src, len);
 	t->len += len;

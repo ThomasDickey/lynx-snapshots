@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYReadCFG.c,v 1.188 2016/10/11 23:44:06 tom Exp $
+ * $LynxId: LYReadCFG.c,v 1.189 2016/11/24 15:35:29 tom Exp $
  */
 #ifndef NO_RULES
 #include <HTRules.h>
@@ -243,8 +243,6 @@ static void add_item_to_list(char *buffer,
 	if (cur_item == NULL)
 	    outofmem(__FILE__, "read_cfg");
 
-	assert(cur_item != NULL);
-
 	*list_ptr = cur_item;
 #ifdef LY_FIND_LEAKS
 	atexit(free_all_item_lists);
@@ -262,8 +260,6 @@ static void add_item_to_list(char *buffer,
 	    outofmem(__FILE__, "read_cfg");
 	else
 	    prev_item->next = cur_item;
-
-	assert(cur_item != NULL);
     }
     /* fill-in nonzero default values */
     cur_item->pagelen = 66;
@@ -474,12 +470,8 @@ static void parse_color(char *buffer)
     if (NULL == (fg = find_colon(buffer)))
 	exit_with_color_syntax(buffer);
 
-    assert(fg != NULL);
-
     if (NULL == (bg = find_colon(++fg)))
 	exit_with_color_syntax(buffer);
-
-    assert(bg != NULL);
 
     StrAllocCopy(temp_fg, fg);
     temp_fg[bg++ - fg] = '\0';
@@ -624,8 +616,6 @@ static int assumed_color_fun(char *buffer)
 	 */
 	if (NULL == (bg = find_colon(fg)))
 	    exit_with_color_syntax(buffer);
-
-	assert(bg != NULL);
 
 	StrAllocCopy(temp_fg, fg);
 	temp_fg[bg++ - fg] = '\0';
@@ -1274,8 +1264,6 @@ static int parse_html_src_spec(HTlexeme lexeme_code, char *value,
     ts2 = StrChr(value, ':');
     if (!ts2)
 	BS();
-
-    assert(ts2 != NULL);
 
     *ts2 = '\0';
 

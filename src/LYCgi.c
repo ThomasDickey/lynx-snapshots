@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYCgi.c,v 1.68 2014/07/24 22:02:26 tom Exp $
+ * $LynxId: LYCgi.c,v 1.70 2016/11/24 16:38:22 tom Exp $
  *                   Lynx CGI support                              LYCgi.c
  *                   ================
  *
@@ -114,7 +114,6 @@ static void add_environment_value(const char *env_value)
 	if (env == NULL) {
 	    outofmem(__FILE__, "LYCgi");
 	}
-	assert(env != NULL);
     }
 
     env[envc++] = DeConst(env_value);
@@ -390,7 +389,7 @@ static int LYLoadCGI(const char *arg,
 			       format_out,
 			       sink, anAnchor);
 
-	if (!target || target == NULL) {
+	if (target == NULL) {
 	    char *tmp = 0;
 
 	    HTSprintf0(&tmp, CANNOT_CONVERT_I_TO_O,
@@ -599,7 +598,6 @@ static int LYLoadCGI(const char *arg,
 		if (argv == NULL) {
 		    outofmem(__FILE__, "LYCgi");
 		}
-		assert(argv != NULL);
 
 		cur_argv = argv + 1;	/* For argv[0] */
 		if (pgm_args != NULL) {

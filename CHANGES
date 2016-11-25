@@ -1,9 +1,13 @@
--- $LynxId: CHANGES,v 1.865 2016/11/24 14:30:28 tom Exp $
+-- $LynxId: CHANGES,v 1.868 2016/11/24 20:42:26 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
 2016-11-24 (2.8.9dev.12)
+* fix several minor warnings reported by Coverity -TD
+* remove redundant asserts which follow a check that leads to outofmem(),
+  added in 2.8.8dev.4 to appease clang 2.6, since clang 3.x understands
+  no-return function declarations -TD
 * when converting host+params to idna, temporarily separate the params to
   avoid a warning from idna_to_ascii_8z() -TD
 * improve warning messages from 2.8.9dev.11 fixes when stripping user/password,

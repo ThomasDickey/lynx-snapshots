@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTParse.c,v 1.77 2016/11/24 14:32:41 tom Exp $
+ * $LynxId: HTParse.c,v 1.78 2016/11/24 15:29:50 tom Exp $
  *
  *		Parse HyperText Document Address		HTParse.c
  *		================================
@@ -386,8 +386,6 @@ char *HTParse(const char *aName,
     result = tail = (char *) LYalloca(need);
     if (result == NULL) {
 	outofmem(__FILE__, "HTParse");
-
-	assert(result != NULL);
     }
     *result = '\0';
     name = result + len;
@@ -785,8 +783,6 @@ const char *HTParseAnchor(const char *aName)
 
 	    if (name == NULL) {
 		outofmem(__FILE__, "HTParseAnchor");
-
-		assert(name != NULL);
 	    }
 	    strcpy(name, aName);
 	    scan(name, &given);
@@ -1008,8 +1004,6 @@ char *HTRelative(const char *aName,
 	if (result == NULL)
 	    outofmem(__FILE__, "HTRelative");
 
-	assert(result != NULL);
-
 	result[0] = '\0';
 	for (; levels; levels--)
 	    strcat(result, "../");
@@ -1070,8 +1064,6 @@ char *HTEscape(const char *str,
     if (result == NULL)
 	outofmem(__FILE__, "HTEscape");
 
-    assert(result != NULL);
-
     for (q = result, p = str; *p; p++) {
 	unsigned char a = UCH(TOASCII(*p));
 
@@ -1113,8 +1105,6 @@ char *HTEscapeUnsafe(const char *str)
     if (result == NULL)
 	outofmem(__FILE__, "HTEscapeUnsafe");
 
-    assert(result != NULL);
-
     for (q = result, p = str; *p; p++) {
 	unsigned char a = UCH(TOASCII(*p));
 
@@ -1155,8 +1145,6 @@ char *HTEscapeSP(const char *str,
 
     if (result == NULL)
 	outofmem(__FILE__, "HTEscape");
-
-    assert(result != NULL);
 
     for (q = result, p = str; *p; p++) {
 	unsigned char a = UCH(TOASCII(*p));
@@ -1325,8 +1313,6 @@ void HTMake822Word(char **str,
     result = AlloCopy(p, *str, added + 1);
     if (result == NULL)
 	outofmem(__FILE__, "HTMake822Word");
-
-    assert(result != NULL);
 
     q = result;
     if (quoted)
