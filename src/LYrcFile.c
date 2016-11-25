@@ -1,4 +1,4 @@
-/* $LynxId: LYrcFile.c,v 1.95 2015/12/18 01:57:45 tom Exp $ */
+/* $LynxId: LYrcFile.c,v 1.96 2016/11/24 16:42:46 tom Exp $ */
 #include <HTUtils.h>
 #include <HTFTP.h>
 #include <LYUtils.h>
@@ -705,6 +705,7 @@ BOOL LYsetRcValue(const char *name, const char *param)
 	 */
 	if (tbl->name == 0) {
 	    CTRACE((tfp, "LYrcFile: ignored %s=%s\n", name, value));
+	    FREE(orig_value);
 	    return FALSE;
 	}
     }

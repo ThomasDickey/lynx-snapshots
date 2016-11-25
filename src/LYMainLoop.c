@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMainLoop.c,v 1.232 2014/12/21 21:27:23 tom Exp $
+ * $LynxId: LYMainLoop.c,v 1.233 2016/11/24 19:50:02 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTAccess.h>
@@ -8133,7 +8133,7 @@ static void status_link(char *curlink_name,
     prefix = (int) strlen(format);
     length = (int) strlen(curlink_name);
 
-    if (prefix > MAX_STATUS || prefix >= MAX_LINE - 1) {
+    if (prefix > MAX_STATUS || prefix >= MAX_LINE - 10) {
 	_user_message("%s", format);	/* no room for url */
     } else {
 	sprintf(format + prefix, "%%.%ds", MAX_STATUS - prefix);

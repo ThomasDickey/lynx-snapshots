@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTMIME.c,v 1.90 2015/12/16 01:13:50 tom Exp $
+ * $LynxId: HTMIME.c,v 1.92 2016/11/24 18:16:23 tom Exp $
  *
  *			MIME Message Parse			HTMIME.c
  *			==================
@@ -1081,12 +1081,7 @@ static void HTMIME_put_character(HTStream *me, int c)
       begin_transparent:
     case MIME_TRANSPARENT:
 	me->anchor->actual_length += 1;
-	if (me->anchor->content_length == 0 ||
-	    (me->anchor->content_length >= me->anchor->actual_length)) {
-	    (me->targetClass.put_character) (me->target, c);
-	} else {
-	    (me->targetClass.put_character) (me->target, c);
-	}
+	(me->targetClass.put_character) (me->target, c);
 	return;
 
 	/* RFC-2616 describes chunked transfer coding */
@@ -2170,8 +2165,6 @@ HTStream *HTMIMEConvert(HTPresentation *pres,
     if (me == NULL)
 	outofmem(__FILE__, "HTMIMEConvert");
 
-    assert(me != NULL);
-
     me->isa = &HTMIME;
     me->sink = sink;
     me->anchor = anchor;
@@ -2319,8 +2312,6 @@ static void HTmmdec_base64(char **t,
     if ((buf = typeMallocn(char, strlen(s) * 3 + 1)) == 0)
 	  outofmem(__FILE__, "HTmmdec_base64");
 
-    assert(buf != NULL);
-
     for (bp = buf; *s; s += 4) {
 	val = 0;
 	if (s[2] == '=')
@@ -2362,8 +2353,6 @@ static void HTmmdec_quote(char **t,
 
     if ((buf = typeMallocn(char, strlen(s) + 1)) == 0)
 	  outofmem(__FILE__, "HTmmdec_quote");
-
-    assert(buf != NULL);
 
     for (bp = buf; *s;) {
 	if (*s == '=') {
@@ -2408,8 +2397,6 @@ void HTmmdecode(char **target,
 
     if ((buf = typeMallocn(char, strlen(source) + 1)) == 0)
 	  outofmem(__FILE__, "HTmmdecode");
-
-    assert(buf != NULL);
 
     for (s = source, u = buf; *s;) {
 	if (!strncasecomp(s, "=?ISO-2022-JP?B?", 16)) {
@@ -2485,8 +2472,6 @@ int HTrjis(char **t,
 
     if ((buf = typeMallocn(char, strlen(s) * 2 + 1)) == 0)
 	  outofmem(__FILE__, "HTrjis");
-
-    assert(buf != NULL);
 
     for (p = buf; *s;) {
 	if (!kanji && s[0] == '$' && (s[1] == '@' || s[1] == 'B')) {

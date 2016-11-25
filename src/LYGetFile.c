@@ -1,4 +1,4 @@
-/* $LynxId: LYGetFile.c,v 1.93 2015/04/06 10:33:23 tom Exp $ */
+/* $LynxId: LYGetFile.c,v 1.94 2016/11/24 15:35:29 tom Exp $ */
 #include <HTUtils.h>
 #include <HTTP.h>
 #include <HTAnchor.h>		/* Anchor class */
@@ -1278,8 +1278,6 @@ static struct trust *new_trust(const char *src, const char *path, int type)
 
     if (tp == NULL)
 	outofmem(__FILE__, "new_trust");
-
-    assert(tp != NULL);
 
     tp->type = type;
     StrAllocCopy(tp->src, src);

@@ -1,5 +1,5 @@
 /*
- * $LynxId: TRSTable.c,v 1.34 2016/09/14 01:02:44 tom Exp $
+ * $LynxId: TRSTable.c,v 1.37 2016/11/24 18:14:41 tom Exp $
  *		Simple table object
  *		===================
  * Authors
@@ -582,18 +582,10 @@ static int Stbl_finishCellInRow(STable_rowinfo *me, STable_states *s, int end_td
 	    case CS__0eb:
 		newstate = empty ? CS__0eb : CS__ebc;
 		s->state = newstate;
-		if (me->fixed_line) {
-		    if (empty) {
-			ret = (lastcell->len <= 0 ? 0 : lastcell->len);
-		    } else {
-			ret = (lastcell->len <= 0 ? 0 : -1);
-		    }
+		if (empty) {
+		    ret = (lastcell->len <= 0 ? 0 : lastcell->len);
 		} else {
-		    if (empty) {
-			ret = (lastcell->len <= 0 ? 0 : lastcell->len);
-		    } else {
-			ret = (lastcell->len <= 0 ? 0 : 0);
-		    }
+		    ret = (lastcell->len <= 0 ? 0 : -1);
 		}
 		goto trace_and_return;
 	    case CS__0cb:
@@ -620,18 +612,10 @@ static int Stbl_finishCellInRow(STable_rowinfo *me, STable_states *s, int end_td
 	    case CS__eb:	/* ##484_set_pending_ret_0_if_empty? */
 		newstate = empty ? CS__eb : CS__ebc;
 		s->state = newstate;
-		if (me->fixed_line) {
-		    if (empty) {
-			ret = (lastcell->len <= 0 ? 0 : lastcell->len);
-		    } else {
-			ret = (lastcell->len <= 0 ? 0 : -1);
-		    }
+		if (empty) {
+		    ret = (lastcell->len <= 0 ? 0 : lastcell->len);
 		} else {
-		    if (empty) {
-			ret = (lastcell->len <= 0 ? 0 : lastcell->len);
-		    } else {
-			ret = (lastcell->len <= 0 ? 0 : -1);
-		    }
+		    ret = (lastcell->len <= 0 ? 0 : -1);
 		}
 		goto trace_and_return;
 	    case CS__cb:
@@ -704,18 +688,10 @@ static int Stbl_finishCellInRow(STable_rowinfo *me, STable_states *s, int end_td
 	    case CS__0eb:
 		newstate = empty ? CS__0ef : CS__0cf;	/* ebc?? */
 		s->state = newstate;
-		if (me->fixed_line) {
-		    if (empty) {
-			ret = (lastcell->len <= 0 ? 0 : lastcell->len);
-		    } else {
-			ret = (lastcell->len <= 0 ? 0 : -1);
-		    }
+		if (empty) {
+		    ret = (lastcell->len <= 0 ? 0 : lastcell->len);
 		} else {
-		    if (empty) {
-			ret = (lastcell->len <= 0 ? 0 : lastcell->len);
-		    } else {
-			ret = (lastcell->len <= 0 ? 0 : 0);
-		    }
+		    ret = (lastcell->len <= 0 ? 0 : -1);
 		}
 		goto trace_and_return;
 	    case CS__0cb:
@@ -752,20 +728,12 @@ static int Stbl_finishCellInRow(STable_rowinfo *me, STable_states *s, int end_td
 		newstate = empty ? CS__ef : CS__cf;
 		break;
 	    case CS__eb:
-		newstate = empty ? CS__ef : CS__ef;	/* ##579??? !!!!! */
+		newstate = CS__ef;
 		s->state = newstate;
-		if (me->fixed_line) {
-		    if (empty) {
-			ret = (lastcell->len <= 0 ? 0 : lastcell->len);
-		    } else {
-			ret = (lastcell->len <= 0 ? 0 : -1);
-		    }
+		if (empty) {
+		    ret = (lastcell->len <= 0 ? 0 : lastcell->len);
 		} else {
-		    if (empty) {
-			ret = (lastcell->len <= 0 ? 0 : lastcell->len);
-		    } else {
-			ret = (lastcell->len <= 0 ? 0 : -1);
-		    }
+		    ret = (lastcell->len <= 0 ? 0 : -1);
 		}
 		goto trace_and_return;
 	    case CS__cb:
@@ -889,7 +857,7 @@ static int Stbl_finishCellInRow(STable_rowinfo *me, STable_states *s, int end_td
 		newstate = empty ? CS__0ef : CS__0cf;
 		break;		/* ##630 */
 	    case CS__0eb:
-		newstate = empty ? CS__0ef : CS__0ef;
+		newstate = CS__0ef;
 		break;		/* ??? */
 	    case CS__0cb:
 		newstate = empty ? CS__0cf : CS__cbc;
@@ -923,7 +891,7 @@ static int Stbl_finishCellInRow(STable_rowinfo *me, STable_states *s, int end_td
 		newstate = empty ? CS__ef : CS__cf;
 		break;		/* ??? */
 	    case CS__cb:
-		newstate = empty ? CS__cf : CS__cf;
+		newstate = CS__cf;
 		break;		/* ??? */
 	    case CS__ef:	/* ignored error */
 	    case CS__cf:	/* ignored error */
@@ -1540,9 +1508,7 @@ int Stbl_addCellToTable(STable_info *me, int colspan,
     if (ncells > 0)
 	sumpos += me->sumcols[ncells - 1].pos - lastrow->cells[ncells - 1].pos;
     update_sumcols0(me->sumcols, lastrow, sumpos,
-		    sumpos - ((ncells > 0)
-			      ? me->sumcols[icell].pos
-			      : me->sumcols[icell].pos),
+		    sumpos - me->sumcols[icell].pos,
 		    icell, 0, me->allocated_sumcols);
 
     me->maxpos = me->sumcols[me->allocated_sumcols - 1].pos;

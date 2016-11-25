@@ -1,5 +1,5 @@
 /*
- * $LynxId: SGML.c,v 1.155 2014/12/10 09:48:35 tom Exp $
+ * $LynxId: SGML.c,v 1.159 2016/11/24 20:08:10 tom Exp $
  *
  *			General SGML Parser code		SGML.c
  *			========================
@@ -19,9 +19,6 @@
 #include <SGML.h>
 #include <HTMLDTD.h>
 #include <HTAccess.h>
-#include <HTCJK.h>		/* FIXME: this doesn't belong in SGML.c */
-#include <UCMap.h>
-#include <UCDefs.h>
 #include <UCAux.h>
 
 #include <HTChunk.h>
@@ -1364,8 +1361,6 @@ static void start_element(HTStream *me)
 
 	if (N == NULL)
 	    outofmem(__FILE__, "start_element");
-
-	assert(N != NULL);
 
 	N->next = me->element_stack;
 	N->tag = new_tag;
@@ -3214,8 +3209,8 @@ static void SGML_character(HTStream *me, int c_in)
 		HTPassEightBitRaw &&
 		saved_char_in >=
 		LYlowest_eightbit[me->outUCLYhndl]) {
-		HTChunkPutUtf8Char(string,
-				   (UCode_t) (0xf000 | saved_char_in));
+		orig_HTChunkPutUtf8Char(string,
+					(UCode_t) (0xf000 | saved_char_in));
 	    } else {
 		HTChunkPutUtf8Char(string, clong);
 	    }
@@ -3624,8 +3619,8 @@ static void SGML_character(HTStream *me, int c_in)
 		HTPassEightBitRaw &&
 		saved_char_in >=
 		LYlowest_eightbit[me->outUCLYhndl]) {
-		HTChunkPutUtf8Char(string,
-				   (UCode_t) (0xf000 | saved_char_in));
+		orig_HTChunkPutUtf8Char(string,
+					(UCode_t) (0xf000 | saved_char_in));
 	    } else {
 		HTChunkPutUtf8Char(string, clong);
 	    }
@@ -3664,8 +3659,8 @@ static void SGML_character(HTStream *me, int c_in)
 		HTPassEightBitRaw &&
 		saved_char_in >=
 		LYlowest_eightbit[me->outUCLYhndl]) {
-		HTChunkPutUtf8Char(string,
-				   (UCode_t) (0xf000 | saved_char_in));
+		orig_HTChunkPutUtf8Char(string,
+					(UCode_t) (0xf000 | saved_char_in));
 	    } else {
 		HTChunkPutUtf8Char(string, clong);
 	    }
@@ -3708,8 +3703,8 @@ static void SGML_character(HTStream *me, int c_in)
 		HTPassEightBitRaw &&
 		saved_char_in >=
 		LYlowest_eightbit[me->outUCLYhndl]) {
-		HTChunkPutUtf8Char(string,
-				   (UCode_t) (0xf000 | saved_char_in));
+		orig_HTChunkPutUtf8Char(string,
+					(UCode_t) (0xf000 | saved_char_in));
 	    } else {
 		HTChunkPutUtf8Char(string, clong);
 	    }
@@ -4320,8 +4315,6 @@ HTStream *SGML_new(const SGML_dtd * dtd,
     if (!me)
 	outofmem(__FILE__, "SGML_begin");
 
-    assert(me != NULL);
-
     me->isa = &SGMLParser;
     me->string = HTChunkCreate(128);	/* Grow by this much */
     me->dtd = dtd;
@@ -4872,7 +4865,6 @@ void TO_JIS(const unsigned char *arg,
 	outofmem(__FILE__, "TO_JIS");
 #endif
     TO_EUC(arg, euc);
-    is_EUC_JP(euc);
     EUC_TO_JIS(euc, jis, TO_KANJI, TO_ASCII);
 
     free(euc);

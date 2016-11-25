@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTPlain.c,v 1.59 2014/12/08 01:11:15 tom Exp $
+ * $LynxId: HTPlain.c,v 1.60 2016/11/24 15:29:50 tom Exp $
  *
  *		Plain text object		HTWrite.c
  *		=================
@@ -576,8 +576,6 @@ HTStream *HTPlainPresent(HTPresentation *pres GCC_UNUSED, HTParentAnchor *anchor
 
     if (me == NULL)
 	outofmem(__FILE__, "HTPlain_new");
-
-    assert(me != NULL);
 
     me->isa = &HTPlain;
 

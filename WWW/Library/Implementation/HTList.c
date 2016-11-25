@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTList.c,v 1.19 2013/01/04 00:31:27 tom Exp $
+ * $LynxId: HTList.c,v 1.20 2016/11/24 15:29:50 tom Exp $
  *
  *	A small List class					      HTList.c
  *	==================
@@ -22,8 +22,6 @@ HTList *HTList_new(void)
 
     if ((newList = typeMalloc(HTList)) == NULL)
 	  outofmem(__FILE__, "HTList_new");
-
-    assert(newList != NULL);
 
     newList->object = NULL;
     newList->next = NULL;
@@ -134,8 +132,6 @@ void HTList_addObject(HTList *me, void *newObject)
 	if ((newNode = typeMalloc(HTList)) == NULL)
 	      outofmem(__FILE__, "HTList_addObject");
 
-	assert(newNode != NULL);
-
 	newNode->object = newObject;
 	newNode->next = me->next;
 	me->next = newNode;
@@ -191,8 +187,6 @@ void HTList_insertObjectAt(HTList *me, void *newObject,
 	if (Pos == 0) {
 	    if ((newNode = typeMalloc(HTList)) == NULL)
 		  outofmem(__FILE__, "HTList_addObjectAt");
-
-	    assert(newNode != NULL);
 
 	    newNode->object = newObject;
 	    newNode->next = temp;

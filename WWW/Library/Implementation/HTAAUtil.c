@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTAAUtil.c,v 1.35 2013/05/03 20:32:37 tom Exp $
+ * $LynxId: HTAAUtil.c,v 1.36 2016/11/24 15:29:50 tom Exp $
  *
  * MODULE							HTAAUtil.c
  *		COMMON PARTS OF ACCESS AUTHORIZATION MODULE
@@ -487,8 +487,6 @@ void HTAA_setupReader(char *start_of_headers,
     }
     if (buffer == NULL)
 	outofmem(__FILE__, "HTAA_setupReader");
-
-    assert(buffer != NULL);
 
 #ifdef LY_FIND_LEAKS
     atexit(FreeHTAAUtil);

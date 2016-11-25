@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTAABrow.c,v 1.40 2013/11/28 11:11:05 tom Exp $
+ * $LynxId: HTAABrow.c,v 1.41 2016/11/24 15:14:00 tom Exp $
  *
  * MODULE							HTAABrow.c
  *		BROWSER SIDE ACCESS AUTHORIZATION MODULE
@@ -150,8 +150,6 @@ void HTAAForwardAuth_set(const char *scheme_name,
     if ((HTAAForwardAuth = typecallocn(char, len)) == 0)
 	  outofmem(__FILE__, "HTAAForwardAuth_set");
 
-    assert(HTAAForwardAuth != 0);
-
     strcpy(HTAAForwardAuth, "Authorization: ");
     if (scheme_name) {
 	strcat(HTAAForwardAuth, scheme_name);
@@ -195,8 +193,6 @@ static HTAAServer *HTAAServer_new(const char *hostname,
 
     if ((server = typecalloc(HTAAServer)) == 0)
 	  outofmem(__FILE__, "HTAAServer_new");
-
-    assert(server != NULL);
 
     server->hostname = NULL;
     server->portnumber = (portnumber > 0 ? portnumber : 80);
@@ -399,8 +395,6 @@ static HTAASetup *HTAASetup_new(HTAAServer *server, char *ctemplate,
     if ((setup = typecalloc(HTAASetup)) == 0)
 	outofmem(__FILE__, "HTAASetup_new");
 
-    assert(setup != NULL);
-
     setup->retry = NO;
     setup->server = server;
     setup->ctemplate = NULL;
@@ -522,8 +516,6 @@ static HTAARealm *HTAARealm_new(HTList *realm_table,
     if (!realm) {
 	if ((realm = typecalloc(HTAARealm)) == 0)
 	      outofmem(__FILE__, "HTAARealm_new");
-
-	assert(realm != NULL);
 
 	realm->realmname = NULL;
 	realm->username = NULL;
@@ -678,8 +670,6 @@ static char *compose_auth_string(HTAAScheme scheme, HTAASetup * setup, int IsPro
 
     if ((cleartext = typecallocn(char, len)) == 0)
 	  outofmem(__FILE__, "compose_auth_string");
-
-    assert(cleartext != NULL);
 
     if (realm->username)
 	strcpy(cleartext, realm->username);
@@ -927,8 +917,6 @@ char *HTAA_composeAuth(const char *hostname,
 	if ((HTAA_composeAuthResult = typecallocn(char, len)) == 0)
 	      outofmem(__FILE__, "HTAA_composeAuth");
 
-	assert(HTAA_composeAuthResult != NULL);
-
 	strcpy(HTAA_composeAuthResult, "Proxy-Authorization: ");
 
     } else {
@@ -1006,8 +994,6 @@ char *HTAA_composeAuth(const char *hostname,
 	len = strlen(auth_string) + strlen(HTAAScheme_name(scheme)) + 20;
 	if ((HTAA_composeAuthResult = typecallocn(char, len)) == 0)
 	      outofmem(__FILE__, "HTAA_composeAuth");
-
-	assert(HTAA_composeAuthResult != NULL);
 
 	strcpy(HTAA_composeAuthResult, "Authorization: ");
     }
@@ -1108,8 +1094,6 @@ BOOL HTAA_shouldRetryWithAuth(char *start_of_headers,
 
 			if (!scheme_specifics)
 			    outofmem(__FILE__, "HTAA_shouldRetryWithAuth");
-
-			assert(scheme_specifics != NULL);
 
 			for (i = 0; i < HTAA_MAX_SCHEMES; i++)
 			    scheme_specifics[i] = NULL;

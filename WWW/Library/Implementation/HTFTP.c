@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFTP.c,v 1.126 2014/07/24 22:08:24 tom Exp $
+ * $LynxId: HTFTP.c,v 1.127 2016/11/24 16:22:50 tom Exp $
  *
  *			File Transfer Protocol (FTP) Client
  *			for a WorldWideWeb browser
@@ -308,9 +308,6 @@ char *HTVMS_name(const char *nn,
 
     if (!filename || !nodename)
 	outofmem(__FILE__, "HTVMSname");
-
-    assert(filename != NULL);
-    assert(nodename != NULL);
 
     strcpy(filename, fn);
     strcpy(nodename, "");	/* On same node?  Yes if node names match */
@@ -823,8 +820,6 @@ static int get_connection(const char *arg,
 	con = typecalloc(connection);
 	if (con == NULL)
 	    outofmem(__FILE__, "get_connection");
-
-	assert(con != NULL);
     }
     con->socket = -1;
 
@@ -2282,8 +2277,6 @@ static EntryInfo *parse_dir_entry(char *entry,
 
     if (entry_info == NULL)
 	outofmem(__FILE__, "parse_dir_entry");
-
-    assert(entry_info != NULL);
 
     entry_info->display = TRUE;
 

@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTP.c,v 1.161 2016/11/24 12:20:07 tom Exp $
+ * $LynxId: HTTP.c,v 1.162 2016/11/24 18:25:32 tom Exp $
  *
  * HyperText Tranfer Protocol	- Client implementation		HTTP.c
  * ==========================
@@ -538,9 +538,7 @@ char *HTSkipToAt(char *host, int *gen_delims)
 
     *gen_delims = 0;
     while ((ch = UCH(*s)) != '\0') {
-	if (ch == '\0') {
-	    break;
-	} else if (ch == ':') {
+	if (ch == ':') {
 	    if (pass++)
 		break;
 	} else if (ch == '@') {

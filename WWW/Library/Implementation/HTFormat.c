@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFormat.c,v 1.84 2016/04/26 09:11:03 tom Exp $
+ * $LynxId: HTFormat.c,v 1.85 2016/11/24 15:29:50 tom Exp $
  *
  *		Manage different file formats			HTFormat.c
  *		=============================
@@ -96,7 +96,6 @@ void HTSetPresentation(const char *representation,
     if (pres == NULL)
 	outofmem(__FILE__, "HTSetPresentation");
 
-    assert(pres != NULL);
     assert(representation != NULL);
 
     CTRACE2(TRACE_CFG,
@@ -158,8 +157,6 @@ void HTSetConversion(const char *representation_in,
 
     if (pres == NULL)
 	outofmem(__FILE__, "HTSetConversion");
-
-    assert(pres != NULL);
 
     CTRACE2(TRACE_CFG,
 	    (tfp,
@@ -1873,8 +1870,6 @@ HTStream *HTNetToText(HTStream *sink)
 
     if (me == NULL)
 	outofmem(__FILE__, "NetToText");
-
-    assert(me != NULL);
 
     me->isa = &NetToTextClass;
 

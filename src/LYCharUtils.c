@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYCharUtils.c,v 1.128 2014/12/10 10:30:58 tom Exp $
+ * $LynxId: LYCharUtils.c,v 1.129 2016/11/24 15:35:29 tom Exp $
  *
  *  Functions associated with LYCharSets.c and the Lynx version of HTML.c - FM
  *  ==========================================================================
@@ -3388,8 +3388,6 @@ void LYformTitle(char **dst,
 
 	if ((tmp_buffer = (char *) malloc(strlen(src) + 1)) == 0)
 	    outofmem(__FILE__, "LYformTitle");
-
-	assert(tmp_buffer != NULL);
 
 	switch (kanji_code) {	/* 1997/11/22 (Sat) 09:28:00 */
 	case EUC:

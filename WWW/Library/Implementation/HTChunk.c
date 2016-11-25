@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTChunk.c,v 1.27 2012/02/07 11:28:44 tom Exp $
+ * $LynxId: HTChunk.c,v 1.28 2016/11/24 15:29:50 tom Exp $
  *
  *		Chunk handling:	Flexible arrays
  *		===============================
@@ -48,8 +48,6 @@ HTChunk *HTChunkCreateMayFail(int grow, int failok)
 	}
     }
 
-    assert(ch != NULL);
-
     HTChunkInit(ch, grow);
     ch->failok = failok;
     return ch;
@@ -64,8 +62,6 @@ HTChunk *HTChunkCreate2(int grow, size_t needed)
 
     if (ch == NULL)
 	outofmem(__FILE__, "HTChunkCreate2");
-
-    assert(ch != NULL);
 
     HTChunkInit(ch, grow);
     if (needed-- > 0) {

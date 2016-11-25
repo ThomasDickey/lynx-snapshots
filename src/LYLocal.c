@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYLocal.c,v 1.129 2015/01/05 01:28:10 Thorsten.Glaser Exp $
+ * $LynxId: LYLocal.c,v 1.131 2016/11/24 17:18:55 tom Exp $
  *
  *  Routines to manipulate the local filesystem.
  *  Written by: Rick Mallett, Carleton University
@@ -848,7 +848,7 @@ static int modify_tagged(char *testpath)
 
 	    if (isEmpty(old_path) || strcmp(old_path, src_path)) {
 		if (!ok_stat(src_path, &src_info)
-		    || same_location(&src_info, &dst_info)
+		    || same_location(&dst_info, &src_info)
 		    || !dir_has_same_owner(&dst_info, &src_info)) {
 		    FREE(src_path);
 		    BStrFree(given_target);
@@ -2510,8 +2510,6 @@ void add_menu_item(char *str)
 
     if (tmp == NULL)
 	outofmem(__FILE__, "add_menu_item");
-
-    assert(tmp != NULL);
 
     /*
      * Conditional on tagged != NULL ?

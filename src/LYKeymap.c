@@ -1,4 +1,4 @@
-/* $LynxId: LYKeymap.c,v 1.118 2015/12/17 01:27:51 tom Exp $ */
+/* $LynxId: LYKeymap.c,v 1.119 2016/11/24 16:38:22 tom Exp $ */
 #include <HTUtils.h>
 #include <LYUtils.h>
 #include <LYGlobalDefs.h>
@@ -1003,7 +1003,7 @@ static int LYLoadKeymap(const char *arg GCC_UNUSED,
      * Set up the stream.  - FM
      */
     target = HTStreamStack(format_in, format_out, sink, anAnchor);
-    if (!target || target == NULL) {
+    if (target == NULL) {
 	HTSprintf0(&buf, CANNOT_CONVERT_I_TO_O,
 		   HTAtom_name(format_in), HTAtom_name(format_out));
 	HTAlert(buf);

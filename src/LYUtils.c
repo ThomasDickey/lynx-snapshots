@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYUtils.c,v 1.275 2016/11/15 09:34:30 tom Exp $
+ * $LynxId: LYUtils.c,v 1.276 2016/11/24 15:35:29 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTCP.h>
@@ -1436,8 +1436,6 @@ void statusline(const char *text)
 	 */
 	if ((temp = typecallocn(unsigned char, strlen(text_buff) + 1)) == NULL)
 	      outofmem(__FILE__, "statusline");
-
-	assert(temp != NULL);
 
 	if (kanji_code == EUC) {
 	    TO_EUC((const unsigned char *) text_buff, temp);

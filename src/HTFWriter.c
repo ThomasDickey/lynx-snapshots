@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFWriter.c,v 1.106 2013/11/28 11:17:04 tom Exp $
+ * $LynxId: HTFWriter.c,v 1.107 2016/11/24 15:35:29 tom Exp $
  *
  *		FILE WRITER				HTFWrite.h
  *		===========
@@ -536,8 +536,6 @@ HTStream *HTFWriter_new(FILE *fp)
     if (me == NULL)
 	outofmem(__FILE__, "HTFWriter_new");
 
-    assert(me != NULL);
-
     me->isa = &HTFWriter;
 
     me->fp = fp;
@@ -634,8 +632,6 @@ HTStream *HTSaveAndExecute(HTPresentation *pres,
     me = typecalloc(HTStream);
     if (me == NULL)
 	outofmem(__FILE__, "HTSaveAndExecute");
-
-    assert(me != NULL);
 
     me->isa = &HTFWriter;
     me->input_format = pres->rep;
@@ -771,8 +767,6 @@ HTStream *HTSaveToFile(HTPresentation *pres,
 
     if (ret_obj == NULL)
 	outofmem(__FILE__, "HTSaveToFile");
-
-    assert(ret_obj != NULL);
 
     ret_obj->isa = &HTFWriter;
     ret_obj->remove_command = NULL;
@@ -1129,8 +1123,6 @@ HTStream *HTCompressed(HTPresentation *pres,
     if (me == NULL)
 	outofmem(__FILE__, "HTCompressed");
 
-    assert(me != NULL);
-
     me->isa = &HTFWriter;
     me->input_format = pres->rep;
     me->output_format = pres->rep_out;
@@ -1275,8 +1267,6 @@ HTStream *HTDumpToStdout(HTPresentation *pres GCC_UNUSED,
 
     if (ret_obj == NULL)
 	outofmem(__FILE__, "HTDumpToStdout");
-
-    assert(ret_obj != NULL);
 
     ret_obj->isa = &HTFWriter;
     ret_obj->remove_command = NULL;
