@@ -1,9 +1,11 @@
--- $LynxId: CHANGES,v 1.869 2016/11/24 23:47:53 tom Exp $
+-- $LynxId: CHANGES,v 1.871 2016/11/27 23:18:41 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2016-11-24 (2.8.9dev.12)
+2016-11-27 (2.8.9dev.12)
+* fix two more typos in the list of ENABLE_LYNXRC in lynx.cfg -TD
+* remove a repeated item for SEND_USERAGENT from lynx.cfg (Larry Hynes)
 * accept userinfo in a URL, subject to override by -auth option or -pauth
   options.  According to RFC-3986, this is deprecated, but testing shows other
   clients support it -TD
