@@ -1,21 +1,21 @@
 # Catalan translation of the Lynx browser message catalog
 # Copyright (C) 2002 Free Software Foundation, Inc.
 # This file is distributed under the same license as the lynx package.
-# Walter Garcia-fontes <walter.garci@upf.edu>, 2015
+# Walter Garcia-fontes <walter.garci@upf.edu>, 2015,2016
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: lynx 2.8.9-dev5\n"
+"Project-Id-Version: lynx 2.8.9-dev7\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-04-14 20:53-0400\n"
-"PO-Revision-Date: 2015-12-04 08:16+0100\n"
+"POT-Creation-Date: 2015-12-14 20:39-0500\n"
+"PO-Revision-Date: 2016-12-23 08:45+0100\n"
 "Last-Translator: Walter Garcia-Fontes <walter.garcia@upf.edu>\n"
 "Language-Team: Catalan <ca@dodds.net>\n"
 "Language: ca\n"
-"X-Bugs: Report translation errors to the Language-Team address.\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=ISO-8859-1\n"
 "Content-Transfer-Encoding: 8bit\n"
+"X-Bugs: Report translation errors to the Language-Team address.\n"
 
 #. ******************************************************************
 #. * The following definitions are for status line prompts, messages, or
@@ -115,1936 +115,2003 @@ msgid "URL too long"
 msgstr "La URL especificada és massa llarga"
 
 #. Inactive input fields, messages used with -tna option - kw
-#. #define FORM_LINK_TEXT_MESSAGE_INA
+#. #define FORM_LINK_TEXT_ADV_MSG_INA
 #: LYMessages.c:57
+#, c-format
+msgid "(Textfield \"%s\"); Inactive.  Press <return> to activate."
+msgstr "(Camp d'entrada de text «%s»); Inactiu. Premeu <intro> per activar-lo."
+
+#. #define FORM_LINK_TEXT_MESSAGE_INA
+#: LYMessages.c:59
 msgid "(Text entry field) Inactive.  Press <return> to activate."
 msgstr "(Camp d'entrada de text) Inactiu. Premeu <intro> per activar-lo."
 
+#. #define FORM_LINK_TEXTAREA_ADV_MSG_INA
+#: LYMessages.c:61
+#, c-format
+msgid "(Textarea \"%s\"); Inactive.  Press <return> to activate."
+msgstr "(Àrea de text «%s»); Inactiva. Premeu <intro> per activar-la."
+
 #. #define FORM_LINK_TEXTAREA_MESSAGE_INA
-#: LYMessages.c:59
+#: LYMessages.c:63
 msgid "(Textarea) Inactive.  Press <return> to activate."
 msgstr "(Àrea de text) Inactiva. Premeu <intro> per activar-la."
 
+#. #define FORM_LINK_TEXTAREA_ADV_MSG_INA_E
+#: LYMessages.c:65
+#, c-format
+msgid "(Textarea \"%s\"); Inactive.  Press <return> to activate (%s for editor)."
+msgstr "(Àrea de text Reconciled «%s»); Inactiva. Premeu <intro> per activar-la (%s per a l'editor)."
+
 #. #define FORM_LINK_TEXTAREA_MESSAGE_INA_E
-#: LYMessages.c:61
+#: LYMessages.c:67
 #, c-format
 msgid "(Textarea) Inactive.  Press <return> to activate (%s for editor)."
 msgstr "(Àrea de text) Inactiva. Premeu <intro> per activar-la (%s per a l'editor)."
 
 #. #define FORM_LINK_TEXT_SUBMIT_MESSAGE_INA
-#: LYMessages.c:63
+#: LYMessages.c:69
 msgid "(Form field) Inactive.  Use <return> to edit."
 msgstr "(Camp de formulari) Inactiu. Useu <intro> per a editar."
 
 #. #define FORM_TEXT_SUBMIT_MESSAGE_INA_X
-#: LYMessages.c:65
+#: LYMessages.c:71
 #, c-format
 msgid "(Form field) Inactive.  Use <return> to edit (%s to submit with no cache)."
 msgstr "(Camp form.) Inactiu. <intro> per a editar (%s per a enviar sense mem. cau)."
 
 #. #define FORM_TEXT_RESUBMIT_MESSAGE_INA
-#: LYMessages.c:67
+#: LYMessages.c:73
 msgid "(Form field) Inactive. Press <return> to edit, press <return> twice to submit."
 msgstr "(Camp form.) Inactiu. <intro> per a editar, <intro> dues vegades per a enviar."
 
 #. #define FORM_TEXT_SUBMIT_MAILTO_MSG_INA
-#: LYMessages.c:69
+#: LYMessages.c:75
 msgid "(mailto form field) Inactive.  Press <return> to change."
 msgstr "(Camp de formulari de correu) Inactiu. Premeu <intro> per a canviar-ho."
 
 #. #define FORM_LINK_PASSWORD_MESSAGE_INA
-#: LYMessages.c:71
+#: LYMessages.c:77
 msgid "(Password entry field) Inactive.  Press <return> to activate."
 msgstr "(Camp de contrasenya) Inactiu. Premeu <intro> per activar-lo."
 
 #. #define FORM_LINK_FILE_UNM_MSG
-#: LYMessages.c:74
+#: LYMessages.c:80
 msgid "UNMODIFIABLE file entry field.  Use UP or DOWN arrows or tab to move off."
 msgstr "Camp de fitxer IMMODIFICABLE. Useu les fletxes o <tab> per a eixir-ne."
 
 #. #define FORM_LINK_FILE_MESSAGE
-#: LYMessages.c:76
+#: LYMessages.c:82
 msgid "(File entry field) Enter filename.  Use UP or DOWN arrows or tab to move off."
 msgstr "(Camp de fitxer) Introduïu el nom de l'arxiu. Fletxes o <tab> per a eixir-ne."
 
+#. #define FORM_LINK_TEXT_ADV_MSG
 #. #define FORM_LINK_TEXT_MESSAGE
-#: LYMessages.c:78
-msgid "(Text entry field) Enter text.  Use UP or DOWN arrows or tab to move off."
-msgstr "(Camp de text) Introduïu text. Useu les fletxes o <tab> per a eixir-ne."
+#: LYMessages.c:84 LYMessages.c:86
+#, c-format
+msgid "(Textfield \"%s\"); Enter text.  Use UP or DOWN arrows or tab to move off."
+msgstr "(Camp de text «%s»); Introduïu text. Useu les fletxes o <tab> per a eixir-ne."
+
+#. #define FORM_LINK_TEXTAREA_ADV_MSG
+#: LYMessages.c:88
+#, c-format
+msgid "(Textarea \"%s\"); Enter text. Use UP/DOWN arrows or TAB to move off."
+msgstr "(Àrea de text «%s»); Introduïu text. Fletxes o <tab> per a eixir-ne."
 
 #. #define FORM_LINK_TEXTAREA_MESSAGE
-#: LYMessages.c:80
+#: LYMessages.c:90
 msgid "(Textarea) Enter text. Use UP/DOWN arrows or TAB to move off."
 msgstr "(Àrea de text) Introduïu text. Fletxes o <tab> per a eixir-ne."
 
+#. #define FORM_LINK_TEXTAREA_ADV_MSG_E
+#: LYMessages.c:92
+#, c-format
+msgid "(Textarea \"%s\"); Enter text. Use UP/DOWN arrows or TAB to move off (%s for editor)."
+msgstr "(Àrea de text «%s»); Introduïu text. Fletxes o <tab> per a eixir-ne (%s per a l'editor)."
+
 #. #define FORM_LINK_TEXTAREA_MESSAGE_E
-#: LYMessages.c:82
+#: LYMessages.c:94
 #, c-format
 msgid "(Textarea) Enter text. Use UP/DOWN arrows or TAB to move off (%s for editor)."
 msgstr "(À. text) Introduïu text. Fletxes o <tab> per a eixir-ne (%s per a l'editor)."
 
 #. #define FORM_LINK_TEXT_UNM_MSG
-#: LYMessages.c:84
+#: LYMessages.c:96
 msgid "UNMODIFIABLE form text field.  Use UP or DOWN arrows or tab to move off."
 msgstr "Camp de text IMMODIFICABLE. Useu les fletxes o <tab> per a eixir-ne."
 
 #. #define FORM_LINK_TEXT_SUBMIT_MESSAGE
-#: LYMessages.c:86
+#: LYMessages.c:98
 msgid "(Form field) Enter text.  Use <return> to submit."
 msgstr "(Camp de formulari) Introduïu text. Useu <intro> per a enviar."
 
 #. #define FORM_LINK_TEXT_SUBMIT_MESSAGE_X
-#: LYMessages.c:88
+#: LYMessages.c:100
 #, c-format
 msgid "(Form field) Enter text.  Use <return> to submit (%s for no cache)."
 msgstr "(Camp de formulari) Introduïu text. <intro> per a enviar (%s sensemem. cau)."
 
 #. #define FORM_LINK_TEXT_RESUBMIT_MESSAGE
-#: LYMessages.c:90
+#: LYMessages.c:102
 msgid "(Form field) Enter text.  Use <return> to submit, arrows or tab to move off."
 msgstr "(C. form.) Introduïu text. <intro> per a enviar, fletxes o tab per eixir-ne."
 
 #. #define FORM_LINK_TEXT_SUBMIT_UNM_MSG
-#: LYMessages.c:92
+#: LYMessages.c:104
 msgid "UNMODIFIABLE form field.  Use UP or DOWN arrows or tab to move off."
 msgstr "Camp IMMODIFICABLE. Useu les fletxes o el tabulador per a eixir-ne."
 
 #. #define FORM_LINK_TEXT_SUBMIT_MAILTO_MSG
-#: LYMessages.c:94
+#: LYMessages.c:106
 msgid "(mailto form field) Enter text.  Use <return> to submit, arrows to move off."
 msgstr "(correu) Introduïu text. <intro> per enviar-lo, amb les fletxes n'eixireu."
 
 #. #define FORM_LINK_TEXT_SUBMIT_MAILTO_DIS_MSG
-#: LYMessages.c:96
+#: LYMessages.c:108
 msgid "(mailto form field) Mail is disallowed so you cannot submit."
 msgstr "(Camp form. correu) El correu no està permés: no podeu enviar-ne."
 
 #. #define FORM_LINK_PASSWORD_MESSAGE
-#: LYMessages.c:98
+#: LYMessages.c:110
 msgid "(Password entry field) Enter text.  Use UP or DOWN arrows or tab to move off."
 msgstr "(Contrasenya) Introduïu text. Useu les fletxes o <tab> per a eixir-ne."
 
 #. #define FORM_LINK_PASSWORD_UNM_MSG
-#: LYMessages.c:100
+#: LYMessages.c:112
 msgid "UNMODIFIABLE form password.  Use UP or DOWN arrows or tab to move off."
 msgstr "Camp de contrasenya IMMODIFICABLE. Fletxes o <tab> per a eixir-ne."
 
+#. #define FORM_LINK_CHECKBOX_ADV_MSG
+#: LYMessages.c:114
+#, c-format
+msgid "(Checkbox \"%s\");   Use right-arrow or <return> to toggle."
+msgstr "(Camp de verificació «%s») Useu fletxa dreta o <intro> per a canviar."
+
 #. #define FORM_LINK_CHECKBOX_MESSAGE
-#: LYMessages.c:102
+#: LYMessages.c:116
 msgid "(Checkbox Field)   Use right-arrow or <return> to toggle."
 msgstr "(Camp de verificació) Useu '->' o <intro> per a canviar."
 
 #. #define FORM_LINK_CHECKBOX_UNM_MSG
-#: LYMessages.c:104
+#: LYMessages.c:118
 msgid "UNMODIFIABLE form checkbox.  Use UP or DOWN arrows or tab to move off."
 msgstr "Quadre de verificació IMMODIFICABLE. Useu les fletxes per a eixir-ne."
 
+#. #define FORM_LINK_RADIO_ADV_MSG
+#: LYMessages.c:120
+#, c-format
+msgid "(Radio Button \"%s\");   Use right-arrow or <return> to toggle."
+msgstr "(Botó d'opció «%s»); Useu fletxa-dreta o <intro> per commutar."
+
 #. #define FORM_LINK_RADIO_MESSAGE
-#: LYMessages.c:106
+#: LYMessages.c:122
 msgid "(Radio Button)   Use right-arrow or <return> to toggle."
 msgstr "(Botó d'opció) Useu fletxa-dreta o <intro> per commutar."
 
 #. #define FORM_LINK_RADIO_UNM_MSG
-#: LYMessages.c:108
+#: LYMessages.c:124
 msgid "UNMODIFIABLE form radio button.  Use UP or DOWN arrows or tab to move off."
 msgstr "Botó de grup IMMODIFICABLE. Useu fletxes o <tab> per a eixir-ne."
 
 #. #define FORM_LINK_SUBMIT_PREFIX
-#: LYMessages.c:110
+#: LYMessages.c:126
 msgid "Submit ('x' for no cache) to "
 msgstr "Enviar a ('x' sense mem. cau) "
 
 #. #define FORM_LINK_RESUBMIT_PREFIX
-#: LYMessages.c:112
+#: LYMessages.c:128
 msgid "Submit to "
 msgstr "Enviar a "
 
 #. #define FORM_LINK_SUBMIT_MESSAGE
-#: LYMessages.c:114
+#: LYMessages.c:130
 msgid "(Form submit button) Use right-arrow or <return> to submit ('x' for no cache)."
 msgstr "(Botó d'enviament) Useu '->' o <intro> per a enviar ('x' sense mem. cau)."
 
 #. #define FORM_LINK_RESUBMIT_MESSAGE
-#: LYMessages.c:116
+#: LYMessages.c:132
 msgid "(Form submit button) Use right-arrow or <return> to submit."
 msgstr "(Botó d'enviament) Useu '->' o <intro> per a enviar."
 
 #. #define FORM_LINK_SUBMIT_DIS_MSG
-#: LYMessages.c:118
+#: LYMessages.c:134
 msgid "DISABLED form submit button.  Use UP or DOWN arrows or tab to move off."
 msgstr "Botó d'enviament DESACTIVAT. Useu les fletxes o <tab> per a eixir-ne."
 
 #. #define FORM_LINK_SUBMIT_MAILTO_PREFIX
-#: LYMessages.c:120
+#: LYMessages.c:136
 msgid "Submit mailto form to "
 msgstr "Enviar correu a "
 
 #. #define FORM_LINK_SUBMIT_MAILTO_MSG
-#: LYMessages.c:122
+#: LYMessages.c:138
 msgid "(mailto form submit button) Use right-arrow or <return> to submit."
 msgstr "(Botó d'enviament de correu) Useu '->' o <intro> per a enviar-lo."
 
 #. #define FORM_LINK_SUBMIT_MAILTO_DIS_MSG
-#: LYMessages.c:124
+#: LYMessages.c:140
 msgid "(mailto form submit button) Mail is disallowed so you cannot submit."
 msgstr "(Botó d'enviament de correu) El correu no està permés: no podeuenviar-ne."
 
 #. #define FORM_LINK_RESET_MESSAGE
-#: LYMessages.c:126
+#: LYMessages.c:142
 msgid "(Form reset button)   Use right-arrow or <return> to reset form to defaults."
 msgstr "(Botó de reinici) Useu '->' o <intro> per a tornar als valors predeterminats."
 
 #. #define FORM_LINK_RESET_DIS_MSG
-#: LYMessages.c:128
+#: LYMessages.c:144
 msgid "DISABLED form reset button.  Use UP or DOWN arrows or tab to move off."
 msgstr "Botó de reinici DESACTIVAT. Useu les fletxes o <tab> per a eixir-ne."
 
 #. #define FORM_LINK_BUTTON_MESSAGE
-#: LYMessages.c:130
+#: LYMessages.c:146
 msgid "(Script button)   Use UP or DOWN arrows or tab to move off."
 msgstr "(Botó d'script)  Useu les fletxes cap amunt o cap avall o el tabulador per eixir-ne."
 
+#. #define FORM_LINK_BUTTON_ADV_MSG
+#: LYMessages.c:148
+#, c-format
+msgid "(Script button \"%s\");   Use UP or DOWN arrows or tab to move off."
+msgstr "(Botó d'script «%s»);  Useu les fletxes cap amunt o cap avall o el tabulador per eixir-ne."
+
 #. #define FORM_LINK_BUTTON_DIS_MSG
-#: LYMessages.c:132
+#: LYMessages.c:150
 msgid "DISABLED Script button.  Use UP or DOWN arrows or tab to move off."
 msgstr "Botó d'script DESACTIVAT. Useu les fletxes cap amunt o cap avall o el tabulador per eixir-ne."
 
+#. #define FORM_LINK_OPTION_LIST_ADV_MSG
+#: LYMessages.c:152
+#, c-format
+msgid "(Option list \"%s\"); Hit return to select option."
+msgstr "(Llista d'opcions «%s»); Premeu <intro> per a triar una opció."
+
 #. #define FORM_LINK_OPTION_LIST_MESSAGE
-#: LYMessages.c:134
+#: LYMessages.c:154
 msgid "(Option list) Hit return and use arrow keys and return to select option."
 msgstr "(Opcions) Premeu <intro> i useu les fletxes i <intro> per a triar-ne una."
 
+#. #define CHOICE_LIST_ADV_MSG
+#: LYMessages.c:156
+#, c-format
+msgid "(Choice entry \"%s\"); Use arrow keys and return to select option."
+msgstr "(Trieu l'entrada «%s»); Useu les tecles de fletxes i intro per triar una opció."
+
 #. #define CHOICE_LIST_MESSAGE
-#: LYMessages.c:136
+#: LYMessages.c:158
 msgid "(Choice list) Hit return and use arrow keys and return to select option."
 msgstr "(Tria) Premeu <intro>; useu les fletxes i <intro> per a triar una opció."
 
+#. #define MOUSE_CHOICE_MESSAGE
+#: LYMessages.c:160
+msgid "Left mouse button or return to select, arrow keys to scroll."
+msgstr "Botó esquerre del ratolí o intro per triar, tecles de fletxes pel desplaçament."
+
 #. #define FORM_LINK_OPTION_LIST_UNM_MSG
-#: LYMessages.c:138
+#: LYMessages.c:162
 msgid "UNMODIFIABLE option list.  Use return or arrow keys to review or leave."
 msgstr "Llista IMMODIFICABLE. <intro> per a revisar-la o fletxes per aeixir-ne."
 
 #. #define CHOICE_LIST_UNM_MSG
-#: LYMessages.c:140
+#: LYMessages.c:164
 msgid "UNMODIFIABLE choice list.  Use return or arrow keys to review or leave."
 msgstr "Llista IMMODIFICABLE. <intro> per a revisar-la o les fletxes per aeixir-ne."
 
-#: LYMessages.c:141
+#: LYMessages.c:165
 msgid "Submitting form..."
 msgstr "Enviant..."
 
-#: LYMessages.c:142
+#: LYMessages.c:166
 msgid "Resetting form..."
 msgstr "Restablint els valors inicials del formulari..."
 
 #. #define RELOADING_FORM
-#: LYMessages.c:144
+#: LYMessages.c:168
 msgid "Reloading document.  Any form entries will be lost!"
 msgstr "Recarregant document. Qualsevol entrada anterior es perdrà!"
 
 #. #define LINK_NOT_IN_FORM
-#: LYMessages.c:146
+#: LYMessages.c:170
 msgid "The current link is not in a FORM"
 msgstr "L'enllaça actual no està a un FORMULARI"
 
-#: LYMessages.c:147
+#: LYMessages.c:171
 #, c-format
 msgid "Warning: Cannot transcode form data to charset %s!"
 msgstr "Alerta: No es poden convertir les dades al joc de caràcters %s!"
 
 #. #define NORMAL_LINK_MESSAGE
-#: LYMessages.c:150
+#: LYMessages.c:174
 msgid "(NORMAL LINK)   Use right-arrow or <return> to activate."
 msgstr "(ENLLAÇ NORMAL) Useu la fletxa a la dreta o <return> per a seguir-lo."
 
-#: LYMessages.c:151
+#: LYMessages.c:175
 msgid "The resource requested is not available at this time."
 msgstr "El recurs sol·licitat no està disponible a hores d'ara."
 
-#: LYMessages.c:152
+#: LYMessages.c:176
 msgid "Enter Lynx keystroke command: "
 msgstr "Introduïu la combinació de tecles: "
 
-#: LYMessages.c:153
+#: LYMessages.c:177
 msgid "Looking up "
 msgstr "Buscant "
 
-#: LYMessages.c:154
+#: LYMessages.c:178
 #, c-format
 msgid "Getting %s"
 msgstr "Rebent %s"
 
-#: LYMessages.c:155
+#: LYMessages.c:179
 #, c-format
 msgid "Skipping %s"
 msgstr "Saltant-se %s"
 
-#: LYMessages.c:156
+#: LYMessages.c:180
 #, c-format
 msgid "Using %s"
 msgstr "Usant %s"
 
-#: LYMessages.c:157
+#: LYMessages.c:181
 #, c-format
 msgid "Illegal URL: %s"
 msgstr "Adreça il·legal: %s"
 
-#: LYMessages.c:158
+#: LYMessages.c:182
 #, c-format
 msgid "Badly formed address %s"
 msgstr "Adreça mal formada: %s"
 
-#: LYMessages.c:159
+#: LYMessages.c:183
 #, c-format
 msgid "URL: %s"
 msgstr "URL: %s"
 
-#: LYMessages.c:160
+#: LYMessages.c:184
 msgid "Unable to access WWW file!!!"
 msgstr "No ha estat possible accedir a l'arxiu!!"
 
-#: LYMessages.c:161
+#: LYMessages.c:185
 #, c-format
 msgid "This is a searchable index.  Use %s to search."
 msgstr "Índex de recerca. Useu %s per a buscar."
 
 #. #define WWW_INDEX_MORE_MESSAGE
-#: LYMessages.c:163
+#: LYMessages.c:187
 #, c-format
 msgid "--More--  This is a searchable index.  Use %s to search."
 msgstr "--Més--  Índex de recerca. Useu %s per a buscar."
 
-#: LYMessages.c:164
+#: LYMessages.c:188
 msgid "You have entered an invalid link number."
 msgstr "Heu introduït un número d'enllaç incorrecte."
 
 #. #define SOURCE_HELP
-#: LYMessages.c:166
+#: LYMessages.c:190
 msgid "Currently viewing document source.  Press '\\' to return to rendered version."
 msgstr "Aquest és el document font. Premeu '\\' per tornar a la versió interpretada."
 
 #. #define NOVICE_LINE_ONE
-#: LYMessages.c:168
+#: LYMessages.c:192
 msgid "  Arrow keys: Up and Down to move.  Right to follow a link; Left to go back.  \n"
 msgstr "Fletxes amunt i avall per a moure-us. '->' segueix l'enllaç; '<-' tornaenrere\n"
 
 #. #define NOVICE_LINE_TWO
-#: LYMessages.c:170
+#: LYMessages.c:194
 msgid " H)elp O)ptions P)rint G)o M)ain screen Q)uit /=search [delete]=history list \n"
 msgstr "H ajuda O)pcions im(P)rimir  G anar M principal Q ix  / buscar [del] història\n"
 
 #. #define NOVICE_LINE_TWO_A
-#: LYMessages.c:172
+#: LYMessages.c:196
 msgid "  O)ther cmds  H)elp  K)eymap  G)oto  P)rint  M)ain screen  o)ptions  Q)uit  \n"
 msgstr "O altres  H ajuda  K tecles  G anar  im(P)rimir  M principal o)pcions  Q ix \n"
 
 #. #define NOVICE_LINE_TWO_B
-#: LYMessages.c:174
+#: LYMessages.c:198
 msgid "  O)ther cmds  B)ack  E)dit  D)ownload ^R)eload ^W)ipe screen  search doc: / \n"
 msgstr "O altres  B enrere E)ditar D)escarregar ^R)ecarregar  ^W refrescar  / buscar \n"
 
 #. #define NOVICE_LINE_TWO_C
-#: LYMessages.c:176
+#: LYMessages.c:200
 msgid "O)ther cmds  C)omment  History: <backspace>  Bookmarks: V)iew, A)dd, R)emove \n"
 msgstr "O altres C)omentari  [del] història  llibreta: V)eure, A)fegir, R eliminar\n"
 
 #. #define FORM_NOVICELINE_ONE
-#: LYMessages.c:178
+#: LYMessages.c:202
 msgid "            Enter text into the field by typing on the keyboard              "
 msgstr "              Useu el teclat per a introduir text en el camp                 "
 
 #. #define FORM_NOVICELINE_TWO
-#: LYMessages.c:180
+#: LYMessages.c:204
 msgid "    Ctrl-U to delete all text in field, [Backspace] to delete a character    "
 msgstr "      Ctrl-U esborra tot el text, [Backspace] esborra només un caràcter      "
 
 #. #define FORM_NOVICELINE_TWO_DELBL
-#: LYMessages.c:182
+#: LYMessages.c:206
 msgid "      Ctrl-U to delete text in field, [Backspace] to delete a character    "
 msgstr "        Ctrl-U esborra el text, [Backspace] esborra només un caràcter      "
 
 #. #define FORM_NOVICELINE_TWO_VAR
-#: LYMessages.c:184
+#: LYMessages.c:208
 #, c-format
 msgid "    %s to delete all text in field, [Backspace] to delete a character    "
 msgstr "      %s esborra tot el text, [Backspace] esborra només un caràcter      "
 
 #. #define FORM_NOVICELINE_TWO_DELBL_VAR
-#: LYMessages.c:186
+#: LYMessages.c:210
 #, c-format
 msgid "      %s to delete text in field, [Backspace] to delete a character    "
 msgstr "       %s esborra el text, [Backspace] esborra només un caràcter      "
 
 #. mailto
-#: LYMessages.c:189
+#: LYMessages.c:213
 msgid "Malformed mailto form submission!  Cancelled!"
 msgstr "Formulari d'enviament de correu mal format! Anul·lació!"
 
-#: LYMessages.c:190
+#: LYMessages.c:214
 msgid "Warning!  Control codes in mail address replaced by ?"
 msgstr "Alerta! Codis de control en l'adreça de correu substituïts per \"?\""
 
-#: LYMessages.c:191
+#: LYMessages.c:215
 msgid "Mail disallowed!  Cannot submit."
 msgstr "El correu no està permés! No s'ha pogut enviar."
 
-#: LYMessages.c:192
+#: LYMessages.c:216
 msgid "Mailto form submission failed!"
 msgstr "El formulari d'enviament de correu ha fallat!"
 
-#: LYMessages.c:193
+#: LYMessages.c:217
 msgid "Mailto form submission Cancelled!!!"
 msgstr "Enviament cancel·lat!!"
 
-#: LYMessages.c:194
+#: LYMessages.c:218
 msgid "Sending form content..."
 msgstr "Enviant el contingut del formulari..."
 
-#: LYMessages.c:195
+#: LYMessages.c:219
 msgid "No email address is present in mailto URL!"
 msgstr "No hi ha cap adreça de correu en aquesta URL!"
 
 #. #define MAILTO_URL_TEMPOPEN_FAILED
-#: LYMessages.c:197
+#: LYMessages.c:221
 msgid "Unable to open temporary file for mailto URL!"
 msgstr "Ha estat impossible obrir el fitxer temporal per a enviar correu a URL!"
 
 #. #define INC_ORIG_MSG_PROMPT
-#: LYMessages.c:199
+#: LYMessages.c:223
 msgid "Do you wish to include the original message?"
 msgstr "Voleu incloure-hi el missatge original?"
 
 #. #define INC_PREPARSED_MSG_PROMPT
-#: LYMessages.c:201
+#: LYMessages.c:225
 msgid "Do you wish to include the preparsed source?"
 msgstr "Voleu incloure-hi la font preanalitzada?"
 
 #. #define SPAWNING_EDITOR_FOR_MAIL
-#: LYMessages.c:203
+#: LYMessages.c:227
 msgid "Spawning your selected editor to edit mail message"
 msgstr "Obrint l'editor seleccionat per a editar el missatge de correu"
 
 #. #define ERROR_SPAWNING_EDITOR
-#: LYMessages.c:205
+#: LYMessages.c:229
 msgid "Error spawning editor, check your editor definition in the options menu"
 msgstr "No s'ha pogut obrir l'editor, comproveu-ne la definició en el menúd'opcions"
 
-#: LYMessages.c:206
+#: LYMessages.c:230
 msgid "Send this comment?"
 msgstr "Enviar aquest comentari?"
 
-#: LYMessages.c:207
+#: LYMessages.c:231
 msgid "Send this message?"
 msgstr "Enviar aquest missatge?"
 
-#: LYMessages.c:208
+#: LYMessages.c:232
 msgid "Sending your message..."
 msgstr "Enviant el missatge..."
 
-#: LYMessages.c:209
+#: LYMessages.c:233
 msgid "Sending your comment:"
 msgstr "Enviant el comentari:"
 
 #. textarea
-#: LYMessages.c:212
+#: LYMessages.c:236
 msgid "Not in a TEXTAREA; cannot use external editor."
 msgstr "No és una àrea de text; no hi podeu usar l'editor extern."
 
-#: LYMessages.c:213
+#: LYMessages.c:237
 msgid "Not in a TEXTAREA; cannot use command."
 msgstr "No és una àrea de text; no s'hi pot usar l'ordre indicada."
 
-#: LYMessages.c:215
+#: LYMessages.c:239
 msgid "file: ACTIONs are disallowed!"
 msgstr "fitxer: les accions (ACTIONS) no estan permeses!"
 
 #. #define FILE_SERVED_LINKS_DISALLOWED
-#: LYMessages.c:217
+#: LYMessages.c:241
 msgid "file: URLs via served links are disallowed!"
 msgstr "fitxer: no estan permesos els URL proveïts per un enllaç servit"
 
-#: LYMessages.c:218
+#: LYMessages.c:242
 msgid "Access to local files denied."
 msgstr "Accés als arxius locals denegat."
 
-#: LYMessages.c:219
+#: LYMessages.c:243
 msgid "file: URLs via bookmarks are disallowed!"
 msgstr "fitxer: les URLs del fitxer d'adreces d'interés no estan permeses!"
 
 #. #define SPECIAL_VIA_EXTERNAL_DISALLOWED
-#: LYMessages.c:221
+#: LYMessages.c:245
 msgid "This special URL is not allowed in external documents!"
 msgstr "No es permet aquesta URL especial en documents externs!"
 
-#: LYMessages.c:222
+#: LYMessages.c:246
 msgid "Press <return> to return to Lynx."
 msgstr "Premeu <return> per tornar a Lynx."
 
 #. #define SPAWNING_MSG
-#: LYMessages.c:225
+#: LYMessages.c:249
 msgid "Spawning DCL subprocess.  Use 'logout' to return to Lynx.\n"
 msgstr "S'està engendrant el subprocés DCL. Useu «logout» per tornar al Lynx.\n"
 
 #. #define SPAWNING_MSG
-#: LYMessages.c:229
+#: LYMessages.c:253
 msgid "Type EXIT to return to Lynx.\n"
 msgstr "Escriviu 'exit' per a tornar a Lynx.\n"
 
 #. #define SPAWNING_MSG
-#: LYMessages.c:232
+#: LYMessages.c:256
 msgid "Spawning your default shell.  Use 'exit' to return to Lynx.\n"
 msgstr "Obrint la shell predeterminada. Useu \"exit\" per a tornar a Lynx.\n"
 
-#: LYMessages.c:235
+#: LYMessages.c:259
 msgid "Spawning is currently disabled."
 msgstr "Actualment no està habilitat engendrar."
 
-#: LYMessages.c:236
+#: LYMessages.c:260
 msgid "The 'd'ownload command is currently disabled."
 msgstr "Actualment l'opció de (d)escàrrega no està activa."
 
-#: LYMessages.c:237
+#: LYMessages.c:261
 msgid "You cannot download an input field."
 msgstr "No és possible descarregar un camp d'entrada de dades."
 
-#: LYMessages.c:238
+#: LYMessages.c:262
 msgid "Form has a mailto action!  Cannot download."
 msgstr "El formulari té una acció mailto. No es pot descarregar."
 
-#: LYMessages.c:239
+#: LYMessages.c:263
 msgid "You cannot download a mailto: link."
 msgstr "No es pot descarregar un enllaç a una adreça de correu."
 
-#: LYMessages.c:240
+#: LYMessages.c:264
 msgid "You cannot download cookies."
 msgstr "Les cookies es poden descarregar."
 
-#: LYMessages.c:241
+#: LYMessages.c:265
 msgid "You cannot download a printing option."
 msgstr "No es poden descarregar les opcions d'impressió."
 
-#: LYMessages.c:242
+#: LYMessages.c:266
 msgid "You cannot download an upload option."
 msgstr "No es poden descarregar les opcions de càrrega."
 
-#: LYMessages.c:243
+#: LYMessages.c:267
 msgid "You cannot download an permit option."
 msgstr "No podeu descarregar una opció de permís."
 
-#: LYMessages.c:244
+#: LYMessages.c:268
 msgid "This special URL cannot be downloaded!"
 msgstr "Aquesta URL especial no es pot descarregar!"
 
-#: LYMessages.c:245
+#: LYMessages.c:269
 msgid "Nothing to download."
 msgstr "No hi ha res per descarregar."
 
-#: LYMessages.c:246
+#: LYMessages.c:270
 msgid "Trace ON!"
 msgstr "Rastreig activat! (Trace ON!)"
 
-#: LYMessages.c:247
+#: LYMessages.c:271
 msgid "Trace OFF!"
 msgstr "Rastreig desactivat! (Trace OFF!)"
 
 #. #define CLICKABLE_IMAGES_ON
-#: LYMessages.c:249
+#: LYMessages.c:273
 msgid "Links will be included for all images!  Reloading..."
 msgstr "S'hi inclouran els enllaços a totes les imatges! Recarregant..."
 
 #. #define CLICKABLE_IMAGES_OFF
-#: LYMessages.c:251
+#: LYMessages.c:275
 msgid "Standard image handling restored!  Reloading..."
 msgstr "Manejament estàndar d'imatges restaurat! Recarregant..."
 
 #. #define PSEUDO_INLINE_ALTS_ON
-#: LYMessages.c:253
+#: LYMessages.c:277
 msgid "Pseudo_ALTs will be inserted for inlines without ALT strings!  Reloading..."
 msgstr "S'inseriran pseudo-ALTs per a les imatges sense cadena ALT! Recarrega..."
 
 #. #define PSEUDO_INLINE_ALTS_OFF
-#: LYMessages.c:255
+#: LYMessages.c:279
 msgid "Inlines without an ALT string specified will be ignored!  Reloading..."
 msgstr "S'ignoraran les imatges sense cadena alternativa ("
 
-#: LYMessages.c:256
+#: LYMessages.c:280
 msgid "Raw 8-bit or CJK mode toggled OFF!  Reloading..."
 msgstr "Mode 8-bits cru o CJK activat! Recàrrega..."
 
-#: LYMessages.c:257
+#: LYMessages.c:281
 msgid "Raw 8-bit or CJK mode toggled ON!  Reloading..."
 msgstr "Mode 8-bits cru o CJK desactivat!  Recàrrega..."
 
 #. #define HEAD_D_L_OR_CANCEL
-#: LYMessages.c:259
+#: LYMessages.c:283
 msgid "Send HEAD request for D)ocument or L)ink, or C)ancel? (d,l,c): "
 msgstr "Voleu enviar una sol·licitud HEAD per al D)ocument o l'en(L)laç, or C)ancel·lar? (d,l,c):"
 
 #. #define HEAD_D_OR_CANCEL
-#: LYMessages.c:261
+#: LYMessages.c:285
 msgid "Send HEAD request for D)ocument, or C)ancel? (d,c): "
 msgstr "Voleu enviar una sol·licitud HEAD per al D)ocument o C)ancel·lar? (d,c):"
 
-#: LYMessages.c:262
+#: LYMessages.c:286
 msgid "Sorry, the document is not an http URL."
 msgstr "El document no és una URL http."
 
-#: LYMessages.c:263
+#: LYMessages.c:287
 msgid "Sorry, the link is not an http URL."
 msgstr "L'enllaç no és una URL http."
 
-#: LYMessages.c:264
+#: LYMessages.c:288
 msgid "Sorry, the ACTION for this form is disabled."
 msgstr "L'ACCIÓ del formulari no està disponible."
 
 #. #define FORM_ACTION_NOT_HTTP_URL
-#: LYMessages.c:266
+#: LYMessages.c:290
 msgid "Sorry, the ACTION for this form is not an http URL."
 msgstr "L'ACCIÓ del formulari no és una adreça de http."
 
-#: LYMessages.c:267
+#: LYMessages.c:291
 msgid "Not an http URL or form ACTION!"
 msgstr "No és una URL http ni una ACCIO de formulari!"
 
-#: LYMessages.c:268
+#: LYMessages.c:292
 msgid "This special URL cannot be a form ACTION!"
 msgstr "Aquesta URL especial no pot ser una ACCIO de formulari!"
 
-#: LYMessages.c:269
+#: LYMessages.c:293
 msgid "URL is not in starting realm!"
 msgstr "La URL no està en el domini inicial!"
 
-#: LYMessages.c:270
+#: LYMessages.c:294
 msgid "News posting is disabled!"
 msgstr "L'enviament de missatges als fòrums de discusió està desactivada!"
 
-#: LYMessages.c:271
+#: LYMessages.c:295
 msgid "File management support is disabled!"
 msgstr "L'administració de fitxers està desactivada!"
 
-#: LYMessages.c:272
+#: LYMessages.c:296
 msgid "No jump file is currently available."
 msgstr "No hi ha cap fitxer de salts disponible."
 
-#: LYMessages.c:273
+#: LYMessages.c:297
 msgid "Jump to (use '?' for list): "
 msgstr "Saltar a (premeu '?' per veure la llista): "
 
-#: LYMessages.c:274
+#: LYMessages.c:298
 msgid "Jumping to a shortcut URL is disallowed!"
 msgstr "El salt a una URL de drecera esta deshabilitat!"
 
-#: LYMessages.c:275
+#: LYMessages.c:299
 msgid "Random URL is disallowed!  Use a shortcut."
 msgstr "Les adreces aleatòries estan desactivades. Useu una drecera."
 
-#: LYMessages.c:276
+#: LYMessages.c:300
 msgid "No random URLs have been used thus far."
 msgstr "Fins ara no s'han usat URLs aleatòries."
 
-#: LYMessages.c:277
+#: LYMessages.c:301
 msgid "Bookmark features are currently disabled."
 msgstr "Els \"favorits\" estan desactivats."
 
-#: LYMessages.c:278
+#: LYMessages.c:302
 msgid "Execution via bookmarks is disabled."
 msgstr "L'execució a través del fitxer d'adreces està desactivada."
 
 #. #define BOOKMARK_FILE_NOT_DEFINED
-#: LYMessages.c:280
+#: LYMessages.c:304
 #, c-format
 msgid "Bookmark file is not defined. Use %s to see options."
 msgstr "El fitxer de favorits no està definit. Useu %s per a veure les opcions."
 
 #. #define NO_TEMP_FOR_HOTLIST
-#: LYMessages.c:282
+#: LYMessages.c:306
 msgid "Unable to open tempfile for X Mosaic hotlist conversion."
 msgstr "No ha estat possible obrir el fitxer temporal per a convertir el fitxer d'adreces de Mosaic."
 
-#: LYMessages.c:283
+#: LYMessages.c:307
 msgid "ERROR - unable to open bookmark file."
 msgstr "ERROR: ha estat impossible obrir l'arxiu d'adreces"
 
 #. #define BOOKMARK_OPEN_FAILED_FOR_DEL
-#: LYMessages.c:285
+#: LYMessages.c:309
 msgid "Unable to open bookmark file for deletion of link."
 msgstr "No ha estat possible obrir l'arxiu d'adreces per esborrar l'enllaç."
 
 #. #define BOOKSCRA_OPEN_FAILED_FOR_DEL
-#: LYMessages.c:287
+#: LYMessages.c:311
 msgid "Unable to open scratch file for deletion of link."
 msgstr "No s'ha pogut obrir el fitxer de treball per a l'esborrament de l'enllaç"
 
-#: LYMessages.c:289
+#: LYMessages.c:313
 msgid "Error renaming scratch file."
 msgstr "S'ha produït un error en reanomenar el fitxer de treball."
 
-#: LYMessages.c:291
+#: LYMessages.c:315
 msgid "Error renaming temporary file."
 msgstr "Error quan s'intentava reanomenar un arxiu temporal."
 
 #. #define BOOKTEMP_COPY_FAIL
-#: LYMessages.c:293
+#: LYMessages.c:317
 msgid "Unable to copy temporary file for deletion of link."
 msgstr "No s'ha pogut copiar el fitxer temporari per l'esborrament de l'enllaç."
 
 #. #define BOOKTEMP_REOPEN_FAIL_FOR_DEL
-#: LYMessages.c:295
+#: LYMessages.c:319
 msgid "Unable to reopen temporary file for deletion of link."
 msgstr "No s'ha pogut reobrir el fitxer temporari per l'esborrament de l'enllaç.<"
 
 #. #define BOOKMARK_LINK_NOT_ONE_LINE
-#: LYMessages.c:298
+#: LYMessages.c:322
 msgid "Link is not by itself all on one line in bookmark file."
 msgstr "Hi ha d'haver un "
 
-#: LYMessages.c:299
+#: LYMessages.c:323
 msgid "Bookmark deletion failed."
 msgstr "Ha fallat l'esborrament del marcador."
 
 #. #define BOOKMARKS_NOT_TRAVERSED
-#: LYMessages.c:301
+#: LYMessages.c:325
 msgid "Bookmark files cannot be traversed (only http URLs)."
 msgstr "Els fitxers de marcadors no es poden recórrer (sols el URL d'http)."
 
 #. #define BOOKMARKS_NOT_OPEN
-#: LYMessages.c:303
+#: LYMessages.c:327
 msgid "Unable to open bookmark file, use 'a' to save a link first"
 msgstr "Impossible obrir el fitxer d'adreces, useu 'a' per a guardar-neuna primer."
 
-#: LYMessages.c:304
+#: LYMessages.c:328
 msgid "There are no links in this bookmark file!"
 msgstr "No hi ha enllaços en aquest fitxer d'adreces!"
 
 #. #define CACHE_D_OR_CANCEL
-#: LYMessages.c:306
+#: LYMessages.c:330
 msgid "D)elete cached document or C)ancel? (d,c): "
 msgstr "D)ocument a la memòria cau s'ha d'esborrar o C)ancel·la? (d,c): "
 
 #. #define BOOK_D_L_OR_CANCEL
-#: LYMessages.c:308
+#: LYMessages.c:332
 msgid "Save D)ocument or L)ink to bookmark file or C)ancel? (d,l,c): "
 msgstr "Guardar com a adreça d'interés D)ocument o en(L)laç,o C)ancel·lar? (d,l,c): "
 
-#: LYMessages.c:309
+#: LYMessages.c:333
 msgid "Save D)ocument to bookmark file or C)ancel? (d,c): "
 msgstr "Guardar D)ocument en l'arxiu d'adreces d'interéso C)ancel·lar? (d, c): "
 
-#: LYMessages.c:310
+#: LYMessages.c:334
 msgid "Save L)ink to bookmark file or C)ancel? (l,c): "
 msgstr "Guardar en(L)laç en l'arxiu d'adreces d'interéso C)ancel·lar? (l, c): "
 
 #. #define NOBOOK_POST_FORM
-#: LYMessages.c:312
+#: LYMessages.c:336
 msgid "Documents from forms with POST content cannot be saved as bookmarks."
 msgstr "No es pot guardar al fitxer d'adreces documents procedents de formularis POST."
 
-#: LYMessages.c:313
+#: LYMessages.c:337
 msgid "Cannot save form fields/links"
 msgstr "No es poden desar el camps dels formularis/enllaços"
 
 #. #define NOBOOK_HSML
-#: LYMessages.c:315
+#: LYMessages.c:339
 msgid "History, showinfo, menu and list files cannot be saved as bookmarks."
 msgstr "Els fitxers historial, informació, menú i lista no es poden guardar al fitxer d'adreces."
 
 #. #define CONFIRM_BOOKMARK_DELETE
-#: LYMessages.c:317
+#: LYMessages.c:341
 msgid "Do you really want to delete this link from your bookmark file?"
 msgstr "Esteu segurs que voleu esborrar aquest enllaç de l'arxiu d'adreces?"
 
-#: LYMessages.c:318
+#: LYMessages.c:342
 msgid "Malformed address."
 msgstr "Adreça mal formada."
 
 #. #define HISTORICAL_ON_MINIMAL_OFF
-#: LYMessages.c:320
+#: LYMessages.c:344
 msgid "Historical comment parsing ON (Minimal is overridden)!"
 msgstr "L'analitzador dels comentaris històrics està activada (El mínim està anul·lat)!"
 
 #. #define HISTORICAL_OFF_MINIMAL_ON
-#: LYMessages.c:322
+#: LYMessages.c:346
 msgid "Historical comment parsing OFF (Minimal is in effect)!"
 msgstr "L'analitzador dels comentaris històrics està desactivada (El mínim està en efecte)!"
 
 #. #define HISTORICAL_ON_VALID_OFF
-#: LYMessages.c:324
+#: LYMessages.c:348
 msgid "Historical comment parsing ON (Valid is overridden)!"
 msgstr "L'analitzador dels comentaris històrics està activada (Vàlid està anul·lat)!"
 
 #. #define HISTORICAL_OFF_VALID_ON
-#: LYMessages.c:326
+#: LYMessages.c:350
 msgid "Historical comment parsing OFF (Valid is in effect)!"
 msgstr "L'analitzador dels comentaris històrics està desactivada (Vàlid està en efecte)!<"
 
 #. #define MINIMAL_ON_IN_EFFECT
-#: LYMessages.c:328
+#: LYMessages.c:352
 msgid "Minimal comment parsing ON (and in effect)!"
 msgstr "L'analitzador del comentari mínim esta activat (i en efecte)!"
 
 #. #define MINIMAL_OFF_VALID_ON
-#: LYMessages.c:330
+#: LYMessages.c:354
 msgid "Minimal comment parsing OFF (Valid is in effect)!"
 msgstr "L'analitzador del comentari mínim esta desactivat (Vàlid està en efecte)!<"
 
 #. #define MINIMAL_ON_BUT_HISTORICAL
-#: LYMessages.c:332
+#: LYMessages.c:356
 msgid "Minimal comment parsing ON (but Historical is in effect)!"
 msgstr "L'analitzador del comentari mínim esta activat (però Històric està en efecte)!"
 
 #. #define MINIMAL_OFF_HISTORICAL_ON
-#: LYMessages.c:334
+#: LYMessages.c:358
 msgid "Minimal comment parsing OFF (Historical is in effect)!"
 msgstr "L'analitzador del comentari mínim esta desactivat (Històric està en efecte)!<"
 
-#: LYMessages.c:335
+#: LYMessages.c:359
 msgid "Soft double-quote parsing ON!"
 msgstr "L'analitzador cometes doble suau està activat!"
 
-#: LYMessages.c:336
+#: LYMessages.c:360
 msgid "Soft double-quote parsing OFF!"
 msgstr "L'analitzador cometes doble suau està activat!<"
 
-#: LYMessages.c:337
+#: LYMessages.c:361
 msgid "Now using TagSoup parsing of HTML."
 msgstr "Utilitzant l'analitzador d'HTML TagSoup."
 
-#: LYMessages.c:338
+#: LYMessages.c:362
 msgid "Now using SortaSGML parsing of HTML!"
 msgstr "Utilitzant l'analitzador d'HTML SortaSGML!"
 
-#: LYMessages.c:339
+#: LYMessages.c:363
 msgid "You are already at the end of this document."
 msgstr "És açò, el final del document."
 
-#: LYMessages.c:340
+#: LYMessages.c:364
 msgid "You are already at the beginning of this document."
 msgstr "És ací, el principi del document."
 
-#: LYMessages.c:341
+#: LYMessages.c:365
 #, c-format
 msgid "You are already at page %d of this document."
 msgstr "És aquesta, la %da pàgina del document."
 
-#: LYMessages.c:342
+#: LYMessages.c:366
 #, c-format
 msgid "Link number %d already is current."
 msgstr "És aquest, l'enllaç número %d."
 
-#: LYMessages.c:343
+#: LYMessages.c:367
 msgid "You are already at the first document"
 msgstr "Aquest és el primer document"
 
-#: LYMessages.c:344
+#: LYMessages.c:368
 msgid "There are no links above this line of the document."
 msgstr "No hi ha enllaços per damunt d'aquesta línia."
 
-#: LYMessages.c:345
+#: LYMessages.c:369
 msgid "There are no links below this line of the document."
 msgstr "No hi ha enllaços per sota d'aquesta línia."
 
 #. #define MAXLEN_REACHED_DEL_OR_MOV
-#: LYMessages.c:347
+#: LYMessages.c:371
 msgid "Maximum length reached!  Delete text or move off field."
 msgstr "S'ha assolit la longitud màxima! Esborreu text o eixiu del camp."
 
 #. #define NOT_ON_SUBMIT_OR_LINK
-#: LYMessages.c:349
+#: LYMessages.c:373
 msgid "You are not on a form submission button or normal link."
 msgstr "No és ni un botó d'enviament ni un enllaç normal."
 
 #. #define NEED_CHECKED_RADIO_BUTTON
-#: LYMessages.c:351
+#: LYMessages.c:375
 msgid "One radio button must be checked at all times!"
 msgstr "Sempre s'ha de triar una opció!"
 
-#: LYMessages.c:352
+#: LYMessages.c:376
 msgid "No submit button for this form, submit single text field?"
 msgstr "No hi ha cap botó d'enviament, enviar simplemtent el camp de text?"
 
-#: LYMessages.c:353
+#: LYMessages.c:377
 msgid "Do you want to go back to the previous document?"
 msgstr "Voleu tornar al document anterior?"
 
-#: LYMessages.c:354
+#: LYMessages.c:378
 msgid "Use arrows or tab to move off of field."
 msgstr "Useu les fletxes o <tab> per a eixir-ne."
 
 #. #define ENTER_TEXT_ARROWS_OR_TAB
-#: LYMessages.c:356
+#: LYMessages.c:380
 msgid "Enter text.  Use arrows or tab to move off of field."
 msgstr "Introduïu text. Useu les fletxes o el tabulador per a eixir-ne."
 
-#: LYMessages.c:357
+#: LYMessages.c:381
 msgid "** Bad HTML!!  No form action defined. **"
 msgstr "** Codi HTML incorrecte!! No hi ha cap acció definida. **"
 
-#: LYMessages.c:358
+#: LYMessages.c:382
 msgid "Bad HTML!!  Unable to create popup window!"
 msgstr "Codi HTML incorrecte! Ha estat impossible crear la finestra emergent!"
 
-#: LYMessages.c:359
+#: LYMessages.c:383
 msgid "Unable to create popup window!"
 msgstr "Ha estat impossible crear la finestra emergent!"
 
-#: LYMessages.c:360
+#: LYMessages.c:384
 msgid "Goto a random URL is disallowed!"
 msgstr "El salt a una URL aleatòria està desactivat!"
 
-#: LYMessages.c:361
+#: LYMessages.c:385
 msgid "Goto a non-http URL is disallowed!"
 msgstr "L'accés a URLs que no compleixen el protocol http no està permés!"
 
-#: LYMessages.c:362
+#: LYMessages.c:386
 #, c-format
 msgid "You are not allowed to goto \"%s\" URLs"
 msgstr "No teniu permís per a anar a URLs \"%s\""
 
-#: LYMessages.c:363
+#: LYMessages.c:387
 msgid "URL to open: "
 msgstr "Anar a: "
 
-#: LYMessages.c:364
+#: LYMessages.c:388
 msgid "Edit the current Goto URL: "
 msgstr "Editar l'adreça actual: "
 
-#: LYMessages.c:365
+#: LYMessages.c:389
 msgid "Edit the previous Goto URL: "
 msgstr "Editar l'adreça anterior: "
 
-#: LYMessages.c:366
+#: LYMessages.c:390
 msgid "Edit a previous Goto URL: "
 msgstr "Editar adreces anteriors: "
 
-#: LYMessages.c:367
+#: LYMessages.c:391
 msgid "Current document has POST data."
 msgstr "El document actual conté dades POST."
 
-#: LYMessages.c:368
+#: LYMessages.c:392
 msgid "Edit this document's URL: "
 msgstr "Editar l'adreça d'aquest document: "
 
-#: LYMessages.c:369
+#: LYMessages.c:393
 msgid "Edit the current link's URL: "
 msgstr "Editar l'adreça de l'enllaç actual: "
 
-#: LYMessages.c:370
+#: LYMessages.c:394
 msgid "Edit the form's submit-URL: "
 msgstr "Edita el formulari submit-URL: "
 
-#: LYMessages.c:371
+#: LYMessages.c:395
 msgid "You cannot edit File Management URLs"
 msgstr "No es poden editar les URLs del gestor de fitxers."
 
-#: LYMessages.c:372
+#: LYMessages.c:396
 msgid "Enter a database query: "
 msgstr "Introduïu una consulta a la base de dades: "
 
-#: LYMessages.c:373
+#: LYMessages.c:397
 msgid "Enter a whereis query: "
 msgstr "Introduïu la paraula que voleu trobar: "
 
-#: LYMessages.c:374
+#: LYMessages.c:398
 msgid "Edit the current query: "
 msgstr "Editar la consulta: "
 
-#: LYMessages.c:375
+#: LYMessages.c:399
 msgid "Edit the previous query: "
 msgstr "Editar la consulta anterior: "
 
-#: LYMessages.c:376
+#: LYMessages.c:400
 msgid "Edit a previous query: "
 msgstr "Editar una consulta anterior: "
 
 #. #define USE_C_R_TO_RESUB_CUR_QUERY
-#: LYMessages.c:378
+#: LYMessages.c:402
 msgid "Use Control-R to resubmit the current query."
 msgstr "Useu Ctrl-R per a reenviar la consulta actual."
 
-#: LYMessages.c:379
+#: LYMessages.c:403
 msgid "Edit the current shortcut: "
 msgstr "Editar la drecera actual: "
 
-#: LYMessages.c:380
+#: LYMessages.c:404
 msgid "Edit the previous shortcut: "
 msgstr "Editar la drecera anterior: "
 
-#: LYMessages.c:381
+#: LYMessages.c:405
 msgid "Edit a previous shortcut: "
 msgstr "Editar una drecera anterior: "
 
-#: LYMessages.c:382
+#: LYMessages.c:406
 #, c-format
 msgid "Key '%c' is not mapped to a jump file!"
 msgstr "La tecla '%c' no està assignada a cap fitxer de salt!"
 
-#: LYMessages.c:383
+#: LYMessages.c:407
 msgid "Cannot locate jump file!"
 msgstr "No s'ha pogut trobar el fitxer de salts!"
 
-#: LYMessages.c:384
+#: LYMessages.c:408
 msgid "Cannot open jump file!"
 msgstr "No s'ha pogut obrir el fitxer de salts!"
 
-#: LYMessages.c:385
+#: LYMessages.c:409
 msgid "Error reading jump file!"
 msgstr "Error de lectura en el fitxer de salts!"
 
-#: LYMessages.c:386
+#: LYMessages.c:410
 msgid "Out of memory reading jump file!"
 msgstr "Memòria exhaurida durant la lectura del fitxer de salts!"
 
-#: LYMessages.c:387
+#: LYMessages.c:411
 msgid "Out of memory reading jump table!"
 msgstr "Memòria exhaurida durant la lectura de la taula de salts!"
 
-#: LYMessages.c:388
+#: LYMessages.c:412
 msgid "No index is currently available."
 msgstr "No hi ha cap índex disponible."
 
 #. #define CONFIRM_MAIN_SCREEN
-#: LYMessages.c:390
+#: LYMessages.c:414
 msgid "Do you really want to go to the Main screen?"
 msgstr "Esteu segur de voler anar a la pàgina principal?"
 
-#: LYMessages.c:391
+#: LYMessages.c:415
 msgid "You are already at main screen!"
 msgstr "És aquesta, la pàgina principal!"
 
 #. #define NOT_ISINDEX
-#: LYMessages.c:393
+#: LYMessages.c:417
 msgid "Not a searchable indexed document -- press '/' to search for a text string"
 msgstr "No és un document indexat: premeu '/' per a buscar una cadena de text"
 
 #. #define NO_OWNER
-#: LYMessages.c:395
+#: LYMessages.c:419
 msgid "No owner is defined for this file so you cannot send a comment"
 msgstr "No consta el propietari de l'arxiu: no podeu enviar-li cap comentari"
 
-#: LYMessages.c:396
+#: LYMessages.c:420
 #, c-format
 msgid "No owner is defined. Use %s?"
 msgstr "No consta el propietari. Usar %s?"
 
-#: LYMessages.c:397
+#: LYMessages.c:421
 msgid "Do you wish to send a comment?"
 msgstr "Voleu enviar un comentari?"
 
-#: LYMessages.c:398
+#: LYMessages.c:422
 msgid "Mail is disallowed so you cannot send a comment"
 msgstr "El correu no està permés; per tant, no podeu enviar comentaris."
 
-#: LYMessages.c:399
+#: LYMessages.c:423
 msgid "The 'e'dit command is currently disabled."
 msgstr "L'ordre Editar està desactivada."
 
-#: LYMessages.c:400
+#: LYMessages.c:424
 msgid "External editing is currently disabled."
 msgstr "L'edició externa està desactivada."
 
-#: LYMessages.c:401
+#: LYMessages.c:425
 msgid "System error - failure to get status."
 msgstr "Error del sistema: no s'ha pogut obtenir l'estat."
 
-#: LYMessages.c:402
+#: LYMessages.c:426
 msgid "No editor is defined!"
 msgstr "No hi ha cap editor definit!"
 
-#: LYMessages.c:403
+#: LYMessages.c:427
 msgid "The 'p'rint command is currently disabled."
 msgstr "L'ordre imPrimir està desactivada."
 
-#: LYMessages.c:404
+#: LYMessages.c:428
 msgid "Document has no Toolbar links or Banner."
 msgstr "El document no té barra d'enllaços ni banner."
 
-#: LYMessages.c:405
+#: LYMessages.c:429
 msgid "Unable to open traversal file."
 msgstr "No s'ha pogut obrir el fitxer de travessada"
 
-#: LYMessages.c:406
+#: LYMessages.c:430
 msgid "Unable to open traversal found file."
 msgstr "No s'ha pogut obrir el fitxer trobat de travessada<"
 
-#: LYMessages.c:407
+#: LYMessages.c:431
 msgid "Unable to open reject file."
 msgstr "No s'ha pogut obrir el fitxer de rebuig."
 
-#: LYMessages.c:408
+#: LYMessages.c:432
 msgid "Unable to open traversal errors output file"
 msgstr "No s'ha pogut obrir el fitxer de sortida d'errors de travessada"
 
-#: LYMessages.c:409
+#: LYMessages.c:433
 msgid "TRAVERSAL WAS INTERRUPTED"
 msgstr "LA TRAVESSADA S'HA INTERROMPUT"
 
-#: LYMessages.c:410
+#: LYMessages.c:434
 msgid "Follow link (or goto link or page) number: "
 msgstr "Seguir l'enllaç (o anar a la pàgina) número: "
 
-#: LYMessages.c:411
+#: LYMessages.c:435
 msgid "Select option (or page) number: "
 msgstr "Triar opció (o pàgina) número: "
 
-#: LYMessages.c:412
+#: LYMessages.c:436
 #, c-format
 msgid "Option number %d already is current."
 msgstr "És aquesta, l'opció número %d."
 
 #. #define ALREADY_AT_OPTION_END
-#: LYMessages.c:414
+#: LYMessages.c:438
 msgid "You are already at the end of this option list."
 msgstr "És ací, el final de la llista d'opcions."
 
 #. #define ALREADY_AT_OPTION_BEGIN
-#: LYMessages.c:416
+#: LYMessages.c:440
 msgid "You are already at the beginning of this option list."
 msgstr "És ací, el començament de la llista d'opcions."
 
 #. #define ALREADY_AT_OPTION_PAGE
-#: LYMessages.c:418
+#: LYMessages.c:442
 #, c-format
 msgid "You are already at page %d of this option list."
 msgstr "És aquesta, la pàgina %d de la llista d'opcions."
 
-#: LYMessages.c:419
+#: LYMessages.c:443
 msgid "You have entered an invalid option number."
 msgstr "Heu introduït un número d'opció que no és vàlid."
 
-#: LYMessages.c:420
+#: LYMessages.c:444
 msgid "** Bad HTML!!  Use -trace to diagnose. **"
 msgstr "** HTML erroni!! Useu l'opció -trace per a obtenir un diagnòstic. **"
 
-#: LYMessages.c:421
+#: LYMessages.c:445
 msgid "Give name of file to save in"
 msgstr "Cal un nom per a l'arxiu."
 
-#: LYMessages.c:422
+#: LYMessages.c:446
 msgid "Can't save data to file -- please run WWW locally"
 msgstr "No s'ha pogut guardar les dades al fitxer: executeu WWW localment."
 
-#: LYMessages.c:423
+#: LYMessages.c:447
 msgid "Can't open temporary file!"
 msgstr "No ha estat possible obrir l'arxiu temporal!"
 
-#: LYMessages.c:424
+#: LYMessages.c:448
 msgid "Can't open output file!  Cancelling!"
 msgstr "No ha estat possible obrir l'arxiu d'eixida! Anul·lat!"
 
-#: LYMessages.c:425
+#: LYMessages.c:449
 msgid "Execution is disabled."
 msgstr "L'execució no està activada."
 
 #. #define EXECUTION_DISABLED_FOR_FILE
-#: LYMessages.c:427
+#: LYMessages.c:451
 #, c-format
 msgid "Execution is not enabled for this file.  See the Options menu (use %s)."
 msgstr "L'execució no està activada. Vegeu el menú d'opcions (useu %s)."
 
 #. #define EXECUTION_NOT_COMPILED
-#: LYMessages.c:429
+#: LYMessages.c:453
 msgid "Execution capabilities are not compiled into this version."
 msgstr "La capacitat d'executar programes no s'ha compilat en aquesta versió."
 
-#: LYMessages.c:430
+#: LYMessages.c:454
 msgid "This file cannot be displayed on this terminal."
 msgstr "El fitxer no es pot mostrar en aquest terminal."
 
 #. #define CANNOT_DISPLAY_FILE_D_OR_C
-#: LYMessages.c:432
+#: LYMessages.c:456
 msgid "This file cannot be displayed on this terminal:  D)ownload, or C)ancel"
 msgstr "El fitxer no es pot mostrar en aquest terminal: D)escarregar oC)ancel·lar."
 
-#: LYMessages.c:433
+#: LYMessages.c:457
 #, c-format
 msgid "%s  D)ownload, or C)ancel"
 msgstr "%s D)escarregar o C)ancel·lar"
 
-#: LYMessages.c:434
+#: LYMessages.c:458
 msgid "Cancelling file."
 msgstr "Cancel·lant."
 
-#: LYMessages.c:435
+#: LYMessages.c:459
 msgid "Retrieving file.  - PLEASE WAIT -"
 msgstr "Descarregant fitxer. - ESPEREU, PER FAVOR -"
 
-#: LYMessages.c:436
+#: LYMessages.c:460
 msgid "Enter a filename: "
 msgstr "Introduïu un nom per a l'arxiu: "
 
-#: LYMessages.c:437
+#: LYMessages.c:461
 msgid "Edit the previous filename: "
 msgstr "Editar el nom anterior: "
 
-#: LYMessages.c:438
+#: LYMessages.c:462
 msgid "Edit a previous filename: "
 msgstr "Editar els noms anteriors: "
 
-#: LYMessages.c:439
+#: LYMessages.c:463
 msgid "Enter a new filename: "
 msgstr "Introduïu un nom nou: "
 
-#: LYMessages.c:440
+#: LYMessages.c:464
 msgid "File name may not begin with a dot."
 msgstr "Els noms d'arxiu no poden començar amb punt."
 
-#: LYMessages.c:442
+#: LYMessages.c:466
 msgid "File exists.  Create higher version?"
 msgstr "El fitxer existeix. Voleu crear una versió més alta?"
 
-#: LYMessages.c:444
+#: LYMessages.c:468
 msgid "File exists.  Overwrite?"
 msgstr "L'arxiu existeix. Voleu sobreescriure'l?"
 
-#: LYMessages.c:446
+#: LYMessages.c:470
 msgid "Cannot write to file."
 msgstr "No es pot escriure en el fitxer."
 
-#: LYMessages.c:447
+#: LYMessages.c:471
 msgid "ERROR! - download command is misconfigured."
 msgstr "ERROR: l'ordre _descarregar_ està mal configurada."
 
-#: LYMessages.c:448
+#: LYMessages.c:472
 msgid "Unable to download file."
 msgstr "Ha estat impossible descarregar el fitxer."
 
-#: LYMessages.c:449
+#: LYMessages.c:473
 msgid "Reading directory..."
 msgstr "Llegint directori..."
 
-#: LYMessages.c:450
+#: LYMessages.c:474
 msgid "Building directory listing..."
 msgstr "Construint la llista del directori..."
 
-#: LYMessages.c:451
+#: LYMessages.c:475
 msgid "Saving..."
 msgstr "Gravant..."
 
-#: LYMessages.c:452
+#: LYMessages.c:476
 #, c-format
 msgid "Could not edit file '%s'."
 msgstr "No ha estat possible editar el fitxer '%s'."
 
-#: LYMessages.c:453
+#: LYMessages.c:477
 msgid "Unable to access document!"
 msgstr "No ha estat possible accedir al document!"
 
-#: LYMessages.c:454
+#: LYMessages.c:478
 msgid "Could not access file."
 msgstr "No ha estat possible accedir a l'arxiu."
 
-#: LYMessages.c:455
+#: LYMessages.c:479
 msgid "Could not access directory."
 msgstr "No ha estat possible accedir al directori."
 
-#: LYMessages.c:456
+#: LYMessages.c:480
 msgid "Could not load data."
 msgstr "No ha estat possible carregar les dades."
 
 #. #define CANNOT_EDIT_REMOTE_FILES
-#: LYMessages.c:458
+#: LYMessages.c:482
 msgid "Lynx cannot currently (e)dit remote WWW files."
 msgstr "Lynx no pot editar fitxers WWW remots."
 
 #. #define CANNOT_EDIT_FIELD
-#: LYMessages.c:460
+#: LYMessages.c:484
 msgid "This field cannot be (e)dited with an external editor."
 msgstr "Aquest camp no es pot editar amb un editor extern."
 
-#: LYMessages.c:461
+#: LYMessages.c:485
 msgid "Bad rule"
 msgstr "Regla incorrecta"
 
-#: LYMessages.c:462
+#: LYMessages.c:486
 msgid "Insufficient operands:"
 msgstr "Nombre d'operands insuficient:"
 
-#: LYMessages.c:463
+#: LYMessages.c:487
 msgid "You are not authorized to edit this file."
 msgstr "No teniu autorització per a editar aquest arxiu."
 
-#: LYMessages.c:464
+#: LYMessages.c:488
 msgid "Title: "
 msgstr "Títol: "
 
-#: LYMessages.c:465
+#: LYMessages.c:489
 msgid "Subject: "
 msgstr "Tema: "
 
-#: LYMessages.c:466
+#: LYMessages.c:490
 msgid "Username: "
 msgstr "Nom d'usuari: "
 
-#: LYMessages.c:467
+#: LYMessages.c:491
 msgid "Password: "
 msgstr "Contrassenya: "
 
-#: LYMessages.c:468
+#: LYMessages.c:492
 msgid "lynx: Username and Password required!!!"
 msgstr "lynx: fa falta el nom d'usuari i la contrasenya!!"
 
-#: LYMessages.c:469
+#: LYMessages.c:493
 msgid "lynx: Password required!!!"
 msgstr "lynx: fa falta la contrasenya!!"
 
-#: LYMessages.c:470
+#: LYMessages.c:494
 msgid "Clear all authorization info for this session?"
 msgstr "Esborrar tota la informació sobre autorització d'aquesta sessió?"
 
-#: LYMessages.c:471
+#: LYMessages.c:495
 msgid "Authorization info cleared."
 msgstr "Informació esborrada."
 
-#: LYMessages.c:472
+#: LYMessages.c:496
 msgid "Authorization failed.  Retry?"
 msgstr "Autorització fallida. Reintentar?"
 
-#: LYMessages.c:473
+#: LYMessages.c:497
 msgid "cgi support has been disabled."
 msgstr "s'ha desactivat el suport per a CGI."
 
 #. #define CGI_NOT_COMPILED
-#: LYMessages.c:475
+#: LYMessages.c:499
 msgid "Lynxcgi capabilities are not compiled into this version."
 msgstr "La capacitat d'usar CGI no ha estat compilada en aquesta versió."
 
-#: LYMessages.c:476
+#: LYMessages.c:500
 #, c-format
 msgid "Sorry, no known way of converting %s to %s."
 msgstr "Em sap greu, no sé com convertir %s a %s."
 
-#: LYMessages.c:477
+#: LYMessages.c:501
 msgid "Unable to set up connection."
 msgstr "Ha estat impossible establir la connexió."
 
-#: LYMessages.c:478
+#: LYMessages.c:502
 msgid "Unable to make connection"
 msgstr "Ha estat impossible fer la connexió."
 
 #. #define MALFORMED_EXEC_REQUEST
-#: LYMessages.c:480
+#: LYMessages.c:504
 msgid "Executable link rejected due to malformed request."
 msgstr "Enllaç executable rebutjat a causa d'una sol·licitud mal formada."
 
 #. #define BADCHAR_IN_EXEC_LINK
-#: LYMessages.c:482
+#: LYMessages.c:506
 #, c-format
 msgid "Executable link rejected due to `%c' character."
 msgstr "Enllaç executable rebutjat a causa del caràcter \"%c\"."
 
 #. #define RELPATH_IN_EXEC_LINK
-#: LYMessages.c:484
+#: LYMessages.c:508
 msgid "Executable link rejected due to relative path string ('../')."
 msgstr "Enllaç executable rebutjat a causa d'un camí relatiu (\"../\")."
 
 #. #define BADLOCPATH_IN_EXEC_LINK
-#: LYMessages.c:486
+#: LYMessages.c:510
 msgid "Executable link rejected due to location or path."
 msgstr "Enllaç executable rebutjat a causa de la localització o la ruta."
 
-#: LYMessages.c:487
+#: LYMessages.c:511
 msgid "Mail access is disabled!"
 msgstr "L'accés a correu no està activat!"
 
 #. #define ACCESS_ONLY_LOCALHOST
-#: LYMessages.c:489
+#: LYMessages.c:513
 msgid "Only files and servers on the local host can be accessed."
 msgstr "Només podeu accedir a fitxers i servidors en la màquina local."
 
-#: LYMessages.c:490
+#: LYMessages.c:514
 msgid "Telnet access is disabled!"
 msgstr "L'accés a telnet no està activat"
 
 #. #define TELNET_PORT_SPECS_DISABLED
-#: LYMessages.c:492
+#: LYMessages.c:516
 msgid "Telnet port specifications are disabled."
 msgstr "Les especificacions del port telnet estan desactivades."
 
-#: LYMessages.c:493
+#: LYMessages.c:517
 msgid "USENET news access is disabled!"
 msgstr "L'accés als fòrums de discusió (USENET) no està activat!"
 
-#: LYMessages.c:494
+#: LYMessages.c:518
 msgid "Rlogin access is disabled!"
 msgstr "L'accés a través de rlogin està desactivat!"
 
-#: LYMessages.c:495
+#: LYMessages.c:519
 msgid "Ftp access is disabled!"
 msgstr "L'accés a ftp no està activat!"
 
-#: LYMessages.c:496
+#: LYMessages.c:520
 msgid "There are no references from this document."
 msgstr "No hi ha referències d'aquest document."
 
-#: LYMessages.c:497
+#: LYMessages.c:521
 msgid "There are only hidden links from this document."
 msgstr "En aquest document només hi ha enllaços ocults."
 
-#: LYMessages.c:499
+#: LYMessages.c:523
 msgid "Unable to open command file."
 msgstr "No ha estat possible obrir el fitxer d'ordres."
 
-#: LYMessages.c:501
+#: LYMessages.c:525
 msgid "News Post Cancelled!!!"
 msgstr "Missatge cancel·lat!!"
 
 #. #define SPAWNING_EDITOR_FOR_NEWS
-#: LYMessages.c:503
+#: LYMessages.c:527
 msgid "Spawning your selected editor to edit news message"
 msgstr "Creant el procés fill que obri l'editor per a editar el missatge"
 
-#: LYMessages.c:504
+#: LYMessages.c:528
 msgid "Post this message?"
 msgstr "Esteu segur que voleu enviar aquest missatge?"
 
-#: LYMessages.c:505
+#: LYMessages.c:529
 #, c-format
 msgid "Append '%s'?"
 msgstr "Afegir \"%s\"?"
 
-#: LYMessages.c:506
+#: LYMessages.c:530
 msgid "Posting to newsgroup(s)..."
 msgstr "Enviant al(s) fòrum(s)..."
 
-#: LYMessages.c:508
+#: LYMessages.c:532
 msgid "*** You have unread mail. ***"
 msgstr "*** Teniu correu pendent. ***"
 
-#: LYMessages.c:510
+#: LYMessages.c:534
 msgid "*** You have mail. ***"
 msgstr "*** Teniu correu. ***"
 
-#: LYMessages.c:512
+#: LYMessages.c:536
 msgid "*** You have new mail. ***"
 msgstr "*** Teniu correu nou. ***"
 
-#: LYMessages.c:513
+#: LYMessages.c:537
 msgid "File insert cancelled!!!"
 msgstr "Inserció del fitxer cancel·lada!!"
 
-#: LYMessages.c:514
+#: LYMessages.c:538
 msgid "Not enough memory for file!"
 msgstr "No hi ha prou memòria per al fitxer!"
 
-#: LYMessages.c:515
+#: LYMessages.c:539
 msgid "Can't open file for reading."
 msgstr "No ha estat possible llegir l'arxiu."
 
-#: LYMessages.c:516
+#: LYMessages.c:540
 msgid "File does not exist."
 msgstr "L'arxiu no existeix."
 
-#: LYMessages.c:517
+#: LYMessages.c:541
 msgid "File does not exist - reenter or cancel:"
 msgstr "L'arxiu no existeix. Reescriviu-ne el nom o cancel·leu:"
 
-#: LYMessages.c:518
+#: LYMessages.c:542
 msgid "File is not readable."
 msgstr "L'arxiu no es pot llegir."
 
-#: LYMessages.c:519
+#: LYMessages.c:543
 msgid "File is not readable - reenter or cancel:"
 msgstr "L'arxiu no es pot llegir. Reescriviu-ne el nom o cancel·leu:"
 
-#: LYMessages.c:520
+#: LYMessages.c:544
 msgid "Nothing to insert - file is 0-length."
 msgstr "No hi ha res per a inserir: el fitxer té longitud 0."
 
-#: LYMessages.c:521
+#: LYMessages.c:545
 msgid "Save request cancelled!!!"
 msgstr "(Gravar) Operació cancel·lada!!"
 
-#: LYMessages.c:522
+#: LYMessages.c:546
 msgid "Mail request cancelled!!!"
 msgstr "Sol·licitud de correu cancel·lada!!"
 
 #. #define CONFIRM_MAIL_SOURCE_PREPARSED
-#: LYMessages.c:524
+#: LYMessages.c:548
 msgid "Viewing preparsed source.  Are you sure you want to mail it?"
 msgstr "Font preanalitzada. Segur que voleu enviar-la?"
 
-#: LYMessages.c:525
+#: LYMessages.c:549
 msgid "Please wait..."
 msgstr "Per favor, espereu..."
 
-#: LYMessages.c:526
+#: LYMessages.c:550
 msgid "Mailing file.  Please wait..."
 msgstr "Enviant arxiu. Per favor, espereu..."
 
-#: LYMessages.c:527
+#: LYMessages.c:551
 msgid "ERROR - Unable to mail file"
 msgstr "ERROR: ha estat impossible enviar l'arxiu"
 
 #. #define CONFIRM_LONG_SCREEN_PRINT
-#: LYMessages.c:529
+#: LYMessages.c:553
 #, c-format
 msgid "File is %d screens long.  Are you sure you want to print?"
 msgstr "L'arxiu ocupa %d pantalles. Esteu segur que voleu imprimir-lo?"
 
-#: LYMessages.c:530
+#: LYMessages.c:554
 msgid "Print request cancelled!!!"
 msgstr "Impressió cancel·lada!!"
 
-#: LYMessages.c:531
+#: LYMessages.c:555
 msgid "Press <return> to begin: "
 msgstr "Premeu <return> per començar: "
 
-#: LYMessages.c:532
+#: LYMessages.c:556
 msgid "Press <return> to finish: "
 msgstr "Premeu <return> per finalitzar: "
 
 #. #define CONFIRM_LONG_PAGE_PRINT
-#: LYMessages.c:534
+#: LYMessages.c:558
 #, c-format
 msgid "File is %d pages long.  Are you sure you want to print?"
 msgstr "L'arxiu ocupa %d pàgines. Esteu segur que voleu imprimir-lo?"
 
 #. #define CHECK_PRINTER
-#: LYMessages.c:536
+#: LYMessages.c:560
 msgid "Be sure your printer is on-line.  Press <return> to start printing:"
 msgstr "Assegureu-vos que la impressora està connectada. Premeu <intro>per començar:"
 
-#: LYMessages.c:537
+#: LYMessages.c:561
 msgid "ERROR - Unable to allocate file space!!!"
 msgstr "ERROR - No s'ha pogut assignar espai per a fitxers!!!"
 
-#: LYMessages.c:538
+#: LYMessages.c:562
 msgid "Unable to open tempfile"
 msgstr "No ha estat possible obrir l'arxiu temporal"
 
-#: LYMessages.c:539
+#: LYMessages.c:563
 msgid "Unable to open print options file"
 msgstr "No ha estat possible obrir l'arxiu d'opcions d'impressió"
 
-#: LYMessages.c:540
+#: LYMessages.c:564
 msgid "Printing file.  Please wait..."
 msgstr "Imprimint l'arxiu. Per favor, espereu..."
 
-#: LYMessages.c:541
+#: LYMessages.c:565
 msgid "Please enter a valid internet mail address: "
 msgstr "Per favor, introduïu una adreça de correu vàlida: "
 
-#: LYMessages.c:542
+#: LYMessages.c:566
 msgid "ERROR! - printer is misconfigured!"
 msgstr "ERROR: la impressora no està ben configurada!"
 
-#: LYMessages.c:543
+#: LYMessages.c:567
 msgid "Image map from POST response not available!"
 msgstr "El mapa d'imatge de la resposta POST no està disponible!"
 
-#: LYMessages.c:544
+#: LYMessages.c:568
 msgid "Misdirected client-side image MAP request!"
 msgstr "Demanda de MAPA d'imatge del costat de client mal dirigida"
 
-#: LYMessages.c:545
+#: LYMessages.c:569
 msgid "Client-side image MAP is not accessible!"
 msgstr "El MAPA d'imatge del costat del client no està accessible!"
 
-#: LYMessages.c:546
+#: LYMessages.c:570
 msgid "No client-side image MAPs are available!"
 msgstr "No ha MAPES d'imatge del costat de client disponibles!"
 
-#: LYMessages.c:547
+#: LYMessages.c:571
 msgid "Client-side image MAP is not available!"
 msgstr "El MAPA d'imatge de costat de clients no està disponible!"
 
 #. #define OPTION_SCREEN_NEEDS_24
-#: LYMessages.c:550
+#: LYMessages.c:574
 msgid "Screen height must be at least 24 lines for the Options menu!"
 msgstr "La pantalla ha de tenir si més no 24 línies per al menú d'opcions!"
 
 #. #define OPTION_SCREEN_NEEDS_23
-#: LYMessages.c:552
+#: LYMessages.c:576
 msgid "Screen height must be at least 23 lines for the Options menu!"
 msgstr "La pantalla ha de tenir si més no 23 línies per al menú d'opcions"
 
 #. #define OPTION_SCREEN_NEEDS_22
-#: LYMessages.c:554
+#: LYMessages.c:578
 msgid "Screen height must be at least 22 lines for the Options menu!"
 msgstr "La pantalla ha de tenir si més no 22 línies per al menú d'opcions"
 
-#: LYMessages.c:556
+#: LYMessages.c:580
 msgid "That key requires Advanced User mode."
 msgstr "Per a usar aquesta tecla cal activar el mode d'usuari avançat"
 
-#: LYMessages.c:557
+#: LYMessages.c:581
 #, c-format
 msgid "Content-type: %s"
 msgstr "Tipus de contingut: %s"
 
-#: LYMessages.c:558
+#: LYMessages.c:582
 msgid "Command: "
 msgstr "Ordre: "
 
-#: LYMessages.c:559
+#: LYMessages.c:583
 msgid "Unknown or ambiguous command"
 msgstr "Ordre desconeguda o ambigua"
 
-#: LYMessages.c:560
+#: LYMessages.c:584
 msgid " Version "
 msgstr " Versió "
 
-#: LYMessages.c:561
+#: LYMessages.c:585
 msgid " first"
 msgstr " primer"
 
-#: LYMessages.c:562
+#: LYMessages.c:586
 msgid ", guessing..."
 msgstr ", provant..."
 
-#: LYMessages.c:563
+#: LYMessages.c:587
 msgid "Permissions for "
 msgstr "Permisos per a "
 
-#: LYMessages.c:564
+#: LYMessages.c:588
 msgid "Select "
 msgstr "Seleccioneu"
 
-#: LYMessages.c:565
+#: LYMessages.c:589
 msgid "capital letter"
 msgstr "la lletra majúscula"
 
-#: LYMessages.c:566
+#: LYMessages.c:590
 msgid " of option line,"
 msgstr "de la línia d'opcions"
 
-#: LYMessages.c:567
+#: LYMessages.c:591
 msgid " to save,"
 msgstr "per desar"
 
-#: LYMessages.c:568
+#: LYMessages.c:592
 msgid " to "
 msgstr "a"
 
-#: LYMessages.c:569
+#: LYMessages.c:593
 msgid " or "
 msgstr " o "
 
-#: LYMessages.c:570
+#: LYMessages.c:594
 msgid " index"
 msgstr " índex"
 
-#: LYMessages.c:571
+#: LYMessages.c:595
 msgid " to return to Lynx."
 msgstr " per a tornar a Lynx."
 
-#: LYMessages.c:572
+#: LYMessages.c:596
 msgid "Accept Changes"
 msgstr "Acceptar els canvis"
 
-#: LYMessages.c:573
+#: LYMessages.c:597
 msgid "Reset Changes"
 msgstr "Anul·lar els canvis"
 
-#: LYMessages.c:574
+#: LYMessages.c:598
 msgid "Left Arrow cancels changes"
 msgstr "'<-' cancel·la els canvis"
 
-#: LYMessages.c:575
+#: LYMessages.c:599
 msgid "Save options to disk"
 msgstr "Gravar les opcions al disc"
 
-#: LYMessages.c:576
+#: LYMessages.c:600
 msgid "Hit RETURN to accept entered data."
 msgstr "Premeu <return> per acceptar les dades introduïdes."
 
 #. #define ACCEPT_DATA_OR_DEFAULT
-#: LYMessages.c:578
+#: LYMessages.c:602
 msgid "Hit RETURN to accept entered data.  Delete data to invoke the default."
 msgstr "<intro> accepta les dades. Esborreu-les si voleu els valors preestablerts"
 
-#: LYMessages.c:579
+#: LYMessages.c:603
 msgid "Value accepted!"
 msgstr "Valor acceptat!"
 
 #. #define VALUE_ACCEPTED_WARNING_X
-#: LYMessages.c:581
+#: LYMessages.c:605
 msgid "Value accepted! -- WARNING: Lynx is configured for XWINDOWS!"
 msgstr "Valor acceptat!  ALERTA: Lynx està configurat per a XWINDOWS!"
 
 #. #define VALUE_ACCEPTED_WARNING_NONX
-#: LYMessages.c:583
+#: LYMessages.c:607
 msgid "Value accepted! -- WARNING: Lynx is NOT configured for XWINDOWS!"
 msgstr "Valor acceptat!  ALERTA: Lynx no està configurat per a XWINDOWS!"
 
-#: LYMessages.c:584
+#: LYMessages.c:608
 msgid "You are not allowed to change which editor to use!"
 msgstr "No teniu permís per a canviar l'editor!"
 
-#: LYMessages.c:585
+#: LYMessages.c:609
 msgid "Failed to set DISPLAY variable!"
 msgstr "Ha estat impossible especificar el nou valor de la variable DISPLAY!"
 
-#: LYMessages.c:586
+#: LYMessages.c:610
 msgid "Failed to clear DISPLAY variable!"
 msgstr "Ha estat impossible eliminar el valor de la variable DISPLAY!"
 
 #. #define BOOKMARK_CHANGE_DISALLOWED
-#: LYMessages.c:588
+#: LYMessages.c:612
 msgid "You are not allowed to change the bookmark file!"
 msgstr "No teniu permís per a canviar l'arxiu d'adreces!"
 
-#: LYMessages.c:589
+#: LYMessages.c:613
 msgid "Terminal does not support color"
 msgstr "El terminal no pot mostrar colors"
 
-#: LYMessages.c:590
+#: LYMessages.c:614
 #, c-format
 msgid "Your '%s' terminal does not support color."
 msgstr "El terminal '%s' no pot mostrar colors."
 
-#: LYMessages.c:591
+#: LYMessages.c:615
 msgid "Access to dot files is disabled!"
 msgstr "L'accés als arxius que comencen amb un punt no està activat!"
 
 #. #define UA_NO_LYNX_WARNING
-#: LYMessages.c:593
+#: LYMessages.c:617
 msgid "User-Agent string does not contain \"Lynx\" or \"L_y_n_x\""
 msgstr "La cadena que identifica el navegador no conté ni \"Lynx\" ni \"L_y_n_x\""
 
 #. #define UA_PLEASE_USE_LYNX
-#: LYMessages.c:595
+#: LYMessages.c:619
 msgid "Use \"L_y_n_x\" or \"Lynx\" in User-Agent, or it looks like intentional deception!"
 msgstr "Useu \"L_y_n_x\" o \"Lynx\" en l'identificador o semblareu desertors!"
 
 #. #define UA_CHANGE_DISABLED
-#: LYMessages.c:597
+#: LYMessages.c:621
 msgid "Changing of the User-Agent string is disabled!"
 msgstr "El canvi de la cadena identificadora del navegador està desactivat!"
 
 #. #define CHANGE_OF_SETTING_DISALLOWED
-#: LYMessages.c:599
+#: LYMessages.c:623
 msgid "You are not allowed to change this setting."
 msgstr "No teniu permís per a canviar aquesta opció."
 
-#: LYMessages.c:600
+#: LYMessages.c:624
 msgid "Saving Options..."
 msgstr "Gravant les opcions..."
 
-#: LYMessages.c:601
+#: LYMessages.c:625
 msgid "Options saved!"
 msgstr "Opcions gravades!"
 
-#: LYMessages.c:602
+#: LYMessages.c:626
 msgid "Unable to save Options!"
 msgstr "No ha estat possible gravar les opcions!"
 
-#: LYMessages.c:603
+#: LYMessages.c:627
 msgid " 'r' to return to Lynx "
 msgstr " 'r' per tornar a Lynx "
 
-#: LYMessages.c:604
+#: LYMessages.c:628
 msgid " '>' to save, or 'r' to return to Lynx "
 msgstr " '>' per gravar, 'r' per tornar a Lynx "
 
 #. #define ANY_KEY_CHANGE_RET_ACCEPT
-#: LYMessages.c:606
+#: LYMessages.c:630
 msgid "Hit any key to change value; RETURN to accept."
 msgstr "Premeu qualsevol tecla per canviar el valor; <intro> per acceptar."
 
-#: LYMessages.c:607
+#: LYMessages.c:631
 msgid "Error uncompressing temporary file!"
 msgstr "Error descomprimint l'arxiu temporal!"
 
-#: LYMessages.c:608
+#: LYMessages.c:632
 msgid "Unsupported URL scheme!"
 msgstr "URL no suportada!"
 
-#: LYMessages.c:609
+#: LYMessages.c:633
 msgid "Unsupported data: URL!  Use SHOWINFO, for now."
 msgstr "Dades no suportades: URL! Useu SHOWINFO, per ara."
 
-#: LYMessages.c:610
+#: LYMessages.c:634
 msgid "Redirection limit of 10 URL's reached."
 msgstr "S'ha assolit el límit de redireccions: 10 URLs."
 
-#: LYMessages.c:611
+#: LYMessages.c:635
 msgid "Illegal redirection URL received from server!"
 msgstr "S'ha rebut del servidor una URL de redirecció il·legal!"
 
 #. #define SERVER_ASKED_FOR_REDIRECTION
-#: LYMessages.c:613
+#: LYMessages.c:637
 #, c-format
 msgid "Server asked for %d redirection of POST content to"
 msgstr "El servidor ha demanat una redirecció %d per a contingut POST a"
 
-#: LYMessages.c:616
+#: LYMessages.c:640
 msgid "P)roceed, use G)ET or C)ancel "
 msgstr "P)rocedir, usar G)ET o C)ancel·lar "
 
-#: LYMessages.c:617
+#: LYMessages.c:641
 msgid "P)roceed, or C)ancel "
 msgstr "P)rocedir o C)ancel·lar "
 
 #. #define ADVANCED_POST_GET_REDIRECT
-#: LYMessages.c:619
+#: LYMessages.c:643
 msgid "Redirection of POST content.  P)roceed, see U)RL, use G)ET or C)ancel"
 msgstr "Redirecció de contingut POST. P)rocedeix, vegeu U)RL, usa G)ET o C)ancel·la"
 
 #. #define ADVANCED_POST_REDIRECT
-#: LYMessages.c:621
+#: LYMessages.c:645
 msgid "Redirection of POST content.  P)roceed, see U)RL, or C)ancel"
 msgstr "Redirecció de contingut POST. P)rocedeix, vegeu U)RL, o C)ancel·la<"
 
 #. #define CONFIRM_POST_RESUBMISSION
-#: LYMessages.c:623
+#: LYMessages.c:647
 msgid "Document from Form with POST content.  Resubmit?"
 msgstr "El document procedeix d'un formulari amb contingut POST. Reenviar?"
 
 #. #define CONFIRM_POST_RESUBMISSION_TO
-#: LYMessages.c:625
+#: LYMessages.c:649
 #, c-format
 msgid "Resubmit POST content to %s ?"
 msgstr "Reenviar el contingut del POST a %s?"
 
 #. #define CONFIRM_POST_LIST_RELOAD
-#: LYMessages.c:627
+#: LYMessages.c:651
 #, c-format
 msgid "List from document with POST data.  Reload %s ?"
 msgstr "La llista prové d'un document amb dades POST. Voleu recarregar %s?"
 
 #. #define CONFIRM_POST_DOC_HEAD
-#: LYMessages.c:629
+#: LYMessages.c:653
 msgid "Document from POST action, HEAD may not be understood.  Proceed?"
 msgstr "Document de l'acció POST, potser HEAD no s'entén. Voleu procedir?"
 
 #. #define CONFIRM_POST_LINK_HEAD
-#: LYMessages.c:631
+#: LYMessages.c:655
 msgid "Form submit action is POST, HEAD may not be understood.  Proceed?"
 msgstr "L'acció de lliurament del formulari és POST, potser HEAD no s'entén. Voleu procedir?"
 
-#: LYMessages.c:632
+#: LYMessages.c:656
 msgid "Proceed without a username and password?"
 msgstr "Continuar sense nom d'usuari i sense contrasenya?"
 
-#: LYMessages.c:633
+#: LYMessages.c:657
 #, c-format
 msgid "Proceed (%s)?"
 msgstr "Continuar (%s)?"
 
-#: LYMessages.c:634
+#: LYMessages.c:658
 msgid "Cannot POST to this host."
 msgstr "No es pot fer POST a aquest amfritió."
 
-#: LYMessages.c:635
+#: LYMessages.c:659
 msgid "POST not supported for this URL - ignoring POST data!"
 msgstr "POST no està suportat per a aquesta URL - s'ignoraran les dades POST!"
 
-#: LYMessages.c:636
+#: LYMessages.c:660
 msgid "Discarding POST data..."
 msgstr "Descartant les dades del POST..."
 
-#: LYMessages.c:637
+#: LYMessages.c:661
 msgid "Document will not be reloaded!"
 msgstr "No es recarregarà el document!"
 
-#: LYMessages.c:638
+#: LYMessages.c:662
 msgid "Location: "
 msgstr "Ubicació: "
 
-#: LYMessages.c:639
+#: LYMessages.c:663
 #, c-format
 msgid "'%s' not found!"
 msgstr "no s'ha trobat \"%s\""
 
-#: LYMessages.c:640
+#: LYMessages.c:664
 msgid "Default Bookmark File"
 msgstr "Fitxer de favorits predeterminat"
 
-#: LYMessages.c:641
+#: LYMessages.c:665
 msgid "Screen too small! (8x35 min)"
 msgstr "Pantalla massa xicoteta! (8x35 min)"
 
-#: LYMessages.c:642
+#: LYMessages.c:666
 msgid "Select destination or ^G to Cancel: "
 msgstr "Trieu destinació o ^G per cancel·lar: "
 
 #. #define MULTIBOOKMARKS_SELECT
-#: LYMessages.c:644
+#: LYMessages.c:668
 msgid "Select subbookmark, '=' for menu, or ^G to cancel: "
 msgstr "Trieu fitxer de favorits, \"=\" mostra el menú i ^G cancel·la: "
 
 #. #define MULTIBOOKMARKS_SELF
-#: LYMessages.c:646
+#: LYMessages.c:670
 msgid "Reproduce L)ink in this bookmark file or C)ancel? (l,c): "
 msgstr "Reproduir l'en(L)laç en aquest fitxer de favorits o C)ancel·lar? (l,c):"
 
-#: LYMessages.c:647
+#: LYMessages.c:671
 msgid "Multiple bookmark support is not available."
 msgstr "El suport per a més d'un fitxer d'adreces no està activat."
 
-#: LYMessages.c:648
+#: LYMessages.c:672
 #, c-format
 msgid " Select Bookmark (screen %d of %d)"
 msgstr " Trieu el fitxer de favorits (pantalla %d de %d)"
 
-#: LYMessages.c:649
+#: LYMessages.c:673
 msgid "       Select Bookmark"
 msgstr "       Trieu fitxer de favorits"
 
 #. #define MULTIBOOKMARKS_EHEAD_MASK
-#: LYMessages.c:651
+#: LYMessages.c:675
 #, c-format
 msgid "Editing Bookmark DESCRIPTION and FILEPATH (%d of 2)"
 msgstr "Edició de la descripció i del camí del fitxer d'adreces interessants (%d de 2)"
 
 #. #define MULTIBOOKMARKS_EHEAD
-#: LYMessages.c:653
+#: LYMessages.c:677
 msgid "         Editing Bookmark DESCRIPTION and FILEPATH"
 msgstr "Edició de la descripció i el camí del fitxer d'adreces d'interés"
 
-#: LYMessages.c:654
+#: LYMessages.c:678
 msgid "Letter: "
 msgstr "Lletra: "
 
 #. #define USE_PATH_OFF_HOME
-#: LYMessages.c:657
+#: LYMessages.c:681
 msgid "Use a filepath off your login directory in SHELL syntax!"
 msgstr "Useu un camí per al fitxers fora del vostre directori d'inici a la sintaxi de l'intèrpret d'ordres "
 
-#: LYMessages.c:659
+#: LYMessages.c:683
 msgid "Use a filepath off your home directory!"
 msgstr "Useu un camí que no pertanga al vostre directori!"
 
 #. #define MAXLINKS_REACHED
-#: LYMessages.c:662
+#: LYMessages.c:686
 msgid "Maximum links per page exceeded!  Use half-page or two-line scrolling."
 msgstr "Superat el nre. d'enllaços/pàg.! Useu mitja pàg. o desplaçament de dues línies."
 
-#: LYMessages.c:663
+#: LYMessages.c:687
 msgid "No previously visited links available!"
 msgstr "No hi ha disponible cap enllaç anterior!"
 
-#: LYMessages.c:664
+#: LYMessages.c:688
 msgid "Memory exhausted!  Program aborted!"
 msgstr "Memòria exhaurida! Programa vortat!"
 
-#: LYMessages.c:665
+#: LYMessages.c:689
 msgid "Memory exhausted!  Aborting..."
 msgstr "Memòria exhaurida! Avortant..."
 
-#: LYMessages.c:666
+#: LYMessages.c:690
 msgid "Not enough memory!"
 msgstr "No hi ha prou memòria!"
 
-#: LYMessages.c:667
+#: LYMessages.c:691
 msgid "Directory/File Manager not available"
 msgstr "No hi ha cap administrador de fitxers disponible"
 
-#: LYMessages.c:668
+#: LYMessages.c:692
 msgid "HREF in BASE tag is not an absolute URL."
 msgstr "La referència (HREF) en l'etiqueta BASE no és una URL absoluta."
 
-#: LYMessages.c:669
+#: LYMessages.c:693
 msgid "Location URL is not absolute."
 msgstr "La URL no és absoluta."
 
-#: LYMessages.c:670
+#: LYMessages.c:694
 msgid "Refresh URL is not absolute."
 msgstr "La URL de refresc no és absoluta."
 
 #. #define SENDING_MESSAGE_WITH_BODY_TO
-#: LYMessages.c:672
+#: LYMessages.c:696
 msgid ""
 "You are sending a message with body to:\n"
 "  "
@@ -2052,7 +2119,7 @@ msgstr ""
 "Esteu enviant un missatge no buit a:\n"
 "  "
 
-#: LYMessages.c:673
+#: LYMessages.c:697
 msgid ""
 "You are sending a comment to:\n"
 "  "
@@ -2060,7 +2127,7 @@ msgstr ""
 "Esteu enviant un comentari a:\n"
 "  "
 
-#: LYMessages.c:674
+#: LYMessages.c:698
 msgid ""
 "\n"
 " With copy to:\n"
@@ -2070,7 +2137,7 @@ msgstr ""
 " Amb còpia a:\n"
 "  "
 
-#: LYMessages.c:675
+#: LYMessages.c:699
 msgid ""
 "\n"
 " With copies to:\n"
@@ -2081,7 +2148,7 @@ msgstr ""
 "  "
 
 #. #define CTRL_G_TO_CANCEL_SEND
-#: LYMessages.c:677
+#: LYMessages.c:701
 msgid ""
 "\n"
 "\n"
@@ -2092,7 +2159,7 @@ msgstr ""
 "Useu Ctrl-G per a cancel·lar si no voleu enviar el missatge\n"
 
 #. #define ENTER_NAME_OR_BLANK
-#: LYMessages.c:679
+#: LYMessages.c:703
 msgid ""
 "\n"
 " Please enter your name, or leave it blank to remain anonymous\n"
@@ -2101,7 +2168,7 @@ msgstr ""
 " Escriviu el vostre nom o deixeu l'espai en blanc si voleu que siga anònim\n"
 
 #. #define ENTER_MAIL_ADDRESS_OR_OTHER
-#: LYMessages.c:681
+#: LYMessages.c:705
 msgid ""
 "\n"
 " Please enter a mail address or some other\n"
@@ -2110,11 +2177,11 @@ msgstr ""
 " Introduïu una adreça de correu o alguna altra\n"
 
 #. #define MEANS_TO_CONTACT_FOR_RESPONSE
-#: LYMessages.c:683
+#: LYMessages.c:707
 msgid " means to contact you, if you desire a response.\n"
 msgstr " forma de contactar, si voleu resposta.\n"
 
-#: LYMessages.c:684
+#: LYMessages.c:708
 msgid ""
 "\n"
 " Please enter a subject line.\n"
@@ -2123,7 +2190,7 @@ msgstr ""
 " Introduïu l'assumpte.\n"
 
 #. #define ENTER_ADDRESS_FOR_CC
-#: LYMessages.c:686
+#: LYMessages.c:710
 msgid ""
 "\n"
 " Enter a mail address for a CC of your message.\n"
@@ -2131,11 +2198,11 @@ msgstr ""
 "\n"
 " Escriviu l'adreça a què voleu enviar una còpia del missatge.\n"
 
-#: LYMessages.c:687
+#: LYMessages.c:711
 msgid " (Leave blank if you don't want a copy.)\n"
 msgstr " (Deixeu la línia en blanc si no en voleu enviar còpia.)\n"
 
-#: LYMessages.c:688
+#: LYMessages.c:712
 msgid ""
 "\n"
 " Please review the message body:\n"
@@ -2145,7 +2212,7 @@ msgstr ""
 " Per favor, reviseu el cos del missatge:\n"
 "\n"
 
-#: LYMessages.c:689
+#: LYMessages.c:713
 msgid ""
 "\n"
 "Press RETURN to continue: "
@@ -2153,7 +2220,7 @@ msgstr ""
 "\n"
 "Premeu <intro> per continuar: "
 
-#: LYMessages.c:690
+#: LYMessages.c:714
 msgid ""
 "\n"
 "Press RETURN to clean up: "
@@ -2161,11 +2228,11 @@ msgstr ""
 "\n"
 "Premeu <intro> per esborrar: "
 
-#: LYMessages.c:691
+#: LYMessages.c:715
 msgid " Use Control-U to erase the default.\n"
 msgstr " Premeu Ctrl-U per esborrar el valor suggerit.\n"
 
-#: LYMessages.c:692
+#: LYMessages.c:716
 msgid ""
 "\n"
 " Please enter your message below."
@@ -2174,7 +2241,7 @@ msgstr ""
 " Escriviu el missatge a partir d'ací."
 
 #. #define ENTER_PERIOD_WHEN_DONE_A
-#: LYMessages.c:694 src/LYNews.c:360
+#: LYMessages.c:718 src/LYNews.c:360
 msgid ""
 "\n"
 " When you are done, press enter and put a single period (.)"
@@ -2183,7 +2250,7 @@ msgstr ""
 " Quan acabeu, premeu <intro> i escriviu només un punt (.)"
 
 #. #define ENTER_PERIOD_WHEN_DONE_B
-#: LYMessages.c:696 src/LYNews.c:361
+#: LYMessages.c:720 src/LYNews.c:361
 msgid ""
 "\n"
 " on a line and press enter again."
@@ -2193,272 +2260,272 @@ msgstr ""
 
 #. Cookies messages
 #. #define ADVANCED_COOKIE_CONFIRMATION
-#: LYMessages.c:700
+#: LYMessages.c:724
 #, c-format
 msgid "%s cookie: %.*s=%.*s  Allow? (Y/N/Always/neVer)"
 msgstr "Cookie de %s: %.*s=%.*s Admetre-la? (S/N/semPre/Mai)"
 
 #. #define INVALID_COOKIE_DOMAIN_CONFIRMATION
-#: LYMessages.c:702
+#: LYMessages.c:726
 #, c-format
 msgid "Accept invalid cookie domain=%s for '%s'?"
 msgstr "Voleu acceptar la cookie amb el domini invàlid %s en comptes de '%s'?"
 
 #. #define INVALID_COOKIE_PATH_CONFIRMATION
-#: LYMessages.c:704
+#: LYMessages.c:728
 #, c-format
 msgid "Accept invalid cookie path=%s as a prefix of '%s'?"
 msgstr "Accepteu la cookie amb el camí (no vàlid) %s com a prefix de '%s'?"
 
-#: LYMessages.c:705
+#: LYMessages.c:729
 msgid "Allowing this cookie."
 msgstr "Tolerant aquesta cookie."
 
-#: LYMessages.c:706
+#: LYMessages.c:730
 msgid "Rejecting this cookie."
 msgstr "Rebutjant aquesta cookie."
 
-#: LYMessages.c:707
+#: LYMessages.c:731
 msgid "The Cookie Jar is empty."
 msgstr "El recipient de les cookies és buit."
 
-#: LYMessages.c:708
+#: LYMessages.c:732
 msgid "The Cache Jar is empty."
 msgstr "El recipient de memòria cau és buit."
 
 #. #define ACTIVATE_TO_GOBBLE
-#: LYMessages.c:710
+#: LYMessages.c:734
 msgid "Activate links to gobble up cookies or entire domains,"
 msgstr "Seguiu els enllaços per eliminar les cookies o els dominis,"
 
-#: LYMessages.c:711
+#: LYMessages.c:735
 msgid "or to change a domain's 'allow' setting."
 msgstr "o per a canviar l\"índex de tolerància\"."
 
-#: LYMessages.c:712
+#: LYMessages.c:736
 msgid "(Cookies never allowed.)"
 msgstr "(Cookies sempre prohibides)"
 
-#: LYMessages.c:713
+#: LYMessages.c:737
 msgid "(Cookies always allowed.)"
 msgstr "(Cookies sempre tolerades)"
 
-#: LYMessages.c:714
+#: LYMessages.c:738
 msgid "(Cookies allowed via prompt.)"
 msgstr "(Es pregunta abans d'acceptar cookies)"
 
-#: LYMessages.c:715
+#: LYMessages.c:739
 msgid "(Persistent Cookies.)"
 msgstr "(Cookies persistents)"
 
-#: LYMessages.c:716
+#: LYMessages.c:740
 msgid "(No title.)"
 msgstr "(Sense títol)"
 
-#: LYMessages.c:717
+#: LYMessages.c:741
 msgid "(No name.)"
 msgstr "(Sense nom)"
 
-#: LYMessages.c:718
+#: LYMessages.c:742
 msgid "(No value.)"
 msgstr "(Sense valor)"
 
-#: LYMessages.c:719 src/LYOptions.c:2424
+#: LYMessages.c:743 src/LYOptions.c:2424
 msgid "None"
 msgstr "Cap"
 
-#: LYMessages.c:720
+#: LYMessages.c:744
 msgid "(End of session.)"
 msgstr "(Fi de la sessió)"
 
-#: LYMessages.c:721
+#: LYMessages.c:745
 msgid "Delete this cookie?"
 msgstr "Esborrar aquesta cookie?"
 
-#: LYMessages.c:722
+#: LYMessages.c:746
 msgid "The cookie has been eaten!"
 msgstr "La cookie ha estat esborrada!"
 
-#: LYMessages.c:723
+#: LYMessages.c:747
 msgid "Delete this empty domain?"
 msgstr "Esborrar aquest domini buit?"
 
-#: LYMessages.c:724
+#: LYMessages.c:748
 msgid "The domain has been eaten!"
 msgstr "El domini ha estat esborrat!"
 
 #. #define DELETE_COOKIES_SET_ALLOW_OR_CANCEL
-#: LYMessages.c:726
+#: LYMessages.c:750
 msgid "D)elete domain's cookies, set allow A)lways/P)rompt/neV)er, or C)ancel? "
 msgstr "D esborrar el domini, admetre  A sempre/P)reguntar/V mai, o C)ancel·lar? "
 
 #. #define DELETE_DOMAIN_SET_ALLOW_OR_CANCEL
-#: LYMessages.c:728
+#: LYMessages.c:752
 msgid "D)elete domain, set allow A)lways/P)rompt/neV)er, or C)ancel? "
 msgstr "D esborrar domini, admetre  A sempre/P)reguntar/V mai, o C)ancel·lar?"
 
-#: LYMessages.c:729
+#: LYMessages.c:753
 msgid "All cookies in the domain have been eaten!"
 msgstr "Totes les cookies del domini han estat esborrades!"
 
-#: LYMessages.c:730
+#: LYMessages.c:754
 #, c-format
 msgid "'A'lways allowing from domain '%s'."
 msgstr "Toler(A)r-les sempre que provinguen del domini '%s'."
 
-#: LYMessages.c:731
+#: LYMessages.c:755
 #, c-format
 msgid "ne'V'er allowing from domain '%s'."
 msgstr "Rebutjar-les sempre que provinguen del domini '%s'."
 
-#: LYMessages.c:732
+#: LYMessages.c:756
 #, c-format
 msgid "'P'rompting to allow from domain '%s'."
 msgstr "(P)reguntar sempre que provinguen del domini '%s'."
 
-#: LYMessages.c:733
+#: LYMessages.c:757
 msgid "Delete all cookies in this domain?"
 msgstr "Esborrar totes les cookies del domini?"
 
-#: LYMessages.c:734
+#: LYMessages.c:758
 msgid "All of the cookies in the jar have been eaten!"
 msgstr "Totes les cookies han estat esborrades!"
 
-#: LYMessages.c:736
+#: LYMessages.c:760
 msgid "Port 19 not permitted in URLs."
 msgstr "El port 19 no està permés en les URLs."
 
-#: LYMessages.c:737
+#: LYMessages.c:761
 msgid "Port 25 not permitted in URLs."
 msgstr "El port 25 no està permés en les URLs."
 
-#: LYMessages.c:738
+#: LYMessages.c:762
 #, c-format
 msgid "Port %lu not permitted in URLs."
 msgstr "El port %lu no està permés en les URLs."
 
-#: LYMessages.c:739
+#: LYMessages.c:763
 msgid "URL has a bad port field."
 msgstr "L'URL té un camp incorrecte de port."
 
-#: LYMessages.c:740
+#: LYMessages.c:764
 msgid "Maximum nesting of HTML elements exceeded."
 msgstr "S'ha excedit el màxim nombre d'anidaments permés per a l'HTML."
 
-#: LYMessages.c:741
+#: LYMessages.c:765
 msgid "Bad partial reference!  Stripping lead dots."
 msgstr "Referència parcial incorrecta! S'esborraran els punts inicials."
 
-#: LYMessages.c:742
+#: LYMessages.c:766
 msgid "Trace Log open failed.  Trace off!"
 msgstr "No s'ha pogut obrir el fitxer de rastreig. Rastreig desactivat!"
 
-#: LYMessages.c:743
+#: LYMessages.c:767
 msgid "Lynx Trace Log"
 msgstr "Rastreig (Lynx Trace Log)"
 
-#: LYMessages.c:744
+#: LYMessages.c:768
 msgid "No trace log has been started for this session."
 msgstr "No s'ha iniciat el rastreig en aquesta sessió."
 
 #. #define MAX_TEMPCOUNT_REACHED
-#: LYMessages.c:746
+#: LYMessages.c:770
 msgid "The maximum temporary file count has been reached!"
 msgstr "S'ha assolit el nombre màxim de fitxers temporals!"
 
 #. #define FORM_VALUE_TOO_LONG
-#: LYMessages.c:748
+#: LYMessages.c:772
 msgid "Form field value exceeds buffer length!  Trim the tail."
 msgstr "El valor del camp excedeix la longitud de la memòria intermèdia! Es tallarà."
 
 #. #define FORM_TAIL_COMBINED_WITH_HEAD
-#: LYMessages.c:750
+#: LYMessages.c:774
 msgid "Modified tail combined with head of form field value."
 msgstr "Es combina la cua modificada amb la capçalera del valor del camp del formulari."
 
 #. HTFile.c
-#: LYMessages.c:753
+#: LYMessages.c:777
 msgid "Directory"
 msgstr "Directori"
 
-#: LYMessages.c:754
+#: LYMessages.c:778
 msgid "Directory browsing is not allowed."
 msgstr "La navegació pel directori està prohibida."
 
-#: LYMessages.c:755
+#: LYMessages.c:779
 msgid "Selective access is not enabled for this directory"
 msgstr "No està habilitat l'accés selectiu a aquest directori"
 
-#: LYMessages.c:756
+#: LYMessages.c:780
 msgid "Multiformat: directory scan failed."
 msgstr "Format múltiple: l'escaneig del directori ha fallat."
 
-#: LYMessages.c:757
+#: LYMessages.c:781
 msgid "This directory is not readable."
 msgstr "No es pot llegir el directori."
 
-#: LYMessages.c:758
+#: LYMessages.c:782
 msgid "Can't access requested file."
 msgstr "No es pot accedir al fitxer sol·licitat."
 
-#: LYMessages.c:759
+#: LYMessages.c:783
 msgid "Could not find suitable representation for transmission."
 msgstr "No s'ha pogut trobar una representació adequada per a la transmissió."
 
-#: LYMessages.c:760
+#: LYMessages.c:784
 msgid "Could not open file for decompression!"
 msgstr "No s'ha pogut obrir el fitxer per a descomprimir-lo!"
 
-#: LYMessages.c:761
+#: LYMessages.c:785
 msgid "Files:"
 msgstr "Arxius:"
 
-#: LYMessages.c:762
+#: LYMessages.c:786
 msgid "Subdirectories:"
 msgstr "Subdirectoris:"
 
-#: LYMessages.c:763
+#: LYMessages.c:787
 msgid " directory"
 msgstr " directori"
 
-#: LYMessages.c:764
+#: LYMessages.c:788
 msgid "Up to "
 msgstr "De "
 
-#: LYMessages.c:765
+#: LYMessages.c:789
 msgid "Current directory is "
 msgstr "El directori actual és "
 
 #. HTFTP.c
-#: LYMessages.c:768
+#: LYMessages.c:792
 msgid "Symbolic Link"
 msgstr "Enllaç simbòlic"
 
 #. HTGopher.c
-#: LYMessages.c:771
+#: LYMessages.c:795
 msgid "No response from server!"
 msgstr "El servidor no respon!"
 
-#: LYMessages.c:772
+#: LYMessages.c:796
 msgid "CSO index"
 msgstr "Índex CSO"
 
-#: LYMessages.c:773
+#: LYMessages.c:797
 msgid ""
 "\n"
 "This is a searchable index of a CSO database.\n"
 msgstr "\n"
 
-#: LYMessages.c:774
+#: LYMessages.c:798
 msgid "CSO Search Results"
 msgstr "Resultats de la recerca CSO"
 
-#: LYMessages.c:775
+#: LYMessages.c:799
 #, c-format
 msgid "Seek fail on %s\n"
 msgstr "Ha fallat la cerca sobre %s\n"
 
-#: LYMessages.c:776
+#: LYMessages.c:800
 msgid ""
 "\n"
 "Press the 's' key and enter search keywords.\n"
@@ -2466,41 +2533,41 @@ msgstr ""
 "\n"
 "Premeu 's' i introduïu els mots que voleu cercar.\n"
 
-#: LYMessages.c:777
+#: LYMessages.c:801
 msgid ""
 "\n"
 "This is a searchable Gopher index.\n"
 msgstr "\n"
 
-#: LYMessages.c:778
+#: LYMessages.c:802
 msgid "Gopher index"
 msgstr "Í"
 
-#: LYMessages.c:779
+#: LYMessages.c:803
 msgid "Gopher Menu"
 msgstr "Menú gopher"
 
-#: LYMessages.c:780
+#: LYMessages.c:804
 msgid " Search Results"
 msgstr " Resultats de la recerca"
 
-#: LYMessages.c:781
+#: LYMessages.c:805
 msgid "Sending CSO/PH request."
 msgstr "S'està enviant una sol·licitud CSO/PH."
 
-#: LYMessages.c:782
+#: LYMessages.c:806
 msgid "Sending Gopher request."
 msgstr "S'està enviant la sol·licitud gopher"
 
-#: LYMessages.c:783
+#: LYMessages.c:807
 msgid "CSO/PH request sent; waiting for response."
 msgstr "Sol·licitud COS/PH enviada; s'està esperant resposta."
 
-#: LYMessages.c:784
+#: LYMessages.c:808
 msgid "Gopher request sent; waiting for response."
 msgstr "S'ha enviat la sol·licitud gopher; s'està esperant resposta."
 
-#: LYMessages.c:785
+#: LYMessages.c:809
 msgid ""
 "\n"
 "Please enter search keywords.\n"
@@ -2508,7 +2575,7 @@ msgstr ""
 "\n"
 "Per favor, introduïu els mots que voleu cercar.\n"
 
-#: LYMessages.c:786
+#: LYMessages.c:810
 msgid ""
 "\n"
 "The keywords that you enter will allow you to search on a"
@@ -2516,205 +2583,205 @@ msgstr ""
 "\n"
 "Els mots que heu introduït us permetran cercar en un"
 
-#: LYMessages.c:787
+#: LYMessages.c:811
 msgid " person's name in the database.\n"
 msgstr " nom de persona en una base de dades.\n"
 
 #. HTNews.c
-#: LYMessages.c:790
+#: LYMessages.c:814
 msgid "Connection closed ???"
 msgstr "Connexió tancada ??"
 
-#: LYMessages.c:791
+#: LYMessages.c:815
 msgid "Cannot open temporary file for news POST."
 msgstr "No ha estat possible obrir el fitxer temporal per enviar el missatge."
 
-#: LYMessages.c:792
+#: LYMessages.c:816
 msgid "This client does not contain support for posting to news with SSL."
 msgstr "Aquest client no pot enviar missatges als fòrums amb SSL."
 
 #. HTStyle.c
-#: LYMessages.c:795
+#: LYMessages.c:819
 #, c-format
 msgid "Style %d `%s' SGML:%s.  Font %s %.1f point.\n"
 msgstr "Estil %d `%s' SGML:%s.  Font %s %.1f punt.\n"
 
-#: LYMessages.c:797
+#: LYMessages.c:821
 #, c-format
 msgid "\tAlign=%d, %d tabs. (%.0f before, %.0f after)\n"
 msgstr "\tAlinea=%d, %d tabulacions. (%.0f abans, %.0f després)\n"
 
-#: LYMessages.c:798
+#: LYMessages.c:822
 #, c-format
 msgid "\t\tTab kind=%d at %.0f\n"
 msgstr "\t\tTipus de tabulació=%d a %.0f\n"
 
 #. HTTP.c
-#: LYMessages.c:801
+#: LYMessages.c:825
 msgid "Can't proceed without a username and password."
 msgstr "No es pot continuar sense un nom d'usuari i una contrasenya."
 
-#: LYMessages.c:802
+#: LYMessages.c:826
 msgid "Can't retry with authorization!  Contact the server's WebMaster."
 msgstr "No es pot reintentar sense autorització! Poseu-vos en contacte amb el webmestre."
 
-#: LYMessages.c:803
+#: LYMessages.c:827
 msgid "Can't retry with proxy authorization!  Contact the server's WebMaster."
 msgstr "No es pot reintentar sense autorització del proxy! Poseu-vos en contacte amb el webmestre."
 
-#: LYMessages.c:804
+#: LYMessages.c:828
 msgid "Retrying with proxy authorization information."
 msgstr "Reintent amb la informació de autorització del servidor intermediari (proxy)."
 
-#: LYMessages.c:805
+#: LYMessages.c:829
 #, c-format
 msgid "SSL error:%s-Continue?"
 msgstr "Error SSL:%s-Voleu continuar?"
 
 #. HTWAIS.c
-#: LYMessages.c:808
+#: LYMessages.c:832
 msgid "HTWAIS: Return message too large."
 msgstr "HTWAIS: El missatge de retorn és massa llarg."
 
-#: LYMessages.c:809
+#: LYMessages.c:833
 msgid "Enter WAIS query: "
 msgstr "Introduïu la consulta de tipus WAIS:"
 
 #. Miscellaneous status
-#: LYMessages.c:812
+#: LYMessages.c:836
 msgid "Retrying as HTTP0 request."
 msgstr "Reintentant com a sol·licitud HTTP0."
 
-#: LYMessages.c:813
+#: LYMessages.c:837
 #, c-format
 msgid "Transferred %d bytes"
 msgstr "%d bytes transferits"
 
-#: LYMessages.c:814
+#: LYMessages.c:838
 msgid "Data transfer complete"
 msgstr "Transferència completa"
 
-#: LYMessages.c:815
+#: LYMessages.c:839
 #, c-format
 msgid "Error processing line %d of %s\n"
 msgstr "Error mentre es processava la línia %d de %s\n"
 
 #. Lynx internal page titles
-#: LYMessages.c:818
+#: LYMessages.c:842
 msgid "Address List Page"
 msgstr "Pàgina d'adreces"
 
-#: LYMessages.c:819
+#: LYMessages.c:843
 msgid "Bookmark file"
 msgstr "Agenda d'adreces d'interés"
 
-#: LYMessages.c:820
+#: LYMessages.c:844
 msgid "Configuration Definitions"
 msgstr "Configuració"
 
-#: LYMessages.c:821
+#: LYMessages.c:845
 msgid "Cookie Jar"
 msgstr "Pot de les galetes (cookie jar) :-)"
 
-#: LYMessages.c:822
+#: LYMessages.c:846
 msgid "Current Edit-Key Map"
 msgstr "Mapa actual de tecles d'edició"
 
-#: LYMessages.c:823
+#: LYMessages.c:847
 msgid "Current Key Map"
 msgstr "Combinacions de tecles actual"
 
-#: LYMessages.c:824
+#: LYMessages.c:848
 msgid "File Management Options"
 msgstr "Opcions d'administració de fitxers"
 
-#: LYMessages.c:825
+#: LYMessages.c:849
 msgid "Download Options"
 msgstr "Opcions de descàrrega"
 
-#: LYMessages.c:826
+#: LYMessages.c:850
 msgid "History Page"
 msgstr "Historial"
 
-#: LYMessages.c:827
+#: LYMessages.c:851
 msgid "Cache Jar"
 msgstr "Jar en memòria cau"
 
-#: LYMessages.c:828
+#: LYMessages.c:852
 msgid "List Page"
 msgstr "Pàgina de llista"
 
-#: LYMessages.c:829
+#: LYMessages.c:853
 msgid "Lynx.cfg Information"
 msgstr "Informació del fitxer lynx.cfg"
 
-#: LYMessages.c:830
+#: LYMessages.c:854
 msgid "Converted Mosaic Hotlist"
 msgstr "Fitxer d'adreces d'interés de Mosaic convertit"
 
-#: LYMessages.c:831
+#: LYMessages.c:855
 msgid "Options Menu"
 msgstr "Menú d'opcions"
 
-#: LYMessages.c:832
+#: LYMessages.c:856
 msgid "File Permission Options"
 msgstr "Opcions dels permissos dels fitxers"
 
-#: LYMessages.c:833
+#: LYMessages.c:857
 msgid "Printing Options"
 msgstr "Opcions d'impressió"
 
-#: LYMessages.c:834
+#: LYMessages.c:858
 msgid "Information about the current document"
 msgstr "Informació del document actual"
 
-#: LYMessages.c:835
+#: LYMessages.c:859
 msgid "Your recent statusline messages"
 msgstr "Missatges recents apareguts en la línia d'estat"
 
-#: LYMessages.c:836
+#: LYMessages.c:860
 msgid "Upload Options"
 msgstr "Opcions de càrrega"
 
-#: LYMessages.c:837
+#: LYMessages.c:861
 msgid "Visited Links Page"
 msgstr "Pàgina dels enllaços visitats"
 
 #. CONFIG_DEF_TITLE subtitles
-#: LYMessages.c:840
+#: LYMessages.c:864
 msgid "See also"
 msgstr "Vegeu també"
 
-#: LYMessages.c:841
+#: LYMessages.c:865
 msgid "your"
 msgstr "el vostre"
 
-#: LYMessages.c:842
+#: LYMessages.c:866
 msgid "for runtime options"
 msgstr "opcions en temps d'execució"
 
-#: LYMessages.c:843
+#: LYMessages.c:867
 msgid "compile time options"
 msgstr "opcions en temps de compilació"
 
-#: LYMessages.c:844
+#: LYMessages.c:868
 msgid "color-style configuration"
 msgstr "configuració d'estil de colors"
 
-#: LYMessages.c:845
+#: LYMessages.c:869
 msgid "latest release"
 msgstr "última versió"
 
-#: LYMessages.c:846
+#: LYMessages.c:870
 msgid "pre-release version"
 msgstr "versió de prova"
 
-#: LYMessages.c:847
+#: LYMessages.c:871
 msgid "development version"
 msgstr "versió de desenvolupament"
 
 #. #define AUTOCONF_CONFIG_CACHE
-#: LYMessages.c:849
+#: LYMessages.c:873
 msgid ""
 "The following data were derived during the automatic configuration/build\n"
 "process of this copy of Lynx.  When reporting a bug, please include a copy\n"
@@ -2725,7 +2792,7 @@ msgstr ""
 "per favor, incloeu una còpia d'aquesta pàgina."
 
 #. #define AUTOCONF_LYNXCFG_H
-#: LYMessages.c:853
+#: LYMessages.c:877
 msgid ""
 "The following data were used as automatically-configured compile-time\n"
 "definitions when this copy of Lynx was built."
@@ -2734,53 +2801,53 @@ msgstr ""
 "quan es va compilar aquesta còpia de Lynx."
 
 #. #define DIRED_NOVICELINE
-#: LYMessages.c:858
+#: LYMessages.c:882
 msgid "  C)reate  D)ownload  E)dit  F)ull menu  M)odify  R)emove  T)ag  U)pload     \n"
 msgstr "  C)rea  D)escarrega  E)dita  M)enú complet  C)anvia  R)emou  S)enyalado  P)uja     \n"
 
-#: LYMessages.c:859
+#: LYMessages.c:883
 msgid "Failed to obtain status of current link!"
 msgstr "Ha estat impossible obtenir l'estat de l'enllaç actual!"
 
 #. #define INVALID_PERMIT_URL
-#: LYMessages.c:862
+#: LYMessages.c:886
 msgid "Special URL only valid from current File Permission menu!"
 msgstr "URL especial que només és vàlida des del menú permisos de fitxer actual!"
 
-#: LYMessages.c:866
+#: LYMessages.c:890
 msgid "External support is currently disabled."
 msgstr "El suport extern està deshabilitat actualment."
 
 #. new with 2.8.4dev.21
-#: LYMessages.c:870
+#: LYMessages.c:894
 msgid "Changing working-directory is currently disabled."
 msgstr "El canvi de directori de treball està desactivat."
 
-#: LYMessages.c:871
+#: LYMessages.c:895
 msgid "Linewrap OFF!"
 msgstr "Salt de línia automàtic desactivat!"
 
-#: LYMessages.c:872
+#: LYMessages.c:896
 msgid "Linewrap ON!"
 msgstr "Salt de línia automàtic activat!"
 
-#: LYMessages.c:873
+#: LYMessages.c:897
 msgid "Parsing nested-tables toggled OFF!  Reloading..."
 msgstr "Anàlisi de taules imbricades desactivat! Recàrrega..."
 
-#: LYMessages.c:874
+#: LYMessages.c:898
 msgid "Parsing nested-tables toggled ON!  Reloading..."
 msgstr "Analisi de taules imbricades activat! Recàrrega..."
 
-#: LYMessages.c:875
+#: LYMessages.c:899
 msgid "Shifting is disabled while line-wrap is in effect"
 msgstr "El desplaçament està deshabilitat mentre l'ajustament de línies està en efecte"
 
-#: LYMessages.c:876
+#: LYMessages.c:900
 msgid "Trace not supported"
 msgstr "Rastreig no suportat"
 
-#: LYMessages.c:796
+#: LYMessages.c:820
 #, c-format
 msgid "\tIndents: first=%.0f others=%.0f, Height=%.1f Desc=%.1f\n"
 msgstr "\tSagnats: primer=%.0f altres=%.0f, Alçada=%.1f Desc=%.1f\n"
@@ -3096,100 +3163,105 @@ msgstr "No s'ha pogut restaurar el sòcol perquè sigui bloquejador."
 msgid "Socket read failed (too many tries)."
 msgstr "La lectura del sòcol ha fallat (massa intents)."
 
-#: WWW/Library/Implementation/HTTP.c:81
+#: WWW/Library/Implementation/HTTP.c:136
 #, c-format
 msgid "SSL callback:%s, preverify_ok=%d, ssl_okay=%d"
 msgstr "Crida de retorn SSL:%s, preverify_ok=%d, ssl_okay=%d"
 
-#: WWW/Library/Implementation/HTTP.c:438
+#: WWW/Library/Implementation/HTTP.c:516
 #, c-format
 msgid "Address contains a username: %s"
 msgstr "L'adreça conté un nom d'usuari: %s"
 
-#: WWW/Library/Implementation/HTTP.c:492
+#: WWW/Library/Implementation/HTTP.c:570
 #, c-format
 msgid "Certificate issued by: %s"
 msgstr "El certificat ha estat expedit per: %s"
 
-#: WWW/Library/Implementation/HTTP.c:679
+#: WWW/Library/Implementation/HTTP.c:757
 msgid "This client does not contain support for HTTPS URLs."
 msgstr "Aquest client no admet adreces HTTPS."
 
-#: WWW/Library/Implementation/HTTP.c:704
+#: WWW/Library/Implementation/HTTP.c:782
 msgid "Unable to connect to remote host."
 msgstr "No ha estat possible connectar amb el servidor."
 
-#: WWW/Library/Implementation/HTTP.c:744
+#: WWW/Library/Implementation/HTTP.c:825
 msgid "Retrying connection without TLS."
 msgstr "S'està reintentant la connexió sense TLS."
 
-#: WWW/Library/Implementation/HTTP.c:794
+#: WWW/Library/Implementation/HTTP.c:877
 msgid "GnuTLS error when trying to verify certificate."
 msgstr "S'ha produït un error GnuTLS quan s'estava intentant verificar el certificat"
 
-#: WWW/Library/Implementation/HTTP.c:806
+#: WWW/Library/Implementation/HTTP.c:889
 msgid "the certificate has no known issuer"
 msgstr "el certificat no té un emissor conegut"
 
-#: WWW/Library/Implementation/HTTP.c:808
+#: WWW/Library/Implementation/HTTP.c:891
 msgid "no issuer was found"
 msgstr "no s'ha trobat cap emissor"
 
-#: WWW/Library/Implementation/HTTP.c:810
+#: WWW/Library/Implementation/HTTP.c:893
 msgid "issuer is not a CA"
 msgstr "l'emissor no és un CA"
 
-#: WWW/Library/Implementation/HTTP.c:812
+#: WWW/Library/Implementation/HTTP.c:895
 msgid "the certificate has been revoked"
 msgstr "el certificat ha estat revocat"
 
-#: WWW/Library/Implementation/HTTP.c:814
+#: WWW/Library/Implementation/HTTP.c:897
 msgid "the certificate is not trusted"
 msgstr "el certificat no és de confiança"
 
-#: WWW/Library/Implementation/HTTP.c:889
+#: WWW/Library/Implementation/HTTP.c:972
 #, c-format
 msgid "Verified connection to %s (cert=%s)"
 msgstr "Connexió verificada a %s (cert=%s)"
 
-#: WWW/Library/Implementation/HTTP.c:937 WWW/Library/Implementation/HTTP.c:979
+#: WWW/Library/Implementation/HTTP.c:1022
+#: WWW/Library/Implementation/HTTP.c:1064
 #, c-format
 msgid "Verified connection to %s (subj=%s)"
 msgstr "Connexió verificada a %s (subj=%s)"
 
-#: WWW/Library/Implementation/HTTP.c:1009
+#: WWW/Library/Implementation/HTTP.c:1094
 msgid "Can't find common name in certificate"
 msgstr "No es pot trobar el nom comú al certificat"
 
-#: WWW/Library/Implementation/HTTP.c:1012
+#: WWW/Library/Implementation/HTTP.c:1097
 #, c-format
 msgid "SSL error:host(%s)!=cert(%s)-Continue?"
 msgstr "Error SSL: servidor(%s)!=cert(%s). Voleu continuar?"
 
-#: WWW/Library/Implementation/HTTP.c:1025
+#: WWW/Library/Implementation/HTTP.c:1104
+msgid "SSL error"
+msgstr "Error de SSL"
+
+#: WWW/Library/Implementation/HTTP.c:1112
 #, c-format
 msgid "UNVERIFIED connection to %s (cert=%s)"
 msgstr "Connexió NO VERIFICADA a %s (cert=%s)"
 
-#: WWW/Library/Implementation/HTTP.c:1034
+#: WWW/Library/Implementation/HTTP.c:1121
 #, c-format
 msgid "Secure %d-bit %s (%s) HTTP connection"
 msgstr "%d-bit %s segur (%s) connexió HTTP"
 
-#: WWW/Library/Implementation/HTTP.c:1497
+#: WWW/Library/Implementation/HTTP.c:1584
 msgid "Sending HTTP request."
 msgstr "Enviant sol·licitud HTTP."
 
-#: WWW/Library/Implementation/HTTP.c:1539
+#: WWW/Library/Implementation/HTTP.c:1626
 msgid "Unexpected network write error; connection aborted."
 msgstr "Error inesperat d'escriptura "
 
-#: WWW/Library/Implementation/HTTP.c:1545
+#: WWW/Library/Implementation/HTTP.c:1632
 msgid "HTTP request sent; waiting for response."
 msgstr "Sol·licitud HTTP enviada; esperant resposta."
 
-#: WWW/Library/Implementation/HTTP.c:1618
-#: WWW/Library/Implementation/HTTP.c:1628
+#: WWW/Library/Implementation/HTTP.c:1705
+#: WWW/Library/Implementation/HTTP.c:1715
 msgid "Unexpected network read error; connection aborted."
 msgstr "Error inesperat de lectura en la xarxa; s'ha avortat la connexió."
 
@@ -3202,7 +3274,7 @@ msgstr "Error inesperat de lectura en la xarxa; s'ha avortat la connexió."
 #. * line and possibly other headers, so we'll deal with them by
 #. * showing the full header to the user as text/plain.  - FM
 #.
-#: WWW/Library/Implementation/HTTP.c:1830
+#: WWW/Library/Implementation/HTTP.c:1917
 msgid "Got unexpected Informational Status."
 msgstr "S'ha obtingut un estat d'informació no esperat"
 
@@ -3212,7 +3284,7 @@ msgstr "S'ha obtingut un estat d'informació no esperat"
 #. * content.  We'll instruct the user to do that, and
 #. * restore the current document.  - FM
 #.
-#: WWW/Library/Implementation/HTTP.c:1864
+#: WWW/Library/Implementation/HTTP.c:1951
 msgid "Request fulfilled.  Reset Content."
 msgstr "S'ha completat la demanda.  Restablaix el contingut."
 
@@ -3222,27 +3294,27 @@ msgstr "S'ha completat la demanda.  Restablaix el contingut."
 #. * status is inappropriate.  We'll deal with it by showing
 #. * the full header to the user as text/plain.  - FM
 #.
-#: WWW/Library/Implementation/HTTP.c:1979
+#: WWW/Library/Implementation/HTTP.c:2066
 msgid "Got unexpected 304 Not Modified status."
 msgstr "S'ha obtingut un codi 304 Not Modified inesperat (el document no ha estat modificat)."
 
-#: WWW/Library/Implementation/HTTP.c:2042
+#: WWW/Library/Implementation/HTTP.c:2129
 msgid "Redirection of POST content requires user approval."
 msgstr "La redirecció del contingut POST requereix l'aprovació de l'usuari."
 
-#: WWW/Library/Implementation/HTTP.c:2057
+#: WWW/Library/Implementation/HTTP.c:2144
 msgid "Have POST content.  Treating Permanent Redirection as Temporary.\n"
 msgstr "Hi ha un contingut POST.  Es tractarà la redirecció permanent com a temporària.\n"
 
-#: WWW/Library/Implementation/HTTP.c:2101
+#: WWW/Library/Implementation/HTTP.c:2188
 msgid "Retrying with access authorization information."
 msgstr "Estic reintentant amb la informació d'accés."
 
-#: WWW/Library/Implementation/HTTP.c:2113
+#: WWW/Library/Implementation/HTTP.c:2200
 msgid "Show the 401 message body?"
 msgstr "Mostrar el cos del missatge d'error 401?"
 
-#: WWW/Library/Implementation/HTTP.c:2157
+#: WWW/Library/Implementation/HTTP.c:2244
 msgid "Show the 407 message body?"
 msgstr "Mostrar el cos del missatge d'error 407?"
 
@@ -3250,7 +3322,7 @@ msgstr "Mostrar el cos del missatge d'error 407?"
 #. * Bad or unknown server_status number.  Take a chance and hope
 #. * there is something to display.  - FM
 #.
-#: WWW/Library/Implementation/HTTP.c:2257
+#: WWW/Library/Implementation/HTTP.c:2344
 msgid "Unknown status reply from server!"
 msgstr "Resposta desconeguda del servidor!"
 
@@ -3631,31 +3703,31 @@ msgstr "no"
 msgid "Y/N/A/V"
 msgstr "S/N/P/M"
 
-#: src/HTML.c:5915
+#: src/HTML.c:5931
 msgid "Description:"
 msgstr "Descripció:"
 
-#: src/HTML.c:5920
+#: src/HTML.c:5936
 msgid "(none)"
 msgstr "(cap)"
 
-#: src/HTML.c:5924
+#: src/HTML.c:5940
 msgid "Filepath:"
 msgstr "Camí:"
 
-#: src/HTML.c:5930
+#: src/HTML.c:5946
 msgid "(unknown)"
 msgstr "(desconegut)"
 
-#: src/HTML.c:7370
+#: src/HTML.c:7386
 msgid "Document has only hidden links.  Use the 'l'ist command."
 msgstr "El document només conté enllaços ocults. Useu el comand L)ist."
 
-#: src/HTML.c:7869
+#: src/HTML.c:7885
 msgid "Source cache error - disk full?"
 msgstr "Source cache error: disc ple?"
 
-#: src/HTML.c:7882
+#: src/HTML.c:7898
 msgid "Source cache error - not enough memory!"
 msgstr "Source cache error: no hi ha prou memòria!"
 
@@ -3747,19 +3819,19 @@ msgstr "Dóna informació del estat actual del suport per a scripts CGI.\n"
 msgid "Exiting via interrupt:"
 msgstr "Eixint a causa de la interrupció:"
 
-#: src/LYCookie.c:2538
+#: src/LYCookie.c:2541
 msgid "(from a previous session)"
 msgstr "(d'una sessió anterior)"
 
-#: src/LYCookie.c:2599
+#: src/LYCookie.c:2602
 msgid "Maximum Gobble Date:"
 msgstr "Data límit d'eliminació:"
 
-#: src/LYCookie.c:2638
+#: src/LYCookie.c:2641
 msgid "Internal"
 msgstr "Intern"
 
-#: src/LYCookie.c:2639
+#: src/LYCookie.c:2642
 msgid "cookie_domain_flag_set error, aborting program"
 msgstr "error cookie_domain_flag_see, s'avortarà el programa"
 
@@ -4267,19 +4339,19 @@ msgstr "Aquest missatge va ser generat automàticament per"
 msgid "No system mailer configured"
 msgstr "No hi ha cap servidor de correu de sistema configurat"
 
-#: src/LYMain.c:1069
+#: src/LYMain.c:1071
 msgid "No Winsock found, sorry."
 msgstr "No s'ha trobat Winsock."
 
-#: src/LYMain.c:1260
+#: src/LYMain.c:1262
 msgid "You MUST define a valid TMP or TEMP area!"
 msgstr "Heu de definir una àrea TMP o TEMP vàlida!"
 
-#: src/LYMain.c:1313 src/LYMainLoop.c:5283
+#: src/LYMain.c:1315 src/LYMainLoop.c:5283
 msgid "No such directory"
 msgstr "No existeix el directori"
 
-#: src/LYMain.c:1507
+#: src/LYMain.c:1509
 #, c-format
 msgid ""
 "\n"
@@ -4290,7 +4362,7 @@ msgstr ""
 "El fitxer de configuració «%s» no està disponible\n"
 "\n"
 
-#: src/LYMain.c:1517
+#: src/LYMain.c:1519
 #, c-format
 msgid ""
 "\n"
@@ -4300,66 +4372,66 @@ msgstr ""
 "\n"
 "Els jocs de caràcters no estan declarats.\n"
 
-#: src/LYMain.c:1654
+#: src/LYMain.c:1675
 #, c-format
 msgid "Ignored %d characters from standard input.\n"
 msgstr "S'han ignorat %d caràcters de l'entrada estàndard.\n"
 
-#: src/LYMain.c:1656
+#: src/LYMain.c:1677
 #, c-format
 msgid "Use \"-stdin\" or \"-\" to tell how to handle piped input.\n"
 msgstr "Useu «-stdin» o «-» per especificar com gestionar l'entrada canalitzada.\n"
 
-#: src/LYMain.c:1814
+#: src/LYMain.c:1835
 msgid "Warning:"
 msgstr "Alerta:"
 
-#: src/LYMain.c:2384
+#: src/LYMain.c:2405
 msgid "persistent cookies state will be changed in next session only."
 msgstr "l'estat de les cookies persistents no es canviarà fins la següent sessió"
 
-#: src/LYMain.c:2621 src/LYMain.c:2666
+#: src/LYMain.c:2642 src/LYMain.c:2687
 #, c-format
 msgid "Lynx: ignoring unrecognized charset=%s\n"
 msgstr "Lynx: joc de caràcters %s no reconegut. S'ignorarà.\n"
 
-#: src/LYMain.c:3185
+#: src/LYMain.c:3206
 #, c-format
 msgid "%s Version %s (%s)"
 msgstr "%s Versió %s (%s)"
 
-#: src/LYMain.c:3223
+#: src/LYMain.c:3247
 #, c-format
-msgid "Built on %s %s %s\n"
-msgstr "Compilat per a %s el %s a les %s\n"
+msgid "Built on %s%s.\n"
+msgstr "Compilat el %s a les %s.\n"
 
-#: src/LYMain.c:3245
+#: src/LYMain.c:3261
 msgid "Copyrights held by the Lynx Developers Group,"
 msgstr "Els Copyright els manté el Lynx Developers Group."
 
-#: src/LYMain.c:3246
+#: src/LYMain.c:3262
 msgid "the University of Kansas, CERN, and other contributors."
 msgstr "la Universitat de Kansas, el CERN i altres contribuïdors."
 
-#: src/LYMain.c:3247
+#: src/LYMain.c:3263
 msgid "Distributed under the GNU General Public License (Version 2)."
 msgstr "Distribuït sota la Llicència Pública General GNU (Versió 2)."
 
-#: src/LYMain.c:3248
-msgid "See http://lynx.isc.org/ and the online help for more information."
-msgstr "Vegeu http://lynx.isc.org/ i l'ajuda en línia per a més informació."
+#: src/LYMain.c:3264
+msgid "See http://lynx.invisible-island.net/ and the online help for more information."
+msgstr "Vegeu http://lynx.invisible-island.net/ i l'ajuda en línia per a més informació."
 
-#: src/LYMain.c:4091
+#: src/LYMain.c:4107
 #, c-format
 msgid "USAGE: %s [options] [file]\n"
 msgstr "UTILITZACIÓ: %s [opcions] [arxiu]\n"
 
-#: src/LYMain.c:4092
+#: src/LYMain.c:4108
 #, c-format
 msgid "Options are:\n"
 msgstr "Les opcions són:\n"
 
-#: src/LYMain.c:4395
+#: src/LYMain.c:4411
 #, c-format
 msgid "%s: Invalid Option: %s\n"
 msgstr "%s: l'opció no és vàlida: %s\n"
@@ -4800,108 +4872,116 @@ msgstr "bzip2"
 msgid "All"
 msgstr "Tot"
 
-#: src/LYOptions.c:2798 src/LYOptions.c:2827
+#: src/LYOptions.c:2801 src/LYOptions.c:2830
 #, c-format
 msgid "Use %s to invoke the Options menu!"
 msgstr "Useu %s per a invocar el menú d'opcions"
 
-#: src/LYOptions.c:3675
+#: src/LYOptions.c:3688
 msgid "(options marked with (!) will not be saved)"
 msgstr "(les opcions marcades amb (!) no es desen)"
 
-#: src/LYOptions.c:3683
+#: src/LYOptions.c:3696
 msgid "General Preferences"
 msgstr "Preferències generals"
 
 #. ***************************************************************
 #. User Mode: SELECT
-#: src/LYOptions.c:3687
+#: src/LYOptions.c:3700
 msgid "User mode"
 msgstr "Tipus d'usuari"
 
 #. Editor: INPUT
-#: src/LYOptions.c:3693
+#: src/LYOptions.c:3706
 msgid "Editor"
 msgstr "Editor"
 
 #. Search Type: SELECT
-#: src/LYOptions.c:3698
+#: src/LYOptions.c:3711
 msgid "Type of Search"
 msgstr "Tipus de recerca"
 
-#: src/LYOptions.c:3703
+#: src/LYOptions.c:3716
 msgid "Security and Privacy"
 msgstr "Seguretat i privacitat"
 
 #. ***************************************************************
 #. Cookies: SELECT
-#: src/LYOptions.c:3707
+#: src/LYOptions.c:3720
 msgid "Cookies"
 msgstr "Cookies"
 
 #. Cookie Prompting: SELECT
-#: src/LYOptions.c:3721
+#: src/LYOptions.c:3734
 msgid "Invalid-Cookie Prompting"
 msgstr "Demanda de cookie no vàlida"
 
 #. SSL Prompting: SELECT
-#: src/LYOptions.c:3728
+#: src/LYOptions.c:3741
 msgid "SSL Prompting"
 msgstr "Demanda de SSL"
 
-#: src/LYOptions.c:3734
+#: src/LYOptions.c:3746
+msgid "SSL client certificate file"
+msgstr "Fitxer de certificat de client SSL"
+
+#: src/LYOptions.c:3750
+msgid "SSL client key file"
+msgstr "Fitxer de clau de client SSL"
+
+#: src/LYOptions.c:3756
 msgid "Keyboard Input"
 msgstr "Teclat"
 
 #. ***************************************************************
 #. Keypad Mode: SELECT
-#: src/LYOptions.c:3738
+#: src/LYOptions.c:3760
 msgid "Keypad mode"
 msgstr "Mode del teclat"
 
 #. Emacs keys: ON/OFF
-#: src/LYOptions.c:3744
+#: src/LYOptions.c:3766
 msgid "Emacs keys"
 msgstr "Tecles d'emacs"
 
 #. VI Keys: ON/OFF
-#: src/LYOptions.c:3750
+#: src/LYOptions.c:3772
 msgid "VI keys"
 msgstr "Tecles de VI"
 
 #. Line edit style: SELECT
 #. well, at least 2 line edit styles available
-#: src/LYOptions.c:3757
+#: src/LYOptions.c:3779
 msgid "Line edit style"
 msgstr "Estil d'edició de la línia"
 
 #. Keyboard layout: SELECT
-#: src/LYOptions.c:3769
+#: src/LYOptions.c:3791
 msgid "Keyboard layout"
 msgstr "Configuració del teclat"
 
 #.
 #. * Display and Character Set
 #.
-#: src/LYOptions.c:3783
+#: src/LYOptions.c:3805
 msgid "Display and Character Set"
 msgstr "Pantalla i joc de caràcters"
 
 #. Use locale-based character set: ON/OFF
-#: src/LYOptions.c:3788
+#: src/LYOptions.c:3810
 msgid "Use locale-based character set"
 msgstr "Usa el conjunt de caràcters basats en el locale"
 
-#: src/LYOptions.c:3795
+#: src/LYOptions.c:3817
 msgid "Use HTML5 charset replacements"
 msgstr "Usa reemplaçaments del conjunt de caràcters de l'HTML5"
 
 #. Display Character Set: SELECT
-#: src/LYOptions.c:3801
+#: src/LYOptions.c:3823
 msgid "Display character set"
 msgstr "Joc de caràcters"
 
-#: src/LYOptions.c:3832
+#: src/LYOptions.c:3854
 msgid "Assumed document character set"
 msgstr "Joc de caràcters predeterminat"
 
@@ -4910,211 +4990,211 @@ msgstr "Joc de caràcters predeterminat"
 #. * we split the header to make it more readable:
 #. * "CJK mode" for CJK display charsets, and "Raw 8-bit" for others.
 #.
-#: src/LYOptions.c:3852
+#: src/LYOptions.c:3874
 msgid "CJK mode"
 msgstr "mode CJK"
 
-#: src/LYOptions.c:3854
+#: src/LYOptions.c:3876
 msgid "Raw 8-bit"
 msgstr "8-bits cru"
 
 #. X Display: INPUT
-#: src/LYOptions.c:3862
+#: src/LYOptions.c:3884
 msgid "X Display"
 msgstr "Pantalla X"
 
 #.
 #. * Document Appearance
 #.
-#: src/LYOptions.c:3868
+#: src/LYOptions.c:3890
 msgid "Document Appearance"
 msgstr "Apariència dels documents"
 
-#: src/LYOptions.c:3874
+#: src/LYOptions.c:3896
 msgid "Show color"
 msgstr "En color"
 
 #. Color style: ON/OFF
-#: src/LYOptions.c:3899
+#: src/LYOptions.c:3921
 msgid "Color style"
 msgstr "Estil de color"
 
-#: src/LYOptions.c:3908
+#: src/LYOptions.c:3930
 msgid "Default colors"
 msgstr "Color predeterminats"
 
 #. Show cursor: ON/OFF
-#: src/LYOptions.c:3916
+#: src/LYOptions.c:3938
 msgid "Show cursor"
 msgstr "Mostrar cursor"
 
 #. Underline links: ON/OFF
-#: src/LYOptions.c:3922
+#: src/LYOptions.c:3944
 msgid "Underline links"
 msgstr "Subratlla els enllaços"
 
 #. Show scrollbar: ON/OFF
-#: src/LYOptions.c:3929
+#: src/LYOptions.c:3951
 msgid "Show scrollbar"
 msgstr "Mostrar la barra de desplaçament"
 
 #. Select Popups: ON/OFF
-#: src/LYOptions.c:3936
+#: src/LYOptions.c:3958
 msgid "Popups for select fields"
 msgstr "Finestres emergents per a camps de selecció"
 
 #. HTML error recovery: SELECT
-#: src/LYOptions.c:3942
+#: src/LYOptions.c:3964
 msgid "HTML error recovery"
 msgstr "Recuperació d'errors de HTML"
 
 #. Bad HTML messages: SELECT
-#: src/LYOptions.c:3948
+#: src/LYOptions.c:3970
 msgid "Bad HTML messages"
 msgstr "Missatges incorrectes d'HTML"
 
 #. Show Images: SELECT
-#: src/LYOptions.c:3954
+#: src/LYOptions.c:3976
 msgid "Show images"
 msgstr "Mostra les imatges"
 
 #. Verbose Images: ON/OFF
-#: src/LYOptions.c:3968
+#: src/LYOptions.c:3990
 msgid "Verbose images"
 msgstr "Detalls sobre imatges"
 
 #.
 #. * Headers Transferred to Remote Servers
 #.
-#: src/LYOptions.c:3976
+#: src/LYOptions.c:3998
 msgid "Headers Transferred to Remote Servers"
 msgstr "Capçaleres que es transmeten als servidors remots"
 
 #. ***************************************************************
 #. Mail Address: INPUT
-#: src/LYOptions.c:3980
+#: src/LYOptions.c:4002
 msgid "Personal mail address"
 msgstr "Adreça electrònica personal"
 
-#: src/LYOptions.c:3985
+#: src/LYOptions.c:4007
 msgid "Personal name for mail"
 msgstr "Adreça personal del correu electrònic"
 
-#: src/LYOptions.c:3992
+#: src/LYOptions.c:4014
 msgid "Password for anonymous ftp"
 msgstr "Contrasenya per al ftp anònimo"
 
 #. Preferred media type: SELECT
-#: src/LYOptions.c:3998
+#: src/LYOptions.c:4020
 msgid "Preferred media type"
 msgstr "Tipus de suport preferit"
 
 #. Preferred encoding: SELECT
-#: src/LYOptions.c:4004
+#: src/LYOptions.c:4026
 msgid "Preferred encoding"
 msgstr "Codificació preferida"
 
 #. Preferred Document Character Set: INPUT
-#: src/LYOptions.c:4010
+#: src/LYOptions.c:4032
 msgid "Preferred document character set"
 msgstr "Joc de caràcters preferit"
 
 #. Preferred Document Language: INPUT
-#: src/LYOptions.c:4015
+#: src/LYOptions.c:4037
 msgid "Preferred document language"
 msgstr "Idioma preferit"
 
-#: src/LYOptions.c:4021
+#: src/LYOptions.c:4043
 msgid "Send User-Agent header"
 msgstr "Envia la capçalera de l'agent d'usuari"
 
-#: src/LYOptions.c:4023
+#: src/LYOptions.c:4045
 msgid "User-Agent header"
 msgstr "Identificació del navegador"
 
 #.
 #. * Listing and Accessing Files
 #.
-#: src/LYOptions.c:4031
+#: src/LYOptions.c:4053
 msgid "Listing and Accessing Files"
 msgstr "Fitxers: llistat i accés"
 
 #. FTP sort: SELECT
-#: src/LYOptions.c:4036
+#: src/LYOptions.c:4058
 msgid "Use Passive FTP"
 msgstr "Usa el FTP passiu"
 
 #. FTP sort: SELECT
-#: src/LYOptions.c:4042
+#: src/LYOptions.c:4064
 msgid "FTP sort criteria"
 msgstr "Criteri d'ordenació per a FTP"
 
 #. Local Directory Sort: SELECT
-#: src/LYOptions.c:4050
+#: src/LYOptions.c:4072
 msgid "Local directory sort criteria"
 msgstr "Criteri d'ordenació local"
 
 #. Local Directory Order: SELECT
-#: src/LYOptions.c:4056
+#: src/LYOptions.c:4078
 msgid "Local directory sort order"
 msgstr "Criteri d'ordenació de directoris locals"
 
-#: src/LYOptions.c:4065
+#: src/LYOptions.c:4087
 msgid "Show dot files"
 msgstr "Mostrar fitxers .*"
 
-#: src/LYOptions.c:4073
+#: src/LYOptions.c:4095
 msgid "Execution links"
 msgstr "Enllaços d'execució"
 
-#: src/LYOptions.c:4091
+#: src/LYOptions.c:4113
 msgid "Pause when showing message"
 msgstr "Pausa quan s'estiguin mostrant els missatges"
 
 #. Show transfer rate: SELECT
-#: src/LYOptions.c:4098
+#: src/LYOptions.c:4120
 msgid "Show transfer rate"
 msgstr "Mostrar taxa de transferència"
 
 #.
 #. * Special Files and Screens
 #.
-#: src/LYOptions.c:4118
+#: src/LYOptions.c:4140
 msgid "Special Files and Screens"
 msgstr "Fitxers i pantalles especials"
 
-#: src/LYOptions.c:4123
+#: src/LYOptions.c:4145
 msgid "Multi-bookmarks"
 msgstr "Marcadors multiples"
 
-#: src/LYOptions.c:4131
+#: src/LYOptions.c:4153
 msgid "Review/edit Bookmarks files"
 msgstr "Editar fitxers de favorits"
 
-#: src/LYOptions.c:4134
+#: src/LYOptions.c:4156
 msgid "Goto multi-bookmark menu"
 msgstr "Veure el menú de múltiples fitxers d'adreces"
 
-#: src/LYOptions.c:4136
+#: src/LYOptions.c:4158
 msgid "Bookmarks file"
 msgstr "Fitxer de favorits"
 
 #. Auto Session: ON/OFF
-#: src/LYOptions.c:4143
+#: src/LYOptions.c:4165
 msgid "Auto Session"
 msgstr "Sessió automàtica"
 
 #. Session File Menu: INPUT
-#: src/LYOptions.c:4149
+#: src/LYOptions.c:4171
 msgid "Session file"
 msgstr "Fitxer de sessió"
 
 #. Visited Pages: SELECT
-#: src/LYOptions.c:4155
+#: src/LYOptions.c:4177
 msgid "Visited Pages"
 msgstr "Pàgines visitades"
 
-#: src/LYOptions.c:4160
+#: src/LYOptions.c:4182
 msgid "View the file "
 msgstr "Veure el fitxer"
 
@@ -5235,38 +5315,38 @@ msgstr "Lynx: impossible iniciar, el fitxer de regles del CERN %s no estàdisponi
 msgid "(no name)"
 msgstr "(sense nom)"
 
-#: src/LYReadCFG.c:2073
+#: src/LYReadCFG.c:2075
 #, c-format
 msgid "More than %d nested lynx.cfg includes -- perhaps there is a loop?!?\n"
 msgstr "Més de %d includes imbricats en lynx.cfg: potser hi ha un bucle?\n"
 
-#: src/LYReadCFG.c:2075
+#: src/LYReadCFG.c:2077
 #, c-format
 msgid "Last attempted include was '%s',\n"
 msgstr "L'últim include ha estat \"%s\", \n"
 
-#: src/LYReadCFG.c:2076
+#: src/LYReadCFG.c:2078
 #, c-format
 msgid "included from '%s'.\n"
 msgstr "inclós des de \"%s\".\n"
 
-#: src/LYReadCFG.c:2479 src/LYReadCFG.c:2492 src/LYReadCFG.c:2550
+#: src/LYReadCFG.c:2481 src/LYReadCFG.c:2494 src/LYReadCFG.c:2552
 msgid "The following is read from your lynx.cfg file."
 msgstr "Les dades següents s'han llegit del vostre fitxer lynx.cfg."
 
-#: src/LYReadCFG.c:2480 src/LYReadCFG.c:2493
+#: src/LYReadCFG.c:2482 src/LYReadCFG.c:2495
 msgid "Please read the distribution"
 msgstr "Per favor, llegiu "
 
-#: src/LYReadCFG.c:2486 src/LYReadCFG.c:2496
+#: src/LYReadCFG.c:2488 src/LYReadCFG.c:2498
 msgid "for more comments."
 msgstr "si necessiteu més informació."
 
-#: src/LYReadCFG.c:2532
+#: src/LYReadCFG.c:2534
 msgid "RELOAD THE CHANGES"
 msgstr "RECARREGAR ELS CANVIS"
 
-#: src/LYReadCFG.c:2540
+#: src/LYReadCFG.c:2542
 msgid "Your primary configuration"
 msgstr "Configuració primària"
 
@@ -6019,7 +6099,7 @@ msgstr ""
 "La variable visited_links controla la forma en què Lynx organitza la\n"
 "informació en la pàgina d'enllaços visitats.\n"
 
-#: src/LYrcFile.c:861
+#: src/LYrcFile.c:863
 msgid ""
 "If keypad_mode is set to \"NUMBERS_AS_ARROWS\", then the numbers on\n"
 "your keypad when the numlock is on will act as arrow keys:\n"
@@ -6030,7 +6110,7 @@ msgid ""
 "regardless of whether numlock is on.\n"
 msgstr "Si poseu keypad_mode \n"
 
-#: src/LYrcFile.c:870
+#: src/LYrcFile.c:872
 msgid ""
 "If keypad_mode is set to \"LINKS_ARE_NUMBERED\", then numbers will\n"
 "appear next to each link and numbers are used to select links.\n"
@@ -6039,7 +6119,7 @@ msgstr ""
 "aleshores apareixerà un número al costat de cada enllaç i podreu triar\n"
 "l'enllaç desitjat prement la tecla del número corresponent.\n"
 
-#: src/LYrcFile.c:874
+#: src/LYrcFile.c:876
 msgid ""
 "If keypad_mode is set to \"LINKS_AND_FORM_FIELDS_ARE_NUMBERED\", then\n"
 "numbers will appear next to each link and visible form input field.\n"
@@ -6059,7 +6139,7 @@ msgstr ""
 "de llista també enumeren les entrades dels formularis.\n"
 "\n"
 
-#: src/LYrcFile.c:883
+#: src/LYrcFile.c:885
 msgid ""
 "NOTE: Some fixed format documents may look disfigured when\n"
 "\"LINKS_ARE_NUMBERED\" or \"LINKS_AND_FORM_FIELDS_ARE_NUMBERED\" are\n"
@@ -6070,13 +6150,13 @@ msgstr ""
 "\"LINKS_AND_FORM_FIELDS_ARE_NUMBERED\" (enllaços i camps de formulari\n"
 "numerats.\n"
 
-#: src/LYrcFile.c:915
+#: src/LYrcFile.c:917
 msgid ""
 "Lynx User Defaults File\n"
 "\n"
 msgstr "Fitxer dels valors predeterminats d'usuari del Lynx\n"
 
-#: src/LYrcFile.c:924
+#: src/LYrcFile.c:926
 msgid ""
 "This file contains options saved from the Lynx Options Screen (normally\n"
 "with the 'o' key).  To save options with that screen, you must select the\n"
@@ -6086,7 +6166,7 @@ msgstr ""
 "amb la tecla «o»).  Per desar opcions amb aquesta pantalla, heu de seleccionar\n"
 "la casella de selecció:\n"
 
-#: src/LYrcFile.c:931
+#: src/LYrcFile.c:933
 msgid ""
 "You must then save the settings using the link on the line above the\n"
 "checkbox:\n"
@@ -6094,7 +6174,7 @@ msgstr ""
 "Heu de desar els paràmetres usant l'enllaç a la línia a sobre de\n"
 "la casella de selecció:\n"
 
-#: src/LYrcFile.c:938
+#: src/LYrcFile.c:940
 msgid ""
 "You may also use the command-line option \"-forms_options\", which displays\n"
 "the simpler Options Menu instead.  Save options with that using the '>' key.\n"
@@ -6104,7 +6184,7 @@ msgstr ""
 "el menú més simple de Menú d'Opcions. Deseu les opcions amb això usant la tecla\n"
 "«>».\n"
 
-#: src/LYrcFile.c:945
+#: src/LYrcFile.c:947
 msgid ""
 "This file contains options saved from the Lynx Options Screen (normally\n"
 "with the '>' key).\n"
@@ -6113,7 +6193,7 @@ msgstr ""
 "Aquest fitxer conté opcions desada de la Pantalla d'Opcions del Lynx (normalment\n"
 "amb la tecla «>»)\n"
 
-#: src/LYrcFile.c:952
+#: src/LYrcFile.c:954
 msgid ""
 "There is normally no need to edit this file manually, since the defaults\n"
 "here can be controlled from the Options Screen, and the next time options\n"

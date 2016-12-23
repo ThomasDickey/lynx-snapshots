@@ -1,9 +1,11 @@
--- $LynxId: CHANGES,v 1.871 2016/11/27 23:18:41 tom Exp $
+-- $LynxId: CHANGES,v 1.872 2016/12/23 07:47:02 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2016-11-27 (2.8.9dev.12)
+2016-12-23 (2.8.9dev.12)
+* update ca.po, from
+    http://translationproject.org/latest/lynx
 * fix two more typos in the list of ENABLE_LYNXRC in lynx.cfg -TD
 * remove a repeated item for SEND_USERAGENT from lynx.cfg (Larry Hynes)
 * accept userinfo in a URL, subject to override by -auth option or -pauth
