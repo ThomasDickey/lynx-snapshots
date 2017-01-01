@@ -1,5 +1,5 @@
 /*
- * $LynxId: GridText.c,v 1.290 2016/11/24 18:10:02 tom Exp $
+ * $LynxId: GridText.c,v 1.291 2017/01/01 00:56:20 Takeshi.Hataguchi Exp $
  *
  *		Character grid hypertext object
  *		===============================
@@ -4444,14 +4444,12 @@ void HText_appendCharacter(HText *text, int ch)
 
 		case SJIS:
 		    if ((text->kcode == EUC) || (text->kcode == JIS)) {
-			if (!conv_jisx0201kana && IS_EUC_X0201KANA(hi, lo)) {
-			    if (IS_EUC_X0201KANA(hi, lo)) {
-				line->data[line->size++] = (char) lo;
-			    } else {
-				EUC_TO_SJIS1(hi, lo, tmp);
-				line->data[line->size++] = (char) tmp[0];
-				line->data[line->size++] = (char) tmp[1];
-			    }
+			if (!conv_jisx0201kana && IS_EUC_X0201KANA(hi, lo))
+			    line->data[line->size++] = lo;
+			else {
+			    EUC_TO_SJIS1(hi, lo, tmp);
+			    line->data[line->size++] = (char) tmp[0];
+			    line->data[line->size++] = (char) tmp[1];
 			}
 		    } else if (IS_SJIS_2BYTE(hi, lo)) {
 			line->data[line->size++] = (char) hi;

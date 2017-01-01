@@ -1,4 +1,4 @@
-/* $LynxId: LYOptions.c,v 1.170 2016/11/24 18:30:48 tom Exp $ */
+/* $LynxId: LYOptions.c,v 1.171 2017/01/01 01:49:49 tom Exp $ */
 #include <HTUtils.h>
 #include <HTFTP.h>
 #include <HTTP.h>		/* 'reloading' flag */
@@ -2513,7 +2513,7 @@ static BOOLEAN GetOptValues(OptValues * table, char *value,
 
 #ifdef USE_COLOR_STYLE
 #ifdef LY_FIND_LEAKS
-static void free_colorstyle_leaks(void)
+void free_colorstyle_leaks(void)
 {
     FREE(color_style_values);
 }

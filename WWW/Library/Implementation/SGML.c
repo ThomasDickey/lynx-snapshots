@@ -1,5 +1,5 @@
 /*
- * $LynxId: SGML.c,v 1.159 2016/11/24 20:08:10 tom Exp $
+ * $LynxId: SGML.c,v 1.160 2017/01/01 00:56:18 Takeshi.Hataguchi Exp $
  *
  *			General SGML Parser code		SGML.c
  *			========================
@@ -4565,15 +4565,15 @@ unsigned char *EUC_TO_SJIS1(unsigned HI,
 			    unsigned LO,
 			    unsigned char *SJCODE)
 {
-    if (HI == 0x8E) {
-	unsigned char HI_data[2];
-	unsigned char LO_data[2];
+    unsigned char HI_data[2];
+    unsigned char LO_data[2];
 
-	HI_data[0] = UCH(HI);
-	LO_data[0] = UCH(LO);
+    HI_data[0] = UCH(HI);
+    LO_data[0] = UCH(LO);
+    if (HI == 0x8E) {
 	JISx0201TO0208_EUC(HI, LO, HI_data, LO_data);
     }
-    JIS_TO_SJIS1(UCH(HI & 0x7F), UCH(LO & 0x7F), SJCODE);
+    JIS_TO_SJIS1(UCH(HI_data[0] & 0x7F), UCH(LO_data[0] & 0x7F), SJCODE);
     return SJCODE;
 }
 
