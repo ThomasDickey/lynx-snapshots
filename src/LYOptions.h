@@ -1,4 +1,4 @@
-/* $LynxId: LYOptions.h,v 1.31 2013/10/22 00:37:32 tom Exp $ */
+/* $LynxId: LYOptions.h,v 1.32 2017/01/01 01:51:23 tom Exp $ */
 #ifndef LYOPTIONS_H
 #define LYOPTIONS_H
 
@@ -34,6 +34,10 @@ extern "C" {
 
 #ifdef USE_COLOR_STYLE
     extern void build_lss_enum(HTList *);
+#endif
+
+#if defined(USE_COLOR_STYLE) && defined(LY_FIND_LEAKS)
+    extern void free_colorstyle_leaks(void);
 #endif
 
 #ifdef __cplusplus
