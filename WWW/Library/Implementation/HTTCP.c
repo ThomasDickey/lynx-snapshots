@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTCP.c,v 1.136 2016/11/24 18:06:26 tom Exp $
+ * $LynxId: HTTCP.c,v 1.137 2017/01/02 02:11:14 tom Exp $
  *
  *			Generic Communication Code		HTTCP.c
  *			==========================
@@ -1562,7 +1562,7 @@ static void really_getaddrinfo(const char *host,
 			       STATUSES * statuses,
 			       void **result)
 {
-    LYNX_ADDRINFO hints, *res;
+    LYNX_ADDRINFO hints, *res = 0;
     int error;
 
     memset(&hints, 0, sizeof(hints));
