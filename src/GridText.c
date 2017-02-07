@@ -1,5 +1,5 @@
 /*
- * $LynxId: GridText.c,v 1.291 2017/01/01 00:56:20 Takeshi.Hataguchi Exp $
+ * $LynxId: GridText.c,v 1.292 2017/02/07 10:10:45 tom Exp $
  *
  *		Character grid hypertext object
  *		===============================
@@ -4305,14 +4305,18 @@ void HText_appendCharacter(HText *text, int ch)
 	       (int) (line->data[line->size - 1] == LY_SOFT_HYPHEN ? 1 : 0))
 	      - ctrl_chars_on_this_line);
 
-    if (((text->permissible_split
+    if ((
+#ifndef USE_SLANG
+	    (text->permissible_split
 #ifdef USE_CURSES_PADS
-	  || !LYwideLines
+	     || !LYwideLines
 #endif
-	 ) && (actual
-	       + (int) style->rightIndent
-	       + ((IS_CJK_TTY && text->kanji_buf) ? 1 : 0)
-	 ) >= WRAP_COLS(text))
+	    ) &&
+#endif
+	    (actual
+	     + (int) style->rightIndent
+	     + ((IS_CJK_TTY && text->kanji_buf) ? 1 : 0)
+	    ) >= WRAP_COLS(text))
 	|| (text->T.output_utf8
 	    && ((actual
 		 + UTFXTRA_ON_THIS_LINE

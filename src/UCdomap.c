@@ -1,5 +1,5 @@
 /*
- * $LynxId: UCdomap.c,v 1.101 2015/10/02 11:25:55 tom Exp $
+ * $LynxId: UCdomap.c,v 1.102 2017/02/07 10:02:21 tom Exp $
  *
  *  UCdomap.c
  *  =========
@@ -457,17 +457,12 @@ static int con_insert_unipair(unsigned unicode, unsigned fontpos, int fordefault
     else
 	p1 = uni_pagedir[n = unicode >> 11];
     if (!p1) {
-	p1 = (u16 * *)malloc(32 * sizeof(u16 *));
+	if ((p1 = typecallocn(u16 *, 32)) == NULL)
+	    return ucError;
 	if (fordefault)
 	    unidefault_pagedir[n] = p1;
 	else
 	    uni_pagedir[n] = p1;
-	if (!p1)
-	    return ucError;
-
-	for (i = 0; i < 32; i++) {
-	    p1[i] = NULL;
-	}
     }
 
     if (!(p2 = p1[n = (unicode >> 6) & 0x1f])) {
@@ -488,7 +483,6 @@ static int con_insert_unipair(unsigned unicode, unsigned fontpos, int fordefault
 static int con_insert_unipair_str(unsigned unicode, const char *replace_str,
 				  int fordefault)
 {
-    int i;
     unsigned n;
     char ***p1;
     const char **p2;
@@ -498,31 +492,19 @@ static int con_insert_unipair_str(unsigned unicode, const char *replace_str,
     else
 	p1 = uni_pagedir_str[n = unicode >> 11];
     if (!p1) {
-	p1 = (char ***) malloc(32 * sizeof(char **));
+	if ((p1[n] = typecallocn(char *, 32)) == NULL)
+	      return ucError;
 
 	if (fordefault)
 	    unidefault_pagedir_str[n] = p1;
 	else
 	    uni_pagedir_str[n] = p1;
-	if (!p1)
-	    return ucError;
-
-	for (i = 0; i < 32; i++) {
-	    p1[i] = NULL;
-	}
     }
 
     n = ((unicode >> 6) & 0x1f);
     if (!p1[n]) {
-	p1[n] = (char **) malloc(64 * sizeof(char *));
-
-	if (!p1[n])
-	    return ucError;
-
-	p2 = (const char **) p1[n];
-	for (i = 0; i < 64; i++) {
-	    p2[i] = NULL;	/* No replace string this character (yet) */
-	}
+	if ((p1[n] = typecallocn(char *, 64)) == NULL)
+	      return ucError;
     }
     p2 = (const char **) p1[n];
 
@@ -1736,19 +1718,13 @@ static STRING2PTR UC_setup_LYCharSets_repl(int UC_charset_in_hndl,
     /*
      * Create a temporary table for reverse lookup of latin1 codes:
      */
-    tp = (const char **) malloc(96 * sizeof(char *));
+    if ((tp = typecallocn(const char *, 96)) == NULL)
+	  return NULL;
 
-    if (!tp)
-	return NULL;
-    for (i = 0; i < 96; i++)
-	tp[i] = NULL;
-    ti = (u8 *) malloc(96 * sizeof(u8));
-    if (!ti) {
+    if ((ti = typecallocn(u8, 96)) == NULL) {
 	FREE(tp);
 	return NULL;
     }
-    for (i = 0; i < 96; i++)
-	ti[i] = 0;
 
     pp = UCInfo[UC_charset_in_hndl].unitable;
 

@@ -1,4 +1,4 @@
-Copyright 1997-2015,2016 Thomas E. Dickey
+Copyright 1997-2016,2017 Thomas E. Dickey
 
 This copyright notice must be included in all copies or substantial
 portions of Lynx.  It outlines rights and restrictions for Lynx which
@@ -80,5 +80,5 @@ For reference, below is the original copyright notice for Lynx (2.4.2).
 */
 ------------------------------------------------------------------------------
 -- vile:txtmode fc=72 noti
--- $LynxId: COPYHEADER,v 1.14 2016/04/11 00:41:05 tom Exp $
+-- $LynxId: COPYHEADER,v 1.15 2017/01/01 17:00:00 tom Exp $
 ------------------------------------------------------------------------------

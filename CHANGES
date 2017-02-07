@@ -1,9 +1,12 @@
--- $LynxId: CHANGES,v 1.874 2017/01/01 02:03:07 tom Exp $
+-- $LynxId: CHANGES,v 1.877 2017/02/07 10:10:04 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2016-12-31 (2.8.9dev.12)
+2017-02-07 (2.8.9dev.12)
+* amend comparision from 2.8.8dev.10 changes to handle slang specially
+  (report/testcase by TH) -TD
+* minor cleanup of UCDomap.c -TD
 * build-fix for color-style with leak-checking -TD
 * amend merge/fixes from
 	http://en.sourceforge.jp/project/lynx-win32-pata

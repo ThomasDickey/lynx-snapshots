@@ -1,4 +1,4 @@
-/* $LynxId: LYCurses.c,v 1.181 2016/11/04 21:54:57 tom Exp $ */
+/* $LynxId: LYCurses.c,v 1.182 2017/02/07 09:34:11 tom Exp $ */
 #include <HTUtils.h>
 #include <HTAlert.h>
 
@@ -2203,6 +2203,8 @@ void LYwaddnstr(WINDOW * w GCC_UNUSED,
     int y, x;
     size_t inx;
 
+    (void) y;
+    (void) y0;
 #ifdef USE_CURSES_PADS
     /*
      * If we've configured to use pads for left/right scrolling, that can
