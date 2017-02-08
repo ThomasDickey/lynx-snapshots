@@ -1,5 +1,5 @@
 /*
- * $LynxId: UCdomap.c,v 1.102 2017/02/07 10:02:21 tom Exp $
+ * $LynxId: UCdomap.c,v 1.103 2017/02/08 01:23:33 tom Exp $
  *
  *  UCdomap.c
  *  =========
@@ -492,7 +492,7 @@ static int con_insert_unipair_str(unsigned unicode, const char *replace_str,
     else
 	p1 = uni_pagedir_str[n = unicode >> 11];
     if (!p1) {
-	if ((p1[n] = typecallocn(char *, 32)) == NULL)
+	if ((p1 = typecallocn(char **, 32)) == NULL)
 	      return ucError;
 
 	if (fordefault)
