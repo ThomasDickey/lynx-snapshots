@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTMIME.c,v 1.92 2016/11/24 18:16:23 tom Exp $
+ * $LynxId: HTMIME.c,v 1.93 2017/02/10 22:27:42 tom Exp $
  *
  *			MIME Message Parse			HTMIME.c
  *			==================
@@ -261,6 +261,8 @@ static int pumpData(HTStream *me)
      */
     CTRACE((tfp, "...address{%s}\n", me->anchor->address));
     method = HTContentTypeToCompressType(me->anchor->content_type_params);
+    if (isEmpty(me->anchor->content_encoding))
+	me->anchor->no_content_encoding = TRUE;
     if ((method != cftNone)
 	&& isEmpty(me->anchor->content_encoding)
 	&& (new_content = UncompressedContentType(me, method)) != 0) {

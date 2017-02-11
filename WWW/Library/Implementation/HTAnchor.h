@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTAnchor.h,v 1.37 2013/10/02 23:21:55 tom Exp $
+ * $LynxId: HTAnchor.h,v 1.38 2017/02/10 22:26:48 tom Exp $
  *
  *	Hypertext "Anchor" Object				     HTAnchor.h
  *	==========================
@@ -104,6 +104,7 @@ extern "C" {
 #ifdef EXP_HTTP_HEADERS
 	HTChunk http_headers;
 #endif
+	BOOL no_content_encoding;	/* server did not use C-T? */
 	char *content_type_params;	/* Content-Type (with parameters if any) */
 	char *content_type;	/* Content-Type */
 	char *content_language;	/* Content-Language */
