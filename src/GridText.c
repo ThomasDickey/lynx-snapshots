@@ -1,5 +1,5 @@
 /*
- * $LynxId: GridText.c,v 1.292 2017/02/07 10:10:45 tom Exp $
+ * $LynxId: GridText.c,v 1.294 2017/02/11 00:50:00 tom Exp $
  *
  *		Character grid hypertext object
  *		===============================
@@ -4449,7 +4449,7 @@ void HText_appendCharacter(HText *text, int ch)
 		case SJIS:
 		    if ((text->kcode == EUC) || (text->kcode == JIS)) {
 			if (!conv_jisx0201kana && IS_EUC_X0201KANA(hi, lo))
-			    line->data[line->size++] = lo;
+			    line->data[line->size++] = (char) lo;
 			else {
 			    EUC_TO_SJIS1(hi, lo, tmp);
 			    line->data[line->size++] = (char) tmp[0];
@@ -4543,7 +4543,7 @@ void _internal_HTC(HText *text, int style, int dir)
 	    if ((int) line->styles[line->numstyles].sc_horizpos >= ctrl_chars_on_this_line) {
 		line->styles[line->numstyles].sc_horizpos -= ctrl_chars_on_this_line;
 	    }
-	    line->styles[line->numstyles].sc_style = style;
+	    line->styles[line->numstyles].sc_style = (unsigned short) style;
 	    line->styles[line->numstyles].sc_direction = dir;
 	    CTRACE_STYLE((tfp, "internal_HTC %d:style[%d] %d (dir=%d)\n",
 			  line->size,

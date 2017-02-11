@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFWriter.c,v 1.107 2016/11/24 15:35:29 tom Exp $
+ * $LynxId: HTFWriter.c,v 1.111 2017/02/11 00:28:32 tom Exp $
  *
  *		FILE WRITER				HTFWrite.h
  *		===========
@@ -143,6 +143,81 @@ static void HTFWriter_write(HTStream *me, const char *s, int l)
     }
 }
 
+static void decompress_gzip(HTStream *me)
+{
+    char *in_name = me->anchor->FileCache;
+    char copied[LY_MAXPATH];
+    FILE *fp = LYOpenTemp(copied, ".tmp.gz", BIN_W);
+
+    if (fp != 0) {
+#ifdef USE_ZLIB
+	char buffer[BUFSIZ];
+	gzFile gzfp;
+	int status;
+
+	CTRACE((tfp, "decompressing '%s'\n", in_name));
+	if ((gzfp = gzopen(in_name, BIN_R)) != 0) {
+	    BOOL success = TRUE;
+	    size_t actual = 0;
+
+	    CTRACE((tfp, "...opened '%s'\n", copied));
+	    while ((status = gzread(gzfp, buffer, sizeof(buffer))) > 0) {
+		size_t want = (size_t) status;
+		size_t have = fwrite(buffer, sizeof(char), want, fp);
+
+		actual += have;
+		if (want != have) {
+		    success = FALSE;
+		    break;
+		}
+	    }
+	    gzclose(gzfp);
+	    LYCloseTempFP(fp);
+	    CTRACE((tfp, "...decompress %ld to %ld\n",
+		    me->anchor->actual_length,
+		    actual));
+	    if (success) {
+		if (rename(copied, in_name) == 0)
+		    me->anchor->actual_length = (off_t) actual;
+		LYRemoveTemp(copied);
+	    }
+	}
+#else
+#define FMT "%s %s"
+	const char *program;
+
+	if (LYCopyFile(in_name, copied) == 0) {
+	    char expanded[LY_MAXPATH];
+	    char *command = NULL;
+
+	    if ((program = HTGetProgramPath(ppUNCOMPRESS)) != NULL) {
+		HTAddParam(&command, FMT, 1, program);
+		HTAddParam(&command, FMT, 2, copied);
+		HTEndParam(&command, FMT, 2);
+	    }
+	    if (LYSystem(command) == 0) {
+		struct stat stat_buf;
+
+		strcpy(expanded, copied);
+		*strrchr(expanded, '.') = '\0';
+		if (rename(expanded, in_name) != 0) {
+		    CTRACE((tfp, "rename failed %s to %s\n", expanded, in_name));
+		} else if (stat(in_name, &stat_buf) != 0) {
+		    CTRACE((tfp, "stat failed for %s\n", in_name));
+		} else {
+		    me->anchor->actual_length = stat_buf.st_size;
+		}
+	    } else {
+		CTRACE((tfp, "command failed: %s\n", command));
+	    }
+	    free(command);
+	    LYRemoveTemp(copied);
+	}
+#undef FMT
+#endif
+    }
+}
+
 /*	Free an HTML object
  *	-------------------
  *
@@ -168,6 +243,19 @@ static void HTFWriter_free(HTStream *me)
 	fflush(me->fp);
     if (me->end_command) {	/* Temp file */
 	LYCloseTempFP(me->fp);
+	/*
+	 * Handle a special case where the server used "Content-Type:  gzip". 
+	 * Normally that feeds into the presentation stages, but if the link
+	 * happens to point to something that will not be presented, but
+	 * instead offered as a download, it comes here.  In that case, ungzip
+	 * the content before prompting the user for the place to store it.
+	 */
+	if (me->anchor->FileCache != NULL
+	    && me->anchor->no_content_encoding == FALSE
+	    && me->input_format == HTAtom_for("application/x-gzip")
+	    && !strcmp(me->anchor->content_encoding, "gzip")) {
+	    decompress_gzip(me);
+	}
 #ifdef VMS
 	if (0 == strcmp(me->end_command, "SaveVMSBinaryFile")) {
 	    /*
