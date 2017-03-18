@@ -1,4 +1,4 @@
-/* $LynxId: LYStrings.c,v 1.264 2016/11/24 15:35:29 tom Exp $ */
+/* $LynxId: LYStrings.c,v 1.265 2017/03/18 21:42:48 tom Exp $ */
 #include <HTUtils.h>
 #include <HTCJK.h>
 #include <UCAux.h>
@@ -1004,12 +1004,13 @@ static const char *expand_tiname(const char *first, size_t len, char **result, c
 {
     char name[BUFSIZ];
     int code;
+    TERMTYPE *tp = (TERMTYPE *) (cur_term);
 
     LYStrNCpy(name, first, len);
     if ((code = lookup_tiname(name, strnames)) >= 0
 	|| (code = lookup_tiname(name, strfnames)) >= 0) {
-	if (cur_term->type.Strings[code] != 0) {
-	    LYStrNCpy(*result, cur_term->type.Strings[code], (final - *result));
+	if (tp->Strings[code] != 0) {
+	    LYStrNCpy(*result, tp->Strings[code], (final - *result));
 	    (*result) += strlen(*result);
 	}
     }

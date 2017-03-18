@@ -1,4 +1,4 @@
-/* $LynxId: LYCurses.c,v 1.182 2017/02/07 09:34:11 tom Exp $ */
+/* $LynxId: LYCurses.c,v 1.183 2017/03/18 21:42:48 tom Exp $ */
 #include <HTUtils.h>
 #include <HTAlert.h>
 
@@ -1696,7 +1696,7 @@ void lynx_enable_mouse(int state)
 void lynx_nl2crlf(int normal GCC_UNUSED)
 {
 #if defined(NCURSES_VERSION_PATCH) && defined(SET_TTY) && defined(TERMIOS) && defined(ONLCR)
-    static TTY saved_tty;
+    static struct termios saved_tty;
     static int did_save = FALSE;
     static int waiting = FALSE;
     static int can_fix = TRUE;
@@ -1705,8 +1705,10 @@ void lynx_nl2crlf(int normal GCC_UNUSED)
 	if (cur_term == 0) {
 	    can_fix = FALSE;
 	} else {
-	    saved_tty = cur_term->Nttyb;
+	    tcgetattr(fileno(stdout), &saved_tty);
 	    did_save = TRUE;
+	    if ((saved_tty.c_oflag & ONLCR))
+		can_fix = FALSE;
 #if NCURSES_VERSION_PATCH < 20010529
 	    /* workaround for optimizer bug with nonl() */
 	    if ((tigetstr("cud1") != 0 && *tigetstr("cud1") == '\n')
@@ -1718,14 +1720,18 @@ void lynx_nl2crlf(int normal GCC_UNUSED)
     if (can_fix) {
 	if (normal) {
 	    if (!waiting) {
-		cur_term->Nttyb.c_oflag |= ONLCR;
+		struct termios alter_tty = saved_tty;
+
+		alter_tty.c_oflag |= ONLCR;
+		tcsetattr(fileno(stdout), TCSAFLUSH, &alter_tty);
+		def_prog_mode();
 		waiting = TRUE;
 		nonl();
 	    }
 	} else {
 	    if (waiting) {
-		cur_term->Nttyb = saved_tty;
-		SET_TTY(fileno(stdout), &saved_tty);
+		tcsetattr(fileno(stdout), TCSAFLUSH, &saved_tty);
+		def_prog_mode();
 		waiting = FALSE;
 		nl();
 		LYrefresh();
