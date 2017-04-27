@@ -1,9 +1,11 @@
--- $LynxId: CHANGES,v 1.879 2017/03/18 21:44:28 tom Exp $
+-- $LynxId: CHANGES,v 1.880 2017/04/27 00:29:19 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2017-03-18 (2.8.9dev.12)
+2017-04-28 (2.8.9dev.12)
+* modify Windows makefile to allow SSL_LIBS and SSL_DEFS to be overridden,
+  reflecting naming-incompatibility in recent OpenSSL development -TD
 * modify ncurses-specific to allow its TERMINAL struct to be opaque -TD 
 * refine special case of server Content-Type from 2.8.7dev.11 changes to
   decompress files offered for download when the server has gzip'd them
