@@ -1,9 +1,12 @@
--- $LynxId: CHANGES,v 1.880 2017/04/27 00:29:19 tom Exp $
+-- $LynxId: CHANGES,v 1.882 2017/04/27 09:20:25 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
 2017-04-28 (2.8.9dev.12)
+* improved several configure macros:  CF_ADD_CFLAGS, CF_CC_ENV_FLAGS,
+  CF_GNU_SOURCE, CF_LARGEFILE, CF_MATH_LIB, CF_PROG_LINT, CF_SRAND,
+  CF_XOPEN_SOURCE -TD
 * modify Windows makefile to allow SSL_LIBS and SSL_DEFS to be overridden,
   reflecting naming-incompatibility in recent OpenSSL development -TD
 * modify ncurses-specific to allow its TERMINAL struct to be opaque -TD 
@@ -34,6 +37,7 @@ Changes since Lynx 2.8 release
 * improve warning messages from 2.8.9dev.11 fixes when stripping user/password,
   dropping an unnecessary message and fixing a case where all-punctuation
   user name was not logged (report by Axel Beckert) -TD
+* update config.guess (2017-03-05), config.sub (2017-02-07)
 
 2016-11-15 (2.8.9dev.11)
 * amend fix for stripping user/password to ensure that the stripped value is

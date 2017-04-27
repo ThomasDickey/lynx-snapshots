@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFile.c,v 1.145 2016/11/24 15:29:50 tom Exp $
+ * $LynxId: HTFile.c,v 1.146 2017/04/27 20:51:05 tom Exp $
  *
  *			File Access				HTFile.c
  *			===========
@@ -2503,7 +2503,7 @@ static int decompressAndParse(HTParentAnchor *anchor,
 		    gzfp = gzopen(localname, BIN_R);
 
 		    CTRACE((tfp, "HTLoadFile: gzopen of `%s' gives %p\n",
-			    localname, gzfp));
+			    localname, (void *) gzfp));
 		}
 		internal_decompress = cftGzip;
 	    } else if (isDOWNLOAD(cftDeflate)) {
@@ -2582,7 +2582,7 @@ static int decompressAndParse(HTParentAnchor *anchor,
 			gzfp = gzopen(localname, BIN_R);
 
 			CTRACE((tfp, "HTLoadFile: gzopen of `%s' gives %p\n",
-				localname, gzfp));
+				localname, (void *) gzfp));
 		    }
 		    internal_decompress = cftGzip;
 		}
