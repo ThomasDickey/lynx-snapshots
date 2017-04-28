@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMain.c,v 1.260 2015/12/18 00:34:45 tom Exp $
+ * $LynxId: LYMain.c,v 1.261 2017/04/27 22:34:12 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTP.h>
@@ -3779,7 +3779,7 @@ with partial-display logic"
 #endif
 #ifndef DISABLE_FTP
    PARSE_SET(
-      "passive-ftp",	4|TOGGLE_ARG,		ftp_passive,
+      "passive_ftp",	4|TOGGLE_ARG,		ftp_passive,
       "toggles passive ftp connection"
    ),
 #endif
@@ -3931,7 +3931,7 @@ bug which treated '>' as a co-terminator for\ndouble-quotes and tags"
       "=text\ninformation for syslog call"
    ),
    PARSE_SET(
-      "syslog-urls",	4|SET_ARG,		syslog_requested_urls,
+      "syslog_urls",	4|SET_ARG,		syslog_requested_urls,
       "log requested URLs with syslog"
    ),
 #endif
@@ -4039,7 +4039,7 @@ with filenames of these images"
    ),
 #endif
    PARSE_SET(
-      "xhtml-parsing",	4|SET_ARG,		LYxhtml_parsing,
+      "xhtml_parsing",	4|SET_ARG,		LYxhtml_parsing,
       "enable XHTML 1.0 parsing"
    ),
    PARSE_NIL
