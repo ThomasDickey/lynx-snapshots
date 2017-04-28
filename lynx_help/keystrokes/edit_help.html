@@ -1,4 +1,4 @@
-<!-- $LynxId: edit_help.html,v 1.17 2014/01/08 21:24:50 tom Exp $ -->
+<!-- $LynxId: edit_help.html,v 1.20 2017/04/28 21:40:03 tom Exp $ -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN">
 
 <html>
@@ -15,7 +15,19 @@
   </head>
 
 <body>
-  <h2>Overview</h2>
+  <div class="nav">
+    <ul>
+      <li><a href="#overview">Overview</a></li>
+
+      <li><a href="#regular_keymap">Regular Keymap</a></li>
+
+      <li><a href="#editing_keymap">Editing Keymap</a></li>
+
+      <li><a href="#notes">Notes</a></li>
+    </ul>
+  </div>
+
+  <h2><a name="overview" id="overview">Overview</a></h2>
 
   <p><strong>Lynx</strong> invokes a built-in <em>Line Editor</em>
   for entering strings in response to prompts, in forms, and for
@@ -23,8 +35,8 @@
   Alternative key bindings are normally available (unless
   <strong>Lynx</strong> was configured with
   <code>--disable-alt-bindings</code>). If available, they may be
-  selected via the 'o'ptions menu, or by editing lineedit_mode in
-  the '.lynxrc' file.</p>
+  selected via the &ldquo;o&rdquo;ptions menu, or by editing
+  lineedit_mode in the &ldquo;.lynxrc&rdquo; file.</p>
 
   <p>Two such alternative key bindings, which may be available on
   your system, are the</p>
@@ -45,7 +57,8 @@
   <p>Note: setting emacs/vi keys ON has no effect on line-editor
   bindings.</p>
 
-  <h2>Regular Keymap</h2>
+  <h2><a name="regular_keymap" id="regular_keymap">Regular
+  Keymap</a></h2>
 
   <p>This is the <em>Default Binding</em> keymap:</p>
   <pre>
@@ -75,7 +88,8 @@
 
 </pre>
 
-  <h2>Editing Keymap</h2>
+  <h2><a name="editing_keymap" id="editing_keymap">Editing
+  Keymap</a></h2>
 
   <p><a name="TASpecial" id="TASpecial">These are special commands
   for use only in textarea fields</a> (see note 3):</p>
@@ -86,7 +100,7 @@
           Grow textarea           - Ctrl-X g
 </pre>
 
-  <h2>Notes</h2>
+  <h2><a name="notes" id="notes">Notes</a></h2>
 
   <ol>
     <li>"next" means the character "under" a box or underline style

@@ -1,4 +1,4 @@
-<!-- $LynxId: lynx_url_support.html,v 1.34 2015/05/07 00:18:49 tom Exp $ -->
+<!-- $LynxId: lynx_url_support.html,v 1.36 2017/04/28 16:47:05 tom Exp $ -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN">
 
 <html>
@@ -67,13 +67,13 @@
   </ul>
 
   <p>When entering a URL on the command line to be used as the
-  <em>startfile</em>, or at the prompt for a '<em>g</em>'oto entry,
-  a partial host field can be used and the scheme field can be
-  omitted if the scheme and fully qualified domain name can be
-  constructed internally by using the URL_DOMAIN_PREFIXES and
-  URL_DOMAIN_SUFFIXES definitions in the <strong>Lynx</strong>
-  configuration file. See the explanation of those definitions and
-  their use in your <em>lynx.cfg</em>.</p>
+  <em>startfile</em>, or at the prompt for a
+  &ldquo;<em>g</em>&rdquo;oto entry, a partial host field can be
+  used and the scheme field can be omitted if the scheme and fully
+  qualified domain name can be constructed internally by using the
+  URL_DOMAIN_PREFIXES and URL_DOMAIN_SUFFIXES definitions in the
+  <strong>Lynx</strong> configuration file. See the explanation of
+  those definitions and their use in your <em>lynx.cfg</em>.</p>
 
   <p>For example, <em>wfbr</em> will be treated as
   <em>http://www.wfbr.edu/</em>, and <em>wfbr/dir/lynx</em> will be
@@ -93,9 +93,9 @@
   <em>file://localhost/current/default/directory</em>.</p>
 
   <p>These expansions are <em>SOLELY</em> for <em>startfile</em> or
-  '<em>g</em>'oto entries! Any partial or relative URLs within HTML
-  documents are resolved according to the rules specified in
-  RFC1808 and subsequent IETF drafts.</p>
+  &ldquo;<em>g</em>&rdquo;oto entries! Any partial or relative URLs
+  within HTML documents are resolved according to the rules
+  specified in RFC1808 and subsequent IETF drafts.</p>
   <hr>
 
   <h2><a name="http_url" id="http_url">The <em>http</em> and
@@ -272,16 +272,17 @@
   For anonymous ftp, <strong>Lynx</strong> uses your
   <em>personal_mail_address</em> (user@host) as the
   <em>password</em> if it has been defined via the
-  '<em>o</em>'ptions menu. Otherwise, <strong>Lynx</strong> uses
-  the dummy password <em>WWWUser</em>. (A password can also be
-  embedded in the URL, by replacing <em>username</em> with
-  <em>username:password</em>. This is strongly discouraged for
-  'real' passwords that must be kept secret, since URLs with the
-  completely unencrypted <em>password</em> may show up on the
-  screen, in HISTORY and LIST pages etc., and may even become
-  visible to remote sites for example through Referer headers.) Do
-  not include the <em>@</em> if neither <em>username</em> nor
-  <em>:password</em> is included.</p>
+  &ldquo;<em>o</em>&rdquo;ptions menu. Otherwise,
+  <strong>Lynx</strong> uses the dummy password <em>WWWUser</em>.
+  (A password can also be embedded in the URL, by replacing
+  <em>username</em> with <em>username:password</em>. This is
+  strongly discouraged for &ldquo;real&rdquo; passwords that must
+  be kept secret, since URLs with the completely unencrypted
+  <em>password</em> may show up on the screen, in HISTORY and LIST
+  pages etc., and may even become visible to remote sites for
+  example through Referer headers.) Do not include the <em>@</em>
+  if neither <em>username</em> nor <em>:password</em> is
+  included.</p>
 
   <p>The <em>;type=</em> parameter can be used with value
   <em>D</em>, <em>I</em>, or <em>A</em> to force handling of the
@@ -547,17 +548,17 @@
   <p>If <em>ENCTYPE="text/plain"</em> is specified for a FORM with
   a mailto ACTION, <strong>Lynx</strong> will not hex escape the
   name=value pairs of the FORM's content, and will use physical
-  newlines instead of '<em>&amp;</em>' or '<em>;</em>' to separate
-  the pairs, so that the content will be readable directly.
-  Otherwise, <strong>Lynx</strong> will mail the content with the
-  default:</p>
+  newlines instead of &ldquo;<em>&amp;</em>&rdquo; or
+  &ldquo;<em>;</em>&rdquo; to separate the pairs, so that the
+  content will be readable directly. Otherwise,
+  <strong>Lynx</strong> will mail the content with the default:</p>
   <pre>
-      <em>ENCTYPE="application/x-www-form-urlencoded"</em> ('<em>&amp;</em>' separates pairs)
+      <em>ENCTYPE="application/x-www-form-urlencoded"</em> (&ldquo;<em>&amp;</em>&rdquo; separates pairs)
 </pre>
 
   <p>or:</p>
   <pre>
-      <em>ENCTYPE="application/sgml-form-urlencoded"</em> ('<em>;</em>' separates pairs)
+      <em>ENCTYPE="application/sgml-form-urlencoded"</em> (&ldquo;<em>;</em>&rdquo; separates pairs)
 </pre>
 
   <p>if the latter was indicated.</p>
@@ -694,13 +695,13 @@
 </pre>
 
   <p>where <em>//localhost</em> is optional and always implied; the
-  full path should be specified, as `~' is not recognized; if the
-  script is in the directory <strong>Lynx</strong> was started
-  from, the simple file name is adequate. The output of the script
-  should be text/html and is rendered and displayed by
-  <strong>Lynx</strong>. Restrictions on use of lynxcgi and on
-  acceptable paths can be imposed in <em>userdefs.h</em> and
-  <em>lynx.cfg</em>, qv.</p>
+  full path should be specified, as &ldquo;~&rdquo; is not
+  recognized; if the script is in the directory
+  <strong>Lynx</strong> was started from, the simple file name is
+  adequate. The output of the script should be text/html and is
+  rendered and displayed by <strong>Lynx</strong>. Restrictions on
+  use of lynxcgi and on acceptable paths can be imposed in
+  <em>userdefs.h</em> and <em>lynx.cfg</em>, qv.</p>
 
   <p>This is a Lynxism and should be used only in local documents
   intended solely for <strong>Lynx</strong>, or for limited local
@@ -748,8 +749,8 @@
     behavior may be modified without notice, or the context in
     which it is allowed may change.</li>
 
-    <li>If it doesn't work as expected when used outside of the
-    intended purpose, don't expect anyone to "fix" it.</li>
+    <li>If it does not work as expected when used outside of the
+    intended purpose, do not expect anyone to "fix" it.</li>
   </ul>
 
   <p>For example, tempting though it might be, do not use
@@ -759,8 +760,8 @@
       <em>Review your &lt;A HREF="LYNXKEYMAP:"&gt;Keymap&lt;/A&gt;</em>
 </pre>
 
-  <p>(No, they won't do any harm. Yes, they work. But don't rely on
-  it.)</p>
+  <p>(No, they will not do any harm. Yes, they work. But do not
+  rely on it.)</p>
 
   <p>If you must try one, the second is OK from the command
   line:<br></p>
@@ -768,9 +769,10 @@
       <em>lynx LYNXKEYMAP:</em>
 </pre>
 
-  <p>But within <strong>Lynx</strong>, use the '<em>K</em>'
-  keystroke command. Sometimes it may be convenient to use a
-  private scheme with '<em>g</em>'oto, as in:</p>
+  <p>But within <strong>Lynx</strong>, use the
+  &ldquo;<em>K</em>&rdquo; keystroke command. Sometimes it may be
+  convenient to use a private scheme with
+  &ldquo;<em>g</em>&rdquo;oto, as in:</p>
   <pre>
       <em>g LYNXMESSAGES:</em>
       <em>g LYNXCOMPILEOPTS:</em>

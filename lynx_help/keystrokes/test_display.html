@@ -1,4 +1,4 @@
-<!-- $LynxId: test_display.html,v 1.9 2014/01/08 00:05:32 tom Exp $ -->
+<!-- $LynxId: test_display.html,v 1.11 2017/04/28 22:04:57 tom Exp $ -->
 <!-- do not use tidy for this page -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN">
 
@@ -16,6 +16,24 @@
   </head>
 
 <body>
+  <div class="nav">
+    <ul>
+      <li><a href="#overview">Overview</a></li>
+
+      <li><a href="#configuration">Configuration</a></li>
+
+      <li><a href="#test_screen">Test-screen</a></li>
+    </ul>
+  </div>
+
+  <h2><a name="overview" id="overview">Overview</a></h2>
+
+  <p>Display a test-page for common problems with Lynx's display
+  character set and/or locale problems.</p>
+
+  <h2><a name="configuration" id=
+  "configuration">Configuration</a></h2>
+
   <p>If you see several letters instead of a single &ndash; your
   promised display charset does not support this character so "7
   bit approximation" is in effect. If you see any single letter
@@ -23,13 +41,17 @@
   settings.</p>
 
   <blockquote>
-    <p><em>Press 'o' for Options menu and change "Display character
-    set"</em>.<br>
+    <p><em>Press &ldquo;o&rdquo; for Options menu and change
+    "Display character set"</em>.<br>
     Try again if necessary.</p>
   </blockquote>
 
   <p>When you are satisfied save your changes in Options menu,
   thanks.</p>
+
+  <h2><a name="test_screen" id="test_screen">Test-screen</a></h2>
+
+  <p>This is only a quick test to see obvious problems.</p>
   <pre>
 
 0x00A9    &copy;           # COPYRIGHT SIGN
@@ -59,7 +81,5 @@
 
 0xFB01    &#64257;           # LATIN SMALL LIGATURE FI
 </pre>
-
-  <p>This is only a quick test to see obvious problems.</p>
 </body>
 </html>

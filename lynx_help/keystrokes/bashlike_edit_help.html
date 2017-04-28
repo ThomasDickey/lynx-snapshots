@@ -1,4 +1,4 @@
-<!-- $LynxId: bashlike_edit_help.html,v 1.10 2014/01/08 00:50:05 tom Exp $ -->
+<!-- $LynxId: bashlike_edit_help.html,v 1.13 2017/04/28 21:04:38 tom Exp $ -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN">
 
 <html>
@@ -19,7 +19,25 @@
   </head>
 
 <body>
-  <h2>Overview</h2>
+  <div class="nav">
+    <ul>
+      <li><a href="#overview">Overview</a></li>
+
+      <li><a href="#bash_bindings">Bash-like bindings</a></li>
+
+      <li><a href="#examples">Try it yourself</a></li>
+
+      <li><a href="#emacs_bindings">Emacs-like commands</a></li>
+
+      <li><a href="#special_keys">Comments on special keys</a></li>
+
+      <li><a href="#notes">Notes</a></li>
+
+      <li><a href="#miscellaneous">Additional details</a></li>
+    </ul>
+  </div>
+
+  <h2><a name="overview" id="overview">Overview</a></h2>
 
   <p>Lynx invokes a built-in <a href="edit_help.html">Line
   Editor</a> for entering strings in response to prompts, in forms,
@@ -27,15 +45,16 @@
   defined. Several sets of key-bindings can be offered by
   configuring with --enable-alt-bindings or by adding them in
   LYEditmap.c before compiling Lynx. If available, they may be
-  selected via the 'o'ptions menu, or by editing lineedit_mode in
-  the '.lynxrc' file.</p>
+  selected via the &ldquo;o&rdquo;ptions menu, or by editing
+  lineedit_mode in the &ldquo;.lynxrc&rdquo; file.</p>
 
-  <p>Note: setting emacs/vi keys ON has no direct effect on
-  line-editor bindings.</p>
+  <p><strong>Note:</strong> setting emacs/vi keys ON has no direct
+  effect on line-editor bindings.</p>
+
+  <h2><a name="bash_bindings" id="bash_bindings">Bash-like
+  bindings</a></h2>
 
   <p>This summarizes the <em>Bash-like Binding</em> keymap.</p>
-
-  <h2>Basic commands</h2>
   <pre>
      ENTER  Input complete        -  Enter, RETURN
      TAB    Completion / Next     -  TAB, Do (<em>see note 2</em>)
@@ -70,7 +89,7 @@
      PASS!  Grow textarea           - C-x g
 </pre>
 
-  <h2>Try it yourself</h2>
+  <h2><a name="examples" id="examples">Try it yourself</a></h2>
 
   <p>Here is a little textarea for practice:</p>
 
@@ -84,7 +103,8 @@ or add text as you like, using the Line-Editor keys.
 </textarea><input type="reset" value="[reset content]"></p>
   </form>
 
-  <h2>Advanced emacs-like commands</h2>
+  <h2><a name="emacs_bindings" id="emacs_bindings">Emacs-like
+  commands</a></h2>
   <pre>
 
     TPOS    Transpose characters                   -  C-t
@@ -94,7 +114,8 @@ or add text as you like, using the Line-Editor keys.
     YANK    Insert text last killed (with KILLREG) -  C-y
 </pre>
 
-  <h2>Comments on special keys</h2>
+  <h2><a name="special_keys" id="special_keys">Comments on special
+  keys</a></h2>
 
   <p><samp><dfn>C-</dfn><strong>key</strong> means
   Control+<strong><kbd>key</kbd></strong>.
@@ -106,7 +127,7 @@ or add text as you like, using the Line-Editor keys.
 
   <ul>
     <li>First ESC, then the <strong><kbd>key</kbd></strong>. This
-    doesn't work with all systems or on all connections, and if it
+    does not work with all systems or on all connections, and if it
     does may not work for some keys (because the ESC character is
     also part of code sequences for "normal" function keys).</li>
 
@@ -126,7 +147,7 @@ or add text as you like, using the Line-Editor keys.
     vice versa.</li>
   </ul>
 
-  <h2>Notes</h2>
+  <h2><a name="notes" id="notes">Notes</a></h2>
 
   <ol>
     <li>"next" means the character "under" a box or underline style
@@ -156,8 +177,8 @@ or add text as you like, using the Line-Editor keys.
     <li>Key is likely unavailable for Lynx, because it is
     interpreted by operating system, comm program, or curses
     library, or swallowed as part of escape sequence recognition.
-    Binding is provided for the benefit of those where this doesn't
-    apply.</li>
+    Binding is provided for the benefit of those where this does
+    not apply.</li>
 
     <li>where <strong>[FORM]</strong> is marked, indicates that the
     binding is effective only in form text fields. It is ignored by
@@ -173,8 +194,11 @@ or add text as you like, using the Line-Editor keys.
   accessible with the key <kbd>K</kbd> for current
   information).</p>
 
-  <h2>Additional details on other keys, for the curious (very much
-  subject to change)</h2>
+  <h2><a name="miscellaneous" id="miscellaneous">Additional
+  details</a></h2>
+
+  <p>Here are some additional details on other keys, for the
+  curious (very much subject to change)</p>
   <pre>
 Normal key action when used in form fields, subject to remapping
 with KEYMAP: [FORM (except Up-Arrow, Down-Arrow)]
