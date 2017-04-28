@@ -1,4 +1,4 @@
-<!-- $LynxId: alt_edit_help.html,v 1.11 2014/01/08 00:56:30 tom Exp $ -->
+<!-- $LynxId: alt_edit_help.html,v 1.14 2017/04/28 21:24:42 tom Exp $ -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN">
 
 <html>
@@ -19,7 +19,18 @@
   </head>
 
 <body>
-  <h2>Overview</h2>
+  <div class="nav">
+    <ul>
+      <li><a href="#overview">Overview</a></li>
+
+      <li><a href="#alternate_bindings">Table of
+      key-bindings</a></li>
+
+      <li><a href="#notes">Notes</a></li>
+    </ul>
+  </div>
+
+  <h2><a name="overview" id="overview">Overview</a></h2>
 
   <p><strong>Lynx</strong> invokes a built-in <a href=
   "edit_help.html">Line Editor</a> for entering strings in response
@@ -28,15 +39,16 @@
   can be offered by configuring with
   <code>--enable-alt-bindings</code> or by adding them in
   LYEditmap.c before compiling <strong>Lynx</strong>. If available,
-  they may be selected via the 'o'ptions menu, or by editing
-  lineedit_mode in the '.lynxrc' file.</p>
+  they may be selected via the &ldquo;o&rdquo;ptions menu, or by
+  editing lineedit_mode in the &ldquo;.lynxrc&rdquo; file.</p>
 
   <p>Note: setting emacs/vi keys ON has no direct effect on
   line-editor bindings.</p>
 
   <p>This is the <em>Alternative Binding</em> keymap.</p>
 
-  <h2>Table of key-bindings</h2>
+  <h2><a name="alternate_bindings" id="alternate_bindings">Table of
+  key-bindings</a></h2>
   <pre>
      ENTER  Input complete        -  RETURN
      TAB    Input complete        -  TAB, Do
@@ -69,7 +81,7 @@
           Grow textarea           - Ctrl-X g
 </pre>
 
-  <h2>Notes</h2>
+  <h2><a name="notes" id="notes">Notes</a></h2>
 
   <ol>
     <li>"next" means the character "under" a box or underline style

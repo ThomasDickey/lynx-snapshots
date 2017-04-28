@@ -1,4 +1,4 @@
-<!-- $LynxId: dired_help.html,v 1.9 2014/01/08 01:15:55 tom Exp $ -->
+<!-- $LynxId: dired_help.html,v 1.11 2017/04/28 21:36:59 tom Exp $ -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN">
 
 <html>
@@ -15,12 +15,25 @@
   </head>
 
 <body>
-  <h2>Overview</h2>
+  <div class="nav">
+    <ul>
+      <li><a href="#overview">Overview</a></li>
+
+      <li><a href="#dired_bindings">Dired Key bindings</a></li>
+
+      <li><a href="#other_bindings">Other Key bindings</a></li>
+
+      <li><a href="#notes">Notes</a></li>
+    </ul>
+  </div>
+
+  <h2><a name="overview" id="overview">Overview</a></h2>
 
   <p><strong>Lynx</strong> changes into <em>Dired mode</em> when
   you use a URL of the type <em>file://localhost/path/</em>.</p>
 
-  <h2>Key bindings</h2>
+  <h2><a name="dired_bindings" id="dired_bindings">Dired Key
+  bindings</a></h2>
 
   <p>While in Dired mode, some keys are remapped to do the
   following functions:</p>
@@ -46,13 +59,16 @@
     T)ag          - Tag the highlighted file.  Multiple files may
                     be tagged and all other commands except "Create"
                     will be performed on tagged files instead of the
-                    one highlighted.  Press '<em>t</em>' again to untag
+                    one highlighted.  Press &ldquo;<em>t</em>&rdquo; again to untag
                     a file.
 
     U)pload       - Upload a file to the current directory using
                     one of the options listed in the upload screen.
 </pre>
   </blockquote>
+
+  <h2><a name="other_bindings" id="other_bindings">Other Key
+  bindings</a></h2>
 
   <p>Some other keys useful in <em>Dired mode</em>:</p>
 
@@ -67,7 +83,7 @@
 </pre>
   </blockquote>
 
-  <h2>Notes</h2>
+  <h2><a name="notes" id="notes">Notes</a></h2>
 
   <p><em>Dired mode</em> must be activated at compile time.
   Otherwise, the above commands will not be available and

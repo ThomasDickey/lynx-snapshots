@@ -1,4 +1,4 @@
-<!-- $LynxId: environments.html,v 1.16 2014/01/08 01:38:23 tom Exp $ -->
+<!-- $LynxId: environments.html,v 1.21 2017/04/28 22:16:55 tom Exp $ -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN">
 
 <html>
@@ -15,9 +15,29 @@
   </head>
 
 <body>
-  <h2>ENVIRONMENT</h2>
+  <div class="nav">
+    <ul>
+      <li><a href="#overview">Environment Variables</a></li>
+
+      <li><a href="#env">Variables Used By Lynx</a></li>
+
+      <li><a href="#setenv">Variables Set or Modified By
+      Lynx</a></li>
+
+      <li><a href="#cgi">Simulated CGI Support</a></li>
+
+      <li><a href="#language">Native Language Support</a></li>
+
+      <li><a href="#proxy">Proxy details and examples</a></li>
+
+      <li><a href="#dos">Win32 (95/NT) and 386 DOS</a></li>
+    </ul>
+  </div>
+
+  <h2><a name="overview" id="overview">Environment
+  Variables</a></h2>
   <pre>
-       In addition to various  "standard"  environment  variables
+       In addition to various  &ldquo;standard&rdquo;  environment  variables
        such as HOME, PATH, USER, DISPLAY, TMPDIR, etc, <strong>Lynx</strong> utilizes
        several <strong>Lynx</strong>-specific environment variables, <a href="#env">if they exist</a>.
 
@@ -26,8 +46,8 @@
        listed separately <a href="#setenv">below</a>.
 
        See also the sections on <a href=
-"#cgi">SIMULATED CGI SUPPORT</a> and
-       <a href="#language">NATIVE LANGUAGE SUPPORT</a>, below.
+"#cgi">Simulated CGI Support</a> and
+       <a href="#language">Native Language Support</a>, below.
 
        Note:  Not all environment variables apply to all types of
        platforms supported by <strong>Lynx</strong>, though most do.  Feedback on
@@ -36,8 +56,7 @@
        variables.
 </pre>
 
-  <h2><a name="env" id="env">Environment Variables Used By
-  Lynx</a></h2>
+  <h2><a name="env" id="env">Variables Used By Lynx</a></h2>
   <pre>
        COLORTERM
                            If set, color capability for the terminal
@@ -130,7 +149,7 @@
                            UNIX, it will override the contents of
                            an /etc/organization file, if present.
 
-       PROTOCOL_proxy
+       <em>PROTOCOL</em>_proxy
                            <strong>Lynx</strong> supports the use of proxy servers
                            that  can act as firewall gateways and
                            caching servers.  They are  preferable
@@ -139,22 +158,22 @@
                            Each protocol used by <strong>Lynx</strong> (http, ftp,
                            gopher, etc), can be mapped separately
                            by setting environment variables of
-                           the form PROTOCOL_proxy (literally:
+                           the form <em>PROTOCOL</em>_proxy (literally:
                            http_proxy, ftp_proxy, gopher_proxy,
-                           etc), to "http://some.server.dom:port/".
+                           etc), to &ldquo;http://some.server.dom:port/&rdquo;.
                            See <a href=
 "#proxy">Proxy details and examples</a>.
 
-       WWW_access_GATEWAY
+       WWW_<em>access</em>_GATEWAY
                            <strong>Lynx</strong> still  supports  use  of  gateway
                            servers,  with  the  servers specified
-                           via   "WWW_access_GATEWAY"   variables
-                           (where  "access" is lower case and can
-                           be "http", "ftp", "gopher" or "wais"),
+                           via   &ldquo;WWW_<em>access</em>_GATEWAY&rdquo;   variables
+                           (where  &ldquo;access&rdquo; is lower case and can
+                           be &ldquo;http&rdquo;, &ldquo;ftp&rdquo;, &ldquo;gopher&rdquo; or &ldquo;wais&rdquo;),
                            however most gateway servers have been
                            discontinued.  Note that  you  do  not
-                           include  a  terminal '/' for gateways,
-                           but do for proxies specified by PROTOCOL_proxy
+                           include  a  terminal &ldquo;/&rdquo; for gateways,
+                           but do for proxies specified by <em>PROTOCOL</em>_proxy
                            environment variables.  See <a href=
 "#proxy">Proxy details</a>.
 
@@ -164,52 +183,52 @@
                            any of the <strong>Lynx</strong> configuration files.
 </pre>
 
-  <h2><a name="setenv" id="setenv">Environment Variables Set or
-  Modified By Lynx</a></h2>
+  <h2><a name="setenv" id="setenv">Variables Set or Modified By
+  Lynx</a></h2>
   <pre>
        LYNX_PRINT_DATE     This  variable  is  set  by  the  <strong>Lynx</strong>
-                           p(rint) function, to the Date:  string
-                           seen  in  the  document's "Information
-                           about" page (= cmd), if  any.   It  is
+                           p(rint) function, to the &ldquo;Date:&rdquo;  string
+                           seen  in  the  document's &ldquo;Information
+                           about&rdquo; page (= cmd), if  any.   It  is
                            created  for  use  by an external program,
                            as  defined   in   a   lynx.cfg
                            PRINTER: definition statement.  If the
                            field does not exist for the document,
                            the  variable  is set to a null string
-                           under UNIX, or "No Date" under VMS.
+                           under UNIX, or &ldquo;No Date&rdquo; under VMS.
 
        LYNX_PRINT_LASTMOD  This  variable  is  set  by  the  <strong>Lynx</strong>
                            p(rint)  function,  to  the  Last Mod:
-                           string seen in the document's  "Information
-                           about"  page  (= cmd), if any.
+                           string seen in the document's  &ldquo;Information
+                           about&rdquo;  page  (= cmd), if any.
                            It is created for use by  an  external
                            program,  as  defined  in  a  lynx.cfg
                            PRINTER: definition statement.  If the
                            field does not exist for the document,
                            the variable is set to a  null  string
-                           under UNIX, or "No LastMod" under VMS.
+                           under UNIX, or &ldquo;No LastMod&rdquo; under VMS.
 
        LYNX_PRINT_TITLE    This  variable  is  set  by  the  <strong>Lynx</strong>
                            p(rint)  function,  to  the  Linkname:
-                           string seen in the document's  "Information
-                           about"  page  (= cmd), if any.
+                           string seen in the document's  &ldquo;Information
+                           about&rdquo;  page  (= cmd), if any.
                            It is created for use by  an  external
                            program,  as  defined  in  a  lynx.cfg
                            PRINTER: definition statement.  If the
                            field does not exist for the document,
                            the variable is set to a  null  string
-                           under UNIX, or "No Title" under VMS.
+                           under UNIX, or &ldquo;No Title&rdquo; under VMS.
 
        LYNX_PRINT_URL      This  variable  is  set  by  the  <strong>Lynx</strong>
                            p(rint) function, to the  URL:  string
-                           seen  in  the  document's "Information
-                           about" page (= cmd), if  any.   It  is
+                           seen  in  the  document's &ldquo;Information
+                           about&rdquo; page (= cmd), if  any.   It  is
                            created  for  use  by an external program,
                            as  defined   in   a   lynx.cfg
                            PRINTER: definition statement.  If the
                            field does not exist for the document,
                            the  variable  is set to a null string
-                           under UNIX, or "No URL" under VMS.
+                           under UNIX, or &ldquo;No URL&rdquo; under VMS.
 
        LYNX_VERSION        This variable is always set  by  <strong>Lynx</strong>,
                            and may be used by an external program
@@ -228,7 +247,7 @@
                            <strong>Lynx</strong> to determine  the  terminal  type
                            being  used  to invoke <strong>Lynx</strong>.  If, however,
                            it is unset at startup time  (or
-                           has  the  value  "unknown"), or if the
+                           has  the  value  &ldquo;unknown&rdquo;), or if the
                            -term  command-line option is used,
                            <strong>Lynx</strong> will set or modify its value
                            to the user specified  terminal type
@@ -238,14 +257,14 @@
                            variables may also be changed.
 </pre>
 
-  <h2><a name="cgi" id="cgi">SIMULATED CGI SUPPORT</a></h2>
+  <h2><a name="cgi" id="cgi">Simulated CGI Support</a></h2>
 
   <p>If built with the cgi-links option enabled,
   <strong>Lynx</strong> allows access to a cgi script directly
   without the need for an http daemon.</p>
 
-  <p>When executing such "lynxcgi scripts" (if enabled), the
-  following variables may be set for simulating a CGI
+  <p>When executing such &ldquo;lynxcgi scripts&rdquo; (if
+  enabled), the following variables may be set for simulating a CGI
   environment:</p>
   <pre>
        CONTENT_LENGTH
@@ -286,8 +305,8 @@
   should be consulted for general information on CGI script
   programming.</p>
 
-  <h2><a name="language" id="language">NATIVE LANGUAGE
-  SUPPORT</a></h2>
+  <h2><a name="language" id="language">Native Language
+  Support</a></h2>
 
   <p>If configured and installed with Native Language Support,
   <strong>Lynx</strong> will display status and other messages in
@@ -332,8 +351,8 @@
   <p>To set your site's NTTP server as the default host for news
   reading and posting via <strong>Lynx</strong>, set the
   environment variable NNTPSERVER so that it points to its Internet
-  address. The variable "NNTPSERVER" is used to specify the host
-  which will be used as the default for news URLs.</p>
+  address. The variable &ldquo;NNTPSERVER&rdquo; is used to specify
+  the host which will be used as the default for news URLs.</p>
 
   <dl>
     <dt>UNIX</dt>
@@ -355,17 +374,20 @@ define/system NNTPSERVER "news.server.dom"
 
   <p><strong>Lynx</strong> still supports use of gateway servers,
   with the servers specified via the variables
-  "WWW_access_GATEWAY", where "access" is lower case and can be
-  "http", "ftp", "gopher" or "wais". Most of the gateway servers
-  have been discontinued, but "http://www.w3.org:8001" is available
-  for wais searches (note that you do not include a terminal '/'
+  &ldquo;WWW_access_GATEWAY&rdquo;, where &ldquo;access&rdquo; is
+  lower case and can be &ldquo;http&rdquo;, &ldquo;ftp&rdquo;,
+  &ldquo;gopher&rdquo; or &ldquo;wais&rdquo;. Most of the gateway
+  servers have been discontinued, but
+  &ldquo;http://www.w3.org:8001&rdquo; is available for wais
+  searches (note that you do not include a terminal &ldquo;/&rdquo;
   for gateways, but do for proxies; see below).</p>
 
   <p><strong>Lynx</strong> version 2.2 and beyond supports the use
   of proxy servers that can act as firewall gateways and caching
   servers. They are preferable to the older gateway servers. Each
   protocol used by <strong>Lynx</strong> can be mapped separately
-  using PROTOCOL_proxy environment variables of the form:</p>
+  using <em>PROTOCOL</em>_proxy environment variables as shown
+  below:</p>
 
   <dl>
     <dt>UNIX</dt>
@@ -373,20 +395,20 @@ define/system NNTPSERVER "news.server.dom"
     <dd>
       <blockquote>
         <pre>
-setenv http_proxy "http://some.server.dom:port/"
-setenv https_proxy "http://some.server.dom:port/"
-setenv ftp_proxy "http://some.server.dom:port/"
-setenv gopher_proxy "http://some.server.dom:port/"
-setenv news_proxy "http://some.server.dom:port/"
-setenv newspost_proxy "http://some.server.dom:port/"
-setenv newsreply_proxy "http://some.server.dom:port/"
-setenv snews_proxy "http://some.server.dom:port/"
-setenv snewspost_proxy "http://some.server.dom:port/"
-setenv snewsreply_proxy "http://some.server.dom:port/"
-setenv nntp_proxy "http://some.server.dom:port/"
-setenv wais_proxy "http://some.server.dom:port/"
-setenv finger_proxy "http://some.server.dom:port/"
-setenv cso_proxy "http://some.server.dom:port/"
+setenv http_proxy         "http://some.server.dom:port/"
+setenv https_proxy        "http://some.server.dom:port/"
+setenv ftp_proxy          "http://some.server.dom:port/"
+setenv gopher_proxy       "http://some.server.dom:port/"
+setenv news_proxy         "http://some.server.dom:port/"
+setenv newspost_proxy     "http://some.server.dom:port/"
+setenv newsreply_proxy    "http://some.server.dom:port/"
+setenv snews_proxy        "http://some.server.dom:port/"
+setenv snewspost_proxy    "http://some.server.dom:port/"
+setenv snewsreply_proxy   "http://some.server.dom:port/"
+setenv nntp_proxy         "http://some.server.dom:port/"
+setenv wais_proxy         "http://some.server.dom:port/"
+setenv finger_proxy       "http://some.server.dom:port/"
+setenv cso_proxy          "http://some.server.dom:port/"
 </pre>
       </blockquote>
     </dd>
@@ -396,37 +418,38 @@ setenv cso_proxy "http://some.server.dom:port/"
     <dd>
       <blockquote>
         <pre>
-define "http_proxy" "http://some.server.dom:port/"
-define "https_proxy" "http://some.server.dom:port/"
-define "ftp_proxy" "http://some.server.dom:port/"
-define "gopher_proxy" "http://some.server.dom:port/"
-define "news_proxy" "http://some.server.dom:port/"
-define "newspost_proxy" "http://some.server.dom:port/"
-define "newsreply_proxy" "http://some.server.dom:port/"
-define "snews_proxy" "http://some.server.dom:port/"
-define "snewspost_proxy" "http://some.server.dom:port/"
+define "http_proxy"       "http://some.server.dom:port/"
+define "https_proxy"      "http://some.server.dom:port/"
+define "ftp_proxy"        "http://some.server.dom:port/"
+define "gopher_proxy"     "http://some.server.dom:port/"
+define "news_proxy"       "http://some.server.dom:port/"
+define "newspost_proxy"   "http://some.server.dom:port/"
+define "newsreply_proxy"  "http://some.server.dom:port/"
+define "snews_proxy"      "http://some.server.dom:port/"
+define "snewspost_proxy"  "http://some.server.dom:port/"
 define "snewsreply_proxy" "http://some.server.dom:port/"
-define "nntp_proxy" "http://some.server.dom:port/"
-define "wais_proxy" "http://some.server.dom:port/"
-define "finger_proxy" "http://some.server.dom:port/"
-define "cso_proxy" "http://some.server.dom:port/"
+define "nntp_proxy"       "http://some.server.dom:port/"
+define "wais_proxy"       "http://some.server.dom:port/"
+define "finger_proxy"     "http://some.server.dom:port/"
+define "cso_proxy"        "http://some.server.dom:port/"
 </pre>
       </blockquote>
 
       <p>(Encase *BOTH* strings in double-quotes to maintain lower
-      case for the PROTOCOL_proxy variable and for the http access
-      type; include /system if you want proxying for all clients on
-      your system.)</p>
+      case for the <em>PROTOCOL</em>_proxy variable and for the
+      http access type; include /system if you want proxying for
+      all clients on your system.)</p>
     </dd>
   </dl>
 
   <p>If you wish to override the use of a proxy server for specific
-  hosts or entire domains you may use the "no_proxy" environment
-  variable. The no_proxy variable can be a comma-separated list of
-  strings defining no-proxy zones in the DNS domain name space. If
-  a tail substring of the domain-path for a host matches one of
-  these strings, transactions with that node will not be proxied.
-  Here is an example use of "no_proxy":</p>
+  hosts or entire domains you may use the &ldquo;no_proxy&rdquo;
+  environment variable. The no_proxy variable can be a
+  comma-separated list of strings defining no-proxy zones in the
+  DNS domain name space. If a tail substring of the domain-path for
+  a host matches one of these strings, transactions with that node
+  will not be proxied. Here is an example use of
+  &ldquo;no_proxy&rdquo;:</p>
 
   <dl>
     <dt>UNIX</dt>
@@ -449,20 +472,22 @@ define "no_proxy" "host.domain.dom, domain1.dom, domain2"
   <p>You can include a port number in the no_proxy list to override
   use of a proxy server for the host accessed via that port, but
   not via other ports. For example, if you use
-  "host.domain.dom:119" and/or "host.domain.dom:210", then news
-  (port 119) URLs and/or any wais (port 210) searches on that host
-  would be excluded, but http, ftp, and gopher services (if
-  normally proxied) would still be included, as would any news or
-  wais services on other hosts.</p>
+  &ldquo;host.domain.dom:119&rdquo; and/or
+  &ldquo;host.domain.dom:210&rdquo;, then news (port 119) URLs
+  and/or any wais (port 210) searches on that host would be
+  excluded, but http, ftp, and gopher services (if normally
+  proxied) would still be included, as would any news or wais
+  services on other hosts.</p>
 
-  <p>Warning: Note that setting 'il' as an entry in this list will
-  block proxying for the .mil domain as well as the .il domain. If
-  the entry is '.il' this will not happen.</p>
+  <p>Warning: Note that setting &ldquo;il&rdquo; as an entry in
+  this list will block proxying for the .mil domain as well as the
+  .il domain. If the entry is &ldquo;.il&rdquo; this will not
+  happen.</p>
 
   <p>If you wish to override the use of a proxy server completely
   (i.e., globally override any existing proxy variables), set the
-  value of "no_proxy" to "*". This is the only allowed use of * in
-  no_proxy.</p>
+  value of &ldquo;no_proxy&rdquo; to &ldquo;*&rdquo;. This is the
+  only allowed use of * in no_proxy.</p>
 
   <p>Note that <strong>Lynx</strong> treats file URLs on the local
   host as requests for direct access to the file, and does not
@@ -473,8 +498,8 @@ define "no_proxy" "host.domain.dom, domain1.dom, domain2"
   <strong>Lynx</strong> to the proxy server, so no special
   procedure for inducing the proxy server to handle them is
   required. Other WWW clients may require that the http server's
-  configuration file have "Map file:* ftp:*" in it to perform that
-  conversion.</p>
+  configuration file have &ldquo;Map file:* ftp:*&rdquo; in it to
+  perform that conversion.</p>
 
   <p>If you have not set NNTPSERVER, proxy or no_proxy environment
   variables you can set them at run time via the configuration file
@@ -482,18 +507,19 @@ define "no_proxy" "host.domain.dom, domain1.dom, domain2"
 
   <h2><a name="dos" id="dos">Win32 (95/NT) and 386 DOS</a></h2>
 
-  <p>(adapted from "readme.txt" by Wayne Buttles<br>
-  and "readme.dos" by Doug Kaufman)</p>
+  <p>(adapted from &ldquo;readme.txt&rdquo; by Wayne Buttles<br>
+  and &ldquo;readme.dos&rdquo; by Doug Kaufman)</p>
 
   <p>Here are some environment variables that should be set,
   usually in a batch file that runs the <strong>Lynx</strong>
   executable. Make sure that you have enough room left in your
-  environment. You may need to change your "SHELL=" setting in
-  config.sys. In addition, <strong>Lynx</strong> looks for a
-  "SHELL" environment variable when shelling to DOS. If you wish to
-  preserve the environment space when shelling, put a line like
-  this in your AUTOEXEC.BAT file also "SET SHELL=C:\COMMAND.COM
-  /E:2048". It should match CONFIG.SYS.</p>
+  environment. You may need to change your &ldquo;SHELL=&rdquo;
+  setting in config.sys. In addition, <strong>Lynx</strong> looks
+  for a &ldquo;SHELL&rdquo; environment variable when shelling to
+  DOS. If you wish to preserve the environment space when shelling,
+  put a line like this in your AUTOEXEC.BAT file also &ldquo;SET
+  SHELL=C:\COMMAND.COM /E:2048&rdquo;. It should match
+  CONFIG.SYS.</p>
   <pre>
     HOME         Where to keep the bookmark file and personal config files.
     TEMP or TMP  Bookmarks are kept here with no HOME.  Temp files here.
@@ -511,14 +537,17 @@ define "no_proxy" "host.domain.dom, domain1.dom, domain2"
 
   <p>Define these in your batch file for running
   <strong>Lynx</strong>. For example, if your application line is
-  "D:\win32\lynx.bat", lynx.bat for Win32 may look like:</p>
+  &ldquo;D:\win32\lynx.bat&rdquo;, lynx.bat for Win32 may look
+  like:</p>
   <pre>
         @ECHO OFF
         set home=d:\win32
         set temp=d:\tmp
         set lynx_cfg=d:\win32\lynx.cfg
         d:\win32\lynx.exe %1 %2 %3 %4 %5
-</pre>In lynx_386, a typical batch file might look like:
+</pre>
+
+  <p>In lynx_386, a typical batch file might look like:</p>
   <pre>
         @echo off
         set HOME=f:/lynx2-8

@@ -1,4 +1,4 @@
-.\" $LynxId: lynx.man,v 1.116 2017/04/27 23:12:12 tom Exp $
+.\" $LynxId: lynx.man,v 1.117 2017/04/28 01:19:42 tom Exp $
 .\" **************************************************************************
 .\" Escape single quotes in literal strings from groff's Unicode transform.
 .ie \n(.g .ds AQ \(aq
@@ -1074,8 +1074,30 @@ servers (see WWW_access_GATEWAY, below).
 .IP
 Each protocol used by \fILynx\fR,
 (http, ftp, gopher, etc), can be mapped separately by setting environment
-variables of the form \fIPROTOCOL\fP_proxy (literally: http_proxy, ftp_proxy,
-gopher_proxy, etc), to \*(``http://some.server.dom:port/\*(''.
+variables of the form \fIPROTOCOL\fP_proxy.
+Protocols are indicated in a URI by the name before \*(``:\*('', e.g.,
+\*(``http\*('' in 
+\*(``http://some.server.dom:port/\*('' for HTML. 
+.IP
+Depending on your system configuration and supported protocols,
+the environment variables recognized by \fIlynx\fP may include
+.NS
+cso_proxy
+finger_proxy
+ftp_proxy
+gopher_proxy
+https_proxy
+http_proxy
+newspost_proxy
+newsreply_proxy
+news_proxy
+nntp_proxy
+no_proxy
+snewspost_proxy
+snewsreply_proxy
+snews_proxy
+wais_proxy
+.NE
 .IP
 See \fBLynx Users Guide\fR for additional details and examples.
 .TP
@@ -1085,9 +1107,10 @@ Set to the directory containing trusted certificates.
 .B SSL_CERT_FILE
 Set to the full path and filename for your file of trusted certificates.
 .TP
-.B WWW_access_GATEWAY
+.B WWW_\fIaccess\fB_GATEWAY
 \fILynx\fR still supports use of gateway servers, with the servers specified
-via \*(``WWW_access_GATEWAY\*('' variables (where \*(``access\*('' is lower case and can be
+via \*(``WWW_\fIaccess\fP_GATEWAY\*('' variables
+(where \*(``\fIaccess\fP\*('' is lower case and can be
 \*(``http\*('', \*(``ftp\*('', \*(``gopher\*('' or \*(``wais\*('').
 However most gateway servers have been discontinued.
 Note that you do not include a terminal \*(``/\*('' for gateways, but
