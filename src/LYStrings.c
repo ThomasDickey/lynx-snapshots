@@ -1,4 +1,4 @@
-/* $LynxId: LYStrings.c,v 1.266 2017/04/29 00:32:21 tom Exp $ */
+/* $LynxId: LYStrings.c,v 1.267 2017/04/29 14:38:32 tom Exp $ */
 #include <HTUtils.h>
 #include <HTCJK.h>
 #include <UCAux.h>
@@ -3112,6 +3112,8 @@ static int cell2char(char *s, int cells)
 	    have = LYstrExtent2(s, pos);
 	    CTRACE_EDIT((tfp, "  %2d:%2d:%.*s\n", pos, have, pos, s));
 	    if (have >= cells) {
+		if (cells <= 0)
+		    break;
 		/* the best solution is the one with the most bytes */
 		best = pos;
 	    }
