@@ -1,4 +1,4 @@
-/* $LynxId: LYStrings.c,v 1.265 2017/03/18 21:42:48 tom Exp $ */
+/* $LynxId: LYStrings.c,v 1.266 2017/04/29 00:32:21 tom Exp $ */
 #include <HTUtils.h>
 #include <HTCJK.h>
 #include <UCAux.h>
@@ -3105,15 +3105,19 @@ static int cell2char(char *s, int cells)
     int have;
 
     CTRACE_EDIT((tfp, "cell2char(%d) %d:%s\n", cells, len, s));
-    /* FIXME - make this a binary search */
     if (len != 0) {
+	int best = -1;
+
 	for (pos = 0; pos <= len; ++pos) {
 	    have = LYstrExtent2(s, pos);
 	    CTRACE_EDIT((tfp, "  %2d:%2d:%.*s\n", pos, have, pos, s));
 	    if (have >= cells) {
-		break;
+		/* the best solution is the one with the most bytes */
+		best = pos;
 	    }
 	}
+	if (best >= 0)
+	    pos = best;
 	if (pos > len)
 	    pos = len;
     } else {
