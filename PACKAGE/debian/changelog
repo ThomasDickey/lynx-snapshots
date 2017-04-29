@@ -1,8 +1,8 @@
-lynx-dev (2.8.9dev.12) unstable; urgency=low
+lynx-dev (2.8.9dev.13) unstable; urgency=low
 
   * maintenance updates
 
- -- Thomas E. Dickey <dickey@invisible-island.net>  Wed, 23 Nov 2016 13:22:53 -0500
+ -- Thomas E. Dickey <dickey@invisible-island.net>  Sat, 29 Apr 2017 08:47:15 -0400
 
 lynx-dev (2.8.8dev.16) unstable; urgency=high
 
