@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTML.c,v 1.168 2016/11/24 18:18:18 tom Exp $
+ * $LynxId: HTML.c,v 1.170 2017/04/30 18:45:06 tom Exp $
  *
  *		Structured stream to Rich hypertext converter
  *		============================================
@@ -4717,7 +4717,7 @@ static int HTML_start_element(HTStructured * me, int element_number,
 	    }
 	    CTRACE((tfp, "2.Ok, we're trying type=[%s] (present=%p)\n",
 		    NONNULL(I.type),
-		    present));
+		    (const void *) present));
 	    /* text+file don't go in here */
 	    if ((UseALTasVALUE == TRUE) ||
 		(present && present[HTML_INPUT_VALUE] &&

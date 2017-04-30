@@ -1,4 +1,4 @@
-/* $LynxId: LYCurses.c,v 1.183 2017/03/18 21:42:48 tom Exp $ */
+/* $LynxId: LYCurses.c,v 1.184 2017/04/30 17:52:12 tom Exp $ */
 #include <HTUtils.h>
 #include <HTAlert.h>
 
@@ -572,7 +572,7 @@ void wcurses_css(WINDOW * win, char *name,
 	if (tmpHash == NOSTYLE) {
 	    char *pclass = strrchr(name, '.');
 
-	    CTRACE2(TRACE_STYLE, (tfp, "undefined, trimming at %p\n", pclass));
+	    CTRACE2(TRACE_STYLE, (tfp, "undefined, trimming at %p\n", (void *) pclass));
 	    if (pclass)
 		*pclass = '\0';
 	    else

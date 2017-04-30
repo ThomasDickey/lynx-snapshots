@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTCP.c,v 1.137 2017/01/02 02:11:14 tom Exp $
+ * $LynxId: HTTCP.c,v 1.138 2017/04/30 17:52:00 tom Exp $
  *
  *			Generic Communication Code		HTTCP.c
  *			==========================
@@ -389,7 +389,7 @@ static void dump_hostent(const char *msgprefix,
 
 	CTRACE((tfp, "%s: %p ", msgprefix, (const void *) phost));
 	if (phost) {
-	    CTRACE((tfp, "{ h_name = %p", phost->h_name));
+	    CTRACE((tfp, "{ h_name = %p", (void *) phost->h_name));
 	    if (phost->h_name) {
 		CTRACE((tfp, " \"%s\",", phost->h_name));
 	    } else {
@@ -401,7 +401,7 @@ static void dump_hostent(const char *msgprefix,
 		for (pcnt = phost->h_aliases; *pcnt; pcnt++) {
 		    CTRACE((tfp, "%s %p \"%s\"",
 			    (pcnt == phost->h_aliases ? " " : ", "),
-			    *pcnt, *pcnt));
+			    (void *) *pcnt, *pcnt));
 		}
 		CTRACE((tfp, "%s0x0 },\n\t",
 			(*phost->h_aliases ? ", " : " ")));
@@ -416,7 +416,7 @@ static void dump_hostent(const char *msgprefix,
 		for (pcnt = phost->h_addr_list; *pcnt; pcnt++) {
 		    CTRACE((tfp, "%s %p",
 			    (pcnt == phost->h_addr_list ? "" : ","),
-			    *pcnt));
+			    (void *) *pcnt));
 		    for (i = 0; i < phost->h_length; i++) {
 			CTRACE((tfp, "%s%d%s", (i == 0 ? " \"" : "."),
 				(int) *((unsigned char *) (*pcnt) + i),

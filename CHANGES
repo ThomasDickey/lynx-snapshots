@@ -1,7 +1,10 @@
--- $LynxId: CHANGES,v 1.889 2017/04/29 14:43:40 tom Exp $
+-- $LynxId: CHANGES,v 1.891 2017/04/30 17:54:33 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
+
+2017-04-30 (2.8.9dev.14)
+* compiler-warning fixes for c99 on OSX -TD
 
 2017-04-29 (2.8.9dev.13)
 * amend fix for Debian #841155, adding check for special case where the
