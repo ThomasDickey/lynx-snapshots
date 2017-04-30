@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFWriter.c,v 1.111 2017/02/11 00:28:32 tom Exp $
+ * $LynxId: HTFWriter.c,v 1.112 2017/04/30 17:55:13 tom Exp $
  *
  *		FILE WRITER				HTFWrite.h
  *		===========
@@ -173,7 +173,7 @@ static void decompress_gzip(HTStream *me)
 	    }
 	    gzclose(gzfp);
 	    LYCloseTempFP(fp);
-	    CTRACE((tfp, "...decompress %ld to %ld\n",
+	    CTRACE((tfp, "...decompress %" PRI_off_t " to %ld\n",
 		    me->anchor->actual_length,
 		    actual));
 	    if (success) {
