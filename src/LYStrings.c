@@ -1,4 +1,4 @@
-/* $LynxId: LYStrings.c,v 1.267 2017/04/29 14:38:32 tom Exp $ */
+/* $LynxId: LYStrings.c,v 1.268 2017/05/10 22:11:33 tom Exp $ */
 #include <HTUtils.h>
 #include <HTCJK.h>
 #include <UCAux.h>
@@ -3069,6 +3069,39 @@ static int mbcs_glyphs(char *s, int len)
 }
 
 /*
+ * Check if there are no continuation bytes in the multibyte (sub)string of
+ * length len.
+ */
+static int mbcs_valid(char *s, int len, int limit)
+{
+    int i;
+    int result = FALSE;
+
+    if (IS_UTF8_TTY) {
+	for (i = 0; s[i] && i < limit; i++) {
+	    if (!IS_UTF8_EXTRA(s[i])) {
+		if ((i + 1) == len) {
+		    result = TRUE;
+		    break;
+		}
+	    }
+	}
+    } else if (IS_CJK_TTY) {
+	for (i = 0; s[i] && i < limit; i++) {
+	    if (!is8bits(s[i])) {
+		if ((i + 1) == len) {
+		    result = TRUE;
+		    break;
+		}
+	    }
+	}
+    } else {
+	result = TRUE;
+    }
+    return result;
+}
+
+/*
  * Calculates offset in bytes of a glyph at cell position pos.
  */
 static int mbcs_skip(char *s, int pos)
@@ -3116,6 +3149,8 @@ static int cell2char(char *s, int cells)
 		    break;
 		/* the best solution is the one with the most bytes */
 		best = pos;
+		if (mbcs_valid(s, pos, len))
+		    break;
 	    }
 	}
 	if (best >= 0)
