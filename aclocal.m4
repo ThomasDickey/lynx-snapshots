@@ -1,4 +1,4 @@
-dnl $LynxId: aclocal.m4,v 1.235 2017/04/27 09:15:35 tom Exp $
+dnl $LynxId: aclocal.m4,v 1.236 2017/05/10 22:32:05 tom Exp $
 dnl Macros for auto-configure script.
 dnl by Thomas E. Dickey <dickey@invisible-island.net>
 dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
@@ -2665,7 +2665,7 @@ AC_TRY_LINK([
 test "$cf_cv_fionbio" = "fcntl" && AC_DEFINE(USE_FCNTL,1,[Define to 1 if we should use fcntl])
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_FUNC_CURSES_VERSION version: 6 updated: 2012/10/06 16:39:58
+dnl CF_FUNC_CURSES_VERSION version: 7 updated: 2017/05/10 18:31:29
 dnl ----------------------
 dnl Solaris has a data item 'curses_version', which confuses AC_CHECK_FUNCS.
 dnl It's a character string "SVR4", not documented.
@@ -2674,7 +2674,7 @@ AC_DEFUN([CF_FUNC_CURSES_VERSION],
 AC_CACHE_CHECK(for function curses_version, cf_cv_func_curses_version,[
 AC_TRY_RUN([
 #include <${cf_cv_ncurses_header:-curses.h}>
-int main()
+int main(void)
 {
 	char temp[1024];
 	sprintf(temp, "%s\n", curses_version());
@@ -2687,7 +2687,7 @@ rm -f core])
 test "$cf_cv_func_curses_version" = yes && AC_DEFINE(HAVE_CURSES_VERSION,1,[Define to 1 if we have curses_version function])
 ])
 dnl ---------------------------------------------------------------------------
-dnl CF_FUNC_GETADDRINFO version: 8 updated: 2012/11/08 20:57:52
+dnl CF_FUNC_GETADDRINFO version: 9 updated: 2017/05/10 18:31:29
 dnl -------------------
 dnl Look for a working version of getaddrinfo(), for IPV6 support.
 AC_DEFUN([CF_FUNC_GETADDRINFO],[
@@ -2701,7 +2701,7 @@ AC_TRY_RUN([
 
 #define expect(a,b) if (strcmp(a,b) != 0) goto bad
 
-int main()
+int main(void)
 {
    int passive, gaierr, inet4 = 0, inet6 = 0;
    struct addrinfo hints, *ai, *aitop;
@@ -4049,7 +4049,7 @@ CF_UPPER(cf_nculib_ROOT,HAVE_LIB$cf_nculib_root)
 AC_DEFINE_UNQUOTED($cf_nculib_ROOT)
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_NCURSES_VERSION version: 14 updated: 2012/10/06 08:57:51
+dnl CF_NCURSES_VERSION version: 15 updated: 2017/05/09 19:26:10
 dnl ------------------
 dnl Check for the version of ncurses, to aid in reporting bugs, etc.
 dnl Call CF_CURSES_CPPFLAGS first, or CF_NCURSES_CPPFLAGS.  We don't use
@@ -4064,7 +4064,7 @@ AC_CACHE_CHECK(for ncurses version, cf_cv_ncurses_version,[
 	AC_TRY_RUN([
 #include <${cf_cv_ncurses_header:-curses.h}>
 #include <stdio.h>
-int main()
+int main(void)
 {
 	FILE *fp = fopen("$cf_tempfile", "w");
 #ifdef NCURSES_VERSION
@@ -4919,7 +4919,7 @@ CF_VERBOSE(...checked $1 [$]$1)
 AC_SUBST(EXTRA_LDFLAGS)
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_SET_ERRNO version: 5 updated: 2012/11/08 20:57:52
+dnl CF_SET_ERRNO version: 6 updated: 2017/05/10 18:31:29
 dnl ------------
 dnl Check if 'errno' is declared in a fashion that lets us set it.
 AC_DEFUN([CF_SET_ERRNO],
@@ -4927,7 +4927,7 @@ AC_DEFUN([CF_SET_ERRNO],
 AC_CACHE_CHECK(if we can set errno,cf_cv_set_errno,[
 AC_TRY_RUN([
 #include <errno.h>
-int main()
+int main(void)
 {
 	errno = 255;
 	${cf_cv_main_return:-return}(errno != 255);
