@@ -1,4 +1,4 @@
--- $LynxId: CHANGES,v 1.892 2017/05/10 22:18:16 tom Exp $
+-- $LynxId: CHANGES,v 1.893 2017/05/10 22:41:50 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
@@ -6,6 +6,8 @@ Changes since Lynx 2.8 release
 2017-05-10 (2.8.9dev.14)
 * amend fix for Debian #841155, adding check for complete multibyte strings to
   decide when the cell-limit has been met (Debian #862148) -TD
+* minor improvements to configure script to reduce warnings in config.log -TD
+* update config.sub (2017-04-02)
 
 * compiler-warning fixes for c99 on OSX -TD
 
