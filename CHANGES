@@ -1,7 +1,10 @@
--- $LynxId: CHANGES,v 1.894 2017/05/11 01:03:49 tom Exp $
+-- $LynxId: CHANGES,v 1.896 2017/05/11 22:44:32 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
+
+2017-05-11 (2.8.9dev.15)
+* build-fix for PGI compilers, e.g., symbol conflicts -TD
 
 2017-05-10 (2.8.9dev.14)
 * amend fix for Debian #841155, adding check for complete multibyte strings to

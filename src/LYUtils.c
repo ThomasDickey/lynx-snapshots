@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYUtils.c,v 1.276 2016/11/24 15:35:29 tom Exp $
+ * $LynxId: LYUtils.c,v 1.277 2017/05/11 22:33:05 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTCP.h>
@@ -499,7 +499,7 @@ static BOOL show_whereis_targets(int flag,
 				 int TargetEmphasisON,
 				 int utf_flag)
 {
-    const char *Data = NULL;
+    const char *mydata = NULL;
     const char *cp;
     char *theData = NULL;
     char buffer[MAX_LINE];
@@ -551,10 +551,10 @@ static BOOL show_whereis_targets(int flag,
 	     * Recursively skip hits that end before this link, and break out
 	     * if there is no hit beyond those.  -FM
 	     */
-	    Data = theData;
+	    mydata = theData;
 	    while ((Offset < hoffset) &&
 		   ((Offset + tLen) <= hoffset)) {
-		data = (Data + tlen);
+		data = (mydata + tlen);
 		offset = (Offset + tLen);
 		if (((cp = LYno_attr_mb_strstr(data,
 					       target,
@@ -562,7 +562,7 @@ static BOOL show_whereis_targets(int flag,
 					       &HitOffset,
 					       &LenNeeded)) != NULL)
 		    && (offset + LenNeeded) < LYcols) {
-		    Data = cp;
+		    mydata = cp;
 		    Offset = (offset + HitOffset);
 		} else {
 		    goto highlight_search_done;
@@ -737,7 +737,7 @@ static BOOL show_whereis_targets(int flag,
 		 */
 		    && ((cp =
 			 LYno_attr_mb_strstr(data = SKIP_GLYPHS(utf_flag,
-								Data,
+								mydata,
 								offset - Offset),
 					     target,
 					     utf_flag, YES,
@@ -756,7 +756,7 @@ static BOOL show_whereis_targets(int flag,
 		     * Set up the data and offset for the hit, and let the code
 		     * for within hightext hits handle it.  -FM
 		     */
-		    Data = cp;
+		    mydata = cp;
 		    Offset = (offset + HitOffset);
 		    data = buffer;
 		    offset = hoffset;
@@ -937,7 +937,7 @@ static BOOL show_whereis_targets(int flag,
 		 */
 		    && ((cp =
 			 LYno_attr_mb_strstr(data = SKIP_GLYPHS(utf_flag,
-								Data,
+								mydata,
 								offset - Offset),
 					     target,
 					     utf_flag, YES,
@@ -959,7 +959,7 @@ static BOOL show_whereis_targets(int flag,
 		     */
 		    if ((HitOffset + (offset + tLen)) >= (hoffset + hLen)) {
 			offset = (HitOffset + offset);
-			data = SKIP_GLYPHS(utf_flag, Data, offset - hoffset);
+			data = SKIP_GLYPHS(utf_flag, mydata, offset - hoffset);
 			if (utf_flag) {
 			    LYrefresh();
 			}
@@ -1042,7 +1042,7 @@ static BOOL show_whereis_targets(int flag,
 			    LYstopTargetEmphasis();
 			}
 		    } else {
-			Data = cp;
+			mydata = cp;
 			Offset = (offset + HitOffset);
 			data = buffer;
 			offset = hoffset;
