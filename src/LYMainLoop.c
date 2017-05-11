@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMainLoop.c,v 1.233 2016/11/24 19:50:02 tom Exp $
+ * $LynxId: LYMainLoop.c,v 1.234 2017/05/11 21:22:06 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTAccess.h>
@@ -7879,7 +7879,7 @@ static void HTGotoURLs_free(void)
  */
 void HTAddGotoURL(char *url)
 {
-    char *copy = NULL;
+    char *mycopy = NULL;
     char *old;
     HTList *cur;
 
@@ -7887,26 +7887,26 @@ void HTAddGotoURL(char *url)
 	return;
 
     CTRACE((tfp, "HTAddGotoURL %s\n", url));
-    StrAllocCopy(copy, url);
+    StrAllocCopy(mycopy, url);
 
     if (!Goto_URLs) {
 	Goto_URLs = HTList_new();
 #ifdef LY_FIND_LEAKS
 	atexit(HTGotoURLs_free);
 #endif
-	HTList_addObject(Goto_URLs, copy);
+	HTList_addObject(Goto_URLs, mycopy);
 	return;
     }
 
     cur = Goto_URLs;
     while (NULL != (old = (char *) HTList_nextObject(cur))) {
-	if (!strcmp(old, copy)) {
+	if (!strcmp(old, mycopy)) {
 	    HTList_removeObject(Goto_URLs, old);
 	    FREE(old);
 	    break;
 	}
     }
-    HTList_addObject(Goto_URLs, copy);
+    HTList_addObject(Goto_URLs, mycopy);
 
     return;
 }
