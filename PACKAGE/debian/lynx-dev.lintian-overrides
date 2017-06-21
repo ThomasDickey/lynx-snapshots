@@ -1,0 +1,9 @@
+# Lynx's version-numbering is not understood by lintian, though legal.
+lynx-dev: rc-version-greater-than-expected-version 2.8.9dev.15 > 2.8.9 (consider using 2.8.9~dev.15)
+
+# This is intentional because it is referenced from the documentation.
+lynx-dev: extra-license-file usr/share/doc/lynx-dev/COPYING
+
+# These are intentional, part of the sample files:
+lynx-dev: zero-byte-file-in-doc-directory usr/share/doc/lynx-dev/test/X
+lynx-dev: zero-byte-file-in-doc-directory usr/share/doc/lynx-dev/test/nobody
