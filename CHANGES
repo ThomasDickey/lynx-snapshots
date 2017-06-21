@@ -1,9 +1,10 @@
--- $LynxId: CHANGES,v 1.897 2017/05/12 03:37:02 tom Exp $
+-- $LynxId: CHANGES,v 1.898 2017/06/21 21:05:32 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2017-05-11 (2.8.9dev.15)
+2017-06-21 (2.8.9dev.15)
+* fix lintian warnings in ".deb" test-package -TD
 * build-fix for PGI compilers, e.g., symbol conflicts -TD
 * update eo.po from
     http://translationproject.org/latest/lynx

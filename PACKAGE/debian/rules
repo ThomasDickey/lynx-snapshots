@@ -22,7 +22,9 @@ helpdir		:= $(docdir)/help_dir
 DSTDIR		:= $(CURDIR)/debian/$(PACKAGE)
 DOCDIR		:= $(DSTDIR)$(docdir)
 
-CFLAGS =
+CPPFLAGS	:= $(shell dpkg-buildflags --get CPPFLAGS)
+CFLAGS		:= $(shell dpkg-buildflags --get CFLAGS)
+LDFLAGS		:= $(shell dpkg-buildflags --get LDFLAGS)
 
 ifneq (,$(findstring debug,$(DEB_BUILD_OPTIONS)))
 DEBOP=--enable-debug
@@ -48,6 +50,9 @@ configure: configure-stamp
 configure-stamp:
 	dh_testdir
 
+	CPPFLAGS="$(CPPFLAGS)" \
+	CFLAGS="$(CFLAGS)" \
+	LDFLAGS="$(LDFLAGS)" \
 	env cf_cv_SYSTEM_MAIL=/usr/sbin/sendmail \
 		COMPRESS=/usr/bin/compress \
 		BZIP2=/bin/bzip2 \
@@ -163,6 +168,7 @@ binary-indep: build install
 binary-arch: build install
 	dh_testdir
 	dh_testroot
+	dh_lintian
 	dh_installdebconf
 	dh_installdocs
 	dh_installmenu

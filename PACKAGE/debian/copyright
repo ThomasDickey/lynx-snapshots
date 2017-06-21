@@ -4,6 +4,9 @@ Current maintainer: Thomas Dickey <dickey@invisible-island.net>
 
 -------------------------------------------------------------------------------
 
+Copyright 1997-2016,2017 Thomas E. Dickey
+Copyright (C) 1995 University of Kansas.
+
 Most of the content of the lynx release (and corresponding copyright) is
 the work of developers on the lynx-dev mailing list, who have agreed to
 distribute their work under the terms and conditions of the GNU General
@@ -18,30 +21,6 @@ Any licensing questions should be directed to the mailing list:
 or to the maintainer (Thomas E. Dickey):
 
 	dickey@invisible-island.net
-
-For reference, below is the original copyright notice for Lynx (2.4.2).
-------------------------------------------------------------------------------
-/* Copyright (C) 1995 University of Kansas.
-
-   This file is part of Lynx, a text-based WWW browser.
-
-   Lynx is free software; you can redistribute it and/or modify it
-   under the terms of the GNU General Public License, version 2, as
-   published by the Free Software Foundation.
-
-   Lynx is distributed in the hope that it will be useful, but WITHOUT
-   ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
-   or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public
-   License for more details.
-
-   You should have received a copy of the GNU General Public License
-   along with Lynx; see the file COPYING.  If not, write to the Free
-   Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
-   02111-1307, USA.
-
-   Any licensing or usage questions should be directed to Michael
-   Grobe <grobe@ukans.edu>.
-*/
 
 -------------------------------------------------------------------------------
 
@@ -101,7 +80,7 @@ License: other-BSD
     shared with many OS's install programs.
 
 Files: debian/*
-Copyright:  2010-2015,2016 Thomas E. Dickey
+Copyright:  2010-2016,2017 Thomas E. Dickey
 License: other-BSD
     Permission to use, copy, modify, and distribute this software and its
     documentation for any purpose and without fee is hereby granted,
