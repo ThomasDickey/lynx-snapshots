@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTMIME.c,v 1.93 2017/02/10 22:27:42 tom Exp $
+ * $LynxId: HTMIME.c,v 1.94 2017/07/02 16:49:21 tom Exp $
  *
  *			MIME Message Parse			HTMIME.c
  *			==================
@@ -2047,7 +2047,8 @@ static void HTMIME_put_character(HTStream *me, int c)
     HTChunkPutc(&me->anchor->http_headers, UCH(c));
     if (me->state == MIME_TRANSPARENT) {
 	HTChunkTerminate(&me->anchor->http_headers);
-	CTRACE((tfp, "Server Headers:\n%.*s\n",
+	CTRACE((tfp, "Server Headers (%d bytes):\n%.*s\n",
+		me->anchor->http_headers.size,
 		me->anchor->http_headers.size,
 		me->anchor->http_headers.data));
 	CTRACE((tfp, "Server Content-Type:%s\n",
