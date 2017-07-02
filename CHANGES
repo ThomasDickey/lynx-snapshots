@@ -1,9 +1,10 @@
--- $LynxId: CHANGES,v 1.898 2017/06/21 21:05:32 tom Exp $
+-- $LynxId: CHANGES,v 1.899 2017/07/02 17:15:14 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2017-06-21 (2.8.9dev.15)
+2017-07-02 (2.8.9dev.15)
+* correct logic in HTCopy() when re-reading a page (Debian #863008) -TD
 * fix lintian warnings in ".deb" test-package -TD
 * build-fix for PGI compilers, e.g., symbol conflicts -TD
 * update eo.po from

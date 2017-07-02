@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFormat.c,v 1.85 2016/11/24 15:29:50 tom Exp $
+ * $LynxId: HTFormat.c,v 1.86 2017/07/02 17:09:45 tom Exp $
  *
  *		Manage different file formats			HTFormat.c
  *		=============================
@@ -732,8 +732,7 @@ int HTCopy(HTParentAnchor *anchor,
     HTStreamClass targetClass;
     BOOL suppress_readprogress = NO;
     off_t limit = anchor ? anchor->content_length : 0;
-    off_t bytes = anchor ? anchor->actual_length : 0;
-    off_t total;
+    off_t bytes = 0;
     int rv = 0;
 
     /*  Push the data down the stream
@@ -865,13 +864,8 @@ int HTCopy(HTParentAnchor *anchor,
 	}
 #endif /* NOT_ASCII */
 
-	total = bytes + status;
-	if (limit == 0 || bytes == 0 || (total < limit)) {
-	    (*targetClass.put_block) (sink, input_buffer, status);
-	} else if (bytes < limit) {
-	    (*targetClass.put_block) (sink, input_buffer, (int) (limit - bytes));
-	}
-	bytes = total;
+	(*targetClass.put_block) (sink, input_buffer, status);
+	bytes += status;
 	if (!suppress_readprogress)
 	    HTReadProgress(bytes, limit);
 	HTDisplayPartial();
@@ -879,7 +873,7 @@ int HTCopy(HTParentAnchor *anchor,
 	/* a few buggy implementations do not close the connection properly
 	 * and will hang if we try to read past the declared content-length.
 	 */
-	if (limit > 0 && bytes == limit)
+	if (limit > 0 && bytes >= limit)
 	    break;
     }				/* next bufferload */
     if (anchor != 0) {
