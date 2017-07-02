@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYUtils.c,v 1.277 2017/05/11 22:33:05 tom Exp $
+ * $LynxId: LYUtils.c,v 1.278 2017/07/02 20:42:32 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTCP.h>
@@ -6066,7 +6066,7 @@ void LYRelaxFilePermissions(const char *name)
 	 */
 	mode_t save = umask(HIDE_UMASK);
 
-	mode = ((mode & 0700) | 0066) & ~save;
+	mode = (mode_t) (((mode & 0700) | 0066) & ~save);
 	(void) umask(save);
 	(void) chmod(name, mode);
     }

@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFTP.c,v 1.128 2016/11/24 23:43:55 tom Exp $
+ * $LynxId: HTFTP.c,v 1.129 2017/07/02 20:42:32 tom Exp $
  *
  *			File Transfer Protocol (FTP) Client
  *			for a WorldWideWeb browser
@@ -2324,6 +2324,7 @@ static EntryInfo *parse_dir_entry(char *entry,
 	    break;
 	}
 	/* fall through if server_type changed for *first == TRUE ! */
+	/* FALLTHRU */
     case UNIX_SERVER:
     case PETER_LEWIS_SERVER:
     case MACHTEN_SERVER:
@@ -2706,7 +2707,8 @@ static char *FormatSize(char **bufp,
     char fmt[512];
 
     if (*start) {
-	sprintf(fmt, "%%%.*s" PRI_off_t, (int) sizeof(fmt) - 3, start);
+	sprintf(fmt, "%%%.*s" PRI_off_t,
+		  (int) sizeof(fmt) - DigitsOf(start) - 3, start);
 
 	HTSprintf(bufp, fmt, value);
     } else {
@@ -2724,7 +2726,8 @@ static char *FormatNum(char **bufp,
     char fmt[512];
 
     if (*start) {
-	sprintf(fmt, "%%%.*sld", (int) sizeof(fmt) - 3, start);
+	sprintf(fmt, "%%%.*sld",
+		(int) sizeof(fmt) - DigitsOf(start) - 3, start);
 	HTSprintf(bufp, fmt, value);
     } else {
 	sprintf(fmt, "%lu", value);
@@ -3951,12 +3954,22 @@ int HTFTPLoad(const char *name,
 	     */
 	    if (control->is_binary) {
 		int code;
-		off_t size;
 
 		status = send_cmd_2("SIZE", filename);
-		if (status == 2 &&
-		    sscanf(response_text, "%d %" PRI_off_t, &code, &size) == 2) {
-		    anchor->content_length = size;
+		if (status == 2) {
+#if !defined(HAVE_LONG_LONG) && defined(GUESS_PRI_off_t)
+		    long size;
+
+		    if (sscanf(response_text, "%d %ld", &code, &size) == 2) {
+			anchor->content_length = (off_t) size;
+		    }
+#else
+		    off_t size;
+		    if (sscanf(response_text, "%d %" SCN_off_t, &code, &size)
+			== 2) {
+			anchor->content_length = size;
+		    }
+#endif
 		}
 	    }
 	    status = send_cmd_2("RETR", filename);

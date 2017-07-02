@@ -1,4 +1,4 @@
-dnl $LynxId: aclocal.m4,v 1.236 2017/05/10 22:32:05 tom Exp $
+dnl $LynxId: aclocal.m4,v 1.237 2017/07/02 18:31:56 tom Exp $
 dnl Macros for auto-configure script.
 dnl by Thomas E. Dickey <dickey@invisible-island.net>
 dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
@@ -4684,6 +4684,37 @@ CF_ACVERSION_CHECK(2.52,
 	[AC_PROG_CC_STDC],
 	[CF_ANSI_CC_REQD])
 CF_CC_ENV_FLAGS
+])dnl
+dnl ---------------------------------------------------------------------------
+dnl CF_PROG_CPP_COMMENTS version: 1 updated: 2017/07/02 14:31:07
+dnl --------------------
+dnl Ask for preprocessor "-C" option if we can get it.
+AC_DEFUN([CF_PROG_CPP_COMMENTS],[
+AC_REQUIRE([AC_PROG_CPP])
+AC_MSG_CHECKING(if preprocessor -C option works)
+AC_CACHE_VAL(cf_cv_prog_cpp_comments,[
+cf_cv_prog_cpp_comments=no
+cat >conftest.c <<CF_EOF
+int main(void)
+{
+	/* COMMENT */
+	return 0;
+}
+CF_EOF
+if ( $CPP -C conftest.c >conftest.i 2>/dev/null )
+then
+	if ( grep COMMENT conftest.i >/dev/null 2>/dev/null )
+	then
+		cf_cv_prog_cpp_comments=yes
+	fi
+fi
+rm -f conftest.[[ci]]
+])
+AC_MSG_RESULT($cf_cv_prog_cpp_comments)
+if test x$cf_cv_prog_cpp_comments = xyes
+then
+	CPP="$CPP -C"
+fi
 ])dnl
 dnl ---------------------------------------------------------------------------
 dnl CF_PROG_EXT version: 13 updated: 2015/04/18 09:03:58

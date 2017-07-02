@@ -1,9 +1,14 @@
--- $LynxId: CHANGES,v 1.899 2017/07/02 17:15:14 tom Exp $
+-- $LynxId: CHANGES,v 1.902 2017/07/02 21:03:29 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
 2017-07-02 (2.8.9dev.15)
+* fix strict gcc7 warnings on OSX, aside from those due to incorrect system
+  headers -TD
+* adjust definition of alloca() in HTUtils.h to quiet bogus compiler warning
+  with NetBSD 7 -TD
+* add configure check for preprocessor -C option, overlooked in c99 -TD
 * correct logic in HTCopy() when re-reading a page (Debian #863008) -TD
 * fix lintian warnings in ".deb" test-package -TD
 * build-fix for PGI compilers, e.g., symbol conflicts -TD

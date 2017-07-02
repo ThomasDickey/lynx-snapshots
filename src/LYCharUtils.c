@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYCharUtils.c,v 1.129 2016/11/24 15:35:29 tom Exp $
+ * $LynxId: LYCharUtils.c,v 1.130 2017/07/02 19:54:30 tom Exp $
  *
  *  Functions associated with LYCharSets.c and the Lynx version of HTML.c - FM
  *  ==========================================================================
@@ -1710,6 +1710,7 @@ char **LYUCFullyTranslateString(char **str,
 		break;
 #endif
 	    }
+	    /* FALLTHRU */
 
 	case S_recover:
 	    if (what == P_decimal || what == P_hex) {

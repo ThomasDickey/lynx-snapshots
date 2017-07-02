@@ -1,4 +1,4 @@
-dnl $LynxId: configure.in,v 1.289 2017/05/11 21:22:30 tom Exp $
+dnl $LynxId: configure.in,v 1.290 2017/07/02 18:18:00 tom Exp $
 dnl
 dnl Process this file with autoconf to produce a configure script.
 dnl
@@ -93,7 +93,7 @@ case $host_os in
 esac
 
 CF_PROG_CC
-AC_PROG_CPP
+CF_PROG_CPP_COMMENTS
 AC_PROG_LN_S
 case $host_os in
 (mingw*)

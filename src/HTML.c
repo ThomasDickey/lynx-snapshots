@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTML.c,v 1.170 2017/04/30 18:45:06 tom Exp $
+ * $LynxId: HTML.c,v 1.171 2017/07/02 19:57:04 tom Exp $
  *
  *		Structured stream to Rich hypertext converter
  *		============================================
@@ -3711,7 +3711,7 @@ static int HTML_start_element(HTStructured * me, int element_number,
 		    TRANSLATE_AND_UNESCAPE_ENTITIES(&me->object_title, TRUE, FALSE);
 		    LYTrimHead(me->object_title);
 		    LYTrimTail(me->object_title);
-		    if (me->object_title == '\0') {
+		    if (*me->object_title == '\0') {
 			FREE(me->object_title);
 		    }
 		}
@@ -3729,7 +3729,7 @@ static int HTML_start_element(HTStructured * me, int element_number,
 		    TRANSLATE_AND_UNESCAPE_ENTITIES(&me->object_type, TRUE, FALSE);
 		    LYTrimHead(me->object_type);
 		    LYTrimTail(me->object_type);
-		    if (me->object_type == '\0') {
+		    if (*me->object_type == '\0') {
 			FREE(me->object_type);
 		    }
 		}
@@ -3740,7 +3740,7 @@ static int HTML_start_element(HTStructured * me, int element_number,
 		    TRANSLATE_AND_UNESCAPE_ENTITIES(&me->object_classid, TRUE, FALSE);
 		    LYTrimHead(me->object_classid);
 		    LYTrimTail(me->object_classid);
-		    if (me->object_classid == '\0') {
+		    if (*me->object_classid == '\0') {
 			FREE(me->object_classid);
 		    }
 		}
@@ -3762,7 +3762,7 @@ static int HTML_start_element(HTStructured * me, int element_number,
 						    FALSE);
 		    LYTrimHead(me->object_codetype);
 		    LYTrimTail(me->object_codetype);
-		    if (me->object_codetype == '\0') {
+		    if (*me->object_codetype == '\0') {
 			FREE(me->object_codetype);
 		    }
 		}
@@ -3772,7 +3772,7 @@ static int HTML_start_element(HTStructured * me, int element_number,
 		    TRANSLATE_AND_UNESCAPE_ENTITIES(&me->object_name, TRUE, FALSE);
 		    LYTrimHead(me->object_name);
 		    LYTrimTail(me->object_name);
-		    if (me->object_name == '\0') {
+		    if (*me->object_name == '\0') {
 			FREE(me->object_name);
 		    }
 		}
@@ -5067,7 +5067,7 @@ static int HTML_start_element(HTStructured * me, int element_number,
 	    && non_empty(value[HTML_TEXTAREA_ID])) {
 	    StrAllocCopy(id_string, value[HTML_TEXTAREA_ID]);
 	    TRANSLATE_AND_UNESCAPE_TO_STD(&id_string);
-	    if ((id_string != '\0') &&
+	    if ((*id_string != '\0') &&
 		(ID_A = HTAnchor_findChildAndLink(me->node_anchor,	/* Parent */
 						  id_string,	/* Tag */
 						  NULL,		/* Addresss */

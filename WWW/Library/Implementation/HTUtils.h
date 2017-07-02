@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTUtils.h,v 1.122 2016/11/23 22:16:51 tom Exp $
+ * $LynxId: HTUtils.h,v 1.124 2017/07/02 20:40:14 tom Exp $
  *
  * Utility macros for the W3 code library
  * MACROS FOR GENERAL USE
@@ -19,11 +19,11 @@
 
 /* see AC_FUNC_ALLOCA macro */
 #ifdef __GNUC__
-# define alloca __builtin_alloca
+# define alloca(size) __builtin_alloca(size)
 #else
 # ifdef _MSC_VER
 #  include <malloc.h>
-#  define alloca _alloca
+#  define alloca(size) _alloca(size)
 # else
 #  if HAVE_ALLOCA_H
 #   include <alloca.h>
@@ -191,7 +191,11 @@ extern int ignore_unused;
 #undef small			/* see <w32api/rpcndr.h> */
 #endif
 
-#ifdef HAVE_ATOLL
+#if defined(__DARWIN_NO_LONG_LONG)
+#undef HAVE_ATOLL
+#endif
+
+#if defined(HAVE_ATOLL)
 #define LYatoll(n) atoll(n)
 #else
 extern off_t LYatoll(const char *value);
@@ -575,6 +579,8 @@ extern int WWW_TraceMask;
 #include <inttypes.h>
 #endif
 
+#define DigitsOf(type)  (int)((sizeof(type)*8)/3)
+
 /*
  * Printing/scanning-formats for "off_t", as well as cast needed to fit.
  */
@@ -602,13 +608,18 @@ extern int WWW_TraceMask;
 #endif
 
 #ifndef PRI_off_t
-#if defined(HAVE_LONG_LONG) && (SIZEOF_OFF_T > SIZEOF_LONG)
+#define GUESS_PRI_off_t
+#if (SIZEOF_OFF_T == SIZEOF_LONG)
+#define PRI_off_t	"ld"
+#define SCN_off_t	"ld"
+#define CAST_off_t(n)	(long)(n)
+#elif defined(HAVE_LONG_LONG)
 #define PRI_off_t	"lld"
 #define SCN_off_t	"lld"
 #define CAST_off_t(n)	(long long)(n)
 #else
 #define PRI_off_t	"ld"
-#define SCN_off_t	"ld"
+/* SCN_off_t requires workaround */
 #define CAST_off_t(n)	(long)(n)
 #endif
 #endif

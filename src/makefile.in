@@ -1,4 +1,4 @@
-# $LynxId: makefile.in,v 1.74 2014/12/16 01:10:39 tom Exp $
+# $LynxId: makefile.in,v 1.75 2017/07/02 18:15:25 tom Exp $
 # template-makefile for Lynx src directory
 
 SHELL		= @CONFIG_SHELL@
@@ -104,7 +104,7 @@ all: lynx$x
 
 .c.i:
 	@RULE_CC@
-	@ECHO_CC@$(CPP) -C $(CPP_OPTS) $< >$@
+	@ECHO_CC@$(CPP) $(CPP_OPTS) $< >$@
 
 lynx$x:   message $(top_builddir)/LYHelp.h $(OBJS) $(WWWLIB)
 	@echo "Linking and creating Lynx executable"

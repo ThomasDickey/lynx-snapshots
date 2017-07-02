@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTRules.c,v 1.46 2016/11/24 15:29:50 tom Exp $
+ * $LynxId: HTRules.c,v 1.47 2017/07/02 19:45:22 tom Exp $
  *
  *	Configuration manager for Hypertext Daemon		HTRules.c
  *	==========================================
@@ -291,6 +291,7 @@ char *HTTranslate(const char *required)
 	case HT_Progress:
 	case HT_Alert:
 	    LYFixCursesOn("show rule message:");	/* and fall through */
+	    /* FALLTHRU */
 	case HT_AlwaysAlert:
 	    pMsg = r->equiv ? r->equiv :
 		(r->op == HT_AlwaysAlert) ? "%s" : "Rule: %s";
@@ -335,7 +336,7 @@ char *HTTranslate(const char *required)
 		CTRACE((tfp, "HTRule: Pass `%s'\n", current));
 		return current;
 	    }
-	    /* Else fall through ...to map and pass */
+	    /* FALLTHRU */
 
 	case HT_Map:
 	case HT_Redirect:
