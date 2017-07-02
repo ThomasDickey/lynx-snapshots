@@ -1,5 +1,5 @@
 /*
- * $LynxId: GridText.c,v 1.294 2017/02/11 00:50:00 tom Exp $
+ * $LynxId: GridText.c,v 1.295 2017/07/02 20:01:22 tom Exp $
  *
  *		Character grid hypertext object
  *		===============================
@@ -7886,7 +7886,7 @@ static int TrimmedLength(char *string)
 
     if (!HTisDocumentSource()) {
 	int adjust = result;
-	unsigned ch;
+	int ch;
 
 	while (adjust > 0) {
 	    ch = UCH(string[adjust - 1]);
@@ -13212,7 +13212,7 @@ int HText_EditTextArea(LinkInfo * form_link)
     TextAnchor *start_anchor = NULL;
     BOOLEAN firstanchor = TRUE;
 
-    char ed_offset[10];
+    char ed_offset[DigitsOf(int) + 3];
     int start_line = 0;
     int entry_line = form_link->anchor_line_num;
     int orig_cnt = 0;

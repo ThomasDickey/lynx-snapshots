@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMainLoop.c,v 1.234 2017/05/11 21:22:06 tom Exp $
+ * $LynxId: LYMainLoop.c,v 1.235 2017/07/02 20:04:20 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTAccess.h>
@@ -3530,7 +3530,8 @@ static char *urlencode(char *str)
 	result = malloc(strlen(str) * 3 + 1);
 	ptr = result;
 
-	assert(result);
+	if (result == NULL)
+	    outofmem(__FILE__, "urlencode");
 
 	while ((ch = UCH(*str++)) != 0) {
 	    if (ch == ' ') {
@@ -3586,7 +3587,7 @@ static BOOLEAN check_JUMP_param(char **url_template)
 	    HTInfoMsg(CANCELLED);
 	    code = FALSE;
 	    break;
-	} else if ((encoded = urlencode(input->str)) != '\0') {
+	} else if (*(encoded = urlencode(input->str)) != '\0') {
 	    int subs_at = (int) (subs - result);
 	    int fill_in = (int) strlen(encoded) - 2;
 	    size_t have = strlen(result);

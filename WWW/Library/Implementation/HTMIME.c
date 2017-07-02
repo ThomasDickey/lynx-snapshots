@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTMIME.c,v 1.94 2017/07/02 16:49:21 tom Exp $
+ * $LynxId: HTMIME.c,v 1.95 2017/07/02 19:40:06 tom Exp $
  *
  *			MIME Message Parse			HTMIME.c
  *			==================
@@ -2004,7 +2004,7 @@ static void HTMIME_put_character(HTStream *me, int c)
     case miWWW_AUTHENTICATE:
 	me->field = me->state;	/* remember it */
 	me->state = miSKIP_GET_VALUE;
-	/* Fall through! */
+	/* FALLTHRU */
 
     case miSKIP_GET_VALUE:
 	if (c == '\n') {
@@ -2021,6 +2021,7 @@ static void HTMIME_put_character(HTStream *me, int c)
 	me->value_pointer = me->value;
 	me->state = miGET_VALUE;
 	/* Fall through to store first character */
+	/* FALLTHRU */
 
     case miGET_VALUE:
       GET_VALUE:
@@ -2033,6 +2034,7 @@ static void HTMIME_put_character(HTStream *me, int c)
 	    }
 	}
 	/* Fall through (if end of line) */
+	/* FALLTHRU */
 
     case miJUNK_LINE:
 	if (c == '\n') {

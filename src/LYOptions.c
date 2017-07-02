@@ -1,4 +1,4 @@
-/* $LynxId: LYOptions.c,v 1.171 2017/01/01 01:49:49 tom Exp $ */
+/* $LynxId: LYOptions.c,v 1.172 2017/07/02 20:07:12 tom Exp $ */
 #include <HTUtils.h>
 #include <HTFTP.h>
 #include <HTTP.h>		/* 'reloading' flag */
@@ -3794,7 +3794,7 @@ static int gen_options(char **newfile)
 	PutLabel(fp0, gettext("Line edit style"), lineedit_mode_string);
 	BeginSelect(fp0, lineedit_mode_string);
 	for (i = 0; LYEditorNames[i]; i++) {
-	    char temp[16];
+	    char temp[DigitsOf(i) + 3];
 
 	    sprintf(temp, "%d", i);
 	    PutOption(fp0, i == current_lineedit, temp, LYEditorNames[i]);
@@ -3806,7 +3806,7 @@ static int gen_options(char **newfile)
     PutLabel(fp0, gettext("Keyboard layout"), kblayout_string);
     BeginSelect(fp0, kblayout_string);
     for (i = 0; LYKbLayoutNames[i]; i++) {
-	char temp[16];
+	char temp[DigitsOf(i) + 3];
 
 	sprintf(temp, "%d", i);
 	PutOption(fp0, i == current_layout, temp, LYKbLayoutNames[i]);
@@ -3838,7 +3838,7 @@ static int gen_options(char **newfile)
     PutLabel(fp0, gettext("Display character set"), display_char_set_string);
     MaybeSelect(fp0, LYLocaleCharset, display_char_set_string);
     for (i = 0; LYchar_set_names[i]; i++) {
-	char temp[10];
+	char temp[DigitsOf(i) + 3];
 	size_t len = strlen(LYchar_set_names[i]);
 
 	if (len > cset_len)

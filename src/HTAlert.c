@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTAlert.c,v 1.102 2016/11/24 23:56:05 tom Exp $
+ * $LynxId: HTAlert.c,v 1.103 2017/07/02 19:54:30 tom Exp $
  *
  *	Displaying messages and getting input for Lynx Browser
  *	==========================================================
@@ -1132,7 +1132,7 @@ int HTConfirmPostRedirect(const char *Redirecting_url, int server_status)
 		result = 303;
 		break;
 	    }
-	    /* fall through to default */
+	    /* FALLTHRU */
 
 	default:
 	    /*

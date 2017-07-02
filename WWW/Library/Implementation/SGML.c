@@ -1,5 +1,5 @@
 /*
- * $LynxId: SGML.c,v 1.160 2017/01/01 00:56:18 Takeshi.Hataguchi Exp $
+ * $LynxId: SGML.c,v 1.161 2017/07/02 19:45:00 tom Exp $
  *
  *			General SGML Parser code		SGML.c
  *			========================
@@ -1895,7 +1895,7 @@ static void SGML_character(HTStream *me, int c_in)
 	if (!(c == '>' && me->slashedtag && TOASCII(clong) < 127)) {
 	    me->state = S_text;
 	}
-	/* fall through in any case! */
+	/* FALLTHRU */
     case S_text:
 	if (IS_CJK_TTY && ((TOASCII(c) & 0200) != 0)
 #ifdef EXP_JAPANESEUTF8_SUPPORT
@@ -3567,7 +3567,7 @@ static void SGML_character(HTStream *me, int c_in)
 	    PSRCSTART(attrval);
 #endif
 	me->state = S_value;
-	/*  no break!  fall through to S_value and process current `c`   */
+	/* FALLTHRU */
 
     case S_value:
 	if (WHITE(c) || (c == '>')) {	/* End of word */
