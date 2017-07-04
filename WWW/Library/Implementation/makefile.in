@@ -1,4 +1,4 @@
-# $LynxId: makefile.in,v 1.32 2015/12/13 23:20:11 tom Exp $
+# $LynxId: makefile.in,v 1.33 2017/07/04 22:45:38 tom Exp $
 # Make WWW under unix for a.n.other unix system (bsd)
 # Use this as a template
 
@@ -170,7 +170,7 @@ lint:
 
 .c.i:
 	@RULE_CC@
-	@ECHO_CC@$(CPP) -C $(CPPOPTS) $(srcdir)/$*.c >$@
+	@ECHO_CC@$(CPP) $(CPPOPTS) $(srcdir)/$*.c >$@
 
 depend :
 	makedepend -fmakefile -- $(CFLAGS) -- $(CFILES)

@@ -1,10 +1,11 @@
--- $LynxId: CHANGES,v 1.907 2017/07/04 20:17:10 tom Exp $
+-- $LynxId: CHANGES,v 1.908 2017/07/04 22:48:35 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
 2017-07-04 (2.8.9dev.15)
-* amended the Backes' change to the COLLAPSE_BR_TAGS feature -TD
+* add note in lynx.cfg about default values (Debian #408448) -TD
+* amended Backes' change to the COLLAPSE_BR_TAGS feature for compatibility -TD
   + use ENABLE_LYNXRC to determine whether it is written to the .lynxrc file.
   + add command-line option, etc., for controlling whether blank lines are
     trimmed, e.g., trailing lines as well as the special case for collapsing
