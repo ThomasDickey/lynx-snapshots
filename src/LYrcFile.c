@@ -1,4 +1,4 @@
-/* $LynxId: LYrcFile.c,v 1.96 2016/11/24 16:42:46 tom Exp $ */
+/* $LynxId: LYrcFile.c,v 1.99 2017/07/04 20:30:03 tom Exp $ */
 #include <HTUtils.h>
 #include <HTFTP.h>
 #include <LYUtils.h>
@@ -380,6 +380,7 @@ correctly on your screen you may try changing to a different 8 bit\n\
 set or using the 7 bit character approximations.\n\
 Current valid characters sets are:\n\
 ")),
+    MAYBE_SET(RC_COLLAPSE_BR_TAGS,      LYCollapseBRs,      MSG_ENABLE_LYNXRC),
     PARSE_LIS(RC_COOKIE_ACCEPT_DOMAINS, LYCookieAcceptDomains, N_("\
 cookie_accept_domains and cookie_reject_domains are comma-delimited\n\
 lists of domains from which Lynx should automatically accept or reject\n\
@@ -620,6 +621,7 @@ presented regardless of user mode.\n\
 ")),
     MAYBE_FUN(RC_TAGSOUP,               get_tagsoup,        put_tagsoup,
               MSG_ENABLE_LYNXRC),
+    MAYBE_SET(RC_TRIM_BLANK_LINES,      LYtrimBlankLines,   MSG_ENABLE_LYNXRC),
     MAYBE_SET(RC_UNDERLINE_LINKS,       LYUnderlineLinks,   MSG_ENABLE_LYNXRC),
     PARSE_ENU(RC_USER_MODE,             user_mode,          tbl_user_mode, N_("\
 user_mode specifies the users level of knowledge with Lynx.  The\n\

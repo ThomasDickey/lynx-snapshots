@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMain.c,v 1.261 2017/04/27 22:34:12 tom Exp $
+ * $LynxId: LYMain.c,v 1.265 2017/07/03 23:31:21 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTP.h>
@@ -204,6 +204,7 @@ BOOLEAN LYforce_no_cache = FALSE;
 BOOLEAN LYinternal_flag = FALSE;	/* override no-cache b/c internal link */
 BOOLEAN LYoverride_no_cache = FALSE;	/*override no-cache b/c history etc */
 BOOLEAN LYresubmit_posts = ALWAYS_RESUBMIT_POSTS;
+BOOLEAN LYtrimBlankLines = TRUE;
 BOOLEAN LYtrimInputFields = FALSE;
 BOOLEAN LYxhtml_parsing = FALSE;
 BOOLEAN bold_H1 = FALSE;
@@ -3412,6 +3413,10 @@ outputs for -source dumps"
       "=FILENAME\nread keystroke commands from the given file\n(see -cmd_log)"
    ),
 #endif
+   PARSE_SET(
+      "collapse_br_tags", 4|TOGGLE_ARG,		LYCollapseBRs,
+      "toggles collapsing of BR tags"
+   ),
 #ifdef USE_SLANG
    PARSE_FUN(
       "color",		4|FUNCTION_ARG,		color_fun,
@@ -3976,6 +3981,10 @@ bug which treated '>' as a co-terminator for\ndouble-quotes and tags"
    PARSE_FUN(
       "traversal",	4|FUNCTION_ARG,		traversal_fun,
       "traverse all http links derived from startfile"
+   ),
+   PARSE_SET(
+      "trim_blank_lines", 2|TOGGLE_ARG,		LYtrimBlankLines,
+      "\ntoggle trimming of leading/trailing/collapsed-br blank lines"
    ),
    PARSE_SET(
       "trim_input_fields", 2|SET_ARG,		LYtrimInputFields,

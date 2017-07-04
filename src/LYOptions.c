@@ -1,4 +1,4 @@
-/* $LynxId: LYOptions.c,v 1.172 2017/07/02 20:07:12 tom Exp $ */
+/* $LynxId: LYOptions.c,v 1.174 2017/07/04 20:28:05 tom Exp $ */
 #include <HTUtils.h>
 #include <HTFTP.h>
 #include <HTTP.h>		/* 'reloading' flag */
@@ -2308,6 +2308,24 @@ static OptValues verbose_images_type_values[] =
     {0, 0, 0}
 };
 
+static const char *collapse_br_tags_string = RC_COLLAPSE_BR_TAGS;
+static OptValues collapse_br_tags_values[] =
+{
+	/* LYCollapseBRs variable */
+    {FALSE, N_("OFF"), "OFF"},
+    {TRUE, N_("collapse"), "ON"},
+    {0, 0, 0}
+};
+
+static const char *trim_blank_lines_string = RC_TRIM_BLANK_LINES;
+static OptValues trim_blank_lines_values[] =
+{
+	/* LYtrimBlankLines variable */
+    {FALSE, N_("OFF"), "OFF"},
+    {TRUE, N_("trim-lines"), "ON"},
+    {0, 0, 0}
+};
+
 /*
  * Bookmark Options
  */
@@ -3101,6 +3119,24 @@ int postoptions(DocInfo *newdoc)
 	    && GetOptValues(verbose_images_type_values, data[i].value, &code)) {
 	    if (verbose_img != code) {
 		verbose_img = (BOOLEAN) code;
+		need_reload = TRUE;
+	    }
+	}
+
+	/* Collapse BR Tags: ON/OFF */
+	if (!strcmp(data[i].tag, collapse_br_tags_string)
+	    && GetOptValues(collapse_br_tags_values, data[i].value, &code)) {
+	    if (LYCollapseBRs != code) {
+		LYCollapseBRs = (BOOLEAN) code;
+		need_reload = TRUE;
+	    }
+	}
+
+	/* Trim Blank Lines: ON/OFF */
+	if (!strcmp(data[i].tag, trim_blank_lines_string)
+	    && GetOptValues(trim_blank_lines_values, data[i].value, &code)) {
+	    if (LYtrimBlankLines != code) {
+		LYtrimBlankLines = (BOOLEAN) code;
 		need_reload = TRUE;
 	    }
 	}
@@ -4005,6 +4041,18 @@ static int gen_options(char **newfile)
     PutLabel(fp0, gettext("Verbose images"), verbose_images_string);
     BeginSelect(fp0, verbose_images_string);
     PutOptValues(fp0, verbose_img, verbose_images_type_values);
+    EndSelect(fp0);
+
+    /* Collapse BR Tags: ON/OFF */
+    PutLabel(fp0, gettext("Collapse BR tags"), collapse_br_tags_string);
+    BeginSelect(fp0, collapse_br_tags_string);
+    PutOptValues(fp0, LYCollapseBRs, collapse_br_tags_values);
+    EndSelect(fp0);
+
+    /* Trim blank lines: ON/OFF */
+    PutLabel(fp0, gettext("Trim blank lines"), trim_blank_lines_string);
+    BeginSelect(fp0, trim_blank_lines_string);
+    PutOptValues(fp0, LYtrimBlankLines, trim_blank_lines_values);
     EndSelect(fp0);
 
     /*

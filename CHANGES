@@ -1,9 +1,18 @@
--- $LynxId: CHANGES,v 1.902 2017/07/02 21:03:29 tom Exp $
+-- $LynxId: CHANGES,v 1.907 2017/07/04 20:17:10 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2017-07-02 (2.8.9dev.15)
+2017-07-04 (2.8.9dev.15)
+* amended the Backes' change to the COLLAPSE_BR_TAGS feature -TD
+  + use ENABLE_LYNXRC to determine whether it is written to the .lynxrc file.
+  + add command-line option, etc., for controlling whether blank lines are
+    trimmed, e.g., trailing lines as well as the special case for collapsing
+    br-tags.  Leading blank lines at the top of the document are untouched.
+  + modify limit for trimmed lines to retain as little as 1 line; previously
+    the trimming would go no smaller than 2 lines.
+* add command-line option and options-menu item for COLLAPSE_BR_TAGS (patch
+  by Peter Backes).
 * fix strict gcc7 warnings on OSX, aside from those due to incorrect system
   headers -TD
 * adjust definition of alloca() in HTUtils.h to quiet bogus compiler warning

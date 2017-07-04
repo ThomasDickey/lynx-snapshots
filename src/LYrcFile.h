@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYrcFile.h,v 1.48 2015/12/18 01:58:05 tom Exp $
+ * $LynxId: LYrcFile.h,v 1.49 2017/07/03 23:20:33 tom Exp $
  */
 #ifndef LYRCFILE_H
 #define LYRCFILE_H
@@ -257,6 +257,7 @@
 #define RC_TN3270_PATH                  "tn3270_path"
 #define RC_TOUCH_PATH                   "touch_path"
 #define RC_TRACK_INTERNAL_LINKS         "track_internal_links"
+#define RC_TRIM_BLANK_LINES             "trim_blank_lines"
 #define RC_TRIM_INPUT_FIELDS            "trim_input_fields"
 #define RC_TRUSTED_EXEC                 "trusted_exec"
 #define RC_TRUSTED_LYNXCGI              "trusted_lynxcgi"
