@@ -1,4 +1,4 @@
-# $LynxId: makefile.in,v 1.40 2015/10/08 00:26:34 Atsuhito.Kohda Exp $
+# $LynxId: makefile.in,v 1.41 2017/07/04 22:46:05 tom Exp $
 #
 # Makefile for the makeuctb and unicode tables.
 #
@@ -135,7 +135,7 @@ makeuctb$o : $(srcdir)/UCkd.h $(srcdir)/makeuctb.c
 
 .c.i:
 	@RULE_CC@
-	@ECHO_CC@$(BUILD_CPP) -C $(CPP_OPTS) $(srcdir)/$*.c >$@
+	@ECHO_CC@$(BUILD_CPP) $(CPP_OPTS) $(srcdir)/$*.c >$@
 
 .tbl.h:
 	./$(MAKEUCTB) $(srcdir)/$*.tbl $*.h
