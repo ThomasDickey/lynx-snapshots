@@ -1,0 +1,162 @@
+#!/usr/bin/env perl
+# $LynxId: collapse-br,v 1.8 2017/07/04 19:35:45 tom Exp $
+# Generate a series of HTML files containing a mixture of text and <br> tags,
+# comparing dumps of those to w3m and elinks.
+
+use warnings;
+use strict;
+use diagnostics;
+
+$| = 1;
+
+use Getopt::Std;
+use File::Temp qw/ tempdir /;
+
+our ( $opt_C, $opt_T, $opt_e, $opt_l, $opt_p, $opt_t, $opt_w );
+our $tempdir = tempdir( CLEANUP => 1 );
+
+sub dumpit($$) {
+    my $prog = shift;
+    my $html = shift;
+    my $opts = "-dump";
+    $html =
+        "<html>"
+      . "<head><title>T</title></head>"
+      . "<body>$html</body>"
+      . "</html>"
+      if ($opt_t);
+    my @result;
+    if ( $prog =~ /lynx$/ ) {
+        my $name = "$tempdir/lynx.cfg";
+        $opts .= " -cfg=$name";
+        open my $fh, ">$name";
+        printf $fh "collapse_br_tags:%s\n", $opt_C ? "false" : "true";
+        printf $fh "trim_blank_lines:%s\n", $opt_T ? "false" : "true";
+        close $fh;
+    }
+    if ($opt_p) {
+        $opts .= " -stdin"       if ( $prog =~ /lynx$/ );
+        $opts .= " -force-html"  if ( $prog =~ /elinks$/ );
+        $opts .= " -T text/html" if ( $prog =~ /w3m$/ );
+        if ( open my $fh, "echo '$html' | $prog $opts |" ) {
+            @result = <$fh>;
+            close $fh;
+        }
+    }
+    else {
+        my $name = "$tempdir/foobar.html";
+        open my $fh, ">$name";
+        printf $fh "%s", $html;
+        close $fh;
+
+        $opts .= " $name";
+        if ( open my $fh, "$prog $opts |" ) {
+            @result = <$fh>;
+            close $fh;
+        }
+    }
+    for my $n ( 0 .. $#result ) {
+        chomp $result[$n];
+    }
+
+    if ( open my $fh, "echo '$html' | $prog $opts |" ) {
+        @result = <$fh>;
+        close $fh;
+        for my $n ( 0 .. $#result ) {
+            chomp $result[$n];
+        }
+    }
+    $result[0] = "OOPS" unless ( $#result >= 0 );
+    return @result;
+}
+
+sub header($) {
+    my @cols = @{ $_[0] };
+    my $text = "";
+    for my $c ( 0 .. $#cols ) {
+        $text .= sprintf "%-8s", $cols[$c];
+    }
+    printf "\t    %s\n", $text;
+}
+
+sub doit() {
+    my $length = 1;
+    my $state  = -1;
+
+    my @tokens;
+    $tokens[0] = " ";
+    $tokens[1] = "X";
+    $tokens[2] = "<br>";
+    my $tokens = $#tokens + 1;
+
+    my @progs;
+    $progs[ $#progs + 1 ] = "lynx";
+
+    $progs[ $#progs + 1 ] = "w3m"    if ($opt_w);
+    $progs[ $#progs + 1 ] = "elinks" if ($opt_e);
+    $progs[ $#progs + 1 ] = "./lynx" if ( -f "./lynx" );
+
+    while ( $length <= $opt_l ) {
+        my $bits  = "";
+        my $html  = "";
+        my $value = ++$state;
+        $length = 0;
+        while ( $value >= 0 ) {
+            my $digit  = $value % $tokens;
+            my $update = ( $value - $digit ) / $tokens;
+            last if ( ( $update <= 0 ) and ( $value <= 0 ) and $length > 0 );
+            $bits .= sprintf "%d", $digit;
+            $length++;
+            $html .= $tokens[$digit];
+            $value = $update;
+        }
+
+        # skip the non-interesting cases
+        next if ( $bits =~ /00/ );
+        next if ( $bits =~ /11/ );
+        next unless ( $bits =~ /2/ );
+        printf "%-*s '%s'\n", $opt_l, $bits, $html;
+        my @listing;
+        for my $p ( 0 .. $#progs ) {
+            my @q = &dumpit( $progs[$p], $html );
+            my $l = $p * 8;
+            for my $r ( 0 .. $#q ) {
+
+                $listing[$r] = "" unless ( $listing[$r] );
+                $listing[$r] = sprintf "%-*s", $l, $listing[$r] if ( $l > 0 );
+                $listing[$r] .= sprintf "|%s",
+                  substr( $q[$r] . "........", 0, 7 );
+            }
+        }
+        &header( \@progs );
+        for my $r ( 0 .. $#listing ) {
+            printf "\t%2d %s|\n", $r, $listing[$r];
+        }
+    }
+}
+
+sub main::HELP_MESSAGE() {
+    printf STDERR <<EOF
+Usage: $0 [options]
+
+Options:
+ -C      do not collapse BR-tags (lynx only)
+ -T      do not trim blank lines (lynx only)
+ -e      compare with elinks
+ -l NUM  generate test-cases up to this length (default: 3)
+ -p      pipe HTML to the program rather than reading a file
+ -t      add dummy title
+ -w      compare with w3m
+
+EOF
+      ;
+    exit;
+}
+
+&getopts('CTel:ptw') || main::HELP_MESSAGE;
+
+$opt_l = 3 unless ($opt_l);
+
+&doit;
+
+1;

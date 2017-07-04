@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTML.c,v 1.171 2017/07/02 19:57:04 tom Exp $
+ * $LynxId: HTML.c,v 1.173 2017/07/04 20:05:01 tom Exp $
  *
  *		Structured stream to Rich hypertext converter
  *		============================================
@@ -1984,14 +1984,15 @@ static int HTML_start_element(HTStructured * me, int element_number,
     case HTML_BR:
 	UPDATE_STYLE;
 	CHECK_ID(HTML_GEN_ID);
-	/* Add a \r (new line) if these three conditions are true:
-	 *   1. We are not collapsing BR's, and
-	 *   2. The previous line has text on it, or
-	 *   3. This line has text on it.
-	 * Otherwise, don't do anything. -DH 980814, TD 980827
+	/* Add a \r (new line) if these conditions are true:
+	 *   * We are not collapsing BR's (and either we are not trimming
+	 *     blank lines, or the preceding line is non-empty), or
+	 *   * The current line has text on it.
+	 * Otherwise, don't do anything. -DH 19980814, TD 19980827/20170704
 	 */
 	if ((LYCollapseBRs == FALSE &&
-	     !HText_PreviousLineEmpty(me->text, FALSE)) ||
+	     (!LYtrimBlankLines ||
+	      !HText_PreviousLineEmpty(me->text, FALSE))) ||
 	    !HText_LastLineEmpty(me->text, FALSE)) {
 	    HText_setLastChar(me->text, ' ');	/* absorb white space */
 	    HText_appendCharacter(me->text, '\r');

@@ -1,5 +1,5 @@
 /*
- * $LynxId: GridText.c,v 1.295 2017/07/02 20:01:22 tom Exp $
+ * $LynxId: GridText.c,v 1.302 2017/07/04 17:27:07 tom Exp $
  *
  *		Character grid hypertext object
  *		===============================
@@ -5760,11 +5760,11 @@ void HText_endAppend(HText *text)
     /*
      * Get the first line.
      */
-    if ((line_ptr = FirstHTLine(text)) != 0) {
+    if (LYtrimBlankLines && (line_ptr = FirstHTLine(text)) != 0) {
 	/*
-	 * Remove the blank lines at the end of document.
+	 * Remove blank lines at the end of the document.
 	 */
-	while (text->last_line->data[0] == '\0' && text->Lines > 2) {
+	while (text->last_line->data[0] == '\0' && text->Lines > 0) {
 	    HTLine *next_to_the_last_line = text->last_line->prev;
 
 	    CTRACE((tfp, "GridText: Removing bottom blank line: `%s'\n",

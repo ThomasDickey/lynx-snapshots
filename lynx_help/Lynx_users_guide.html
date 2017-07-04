@@ -1,4 +1,4 @@
-<!-- $LynxId: Lynx_users_guide.html,v 1.130 2017/04/28 16:42:13 tom Exp $ -->
+<!-- $LynxId: Lynx_users_guide.html,v 1.131 2017/07/04 20:41:58 tom Exp $ -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN">
 
 <html>
@@ -688,7 +688,7 @@
   generated at runtime, in which the user fills in choices as in
   any ordinary HTML form.</p>
   <pre>
-                    Options Menu (Lynx Version 2.8.8pre.2)
+                    Options Menu (Lynx Version 2.8.9dev.15)
 
     Accept Changes - Reset Changes - Left Arrow cancels changes - HELP!
 
@@ -731,6 +731,8 @@
   Bad HTML messages (!)            : [Warn, point to trace-file]
   Show images                      : [ignore___]
   Verbose images                   : [OFF__________]
+  Collapse BR tags (!)             : [OFF_____]
+  Trim blank lines (!)             : [trim-lines]
 
   Headers Transferred to Remote Servers
   Personal mail address            : __________________________________________
@@ -772,7 +774,7 @@
   accessed by setting FORMS_OPTIONS to TRUE in <a href=
   "#lynx.cfg">lynx.cfg</a>.</p>
   <pre>
-             Options Menu (Lynx Version 2.8.8pre.2)
+             Options Menu (Lynx Version 2.8.9dev.15)
 
      (E)ditor                     : emacs
      (D)ISPLAY variable           : aixtest.cc.ukans.edu:0.0
@@ -907,6 +909,15 @@
       for the filepath (e.g., <em>not</em>
       [.BM]lynx_bookmarks.html).</p>
     </dd>
+
+    <dt>Collapse BR tags</dt>
+
+    <dd>If <em>Collapse BR tags</em> is turned off, Lynx will not
+    collapse serial <code>BR</code> tags. If turned on, i.e.,
+    &ldquo;collapse&rdquo;, two or more concurrent <code>BR</code>s
+    will be collapsed into a single line break. Note that the valid
+    way to insert extra blank lines in HTML is via a
+    <code>PRE</code> block with only newlines in the block.</dd>
 
     <dt>Cookies</dt>
 
@@ -1365,6 +1376,14 @@
     cookie, <em>force yes-response</em> to reply "yes" to each
     prompt, <em>force no-response</em> to reply "no" to each
     prompt.</dd>
+
+    <dt>Trim blank lines</dt>
+
+    <dd>If <em>Trim blank lines</em> is turned off, Lynx will not
+    trim trailing blank lines from the document. Also, Lynx will
+    not collapse <code>BR</code>-tags onto the previous line when
+    it happens to be empty as part of the <em>Collapse BR tags</em>
+    feature.</dd>
 
     <dt>Type of Search</dt>
 

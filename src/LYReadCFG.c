@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYReadCFG.c,v 1.189 2016/11/24 15:35:29 tom Exp $
+ * $LynxId: LYReadCFG.c,v 1.190 2017/07/03 23:21:43 tom Exp $
  */
 #ifndef NO_RULES
 #include <HTRules.h>
@@ -1740,6 +1740,7 @@ static Config_Type Config_Table [] =
 #endif
      PARSE_PRG(RC_TOUCH_PATH,           ppTOUCH),
      PARSE_SET(RC_TRACK_INTERNAL_LINKS, track_internal_links),
+     PARSE_SET(RC_TRIM_BLANK_LINES,     LYtrimBlankLines),
      PARSE_SET(RC_TRIM_INPUT_FIELDS,    LYtrimInputFields),
 #ifdef EXEC_LINKS
      PARSE_DEF(RC_TRUSTED_EXEC,         EXEC_PATH),

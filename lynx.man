@@ -1,4 +1,4 @@
-.\" $LynxId: lynx.man,v 1.117 2017/04/28 01:19:42 tom Exp $
+.\" $LynxId: lynx.man,v 1.119 2017/07/04 20:45:52 tom Exp $
 .\" **************************************************************************
 .\" Escape single quotes in literal strings from groff's Unicode transform.
 .ie \n(.g .ds AQ \(aq
@@ -230,6 +230,9 @@ followed by a \*(``name=value\*('' allows one to override values set in the
 lynx.cfg or \&.lynxrc files.
 \fILynx\fP tries the cfg-file setting first.
 .RE
+.TP
+.B \-collapse_br_tags
+toggles collapsing of BR tags.
 .TP
 .B \-color
 forces color mode on, if available.
@@ -899,6 +902,10 @@ When used with
 is output to a file, intended for indexing.
 .IP
 See CRAWL.announce for more information.
+.TP
+.B \-trim_blank_lines
+toggles trimming of trailing blank lines as well as
+the related trimming of blank lines while collapsing BR tags.
 .TP
 .B \-trim_input_fields
 trim input text/textarea fields in forms.
