@@ -1,9 +1,11 @@
--- $LynxId: CHANGES,v 1.910 2017/07/05 20:39:40 tom Exp $
+-- $LynxId: CHANGES,v 1.911 2017/07/05 22:23:00 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
 2017-07-05 (2.8.9dev.16)
+* add a check to ensure that HTML_put_string() will not append a chunk onto
+  itself (report by Ned Williamson) -TD
 * update et.po, tr.po from
     http://translationproject.org/latest/lynx
 
