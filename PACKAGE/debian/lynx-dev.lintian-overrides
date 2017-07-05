@@ -1,5 +1,5 @@
 # Lynx's version-numbering is not understood by lintian, though legal.
-lynx-dev: rc-version-greater-than-expected-version 2.8.9dev.15 > 2.8.9 (consider using 2.8.9~dev.15)
+lynx-dev: rc-version-greater-than-expected-version
 
 # This is intentional because it is referenced from the documentation.
 lynx-dev: extra-license-file usr/share/doc/lynx-dev/COPYING
