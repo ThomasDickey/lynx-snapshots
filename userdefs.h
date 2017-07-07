@@ -1,5 +1,5 @@
 /*
- * $LynxId: userdefs.h,v 1.328 2017/07/05 20:13:35 tom Exp $
+ * $LynxId: userdefs.h,v 1.329 2017/07/06 00:50:59 tom Exp $
  *
  * Lynx - Hypertext navigation system
  *
@@ -483,7 +483,10 @@
  * Normally we expect you will connect to a remote site, e.g., the Lynx starting
  * site:
  */
-#define STARTFILE "http://lynx.invisible-island.net/"
+#ifndef HOMEPAGE_URL
+#define HOMEPAGE_URL "http://lynx.invisible-island.net/"
+#endif
+#define STARTFILE HOMEPAGE_URL
 /*
  * As an alternative, you may want to use a local URL.  A good choice for this
  * is the user's home directory:

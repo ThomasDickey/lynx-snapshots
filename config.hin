@@ -1,11 +1,13 @@
 /*
- * $LynxId: config.hin,v 1.139 2016/04/16 00:47:08 tom Exp $
+ * $LynxId: config.hin,v 1.140 2017/07/06 00:47:43 tom Exp $
  * vile:cmode
  *
  * The configure script translates "config.hin" into "lynx_cfg.h"
  */
 #ifndef LYNX_CFG_H
 #define LYNX_CFG_H 1
+
+#undef HOMEPAGE_URL
 
 #undef ALL_CHARSETS		/* AC_ARG_WITH(charsets) */
 #undef ALT_CHAR_SET		/* CF_ALT_CHAR_SET */
