@@ -1,4 +1,4 @@
-dnl $LynxId: configure.in,v 1.291 2017/07/05 20:13:35 tom Exp $
+dnl $LynxId: configure.in,v 1.292 2017/07/06 00:48:30 tom Exp $
 dnl
 dnl Process this file with autoconf to produce a configure script.
 dnl
@@ -1560,6 +1560,10 @@ if test -n "$srcdir" ; then
 	test "$USE_INCLUDED_LIBINTL" = yes && mkdir -p intl
 	test "$srcdir" != "." && SRCDIR_CLEAN=""
 fi
+
+HOMEPAGE_URL="http://lynx.invisible-island.net/"
+AC_DEFINE_UNQUOTED(HOMEPAGE_URL,"$HOMEPAGE_URL",[Define to Lynx homepage URL])
+AC_SUBST(HOMEPAGE_URL)
 
 AC_SUBST(SRCDIR_CLEAN)
 AC_OUTPUT(

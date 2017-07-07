@@ -1,9 +1,9 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: lynx 2.8.9dev.15\n"
+"Project-Id-Version: lynx 2.8.9dev.16\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-07-04 16:51-0400\n"
+"POT-Creation-Date: 2017-07-06 04:38-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -3693,31 +3693,31 @@ msgstr ""
 msgid "Y/N/A/V"
 msgstr ""
 
-#: src/HTML.c:5932
+#: src/HTML.c:5943
 msgid "Description:"
 msgstr ""
 
-#: src/HTML.c:5937
+#: src/HTML.c:5948
 msgid "(none)"
 msgstr ""
 
-#: src/HTML.c:5941
+#: src/HTML.c:5952
 msgid "Filepath:"
 msgstr ""
 
-#: src/HTML.c:5947
+#: src/HTML.c:5958
 msgid "(unknown)"
 msgstr ""
 
-#: src/HTML.c:7387
+#: src/HTML.c:7398
 msgid "Document has only hidden links.  Use the 'l'ist command."
 msgstr ""
 
-#: src/HTML.c:7885
+#: src/HTML.c:7896
 msgid "Source cache error - disk full?"
 msgstr ""
 
-#: src/HTML.c:7898
+#: src/HTML.c:7909
 msgid "Source cache error - not enough memory!"
 msgstr ""
 

@@ -1,9 +1,11 @@
--- $LynxId: CHANGES,v 1.912 2017/07/06 00:25:29 tom Exp $
+-- $LynxId: CHANGES,v 1.913 2017/07/07 01:22:54 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2017-07-05 (2.8.9dev.16)
+2017-07-06 (2.8.9dev.16)
+* modify po-makefile to use msgmerge to align with lynx.pot, and also use sed
+  to update some obsolete homepage URLs in translations -TD
 * add a note in the comments for INCLUDE in lynx.cfg regarding the default
   directory searches LYOpenCFG(), added in 2.8.4dev.20 (Debian #818047) -TD
 * add a check to ensure that HTML_put_string() will not append a chunk onto

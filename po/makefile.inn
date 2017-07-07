@@ -1,4 +1,4 @@
-# $LynxId: makefile.inn,v 1.22 2015/10/02 11:12:57 tom Exp $
+# $LynxId: makefile.inn,v 1.26 2017/07/07 01:22:54 tom Exp $
 #
 # Makefile for program source directory in GNU NLS utilities package.
 # Copyright (C) 1995, 1996, 1997 by Ulrich Drepper <drepper@gnu.ai.mit.edu>
@@ -74,6 +74,7 @@ INSTOBJ		= $(NLS_TEXTDOMAIN)$(INSTOBJEXT)
 .SUFFIXES: .c .o .po .pox .gmo .mo .msg .cat
 
 .c.o:
+	@RULE_CC@
 	$(COMPILE) $<
 
 .po.pox:
@@ -81,14 +82,21 @@ INSTOBJ		= $(NLS_TEXTDOMAIN)$(INSTOBJEXT)
 	$(MSGMERGE) -w 132 $< $(srcdir)/$(PACKAGE).pot -o $*.pox
 
 .po.mo:
-	$(MSGFMT) -o $@ $<
+	@echo "translating $< to $@"
+	@ECHO_CC@$(MSGFMT) -o $@ $<
 
 .po.gmo:
-	file=$(srcdir)/`echo $* | sed 's,.*/,,'`.gmo \
-	  && rm -f $$file && $(GMSGFMT) -o $$file $<
+	@echo "translating $< to $@"
+	@sed	-e s,http://lynx.browser.org/,@HOMEPAGE_URL@,g \
+		-e s,http://lynx.isc.org/,@HOMEPAGE_URL@,g $< >pass1.tmp
+	@ECHO_CC@$(MSGMERGE) -w 132 pass1.tmp $(srcdir)/$(PACKAGE).pot -o pass2.tmp
+	@ECHO_CC@file=$(srcdir)/`echo $* | sed 's,.*/,,'`.gmo \
+	  && rm -f $$file && $(GMSGFMT) -o $$file pass2.tmp
+	@-rm -f pass*.tmp
 
 .po.cat:
-	sed -f ../intl/po2msg.sed < $< > $*.msg \
+	@echo "translating $< to $@"
+	@ECHO_CC@sed -f ../intl/po2msg.sed < $< > $*.msg \
 	  && rm -f $@ && $(GENCAT) $@ $*.msg
 
 
@@ -97,9 +105,9 @@ all: all-@USE_NLS@
 all-yes: $(SOURCES) $(CATALOGS)
 all-no:
 
-en.po :	
+en.po :
 	msginit --no-translator -l en -i $(PACKAGE).pot
-	# cygwin's msginit 1.19.3 creates "en_US.po" rather than "en.po"...
+# cygwin's msginit 1.19.3 creates "en_US.po" rather than "en.po"...
 	@$(SHELL) -c 'for n in en*.po; \
 		do \
 		if test -f $$n; \
@@ -110,8 +118,12 @@ en.po :
 		done'
 
 $(srcdir)/$(PACKAGE).pot: $(POTFILES)
-	$(XGETTEXT) --default-domain=$(NLS_TEXTDOMAIN) --directory=$(top_srcdir) \
-	  --add-comments --keyword=_ --keyword=N_ \
+	$(XGETTEXT) \
+	  --default-domain=$(NLS_TEXTDOMAIN) \
+	  --directory=$(top_srcdir) \
+	  --add-comments \
+	  --keyword=_ \
+	  --keyword=N_ \
 	  --files-from=$(srcdir)/POTFILES.in \
 	&& test ! -f $(PACKAGE).po \
 	   || ( rm -f $(srcdir)/$(PACKAGE).pot \
@@ -201,12 +213,13 @@ dvi info tags TAGS ID:
 
 mostlyclean:
 	rm -f core core.* *.pox $(PACKAGE).po en.po *.old.po cat-id-tbl.tmp
+	rm -f *.gmo *.mo *.tmp
 	rm -fr *.o
 
 clean: mostlyclean
 
 distclean: clean
-	rm -f cat-id-tbl.c stamp-cat-id *.gmo *.mo
+	rm -f cat-id-tbl.c stamp-cat-id
 	rm -f makefile makefile.in POTFILES *.mo *.msg *.cat *.cat.m
 
 maintainer-clean: distclean
