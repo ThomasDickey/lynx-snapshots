@@ -1,4 +1,4 @@
-# $LynxId: makefile.inn,v 1.26 2017/07/07 01:22:54 tom Exp $
+# $LynxId: makefile.inn,v 1.28 2017/07/08 19:04:06 tom Exp $
 #
 # Makefile for program source directory in GNU NLS utilities package.
 # Copyright (C) 1995, 1996, 1997 by Ulrich Drepper <drepper@gnu.ai.mit.edu>
@@ -87,9 +87,22 @@ INSTOBJ		= $(NLS_TEXTDOMAIN)$(INSTOBJEXT)
 
 .po.gmo:
 	@echo "translating $< to $@"
-	@sed	-e s,http://lynx.browser.org/,@HOMEPAGE_URL@,g \
-		-e s,http://lynx.isc.org/,@HOMEPAGE_URL@,g $< >pass1.tmp
-	@ECHO_CC@$(MSGMERGE) -w 132 pass1.tmp $(srcdir)/$(PACKAGE).pot -o pass2.tmp
+	@$(SHELL) -c 'LC_ALL=C \
+	sed	-e s,http://lynx.browser.org/,@HOMEPAGE_URL@,g \
+		-e s,http://lynx.isc.org/,@HOMEPAGE_URL@,g $< >pass1.tmp;\
+	if cmp -s $< pass1.tmp; \
+	then \
+		echo ...no change made to homepage URL; \
+	else \
+		echo ...updated homepage URL;\
+	fi; \
+	if $(MSGMERGE) -w 132 pass1.tmp $(srcdir)/$(PACKAGE).pot -o pass2.tmp; \
+	then \
+		echo "...merged against $(srcdir)/$(PACKAGE).pot";\
+	else \
+		echo "...workaround without merging against $(srcdir)/$(PACKAGE).pot";\
+		cat  $< >pass2.tmp; \
+	fi '
 	@ECHO_CC@file=$(srcdir)/`echo $* | sed 's,.*/,,'`.gmo \
 	  && rm -f $$file && $(GMSGFMT) -o $$file pass2.tmp
 	@-rm -f pass*.tmp

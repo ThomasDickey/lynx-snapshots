@@ -1,9 +1,12 @@
--- $LynxId: CHANGES,v 1.914 2017/07/07 09:19:59 tom Exp $
+-- $LynxId: CHANGES,v 1.916 2017/07/08 18:50:52 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2017-07-07 (2.8.9dev.16)
+2017-07-08 (2.8.9dev.16)
+* convert po/zh_TW.po to UTF-8 to work with Solaris10, which lacks big5 -TD
+* build-fix for OSX Panther, which has PRId64 but not SCNd64 (patch by Martijn
+  Dekker).
 * modify po-makefile to use msgmerge to align with lynx.pot, and also use sed
   to update some obsolete homepage URLs in translations -TD
 * add a note in the comments for INCLUDE in lynx.cfg regarding the default

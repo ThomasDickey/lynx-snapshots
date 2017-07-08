@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTUtils.h,v 1.124 2017/07/02 20:40:14 tom Exp $
+ * $LynxId: HTUtils.h,v 1.125 2017/07/07 20:49:16 Martijn.Dekker Exp $
  *
  * Utility macros for the W3 code library
  * MACROS FOR GENERAL USE
@@ -585,7 +585,7 @@ extern int WWW_TraceMask;
  * Printing/scanning-formats for "off_t", as well as cast needed to fit.
  */
 #if defined(HAVE_LONG_LONG) && defined(HAVE_INTTYPES_H) && defined(SIZEOF_OFF_T)
-#if (SIZEOF_OFF_T == 8) && defined(PRId64)
+#if (SIZEOF_OFF_T == 8) && defined(PRId64) && defined(SCNd64)
 
 #define PRI_off_t	PRId64
 #define SCN_off_t	SCNd64
