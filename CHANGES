@@ -1,9 +1,14 @@
--- $LynxId: CHANGES,v 1.916 2017/07/08 18:50:52 tom Exp $
+-- $LynxId: CHANGES,v 1.918 2017/07/11 00:17:59 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2017-07-08 (2.8.9dev.16)
+2017-07-10 (2.8.9dev.16)
+* modify configure script to warn if NLS cannot be configured, and disable
+  the feature rather than leaving it partly configured and failing during
+  the build -TD
+* modify configure script to allow pre-set $MSGFMT and $XGETTEXT variables to
+  to used to build the NLS configuration using system's native NLS support -TD
 * convert po/zh_TW.po to UTF-8 to work with Solaris10, which lacks big5 -TD
 * build-fix for OSX Panther, which has PRId64 but not SCNd64 (patch by Martijn
   Dekker).
