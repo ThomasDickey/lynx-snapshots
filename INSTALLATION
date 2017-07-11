@@ -501,6 +501,21 @@ II. Compile instructions -- UNIX
   --enable-nls				(several definitions)
 	use Native Language Support (i.e., gettext).
 
+	This relies upon external programs (msgfmt and xgettext) to format
+	the message catalogs:
+	
+	    + Unless you set the environment variables MSGFMT and XGETTEXT to
+	      the full pathnames of these utilities, the configure script will
+	      search for the GNU versions of these utilities.
+	      
+	      It will also search for the GNU version of the corresponding
+	      gettext() runtime function.  On some platforms (such as Solaris),
+	      this search gives misleading results.
+
+	    + If you set those environment variables to full pathnames, the
+	      configure script will warn if they are not the GNU versions of
+	      the utilities.
+
   --enable-nsl-fork			(define NSL_FORK)
 	Disabled by default, this allows interruption of NSL requests,
 	so that `z' will stop the `look-up' phase of a connection.
@@ -1467,4 +1482,4 @@ VIII. Acknowledgment
 
 -- 1999/04/24 - H. Nelson <lynx-admin@irm.nara.kindai.ac.jp>
 -- vile:txtmode
--- $LynxId: INSTALLATION,v 1.126 2015/09/19 17:40:20 tom Exp $
+-- $LynxId: INSTALLATION,v 1.127 2017/07/10 08:55:07 tom Exp $
