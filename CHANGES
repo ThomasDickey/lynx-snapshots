@@ -1,7 +1,10 @@
--- $LynxId: CHANGES,v 1.918 2017/07/11 00:17:59 tom Exp $
+-- $LynxId: CHANGES,v 1.920 2017/08/08 22:34:27 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
+
+2017-07-10 (2.8.9dev.17)
+* update ftp-site url -TD
 
 2017-07-10 (2.8.9dev.16)
 * modify configure script to warn if NLS cannot be configured, and disable
@@ -3312,7 +3315,7 @@ FreeBSD 4.1, 4.8, NetBSD 1.5, 1.6 and OpenBSD 2.8 (curses/ncurses).
   better diagnosis of problem reported by David Balazic
   <david.balazic@uni-mb.si> on HP-UX 11.00) -PG
 * modify configure.in and aclocal.m4 to work with autoconf 2.52 patched with
-    ftp://invisible-island.net/autoconf/autoconf-2.52-20011227.patch.gz
+    ftp://ftp.invisible-island.net/autoconf/autoconf-2.52-20011227.patch.gz
   (TD).
 * modify configure macros CF_CURSES_CPPFLAGS and CF_NCURSES_CPPFLAGS to ensure
   that the (n)curses.h header file is actually found, in case someone tries to
