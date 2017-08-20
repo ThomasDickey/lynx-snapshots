@@ -1,9 +1,11 @@
--- $LynxId: CHANGES,v 1.920 2017/08/08 22:34:27 tom Exp $
+-- $LynxId: CHANGES,v 1.921 2017/08/20 20:10:48 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2017-07-10 (2.8.9dev.17)
+2017-08-20 (2.8.9dev.17)
+* update fr.po from
+    http://translationproject.org/latest/lynx
 * update ftp-site url -TD
 
 2017-07-10 (2.8.9dev.16)
