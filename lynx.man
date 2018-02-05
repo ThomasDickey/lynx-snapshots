@@ -1,4 +1,4 @@
-.\" $LynxId: lynx.man,v 1.119 2017/07/04 20:45:52 tom Exp $
+.\" $LynxId: lynx.man,v 1.120 2018/02/05 09:58:06 tom Exp $
 .\" **************************************************************************
 .\" Escape single quotes in literal strings from groff's Unicode transform.
 .ie \n(.g .ds AQ \(aq
@@ -8,12 +8,13 @@
 .ie \n(.g .ds '' \(rq
 .el       .ds '' ''
 .de bP
-.IP \(bu 4
+.ie n  .IP \(bu 4
+.el    .IP \(bu 2
 ..
 .de NS
-.ie \n(.sp
+.ie n  .sp
 .el    .sp .5
-.ie \n(.in +4
+.ie n  .in +4
 .el    .in +2
 .nf
 .ft C			\" Courier
