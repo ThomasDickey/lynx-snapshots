@@ -1,12 +1,12 @@
 /*
- * $LynxId: userdefs.h,v 1.331 2017/08/08 22:32:03 tom Exp $
+ * $LynxId: userdefs.h,v 1.332 2018/02/05 09:42:23 tom Exp $
  *
  * Lynx - Hypertext navigation system
  *
  *   (c) Copyright 1992, 1993, 1994 University of Kansas
  *	 1995, 1996: GNU General Public License
  *
- *   Copyright 1996-2016,2017 Thomas E. Dickey and Lynx Developers Group
+ *   Copyright 1996-2017,2018 Thomas E. Dickey and Lynx Developers Group
  *   Note: GNU General Public License is not a copyright.
  */
 

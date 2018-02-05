@@ -1,12 +1,18 @@
--- $LynxId: CHANGES,v 1.922 2017/11/17 02:47:02 tom Exp $
+-- $LynxId: CHANGES,v 1.925 2018/02/05 09:54:38 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2017-11-16 (2.8.9dev.17)
-* update ep.po, fr.po from
+2018-02-05 (2.8.9dev.17)
+* repair link in lynx_help_main.html to HTML 3.2 documentation
+  (Savannah #47803).
+* update eo.po, fr.po from
     http://translationproject.org/latest/lynx
-* update ftp-site url -TD
+* improved several configure macros:  
+  CF_BUILD_CC, CF_CC_ENV_FLAGS, CF_CURSES_FUNCS, CF_CURSES_LIBS,
+  CF_NCURSES_CONFIG
+* updated ftp-site url -TD
+* update config.guess (2018-01-26), config.sub (2018-01-15)
 
 2017-07-10 (2.8.9dev.16)
 * modify configure script to warn if NLS cannot be configured, and disable
