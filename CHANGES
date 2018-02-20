@@ -1,9 +1,11 @@
--- $LynxId: CHANGES,v 1.927 2018/02/20 00:44:42 tom Exp $
+-- $LynxId: CHANGES,v 1.928 2018/02/20 02:04:01 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
 2018-02-19 (2.8.9dev.17)
+* modify po/makefile.inn to ensure the temporary files have distinct names
+  to avoid problem with "make -j8" (Debian #890811).
 * update makefile/batch-scripts to allow building with newer Visual Studio
   versions, e.g., 2010, 2012, so that a 64-bit executable can be built -TD
 * repair link in lynx_help_main.html to HTML 3.2 documentation
