@@ -1,4 +1,4 @@
-/* $LynxId: LYStrings.c,v 1.268 2017/05/10 22:11:33 tom Exp $ */
+/* $LynxId: LYStrings.c,v 1.269 2018/02/19 21:22:53 tom Exp $ */
 #include <HTUtils.h>
 #include <HTCJK.h>
 #include <UCAux.h>
@@ -3323,8 +3323,8 @@ int LYDoEdit(FieldEditor * edit, int ch,
 	 */
 	if (!IS_CJK_TTY && LYlowest_eightbit[current_char_set] > 0x97)
 	    return (ch);
-	/* FALLTHRU */
 #endif
+	/* FALLTHRU */
     case LYE_CHAR:
 	uch = UCH(ch);
 	LYEditInsert(edit, &uch, 1, map_active, maxMessage);
@@ -5265,8 +5265,8 @@ int LYgetBString(bstring **inputline,
 		LYLineEdit(edit, ch, FALSE);
 		break;
 	    }
-	    /* FALLTHRU */
 #endif
+	    /* FALLTHRU */
 	case LYE_ENTER:
 	    BStrCopy0(*inputline, Buffer);
 	    if (!hidden)

@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMainLoop.c,v 1.235 2017/07/02 20:04:20 tom Exp $
+ * $LynxId: LYMainLoop.c,v 1.236 2018/02/15 01:53:44 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTAccess.h>
@@ -725,7 +725,7 @@ static BOOL do_check_recall(int ch,
 
     for (;;) {
 #ifdef WIN_EX			/* 1998/10/11 (Sun) 10:41:05 */
-	int len = strlen((*user_input)->str);
+	int len = (int) strlen((*user_input)->str);
 
 	if (len >= 3) {
 	    if (len < MAX_LINE - 1

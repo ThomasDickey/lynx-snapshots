@@ -1,4 +1,4 @@
-/* $LynxId: Xsystem.c,v 1.28 2013/11/29 00:22:00 tom Exp $
+/* $LynxId: Xsystem.c,v 1.29 2018/02/17 14:58:15 tom Exp $
  *	like system("cmd") but return with exit code of "cmd"
  *	for Turbo-C/MS-C/LSI-C
  *  This code is in the public domain.
@@ -55,12 +55,10 @@ extern char *mktemp(char *);
 #define isdeg(c) ('0' <= (c) && (c) <= '9')
 
 #ifndef NEAR
-#if 0				/* MS-C */
-#define NEAR	_near
-#else
 #define NEAR
 #endif
-#endif
+
+#define SAVE_FD 10
 
 typedef struct _proc {
     struct _proc *next;
@@ -71,8 +69,8 @@ typedef struct _proc {
     int infmod;
     char *outf;
     int outfmod;
-    int ored[10];
-    int sred[10];
+    int ored[SAVE_FD];
+    int sred[SAVE_FD];
 } PRO;
 
 static PRO *p1 = 0;
@@ -112,7 +110,7 @@ static int NEAR is_builtin_command(char *s)
     };
     int i, l, lc, count;
 
-    l = strlen(s);
+    l = (int) strlen(s);
     count = TABLESIZE(cmdtab);
     count--;
 #ifdef WIN_EX
@@ -122,7 +120,7 @@ static int NEAR is_builtin_command(char *s)
     for (i = 0; i < count; i++) {
 	if (strcasecomp(s, cmdtab[i]) == 0)
 	    return 1;
-	lc = strlen(cmdtab[i]);
+	lc = (int) strlen(cmdtab[i]);
 	if (lc < l && strncasecomp(s, cmdtab[i], lc) == 0 && issep2(s[lc]))
 	    return 1;
     }
@@ -145,11 +143,16 @@ static int NEAR getswchar(void)
     return result;
 }
 
+#define spawnl_rc(flag, rc) \
+	((flag == P_WAIT) \
+	 ? (int)(rc) \
+	 : ((rc) == 0 ? -2 : 0))
+
 static int NEAR csystem(PRO * p, int flag)
 {
     char *cmp;
     char SW[3];
-    int rc;
+    intptr_t rc;
 
     if ((cmp = LYGetEnv("COMSPEC")) == 0)
 	return -2;
@@ -157,7 +160,7 @@ static int NEAR csystem(PRO * p, int flag)
     SW[1] = 'c';
     SW[2] = 0;
     rc = spawnl(flag, cmp, cmp, SW, p->cmd, p->arg, (char *) 0);
-    return rc < 0 ? -2 : rc;
+    return spawnl_rc(flag, rc);
 }
 
 static PRO *NEAR pars1c(char *s)
@@ -293,16 +296,19 @@ static int NEAR try3(char *cnm, PRO * p, int flag)
 {
     char cmdb[STR_MAX];
     int rc;
+    intptr_t rc2;
 
     sprintf(cmdb, "%.*s.com", (int) sizeof(cmdb) - 5, cnm);
     if ((rc = open(cmdb, O_RDONLY)) >= 0) {
 	close(rc);
-	return spawnl(flag, cmdb, cmdb, p->arg, (char *) 0);
+	rc2 = spawnl(flag, cmdb, cmdb, p->arg, (char *) 0);
+	return spawnl_rc(flag, rc2);
     }
     sprintf(cmdb, "%.*s.exe", (int) sizeof(cmdb) - 5, cnm);
     if ((rc = open(cmdb, O_RDONLY)) >= 0) {
 	close(rc);
-	return spawnl(flag, cmdb, cmdb, p->arg, (char *) 0);
+	rc2 = spawnl(flag, cmdb, cmdb, p->arg, (char *) 0);
+	return spawnl_rc(flag, rc2);
     }
     sprintf(cmdb, "%.*s.bat", (int) sizeof(cmdb) - 5, cnm);
     if ((rc = open(cmdb, O_RDONLY)) >= 0) {
@@ -319,8 +325,9 @@ static int NEAR prog_go(PRO * p, int flag)
     char cmdb[STR_MAX];
     char *ep;
     int rc, lc = 0, cmd_len;
+    intptr_t rc2;
 
-    cmd_len = strlen(p->cmd);
+    cmd_len = (int) strlen(p->cmd);
 
     s = p->cmd + cmd_len - 1;
     while (cmd_len && (*s != '\\') && (*s != '/') && (*s != ':')) {
@@ -340,7 +347,8 @@ static int NEAR prog_go(PRO * p, int flag)
 	    if (extp) {		/* has extension */
 		if ((rc = open(cmdb, O_RDONLY)) >= 0) {
 		    close(rc);
-		    rc = spawnl(flag, cmdb, cmdb, p->arg, (char *) 0);
+		    rc2 = spawnl(flag, cmdb, cmdb, p->arg, (char *) 0);
+		    rc = spawnl_rc(flag, rc2);
 		}
 	    } else {
 		rc = try3(cmdb, p, flag);
@@ -369,7 +377,8 @@ static int NEAR prog_go(PRO * p, int flag)
 	if (extp) {		/* has extension */
 	    if ((rc = open(p->cmd, O_RDONLY)) >= 0) {
 		close(rc);
-		return spawnl(flag, p->cmd, p->cmd, p->arg, (char *) 0);
+		rc2 = spawnl(flag, p->cmd, p->cmd, p->arg, (char *) 0);
+		return spawnl_rc(flag, rc2);
 	    }
 	    return -1;
 	} else {
@@ -386,7 +395,7 @@ static char *NEAR tmpf(char *tp)
 
     if ((ev = LYGetEnv("TMP")) != 0) {
 	LYStrNCpy(tplate, ev, sizeof(tplate) - 2 - strlen(tp));
-	i = strlen(ev);
+	i = (int) strlen(ev);
 	if (i && ev[i - 1] != '\\' && ev[i - 1] != '/')
 	    strcat(tplate, "\\");
     } else {

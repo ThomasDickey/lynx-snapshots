@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMain.c,v 1.265 2017/07/03 23:31:21 tom Exp $
+ * $LynxId: LYMain.c,v 1.266 2018/02/19 14:29:30 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTP.h>
@@ -1193,8 +1193,8 @@ int main(int argc,
     /*
      * Zero the MultiBookmark arrays.
      */
-    memset((void *) MBM_A_subbookmark, 0, sizeof(char) * (MBM_V_MAXFILES + 1));
-    memset((void *) MBM_A_subdescript, 0, sizeof(char) * (MBM_V_MAXFILES + 1));
+    memset((void *) MBM_A_subbookmark, 0, sizeof(char *) * (MBM_V_MAXFILES + 1));
+    memset((void *) MBM_A_subdescript, 0, sizeof(char *) * (MBM_V_MAXFILES + 1));
 
 #ifndef VMS
     StrAllocCopy(list_format, LIST_FORMAT);

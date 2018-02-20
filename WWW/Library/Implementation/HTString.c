@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTString.c,v 1.73 2016/11/24 15:29:50 tom Exp $
+ * $LynxId: HTString.c,v 1.74 2018/02/15 01:54:27 tom Exp $
  *
  *	Case-independent string comparison		HTString.c
  *
@@ -795,7 +795,7 @@ PUBLIC_IF_FIND_LEAKS char *StrAllocVsprintf(char **pstr,
 			VA_POINT(char *);
 
 			if (prec < 0)
-			    prec = strlen(pval);
+			    prec = (int) strlen(pval);
 			used = 's';
 			break;
 		    case 'p':

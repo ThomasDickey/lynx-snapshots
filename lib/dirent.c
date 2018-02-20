@@ -1,5 +1,5 @@
 /*
- * $LynxId: dirent.c,v 1.6 2013/12/07 13:46:58 tom Exp $
+ * $LynxId: dirent.c,v 1.7 2018/02/17 17:52:45 tom Exp $
  *
  * dir.c for MS-DOS by Samuel Lam <skl@van-bc.UUCP>, June/87 
  */
@@ -92,7 +92,7 @@ DIR *opendirx(char *name, char *pattern)
 	    break;
 	}
     }
-    len = ip - name;
+    len = (int) (ip - name);
     if (len > 0) {
 	unc = ((path[0] == '\\' || path[0] == '/') &&
 	       (path[1] == '\\' || path[1] == '/'));
@@ -207,7 +207,7 @@ struct dirent *readdir(DIR *dirp)
     dp.d_name = dirp->dd_cp->_d_entry;
 
     dp.d_namlen = dp.d_reclen =
-	strlen(dp.d_name);
+	(int) strlen(dp.d_name);
 
     dp.d_ino = (ino_t) (dirp->dd_loc + 1);	/* fake the inode */
 

@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYUtils.c,v 1.278 2017/07/02 20:42:32 tom Exp $
+ * $LynxId: LYUtils.c,v 1.279 2018/02/15 01:54:02 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTCP.h>
@@ -5303,7 +5303,7 @@ char *LYPathLeaf(char *pathname)
 #else
     int n;
 
-    for (leaf = 0, n = strlen(pathname) - 1; n >= 0; n--) {
+    for (leaf = 0, n = (int) strlen(pathname) - 1; n >= 0; n--) {
 	if (StrChr("\\/:", pathname[n]) != 0) {
 	    leaf = pathname + n + 1;
 	    break;
@@ -7738,7 +7738,7 @@ int put_clip(const char *szBuffer)
     if (szBuffer == NULL)
 	return EOF;
 
-    len = strlen(szBuffer);
+    len = (int) strlen(szBuffer);
     if (len == 0)
 	return EOF;
     else
@@ -8060,7 +8060,7 @@ int unsafe_filename(const char *fname)
 
     sum = 0;
     cp = save;
-    len = strlen(fname);
+    len = (int) strlen(fname);
     while (cp < (save + len)) {
 	if (*cp == '\0') {
 	    cp++;

@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTUtils.h,v 1.125 2017/07/07 20:49:16 Martijn.Dekker Exp $
+ * $LynxId: HTUtils.h,v 1.126 2018/02/19 21:37:37 tom Exp $
  *
  * Utility macros for the W3 code library
  * MACROS FOR GENERAL USE
@@ -622,6 +622,16 @@ extern int WWW_TraceMask;
 /* SCN_off_t requires workaround */
 #define CAST_off_t(n)	(long)(n)
 #endif
+#endif
+
+/*
+ * MinGW-32 uses only 32-bit DLL, which limits printing.
+ */
+#if defined(__MINGW32__)
+#undef  PRI_off_t
+#undef  CAST_off_t
+#define PRI_off_t	"ld"
+#define CAST_off_t(n)	(long)(n)
 #endif
 
 /*
