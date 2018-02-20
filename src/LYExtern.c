@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYExtern.c,v 1.54 2013/11/29 00:21:20 tom Exp $
+ * $LynxId: LYExtern.c,v 1.55 2018/02/15 01:53:07 tom Exp $
  *
  External application support.
  This feature allows lynx to pass a given URL to an external program.
@@ -186,7 +186,7 @@ static char *format_command(char *command,
 	int last_pos;
 
 	LYStrNCpy(host, param + 9, sizeof(host));
-	last_pos = strlen(host) - 1;
+	last_pos = (int) strlen(host) - 1;
 	if (last_pos > 1 && host[last_pos] == '/')
 	    host[last_pos] = '\0';
 
@@ -371,7 +371,7 @@ BOOL run_external(char *param,
 	confirmed = HTConfirm(LYElideString(cmdbuf, 40)) != NO;
 #endif
 	if (confirmed) {
-	    len = strlen(cmdbuf);
+	    len = (int) strlen(cmdbuf);
 	    if (len > 255) {
 		sprintf(buff, "Lynx: command line too long (%d > 255)", len);
 #ifdef WIN_GUI			/* 1997/11/06 (Thu) 14:17:02 */

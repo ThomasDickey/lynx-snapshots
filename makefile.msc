@@ -1,4 +1,4 @@
-# $LynxId: makefile.msc,v 1.30 2017/04/26 23:19:00 tom Exp $
+# $LynxId: makefile.msc,v 1.31 2018/02/17 17:17:38 tom Exp $
 #
 # Makefile for `Lynx' browser for Microsoft Visual C++ 4.2 or later
 #
@@ -60,7 +60,8 @@ SSL_LIBS = "$(SSL_DIR)\lib\ssleay32.lib" "$(SSL_DIR)\lib\libeay32.lib"
 SCREEN_DEFS = /D "PDCURSES" /D "COLOR_CURSES" /D "FANCY_CURSES" /D "WIDE_CURSES"
 SCREEN_LIB  = pdcurses
 !else
-SCREEN_DEFS = /D "USE_SLANG" /D "SLANG_DLL"
+SCREEN_DEFS = /D "USE_SLANG"
+# FIXME /D "SLANG_DLL"
 SCREEN_LIB  = wslang32
 !endif
 
@@ -114,15 +115,16 @@ DEFS = /D "WIN32_LEAN_AND_MEAN" $(CS_DEFS) $(SOCK_DEFS) $(SSL_DEFS) $(SCREEN_DEF
  /D _WIN_CC="1" \
  /D VC="2.14FM"
 
-# /GX == /EHsc == 
+# /GX == /EHsc ==
 # /EHs enable C++ EH (no SEH exceptions)  /EHa enable C++ EH (w/ SEH exceptions)
-# /EHc extern "C" defaults to nothrow     
+# /EHc extern "C" defaults to nothrow
+MACHINE  = i386
 !if "$(DEBUG)" == ""
 CFLAGS   = /nologo /MT /W3 /EHsc /O2 /c
-LDFLAGS  = /nologo /subsystem:console /incremental:no /machine:I386
+LDFLAGS  = /nologo /subsystem:console /incremental:no /machine:$(MACHINE)
 !else
 CFLAGS   = /nologo /MT /W3 /EHsc /Zi /c
-LDFLAGS  = /debug /nologo /subsystem:console /incremental:no /machine:I386
+LDFLAGS  = /debug /nologo /subsystem:console /incremental:no /machine:$(MACHINE)
 !endif
 
 LIBS     = kernel32.lib user32.lib wsock32.lib advapi32.lib /NODEFAULTLIB:libc\
@@ -405,7 +407,7 @@ LYIcon.obj : $(SRC_DIR)\LYIcon.rc
 	cd $(SRC_DIR)
 	$(RC) /r /fo ..\LYIcon.res LYIcon.rc
 	cd ..
-	cvtres /verbose /machine:ix86 LYIcon.res
+	cvtres /verbose /machine:$(MACHINE) LYIcon.res
 
 dirent.obj : $(ETC_LIB)\dirent.c
 	$(COMPILE) $(ETC_LIB)\dirent.c
