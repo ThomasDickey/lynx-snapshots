@@ -1,4 +1,4 @@
-dnl $LynxId: aclocal.m4,v 1.244 2018/02/05 09:55:09 tom Exp $
+dnl $LynxId: aclocal.m4,v 1.251 2018/02/22 02:31:22 tom Exp $
 dnl Macros for auto-configure script.
 dnl by Thomas E. Dickey <dickey@invisible-island.net>
 dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
@@ -286,7 +286,7 @@ fi
 AC_SUBST($1)dnl
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl AM_WITH_NLS version: 28 updated: 2017/07/11 04:44:41
+dnl AM_WITH_NLS version: 29 updated: 2018/02/21 21:26:03
 dnl -----------
 dnl Inserted as requested by gettext 0.10.40
 dnl File from /usr/share/aclocal
@@ -507,12 +507,12 @@ AC_DEFUN([AM_WITH_NLS],
   if test "$XGETTEXT" != ":"; then
     AC_OUTPUT_COMMANDS(
      [for ac_file in $CONFIG_FILES; do
-  
+
         # Support "outfile[:infile[:infile...]]"
         case "$ac_file" in
           (*:*) ac_file=`echo "$ac_file"|sed 's%:.*%%'` ;;
         esac
-  
+
         # PO directories have a Makefile.in generated from Makefile.inn.
         case "$ac_file" in
         (*/[Mm]akefile.in)
@@ -524,13 +524,13 @@ AC_DEFUN([AM_WITH_NLS],
           # In autoconf-2.13 it is called $ac_given_srcdir.
           # In autoconf-2.50 it is called $srcdir.
           test -n "$ac_given_srcdir" || ac_given_srcdir="$srcdir"
-  
+
           case "$ac_given_srcdir" in
             (.)  top_srcdir=`echo $ac_dots|sed 's%/$%%'` ;;
             (/*) top_srcdir="$ac_given_srcdir" ;;
             (*)  top_srcdir="$ac_dots$ac_given_srcdir" ;;
           esac
-  
+
           if test -f "$ac_given_srcdir/$ac_dir/POTFILES.in"; then
             rm -f "$ac_dir/POTFILES"
             test -n "$as_me" && echo "$as_me: creating $ac_dir/POTFILES" || echo "creating $ac_dir/POTFILES"
@@ -541,13 +541,13 @@ AC_DEFUN([AM_WITH_NLS],
           ;;
         esac
       done])
-  
+
     dnl If this is used in GNU gettext we have to set BUILD_INCLUDED_LIBINTL
     dnl to 'yes' because some of the testsuite requires it.
     if test "$PACKAGE" = gettext; then
       BUILD_INCLUDED_LIBINTL=yes
     fi
-  
+
     dnl intl/plural.c is generated from intl/plural.y. It requires bison,
     dnl because plural.y uses bison specific features. It requires at least
     dnl bison-1.26 because earlier versions generate a plural.c that doesn't
@@ -580,7 +580,7 @@ changequote([,])dnl
         INTLBISON=:
       fi
     fi
-  
+
     dnl These rules are solely for the distribution goal.  While doing this
     dnl we only have to keep exactly one list of the available catalogs
     dnl in configure.in.
@@ -1620,7 +1620,7 @@ fi
 
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_CHECK_SIZEOF version: 2 updated: 2015/05/09 11:00:10
+dnl CF_CHECK_SIZEOF version: 3 updated: 2018/02/21 21:26:03
 dnl ---------------
 dnl Improve on AC_CHECK_SIZEOF for cases when the build-environment is
 dnl deficient, e.g., if someone tries to build in busybox.  Use the second
@@ -1632,12 +1632,19 @@ dnl includes several header files.
 AC_DEFUN([CF_CHECK_SIZEOF],[
 AC_CHECK_SIZEOF([$1],[$2])
 if test "${ac_cv_type_$1+set}" = set; then
+	cf_cv_sizeof="$ac_cv_sizeof_$1"
 	if test "${ac_cv_sizeof_$1+set}" != set; then
 		AC_MSG_WARN(using $2 for sizeof $1)
 		ac_cv_sizeof_$1=$2
 	elif test "x${ac_cv_sizeof_$1}" = x0; then
 		AC_MSG_WARN([sizeof $1 not found, using $2])
 		ac_cv_sizeof_$1=$2
+	fi
+	if test "x$ac_cv_sizeof_$1" != "x$cf_cv_sizeof"
+	then
+		CF_UPPER(cf_cv_type,sizeof_$1)
+		sed -e "s/\([[ 	]]$cf_cv_type[[ 	]]\).*/\1$ac_cv_sizeof_$1/" confdefs.h >conftest.val
+		mv conftest.val confdefs.h
 	fi
 fi
 ])dnl
@@ -3592,7 +3599,7 @@ AC_MSG_RESULT($cf_cv_locale)
 test $cf_cv_locale = yes && { ifelse($1,,AC_DEFINE(LOCALE,1,[Define to 1 if we have locale support]),[$1]) }
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_MAKEFLAGS version: 17 updated: 2015/08/05 20:44:28
+dnl CF_MAKEFLAGS version: 18 updated: 2018/02/21 21:26:03
 dnl ------------
 dnl Some 'make' programs support ${MAKEFLAGS}, some ${MFLAGS}, to pass 'make'
 dnl options to lower-levels.  It's very useful for "make -n" -- if we have it.
@@ -3621,8 +3628,10 @@ CF_EOF
 			esac
 			break
 			;;
-		(.-)	;;
-		(*)	echo "given option \"$cf_option\", no match \"$cf_result\""
+		(.-)
+			;;
+		(*)
+			CF_MSG_LOG(given option \"$cf_option\", no match \"$cf_result\")
 			;;
 		esac
 	done
@@ -5989,6 +5998,70 @@ else
 fi
 ])
 dnl ---------------------------------------------------------------------------
+dnl CF_TRY_RPATH version: 1 updated: 2018/02/21 21:26:03
+dnl ------------
+dnl Work around broken-by-design packaging systems which solve at most the
+dnl problem of building packages, without providing for library reuse...
+AC_DEFUN([CF_TRY_RPATH],[
+AC_REQUIRE([CF_LD_RPATH_OPT])
+if test -z "$LD_RPATH_OPT"
+then
+	CF_VERBOSE(will not attempt to use rpath)
+elif test "x${enable_rpath_hack:-yes}" = "xno"
+then
+	CF_VERBOSE("rpath is disabled)
+elif test -z "${LD_RUN_PATH}${LD_LIBRARY_PATH}"
+then
+	case "$LIBS" in
+	(*-L/*)
+		CF__CHECK_RUN(cf_check_run)
+		if test "x$cf_check_run" = xno
+		then
+			CF_VERBOSE(linkage is broken)
+			cf_result=
+			for cf_item in $LIBS
+			do
+				case " $cf_item" in
+				(\ -L/*)
+					cf_rpath_arg=`echo " $cf_item" | sed -e "s% -L%$LD_RPATH_OPT%"`
+					cf_rpath_tmp=`echo "$cf_result " | sed -e "s% $cf_rpath_arg % %"`
+					if test "x$cf_result " = "x$cf_rpath_tmp"
+					then
+						cf_result="$cf_result $cf_rpath_arg"
+					fi
+					cf_rpath_tmp=`echo "$cf_result " | sed -e "s% $cf_item % %g"`
+					if test "x$cf_result " != "x$cf_rpath_tmp"
+					then
+						continue
+					fi
+					;;
+				esac
+				cf_result="$cf_result $cf_item"
+			done
+			cf_result=`echo "$cf_result" | sed -e 's/^ //'`
+			if test "x$cf_result" != "x$LIBS"
+			then
+				cf_save_LIBS="$LIBS"
+				LIBS="$cf_result"
+				CF__CHECK_RUN(cf_check_run)
+				if test "x$cf_check_run" = "xyes"
+				then
+					CF_VERBOSE(use rpath for $cf_save_LIBS)
+					LIBS="$cf_result"
+					CF_VERBOSE(result is now $LIBS)
+				else
+					LIBS="$cf_save_LIBS"
+				fi
+			fi
+		fi
+		;;
+	(*)
+		CF_VERBOSE(will not attempt to use rpath)
+		;;
+	esac
+fi
+])dnl
+dnl ---------------------------------------------------------------------------
 dnl CF_TRY_XOPEN_SOURCE version: 1 updated: 2011/10/30 17:09:50
 dnl -------------------
 dnl If _XOPEN_SOURCE is not defined in the compile environment, check if we
@@ -7098,6 +7171,20 @@ test program.  You will have to check and add the proper libraries by hand
 to makefile.])
 fi
 ])dnl
+dnl ---------------------------------------------------------------------------
+dnl CF__CHECK_RUN version: 1 updated: 2018/02/21 21:26:03
+dnl -------------
+dnl Check if a simple program can be made to run with the existing libraries.
+define([CF__CHECK_RUN],[
+AC_TRY_RUN([#include <stdio.h>
+int main(void) {
+	fflush(stderr);
+	${cf_cv_main_return:-return}(0);
+}],
+	$1=yes,
+	$1=no,
+	$1=unknown)
+])
 dnl ---------------------------------------------------------------------------
 dnl CF__CURSES_HEAD version: 2 updated: 2010/10/23 15:54:49
 dnl ---------------

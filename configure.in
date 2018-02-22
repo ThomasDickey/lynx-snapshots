@@ -1,4 +1,4 @@
-dnl $LynxId: configure.in,v 1.294 2018/02/19 20:37:46 tom Exp $
+dnl $LynxId: configure.in,v 1.296 2018/02/21 10:25:35 tom Exp $
 dnl
 dnl Process this file with autoconf to produce a configure script.
 dnl
@@ -561,6 +561,8 @@ case $cf_cv_screen in
 	dft_color_style=no
 	;;
 esac
+
+CF_TRY_RPATH
 
 CF_CURSES_CHTYPE
 
