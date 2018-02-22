@@ -1,9 +1,13 @@
--- $LynxId: CHANGES,v 1.928 2018/02/20 02:04:01 tom Exp $
+-- $LynxId: CHANGES,v 1.929 2018/02/22 02:04:40 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2018-02-19 (2.8.9dev.17)
+2018-02-21 (2.8.9dev.17)
+* modify configure script to make a quirk of NetBSD's make-program less
+  noticeable -TD
+* modify configure script to work around pkgsrc's misconfiguration of shared
+  libraries -TD
 * modify po/makefile.inn to ensure the temporary files have distinct names
   to avoid problem with "make -j8" (Debian #890811).
 * update makefile/batch-scripts to allow building with newer Visual Studio
