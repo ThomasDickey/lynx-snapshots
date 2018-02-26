@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTNews.c,v 1.71 2016/11/24 23:43:38 tom Exp $
+ * $LynxId: HTNews.c,v 1.73 2018/02/26 00:28:40 tom Exp $
  *
  *			NEWS ACCESS				HTNews.c
  *			===========
@@ -44,6 +44,14 @@ int HTNewsMaxChunk = 40;	/* Largest number of articles in one window */
 #endif /* NEWS_AUTH_FILE */
 
 #ifdef USE_SSL
+
+#if defined(LIBRESSL_VERSION_NUMBER)
+/* OpenSSL and LibreSSL version numbers do not correspond */
+#elif (OPENSSL_VERSION_NUMBER >= 0x10100000L)
+#undef  SSL_load_error_strings
+#define SSL_load_error_strings()	/* nothing */
+#endif
+
 static SSL *Handle = NULL;
 static int channel_s = 1;
 
