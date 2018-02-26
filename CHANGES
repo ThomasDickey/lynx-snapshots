@@ -1,9 +1,11 @@
--- $LynxId: CHANGES,v 1.929 2018/02/22 02:04:40 tom Exp $
+-- $LynxId: CHANGES,v 1.930 2018/02/25 20:30:09 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2018-02-21 (2.8.9dev.17)
+2018-02-25 (2.8.9dev.17)
+* additional fixes to work with LibreSSL on OpenBSD 6.2 -TD
+* build-fixes for OpenSSL 1.1.0 versus 1.0.0 (patch by Quentin Minster).
 * modify configure script to make a quirk of NetBSD's make-program less
   noticeable -TD
 * modify configure script to work around pkgsrc's misconfiguration of shared
@@ -4540,7 +4542,7 @@ recently, FreeBSD 4.1, NetBSD 1.5 and OpenBSD 2.8 (curses/ncurses).
 * make -stdin option a little more flexible by ifdef'ing primarily based on
   ttyname(), and adding fallback definitions for Win32 and VMS -TD
 * for slang configurations past 1.3.6, call SLsmg_touch_screen() in
-  start_curses to ensure that the screen is properly initialized for non-bce
+  start_curses to ensure that the screen is properly initialized for noce
   terminals -JED (John E Davis)
 * move call on lynx_initialize_keymaps() for slang configuration into the
   start_curses() function, avoiding premature reference to $TERM, especially

@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTP.c,v 1.163 2016/11/24 23:56:50 tom Exp $
+ * $LynxId: HTTP.c,v 1.166 2018/02/26 00:21:47 tom Exp $
  *
  * HyperText Tranfer Protocol	- Client implementation		HTTP.c
  * ==========================
@@ -46,13 +46,30 @@
 #include <LYCurses.h>
 
 #ifdef USE_SSL
+
 #ifdef USE_OPENSSL_INCL
 #include <openssl/x509v3.h>
 #endif
+
+#if defined(LIBRESSL_VERSION_NUMBER)
+/* OpenSSL and LibreSSL version numbers do not correspond */
+#elif defined(OPENSSL_VERSION_NUMBER) && (OPENSSL_VERSION_NUMBER >= 0x10100000L)
+#define SSLEAY_VERSION_NUMBER		OPENSSL_VERSION_NUMBER
+#undef  SSL_load_error_strings
+#undef  SSLeay_add_ssl_algorithms
+#define ASN1_STRING_data		ASN1_STRING_get0_data
+#define TLS_client_method()		SSLv23_client_method()
+#define SSL_load_error_strings()	/* nothing */
+#define SSLeay_add_ssl_algorithms()	/* nothing */
+#elif defined(SSLEAY_VERSION_NUMBER)
+#define TLS_client_method()		SSLv23_client_method()
+#endif
+
 #ifdef USE_GNUTLS_INCL
 #include <gnutls/x509.h>
 #endif
-#endif
+
+#endif /* USE_SSL */
 
 BOOLEAN reloading = FALSE;	/* Reloading => send no-cache pragma to proxy */
 char *redirecting_url = NULL;	/* Location: value. */
@@ -174,7 +191,7 @@ SSL *HTGetSSLHandle(void)
 	}
 #else
 	SSLeay_add_ssl_algorithms();
-	if ((ssl_ctx = SSL_CTX_new(SSLv23_client_method())) != NULL) {
+	if ((ssl_ctx = SSL_CTX_new(TLS_client_method())) != NULL) {
 #ifdef SSL_OP_NO_SSLv2
 	    SSL_CTX_set_options(ssl_ctx, SSL_OP_ALL | SSL_OP_NO_SSLv2);
 #else
