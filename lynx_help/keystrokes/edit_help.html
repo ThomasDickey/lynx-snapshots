@@ -1,4 +1,4 @@
-<!-- $LynxId: edit_help.html,v 1.20 2017/04/28 21:40:03 tom Exp $ -->
+<!-- $LynxId: edit_help.html,v 1.29 2018/03/01 01:54:21 tom Exp $ -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN">
 
 <html>
@@ -22,6 +22,8 @@
       <li><a href="#regular_keymap">Regular Keymap</a></li>
 
       <li><a href="#editing_keymap">Editing Keymap</a></li>
+
+      <li><a href="#examples">Try it yourself</a></li>
 
       <li><a href="#notes">Notes</a></li>
     </ul>
@@ -54,8 +56,8 @@
   "LYNXEDITMAP:">LYNXEDITMAP:</a>. This page is provided for those
   not using Lynx.</p>
 
-  <p>Note: setting emacs/vi keys ON has no effect on line-editor
-  bindings.</p>
+  <p><strong><em>Note:</em></strong> setting emacs/vi keys ON has
+  no effect on line-editor bindings.</p>
 
   <h2><a name="regular_keymap" id="regular_keymap">Regular
   Keymap</a></h2>
@@ -74,8 +76,9 @@
      BOL    Go to begin of  line  -  Ctrl-A, Home, Find
      EOL    Go to end   of  line  -  Ctrl-E, End,  Select
 
-     DELP   Delete prev     char  -  Ctrl-H, DELETE, Remove
-     DELN   Delete next     char  -  Ctrl-D, Ctrl-R (see note 1)
+     DELP   Delete prev     char  -  Backspace, Delete, Remove
+     DELN   Delete next     char  -  Ctrl-D, Ctrl-R (<em><a href=
+"#note_1">see note 1</a></em>)
      DELPW  Delete prev     word  -  Ctrl-B
      DELNW  Delete next     word  -  Ctrl-F
      DELEL  Delete to end of line -  Ctrl-_
@@ -83,35 +86,106 @@
      UPPER  Upper case the line   -  Ctrl-T
      LOWER  Lower case the line   -  Ctrl-K
 
-     LKCMD  Invoke cmd prompt     -  Ctrl-V (in form text fields, only) (see note 2)
+     LKCMD  Invoke cmd prompt     -  Ctrl-V (in form text fields, only) (<em><a href="#note_2">see note 2</a></em>)
      SWMAP  Switch input keymap   -  Ctrl-^ (if compiled in)
-
 </pre>
 
   <h2><a name="editing_keymap" id="editing_keymap">Editing
   Keymap</a></h2>
 
   <p><a name="TASpecial" id="TASpecial">These are special commands
-  for use only in textarea fields</a> (see note 3):</p>
+  for use only in textarea fields</a> (<em><a href="#note_3">see
+  note 3</a></em>):</p>
   <pre>
-
           Textarea external edit  - Ctrl-X e
           Insert file in textarea - Ctrl-X i
           Grow textarea           - Ctrl-X g
 </pre>
 
+  <h2><a name="emacs_bindings" id="emacs_bindings">Emacs-like
+  commands</a></h2>
+  <pre>
+    TPOS    Transpose characters                   -  Ctrl-t
+    SETMARK Set mark at current position in line   -  Ctrl-@
+    XPMARK  Exchange current position with mark    -  Ctrl-x Ctrl-x
+    KILLREG Kill region between mark and position  -  Ctrl-x Ctrl-w (<em><a href="#note_3">see note 3</a></em>)
+    YANK    Insert text last killed (with KILLREG) -  Ctrl-y
+</pre>
+
+  <h2><a name="examples" id="examples">Try it yourself</a></h2>
+
+  <p>Here is a little textarea for practice:</p>
+
+  <form action="">
+    <p>
+    <textarea name="practice" cols="40" rows="5">
+This text cannot be submitted.  Normally lines like
+these would be part of a form that is filled out and
+then submitted.  You can move around here and delete
+or add text as you like, using the Line-Editor keys.
+</textarea><input type="reset" value="[reset content]"></p>
+  </form>
+
+  <h2><a name="special_keys" id="special_keys">Special
+  keys</a></h2>
+
+  <p><samp><dfn>Ctrl-</dfn><strong>key</strong> means
+  Control+<strong><kbd>key</kbd></strong>.
+  <dfn><code>Ctrl-x</code></dfn> <strong>key</strong> means first
+  Control+<kbd>x</kbd>, then <strong><kbd>key</kbd></strong>.
+  <dfn>M-</dfn>key means Meta+<strong><kbd>key</kbd></strong>,
+  where Meta is a modifier that can be entered in a variety of
+  ways:</samp></p>
+
+  <ul>
+    <li>First ESC, then the <strong><kbd>key</kbd></strong>. This
+    does not work with all systems or on all connections, and if it
+    does may not work for some keys (because the ESC character is
+    also part of code sequences for "normal" function keys).</li>
+
+    <li>Alt+<strong><kbd>key</kbd></strong>. This works if the
+    terminal, console, or comm program is set up to interpret Alt
+    as a modifier to send ESC. The Linux console acts like that by
+    default for most keys; Kermit can be set up to do it, xterm can
+    be for some keys, and so on. But the same caveats as for the
+    previous item apply. This Alt mapping may also be possible,
+    independent of the ESC character, for some keys in
+    <strong>Lynx</strong> for DOS/i386 or for Win32.</li>
+
+    <li>Ctrl-x <strong><kbd>key</kbd></strong>. Actually, currently
+    the same internal table is used for Meta and the Ctrl-x prefix.
+    Therefore all M-<strong><kbd>key</kbd></strong> combinations
+    can also be typed as Ctrl-x <strong><kbd>key</kbd></strong>,
+    and vice versa.</li>
+  </ul>
+
+  <p>A few key names may be less familiar now than when
+  <strong>Lynx</strong> was first written: <em>Find</em>,
+  <em>Select</em> and <em>Remove</em>. The <a href=
+  "https://invisible-island.net/xterm/xterm.faq.html#xterm_keypad">XTerm
+  FAQ</a> shows some typical keypad layouts of emulators for VT220
+  and other DEC terminals.</p>
+
+  <p>The VT220 did not have a &ldquo;backspace&rdquo; key but
+  <strong>Lynx</strong>'s default bindings mention it. Both ASCII
+  <samp>BS</samp> (backspace) and <samp>DEL</samp> are bound by
+  default to the same functions. <samp>DEL</samp> (occasionally
+  referred to as <samp>RUBOUT</samp>) is not the same as
+  <samp>Delete</samp>: the former is a single character while the
+  latter is usually a sequence of characters.</p>
+
   <h2><a name="notes" id="notes">Notes</a></h2>
 
   <ol>
-    <li>"next" means the character "under" a box or underline style
-    cursor; it means "to the immediate right of" an I-beam (between
-    characters) type cursor.</li>
+    <li id="note_1">"next" means the character "under" a box or
+    underline style cursor; it means "to the immediate right of" an
+    I-beam (between characters) type cursor.</li>
 
-    <li>Follow Ctrl-V with any recognized key command, to "escape"
-    from a text input field.</li>
+    <li id="note_2">Follow Ctrl-V with any recognized key command,
+    to "escape" from a text input field.</li>
 
-    <li>For other key combinations using Ctrl-X as a prefix key,
-    see the Help page for the <a rel="Sibling" title=
+    <li id="note_3">For other key combinations using Ctrl-X as a
+    prefix key, see the Help page for the <a rel="Sibling" title=
     "Bash-Like Binding" href=
     "bashlike_edit_help.html">Bash-Like</a> Binding.</li>
   </ol>

@@ -1,9 +1,11 @@
--- $LynxId: CHANGES,v 1.930 2018/02/25 20:30:09 tom Exp $
+-- $LynxId: CHANGES,v 1.931 2018/03/01 01:52:40 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2018-02-25 (2.8.9dev.17)
+2018-02-27 (2.8.9dev.17)
+* improve consistency in help-files discussing line-edit keymaps (prompted by
+  Debian #888391) -TD
 * additional fixes to work with LibreSSL on OpenBSD 6.2 -TD
 * build-fixes for OpenSSL 1.1.0 versus 1.0.0 (patch by Quentin Minster).
 * modify configure script to make a quirk of NetBSD's make-program less
