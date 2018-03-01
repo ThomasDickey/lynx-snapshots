@@ -1,4 +1,4 @@
-<!-- $LynxId: alt_edit_help.html,v 1.14 2017/04/28 21:24:42 tom Exp $ -->
+<!-- $LynxId: alt_edit_help.html,v 1.20 2018/03/01 01:46:17 tom Exp $ -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN">
 
 <html>
@@ -42,13 +42,13 @@
   they may be selected via the &ldquo;o&rdquo;ptions menu, or by
   editing lineedit_mode in the &ldquo;.lynxrc&rdquo; file.</p>
 
-  <p>Note: setting emacs/vi keys ON has no direct effect on
-  line-editor bindings.</p>
-
-  <p>This is the <em>Alternative Binding</em> keymap.</p>
+  <p><strong><em>Note:</em></strong> setting emacs/vi keys ON has
+  no direct effect on line-editor bindings.</p>
 
   <h2><a name="alternate_bindings" id="alternate_bindings">Table of
   key-bindings</a></h2>
+
+  <p>This is the <em>Alternative Binding</em> keymap.</p>
   <pre>
      ENTER  Input complete        -  RETURN
      TAB    Input complete        -  TAB, Do
@@ -62,8 +62,9 @@
      BOL    Go to begin of  line  -  Ctrl-A, Home, Find
      EOL    Go to end   of  line  -  Ctrl-E, End,  Select
 
-     DELP   Delete prev     char  -  Ctrl-H, DELETE, Remove
-     DELN   Delete next     char  -  Ctrl-D (<em>see note 1</em>)
+     DELP   Delete prev     char  -  Backspace, Delete, Remove
+     DELN   Delete next     char  -  Ctrl-D (<em><a href=
+"#note_1">see note 1</a></em>)
      DELPW  Delete prev     word  -  Ctrl-R
      DELNW  Delete next     word  -  Ctrl-T
      DELEL  Delete to end of line -  Ctrl-K
@@ -71,28 +72,59 @@
      UPPER  Upper case the line   -  Ctrl-^
      LOWER  Lower case the line   -  Ctrl-_
 
-     LKCMD  Invoke cmd prompt     -  Ctrl-V (in form text fields, only) (<em>see note 2</em>)
+     LKCMD  Invoke cmd prompt     -  Ctrl-V (in form text fields, only) (<em><a href="#note_2">see note 2</a></em>)
 
 <a name="TASpecial" id=
-"TASpecial">Special commands for use only in textarea fields</a>(<em>see note 3</em>):
+"TASpecial">Special commands for use only in textarea fields</a> (<em><a href="#note_3">see note 3</a></em>):
 
           Textarea external edit  - Ctrl-X e
           Insert file in textarea - Ctrl-X i
           Grow textarea           - Ctrl-X g
 </pre>
 
+  <h2><a name="emacs_bindings" id="emacs_bindings">Emacs-like
+  commands</a></h2>
+  <pre>
+    TPOS    Transpose characters                   -  Ctrl-t
+    SETMARK Set mark at current position in line   -  Ctrl-@
+    XPMARK  Exchange current position with mark    -  Ctrl-x Ctrl-x
+    KILLREG Kill region between mark and position  -  Ctrl-x Ctrl-w (<em><a href="#note_3">see note 3</a></em>)
+    YANK    Insert text last killed (with KILLREG) -  Ctrl-y
+</pre>
+
+  <h2><a name="examples" id="examples">Try it yourself</a></h2>
+
+  <p>Here is a little textarea for practice:</p>
+
+  <form action="">
+    <p>
+    <textarea name="practice" cols="40" rows="5">
+This text cannot be submitted.  Normally lines like
+these would be part of a form that is filled out and
+then submitted.  You can move around here and delete
+or add text as you like, using the Line-Editor keys.
+</textarea><input type="reset" value="[reset content]"></p>
+  </form>
+
+  <h2><a name="special_keys" id="special_keys">Special
+  keys</a></h2>
+
+  <p>See the <em><a href="edit_help.html#special_keys">Lynx Line
+  Editor</a></em> page for an explanation of terminology and
+  key-names.</p>
+
   <h2><a name="notes" id="notes">Notes</a></h2>
 
   <ol>
-    <li>"next" means the character "under" a box or underline style
-    cursor; it means "to the immediate right of" an I-beam (between
-    characters) type cursor.</li>
+    <li id="note_1">"next" means the character "under" a box or
+    underline style cursor; it means "to the immediate right of" an
+    I-beam (between characters) type cursor.</li>
 
-    <li>Follow Ctrl-V with any recognized key command, to "escape"
-    from a text input field.</li>
+    <li id="note_2">Follow Ctrl-V with any recognized key command,
+    to "escape" from a text input field.</li>
 
-    <li>For other key combinations using Ctrl-X as a prefix key,
-    see the Help page for the <a rel="Sibling" title=
+    <li id="note_3">For other key combinations using Ctrl-X as a
+    prefix key, see the Help page for the <a rel="Sibling" title=
     "Bash-Like Binding" href=
     "bashlike_edit_help.html">Bash-Like</a> Binding.</li>
   </ol>
