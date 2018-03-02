@@ -1,4 +1,4 @@
-/* $LynxId: LYCurses.c,v 1.184 2017/04/30 17:52:12 tom Exp $ */
+/* $LynxId: LYCurses.c,v 1.186 2018/03/02 00:39:46 tom Exp $ */
 #include <HTUtils.h>
 #include <HTAlert.h>
 
@@ -970,6 +970,23 @@ int saved_scrsize_x2 = 0;
 int saved_scrsize_y2 = 0;
 int saved_winpos_x2 = 0;
 int saved_winpos_y2 = 0;
+
+static int LYresize_term(int nlines, int ncols)
+{
+#ifdef _WINDOWS
+    HANDLE hConsole;
+    CONSOLE_SCREEN_BUFFER_INFO csbi;
+    SMALL_RECT srWindowRect;
+
+    hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+    GetConsoleScreenBufferInfo(hConsole, &csbi);
+    srWindowRect.Right = min(ncols, csbi.dwSize.X) - 1;
+    srWindowRect.Bottom = min(nlines, csbi.dwSize.Y) - 1;
+    srWindowRect.Left = srWindowRect.Top = (SHORT) 0;
+    SetConsoleWindowInfo(hConsole, TRUE, &srWindowRect);
+#endif
+    return resize_term(nlines, ncols);
+}
 #endif
 
 #ifdef USE_MAXSCREEN_TOGGLE
@@ -1077,64 +1094,35 @@ static void adjustWindowPos(void)
 
 void maxmizeWindowSize(void)
 {
-    int disp_height, disp_width, win_height, win_width;
     RECT winrect;
-    DWORD pid;
-    int font_width, font_height;
+    HANDLE hConsole;
+    COORD coordScreen;
 
     setCurrentWindowHandle();
     if (currentWindowHandle == NULL) {
 	return;
     }
-    GetWindowThreadProcessId(currentWindowHandle, &pid);
-    disp_width = GetSystemMetrics(SM_CXFULLSCREEN);
-    disp_height = GetSystemMetrics(SM_CYFULLSCREEN);
     GetWindowRect(currentWindowHandle, &winrect);
-    win_width = winrect.right - winrect.left;
-    win_height = winrect.bottom - winrect.top;
     saved_winpos_x2 = winrect.left;
     saved_winpos_y2 = winrect.top;
 
-    if ((win_width <= disp_width) && (win_height <= disp_height)) {
-	GetClientRect(currentWindowHandle, &winrect);
-	win_width = winrect.right - winrect.left;
-	win_height = winrect.bottom - winrect.top;
-	CTRACE((tfp, "Current Rect: (%4d,%4d,%3d,%3d), ",
-		(int) winrect.left, (int) winrect.right,
-		(int) winrect.top, (int) winrect.bottom));
-	CTRACE((tfp, "Size: (%4d,%3d)\n", win_width, win_height));
+    hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+    coordScreen = GetLargestConsoleWindowSize(hConsole);
 
-	if (scrsize_x == 0) {
-	    scrsize_x = COLS;
-	    scrsize_y = LINES + 1;
-	}
-	if ((scrsize_x == 0) || (scrsize_y == 0)) {
-	    CTRACE((tfp, "Illegal value: scrsize_x=%d, scrsize_y=%d\n",
-		    scrsize_x, scrsize_y));
-	} else {
-	    font_width = win_width / scrsize_x;
-	    font_height = win_height / scrsize_y;
-	    CTRACE((tfp, "Font Size: (%2d,%2d)\n", font_width, font_height));
-	    if ((font_width == 0) || (font_height == 0)) {
-		CTRACE((tfp, "Illegal font size.\n"));
-	    } else {
-		LYcols = scrsize_x = (disp_width - 4) / font_width;
-		LYlines = scrsize_y = (disp_height - 32) / font_height;
-		LYlines--;
-		CTRACE((tfp, "Request maximum screen size: %dx%d\n",
-			scrsize_y, scrsize_x));
-		resize_term(scrsize_y, scrsize_x);
-		Sleep(100);
-		moveWindowHXY(currentWindowHandle, 0, 0);
-		LYlines = LYscreenHeight();
-		LYcols = LYscreenWidth();
-		CTRACE((tfp, "...actual maximum screen size: %dx%d\n",
-			LYlines, LYcols));
-		LYStatusLine = -1;
-		recent_sizechange = TRUE;
-	    }
-	}
-    }
+    LYcols = scrsize_x = coordScreen.X - 1;
+    LYlines = scrsize_y = coordScreen.Y - 1;
+    LYlines--;
+    CTRACE((tfp, "Request maximum screen size: %dx%d\n",
+	    scrsize_x, scrsize_y));
+    LYresize_term(scrsize_y, scrsize_x);
+    Sleep(100);
+    moveWindowHXY(currentWindowHandle, 0, 0);
+    LYlines = LYscreenHeight();
+    LYcols = LYscreenWidth();
+    CTRACE((tfp, "...actual maximum screen size: %dx%d\n",
+	    LYcols, LYlines));
+    LYStatusLine = -1;
+    recent_sizechange = TRUE;
 }
 
 void recoverWindowSize(void)
@@ -1146,7 +1134,7 @@ void recoverWindowSize(void)
 	LYStatusLine = -1;
 	wclear(curscr);
 	doupdate();
-	resize_term(scrsize_y, scrsize_x);
+	LYresize_term(scrsize_y, scrsize_x);
 
 	setCurrentWindowHandle();
 	if (currentWindowHandle != NULL) {
@@ -1389,7 +1377,7 @@ void start_curses(void)
 	size_change(0);
 	recent_sizechange = FALSE;	/* prevent mainloop drawing 1st doc twice */
 #endif /* SIGWINCH */
-	CTRACE((tfp, "Screen size is now %d x %d\n", LYlines, LYcols));
+	CTRACE((tfp, "Screen size is now %d x %d\n", LYcols, LYlines));
 
 #ifdef USE_CURSES_PADS
 	if (LYuseCursesPads) {
@@ -1560,7 +1548,7 @@ void start_curses(void)
 	}
 	CTRACE((tfp, "resize_term: x=%d, y=%d\n", scrsize_x, scrsize_y));
 	CTRACE((tfp, "saved terminal size: x=%d, y=%d\n", saved_scrsize_x, saved_scrsize_y));
-	resize_term(scrsize_y, scrsize_x);
+	LYresize_term(scrsize_y, scrsize_x);
 	LYlines = LYscreenHeight();
 	LYcols = LYscreenWidth();
 	LYStatusLine = -1;

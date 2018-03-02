@@ -1,4 +1,4 @@
-/* $LynxId: LYUtils.h,v 1.98 2014/07/24 22:10:20 tom Exp $ */
+/* $LynxId: LYUtils.h,v 1.99 2018/03/01 22:14:42 Takeshi.Hataguchi Exp $ */
 #ifndef LYUTILS_H
 #define LYUTILS_H
 
@@ -166,6 +166,7 @@ extern "C" {
     extern const char *wwwName(const char *pathname);
     extern int HTCheckForInterrupt(void);
     extern int LYConsoleInputFD(int need_selectable);
+    extern int LYRenameFile(char *src, char *dst);
     extern int LYCopyFile(char *src, char *dst);
     extern int LYGetHilitePos(int cur, int count);
     extern int LYRemoveTemp(char *name);
