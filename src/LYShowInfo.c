@@ -1,4 +1,4 @@
-/* $LynxId: LYShowInfo.c,v 1.76 2013/10/03 01:01:34 tom Exp $ */
+/* $LynxId: LYShowInfo.c,v 1.77 2018/03/02 01:53:43 tom Exp $ */
 #include <HTUtils.h>
 #include <HTFile.h>
 #include <HTParse.h>
@@ -28,7 +28,8 @@
 #define BEGIN_DL(text) fprintf(fp0, "<h2>%s</h2>\n<dl compact>", LYEntifyTitle(&buffer, text))
 #define END_DL()       fprintf(fp0, "\n</dl>\n")
 
-#define ADD_SS(label,value)       dt_String(fp0, label, value)
+#define ADD_SS(label,value)       dt_String(fp0, label, value, FALSE)
+#define ADD_WW(label,value)       dt_String(fp0, label, value, TRUE)
 #define ADD_NN(label,value,units) dt_Number(fp0, label, (long) value, units)
 
 static int label_columns;
@@ -67,7 +68,8 @@ const char *LYVersionDate(void)
 
 static void dt_String(FILE *fp,
 		      const char *label,
-		      const char *value)
+		      const char *value,
+		      BOOL allow_wide)
 {
     int have;
     int need;
@@ -86,7 +88,10 @@ static void dt_String(FILE *fp,
     fprintf(fp, "<dt>");
     while (need++ < label_columns)
 	fprintf(fp, "&nbsp;");
-    fprintf(fp, "<em>%s</em> %s\n", the_label, the_value);
+    if (LYwideLines && allow_wide)
+	fprintf(fp, "<em>%s</em><pre>%s</pre>\n", the_label, the_value);
+    else
+	fprintf(fp, "<em>%s</em>%s\n", the_label, the_value);
 
     FREE(the_label);
     FREE(the_value);
@@ -108,7 +113,7 @@ static void dt_Number(FILE *fp0,
 
 static void dt_URL(FILE *fp0, const char *address)
 {
-    ADD_SS(gettext("URL:"), address);
+    ADD_WW(gettext("URL:"), address);
 
     /*
      * If the display handles UTF-8, and if the address uses %xy formatted
