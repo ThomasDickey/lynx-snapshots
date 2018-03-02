@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYUtils.c,v 1.279 2018/02/15 01:54:02 tom Exp $
+ * $LynxId: LYUtils.c,v 1.280 2018/03/01 22:14:57 Takeshi.Hataguchi Exp $
  */
 #include <HTUtils.h>
 #include <HTTCP.h>
@@ -7096,6 +7096,26 @@ void LYAddHtmlSep0(char *path)
 	&& !LYIsHtmlSep(path[len - 1])) {
 	strcat(path, "/");
     }
+}
+
+/*
+ * Rename a file
+ */
+int LYRenameFile(char *src,
+		 char *dst)
+{
+#ifdef _WINDOWS
+    /* 
+     * If dest_file exists prior to calling rename(), rename() will fail on Windows platforms.
+     * https://www.securecoding.cert.org/confluence/display/c/FIO10-C.+Take+care+when+using+the+rename%28%29+function
+     */
+    struct stat st;
+
+    if (stat(dst, &st) == 0) {
+	unlink(dst);
+    }
+#endif
+    return rename(src, dst);
 }
 
 /*

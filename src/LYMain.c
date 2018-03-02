@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMain.c,v 1.266 2018/02/19 14:29:30 tom Exp $
+ * $LynxId: LYMain.c,v 1.267 2018/03/01 22:27:37 Takeshi.Hataguchi Exp $
  */
 #include <HTUtils.h>
 #include <HTTP.h>
@@ -3307,11 +3307,11 @@ static int scrsize_fun(char *next_arg)
 	    if ((scrsize_x <= 1) || (scrsize_y <= 1)) {
 		scrsize_x = scrsize_y = 0;
 	    }
-	    if ((scrsize_x > 0) && (scrsize_x < 80)) {
-		scrsize_x = 80;
+	    if ((scrsize_x > 0) && (scrsize_x < 40)) {
+		scrsize_x = 40;
 	    }
-	    if ((scrsize_y > 0) && (scrsize_y < 4)) {
-		scrsize_y = 4;
+	    if ((scrsize_y > 0) && (scrsize_y < 6)) {
+		scrsize_y = 6;
 	    }
 	    CTRACE((tfp, "scrsize: x=%d, y=%d\n", scrsize_x, scrsize_y));
 	}

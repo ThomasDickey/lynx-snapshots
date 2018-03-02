@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFWriter.c,v 1.113 2017/07/02 20:42:32 tom Exp $
+ * $LynxId: HTFWriter.c,v 1.114 2018/03/01 22:14:42 Takeshi.Hataguchi Exp $
  *
  *		FILE WRITER				HTFWrite.h
  *		===========
@@ -177,7 +177,7 @@ static void decompress_gzip(HTStream *me)
 		    CAST_off_t (me->anchor->actual_length),
 		    actual));
 	    if (success) {
-		if (rename(copied, in_name) == 0)
+		if (LYRenameFile(copied, in_name) == 0)
 		    me->anchor->actual_length = (off_t) actual;
 		LYRemoveTemp(copied);
 	    }
@@ -200,7 +200,7 @@ static void decompress_gzip(HTStream *me)
 
 		strcpy(expanded, copied);
 		*strrchr(expanded, '.') = '\0';
-		if (rename(expanded, in_name) != 0) {
+		if (LYRenameFile(expanded, in_name) != 0) {
 		    CTRACE((tfp, "rename failed %s to %s\n", expanded, in_name));
 		} else if (stat(in_name, &stat_buf) != 0) {
 		    CTRACE((tfp, "stat failed for %s\n", in_name));
@@ -364,7 +364,7 @@ static void HTFWriter_free(HTStream *me)
 			    new_path[off] = '.';
 			    if (strlen(new_path + off) > 4)
 				new_path[off + 4] = '\0';
-			    if (rename(path, new_path) == 0) {
+			    if (LYRenameFile(path, new_path) == 0) {
 				FREE(path);
 				path = new_path;
 			    } else {
