@@ -1,4 +1,4 @@
-/* $LynxId: LYCurses.c,v 1.186 2018/03/02 00:39:46 tom Exp $ */
+/* $LynxId: LYCurses.c,v 1.187 2018/03/03 15:20:19 tom Exp $ */
 #include <HTUtils.h>
 #include <HTAlert.h>
 
@@ -454,22 +454,11 @@ static void LYAttrset(WINDOW * win, int color,
 void curses_w_style(WINDOW * win, int style,
 		    int dir)
 {
-#if OMIT_SCN_KEEPING
-# define SPECIAL_STYLE /*(CSHASHSIZE+1) */ 88888
-/* if TRACEs are not compiled in, this macro is redundant - we needn't valid
-'ds' to stack off. */
-#endif
-
     int YP, XP;
     bucket *ds;
     BOOL free_ds = TRUE;
 
     switch (style) {
-#if OMIT_SCN_KEEPING
-    case SPECIAL_STYLE:
-	ds = special_bucket();
-	break;
-#endif
     case NOSTYLE:
 	ds = nostyle_bucket();
 	break;
@@ -481,11 +470,9 @@ void curses_w_style(WINDOW * win, int style,
 
     if (!ds->name) {
 	CTRACE2(TRACE_STYLE, (tfp, "CSS.CS:Style %d not configured\n", style));
-#if !OMIT_SCN_KEEPING
 	if (free_ds)
 	    free(ds);
 	return;
-#endif
     }
 
     CTRACE2(TRACE_STYLE, (tfp, "CSS.CS:<%s%s> style %d code %#x, color %#x\n",
@@ -524,15 +511,6 @@ void curses_w_style(WINDOW * win, int style,
 	}
 	last_styles[last_colorattr_ptr++] = (int) LYgetattrs(win);
 	/* don't cache style changes for active links */
-#if OMIT_SCN_KEEPING
-	/* since we don't compute the hcode to stack off in HTML.c, we
-	 * don't know whether this style is configured.  So, we
-	 * shouldn't simply return on stacking on unconfigured
-	 * styles, we should push curr attrs on stack.  -HV
-	 */
-	if (!ds->name)
-	    break;
-#endif
 	/* FALL THROUGH */
     case ABS_ON:		/* change without remembering the previous style */
 	/* don't cache style changes for active links and edits */

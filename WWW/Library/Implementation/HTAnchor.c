@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTAnchor.c,v 1.77 2016/11/24 15:29:50 tom Exp $
+ * $LynxId: HTAnchor.c,v 1.78 2018/03/02 22:01:24 tom Exp $
  *
  *	Hypertext "Anchor" Object				HTAnchor.c
  *	==========================
@@ -16,7 +16,7 @@
  *	(c) Copyright CERN 1991 - See Copyright.html
  */
 
-#define HASH_SIZE 1001		/* Arbitrary prime.  Memory/speed tradeoff */
+#define HASH_SIZE 997		/* Arbitrary prime.  Memory/speed tradeoff */
 
 #include <HTUtils.h>
 #include <HTAnchor.h>

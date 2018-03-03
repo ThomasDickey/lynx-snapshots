@@ -1,9 +1,14 @@
--- $LynxId: CHANGES,v 1.938 2018/03/02 21:32:08 tom Exp $
+-- $LynxId: CHANGES,v 1.941 2018/03/03 15:23:29 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
 2018-03-02 (2.8.9dev.17)
+* remove dead-code for OMIT_SCN_KEEPING -TD
+* remove dead/unreachable pretty-source code in HTML.c, noticed because
+  it complicates hashing -TD
+* improve hashing for anchors and styles by using a more suitable hash-table
+  size -TD
 * add a note in lynx.cfg telling how to remove a default key-mapping -TD
 * modify "=" command to make it possible to disable margins for the URL string,
   by first disabling wrapping using "|" -TD
