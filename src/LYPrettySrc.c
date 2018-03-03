@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYPrettySrc.c,v 1.29 2013/11/28 11:21:09 tom Exp $
+ * $LynxId: LYPrettySrc.c,v 1.32 2018/03/03 01:42:11 tom Exp $
  *
  * HTML source syntax highlighting
  * by Vlad Harchev <hvv@hippo.ru>
@@ -156,28 +156,11 @@ static void append_open_tag(char *tagname,
     subj->start = TRUE;
 
 #ifdef USE_COLOR_STYLE
-    hcode = hash_code_lowercase_on_fly(tagname);
     if (non_empty(classname)) {
-
-#  if 0
-	/*
-	 * we don't provide a classname as attribute of that tag, since for
-	 * plain formatting tags they are not used directly for anything except
-	 * style - and we provide style value directly.
-	 */
-	HTTag *tag = HTML_dtd.tags + subj->element;
-	int class_attr_idx = 0;
-	int n = tag->number_of_attributes;
-	attr *attrs = tag->attributes;
-
-/*.... */
-/* this is not implemented though it's easy */
-#  endif
-
-	hcode = hash_code_aggregate_char('.', hcode);
-	hcode = hash_code_aggregate_lower_str(classname, hcode);
+	hcode = hash_code_aggregate(tagname, ".", classname);
 	StrAllocCopy(subj->class_name, classname);
     } else {
+	hcode = hash_code_caseless(tagname);
 	StrAllocCopy(subj->class_name, "");
     }
     subj->style = hcode;

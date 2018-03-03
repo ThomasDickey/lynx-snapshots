@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTML.c,v 1.174 2017/07/05 22:48:09 tom Exp $
+ * $LynxId: HTML.c,v 1.180 2018/03/03 15:23:54 tom Exp $
  *
  *		Structured stream to Rich hypertext converter
  *		============================================
@@ -65,13 +65,6 @@
 #include <LYStyle.h>
 #undef SELECTED_STYLES
 #define pHText_changeStyle(X,Y,Z) {}
-
-#if OMIT_SCN_KEEPING
-# define HCODE_TO_STACK_OFF(x) /*(CSHASHSIZE+1)*/ 88888		/*special value. */
-#else
-# define HCODE_TO_STACK_OFF(x) x	/*pass computed value */
-#endif
-
 #endif /* USE_COLOR_STYLE */
 
 #ifdef USE_SOURCE_CACHE
@@ -788,49 +781,6 @@ static void addClassName(const char *prefix,
 #define addClassName(prefix, actual, length)	/* nothing */
 #endif
 
-#ifdef USE_PRETTYSRC
-
-static void HTMLSRC_apply_markup(HTStructured * context, HTlexeme lexeme, int start,
-				 int tag_charset)
-{
-    HT_tagspec *ts = *((start ? lexeme_start : lexeme_end) + lexeme);
-
-    while (ts) {
-#ifdef USE_COLOR_STYLE
-	if (ts->start) {
-	    current_tag_style = ts->style;
-	    force_current_tag_style = TRUE;
-	    forced_classname = ts->class_name;
-	    force_classname = TRUE;
-	}
-#endif
-	CTRACE((tfp, ts->start ? "SRCSTART %d\n" : "SRCSTOP %d\n", (int) lexeme));
-	if (ts->start)
-	    HTML_start_element(context,
-			       (int) ts->element,
-			       ts->present,
-			       (STRING2PTR) ts->value,
-			       tag_charset,
-			       NULL);
-	else
-	    HTML_end_element(context,
-			     (int) ts->element,
-			     NULL);
-	ts = ts->next;
-    }
-}
-
-#  define START TRUE
-#  define STOP FALSE
-
-#  define PSRCSTART(x)	HTMLSRC_apply_markup(me,HTL_##x,START,tag_charset)
-#  define PSRCSTOP(x)  HTMLSRC_apply_markup(me,HTL_##x,STOP,tag_charset)
-
-#  define PUTC(x) HTML_put_character(me,x)
-#  define PUTS(x) HTML_put_string(me,x)
-
-#endif /* USE_PRETTYSRC */
-
 static void LYStartArea(HTStructured * obj, const char *href,
 			const char *alt,
 			const char *title,
@@ -1000,105 +950,6 @@ static int HTML_start_element(HTStructured * me, int element_number,
     int class_used = 0;
 #endif
 
-#ifdef USE_PRETTYSRC
-    if (psrc_view && !sgml_in_psrc_was_initialized) {
-	if (!psrc_nested_call) {
-	    HTTag *tag = &HTML_dtd.tags[element_number];
-	    char buf[200];
-	    const char *p;
-
-	    if (psrc_first_tag) {
-		psrc_first_tag = FALSE;
-		/* perform the special actions on the begining of the document.
-		   It's assumed that all lynx modules start generating html
-		   from tag (ie not a text) so we are able to trap this moment
-		   and initialize.
-		 */
-		psrc_nested_call = TRUE;
-		HTML_start_element(me, HTML_BODY, NULL, NULL, tag_charset, NULL);
-		HTML_start_element(me, HTML_PRE, NULL, NULL, tag_charset, NULL);
-		PSRCSTART(entire);
-		psrc_nested_call = FALSE;
-	    }
-
-	    psrc_nested_call = TRUE;
-	    /*write markup for tags and exit */
-	    PSRCSTART(abracket);
-	    PUTC('<');
-	    PSRCSTOP(abracket);
-	    PSRCSTART(tag);
-	    if (tagname_transform != 0)
-		PUTS(tag->name);
-	    else {
-		LYStrNCpy(buf, tag->name, sizeof(buf) - 1);
-		LYLowerCase(buf);
-		PUTS(buf);
-	    }
-	    if (present) {
-		for (i = 0; i < tag->number_of_attributes; i++)
-		    if (present[i]) {
-			PUTC(' ');
-			PSRCSTART(attrib);
-			if (attrname_transform != 0)
-			    PUTS(tag->attributes[i].name);
-			else {
-			    LYStrNCpy(buf,
-				      tag->attributes[i].name,
-				      sizeof(buf) - 1);
-			    LYLowerCase(buf);
-			    PUTS(buf);
-			}
-			if (value[i]) {
-			    char q = '"';
-
-			    /*0 in dquotes, 1 - in quotes, 2 mixed */
-			    char kind = (char) (!StrChr(value[i], '"') ?
-						0 :
-						!StrChr(value[i], '\'') ?
-						q = '\'', 1 :
-						2);
-
-			    PUTC('=');
-			    PSRCSTOP(attrib);
-			    PSRCSTART(attrval);
-			    PUTC(q);
-			    /*is it special ? */
-			    if (tag->attributes[i].type == HTMLA_ANAME) {
-				HTStartAnchor(me, value[i], NULL);
-				HTML_end_element(me, HTML_A, NULL);
-			    } else if (tag->attributes[i].type == HTMLA_HREF) {
-				PSRCSTART(href);
-				HTStartAnchor(me, NULL, value[i]);
-			    }
-			    if (kind != 2)
-				PUTS(value[i]);
-			    else
-				for (p = value[i]; *p; p++)
-				    if (*p != '"')
-					PUTC(*p);
-				    else
-					PUTS("&#34;");
-			    /*is it special ? */
-			    if (tag->attributes[i].type == HTMLA_HREF) {
-				HTML_end_element(me, HTML_A, NULL);
-				PSRCSTOP(href);
-			    }
-			    PUTC(q);
-			    PSRCSTOP(attrval);
-			}	/* if value */
-		    }		/* if present[i] */
-	    }			/* if present */
-	    PSRCSTOP(tag);
-	    PSRCSTART(abracket);
-	    PUTC('>');
-	    PSRCSTOP(abracket);
-	    psrc_nested_call = FALSE;
-	    return HT_OK;
-	}			/*if (!psrc_nested_call) */
-	/*fall through */
-    }
-#endif /* USE_PRETTYSRC */
-
     if (LYMapsOnly) {
 	if (!(ElementNumber == HTML_MAP || ElementNumber == HTML_AREA ||
 	      ElementNumber == HTML_BASE || ElementNumber == HTML_OBJECT ||
@@ -1140,12 +991,13 @@ static int HTML_start_element(HTStructured * me, int element_number,
     CTRACE2(TRACE_STYLE, (tfp, "CSS.elt:<%s>\n", HTML_dtd.tags[element_number].name));
 
     if (current_tag_style == -1) {	/* Append class_name */
-	hcode = hash_code_lowercase_on_fly(HTML_dtd.tags[element_number].name);
+	hcode = hash_code_caseless(HTML_dtd.tags[element_number].name);
 	if (class_name[0]) {
 	    int ohcode = hcode;
 
-	    hcode = hash_code_aggregate_char('.', hcode);
-	    hcode = hash_code_aggregate_lower_str(class_name, hcode);
+	    hcode = hash_code_aggregate(HTML_dtd.tags[element_number].name,
+					".",
+					class_name);
 	    if (!hashStyles[hcode].name) {	/* None such -> classless version */
 		hcode = ohcode;
 		CTRACE2(TRACE_STYLE,
@@ -1176,7 +1028,6 @@ static int HTML_start_element(HTStructured * me, int element_number,
 	current_tag_style = -1;
     }
 
-#if !OMIT_SCN_KEEPING		/* Can be done in other cases too... */
     if (!class_used && ElementNumber == HTML_INPUT) {	/* For some other too? */
 	const char *type = "";
 	int ohcode = hcode;
@@ -1199,7 +1050,6 @@ static int HTML_start_element(HTStructured * me, int element_number,
 		     HTML_dtd.tags[element_number].name, type, hcode));
 	}
     }
-#endif /* !OMIT_SCN_KEEPING */
 
     HText_characterStyle(me->text, hcode, STACK_ON);
 #endif /* USE_COLOR_STYLE */
@@ -5633,14 +5483,12 @@ static int HTML_start_element(HTStructured * me, int element_number,
     if (ReallyEmptyTagNum(element_number)) {
 	CTRACE2(TRACE_STYLE,
 		(tfp, "STYLE.begin_element:ending \"EMPTY\" element style\n"));
-	HText_characterStyle(me->text, HCODE_TO_STACK_OFF(hcode), STACK_OFF);
+	HText_characterStyle(me->text, hcode, STACK_OFF);
 
-#  if !OMIT_SCN_KEEPING
 	FastTrimColorClass(HTML_dtd.tags[element_number].name,
 			   HTML_dtd.tags[element_number].name_len,
 			   Style_className,
 			   &Style_className_end, &hcode);
-#  endif
     }
 #endif /* USE_COLOR_STYLE */
     return status;
@@ -5671,36 +5519,6 @@ static int HTML_end_element(HTStructured * me, int element_number,
     BOOL skip_stack_requested = FALSE;
 #endif
     EMIT_IFDEF_USE_JUSTIFY_ELTS(BOOL reached_awaited_stacked_elt = FALSE);
-
-#ifdef USE_PRETTYSRC
-    if (psrc_view && !sgml_in_psrc_was_initialized) {
-	if (!psrc_nested_call) {
-	    HTTag *tag = &HTML_dtd.tags[element_number];
-	    char buf[200];
-	    int tag_charset = 0;
-
-	    psrc_nested_call = TRUE;
-	    PSRCSTART(abracket);
-	    PUTS("</");
-	    PSRCSTOP(abracket);
-	    PSRCSTART(tag);
-	    if (tagname_transform != 0)
-		PUTS(tag->name);
-	    else {
-		LYStrNCpy(buf, tag->name, sizeof(buf) - 1);
-		LYLowerCase(buf);
-		PUTS(buf);
-	    }
-	    PSRCSTOP(tag);
-	    PSRCSTART(abracket);
-	    PUTC('>');
-	    PSRCSTOP(abracket);
-	    psrc_nested_call = FALSE;
-	    return HT_OK;
-	}
-	/*fall through */
-    }
-#endif
 
     if ((me->sp >= (me->stack + MAX_NESTING - 1) ||
 	 element_number != me->sp[0].tag_number) &&
@@ -7244,19 +7062,17 @@ static int HTML_end_element(HTStructured * me, int element_number,
     }
 #ifdef USE_COLOR_STYLE
     if (!skip_stack_requested) {	/*don't emit stylechanges if skipped stack element - VH */
-# if !OMIT_SCN_KEEPING
 	FastTrimColorClass(HTML_dtd.tags[element_number].name,
 			   HTML_dtd.tags[element_number].name_len,
 			   Style_className,
 			   &Style_className_end, &hcode);
-#  endif
 
 	if (!ReallyEmptyTagNum(element_number)) {
 	    CTRACE2(TRACE_STYLE,
 		    (tfp,
 		     "STYLE.end_element: ending non-\"EMPTY\" style <%s...>\n",
 		     HTML_dtd.tags[element_number].name));
-	    HText_characterStyle(me->text, HCODE_TO_STACK_OFF(hcode), STACK_OFF);
+	    HText_characterStyle(me->text, hcode, STACK_OFF);
 	}
     }
 #endif /* USE_COLOR_STYLE */

@@ -1,12 +1,14 @@
 /*
- * $LynxId: LYHash.c,v 1.19 2013/06/12 09:21:21 tom Exp $
+ * $LynxId: LYHash.c,v 1.23 2018/03/03 01:51:03 tom Exp $
  *
  * A hash table for the (fake) CSS support in Lynx-rp
  * (c) 1996 Rob Partington
  * rewritten 1997 by Klaus Weide.
+ * rewritten 2018 -TD
  */
 #include <LYHash.h>
 #include <LYUtils.h>
+#include <LYStrings.h>
 
 #ifdef USE_COLOR_STYLE
 
@@ -18,33 +20,53 @@
 #define HASH_SIZE CSHASHSIZE
 #define HASH_OF(h, v) ((int)((h) * 3 + UCH(v)) % HASH_SIZE)
 
+static size_t limit;
+static char *buffer;
+
+static char *get_buffer(size_t need)
+{
+    if (++need > limit) {
+	char *test = realloc(buffer, (limit = (1 + need) * 2));
+
+	if (test == 0)
+	    outofmem(__FILE__, "LYHash");
+	buffer = test;
+    }
+    return buffer;
+}
+
 int hash_code(const char *string)
 {
-    int hash;
-    const char *p;
+    int hash = 0;
 
-    for (p = string, hash = 0; *p; p++)
-	hash = HASH_OF(hash, *p);
+    if (string != 0) {
+	const char *p;
 
-    CTRACE_STYLE((tfp, "hash_code(%s) = %d\n", string, hash));
+	for (p = string; *p; p++)
+	    hash = HASH_OF(hash, *p);
+
+	CTRACE_STYLE((tfp, "hash_code(%s) = %d\n", string, hash));
+    } else {
+	FREE(buffer);
+	limit = 0;
+    }
     return hash;
 }
 
-int hash_code_lowercase_on_fly(const char *string)
+int hash_code_caseless(const char *string)
 {
-    int hash;
-    const char *p;
-
-    for (p = string, hash = 0; *p; p++)
-	hash = HASH_OF(hash, TOLOWER(*p));
-
-    CTRACE_STYLE((tfp, "hash_code_lc(%s) = %d\n", string, hash));
-    return hash;
+    LYLowerCase(strcpy(get_buffer(strlen(string)), string));
+    return hash_code(buffer);
 }
 
-int hash_code_aggregate_char(int c, int hash)
+int hash_code_aggregate(const char *p, const char *q, const char *r)
 {
-    return HASH_OF(hash, c);
+    get_buffer(strlen(p) + strlen(q) + strlen(r));
+    strcpy(buffer, p);
+    strcat(buffer, q);
+    strcat(buffer, r);
+    LYLowerCase(buffer);
+    return hash_code(buffer);
 }
 
 int hash_code_aggregate_lower_str(const char *string, int hash_was)

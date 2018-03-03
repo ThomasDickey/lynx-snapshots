@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYStyle.c,v 1.97 2016/10/12 00:50:05 tom Exp $
+ * $LynxId: LYStyle.c,v 1.99 2018/03/03 15:20:46 tom Exp $
  *
  * character level styles for Lynx
  * (c) 1996 Rob Partington -- donated to the Lyncei (if they want it :-)
@@ -124,13 +124,6 @@ static bucket *new_bucket(const char *name)
     StrAllocCopy(result->name, name);
     return result;
 }
-
-#if OMIT_SCN_KEEPING
-bucket *special_bucket(void)
-{
-    return new_bucket("<special>");
-}
-#endif
 
 bucket *nostyle_bucket(void)
 {
@@ -963,22 +956,9 @@ void init_color_styles(char **from_cmdline, const char *default_styles)
 
 void reinit_color_styles(void)
 {
+#ifdef USE_PRETTYSRC
     int cs;
 
-    for (cs = 0; cs < CSHASHSIZE; ++cs) {
-	bucket *style = &hashStyles[cs];
-
-	while (style != 0) {
-	    bucket *next = style->next;
-
-	    if (next != 0) {
-		hashStyles[cs] = *next;
-		free(next);
-	    }
-	    style = hashStyles[cs].next;
-	}
-    }
-#ifdef USE_PRETTYSRC
     for (cs = 0; cs < HTL_num_lexemes; ++cs) {
 	html_src_clean_item((HTlexeme) cs);
     }
