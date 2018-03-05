@@ -1,4 +1,4 @@
-/* $LynxId: LYOptions.c,v 1.174 2017/07/04 20:28:05 tom Exp $ */
+/* $LynxId: LYOptions.c,v 1.176 2018/03/05 22:18:05 tom Exp $ */
 #include <HTUtils.h>
 #include <HTFTP.h>
 #include <HTTP.h>		/* 'reloading' flag */
@@ -2117,6 +2117,8 @@ typedef struct {
     const char *HtmlName;
 } OptValues;
 
+#define END_OPTIONS
+
 typedef struct {
     char *tag;
     char *value;
@@ -2132,7 +2134,7 @@ static OptValues bool_values[] =
 {
     {FALSE, N_("OFF"), "OFF"},
     {TRUE, N_("ON"), "ON"},
-    {0, 0, 0}
+    END_OPTIONS
 };
 
 static const char *secure_string = "secure";
@@ -2162,7 +2164,7 @@ static OptValues exec_links_values[] =
 #ifndef NEVER_ALLOW_REMOTE_EXEC
     {EXEC_ALWAYS, N_("ALWAYS ON"), "ALWAYS ON"},
 #endif
-    {0, 0, 0}
+    END_OPTIONS
 };
 #endif /* ENABLE_OPTS_CHANGE_EXEC */
 
@@ -2182,7 +2184,7 @@ static OptValues keypad_mode_values[] =
     {FIELDS_ARE_NUMBERED,
      N_("Form fields are numbered"),
      "forms_numbered"},
-    {0, 0, 0}
+    END_OPTIONS
 };
 static const char *lineedit_mode_string = RC_LINEEDIT_MODE;
 static const char *mail_address_string = RC_PERSONAL_MAIL_ADDRESS;
@@ -2197,7 +2199,7 @@ static OptValues search_type_values[] =
 {
     {FALSE, N_("Case insensitive"), "case_insensitive"},
     {TRUE, N_("Case sensitive"), "case_sensitive"},
-    {0, 0, 0}
+    END_OPTIONS
 };
 
 #if defined(USE_SLANG) || defined(COLOR_CURSES)
@@ -2208,7 +2210,7 @@ static OptValues show_color_values[] =
     {SHOW_COLOR_OFF, off_string, off_string},
     {SHOW_COLOR_ON, on_string, on_string},
     {SHOW_COLOR_ALWAYS, always_string, always_string},
-    {0, 0, 0}
+    END_OPTIONS
 };
 #endif
 
@@ -2238,7 +2240,7 @@ static OptValues prompt_values[] =
     {FORCE_PROMPT_DFT, prompt_dft_string, prompt_dft_string},
     {FORCE_PROMPT_YES, prompt_yes_string, prompt_yes_string},
     {FORCE_PROMPT_NO, prompt_no_string, prompt_no_string},
-    {0, 0, 0}
+    END_OPTIONS
 };
 
 static const char *cookie_prompt_string = RC_FORCE_COOKIE_PROMPT;
@@ -2253,7 +2255,7 @@ static OptValues user_mode_values[] =
     {NOVICE_MODE, N_("Novice"), "Novice"},
     {INTERMEDIATE_MODE, N_("Intermediate"), "Intermediate"},
     {ADVANCED_MODE, N_("Advanced"), "Advanced"},
-    {0, 0, 0}
+    END_OPTIONS
 };
 
 static const char *vi_keys_string = RC_VI_KEYS;
@@ -2268,7 +2270,7 @@ static OptValues visited_links_values[] =
     {VISITED_LINKS_AS_LATEST, N_("By Last Visit"), "last_visited"},
     {VISITED_LINKS_AS_LATEST | VISITED_LINKS_REVERSE,
      N_("By Last Visit Reversed"), "last_visited_reversed"},
-    {0, 0, 0}
+    END_OPTIONS
 };
 
 /*
@@ -2280,7 +2282,7 @@ static OptValues DTD_type_values[] =
 	/* Old_DTD variable */
     {TRUE, N_("relaxed (TagSoup mode)"), "tagsoup"},
     {FALSE, N_("strict (SortaSGML mode)"), "sortasgml"},
-    {0, 0, 0}
+    END_OPTIONS
 };
 
 static const char *bad_html_string = RC_BAD_HTML;
@@ -2290,7 +2292,7 @@ static OptValues bad_html_values[] =
     {BAD_HTML_TRACE, N_("Add to trace-file"), "trace"},
     {BAD_HTML_MESSAGE, N_("Add to LYNXMESSAGES"), "message"},
     {BAD_HTML_WARN, N_("Warn, point to trace-file"), "warn"},
-    {0, 0, 0}
+    END_OPTIONS
 };
 
 static const char *select_popups_string = RC_SELECT_POPUPS;
@@ -2305,7 +2307,7 @@ static OptValues verbose_images_type_values[] =
 	/* verbose_img variable */
     {FALSE, N_("OFF"), "OFF"},
     {TRUE, N_("show filename"), "ON"},
-    {0, 0, 0}
+    END_OPTIONS
 };
 
 static const char *collapse_br_tags_string = RC_COLLAPSE_BR_TAGS;
@@ -2314,7 +2316,7 @@ static OptValues collapse_br_tags_values[] =
 	/* LYCollapseBRs variable */
     {FALSE, N_("OFF"), "OFF"},
     {TRUE, N_("collapse"), "ON"},
-    {0, 0, 0}
+    END_OPTIONS
 };
 
 static const char *trim_blank_lines_string = RC_TRIM_BLANK_LINES;
@@ -2323,7 +2325,7 @@ static OptValues trim_blank_lines_values[] =
 	/* LYtrimBlankLines variable */
     {FALSE, N_("OFF"), "OFF"},
     {TRUE, N_("trim-lines"), "ON"},
-    {0, 0, 0}
+    END_OPTIONS
 };
 
 /*
@@ -2335,7 +2337,7 @@ static OptValues mbm_values[] =
     {MBM_OFF, N_("OFF"), "OFF"},
     {MBM_STANDARD, N_("STANDARD"), "STANDARD"},
     {MBM_ADVANCED, N_("ADVANCED"), "ADVANCED"},
-    {0, 0, 0}
+    END_OPTIONS
 };
 
 static const char *single_bookmark_string = RC_BOOKMARK_FILE;
@@ -2371,7 +2373,7 @@ static OptValues dired_list_values[] =
     {DIRS_FIRST, N_("Directories first"), "dired_dir"},
     {FILES_FIRST, N_("Files first"), "dired_files"},
     {MIXED_STYLE, N_("Mixed style"), "dired_mixed"},
-    {0, 0, 0}
+    END_OPTIONS
 };
 
 #ifdef LONG_LIST
@@ -2387,7 +2389,7 @@ static OptValues dired_sort_values[] =
     {ORDER_BY_USER, N_("By User"), "dired_by_user"},
     {ORDER_BY_GROUP, N_("By Group"), "dired_by_group"},
 #endif
-    {0, 0, 0}
+    END_OPTIONS
 };
 #endif /* LONG_LIST */
 #endif /* DIRED_SUPPORT */
@@ -2402,7 +2404,7 @@ static OptValues ftp_sort_values[] =
     {FILE_BY_TYPE, N_("By Type"), "ftp_by_type"},
     {FILE_BY_SIZE, N_("By Size"), "ftp_by_size"},
     {FILE_BY_DATE, N_("By Date"), "ftp_by_date"},
-    {0, 0, 0}
+    END_OPTIONS
 };
 #endif
 
@@ -2422,9 +2424,18 @@ static OptValues rate_values[] =
 #ifdef USE_PROGRESSBAR
     {rateBAR, N_("Show progressbar"), "rate_bar"},
 #endif
-    {0, 0, 0}
+    END_OPTIONS
 };
 #endif /* USE_READPROGRESS */
+
+static const char *preferred_content_string = RC_PREFERRED_CONTENT_TYPE;
+static OptValues content_values[] =
+{
+    {contentBINARY, STR_BINARY, STR_BINARY},
+    {contentTEXT, STR_PLAINTEXT, STR_PLAINTEXT},
+    {contentHTML, STR_HTML, STR_HTML},
+    END_OPTIONS
+};
 
 /*
  * Presentation (MIME) types used in "Accept".
@@ -2437,7 +2448,7 @@ static OptValues media_values[] =
     {mediaOpt3, N_("Also accept user's types"), "media_opt3"},
     {mediaOpt4, N_("Also accept system's types"), "media_opt4"},
     {mediaALL, N_("Accept all types"), "media_all"},
-    {0, 0, 0}
+    END_OPTIONS
 };
 
 static const char *preferred_encoding_string = RC_PREFERRED_ENCODING;
@@ -2455,7 +2466,7 @@ static OptValues encoding_values[] =
     {encodingBZIP2, N_("bzip2"), "encoding_bzip2"},
 #endif
     {encodingALL, N_("All"), "encoding_all"},
-    {0, 0, 0}
+    END_OPTIONS
 };
 
 /*
@@ -2466,7 +2477,7 @@ static OptValues http_protocol_values[] =
 {
     {HTTP_1_0, N_("HTTP 1.0"), "HTTP_1_0"},
     {HTTP_1_1, N_("HTTP 1.1"), "HTTP_1_1"},
-    {0, 0, 0}
+    END_OPTIONS
 };
 
 static const char *preferred_doc_char_string = RC_PREFERRED_CHARSET;
@@ -3274,6 +3285,11 @@ int postoptions(DocInfo *newdoc)
 	}
 #endif /* USE_READPROGRESS */
 
+	/* Preferred Content Type: SELECT */
+	if (!strcmp(data[i].tag, preferred_content_string)) {
+	    GetOptValues(content_values, data[i].value, &LYContentType);
+	}
+
 	/* Preferred Media Type: SELECT */
 	if (!strcmp(data[i].tag, preferred_media_string)) {
 	    GetOptValues(media_values, data[i].value, &LYAcceptMedia);
@@ -4078,6 +4094,12 @@ static int gen_options(char **newfile)
     PutTextInput(fp0, anonftp_password_string,
 		 NonNull(anonftp_password), text_len, "");
 #endif
+
+    /* Preferred content type: SELECT */
+    PutLabel(fp0, gettext("Preferred content type"), preferred_content_string);
+    BeginSelect(fp0, preferred_content_string);
+    PutOptValues(fp0, LYContentType, content_values);
+    EndSelect(fp0);
 
     /* Preferred media type: SELECT */
     PutLabel(fp0, gettext("Preferred media type"), preferred_media_string);

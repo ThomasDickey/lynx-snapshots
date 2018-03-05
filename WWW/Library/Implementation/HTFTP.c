@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFTP.c,v 1.129 2017/07/02 20:42:32 tom Exp $
+ * $LynxId: HTFTP.c,v 1.130 2018/03/05 22:33:35 tom Exp $
  *
  *			File Transfer Protocol (FTP) Client
  *			for a WorldWideWeb browser
@@ -2556,7 +2556,7 @@ static EntryInfo *parse_dir_entry(char *entry,
 	    if ((server_type != UNIX_SERVER) ||
 		(cp > (entry_info->filename + 3) &&
 		 0 == strncasecomp((cp - 4), "read.me", 7))) {
-		StrAllocCopy(entry_info->type, "text/plain");
+		StrAllocCopy(entry_info->type, STR_PLAINTEXT);
 	    }
 	}
     }

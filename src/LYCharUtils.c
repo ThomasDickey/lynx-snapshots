@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYCharUtils.c,v 1.130 2017/07/02 19:54:30 tom Exp $
+ * $LynxId: LYCharUtils.c,v 1.131 2018/03/05 22:32:14 tom Exp $
  *
  *  Functions associated with LYCharSets.c and the Lynx version of HTML.c - FM
  *  ==========================================================================
@@ -540,7 +540,7 @@ void LYAddMETAcharsetToStream(HTStream *target, int disp_chndl)
 	disp_chndl = current_char_set;
 
     if (target != 0 && disp_chndl >= 0) {
-	HTSprintf0(&buf, "<META %s content=\"text/html;charset=%s\">\n",
+	HTSprintf0(&buf, "<META %s content=\"" STR_HTML ";charset=%s\">\n",
 		   "http-equiv=\"content-type\"",
 		   LYCharSet_UC[disp_chndl].MIMEname);
 	(*target->isa->put_string) (target, buf);
@@ -605,7 +605,7 @@ void LYAddMETAcharsetToFD(FILE *fd, int disp_chndl)
      * during the lifetime of the file (by toggling raw mode or changing the
      * display character set), so proceed.
      */
-    fprintf(fd, "<META %s content=\"text/html;charset=%s\">\n",
+    fprintf(fd, "<META %s content=\"" STR_HTML ";charset=%s\">\n",
 	    "http-equiv=\"content-type\"",
 	    LYCharSet_UC[disp_chndl].MIMEname);
 }

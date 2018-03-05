@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTP.c,v 1.166 2018/02/26 00:21:47 tom Exp $
+ * $LynxId: HTTP.c,v 1.167 2018/03/05 22:33:35 tom Exp $
  *
  * HyperText Tranfer Protocol	- Client implementation		HTTP.c
  * ==========================
@@ -2004,7 +2004,7 @@ static int HTLoadHTTP(const char *arg,
 	     * Treat all plain text as HTML.  This sucks but its the only
 	     * solution without without looking at content.
 	     */
-	    if (!StrNCmp(HTAtom_name(format_in), "text/plain", 10)) {
+	    if (!StrNCmp(HTAtom_name(format_in), STR_PLAINTEXT, 10)) {
 		CTRACE((tfp, "HTTP: format_in being changed to text/HTML\n"));
 		format_in = WWW_HTML;
 	    }
@@ -2551,7 +2551,7 @@ static int HTLoadHTTP(const char *arg,
 #else
 	length = rawlength;
 #endif
-	format_in = HTAtom_for("text/plain");
+	format_in = HTAtom_for(STR_PLAINTEXT);
 
     } else if (doing_redirect) {
 

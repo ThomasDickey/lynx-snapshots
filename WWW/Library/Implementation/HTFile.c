@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFile.c,v 1.147 2017/07/02 20:42:33 tom Exp $
+ * $LynxId: HTFile.c,v 1.148 2018/03/05 22:37:12 tom Exp $
  *
  *			File Access				HTFile.c
  *			===========
@@ -1583,7 +1583,8 @@ void HTStructured_doctype(HTStructured * target, HTFormat format_out)
 void HTStructured_meta(HTStructured * target, HTFormat format_out)
 {
     if (view_structured(format_out))
-	PUTS("<meta http-equiv=\"Content-Type\" content=\"text/html; charset=iso-8859-1\">\n");
+	PUTS("<meta http-equiv=\"Content-Type\" content=\"" STR_HTML
+	     "; charset=iso-8859-1\">\n");
 }
 /*	Output parent directory entry.
  *	------------------------------

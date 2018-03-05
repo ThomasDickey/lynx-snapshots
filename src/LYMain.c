@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMain.c,v 1.267 2018/03/01 22:27:37 Takeshi.Hataguchi Exp $
+ * $LynxId: LYMain.c,v 1.270 2018/03/05 22:32:14 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTP.h>
@@ -548,6 +548,13 @@ BOOLEAN LYShowTransferRate = TRUE;
 int LYTransferRate = rateKB;
 int LYAcceptEncoding = encodingALL;
 int LYAcceptMedia = mediaOpt1;
+int LYContentType = contentTEXT;
+const char *ContentTypes[] =
+{
+    STR_BINARY,
+    STR_PLAINTEXT,
+    STR_HTML
+};
 char *LYTransferName = NULL;
 
 char *XLoadImageCommand = NULL;	/* Default image viewer for X */
@@ -3356,7 +3363,7 @@ static Config_Type Arg_Table [] =
    ),
    PARSE_FUN(
       "base",		4|FUNCTION_ARG,		base_fun,
-      "prepend a request URL comment and BASE tag to text/html\n\
+      "prepend a request URL comment and BASE tag to " STR_HTML "\n\
 outputs for -source dumps"
    ),
 #ifndef DISABLE_BIBP
@@ -3804,7 +3811,7 @@ terminated by '---' on a line"
    ),
    PARSE_SET(
       "preparsed",	4|SET_ARG,		LYPreparsedSource,
-      "show parsed text/html with -source and in source view\n\
+      "show parsed " STR_HTML " with -source and in source view\n\
 to visualize how lynx behaves with invalid HTML"
    ),
 #ifdef USE_PRETTYSRC

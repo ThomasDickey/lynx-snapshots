@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYHistory.c,v 1.89 2016/11/24 16:38:22 tom Exp $
+ * $LynxId: LYHistory.c,v 1.90 2018/03/05 22:32:14 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTP.h>
@@ -1112,7 +1112,7 @@ static int LYLoadMESSAGES(const char *arg GCC_UNUSED,
     /*
      * This page is a list of messages in display character set.
      */
-    HTSprintf0(&buf, "<META %s content=\"text/html;charset=%s\">\n",
+    HTSprintf0(&buf, "<META %s content=\"" STR_HTML ";charset=%s\">\n",
 	       "http-equiv=\"content-type\"",
 	       LYCharSet_UC[current_char_set].MIMEname);
     PUTS(buf);

@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMail.c,v 1.97 2014/12/30 22:16:41 Gisle.Vanem Exp $
+ * $LynxId: LYMail.c,v 1.98 2018/03/05 22:36:09 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTParse.h>
@@ -1318,7 +1318,7 @@ void reply_by_mail(char *mail_address,
 	if (!LYHaveCJKCharacterSet &&
 	    strncasecomp(LYCharSet_UC[current_char_set].MIMEname, "x-", 2)
 	    != 0) {
-	    HTSprintf(&header, "Content-Type: text/plain; charset=%s\n",
+	    HTSprintf(&header, "Content-Type: " STR_PLAINTEXT "; charset=%s\n",
 		      LYCharSet_UC[current_char_set].MIMEname);
 	}
 	StrAllocCat(header, "Content-Transfer-Encoding: 8bit\n");

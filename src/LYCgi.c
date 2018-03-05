@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYCgi.c,v 1.70 2016/11/24 16:38:22 tom Exp $
+ * $LynxId: LYCgi.c,v 1.71 2018/03/05 22:36:09 tom Exp $
  *                   Lynx CGI support                              LYCgi.c
  *                   ================
  *
@@ -670,7 +670,7 @@ static int LYLoadCGI(const char *arg,
 		execve(argv[0], argv, env);
 		exec_errno = errno;
 		PERROR("execve failed");
-		printf("Content-Type: text/plain\r\n\r\n");
+		printf("Content-Type: " STR_PLAINTEXT "\r\n\r\n");
 		if (!anAnchor->isHEAD) {
 		    printf("exec of %s failed", pgm);
 		    printf(": %s.\r\n", LYStrerror(exec_errno));

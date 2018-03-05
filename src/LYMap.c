@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMap.c,v 1.49 2016/11/24 16:38:22 tom Exp $
+ * $LynxId: LYMap.c,v 1.50 2018/03/05 22:32:14 tom Exp $
  *			Lynx Client-side Image MAP Support	       LYMap.c
  *			==================================
  *
@@ -550,7 +550,7 @@ static int LYLoadIMGmap(const char *arg,
 
     HTSprintf0(&buf, "<html>\n<head>\n");
     PUTS(buf);
-    HTSprintf0(&buf, "<META %s content=\"text/html;charset=%s\">\n",
+    HTSprintf0(&buf, "<META %s content=\"" STR_HTML ";charset=%s\">\n",
 	       "http-equiv=\"content-type\"",
 	       LYCharSet_UC[current_char_set].MIMEname);
     PUTS(buf);
