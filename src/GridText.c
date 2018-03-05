@@ -1,5 +1,5 @@
 /*
- * $LynxId: GridText.c,v 1.307 2018/03/01 22:23:53 Takeshi.Hataguchi Exp $
+ * $LynxId: GridText.c,v 1.308 2018/03/05 22:35:07 tom Exp $
  *
  *		Character grid hypertext object
  *		===============================
@@ -10666,7 +10666,7 @@ static const char *guess_content_type(const char *filename)
 
     return (format != 0 && non_empty(format->name))
 	? format->name
-	: "text/plain";
+	: STR_PLAINTEXT;
 }
 #endif /* USE_FILE_UPLOAD */
 
@@ -10837,7 +10837,7 @@ static char *escape_or_quote_name(const char *name,
 	StrAllocCopy(escaped1, "Content-Disposition: form-data");
 	HTSprintf(&escaped1, "; name=\"%s\"", name);
 	if (MultipartContentType)
-	    HTSprintf(&escaped1, MultipartContentType, "text/plain");
+	    HTSprintf(&escaped1, MultipartContentType, STR_PLAINTEXT);
 	if (quoting == QUOTE_BASE64)
 	    StrAllocCat(escaped1, "\r\nContent-Transfer-Encoding: base64");
 	StrAllocCat(escaped1, "\r\n\r\n");
@@ -10989,7 +10989,7 @@ int HText_SubmitForm(FormInfo * submit_item, DocInfo *doc,
      * Check the ENCTYPE and set up the appropriate variables.  -FM
      */
     if (submit_item->submit_enctype &&
-	!strncasecomp(submit_item->submit_enctype, "text/plain", 10)) {
+	!strncasecomp(submit_item->submit_enctype, STR_PLAINTEXT, 10)) {
 	/*
 	 * Do not hex escape, and use physical newlines
 	 * to separate name=value pairs.  -FM
@@ -11181,7 +11181,7 @@ int HText_SubmitForm(FormInfo * submit_item, DocInfo *doc,
 			 "application/sgml-form-urlencoded");
 	} else if (PlainText == TRUE) {
 	    StrAllocCopy(content_type_out,
-			 "text/plain");
+			 STR_PLAINTEXT);
 	} else if (Boundary != NULL) {
 	    StrAllocCopy(content_type_out,
 			 "multipart/form-data");

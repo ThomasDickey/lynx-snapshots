@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYBookmark.c,v 1.76 2013/11/28 11:17:59 tom Exp $
+ * $LynxId: LYBookmark.c,v 1.77 2018/03/05 22:32:14 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTAlert.h>
@@ -368,7 +368,7 @@ void save_bookmark_link(const char *address,
 	else
 	    fprintf(fp, "<META %s %s>\n",
 		    "http-equiv=\"content-type\"",
-		    "content=\"text/html;charset=iso-2022-jp\"");
+		    "content=\"" STR_HTML ";charset=iso-2022-jp\"");
 #else
 	LYAddMETAcharsetToFD(fp, -1);
 #endif /* !_WINDOWS */

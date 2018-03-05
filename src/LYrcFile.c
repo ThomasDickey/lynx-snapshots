@@ -1,4 +1,4 @@
-/* $LynxId: LYrcFile.c,v 1.99 2017/07/04 20:30:03 tom Exp $ */
+/* $LynxId: LYrcFile.c,v 1.101 2018/03/05 22:18:05 tom Exp $ */
 #include <HTUtils.h>
 #include <HTFTP.h>
 #include <LYUtils.h>
@@ -87,6 +87,13 @@ Config_Enum tbl_multi_bookmarks[] = {
     { "STANDARD",	MBM_STANDARD },
     { "ON",		MBM_STANDARD },
     { "ADVANCED",	MBM_ADVANCED },
+    { NULL,		-1 }
+};
+
+Config_Enum tbl_preferred_content[] = {
+    { STR_BINARY,	contentBINARY },
+    { STR_PLAINTEXT,	contentTEXT },
+    { STR_HTML,		contentHTML },
     { NULL,		-1 }
 };
 
@@ -516,6 +523,8 @@ according to the Accept-Charset header, then the server SHOULD send\n\
 an error response, though the sending of an unacceptable response\n\
 is also allowed.\n\
 ")),
+    MAYBE_ENU(RC_PREFERRED_CONTENT_TYPE, LYContentType,     tbl_preferred_content,
+	      MSG_ENABLE_LYNXRC),
     MAYBE_ENU(RC_PREFERRED_ENCODING,    LYAcceptEncoding,   tbl_preferred_encoding,
 	      MSG_ENABLE_LYNXRC),
     PARSE_STR(RC_PREFERRED_LANGUAGE,    language, N_("\

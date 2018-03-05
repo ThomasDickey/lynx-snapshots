@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYrcFile.h,v 1.49 2017/07/03 23:20:33 tom Exp $
+ * $LynxId: LYrcFile.h,v 1.50 2018/03/05 02:00:13 tom Exp $
  */
 #ifndef LYRCFILE_H
 #define LYRCFILE_H
@@ -188,6 +188,7 @@
 #define RC_PERSONAL_MAIL_NAME           "personal_mail_name"
 #define RC_POSITIONABLE_EDITOR          "positionable_editor"
 #define RC_PREFERRED_CHARSET            "preferred_charset"
+#define RC_PREFERRED_CONTENT_TYPE       "preferred_content_type"
 #define RC_PREFERRED_ENCODING           "preferred_encoding"
 #define RC_PREFERRED_LANGUAGE           "preferred_language"
 #define RC_PREFERRED_MEDIA_TYPES        "preferred_media_types"
@@ -290,6 +291,7 @@
 extern Config_Enum tbl_force_prompt[];
 extern Config_Enum tbl_keypad_mode[];
 extern Config_Enum tbl_multi_bookmarks[];
+extern Config_Enum tbl_preferred_content[];
 extern Config_Enum tbl_preferred_encoding[];
 extern Config_Enum tbl_preferred_media[];
 extern Config_Enum tbl_transfer_rate[];

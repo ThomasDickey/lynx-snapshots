@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFWriter.c,v 1.114 2018/03/01 22:14:42 Takeshi.Hataguchi Exp $
+ * $LynxId: HTFWriter.c,v 1.115 2018/03/05 22:38:53 tom Exp $
  *
  *		FILE WRITER				HTFWrite.h
  *		===========
@@ -782,7 +782,7 @@ HTStream *HTSaveAndExecute(HTPresentation *pres,
 	 * Check for a suffix.
 	 * Save the file under a suitably suffixed name.
 	 */
-	if (!strcasecomp(pres->rep->name, "text/html")) {
+	if (!strcasecomp(pres->rep->name, STR_HTML)) {
 	    suffix = HTML_SUFFIX;
 	} else if (!strncasecomp(pres->rep->name, "text/", 5)) {
 	    suffix = TEXT_SUFFIX;
@@ -936,7 +936,7 @@ HTStream *HTSaveToFile(HTPresentation *pres,
 	 * Check for a suffix.
 	 * Save the file under a suitably suffixed name.
 	 */
-	if (!strcasecomp(pres->rep->name, "text/html")) {
+	if (!strcasecomp(pres->rep->name, STR_HTML)) {
 	    suffix = HTML_SUFFIX;
 	} else if (!strncasecomp(pres->rep->name, "text/", 5)) {
 	    suffix = TEXT_SUFFIX;
@@ -1003,7 +1003,7 @@ HTStream *HTSaveToFile(HTPresentation *pres,
     StrAllocCopy(anchor->FileCache, fnam);
   Prepend_BASE:
     if (LYPrependBaseToSource &&
-	!strncasecomp(pres->rep->name, "text/html", 9) &&
+	!strncasecomp(pres->rep->name, STR_HTML, 9) &&
 	!anchor->content_encoding) {
 	/*
 	 * Add the document's base as a BASE tag at the top of the file, so
@@ -1047,7 +1047,7 @@ HTStream *HTSaveToFile(HTPresentation *pres,
 	FREE(temp);
     }
     if (LYPrependCharsetToSource &&
-	!strncasecomp(pres->rep->name, "text/html", 9) &&
+	!strncasecomp(pres->rep->name, STR_HTML, 9) &&
 	!anchor->content_encoding) {
 	/*
 	 * Add the document's charset as a META CHARSET tag at the top of the
@@ -1063,7 +1063,8 @@ HTStream *HTSaveToFile(HTPresentation *pres,
 	    StrAllocCopy(temp, anchor->charset);
 	    LYRemoveBlanks(temp);
 	    fprintf(ret_obj->fp,
-		    "<META HTTP-EQUIV=\"Content-Type\" CONTENT=\"text/html; charset=%s\">\n\n",
+		    "<META HTTP-EQUIV=\"Content-Type\" CONTENT=\"" STR_HTML
+		    "; charset=%s\">\n\n",
 		    temp);
 	}
 	FREE(temp);
@@ -1101,7 +1102,7 @@ HTStream *HTCompressed(HTPresentation *pres,
 	 * We have no idea what we're dealing with, so treat it as a binary
 	 * stream.  - FM
 	 */
-	format = HTAtom_for("application/octet-stream");
+	format = HTAtom_for(STR_BINARY);
 	me = HTStreamStack(format, pres->rep_out, sink, anchor);
 	return me;
     }
@@ -1176,8 +1177,8 @@ HTStream *HTCompressed(HTPresentation *pres,
 	HTOutputFormat == HTAtom_for("www/download") ||		/* download */
 	!strcasecomp(pres->rep_out->name, "www/download") ||	/* download */
 	(traversal &&		/* only handle html or plain text for traversals */
-	 strcasecomp(anchor->content_type, "text/html") &&
-	 strcasecomp(anchor->content_type, "text/plain"))) {
+	 strcasecomp(anchor->content_type, STR_HTML) &&
+	 strcasecomp(anchor->content_type, STR_PLAINTEXT))) {
 	/*
 	 * Cast the Content-Encoding to a Content-Type and pass it back to be
 	 * handled as that type.  - FM
@@ -1232,7 +1233,7 @@ HTStream *HTCompressed(HTPresentation *pres,
      * Get a new temporary filename and substitute a suitable suffix.  - FM
      */
     middle = NULL;
-    if (!strcasecomp(anchor->content_type, "text/html")) {
+    if (!strcasecomp(anchor->content_type, STR_HTML)) {
 	middle = HTML_SUFFIX;
 	middle++;		/* point to 'h' of .htm(l) - kw */
     } else if (!strncasecomp(anchor->content_type, "text/", 5)) {

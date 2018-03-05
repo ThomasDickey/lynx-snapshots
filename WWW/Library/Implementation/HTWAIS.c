@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTWAIS.c,v 1.38 2013/11/28 11:16:03 tom Exp $
+ * $LynxId: HTWAIS.c,v 1.39 2018/03/05 22:33:35 tom Exp $
  *
  *	WorldWideWeb - Wide Area Informaion Server Access	HTWAIS.c
  *	==================================================
@@ -915,10 +915,10 @@ int HTLoadWAIS(const char *arg,
 
 	format_in =
 	    !strcmp(doctype, "WSRC") ? HTAtom_for("application/x-wais-source") :
-	    !strcmp(doctype, "TEXT") ? HTAtom_for("text/plain") :
-	    !strcmp(doctype, "HTML") ? HTAtom_for("text/html") :
+	    !strcmp(doctype, "TEXT") ? HTAtom_for(STR_PLAINTEXT) :
+	    !strcmp(doctype, "HTML") ? HTAtom_for(STR_HTML) :
 	    !strcmp(doctype, "GIF") ? HTAtom_for("image/gif") :
-	    HTAtom_for("application/octet-stream");
+	    HTAtom_for(STR_BINARY);
 	binary =
 	    0 != strcmp(doctype, "WSRC") &&
 	    0 != strcmp(doctype, "TEXT") &&

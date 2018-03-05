@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTInit.c,v 1.89 2016/11/24 15:35:29 tom Exp $
+ * $LynxId: HTInit.c,v 1.90 2018/03/05 22:35:07 tom Exp $
  *
  *		Configuration-specific Initialization		HTInit.c
  *		----------------------------------------
@@ -118,7 +118,7 @@ void HTFormatInit(void)
      * The following support some content types seen here/there:
      */
     SET_INTERNL("application/html", "text/x-c", HTMLToC, 0.5);
-    SET_INTERNL("application/html", "text/plain", HTMLToPlain, 0.5);
+    SET_INTERNL("application/html", STR_PLAINTEXT, HTMLToPlain, 0.5);
     SET_INTERNL("application/html", "www/present", HTMLPresent, 2.0);
     SET_INTERNL("application/html", "www/source", HTPlainPresent, 1.0);
     SET_INTERNL("application/xml", "www/present", HTMLPresent, 2.0);
@@ -144,11 +144,11 @@ void HTFormatInit(void)
      * Other internal types, which must precede the "www/present" entries
      * below (otherwise, they will be filtered out in HTFilterPresentations()).
      */
-    SET_INTERNL("text/css", "text/plain", HTMLToPlain, 0.5);
-    SET_INTERNL("text/html", "text/plain", HTMLToPlain, 0.5);
-    SET_INTERNL("text/html", "text/x-c", HTMLToC, 0.5);
-    SET_INTERNL("text/html", "www/source", HTPlainPresent, 1.0);
-    SET_INTERNL("text/plain", "www/source", HTPlainPresent, 1.0);
+    SET_INTERNL("text/css", STR_PLAINTEXT, HTMLToPlain, 0.5);
+    SET_INTERNL(STR_HTML, STR_PLAINTEXT, HTMLToPlain, 0.5);
+    SET_INTERNL(STR_HTML, "text/x-c", HTMLToC, 0.5);
+    SET_INTERNL(STR_HTML, "www/source", HTPlainPresent, 1.0);
+    SET_INTERNL(STR_PLAINTEXT, "www/source", HTPlainPresent, 1.0);
     SET_INTERNL("text/sgml", "www/source", HTPlainPresent, 1.0);
     SET_INTERNL("text/x-sgml", "www/source", HTPlainPresent, 1.0);
 
@@ -180,8 +180,8 @@ void HTFormatInit(void)
      */
     SET_INTERNL("application/xhtml+xml", "www/present", HTMLPresent, 1.0);
     SET_INTERNL("text/css", "www/present", HTPlainPresent, 1.0);
-    SET_INTERNL("text/html", "www/present", HTMLPresent, 1.0);
-    SET_INTERNL("text/plain", "www/present", HTPlainPresent, 1.0);
+    SET_INTERNL(STR_HTML, "www/present", HTMLPresent, 1.0);
+    SET_INTERNL(STR_PLAINTEXT, "www/present", HTPlainPresent, 1.0);
     SET_INTERNL("text/sgml", "www/present", HTMLPresent, 1.0);
     SET_INTERNL("text/x-sgml", "www/present", HTMLPresent, 2.0);
     SET_INTERNL("text/xml", "www/present", HTMLPresent, 2.0);
@@ -217,8 +217,8 @@ void HTPreparsedFormatInit(void)
 {
     CTrace((tfp, "HTPreparsedFormatInit\n"));
     if (LYPreparsedSource) {
-	SET_INTERNL("text/html", "www/source", HTMLParsedPresent, 1.0);
-	SET_INTERNL("text/html", "www/dump", HTMLParsedPresent, 1.0);
+	SET_INTERNL(STR_HTML, "www/source", HTMLParsedPresent, 1.0);
+	SET_INTERNL(STR_HTML, "www/dump", HTMLParsedPresent, 1.0);
     }
 }
 
@@ -413,8 +413,8 @@ static int ProcessMailcapEntry(FILE *fp, struct MailcapEntry *mc, AcceptMedia me
 	return (0);
     }
     *s++ = '\0';
-    if (!strncasecomp(t, "text/html", 9) ||
-	!strncasecomp(t, "text/plain", 10)) {
+    if (!strncasecomp(t, STR_HTML, 9) ||
+	!strncasecomp(t, STR_PLAINTEXT, 10)) {
 	--s;
 	*s = ';';
 	CTrace((tfp, "ProcessMailcapEntry: Ignoring mailcap entry: %s\n",
@@ -1052,8 +1052,8 @@ void HTFileInit(void)
 	CTrace((tfp, "HTFileInit: Loading default (HTInit) extension maps.\n"));
 
 	/* default suffix interpretation */
-	SET_SUFFIX1("*", "text/plain", "8bit");
-	SET_SUFFIX1("*.*", "text/plain", "8bit");
+	SET_SUFFIX1("*", STR_PLAINTEXT, "8bit");
+	SET_SUFFIX1("*.*", STR_PLAINTEXT, "8bit");
 
 #ifdef EXEC_SCRIPTS
 	/*
@@ -1090,7 +1090,7 @@ void HTFileInit(void)
 	SET_SUFFIX1(".AXP_exe", "application/x-Executable",	"binary");
 	SET_SUFFIX1(".VAX-exe", "application/x-Executable",	"binary");
 	SET_SUFFIX1(".VAX_exe", "application/x-Executable",	"binary");
-	SET_SUFFIX5(".exe",	"application/octet-stream",	"binary", "Executable");
+	SET_SUFFIX5(".exe",	STR_BINARY,			"binary", "Executable");
 
 #ifdef TRADITIONAL_SUFFIXES
 	SET_SUFFIX1(".exe.Z",	"application/x-Comp. Executable", "binary");
@@ -1100,7 +1100,7 @@ void HTFileInit(void)
 #else
 	SET_SUFFIX5(".Z",	"application/x-compress",	"binary", "UNIX Compressed");
 	SET_SUFFIX5(".Z",	NULL,				"compress", "UNIX Compressed");
-	SET_SUFFIX5(".exe.Z",	"application/octet-stream",	"compress", "Executable");
+	SET_SUFFIX5(".exe.Z",	STR_BINARY,			"compress", "Executable");
 	SET_SUFFIX5(".tar_Z",	"application/x-tar",		"compress", "UNIX Compr. Tar");
 	SET_SUFFIX5(".tar.Z",	"application/x-tar",		"compress", "UNIX Compr. Tar");
 #endif
@@ -1151,9 +1151,9 @@ void HTFileInit(void)
 
 	SET_SUFFIX5(".hqx",	"application/mac-binhex40",	"8bit", "Mac BinHex");
 
-	HTSetSuffix5(".o",	"application/octet-stream",	"binary", "Prog. Object", 0.5);
-	HTSetSuffix5(".a",	"application/octet-stream",	"binary", "Prog. Library", 0.5);
-	HTSetSuffix5(".so",	"application/octet-stream",	"binary", "Shared Lib", 0.5);
+	HTSetSuffix5(".o",	STR_BINARY,			"binary", "Prog. Object", 0.5);
+	HTSetSuffix5(".a",	STR_BINARY,			"binary", "Prog. Library", 0.5);
+	HTSetSuffix5(".so",	STR_BINARY,			"binary", "Shared Lib", 0.5);
 #endif
 
 	SET_SUFFIX5(".oda",	"application/oda",		"binary", "ODA");
@@ -1210,19 +1210,19 @@ void HTFileInit(void)
 	SET_SUFFIX1(".bkp",	"application/x-VMS BAK File",	"binary");
 	SET_SUFFIX1(".bck",	"application/x-VMS BAK File",	"binary");
 
-	SET_SUFFIX5(".bkp_gz",	"application/octet-stream",	"gzip", "GNU BAK File");
-	SET_SUFFIX5(".bkp-gz",	"application/octet-stream",	"gzip", "GNU BAK File");
-	SET_SUFFIX5(".bck_gz",	"application/octet-stream",	"gzip", "GNU BAK File");
-	SET_SUFFIX5(".bck-gz",	"application/octet-stream",	"gzip", "GNU BAK File");
+	SET_SUFFIX5(".bkp_gz",	STR_BINARY,			"gzip", "GNU BAK File");
+	SET_SUFFIX5(".bkp-gz",	STR_BINARY,			"gzip", "GNU BAK File");
+	SET_SUFFIX5(".bck_gz",	STR_BINARY,			"gzip", "GNU BAK File");
+	SET_SUFFIX5(".bck-gz",	STR_BINARY,			"gzip", "GNU BAK File");
 
-	SET_SUFFIX5(".bkp-Z",	"application/octet-stream",	"compress", "Comp. BAK File");
-	SET_SUFFIX5(".bkp_Z",	"application/octet-stream",	"compress", "Comp. BAK File");
-	SET_SUFFIX5(".bck-Z",	"application/octet-stream",	"compress", "Comp. BAK File");
-	SET_SUFFIX5(".bck_Z",	"application/octet-stream",	"compress", "Comp. BAK File");
+	SET_SUFFIX5(".bkp-Z",	STR_BINARY,			"compress", "Comp. BAK File");
+	SET_SUFFIX5(".bkp_Z",	STR_BINARY,			"compress", "Comp. BAK File");
+	SET_SUFFIX5(".bck-Z",	STR_BINARY,			"compress", "Comp. BAK File");
+	SET_SUFFIX5(".bck_Z",	STR_BINARY,			"compress", "Comp. BAK File");
 #else
 	HTSetSuffix5(".bak",	NULL,				"binary", "Backup", 0.5);
-	SET_SUFFIX5(".bkp",	"application/octet-stream",	"binary", "VMS BAK File");
-	SET_SUFFIX5(".bck",	"application/octet-stream",	"binary", "VMS BAK File");
+	SET_SUFFIX5(".bkp",	STR_BINARY,			"binary", "VMS BAK File");
+	SET_SUFFIX5(".bck",	STR_BINARY,			"binary", "VMS BAK File");
 #endif
 
 #if defined(TRADITIONAL_SUFFIXES) || defined(VMS)
@@ -1233,11 +1233,11 @@ void HTFileInit(void)
 	SET_SUFFIX1(".decw$book", "application/x-DEC BookReader", "binary");
 	SET_SUFFIX1(".mem",	"application/x-RUNOFF-MANUAL", "8bit");
 #else
-	SET_SUFFIX5(".hlb",	"application/octet-stream",	"binary", "VMS Help Libr.");
-	SET_SUFFIX5(".olb",	"application/octet-stream",	"binary", "VMS Obj. Libr.");
-	SET_SUFFIX5(".tlb",	"application/octet-stream",	"binary", "VMS Text Libr.");
-	SET_SUFFIX5(".obj",	"application/octet-stream",	"binary", "Prog. Object");
-	SET_SUFFIX5(".decw$book", "application/octet-stream",	"binary", "DEC BookReader");
+	SET_SUFFIX5(".hlb",	STR_BINARY,			"binary", "VMS Help Libr.");
+	SET_SUFFIX5(".olb",	STR_BINARY,			"binary", "VMS Obj. Libr.");
+	SET_SUFFIX5(".tlb",	STR_BINARY,			"binary", "VMS Text Libr.");
+	SET_SUFFIX5(".obj",	STR_BINARY,			"binary", "Prog. Object");
+	SET_SUFFIX5(".decw$book", STR_BINARY,			"binary", "DEC BookReader");
 	SET_SUFFIX5(".mem",	"text/x-runoff-manual",		"8bit", "RUNOFF-MANUAL");
 #endif
 
@@ -1320,25 +1320,25 @@ void HTFileInit(void)
 
 	SET_SUFFIX1(".mime",	"message/rfc822",		"8bit");
 
-	SET_SUFFIX1(".c",	"text/plain",			"8bit");
-	SET_SUFFIX1(".cc",	"text/plain",			"8bit");
-	SET_SUFFIX1(".c++",	"text/plain",			"8bit");
-	SET_SUFFIX1(".css",	"text/plain",			"8bit");
-	SET_SUFFIX1(".h",	"text/plain",			"8bit");
-	SET_SUFFIX1(".pl",	"text/plain",			"8bit");
-	SET_SUFFIX1(".text",	"text/plain",			"8bit");
-	SET_SUFFIX1(".txt",	"text/plain",			"8bit");
+	SET_SUFFIX1(".c",	STR_PLAINTEXT,			"8bit");
+	SET_SUFFIX1(".cc",	STR_PLAINTEXT,			"8bit");
+	SET_SUFFIX1(".c++",	STR_PLAINTEXT,			"8bit");
+	SET_SUFFIX1(".css",	STR_PLAINTEXT,			"8bit");
+	SET_SUFFIX1(".h",	STR_PLAINTEXT,			"8bit");
+	SET_SUFFIX1(".pl",	STR_PLAINTEXT,			"8bit");
+	SET_SUFFIX1(".text",	STR_PLAINTEXT,			"8bit");
+	SET_SUFFIX1(".txt",	STR_PLAINTEXT,			"8bit");
 
-	SET_SUFFIX1(".php",	"text/html",			"8bit");
-	SET_SUFFIX1(".php3",	"text/html",			"8bit");
-	SET_SUFFIX1(".html3",	"text/html",			"8bit");
-	SET_SUFFIX1(".ht3",	"text/html",			"8bit");
-	SET_SUFFIX1(".phtml",	"text/html",			"8bit");
-	SET_SUFFIX1(".shtml",	"text/html",			"8bit");
-	SET_SUFFIX1(".sht",	"text/html",			"8bit");
-	SET_SUFFIX1(".htmlx",	"text/html",			"8bit");
-	SET_SUFFIX1(".htm",	"text/html",			"8bit");
-	SET_SUFFIX1(".html",	"text/html",			"8bit");
+	SET_SUFFIX1(".php",	STR_HTML,			"8bit");
+	SET_SUFFIX1(".php3",	STR_HTML,			"8bit");
+	SET_SUFFIX1(".html3",	STR_HTML,			"8bit");
+	SET_SUFFIX1(".ht3",	STR_HTML,			"8bit");
+	SET_SUFFIX1(".phtml",	STR_HTML,			"8bit");
+	SET_SUFFIX1(".shtml",	STR_HTML,			"8bit");
+	SET_SUFFIX1(".sht",	STR_HTML,			"8bit");
+	SET_SUFFIX1(".htmlx",	STR_HTML,			"8bit");
+	SET_SUFFIX1(".htm",	STR_HTML,			"8bit");
+	SET_SUFFIX1(".html",	STR_HTML,			"8bit");
 	/* *INDENT-ON* */
 
     } else {			/* LYSuffixRules */
@@ -1362,8 +1362,8 @@ void HTFileInit(void)
      * in a lynx.cfg or mime.types file to be usable for local HTML files at
      * all.  That includes many of the generated user interface pages.  - kw
      */
-    SET_SUFFIX1(".htm", "text/html", "8bit");
-    SET_SUFFIX1(".html", "text/html", "8bit");
+    SET_SUFFIX1(".htm", STR_HTML, "8bit");
+    SET_SUFFIX1(".html", STR_HTML, "8bit");
 #endif /* BUILTIN_SUFFIX_MAPS */
 
     if (LYisAbsPath(global_extension_map)) {

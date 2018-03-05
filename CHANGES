@@ -1,9 +1,14 @@
--- $LynxId: CHANGES,v 1.941 2018/03/03 15:23:29 tom Exp $
+-- $LynxId: CHANGES,v 1.942 2018/03/05 22:48:35 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2018-03-02 (2.8.9dev.17)
+2018-03-05 (2.8.9dev.17)
+* add PREFERRED_CONTENT_TYPE defaulting to text/plain and options-menu to
+  replace an assumption in HTMIMEConvert that everything is text/html.
+  Since most servers provide a valid Content-Type for HTML, and are more likely
+  to omit it for files lacking a known suffix, defaulting to text/plain is a
+  better choice -TD
 * remove dead-code for OMIT_SCN_KEEPING -TD
 * remove dead/unreachable pretty-source code in HTML.c, noticed because
   it complicates hashing -TD

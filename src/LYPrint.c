@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYPrint.c,v 1.105 2014/08/24 10:41:17 tom Exp $
+ * $LynxId: LYPrint.c,v 1.106 2018/03/05 22:38:53 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTAccess.h>
@@ -153,7 +153,7 @@ static void SetupFilename(bstring **filename,
 	&& (cp = strrchr((*filename)->str, '.')) != NULL) {
 	format = HTFileFormat((*filename)->str, &encoding, NULL);
 	CTRACE((tfp, "... format %s\n", format->name));
-	if (!strcasecomp(format->name, "text/html") ||
+	if (!strcasecomp(format->name, STR_HTML) ||
 	    !IsUnityEnc(encoding)) {
 	    (*filename)->len = (int) (cp - (*filename)->str);
 	    BStrCat0(*filename, TEXT_SUFFIX);
@@ -437,7 +437,8 @@ static void send_file_to_file(DocInfo *newdoc,
 	    strncasecomp(disp_charset, "x-", 2) == 0) {
 	} else {
 	    fprintf(outfile_fp,
-		    "<META HTTP-EQUIV=\"Content-Type\" CONTENT=\"text/html; charset=%s\">\n\n",
+		    "<META HTTP-EQUIV=\"Content-Type\" CONTENT=\"" STR_HTML
+		    "; charset=%s\">\n\n",
 		    disp_charset);
 	}
     }
@@ -592,7 +593,7 @@ static void send_file_to_mail(DocInfo *newdoc,
 	     * Add Content-Type, Content-Location, and Content-Base headers for
 	     * HTML source.  - FM
 	     */
-	    fprintf(hfd, "Content-Type: text/html");
+	    fprintf(hfd, "Content-Type: " STR_HTML);
 	    if (disp_charset != NULL) {
 		fprintf(hfd, "; charset=%s\n", disp_charset);
 	    } else {
@@ -607,7 +608,7 @@ static void send_file_to_mail(DocInfo *newdoc,
 	     */
 	    if (disp_charset != NULL) {
 		fprintf(hfd,
-			"Content-Type: text/plain; charset=%s\n",
+			"Content-Type: " STR_PLAINTEXT "; charset=%s\n",
 			disp_charset);
 	    }
 	}
@@ -733,7 +734,7 @@ static void send_file_to_mail(DocInfo *newdoc,
 	 * Add Content-Type, Content-Location, and Content-Base headers for
 	 * HTML source.  - FM
 	 */
-	fprintf(outfile_fp, "Content-Type: text/html");
+	fprintf(outfile_fp, "Content-Type: " STR_HTML);
 	if (disp_charset != NULL) {
 	    fprintf(outfile_fp, "; charset=%s\n", disp_charset);
 	} else {
@@ -746,7 +747,7 @@ static void send_file_to_mail(DocInfo *newdoc,
 	 */
 	if (disp_charset != NULL) {
 	    fprintf(outfile_fp,
-		    "Content-Type: text/plain; charset=%s\n",
+		    "Content-Type: " STR_PLAINTEXT "; charset=%s\n",
 		    disp_charset);
 	}
     }

@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTMIME.c,v 1.95 2017/07/02 19:40:06 tom Exp $
+ * $LynxId: HTMIME.c,v 1.97 2018/03/05 10:21:10 tom Exp $
  *
  *			MIME Message Parse			HTMIME.c
  *			==================
@@ -32,6 +32,7 @@
 #include <LYCharUtils.h>
 #include <LYStrings.h>
 #include <LYUtils.h>
+#include <LYGlobalDefs.h>
 #include <LYLeaks.h>
 
 /*		MIME Object
@@ -2165,6 +2166,7 @@ HTStream *HTMIMEConvert(HTPresentation *pres,
 {
     HTStream *me;
 
+    CTRACE((tfp, "HTMIMEConvert\n"));
     me = typecalloc(HTStream);
 
     if (me == NULL)
@@ -2197,27 +2199,8 @@ HTStream *HTMIMEConvert(HTPresentation *pres,
     FREE(me->anchor->server);
     me->target = NULL;
     me->state = miBEGINNING_OF_LINE;
-    /*
-     * Sadly enough, change this to always default to WWW_HTML to parse all
-     * text as HTML for the users.
-     * GAB 06-30-94
-     * Thanks to Robert Rowland robert@cyclops.pei.edu
-     *
-     * After discussion of the correct handline, should be application/octet-
-     * stream or unknown; causing servers to send a correct content type.
-     *
-     * The consequence of using WWW_UNKNOWN is that you end up downloading as a
-     * binary file what 99.9% of the time is an HTML file, which should have
-     * been rendered or displayed.  So sadly enough, I'm changing it back to
-     * WWW_HTML, and it will handle the situation like Mosaic does, and as
-     * Robert Rowland suggested, because being functionally correct 99.9% of
-     * the time is better than being technically correct but functionally
-     * nonsensical.  - FM
-     */
-    /***
-    me->format	  =	WWW_UNKNOWN;
-    ***/
-    me->format = WWW_HTML;
+    me->format = HTAtom_for(ContentTypes[LYContentType]);
+    CTRACE((tfp, "default Content-Type is %s\n", HTAtom_name(me->format)));
     me->targetRep = pres->rep_out;
     me->boundary = NULL;	/* Not set yet */
     me->set_cookie = NULL;	/* Not set yet */

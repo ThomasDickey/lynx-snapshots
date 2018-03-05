@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMainLoop.c,v 1.238 2018/03/01 22:20:33 Takeshi.Hataguchi Exp $
+ * $LynxId: LYMainLoop.c,v 1.239 2018/03/05 22:38:53 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTAccess.h>
@@ -6440,7 +6440,7 @@ int mainloop(void)
 			HTAtom *encoding;
 
 			if (HTFileFormat(temp, &encoding, NULL) != WWW_HTML) {
-			    HTSetSuffix(temp, "text/html", "8bit", 1.0);
+			    HTSetSuffix(temp, STR_HTML, "8bit", 1.0);
 			}
 		    }
 		    if ((cp = strrchr(temp, '/')) != NULL) {
@@ -8080,7 +8080,8 @@ static void exit_immediately_with_error_message(int state, int first_file)
     if (state == NULLFILE) {
 	HTSprintf0(&buf, "%s\n%s\n%s\n",
 		   NonNull(buf2),
-		   gettext("lynx: Start file could not be found or is not text/html or text/plain"),
+		   gettext("lynx: Start file could not be found or is not "
+			   STR_HTML " or " STR_PLAINTEXT),
 		   gettext("      Exiting..."));
     }
 

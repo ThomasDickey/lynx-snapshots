@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYGlobalDefs.h,v 1.142 2017/07/03 23:10:31 tom Exp $
+ * $LynxId: LYGlobalDefs.h,v 1.143 2018/03/05 09:49:59 tom Exp $
  *
  * global variable definitions
  */
@@ -300,6 +300,8 @@ extern "C" {
 
     extern int LYAcceptEncoding;
     extern int LYAcceptMedia;
+    extern int LYContentType;
+    extern const char *ContentTypes[];
     extern int LYTransferRate;	/* see enum TransferRate */
     extern int display_lines;	/* number of lines in the display */
     extern int dump_output_width;
