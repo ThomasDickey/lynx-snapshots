@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTML.c,v 1.180 2018/03/03 15:23:54 tom Exp $
+ * $LynxId: HTML.c,v 1.186 2018/03/05 00:03:30 tom Exp $
  *
  *		Structured stream to Rich hypertext converter
  *		============================================
@@ -946,8 +946,9 @@ static int HTML_start_element(HTStructured * me, int element_number,
     int status = HT_OK;
 
 #ifdef USE_COLOR_STYLE
-    char *class_name;
-    int class_used = 0;
+    const char *class_name;
+    const char *prefix_string;
+    BOOL class_used = FALSE;
 #endif
 
     if (LYMapsOnly) {
@@ -981,7 +982,7 @@ static int HTML_start_element(HTStructured * me, int element_number,
     force_classname = FALSE;
 
     if (force_current_tag_style == FALSE) {
-	current_tag_style = (class_name[0]
+	current_tag_style = (non_empty(class_name)
 			     ? -1
 			     : cached_tag_styles[element_number]);
     } else {
@@ -990,16 +991,17 @@ static int HTML_start_element(HTStructured * me, int element_number,
 
     CTRACE2(TRACE_STYLE, (tfp, "CSS.elt:<%s>\n", HTML_dtd.tags[element_number].name));
 
+    prefix_string = "";
     if (current_tag_style == -1) {	/* Append class_name */
-	hcode = hash_code_caseless(HTML_dtd.tags[element_number].name);
-	if (class_name[0]) {
+	hcode = hash_code_1(HTML_dtd.tags[element_number].name);
+	if (non_empty(class_name)) {
 	    int ohcode = hcode;
 
-	    hcode = hash_code_aggregate(HTML_dtd.tags[element_number].name,
-					".",
-					class_name);
+	    prefix_string = HTML_dtd.tags[element_number].name;
+	    hcode = hash_code_3(prefix_string, ".", class_name);
 	    if (!hashStyles[hcode].name) {	/* None such -> classless version */
 		hcode = ohcode;
+		prefix_string = "";
 		CTRACE2(TRACE_STYLE,
 			(tfp,
 			 "STYLE.start_element: <%s> (class <%s> not configured), hcode=%d.\n",
@@ -1009,19 +1011,22 @@ static int HTML_start_element(HTStructured * me, int element_number,
 
 		CTRACE2(TRACE_STYLE,
 			(tfp, "STYLE.start_element: <%s>.<%s>, hcode=%d.\n",
-			 HTML_dtd.tags[element_number].name, class_name, hcode));
-		class_used = 1;
+			 prefix_string, class_name, hcode));
+		class_used = TRUE;
 	    }
 	}
 
 	class_string[0] = '\0';
 
     } else {			/* (current_tag_style!=-1)  */
-	if (class_name[0]) {
+	if (non_empty(class_name)) {
 	    addClassName(".", class_name, strlen(class_name));
 	    class_string[0] = '\0';
 	}
 	hcode = current_tag_style;
+	if (hcode >= 0 && hashStyles[hcode].name) {
+	    prefix_string = hashStyles[hcode].name;
+	}
 	CTRACE2(TRACE_STYLE,
 		(tfp, "STYLE.start_element: <%s>, hcode=%d.\n",
 		 HTML_dtd.tags[element_number].name, hcode));
@@ -1035,8 +1040,7 @@ static int HTML_start_element(HTStructured * me, int element_number,
 	if (present && present[HTML_INPUT_TYPE] && value[HTML_INPUT_TYPE])
 	    type = value[HTML_INPUT_TYPE];
 
-	hcode = hash_code_aggregate_lower_str(".type.", hcode);
-	hcode = hash_code_aggregate_lower_str(type, hcode);
+	hcode = hash_code_3(prefix_string, ".type.", type);
 	if (!hashStyles[hcode].name) {	/* None such -> classless version */
 	    hcode = ohcode;
 	    CTRACE2(TRACE_STYLE,
@@ -1443,17 +1447,19 @@ static int HTML_start_element(HTStructured * me, int element_number,
 	    if (present && present[HTML_LINK_CLASS] &&
 		non_empty(value[HTML_LINK_CLASS])) {
 		char *tmp = 0;
+		int hcode2;
 
 		HTSprintf0(&tmp, "link.%s.%s", value[HTML_LINK_CLASS], title);
+		hcode2 = hash_code_1(tmp);
 		CTRACE2(TRACE_STYLE,
 			(tfp, "STYLE.link: using style <%s>\n", tmp));
 
-		HText_characterStyle(me->text, hash_code(tmp), STACK_ON);
+		HText_characterStyle(me->text, hcode2, STACK_ON);
 		HTML_put_string(me, title);
 		HTML_put_string(me, " (");
 		HTML_put_string(me, value[HTML_LINK_CLASS]);
 		HTML_put_string(me, ")");
-		HText_characterStyle(me->text, hash_code(tmp), STACK_OFF);
+		HText_characterStyle(me->text, hcode2, STACK_OFF);
 		FREE(tmp);
 	    } else
 #endif
@@ -7486,7 +7492,11 @@ HTStructured *HTML_new(HTParentAnchor *anchor,
 
     HTStructured *me;
 
-    CTRACE((tfp, "start HTML_new\n"));
+    CTRACE((tfp, "start HTML_new(parent %s, format %s)\n",
+	    ((anchor)
+	     ? NONNULL(anchor->address)
+	     : "<NULL>"),
+	    HTAtom_name(format_out)));
 
     if (format_out != WWW_PLAINTEXT && format_out != WWW_PRESENT) {
 	HTStream *intermediate = HTStreamStack(WWW_HTML, format_out,
