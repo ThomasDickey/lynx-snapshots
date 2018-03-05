@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTMLGen.c,v 1.41 2016/11/24 15:29:50 tom Exp $
+ * $LynxId: HTMLGen.c,v 1.42 2018/03/04 20:04:55 tom Exp $
  *
  *		HTML Generator
  *		==============
@@ -338,7 +338,7 @@ static int HTMLGen_start_element(HTStructured * me, int element_number,
 	}
 	class_string[0] = '\0';
 	strtolower(myHash);
-	hcode = hash_code(myHash);
+	hcode = hash_code_1(myHash);
 	strtolower(Style_className);
 
 	if (TRACE_STYLE) {
@@ -351,7 +351,7 @@ static int HTMLGen_start_element(HTStructured * me, int element_number,
 		    int hcd;
 
 		    *rp = '\0';	/* trim the class */
-		    hcd = hash_code(myHash);
+		    hcd = hash_code_1(myHash);
 		    fprintf(tfp, "CSS:%s -> %d", myHash, hcd);
 		    if (hashStyles[hcd].code != hcd)
 			fprintf(tfp, " (undefined) %s\n", myHash);
@@ -409,7 +409,7 @@ static int HTMLGen_start_element(HTStructured * me, int element_number,
 				(tfp, "CSSTRIM:link=%s\n", title_tmp));
 
 			do_cstyle_flush(me);
-			HText_characterStyle(me->text, hash_code(title_tmp), 1);
+			HText_characterStyle(me->text, hash_code_1(title_tmp), 1);
 		    }
 		}
 #endif
@@ -450,7 +450,7 @@ static int HTMLGen_start_element(HTStructured * me, int element_number,
 	     */
 	    if (title && *title) {
 		do_cstyle_flush(me);
-		HText_characterStyle(me->text, hash_code(title_tmp), 0);
+		HText_characterStyle(me->text, hash_code_1(title_tmp), 0);
 		FREE(title_tmp);
 	    }
 	    FREE(title);

@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYStyle.c,v 1.99 2018/03/03 15:20:46 tom Exp $
+ * $LynxId: LYStyle.c,v 1.101 2018/03/04 19:54:30 tom Exp $
  *
  * character level styles for Lynx
  * (c) 1996 Rob Partington -- donated to the Lyncei (if they want it :-)
@@ -185,7 +185,7 @@ static void parse_attributes(const char *mono,
     int fA = default_fg;
     int bA = default_bg;
     int cA = A_NORMAL;
-    int newstyle = hash_code(element);
+    int newstyle = hash_code_1(element);
     int colored_attr;
 
     CTRACE2(TRACE_STYLE, (tfp, "CSS(PA):style d=%d / h=%d, e=%s\n",
@@ -359,8 +359,8 @@ where OBJECT is one of EM,STRONG,B,I,U,BLINK etc.\n\n"), buffer);
     }
 
     CTRACE2(TRACE_STYLE, (tfp, "CSSPARSE:%s => %d %s\n",
-			  element, hash_code(element),
-			  (hashStyles[hash_code(element)].name ? "used" : "")));
+			  element, hash_code_1(element),
+			  (hashStyles[hash_code_1(element)].name ? "used" : "")));
 
     /*
      * We use some pseudo-elements, so catch these first
@@ -369,7 +369,7 @@ where OBJECT is one of EM,STRONG,B,I,U,BLINK etc.\n\n"), buffer);
 	if (!strcasecomp(element, table[n].name)) {
 	    parse_attributes(mono, fg, bg, table[n].style, table[n].name);
 	    if (table[n].set_hash != 0)
-		*(table[n].set_hash) = hash_code(table[n].name);
+		*(table[n].set_hash) = hash_code_1(table[n].name);
 	    found = TRUE;
 	    break;
 	}
@@ -379,7 +379,7 @@ where OBJECT is one of EM,STRONG,B,I,U,BLINK etc.\n\n"), buffer);
 	if (!strcasecomp(element, "normal")) {
 	    /* added - kw */
 	    parse_attributes(mono, fg, bg, DSTYLE_NORMAL, "html");
-	    s_normal = hash_code("html");	/* rather bizarre... - kw */
+	    s_normal = hash_code_1("html");	/* rather bizarre... - kw */
 
 	    LYnormalColor();
 	}
@@ -453,16 +453,16 @@ static void style_initialiseHashTable(void)
 	atexit(free_colorstyle_leaks);
 #endif
     }
-    s_alink = hash_code("alink");
-    s_a = hash_code("a");
-    s_status = hash_code("status");
-    s_alert = hash_code("alert");
-    s_title = hash_code("title");
+    s_alink = hash_code_1("alink");
+    s_a = hash_code_1("a");
+    s_status = hash_code_1("status");
+    s_alert = hash_code_1("alert");
+    s_title = hash_code_1("title");
 #ifdef USE_SCROLLBAR
-    s_sb_bar = hash_code("scroll.bar");
-    s_sb_bg = hash_code("scroll.back");
-    s_sb_aa = hash_code("scroll.arrow");
-    s_sb_naa = hash_code("scroll.noarrow");
+    s_sb_bar = hash_code_1("scroll.bar");
+    s_sb_bg = hash_code_1("scroll.back");
+    s_sb_aa = hash_code_1("scroll.arrow");
+    s_sb_naa = hash_code_1("scroll.noarrow");
 #endif
 }
 
@@ -707,7 +707,7 @@ void TrimColorClass(const char *tagname,
 	if (end)
 	    *end = '\0';
     }
-    *phcode = hash_code(lookfrom && *lookfrom ? lookfrom : &tmp[1]);
+    *phcode = hash_code_1(lookfrom && *lookfrom ? lookfrom : &tmp[1]);
 }
 
 /* This function is designed as faster analog to TrimColorClass.
@@ -738,7 +738,7 @@ void FastTrimColorClass(const char *tag_name,
 	*pstylename_end = tag_start;
     }
     CTRACE2(TRACE_STYLE, (tfp, found ? "success.\n" : "failed.\n"));
-    *phcode = hash_code(tag_start + 1);
+    *phcode = hash_code_1(tag_start + 1);
 }
 
 /* This is called each time lss styles are read. It will fill
@@ -746,13 +746,10 @@ void FastTrimColorClass(const char *tag_name,
  */
 void cache_tag_styles(void)
 {
-    char buf[200];
     int i;
 
     for (i = 0; i < HTML_ELEMENTS; ++i) {
-	LYStrNCpy(buf, HTML_dtd.tags[i].name, sizeof(buf) - 1);
-	LYLowerCase(buf);
-	cached_tag_styles[i] = hash_code(buf);
+	cached_tag_styles[i] = hash_code_1(HTML_dtd.tags[i].name);
     }
 }
 

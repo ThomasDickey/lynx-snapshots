@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYPrettySrc.c,v 1.32 2018/03/03 01:42:11 tom Exp $
+ * $LynxId: LYPrettySrc.c,v 1.34 2018/03/04 19:48:49 tom Exp $
  *
  * HTML source syntax highlighting
  * by Vlad Harchev <hvv@hippo.ru>
@@ -76,7 +76,7 @@ HT_tagspec *lexeme_end[HTL_num_lexemes];
 int tagname_transform = 2;
 int attrname_transform = 2;
 
-static int html_src_tag_index(char *tagname)
+static int html_src_tag_index(const char *tagname)
 {
     HTTag *tag = SGMLFindTag(&HTML_dtd, tagname);
 
@@ -90,7 +90,7 @@ typedef enum {
     HTSRC_CK_seen_dot
 } html_src_check_state;
 
-static void append_close_tag(char *tagname,
+static void append_close_tag(const char *tagname,
 			     HT_tagspec ** head,
 			     HT_tagspec ** tail)
 {
@@ -140,8 +140,8 @@ static void append_close_tag(char *tagname,
 
 /* this will allocate node, initialize all members, and node
    append to the list, possibly modifying head and modifying tail */
-static void append_open_tag(char *tagname,
-			    char *classname GCC_UNUSED,
+static void append_open_tag(const char *tagname,
+			    const char *classname GCC_UNUSED,
 			    HT_tagspec ** head,
 			    HT_tagspec ** tail)
 {
@@ -157,10 +157,10 @@ static void append_open_tag(char *tagname,
 
 #ifdef USE_COLOR_STYLE
     if (non_empty(classname)) {
-	hcode = hash_code_aggregate(tagname, ".", classname);
+	hcode = hash_code_3(tagname, ".", classname);
 	StrAllocCopy(subj->class_name, classname);
     } else {
-	hcode = hash_code_caseless(tagname);
+	hcode = hash_code_1(tagname);
 	StrAllocCopy(subj->class_name, "");
     }
     subj->style = hcode;

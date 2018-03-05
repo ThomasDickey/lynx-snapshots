@@ -1,4 +1,4 @@
-/* $LynxId: LYCurses.c,v 1.187 2018/03/03 15:20:19 tom Exp $ */
+/* $LynxId: LYCurses.c,v 1.188 2018/03/04 20:00:33 tom Exp $ */
 #include <HTUtils.h>
 #include <HTAlert.h>
 
@@ -544,7 +544,7 @@ void wcurses_css(WINDOW * win, char *name,
     int try_again = 1;
 
     while (try_again) {
-	int tmpHash = hash_code(name);
+	int tmpHash = hash_code_1(name);
 
 	CTRACE2(TRACE_STYLE, (tfp, "CSSTRIM:trying to set [%s] style - ", name));
 	if (tmpHash == NOSTYLE) {
@@ -556,8 +556,8 @@ void wcurses_css(WINDOW * win, char *name,
 	    else
 		try_again = 0;
 	} else {
-	    CTRACE2(TRACE_STYLE, (tfp, "ok (%d)\n", hash_code(name)));
-	    curses_w_style(win, hash_code(name), dir);
+	    CTRACE2(TRACE_STYLE, (tfp, "ok (%d)\n", tmpHash));
+	    curses_w_style(win, tmpHash, dir);
 	    try_again = 0;
 	}
     }

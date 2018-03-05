@@ -1,4 +1,4 @@
-/* $LynxId: LYHash.h,v 1.31 2018/03/03 15:20:39 tom Exp $ */
+/* $LynxId: LYHash.h,v 1.34 2018/03/04 20:02:45 tom Exp $ */
 #ifndef _LYHASH_H_
 #define _LYHASH_H_ 1
 
@@ -23,16 +23,11 @@ extern "C" {
 
 #define NOSTYLE -1
 
-    /* hashStyles[] is used in CTRACE when NOSTYLE is passed as 'style' to
-     * curses_w_style
-     */
     extern bucket hashStyles[CSHASHSIZE];
-    extern int hash_code(const char *string);
     extern bucket *nostyle_bucket(void);
 
-    extern int hash_code_caseless(const char *string);
-    extern int hash_code_aggregate(const char *p, const char *q, const char *r);
-    extern int hash_code_aggregate_lower_str(const char *c, int hash_was);
+    extern int hash_code_1(const char *string);
+    extern int hash_code_3(const char *p, const char *q, const char *r);
 
     extern int s_a;
     extern int s_aedit;
