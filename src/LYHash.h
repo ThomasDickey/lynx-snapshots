@@ -1,4 +1,4 @@
-/* $LynxId: LYHash.h,v 1.34 2018/03/04 20:02:45 tom Exp $ */
+/* $LynxId: LYHash.h,v 1.38 2018/03/06 23:28:12 tom Exp $ */
 #ifndef _LYHASH_H_
 #define _LYHASH_H_ 1
 
@@ -11,23 +11,21 @@ extern "C" {
 #endif
     typedef struct {
 	char *name;		/* name of this item */
-	int code;		/* code of this item */
+	BOOL used;		/* color/attributes have been assigned */
 	int color;		/* color highlighting to be done */
 	int mono;		/* mono highlighting to be done */
 	int cattr;		/* attributes to go with the color */
     } bucket;
 
-#ifndef CSHASHSIZE
 #define CSHASHSIZE 9973		/* Arbitrary prime.  Memory/speed tradeoff */
-#endif
 
 #define NOSTYLE -1
 
     extern bucket hashStyles[CSHASHSIZE];
     extern bucket *nostyle_bucket(void);
 
-    extern int hash_code_1(const char *string);
-    extern int hash_code_3(const char *p, const char *q, const char *r);
+    extern int color_style_1(const char *string);
+    extern int color_style_3(const char *p, const char *q, const char *r);
 
     extern int s_a;
     extern int s_aedit;

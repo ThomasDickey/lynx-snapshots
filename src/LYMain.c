@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMain.c,v 1.270 2018/03/05 22:32:14 tom Exp $
+ * $LynxId: LYMain.c,v 1.272 2018/03/07 22:18:43 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTP.h>
@@ -757,6 +757,9 @@ static void free_lynx_globals(void)
 {
     int i;
 
+#if defined(USE_COLOR_STYLE)
+    clear_lss_list();
+#endif
     FREE(ftp_format);
 #ifndef VMS
     FREE(list_format);
@@ -850,6 +853,8 @@ static void free_lynx_globals(void)
     FREE(LYTraceLogPath);
     FREE(lynx_cfg_file);
     FREE(SSL_cert_file);
+    FREE(SSL_client_cert_file);
+    FREE(SSL_client_key_file);
 #if defined(USE_COLOR_STYLE)
     FREE(lynx_lss_file2);
     FREE(lynx_lss_file);

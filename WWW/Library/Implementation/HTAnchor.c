@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTAnchor.c,v 1.78 2018/03/02 22:01:24 tom Exp $
+ * $LynxId: HTAnchor.c,v 1.80 2018/03/06 09:34:12 tom Exp $
  *
  *	Hypertext "Anchor" Object				HTAnchor.c
  *	==========================
@@ -31,29 +31,15 @@
 #include <LYUtils.h>
 #include <LYLeaks.h>
 
-#define HASH_TYPE unsigned short
+#define HASH_OF(h, v) ((HASH_TYPE)((h) * 3 + UCH(v)) % HASH_SIZE)
 
-#ifdef NOT_DEFINED
-/*
- *	This is the hashing function used to determine which list in the
- *		adult_table a parent anchor should be put in.  This is a
- *		much simpler function than the original used.
- */
-#define HASH_FUNCTION(cp_address) \
-	( (HASH_TYPE)strlen(cp_address) *\
-	  (HASH_TYPE)TOUPPER(*cp_address) % HASH_SIZE )
-#endif /* NOT_DEFINED */
-
-/*
- *	This is the original function.	We'll use it again. - FM
- */
-static HASH_TYPE HASH_FUNCTION(const char *cp_address)
+static HASH_TYPE anchor_hash(const char *cp_address)
 {
     HASH_TYPE hash;
-    const unsigned char *p;
+    const char *p;
 
-    for (p = (const unsigned char *) cp_address, hash = 0; *p; p++)
-	hash = (HASH_TYPE) (hash * 3 + (*(const unsigned char *) p)) % HASH_SIZE;
+    for (p = cp_address, hash = 0; *p; p++)
+	hash = HASH_OF(hash, *p);
 
     return (hash);
 }
@@ -446,7 +432,7 @@ static HTParentAnchor0 *HTAnchor_findAddress_in_adult_table(const DocAddress *ne
     /*
      * Select list from hash table,
      */
-    hash = HASH_FUNCTION(newdoc->address);
+    hash = anchor_hash(newdoc->address);
     adults = &(adult_table[hash]);
 
     /*

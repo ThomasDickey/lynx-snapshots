@@ -1,4 +1,4 @@
-/* $LynxId: LYCurses.c,v 1.188 2018/03/04 20:00:33 tom Exp $ */
+/* $LynxId: LYCurses.c,v 1.191 2018/03/07 10:02:01 tom Exp $ */
 #include <HTUtils.h>
 #include <HTAlert.h>
 
@@ -417,12 +417,10 @@ void setHashStyle(int style,
 	    (tfp, "CSS(SET): <%s> hash=%d, ca=%#x, ma=%#x\n",
 	     element, style, color, mono));
 
+    ds->used = TRUE;
     ds->color = color;
     ds->cattr = cattr;
     ds->mono = mono;
-    ds->code = style;
-    FREE(ds->name);
-    StrAllocCopy(ds->name, element);
 }
 
 /*
@@ -468,16 +466,16 @@ void curses_w_style(WINDOW * win, int style,
 	break;
     }
 
-    if (!ds->name) {
+    if (!ds->used) {
 	CTRACE2(TRACE_STYLE, (tfp, "CSS.CS:Style %d not configured\n", style));
 	if (free_ds)
 	    free(ds);
 	return;
     }
 
-    CTRACE2(TRACE_STYLE, (tfp, "CSS.CS:<%s%s> style %d code %#x, color %#x\n",
+    CTRACE2(TRACE_STYLE, (tfp, "CSS.CS:<%s%s> style %d color %#x\n",
 			  (dir ? "" : "/"),
-			  ds->name, style, ds->code, ds->color));
+			  ds->name, style, ds->color));
 
     getyx(win, YP, XP);
 
@@ -544,7 +542,7 @@ void wcurses_css(WINDOW * win, char *name,
     int try_again = 1;
 
     while (try_again) {
-	int tmpHash = hash_code_1(name);
+	int tmpHash = color_style_1(name);
 
 	CTRACE2(TRACE_STYLE, (tfp, "CSSTRIM:trying to set [%s] style - ", name));
 	if (tmpHash == NOSTYLE) {

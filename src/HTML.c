@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTML.c,v 1.186 2018/03/05 00:03:30 tom Exp $
+ * $LynxId: HTML.c,v 1.188 2018/03/07 10:26:46 tom Exp $
  *
  *		Structured stream to Rich hypertext converter
  *		============================================
@@ -993,13 +993,13 @@ static int HTML_start_element(HTStructured * me, int element_number,
 
     prefix_string = "";
     if (current_tag_style == -1) {	/* Append class_name */
-	hcode = hash_code_1(HTML_dtd.tags[element_number].name);
+	hcode = color_style_1(HTML_dtd.tags[element_number].name);
 	if (non_empty(class_name)) {
 	    int ohcode = hcode;
 
 	    prefix_string = HTML_dtd.tags[element_number].name;
-	    hcode = hash_code_3(prefix_string, ".", class_name);
-	    if (!hashStyles[hcode].name) {	/* None such -> classless version */
+	    hcode = color_style_3(prefix_string, ".", class_name);
+	    if (!hashStyles[hcode].used) {	/* None such -> classless version */
 		hcode = ohcode;
 		prefix_string = "";
 		CTRACE2(TRACE_STYLE,
@@ -1024,7 +1024,7 @@ static int HTML_start_element(HTStructured * me, int element_number,
 	    class_string[0] = '\0';
 	}
 	hcode = current_tag_style;
-	if (hcode >= 0 && hashStyles[hcode].name) {
+	if (hcode >= 0 && hashStyles[hcode].used) {
 	    prefix_string = hashStyles[hcode].name;
 	}
 	CTRACE2(TRACE_STYLE,
@@ -1040,8 +1040,8 @@ static int HTML_start_element(HTStructured * me, int element_number,
 	if (present && present[HTML_INPUT_TYPE] && value[HTML_INPUT_TYPE])
 	    type = value[HTML_INPUT_TYPE];
 
-	hcode = hash_code_3(prefix_string, ".type.", type);
-	if (!hashStyles[hcode].name) {	/* None such -> classless version */
+	hcode = color_style_3(prefix_string, ".type.", type);
+	if (!hashStyles[hcode].used) {	/* None such -> classless version */
 	    hcode = ohcode;
 	    CTRACE2(TRACE_STYLE,
 		    (tfp, "STYLE.start_element: type <%s> not configured.\n",
@@ -1450,7 +1450,7 @@ static int HTML_start_element(HTStructured * me, int element_number,
 		int hcode2;
 
 		HTSprintf0(&tmp, "link.%s.%s", value[HTML_LINK_CLASS], title);
-		hcode2 = hash_code_1(tmp);
+		hcode2 = color_style_1(tmp);
 		CTRACE2(TRACE_STYLE,
 			(tfp, "STYLE.link: using style <%s>\n", tmp));
 

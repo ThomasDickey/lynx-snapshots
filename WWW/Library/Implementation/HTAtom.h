@@ -34,7 +34,6 @@ extern "C" {
     };				/* struct _HTAtom */
 
     extern HTAtom *HTAtom_for(const char *string);
-    extern HTList *HTAtom_templateMatches(const char *templ);
 
 #define HTAtom_name(a) ((a)->name)
 

@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYUtils.c,v 1.280 2018/03/01 22:14:57 Takeshi.Hataguchi Exp $
+ * $LynxId: LYUtils.c,v 1.281 2018/03/07 10:02:51 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTCP.h>
@@ -1559,7 +1559,7 @@ void statusline(const char *text)
 	{
 	    int y, x;
 	    int a = ((StrNCmp(buffer, ALERT_FORMAT, ALERT_PREFIX_LEN)
-		      || !hashStyles[s_alert].name)
+		      || !hashStyles[s_alert].used)
 		     ? s_status
 		     : s_alert);
 
