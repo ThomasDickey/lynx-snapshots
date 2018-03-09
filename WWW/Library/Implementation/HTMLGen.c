@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTMLGen.c,v 1.42 2018/03/04 20:04:55 tom Exp $
+ * $LynxId: HTMLGen.c,v 1.44 2018/03/07 10:26:05 tom Exp $
  *
  *		HTML Generator
  *		==============
@@ -338,12 +338,12 @@ static int HTMLGen_start_element(HTStructured * me, int element_number,
 	}
 	class_string[0] = '\0';
 	strtolower(myHash);
-	hcode = hash_code_1(myHash);
+	hcode = color_style_1(myHash);
 	strtolower(Style_className);
 
 	if (TRACE_STYLE) {
 	    fprintf(tfp, "CSSTRIM:%s -> %d", myHash, hcode);
-	    if (hashStyles[hcode].code != hcode) {
+	    if (!hashStyles[hcode].used) {
 		char *rp = strrchr(myHash, '.');
 
 		fprintf(tfp, " (undefined) %s\n", myHash);
@@ -351,9 +351,9 @@ static int HTMLGen_start_element(HTStructured * me, int element_number,
 		    int hcd;
 
 		    *rp = '\0';	/* trim the class */
-		    hcd = hash_code_1(myHash);
+		    hcd = color_style_1(myHash);
 		    fprintf(tfp, "CSS:%s -> %d", myHash, hcd);
-		    if (hashStyles[hcd].code != hcd)
+		    if (!hashStyles[hcd].used)
 			fprintf(tfp, " (undefined) %s\n", myHash);
 		    else
 			fprintf(tfp, " ca=%d\n", hashStyles[hcd].color);
@@ -409,7 +409,8 @@ static int HTMLGen_start_element(HTStructured * me, int element_number,
 				(tfp, "CSSTRIM:link=%s\n", title_tmp));
 
 			do_cstyle_flush(me);
-			HText_characterStyle(me->text, hash_code_1(title_tmp), 1);
+			HText_characterStyle(me->text,
+					     color_style_1(title_tmp), 1);
 		    }
 		}
 #endif
@@ -450,7 +451,7 @@ static int HTMLGen_start_element(HTStructured * me, int element_number,
 	     */
 	    if (title && *title) {
 		do_cstyle_flush(me);
-		HText_characterStyle(me->text, hash_code_1(title_tmp), 0);
+		HText_characterStyle(me->text, color_style_1(title_tmp), 0);
 		FREE(title_tmp);
 	    }
 	    FREE(title);

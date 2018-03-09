@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYHash.c,v 1.26 2018/03/04 20:01:27 tom Exp $
+ * $LynxId: LYHash.c,v 1.33 2018/03/07 10:20:10 tom Exp $
  *
  * A hash table for the (fake) CSS support in Lynx-rp
  * (c) 1996 Rob Partington
@@ -12,13 +12,9 @@
 
 #ifdef USE_COLOR_STYLE
 
-/*
- * This is the same function as the private HASH_FUNCTION() in HTAnchor.c, but
- * with a different value for HASH_SIZE.
- */
-
 #define HASH_SIZE CSHASHSIZE
-#define HASH_OF(h, v) ((int)((h) * 3 + UCH(v)) % HASH_SIZE)
+#define HASH_TYPE     int
+#define HASH_OF(h, v) ((HASH_TYPE)((h) * 3 + UCH(v)) % HASH_SIZE)
 
 static size_t limit;
 static char *buffer;
@@ -35,40 +31,67 @@ static char *get_buffer(size_t need)
     return buffer;
 }
 
-static int hash_code(const char *string)
+/*
+ * This is the same algorithm as the private anchor_hash() in HTAnchor.c, but
+ * with a different value for HASH_SIZE.
+ */
+static HASH_TYPE cs_hash(const char *string)
 {
-    int hash = 0;
+    HASH_TYPE hash = 0;
+    HASH_TYPE best, n;
+    bucket *data;
+    const char *p;
+    int bumped = 0;
 
-    if (string != 0) {
-	const char *p;
+    for (p = string; *p; p++)
+	hash = HASH_OF(hash, *p);
 
-	for (p = string; *p; p++)
-	    hash = HASH_OF(hash, *p);
+    /*
+     * The computed hash-code is only a starting point.  Check for collision.
+     */
+    best = hash;
+    for (n = 0; n < HASH_SIZE; n++) {
+	int nn = (n + hash) % HASH_SIZE;
 
-	CTRACE_STYLE((tfp, "hash_code(%s) = %d\n", string, hash));
-    } else {
-	FREE(buffer);
-	limit = 0;
+	data = &hashStyles[nn];
+	if (data->name == 0 || !strcmp(string, data->name)) {
+	    best = nn;
+	    hash = nn;
+	    break;
+	}
+	++bumped;
     }
+    data = &hashStyles[best];
+    if (data->name != 0) {
+	if (strcmp(string, data->name)) {
+	    CTRACE_STYLE((tfp, "cs_hash(%s) overwriting %d\n", string, data->name));
+	    FREE(data->name);
+	    StrAllocCopy(data->name, string);
+	}
+    } else {
+	StrAllocCopy(data->name, string);
+    }
+
+    CTRACE_STYLE((tfp, "cs_hash(%s) = %d\n", string, hash));
     return hash;
 }
 
-int hash_code_1(const char *string)
+int color_style_1(const char *string)
 {
     get_buffer(strlen(string));
     strcpy(buffer, string);
     LYLowerCase(buffer);
-    return hash_code(buffer);
+    return cs_hash(buffer);
 }
 
-int hash_code_3(const char *p, const char *q, const char *r)
+int color_style_3(const char *p, const char *q, const char *r)
 {
     get_buffer(strlen(p) + strlen(q) + strlen(r));
     strcpy(buffer, p);
     strcat(buffer, q);
     strcat(buffer, r);
     LYLowerCase(buffer);
-    return hash_code(buffer);
+    return cs_hash(buffer);
 }
 
 #endif /* USE_COLOR_STYLE */
