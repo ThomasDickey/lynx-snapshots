@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYHash.c,v 1.33 2018/03/07 10:20:10 tom Exp $
+ * $LynxId: LYHash.c,v 1.38 2018/03/10 01:50:19 tom Exp $
  *
  * A hash table for the (fake) CSS support in Lynx-rp
  * (c) 1996 Rob Partington
@@ -8,6 +8,7 @@
  */
 #include <LYHash.h>
 #include <LYUtils.h>
+#include <LYLeaks.h>
 #include <LYStrings.h>
 
 #ifdef USE_COLOR_STYLE
@@ -16,6 +17,7 @@
 #define HASH_TYPE     int
 #define HASH_OF(h, v) ((HASH_TYPE)((h) * 3 + UCH(v)) % HASH_SIZE)
 
+static int count_bump;
 static size_t limit;
 static char *buffer;
 
@@ -41,7 +43,6 @@ static HASH_TYPE cs_hash(const char *string)
     HASH_TYPE best, n;
     bucket *data;
     const char *p;
-    int bumped = 0;
 
     for (p = string; *p; p++)
 	hash = HASH_OF(hash, *p);
@@ -59,7 +60,7 @@ static HASH_TYPE cs_hash(const char *string)
 	    hash = nn;
 	    break;
 	}
-	++bumped;
+	++count_bump;
     }
     data = &hashStyles[best];
     if (data->name != 0) {
@@ -92,6 +93,35 @@ int color_style_3(const char *p, const char *q, const char *r)
     strcat(buffer, r);
     LYLowerCase(buffer);
     return cs_hash(buffer);
+}
+
+void report_hashStyles(void)
+{
+    int i;
+    int count_name = 0;
+    int count_used = 0;
+
+    for (i = 0; i < CSHASHSIZE; i++) {
+	count_name += (hashStyles[i].name != 0);
+	count_used += (hashStyles[i].used != 0);
+    }
+    CTRACE((tfp, "Style hash:\n"));
+    CTRACE((tfp, "%5d names allocated\n", count_name));
+    CTRACE((tfp, "%5d buckets used\n", count_used));
+    CTRACE((tfp, "%5d hash collisions\n", count_bump));
+}
+
+void free_hashStyles(void)
+{
+    int i;
+
+    for (i = 0; i < CSHASHSIZE; i++) {
+	FREE(hashStyles[i].name);
+	hashStyles[i].used = FALSE;
+    }
+    FREE(buffer);
+    limit = 0;
+    count_bump = 0;
 }
 
 #endif /* USE_COLOR_STYLE */

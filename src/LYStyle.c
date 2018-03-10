@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYStyle.c,v 1.105 2018/03/08 21:05:53 tom Exp $
+ * $LynxId: LYStyle.c,v 1.109 2018/03/10 01:54:30 tom Exp $
  *
  * character level styles for Lynx
  * (c) 1996 Rob Partington -- donated to the Lyncei (if they want it :-)
@@ -426,12 +426,11 @@ static void free_lss_list(void)
 
 static void free_colorstylestuff(void)
 {
-    int i;
-
-    style_initialiseHashTable();
-    for (i = 0; i < CSHASHSIZE; i++) {
-	FREE(hashStyles[i].name);
+    if (TRACE_STYLE) {
+	report_hashStyles();
     }
+    style_initialiseHashTable();
+    free_hashStyles();
     style_deleteStyleList();
     memset(our_pairs, 0, sizeof(our_pairs));
     FreeCachedStyles();
