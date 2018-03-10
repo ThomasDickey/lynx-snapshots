@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYEditmap.c,v 1.74 2015/10/08 00:17:28 tom Exp $
+ * $LynxId: LYEditmap.c,v 1.75 2018/03/10 01:31:27 tom Exp $
  *
  * LYEditMap.c
  * Keybindings for line and form editing.
@@ -12,6 +12,7 @@
 #include <LYCharUtils.h>
 #include <LYStrings.h>
 #include <LYKeymap.h>		/* KEYMAP_SIZE, LKC_*, LYK_* - kw */
+#include <LYLeaks.h>
 
 #define PUTS(buf)    (*target->isa->put_string)(target, buf)
 

@@ -1,4 +1,4 @@
-/* $LynxId: LYHash.h,v 1.38 2018/03/06 23:28:12 tom Exp $ */
+/* $LynxId: LYHash.h,v 1.40 2018/03/10 01:47:33 tom Exp $ */
 #ifndef _LYHASH_H_
 #define _LYHASH_H_ 1
 
@@ -26,6 +26,8 @@ extern "C" {
 
     extern int color_style_1(const char *string);
     extern int color_style_3(const char *p, const char *q, const char *r);
+    extern void free_hashStyles(void);
+    extern void report_hashStyles(void);
 
     extern int s_a;
     extern int s_aedit;
