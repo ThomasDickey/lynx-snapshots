@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTUtils.h,v 1.126 2018/02/19 21:37:37 tom Exp $
+ * $LynxId: HTUtils.h,v 1.127 2018/03/11 22:29:50 tom Exp $
  *
  * Utility macros for the W3 code library
  * MACROS FOR GENERAL USE
@@ -743,8 +743,6 @@ extern int WWW_TraceMask;
 #endif
 
 #endif /* USE_SOCKS5 */
-
-#define SHORTENED_RBIND		/* FIXME: do this in configure-script */
 
 #ifdef USE_SSL
 

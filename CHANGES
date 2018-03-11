@@ -1,9 +1,12 @@
--- $LynxId: CHANGES,v 1.944 2018/03/11 21:51:34 tom Exp $
+-- $LynxId: CHANGES,v 1.945 2018/03/11 22:47:43 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
 2018-03-11 (2.8.9dev.17)
+* permanently enable MISC_EXP feature -TD
+* remove several obsolete ifdefs: DGUX, DGUX_OLD, HP_TERMINAL,
+  REVERSE_CLEAR_SCREEN_PROBLEM, SHORTENED_RBIND, SLANG_MBCS_HACK, SNAKE -TD
 * improve logic in HTCopy used to limit reads based on content-length to
   take into account server headers which extend past the first block read
   (report/test-case by Dick Wesseling) -TD

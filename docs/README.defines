@@ -1,3 +1,5 @@
+-- $LynxId: README.defines,v 1.19 2018/03/11 22:48:09 tom Exp $
+
 This file lists preprocessor macros (symbols) which are tested in the
 code (typically with ifdef).
 
@@ -19,11 +21,6 @@ See also under B for things needed by some systems.
 # if you have an SVR4 system with the "type any key" problem, try defining
 #
 # -DSVR4_BSDSELECT
-
-# Old Data General systems may need this in their SITE_LYDEFS
-# for their inet_addr(host) calls.
-#
-# -DDGUX_OLD
 
 ---
 Ports have been added for Win32 (95/NT) and 386 DOS computers with a
@@ -56,8 +53,6 @@ Network related, specific protocols
 -----------------------------------
 # -DSOCKS          For making a SOCKSified lynx.
        			see comments in makefile.in
-# -DSHORTENED_RBIND  For a SOCKSified lynx with the short version of Rbind.
-               		see comments in makefile.in
 
 Related to DirEd code - probably only usable for UNIX or similar
 ----------------------------------------------------------------
@@ -90,7 +85,6 @@ Using curses or ncurses library:
                    for UNIX handled by ./configure
 # -DUSE_COLOR_STYLE (see INSTALLATION, Section II-1c) needs SVr4 curses
 # -DUNDERLINE_LINKS  Define if you want links underlined instead of bold.
-# -DHP_TERMINAL    For DIM workaround to REVERSE problems on HP terminals.
 # -DNO_SIZECHANGE (old) or HAVE_SIZECHANGE (new) whether using code to detect
                    new size after size changes of the terminal (window).
                    for UNIX handled by ./configure, may be set in HTUtils.h
@@ -99,17 +93,11 @@ Using curses or ncurses library:
 
 Using slang library:
 # -DUSE_SLANG      (see INSTALLATION, Section II-1c)
-# -DSLANG_MBCS_HACK prevent cutoff lines when using UTF8 console (slang only)
-Both:
-# -DREVERSE_CLEAR_SCREEN_PROBLEM
-# 	if you have the reverse clear screen problem of some SUN4 systems, or
-# 	to work around some other "garbage on the screen" problems
 
 Other general
 -------------
 # -DIGNORE_CTRL_C  Define if Control-C shouldn't exit lynx.
 # -DINACTIVE_INPUT_STYLE_VH  Different style for showing inactive text fields
-# -DMISC_EXP       Enable some truly experimental stuff
 # -DNO_DUMP_WITH_BACKSPACES Disables -with_backspaces code
 # -DNO_RULES	   Disables code for CERN-style rules files
 # -DUSE_VASPRINT   Use vasprintf() function

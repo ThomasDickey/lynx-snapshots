@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMain.c,v 1.272 2018/03/07 22:18:43 tom Exp $
+ * $LynxId: LYMain.c,v 1.273 2018/03/11 22:49:35 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTP.h>
@@ -158,12 +158,7 @@ BOOLEAN track_internal_links = TRUE;
 BOOLEAN track_internal_links = FALSE;
 #endif
 
-#ifdef REVERSE_CLEAR_SCREEN_PROBLEM
-BOOLEAN enable_scrollback = TRUE;
-
-#else
 BOOLEAN enable_scrollback = FALSE;
-#endif /* REVERSE_CLEAR_SCREEN_PROBLEM */
 
 char empty_string[] =
 {'\0'};
@@ -640,9 +635,7 @@ BOOLEAN LYNonRestartingSIGWINCH = FALSE;
 BOOLEAN LYReuseTempfiles = FALSE;
 BOOLEAN LYUseBuiltinSuffixes = TRUE;
 
-#ifdef MISC_EXP
 int LYNoZapKey = 0;		/* 0: off (do z checking), 1: full, 2: initially */
-#endif
 
 #ifndef DISABLE_NEWS
 #include <HTNews.h>
@@ -2626,7 +2619,6 @@ static int color_fun(char *next_arg GCC_UNUSED)
 }
 #endif
 
-#ifdef MISC_EXP
 /* -convert_to */
 static int convert_to_fun(char *next_arg)
 {
@@ -2668,7 +2660,6 @@ static int convert_to_fun(char *next_arg)
     }
     return 0;
 }
-#endif
 
 /* -crawl */
 static int crawl_fun(char *next_arg GCC_UNUSED)
@@ -2919,7 +2910,6 @@ static int nounderline_fun(char *next_arg GCC_UNUSED)
     return 0;
 }
 
-#ifdef MISC_EXP
 /* -nozap */
 static int nozap_fun(char *next_arg)
 {
@@ -2931,7 +2921,6 @@ static int nozap_fun(char *next_arg)
     }
     return 0;
 }
-#endif /* MISC_EXP */
 
 /* -pauth */
 static int pauth_fun(char *next_arg)
@@ -3439,12 +3428,10 @@ outputs for -source dumps"
       "connect_timeout", 4|NEED_INT_ARG,	connect_timeout,
       "=N\nset the N-second connection timeout"
    ),
-#ifdef MISC_EXP
    PARSE_FUN(
       "convert_to",	4|FUNCTION_ARG,		convert_to_fun,
       "=FORMAT\nconvert input, FORMAT is in MIME type notation\n(experimental)"
    ),
-#endif
 #ifdef USE_PERSISTENT_COOKIES
    PARSE_STR(
       "cookie_file",	4|LYSTRING_ARG,		LYCookieFile,
@@ -3769,12 +3756,10 @@ soon as they are seen)"
       "nounderline",	4|FUNCTION_ARG,		nounderline_fun,
       "disable underline video-attribute"
    ),
-#ifdef MISC_EXP
    PARSE_FUN(
       "nozap",		4|FUNCTION_ARG,		nozap_fun,
       "=DURATION (\"initially\" or \"full\") disable checks for 'z' key"
    ),
-#endif
    PARSE_SET(
       "number_fields",	4|SET_ARG,		number_fields,
       "force numbering of links as well as form input fields"

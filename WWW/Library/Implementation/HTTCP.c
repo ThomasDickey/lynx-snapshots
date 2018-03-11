@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTCP.c,v 1.138 2017/04/30 17:52:00 tom Exp $
+ * $LynxId: HTTCP.c,v 1.139 2018/03/11 22:30:30 tom Exp $
  *
  *			Generic Communication Code		HTTCP.c
  *			==========================
@@ -1356,9 +1356,6 @@ static int HTParseInet(SockA * soc_in, const char *str)
      */
     if (dotcount_ip == 3)	/* Numeric node address: */
     {
-#ifdef DGUX_OLD
-	soc_in->sin_addr.s_addr = inet_addr(host).s_addr;	/* See arpa/inet.h */
-#else
 #ifdef GUSI
 	soc_in->sin_addr = inet_addr(host);	/* See netinet/in.h */
 #else
@@ -1372,7 +1369,6 @@ static int HTParseInet(SockA * soc_in, const char *str)
 	soc_in->sin_addr.s_addr = inet_addr(host);	/* See arpa/inet.h */
 #endif /* HAVE_INET_ATON */
 #endif /* GUSI */
-#endif /* DGUX_OLD */
 	FREE(host);
     } else {			/* Alphanumeric node name: */
 
@@ -1931,9 +1927,6 @@ int HTDoConnect(const char *url,
 #else
 	    status = Rconnect(*s, (struct sockaddr *) &soc_address,
 			      sizeof(soc_address));
-#ifndef SHORTENED_RBIND
-	    socks_bind_remoteAddr = soc_address.sin_addr.s_addr;
-#endif
 #endif /* INET6 */
 	} else
 #endif /* SOCKS */
