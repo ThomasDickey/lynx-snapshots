@@ -1,4 +1,4 @@
-/* $LynxId: LYStrings.c,v 1.269 2018/02/19 21:22:53 tom Exp $ */
+/* $LynxId: LYStrings.c,v 1.270 2018/03/11 23:10:37 tom Exp $ */
 #include <HTUtils.h>
 #include <HTCJK.h>
 #include <UCAux.h>
@@ -811,10 +811,6 @@ static int myGetChar(void)
     return c;
 }
 #define GetChar() myGetChar()
-#endif
-
-#if !defined(GetChar) && defined(SNAKE)
-#define GetChar() wgetch(LYwin)
 #endif
 
 #if !defined(GetChar) && defined(VMS)
@@ -1834,7 +1830,6 @@ static int LYgetch_for(int code)
 #endif /* !USE_SLANG || VMS */
 
     CTRACE((tfp, "GETCH%d: Got %#x.\n", code, c));
-#ifdef MISC_EXP
     if (LYNoZapKey > 1 && errno != EINTR &&
 	(c == EOF
 #ifdef USE_SLANG
@@ -1855,8 +1850,6 @@ static int LYgetch_for(int code)
 	    goto re_read;
 	}
     }
-#endif /* MISC_EXP */
-
 #ifdef USE_GETCHAR
     if (c == EOF && errno == EINTR)	/* Ctrl-Z causes EINTR in getchar() */
 	goto re_read;

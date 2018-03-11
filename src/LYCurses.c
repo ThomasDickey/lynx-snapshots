@@ -1,4 +1,4 @@
-/* $LynxId: LYCurses.c,v 1.191 2018/03/07 10:02:01 tom Exp $ */
+/* $LynxId: LYCurses.c,v 1.192 2018/03/11 22:19:56 tom Exp $ */
 #include <HTUtils.h>
 #include <HTAlert.h>
 
@@ -97,13 +97,6 @@ static int Masked_Attr;
 unsigned Lynx_Color_Flags = 0;
 BOOLEAN FullRefresh = FALSE;
 int curscr = 0;
-
-#ifdef SLANG_MBCS_HACK
-/*
- * Will be set by size_change.  - KW
- */
-int PHYSICAL_SLtt_Screen_Cols = 10;
-#endif /* SLANG_MBCS_HACK */
 
 void LY_SLrefresh(void)
 {

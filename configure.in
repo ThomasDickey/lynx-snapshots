@@ -1,4 +1,4 @@
-dnl $LynxId: configure.in,v 1.296 2018/02/21 10:25:35 tom Exp $
+dnl $LynxId: configure.in,v 1.297 2018/03/11 22:27:35 tom Exp $
 dnl
 dnl Process this file with autoconf to produce a configure script.
 dnl
@@ -245,11 +245,8 @@ case $host_os in
 	TRY_CFLAGS="$TRY_CFLAGS -DWIN_EX -D_WINDOWS_NSL"
 	LIBS="$LIBS -luser32"
 	;;
-(dgux*)
-	TRY_CFLAGS="$TRY_CFLAGS -DDGUX"
-	;;
 (hpux*)
-	TRY_CFLAGS="$TRY_CFLAGS -DSNAKE -D_XOPEN_SOURCE_EXTENDED"
+	TRY_CFLAGS="$TRY_CFLAGS -D_XOPEN_SOURCE_EXTENDED"
 	test -z "$GCC" && TRY_CFLAGS="$TRY_CFLAGS -Wp,-H600000 -DSYS_HPUX"
 	;;
 (isc*)

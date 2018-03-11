@@ -739,9 +739,7 @@ II. Compile instructions -- UNIX
 	servers.  Also, instead of SOCKSifying lynx for use behind a firewall,
 	you are better off if you make it normally, and set it up to use a
 	proxy server.  You can SOCKSify the proxy server, and it will handle
-	all clients, not just Lynx.  If your SOCKS server was compiled to use
-	the short version of Rbind, also include -DSHORTENED_RBIND in your
-	SITE_LYDEFS and SITE_DEFS.  If you do SOCKSify lynx, you can turn off
+	all clients, not just Lynx.  If you do SOCKSify lynx, you can turn off
 	SOCKS proxy usage via a -nosocks command line switch.
 
   --with-ssl[=XXX]			(define USE_SSL)
@@ -1486,4 +1484,4 @@ VIII. Acknowledgment
 
 -- 1999/04/24 - H. Nelson <lynx-admin@irm.nara.kindai.ac.jp>
 -- vile:txtmode
--- $LynxId: INSTALLATION,v 1.128 2017/08/08 22:34:10 tom Exp $
+-- $LynxId: INSTALLATION,v 1.129 2018/03/11 22:29:22 tom Exp $

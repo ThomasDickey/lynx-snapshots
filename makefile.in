@@ -1,4 +1,4 @@
-# $LynxId: makefile.in,v 1.166 2017/08/08 22:34:10 tom Exp $
+# $LynxId: makefile.in,v 1.167 2018/03/11 22:48:48 tom Exp $
 ##makefile for lynx
 
 SHELL		= @CONFIG_SHELL@
@@ -156,12 +156,8 @@ SITE_LYDEFS = # Your defines here
 SITE_DEFS = # Your defines here
 
 # defines for which there are no configure options:
-# -DHP_TERMINAL    For DIM workaround to REVERSE problems on HP terminals.
 # -DIGNORE_CTRL_C  Define if Control-C shouldn't exit lynx.
 # -DNO_RULES       Disables CERN-style access rules (see lynx.cfg).
-# -DMISC_EXP       Enable some truly experimental stuff
-# -DSHORTENED_RBIND  For a SOCKSified lynx with the short version of Rbind.
-# -DSLANG_MBCS_HACK prevent cutoff lines when using UTF8 console (slang only)
 # -DUSE_VASPRINT   Use vasprintf() function
 #
 # if you are linking to freeWAIS-0.202 or older, you should define this
@@ -169,21 +165,11 @@ SITE_DEFS = # Your defines here
 #
 # -DDECLARE_WAIS_LOGFILES
 #
-# if you have the reverse clear screen problem of some SUN4 systems you
-# should define this in SITE_DEFS
-#
-# -DREVERSE_CLEAR_SCREEN_PROBLEM
-#
 # if you have an SVR4 system with the "type any key" problem, try defining
 # this in LYFLAGS (SITE_LYDEFS) and SITE_DEFS
 #
 # -DSVR4_BSDSELECT
 #
-# Old Data General systems may need this in their SITE_LYDEFS
-# for their inet_addr(host) calls.
-#
-# -DDGUX_OLD
-
 # Many other defines have configure options  (see INSTALLATION, Section II-1c.):
 #
 # for installation of local execution links, please see the file userdefs.h

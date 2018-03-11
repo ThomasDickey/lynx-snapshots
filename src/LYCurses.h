@@ -1,4 +1,4 @@
-/* $LynxId: LYCurses.h,v 1.95 2016/10/11 23:43:51 tom Exp $ */
+/* $LynxId: LYCurses.h,v 1.96 2018/03/11 22:19:36 tom Exp $ */
 #ifndef LYCURSES_H
 #define LYCURSES_H
 
@@ -558,13 +558,7 @@ extern "C" {
  *  Map some curses functions to slang functions.
  */
 #define stdscr ((WINDOW *)0)
-#ifdef SLANG_MBCS_HACK
-    extern int PHYSICAL_SLtt_Screen_Cols;
-
-#define COLS PHYSICAL_SLtt_Screen_Cols
-#else
 #define COLS SLtt_Screen_Cols
-#endif				/* SLANG_MBCS_HACK */
 #define LINES SLtt_Screen_Rows
 #define move SLsmg_gotorc
 #define addstr SLsmg_write_string
@@ -685,17 +679,10 @@ extern "C" {
 #define start_underline()	LYaddAttr(LYUnderlineLinks ? A_BOLD : A_UNDERLINE)
 #define stop_underline()	LYsubAttr(LYUnderlineLinks ? A_BOLD : A_UNDERLINE)
 
-#if defined(SNAKE) && defined(HP_TERMINAL)
-#define start_reverse()		LYaddWAttr(LYwin, A_DIM)
-#define wstart_reverse(w)	LYaddWAttr(w, A_DIM)
-#define stop_reverse()		LYsubWAttr(LYwin, A_DIM)
-#define wstop_reverse(w)	LYsubWAttr(w, A_DIM)
-#else
 #define start_reverse()		LYaddAttr(A_REVERSE)
 #define wstart_reverse(w)	LYaddWAttr(w, A_REVERSE)
 #define stop_reverse()		LYsubAttr(A_REVERSE)
 #define wstop_reverse(w)	LYsubWAttr(w, A_REVERSE)
-#endif				/* SNAKE && HP_TERMINAL */
 
 #endif				/* VMS */
 

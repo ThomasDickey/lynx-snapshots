@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFTP.c,v 1.130 2018/03/05 22:33:35 tom Exp $
+ * $LynxId: HTFTP.c,v 1.131 2018/03/11 22:30:30 tom Exp $
  *
  *			File Transfer Protocol (FTP) Client
  *			for a WorldWideWeb browser
@@ -1245,11 +1245,7 @@ static int get_listen_socket(void)
 		if ((status = Rbind(new_socket,
 				    (struct sockaddr *) &soc_address,
 		/* Cast to generic sockaddr */
-				    SOCKADDR_LEN(soc_address)
-#ifndef SHORTENED_RBIND
-				    ,socks_bind_remoteAddr
-#endif /* !SHORTENED_RBIND */
-		     )) == 0) {
+				    SOCKADDR_LEN(soc_address))) == 0) {
 		    break;
 		} else
 #endif /* SOCKS */
@@ -1299,11 +1295,7 @@ static int get_listen_socket(void)
 	    status = Rbind(new_socket,
 			   (struct sockaddr *) &soc_address,
 	    /* Cast to generic sockaddr */
-			   sizeof(soc_address)
-#ifndef SHORTENED_RBIND
-			   ,socks_bind_remoteAddr
-#endif /* !SHORTENED_RBIND */
-		);
+			   sizeof(soc_address));
 	else
 #endif /* SOCKS */
 	    status = bind(new_socket,

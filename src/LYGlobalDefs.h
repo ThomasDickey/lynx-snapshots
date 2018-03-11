@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYGlobalDefs.h,v 1.143 2018/03/05 09:49:59 tom Exp $
+ * $LynxId: LYGlobalDefs.h,v 1.144 2018/03/11 22:49:43 tom Exp $
  *
  * global variable definitions
  */
@@ -588,9 +588,7 @@ extern "C" {
     extern int ssl_noprompt;
 #endif
 
-#ifdef MISC_EXP
     extern int LYNoZapKey;	/* 0: off (do 'z' checking), 1: full, 2: initially */
-#endif
 
 #ifdef USE_JUSTIFY_ELTS
     extern BOOLEAN ok_justify;

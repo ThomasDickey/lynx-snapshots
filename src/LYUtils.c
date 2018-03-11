@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYUtils.c,v 1.281 2018/03/07 10:02:51 tom Exp $
+ * $LynxId: LYUtils.c,v 1.282 2018/03/11 22:50:21 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTCP.h>
@@ -1638,7 +1638,6 @@ void noviceline(int more_flag GCC_UNUSED)
     return;
 }
 
-#if defined(MISC_EXP) || defined(TTY_DEVICE) || defined(HAVE_TTYNAME)
 /*
  * If the standard input is not a tty, and Lynx is really reading from the
  * standard input, attempt to reopen it, pointing to a real tty.  Normally
@@ -1699,9 +1698,7 @@ int LYReopenInput(void)
     }
     return result;
 }
-#endif
 
-#if defined(NSL_FORK) || defined(MISC_EXP) || defined (TTY_DEVICE) || defined(HAVE_TTYNAME)
 /*
  * Returns the file descriptor from which keyboard input is expected, or INVSOC
  * (-1) if not available.  If need_selectable is true, returns non-INVSOC fd
@@ -1735,7 +1732,6 @@ int LYConsoleInputFD(int need_selectable)
     }
     return fd;
 }
-#endif /* NSL_FORK || MISC_EXP */
 
 static int fake_zap = 0;
 
@@ -1768,10 +1764,8 @@ static int DontCheck(void)
     if (LYHaveCmdScript())	/* we may be running from a script */
 	return (TRUE);
 
-#ifdef MISC_EXP
     if (LYNoZapKey)
 	return (TRUE);
-#endif
     /*
      * Avoid checking interrupts more than one per second, since it is a slow
      * and expensive operation - TD
@@ -3086,16 +3080,6 @@ void size_change(int sig GCC_UNUSED)
 #endif /* VMS || UNIX */
     LYlines = SLtt_Screen_Rows;
     LYcols = SLtt_Screen_Cols;
-#ifdef SLANG_MBCS_HACK
-    PHYSICAL_SLtt_Screen_Cols = LYcols;
-#ifdef SLANG_NO_LIMIT		/* define this if slang has been fixed */
-    SLtt_Screen_Cols = LYcolLimit * 6;
-#else
-    /* Needs to be limited: fixed buffer bugs in slang can cause crash,
-       see slang's SLtt_smart_puts - kw */
-    SLtt_Screen_Cols = HTMIN(LYcolLimit * 6, 255);
-#endif
-#endif /* SLANG_MBCS_HACK */
     if (sig == 0)
 	/*
 	 * Called from start_curses().

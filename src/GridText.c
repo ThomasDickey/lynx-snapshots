@@ -1,5 +1,5 @@
 /*
- * $LynxId: GridText.c,v 1.309 2018/03/11 18:32:25 tom Exp $
+ * $LynxId: GridText.c,v 1.310 2018/03/11 23:12:39 tom Exp $
  *
  *		Character grid hypertext object
  *		===============================
@@ -2494,16 +2494,15 @@ void HText_beginAppend(HText *text)
 
 }
 
-/* LYcols_cu is the notion that the display library has of the screen
-   width.  Normally it is the same as LYcols, but there may be a
-   difference via SLANG_MBCS_HACK.  Checks of the line length (as the
-   non-UTF-8-aware display library would see it) against LYcols_cu are
-   is used to try to prevent that lines with UTF-8 chars get wrapped
-   by the library when they shouldn't.
-   If there is no display library involved, i.e. dump_output_immediately,
-   no such limit should be imposed.  MAX_COLS should be just as good
-   as any other large value.  (But don't use INT_MAX or something close
-   to it to, avoid over/underflow.) - kw */
+/*
+ * LYcols_cu is the notion that the display library has of the screen width. 
+ * Checks of the line length (as the non-UTF-8-aware display library would see
+ * it) against LYcols_cu are used to try to prevent lines with UTF-8 chars from
+ * being wrapped by the library when they shouldn't.  If there is no display
+ * library involved, i.e., dump_output_immediately, no such limit should be
+ * imposed.  MAX_COLS should be just as good as any other large value.  (But
+ * don't use INT_MAX or something close to it to, avoid over/underflow.) - kw
+ */
 #ifdef USE_SLANG
 #define LYcols_cu(text) (dump_output_immediately ? MAX_COLS : SLtt_Screen_Cols)
 #else
