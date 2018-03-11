@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFormat.c,v 1.86 2017/07/02 17:09:45 tom Exp $
+ * $LynxId: HTFormat.c,v 1.89 2018/03/11 21:33:34 tom Exp $
  *
  *		Manage different file formats			HTFormat.c
  *		=============================
@@ -733,6 +733,7 @@ int HTCopy(HTParentAnchor *anchor,
     BOOL suppress_readprogress = NO;
     off_t limit = anchor ? anchor->content_length : 0;
     off_t bytes = 0;
+    off_t header_length = 0;
     int rv = 0;
 
     /*  Push the data down the stream
@@ -864,11 +865,39 @@ int HTCopy(HTParentAnchor *anchor,
 	}
 #endif /* NOT_ASCII */
 
+	header_length = anchor->header_length;
+
 	(*targetClass.put_block) (sink, input_buffer, status);
-	bytes += status;
-	if (!suppress_readprogress)
-	    HTReadProgress(bytes, limit);
-	HTDisplayPartial();
+	if (anchor->inHEAD) {
+	    if (!suppress_readprogress) {
+		statusline(gettext("Reading headers..."));
+	    }
+	    CTRACE((tfp, "HTCopy read %" PRI_off_t " header bytes\n",
+		    CAST_off_t (anchor->header_length)));
+	} else {
+	    /*
+	     * If header-length is increased at this point, that is due to
+	     * HTMIME, which detects the end of the server headers.  There
+	     * may be additional (non-header) data in that block.
+	     */
+	    if (anchor->header_length > header_length) {
+		int header = (int) (anchor->header_length - header_length);
+
+		CTRACE((tfp, "HTCopy read %" PRI_off_t " header bytes "
+			"(%d extra vs %d total)\n",
+			CAST_off_t (anchor->header_length),
+			header, status));
+		if (status > header) {
+		    bytes += (status - header);
+		}
+	    } else {
+		bytes += status;
+	    }
+	    if (!suppress_readprogress) {
+		HTReadProgress(bytes, limit);
+	    }
+	    HTDisplayPartial();
+	}
 
 	/* a few buggy implementations do not close the connection properly
 	 * and will hang if we try to read past the declared content-length.

@@ -1,5 +1,5 @@
 /*
- * $LynxId: GridText.c,v 1.308 2018/03/05 22:35:07 tom Exp $
+ * $LynxId: GridText.c,v 1.309 2018/03/11 18:32:25 tom Exp $
  *
  *		Character grid hypertext object
  *		===============================
@@ -7074,7 +7074,6 @@ const char *HText_getServer(void)
 	    HTAnchor_server(HTMainText->node_anchor) : 0);
 }
 
-#ifdef EXP_HTTP_HEADERS
 /*
  * Returns the full text of HTTP headers, if available, for the current
  * document.
@@ -7084,7 +7083,6 @@ const char *HText_getHttpHeaders(void)
     return (HTMainText ?
 	    HTAnchor_http_headers(HTMainText->node_anchor) : 0);
 }
-#endif
 
 /*
  * HText_pageDisplay displays a screen of text
