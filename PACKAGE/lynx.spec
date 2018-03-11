@@ -1,4 +1,4 @@
-# $LynxId: lynx.spec,v 1.44 2017/08/08 22:32:03 tom Exp $
+# $LynxId: lynx.spec,v 1.45 2018/03/11 18:34:02 tom Exp $
 Summary: A text-based Web browser
 Name: lynx
 Version: 2.8.9
@@ -29,7 +29,7 @@ HTTP, FTP, WAIS, and NNTP servers.
 %setup -q -n lynx%{version}%{release}
 
 %build
-CPPFLAGS="-DMISC_EXP -DEXP_HTTP_HEADERS" \
+CPPFLAGS="-DMISC_EXP" \
 %configure \
 	--target %{_target_platform} \
 	--prefix=%{_prefix} \

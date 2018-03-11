@@ -1,9 +1,13 @@
--- $LynxId: CHANGES,v 1.943 2018/03/09 01:45:26 tom Exp $
+-- $LynxId: CHANGES,v 1.944 2018/03/11 21:51:34 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2018-03-05 (2.8.9dev.17)
+2018-03-11 (2.8.9dev.17)
+* improve logic in HTCopy used to limit reads based on content-length to
+  take into account server headers which extend past the first block read
+  (report/test-case by Dick Wesseling) -TD
+* permanently enable EXP_HTTP_HEADERS feature -TD
 * modify color-style hashing to check for collisions -TD
 * add PREFERRED_CONTENT_TYPE defaulting to text/plain and options-menu to
   replace an assumption in HTMIMEConvert that everything is text/html.

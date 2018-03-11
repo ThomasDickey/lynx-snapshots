@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTAnchor.h,v 1.38 2017/02/10 22:26:48 tom Exp $
+ * $LynxId: HTAnchor.h,v 1.40 2018/03/11 18:43:50 tom Exp $
  *
  *	Hypertext "Anchor" Object				     HTAnchor.h
  *	==========================
@@ -100,10 +100,9 @@ extern "C" {
 	char *SugFname;		/* Suggested filename */
 	char *cache_control;	/* Cache-Control */
 	BOOL no_cache;		/* Cache-Control, Pragma or META "no-cache"? */
+	BOOL inHEAD;		/* HTMIMEConvert is decoding server-headers */
 	BOOL inBASE;		/* duplicated from HTStructured (HTML.c/h) */
-#ifdef EXP_HTTP_HEADERS
 	HTChunk http_headers;
-#endif
 	BOOL no_content_encoding;	/* server did not use C-T? */
 	char *content_type_params;	/* Content-Type (with parameters if any) */
 	char *content_type;	/* Content-Type */
@@ -115,6 +114,7 @@ extern "C" {
 	char *content_md5;	/* Content-MD5 */
 	char *message_id;	/* Message-ID */
 	char *subject;		/* Subject */
+	off_t header_length;	/* length of headers */
 	off_t content_length;	/* Content-Length */
 	off_t actual_length;	/* actual length may differ */
 	char *date;		/* Date */

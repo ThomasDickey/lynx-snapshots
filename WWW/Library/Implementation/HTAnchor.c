@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTAnchor.c,v 1.80 2018/03/06 09:34:12 tom Exp $
+ * $LynxId: HTAnchor.c,v 1.81 2018/03/11 18:34:50 tom Exp $
  *
  *	Hypertext "Anchor" Object				HTAnchor.c
  *	==========================
@@ -762,9 +762,7 @@ static void HTParentAnchor_free(HTParentAnchor *me)
     }
     FREE(me->SugFname);
     FREE(me->cache_control);
-#ifdef EXP_HTTP_HEADERS
     HTChunkClear(&(me->http_headers));
-#endif
     FREE(me->content_type_params);
     FREE(me->content_type);
     FREE(me->content_language);
@@ -1067,14 +1065,12 @@ const char *HTAnchor_SugFname(HTParentAnchor *me)
     return (me ? me->SugFname : NULL);
 }
 
-#ifdef EXP_HTTP_HEADERS
 /*	HTTP Headers.
 */
 const char *HTAnchor_http_headers(HTParentAnchor *me)
 {
     return (me ? me->http_headers.data : NULL);
 }
-#endif
 
 /*	Content-Type handling (parameter list).
 */

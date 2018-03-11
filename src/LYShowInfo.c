@@ -1,4 +1,4 @@
-/* $LynxId: LYShowInfo.c,v 1.77 2018/03/02 01:53:43 tom Exp $ */
+/* $LynxId: LYShowInfo.c,v 1.79 2018/03/11 21:37:12 tom Exp $ */
 #include <HTUtils.h>
 #include <HTFile.h>
 #include <HTParse.h>
@@ -22,8 +22,6 @@
 #include <time.h>
 #include <LYLocal.h>
 #endif /* DIRED_SUPPORT */
-
-#define ADVANCED_INFO 1		/* to get more info in advanced mode */
 
 #define BEGIN_DL(text) fprintf(fp0, "<h2>%s</h2>\n<dl compact>", LYEntifyTitle(&buffer, text))
 #define END_DL()       fprintf(fp0, "\n</dl>\n")
@@ -147,9 +145,8 @@ int LYShowInfo(DocInfo *doc,
     char *temp = 0;
     char *buffer = 0;
 
-#ifdef ADVANCED_INFO
     BOOLEAN LYInfoAdvanced = (BOOL) (user_mode == ADVANCED_MODE);
-#endif
+
 #ifdef DIRED_SUPPORT
     struct stat dir_info;
     const char *name;
@@ -377,7 +374,6 @@ int LYShowInfo(DocInfo *doc,
 	if ((cp = HText_getLastModified()) != NULL && *cp != '\0')
 	    ADD_SS(gettext("Last Mod:"), cp);
 
-#ifdef ADVANCED_INFO
 	if (LYInfoAdvanced) {
 	    if (HTMainAnchor && HTMainAnchor->expires) {
 		ADD_SS(gettext("Expires:"), HTMainAnchor->expires);
@@ -398,7 +394,6 @@ int LYShowInfo(DocInfo *doc,
 		ADD_SS(gettext("Language:"), HTMainAnchor->content_language);
 	    }
 	}
-#endif /* ADVANCED_INFO */
 
 	if (doc->post_data) {
 	    fprintf(fp0, "<dt><em>%s</em> <xmp>%.*s</xmp>\n",
@@ -428,7 +423,6 @@ int LYShowInfo(DocInfo *doc,
 	if (doc->internal_link)
 	    StrAllocCat(temp, gettext(", via internal link"));
 
-#ifdef ADVANCED_INFO
 	if (LYInfoAdvanced) {
 	    if (HText_hasNoCacheSet(HTMainText))
 		StrAllocCat(temp, gettext(", no-cache"));
@@ -437,7 +431,6 @@ int LYShowInfo(DocInfo *doc,
 	    if (doc->bookmark)
 		StrAllocCat(temp, gettext(", bookmark file"));
 	}
-#endif /* ADVANCED_INFO */
 
 	ADD_SS(gettext("mode:"), temp);
 	FREE(temp);
@@ -483,15 +476,12 @@ int LYShowInfo(DocInfo *doc,
 				  gettext("No Links on the current page")));
 	}
 
-#ifdef EXP_HTTP_HEADERS
 	if ((cp = HText_getHttpHeaders()) != 0) {
 	    fprintf(fp0, "<h2>%s</h2>",
 		    LYEntifyTitle(&buffer, gettext("Server Headers:")));
 	    fprintf(fp0, "<pre>%s</pre>",
 		    LYEntifyTitle(&buffer, cp));
 	}
-#endif
-
 #ifdef DIRED_SUPPORT
     }
 #endif /* DIRED_SUPPORT */
