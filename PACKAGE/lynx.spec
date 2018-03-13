@@ -1,17 +1,25 @@
-# $LynxId: lynx.spec,v 1.46 2018/03/11 22:48:05 tom Exp $
+# $LynxId: lynx.spec,v 1.47 2018/03/13 00:21:12 tom Exp $
 Summary: A text-based Web browser
-Name: lynx
+Name: lynx-dev
 Version: 2.8.9
 Release: dev.17
 License: GPLv2
 Group: Applications/Internet
 Source: lynx%{version}%{release}.tgz
-# URL: http://invisible-island.net/lynx/
+URL: http://lynx.invisible-island.net
 Provides: webclient
 Provides: text-www-browser
-# BuildRequires: openssl-devel, pkgconfig, ncurses-devel >= 5.3-5,
-# BuildRequires: zlib-devel, gettext, rsh, telnet, zip, unzip
-# Buildroot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
+
+# Fedora:
+BuildRequires: openssl-devel, pkgconfig, ncurses-devel >= 5.3-5,
+BuildRequires: zlib-devel, gettext
+BuildRequires: libidn-devel
+# BuildRequires: bzip2-devel
+
+# SuSE:
+# BuildRequires: libbz2-devel       
+
+Requires: gzip, bzip2, tar, zip, unzip
 
 %description
 Lynx is a fully-featured World Wide Web (WWW) client for users running
@@ -20,8 +28,8 @@ to use.  It will display HTML documents containing links to files residing on
 the local system, as well as files residing on remote systems running Gopher,
 HTTP, FTP, WAIS, and NNTP servers.
 
-%define lynx_doc %{_defaultdocdir}/lynx
-%define lynx_etc %{_sysconfdir}/lynx
+%define lynx_doc %{_defaultdocdir}/%{name}
+%define lynx_etc %{_sysconfdir}/%{name}
 
 %prep
 
@@ -33,11 +41,13 @@ HTTP, FTP, WAIS, and NNTP servers.
 	--target %{_target_platform} \
 	--prefix=%{_prefix} \
 	--bindir=%{_bindir} \
+	--program-suffix=-dev \
 	--datadir=%{lynx_doc} \
 	--libdir=%{lynx_etc} \
 	--mandir=%{_mandir} \
 	--sysconfdir=%{lynx_etc} \
 	--with-cfg-path=%{lynx_etc}:%{lynx_doc}/samples \
+	--with-textdomain=%{name} \
 	--disable-font-switch \
 	--disable-internal-links \
 	--enable-8bit-toupper \
@@ -103,14 +113,17 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(-,root,root,-)
-%{_bindir}/lynx
+%{_bindir}/%{name}
 %{_mandir}/*/*
 %{_datadir}/locale/*
 %{lynx_doc}/*
-%config %{lynx_etc}/lynx.cfg
-%config %{lynx_etc}/lynx.lss
+%config %{lynx_etc}/*.cfg
+%config %{lynx_etc}/*.lss
 
 %changelog
+
+* Mon Mar 12 2018 Thomas E. Dickey
+- rename to "lynx-dev", add a few dependencies where package names are same.
 
 * Fri Sep 17 2010 Thomas E. Dickey
 - initial version.
