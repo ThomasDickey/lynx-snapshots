@@ -1,9 +1,14 @@
--- $LynxId: CHANGES,v 1.945 2018/03/11 22:47:43 tom Exp $
+-- $LynxId: CHANGES,v 1.948 2018/03/13 09:14:59 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2018-03-11 (2.8.9dev.17)
+2018-03-13 (2.8.9dev.17)
+* modify windows installers to use static libraries for pdcurses and slang,
+  because the dll for the latter is much larger than the rest of lynx -TD
+* rename test-package for ".rpm" to "lynx-dev" for consistency with ".deb" -TD
+* improve samples/lynx.bat by using location of script rather than current
+  directory ("Smuggler" loto1992@inbox.ru).
 * permanently enable MISC_EXP feature -TD
 * remove several obsolete ifdefs: DGUX, DGUX_OLD, HP_TERMINAL,
   REVERSE_CLEAR_SCREEN_PROBLEM, SHORTENED_RBIND, SLANG_MBCS_HACK, SNAKE -TD

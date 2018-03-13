@@ -1,4 +1,4 @@
-# $LynxId: makefile.in,v 1.167 2018/03/11 22:48:48 tom Exp $
+# $LynxId: makefile.in,v 1.168 2018/03/12 23:25:57 tom Exp $
 ##makefile for lynx
 
 SHELL		= @CONFIG_SHELL@
@@ -37,7 +37,6 @@ LIBS		= @LIBS@
 INSTALL		= @INSTALL@
 INSTALL_PROGRAM	= @INSTALL_PROGRAM@
 INSTALL_DATA	= @INSTALL_DATA@
-transform	= @program_transform_name@
 
 LN_S		= @LN_S@
 
@@ -196,7 +195,7 @@ SRC_CFLAGS = \
 	WWWINC=$(WWW_DIR) \
 	WWWLIB="../$(WWW_DIR)/libwww.a"
 
-actual_PROG  = `echo lynx|    sed '$(transform)'`
+actual_PROG  = `echo lynx|sed '@program_transform_name@'`
 binary_PROG  = $(actual_PROG)$x
 
 all lynx$x: cfg_defs.h LYHelp.h
@@ -299,9 +298,9 @@ install-full: install install-help install-doc
 
 install-bin: $(BINDIR) lynx$x
 @MSG_DIR_MAKE@	cd $(PO_DIR) && $(MAKE_RECUR) install
-	@ECHO_CC@$(SHELL) -c \
-	'if test -f $(BINDIR)/$(binary_PROG) ; then \
-	      mv -f $(BINDIR)/$(binary_PROG) $(BINDIR)/lynx.old; fi'
+	@ECHO_CC@$(SHELL) -c "P=$(binary_PROG); \
+	if test -f $(BINDIR)/$$P ; then \
+	      mv -f $(BINDIR)/$$P $(BINDIR)/$$P.old; fi"
 	$(INSTALL_PROGRAM) lynx$x $(BINDIR)/$(binary_PROG)
 
 install-man : $(MANDIR)

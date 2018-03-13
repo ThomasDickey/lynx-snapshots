@@ -1,4 +1,4 @@
-; $LynxId: lynx.iss,v 1.18 2018/02/05 09:42:33 tom Exp $
+; $LynxId: lynx.iss,v 1.19 2018/03/13 09:11:29 tom Exp $
 ; vile:ts=2 sw=2 notabinsert
 ;
 ; This is the BASE script for different flavors of the installer for Lynx.
@@ -37,7 +37,7 @@
 #endif
 
 #ifndef ZlibDllName
-#define ZlibDllName "zlib.dll"
+#define ZlibDllName "zlib1.dll"
 #endif
 
 #ifndef BzipExeName
@@ -62,7 +62,7 @@
 #ifndef DllsSrcDir
 #define DllsSrcDir GetEnv("LYNX_DLLSDIR")
 #if DllsSrcDir == ""
-#define DllsSrcDir "..\dlls"
+#define DllsSrcDir "..\bin"
 #endif
 #endif
 
