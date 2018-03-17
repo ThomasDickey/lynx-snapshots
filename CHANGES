@@ -1,11 +1,17 @@
--- $LynxId: CHANGES,v 1.948 2018/03/13 09:14:59 tom Exp $
+-- $LynxId: CHANGES,v 1.953 2018/03/17 11:42:59 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2018-03-13 (2.8.9dev.17)
+2018-03-17 (2.8.9dev.17)
+* modify windows installer to select directory containing SSL DLLs and copy
+  them into lynx's application directory -TD
+* add oldlynx.bat sample script to windows installer -TD
+* use default lynx.lss color scheme with samples/lynx.bat -TD
 * modify windows installers to use static libraries for pdcurses and slang,
-  because the dll for the latter is much larger than the rest of lynx -TD
+  because the dll for the latter is much larger than the rest of lynx.
+  Even with this change, lynx.exe is 50% larger when using slang than with
+  pdcurses -TD
 * rename test-package for ".rpm" to "lynx-dev" for consistency with ".deb" -TD
 * improve samples/lynx.bat by using location of script rather than current
   directory ("Smuggler" loto1992@inbox.ru).

@@ -1,4 +1,4 @@
-; $LynxId: lynx.iss,v 1.19 2018/03/13 09:11:29 tom Exp $
+; $LynxId: lynx.iss,v 1.27 2018/03/17 15:40:36 tom Exp $
 ; vile:ts=2 sw=2 notabinsert
 ;
 ; This is the BASE script for different flavors of the installer for Lynx.
@@ -104,6 +104,7 @@ OutputDir=..\PACKAGE\lynx-setup
 Compression=lzma
 SolidCompression=yes
 PrivilegesRequired=none
+SetupLogging=no
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
@@ -145,16 +146,16 @@ Name: "{app}\tmp"
 #emit 'Source: "' + HelpSrcDir + '\keystrokes\*.*"; DestDir: "{app}\help\keystrokes"; Flags: '
 
 ; some of these data files are from an earlier installer by Claudio Santambrogio
-Source: "..\samples\lynx.ico"; DestDir: "{app}\icon"
-Source: "..\samples\lynx.bat"; DestDir: "{app}"
-Source: "..\samples\jumps.htm"; DestDir: "{app}"
-Source: "..\samples\home.htm"; DestDir: "{app}"
-Source: "..\samples\lynx_bookmarks.htm"; DestDir: "{app}"
-Source: "..\samples\*.lss"; DestDir: "{app}"
-Source: "..\samples\lynx.bat"; DestDir: "{app}"
-Source: "..\samples\lynx-demo.cfg"; DestDir: "{app}"
-Source: "..\lynx.man"; DestDir: "{app}"
 Source: "..\lynx.cfg"; DestDir: "{app}" ; AfterInstall: myCustomCfg; Flags: ignoreversion
+Source: "..\lynx.man"; DestDir: "{app}"
+Source: "..\samples\*.lss"; DestDir: "{app}"
+Source: "..\samples\home.htm"; DestDir: "{app}"
+Source: "..\samples\jumps.htm"; DestDir: "{app}"
+Source: "..\samples\lynx-demo.cfg"; DestDir: "{app}"
+Source: "..\samples\lynx.bat"; DestDir: "{app}"
+Source: "..\samples\lynx.ico"; DestDir: "{app}\icon"
+Source: "..\samples\lynx_bookmarks.htm"; DestDir: "{app}"
+Source: "..\samples\oldlynx.bat"; DestDir: "{app}"
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]
@@ -173,6 +174,7 @@ Type: dirifempty; Name: {app}
 
 [Code]
 #emit 'const MY_APP_NAME = ''{app}\' + myAppProg + '.exe'';'
+
 
 function isGuru(): Boolean;
 begin
@@ -334,7 +336,7 @@ begin
   Log('** set LYNX_CFG=' + CfgFile);
 
   SaveStringToFile(CfgFile, 'HELPFILE:' + AppDir + '/help/Lynx_help_main.html.gz' + #10, True);
-  SaveStringToFile(CfgFile, 'COLOR_STYLE:' + AppDir + '/opaque.lss' + #10, True);
+  SaveStringToFile(CfgFile, 'COLOR_STYLE:' + AppDir + '/lynx.lss' + #10, True);
 
   SaveStringToFile(CfgFile, 'CHMOD_PATH:' + #10, True);
   SaveStringToFile(CfgFile, 'COPY_PATH:' + #10, True);
@@ -385,20 +387,197 @@ begin
         end
     end
 end;
-      
+
+#ifdef SslGlob1
+#emit "const SslGlob1 = " + SslGlob1 + ";"
+#emit "const SslGlob2 = " + SslGlob2 + ";"
+var
+    SslDirPage     : TInputFileWizardPage;
+    SslLibraryPath : String;
+
+function DirContains(const PathList: string; const PathItem: string): Boolean;
+var
+    myList : string;
+    myItem : string;
+    myPart : string;
+    offset : integer;
+begin
+    Result := False;
+    myList := Uppercase(PathList);
+    myItem := Uppercase(RemoveBackslashUnlessRoot(PathItem));
+    offset := Pos(myItem, myList);
+    if offset <> 0 then
+        begin
+        myPart := Copy( myList, offset + Length(myItem), Length(myList) );
+        if ( Length(myPart) = 0 ) or ( Pos(';', myPart) = 1 ) or ( Pos('\;', myPart) = 1 ) then
+            begin
+            Result := True;
+            end;
+        end;
+end;
+
+function PathCat(const head, tail: string): string;
+begin
+    Result := RemoveBackslashUnlessRoot(head) + '\' + tail;
+end;
+
+procedure CopyFromTo(const source, target, name: string);
+var
+    FailExists : Boolean;
+    Status:      Boolean;
+begin
+    Log('Copy from: ' + PathCat(source, name));
+    Log('Copy   to: ' + PathCat(target, name));
+    FailExists := False;
+    Status := FileCopy(PathCat(source, name), PathCat(target, name), FailExists);
+    if not Status then
+        begin
+        MsgBox('Failed to copy ' + name, mbError, MB_OK);
+        Abort();
+        end;
+end;
+
+procedure ReallyDelete(const fullPath: string);
+begin
+    if DeleteFile( fullPath ) then
+        Log( '...successful' )
+    else
+        begin
+        MsgBox('Failed to delete ' + fullPath, mbError, MB_OK);
+        end;
+end;
+
+procedure DeleteAppFile(const name: string);
+var
+    AppDir   : string;
+    fullPath : string;
+    findRec  : TFindRec;
+begin
+    AppDir := ExpandConstant('{app}');
+    fullPath := PathCat( AppDir, name );
+    Log( 'Deleting ' + fullPath );
+    if Pos('*', fullPath) <> 0 then
+        begin
+        if FindFirst(fullPath, findRec) then
+            begin
+            ReallyDelete( PathCat( AppDir, findRec.name ) );
+            while FindNext( findRec ) do
+                ReallyDelete( PathCat( AppDir, findRec.name ) );
+            end
+        end
+    else
+        begin
+        ReallyDelete( fullPath );
+        end;
+end;
+
+function checkSslDir(): Boolean;
+begin
+    Result := True;
+    SslLibraryPath := Trim( SslDirPage.Values[0] );
+    if ( Length( SslLibraryPath ) = 0 ) or ( not FileExists( SslLibraryPath ) ) then
+        begin
+        MsgBox('No SSL library found', mbError, MB_OK)
+        Result := False;
+        end;
+end;
+
+procedure copySslDlls();
+var
+    SslDirectory   : String;
+    SslFilename    : String;
+    TargetDir      : String;
+begin
+    Log('Copying SSL DLLs');
+    SslDirectory := ExtractFilePath(SslLibraryPath);
+
+    // If the directory is not already in the PATH, copy the DLLs to
+    // the application directory.
+    if DirContains( GetEnv('PATH'), SslDirectory) then
+        Log( 'PATH contains SSL directory' )
+    else
+        begin
+        TargetDir := ExpandConstant('{app}');
+        CreateDir(TargetDir);
+        if DirExists(TargetDir) then
+            begin
+            SslFilename := Lowercase( ExtractFileName( SslLibraryPath ) );
+            CopyFromTo( SslDirectory, TargetDir, SslFilename );
+            Log( 'comparing: ' + SslFilename + ' to ' + SslGlob1 );
+            if CompareText( SslFilename, SslGlob1 ) = 0 then
+                // old-ssl is literal, new is a glob...
+                CopyFromTo( SslDirectory, TargetDir, SslGlob2 )
+            else
+                // new-ssl matches "libssl-x-x-z", s/libssl/libcrypto/
+                SslFilename := 'libcrypto' + Copy(SslFilename, 7, Length(SslFilename));
+                CopyFromTo( SslDirectory, TargetDir, SslFilename );
+            CopyFromTo( SslDirectory, TargetDir, 'msvcr120.dll' );
+            end
+        else
+            begin
+            MsgBox( 'Cannot create application directory', mbError, MB_OK )
+            Abort();
+            end
+        end;
+    Log('done - Copying SSL DLLs');
+end;
+
+procedure RegisterPreviousData(PreviousDataKey: Integer);
+begin
+    SetPreviousData( PreviousDataKey, 'SSL PATH', SslLibraryPath );
+end;
+
+function NextButtonClick(CurPageId: integer): Boolean;
+begin
+    Result := True;
+    if CurPageId = SslDirPage.Id then
+        begin
+        Result := checkSslDir();
+        end;
+end;
+
+procedure CurStepChanged(CurStep: TSetupStep);
+begin
+    if CurStep = ssInstall then
+    begin
+        CopySslDlls();
+    end;
+end;
+
+procedure InitializeWizard();
+var
+    myGlob: string;
+begin
+    // Create a page to locate the SSL library
+    SslDirPage := CreateInputFilePage(wpSelectDir,
+        'Select SSL Library Location',
+        'Where is the SSL library located?',
+        'Select it from the directory, then click Next.');
+
+    myGlob := 'SSL dll|' + SslGlob1;
+    Log( 'search for SSL libraries ' + myGlob );
+    SslDirPage.Add( 'Locate SSL library:', myGlob, '*.dll' );
+    SslDirPage.Values[0] := GetPreviousData( 'SSL PATH', '' );
+end;
+#endif
+
 // On uninstall, we do not know which registry setting was selected during install, so we remove all.
 procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);
 begin
   case CurUninstallStep of
     usUninstall:
       begin
-        // MsgBox('CurUninstallStepChanged:' #13#13 'Uninstall is about to start.', mbInformation, MB_OK)
+      Log('CurUninstallStepChanged:' + 'Uninstall is about to start.')
         // ...insert code to perform pre-uninstall tasks here...
+#ifdef SslGlob1
+      DeleteAppFile( SslGlob1 );
+      DeleteAppFile( SslGlob2 );
+      DeleteAppFile( 'msvcr120.dll' );
+#endif
       end;
     usPostUninstall:
       begin
         removeAnyVariable('LYNX_CFG');
-
       {
         If we don't find the settings in the current user, try the local machine.
         The setup program cannot pass the all-users flag to the uninstaller, so we
@@ -410,8 +589,8 @@ begin
         Log('Checking local-machine registry key');
         CleanupMyKey(HKEY_LOCAL_MACHINE);
         end;
-    
-        // MsgBox('CurUninstallStepChanged:' #13#13 'Uninstall just finished.', mbInformation, MB_OK);
+
+        Log('CurUninstallStepChanged:' + 'Uninstall just finished.');
       end;
   end;
 end;
