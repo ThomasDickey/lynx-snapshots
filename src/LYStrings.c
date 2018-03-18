@@ -1,4 +1,4 @@
-/* $LynxId: LYStrings.c,v 1.270 2018/03/11 23:10:37 tom Exp $ */
+/* $LynxId: LYStrings.c,v 1.271 2018/03/18 19:14:44 tom Exp $ */
 #include <HTUtils.h>
 #include <HTCJK.h>
 #include <UCAux.h>
@@ -6113,7 +6113,7 @@ void LYOpenCmdLogfile(int argc,
 {
     int n;
 
-    if (lynx_cmd_logfile != 0) {
+    if (non_empty(lynx_cmd_logfile)) {
 	cmd_logfile = LYNewTxtFile(lynx_cmd_logfile);
 	if (cmd_logfile != 0) {
 	    fprintf(cmd_logfile, "# Command logfile created by %s %s (%s)\n",
@@ -6132,7 +6132,7 @@ BOOL LYHaveCmdScript(void)
 
 void LYOpenCmdScript(void)
 {
-    if (lynx_cmd_script != 0) {
+    if (non_empty(lynx_cmd_script)) {
 	cmd_script = fopen(lynx_cmd_script, TXT_R);
 	CTRACE((tfp, "LYOpenCmdScript(%s) %s\n",
 		lynx_cmd_script,

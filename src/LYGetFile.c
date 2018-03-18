@@ -1,4 +1,4 @@
-/* $LynxId: LYGetFile.c,v 1.94 2016/11/24 15:35:29 tom Exp $ */
+/* $LynxId: LYGetFile.c,v 1.95 2018/03/18 19:34:45 tom Exp $ */
 #include <HTUtils.h>
 #include <HTTP.h>
 #include <HTAnchor.h>		/* Anchor class */
@@ -199,15 +199,16 @@ int getfile(DocInfo *doc, int *target)
 		  url_type == LYNXMESSAGES_URL_TYPE ||
 		  (url_type == LYNXOPTIONS_URL_TYPE &&
 		   WWWDoc.post_data) ||
-		  0 == STRNADDRCOMP(WWWDoc.address, helpfilepath,
-				    strlen(helpfilepath)) ||
-		  (lynxlistfile != NULL &&
+		  (non_empty(helpfilepath) &&
+		   0 == STRNADDRCOMP(WWWDoc.address, helpfilepath,
+				     strlen(helpfilepath))) ||
+		  (non_empty(lynxlistfile) &&
 		   0 == STRNADDRCOMP(WWWDoc.address, lynxlistfile,
 				     strlen(lynxlistfile))) ||
-		  (lynxlinksfile != NULL &&
+		  (non_empty(lynxlinksfile) &&
 		   0 == STRNADDRCOMP(WWWDoc.address, lynxlinksfile,
 				     strlen(lynxlinksfile))) ||
-		  (lynxjumpfile != NULL &&
+		  (non_empty(lynxjumpfile) &&
 		   0 == STRNADDRCOMP(WWWDoc.address, lynxjumpfile,
 				     strlen(lynxjumpfile))))) {
 		HTUserMsg(NOT_HTTP_URL_OR_ACTION);

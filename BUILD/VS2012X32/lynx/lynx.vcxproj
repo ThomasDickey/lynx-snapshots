@@ -1,0 +1,309 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{77B6BED2-257D-4F7D-AA1B-D180875BD3BF}</ProjectGuid>
+    <RootNamespace>lynx</RootNamespace>
+    <Keyword>Win32Proj</Keyword>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <PlatformToolset>v120</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v120</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.40219.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Configuration)\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</LinkIncremental>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Configuration)\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>..\lynx;$(SolutionDir)..\..\..;$(SolutionDir)..\..\..\lib;$(SolutionDir)..\..\..\WWW\Library\Implementation;$(SolutionDir)..\..\..\src;$(SolutionDir)..\..\..\src\chrtrans;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_CONSOLE;HAVE_CONFIG_H;DONT_HAVE_TM_GMTOFF;_WIN_CC</PreprocessorDefinitions>
+      <PreprocessToFile>false</PreprocessToFile>
+      <PreprocessSuppressLineNumbers>false</PreprocessSuppressLineNumbers>
+      <MinimalRebuild>true</MinimalRebuild>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>pdcurses.lib;zlib.lib;wsock32.lib;user32.lib;advapi32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(VcInstallDir)lib;$(SolutionDir)\lib;$(SolutionDir)..\..\..\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <IgnoreSpecificDefaultLibraries>libc;libcmt;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Console</SubSystem>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention>
+      </DataExecutionPrevention>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>..\lynx;$(SolutionDir)..\..\..;$(SolutionDir)..\..\..\lib;$(SolutionDir)..\..\..\WWW\Library\Implementation;$(SolutionDir)..\..\..\src;$(SolutionDir)..\..\..\src\chrtrans;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_CONSOLE;_MBCS;HAVE_CONFIG_H;DONT_HAVE_TM_GMTOFF;_WIN_CC</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>pdcurses.lib;zlib.lib;wsock32.lib;user32.lib;advapi32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(VcInstallDir)lib;$(SolutionDir)\lib;$(SolutionDir)..\..\..\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Console</SubSystem>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention>
+      </DataExecutionPrevention>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\src\DefaultStyle.c" />
+    <ClCompile Include="..\..\..\lib\dirent.c" />
+    <ClCompile Include="..\..\..\src\GridText.c" />
+    <ClCompile Include="..\..\..\WWW\Library\Implementation\HTAABrow.c" />
+    <ClCompile Include="..\..\..\WWW\Library\Implementation\HTAAProt.c" />
+    <ClCompile Include="..\..\..\WWW\Library\Implementation\HTAAUtil.c" />
+    <ClCompile Include="..\..\..\WWW\Library\Implementation\HTAccess.c" />
+    <ClCompile Include="..\..\..\src\HTAlert.c" />
+    <ClCompile Include="..\..\..\WWW\Library\Implementation\HTAnchor.c" />
+    <ClCompile Include="..\..\..\WWW\Library\Implementation\HTAssoc.c" />
+    <ClCompile Include="..\..\..\WWW\Library\Implementation\HTAtom.c" />
+    <ClCompile Include="..\..\..\WWW\Library\Implementation\HTBTree.c" />
+    <ClCompile Include="..\..\..\WWW\Library\Implementation\HTChunk.c" />
+    <ClCompile Include="..\..\..\WWW\Library\Implementation\HTDOS.c" />
+    <ClCompile Include="..\..\..\WWW\Library\Implementation\HTFile.c" />
+    <ClCompile Include="..\..\..\WWW\Library\Implementation\HTFinger.c" />
+    <ClCompile Include="..\..\..\WWW\Library\Implementation\HTFormat.c" />
+    <ClCompile Include="..\..\..\WWW\Library\Implementation\HTFTP.c" />
+    <ClCompile Include="..\..\..\src\HTFWriter.c" />
+    <ClCompile Include="..\..\..\WWW\Library\Implementation\HTGopher.c" />
+    <ClCompile Include="..\..\..\WWW\Library\Implementation\HTGroup.c" />
+    <ClCompile Include="..\..\..\src\HTInit.c" />
+    <ClCompile Include="..\..\..\WWW\Library\Implementation\HTLex.c" />
+    <ClCompile Include="..\..\..\WWW\Library\Implementation\HTList.c" />
+    <ClCompile Include="..\..\..\WWW\Library\Implementation\HTMIME.c" />
+    <ClCompile Include="..\..\..\src\HTML.c" />
+    <ClCompile Include="..\..\..\WWW\Library\Implementation\HTMLDTD.c" />
+    <ClCompile Include="..\..\..\WWW\Library\Implementation\HTMLGen.c" />
+    <ClCompile Include="..\..\..\WWW\Library\Implementation\HTNews.c" />
+    <ClCompile Include="..\..\..\WWW\Library\Implementation\HTParse.c" />
+    <ClCompile Include="..\..\..\WWW\Library\Implementation\HTPlain.c" />
+    <ClCompile Include="..\..\..\WWW\Library\Implementation\HTRules.c" />
+    <ClCompile Include="..\..\..\WWW\Library\Implementation\HTString.c" />
+    <ClCompile Include="..\..\..\WWW\Library\Implementation\HTStyle.c" />
+    <ClCompile Include="..\..\..\WWW\Library\Implementation\HTTCP.c" />
+    <ClCompile Include="..\..\..\WWW\Library\Implementation\HTTelnet.c" />
+    <ClCompile Include="..\..\..\WWW\Library\Implementation\HTTP.c" />
+    <ClCompile Include="..\..\..\WWW\Library\Implementation\HTUU.c" />
+    <ClCompile Include="..\..\..\WWW\Library\Implementation\HTWSRC.c" />
+    <ClCompile Include="..\..\..\src\LYBookmark.c" />
+    <ClCompile Include="..\..\..\src\LYCgi.c" />
+    <ClCompile Include="..\..\..\src\LYCharSets.c" />
+    <ClCompile Include="..\..\..\src\LYCharUtils.c" />
+    <ClCompile Include="..\..\..\src\LYClean.c" />
+    <ClCompile Include="..\..\..\src\LYCookie.c" />
+    <ClCompile Include="..\..\..\src\LYCurses.c" />
+    <ClCompile Include="..\..\..\src\LYDownload.c" />
+    <ClCompile Include="..\..\..\src\LYEdit.c" />
+    <ClCompile Include="..\..\..\src\LYEditmap.c" />
+    <ClCompile Include="..\..\..\src\LYexit.c" />
+    <ClCompile Include="..\..\..\src\LYExtern.c" />
+    <ClCompile Include="..\..\..\src\LYForms.c" />
+    <ClCompile Include="..\..\..\src\LYGetFile.c" />
+    <ClCompile Include="..\..\..\src\LYHash.c" />
+    <ClCompile Include="..\..\..\src\LYHistory.c" />
+    <ClCompile Include="..\..\..\src\LYJump.c" />
+    <ClCompile Include="..\..\..\src\LYKeymap.c" />
+    <ClCompile Include="..\..\..\src\LYLeaks.c" />
+    <ClCompile Include="..\..\..\src\LYList.c" />
+    <ClCompile Include="..\..\..\src\LYLocal.c" />
+    <ClCompile Include="..\..\..\src\LYMail.c" />
+    <ClCompile Include="..\..\..\src\LYMain.c" />
+    <ClCompile Include="..\..\..\src\LYMainLoop.c" />
+    <ClCompile Include="..\..\..\src\LYMap.c" />
+    <ClCompile Include="..\..\..\src\LYmktime.c" />
+    <ClCompile Include="..\..\..\src\LYNews.c" />
+    <ClCompile Include="..\..\..\src\LYOptions.c" />
+    <ClCompile Include="..\..\..\src\LYPrettySrc.c" />
+    <ClCompile Include="..\..\..\src\LYPrint.c" />
+    <ClCompile Include="..\..\..\src\LYrcFile.c" />
+    <ClCompile Include="..\..\..\src\LYReadCFG.c" />
+    <ClCompile Include="..\..\..\src\LYSearch.c" />
+    <ClCompile Include="..\..\..\src\LYSession.c" />
+    <ClCompile Include="..\..\..\src\LYShowInfo.c" />
+    <ClCompile Include="..\..\..\src\LYStrings.c" />
+    <ClCompile Include="..\..\..\src\LYStyle.c" />
+    <ClCompile Include="..\..\..\src\LYTraversal.c" />
+    <ClCompile Include="..\..\..\src\LYUpload.c" />
+    <ClCompile Include="..\..\..\src\LYUtils.c" />
+    <ClCompile Include="..\..\..\src\parsdate.c" />
+    <ClCompile Include="..\..\..\WWW\Library\Implementation\SGML.c" />
+    <ClCompile Include="..\..\..\src\TRSTable.c" />
+    <ClCompile Include="..\..\..\src\UCAuto.c" />
+    <ClCompile Include="..\..\..\src\UCAux.c" />
+    <ClCompile Include="..\..\..\src\UCdomap.c" />
+    <ClCompile Include="..\..\..\src\Xsystem.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\lib\bzlib.h" />
+    <ClInclude Include="..\..\..\lib\curses.h" />
+    <ClInclude Include="..\..\..\lib\dirent.h" />
+    <ClInclude Include="..\..\..\lib\zconf.h" />
+    <ClInclude Include="..\..\..\lib\zlib.h" />
+    <ClInclude Include="..\..\..\lymessages_en.h" />
+    <ClInclude Include="..\..\..\src\AttrList.h" />
+    <ClInclude Include="..\..\..\src\chrtrans\cp1251_uni.h" />
+    <ClInclude Include="..\..\..\src\GridText.h" />
+    <ClInclude Include="..\..\..\userdefs.h" />
+    <ClInclude Include="..\..\..\WWW\Library\Implementation\HTAABrow.h" />
+    <ClInclude Include="..\..\..\WWW\Library\Implementation\HTAAProt.h" />
+    <ClInclude Include="..\..\..\WWW\Library\Implementation\HTAAUtil.h" />
+    <ClInclude Include="..\..\..\WWW\Library\Implementation\HTAccess.h" />
+    <ClInclude Include="..\..\..\src\HTAlert.h" />
+    <ClInclude Include="..\..\..\WWW\Library\Implementation\HTAnchor.h" />
+    <ClInclude Include="..\..\..\WWW\Library\Implementation\HTAssoc.h" />
+    <ClInclude Include="..\..\..\WWW\Library\Implementation\HTAtom.h" />
+    <ClInclude Include="..\..\..\WWW\Library\Implementation\HTBTree.h" />
+    <ClInclude Include="..\..\..\WWW\Library\Implementation\HTChunk.h" />
+    <ClInclude Include="..\..\..\WWW\Library\Implementation\HTCJK.h" />
+    <ClInclude Include="..\..\..\WWW\Library\Implementation\HTDOS.h" />
+    <ClInclude Include="..\..\..\WWW\Library\Implementation\HText.h" />
+    <ClInclude Include="..\..\..\WWW\Library\Implementation\HTFile.h" />
+    <ClInclude Include="..\..\..\WWW\Library\Implementation\HTFinger.h" />
+    <ClInclude Include="..\..\..\src\HTFont.h" />
+    <ClInclude Include="..\..\..\WWW\Library\Implementation\HTFormat.h" />
+    <ClInclude Include="..\..\..\src\HTForms.h" />
+    <ClInclude Include="..\..\..\WWW\Library\Implementation\HTFTP.h" />
+    <ClInclude Include="..\..\..\WWW\Library\Implementation\HTFWriter.h" />
+    <ClInclude Include="..\..\..\WWW\Library\Implementation\HTGopher.h" />
+    <ClInclude Include="..\..\..\WWW\Library\Implementation\HTGroup.h" />
+    <ClInclude Include="..\..\..\WWW\Library\Implementation\HTInit.h" />
+    <ClInclude Include="..\..\..\WWW\Library\Implementation\HTioctl.h" />
+    <ClInclude Include="..\..\..\WWW\Library\Implementation\HTLex.h" />
+    <ClInclude Include="..\..\..\WWW\Library\Implementation\HTList.h" />
+    <ClInclude Include="..\..\..\WWW\Library\Implementation\HTMIME.h" />
+    <ClInclude Include="..\..\..\src\HTML.h" />
+    <ClInclude Include="..\..\..\WWW\Library\Implementation\HTMLDTD.h" />
+    <ClInclude Include="..\..\..\WWW\Library\Implementation\HTMLGen.h" />
+    <ClInclude Include="..\..\..\src\HTNestedList.h" />
+    <ClInclude Include="..\..\..\WWW\Library\Implementation\HTNews.h" />
+    <ClInclude Include="..\..\..\WWW\Library\Implementation\HTParse.h" />
+    <ClInclude Include="..\..\..\WWW\Library\Implementation\HTPlain.h" />
+    <ClInclude Include="..\..\..\WWW\Library\Implementation\HTRules.h" />
+    <ClInclude Include="..\..\..\src\HTSaveToFile.h" />
+    <ClInclude Include="..\..\..\WWW\Library\Implementation\HTStream.h" />
+    <ClInclude Include="..\..\..\WWW\Library\Implementation\HTString.h" />
+    <ClInclude Include="..\..\..\WWW\Library\Implementation\HTStyle.h" />
+    <ClInclude Include="..\..\..\WWW\Library\Implementation\HTTCP.h" />
+    <ClInclude Include="..\..\..\WWW\Library\Implementation\HTTelnet.h" />
+    <ClInclude Include="..\..\..\WWW\Library\Implementation\HTTP.h" />
+    <ClInclude Include="..\..\..\WWW\Library\Implementation\htutils.h" />
+    <ClInclude Include="..\..\..\WWW\Library\Implementation\HTUU.h" />
+    <ClInclude Include="..\..\..\WWW\Library\Implementation\HTWSRC.h" />
+    <ClInclude Include="..\..\..\src\LYBookmark.h" />
+    <ClInclude Include="..\..\..\src\LYCgi.h" />
+    <ClInclude Include="..\..\..\src\LYCharSets.h" />
+    <ClInclude Include="..\..\..\src\LYCharUtils.h" />
+    <ClInclude Include="..\..\..\src\LYCharVals.h" />
+    <ClInclude Include="..\..\..\src\LYClean.h" />
+    <ClInclude Include="..\..\..\src\LYCookie.h" />
+    <ClInclude Include="..\..\..\src\LYCurses.h" />
+    <ClInclude Include="..\..\..\src\LYDownload.h" />
+    <ClInclude Include="..\..\..\src\LYEdit.h" />
+    <ClInclude Include="..\..\..\WWW\Library\Implementation\LYexit.h" />
+    <ClInclude Include="..\..\..\src\LYExtern.h" />
+    <ClInclude Include="..\..\..\src\LYGCurses.h" />
+    <ClInclude Include="..\..\..\src\LYGetFile.h" />
+    <ClInclude Include="..\..\..\src\LYGlobalDefs.h" />
+    <ClInclude Include="..\..\..\src\LYHash.h" />
+    <ClInclude Include="..\..\..\src\LYHistory.h" />
+    <ClInclude Include="..\..\..\src\LYJump.h" />
+    <ClInclude Include="..\..\..\src\LYJustify.h" />
+    <ClInclude Include="..\..\..\src\LYKeymap.h" />
+    <ClInclude Include="..\..\..\WWW\Library\Implementation\LYLeaks.h" />
+    <ClInclude Include="..\..\..\src\LYList.h" />
+    <ClInclude Include="..\..\..\src\LYLocal.h" />
+    <ClInclude Include="..\..\..\src\LYMail.h" />
+    <ClInclude Include="..\..\..\src\LYMainLoop.h" />
+    <ClInclude Include="..\..\..\src\LYMap.h" />
+    <ClInclude Include="..\..\..\src\LYNews.h" />
+    <ClInclude Include="..\..\..\www\library\implementation\tidy_tls.h" />
+    <ClInclude Include="lynx_cfg.h" />
+    <ClInclude Include="..\..\..\src\LYOptions.h" />
+    <ClInclude Include="..\..\..\src\LYPrettySrc.h" />
+    <ClInclude Include="..\..\..\src\LYPrint.h" />
+    <ClInclude Include="..\..\..\src\LYrcFile.h" />
+    <ClInclude Include="..\..\..\src\LYReadCFG.h" />
+    <ClInclude Include="..\..\..\src\LYSearch.h" />
+    <ClInclude Include="..\..\..\src\LYSession.h" />
+    <ClInclude Include="..\..\..\src\LYShowInfo.h" />
+    <ClInclude Include="..\..\..\src\LYSignal.h" />
+    <ClInclude Include="..\..\..\src\LYStrings.h" />
+    <ClInclude Include="..\..\..\src\LYStructs.h" />
+    <ClInclude Include="..\..\..\src\LYStyle.h" />
+    <ClInclude Include="..\..\..\src\LYTraversal.h" />
+    <ClInclude Include="..\..\..\src\LYUpload.h" />
+    <ClInclude Include="..\..\..\src\LYUtils.h" />
+    <ClInclude Include="..\..\..\src\LYVMSdef.h" />
+    <ClInclude Include="..\..\..\WWW\Library\Implementation\SGML.h" />
+    <ClInclude Include="..\..\..\src\structdump.h" />
+    <ClInclude Include="..\..\..\src\TRSTable.h" />
+    <ClInclude Include="..\..\..\src\UCAuto.h" />
+    <ClInclude Include="..\..\..\WWW\Library\Implementation\UCAux.h" />
+    <ClInclude Include="..\..\..\WWW\Library\Implementation\UCDefs.h" />
+    <ClInclude Include="..\..\..\src\UCdomap.h" />
+    <ClInclude Include="..\..\..\WWW\Library\Implementation\UCMap.h" />
+    <ClInclude Include="..\..\..\WWW\Library\Implementation\www_tcp.h" />
+    <ClInclude Include="..\..\..\WWW\Library\Implementation\www_wait.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\makeuctb\makeuctb.vcxproj">
+      <Project>{3ef8c45c-fc77-47b8-a5b6-5f9034ece06e}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

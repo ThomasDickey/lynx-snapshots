@@ -1,0 +1,4 @@
+-- $LynxId: README,v 1.1 2018/03/18 20:42:49 tom Exp $
+Lynx is usually built on the command-line, e.g., using make-msc.bat
+However, IDEs are occasionally useful for debugging.  Here are project
+files used for different versions of Visual Studio.

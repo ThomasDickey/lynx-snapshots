@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTP.c,v 1.167 2018/03/05 22:33:35 tom Exp $
+ * $LynxId: HTTP.c,v 1.168 2018/03/18 18:47:59 tom Exp $
  *
  * HyperText Tranfer Protocol	- Client implementation		HTTP.c
  * ==========================
@@ -1417,11 +1417,11 @@ static int HTLoadHTTP(const char *arg,
 	    }
 	}
 
-	if (language && *language) {
+	if (non_empty(language)) {
 	    HTBprintf(&command, "Accept-Language: %s%c%c", language, CR, LF);
 	}
 
-	if (pref_charset && *pref_charset) {
+	if (non_empty(pref_charset)) {
 	    BStrCat0(command, "Accept-Charset: ");
 	    StrAllocCopy(linebuf, pref_charset);
 	    if (linebuf[strlen(linebuf) - 1] == ',')
@@ -1489,7 +1489,7 @@ static int HTLoadHTTP(const char *arg,
 	    }
 	}
 
-	if (personal_mail_address && !LYNoFromHeader) {
+	if (non_empty(personal_mail_address) && !LYNoFromHeader) {
 	    HTBprintf(&command, "From: %s%c%c", personal_mail_address, CR, LF);
 	}
 
@@ -1966,7 +1966,8 @@ static int HTLoadHTTP(const char *arg,
 
 	CTRACE((tfp, "HTTP: Scanned %d fields from line_buffer\n", fields));
 
-	if (http_error_file) {	/* Make the status code externally available */
+	if (non_empty(http_error_file)) {
+	    /* Make the status code externally available */
 	    FILE *error_file;
 
 #ifdef SERVER_STATUS_ONLY

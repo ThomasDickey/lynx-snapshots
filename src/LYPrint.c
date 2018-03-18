@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYPrint.c,v 1.106 2018/03/05 22:38:53 tom Exp $
+ * $LynxId: LYPrint.c,v 1.107 2018/03/18 19:06:06 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTAccess.h>
@@ -315,7 +315,7 @@ static void send_file_to_file(DocInfo *newdoc,
 
   retry:
     SetupFilename(&filename, sug_filename);
-    if (lynx_save_space) {
+    if (non_empty(lynx_save_space)) {
 	BStrCopy0(buffer, lynx_save_space);
 	BStrCat(buffer, filename);
 	BStrCopy(filename, buffer);

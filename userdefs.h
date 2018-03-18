@@ -1,5 +1,5 @@
 /*
- * $LynxId: userdefs.h,v 1.332 2018/02/05 09:42:23 tom Exp $
+ * $LynxId: userdefs.h,v 1.333 2018/03/17 16:07:07 tom Exp $
  *
  * Lynx - Hypertext navigation system
  *
@@ -1547,6 +1547,10 @@
 
 #ifndef USE_BLAT_MAILER
 #define USE_BLAT_MAILER 1
+#endif
+
+#ifndef LYNX_CFG_PATH
+#define LYNX_CFG_PATH "."
 #endif
 
 #else

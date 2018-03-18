@@ -1,4 +1,4 @@
-/* $LynxId: LYCurses.c,v 1.192 2018/03/11 22:19:56 tom Exp $ */
+/* $LynxId: LYCurses.c,v 1.193 2018/03/18 19:19:12 tom Exp $ */
 #include <HTUtils.h>
 #include <HTAlert.h>
 
@@ -1809,7 +1809,9 @@ BOOLEAN setup(char *terminal)
      */
     term[0] = '\0';
     longname(dummy, term);
-    if (term[0] == '\0' && (form_get_data || form_post_data)) {
+    if (term[0] == '\0' &&
+	(non_empty(form_get_data) ||
+	 non_empty(form_post_data))) {
 	/*
 	 * Some yoyo used these under conditions which require -dump, so force
 	 * that mode here.  - FM

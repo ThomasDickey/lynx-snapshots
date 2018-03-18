@@ -1,5 +1,5 @@
 /*
- * $LynxId: UCAuto.c,v 1.54 2016/11/24 15:35:29 tom Exp $
+ * $LynxId: UCAuto.c,v 1.55 2018/03/18 18:51:29 tom Exp $
  *
  *  This file contains code for changing the Linux console mode.
  *  Currently some names for font files are hardwired in here.
@@ -213,7 +213,7 @@ static int nonempty_file(const char *p)
 
 static BOOL on_console(void)
 {
-    if ((x_display != NULL) ||
+    if ((non_empty(x_display)) ||
 	LYgetXDisplay() != NULL) {
 	/*
 	 * We won't do anything in an xterm.  Better that way...

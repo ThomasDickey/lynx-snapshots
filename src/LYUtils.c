@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYUtils.c,v 1.282 2018/03/11 22:50:21 tom Exp $
+ * $LynxId: LYUtils.c,v 1.283 2018/03/18 18:51:53 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTCP.h>
@@ -5686,7 +5686,7 @@ char *LYAddPathToSave(char *fname)
     if (LYisAbsPath(fname)) {
 	StrAllocCopy(result, fname);
     } else {
-	if (lynx_save_space != NULL) {
+	if (non_empty(lynx_save_space)) {
 	    StrAllocCopy(result, lynx_save_space);
 	} else {
 	    char temp[LY_MAXPATH];

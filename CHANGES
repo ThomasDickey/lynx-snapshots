@@ -1,9 +1,14 @@
--- $LynxId: CHANGES,v 1.953 2018/03/17 11:42:59 tom Exp $
+-- $LynxId: CHANGES,v 1.956 2018/03/18 23:55:09 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2018-03-17 (2.8.9dev.17)
+2018-03-18 (2.8.9dev.17)
+* add Visual Studio project files for 2010, 2012 -TD
+* improve checks for strings which should not be empty -TD
+* check for empty personal-mail-address (report by TG) -TD
+* modify samples/lynx-demo.cfg to use SOURCE_CACHE:memory -TD
+* modify samples/*lynx.bat to use existing TEMP-directory if possible -TD
 * modify windows installer to select directory containing SSL DLLs and copy
   them into lynx's application directory -TD
 * add oldlynx.bat sample script to windows installer -TD
