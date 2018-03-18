@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTUtils.h,v 1.127 2018/03/11 22:29:50 tom Exp $
+ * $LynxId: HTUtils.h,v 1.128 2018/03/17 15:56:11 tom Exp $
  *
  * Utility macros for the W3 code library
  * MACROS FOR GENERAL USE
@@ -23,7 +23,9 @@
 #else
 # ifdef _MSC_VER
 #  include <malloc.h>
-#  define alloca(size) _alloca(size)
+#  ifndef alloca
+#   define alloca(size) _alloca(size)
+#  endif
 # else
 #  if HAVE_ALLOCA_H
 #   include <alloca.h>

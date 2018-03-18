@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYCgi.c,v 1.71 2018/03/05 22:36:09 tom Exp $
+ * $LynxId: LYCgi.c,v 1.72 2018/03/18 18:56:05 tom Exp $
  *                   Lynx CGI support                              LYCgi.c
  *                   ================
  *
@@ -639,7 +639,7 @@ static int LYLoadCGI(const char *arg,
 		argv[0] = pgm;
 
 		/* Begin WebSter Mods  -jkt */
-		if (LYCgiDocumentRoot != NULL) {
+		if (non_empty(LYCgiDocumentRoot)) {
 		    /* Add DOCUMENT_ROOT to env */
 		    cp = NULL;
 		    StrAllocCopy(cp, "DOCUMENT_ROOT=");
@@ -653,7 +653,7 @@ static int LYLoadCGI(const char *arg,
 		    StrAllocCat(cp, path_info);
 		    add_environment_value(cp);
 		}
-		if (LYCgiDocumentRoot != NULL && path_info != NULL) {
+		if (non_empty(LYCgiDocumentRoot) && path_info != NULL) {
 		    /* Construct and add PATH_TRANSLATED to env */
 		    StrAllocCopy(document_root, LYCgiDocumentRoot);
 		    LYTrimHtmlSep(document_root);

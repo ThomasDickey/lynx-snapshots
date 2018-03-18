@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYNews.c,v 1.61 2013/11/28 11:21:09 tom Exp $
+ * $LynxId: LYNews.c,v 1.62 2018/03/18 18:51:02 tom Exp $
  */
 #include <HTUtils.h>
 #ifndef DISABLE_NEWS
@@ -407,7 +407,7 @@ char *LYNewsPost(char *newsgroups,
 	    || HTConfirmDefault(POST_MSG_PROMPT, NO) != YES)
 	    goto cleanup;
     }
-    if ((LynxSigFile != NULL) && (fp = fopen(LynxSigFile, TXT_R)) != NULL) {
+    if ((non_empty(LynxSigFile)) && (fp = fopen(LynxSigFile, TXT_R)) != NULL) {
 	char *msg = NULL;
 
 	HTSprintf0(&msg, APPEND_SIG_FILE, LynxSigFile);

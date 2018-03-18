@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMain.c,v 1.273 2018/03/11 22:49:35 tom Exp $
+ * $LynxId: LYMain.c,v 1.274 2018/03/18 19:17:00 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTP.h>
@@ -1450,14 +1450,14 @@ int main(int argc,
     /*
      * Open command-script, if specified
      */
-    if (lynx_cmd_script != 0) {
+    if (non_empty(lynx_cmd_script)) {
 	LYTildeExpand(&lynx_cmd_script, TRUE);
 	LYOpenCmdScript();
     }
     /*
      * Open command-logging, if specified
      */
-    if (lynx_cmd_logfile != 0) {
+    if (non_empty(lynx_cmd_logfile)) {
 	LYTildeExpand(&lynx_cmd_logfile, TRUE);
 	LYOpenCmdLogfile(argc, argv);
     }
@@ -1483,13 +1483,13 @@ int main(int argc,
      * If no alternate configuration file was specified on the command line,
      * see if it's in the environment.
      */
-    if (!lynx_cfg_file) {
+    if (isEmpty(lynx_cfg_file)) {
 	if (((cp = LYGetEnv("LYNX_CFG")) != NULL) ||
 	    (cp = LYGetEnv("lynx_cfg")) != NULL)
 	    StrAllocCopy(lynx_cfg_file, cp);
     }
 #ifdef USE_PROGRAM_DIR
-    if (!lynx_cfg_file) {
+    if (isEmpty(lynx_cfg_file)) {
 	HTSprintf0(&lynx_cfg_file, "%s\\lynx.cfg", program_dir);
 	if (!LYCanReadFile(lynx_cfg_file)) {
 	    FREE(lynx_cfg_file);
@@ -1502,7 +1502,7 @@ int main(int argc,
      * If we still don't have a configuration file, use the userdefs.h
      * definition.
      */
-    if (!lynx_cfg_file)
+    if (isEmpty(lynx_cfg_file))
 	StrAllocCopy(lynx_cfg_file, LYNX_CFG_FILE);
 
 #ifndef _WINDOWS		/* avoid the whole ~ thing for now */
@@ -1750,7 +1750,7 @@ int main(int argc,
     }
 
     /* tilde-expand LYCookieSaveFile */
-    if (LYCookieSaveFile != NULL) {
+    if (non_empty(LYCookieSaveFile)) {
 	LYTildeExpand(&LYCookieSaveFile, FALSE);
     }
 #ifdef USE_PROGRAM_DIR
@@ -1803,10 +1803,10 @@ int main(int argc,
     /*
      * We have a save space path, make sure it's valid.  - FM
      */
-    if (lynx_save_space && *lynx_save_space == '\0') {
+    if (isEmpty(lynx_save_space)) {
 	FREE(lynx_save_space);
     }
-    if (lynx_save_space) {
+    if (non_empty(lynx_save_space)) {
 	LYTildeExpand(&lynx_save_space, TRUE);
 #ifdef VMS
 	LYLowerCase(lynx_save_space);
@@ -2074,7 +2074,7 @@ int main(int argc,
      * force in "//localhost", and if it's not an absolute URL, make it one.  -
      * FM
      */
-    if (homepage) {
+    if (non_empty(homepage)) {
 	LYEnsureAbsoluteURL(&homepage, "HOMEPAGE", FALSE);
     }
 

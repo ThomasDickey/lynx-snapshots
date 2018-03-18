@@ -1,0 +1,124 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{3EF8C45C-FC77-47B8-A5B6-5F9034ECE06E}</ProjectGuid>
+    <RootNamespace>makeuctb</RootNamespace>
+    <Keyword>Win32Proj</Keyword>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.40219.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Configuration)\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</LinkIncremental>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Configuration)\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <CustomBuildStep>
+      <Command>setlocal
+set MYDST=..\..\..\src\chrtrans
+copy $(TargetPath) %MYDST%
+cd %MYDST%
+call makehdrs
+endlocal
+</Command>
+      <Outputs>..\..\..\src\chrtrans\makeuctb.exe;..\..\..\src\chrtrans\def7_uni.h;..\..\..\src\chrtrans\cp1250_uni.h;..\..\..\src\chrtrans\cp1251_uni.h;..\..\..\src\chrtrans\cp1252_uni.h;..\..\..\src\chrtrans\cp1253_uni.h;..\..\..\src\chrtrans\cp1255_uni.h;..\..\..\src\chrtrans\cp1256_uni.h;..\..\..\src\chrtrans\cp1257_uni.h;..\..\..\src\chrtrans\cp437_uni.h;..\..\..\src\chrtrans\cp737_uni.h;..\..\..\src\chrtrans\cp775_uni.h;..\..\..\src\chrtrans\cp850_uni.h;..\..\..\src\chrtrans\cp852_uni.h;..\..\..\src\chrtrans\cp857_uni.h;..\..\..\src\chrtrans\cp862_uni.h;..\..\..\src\chrtrans\cp864_uni.h;..\..\..\src\chrtrans\cp866_uni.h;..\..\..\src\chrtrans\cp866u_uni.h;..\..\..\src\chrtrans\cp869_uni.h;..\..\..\src\chrtrans\dmcs_uni.h;..\..\..\src\chrtrans\hp_uni.h;..\..\..\src\chrtrans\iso01_uni.h;..\..\..\src\chrtrans\iso02_uni.h;..\..\..\src\chrtrans\iso03_uni.h;..\..\..\src\chrtrans\iso04_uni.h;..\..\..\src\chrtrans\iso05_uni.h;..\..\..\src\chrtrans\iso06_uni.h;..\..\..\src\chrtrans\iso07_uni.h;..\..\..\src\chrtrans\iso08_uni.h;..\..\..\src\chrtrans\iso09_uni.h;..\..\..\src\chrtrans\iso10_uni.h;..\..\..\src\chrtrans\iso13_uni.h;..\..\..\src\chrtrans\iso14_uni.h;..\..\..\src\chrtrans\iso15_uni.h;..\..\..\src\chrtrans\koi8r_uni.h;..\..\..\src\chrtrans\koi8u_uni.h;..\..\..\src\chrtrans\mac_uni.h;..\..\..\src\chrtrans\mnem2_suni.h;..\..\..\src\chrtrans\mnem_suni.h;..\..\..\src\chrtrans\next_uni.h;..\..\..\src\chrtrans\pt154_uni.h;..\..\..\src\chrtrans\rfc_suni.h;..\..\..\src\chrtrans\utf8_uni.h;..\..\..\src\chrtrans\viscii_uni.h;%(Outputs)</Outputs>
+    </CustomBuildStep>
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>..\lynx;$(SolutionDir)..\..\..;$(SolutionDir)..\..\..\lib;$(SolutionDir)..\..\..\WWW\Library\Implementation;$(SolutionDir)..\..\..\src;$(SolutionDir)..\..\..\src\chrtrans;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_MBCS;HAVE_CONFIG_H;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>true</MinimalRebuild>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Console</SubSystem>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention>
+      </DataExecutionPrevention>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <CustomBuildStep>
+      <Command>setlocal
+set MYDST=..\..\..\src\chrtrans
+copy $(TargetPath) %MYDST%
+cd %MYDST%
+call makehdrs
+endlocal
+</Command>
+      <Outputs>..\..\..\src\chrtrans\makeuctb.exe;..\..\..\src\chrtrans\def7_uni.h;..\..\..\src\chrtrans\cp1250_uni.h;..\..\..\src\chrtrans\cp1251_uni.h;..\..\..\src\chrtrans\cp1252_uni.h;..\..\..\src\chrtrans\cp1253_uni.h;..\..\..\src\chrtrans\cp1255_uni.h;..\..\..\src\chrtrans\cp1256_uni.h;..\..\..\src\chrtrans\cp1257_uni.h;..\..\..\src\chrtrans\cp437_uni.h;..\..\..\src\chrtrans\cp737_uni.h;..\..\..\src\chrtrans\cp775_uni.h;..\..\..\src\chrtrans\cp850_uni.h;..\..\..\src\chrtrans\cp852_uni.h;..\..\..\src\chrtrans\cp857_uni.h;..\..\..\src\chrtrans\cp862_uni.h;..\..\..\src\chrtrans\cp864_uni.h;..\..\..\src\chrtrans\cp866_uni.h;..\..\..\src\chrtrans\cp866u_uni.h;..\..\..\src\chrtrans\cp869_uni.h;..\..\..\src\chrtrans\dmcs_uni.h;..\..\..\src\chrtrans\hp_uni.h;..\..\..\src\chrtrans\iso01_uni.h;..\..\..\src\chrtrans\iso02_uni.h;..\..\..\src\chrtrans\iso03_uni.h;..\..\..\src\chrtrans\iso04_uni.h;..\..\..\src\chrtrans\iso05_uni.h;..\..\..\src\chrtrans\iso06_uni.h;..\..\..\src\chrtrans\iso07_uni.h;..\..\..\src\chrtrans\iso08_uni.h;..\..\..\src\chrtrans\iso09_uni.h;..\..\..\src\chrtrans\iso10_uni.h;..\..\..\src\chrtrans\iso13_uni.h;..\..\..\src\chrtrans\iso14_uni.h;..\..\..\src\chrtrans\iso15_uni.h;..\..\..\src\chrtrans\koi8r_uni.h;..\..\..\src\chrtrans\koi8u_uni.h;..\..\..\src\chrtrans\mac_uni.h;..\..\..\src\chrtrans\mnem2_suni.h;..\..\..\src\chrtrans\mnem_suni.h;..\..\..\src\chrtrans\next_uni.h;..\..\..\src\chrtrans\pt154_uni.h;..\..\..\src\chrtrans\rfc_suni.h;..\..\..\src\chrtrans\utf8_uni.h;..\..\..\src\chrtrans\viscii_uni.h;%(Outputs)</Outputs>
+    </CustomBuildStep>
+    <ClCompile>
+      <AdditionalIncludeDirectories>..\lynx;$(SolutionDir)..\..\..;$(SolutionDir)..\..\..\lib;$(SolutionDir)..\..\..\WWW\Library\Implementation;$(SolutionDir)..\..\..\src;$(SolutionDir)..\..\..\src\chrtrans;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;HAVE_CONFIG_H;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Console</SubSystem>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention>
+      </DataExecutionPrevention>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\src\chrtrans\makeuctb.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\src\chrtrans\caselower.h" />
+    <ClInclude Include="..\..\..\src\chrtrans\entities.h" />
+    <ClInclude Include="..\..\..\src\chrtrans\jcuken_kb.h" />
+    <ClInclude Include="..\..\..\src\chrtrans\rot13_kb.h" />
+    <ClInclude Include="..\..\..\src\chrtrans\UCkd.h" />
+    <ClInclude Include="..\..\..\src\chrtrans\yawerty_kb.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

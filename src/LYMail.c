@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMail.c,v 1.98 2018/03/05 22:36:09 tom Exp $
+ * $LynxId: LYMail.c,v 1.99 2018/03/18 19:16:29 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTParse.h>
@@ -1406,7 +1406,7 @@ void reply_by_mail(char *mail_address,
 	label = "From";
 #endif /* VMS */
 	/* Add the personal mail address if there is one. */
-	if (personal_mail_address)
+	if (non_empty(personal_mail_address))
 	    StrAllocCopy(from_address, personal_mail_address);
 	if (!header_prompt(label, &from_address, LINESIZE)) {
 	    goto cancelled;
@@ -1448,7 +1448,7 @@ void reply_by_mail(char *mail_address,
     if (!LYNoCc) {
 	LYaddstr(ENTER_ADDRESS_FOR_CC);
 	LYaddstr(BLANK_FOR_NO_COPY);
-	if (personal_mail_address)
+	if (non_empty(personal_mail_address))
 	    StrAllocCopy(cc_address, personal_mail_address);
 	if (!header_prompt("Cc", &cc_address, LINESIZE)) {
 	    goto cancelled;
@@ -1598,7 +1598,7 @@ void reply_by_mail(char *mail_address,
 	LYclear();		/* clear the screen */
 	goto cleanup;
     }
-    if ((body == NULL && LynxSigFile != NULL) &&
+    if ((body == NULL && non_empty(LynxSigFile)) &&
 	(fp = fopen(LynxSigFile, TXT_R)) != NULL) {
 	LYStatusLine = (LYlines - 1);
 	if (term_letter) {
@@ -1766,7 +1766,7 @@ void reply_by_mail(char *mail_address,
  */
 BOOLEAN LYSystemMail(void)
 {
-    if (system_mail == 0 || !strcmp(system_mail, "unknown")) {
+    if (isEmpty(system_mail) || !strcmp(system_mail, "unknown")) {
 	HTAlert(gettext("No system mailer configured"));
 	return FALSE;
     }

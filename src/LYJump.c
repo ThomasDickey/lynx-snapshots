@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYJump.c,v 1.51 2016/11/24 15:35:29 tom Exp $
+ * $LynxId: LYJump.c,v 1.52 2018/03/18 19:17:00 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTAlert.h>
@@ -143,7 +143,7 @@ BOOL LYJumpInit(char *config)
     if (cp && !JThead) {
 	JThead = jtp;
 	StrAllocCopy(JThead->msg, jumpprompt);
-	if (!jumpfile)
+	if (isEmpty(jumpfile))
 	    StrAllocCopy(jumpfile, JThead->file);
 	jtp = typecalloc(struct JumpTable);
 

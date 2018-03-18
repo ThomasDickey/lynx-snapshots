@@ -1,4 +1,4 @@
-/* $LynxId: LYOptions.c,v 1.176 2018/03/05 22:18:05 tom Exp $ */
+/* $LynxId: LYOptions.c,v 1.177 2018/03/18 16:38:00 tom Exp $ */
 #include <HTUtils.h>
 #include <HTFTP.h>
 #include <HTTP.h>		/* 'reloading' flag */
@@ -2117,7 +2117,7 @@ typedef struct {
     const char *HtmlName;
 } OptValues;
 
-#define END_OPTIONS
+#define END_OPTIONS {0, 0, 0}
 
 typedef struct {
     char *tag;
