@@ -1,4 +1,4 @@
-/* $LynxId: LYOptions.c,v 1.177 2018/03/18 16:38:00 tom Exp $ */
+/* $LynxId: LYOptions.c,v 1.178 2018/03/19 23:06:50 tom Exp $ */
 #include <HTUtils.h>
 #include <HTFTP.h>
 #include <HTTP.h>		/* 'reloading' flag */
@@ -2119,6 +2119,8 @@ typedef struct {
 
 #define END_OPTIONS {0, 0, 0}
 
+#define HasOptValues(table) (((table) != NULL) && ((table)->LongName != NULL))
+
 typedef struct {
     char *tag;
     char *value;
@@ -3574,7 +3576,7 @@ static void PutLabel(FILE *fp, const char *name,
     int need = LYstrExtent(name, have, want);
     char *buffer = NULL;
 
-    fprintf(fp, "%s%s", MARGIN_STR, LYEntifyTitle(&buffer, name));
+    fprintf(fp, "%s%s", MARGIN_STR, LYEntifyTitle(&buffer, NonNull(name)));
 
     if (will_save_rc(value) && !no_option_save) {
 	while (need++ < want)
@@ -3985,10 +3987,12 @@ static int gen_options(char **newfile)
 
 #ifdef USE_COLOR_STYLE
     /* Color style: ON/OFF */
-    PutLabel(fp0, gettext("Color style"), color_style_string);
-    BeginSelect(fp0, color_style_string);
-    PutOptValues(fp0, get_color_style_value(), color_style_values);
-    EndSelect(fp0);
+    if (HasOptValues(color_style_values)) {
+	PutLabel(fp0, gettext("Color style"), color_style_string);
+	BeginSelect(fp0, color_style_string);
+	PutOptValues(fp0, get_color_style_value(), color_style_values);
+	EndSelect(fp0);
+    }
 #endif
 
 #ifdef USE_DEFAULT_COLORS

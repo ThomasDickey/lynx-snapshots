@@ -90,7 +90,7 @@
     </ClCompile>
     <Link>
       <AdditionalDependencies>pdcurses.lib;zlib.lib;wsock32.lib;user32.lib;advapi32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(VcInstallDir)lib;$(SolutionDir)\lib;$(SolutionDir)..\..\..\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(VcInstallDir)lib;$(SolutionDir)lib;$(SolutionDir)..\..\lib;$(SolutionDir)..\..\..\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>libc;libcmt;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
