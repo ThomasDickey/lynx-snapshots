@@ -1,5 +1,5 @@
-; $LynxId: lynx.iss,v 1.27 2018/03/17 15:40:36 tom Exp $
-; vile:ts=2 sw=2 notabinsert
+; $LynxId: lynx.iss,v 1.28 2018/03/18 17:48:41 tom Exp $
+; vile:ts=4 sw=4 notabinsert fk=8bit
 ;
 ; This is the BASE script for different flavors of the installer for Lynx.
 ; It can be overridden to select different source-executables (and their associated

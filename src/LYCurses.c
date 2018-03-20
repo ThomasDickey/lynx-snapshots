@@ -1,4 +1,4 @@
-/* $LynxId: LYCurses.c,v 1.193 2018/03/18 19:19:12 tom Exp $ */
+/* $LynxId: LYCurses.c,v 1.194 2018/03/19 22:38:49 tom Exp $ */
 #include <HTUtils.h>
 #include <HTAlert.h>
 
@@ -2251,11 +2251,16 @@ int LYstrExtent0(const char *string,
 		 int maxCells GCC_UNUSED,
 		 int retCellNum GCC_UNUSED)
 {
-    int used = (len < 0 ? (int) strlen(string) : len);
-    int result = used;
+    int used, result;
 
+    if (isEmpty(string)) {
+	used = ((len > 0) ? len : 0);
+    } else {
+	used = ((len < 0) ? (int) strlen(string) : len);
+    }
+    result = used;
 #ifdef WIDEC_CURSES
-    if (used > 0 && lynx_called_initscr) {
+    if (non_empty(string) && used > 0 && lynx_called_initscr) {
 	static WINDOW *fake_win;
 	static int fake_max;
 

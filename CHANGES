@@ -1,9 +1,10 @@
--- $LynxId: CHANGES,v 1.956 2018/03/18 23:55:09 tom Exp $
+-- $LynxId: CHANGES,v 1.957 2018/03/20 00:22:41 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2018-03-18 (2.8.9dev.17)
+2018-03-19 (2.8.9dev.17)
+* add checks in options-menu in case no color-styles have been defined -TD
 * add Visual Studio project files for 2010, 2012 -TD
 * improve checks for strings which should not be empty -TD
 * check for empty personal-mail-address (report by TG) -TD
