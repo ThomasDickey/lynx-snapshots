@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTGopher.c,v 1.65 2016/11/24 16:38:54 tom Exp $
+ * $LynxId: HTGopher.c,v 1.66 2018/03/20 23:38:15 tom Exp $
  *
  *			GOPHER ACCESS				HTGopher.c
  *			=============
@@ -212,6 +212,7 @@ static void parse_menu(const char *arg GCC_UNUSED,
 		       HTParentAnchor *anAnchor)
 {
     char gtype;
+    char this_type;
     int ich;
     char line[BIG];
     char *name = NULL, *selector = NULL;	/* Gopher menu fields */
@@ -251,6 +252,7 @@ static void parse_menu(const char *arg GCC_UNUSED,
     PUTC('\n');
     START(HTML_PRE);
     PUTC('\n');			/* newline after HTML_PRE forces split-line */
+    this_type = GOPHER_ERROR;
     while ((ich = NEXT_CHAR) != EOF) {
 
 	if (interrupted_in_htgetcharacter) {
@@ -333,7 +335,9 @@ static void parse_menu(const char *arg GCC_UNUSED,
 		PUTS("       ");
 		PUTS(name);
 
-	    } else if (port) {	/* Other types need port */
+	    } else if (port &&	/* Other types need port */
+		       (gtype != GOPHER_DUPLICATE ||
+			this_type != GOPHER_ERROR)) {
 		char *address = 0;
 		const char *format = *selector ? "%s//%s@%s/" : "%s//%s/";
 
@@ -352,6 +356,9 @@ static void parse_menu(const char *arg GCC_UNUSED,
 			break;
 		    case GOPHER_MENU:
 			PUTS(" (DIR) ");
+			break;
+		    case GOPHER_DUPLICATE:
+			PUTS(" (+++) ");
 			break;
 		    case GOPHER_CSO:
 			PUTS(" (CSO) ");
@@ -398,7 +405,9 @@ static void parse_menu(const char *arg GCC_UNUSED,
 			break;
 		    }
 
-		    HTSprintf0(&address, "//%s/%c", host, gtype);
+		    if (gtype != GOPHER_DUPLICATE)
+			this_type = gtype;
+		    HTSprintf0(&address, "//%s/%c", host, this_type);
 
 		    for (r = selector; *r; r++) {	/* Encode selector string */
 			if (acceptable[UCH(*r)]) {
@@ -419,7 +428,8 @@ static void parse_menu(const char *arg GCC_UNUSED,
 		    PUTS(name);
 		FREE(address);
 	    } else {		/* parse error */
-		CTRACE((tfp, "HTGopher: Bad menu item.\n"));
+		CTRACE((tfp, "HTGopher: Bad menu item (type %d, port %s).\n",
+			gtype, NonNull(port)));
 		PUTS(line);
 
 	    }			/* parse error */
