@@ -1,5 +1,5 @@
 #!/bin/sh
-# $LynxId: install-cfg.sh,v 1.3 2008/09/10 13:15:35 tom Exp $
+# $LynxId: install-cfg.sh,v 1.4 2018/03/21 16:20:42 tom Exp $
 # install lynx.cfg, ensuring the old config-file is saved to a unique file,
 # and prepending customizations to the newly-installed file.
 #
@@ -25,6 +25,7 @@ if test -f "$DST" ; then
 	rm -f $OLD $NEW $TST $TMP
 
 	# avoid propagating obsolete URLs into new installs
+	echo lynx.isc.org >$TMP
 	echo lynx.browser.org >$TMP
 	echo www.trill-home.com >>$TMP
 	echo www.cc.ukans.edu >>$TMP
