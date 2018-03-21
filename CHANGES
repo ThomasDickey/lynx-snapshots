@@ -1,9 +1,18 @@
--- $LynxId: CHANGES,v 1.958 2018/03/20 23:40:45 tom Exp $
+-- $LynxId: CHANGES,v 1.963 2018/03/21 14:38:06 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2018-03-20 (2.8.9dev.17)
+2018-03-21 (2.8.9dev.17)
+* modify samples/oldlynx.bat to check if Lynx recognizes the -lss option -TD
+* modify samples/*lynx.bat to check for environment variables that Lynx would
+  test for temp-directory, and only if those are absent will the scripts
+  attempt to create a temp-directory -TD
+* modify samples/*lynx.bat to set PATH for executing utility programs -TD
+* remove unused critSec_DNS -TD
+* use EnterCriticalSection in ws_netread rather than InitializeCriticalSection
+  since critSec_READ was initialized in LYMain.c (report by GV) -TD
+* use freeaddrinfo() in one case where free() was used (report by GV) -TD
 * implement "+" item type for gopher protocol (report by James Tomasino) -TD
 * add checks in options-menu in case no color-styles have been defined -TD
 * add Visual Studio project files for 2010, 2012 -TD
@@ -29,7 +38,8 @@ Changes since Lynx 2.8 release
   take into account server headers which extend past the first block read
   (report/test-case by Dick Wesseling) -TD
 * permanently enable EXP_HTTP_HEADERS feature -TD
-* modify color-style hashing to check for collisions -TD
+* modify color-style hashing to check for collisions (reported by TG, Russell
+  Bell) -TD
 * add PREFERRED_CONTENT_TYPE defaulting to text/plain and options-menu to
   replace an assumption in HTMIMEConvert that everything is text/html.
   Since most servers provide a valid Content-Type for HTML, and are more likely

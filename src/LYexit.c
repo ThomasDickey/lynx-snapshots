@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYexit.c,v 1.36 2013/10/24 09:16:37 tom Exp $
+ * $LynxId: LYexit.c,v 1.37 2018/03/21 00:50:51 tom Exp $
  *
  *	Copyright (c) 1994, University of Kansas, All Rights Reserved
  *	(most of this file was rewritten in 1996 and 2004).
@@ -86,7 +86,6 @@ void LYexit(int status)
 {
 #ifndef VMS			/*  On VMS, the VMSexit() handler does these. - FM */
 #ifdef _WINDOWS
-    DeleteCriticalSection(&critSec_DNS);
     DeleteCriticalSection(&critSec_READ);
 
     WSACleanup();

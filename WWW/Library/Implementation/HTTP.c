@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTP.c,v 1.168 2018/03/18 18:47:59 tom Exp $
+ * $LynxId: HTTP.c,v 1.169 2018/03/21 00:45:27 tom Exp $
  *
  * HyperText Tranfer Protocol	- Client implementation		HTTP.c
  * ==========================
@@ -431,7 +431,7 @@ int ws_netread(int fd, char *buf, int len)
 #define TICK	5
 #define STACK_SIZE	0x2000uL
 
-    InitializeCriticalSection(&critSec_READ);
+    EnterCriticalSection(&critSec_READ);
 
     para.fd = fd;
     para.buf = buf;

@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYGlobalDefs.h,v 1.144 2018/03/11 22:49:43 tom Exp $
+ * $LynxId: LYGlobalDefs.h,v 1.145 2018/03/21 00:50:51 tom Exp $
  *
  * global variable definitions
  */
@@ -667,7 +667,6 @@ extern "C" {
     extern BOOLEAN system_is_NT;
     extern char windows_drive[4];
     extern int lynx_timeout;
-    extern CRITICAL_SECTION critSec_DNS;
     extern CRITICAL_SECTION critSec_READ;
 #endif				/* _WINDOWS */
 

@@ -1,4 +1,4 @@
-; $LynxId: lynx.iss,v 1.28 2018/03/18 17:48:41 tom Exp $
+; $LynxId: lynx.iss,v 1.29 2018/03/21 14:56:20 tom Exp $
 ; vile:ts=4 sw=4 notabinsert fk=8bit
 ;
 ; This is the BASE script for different flavors of the installer for Lynx.
@@ -128,7 +128,6 @@ Name: "{app}\doc\test"
 Name: "{app}\help"
 Name: "{app}\help\keystrokes"
 Name: "{app}\icon"
-Name: "{app}\tmp"
 
 [Files]
 #emit 'Source: "' + BinsSrcDir + '\' + SourceExeName + '"; DestDir: "{app}"; DestName: ' + MyAppExeName + '; AfterInstall: myPostExecutable; Flags: ignoreversion'

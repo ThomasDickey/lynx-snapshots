@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMain.c,v 1.274 2018/03/18 19:17:00 tom Exp $
+ * $LynxId: LYMain.c,v 1.275 2018/03/21 00:50:51 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTP.h>
@@ -341,7 +341,6 @@ char windows_drive[4];		/* 1998/01/13 (Tue) 21:13:24 */
 #ifdef _WINDOWS
 #define	TIMEOUT	180		/* 1998/03/30 (Mon) 14:50:44 */
 int lynx_timeout = TIMEOUT;
-CRITICAL_SECTION critSec_DNS;	/* 1998/09/03 (Thu) 22:01:56 */
 CRITICAL_SECTION critSec_READ;	/* 1998/09/03 (Thu) 22:01:56 */
 #endif /* _WINDOWS */
 
@@ -1083,7 +1082,6 @@ int main(int argc,
     }
 
     /* 1998/09/03 (Thu) 22:02:32 */
-    InitializeCriticalSection(&critSec_DNS);
     InitializeCriticalSection(&critSec_READ);
 
 #endif /* _WINDOWS */
