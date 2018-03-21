@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTP.c,v 1.169 2018/03/21 00:45:27 tom Exp $
+ * $LynxId: HTTP.c,v 1.172 2018/03/21 21:25:11 tom Exp $
  *
  * HyperText Tranfer Protocol	- Client implementation		HTTP.c
  * ==========================
@@ -53,7 +53,13 @@
 
 #if defined(LIBRESSL_VERSION_NUMBER)
 /* OpenSSL and LibreSSL version numbers do not correspond */
+
+#if LIBRESSL_VERSION_NUMBER >= 0x2060100fL
+#define SSL_set_no_TLSV1()		SSL_set_min_proto_version(handle, TLS1_1_VERSION)
+#endif
+
 #elif defined(OPENSSL_VERSION_NUMBER) && (OPENSSL_VERSION_NUMBER >= 0x10100000L)
+
 #define SSLEAY_VERSION_NUMBER		OPENSSL_VERSION_NUMBER
 #undef  SSL_load_error_strings
 #undef  SSLeay_add_ssl_algorithms
@@ -61,8 +67,16 @@
 #define TLS_client_method()		SSLv23_client_method()
 #define SSL_load_error_strings()	/* nothing */
 #define SSLeay_add_ssl_algorithms()	/* nothing */
+#define SSL_set_no_TLSV1()		SSL_set_min_proto_version(handle, TLS1_1_VERSION)
+
 #elif defined(SSLEAY_VERSION_NUMBER)
+
 #define TLS_client_method()		SSLv23_client_method()
+
+#endif
+
+#ifndef SSL_set_no_TLSV1
+#define SSL_set_no_TLSV1()		SSL_set_options(handle, SSL_OP_NO_TLSv1)
 #endif
 
 #ifdef USE_GNUTLS_INCL
@@ -943,11 +957,7 @@ static int HTLoadHTTP(const char *arg,
 #elif SSLEAY_VERSION_NUMBER >= 0x0900
 #ifndef USE_NSS_COMPAT_INCL
 	if (!try_tls) {
-#if OPENSSL_VERSION_NUMBER >= 0x10100000L
-	    SSL_set_min_proto_version(handle, TLS1_1_VERSION);
-#else
-	    SSL_set_options(handle, SSL_OP_NO_TLSv1);
-#endif
+	    SSL_set_no_TLSV1();
 	    CTRACE((tfp, "...adding SSL_OP_NO_TLSv1\n"));
 	}
 #if OPENSSL_VERSION_NUMBER >= 0x0090806fL && !defined(OPENSSL_NO_TLSEXT)
