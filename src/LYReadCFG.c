@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYReadCFG.c,v 1.191 2018/03/05 01:57:19 tom Exp $
+ * $LynxId: LYReadCFG.c,v 1.192 2018/03/27 23:04:44 tom Exp $
  */
 #ifndef NO_RULES
 #include <HTRules.h>
@@ -1541,6 +1541,7 @@ static Config_Type Config_Table [] =
      PARSE_Env(RC_GOPHER_PROXY,         0),
      PARSE_SET(RC_GOTOBUFFER,           goto_buffer),
      PARSE_PRG(RC_GZIP_PATH,            ppGZIP),
+     PARSE_SET(RC_GUESS_SCHEME,         LYGuessScheme),
      PARSE_STR(RC_HELPFILE,             helpfile),
      PARSE_FUN(RC_HIDDENLINKS,          hiddenlinks_fun),
 #ifdef MARK_HIDDEN_LINKS

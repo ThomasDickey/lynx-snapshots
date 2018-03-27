@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYUtils.c,v 1.283 2018/03/18 18:51:53 tom Exp $
+ * $LynxId: LYUtils.c,v 1.290 2018/03/27 23:07:44 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTCP.h>
@@ -4078,6 +4078,351 @@ void LYEnsureAbsoluteURL(char **href,
     FREE(temp);
 }
 
+static const char *default_scheme = "http://";
+
+static const char *guess_scheme(const char *url)
+{
+    const char *scheme = NULL;
+
+    if (LYGuessScheme && non_empty(url)) {
+	if (0 == strncasecomp(url, "www.", 4)) {
+	    scheme = "http://";
+	} else if (0 == strncasecomp(url, "ftp.", 4)) {
+	    scheme = "ftp://";
+	} else if (0 == strncasecomp(url, "gopher.", 7)) {
+	    scheme = "gopher://";
+	} else if (0 == strncasecomp(url, "wais.", 5)) {
+	    scheme = "wais://";
+	} else if (0 == strncasecomp(url, "cso.", 4) ||
+		   0 == strncasecomp(url, "ns.", 3) ||
+		   0 == strncasecomp(url, "ph.", 3)) {
+	    scheme = "cso://";
+	} else if (0 == strncasecomp(url, "finger.", 7)) {
+	    scheme = "finger://";
+	} else if (0 == strncasecomp(url, "news.", 5)) {
+	    scheme = "news://";
+	} else if (0 == strncasecomp(url, "nntp.", 5)) {
+	    scheme = "nntp://";
+	}
+    }
+    CTRACE((tfp, "guess_scheme(%s) -> '%s'\n", NonNull(url), NonNull(scheme)));
+    return scheme;
+}
+
+/*
+ * This function rewrites and reallocates a previously allocated string that
+ * begins with an Internet host name so that the string begins with its guess
+ * of the scheme based on the first field of the host name, or the default
+ * scheme if no guess was made.
+ */
+static void LYAddSchemeForURL(char **AllocatedString)
+{
+    if (non_empty(*AllocatedString)) {
+	char *Str = NULL;
+	const char *scheme = guess_scheme(*AllocatedString);
+
+	if (scheme == NULL)
+	    scheme = default_scheme;
+
+	StrAllocCopy(Str, scheme);
+	StrAllocCat(Str, *AllocatedString);
+	StrAllocCopy(*AllocatedString, Str);
+
+	FREE(Str);
+    }
+}
+
+/*
+ * This function rewrites and reallocates a previously allocated string so that
+ * the first element is a confirmed Internet host, and returns TRUE, otherwise
+ * it does not modify the string and returns FALSE.
+ *
+ * It first tries the element as is, then, if the element does not end with a
+ * dot, it adds prefixes from the (comma separated) prefix list argument, and,
+ * if the element does not begin with a dot, suffixes from the (comma
+ * separated) suffix list arguments (e.g., www.host.com, then www.host,edu,
+ * then www.host.net, then www.host.org).
+ *
+ * The remaining path, if one is present, will be appended to the expanded
+ * host.
+ *
+ * It also takes into account whether a colon is in the element or suffix, and
+ * includes that and what follows as a port field for the expanded host field
+ * (e.g, wfbr:8002/dir/lynx should yield www.wfbr.edu:8002/dir/lynx).
+ */
+static BOOLEAN LYExpandHostForURL(char **AllocatedString,
+				  char *prefix_list,
+				  char *suffix_list)
+{
+    char *DomainPrefix = NULL;
+    const char *StartP, *EndP;
+    char *DomainSuffix = NULL;
+    const char *StartS, *EndS;
+    char *Str = NULL, *StrColon = NULL, *MsgStr = NULL;
+    char *Host = NULL, *HostColon = NULL, *host = NULL;
+    char *Path = NULL;
+    char *Fragment = NULL;
+    BOOLEAN GotHost = FALSE;
+    BOOLEAN Startup = (BOOL) (helpfilepath == NULL);
+
+    /*
+     * If it's a NULL or zero-length string, or if it begins with a slash or
+     * hash, don't continue pointlessly.  - FM
+     */
+    if (isEmpty(*AllocatedString) ||
+	*AllocatedString[0] == '/' ||
+	*AllocatedString[0] == '#') {
+	return GotHost;
+    }
+
+    /*
+     * If it's a partial or relative path, don't continue pointlessly.  - FM
+     */
+    if (!StrNCmp(*AllocatedString, "..", 2) ||
+	!StrNCmp(*AllocatedString, "./", 2)) {
+	return GotHost;
+    }
+
+    /*
+     * Make a clean copy of the string, and trim off the path if one is
+     * present, but save the information so we can restore the path after
+     * filling in the Host[:port] field.  - FM
+     */
+    StrAllocCopy(Str, *AllocatedString);
+    if ((Path = StrChr(Str, '/')) != NULL) {
+	/*
+	 * Have a path.  Any fragment should already be included in Path.  - FM
+	 */
+	*Path = '\0';
+    } else {
+	/*
+	 * No path, so check for a fragment and trim that, to be restored after
+	 * filling in the Host[:port] field.  - FM
+	 */
+	Fragment = trimPoundSelector(Str);
+    }
+
+    /*
+     * If the potential host string has a colon, assume it begins a port field,
+     * and trim it off, but save the information so we can restore the port
+     * field after filling in the host field.  - FM
+     */
+    if ((StrColon = strrchr(Str, ':')) != NULL &&
+	isdigit(UCH(StrColon[1])) && StrChr(StrColon, ']') == NULL) {
+	if (StrColon == Str) {
+	    goto cleanup;
+	}
+	*StrColon = '\0';
+    }
+
+    /*
+     * Do a DNS test on the potential host field as presently trimmed.  - FM
+     */
+    StrAllocCopy(host, Str);
+    strip_userid(host, FALSE);
+    HTUnEscape(host);
+    if (LYCursesON) {
+	StrAllocCopy(MsgStr, WWW_FIND_MESSAGE);
+	StrAllocCat(MsgStr, host);
+	StrAllocCat(MsgStr, FIRST_SEGMENT);
+	HTProgress(MsgStr);
+    } else if (Startup && !dump_output_immediately) {
+	fprintf(stdout, "%s '%s'%s\r\n", WWW_FIND_MESSAGE, host, FIRST_SEGMENT);
+    }
+#ifdef INET6
+    if (HTGetAddrInfo(host, 80) != NULL)
+#else
+    if (LYGetHostByName(host) != NULL)
+#endif /* INET6 */
+    {
+	/*
+	 * Clear any residual interrupt.  - FM
+	 */
+	if (LYCursesON && HTCheckForInterrupt()) {
+	    CTRACE((tfp,
+		    "LYExpandHostForURL: Ignoring interrupt because '%s' resolved.\n",
+		    host));
+	}
+
+	/*
+	 * Return success.  - FM
+	 */
+	GotHost = TRUE;
+	goto cleanup;
+    } else if (LYCursesON && (lynx_nsl_status == HT_INTERRUPTED)) {
+	/*
+	 * Give the user chance to interrupt lookup cycles.  - KW & FM
+	 */
+	CTRACE((tfp,
+		"LYExpandHostForURL: Interrupted while '%s' failed to resolve.\n",
+		host));
+
+	/*
+	 * Return failure.  - FM
+	 */
+	goto cleanup;
+    }
+
+    /*
+     * Set the first prefix, making it a zero-length string if the list is NULL
+     * or if the potential host field ends with a dot.  - FM
+     */
+    StartP = ((prefix_list && Str[strlen(Str) - 1] != '.')
+	      ? prefix_list
+	      : "");
+    /*
+     * If we have a prefix, but the allocated string is one of the common host
+     * prefixes, make our prefix a zero-length string.  - FM
+     */
+    if (*StartP && *StartP != '.') {
+	if (guess_scheme(*AllocatedString) != NULL) {
+	    StartP = "";
+	}
+    }
+    while ((*StartP) && (WHITE(*StartP) || *StartP == ',')) {
+	StartP++;		/* Skip whitespace and separators */
+    }
+    EndP = StartP;
+    while (*EndP && !WHITE(*EndP) && *EndP != ',') {
+	EndP++;			/* Find separator */
+    }
+    StrAllocCopy(DomainPrefix, StartP);
+    DomainPrefix[EndP - StartP] = '\0';
+
+    /*
+     * Test each prefix with each suffix.  - FM
+     */
+    do {
+	/*
+	 * Set the first suffix, making it a zero-length string if the list is
+	 * NULL or if the potential host field begins with a dot.  - FM
+	 */
+	StartS = ((suffix_list && *Str != '.')
+		  ? suffix_list
+		  : "");
+	while ((*StartS) && (WHITE(*StartS) || *StartS == ',')) {
+	    StartS++;		/* Skip whitespace and separators */
+	}
+	EndS = StartS;
+	while (*EndS && !WHITE(*EndS) && *EndS != ',') {
+	    EndS++;		/* Find separator */
+	}
+	StrAllocCopy(DomainSuffix, StartS);
+	DomainSuffix[EndS - StartS] = '\0';
+
+	/*
+	 * Create domain names and do DNS tests.  - FM
+	 */
+	do {
+	    StrAllocCopy(Host, DomainPrefix);
+	    StrAllocCat(Host, ((*Str == '.') ? (Str + 1) : Str));
+	    if (Host[strlen(Host) - 1] == '.') {
+		Host[strlen(Host) - 1] = '\0';
+	    }
+	    StrAllocCat(Host, DomainSuffix);
+	    if ((HostColon = strrchr(Host, ':')) != NULL &&
+		isdigit(UCH(HostColon[1]))) {
+		*HostColon = '\0';
+	    }
+	    StrAllocCopy(host, Host);
+	    HTUnEscape(host);
+	    if (LYCursesON) {
+		StrAllocCopy(MsgStr, WWW_FIND_MESSAGE);
+		StrAllocCat(MsgStr, host);
+		StrAllocCat(MsgStr, GUESSING_SEGMENT);
+		HTProgress(MsgStr);
+	    } else if (Startup && !dump_output_immediately) {
+		fprintf(stdout, "%s '%s'%s\n", WWW_FIND_MESSAGE, host, GUESSING_SEGMENT);
+	    }
+	    GotHost = (BOOL) (LYGetHostByName(host) != NULL);
+	    if (HostColon != NULL) {
+		*HostColon = ':';
+	    }
+	    if (GotHost == FALSE) {
+		/*
+		 * Give the user chance to interrupt lookup cycles.  - KW
+		 */
+		if (LYCursesON && (lynx_nsl_status == HT_INTERRUPTED)) {
+		    CTRACE((tfp,
+			    "LYExpandHostForURL: Interrupted while '%s' failed to resolve.\n",
+			    host));
+		    goto cleanup;	/* We didn't find a valid name. */
+		}
+
+		/*
+		 * Advance to the next suffix, or end of suffix list.  - FM
+		 */
+		StartS = ((*EndS == '\0') ? EndS : (EndS + 1));
+		while ((*StartS) && (WHITE(*StartS) || *StartS == ',')) {
+		    StartS++;	/* Skip whitespace and separators */
+		}
+		EndS = StartS;
+		while (*EndS && !WHITE(*EndS) && *EndS != ',') {
+		    EndS++;	/* Find separator */
+		}
+		LYStrNCpy(DomainSuffix, StartS, (EndS - StartS));
+	    }
+	} while ((GotHost == FALSE) && (*DomainSuffix != '\0'));
+
+	if (GotHost == FALSE) {
+	    /*
+	     * Advance to the next prefix, or end of prefix list.  - FM
+	     */
+	    StartP = ((*EndP == '\0') ? EndP : (EndP + 1));
+	    while ((*StartP) && (WHITE(*StartP) || *StartP == ',')) {
+		StartP++;	/* Skip whitespace and separators */
+	    }
+	    EndP = StartP;
+	    while (*EndP && !WHITE(*EndP) && *EndP != ',') {
+		EndP++;		/* Find separator */
+	    }
+	    LYStrNCpy(DomainPrefix, StartP, (EndP - StartP));
+	}
+    } while ((GotHost == FALSE) && (*DomainPrefix != '\0'));
+
+    /*
+     * If a test passed, restore the port field if we had one and there is no
+     * colon in the expanded host, and the path if we had one, and reallocate
+     * the original string with the expanded Host[:port] field included.  - FM
+     */
+    if (GotHost) {
+	if (StrColon && StrChr(Host, ':') == NULL) {
+	    *StrColon = ':';
+	    StrAllocCat(Host, StrColon);
+	}
+	if (Path) {
+	    *Path = '/';
+	    StrAllocCat(Host, Path);
+	} else if (Fragment) {
+	    StrAllocCat(Host, "/");
+	    restorePoundSelector(Fragment);
+	    StrAllocCat(Host, Fragment);
+	}
+	StrAllocCopy(*AllocatedString, Host);
+    }
+
+    /*
+     * Clear any residual interrupt.  - FM
+     */
+    if (LYCursesON && HTCheckForInterrupt()) {
+	CTRACE((tfp,
+		"LYExpandHostForURL: Ignoring interrupt because '%s' %s.\n",
+		host,
+		(GotHost ? "resolved" : "timed out")));
+    }
+
+    /*
+     * Clean up and return the last test result.  - FM
+     */
+  cleanup:
+    FREE(DomainPrefix);
+    FREE(DomainSuffix);
+    FREE(Str);
+    FREE(MsgStr);
+    FREE(Host);
+    FREE(host);
+    return GotHost;
+}
 /*
  * Rewrite and reallocate a previously allocated string as a file URL if the
  * string resolves to a file or directory on the local system, otherwise as an
@@ -4210,16 +4555,8 @@ void LYConvertToURL(char **AllocatedString,
 			    old_string));
 		    StrAllocCat(*AllocatedString, url_file);
 		} else {
-		    /*
-		     * Assume a URL is wanted, so guess the scheme with
-		     * "http://" as the default.  - FM
-		     */
-		    if (!LYAddSchemeForURL(&old_string, "http://")) {
-			StrAllocCopy(*AllocatedString, "http://");
-			StrAllocCat(*AllocatedString, old_string);
-		    } else {
-			StrAllocCopy(*AllocatedString, old_string);
-		    }
+		    LYAddSchemeForURL(&old_string);
+		    StrAllocCopy(*AllocatedString, old_string);
 		}
 	    }
 	} else {
@@ -4245,16 +4582,8 @@ void LYConvertToURL(char **AllocatedString,
 			old_string));
 		StrAllocCat(*AllocatedString, url_file);
 	    } else {
-		/*
-		 * Assume a URL is wanted, so guess the scheme with "http://"
-		 * as the default.  - FM
-		 */
-		if (!LYAddSchemeForURL(&old_string, "http://")) {
-		    StrAllocCopy(*AllocatedString, "http://");
-		    StrAllocCat(*AllocatedString, old_string);
-		} else {
-		    StrAllocCopy(*AllocatedString, old_string);
-		}
+		LYAddSchemeForURL(&old_string);
+		StrAllocCopy(*AllocatedString, old_string);
 	    }
 	}
 	lib$find_file_end(&context);
@@ -4468,14 +4797,9 @@ void LYConvertToURL(char **AllocatedString,
 		if (LYExpandHostForURL(&old_string,
 				       URLDomainPrefixes,
 				       URLDomainSuffixes)) {
-		    if (!LYAddSchemeForURL(&old_string, "http://")) {
-			StrAllocCopy(*AllocatedString, "http://");
-			StrAllocCat(*AllocatedString, old_string);
-		    } else {
-			StrAllocCopy(*AllocatedString, old_string);
-		    }
+		    LYAddSchemeForURL(&old_string);
+		    StrAllocCopy(*AllocatedString, old_string);
 		} else if (fixit) {
-		    /* RW 1998Mar16  Restore AllocatedString to 'old_string' */
 		    StrAllocCopy(*AllocatedString, old_string);
 		} else {
 		    /* Return file URL for the file that does not exist */
@@ -4586,408 +4910,6 @@ void sleep(unsigned sec)
 }
 #endif /* !__MINGW32__ */
 #endif /* _WINDOWS */
-
-/*
- * This function rewrites and reallocates a previously allocated string so that
- * the first element is a confirmed Internet host, and returns TRUE, otherwise
- * it does not modify the string and returns FALSE.  It first tries the element
- * as is, then, if the element does not end with a dot, it adds prefixes from
- * the (comma separated) prefix list argument, and, if the element does not
- * begin with a dot, suffixes from the (comma separated) suffix list arguments
- * (e.g., www.host.com, then www.host,edu, then www.host.net, then
- * www.host.org).  The remaining path, if one is present, will be appended to
- * the expanded host.  It also takes into account whether a colon is in the
- * element or suffix, and includes that and what follows as a port field for
- * the expanded host field (e.g, wfbr:8002/dir/lynx should yield
- * www.wfbr.edu:8002/dir/lynx).  The calling function should prepend the scheme
- * field (e.g., http://), or pass the string to LYAddSchemeForURL(), if this
- * function returns TRUE.  - FM
- */
-BOOLEAN LYExpandHostForURL(char **AllocatedString,
-			   char *prefix_list,
-			   char *suffix_list)
-{
-    char *DomainPrefix = NULL;
-    const char *StartP, *EndP;
-    char *DomainSuffix = NULL;
-    const char *StartS, *EndS;
-    char *Str = NULL, *StrColon = NULL, *MsgStr = NULL;
-    char *Host = NULL, *HostColon = NULL, *host = NULL;
-    char *Path = NULL;
-    char *Fragment = NULL;
-    BOOLEAN GotHost = FALSE;
-    BOOLEAN Startup = (BOOL) (helpfilepath == NULL);
-
-    /*
-     * If it's a NULL or zero-length string, or if it begins with a slash or
-     * hash, don't continue pointlessly.  - FM
-     */
-    if (!(*AllocatedString) || *AllocatedString[0] == '\0' ||
-	*AllocatedString[0] == '/' || *AllocatedString[0] == '#') {
-	return GotHost;
-    }
-
-    /*
-     * If it's a partial or relative path, don't continue pointlessly.  - FM
-     */
-    if (!StrNCmp(*AllocatedString, "..", 2) ||
-	!StrNCmp(*AllocatedString, "./", 2)) {
-	return GotHost;
-    }
-
-    /*
-     * Make a clean copy of the string, and trim off the path if one is
-     * present, but save the information so we can restore the path after
-     * filling in the Host[:port] field.  - FM
-     */
-    StrAllocCopy(Str, *AllocatedString);
-    if ((Path = StrChr(Str, '/')) != NULL) {
-	/*
-	 * Have a path.  Any fragment should already be included in Path.  - FM
-	 */
-	*Path = '\0';
-    } else {
-	/*
-	 * No path, so check for a fragment and trim that, to be restored after
-	 * filling in the Host[:port] field.  - FM
-	 */
-	Fragment = trimPoundSelector(Str);
-    }
-
-    /*
-     * If the potential host string has a colon, assume it begins a port field,
-     * and trim it off, but save the information so we can restore the port
-     * field after filling in the host field.  - FM
-     */
-    if ((StrColon = strrchr(Str, ':')) != NULL &&
-	isdigit(UCH(StrColon[1])) && StrChr(StrColon, ']') == NULL) {
-	if (StrColon == Str) {
-	    goto cleanup;
-	}
-	*StrColon = '\0';
-    }
-
-    /*
-     * Do a DNS test on the potential host field as presently trimmed.  - FM
-     */
-    StrAllocCopy(host, Str);
-    strip_userid(host, FALSE);
-    HTUnEscape(host);
-    if (LYCursesON) {
-	StrAllocCopy(MsgStr, WWW_FIND_MESSAGE);
-	StrAllocCat(MsgStr, host);
-	StrAllocCat(MsgStr, FIRST_SEGMENT);
-	HTProgress(MsgStr);
-    } else if (Startup && !dump_output_immediately) {
-	fprintf(stdout, "%s '%s'%s\r\n", WWW_FIND_MESSAGE, host, FIRST_SEGMENT);
-    }
-#ifdef INET6
-    if (HTGetAddrInfo(host, 80) != NULL)
-#else
-    if (LYGetHostByName(host) != NULL)
-#endif /* INET6 */
-    {
-	/*
-	 * Clear any residual interrupt.  - FM
-	 */
-	if (LYCursesON && HTCheckForInterrupt()) {
-	    CTRACE((tfp,
-		    "LYExpandHostForURL: Ignoring interrupt because '%s' resolved.\n",
-		    host));
-	}
-
-	/*
-	 * Return success.  - FM
-	 */
-	GotHost = TRUE;
-	goto cleanup;
-    } else if (LYCursesON && (lynx_nsl_status == HT_INTERRUPTED)) {
-	/*
-	 * Give the user chance to interrupt lookup cycles.  - KW & FM
-	 */
-	CTRACE((tfp,
-		"LYExpandHostForURL: Interrupted while '%s' failed to resolve.\n",
-		host));
-
-	/*
-	 * Return failure.  - FM
-	 */
-	goto cleanup;
-    }
-
-    /*
-     * Set the first prefix, making it a zero-length string if the list is NULL
-     * or if the potential host field ends with a dot.  - FM
-     */
-    StartP = ((prefix_list && Str[strlen(Str) - 1] != '.')
-	      ? prefix_list
-	      : "");
-    /*
-     * If we have a prefix, but the allocated string is one of the common host
-     * prefixes, make our prefix a zero-length string.  - FM
-     */
-    if (*StartP && *StartP != '.') {
-	if (!strncasecomp(*AllocatedString, "www.", 4) ||
-	    !strncasecomp(*AllocatedString, "ftp.", 4) ||
-	    !strncasecomp(*AllocatedString, "gopher.", 7) ||
-	    !strncasecomp(*AllocatedString, "wais.", 5) ||
-	    !strncasecomp(*AllocatedString, "cso.", 4) ||
-	    !strncasecomp(*AllocatedString, "ns.", 3) ||
-	    !strncasecomp(*AllocatedString, "ph.", 3) ||
-	    !strncasecomp(*AllocatedString, "finger.", 7) ||
-	    !strncasecomp(*AllocatedString, "news.", 5) ||
-	    !strncasecomp(*AllocatedString, "nntp.", 5)) {
-	    StartP = "";
-	}
-    }
-    while ((*StartP) && (WHITE(*StartP) || *StartP == ',')) {
-	StartP++;		/* Skip whitespace and separators */
-    }
-    EndP = StartP;
-    while (*EndP && !WHITE(*EndP) && *EndP != ',') {
-	EndP++;			/* Find separator */
-    }
-    StrAllocCopy(DomainPrefix, StartP);
-    DomainPrefix[EndP - StartP] = '\0';
-
-    /*
-     * Test each prefix with each suffix.  - FM
-     */
-    do {
-	/*
-	 * Set the first suffix, making it a zero-length string if the list is
-	 * NULL or if the potential host field begins with a dot.  - FM
-	 */
-	StartS = ((suffix_list && *Str != '.')
-		  ? suffix_list
-		  : "");
-	while ((*StartS) && (WHITE(*StartS) || *StartS == ',')) {
-	    StartS++;		/* Skip whitespace and separators */
-	}
-	EndS = StartS;
-	while (*EndS && !WHITE(*EndS) && *EndS != ',') {
-	    EndS++;		/* Find separator */
-	}
-	StrAllocCopy(DomainSuffix, StartS);
-	DomainSuffix[EndS - StartS] = '\0';
-
-	/*
-	 * Create domain names and do DNS tests.  - FM
-	 */
-	do {
-	    StrAllocCopy(Host, DomainPrefix);
-	    StrAllocCat(Host, ((*Str == '.') ? (Str + 1) : Str));
-	    if (Host[strlen(Host) - 1] == '.') {
-		Host[strlen(Host) - 1] = '\0';
-	    }
-	    StrAllocCat(Host, DomainSuffix);
-	    if ((HostColon = strrchr(Host, ':')) != NULL &&
-		isdigit(UCH(HostColon[1]))) {
-		*HostColon = '\0';
-	    }
-	    StrAllocCopy(host, Host);
-	    HTUnEscape(host);
-	    if (LYCursesON) {
-		StrAllocCopy(MsgStr, WWW_FIND_MESSAGE);
-		StrAllocCat(MsgStr, host);
-		StrAllocCat(MsgStr, GUESSING_SEGMENT);
-		HTProgress(MsgStr);
-	    } else if (Startup && !dump_output_immediately) {
-		fprintf(stdout, "%s '%s'%s\n", WWW_FIND_MESSAGE, host, GUESSING_SEGMENT);
-	    }
-	    GotHost = (BOOL) (LYGetHostByName(host) != NULL);
-	    if (HostColon != NULL) {
-		*HostColon = ':';
-	    }
-	    if (GotHost == FALSE) {
-		/*
-		 * Give the user chance to interrupt lookup cycles.  - KW
-		 */
-		if (LYCursesON && (lynx_nsl_status == HT_INTERRUPTED)) {
-		    CTRACE((tfp,
-			    "LYExpandHostForURL: Interrupted while '%s' failed to resolve.\n",
-			    host));
-		    goto cleanup;	/* We didn't find a valid name. */
-		}
-
-		/*
-		 * Advance to the next suffix, or end of suffix list.  - FM
-		 */
-		StartS = ((*EndS == '\0') ? EndS : (EndS + 1));
-		while ((*StartS) && (WHITE(*StartS) || *StartS == ',')) {
-		    StartS++;	/* Skip whitespace and separators */
-		}
-		EndS = StartS;
-		while (*EndS && !WHITE(*EndS) && *EndS != ',') {
-		    EndS++;	/* Find separator */
-		}
-		LYStrNCpy(DomainSuffix, StartS, (EndS - StartS));
-	    }
-	} while ((GotHost == FALSE) && (*DomainSuffix != '\0'));
-
-	if (GotHost == FALSE) {
-	    /*
-	     * Advance to the next prefix, or end of prefix list.  - FM
-	     */
-	    StartP = ((*EndP == '\0') ? EndP : (EndP + 1));
-	    while ((*StartP) && (WHITE(*StartP) || *StartP == ',')) {
-		StartP++;	/* Skip whitespace and separators */
-	    }
-	    EndP = StartP;
-	    while (*EndP && !WHITE(*EndP) && *EndP != ',') {
-		EndP++;		/* Find separator */
-	    }
-	    LYStrNCpy(DomainPrefix, StartP, (EndP - StartP));
-	}
-    } while ((GotHost == FALSE) && (*DomainPrefix != '\0'));
-
-    /*
-     * If a test passed, restore the port field if we had one and there is no
-     * colon in the expanded host, and the path if we had one, and reallocate
-     * the original string with the expanded Host[:port] field included.  - FM
-     */
-    if (GotHost) {
-	if (StrColon && StrChr(Host, ':') == NULL) {
-	    *StrColon = ':';
-	    StrAllocCat(Host, StrColon);
-	}
-	if (Path) {
-	    *Path = '/';
-	    StrAllocCat(Host, Path);
-	} else if (Fragment) {
-	    StrAllocCat(Host, "/");
-	    restorePoundSelector(Fragment);
-	    StrAllocCat(Host, Fragment);
-	}
-	StrAllocCopy(*AllocatedString, Host);
-    }
-
-    /*
-     * Clear any residual interrupt.  - FM
-     */
-    if (LYCursesON && HTCheckForInterrupt()) {
-	CTRACE((tfp,
-		"LYExpandHostForURL: Ignoring interrupt because '%s' %s.\n",
-		host,
-		(GotHost ? "resolved" : "timed out")));
-    }
-
-    /*
-     * Clean up and return the last test result.  - FM
-     */
-  cleanup:
-    FREE(DomainPrefix);
-    FREE(DomainSuffix);
-    FREE(Str);
-    FREE(MsgStr);
-    FREE(Host);
-    FREE(host);
-    return GotHost;
-}
-
-/*
- * This function rewrites and reallocates a previously allocated string that
- * begins with an Internet host name so that the string begins with its guess
- * of the scheme based on the first field of the host name, or the default
- * scheme if no guess was made, and returns TRUE, otherwise it does not modify
- * the string and returns FALSE.  It also returns FALSE without modifying the
- * string if the default_scheme argument was NULL or zero-length and no guess
- * was made.  - FM
- */
-BOOLEAN LYAddSchemeForURL(char **AllocatedString,
-			  const char *default_scheme)
-{
-    char *Str = NULL;
-    BOOLEAN GotScheme = FALSE;
-
-    /*
-     * If we were passed a NULL or zero-length string, don't continue
-     * pointlessly.  - FM
-     */
-    if (!(*AllocatedString) || *AllocatedString[0] == '\0') {
-	return GotScheme;
-    }
-
-    /*
-     * Try to guess the appropriate scheme. - FM
-     */
-    if (0 == strncasecomp(*AllocatedString, "www", 3)) {
-	/*
-	 * This could be either http or https, so check the default and
-	 * otherwise use "http".  - FM
-	 */
-	if (default_scheme != NULL &&
-	    NULL != strstr(default_scheme, "http")) {
-	    StrAllocCopy(Str, default_scheme);
-	} else {
-	    StrAllocCopy(Str, "http://");
-	}
-	GotScheme = TRUE;
-
-    } else if (0 == strncasecomp(*AllocatedString, "ftp", 3)) {
-	StrAllocCopy(Str, "ftp://");
-	GotScheme = TRUE;
-
-    } else if (0 == strncasecomp(*AllocatedString, "gopher", 6)) {
-	StrAllocCopy(Str, "gopher://");
-	GotScheme = TRUE;
-
-    } else if (0 == strncasecomp(*AllocatedString, "wais", 4)) {
-	StrAllocCopy(Str, "wais://");
-	GotScheme = TRUE;
-
-    } else if (0 == strncasecomp(*AllocatedString, "cso", 3) ||
-	       0 == strncasecomp(*AllocatedString, "ns.", 3) ||
-	       0 == strncasecomp(*AllocatedString, "ph.", 3)) {
-	StrAllocCopy(Str, "cso://");
-	GotScheme = TRUE;
-
-    } else if (0 == strncasecomp(*AllocatedString, "finger", 6)) {
-	StrAllocCopy(Str, "finger://");
-	GotScheme = TRUE;
-
-    } else if (0 == strncasecomp(*AllocatedString, "news", 4)) {
-	/*
-	 * This could be either news, snews, or nntp, so check the default, and
-	 * otherwise use news.  - FM
-	 */
-	if ((default_scheme != NULL) &&
-	    (NULL != strstr(default_scheme, "news") ||
-	     NULL != strstr(default_scheme, "nntp"))) {
-	    StrAllocCopy(Str, default_scheme);
-	} else {
-	    StrAllocCopy(Str, "news://");
-	}
-	GotScheme = TRUE;
-
-    } else if (0 == strncasecomp(*AllocatedString, "nntp", 4)) {
-	StrAllocCopy(Str, "nntp://");
-	GotScheme = TRUE;
-
-    }
-
-    /*
-     * If we've make a guess, use it.  Otherwise, if we were passed a default
-     * scheme prefix, use that.  - FM
-     */
-    if (GotScheme == TRUE) {
-	StrAllocCat(Str, *AllocatedString);
-	StrAllocCopy(*AllocatedString, Str);
-	FREE(Str);
-	return GotScheme;
-
-    } else if (non_empty(default_scheme)) {
-	StrAllocCopy(Str, default_scheme);
-	GotScheme = TRUE;
-	StrAllocCat(Str, *AllocatedString);
-	StrAllocCopy(*AllocatedString, Str);
-	FREE(Str);
-	return GotScheme;
-    }
-
-    return GotScheme;
-}
-
 /*
  * This function expects an absolute Unix or VMS SHELL path spec as an
  * allocated string, simplifies it, and trims out any residual relative

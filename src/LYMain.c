@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMain.c,v 1.275 2018/03/21 00:50:51 tom Exp $
+ * $LynxId: LYMain.c,v 1.276 2018/03/27 23:05:51 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTP.h>
@@ -187,6 +187,7 @@ int LYrcShowColor = SHOW_COLOR_UNKNOWN;		/* ... last used */
 BOOLEAN LYUseFormsOptions = TRUE;	/* use forms-based options menu */
 #endif
 
+BOOLEAN LYGuessScheme = FALSE;
 BOOLEAN LYJumpFileURL = FALSE;	/* always FALSE the first time */
 BOOLEAN LYPermitURL = FALSE;
 BOOLEAN LYRestricted = FALSE;	/* whether we have -anonymous option */

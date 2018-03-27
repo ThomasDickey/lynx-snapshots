@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYGlobalDefs.h,v 1.145 2018/03/21 00:50:51 tom Exp $
+ * $LynxId: LYGlobalDefs.h,v 1.146 2018/03/27 23:05:13 tom Exp $
  *
  * global variable definitions
  */
@@ -397,6 +397,7 @@ extern "C" {
     extern char *personal_extension_map;
     extern char *LYHostName;
     extern char *LYLocalDomain;
+    extern BOOLEAN LYGuessScheme;
     extern BOOLEAN unique_urls;
     extern BOOLEAN use_underscore;
     extern BOOLEAN no_list;

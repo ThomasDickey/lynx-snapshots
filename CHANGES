@@ -1,7 +1,13 @@
--- $LynxId: CHANGES,v 1.963 2018/03/21 14:38:06 tom Exp $
+-- $LynxId: CHANGES,v 1.965 2018/03/27 23:28:34 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
+
+2018-03-27 (2.8.9dev.18)
+* modify legacy feature from Lynx 2.7.2 which checks the hostname of a URI
+  to guess whether to use HTTP, FTP, etc., depending upon the prefix of the
+  URIs hostname.  This is now an optional feature, GUESS_SCHEME, which defaults
+  to FALSE (Debian #893907) -TD
 
 2018-03-21 (2.8.9dev.17)
 * modify samples/oldlynx.bat to check if Lynx recognizes the -lss option -TD
