@@ -1,4 +1,4 @@
-/* $LynxId: LYUtils.h,v 1.99 2018/03/01 22:14:42 Takeshi.Hataguchi Exp $ */
+/* $LynxId: LYUtils.h,v 1.100 2018/03/27 21:19:21 tom Exp $ */
 #ifndef LYUTILS_H
 #define LYUTILS_H
 
@@ -122,15 +122,12 @@ extern "C" {
 #define restorePoundSelector(pound) if ((pound) != NULL) *(pound) = '#'
 
     extern BOOL strn_dash_equ(const char *p1, const char *p2, int len);
-    extern BOOLEAN LYAddSchemeForURL(char **AllocatedString, const char *default_scheme);
     extern BOOLEAN LYCachedTemp(char *result, char **cached);
     extern BOOLEAN LYCanDoHEAD(const char *address);
     extern BOOLEAN LYCanReadFile(const char *name);
     extern BOOLEAN LYCanWriteFile(const char *name);
     extern BOOLEAN LYCloseInput(FILE *fp);
     extern BOOLEAN LYCloseOutput(FILE *fp);
-    extern BOOLEAN LYExpandHostForURL(char **AllocatedString,
-				      char *prefix_list, char *suffix_list);
     extern BOOLEAN LYFixCursesOnForAccess(const char *addr, const char *physical);
     extern BOOLEAN LYPathOffHomeOK(char *fbuffer, size_t fbuffer_size);
     extern BOOLEAN LYValidateFilename(bstring **result, bstring **given);

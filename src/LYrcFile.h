@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYrcFile.h,v 1.50 2018/03/05 02:00:13 tom Exp $
+ * $LynxId: LYrcFile.h,v 1.51 2018/03/27 23:03:51 tom Exp $
  */
 #ifndef LYRCFILE_H
 #define LYRCFILE_H
@@ -99,6 +99,7 @@
 #define RC_GOPHER_PROXY                 "gopher_proxy"
 #define RC_GOTOBUFFER                   "gotobuffer"
 #define RC_GZIP_PATH                    "gzip_path"
+#define RC_GUESS_SCHEME                 "guess_scheme"
 #define RC_HELPFILE                     "helpfile"
 #define RC_HIDDENLINKS                  "hiddenlinks"
 #define RC_HIDDEN_LINK_MARKER           "hidden_link_marker"
