@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMain.c,v 1.276 2018/03/27 23:05:51 tom Exp $
+ * $LynxId: LYMain.c,v 1.277 2018/03/28 20:07:59 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTP.h>
@@ -571,6 +571,10 @@ FILE *LYTraceLogFP = NULL;	/* Pointer for TRACE log  */
 char *LYTraceLogPath = NULL;	/* Path for TRACE log      */
 BOOLEAN LYUseTraceLog = USE_TRACE_LOG;	/* Use a TRACE log?        */
 
+#ifdef LY_FIND_LEAKS
+char LYLeaksPath[LY_MAXPATH];
+#endif
+
 BOOLEAN LYSeekFragMAPinCur = TRUE;
 BOOLEAN LYSeekFragAREAinCur = TRUE;
 BOOLEAN LYStripDotDotURLs = TRUE;	/* Try to fix ../ in some URLs? */
@@ -1039,6 +1043,7 @@ int main(int argc,
 #endif
 
 #ifdef LY_FIND_LEAKS
+    LYAddPathToHome(LYLeaksPath, (size_t) LY_MAXPATH, LEAKAGE_SINK);
     /*
      * Register the final function to be executed when being exited.  Will
      * display memory leaks if the -find-leaks option is used.  This should

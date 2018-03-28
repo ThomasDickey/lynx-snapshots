@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYLeaks.h,v 1.14 2012/02/10 00:15:56 tom Exp $
+ * $LynxId: LYLeaks.h,v 1.15 2018/03/28 09:28:18 tom Exp $
  */
 #ifndef __LYLEAKS_H
 /*
@@ -77,7 +77,8 @@ extern "C" {
 #endif				/* VMS */
 /*
  * Data structures
- */ typedef struct SourceLocation_tag {
+ */
+    typedef struct SourceLocation_tag {
 	/*
 	 * The file name and line number of where an event took place.
 	 */
@@ -119,6 +120,7 @@ extern "C" {
 /*
  *  Global variable declarations
  */
+    extern char LYLeaksPath[];
 
 /*
  *  Macros

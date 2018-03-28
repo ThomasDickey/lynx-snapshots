@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYLeaks.c,v 1.38 2016/11/24 15:35:29 tom Exp $
+ * $LynxId: LYLeaks.c,v 1.39 2018/03/28 09:28:32 tom Exp $
  *
  *	Copyright (c) 1994, University of Kansas, All Rights Reserved
  *	(this file was rewritten twice - 1998/1999 and 2003/2004)
@@ -197,7 +197,7 @@ void LYLeaks(void)
      * Open the leakage sink to take all the output.  Recreate the file each
      * time.  Do nothing if unable to open the file.
      */
-    Fp_leakagesink = LYNewTxtFile(LEAKAGE_SINK);
+    Fp_leakagesink = LYNewTxtFile(LYLeaksPath);
     if (Fp_leakagesink == NULL) {
 	return;
     }

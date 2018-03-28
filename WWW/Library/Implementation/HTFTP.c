@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFTP.c,v 1.131 2018/03/11 22:30:30 tom Exp $
+ * $LynxId: HTFTP.c,v 1.132 2018/03/28 08:51:10 Gisle.Vanem Exp $
  *
  *			File Transfer Protocol (FTP) Client
  *			for a WorldWideWeb browser
@@ -1470,6 +1470,11 @@ typedef struct _EntryInfo {
 static void free_entryinfo_struct_contents(EntryInfo *entry_info)
 {
     if (entry_info) {
+#ifdef LONG_LIST
+	FREE(entry_info->file_mode);
+	FREE(entry_info->file_user);
+	FREE(entry_info->file_group);
+#endif
 	FREE(entry_info->filename);
 	FREE(entry_info->linkname);
 	FREE(entry_info->type);
