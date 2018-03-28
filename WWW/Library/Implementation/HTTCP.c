@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTCP.c,v 1.140 2018/03/21 00:29:50 tom Exp $
+ * $LynxId: HTTCP.c,v 1.141 2018/03/28 00:44:27 tom Exp $
  *
  *			Generic Communication Code		HTTCP.c
  *			==========================
@@ -1965,7 +1965,9 @@ int HTDoConnect(const char *url,
 	    int tries = 0;
 
 #ifdef SOCKET_DEBUG_TRACE
-	    HTInetStatus("this socket's first connect");
+	    if (SOCKET_ERRNO != EINPROGRESS) {
+		HTInetStatus("this socket's first connect");
+	    }
 #endif /* SOCKET_DEBUG_TRACE */
 	    ret = 0;
 	    while (ret <= 0) {
@@ -2002,7 +2004,9 @@ int HTDoConnect(const char *url,
 
 #ifdef SOCKET_DEBUG_TRACE
 		if (tries == 1) {
-		    HTInetStatus("this socket's first select");
+		    if (SOCKET_ERRNO != EINPROGRESS) {
+			HTInetStatus("this socket's first select");
+		    }
 		}
 #endif /* SOCKET_DEBUG_TRACE */
 		/*
@@ -2030,6 +2034,11 @@ int HTDoConnect(const char *url,
 		 */
 		if ((ret < 0) && (SOCKET_ERRNO != EALREADY)) {
 		    status = ret;
+		    break;
+		} else if (((SOCKET_ERRNO == EALREADY) ||
+			    (SOCKET_ERRNO == EINPROGRESS)) &&
+			   HTCheckForInterrupt()) {
+		    status = HT_INTERRUPTED;
 		    break;
 		} else if (ret > 0) {
 		    /*
@@ -2132,7 +2141,8 @@ int HTDoConnect(const char *url,
 	if (status < 0) {
 	    NETCLOSE(*s);
 	    *s = -1;
-	    continue;
+	    if (status != HT_INTERRUPTED)
+		continue;
 	}
 	break;
     }
