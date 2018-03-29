@@ -1,9 +1,10 @@
--- $LynxId: CHANGES,v 1.968 2018/03/28 20:09:55 tom Exp $
+-- $LynxId: CHANGES,v 1.969 2018/03/28 22:33:40 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
 2018-03-28 (2.8.9dev.18)
+* fix a few more memory leaks -TD
 * put Lynx.leaks file in home directory like Lynx.trace (report by GV) -TD
 * fix a memory leak in HTFTP.c -GV
 * modify HTDoConnect(), adding a check for keyboard interrupt with 'z' in the

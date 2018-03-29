@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYUtils.c,v 1.290 2018/03/27 23:07:44 tom Exp $
+ * $LynxId: LYUtils.c,v 1.291 2018/03/28 21:14:39 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTCP.h>
@@ -4230,9 +4230,9 @@ static BOOLEAN LYExpandHostForURL(char **AllocatedString,
 	fprintf(stdout, "%s '%s'%s\r\n", WWW_FIND_MESSAGE, host, FIRST_SEGMENT);
     }
 #ifdef INET6
-    if (HTGetAddrInfo(host, 80) != NULL)
+    if (HTCheckAddrInfo(host, 80))
 #else
-    if (LYGetHostByName(host) != NULL)
+    if (LYCheckHostByName(host))
 #endif /* INET6 */
     {
 	/*
@@ -4334,7 +4334,7 @@ static BOOLEAN LYExpandHostForURL(char **AllocatedString,
 	    } else if (Startup && !dump_output_immediately) {
 		fprintf(stdout, "%s '%s'%s\n", WWW_FIND_MESSAGE, host, GUESSING_SEGMENT);
 	    }
-	    GotHost = (BOOL) (LYGetHostByName(host) != NULL);
+	    GotHost = LYCheckHostByName(host);
 	    if (HostColon != NULL) {
 		*HostColon = ':';
 	    }
