@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYHash.c,v 1.38 2018/03/10 01:50:19 tom Exp $
+ * $LynxId: LYHash.c,v 1.39 2018/03/29 00:38:59 tom Exp $
  *
  * A hash table for the (fake) CSS support in Lynx-rp
  * (c) 1996 Rob Partington
@@ -10,8 +10,11 @@
 #include <LYUtils.h>
 #include <LYLeaks.h>
 #include <LYStrings.h>
+#include <LYGlobalDefs.h>
 
 #ifdef USE_COLOR_STYLE
+
+#undef HASH_TYPE
 
 #define HASH_SIZE CSHASHSIZE
 #define HASH_TYPE     int
@@ -79,20 +82,34 @@ static HASH_TYPE cs_hash(const char *string)
 
 int color_style_1(const char *string)
 {
-    get_buffer(strlen(string));
-    strcpy(buffer, string);
-    LYLowerCase(buffer);
-    return cs_hash(buffer);
+    int hash;
+
+    if (dump_output_immediately) {
+	hash = 0;
+    } else {
+	get_buffer(strlen(string));
+	strcpy(buffer, string);
+	LYLowerCase(buffer);
+	hash = cs_hash(buffer);
+    }
+    return hash;
 }
 
 int color_style_3(const char *p, const char *q, const char *r)
 {
-    get_buffer(strlen(p) + strlen(q) + strlen(r));
-    strcpy(buffer, p);
-    strcat(buffer, q);
-    strcat(buffer, r);
-    LYLowerCase(buffer);
-    return cs_hash(buffer);
+    int hash;
+
+    if (dump_output_immediately) {
+	hash = 0;
+    } else {
+	get_buffer(strlen(p) + strlen(q) + strlen(r));
+	strcpy(buffer, p);
+	strcat(buffer, q);
+	strcat(buffer, r);
+	LYLowerCase(buffer);
+	hash = cs_hash(buffer);
+    }
+    return hash;
 }
 
 void report_hashStyles(void)

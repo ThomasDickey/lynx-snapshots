@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTCP.c,v 1.141 2018/03/28 00:44:27 tom Exp $
+ * $LynxId: HTTCP.c,v 1.143 2018/03/28 22:29:45 tom Exp $
  *
  *			Generic Communication Code		HTTCP.c
  *			==========================
@@ -32,6 +32,9 @@
 #ifdef NSL_FORK
 #include <signal.h>
 #include <www_wait.h>
+#define FREE_NSL_FORK(p) FREE(p)
+#else
+#define FREE_NSL_FORK(p)	/* nothing */
 #endif /* NSL_FORK */
 
 #ifdef HAVE_RESOLV_H
@@ -1115,7 +1118,7 @@ static void really_gethostbyname(const char *host,
  *	HT_ERROR		Resolver error, reason not known
  *	HT_INTERNAL		Internal error
  */
-LYNX_HOSTENT *LYGetHostByName(char *host)
+static LYNX_HOSTENT *LYGetHostByName(char *host)
 {
     static const char *this_func = "LYGetHostByName";
 
@@ -1259,6 +1262,15 @@ LYNX_HOSTENT *LYGetHostByName(char *host)
     return NULL;
 }
 
+BOOLEAN LYCheckHostByName(char *host)
+{
+    LYNX_HOSTENT *data = LYGetHostByName(host);
+    BOOLEAN result = (data != NULL);
+
+    FREE_NSL_FORK(data);
+    return result;
+}
+
 /*	Parse a network node address and port
  *	-------------------------------------
  *
@@ -1393,6 +1405,7 @@ static int HTParseInet(SockA * soc_in, const char *str)
 		HTAlwaysAlert(host, gettext("Address length looks invalid"));
 	    }
 	    MemCpy((void *) &soc_in->sin_addr, phost->h_addr_list[0], phost->h_length);
+	    FREE_NSL_FORK(phost);
 	}
 #endif /* _WINDOWS_NSL */
 
@@ -1593,8 +1606,8 @@ static void really_getaddrinfo(const char *host,
 }
 #endif /* NSL_FORK */
 
-LYNX_ADDRINFO *HTGetAddrInfo(const char *str,
-			     const int defport)
+static LYNX_ADDRINFO *HTGetAddrInfo(const char *str,
+				    const int defport)
 {
 #ifdef NSL_FORK
     /* for transfer of result between from child to parent: */
@@ -1653,6 +1666,15 @@ LYNX_ADDRINFO *HTGetAddrInfo(const char *str,
     dump_addrinfo("HTGetAddrInfo", res);
 #endif
     return res;
+}
+
+BOOLEAN HTCheckAddrInfo(const char *str, const int defport)
+{
+    LYNX_ADDRINFO *data = HTGetAddrInfo(str, defport);
+    BOOLEAN result = (data != 0);
+
+    FREE_NSL_FORK(data);
+    return result;
 }
 #endif /* INET6 */
 
@@ -2181,7 +2203,9 @@ int HTDoConnect(const char *url,
 
 #ifdef INET6
     FREE(line);
-#ifndef NSL_FORK
+#ifdef NSL_FORK
+    FREE_NSL_FORK(res0);
+#else
     if (res0)
 	freeaddrinfo(res0);
 #endif

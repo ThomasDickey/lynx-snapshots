@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTCP.h,v 1.24 2014/12/03 00:27:57 tom Exp $
+ * $LynxId: HTTCP.h,v 1.25 2018/03/28 21:14:18 tom Exp $
  *
  *                               /Net/dxcern/userd/timbl/hypertext/WWW/Library/src/HTTCP.html
  *                             GENERIC TCP/IP COMMUNICATION
@@ -88,17 +88,10 @@ extern "C" {
  */
     extern int lynx_nsl_status;
 
-#ifndef LYNX_HOSTENT
-#define LYNX_HOSTENT void
-#endif
-
-    extern LYNX_HOSTENT *LYGetHostByName(char *host);
+    extern BOOLEAN LYCheckHostByName(char *host);
 
 #ifdef INET6
-#ifndef LYNX_ADDRINFO
-#define LYNX_ADDRINFO void
-#endif
-    extern LYNX_ADDRINFO *HTGetAddrInfo(const char *str, const int defport);
+    extern BOOLEAN HTCheckAddrInfo(const char *str, const int defport);
 #endif
 
 /*      Get Name of This Machine

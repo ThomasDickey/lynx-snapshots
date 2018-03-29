@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMain.c,v 1.277 2018/03/28 20:07:59 tom Exp $
+ * $LynxId: LYMain.c,v 1.278 2018/03/28 21:41:50 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTP.h>
@@ -1043,7 +1043,6 @@ int main(int argc,
 #endif
 
 #ifdef LY_FIND_LEAKS
-    LYAddPathToHome(LYLeaksPath, (size_t) LY_MAXPATH, LEAKAGE_SINK);
     /*
      * Register the final function to be executed when being exited.  Will
      * display memory leaks if the -find-leaks option is used.  This should
@@ -1055,6 +1054,8 @@ int main(int argc,
      * Register the function which will free our allocated globals.
      */
     atexit(free_lynx_globals);
+
+    LYAddPathToHome(LYLeaksPath, (size_t) LY_MAXPATH, LEAKAGE_SINK);
 #endif /* LY_FIND_LEAKS */
 
 #ifdef    NOT_ASCII
