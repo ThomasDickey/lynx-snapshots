@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTCP.c,v 1.143 2018/03/28 22:29:45 tom Exp $
+ * $LynxId: HTTCP.c,v 1.144 2018/03/30 00:13:21 tom Exp $
  *
  *			Generic Communication Code		HTTCP.c
  *			==========================
@@ -32,7 +32,9 @@
 #ifdef NSL_FORK
 #include <signal.h>
 #include <www_wait.h>
-#define FREE_NSL_FORK(p) FREE(p)
+#define FREE_NSL_FORK(p) { FREE(p); }
+#elif defined(_WINDOWS_NSL)
+#define FREE_NSL_FORK(p) if ((p) == gbl_phost) { FREE(p); }
 #else
 #define FREE_NSL_FORK(p)	/* nothing */
 #endif /* NSL_FORK */
@@ -1393,6 +1395,7 @@ static int HTParseInet(SockA * soc_in, const char *str)
 	if (!gbl_phost)
 	    goto failed;
 	MemCpy((void *) &soc_in->sin_addr, gbl_phost->h_addr_list[0], gbl_phost->h_length);
+	FREE(gbl_phost);
 #else /* !_WINDOWS_NSL */
 	{
 	    LYNX_HOSTENT *phost;

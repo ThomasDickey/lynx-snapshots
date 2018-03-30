@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYLeaks.c,v 1.39 2018/03/28 09:28:32 tom Exp $
+ * $LynxId: LYLeaks.c,v 1.41 2018/03/30 00:27:58 tom Exp $
  *
  *	Copyright (c) 1994, University of Kansas, All Rights Reserved
  *	(this file was rewritten twice - 1998/1999 and 2003/2004)
@@ -739,6 +739,22 @@ void LYLeakFree(void *vp_Alloced,
 	    free(vp_Alloced);
 	}
     }
+}
+
+/*
+ * Check for leaked strdup() results -TD
+ */
+char *LYLeakStrdup(const char *source,
+		   const char *cp_File,
+		   const short ssi_Line)
+{
+    size_t length = strlen(source) + 1;
+    char *target = (char *) LYLeakMalloc(length, cp_File, ssi_Line);
+
+    if (target != 0) {
+	memcpy(target, source, length);
+    }
+    return target;
 }
 
 /*
