@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYLeaks.h,v 1.15 2018/03/28 09:28:18 tom Exp $
+ * $LynxId: LYLeaks.h,v 1.17 2018/03/30 00:35:10 tom Exp $
  */
 #ifndef __LYLEAKS_H
 /*
@@ -155,6 +155,11 @@ extern "C" {
 #endif				/* free */
 #define free(vp_alloced) LYLeakFree(vp_alloced, __FILE__, __LINE__)
 
+#ifdef strdup
+#undef strdup
+#endif				/* free */
+#define strdup(vp_alloced) LYLeakStrdup(vp_alloced, __FILE__, __LINE__)
+
 /*
  * Added the following two defines to track Lynx's frequent use of those
  * macros.  - KW 1997-10-12
@@ -249,6 +254,9 @@ extern "C" {
     extern void LYLeakFree(void *vp_alloced,
 			   const char *cp_File,
 			   const short ssi_Line);
+    extern char *LYLeakStrdup(const char *src,
+			      const char *cp_File,
+			      const short ssi_Line);
     extern char *LYLeakSACopy(char **dest,
 			      const char *src,
 			      const char *cp_File,

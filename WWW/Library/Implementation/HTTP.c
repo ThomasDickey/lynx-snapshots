@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTP.c,v 1.172 2018/03/21 21:25:11 tom Exp $
+ * $LynxId: HTTP.c,v 1.173 2018/03/30 00:56:26 tom Exp $
  *
  * HyperText Tranfer Protocol	- Client implementation		HTTP.c
  * ==========================
@@ -1280,6 +1280,7 @@ static int HTLoadHTTP(const char *arg,
 		   SSL_get_cipher(handle));
 	_HTProgress(msg);
 	FREE(msg);
+	FREE(ssl_all_cns);
     }
 #endif /* USE_SSL */
 

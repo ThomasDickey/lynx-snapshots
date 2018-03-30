@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTAccess.c,v 1.80 2016/11/24 15:29:50 tom Exp $
+ * $LynxId: HTAccess.c,v 1.81 2018/03/29 21:41:37 tom Exp $
  *
  *		Access Manager					HTAccess.c
  *		==============
@@ -1118,10 +1118,17 @@ static BOOL HTLoadDocument(const char *full_address,	/* may include #fragment */
  */
 BOOL HTLoadAbsolute(const DocAddress *docaddr)
 {
-    return HTLoadDocument(docaddr->address,
-			  HTAnchor_findAddress(docaddr),
-			  (HTOutputFormat ? HTOutputFormat : WWW_PRESENT),
-			  HTOutputStream);
+    BOOL result;
+    HTParentAnchor *anchor = HTAnchor_findAddress(docaddr);
+
+    result = HTLoadDocument(docaddr->address,
+			    anchor,
+			    (HTOutputFormat ? HTOutputFormat : WWW_PRESENT),
+			    HTOutputStream);
+    if (!result) {
+	HTAnchor_delete(anchor->parent);
+    }
+    return result;
 }
 
 #ifdef NOT_USED_CODE
