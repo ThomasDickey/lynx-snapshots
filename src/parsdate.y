@@ -3,7 +3,7 @@
 #include <LYLeaks.h>
 
 /*
- *  $LynxId: parsdate.y,v 1.20 2013/01/05 01:58:50 tom Exp $
+ *  $LynxId: parsdate.y,v 1.21 2018/04/01 22:21:45 tom Exp $
  *
  *  This module is adapted and extended from tin, to use for LYmktime().
  *
@@ -883,12 +883,31 @@ static int GetTimeInfo(TIMEINFO * Now)
     return 0;
 }
 
+#if defined(YYBYACC) && defined(YYPURE) && defined(LY_FIND_LEAKS)
+#undef YYPURE
+#define YYPURE 1
+static void yyfreestack(YYSTACKDATA *);
+static void parsedate_leaks(void)
+{
+    yyfreestack(&yystack);
+}
+#endif
+
 time_t parsedate(char *p,
 		 TIMEINFO * now)
 {
     struct tm *tm;
     TIMEINFO ti;
     time_t Start;
+
+#if defined(YYBYACC) && defined(YYPURE) && defined(LY_FIND_LEAKS)
+    static int initialized;
+
+    if (!initialized) {
+	initialized = 1;
+	atexit(parsedate_leaks);
+    }
+#endif
 
     yyInput = p;
     if (now == NULL) {

@@ -1,4 +1,4 @@
-/* $LynxId: LYGetFile.c,v 1.95 2018/03/18 19:34:45 tom Exp $ */
+/* $LynxId: LYGetFile.c,v 1.96 2018/04/01 15:27:18 tom Exp $ */
 #include <HTUtils.h>
 #include <HTTP.h>
 #include <HTAnchor.h>		/* Anchor class */
@@ -1296,11 +1296,11 @@ static struct trust *get_trust(struct trust **table, const char *src, int type)
 }
 
 #ifdef LY_FIND_LEAKS
-static void free_data(struct trust *cur)
+static void free_data(struct trust **data)
 {
+    struct trust *cur = (*data);
     struct trust *next;
 
-    cur = trusted_exec;
     while (cur) {
 	FREE(cur->src);
 	FREE(cur->path);
@@ -1308,13 +1308,14 @@ static void free_data(struct trust *cur)
 	FREE(cur);
 	cur = next;
     }
+    *data = NULL;
 }
 
 static void LYTrusted_free(void)
 {
-    free_data(trusted_exec);
-    free_data(always_trusted_exec);
-    free_data(trusted_cgi);
+    free_data(&trusted_exec);
+    free_data(&always_trusted_exec);
+    free_data(&trusted_cgi);
 
     return;
 }

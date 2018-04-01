@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMain.c,v 1.279 2018/03/30 09:22:45 tom Exp $
+ * $LynxId: LYMain.c,v 1.280 2018/04/01 20:48:44 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTP.h>
@@ -772,6 +772,8 @@ static void free_lynx_globals(void)
 
 #ifdef VMS
     Define_VMSLogical("LYNX_VERSION", "");
+#else
+    (void) putenv("LYNX_VERSION=" LYNX_VERSION);
 #endif /* VMS */
 #ifndef VMS
     FREE(lynx_version_putenv_command);

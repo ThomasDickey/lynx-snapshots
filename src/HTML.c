@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTML.c,v 1.190 2018/04/01 15:37:53 tom Exp $
+ * $LynxId: HTML.c,v 1.192 2018/04/01 23:26:24 tom Exp $
  *
  *		Structured stream to Rich hypertext converter
  *		============================================
@@ -4625,7 +4625,7 @@ static int HTML_start_element(HTStructured * me, int element_number,
 		    me->UsePlainSpace = TRUE;
 		}
 
-		StrAllocCopy(I.value,
+		StrAllocCopy(I_value,
 			     ((UseALTasVALUE == TRUE)
 			      ? value[HTML_INPUT_ALT]
 			      : value[HTML_INPUT_VALUE]));
@@ -4633,13 +4633,14 @@ static int HTML_start_element(HTStructured * me, int element_number,
 		    I.value_cs = current_char_set;
 		}
 		CTRACE((tfp, "4.Ok, we're trying type=[%s]\n", NONNULL(I.type)));
-		TRANSLATE_AND_UNESCAPE_ENTITIES6(&I.value,
+		TRANSLATE_AND_UNESCAPE_ENTITIES6(&I_value,
 						 ATTR_CS_IN,
 						 I.value_cs,
 						 (BOOL) (me->UsePlainSpace &&
 							 !me->HiddenValue),
 						 me->UsePlainSpace,
 						 me->HiddenValue);
+		I.value = I_value;
 		if (me->UsePlainSpace == TRUE) {
 		    /*
 		     * Convert any newlines or tabs to spaces, and trim any
@@ -4664,7 +4665,8 @@ static int HTML_start_element(HTStructured * me, int element_number,
 		 * If we didn't put up a link, then HText_beginInput() will use
 		 * "[IMAGE]-Submit".  - FM
 		 */
-		StrAllocCopy(I.value, "Submit");
+		StrAllocCopy(I_value, "Submit");
+		I.value = I_value;
 	    } else if (ImageSrc) {
 		/* [IMAGE]-Submit with verbose images and not clickable images.
 		 * Use ImageSrc if no other alt or value is supplied. --LE
@@ -4814,7 +4816,7 @@ static int HTML_start_element(HTStructured * me, int element_number,
 		     * We have a submit or reset button in a PRE block, so
 		     * output the entire value from the markup.  If it extends
 		     * to the right margin, it will wrap there, and only the
-		     * portion before that wrap will be hightlighted on screen
+		     * portion before that wrap will be highlighted on screen
 		     * display (Yuk!) but we may as well show the rest of the
 		     * full value on the next or more lines.  - FM
 		     */
@@ -4854,6 +4856,8 @@ static int HTML_start_element(HTStructured * me, int element_number,
 		HText_endInput(me->text);
 	    }
 	    FREE(ImageSrc);
+	    if (strcasecomp(NonNull(I.type), "submit"))
+		FREE(I_value);
 	    FREE(I_name);
 	}
 	break;
