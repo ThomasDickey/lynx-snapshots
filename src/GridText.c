@@ -1,5 +1,5 @@
 /*
- * $LynxId: GridText.c,v 1.310 2018/03/11 23:12:39 tom Exp $
+ * $LynxId: GridText.c,v 1.311 2018/04/01 14:22:01 tom Exp $
  *
  *		Character grid hypertext object
  *		===============================
@@ -10100,8 +10100,9 @@ int HText_beginInput(HText *text,
     /*
      * Set up VALUE.
      */
-    if (I->value)
+    if (I->value) {
 	StrAllocCopy(IValue, I->value);
+    }
     if (IValue &&
 	IS_CJK_TTY &&
 	((I->type == NULL) || strcasecomp(I->type, "hidden"))) {
@@ -10435,6 +10436,8 @@ int HText_beginInput(HText *text,
 	 * Save value for submit/reset buttons so they
 	 * will be visible when printing the page.  - LE
 	 */
+	if (f->type == F_SUBMIT_TYPE)
+	    FREE(I->value);
 	I->value = f->value;
 	break;
 

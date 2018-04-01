@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTML.c,v 1.188 2018/03/07 10:26:46 tom Exp $
+ * $LynxId: HTML.c,v 1.190 2018/04/01 15:37:53 tom Exp $
  *
  *		Structured stream to Rich hypertext converter
  *		============================================
@@ -4230,6 +4230,7 @@ static int HTML_start_element(HTStructured * me, int element_number,
 	{
 	    InputFieldData I;
 	    int chars;
+	    BOOL faked_button = FALSE;
 
 	    /* init */
 	    memset(&I, 0, sizeof(I));
@@ -4292,11 +4293,10 @@ static int HTML_start_element(HTStructured * me, int element_number,
 		/*
 		 * Convert any HTML entities or decimal escaping.  - FM
 		 */
-		StrAllocCopy(I_value, value[HTML_BUTTON_VALUE]);
+		StrAllocCopy(I.value, value[HTML_BUTTON_VALUE]);
 		me->UsePlainSpace = TRUE;
-		TRANSLATE_AND_UNESCAPE_ENTITIES(&I_value, TRUE, me->HiddenValue);
+		TRANSLATE_AND_UNESCAPE_ENTITIES(&I.value, TRUE, me->HiddenValue);
 		me->UsePlainSpace = FALSE;
-		I.value = I_value;
 		/*
 		 * Convert any newlines or tabs to spaces, and trim any lead or
 		 * trailing spaces.  - FM
@@ -4307,6 +4307,7 @@ static int HTML_start_element(HTStructured * me, int element_number,
 		    StrAllocCopy(I.value, I.name);
 		} else {
 		    StrAllocCopy(I.value, "BUTTON");
+		    faked_button = TRUE;
 		}
 	    } else if (I.value == 0) {
 		StrAllocCopy(I.value, "BUTTON");
@@ -4348,7 +4349,7 @@ static int HTML_start_element(HTStructured * me, int element_number,
 		 * We have a submit or reset button in a PRE block, so output
 		 * the entire value from the markup.  If it extends to the
 		 * right margin, it will wrap there, and only the portion
-		 * before that wrap will be hightlighted on screen display
+		 * before that wrap will be highlighted on screen display
 		 * (Yuk!) but we may as well show the rest of the full value on
 		 * the next or more lines.  - FM
 		 */
@@ -4386,7 +4387,8 @@ static int HTML_start_element(HTStructured * me, int element_number,
 		HTML_put_character(me, ' ');
 		me->in_word = NO;
 	    }
-	    FREE(I_value);
+	    if (faked_button)
+		FREE(I.value);
 	    FREE(I_name);
 	}
 	break;
@@ -4623,7 +4625,7 @@ static int HTML_start_element(HTStructured * me, int element_number,
 		    me->UsePlainSpace = TRUE;
 		}
 
-		StrAllocCopy(I_value,
+		StrAllocCopy(I.value,
 			     ((UseALTasVALUE == TRUE)
 			      ? value[HTML_INPUT_ALT]
 			      : value[HTML_INPUT_VALUE]));
@@ -4631,14 +4633,13 @@ static int HTML_start_element(HTStructured * me, int element_number,
 		    I.value_cs = current_char_set;
 		}
 		CTRACE((tfp, "4.Ok, we're trying type=[%s]\n", NONNULL(I.type)));
-		TRANSLATE_AND_UNESCAPE_ENTITIES6(&I_value,
+		TRANSLATE_AND_UNESCAPE_ENTITIES6(&I.value,
 						 ATTR_CS_IN,
 						 I.value_cs,
 						 (BOOL) (me->UsePlainSpace &&
 							 !me->HiddenValue),
 						 me->UsePlainSpace,
 						 me->HiddenValue);
-		I.value = I_value;
 		if (me->UsePlainSpace == TRUE) {
 		    /*
 		     * Convert any newlines or tabs to spaces, and trim any
@@ -4663,8 +4664,7 @@ static int HTML_start_element(HTStructured * me, int element_number,
 		 * If we didn't put up a link, then HText_beginInput() will use
 		 * "[IMAGE]-Submit".  - FM
 		 */
-		StrAllocCopy(I_value, "Submit");
-		I.value = I_value;
+		StrAllocCopy(I.value, "Submit");
 	    } else if (ImageSrc) {
 		/* [IMAGE]-Submit with verbose images and not clickable images.
 		 * Use ImageSrc if no other alt or value is supplied. --LE
@@ -4854,7 +4854,6 @@ static int HTML_start_element(HTStructured * me, int element_number,
 		HText_endInput(me->text);
 	    }
 	    FREE(ImageSrc);
-	    FREE(I_value);
 	    FREE(I_name);
 	}
 	break;

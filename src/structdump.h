@@ -32,9 +32,9 @@ CTRACE((tfp, "\n" \
             (L), sizeof(*((L))), \
             (L)->lname, (L)->lname, (L)->target, (L)->target, \
             (L)->l_hightext, (L)->l_hightext, \
-	    (L)->l_hightext2, (L)->l_hightext2, \
+            (L)->l_hightext2, (L)->l_hightext2, \
             (L)->l_hightext2_offset, \
-	    (L)->inUnderline, (L)->lx, (L)->ly, \
+            (L)->inUnderline, (L)->lx, (L)->ly, \
             (L)->type, (L)->anchor_number, (L)->anchor_line_num, (L)->form)); \
 }else{ \
 CTRACE((tfp, "\n" \
@@ -46,18 +46,14 @@ CTRACE_FLUSH(tfp);
 #define   DUMPSTRUCT_ANCHOR(A,X) \
 if ((A)) { \
 CTRACE((tfp, "\n" \
-            "KED:   anchor_ptr=%p  sizeof=%d  ["X"]\n" \
+            "KED:   anchor_ptr=%p  sizeof=%lu  ["X"]\n" \
             "TextAnchor struct {\n"      \
             "            *next=%p\n"     \
+            "            *prev=%p\n"     \
             "           number=%d\n"     \
             "         line_pos=%d\n"     \
             "           extent=%d\n"     \
             "         line_num=%d\n"     \
-            "        *hightext=%p\n"     \
-            "         hightext=|%s|\n"   \
-            "       *hightext2=%p\n"     \
-            "        hightext2=|%s|\n"   \
-            "  hightext2offset=%d\n"     \
             "        link_type=%d\n"     \
             "     *input_field=%p\n"     \
             "      input_field=|%s|\n"   \
@@ -66,12 +62,14 @@ CTRACE((tfp, "\n" \
             "   expansion_anch=%1x\n"    \
             "          *anchor=%p\n"     \
             "}\n", \
-            (A), sizeof(*((A))), \
-            (A)->next, (A)->number, (A)->line_pos, \
+            (A), (unsigned long) sizeof(*((A))), \
+            (A)->next, (A)->prev, \
+            (A)->number, (A)->line_pos, \
             (A)->extent, (A)->line_num, \
-            (A)->hightext, (A)->hightext, (A)->hightext2, (A)->hightext2, \
-            (A)->hightext2offset, (A)->link_type, \
-            (A)->input_field, (A)->input_field->name, (A)->show_anchor, \
+            (A)->link_type, \
+            (A)->input_field, \
+            (A)->input_field ? NonNull((A)->input_field->name) : "", \
+            (A)->show_anchor, \
             (A)->inUnderline, (A)->expansion_anch, (A)->anchor)); \
 }else{ \
 CTRACE((tfp, "\n" \
@@ -83,7 +81,7 @@ CTRACE_FLUSH(tfp);
 #define   DUMPSTRUCT_FORMINFO(F,X) \
 if ((F)) { \
 CTRACE((tfp, "\n" \
-            "KED: forminfo_ptr=%p  sizeof=%d  ["X"]\n" \
+            "KED: forminfo_ptr=%p  sizeof=%lu  ["X"]\n" \
             "FormInfo   struct {\n"      \
             "            *name=%p\n"     \
             "             name=|%s|\n"   \
@@ -94,7 +92,7 @@ CTRACE((tfp, "\n" \
             "      *orig_value=%p\n"     \
             "       orig_value=|%s|\n"   \
             "             size=%d\n"     \
-            "        maxlength=%d\n"     \
+            "        maxlength=%lu\n"    \
             "            group=%d\n"     \
             "        num_value=%d\n"     \
             "           hrange=%d\n"     \
@@ -114,15 +112,23 @@ CTRACE((tfp, "\n" \
             "         value_cs=%d\n"     \
             "        accept_cs=|%s|\n"   \
             "}\n", \
-            (F), sizeof(*((F))), \
-            (F)->name, (F)->name, (F)->number, (F)->type, \
-            (F)->value, (F)->value, (F)->orig_value, (F)->orig_value, \
-            (F)->size, (F)->maxlength, (F)->group, (F)->num_value, \
-            (F)->hrange, (F)->lrange, (F)->select_list, (F)->submit_action, \
-            (F)->submit_method, (F)->submit_enctype, (F)->submit_title, \
-            (F)->no_cache, (F)->cp_submit_value, (F)->orig_submit_value, \
+            (F), (unsigned long) sizeof(*((F))), \
+            (F)->name, NonNull((F)->name), \
+            (F)->number, (F)->type, \
+            (F)->value, NonNull((F)->value), \
+            (F)->orig_value, NonNull((F)->orig_value), \
+            (F)->size, (unsigned long) (F)->maxlength, \
+            (F)->group, (F)->num_value, \
+            (F)->hrange, (F)->lrange, (F)->select_list, \
+            NonNull((F)->submit_action), \
+            (F)->submit_method, \
+            NonNull((F)->submit_enctype), \
+            NonNull((F)->submit_title), \
+            (F)->no_cache, \
+            NonNull((F)->cp_submit_value), \
+            NonNull((F)->orig_submit_value), \
             (F)->size_l, (F)->disabled, (F)->readonly, (F)->name_cs, (F)->value_cs, \
-            (F)->accept_cs)); \
+            NonNull((F)->accept_cs))); \
 } else { \
 CTRACE((tfp, "\n" \
             "KED: forminfo_ptr=0x00000000  (NULL)     ["X"]\n")); \

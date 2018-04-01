@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMain.c,v 1.278 2018/03/28 21:41:50 tom Exp $
+ * $LynxId: LYMain.c,v 1.279 2018/03/30 09:22:45 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTP.h>
@@ -2059,10 +2059,10 @@ int main(int argc,
 #ifdef USE_PRETTYSRC
     if (!dump_output_immediately) {
 	HTMLSRC_init_caches(FALSE);	/* do it before terminal is initialized */
-#ifdef LY_FIND_LEAKS
-	atexit(html_src_clean_data);
-#endif
     }
+#ifdef LY_FIND_LEAKS
+    atexit(html_src_clean_data);
+#endif
 #endif
 
     if (!dump_output_immediately) {
