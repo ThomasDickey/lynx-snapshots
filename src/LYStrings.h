@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYStrings.h,v 1.116 2015/10/07 23:20:48 tom Exp $
+ * $LynxId: LYStrings.h,v 1.117 2018/05/04 22:47:10 tom Exp $
  */
 #ifndef LYSTRINGS_H
 #define LYSTRINGS_H
@@ -54,13 +54,13 @@ extern "C" {
     extern int LYgetch_single(void);
     extern int LYgetstr(char *inputline,
 			int masked,
-			size_t bufsize,
+			unsigned bufsize,
 			RecallType recall);
 #define LYGetStr(input,masked,bufsize,recall) \
-	LYgetstr(input,masked,(size_t)(bufsize),recall)
+	LYgetstr(input,masked,(unsigned)(bufsize),recall)
     extern int LYgetBString(bstring **inputline,
 			    int masked,
-			    size_t max_cols,
+			    unsigned max_cols,
 			    RecallType recall);
     extern int LYscanFloat(const char *source, float *result);
     extern int LYscanFloat2(const char **source, float *result);
@@ -357,7 +357,7 @@ extern "C" {
     extern void LYLowerCase(char *buffer);
     extern void LYRefreshEdit(FieldEditor * edit);
     extern void LYSetupEdit(FieldEditor * edit, char *old,
-			    size_t buffer_limit,
+			    unsigned buffer_limit,
 			    int display_limit);
     extern void LYTrimAllStartfile(char *buffer);
     extern void LYTrimLeading(char *buffer);

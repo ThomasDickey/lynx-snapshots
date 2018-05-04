@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTForms.h,v 1.33 2012/02/12 22:30:53 tom Exp $
+ * $LynxId: HTForms.h,v 1.34 2018/05/04 22:50:54 tom Exp $
  */
 #ifndef HTFORMS_H
 #define HTFORMS_H
@@ -75,7 +75,7 @@ extern "C" {
 	char *value;		/* user entered string data */
 	char *orig_value;	/* the original value */
 	int size;		/* width on the screen */
-	size_t maxlength;	/* max width of data */
+	unsigned maxlength;	/* max width of data */
 	int group;		/* a group associated with the link
 				 *  this is used for select's
 				 */
