@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTP.c,v 1.174 2018/03/30 09:12:37 tom Exp $
+ * $LynxId: HTTP.c,v 1.175 2018/05/04 20:07:43 Elliot.Thomas Exp $
  *
  * HyperText Tranfer Protocol	- Client implementation		HTTP.c
  * ==========================
@@ -191,9 +191,9 @@ SSL *HTGetSSLHandle(void)
 {
 #ifdef USE_GNUTLS_INCL
     static char *certfile = NULL;
+#endif
     static char *client_keyfile = NULL;
     static char *client_certfile = NULL;
-#endif
 
     if (ssl_ctx == NULL) {
 	/*
@@ -262,7 +262,7 @@ SSL *HTGetSSLHandle(void)
 #endif
 	atexit(free_ssl_ctx);
     }
-#ifdef USE_GNUTLS_INCL
+
     if (non_empty(SSL_client_key_file)) {
 	client_keyfile = SSL_client_key_file;
 	CTRACE((tfp,
@@ -276,13 +276,21 @@ SSL *HTGetSSLHandle(void)
 		"HTGetSSLHandle: client cert file is set to %s by config SSL_CLIENT_CERT_FILE\n",
 		client_certfile));
     }
-
+#ifdef USE_GNUTLS_INCL
     ssl_ctx->certfile = certfile;
     ssl_ctx->certfile_type = GNUTLS_X509_FMT_PEM;
     ssl_ctx->client_keyfile = client_keyfile;
     ssl_ctx->client_keyfile_type = GNUTLS_X509_FMT_PEM;
     ssl_ctx->client_certfile = client_certfile;
     ssl_ctx->client_certfile_type = GNUTLS_X509_FMT_PEM;
+#elif SSLEAY_VERSION_NUMBER >= 0x0930
+    if (client_certfile != NULL) {
+	if (client_keyfile == NULL) {
+	    client_keyfile = client_certfile;
+	}
+	SSL_CTX_use_certificate_chain_file(ssl_ctx, client_certfile);
+	SSL_CTX_use_PrivateKey_file(ssl_ctx, client_keyfile, SSL_FILETYPE_PEM);
+    }
 #endif
     ssl_okay = 0;
     return (SSL_new(ssl_ctx));

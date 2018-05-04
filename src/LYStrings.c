@@ -1,4 +1,4 @@
-/* $LynxId: LYStrings.c,v 1.271 2018/03/18 19:14:44 tom Exp $ */
+/* $LynxId: LYStrings.c,v 1.273 2018/05/04 23:29:29 tom Exp $ */
 #include <HTUtils.h>
 #include <HTCJK.h>
 #include <UCAux.h>
@@ -2978,7 +2978,7 @@ void LYFinishEdit(FieldEditor * edit)
     FREE(Offs2Col);
 }
 
-void LYSetupEdit(FieldEditor * edit, char *old_value, size_t buffer_limit, int display_limit)
+void LYSetupEdit(FieldEditor * edit, char *old_value, unsigned buffer_limit, int display_limit)
 {
     CTRACE((tfp, "LYSetupEdit buffer %lu, display %d:%s\n",
 	    (unsigned long) buffer_limit,
@@ -2987,7 +2987,7 @@ void LYSetupEdit(FieldEditor * edit, char *old_value, size_t buffer_limit, int d
 
     BufLimit = buffer_limit;
     if (buffer_limit == 0)
-	buffer_limit = strlen(old_value) + 1;
+	buffer_limit = (unsigned) strlen(old_value) + 1;
 
     /*
      * Initialize edit record
@@ -5104,7 +5104,7 @@ int LYhandlePopupList(int cur_choice,
  */
 int LYgetBString(bstring **inputline,
 		 int hidden,
-		 size_t max_cols,
+		 unsigned max_cols,
 		 RecallType recall)
 {
     int x, y;
@@ -5389,7 +5389,7 @@ int LYgetBString(bstring **inputline,
  */
 int LYgetstr(char *inputline,	/* fixed-size buffer for input/output */
 	     int hidden,	/* true to suppress from command-history */
-	     size_t bufsize,	/* sizeof(inputline) */
+	     unsigned bufsize,	/* sizeof(inputline) */
 	     RecallType recall)	/* type of command-history */
 {
     int ch;

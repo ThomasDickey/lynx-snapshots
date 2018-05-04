@@ -1,4 +1,4 @@
-/* $LynxId: LYShowInfo.c,v 1.79 2018/03/11 21:37:12 tom Exp $ */
+/* $LynxId: LYShowInfo.c,v 1.80 2018/05/04 22:28:57 tom Exp $ */
 #include <HTUtils.h>
 #include <HTFile.h>
 #include <HTParse.h>
@@ -26,8 +26,8 @@
 #define BEGIN_DL(text) fprintf(fp0, "<h2>%s</h2>\n<dl compact>", LYEntifyTitle(&buffer, text))
 #define END_DL()       fprintf(fp0, "\n</dl>\n")
 
-#define ADD_SS(label,value)       dt_String(fp0, label, value, FALSE)
-#define ADD_WW(label,value)       dt_String(fp0, label, value, TRUE)
+#define ADD_SS(label,value)       dt_String(fp0, label, value, 0)
+#define ADD_WW(label,value)       dt_String(fp0, label, value, 1)
 #define ADD_NN(label,value,units) dt_Number(fp0, label, (long) value, units)
 
 static int label_columns;
@@ -67,7 +67,7 @@ const char *LYVersionDate(void)
 static void dt_String(FILE *fp,
 		      const char *label,
 		      const char *value,
-		      BOOL allow_wide)
+		      int allow_wide)
 {
     int have;
     int need;

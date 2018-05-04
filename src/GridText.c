@@ -1,5 +1,5 @@
 /*
- * $LynxId: GridText.c,v 1.311 2018/04/01 14:22:01 tom Exp $
+ * $LynxId: GridText.c,v 1.312 2018/05/04 22:53:37 tom Exp $
  *
  *		Character grid hypertext object
  *		===============================
@@ -10642,7 +10642,7 @@ static void load_a_file(const char *val_used,
 {
     FILE *fd;
     size_t bytes;
-    char buffer[BUFSIZ + 1];
+    char bfr[BUFSIZ + 1];
 
     CTRACE((tfp, "Ok, about to convert \"%s\" to mime/thingy\n", val_used));
 
@@ -10650,8 +10650,8 @@ static void load_a_file(const char *val_used,
 	if ((fd = fopen(val_used, BIN_R)) == 0) {
 	    HTAlert(gettext("Can't open file for uploading"));
 	} else {
-	    while ((bytes = fread(buffer, sizeof(char), BUFSIZ, fd)) != 0) {
-		HTSABCat(result, buffer, (int) bytes);
+	    while ((bytes = fread(bfr, sizeof(char), sizeof(bfr) - 1, fd)) != 0) {
+		HTSABCat(result, bfr, (int) bytes);
 	    }
 	    LYCloseInput(fd);
 	}
@@ -11861,7 +11861,7 @@ int HText_SubmitForm(FormInfo * submit_item, DocInfo *doc,
 	 */
 	if (my_query != 0 &&
 	    my_query->len > 5 &&
-	    !strncmp(my_query->str, "file:", 5)) {
+	    !strncmp(my_query->str, "file:", (size_t) 5)) {
 	    strtok(my_query->str, "?");
 	}
 	if (submit_item->submit_method == URL_POST_METHOD || Boundary) {

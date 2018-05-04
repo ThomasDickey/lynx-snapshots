@@ -1,9 +1,11 @@
--- $LynxId: CHANGES,v 1.972 2018/04/01 14:31:31 tom Exp $
+-- $LynxId: CHANGES,v 1.973 2018/05/04 22:33:56 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2018-04-01 (2.8.9dev.18)
+2018-05-03 (2.8.9dev.18)
+* add support for using client certificate with OpenSSL configuration (patch
+  by Elliot Thomas).
 * fix a few more memory leaks -TD
 * put Lynx.leaks file in home directory like Lynx.trace (report by GV) -TD
 * fix a memory leak in HTFTP.c -GV

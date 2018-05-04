@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMainLoop.c,v 1.239 2018/03/05 22:38:53 tom Exp $
+ * $LynxId: LYMainLoop.c,v 1.240 2018/05/04 22:49:06 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTAccess.h>
@@ -1489,7 +1489,7 @@ static int handle_LYK_ACTIVATE(int *c,
 	 ? (F_SUBMITLIKE((form)->type)) \
 	 : ((form)->type == F_RESET_TYPE))
 
-static FormInfo *FindFormAction(FormInfo * given, BOOLEAN submit)
+static FormInfo *FindFormAction(FormInfo * given, int submit)
 {
     FormInfo *result = NULL;
     FormInfo *fi;
@@ -1512,7 +1512,7 @@ static FormInfo *FindFormAction(FormInfo * given, BOOLEAN submit)
     return result;
 }
 
-static FormInfo *MakeFormAction(FormInfo * given, BOOLEAN submit)
+static FormInfo *MakeFormAction(FormInfo * given, int submit)
 {
     FormInfo *result = 0;
 
@@ -1540,12 +1540,12 @@ static FormInfo *MakeFormAction(FormInfo * given, BOOLEAN submit)
 
 static void handle_LYK_SUBMIT(int cur, DocInfo *doc, BOOLEAN *refresh_screen)
 {
-    FormInfo *form = FindFormAction(links[cur].l_form, TRUE);
+    FormInfo *form = FindFormAction(links[cur].l_form, 1);
     FormInfo *make = NULL;
     char *save_submit_action = NULL;
 
     if (form == 0) {
-	make = MakeFormAction(links[cur].l_form, TRUE);
+	make = MakeFormAction(links[cur].l_form, 1);
 	form = make;
     }
 
@@ -1570,11 +1570,11 @@ static void handle_LYK_SUBMIT(int cur, DocInfo *doc, BOOLEAN *refresh_screen)
 
 static void handle_LYK_RESET(int cur, BOOLEAN *refresh_screen)
 {
-    FormInfo *form = FindFormAction(links[cur].l_form, FALSE);
+    FormInfo *form = FindFormAction(links[cur].l_form, 0);
     FormInfo *make = NULL;
 
     if (form == 0) {
-	make = MakeFormAction(links[cur].l_form, FALSE);
+	make = MakeFormAction(links[cur].l_form, 0);
 	form = make;
     }
 
