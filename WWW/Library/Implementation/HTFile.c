@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFile.c,v 1.148 2018/03/05 22:37:12 tom Exp $
+ * $LynxId: HTFile.c,v 1.149 2018/05/06 19:46:38 tom Exp $
  *
  *			File Access				HTFile.c
  *			===========
@@ -1423,7 +1423,7 @@ CompressFileType HTContentToCompressType(HTParentAnchor *anchor)
     const char *ct = HTAnchor_content_type(anchor);
     const char *ce = HTAnchor_content_encoding(anchor);
 
-    if (ce == NULL && ct != 0) {
+    if (ct != 0) {
 	method = HTContentTypeToCompressType(ct);
     } else if (ce != 0) {
 	method = HTEncodingToCompressType(ce);

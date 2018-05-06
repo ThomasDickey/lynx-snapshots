@@ -1,9 +1,11 @@
--- $LynxId: CHANGES,v 1.973 2018/05/04 22:33:56 tom Exp $
+-- $LynxId: CHANGES,v 1.974 2018/05/06 20:06:36 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2018-05-03 (2.8.9dev.18)
+2018-05-06 (2.8.9dev.18)
+* ignore content-encoding in HTContentToCompressType() if the content-type is
+  known, to improve the suggested filename (report by Russell Bell) -TD
 * add support for using client certificate with OpenSSL configuration (patch
   by Elliot Thomas).
 * fix a few more memory leaks -TD

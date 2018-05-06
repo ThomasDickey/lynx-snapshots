@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTGopher.c,v 1.66 2018/03/20 23:38:15 tom Exp $
+ * $LynxId: HTGopher.c,v 1.67 2018/05/04 22:42:37 tom Exp $
  *
  *			GOPHER ACCESS				HTGopher.c
  *			=============
@@ -1712,7 +1712,7 @@ static char *link_to_URL(const char *arg)
 	result = next + 1;
     }
     /* check if the selector is the special html one */
-    if (!strncmp(result, "hURL:", 5)) {
+    if (!strncmp(result, "hURL:", (size_t)5)) {
 	result += 5;
 	next = result;
 	result = temp;
