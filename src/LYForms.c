@@ -1,4 +1,4 @@
-/* $LynxId: LYForms.c,v 1.117 2015/12/15 01:32:45 tom Exp $ */
+/* $LynxId: LYForms.c,v 1.118 2018/05/08 20:51:57 tom Exp $ */
 #include <HTUtils.h>
 #include <HTCJK.h>
 #include <HTTP.h>
@@ -421,10 +421,10 @@ static int form_getstr(int cur,
 	LastTFPos < (int) edit->efBufInUse) {
 #if defined(TEXTFIELDS_MAY_NEED_ACTIVATION) && defined(INACTIVE_INPUT_STYLE_VH)
 	if (redraw_only) {
-	    if (!(edit->efBufInUse >= edit->efWide &&
-		  LastTFPos >= edit->efWide - edit->efPanMargin)) {
+	    if (!((int) edit->efBufInUse >= edit->efWidth &&
+		  LastTFPos >= edit->efWidth - edit->efPanMargin)) {
 		edit->efEditAt = LastTFPos;
-		if (edit->efBufInUse >= edit->efWide)
+		if ((int) edit->efBufInUse >= edit->efWidth)
 		    textinput_redrawn = FALSE;
 	    }
 	} else
