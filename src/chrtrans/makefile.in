@@ -1,4 +1,4 @@
-# $LynxId: makefile.in,v 1.41 2017/07/04 22:46:05 tom Exp $
+# $LynxId: makefile.in,v 1.43 2018/05/08 00:45:34 tom Exp $
 #
 # Makefile for the makeuctb and unicode tables.
 #
@@ -22,13 +22,7 @@ CFLAGS		= @CFLAGS@
 EXTRA_CPPFLAGS	= @EXTRA_CPPFLAGS@
 CPPFLAGS	= @CPPFLAGS@
 
-LIBS		= @LIBS@
-LDFLAGS		= @LDFLAGS@
-
-INTLLIB		= @INTLDIR_MAKE@@INTLLIBS@
-
 WWWINC		= WWW/Library/Implementation
-INTLDIR_CPPFLAGS= @INTLDIR_CPPFLAGS@-I$(top_srcdir)/intl
 
 SITE_DEFS	= # FIXME: set in parent makefile
 
@@ -37,7 +31,7 @@ BUILD_CPP	= @BUILD_CPP@
 BUILD_CFLAGS	= @BUILD_CFLAGS@
 BUILD_CPPFLAGS	= @BUILD_CPPFLAGS@ @DEFS@
 
-BUILD_LIBS	= @BUILD_LIBS@ #$(SITE_LIBS)
+BUILD_LIBS	= @BUILD_LIBS@
 BUILD_LDFLAGS	= @BUILD_LDFLAGS@
 
 x		= @EXEEXT@
@@ -50,11 +44,11 @@ CPP_OPTS	= \
 		-I$(top_srcdir)/src/chrtrans \
 		-I$(top_srcdir)/$(WWWINC) \
 		-I$(top_srcdir)/ \
-		$(INTLDIR_CPPFLAGS) $(SITE_DEFS) $(BUILD_CPPFLAGS)
+		$(SITE_DEFS) $(BUILD_CPPFLAGS)
 CC_OPTS		= $(CPP_OPTS) $(BUILD_CFLAGS)
 
 LINT		= @LINT@
-LINTOPTS	=
+LINTOPTS	= @LINT_OPTS@
 
 CTAGS		= @CTAGS@
 
@@ -123,7 +117,7 @@ OBJS		= makeuctb$o
 C_SRC		= $(OBJS:$o=.c)
 
 $(MAKEUCTB) : $(OBJS)
-	$(BUILD_CC) $(CC_OPTS) $(LDFLAGS) $(BUILD_LDFLAGS) -o $@ $(OBJS) $(INTLLIB) $(BUILD_LIBS)
+	$(BUILD_CC) $(CC_OPTS) $(BUILD_LDFLAGS) -o $@ $(OBJS) $(BUILD_LIBS)
 
 makeuctb$o : $(srcdir)/UCkd.h $(srcdir)/makeuctb.c
 
