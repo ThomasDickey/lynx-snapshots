@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFormat.c,v 1.89 2018/03/11 21:33:34 tom Exp $
+ * $LynxId: HTFormat.c,v 1.90 2018/05/11 22:18:24 tom Exp $
  *
  *		Manage different file formats			HTFormat.c
  *		=============================
@@ -865,10 +865,10 @@ int HTCopy(HTParentAnchor *anchor,
 	}
 #endif /* NOT_ASCII */
 
-	header_length = anchor->header_length;
+	header_length = anchor != 0 ? anchor->header_length : 0;
 
 	(*targetClass.put_block) (sink, input_buffer, status);
-	if (anchor->inHEAD) {
+	if (anchor != 0 && anchor->inHEAD) {
 	    if (!suppress_readprogress) {
 		statusline(gettext("Reading headers..."));
 	    }
@@ -880,7 +880,7 @@ int HTCopy(HTParentAnchor *anchor,
 	     * HTMIME, which detects the end of the server headers.  There
 	     * may be additional (non-header) data in that block.
 	     */
-	    if (anchor->header_length > header_length) {
+	    if (anchor != 0 && (anchor->header_length > header_length)) {
 		int header = (int) (anchor->header_length - header_length);
 
 		CTRACE((tfp, "HTCopy read %" PRI_off_t " header bytes "

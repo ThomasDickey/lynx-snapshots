@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTAccess.c,v 1.81 2018/03/29 21:41:37 tom Exp $
+ * $LynxId: HTAccess.c,v 1.84 2018/05/11 21:36:35 tom Exp $
  *
  *		Access Manager					HTAccess.c
  *		==============
@@ -754,7 +754,9 @@ static BOOL HTLoadDocument(const char *full_address,	/* may include #fragment */
     char *cp;
     BOOL ForcingNoCache = LYforce_no_cache;
 
-    CTRACE((tfp, "HTAccess: loading document %s\n", address_to_load));
+    CTRACE((tfp, "HTAccess: loading document %s\n", NonNull(address_to_load)));
+    if (isEmpty(address_to_load))
+	return NO;
 
     /*
      * Free use_this_url_instead and reset permanent_redirection if not done
@@ -1290,6 +1292,10 @@ BOOL HTSearch(const char *keywords,
     if (escaped == NULL)
 	outofmem(__FILE__, "HTSearch");
 
+    if (here->isIndexAction == NULL) {
+	free(escaped);
+	return FALSE;
+    }
     StrAllocCopy(address, here->isIndexAction);
 
     /*

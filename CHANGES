@@ -1,9 +1,10 @@
--- $LynxId: CHANGES,v 1.978 2018/05/08 21:02:36 tom Exp $
+-- $LynxId: CHANGES,v 1.980 2018/05/12 00:19:30 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2018-05-08 (2.8.9dev.19)
+2018-05-11 (2.8.9dev.19)
+* fix several minor warnings reported by Coverity -TD
 * build-fix overlooked in 2.8.9dev.3 when INACTIVE_INPUT_STYLE_VH is defined,
   for problem introduced by 2.8.8dev.17 code-cleanup -GV
 * trim unnecessary intllib symbols from src/chrtrans/makefile.in -TD

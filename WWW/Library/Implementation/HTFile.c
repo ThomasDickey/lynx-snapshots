@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFile.c,v 1.149 2018/05/06 19:46:38 tom Exp $
+ * $LynxId: HTFile.c,v 1.151 2018/05/11 23:20:35 tom Exp $
  *
  *			File Access				HTFile.c
  *			===========
@@ -997,14 +997,17 @@ HTFormat HTCharsetFormat(HTFormat format,
     char *cp = NULL, *cp1, *cp2, *cp3 = NULL, *cp4;
     BOOL chartrans_ok = FALSE;
     int chndl = -1;
+    const char *format_name = format->name;
 
     FREE(anchor->charset);
-    StrAllocCopy(cp, format->name);
+    if (format_name == 0)
+	format_name = "";
+    StrAllocCopy(cp, format_name);
     LYLowerCase(cp);
     if (((cp1 = StrChr(cp, ';')) != NULL) &&
 	(cp2 = strstr(cp1, "charset")) != NULL) {
 	CTRACE((tfp, "HTCharsetFormat: Extended MIME Content-Type is %s\n",
-		format->name));
+		format_name));
 	cp2 += 7;
 	while (*cp2 == ' ' || *cp2 == '=')
 	    cp2++;
@@ -1512,14 +1515,15 @@ HTStream *HTFileSaveStream(HTParentAnchor *anchor)
 /*	Output one directory entry.
  *	---------------------------
  */
-void HTDirEntry(HTStructured * target, const char *tail,
-		const char *entry)
+void HTDirEntry(HTStructured * target, const char *tail, const char *entry)
 {
     char *relative = NULL;
     char *stripped = NULL;
     char *escaped = NULL;
     int len;
 
+    if (entry == NULL)
+	entry = "";
     StrAllocCopy(escaped, entry);
     LYTrimPathSep(escaped);
     if (strcmp(escaped, "..") != 0) {

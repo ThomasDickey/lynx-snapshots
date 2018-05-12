@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYReadCFG.c,v 1.192 2018/03/27 23:04:44 tom Exp $
+ * $LynxId: LYReadCFG.c,v 1.193 2018/05/11 00:03:10 tom Exp $
  */
 #ifndef NO_RULES
 #include <HTRules.h>
@@ -1936,6 +1936,8 @@ BOOL LYSetConfigValue(const char *name,
     char *temp_name = 0;
     char *temp_value = 0;
 
+    if (param == NULL)
+	param = "";
     StrAllocCopy(value, param);
     switch (tbl->type) {
     case CONF_BOOL:

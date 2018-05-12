@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTAABrow.c,v 1.42 2016/11/24 23:57:57 tom Exp $
+ * $LynxId: HTAABrow.c,v 1.43 2018/05/11 22:54:19 tom Exp $
  *
  * MODULE							HTAABrow.c
  *		BROWSER SIDE ACCESS AUTHORIZATION MODULE
@@ -535,11 +535,17 @@ static HTAARealm *HTAARealm_new(HTList *realm_table,
 BOOL HTAA_HaveUserinfo(const char *hostname)
 {
     int gen_delims = 0;
+    BOOL result = FALSE;
     char *my_info = NULL;
-    char *at_sign = HTSkipToAt(StrAllocCopy(my_info, hostname), &gen_delims);
 
-    free(my_info);
-    return (at_sign != NULL && gen_delims == 0) ? TRUE : FALSE;
+    if (StrAllocCopy(my_info, hostname) != NULL) {
+	char *at_sign = HTSkipToAt(my_info, &gen_delims);
+
+	free(my_info);
+	if (at_sign != NULL && gen_delims == 0)
+	    result = TRUE;
+    }
+    return result;
 }
 
 /*

@@ -1,5 +1,5 @@
 /*
- * $LynxId: SGML.c,v 1.161 2017/07/02 19:45:00 tom Exp $
+ * $LynxId: SGML.c,v 1.162 2018/05/11 23:46:28 tom Exp $
  *
  *			General SGML Parser code		SGML.c
  *			========================
@@ -70,17 +70,13 @@ static void fake_put_character(void *p GCC_UNUSED,
 			AS_casecomp(a,b) : \
 			(TOASCII(TOUPPER(*a)) - TOASCII(TOUPPER(*b))))
 
- /* will use partially inlined version */
-#define orig_HTChunkPutUtf8Char HTChunkPutUtf8Char
-#undef HTChunkPutUtf8Char
-
 /* ...used for comments and attributes value like href... */
 #define HTChunkPutUtf8Char(ch,x) \
     { \
     if ((TOASCII(x) < 128)  && (ch->size < ch->allocated)) \
 	ch->data[ch->size++] = (char)x; \
     else \
-	orig_HTChunkPutUtf8Char(ch,x); \
+	(HTChunkPutUtf8Char)(ch,x); \
     }
 
 #define PUTS(str) ((*me->actions->put_string)(me->target, str))
@@ -3209,8 +3205,8 @@ static void SGML_character(HTStream *me, int c_in)
 		HTPassEightBitRaw &&
 		saved_char_in >=
 		LYlowest_eightbit[me->outUCLYhndl]) {
-		orig_HTChunkPutUtf8Char(string,
-					(UCode_t) (0xf000 | saved_char_in));
+		(HTChunkPutUtf8Char) (string,
+				      (UCode_t) (0xf000 | saved_char_in));
 	    } else {
 		HTChunkPutUtf8Char(string, clong);
 	    }
@@ -3619,8 +3615,8 @@ static void SGML_character(HTStream *me, int c_in)
 		HTPassEightBitRaw &&
 		saved_char_in >=
 		LYlowest_eightbit[me->outUCLYhndl]) {
-		orig_HTChunkPutUtf8Char(string,
-					(UCode_t) (0xf000 | saved_char_in));
+		(HTChunkPutUtf8Char) (string,
+				      (UCode_t) (0xf000 | saved_char_in));
 	    } else {
 		HTChunkPutUtf8Char(string, clong);
 	    }
@@ -3659,8 +3655,8 @@ static void SGML_character(HTStream *me, int c_in)
 		HTPassEightBitRaw &&
 		saved_char_in >=
 		LYlowest_eightbit[me->outUCLYhndl]) {
-		orig_HTChunkPutUtf8Char(string,
-					(UCode_t) (0xf000 | saved_char_in));
+		(HTChunkPutUtf8Char) (string,
+				      (UCode_t) (0xf000 | saved_char_in));
 	    } else {
 		HTChunkPutUtf8Char(string, clong);
 	    }
@@ -3703,8 +3699,8 @@ static void SGML_character(HTStream *me, int c_in)
 		HTPassEightBitRaw &&
 		saved_char_in >=
 		LYlowest_eightbit[me->outUCLYhndl]) {
-		orig_HTChunkPutUtf8Char(string,
-					(UCode_t) (0xf000 | saved_char_in));
+		(HTChunkPutUtf8Char) (string,
+				      (UCode_t) (0xf000 | saved_char_in));
 	    } else {
 		HTChunkPutUtf8Char(string, clong);
 	    }

@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTMLGen.c,v 1.44 2018/03/07 10:26:05 tom Exp $
+ * $LynxId: HTMLGen.c,v 1.45 2018/05/11 22:41:59 tom Exp $
  *
  *		HTML Generator
  *		==============
@@ -322,15 +322,16 @@ static int HTMLGen_start_element(HTStructured * me, int element_number,
 #if defined(USE_COLOR_STYLE)
     char *title = NULL;
     char *title_tmp = NULL;
+    const char *name;
 
-    if (LYPreparsedSource) {
+    if (LYPreparsedSource && (name = tag->name) != 0) {
 	char *myHash = NULL;
 
 	/*
 	 * Same logic as in HTML_start_element, copied from there.  - kw
 	 */
-	HTSprintf(&Style_className, ";%s", HTML_dtd.tags[element_number].name);
-	StrAllocCopy(myHash, HTML_dtd.tags[element_number].name);
+	HTSprintf(&Style_className, ";%s", name);
+	StrAllocCopy(myHash, name);
 	if (class_string[0]) {
 	    StrAllocCat(myHash, ".");
 	    StrAllocCat(myHash, class_string);
@@ -365,7 +366,7 @@ static int HTMLGen_start_element(HTStructured * me, int element_number,
 	if (displayStyles[element_number + STARTAT].color > -2) {
 	    CTRACE2(TRACE_STYLE,
 		    (tfp, "CSSTRIM: start_element: top <%s>\n",
-		     HTML_dtd.tags[element_number].name));
+		     tag->name));
 	    do_cstyle_flush(me);
 	    HText_characterStyle(me->text, hcode, 1);
 	}
@@ -473,7 +474,7 @@ static int HTMLGen_start_element(HTStructured * me, int element_number,
      * Can break after element start.
      */
     if (!me->preformatted && tag->contents != SGML_EMPTY) {
-	if (HTML_dtd.tags[element_number].contents == SGML_ELEMENT)
+	if (tag->contents == SGML_ELEMENT)
 	    allow_break(me, 15, NO);
 	else
 	    allow_break(me, 2, NO);
@@ -489,8 +490,7 @@ static int HTMLGen_start_element(HTStructured * me, int element_number,
 		(tfp, "STYLE:begin_element:ending EMPTY element style\n"));
 	do_cstyle_flush(me);
 	HText_characterStyle(me->text, hcode, STACK_OFF);
-	TrimColorClass(HTML_dtd.tags[element_number].name,
-		       Style_className, &hcode);
+	TrimColorClass(tag->name, Style_className, &hcode);
     }
 #endif /* USE_COLOR_STYLE */
     if (element_number == HTML_OBJECT && tag->contents == SGML_LITTERAL) {

@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTString.h,v 1.38 2013/11/28 11:09:55 tom Exp $
+ * $LynxId: HTString.h,v 1.39 2018/05/11 22:36:34 tom Exp $
  *						String handling for libwww
  *                                         STRINGS
  *                                            
@@ -146,7 +146,7 @@ extern "C" {
 
 #define BINEQ(a,b)    (HTSABEql(a,b))	/* like STREQ() */
 
-#define isBEmpty(p)   ((p) == 0 || BStrLen(p) == 0)
+#define isBEmpty(p)   ((p) == 0 || BStrData(p) == 0 || BStrLen(p) == 0)
 
 #define BStrAlloc(d,n)   HTSABAlloc( &(d), n)
 #define BStrCopy(d,s)    HTSABCopy( &(d), BStrData(s), BStrLen(s))
