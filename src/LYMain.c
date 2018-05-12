@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMain.c,v 1.280 2018/04/01 20:48:44 tom Exp $
+ * $LynxId: LYMain.c,v 1.281 2018/05/11 23:11:18 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTP.h>
@@ -2360,7 +2360,8 @@ void reload_read_cfg(void)
 	(void) LYRemoveTemp(tempfile);
 	FREE(tempfile);
 	return;			/* can not write the very own file :( */
-    } {
+    }
+    if (LYCookieFile != 0 && LYCookieSaveFile != 0) {
 	/* set few safe flags: */
 #ifdef USE_PERSISTENT_COOKIES
 	BOOLEAN persistent_cookies_flag = persistent_cookies;

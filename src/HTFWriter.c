@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFWriter.c,v 1.115 2018/03/05 22:38:53 tom Exp $
+ * $LynxId: HTFWriter.c,v 1.116 2018/05/11 20:41:05 tom Exp $
  *
  *		FILE WRITER				HTFWrite.h
  *		===========
@@ -179,7 +179,7 @@ static void decompress_gzip(HTStream *me)
 	    if (success) {
 		if (LYRenameFile(copied, in_name) == 0)
 		    me->anchor->actual_length = (off_t) actual;
-		LYRemoveTemp(copied);
+		(void) LYRemoveTemp(copied);
 	    }
 	}
 #else
@@ -211,7 +211,7 @@ static void decompress_gzip(HTStream *me)
 		CTRACE((tfp, "command failed: %s\n", command));
 	    }
 	    free(command);
-	    LYRemoveTemp(copied);
+	    (void) LYRemoveTemp(copied);
 	}
 #undef FMT
 #endif

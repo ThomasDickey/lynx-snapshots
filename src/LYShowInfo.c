@@ -1,4 +1,4 @@
-/* $LynxId: LYShowInfo.c,v 1.80 2018/05/04 22:28:57 tom Exp $ */
+/* $LynxId: LYShowInfo.c,v 1.82 2018/05/11 20:43:26 tom Exp $ */
 #include <HTUtils.h>
 #include <HTFile.h>
 #include <HTParse.h>
@@ -71,8 +71,8 @@ static void dt_String(FILE *fp,
 {
     int have;
     int need;
-    char *the_label = 0;
-    char *the_value = 0;
+    char *the_label = NULL;
+    char *the_value = NULL;
 
     StrAllocCopy(the_label, label);
     StrAllocCopy(the_value, value);
@@ -111,6 +111,8 @@ static void dt_Number(FILE *fp0,
 
 static void dt_URL(FILE *fp0, const char *address)
 {
+    if (address == NULL)
+	address = "";
     ADD_WW(gettext("URL:"), address);
 
     /*
@@ -118,7 +120,7 @@ static void dt_URL(FILE *fp0, const char *address)
      * characters, show the decoded URL on the next line.
      */
     if (LYCharSet_UC[current_char_set].enc == UCT_ENC_UTF8) {
-	char *working = 0;
+	char *working = NULL;
 
 	StrAllocCopy(working, address);
 	if (strcmp(HTUnEscape(working), address)) {
@@ -142,8 +144,8 @@ int LYShowInfo(DocInfo *doc,
     FILE *fp0;
     char *Title = NULL;
     const char *cp;
-    char *temp = 0;
-    char *buffer = 0;
+    char *temp = NULL;
+    char *buffer = NULL;
 
     BOOLEAN LYInfoAdvanced = (BOOL) (user_mode == ADVANCED_MODE);
 
@@ -155,7 +157,7 @@ int LYShowInfo(DocInfo *doc,
     if (LYReuseTempfiles) {
 	fp0 = LYOpenTempRewrite(tempfile, HTML_SUFFIX, "w");
     } else {
-	LYRemoveTemp(tempfile);
+	(void) LYRemoveTemp(tempfile);
 	fp0 = LYOpenTemp(tempfile, HTML_SUFFIX, "w");
     }
     if (fp0 == NULL) {

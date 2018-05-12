@@ -1,4 +1,4 @@
-/* $LynxId: LYrcFile.c,v 1.101 2018/03/05 22:18:05 tom Exp $ */
+/* $LynxId: LYrcFile.c,v 1.102 2018/05/11 00:27:54 tom Exp $ */
 #include <HTUtils.h>
 #include <HTFTP.h>
 #include <LYUtils.h>
@@ -698,6 +698,8 @@ BOOL LYsetRcValue(const char *name, const char *param)
     char *value = NULL;
     char *orig_value = NULL;
 
+    if (param == NULL)
+	param = "";
     StrAllocCopy(value, param);
     orig_value = value;
     value = LYSkipBlanks(value);

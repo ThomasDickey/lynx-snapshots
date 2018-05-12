@@ -1,4 +1,4 @@
-/* $LynxId: LYDownload.c,v 1.69 2013/10/13 20:23:07 tom Exp $ */
+/* $LynxId: LYDownload.c,v 1.70 2018/05/11 22:57:30 tom Exp $ */
 #include <HTUtils.h>
 #include <HTParse.h>
 #include <HTList.h>
@@ -57,7 +57,8 @@ void LYDownload(char *line)
     /*
      * Make a copy of the LYNXDOWNLOAD internal URL for parsing.  - FM
      */
-    StrAllocCopy(Line, line);
+    if (StrAllocCopy(Line, line) == 0)
+	goto failed;
 
     /*
      * Parse out the File, sug_file, and the Method.
