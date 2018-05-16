@@ -1,5 +1,5 @@
 /*                System dependencies in the W3 library
- * $LynxId: www_tcp.h,v 1.54 2013/07/20 14:08:29 tom Exp $
+ * $LynxId: www_tcp.h,v 1.59 2018/05/16 20:31:43 tom Exp $
  *
                                    SYSTEM DEPENDENCIES
 
@@ -970,12 +970,19 @@ typedef TYPE_FD_SET fd_set;
 #endif
 #endif /* HAVE_GETADDRINFO && ENABLE_IPV6 */
 
+typedef union {
+    struct sockaddr_in soc_in;
+    struct sockaddr soc_address;
+#ifdef INET6
+    struct sockaddr_storage soc_storage;
+#endif
+} LY_SOCKADDR;
+
 #ifdef INET6
 typedef struct sockaddr_storage SockA;
 
-#ifdef SIN6_LEN
-#define SOCKADDR_LEN(soc_address) (((struct sockaddr *)&soc_address)->sa_len)
-#else
+#define SOCKADDR_OF(param) (&((param).soc_address))
+
 #ifndef SA_LEN
 #define SA_LEN(x) (((x)->sa_family == AF_INET6) \
 		   ? sizeof(struct sockaddr_in6) \
@@ -983,12 +990,17 @@ typedef struct sockaddr_storage SockA;
 		      ? sizeof(struct sockaddr_in) \
 		      : sizeof(struct sockaddr)))	/* AF_UNSPEC? */
 #endif
-#define SOCKADDR_LEN(soc_address) (socklen_t) (SA_LEN((struct sockaddr *)&soc_address))
+
+#ifdef SIN6_LEN
+#define SOCKADDR_LEN(param) (SOCKADDR_OF(param)->sa_len)
+#else
+#define SOCKADDR_LEN(param) (socklen_t) SA_LEN(SOCKADDR_OF(param))
 #endif /* SIN6_LEN */
 #else
 typedef struct sockaddr_in SockA;
 
-#define SOCKADDR_LEN(soc_address) sizeof(soc_address)
+#define SOCKADDR_OF(param) ((struct sockaddr *)&(param))
+#define SOCKADDR_LEN(param) sizeof(param)
 #endif /* INET6 */
 
 #ifndef MAXHOSTNAMELEN

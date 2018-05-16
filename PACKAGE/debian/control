@@ -1,6 +1,6 @@
 Source: lynx-dev
 Section: web
-Priority: extra
+Priority: optional
 Maintainer: Thomas E. Dickey <dickey@invisible-island.net>
 Homepage: http://invisible-island.net/lynx/
 Build-Depends: debhelper (>= 7), dpatch, po-debconf, libncursesw5-dev, zlib1g-dev, gettext, libgnutls-dev, sharutils, telnet, openssh-client, libbsd-dev, libidn11-dev

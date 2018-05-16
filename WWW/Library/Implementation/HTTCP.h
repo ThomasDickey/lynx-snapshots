@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTCP.h,v 1.25 2018/03/28 21:14:18 tom Exp $
+ * $LynxId: HTTCP.h,v 1.27 2018/05/16 19:48:16 tom Exp $
  *
  *                               /Net/dxcern/userd/timbl/hypertext/WWW/Library/src/HTTCP.html
  *                             GENERIC TCP/IP COMMUNICATION
@@ -23,12 +23,7 @@ extern "C" {
  *           returns a pointer to a static string which must be copied if
  *                it is to be kept.
  */
-#ifdef INET6
-    extern const char *HTInetString(SockA * mysin);
-
-#else
-    extern const char *HTInetString(struct sockaddr_in *mysin);
-#endif				/* INET6 */
+    extern const char *HTInetString(LY_SOCKADDR * mysin);
 
 /*      Encode INET status (as in sys/errno.h)                    inet_status()
  *      ------------------

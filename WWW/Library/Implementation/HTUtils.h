@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTUtils.h,v 1.128 2018/03/17 15:56:11 tom Exp $
+ * $LynxId: HTUtils.h,v 1.129 2018/05/16 22:16:05 tom Exp $
  *
  * Utility macros for the W3 code library
  * MACROS FOR GENERAL USE
@@ -706,7 +706,7 @@ extern int WWW_TraceMask;
  * definitions have to be included everywhere, since they're making wrappers
  * for the stdio functions as well as the network functions.
  */
-#if defined(USE_SOCKS5) && !defined(DONT_USE_SOCKS5)
+#if defined(USE_SOCKS5)
 #define SOCKS4TO5		/* turn on the Rxxxx definitions used in Lynx */
 #include <socks.h>
 
@@ -744,6 +744,8 @@ extern int WWW_TraceMask;
 #define Rselect       select
 #endif
 
+#elif defined(SOCKS)
+#include <socks.h>
 #endif /* USE_SOCKS5 */
 
 #ifdef USE_SSL
