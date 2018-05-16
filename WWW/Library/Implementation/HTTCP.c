@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTCP.c,v 1.144 2018/03/30 00:13:21 tom Exp $
+ * $LynxId: HTTCP.c,v 1.149 2018/05/16 19:48:49 tom Exp $
  *
  *			Generic Communication Code		HTTCP.c
  *			==========================
@@ -280,18 +280,20 @@ unsigned int HTCardinal(int *pstatus,
  *	returns a pointer to a static string which must be copied if
  *		it is to be kept.
  */
-const char *HTInetString(SockA * soc_in)
+const char *HTInetString(LY_SOCKADDR * soc_A)
 {
 #ifdef INET6
     static char hostbuf[MAXHOSTNAMELEN];
+    struct sockaddr *soc_addr = &(soc_A->soc_address);
 
-    getnameinfo((struct sockaddr *) soc_in,
-		SOCKADDR_LEN(soc_in),
+    getnameinfo(soc_addr,
+		SA_LEN(soc_addr),
 		hostbuf, (socklen_t) sizeof(hostbuf),
 		NULL, 0,
 		NI_NUMERICHOST);
     return hostbuf;
 #else
+    struct sockaddr_in *soc_in = &(soc_A->soc_in);
     static char string[20];
 
     sprintf(string, "%d.%d.%d.%d",
@@ -1832,8 +1834,8 @@ int HTDoConnect(const char *url,
     LYNX_ADDRINFO *res = 0, *res0 = 0;
 
 #else
-    struct sockaddr_in soc_address;
-    struct sockaddr_in *soc_in = &soc_address;
+    struct sockaddr_in sock_A;
+    struct sockaddr_in *soc_in = &sock_A;
 
     /*
      * Set up defaults.
@@ -1950,15 +1952,14 @@ int HTDoConnect(const char *url,
 #ifdef INET6
 	    status = Rconnect(*s, res->ai_addr, res->ai_addrlen);
 #else
-	    status = Rconnect(*s, (struct sockaddr *) &soc_address,
-			      sizeof(soc_address));
+	    status = Rconnect(*s, SOCKADDR_OF(sock_A), sizeof(sock_A));
 #endif /* INET6 */
 	} else
 #endif /* SOCKS */
 #ifdef INET6
 	    status = connect(*s, res->ai_addr, res->ai_addrlen);
 #else
-	    status = connect(*s, (struct sockaddr *) &soc_address, sizeof(soc_address));
+	    status = connect(*s, SOCKADDR_OF(sock_A), sizeof(sock_A));
 #endif /* INET6 */
 
 	/*
@@ -2079,8 +2080,7 @@ int HTDoConnect(const char *url,
 #ifdef INET6
 			status = connect(*s, res->ai_addr, res->ai_addrlen);
 #else
-			status = connect(*s, (struct sockaddr *) &soc_address,
-					 sizeof(soc_address));
+			status = connect(*s, SOCKADDR_OF(sock_A), sizeof(sock_A));
 #endif /* INET6 */
 #ifdef UCX
 			/*
@@ -2132,8 +2132,7 @@ int HTDoConnect(const char *url,
 #ifdef INET6
 		    status = connect(*s, res->ai_addr, res->ai_addrlen);
 #else
-		    status = connect(*s, (struct sockaddr *) &soc_address,
-				     sizeof(soc_address));
+		    status = connect(*s, SOCKADDR_OF(sock_A), sizeof(sock_A));
 #endif /* INET6 */
 		    if ((status < 0) &&
 			(SOCKET_ERRNO != EALREADY

@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFTP.c,v 1.132 2018/03/28 08:51:10 Gisle.Vanem Exp $
+ * $LynxId: HTFTP.c,v 1.137 2018/05/16 19:36:44 tom Exp $
  *
  *			File Transfer Protocol (FTP) Client
  *			for a WorldWideWeb browser
@@ -1156,15 +1156,11 @@ static int close_master_socket(void)
  */
 static int get_listen_socket(void)
 {
-#ifdef INET6
-    struct sockaddr_storage soc_address;	/* Binary network address */
-    struct sockaddr_in *soc_in = (struct sockaddr_in *) &soc_address;
-    int af;
-    LY_SOCKLEN slen;
+    LY_SOCKADDR soc_A;
 
-#else
-    struct sockaddr_in soc_address;	/* Binary network address */
-    struct sockaddr_in *soc_in = &soc_address;
+#ifdef INET6
+    unsigned short af;
+    LY_SOCKLEN slen;
 #endif /* INET6 */
     int new_socket;		/* Will be master_socket */
 
@@ -1178,13 +1174,12 @@ static int get_listen_socket(void)
 
 #ifdef INET6
     /* query address family of control connection */
-    slen = (LY_SOCKLEN) sizeof(soc_address);
-    if (getsockname(control->socket, (struct sockaddr *) &soc_address,
-		    &slen) < 0) {
+    slen = (LY_SOCKLEN) sizeof(soc_A);
+    if (getsockname(control->socket, SOCKADDR_OF(soc_A), &slen) < 0) {
 	return HTInetStatus("getsockname failed");
     }
-    af = ((struct sockaddr *) &soc_address)->sa_family;
-    memset(&soc_address, 0, sizeof(soc_address));
+    af = SOCKADDR_OF(soc_A)->sa_family;
+    memset(&soc_A, 0, sizeof(soc_A));
 #endif /* INET6 */
 
 /*  Create internet socket
@@ -1203,25 +1198,25 @@ static int get_listen_socket(void)
 /*  Search for a free port.
 */
 #ifdef INET6
-    memset(&soc_address, 0, sizeof(soc_address));
-    ((struct sockaddr *) &soc_address)->sa_family = af;
+    memset(&soc_A, 0, sizeof(soc_A));
+    SOCKADDR_OF(soc_A)->sa_family = (unsigned short) af;
     switch (af) {
     case AF_INET:
 #ifdef SIN6_LEN
-	((struct sockaddr *) &soc_address)->sa_len = sizeof(struct sockaddr_in);
+	SOCKADDR_OF(soc_A)->sa_len = sizeof(struct sockaddr_in);
 #endif /* SIN6_LEN */
 	break;
     case AF_INET6:
 #ifdef SIN6_LEN
-	((struct sockaddr *) &soc_address)->sa_len = sizeof(struct sockaddr_in6);
+	SOCKADDR_OF(soc_A)->sa_len = sizeof(struct sockaddr_in6);
 #endif /* SIN6_LEN */
 	break;
     default:
 	HTInetStatus("AF");
     }
 #else
-    soc_in->sin_family = AF_INET;	/* Family = internet, host order  */
-    soc_in->sin_addr.s_addr = INADDR_ANY;	/* Any peer address */
+    soc_A.soc_in.sin_family = AF_INET;	/* Family = internet, host order  */
+    soc_A.soc_in.sin_addr.s_addr = INADDR_ANY;	/* Any peer address */
 #endif /* INET6 */
 #ifdef POLL_PORTS
     {
@@ -1236,23 +1231,21 @@ static int get_listen_socket(void)
 		return HTInetStatus("bind");
 	    }
 #ifdef INET6
-	    soc_in->sin_port = htons(port_number);
+	    soc_A.soc_in.sin_port = htons(port_number);
 #else
-	    soc_address.sin_port = htons(port_number);
+	    soc_A.sin_port = htons(port_number);
 #endif /* INET6 */
 #ifdef SOCKS
 	    if (socks_flag)
 		if ((status = Rbind(new_socket,
-				    (struct sockaddr *) &soc_address,
-		/* Cast to generic sockaddr */
-				    SOCKADDR_LEN(soc_address))) == 0) {
+				    SOCKADDR_OF(soc_A),
+				    SOCKADDR_LEN(soc_A))) == 0) {
 		    break;
 		} else
 #endif /* SOCKS */
 		    if ((status = bind(new_socket,
-				       (struct sockaddr *) &soc_address,
-		    /* Cast to generic sockaddr */
-				       SOCKADDR_LEN(soc_address)
+				       SOCKADDR_OF(soc_A),
+				       SOCKADDR_LEN(soc_A)
 			 )) == 0) {
 		    break;
 		}
@@ -1263,61 +1256,51 @@ static int get_listen_socket(void)
 #else
     {
 	int status;
-	LY_SOCKLEN address_length = (LY_SOCKLEN) sizeof(soc_address);
+	LY_SOCKLEN address_length = (LY_SOCKLEN) sizeof(soc_A);
 
 #ifdef SOCKS
 	if (socks_flag)
 	    status = Rgetsockname(control->socket,
-				  (struct sockaddr *) &soc_address,
+				  SOCKADDR_OF(soc_A),
 				  &address_length);
 	else
 #endif /* SOCKS */
 	    status = getsockname(control->socket,
-				 (struct sockaddr *) &soc_address,
+				 SOCKADDR_OF(soc_A),
 				 &address_length);
 	if (status < 0) {
 	    close(new_socket);
 	    return HTInetStatus("getsockname");
 	}
-#ifdef INET6
 	CTRACE((tfp, "HTFTP: This host is %s\n",
-		HTInetString((void *) soc_in)));
+		HTInetString((void *) &soc_A.soc_in)));
 
-	soc_in->sin_port = 0;	/* Unspecified: please allocate */
-#else
-	CTRACE((tfp, "HTFTP: This host is %s\n",
-		HTInetString(soc_in)));
-
-	soc_address.sin_port = 0;	/* Unspecified: please allocate */
-#endif /* INET6 */
+	soc_A.soc_in.sin_port = 0;	/* Unspecified: please allocate */
 #ifdef SOCKS
 	if (socks_flag)
 	    status = Rbind(new_socket,
-			   (struct sockaddr *) &soc_address,
-	    /* Cast to generic sockaddr */
-			   sizeof(soc_address));
+			   SOCKADDR_OF(soc_A),
+			   sizeof(soc_A));
 	else
 #endif /* SOCKS */
 	    status = bind(new_socket,
-			  (struct sockaddr *) &soc_address,
-	    /* Cast to generic sockaddr */
-			  SOCKADDR_LEN(soc_address)
-		);
+			  SOCKADDR_OF(soc_A),
+			  SOCKADDR_LEN(soc_A));
 	if (status < 0) {
 	    close(new_socket);
 	    return HTInetStatus("bind");
 	}
 
-	address_length = sizeof(soc_address);
+	address_length = sizeof(soc_A);
 #ifdef SOCKS
 	if (socks_flag)
 	    status = Rgetsockname(new_socket,
-				  (struct sockaddr *) &soc_address,
+				  SOCKADDR_OF(soc_A),
 				  &address_length);
 	else
 #endif /* SOCKS */
 	    status = getsockname(new_socket,
-				 (struct sockaddr *) &soc_address,
+				 SOCKADDR_OF(soc_A),
 				 &address_length);
 	if (status < 0) {
 	    close(new_socket);
@@ -1326,15 +1309,9 @@ static int get_listen_socket(void)
     }
 #endif /* POLL_PORTS */
 
-#ifdef INET6
     CTRACE((tfp, "HTFTP: bound to port %d on %s\n",
-	    (int) ntohs(soc_in->sin_port),
-	    HTInetString((void *) soc_in)));
-#else
-    CTRACE((tfp, "HTFTP: bound to port %d on %s\n",
-	    (int) ntohs(soc_in->sin_port),
-	    HTInetString(soc_in)));
-#endif /* INET6 */
+	    (int) ntohs(soc_A.soc_in.sin_port),
+	    HTInetString((void *) &soc_A.soc_in)));
 
 #ifdef REPEAT_LISTEN
     if (have_socket)
@@ -1347,16 +1324,16 @@ static int get_listen_socket(void)
 */
     (void) HTHostName();	/* Make address valid - doesn't work */
 #ifdef INET6
-    switch (((struct sockaddr *) &soc_address)->sa_family) {
+    switch (SOCKADDR_OF(soc_A)->sa_family) {
     case AF_INET:
 #endif /* INET6 */
 	sprintf(port_command, "PORT %d,%d,%d,%d,%d,%d%c%c",
-		(int) *((unsigned char *) (&soc_in->sin_addr) + 0),
-		(int) *((unsigned char *) (&soc_in->sin_addr) + 1),
-		(int) *((unsigned char *) (&soc_in->sin_addr) + 2),
-		(int) *((unsigned char *) (&soc_in->sin_addr) + 3),
-		(int) *((unsigned char *) (&soc_in->sin_port) + 0),
-		(int) *((unsigned char *) (&soc_in->sin_port) + 1),
+		(int) *((unsigned char *) (&soc_A.soc_in.sin_addr) + 0),
+		(int) *((unsigned char *) (&soc_A.soc_in.sin_addr) + 1),
+		(int) *((unsigned char *) (&soc_A.soc_in.sin_addr) + 2),
+		(int) *((unsigned char *) (&soc_A.soc_in.sin_addr) + 3),
+		(int) *((unsigned char *) (&soc_A.soc_in.sin_port) + 0),
+		(int) *((unsigned char *) (&soc_A.soc_in.sin_port) + 1),
 		CR, LF);
 
 #ifdef INET6
@@ -1367,8 +1344,8 @@ static int get_listen_socket(void)
 	    char hostbuf[MAXHOSTNAMELEN];
 	    char portbuf[MAXHOSTNAMELEN];
 
-	    getnameinfo((struct sockaddr *) &soc_address,
-			SOCKADDR_LEN(soc_address),
+	    getnameinfo(SOCKADDR_OF(soc_A),
+			SOCKADDR_LEN(soc_A),
 			hostbuf,
 			(socklen_t) sizeof(hostbuf),
 			portbuf,
@@ -1448,7 +1425,7 @@ static void set_years_and_date(void)
     sprintf(date, "9999%02d%.2s", i, day);
     TheDate = atoi(date);
     LYStrNCpy(ThisYear, printable + 20, 4);
-    sprintf(LastYear, "%d", (atoi(ThisYear) - 1));
+    sprintf(LastYear, "%d", (atoi(ThisYear) - 1) % 10000);
     HaveYears = TRUE;
 }
 
@@ -3359,7 +3336,7 @@ static int setup_connection(const char *name,
 		sprintf(dst, "%d.%d.%d.%d", h0, h1, h2, h3);
 	    } else if (strcmp(p, "EPSV") == 0) {
 		char c0, c1, c2, c3;
-		struct sockaddr_storage ss;
+		LY_SOCKADDR ss;
 		LY_SOCKLEN sslen;
 
 		/*
@@ -3382,13 +3359,12 @@ static int setup_connection(const char *name,
 		passive_port = (PortNumber) p0;
 
 		sslen = (LY_SOCKLEN) sizeof(ss);
-		if (getpeername(control->socket, (struct sockaddr *) &ss,
-				&sslen) < 0) {
+		if (getpeername(control->socket, SOCKADDR_OF(ss), &sslen) < 0) {
 		    fprintf(tfp, "HTFTP: getpeername(control) failed\n");
 		    status = HT_NO_CONNECTION;
 		    break;
 		}
-		if (getnameinfo((struct sockaddr *) &ss,
+		if (getnameinfo(SOCKADDR_OF(ss),
 				sslen,
 				dst,
 				(socklen_t) sizeof(dst),
@@ -4015,23 +3991,18 @@ int HTFTPLoad(const char *name,
   listen:
     if (!ftp_local_passive) {
 	/* Wait for the connection */
-#ifdef INET6
-	struct sockaddr_storage soc_address;
-
-#else
-	struct sockaddr_in soc_address;
-#endif /* INET6 */
-	LY_SOCKLEN soc_addrlen = (LY_SOCKLEN) sizeof(soc_address);
+	LY_SOCKADDR soc_A;
+	LY_SOCKLEN soc_addrlen = (LY_SOCKLEN) sizeof(soc_A);
 
 #ifdef SOCKS
 	if (socks_flag)
 	    status = Raccept((int) master_socket,
-			     (struct sockaddr *) &soc_address,
+			     SOCKADDR_OF(soc_A),
 			     &soc_addrlen);
 	else
 #endif /* SOCKS */
 	    status = accept((int) master_socket,
-			    (struct sockaddr *) &soc_address,
+			    SOCKADDR_OF(soc_A),
 			    &soc_addrlen);
 	if (status < 0) {
 	    init_help_message_cache();	/* to free memory */

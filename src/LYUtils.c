@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYUtils.c,v 1.291 2018/03/28 21:14:39 tom Exp $
+ * $LynxId: LYUtils.c,v 1.292 2018/05/15 21:20:52 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTCP.h>
@@ -2937,21 +2937,38 @@ BOOLEAN inlocaldomain(void)
     struct utmp me;
     char *cp, *mytty = NULL;
 
-    if ((cp = ttyname(0)))
-	mytty = LYLastPathSep(cp);
+    if ((cp = ttyname(0))) {
+	mytty = cp;
+	if (!strncmp(mytty, "/dev/", 5)) {
+	    mytty += 5;		/* pty's can be like "pts/0" in utmp */
+	} else {
+	    if ((mytty = LYLastPathSep(cp)) != 0)
+		++mytty;
+	}
+    }
 
     result = FALSE;
     if (mytty && (fp = fopen(UTMP_FILE, "r")) != NULL) {
-	mytty++;
+	size_t ulen = strlen(mytty);
+
+	if (ulen > sizeof(me.ut_line))
+	    ulen = sizeof(me.ut_line);
 	do {
 	    n = (int) fread((char *) &me, sizeof(struct utmp), (size_t) 1, fp);
-	} while (n > 0 && !STREQ(me.ut_line, mytty));
+
+	    if (n <= 0)
+		break;
+	} while (memcmp(me.ut_line, mytty, ulen));
 	(void) LYCloseInput(fp);
 
 	if (n > 0) {
-	    if (strlen(me.ut_host) > strlen(LYLocalDomain) &&
+	    for (ulen = 0; ulen < sizeof(me.ut_host); ++ulen) {
+		if (me.ut_host[ulen] == '\0')
+		    break;
+	    }
+	    if (ulen > strlen(LYLocalDomain) &&
 		STREQ(LYLocalDomain,
-		      me.ut_host + strlen(me.ut_host) - strlen(LYLocalDomain))) {
+		      me.ut_host + ulen - strlen(LYLocalDomain))) {
 		result = TRUE;
 	    }
 #ifdef LINUX

@@ -1,5 +1,5 @@
 /*
- * $LynxId: userdefs.h,v 1.336 2018/05/07 23:37:31 tom Exp $
+ * $LynxId: userdefs.h,v 1.337 2018/05/15 21:12:20 tom Exp $
  *
  * Lynx - Hypertext navigation system
  *
@@ -616,7 +616,7 @@
  * name of the system on which Lynx is running) will all be passed as
  * local.  A different definition in lynx.cfg will override this one.
  */
-/* #define LYNX_HOST_NAME "www.cc.ukans.edu" */
+/* #define LYNX_HOST_NAME "localhost" */
 
 /*********************
  * LOCAL_DOMAIN is used for a tail match with the ut_host element of
@@ -627,7 +627,7 @@
  * if your system does not have utmp capabilities.  CHANGE THIS here
  * or in lynx.cfg.
  */
-#define LOCAL_DOMAIN "ukans.edu"
+#define LOCAL_DOMAIN "localdomain"
 
 /********************************
 * The DEFAULT_CACHE_SIZE specifies the number of WWW documents to be

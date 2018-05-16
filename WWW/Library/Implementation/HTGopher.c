@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTGopher.c,v 1.67 2018/05/04 22:42:37 tom Exp $
+ * $LynxId: HTGopher.c,v 1.68 2018/05/15 21:58:15 tom Exp $
  *
  *			GOPHER ACCESS				HTGopher.c
  *			=============
@@ -970,7 +970,6 @@ static int parse_cso_fields(char *buf,
 	     * Lines beginning with 5 are errors.  Print them and quit.
 	     */
 	    if (*p == '5') {
-		strcpy(buf, p);
 		return 5;
 	    }
 
@@ -1712,7 +1711,7 @@ static char *link_to_URL(const char *arg)
 	result = next + 1;
     }
     /* check if the selector is the special html one */
-    if (!strncmp(result, "hURL:", (size_t)5)) {
+    if (!strncmp(result, "hURL:", (size_t) 5)) {
 	result += 5;
 	next = result;
 	result = temp;

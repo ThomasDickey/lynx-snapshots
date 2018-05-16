@@ -1,5 +1,5 @@
 /*
- * $LynxId: GridText.c,v 1.312 2018/05/04 22:53:37 tom Exp $
+ * $LynxId: GridText.c,v 1.313 2018/05/15 20:43:41 tom Exp $
  *
  *		Character grid hypertext object
  *		===============================
@@ -1654,7 +1654,7 @@ static int display_line(HTLine *line,
 static void display_title(HText *text)
 {
     char *title = NULL;
-    char percent[20];
+    char percent[40];
     unsigned char *tmp = NULL;
     int i = 0, j = 0;
     int limit;

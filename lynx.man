@@ -1,4 +1,4 @@
-.\" $LynxId: lynx.man,v 1.120 2018/02/05 09:58:06 tom Exp $
+.\" $LynxId: lynx.man,v 1.121 2018/05/14 00:21:39 tom Exp $
 .\" **************************************************************************
 .\" Escape single quotes in literal strings from groff's Unicode transform.
 .ie \n(.g .ds AQ \(aq
@@ -86,7 +86,8 @@ Then follow the link titled, \*(``Help on URLs.\*(''
 .PP
 If more than one local file or remote URL is listed on the command line,
 \fILynx\fP will open only the last interactively.
-All of the names (local files and remote URLs) are added to the \fBG)oto\fP history.
+All of the names (local files and remote URLs)
+are added to the \fBG)oto\fP history.
 .PP
 \fILynx\fR uses only long option names.
 Option names can begin with double dash \*(``\-\-\*('' as well,
@@ -147,7 +148,8 @@ charset for documents that do not specify it.
 .TP
 .B \-assume_local_charset\fR=\fIMIMEname
 charset assumed for local files,
-i.e., files which \fILynx\fP creates such as internal pages for the options menu.
+i.e., files which \fILynx\fP creates such as
+internal pages for the options menu.
 .TP
 .B \-assume_unrec_charset\fR=\fIMIMEname
 use this instead of unrecognized charsets.
@@ -213,7 +215,8 @@ read keystroke commands from the specified file.
 You can use the data written using the \fB\-cmd_log\fR option.
 \fILynx\fP will ignore other information which the command-logging may have
 written to the logfile.
-Each line of the command script contains either a comment beginning with \*(``#\*('',
+Each line of the command script contains either
+a comment beginning with \*(``#\*('',
 or a keyword:
 .RS
 .TP 3
@@ -269,7 +272,8 @@ toggles handling of Set-Cookie headers.
 .TP
 .B \-core
 toggles forced core dumps on fatal errors.
-Turn this option off to ask \fILynx\fP to force a core dump if a fatal error occurs.
+Turn this option off to ask \fILynx\fP to force
+a core dump if a fatal error occurs.
 .TP
 .B \-crawl
 with \fB\-traversal,\fR output each page to a file.
@@ -719,8 +723,12 @@ domain (utmp required for selectivity).
 .B outside_news
 disallow USENET news reading and posting for people coming
 from outside your domain (utmp required for selectivity).
-This restriction applies to \*(``news\*('', \*(``nntp\*('', \*(``newspost\*('', and
-\*(``newsreply\*('' URLs, but not to \*(``snews\*('', \*(``snewspost\*('',
+This restriction applies to
+\*(``news\*('',
+\*(``nntp\*('',
+\*(``newspost\*('', and
+\*(``newsreply\*('' URLs,
+but not to \*(``snews\*('', \*(``snewspost\*('',
 or \*(``snewsreply\*('' in case they are supported.
 .TP
 .B outside_rlogin
@@ -779,7 +787,8 @@ portion which cannot be displayed.
 The beginning and end of the URL are displayed, rather than suppressing the end.
 .TP
 .B \-show_cfg
-Print the configuration settings, e.g., as read from \*(``lynx.cfg\*('', and exit.
+Print the configuration settings,
+e.g., as read from \*(``lynx.cfg\*('', and exit.
 .TP
 .B \-show_cursor
 If enabled the cursor will not be hidden in the right hand
@@ -878,7 +887,12 @@ color-style
 TRST (table layout)
 .TP
 .B 8
-configuration (lynx.cfg, \&.lynxrc, \&.lynx-keymaps, mime.types and mailcap contents)
+configuration
+(lynx.cfg,
+\&.lynxrc,
+\&.lynx-keymaps,
+mime.types and
+mailcap contents)
 .TP
 .B 16
 binary string copy/append, used in form data construction.
@@ -930,7 +944,8 @@ Click on the top line to scroll up.
 Click on the bottom line to scroll down.
 The first few positions in the top and bottom line may invoke
 additional functions.
-\fILynx\fP must be compiled with \fBncurses\fR or \fBslang\fR to support this feature.
+\fILynx\fP must be compiled with
+\fBncurses\fR or \fBslang\fR to support this feature.
 If \fBncurses\fR is used, clicking the middle mouse button pops up
 a simple menu.
 Mouse clicks may only work reliably while \fILynx\fP is
@@ -980,8 +995,8 @@ Use \fBUp arrow\fR and \fBDown arrow\fR to scroll through hypertext links.
 .bP
 \fBLeft Arrow\fR or \*(``\fBu\fR\*('' will retreat from a link.
 .bP
-Type \*(``\fBH\fR\*('', \*(``\fB?\fR\*('', or \fBF1\fR for online help and descriptions
-of key-stroke commands.
+Type \*(``\fBH\fR\*('', \*(``\fB?\fR\*('', or \fBF1\fR
+for online help and descriptions of key-stroke commands.
 .bP
 Type \*(``\fBk\fR\*('' or \*(``\fBK\fR\*('' for a list of the current key-stroke
 command mappings.
@@ -1204,8 +1219,8 @@ Note: If set/modified by \fILynx\fR, the values of the \fBLINES\fR and/or
 If built with the \fBcgi-links\fR option enabled, \fILynx\fR allows access
 to a cgi script directly without the need for an http daemon.
 .PP
-When executing such \*(``lynxcgi scripts\*('' (if enabled), the following variables
-may be set for simulating a CGI environment:
+When executing such \*(``lynxcgi scripts\*('' (if enabled),
+the following variables may be set for simulating a CGI environment:
 .PP
 .B CONTENT_LENGTH
 .PP
@@ -1335,9 +1350,9 @@ Also a special thanks to Foteos Macrides who ported
 much of \fILynx\fP to VMS and did or organized most of its development since the
 departures of Lou Montulli and Garrett Blythe from the University of Kansas
 in the summer of 1994 through the release of v2.7.2, and to everyone
-on the net who has contributed to \fILynx\fP's development either directly (through
-patches, comments or bug reports) or indirectly (through inspiration and
-development of other systems).
+on the net who has contributed to \fILynx\fP's development either directly
+(through patches, comments or bug reports) or indirectly
+(through inspiration and development of other systems).
 .SH AUTHORS
 Lou Montulli, Garrett Blythe, Craig Lavender, Michael Grobe, Charles Rezac
 .br

@@ -1,5 +1,5 @@
 /*
- * $LynxId: SGML.c,v 1.162 2018/05/11 23:46:28 tom Exp $
+ * $LynxId: SGML.c,v 1.163 2018/05/15 21:55:21 tom Exp $
  *
  *			General SGML Parser code		SGML.c
  *			========================
@@ -53,8 +53,8 @@ static char *entity_string;	/* this is used for printing entity name.
 
 				   Unconditionally added since redundant assigments don't hurt much */
 
-static void fake_put_character(void *p GCC_UNUSED,
-			       char c GCC_UNUSED)
+static void fake_put_character(HTStream *p GCC_UNUSED,
+			       int c GCC_UNUSED)
 {
 }
 
