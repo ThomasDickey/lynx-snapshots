@@ -7,3 +7,12 @@ lynx-dev: extra-license-file usr/share/doc/lynx-dev/COPYING
 # These are intentional, part of the sample files:
 lynx-dev: zero-byte-file-in-doc-directory usr/share/doc/lynx-dev/test/X
 lynx-dev: zero-byte-file-in-doc-directory usr/share/doc/lynx-dev/test/nobody
+
+# These are a known problem with lintian:
+# https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=891301
+lynx-dev: privacy-breach-generic usr/share/doc/lynx-dev/test/ALT88592.html [<link rev="owner" href="http://mail.gnu.org/mailman/listinfo/lynx-dev/">] (http://mail.gnu.org/mailman/listinfo/lynx-dev/)
+lynx-dev: privacy-breach-generic usr/share/doc/lynx-dev/test/bad-html.html [<link rev="owner" href="http://mail.gnu.org/mailman/listinfo/lynx-dev/">] (http://mail.gnu.org/mailman/listinfo/lynx-dev/)
+lynx-dev: privacy-breach-generic usr/share/doc/lynx-dev/test/cp-1252.html [<link rev="owner" href="http://mail.gnu.org/mailman/listinfo/lynx-dev/">] (http://mail.gnu.org/mailman/listinfo/lynx-dev/)
+lynx-dev: privacy-breach-generic usr/share/doc/lynx-dev/test/cp-1252a.html [<link rev="owner" href="http://mail.gnu.org/mailman/listinfo/lynx-dev/">] (http://mail.gnu.org/mailman/listinfo/lynx-dev/)
+lynx-dev: privacy-breach-generic usr/share/doc/lynx-dev/test/iso-8859-2.html [<link rev="owner" href="http://mail.gnu.org/mailman/listinfo/lynx-dev/">] (http://mail.gnu.org/mailman/listinfo/lynx-dev/)
+lynx-dev: privacy-breach-generic usr/share/doc/lynx-dev/test/iso-8859-2a.html [<link rev="owner" href="http://mail.gnu.org/mailman/listinfo/lynx-dev/">] (http://mail.gnu.org/mailman/listinfo/lynx-dev/)
