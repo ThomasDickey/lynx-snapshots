@@ -1,4 +1,4 @@
-# $LynxId: lynx.spec,v 1.49 2018/05/07 23:37:31 tom Exp $
+# $LynxId: lynx.spec,v 1.50 2018/05/17 22:00:16 tom Exp $
 Summary: A text-based Web browser
 Name: lynx-dev
 Version: 2.8.9
@@ -6,9 +6,9 @@ Release: dev.19
 License: GPLv2
 Group: Applications/Internet
 Source: lynx%{version}%{release}.tgz
-URL: http://lynx.invisible-island.net
-Provides: webclient
-Provides: text-www-browser
+URL: https://lynx.invisible-island.net
+Provides: webclient >= 0.0
+Provides: text-www-browser >= 0.0
 
 # Fedora:
 BuildRequires: openssl-devel, pkgconfig, ncurses-devel >= 5.3-5,
@@ -17,7 +17,7 @@ BuildRequires: libidn-devel
 # BuildRequires: bzip2-devel
 
 # SuSE:
-# BuildRequires: libbz2-devel       
+# BuildRequires: libbz2-devel
 
 Requires: gzip, bzip2, tar, zip, unzip
 
@@ -89,7 +89,7 @@ HTTP, FTP, WAIS, and NNTP servers.
 	--enable-syslog \
 	--enable-warnings \
 	--with-bzlib \
-	--with-screen=ncursesw6 \
+	--with-screen=ncursesw6dev \
 	--with-ssl \
 	--with-zlib
 make \
@@ -121,6 +121,10 @@ rm -rf $RPM_BUILD_ROOT
 %config %{lynx_etc}/*.lss
 
 %changelog
+
+* Thu May 17 2018 Thomas E. Dickey
+- use "ncursesw6dev", reflecting renaming of ncurses test-packages to avoid
+  conflict with new packages in Fedora.
 
 * Mon Mar 12 2018 Thomas E. Dickey
 - rename to "lynx-dev", add a few dependencies where package names are same.

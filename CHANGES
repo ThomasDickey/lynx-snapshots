@@ -1,9 +1,10 @@
--- $LynxId: CHANGES,v 1.981 2018/05/16 23:26:54 tom Exp $
+-- $LynxId: CHANGES,v 1.983 2018/05/17 23:29:45 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2018-05-16 (2.8.9dev.19)
+2018-05-17 (2.8.9dev.19)
+* update test-packages to use current ncurses test-packages -TD
 * improve portability for sockaddr structures used in HTTP and FTP, for
   IPv6 and SOCKS configurations -TD
 * fix several minor warnings reported by Coverity -TD
