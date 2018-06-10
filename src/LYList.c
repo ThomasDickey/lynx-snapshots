@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYList.c,v 1.53 2013/10/03 07:46:14 tom Exp $
+ * $LynxId: LYList.c,v 1.54 2018/06/10 20:27:01 tom Exp $
  *
  *			Lynx Document Reference List Support	      LYList.c
  *			====================================
@@ -359,7 +359,7 @@ void printlist(FILE *fp, int titles)
 	    if (LYHiddenLinks == HIDDENLINKS_IGNORE)
 		hidden_links = 0;
 	    if (hidden_links > 0) {
-		fprintf(fp, "   %s\n", gettext("Visible links"));
+		fprintf(fp, "   %s\n", gettext("Visible links:"));
 	    }
 	    refs = print_refs(fp, titles, refs) + 1;
 

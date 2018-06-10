@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMainLoop.c,v 1.240 2018/05/04 22:49:06 tom Exp $
+ * $LynxId: LYMainLoop.c,v 1.241 2018/06/10 20:44:10 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTAccess.h>
@@ -8080,8 +8080,7 @@ static void exit_immediately_with_error_message(int state, int first_file)
     if (state == NULLFILE) {
 	HTSprintf0(&buf, "%s\n%s\n%s\n",
 		   NonNull(buf2),
-		   gettext("lynx: Start file could not be found or is not "
-			   STR_HTML " or " STR_PLAINTEXT),
+		   gettext("lynx: Start file could not be found or is not text/html or text/plain"),
 		   gettext("      Exiting..."));
     }
 

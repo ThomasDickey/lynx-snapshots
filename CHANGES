@@ -1,7 +1,10 @@
--- $LynxId: CHANGES,v 1.983 2018/05/17 23:29:45 tom Exp $
+-- $LynxId: CHANGES,v 1.987 2018/06/10 21:35:39 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
+
+2018-06-10 (2.8.9pre.1)
+* fix an inconsistency in message for "-listonly" option (Debian #805753) -TD
 
 2018-05-17 (2.8.9dev.19)
 * update test-packages to use current ncurses test-packages -TD
