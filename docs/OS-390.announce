@@ -3,7 +3,7 @@ This document suggests steps to install Lynx on OS/390 systems.
 ========================================================================
 o Download the archive file lynx2-8-6.tar.Z in BINARY from the site
   where you found this announcement or from a site listed at
-  http://lynx.invisible-island.net/
+  https://lynx.invisible-island.net/
 
 o Unpack with:
 

@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: lynx 2.8.9pre.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-06-10 16:44-0400\n"
+"POT-Creation-Date: 2018-07-08 12:48-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -4381,7 +4381,7 @@ msgstr ""
 
 #: src/LYMain.c:3276
 msgid ""
-"See http://lynx.invisible-island.net/ and the online help for more "
+"See https://lynx.invisible-island.net/ and the online help for more "
 "information."
 msgstr ""
 

@@ -1,4 +1,4 @@
--- $LynxId: README.metrics,v 1.12 2014/02/13 23:56:42 tom Exp $
+-- $LynxId: README.metrics,v 1.17 2018/07/08 16:43:30 tom Exp $
 
 This is a short summary of code metrics showing how lynx has grown from
 release to release.  It also shows how the original codebase has
@@ -23,8 +23,10 @@ Release         Current                 Original
                                         15573   13587     3.9     8.0
 2.8.7           441453  180674          25064   23101     5.7    12.8
                                         15436   13473     3.5     7.5
-2.8.8           465971  184961          24031   22293     5.2    12.1
-                                        14612   12874     3.1     7.0
+2.8.8           465971  185375          24513   22293     5.3    12.0
+                                        15094   12874     3.2     6.9
+2.8.9           478344  186103          24314   22116     5.1    11.9
+                                        14931   12733     3.1     6.8
 
 Beginning with 2.8.6, the percentage of the remaining original codebase is
 shown on two lines (i.e., comparing against 2.4.2 indented to use the current
@@ -34,7 +36,7 @@ viewed taking into account insignificant similarities (such as blank lines).
 
 Starting in 2.8.6dev.3, all C source code has been routinely indented using
 the lnx-indent script from
-    http://invisible-island.net/cindent/
+    https://invisible-island.net/cindent/
 
 Current lynx releases contain a large amount of text other than C code.
 That includes plain text, html, message libraries, custom and generated
@@ -47,13 +49,16 @@ start of the 2.8 series:
 
     0.5 AJL
     3   Al Gilman
+    1   Al Walker
     1   Alexei Anatski
     2   Alexey Dobriyan
+    2   Andreas Metzler
     2   Andrew Belov
     3.5 Andrey A Chernov
     1   Arkadiusz Miskiewicz
     1   Arnaud Giersch
     2   Atsuhito Kohda
+    2   Axel Beckert
     1   Bake Timmons
    25.5 Bela Lubkin
     1   Bill Nottingham
@@ -80,9 +85,10 @@ start of the 2.8 series:
   129.7 Doug Kaufman
     1   Duncan Simpson
     2.5 Eduardo Chappa
+    1   Elliot Thomas
     2   Emanuele Giaquinta
     1   Eric Brun
-   51   External
+   70   External
     1   Fabian Fingerle
   280.5 Foteos Macrides
     2   Frank Heckenbach
@@ -90,10 +96,10 @@ start of the 2.8 series:
     1   Frederick P Herrmann
     1   Georg Drenkhahn
     1   George Lindholm
-   22   Gisle Vanem
+   27   Gisle Vanem
     1   Glenn Nielsen
     1   Hans Wurst
-   26.5 Hataguchi Takeshi
+   28.5 Hataguchi Takeshi
     1   Heikki Kantola
     0.5 Helen Sommer
    23   Henry Nelson
@@ -123,13 +129,14 @@ start of the 2.8 series:
     2   Jonathan Sergent
     1   Josef Sontgen
     2   Julian Coleman
-    1   Kamil Dudka
+    2   Kamil Dudka
     3   Karl Eichwalder
     1   Karl-Andre Skevik
-    3   Kihara Hideto
+    4   Kihara Hideto
    29.3 Kim DeVaughn
   706.3 Klaus Weide
     1   Lalo Martins
+    1   Larry Hynes
     1   Larry Virden
    15.8 Larry W Virden
    11   Laura Eaves
@@ -137,6 +144,7 @@ start of the 2.8 series:
     1   Liam Davis
     1   Marc Huber
     0.3 Marek Kubita
+    1   Martijn Dekker
     2   Masashi Fujita
     1   Masayasu Ishikawa
     1   Masayuki Hatta
@@ -154,30 +162,37 @@ start of the 2.8 series:
    13.5 Paul B Mahol
     1   Paul D Smith
    52.5 Paul Gilmartin
+    1   Peter Backes
     1   Peter Canning
     1   Phil Pennock
    27.3 Philip Webb
    14   Philippe De Muyter
+    1   Quentin Minster
     5.5 Rado Smiljanic
     2   Ralph Babel
     1   Randall
+    1   Reiner Hermann
     1   Risto Widenius
     1   Rob Cameron
+    1   Ruda Moura
     1   Ryan Nielsen
     2   Scott Bigham
     1   Sergej Kvachonok
     6   Sergey Svishchev
     1   Serhii Hlodin
+    2   Simon Kainz
    15   Sinan Kaan Yerli
     7.8 Stefan Caunter
     1   Stepan Kasal
     1   Tadayoshi Okuma
     1   Takao Fujiwara
+    1   Taketo Kabe
     1   Thomas Braun
- 2030.3 Thomas E Dickey
-    0.5 Thomas Klausner
+ 2188.3 Thomas E Dickey
+    1.5 Thomas Klausner
+    1   Thomas Petazzoni
     1   Thomas Viehmann
-   17   Thorsten Glaser
+   21   Thorsten Glaser
     1   Tim Chase
     4   Tim Larson
     1   Timur Birsh
@@ -190,7 +205,7 @@ start of the 2.8 series:
     1   Wesley Morgan
     1   Zdenek Prikryl
     1.5 nsh@horae.dti.ne.jp
- 4355   Total
+ 4563   Total
 
 -------------------------------------------------------------------------------
 
@@ -206,35 +221,34 @@ However, some information can be gleaned from the existing change-logs
 to show the principal contributors for each release (i.e., not listing those
 with less than 1%):
 
-** credits from CHANGES docs/CHANGES2.8 (4328.6 changes)
-  1.1 Brian J Pardy
-  3.0 Doug Kaufman
-  6.5 Foteos Macrides
-  2.0 Ilya Zakharevich
- 16.3 Klaus Weide
-  7.9 Leonid Pauzner
+** credits from CHANGES docs/CHANGES2.8 (4492.6 changes)
+  1.0 Brian J Pardy
+  2.9 Doug Kaufman
+  6.2 Foteos Macrides
+  1.9 Ilya Zakharevich
+ 15.7 Klaus Weide
+  7.6 Leonid Pauzner
   1.2 Paul Gilmartin
- 47.4 Thomas E Dickey
-  2.0 Vlad Harchev
-** credits from CHANGES docs/CHANGES* (5795.6 changes)
-  2.3 Doug Kaufman
- 23.6 Foteos Macrides
-  1.5 Ilya Zakharevich
- 12.4 Klaus Weide
-  5.9 Leonid Pauzner
- 35.4 Thomas E Dickey
-  1.5 Vlad Harchev
-  3.6 unknown
-** credits from CHANGES (3408.6 changes)
-  1.4 Brian J Pardy
-  3.5 Doug Kaufman
-  2.5 Ilya Zakharevich
-  1.0 John Bley
- 12.9 Klaus Weide
-  9.2 Leonid Pauzner
+ 48.7 Thomas E Dickey
+  1.9 Vlad Harchev
+** credits from CHANGES docs/CHANGES* (5959.6 changes)
+  2.2 Doug Kaufman
+ 23.0 Foteos Macrides
+  1.4 Ilya Zakharevich
+ 12.1 Klaus Weide
+  5.7 Leonid Pauzner
+ 36.7 Thomas E Dickey
+  1.4 Vlad Harchev
+  3.5 unknown
+** credits from CHANGES (3572.6 changes)
+  1.3 Brian J Pardy
+  3.3 Doug Kaufman
+  2.4 Ilya Zakharevich
+ 12.3 Klaus Weide
+  8.8 Leonid Pauzner
   1.5 Paul Gilmartin
- 52.8 Thomas E Dickey
-  2.5 Vlad Harchev
+ 54.2 Thomas E Dickey
+  2.4 Vlad Harchev
 ** credits from docs/CHANGES2.8 (920 changes)
   1.2 Doug Kaufman
  30.5 Foteos Macrides

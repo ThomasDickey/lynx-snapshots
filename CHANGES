@@ -1,7 +1,10 @@
--- $LynxId: CHANGES,v 1.987 2018/06/10 21:35:39 tom Exp $
+-- $LynxId: CHANGES,v 1.990 2018/07/08 16:51:50 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
+
+2018-07-08 (2.8.9rel.1)
+* documentation/metrics updates -TD
 
 2018-06-10 (2.8.9pre.1)
 * fix an inconsistency in message for "-listonly" option (Debian #805753) -TD
@@ -60,7 +63,7 @@ Changes since Lynx 2.8 release
   pdcurses -TD
 * rename test-package for ".rpm" to "lynx-dev" for consistency with ".deb" -TD
 * improve samples/lynx.bat by using location of script rather than current
-  directory ("Smuggler" loto1992@inbox.ru).
+  directory -loto1992@inbox.ru ("Smuggler")
 * permanently enable MISC_EXP feature -TD
 * remove several obsolete ifdefs: DGUX, DGUX_OLD, HP_TERMINAL,
   REVERSE_CLEAR_SCREEN_PROBLEM, SHORTENED_RBIND, SLANG_MBCS_HACK, SNAKE -TD
@@ -105,11 +108,11 @@ Changes since Lynx 2.8 release
 * modify configure script to work around pkgsrc's misconfiguration of shared
   libraries -TD
 * modify po/makefile.inn to ensure the temporary files have distinct names
-  to avoid problem with "make -j8" (Debian #890811).
+  to avoid problem with "make -j8" (Debian #890811) -TD
 * update makefile/batch-scripts to allow building with newer Visual Studio
   versions, e.g., 2010, 2012, so that a 64-bit executable can be built -TD
 * repair link in lynx_help_main.html to HTML 3.2 documentation
-  (Savannah #47803).
+  (Savannah #47803) -TD
 * update eo.po, fr.po from
     http://translationproject.org/latest/lynx
 * improved several configure macros:
@@ -198,7 +201,7 @@ Changes since Lynx 2.8 release
   as well as problem introduced by 2.8.8dev.6 cleanup -TH
 * update ca.po, from
     http://translationproject.org/latest/lynx
-* tidy whitespace in lynx.cfg (report by David Niklas)
+* tidy whitespace in lynx.cfg (report by David Niklas) -TD
 * fix two more typos in the list of ENABLE_LYNXRC in lynx.cfg -TD
 * remove a repeated item for SEND_USERAGENT from lynx.cfg (Larry Hynes)
 * accept userinfo in a URL, subject to override by -auth option or -pauth
@@ -230,7 +233,7 @@ Changes since Lynx 2.8 release
 * build-fix for OpenSSL 1.1 (Kamil Dudka)
 * begin work to parse gopher extension "link to URL" -TD
 * remove an obsolete comment in the manual page about -dump versus -force_html
-  (report by Peter Schmitt).
+  (report by Peter Schmitt) -TD
 * modify samples/oldlynx to provide an empty ".lss" file as a better default
   than providing an empty "-lss" option -TD
 * amend change made in 2.8.8dev.17 to permit multiple COLOR_STYLE items to
@@ -392,7 +395,7 @@ Changes since Lynx 2.8 release
   rather than gcry_randomize() (adapted from patch by Andreas Metzler,
   Debian #753699) -TD
 * fix a reference-after-free in scan_cookie_sublist(), probably fixing RedHat
-  #1120925 (patch by Mike Gorse).
+  #1120925 -Mike Gorse
 * update eo.po, id.po from
     http://translationproject.org/latest/lynx
 * improve workaround for too-long pathnames in LYPrint.c SetupFilename() -TD
@@ -453,7 +456,7 @@ Changes since Lynx 2.8 release
   do not mention this since forms are an HTTP feature (Debian #738121) -TD
 * reviewed command-line options which were not provided in lynx.cfg; added
   others which could be useful for dumps (i.e., force_html, hiddenlinks,
-  listonly, list_inline, localhost, short_url, with_backspaces) -TD:
+  listonly, list_inline, localhost, short_url, with_backspaces) -TD
 * add dont_wrap_pre to lynx.cfg (request by GV) -TD
 * use idn_free() rather than ordinary free (patch by GV)
 * build-fix when alt-bindings are disabled (patch by GV)
@@ -496,7 +499,7 @@ Changes since Lynx 2.8 release
 * change URL for HELPFILE in lynx.cfg, etc., to omit version-specifics -TD
 * update example of options menu shown in user-guide -TD
 * restore ^Z maxscreen-toggle for Windows, omitted in 2.8.8dev.17 cleanup -TD
-* typographical fixes for manpage (Bjarni I. Gislason, Debian #732236).
+* typographical fixes for manpage (patch by Bjarni I. Gislason, Debian #732236)
 * allow fallback sleep() function to be used for MinGW -GV
 * remove special case in configure.in which added "-lcompat" to $LIBS
   for OpenBSD, MirBSD and EkkoBSD (Christian Weisgerber, Thorsten Glaser).
@@ -1391,7 +1394,7 @@ Changes since Lynx 2.8 release
 * translate named entities, etc., for "content" field of refresh-URL, cf:
   2.8.5dev.13 (report by Ivan Shmakov) -TD
 * suppress computation in TrimmedLength() for source-view, which is not needed
-  for Debian #204515 (patch by Mike Knight)
+  for Debian #204515 -Mike Knight
 * add check-po rule to po/makefile -TD
 * modify top-level makefile to work with configure --srcdir -TD
 * add update-po rule to top-level makefile -TD
@@ -1402,7 +1405,7 @@ Changes since Lynx 2.8 release
 * parse xml processing-instruction to turn on UTF-8 decoding, as well as
   disable upper/lower case transforming in source view (discussion on
   lynx-dev) -TD
-* fix typo in Lynx_users_guide.html (report by Kristof Zelechovski)
+* fix typo in Lynx_users_guide.html (report by Kristof Zelechovski) -TD
 * minor fix to documentation in lynx.cfg -PW
 * use off_t rather than long for representing file sizes, e.g., when used to
   print progress messages (reports by LP, Tomas Liska, TG, PG) -TD

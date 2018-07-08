@@ -1,4 +1,4 @@
-/* $LynxId: LYSession.c,v 1.11 2015/09/19 17:40:20 tom Exp $ */
+/* $LynxId: LYSession.c,v 1.12 2018/07/08 15:22:44 tom Exp $ */
 
 #include <LYSession.h>
 
@@ -20,7 +20,7 @@
  * / hereby
  * / reduce
  * g file://localhost/COPYRIGHT
- * g http://lynx.invisible-island.net
+ * g https://lynx.invisible-island.net
  * h 1 -1 file://localhost/COPYRIGHT       Entry into main screen
  * h 1 0 LYNXCACHE:/       Cache Jar
  * h 1 16 file://localhost/usr/local/share/lynx_help/Lynx_users_guide.html#Cache   Lynx Users Guide v2.8.6

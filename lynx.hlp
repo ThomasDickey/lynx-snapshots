@@ -56,9 +56,9 @@
        can  be  given  in  different  forms  to  allow  for  operating  system
        constraints, e.g.,
 
-         -center:off
-         -center=off
-         -center-
+           -center:off
+           -center=off
+           -center-
 
        Lynx recognizes "1", "+", "on" and "true" for  true  values,  and  "0",
        "-",  "off"  and  "false"  for  false  values.  Other option-values are
@@ -236,7 +236,7 @@
               interactive mode, all documents are processed.  This can be used
               in the following way:
 
-                lynx -dump http://www.subir.com/lynx.html
+                  lynx -dump http://www.subir.com/lynx.html
 
               Files specified on the command line are  formatted  as  HTML  if
               their  names  end  with one of the standard web suffixes such as
@@ -281,16 +281,16 @@
 
               Lynx recognizes these file suffixes as HTML:
 
-                ".ht3",
-                ".htm",
-                ".html3",
-                ".html",
-                ".htmlx",
-                ".php3",
-                ".php",
-                ".phtml",
-                ".sht", and
-                ".shtml".
+                  ".ht3",
+                  ".htm",
+                  ".html3",
+                  ".html",
+                  ".htmlx",
+                  ".php3",
+                  ".php",
+                  ".phtml",
+                  ".sht", and
+                  ".shtml".
 
        -force_secure
               toggles forcing of the secure flag for SSL cookies.
@@ -701,14 +701,14 @@
               works  the  same  as  dump  but  outputs  HTML source instead of
               formatted text.  For example
 
-                lynx -source . >foo.html
+                  lynx -source . >foo.html
 
               generates  HTML  source  listing  the  files  in   the   current
               directory.   Each  file  is  marked  by  an HREF relative to the
               parent directory.  Add a  trailing  slash  to  make  the  HREF's
               relative to the current directory:
 
-                lynx -source ./ >foo.html
+                  lynx -source ./ >foo.html
 
        -stack_dump
               disable SIGINT cleanup handler
@@ -966,21 +966,21 @@
                            supported  protocols,  the  environment   variables
                            recognized by lynx may include
 
-                             cso_proxy
-                             finger_proxy
-                             ftp_proxy
-                             gopher_proxy
-                             https_proxy
-                             http_proxy
-                             newspost_proxy
-                             newsreply_proxy
-                             news_proxy
-                             nntp_proxy
-                             no_proxy
-                             snewspost_proxy
-                             snewsreply_proxy
-                             snews_proxy
-                             wais_proxy
+                               cso_proxy
+                               finger_proxy
+                               ftp_proxy
+                               gopher_proxy
+                               https_proxy
+                               http_proxy
+                               newspost_proxy
+                               newsreply_proxy
+                               news_proxy
+                               nntp_proxy
+                               no_proxy
+                               snewspost_proxy
+                               snewsreply_proxy
+                               snews_proxy
+                               wais_proxy
 
                            See  Lynx  Users  Guide  for additional details and
                            examples.
@@ -1147,7 +1147,7 @@
                            for message catalogs.
 
 2 Notes
-       This is the Lynx v2.8.8 Release; development is in progress for 2.8.9.
+       This is the Lynx v2.8.9 Release; development is in progress for 2.9.0.
 
        If you wish to contribute to the further development of Lynx, subscribe
        to our mailing list.  Send email to <lynx-dev-request@nongnu.org>  with
