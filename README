@@ -10,7 +10,7 @@ To use this package, you need a compiler & a bit of experience
 at very simple programming.  If you just want something which will work
 `out-of-the-box', you can get pre-compiled versions of Lynx
 by following the links from
-        <URL: http://lynx.invisible-island.net/resources.html/> ;
+        <URL: https://lynx.invisible-island.net/resources.html/> ;
 
 For DOS or Windows, go to
         <URL: http://www.fdisk.com/doslynx/lynxport.htm>.
@@ -35,13 +35,13 @@ WHAT IS LYNX?
 HOW TO GET LYNX
 
    For the latest release of Lynx go to:
-       <URL: http://lynx.invisible-island.net/release>;
+       <URL: https://lynx.invisible-island.net/release>;
        <URL: ftp://ftp.invisible-island.net/lynx/tarballs>;
 
    The latest development version is at:
-       <URL: http://lynx.invisible-island.net/current/>.
+       <URL: https://lynx.invisible-island.net/current/>.
 
-   The Lynx homepage is <URL: http://lynx.invisible-island.net/>.
+   The Lynx homepage is <URL: https://lynx.invisible-island.net/>.
    The on-line help page (enter `h') has links to many useful things.
 
 LICENSE
@@ -150,5 +150,5 @@ LYNX-DEV MAILING LIST
 
 ------------------------------------------------------------------------------
 -- vile:txtmode fc=72 noti
--- $LynxId: README,v 1.33 2017/08/08 22:34:10 tom Exp $
+-- $LynxId: README,v 1.34 2018/07/08 15:22:44 tom Exp $
 ------------------------------------------------------------------------------

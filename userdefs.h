@@ -1,5 +1,5 @@
 /*
- * $LynxId: userdefs.h,v 1.339 2018/06/10 21:09:45 tom Exp $
+ * $LynxId: userdefs.h,v 1.342 2018/07/08 15:22:44 tom Exp $
  *
  * Lynx - Hypertext navigation system
  *
@@ -484,7 +484,7 @@
  * site:
  */
 #ifndef HOMEPAGE_URL
-#define HOMEPAGE_URL "http://lynx.invisible-island.net/"
+#define HOMEPAGE_URL "https://lynx.invisible-island.net/"
 #endif
 #define STARTFILE HOMEPAGE_URL
 /*
@@ -505,12 +505,12 @@
  *   for this distribution (use SHELL syntax including the device
  *   on VMS systems).
  * The default HELPFILE is:
- * http://lynx.invisible-island.net/lynx_help/lynx_help_main.html
+ * https://lynx.invisible-island.net/lynx_help/lynx_help_main.html
  *   This should be changed here or in lynx.cfg to the local path.
  * The definition here can be overridden at run time by defining a
  * "LYNX_HELPFILE" environment variable.
  */
-#define HELPFILE "http://lynx.invisible-island.net/lynx_help/lynx_help_main.html"
+#define HELPFILE "https://lynx.invisible-island.net/lynx_help/lynx_help_main.html"
 /* #define HELPFILE "file://localhost/PATH_TO/lynx_help/lynx_help_main.html" */
 
 /*****************************
@@ -1445,11 +1445,11 @@
  * the version definition with the Project Version on checkout.  Just
  * ignore it. - kw */
 /* $Format: "#define LYNX_VERSION \"$ProjectVersion$\""$ */
-#define LYNX_VERSION "2.8.9pre.1"
-#define LYNX_WWW_HOME "http://lynx.invisible-island.net/"
-#define LYNX_WWW_DIST "http://lynx.invisible-island.net/current/"
+#define LYNX_VERSION "2.8.9rel.1"
+#define LYNX_WWW_HOME "https://lynx.invisible-island.net/"
+#define LYNX_WWW_DIST "https://lynx.invisible-island.net/current/"
 /* $Format: "#define LYNX_DATE \"$ProjectDate$\""$ */
-#define LYNX_DATE "Sun, 10 Jun 2018 17:09:45 -0400"
+#define LYNX_DATE "Sun, 08 Jul 2018 06:46:06 -0400"
 #define LYNX_DATE_OFF 5		/* truncate the automatically-generated date */
 #define LYNX_DATE_LEN 11	/* truncate the automatically-generated date */
 

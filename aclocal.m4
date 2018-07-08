@@ -1,4 +1,4 @@
-dnl $LynxId: aclocal.m4,v 1.251 2018/02/22 02:31:22 tom Exp $
+dnl $LynxId: aclocal.m4,v 1.252 2018/07/08 15:22:44 tom Exp $
 dnl Macros for auto-configure script.
 dnl by Thomas E. Dickey <dickey@invisible-island.net>
 dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
@@ -8,7 +8,7 @@ dnl Created: 1997/01/28
 dnl
 dnl The autoconf used in Lynx development is GNU autoconf 2.13 or 2.52, patched
 dnl by Thomas Dickey.  See your local GNU archives, and this URL:
-dnl http://invisible-island.net/autoconf/autoconf.html
+dnl https://invisible-island.net/autoconf/autoconf.html
 dnl
 dnl ---------------------------------------------------------------------------
 dnl

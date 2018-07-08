@@ -1,4 +1,4 @@
-.\" $LynxId: lynx.man,v 1.121 2018/05/14 00:21:39 tom Exp $
+.\" $LynxId: lynx.man,v 1.123 2018/07/08 10:54:20 tom Exp $
 .\" **************************************************************************
 .\" Escape single quotes in literal strings from groff's Unicode transform.
 .ie \n(.g .ds AQ \(aq
@@ -22,7 +22,8 @@
 .de NE
 .fi
 .ft R
-.in -4
+.ie n  .in -4
+.el    .in -2
 ..
 .\" **************************************************************************
 .TH LYNX 1
@@ -1293,7 +1294,7 @@ Currently, it is hard-coded to a wish list.
 .B NLSPATH
 This variable, if set, is used as the path prefix for message catalogs.
 .SH NOTES
-This is the \fILynx\fP v2.8.8 Release; development is in progress for 2.8.9.
+This is the \fILynx\fP v2.8.9 Release; development is in progress for 2.9.0.
 .PP
 If you wish to contribute to the further development
 of \fILynx\fR, subscribe to our mailing list.
@@ -1309,19 +1310,19 @@ Unsubscribe by sending email to <lynx-dev-request@nongnu.org> with
 Do not send the unsubscribe message to the lynx-dev list, itself.
 .SH SEE ALSO
 .hy 0
-\fIcatgets\fR(3),
-\fIcurses\fR(3),
-\fIenviron\fR(7),
-\fIexecve\fR(2),
-\fIftp\fR(1),
-\fIgettext\fR(GNU),
-\fIlocaleconv\fR(3),
-\fIncurses\fR(3),
-\fIsetlocale\fR(3),
-\fIslang\fR(?),
-\fItermcap\fR(5),
-\fIterminfo\fR(5),
-\fIwget\fR(GNU)
+\fBcatgets\fR(3),
+\fBcurses\fR(3),
+\fBenviron\fR(7),
+\fBexecve\fR(2),
+\fBftp\fR(1),
+\fBgettext\fR(GNU),
+\fBlocaleconv\fR(3),
+\fBncurses\fR(3),
+\fBsetlocale\fR(3),
+\fBslang\fR(?),
+\fBtermcap\fR(5),
+\fBterminfo\fR(5),
+\fBwget\fR(GNU)
 .hy 1
 .PP
 Note that man page availability and section numbering is somewhat

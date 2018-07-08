@@ -1,7 +1,7 @@
 #!/bin/sh
-# $LynxId: indent.sh,v 1.4 2013/10/20 19:34:35 tom Exp $
+# $LynxId: indent.sh,v 1.5 2018/07/08 15:22:44 tom Exp $
 # Indent LYNX files (for reference).  See "lnx-indent" from
-#	http://invisible-island.net/cindent/
+#	https://invisible-island.net/cindent/
 NOOP=no
 OPTS='
 --blank-lines-after-declarations

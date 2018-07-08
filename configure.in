@@ -1,4 +1,4 @@
-dnl $LynxId: configure.in,v 1.300 2018/06/10 21:09:45 tom Exp $
+dnl $LynxId: configure.in,v 1.302 2018/07/08 15:22:44 tom Exp $
 dnl
 dnl Process this file with autoconf to produce a configure script.
 dnl
@@ -29,7 +29,7 @@ dnl ---------------------------------------------------------------------------
 dnl
 dnl ask PRCS to plug-in the project-version for the configure-script.
 dnl $Format: "AC_REVISION($ProjectVersion$)"$
-AC_REVISION(2.8.9pre.1)
+AC_REVISION(2.8.9rel.1)
 
 # Save the original $CFLAGS so we can distinguish whether the user set those
 # in the environment, or whether autoconf added -O and -g options:
@@ -1561,7 +1561,7 @@ if test -n "$srcdir" ; then
 	test "$srcdir" != "." && SRCDIR_CLEAN=""
 fi
 
-HOMEPAGE_URL="http://lynx.invisible-island.net/"
+HOMEPAGE_URL="https://lynx.invisible-island.net/"
 AC_DEFINE_UNQUOTED(HOMEPAGE_URL,"$HOMEPAGE_URL",[Define to Lynx homepage URL])
 AC_SUBST(HOMEPAGE_URL)
 
