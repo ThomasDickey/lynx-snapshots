@@ -1,7 +1,10 @@
--- $LynxId: CHANGES,v 1.990 2018/07/08 16:51:50 tom Exp $
+-- $LynxId: CHANGES,v 1.991 2018/07/09 20:02:17 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
+
+2018-07-09 (2.8.9dev.1)
+* fix overlooked "2.8.9" in README -Larry Hynes
 
 2018-07-08 (2.8.9rel.1)
 * documentation/metrics updates -TD
