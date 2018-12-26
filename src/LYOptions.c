@@ -1,4 +1,4 @@
-/* $LynxId: LYOptions.c,v 1.178 2018/03/19 23:06:50 tom Exp $ */
+/* $LynxId: LYOptions.c,v 1.179 2018/12/26 01:23:33 tom Exp $ */
 #include <HTUtils.h>
 #include <HTFTP.h>
 #include <HTTP.h>		/* 'reloading' flag */
@@ -3551,7 +3551,7 @@ static char *NewSecureValue(void)
     FREE(secure_value);
     if ((secure_value = typeMallocn(char, 80)) != 0) {
 #if defined(RAND_MAX)
-	long key = lynx_rand();
+	long key = (long) lynx_rand();
 
 #else
 	long key = (long) secure_value + (long) time(0);

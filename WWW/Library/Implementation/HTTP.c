@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTP.c,v 1.175 2018/05/04 20:07:43 Elliot.Thomas Exp $
+ * $LynxId: HTTP.c,v 1.176 2018/12/26 01:24:09 tom Exp $
  *
  * HyperText Tranfer Protocol	- Client implementation		HTTP.c
  * ==========================
@@ -334,7 +334,7 @@ void HTSSLInitPRNG(void)
 	lynx_srand((unsigned) seed);
 	while (RAND_status() == 0) {
 	    /* Repeatedly seed the PRNG using the system's random number generator until it has been seeded with enough data */
-	    l = lynx_rand();
+	    l = (long) lynx_rand();
 	    RAND_seed((unsigned char *) &l, (int) sizeof(long));
 	}
 	/* Write a rand_file */

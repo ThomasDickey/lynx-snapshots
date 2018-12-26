@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYUtils.c,v 1.292 2018/05/15 21:20:52 tom Exp $
+ * $LynxId: LYUtils.c,v 1.293 2018/12/26 01:23:05 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTCP.h>
@@ -3545,8 +3545,8 @@ static int fmt_tempname(char *result,
      */
     counter = MAX_TEMPNAME;
     if (names_used < MAX_TEMPNAME) {
-	long get_rand = lynx_rand();
-	long max_rand = LYNX_RAND_MAX;
+	long get_rand = (long) lynx_rand();
+	long max_rand = (long) LYNX_RAND_MAX;
 
 	counter = (unsigned) (((float) MAX_TEMPNAME * (float) get_rand) /
 			      (float) max_rand + 1);

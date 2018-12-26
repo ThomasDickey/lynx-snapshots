@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFWriter.c,v 1.116 2018/05/11 20:41:05 tom Exp $
+ * $LynxId: HTFWriter.c,v 1.117 2018/12/25 23:14:16 tom Exp $
  *
  *		FILE WRITER				HTFWrite.h
  *		===========
@@ -173,9 +173,9 @@ static void decompress_gzip(HTStream *me)
 	    }
 	    gzclose(gzfp);
 	    LYCloseTempFP(fp);
-	    CTRACE((tfp, "...decompress %" PRI_off_t " to %ld\n",
+	    CTRACE((tfp, "...decompress %" PRI_off_t " to %lu\n",
 		    CAST_off_t (me->anchor->actual_length),
-		    actual));
+		    (unsigned long) actual));
 	    if (success) {
 		if (LYRenameFile(copied, in_name) == 0)
 		    me->anchor->actual_length = (off_t) actual;
