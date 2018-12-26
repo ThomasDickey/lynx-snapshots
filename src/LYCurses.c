@@ -1,4 +1,4 @@
-/* $LynxId: LYCurses.c,v 1.194 2018/03/19 22:38:49 tom Exp $ */
+/* $LynxId: LYCurses.c,v 1.195 2018/12/26 01:28:15 tom Exp $ */
 #include <HTUtils.h>
 #include <HTAlert.h>
 
@@ -429,11 +429,11 @@ static void LYAttrset(WINDOW * win, int color,
 	&& color >= 0) {
 	CTRACE2(TRACE_STYLE, (tfp, "CSS:LYAttrset color %#x -> (%s)\n",
 			      color, shown = attr_to_string(color)));
-	(void) wattrset(win, (unsigned) color);
+	(void) wattrset(win, color);
     } else if (mono >= 0) {
 	CTRACE2(TRACE_STYLE, (tfp, "CSS:LYAttrset mono %#x -> (%s)\n",
 			      mono, shown = attr_to_string(mono)));
-	(void) wattrset(win, (unsigned) mono);
+	(void) wattrset(win, mono);
     } else {
 	CTRACE2(TRACE_STYLE, (tfp, "CSS:LYAttrset (A_NORMAL)\n"));
 	(void) wattrset(win, A_NORMAL);
@@ -814,10 +814,10 @@ int lynx_chg_color(int color,
 void lynx_set_color(int a)
 {
     if (lynx_has_color && LYShowColor >= SHOW_COLOR_ON) {
-	(void) wattrset(LYwin, (unsigned) lynx_color_cfg_attr(a)
+	(void) wattrset(LYwin, lynx_color_cfg_attr(a)
 			| (((a + 1) < COLOR_PAIRS)
-			   ? (chtype) get_color_pair(a + 1)
-			   : A_NORMAL));
+			   ? get_color_pair(a + 1)
+			   : (int) A_NORMAL));
     }
 }
 

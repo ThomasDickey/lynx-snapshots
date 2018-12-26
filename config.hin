@@ -1,5 +1,5 @@
 /*
- * $LynxId: config.hin,v 1.141 2018/03/11 22:30:30 tom Exp $
+ * $LynxId: config.hin,v 1.142 2018/12/25 22:55:09 tom Exp $
  * vile:cmode
  *
  * The configure script translates "config.hin" into "lynx_cfg.h"
@@ -233,6 +233,7 @@
 #undef SIZEOF_INT		/* AC_CHECK_SIZEOF(int) */
 #undef SIZEOF_LONG		/* AC_CHECK_SIZEOF(long) */
 #undef SIZEOF_OFF_T		/* AC_CHECK_SIZEOF(off_t) */
+#undef SIZEOF_SIZE_T		/* AC_CHECK_SIZEOF(size_t) */
 #undef SIZEOF_TIME_T		/* AC_CHECK_SIZEOF(time_t) */
 #undef SLsmg_Color_Type		/* CF_SLANG_UNIX_DEFS */
 #undef SLtt_Char_Type		/* CF_SLANG_UNIX_DEFS */

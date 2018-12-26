@@ -1,5 +1,5 @@
 /*
- * $LynxId: makeuctb.c,v 1.49 2013/11/28 11:28:53 tom Exp $
+ * $LynxId: makeuctb.c,v 1.50 2018/12/26 01:17:22 tom Exp $
  *
  *  makeuctb.c, derived from conmakehash.c   - kw
  *
@@ -759,7 +759,7 @@ int main(int argc, char **argv)
     if (argc > 4) {
 	StrNCpy(this_LYNXcharset, argv[4], UC_MAXLEN_LYNXCSNAME);
     } else if (this_LYNXcharset[0] == '\0') {
-	StrNCpy(this_LYNXcharset, this_MIMEcharset, UC_MAXLEN_LYNXCSNAME);
+	memcpy(this_LYNXcharset, this_MIMEcharset, UC_MAXLEN_LYNXCSNAME);
     }
 
     if (this_isDefaultMap == -1) {
