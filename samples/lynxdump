@@ -12,4 +12,5 @@ if test $HOME/.lynxrc ; then
 fi
 echo 'keypad_mode=NUMBERS_AS_ARROWS' >> $MYTMP/.lynxrc
 HOME=$MYTMP; export HOME
+umask $oldmask
 lynx -justify -dump -force_html -with_backspaces -nolist $*

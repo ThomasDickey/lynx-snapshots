@@ -1,4 +1,4 @@
-/* $LynxId: LYDownload.c,v 1.70 2018/05/11 22:57:30 tom Exp $ */
+/* $LynxId: LYDownload.c,v 1.71 2018/12/27 23:48:37 Kamil.Dudka Exp $ */
 #include <HTUtils.h>
 #include <HTParse.h>
 #include <HTList.h>
@@ -456,6 +456,7 @@ void LYDownload(char *line)
   cleanup:
     FREE(Line);
     BStrFree(buffer);
+    BStrFree(command);
     return;
 }
 
