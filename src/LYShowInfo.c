@@ -1,4 +1,4 @@
-/* $LynxId: LYShowInfo.c,v 1.82 2018/05/11 20:43:26 tom Exp $ */
+/* $LynxId: LYShowInfo.c,v 1.83 2018/12/27 22:35:44 Chuck.Martin Exp $ */
 #include <HTUtils.h>
 #include <HTFile.h>
 #include <HTParse.h>
@@ -87,9 +87,9 @@ static void dt_String(FILE *fp,
     while (need++ < label_columns)
 	fprintf(fp, "&nbsp;");
     if (LYwideLines && allow_wide)
-	fprintf(fp, "<em>%s</em><pre>%s</pre>\n", the_label, the_value);
+	fprintf(fp, "<em>%s</em> <pre>%s</pre>\n", the_label, the_value);
     else
-	fprintf(fp, "<em>%s</em>%s\n", the_label, the_value);
+	fprintf(fp, "<em>%s</em> %s\n", the_label, the_value);
 
     FREE(the_label);
     FREE(the_value);

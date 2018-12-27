@@ -3,7 +3,7 @@
 #include <LYLeaks.h>
 
 /*
- *  $LynxId: parsdate.y,v 1.21 2018/04/01 22:21:45 tom Exp $
+ *  $LynxId: parsdate.y,v 1.28 2018/12/27 21:56:01 tom Exp $
  *
  *  This module is adapted and extended from tin, to use for LYmktime().
  *
@@ -11,7 +11,7 @@
  *  Module    : parsedate.y
  *  Author    : S. Bellovin, R. $alz, J. Berets, P. Eggert
  *  Created   : 1990-08-01
- *  Updated   : 2008-06-30 (by Thomas Dickey, for Lynx)
+ *  Updated   : 2018-12-27 (by Thomas Dickey, for Lynx)
  *  Notes     : This grammar has 8 shift/reduce conflicts.
  *
  *              Originally written by Steven M. Bellovin <smb@research.att.com>
@@ -61,6 +61,9 @@ extern int date_parse(void);
 #define yyparse		date_parse
 #define yylex		date_lex
 #define yyerror		date_error
+
+#define BAD_TIME	((time_t)-1)
+#define isBadTime(n)	((n) != 0 && (((n) == BAD_TIME) || !((n) > 0)))
 
     /* See the LeapYears table in Convert. */
 #define EPOCH		1970
@@ -529,14 +532,14 @@ static const TABLE	TimezoneTable[] = {
 
 static time_t ToSeconds(time_t Hours, time_t Minutes, time_t Seconds, MERIDIAN Meridian)
 {
-    if ((long) Minutes < 0 || Minutes > 59 || (long) Seconds < 0 || Seconds > 61)
-	return -1;
+    if (isBadTime(Minutes) || Minutes > 59 || isBadTime(Seconds) || Seconds > 61)
+	return BAD_TIME;
     if (Meridian == MER24) {
-	if ((long) Hours < 0 || Hours > 23)
-	    return -1;
+	if (isBadTime(Hours) || Hours > 23)
+	    return BAD_TIME;
     } else {
 	if (Hours < 1 || Hours > 12)
-	    return -1;
+	    return BAD_TIME;
 	if (Hours == 12)
 	    Hours = 0;
 	if (Meridian == MERpm)
@@ -568,7 +571,7 @@ static time_t Convert(time_t Month, time_t Day, time_t Year, time_t Hours,
     time_t Julian;
     time_t tod;
 
-    if ((long) Year < 0)
+    if (isBadTime(Year))
 	Year = -Year;
     if (Year < 70)
 	Year += 2000;
@@ -586,7 +589,7 @@ static time_t Convert(time_t Month, time_t Day, time_t Year, time_t Hours,
     /* NOSTRICT */
     /* conversion from long may lose accuracy */
 	|| Day < 1 || Day > mp[(int) Month]) {
-	return -1;
+	return BAD_TIME;
     }
 
     Julian = Day - 1 + (Year - EPOCH) * 365;
@@ -598,23 +601,39 @@ static time_t Convert(time_t Month, time_t Day, time_t Year, time_t Hours,
 	Julian += *++mp;
     Julian *= SECSPERDAY;
     Julian += yyTimezone * 60L;
-    if ((long) (tod = ToSeconds(Hours, Minutes, Seconds, Meridian)) < 0) {
-	return -1;
+    tod = ToSeconds(Hours, Minutes, Seconds, Meridian);
+    if (isBadTime(tod)) {
+	return BAD_TIME;
     }
     Julian += tod;
     tod = Julian;
-    if (dst == DSTon || (dst == DSTmaybe && localtime(&tod)->tm_isdst))
+    if (dst == DSTon) {
 	Julian -= DST_OFFSET * 60 * 60;
+    } else if (dst == DSTmaybe) {
+	struct tm *tm = localtime(&tod);
+
+	if (tm != NULL && tm->tm_isdst)
+	    Julian -= DST_OFFSET * 60 * 60;
+	else
+	    Julian = BAD_TIME;
+    }
     return Julian;
 }
 
 static time_t DSTcorrect(time_t Start, time_t Future)
 {
+    struct tm *tm;
     time_t StartDay;
     time_t FutureDay;
 
-    StartDay = (localtime(&Start)->tm_hour + 1) % 24;
-    FutureDay = (localtime(&Future)->tm_hour + 1) % 24;
+    if ((tm = localtime(&Start)) == NULL)
+	return BAD_TIME;
+    StartDay = (tm->tm_hour + 1) % 24;
+
+    if ((tm = localtime(&Future)) == NULL)
+	return BAD_TIME;
+    FutureDay = (tm->tm_hour + 1) % 24;
+
     return (Future - Start) + (StartDay - FutureDay) * DST_OFFSET * 60 * 60;
 }
 
@@ -624,7 +643,9 @@ static time_t RelativeMonth(time_t Start, time_t RelMonth)
     time_t Month;
     time_t Year;
 
-    tm = localtime(&Start);
+    if ((tm = localtime(&Start)) == NULL)
+	return BAD_TIME;
+
     Month = 12 * tm->tm_year + tm->tm_mon + RelMonth;
     Year = Month / 12 + 1900;
     Month = Month % 12 + 1;
@@ -915,32 +936,35 @@ time_t parsedate(char *p,
 	(void) GetTimeInfo(&ti);
     }
 
-    tm = localtime(&now->time);
-    yyYear = tm->tm_year + 1900;
-    yyMonth = tm->tm_mon + 1;
-    yyDay = tm->tm_mday;
-    yyTimezone = now->tzone;
+    if ((tm = localtime(&now->time)) == NULL)
+	return BAD_TIME;
+
+    /* *INDENT-EQLS* */
+    yyYear       = tm->tm_year + 1900;
+    yyMonth      = tm->tm_mon + 1;
+    yyDay        = tm->tm_mday;
+    yyTimezone   = now->tzone;
     if (tm->tm_isdst)		/* Correct timezone offset for DST */
-	yyTimezone += DST_OFFSET * 60;
-    yyDSTmode = DSTmaybe;
-    yyHour = 0;
-    yyMinutes = 0;
-    yySeconds = 0;
-    yyMeridian = MER24;
+	yyTimezone   += DST_OFFSET * 60;
+    yyDSTmode    = DSTmaybe;
+    yyHour       = 0;
+    yyMinutes    = 0;
+    yySeconds    = 0;
+    yyMeridian   = MER24;
     yyRelSeconds = 0;
-    yyRelMonth = 0;
-    yyHaveDate = 0;
-    yyHaveRel = 0;
-    yyHaveTime = 0;
+    yyRelMonth   = 0;
+    yyHaveDate   = 0;
+    yyHaveRel    = 0;
+    yyHaveTime   = 0;
 
     if (date_parse() || yyHaveTime > 1 || yyHaveDate > 1)
-	return -1;
+	return BAD_TIME;
 
     if (yyHaveDate || yyHaveTime) {
 	Start = Convert(yyMonth, yyDay, yyYear, yyHour, yyMinutes, yySeconds,
 			yyMeridian, yyDSTmode);
-	if ((long) Start < 0)
-	    return -1;
+	if (isBadTime(Start))
+	    return BAD_TIME;
     } else {
 	Start = now->time;
 	if (!yyHaveRel)
@@ -953,5 +977,5 @@ time_t parsedate(char *p,
 
     /* Have to do *something* with a legitimate -1 so it's distinguishable
      * from the error return value.  (Alternately could set errno on error.) */
-    return (Start == (time_t) -1) ? 0 : Start;
+    return (Start == BAD_TIME) ? 0 : Start;
 }

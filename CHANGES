@@ -1,9 +1,12 @@
--- $LynxId: CHANGES,v 1.993 2018/12/26 12:19:54 tom Exp $
+-- $LynxId: CHANGES,v 1.995 2018/12/27 22:39:43 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2018-12-26 (2.9.0dev.1)
+2018-12-27 (2.9.0dev.1)
+* restore whitespace in info-page omitted in 2.8.9dev.17, useful for screen
+  readers (report by Dan Dunfee) -Chuck Martin
+* improve error-checks in parsdate.y (prompted by patch by TH) -TD
 * compiler-warning fixes for gcc8 and VS2015 -TD
 * fix overlooked "2.8.9" in README -Larry Hynes
 
