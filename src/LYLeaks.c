@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYLeaks.c,v 1.41 2018/03/30 00:27:58 tom Exp $
+ * $LynxId: LYLeaks.c,v 1.42 2018/12/27 10:33:52 tom Exp $
  *
  *	Copyright (c) 1994, University of Kansas, All Rights Reserved
  *	(this file was rewritten twice - 1998/1999 and 2003/2004)
@@ -1117,7 +1117,7 @@ static char *LYLeakSAVsprintf(char **dest,
 
 /* Note: the following may need updating if HTSprintf in HTString.c
  * is changed. - kw */
-static char *LYLeakHTSprintf(char **pstr, const char *fmt,...)
+static char *LYLeakHTSprintf(char **pstr, const char *fmt, ...)
 {
     char *str;
     size_t inuse = 0;
@@ -1136,7 +1136,7 @@ static char *LYLeakHTSprintf(char **pstr, const char *fmt,...)
 
 /* Note: the following may need updating if HTSprintf0 in HTString.c
  * is changed. - kw */
-static char *LYLeakHTSprintf0(char **pstr, const char *fmt,...)
+static char *LYLeakHTSprintf0(char **pstr, const char *fmt, ...)
 {
     char *str;
     va_list ap;

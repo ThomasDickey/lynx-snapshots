@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTCP.c,v 1.149 2018/05/16 19:48:49 tom Exp $
+ * $LynxId: HTTCP.c,v 1.151 2018/12/26 13:16:59 tom Exp $
  *
  *			Generic Communication Code		HTTCP.c
  *			==========================
@@ -1288,7 +1288,7 @@ BOOLEAN LYCheckHostByName(char *host)
  *		field is left unchanged in *soc_in.
  */
 #ifndef INET6
-static int HTParseInet(SockA * soc_in, const char *str)
+static int HTParseInet(SockA *soc_in, const char *str)
 {
     static const char *this_func = "HTParseInet";
 
@@ -2015,7 +2015,7 @@ int HTDoConnect(const char *url,
 		}
 		set_timeout(&select_timeout);
 		FD_ZERO(&writefds);
-		FD_SET((unsigned) *s, &writefds);
+		FD_SET((LYNX_FD) *s, &writefds);
 #ifdef SOCKS
 		if (socks_flag)
 		    ret = Rselect(*s + 1, NULL,
@@ -2292,7 +2292,7 @@ int HTDoRead(int fildes,
 	do {
 	    set_timeout(&select_timeout);
 	    FD_ZERO(&readfds);
-	    FD_SET((unsigned) fildes, &readfds);
+	    FD_SET((LYNX_FD) fildes, &readfds);
 #ifdef SOCKS
 	    if (socks_flag)
 		ret = Rselect(fildes + 1,

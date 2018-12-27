@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYLocal.c,v 1.131 2016/11/24 17:18:55 tom Exp $
+ * $LynxId: LYLocal.c,v 1.132 2018/12/27 10:33:52 tom Exp $
  *
  *  Routines to manipulate the local filesystem.
  *  Written by: Rick Mallett, Carleton University
@@ -377,7 +377,7 @@ static BOOLEAN ok_localname(char *dst, const char *src)
 
 #define MAX_ARGC 10
 
-static char **make_argv(const char *command,...)
+static char **make_argv(const char *command, ...)
 {
     static char *result[MAX_ARGC];
     int argc = 0;

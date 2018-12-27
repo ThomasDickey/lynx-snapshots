@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFTP.c,v 1.137 2018/05/16 19:36:44 tom Exp $
+ * $LynxId: HTFTP.c,v 1.140 2018/12/27 10:24:31 tom Exp $
  *
  *			File Transfer Protocol (FTP) Client
  *			for a WorldWideWeb browser
@@ -233,11 +233,11 @@ static PortNumber port_number = FIRST_TCP_PORT;
 #endif /* POLL_PORTS */
 
 static BOOL have_socket = FALSE;	/* true if master_socket is valid */
-static unsigned master_socket;	/* Listening socket = invalid */
+static LYNX_FD master_socket;	/* Listening socket = invalid */
 
 static char port_command[255];	/* Command for setting the port */
 static fd_set open_sockets;	/* Mask of active channels */
-static unsigned num_sockets;	/* Number of sockets to scan */
+static LYNX_FD num_sockets;	/* Number of sockets to scan */
 static PortNumber passive_port;	/* Port server specified for data */
 
 #define NEXT_CHAR HTGetCharacter()	/* Use function in HTFormat.c */
@@ -1113,7 +1113,7 @@ static void set_master_socket(int value)
 {
     have_socket = (BOOLEAN) (value >= 0);
     if (have_socket)
-	master_socket = (unsigned) value;
+	master_socket = (LYNX_FD) value;
 }
 
 /*	Close Master (listening) socket
@@ -1129,7 +1129,7 @@ static int close_master_socket(void)
 	FD_CLR(master_socket, &open_sockets);
 
     status = NETCLOSE((int) master_socket);
-    CTRACE((tfp, "HTFTP: Closed master socket %u\n", master_socket));
+    CTRACE((tfp, "HTFTP: Closed master socket %u\n", (unsigned) master_socket));
 
     reset_master_socket();
 
@@ -1422,7 +1422,7 @@ static void set_years_and_date(void)
 	}
     }
     i++;
-    sprintf(date, "9999%02d%.2s", i, day);
+    sprintf(date, "9999%02d%.2s", i % 100, day);
     TheDate = atoi(date);
     LYStrNCpy(ThisYear, printable + 20, 4);
     sprintf(LastYear, "%d", (atoi(ThisYear) - 1) % 10000);
@@ -2586,7 +2586,7 @@ static void formatDate(char target[16], EntryInfo *entry)
 	}
     }
     i++;
-    sprintf(month, "%02d", i);
+    sprintf(month, "%02d", i % 100);
     strcat(target, month);
     StrNCat(target, &entry->date[4], 2);
     if (target[6] == ' ' || target[6] == HT_NON_BREAK_SPACE) {

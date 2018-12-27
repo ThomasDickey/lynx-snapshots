@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTString.h,v 1.39 2018/05/11 22:36:34 tom Exp $
+ * $LynxId: HTString.h,v 1.40 2018/12/27 10:27:01 tom Exp $
  *						String handling for libwww
  *                                         STRINGS
  *                                            
@@ -90,8 +90,8 @@ extern "C" {
     extern char *HTNextTok(char **pstr,
 			   const char *delims, const char *bracks, char *found);
 
-    extern char *HTSprintf(char **pstr, const char *fmt,...) GCC_PRINTFLIKE(2,3);
-    extern char *HTSprintf0(char **pstr, const char *fmt,...) GCC_PRINTFLIKE(2,3);
+    extern char *HTSprintf(char **pstr, const char *fmt, ...) GCC_PRINTFLIKE(2,3);
+    extern char *HTSprintf0(char **pstr, const char *fmt, ...) GCC_PRINTFLIKE(2,3);
 
 #if defined(LY_FIND_LEAKS)	/* private otherwise */
     extern char *StrAllocVsprintf(char **pstr,
@@ -156,7 +156,7 @@ extern "C" {
 #define BStrCat0(d,s)    HTSABCat0( &(d), s)
 #define BStrFree(d)      HTSABFree( &(d))
 
-    extern bstring *HTBprintf(bstring **pstr, const char *fmt,...) GCC_PRINTFLIKE(2,3);
+    extern bstring *HTBprintf(bstring **pstr, const char *fmt, ...) GCC_PRINTFLIKE(2,3);
 
     extern void trace_bstring(bstring *data);
     extern void trace_bstring2(const char *text, int size);

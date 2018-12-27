@@ -1,9 +1,10 @@
--- $LynxId: CHANGES,v 1.992 2018/12/25 21:27:01 tom Exp $
+-- $LynxId: CHANGES,v 1.993 2018/12/26 12:19:54 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2018-12-25 (2.9.0dev.1)
+2018-12-26 (2.9.0dev.1)
+* compiler-warning fixes for gcc8 and VS2015 -TD
 * fix overlooked "2.8.9" in README -Larry Hynes
 
 2018-07-08 (2.8.9rel.1)
