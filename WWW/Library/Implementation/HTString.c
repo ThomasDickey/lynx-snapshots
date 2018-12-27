@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTString.c,v 1.74 2018/02/15 01:54:27 tom Exp $
+ * $LynxId: HTString.c,v 1.75 2018/12/27 10:28:12 tom Exp $
  *
  *	Case-independent string comparison		HTString.c
  *
@@ -897,7 +897,7 @@ PUBLIC_IF_FIND_LEAKS char *StrAllocVsprintf(char **pstr,
 #ifdef HTSprintf		/* if hidden by LYLeaks stuff */
 #undef HTSprintf
 #endif
-char *HTSprintf(char **pstr, const char *fmt,...)
+char *HTSprintf(char **pstr, const char *fmt, ...)
 {
     char *result = 0;
     size_t inuse = 0;
@@ -924,7 +924,7 @@ char *HTSprintf(char **pstr, const char *fmt,...)
 #ifdef HTSprintf0		/* if hidden by LYLeaks stuff */
 #undef HTSprintf0
 #endif
-char *HTSprintf0(char **pstr, const char *fmt,...)
+char *HTSprintf0(char **pstr, const char *fmt, ...)
 {
     char *result = 0;
     va_list ap;
@@ -1330,7 +1330,7 @@ void HTSABFree(bstring **ptr)
  * Use this function to perform formatted sprintf's onto the end of a bstring.
  * The bstring may contain embedded nulls; the formatted portions must not.
  */
-bstring *HTBprintf(bstring **pstr, const char *fmt,...)
+bstring *HTBprintf(bstring **pstr, const char *fmt, ...)
 {
     bstring *result = 0;
     char *temp = 0;

@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYLeaks.h,v 1.17 2018/03/30 00:35:10 tom Exp $
+ * $LynxId: LYLeaks.h,v 1.18 2018/12/27 10:27:01 tom Exp $
  */
 #ifndef __LYLEAKS_H
 /*
@@ -296,7 +296,7 @@ extern "C" {
  * Trick to get tracking of var arg functions without relying on var arg
  * preprocessor macros:
  */
-    typedef char *HTSprintflike(char **, const char *,...);
+    typedef char *HTSprintflike(char **, const char *, ...);
     extern HTSprintflike *Get_htsprintf_fn(const char *cp_File,
 					   const short ssi_Line);
     extern HTSprintflike *Get_htsprintf0_fn(const char *cp_File,

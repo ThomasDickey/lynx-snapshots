@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTVMS_WaisUI.c,v 1.19 2013/05/03 20:51:49 tom Exp $
+ * $LynxId: HTVMS_WaisUI.c,v 1.20 2018/12/27 10:28:12 tom Exp $
  *								HTVMS_WAISUI.c
  *
  *	Adaptation for Lynx by F.Macrides (macrides@sci.wfeb.edu)
@@ -1484,7 +1484,7 @@ long anyToLong(any *a)
 
 #define bitsPerByte	8
 
-bit_map *makeBitMap(unsigned long numBits,...)
+bit_map *makeBitMap(unsigned long numBits, ...)
 /* construct and return a bitmap with numBits elements */
 {
     va_list ap;
@@ -2127,7 +2127,7 @@ static void exitAction(long error GCC_UNUSED)
 
 #define PANIC_HEADER "Fatal Error:  "
 
-void panic(char *format,...)
+void panic(char *format, ...)
 {
     va_list ap;			/* the variable arguments */
 

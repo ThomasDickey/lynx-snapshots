@@ -1,4 +1,4 @@
-/* $LynxId: LYKeymap.c,v 1.119 2016/11/24 16:38:22 tom Exp $ */
+/* $LynxId: LYKeymap.c,v 1.120 2018/12/27 10:33:52 tom Exp $ */
 #include <HTUtils.h>
 #include <LYUtils.h>
 #include <LYGlobalDefs.h>
@@ -1516,6 +1516,7 @@ static void initKeyMap(LYEditConfig * table)
     const LYEditInit *init = table->init;
 
     memset(used, 0, sizeof(LYEditCode) * KEYMAP_SIZE);
+
     for (k = 0; init[k].code >= 0; ++k) {
 	int code = init[k].code;
 

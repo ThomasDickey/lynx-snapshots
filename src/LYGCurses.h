@@ -194,13 +194,13 @@ extern "C" {
 #undef scanw
 #pragma STANDARD
 
-    int printw(char *format_spec,...);
+    int printw(char *format_spec, ...);
 
-    int wprintw(WINDOW * win, char *format_spec,...);
+    int wprintw(WINDOW * win, char *format_spec, ...);
 
     int wrefresh(WINDOW * win);
 
-    int wscanw(WINDOW * win, char *format_spec,...);
+    int wscanw(WINDOW * win, char *format_spec, ...);
 
     int scanw(char *fmt, int arg1);
 

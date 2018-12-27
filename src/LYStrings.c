@@ -1,4 +1,4 @@
-/* $LynxId: LYStrings.c,v 1.273 2018/05/04 23:29:29 tom Exp $ */
+/* $LynxId: LYStrings.c,v 1.275 2018/12/27 10:32:15 tom Exp $ */
 #include <HTUtils.h>
 #include <HTCJK.h>
 #include <UCAux.h>
@@ -3226,9 +3226,11 @@ int LYEditInsert(FieldEditor * edit, unsigned const char *s,
 		} else
 		    utfbuf[0] = (char) ucode;
 	    }
-	    StrNCpy(Buffer + off, utfbuf, l);
-	    edited = 1;
-	    off += l;
+	    if ((size_t) (off + l) <= BufAlloc) {
+		memcpy(Buffer + off, utfbuf, (size_t) l);
+		edited = 1;
+		off += l;
+	    }
 	    s++;
 	}
 	if (tail)

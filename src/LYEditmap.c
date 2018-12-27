@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYEditmap.c,v 1.75 2018/03/10 01:31:27 tom Exp $
+ * $LynxId: LYEditmap.c,v 1.76 2018/12/27 10:33:52 tom Exp $
  *
  * LYEditMap.c
  * Keybindings for line and form editing.
@@ -1732,6 +1732,7 @@ static void initLineEditor(LYEditConfig * table)
     const LYEditInit *init = table->init;
 
     memset(used, 0, sizeof(LYEditCode) * KEYMAP_SIZE);
+
     for (k = 0; init[k].code >= 0; ++k) {
 	int code = init[k].code;
 

@@ -1,5 +1,5 @@
 /*
- * $LynxId: dtd_util.c,v 1.78 2015/12/13 23:22:17 tom Exp $
+ * $LynxId: dtd_util.c,v 1.79 2018/12/27 10:28:12 tom Exp $
  *
  * Given a SGML_dtd structure, write a corresponding flat file, or "C" source.
  * Given the flat-file, write the "C" source.
@@ -177,9 +177,9 @@ static SGMLContent s2SGMLContent(const char *value)
     return result;
 }
 
-static void PrintF(FILE *, int, const char *,...) GCC_PRINTFLIKE(3, 4);
+static void PrintF(FILE *, int, const char *, ...) GCC_PRINTFLIKE(3, 4);
 
-static void PrintF(FILE *output, int width, const char *fmt,...)
+static void PrintF(FILE *output, int width, const char *fmt, ...)
 {
     char buffer[BUFSIZ];
     va_list ap;
