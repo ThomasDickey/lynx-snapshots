@@ -1,4 +1,4 @@
-/* $LynxId: LYmktime.c,v 1.14 2013/05/03 20:14:06 tom Exp $ */
+/* $LynxId: LYmktime.c,v 1.18 2018/12/27 21:08:33 tom Exp $ */
 
 #include <LYStrings.h>
 #include <LYUtils.h>
@@ -6,6 +6,15 @@
 #include <parsdate.h>
 
 #ifdef TEST_DRIVER
+
+int ascii_toupper(int i)
+{
+    if (123 > i && i > 96)
+	return (i - 32);
+    else
+	return i;
+}
+
 char *LYstrncpy(char *dst,
 		const char *src,
 		int n)
@@ -61,10 +70,13 @@ time_t LYmktime(char *string,
 
     if (non_empty(string)) {
 	CTRACE((tfp, "LYmktime: Parsing '%s'\n", string));
-	result = parsedate(string, 0);
+	if ((result = parsedate(string, 0)) == ((time_t) -1))
+	    result = 0;
 
 	if (!absolute) {
-	    if ((long) (time((time_t *) 0) - result) >= 0)
+	    time_t now = time((time_t *) NULL);
+
+	    if (result < now)
 		result = 0;
 	}
 	if (result != 0) {
@@ -76,7 +88,7 @@ time_t LYmktime(char *string,
     return result;
 #else
     char *s;
-    time_t now, clock2;
+    time_t clock2;
     int day, month, year, hour, minutes, seconds;
     char *start;
     char temp[8];
@@ -215,7 +227,6 @@ time_t LYmktime(char *string,
     if ((s - start) == 4) {
 	LYStrNCpy(temp, start, 4);
     } else if ((s - start) == 2) {
-	now = time(NULL);
 	/*
 	 * Assume that received 2-digit dates >= 70 are 19xx; others
 	 * are 20xx.  Only matters when dealing with broken software
@@ -333,6 +344,15 @@ int main(void)
     test_mktime("Wed May 14 22:00:00 2008");
     test_mktime("Sun, 29-Jun-2008 23:19:30 GMT");
     test_mktime("Sun Jul 06 07:00:00 2008 GMT");
+    test_mktime("Sun Jul 06 07:00:00 2018 GMT");
+    test_mktime("Sun Jul 06 07:00:00 2028 GMT");
+    test_mktime("Tue Jan 01 07:00:00 2036 GMT");
+    test_mktime("Thu Jan 01 07:00:00 2037 GMT");
+    /* problems with 32-bits */
+    test_mktime("Fri Jan 01 07:00:00 2038 GMT");
+    test_mktime("Sun Jul 06 07:00:00 2038 GMT");
+    test_mktime("Sun Jul 06 07:00:00 2138 GMT");
+    printf("DONE!\n");
     return 0;
 }
 #endif
