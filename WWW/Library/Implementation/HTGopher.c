@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTGopher.c,v 1.68 2018/05/15 21:58:15 tom Exp $
+ * $LynxId: HTGopher.c,v 1.69 2018/12/27 23:48:37 Kamil.Dudka Exp $
  *
  *			GOPHER ACCESS				HTGopher.c
  *			=============
@@ -1651,6 +1651,7 @@ static int HTLoadCSO(const char *arg,
 	(*Target->isa->put_block) (Target, buf, (int) strlen(buf));
 	(*Target->isa->_free) (Target);
 	free_CSOfields();
+	BStrFree(command);
 	return HT_LOADED;
     }
     /*

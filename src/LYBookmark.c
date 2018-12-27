@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYBookmark.c,v 1.78 2018/03/18 19:27:30 tom Exp $
+ * $LynxId: LYBookmark.c,v 1.79 2018/12/27 23:48:37 Kamil.Dudka Exp $
  */
 #include <HTUtils.h>
 #include <HTAlert.h>
@@ -303,6 +303,7 @@ void save_bookmark_link(const char *address,
 	    LYMBM_statusline(CANCELLED);
 	    LYSleepMsg();
 	    FREE(bookmark_URL);
+	    BStrFree(tmp_data);
 	    return;
 	}
     } while (!havevisible(string_data->str));
@@ -347,6 +348,7 @@ void save_bookmark_link(const char *address,
 	LYSleepAlert();
 	FREE(Title);
 	FREE(bookmark_URL);
+	BStrFree(tmp_data);
 	return;
     }
 
