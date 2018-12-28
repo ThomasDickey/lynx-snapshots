@@ -1,5 +1,5 @@
 /*
- * $LynxId: GridText.c,v 1.313 2018/05/15 20:43:41 tom Exp $
+ * $LynxId: GridText.c,v 1.318 2018/12/28 22:36:22 tom Exp $
  *
  *		Character grid hypertext object
  *		===============================
@@ -50,7 +50,17 @@
 #include <AttrList.h>
 #include <LYHash.h>
 #include <LYStyle.h>
+#endif
 
+#ifdef EXP_WCWIDTH_SUPPORT
+#  ifdef HAVE_WCWIDTH
+#    ifdef HAVE_WCHAR_H
+#      include <wchar.h>
+#    endif
+#  else
+#    include <wcwidth.h>
+#    define wcwidth(n) mk_wcwidth(n)
+#  endif
 #endif
 
 #include <LYJustify.h>
@@ -73,6 +83,9 @@
 #define LastHTLine(text)  ((text)->last_line)
 
 static void HText_trimHightext(HText *text, int final, int stop_before);
+
+#define IS_UTF_FIRST(ch) (text->T.output_utf8 && \
+			  (UCH((ch))&0xc0) == 0xc0)
 
 #define IS_UTF_EXTRA(ch) (text->T.output_utf8 && \
 			  (UCH((ch))&0xc0) == 0x80)
@@ -589,8 +602,16 @@ static int ctrl_chars_on_this_line = 0;		/* num of ctrl chars in current line */
 static int utfxtra_on_this_line = 0;	/* num of UTF-8 extra bytes in line,
 
 					   they *also* count as ctrl chars. */
+#ifdef EXP_WCWIDTH_SUPPORT
+static int utfxtracells_on_this_line = 0;	/* num of UTF-8 extra cells in line */
+static int utfextracells(const char *s);
+#endif
 #ifdef WIDEC_CURSES
+# ifdef EXP_WCWIDTH_SUPPORT	/* TODO: support for !WIDEC_CURSES */
+#define UTFXTRA_ON_THIS_LINE utfxtracells_on_this_line
+# else
 #define UTFXTRA_ON_THIS_LINE 0
+# endif
 #else
 #define UTFXTRA_ON_THIS_LINE utfxtra_on_this_line
 #endif
@@ -2690,6 +2711,10 @@ static HTLine *insert_blanks_in_line(HTLine *line, int line_number,
 		    break;
 		ioldc++;
 		pre = s + 1;
+#ifdef EXP_WCWIDTH_SUPPORT
+		if (text && text->T.output_utf8 && IS_UTF_FIRST(*s))
+		    ioldc += utfextracells(s);
+#endif
 	    }
 	    s++;
 	}
@@ -2832,6 +2857,9 @@ static void split_line(HText *text, unsigned split)
 
     ctrl_chars_on_this_line = 0;	/*reset since we are going to a new line */
     utfxtra_on_this_line = 0;	/*reset too, we'll count them */
+#ifdef EXP_WCWIDTH_SUPPORT
+    utfxtracells_on_this_line = 0;
+#endif
     text->LastChar = ' ';
 
 #ifdef DEBUG_APPCH
@@ -2959,6 +2987,10 @@ static void split_line(HText *text, unsigned split)
 		    ctrl_chars_on_this_line++;
 		} else if (IS_UTF_EXTRA(p[i])) {
 		    utfxtra_on_this_line++;
+#ifdef EXP_WCWIDTH_SUPPORT
+		} else if (IS_UTF_FIRST(p[i])) {
+		    utfxtracells_on_this_line += utfextracells(&p[i]);
+#endif
 		}
 		if (p[i] == LY_SOFT_HYPHEN &&
 		    (int) text->permissible_split < i)
@@ -4112,6 +4144,21 @@ void HText_appendCharacter(HText *text, int ch)
 	    line->data[line->size] = '\0';
 	    utfxtra_on_this_line++;
 	    ctrl_chars_on_this_line++;
+#ifdef EXP_WCWIDTH_SUPPORT
+	    /* update utfxtracells_on_this_line on last byte of UTF-8 sequence */
+	    {
+		/* find start position of UTF-8 sequence */
+		int utff = line->size - 2;
+		int utf_xlen;
+
+		while (utff > 0 && IS_UTF_EXTRA(line->data[utff]))
+		    utff--;
+		utf_xlen = UTF_XLEN(line->data[utff]);
+
+		if (line->size - utff == utf_xlen + 1)	/* have last byte */
+		    utfxtracells_on_this_line += utfextracells(&(line->data[utff]));
+	    }
+#endif
 	    return;
 	} else if (ch & 0x80) {	/* a first char of UTF-8 sequence - kw */
 	    if ((line->size > (MAX_LINE - 7))) {
@@ -4331,6 +4378,9 @@ void HText_appendCharacter(HText *text, int ch)
 	    (actual
 	     + (int) style->rightIndent
 	     + ((IS_CJK_TTY && text->kanji_buf) ? 1 : 0)
+#ifdef EXP_WCWIDTH_SUPPORT
+	     + utfxtracells_on_this_line
+#endif
 	    ) >= WRAP_COLS(text))
 	|| (text->T.output_utf8
 	    && ((actual
@@ -9176,6 +9226,12 @@ static int HText_TrueLineSize(HTLine *line, HText *text, int IgnoreSpaces)
 		UCH(line->data[i]) != HT_NON_BREAK_SPACE &&
 		UCH(line->data[i]) != HT_EN_SPACE) {
 		true_size++;
+#ifdef EXP_WCWIDTH_SUPPORT
+		if (text && text->T.output_utf8 &&
+		    IS_UTF_FIRST(line->data[i])) {
+		    true_size += utfextracells(&(line->data[i]));
+		}
+#endif
 	    }
 	}
     } else {
@@ -9183,6 +9239,12 @@ static int HText_TrueLineSize(HTLine *line, HText *text, int IgnoreSpaces)
 	    if (!IsSpecialAttrChar(line->data[i]) &&
 		IS_UTF8_EXTRA(line->data[i])) {
 		true_size++;
+#ifdef EXP_WCWIDTH_SUPPORT
+		if (text && text->T.output_utf8 &&
+		    IS_UTF_FIRST(line->data[i])) {
+		    true_size += utfextracells(&(line->data[i]));
+		}
+#endif
 	    }
 	}
     }
@@ -14869,3 +14931,19 @@ GLOBALDEF HTProtocol LYLynxCache =
 {"LYNXCACHE", LYHandleCache, 0};
 #endif /* GLOBALDEF_IS_MACRO */
 #endif /* USE_CACHEJAR */
+
+#ifdef EXP_WCWIDTH_SUPPORT
+static int utfextracells(const char *s)
+{
+    UCode_t ucs = UCGetUniFromUtf8String(&s);
+    int result = 0;
+
+    if (ucs > 0) {
+	int cells = wcwidth((wchar_t) ucs);
+
+	if (cells > 1)
+	    result = (cells - 1);
+    }
+    return result;
+}
+#endif
