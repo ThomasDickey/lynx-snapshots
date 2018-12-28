@@ -540,6 +540,9 @@ II. Compile instructions -- UNIX
   --enable-wais
 	Use this option to turn on configure check for freeWAIS library.
 
+  --enable-wcwidth-support		(define EXP_WCWIDTH_SUPPORT)
+	use experimental wcwidth/UTF-8 logic.
+
   --enable-widec
 	Use this option to allow the configure script to look for wide-curses
 	features.  If you do not specify the option, the configure script
@@ -1484,4 +1487,4 @@ VIII. Acknowledgment
 
 -- 1999/04/24 - H. Nelson <lynx-admin@irm.nara.kindai.ac.jp>
 -- vile:txtmode
--- $LynxId: INSTALLATION,v 1.130 2018/07/08 15:22:44 tom Exp $
+-- $LynxId: INSTALLATION,v 1.131 2018/12/28 21:40:38 tom Exp $

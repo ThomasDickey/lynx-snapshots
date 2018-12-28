@@ -1,5 +1,5 @@
 /*
- * $LynxId: config.hin,v 1.142 2018/12/25 22:55:09 tom Exp $
+ * $LynxId: config.hin,v 1.145 2018/12/28 22:30:57 tom Exp $
  * vile:cmode
  *
  * The configure script translates "config.hin" into "lynx_cfg.h"
@@ -44,6 +44,7 @@
 #undef EXP_JAPANESEUTF8_SUPPORT	/* CF_ARG_ENABLE(japanese-utf8) */
 #undef EXP_KEYBOARD_LAYOUT	/* CF_ARG_ENABLE(kbd-layout) */
 #undef EXP_NESTED_TABLES	/* CF_ARG_ENABLE(nested-tables) */
+#undef EXP_WCWIDTH_SUPPORT	/* CF_ARG_ENABLE(wcwidth-support) */
 #undef FANCY_CURSES		/* CF_FANCY_CURSES */
 #undef GCC_NORETURN		/* CF_GCC_ATTRIBUTES */
 #undef GCC_PRINTF		/* CF_GCC_ATTRIBUTES */
@@ -105,6 +106,7 @@
 #undef HAVE_MBSTATE_T		/* CF_WIDEC_CURSES */
 #undef HAVE_MKDTEMP
 #undef HAVE_MKTEMP
+#undef HAVE_MKTIME		/* AC_REPLACE_FUNCS(mktime) */
 #undef HAVE_MMAP		/* AM_GNU_GETTEXT */
 #undef HAVE_MUNMAP		/* AM_GNU_GETTEXT */
 #undef HAVE_NAPMS
@@ -175,12 +177,13 @@
 #undef HAVE_WAITPID
 #undef HAVE_WATTR_GET
 #undef HAVE_WBORDER
+#undef HAVE_WCHAR_H
+#undef HAVE_WCWIDTH		/* AC_REPLACE_FUNCS(wcwidth) */
 #undef HAVE_WINDOWS_H		/* CF_NETLIBS */
 #undef HAVE_WINSOCK2_H		/* CF_NETLIBS */
 #undef HAVE_WINSOCK_H		/* CF_NETLIBS */
 #undef HAVE_WREDRAWLN
 #undef HAVE_WRESIZE
-#undef TRACK_INTERNAL_LINKS	/* CF_ARG_DISABLE(internal-links) */
 #undef HAVE_XCURSES		/* CF_PDCURSES_X11 */
 #undef HAVE_ZERROR
 #undef HAVE__NC_FREEALL		/* ncurses debugging extension */
@@ -253,6 +256,7 @@
 #undef TIME_WITH_SYS_TIME	/* AC_HEADER_TIME */
 #undef TN3270_PATH		/* CF_PATH_PROG(tn3270) */
 #undef TOUCH_PATH		/* CF_PATH_PROG(touch) */
+#undef TRACK_INTERNAL_LINKS	/* CF_ARG_DISABLE(internal-links) */
 #undef ULTRIX			/* config.sub */
 #undef UNCOMPRESS_PATH		/* CF_PATH_PROG(gunzip) */
 #undef UNDERLINE_LINKS		/* CF_ARG_ENABLE(underlines) */

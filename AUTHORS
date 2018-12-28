@@ -1,4 +1,4 @@
--- $LynxId: AUTHORS,v 1.8 2018/07/08 16:20:14 tom Exp $
+-- $LynxId: AUTHORS,v 1.9 2018/12/28 20:42:52 tom Exp $
 -- vile:txtmode
 Most of the people who have contributed more than one patch to Lynx (as well as
 a few who have only one) are noted in the changelogs by their initials (to keep
@@ -29,6 +29,7 @@ JES	James E Spath
 JKT	J Kevin Ternes
 JN	John Nowlin
 KED	Kim DeVaughn
+KH	Kihara Hideto
 KW	Klaus Weide
 LE	Laura Eaves
 LP	Leonid Pauzner
