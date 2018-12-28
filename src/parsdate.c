@@ -22,7 +22,7 @@
 #include <LYLeaks.h>
 
 /*
- *  $LynxId: parsdate.c,v 1.26 2018/12/27 22:31:48 tom Exp $
+ *  $LynxId: parsdate.c,v 1.27 2018/12/28 01:54:18 tom Exp $
  *
  *  This module is adapted and extended from tin, to use for LYmktime().
  *
@@ -672,10 +672,12 @@ static time_t Convert(time_t Month, time_t Day, time_t Year, time_t Hours,
     } else if (dst == DSTmaybe) {
 	struct tm *tm = localtime(&tod);
 
-	if (tm != NULL && tm->tm_isdst)
-	    Julian -= DST_OFFSET * 60 * 60;
-	else
+	if (tm != NULL) {
+	    if (tm->tm_isdst)
+		Julian -= DST_OFFSET * 60 * 60;
+	} else {
 	    Julian = BAD_TIME;
+	}
     }
     return Julian;
 }
@@ -1039,7 +1041,7 @@ time_t parsedate(char *p,
      * from the error return value.  (Alternately could set errno on error.) */
     return (Start == BAD_TIME) ? 0 : Start;
 }
-#line 1043 "y.tab.c"
+#line 1045 "y.tab.c"
 
 #if YYDEBUG
 #include <stdio.h>	/* needed for printf */
@@ -1524,7 +1526,7 @@ case 35:
 	    yyval.Meridian = yystack.l_mark[0].Meridian;
 	}
 break;
-#line 1528 "y.tab.c"
+#line 1530 "y.tab.c"
     }
     yystack.s_mark -= yym;
     yystate = *yystack.s_mark;

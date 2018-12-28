@@ -3,7 +3,7 @@
 #include <LYLeaks.h>
 
 /*
- *  $LynxId: parsdate.y,v 1.28 2018/12/27 21:56:01 tom Exp $
+ *  $LynxId: parsdate.y,v 1.29 2018/12/28 01:53:17 tom Exp $
  *
  *  This module is adapted and extended from tin, to use for LYmktime().
  *
@@ -612,10 +612,12 @@ static time_t Convert(time_t Month, time_t Day, time_t Year, time_t Hours,
     } else if (dst == DSTmaybe) {
 	struct tm *tm = localtime(&tod);
 
-	if (tm != NULL && tm->tm_isdst)
-	    Julian -= DST_OFFSET * 60 * 60;
-	else
+	if (tm != NULL) {
+	    if (tm->tm_isdst)
+		Julian -= DST_OFFSET * 60 * 60;
+	} else {
 	    Julian = BAD_TIME;
+	}
     }
     return Julian;
 }

@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTGopher.c,v 1.69 2018/12/27 23:48:37 Kamil.Dudka Exp $
+ * $LynxId: HTGopher.c,v 1.71 2018/12/28 16:58:59 tom Exp $
  *
  *			GOPHER ACCESS				HTGopher.c
  *			=============
@@ -28,6 +28,7 @@
 #include <HTParse.h>
 #include <HTTCP.h>
 #include <HTFinger.h>
+#include <LYGlobalDefs.h>
 
 /*
  *  Implements.
@@ -262,9 +263,33 @@ static void parse_menu(const char *arg GCC_UNUSED,
 	}
 
 	if ((char) ich != LF) {
-	    *p = (char) ich;	/* Put character in line */
-	    if (p < &line[BIG - 1])
-		p++;
+	    const char *ss = NULL;
+
+	    /*
+	     * Help the -source output to look like the HTML equivalent of the
+	     * Gopher menu.
+	     */
+	    if (dump_output_immediately
+		&& HTOutputFormat == HTAtom_for("www/dump")) {
+		if (ich == '<') {
+		    ss = "&lt;";
+		} else if (ich == '>') {
+		    ss = "&gt;";
+		} else if (ich == '&') {
+		    ss = "&amp;";
+		}
+	    }
+	    if (ss != NULL) {
+		if ((p + 5) < &line[BIG - 1]) {
+		    while (*ss != '\0') {
+			*p++ = *ss++;
+		    }
+		}
+	    } else {
+		*p = (char) ich;	/* Put character in line */
+		if (p < &line[BIG - 1])
+		    p++;
+	    }
 
 	} else {
 	    *p++ = '\0';	/* Terminate line */
@@ -1172,7 +1197,7 @@ static int generate_cso_form(char *host,
 
 		if (ctx.seek) {
 		    /*
-		     * Command wants us to skip (forward) to indicated token. 
+		     * Command wants us to skip (forward) to indicated token.
 		     * Start at current position.
 		     */
 		    size_t slen = strlen(ctx.seek);

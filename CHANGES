@@ -1,9 +1,14 @@
--- $LynxId: CHANGES,v 1.996 2018/12/27 23:59:59 tom Exp $
+-- $LynxId: CHANGES,v 1.998 2018/12/28 16:53:36 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2018-12-27 (2.9.0dev.1)
+2018-12-28 (2.9.0dev.1)
+* modify generated HTML when processing -source option for a Gopher menu to
+  convert literal "<", "&", and ">" to HTML named entities (report/testcase by
+  Zachary Lee Andrews) -TD
+* build-fix when persistent cookies are disabled (report by Juan Manuel
+  Guerrero) -TD
 * memory-leak and dead-code fixes from static analysis (patch by Kamil Dudka).
 * restore whitespace in info-page omitted in 2.8.9dev.17, useful for screen
   readers (report by Dan Dunfee) -Chuck Martin
