@@ -1,9 +1,11 @@
--- $LynxId: CHANGES,v 1.1003 2018/12/29 00:36:37 tom Exp $
+-- $LynxId: CHANGES,v 1.1004 2018/12/29 01:32:29 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
 2018-12-28 (2.9.0dev.1)
+* modify tidy_tls.c to work with TLS 1.3 when built with gnutls 3.6.5 or later
+  (patch by Andreas Metzler).
 * add to experimental Japanese UTF-8 feature -KH
   + fix JIS X 0201 Katakana conversion from Shift_JIS/EUC-JP to UTF-8.
     http://www1.interq.or.jp/~deton/lynx-sjisjisx0201/
