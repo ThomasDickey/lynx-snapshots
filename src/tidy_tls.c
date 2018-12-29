@@ -1,6 +1,6 @@
 /*
- * $LynxId: tidy_tls.c,v 1.35 2016/11/24 18:48:02 tom Exp $
- * Copyright 2008-2015,2016 Thomas E. Dickey
+ * $LynxId: tidy_tls.c,v 1.37 2018/12/29 01:41:39 tom Exp $
+ * Copyright 2008-2016,2018 Thomas E. Dickey
  * with fix Copyright 2008 by Thomas Viehmann
  *
  * Required libraries:
@@ -462,13 +462,26 @@ int SSL_read(SSL * ssl, void *buffer, int length)
 {
     int rc;
 
-    rc = (int) gnutls_record_recv(ssl->gnutls_state, buffer, (size_t) length);
+    do {
+	rc = (int) gnutls_record_recv(ssl->gnutls_state, buffer, (size_t) length);
+    }
+    while ((rc == GNUTLS_E_AGAIN) || (rc == GNUTLS_E_INTERRUPTED));
 
     if (rc < 0 && gnutls_error_is_fatal(rc) == 0) {
 	if (rc == GNUTLS_E_REHANDSHAKE) {
 	    (void) gnutls_handshake(ssl->gnutls_state);
-	    gnutls_record_send(ssl->gnutls_state, ssl->sendbuffer, (size_t) ssl->bytes_sent);
-	    rc = (int) gnutls_record_recv(ssl->gnutls_state, buffer, (size_t) length);
+	    do {
+		rc = (int) gnutls_record_send(ssl->gnutls_state,
+					      ssl->sendbuffer,
+					      (size_t) ssl->bytes_sent);
+	    }
+	    while ((rc == GNUTLS_E_AGAIN) || (rc == GNUTLS_E_INTERRUPTED));
+	    do {
+		rc = (int) gnutls_record_recv(ssl->gnutls_state,
+					      buffer,
+					      (size_t) length);
+	    }
+	    while ((rc == GNUTLS_E_AGAIN) || (rc == GNUTLS_E_INTERRUPTED));
 	}
     }
 
@@ -500,7 +513,10 @@ int SSL_write(SSL * ssl, const void *buffer, int length)
 {
     int rc;
 
-    rc = (int) gnutls_record_send(ssl->gnutls_state, buffer, (size_t) length);
+    do {
+	rc = (int) gnutls_record_send(ssl->gnutls_state, buffer, (size_t) length);
+    }
+    while ((rc == GNUTLS_E_AGAIN) || (rc == GNUTLS_E_INTERRUPTED));
     ssl->last_error = rc;
 
     if (rc < 0) {
