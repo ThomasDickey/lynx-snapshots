@@ -1,5 +1,5 @@
 /*
- * $LynxId: SGML.c,v 1.163 2018/05/15 21:55:21 tom Exp $
+ * $LynxId: SGML.c,v 1.165 2018/12/29 00:50:51 tom Exp $
  *
  *			General SGML Parser code		SGML.c
  *			========================
@@ -92,6 +92,12 @@ static void fake_put_character(HTStream *p GCC_UNUSED,
 
 /*the following macros are used for pretty source view. */
 #define IS_C(attr) (attr.type == HTMLA_CLASS)
+
+#if defined(EXP_JAPANESEUTF8_SUPPORT)
+# define UTF8_TTY_ISO2022JP (me->T.output_utf8)
+#else
+# define UTF8_TTY_ISO2022JP 0
+#endif
 
 HTCJKlang HTCJK = NOCJK;	/* CJK enum value.              */
 BOOL HTPassEightBitRaw = FALSE;	/* Pass 161-172,174-255 raw.    */
@@ -786,7 +792,8 @@ static void handle_entity(HTStream *me, int term)
     if (psrc_view)
 	PSRCSTART(badseq);
 #endif
-    CTRACE((tfp, "SGML: Unknown entity '%s' %" PRI_UCode_t " %ld\n", s, code, uck));	/* S/390 -- gil -- 0695 */
+    /* S/390 -- gil -- 0695 */
+    CTRACE((tfp, "SGML: Unknown entity '%s' %" PRI_UCode_t " %ld\n", s, code, uck));
     PUTC('&');
     PUTS(s);
     if (term != '\0')
@@ -1659,6 +1666,38 @@ static void SGML_character(HTStream *me, int c_in)
     /*
      * If we want the raw input converted to Unicode, try that now.  - FM
      */
+    /* Convert ISO-2022-JP to Unicode (charset=iso-2022-jp is unrecognized) */
+#define IS_JIS7_HILO(c) (0x20<(c)&&(c)<0x7F)
+    if (UTF8_TTY_ISO2022JP && (me->state == S_nonascii_text
+			       || me->state == S_nonascii_text_sq
+			       || me->state == S_nonascii_text_dq)) {
+	/* end of ISO-2022-JP? || not in ISO-2022-JP range */
+	if (TOASCII(c) == '\033' || !IS_JIS7_HILO(c)) {
+	    me->kanji_buf = '\0';
+	    goto top1;
+	}
+	if (me->kanji_buf == '\t') {	/* flag for single byte kana in "ESC(I" */
+	    if (conv_jisx0201kana) {
+		JISx0201TO0208_SJIS(c | 0200,
+				    (unsigned char *) me->U.utf_buf,
+				    (unsigned char *) me->U.utf_buf + 1);
+		clong = UCTransJPToUni(me->U.utf_buf, 2,
+				       UCGetLYhndl_byMIME("shift_jis"));
+	    } else {
+		clong = UCTransToUni(c | 0200, UCGetLYhndl_byMIME("shift_jis"));
+	    }
+	} else if (me->kanji_buf) {
+	    me->U.utf_buf[0] = (char) (me->kanji_buf | 0200);	/* to EUC-JP */
+	    me->U.utf_buf[1] = (char) (c | 0200);
+	    clong = UCTransJPToUni(me->U.utf_buf, 2,
+				   UCGetLYhndl_byMIME("euc-jp"));
+	    me->kanji_buf = '\0';
+	} else {
+	    me->kanji_buf = c;
+	    clong = ucNeedMore;
+	}
+	goto top1;
+    }
     if (me->T.trans_to_uni &&
 #ifdef EXP_JAPANESEUTF8_SUPPORT
 	((strcmp(LYCharSet_UC[me->inUCLYhndl].MIMEname, "euc-jp") == 0) ||
@@ -1670,6 +1709,15 @@ static void SGML_character(HTStream *me, int c_in)
 		    me->U.utf_buf[0] = (char) c;
 		    me->U.utf_count = 1;
 		    clong = -11;
+		} else if (IS_SJIS_X0201KANA(c)) {
+		    if (conv_jisx0201kana) {
+			JISx0201TO0208_SJIS(c,
+					    (unsigned char *) me->U.utf_buf,
+					    (unsigned char *) me->U.utf_buf + 1);
+			clong = UCTransJPToUni(me->U.utf_buf, 2, me->inUCLYhndl);
+		    } else {
+			clong = UCTransToUni(c, me->inUCLYhndl);
+		    }
 		}
 	    } else {
 		if (IS_SJIS_LO((unsigned char) c)) {
@@ -1680,7 +1728,7 @@ static void SGML_character(HTStream *me, int c_in)
 	    }
 	} else {
 	    if (me->U.utf_count == 0) {
-		if (IS_EUC_HI((unsigned char) c)) {
+		if (IS_EUC_HI((unsigned char) c) || c == 0x8E) {
 		    me->U.utf_buf[0] = (char) c;
 		    me->U.utf_count = 1;
 		    clong = -11;
@@ -1696,7 +1744,8 @@ static void SGML_character(HTStream *me, int c_in)
 	goto top1;
     } else if (me->T.trans_to_uni &&
 #endif
-	       ((TOASCII(clong) >= LYlowest_eightbit[me->inUCLYhndl]) ||	/* S/390 -- gil -- 0744 */
+	/* S/390 -- gil -- 0744 */
+	       ((TOASCII(clong) >= LYlowest_eightbit[me->inUCLYhndl]) ||
 		(clong < ' ' && clong != 0 &&
 		 me->T.trans_C0_to_uni))) {
 	/*
@@ -1801,7 +1850,8 @@ static void SGML_character(HTStream *me, int c_in)
      */
     if (TOASCII(clong) < 32 &&
 	c != '\t' && c != '\n' && c != '\r' &&
-	!IS_CJK_TTY)
+	!IS_CJK_TTY &&
+	!(UTF8_TTY_ISO2022JP && TOASCII(c) == '\033'))
 	goto after_switch;
 
     /*
@@ -1909,13 +1959,15 @@ static void SGML_character(HTStream *me, int c_in)
 	    me->state = S_in_kanji;
 	    me->kanji_buf = c;
 	    break;
-	} else if (IS_CJK_TTY && TOASCII(c) == '\033') {	/* S/390 -- gil -- 0881 */
+	} else if ((IS_CJK_TTY || UTF8_TTY_ISO2022JP) && TOASCII(c) == '\033') {
+	    /* S/390 -- gil -- 0881 */
 	    /*
 	     * Setting up for CJK escape sequence handling (based on Takuya
 	     * ASADA's (asada@three-a.co.jp) CJK Lynx).  - FM
 	     */
 	    me->state = S_esc;
-	    PUTC(c);
+	    if (!UTF8_TTY_ISO2022JP)
+		PUTC(c);
 	    break;
 	}
 
@@ -3642,7 +3694,8 @@ static void SGML_character(HTStream *me, int c_in)
 	     * - Takuya ASADA (asada@three-a.co.jp)
 	     */
 	    me->state = S_esc_sq;
-	    HTChunkPutc(string, c);
+	    if (!UTF8_TTY_ISO2022JP)
+		HTChunkPutc(string, c);
 	} else if (me->T.decode_utf8 &&
 		   *me->U.utf_buf) {
 	    HTChunkPuts(string, me->U.utf_buf);
@@ -3686,7 +3739,8 @@ static void SGML_character(HTStream *me, int c_in)
 	     * - Takuya ASADA (asada@three-a.co.jp)
 	     */
 	    me->state = S_esc_dq;
-	    HTChunkPutc(string, c);
+	    if (!UTF8_TTY_ISO2022JP)
+		HTChunkPutc(string, c);
 	} else if (me->T.decode_utf8 &&
 		   *me->U.utf_buf) {
 	    HTChunkPuts(string, me->U.utf_buf);
@@ -3949,8 +4003,11 @@ static void SGML_character(HTStream *me, int c_in)
 	    me->state = S_paren;
 	} else {
 	    me->state = S_text;
+	    if (UTF8_TTY_ISO2022JP)
+		goto top1;
 	}
-	PUTC(c);
+	if (!UTF8_TTY_ISO2022JP)
+	    PUTC(c);
 	break;
 
     case S_dollar:		/* Expecting '@', 'B', 'A' or '(' after CJK "ESC$". */
@@ -3959,7 +4016,8 @@ static void SGML_character(HTStream *me, int c_in)
 	} else if (c == '(') {
 	    me->state = S_dollar_paren;
 	}
-	PUTC(c);
+	if (!UTF8_TTY_ISO2022JP)
+	    PUTC(c);
 	break;
 
     case S_dollar_paren:	/* Expecting 'C' after CJK "ESC$(". */
@@ -3967,8 +4025,13 @@ static void SGML_character(HTStream *me, int c_in)
 	    me->state = S_nonascii_text;
 	} else {
 	    me->state = S_text;
+	    if (UTF8_TTY_ISO2022JP) {
+		PUTS("$(");
+		goto top1;
+	    }
 	}
-	PUTC(c);
+	if (!UTF8_TTY_ISO2022JP)
+	    PUTC(c);
 	break;
 
     case S_paren:		/* Expecting 'B', 'J', 'T' or 'I' after CJK "ESC(". */
@@ -3976,19 +4039,30 @@ static void SGML_character(HTStream *me, int c_in)
 	    me->state = S_text;
 	} else if (c == 'I') {
 	    me->state = S_nonascii_text;
+	    if (UTF8_TTY_ISO2022JP)
+		me->kanji_buf = '\t';	/* flag for single byte katakana */
 	} else {
 	    me->state = S_text;
+	    if (UTF8_TTY_ISO2022JP) {
+		PUTC('(');
+		goto top1;
+	    }
 	}
-	PUTC(c);
+	if (!UTF8_TTY_ISO2022JP)
+	    PUTC(c);
 	break;
 
     case S_nonascii_text:	/* Expecting CJK ESC after non-ASCII text. */
 	if (TOASCII(c) == '\033') {	/* S/390 -- gil -- 1264 */
 	    me->state = S_esc;
-	}
-	PUTC(c);
-	if (c < 32)
+	} else if (c < 32) {
 	    me->state = S_text;
+	}
+	if (UTF8_TTY_ISO2022JP) {
+	    if (TOASCII(c) != '\033')
+		PUTUTF8(clong);
+	} else
+	    PUTC(c);
 	break;
 
     case S_esc_sq:		/* Expecting '$'or '(' following CJK ESC. */
@@ -3998,8 +4072,11 @@ static void SGML_character(HTStream *me, int c_in)
 	    me->state = S_paren_sq;
 	} else {
 	    me->state = S_squoted;
+	    if (UTF8_TTY_ISO2022JP)
+		goto top1;
 	}
-	HTChunkPutc(string, c);
+	if (!UTF8_TTY_ISO2022JP)
+	    HTChunkPutc(string, c);
 	break;
 
     case S_dollar_sq:		/* Expecting '@', 'B', 'A' or '(' after CJK "ESC$". */
@@ -4008,7 +4085,8 @@ static void SGML_character(HTStream *me, int c_in)
 	} else if (c == '(') {
 	    me->state = S_dollar_paren_sq;
 	}
-	HTChunkPutc(string, c);
+	if (!UTF8_TTY_ISO2022JP)
+	    HTChunkPutc(string, c);
 	break;
 
     case S_dollar_paren_sq:	/* Expecting 'C' after CJK "ESC$(". */
@@ -4016,8 +4094,13 @@ static void SGML_character(HTStream *me, int c_in)
 	    me->state = S_nonascii_text_sq;
 	} else {
 	    me->state = S_squoted;
+	    if (UTF8_TTY_ISO2022JP) {
+		HTChunkPuts(string, "$(");
+		goto top1;
+	    }
 	}
-	HTChunkPutc(string, c);
+	if (!UTF8_TTY_ISO2022JP)
+	    HTChunkPutc(string, c);
 	break;
 
     case S_paren_sq:		/* Expecting 'B', 'J', 'T' or 'I' after CJK "ESC(". */
@@ -4025,17 +4108,28 @@ static void SGML_character(HTStream *me, int c_in)
 	    me->state = S_squoted;
 	} else if (c == 'I') {
 	    me->state = S_nonascii_text_sq;
+	    if (UTF8_TTY_ISO2022JP)
+		me->kanji_buf = '\t';	/* flag for single byte katakana */
 	} else {
 	    me->state = S_squoted;
+	    if (UTF8_TTY_ISO2022JP) {
+		HTChunkPutc(string, '(');
+		goto top1;
+	    }
 	}
-	HTChunkPutc(string, c);
+	if (!UTF8_TTY_ISO2022JP)
+	    HTChunkPutc(string, c);
 	break;
 
     case S_nonascii_text_sq:	/* Expecting CJK ESC after non-ASCII text. */
 	if (TOASCII(c) == '\033') {	/* S/390 -- gil -- 1281 */
 	    me->state = S_esc_sq;
 	}
-	HTChunkPutc(string, c);
+	if (UTF8_TTY_ISO2022JP) {
+	    if (TOASCII(c) != '\033')
+		HTChunkPutUtf8Char(string, clong);
+	} else
+	    HTChunkPutc(string, c);
 	break;
 
     case S_esc_dq:		/* Expecting '$'or '(' following CJK ESC. */
@@ -4045,8 +4139,11 @@ static void SGML_character(HTStream *me, int c_in)
 	    me->state = S_paren_dq;
 	} else {
 	    me->state = S_dquoted;
+	    if (UTF8_TTY_ISO2022JP)
+		goto top1;
 	}
-	HTChunkPutc(string, c);
+	if (!UTF8_TTY_ISO2022JP)
+	    HTChunkPutc(string, c);
 	break;
 
     case S_dollar_dq:		/* Expecting '@', 'B', 'A' or '(' after CJK "ESC$". */
@@ -4055,7 +4152,8 @@ static void SGML_character(HTStream *me, int c_in)
 	} else if (c == '(') {
 	    me->state = S_dollar_paren_dq;
 	}
-	HTChunkPutc(string, c);
+	if (!UTF8_TTY_ISO2022JP)
+	    HTChunkPutc(string, c);
 	break;
 
     case S_dollar_paren_dq:	/* Expecting 'C' after CJK "ESC$(". */
@@ -4063,8 +4161,13 @@ static void SGML_character(HTStream *me, int c_in)
 	    me->state = S_nonascii_text_dq;
 	} else {
 	    me->state = S_dquoted;
+	    if (UTF8_TTY_ISO2022JP) {
+		HTChunkPuts(string, "$(");
+		goto top1;
+	    }
 	}
-	HTChunkPutc(string, c);
+	if (!UTF8_TTY_ISO2022JP)
+	    HTChunkPutc(string, c);
 	break;
 
     case S_paren_dq:		/* Expecting 'B', 'J', 'T' or 'I' after CJK "ESC(". */
@@ -4072,17 +4175,28 @@ static void SGML_character(HTStream *me, int c_in)
 	    me->state = S_dquoted;
 	} else if (c == 'I') {
 	    me->state = S_nonascii_text_dq;
+	    if (UTF8_TTY_ISO2022JP)
+		me->kanji_buf = '\t';	/* flag for single byte katakana */
 	} else {
 	    me->state = S_dquoted;
+	    if (UTF8_TTY_ISO2022JP) {
+		HTChunkPutc(string, '(');
+		goto top1;
+	    }
 	}
-	HTChunkPutc(string, c);
+	if (!UTF8_TTY_ISO2022JP)
+	    HTChunkPutc(string, c);
 	break;
 
     case S_nonascii_text_dq:	/* Expecting CJK ESC after non-ASCII text. */
 	if (TOASCII(c) == '\033') {	/* S/390 -- gil -- 1298 */
 	    me->state = S_esc_dq;
 	}
-	HTChunkPutc(string, c);
+	if (UTF8_TTY_ISO2022JP) {
+	    if (TOASCII(c) != '\033')
+		HTChunkPutUtf8Char(string, clong);
+	} else
+	    HTChunkPutc(string, c);
 	break;
 
     case S_junk_tag:

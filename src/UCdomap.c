@@ -1,5 +1,5 @@
 /*
- * $LynxId: UCdomap.c,v 1.103 2017/02/08 01:23:33 tom Exp $
+ * $LynxId: UCdomap.c,v 1.104 2018/12/29 00:20:33 Kihara.Hideto Exp $
  *
  *  UCdomap.c
  *  =========
@@ -1217,6 +1217,16 @@ UCode_t UCTransToUni(int ch_in,
 		    buffer[0] = (char) ch_in;
 		    inx = 1;
 		    return ucNeedMore;
+		} else if (IS_SJIS_X0201KANA(ch_iu)) {
+		    buffer[0] = (char) ch_in;
+		    buffer[1] = 0;
+		    cd = iconv_open("UTF-16BE", "Shift_JIS");
+		    ilen = 1;
+		    (void) iconv(cd, (ICONV_CONST char **) &pin, &ilen, &pout, &olen);
+		    iconv_close(cd);
+		    if ((ilen == 0) && (olen == 0)) {
+			return (UCH(obuffer[0]) << 8) + UCH(obuffer[1]);
+		    }
 		}
 	    } else {
 		if (IS_SJIS_LO(ch_iu)) {
@@ -1235,7 +1245,7 @@ UCode_t UCTransToUni(int ch_in,
 	}
 	if (strcmp(LYCharSet_UC[charset_in].MIMEname, "euc-jp") == 0) {
 	    if (inx == 0) {
-		if (IS_EUC_HI(ch_iu)) {
+		if (IS_EUC_HI(ch_iu) || ch_iu == 0x8E) {
 		    buffer[0] = (char) ch_in;
 		    inx = 1;
 		    return ucNeedMore;
