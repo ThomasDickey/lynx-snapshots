@@ -1,9 +1,14 @@
--- $LynxId: CHANGES,v 1.1002 2018/12/28 22:03:14 tom Exp $
+-- $LynxId: CHANGES,v 1.1003 2018/12/29 00:36:37 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
 2018-12-28 (2.9.0dev.1)
+* add to experimental Japanese UTF-8 feature -KH
+  + fix JIS X 0201 Katakana conversion from Shift_JIS/EUC-JP to UTF-8.
+    http://www1.interq.or.jp/~deton/lynx-sjisjisx0201/
+  + add conversion from Japanese ISO-2022-JP html to UTF-8 display_charset.
+    http://www1.interq.or.jp/~deton/lynx-jis2utf8/
 * add configure option for experimental feature "--enable-wcwidth-support" -TD
 * use/adapt wcwidth from xterm -TD
 * add support for displaying double-cell characters -KH
