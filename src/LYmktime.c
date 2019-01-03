@@ -1,4 +1,4 @@
-/* $LynxId: LYmktime.c,v 1.18 2018/12/27 21:08:33 tom Exp $ */
+/* $LynxId: LYmktime.c,v 1.19 2019/01/03 02:07:48 tom Exp $ */
 
 #include <LYStrings.h>
 #include <LYUtils.h>
@@ -58,7 +58,7 @@ FILE *TraceFP(void)
  * FALSE.  It is intended for handling 'expires' strings in Version 0 cookies
  * homologously to 'max-age' strings in Version 1 cookies, for which 0 is the
  * minimum, and greater values are handled as '[max-age seconds] + time(NULL)'. 
- * If "absolute" if TRUE, we return the clock format value itself, but if
+ * If "absolute" is TRUE, we return the clock format value itself, but if
  * anything goes wrong when parsing the expected patterns, we still return 0. 
  * - FM
  */

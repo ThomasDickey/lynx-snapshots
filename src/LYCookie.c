@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYCookie.c,v 1.134 2016/11/24 17:24:12 tom Exp $
+ * $LynxId: LYCookie.c,v 1.135 2019/01/03 02:10:17 tom Exp $
  *
  *			       Lynx Cookie Support		   LYCookie.c
  *			       ===================
@@ -1068,12 +1068,12 @@ static unsigned parse_attribute(unsigned flags,
 	}
     } else if (is_attr("max-age", 7)) {
 	known_attr = YES;
-	if (cur_cookie != NULL && value &&
 	/*
 	 * Don't process a repeat max-age.  - FM
 	 */
+	if (cur_cookie != NULL && value &&
 	    !(flags & FLAGS_MAXAGE_ATTR)) {
-	    int temp = (int) strtol(value, NULL, 10);
+	    long temp = strtol(value, NULL, 10);
 
 	    cur_cookie->flags |= COOKIE_FLAG_EXPIRES_SET;
 	    if (errno == -ERANGE) {

@@ -1,4 +1,4 @@
-; $LynxId: lynx.iss,v 1.29 2018/03/21 14:56:20 tom Exp $
+; $LynxId: lynx.iss,v 1.30 2019/01/02 10:07:14 tom Exp $
 ; vile:ts=4 sw=4 notabinsert fk=8bit
 ;
 ; This is the BASE script for different flavors of the installer for Lynx.
@@ -90,7 +90,7 @@ AppName={#MyAppName}
 #emit 'VersionInfoVersion=' + LYNX_TARGET1
 AppVerName={#MyAppVerName}
 AppPublisher={#MyAppPublisher}
-AppCopyright=© 1997-2017,2018, Thomas E. Dickey
+AppCopyright=© 1997-2018,2019, Thomas E. Dickey
 AppPublisherURL={#MyAppURL}
 AppSupportURL={#MyAppURL}
 AppUpdatesURL={#MyAppURL}

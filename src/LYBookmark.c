@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYBookmark.c,v 1.79 2018/12/27 23:48:37 Kamil.Dudka Exp $
+ * $LynxId: LYBookmark.c,v 1.80 2019/01/02 21:14:08 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTAlert.h>
@@ -29,11 +29,11 @@ char *MBM_A_subdescript[MBM_V_MAXFILES + 1];
 static BOOLEAN is_mosaic_hotlist = FALSE;
 static const char *convert_mosaic_bookmark_file(const char *filename_buffer);
 
-int LYindex2MBM(int n)
+unsigned LYindex2MBM(int n)
 {
     static char MBMcodes[MBM_V_MAXFILES + 2] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
-    return n >= 0 && n <= MBM_V_MAXFILES ? MBMcodes[n] : '?';
+    return n >= 0 && n <= MBM_V_MAXFILES ? UCH(MBMcodes[n]) : UCH('?');
 }
 
 int LYMBM2index(int ch)
@@ -854,7 +854,7 @@ int select_menu_multi_bookmarks(void)
 	MBM_tmp_count = 0;
 	for (c = MBM_from; c <= MBM_to; c++) {
 	    LYmove(3 + MBM_tmp_count, 5);
-	    LYaddch((chtype) LYindex2MBM(c));
+	    LYaddch(UCH(LYindex2MBM(c)));
 	    LYaddstr(" : ");
 	    if (MBM_A_subdescript[c])
 		LYaddstr(MBM_A_subdescript[c]);

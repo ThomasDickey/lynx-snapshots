@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFormat.c,v 1.90 2018/05/11 22:18:24 tom Exp $
+ * $LynxId: HTFormat.c,v 1.91 2019/01/02 23:25:10 tom Exp $
  *
  *		Manage different file formats			HTFormat.c
  *		=============================
@@ -347,7 +347,9 @@ static int half_match(char *trial_type, char *target)
  */
 static BOOL failsMailcap(HTPresentation *pres, HTParentAnchor *anchor)
 {
-    if (pres->testcommand != 0) {
+    if (pres->testcommand != NULL &&
+	anchor != NULL &&
+	anchor->content_type_params != NULL) {
 	if (LYTestMailcapCommand(pres->testcommand,
 				 anchor->content_type_params) != 0)
 	    return TRUE;

@@ -1,4 +1,4 @@
-/* $LynxId: LYrcFile.c,v 1.102 2018/05/11 00:27:54 tom Exp $ */
+/* $LynxId: LYrcFile.c,v 1.103 2019/01/02 21:13:45 tom Exp $ */
 #include <HTUtils.h>
 #include <HTFTP.h>
 #include <LYUtils.h>
@@ -768,7 +768,7 @@ BOOL LYsetRcValue(const char *name, const char *param)
 
     case CONF_MBM:
 	for (n = 1; n <= MBM_V_MAXFILES; n++) {
-	    sprintf(MBM_line, "multi_bookmark%c", LYindex2MBM(n));
+	    sprintf(MBM_line, "multi_bookmark%c", UCH(LYindex2MBM(n)));
 
 	    if (!strcasecomp(name, MBM_line)) {
 		if ((notes = StrChr(value, ',')) != 0) {
@@ -1042,7 +1042,7 @@ It is not this file.\n\
 
 	case CONF_MBM:
 	    for (n = 1; n <= MBM_V_MAXFILES; n++) {
-		fprintf(fp, "multi_bookmark%c=", LYindex2MBM(n));
+		fprintf(fp, "multi_bookmark%c=", UCH(LYindex2MBM(n)));
 
 		fprintf(fp, "%s", NonNull(MBM_A_subbookmark[n]));
 		if (MBM_A_subdescript[n] != 0
