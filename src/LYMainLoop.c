@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMainLoop.c,v 1.241 2018/06/10 20:44:10 tom Exp $
+ * $LynxId: LYMainLoop.c,v 1.242 2019/01/02 23:31:19 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTAccess.h>
@@ -3566,9 +3566,9 @@ static BOOLEAN check_JUMP_param(char **url_template)
     int code = TRUE;
     bstring *input = NULL;
 
-    CTRACE((tfp, "check_JUMP_param: %s\n", result));
+    CTRACE((tfp, "check_JUMP_param: %s\n", NONNULL(result)));
 
-    while ((subs = strstr(result, "%s")) != 0) {
+    while (result != NULL && (subs = strstr(result, "%s")) != 0) {
 	char prompt[MAX_LINE];
 	RecallType recall = NORECALL;
 
@@ -3588,7 +3588,7 @@ static BOOLEAN check_JUMP_param(char **url_template)
 	    HTInfoMsg(CANCELLED);
 	    code = FALSE;
 	    break;
-	} else if (*(encoded = urlencode(input->str)) != '\0') {
+	} else if ((encoded = urlencode(input->str)) != NULL && *encoded != '\0') {
 	    int subs_at = (int) (subs - result);
 	    int fill_in = (int) strlen(encoded) - 2;
 	    size_t have = strlen(result);

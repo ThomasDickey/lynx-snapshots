@@ -1,5 +1,5 @@
 /*
- * $LynxId: SGML.c,v 1.165 2018/12/29 00:50:51 tom Exp $
+ * $LynxId: SGML.c,v 1.167 2019/01/02 21:06:28 tom Exp $
  *
  *			General SGML Parser code		SGML.c
  *			========================
@@ -108,7 +108,6 @@ BOOL HTPassHighCtrlNum = FALSE;	/* Pass &#128;-&#159; raw.      */
 /*	The State (context) of the parser
  *
  *	This is passed with each call to make the parser reentrant
- *
  */
 
 #define MAX_ATTRIBUTES 36	/* Max number of attributes per element */
@@ -1666,6 +1665,7 @@ static void SGML_character(HTStream *me, int c_in)
     /*
      * If we want the raw input converted to Unicode, try that now.  - FM
      */
+#ifdef EXP_JAPANESEUTF8_SUPPORT
     /* Convert ISO-2022-JP to Unicode (charset=iso-2022-jp is unrecognized) */
 #define IS_JIS7_HILO(c) (0x20<(c)&&(c)<0x7F)
     if (UTF8_TTY_ISO2022JP && (me->state == S_nonascii_text
@@ -1698,6 +1698,7 @@ static void SGML_character(HTStream *me, int c_in)
 	}
 	goto top1;
     }
+#endif /* EXP_JAPANESEUTF8_SUPPORT */
     if (me->T.trans_to_uni &&
 #ifdef EXP_JAPANESEUTF8_SUPPORT
 	((strcmp(LYCharSet_UC[me->inUCLYhndl].MIMEname, "euc-jp") == 0) ||
@@ -1743,7 +1744,7 @@ static void SGML_character(HTStream *me, int c_in)
 	}
 	goto top1;
     } else if (me->T.trans_to_uni &&
-#endif
+#endif /* EXP_JAPANESEUTF8_SUPPORT */
 	/* S/390 -- gil -- 0744 */
 	       ((TOASCII(clong) >= LYlowest_eightbit[me->inUCLYhndl]) ||
 		(clong < ' ' && clong != 0 &&

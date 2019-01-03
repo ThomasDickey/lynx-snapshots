@@ -1,6 +1,6 @@
 /*
- * $LynxId: tidy_tls.c,v 1.37 2018/12/29 01:41:39 tom Exp $
- * Copyright 2008-2016,2018 Thomas E. Dickey
+ * $LynxId: tidy_tls.c,v 1.39 2019/01/03 00:18:31 tom Exp $
+ * Copyright 2008-2018,2019 Thomas E. Dickey
  * with fix Copyright 2008 by Thomas Viehmann
  *
  * Required libraries:
@@ -368,8 +368,12 @@ SSL_CIPHER *SSL_get_current_cipher(SSL * ssl)
 	result->encrypts = gnutls_cipher_get(ssl->gnutls_state);
 	result->key_xchg = gnutls_kx_get(ssl->gnutls_state);
 	result->msg_code = gnutls_mac_get(ssl->gnutls_state);
-	result->compress = gnutls_compression_get(ssl->gnutls_state);
 	result->cert = gnutls_certificate_type_get(ssl->gnutls_state);
+#if !defined(_GNUTLS_GCC_VERSION) || (_GNUTLS_GCC_VERSION < 30100)
+	result->compress = gnutls_compression_get(ssl->gnutls_state);
+#else
+	result->compress = GNUTLS_COMP_UNKNOWN;
+#endif
     }
 
     return result;

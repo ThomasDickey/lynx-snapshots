@@ -1,5 +1,5 @@
 /*
- * $LynxId: GridText.c,v 1.318 2018/12/28 22:36:22 tom Exp $
+ * $LynxId: GridText.c,v 1.319 2019/01/03 00:14:15 tom Exp $
  *
  *		Character grid hypertext object
  *		===============================
@@ -8157,7 +8157,7 @@ void print_wwwfile_to_fd(FILE *fp,
 			 int is_email,
 			 int is_reply)
 {
-    int line_num, byte_num, byte_count, byte_next, byte_offset;
+    int line_num, byte_num, byte_count, byte_offset;
     int first = TRUE;
     HTLine *line;
     AnchorIndex **inx;		/* sorted index of input-fields */
@@ -8227,8 +8227,7 @@ void print_wwwfile_to_fd(FILE *fp,
 	 */
 	byte_offset = line->offset;
 	byte_count = TrimmedLength(line->data);
-	byte_next = 1;
-	for (byte_num = 0; byte_num < byte_count; byte_num += byte_next) {
+	for (byte_num = 0; byte_num < byte_count; byte_num += 1) {
 	    int cell_chr, temp_chr;
 	    size_t cell_len, temp_len;
 	    const char *cell_ptr, *temp_ptr, *try_utf8;
@@ -8236,7 +8235,6 @@ void print_wwwfile_to_fd(FILE *fp,
 	    cell_ptr = &line->data[byte_num];
 	    cell_len = 1;
 	    cell_chr = UCH(*cell_ptr);
-	    byte_next = 1;
 
 	    while (cur != 0 && FieldLast(cur, this_wrap) < byte_offset) {
 		CTRACE2(TRACE_GRIDTEXT,
