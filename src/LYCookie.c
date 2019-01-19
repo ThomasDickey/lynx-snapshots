@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYCookie.c,v 1.135 2019/01/03 02:10:17 tom Exp $
+ * $LynxId: LYCookie.c,v 1.137 2019/01/19 01:40:16 tom Exp $
  *
  *			       Lynx Cookie Support		   LYCookie.c
  *			       ===================
@@ -26,7 +26,7 @@
  *	Modified to follow RFC-6265 regarding leading dot of Domain, and
  *	matching of hostname vs domain (2011/06/10 -TD)
  *
- *  TO DO: (roughly in order of decreasing priority)
+ *  FM's TO DO: (roughly in order of decreasing priority)
       * Persistent cookies are still experimental.  Presently cookies
 	lose many pieces of information that distinguish
 	version 1 from version 0 cookies.  There is no easy way around
@@ -115,12 +115,12 @@ struct _cookie {
 };
 typedef struct _cookie cookie;
 
-#define COOKIE_FLAG_SECURE 1	/* If set, cookie requires secure links */
-#define COOKIE_FLAG_DISCARD 2	/* If set, expire at end of session */
+#define COOKIE_FLAG_SECURE      1	/* If set, cookie requires secure links */
+#define COOKIE_FLAG_DISCARD     2	/* If set, expire at end of session */
 #define COOKIE_FLAG_EXPIRES_SET 4	/* If set, an expiry date was set */
-#define COOKIE_FLAG_DOMAIN_SET 8	/* If set, an non-default domain was set */
-#define COOKIE_FLAG_PATH_SET 16	/* If set, an non-default path was set */
-#define COOKIE_FLAG_FROM_FILE 32	/* If set, this cookie was persistent */
+#define COOKIE_FLAG_DOMAIN_SET  8	/* If set, an non-default domain was set */
+#define COOKIE_FLAG_PATH_SET   16	/* If set, an non-default path was set */
+#define COOKIE_FLAG_FROM_FILE  32	/* If set, this cookie was persistent */
 
 static void MemAllocCopy(char **dest,
 			 const char *start,
@@ -399,6 +399,7 @@ static void store_cookie(cookie * co, const char *hostname,
     /*
      * Apply sanity checks.
      *
+     * RFC 2109 -
      * Section 4.3.2, condition 1:  The value for the Path attribute is
      * not a prefix of the request-URI.
      *
@@ -886,6 +887,24 @@ static char *alloc_attr_value(const char *value_start,
 
 #define is_attr(s, len) attr_len == len && !strncasecomp(attr_start, s, len)
 
+/*
+ * Attribute-names are matched ignoring case.
+ *
+ *	Attribute	RFC-2109 (1997)	RFC-2965 (2000)	RFC-6265 (2011)
+ *	---------------------------------------------------------------
+ *	comment		yes		yes		-
+ *	commentURL	-		yes		-
+ *	discard		-		yes		-
+ *	domain		yes		yes		yes
+ *	expires		yes		yes		yes
+ *	httponly	-		-		yes
+ *	max-age		yes		yes		yes
+ *	path		yes		yes		yes
+ *	port		-		yes		-
+ *	secure		yes		yes		yes
+ *	version		yes		yes		-
+ *	---------------------------------------------------------------
+ */
 static unsigned parse_attribute(unsigned flags,
 				cookie * cur_cookie,
 				int *cookie_len,
@@ -913,6 +932,12 @@ static unsigned parse_attribute(unsigned flags,
 	     * If secure has a value, assume someone misused it as cookie name. 
 	     * - FM
 	     */
+	    known_attr = NO;
+	}
+    } else if (is_attr("httponly", 8)) {
+	if (value == NULL) {
+	    known_attr = YES;	/* known, but irrelevant to lynx */
+	} else {
 	    known_attr = NO;
 	}
     } else if (is_attr("discard", 7)) {
@@ -1018,6 +1043,7 @@ static unsigned parse_attribute(unsigned flags,
 	    StrAllocCopy(cur_cookie->path, value);
 	    *cookie_len += (cur_cookie->pathlen = (int) strlen(cur_cookie->path));
 	    cur_cookie->flags |= COOKIE_FLAG_PATH_SET;
+	    CTrace((tfp, " ->%.*s\n", cur_cookie->pathlen, cur_cookie->path));
 	}
     } else if (is_attr("port", 4)) {
 	if (cur_cookie != NULL && value &&
