@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYrcFile.h,v 1.51 2018/03/27 23:03:51 tom Exp $
+ * $LynxId: LYrcFile.h,v 1.53 2019/01/25 13:40:18 tom Exp $
  */
 #ifndef LYRCFILE_H
 #define LYRCFILE_H
@@ -54,6 +54,7 @@
 #define RC_COOKIE_REJECT_DOMAINS        "cookie_reject_domains"
 #define RC_COOKIE_SAVE_FILE             "cookie_save_file"
 #define RC_COOKIE_STRICT_INVALID_DOMAIN "cookie_strict_invalid_domains"
+#define RC_COOKIE_VERSION               "cookie_version"
 #define RC_COPY_PATH                    "copy_path"
 #define RC_CSO_PROXY                    "cso_proxy"
 #define RC_CSWING_PATH                  "cswing_path"
@@ -289,6 +290,7 @@
 #define RC_ZCAT_PATH                    "zcat_path"
 #define RC_ZIP_PATH                     "zip_path"
 
+extern Config_Enum tbl_cookie_version[];
 extern Config_Enum tbl_force_prompt[];
 extern Config_Enum tbl_keypad_mode[];
 extern Config_Enum tbl_multi_bookmarks[];

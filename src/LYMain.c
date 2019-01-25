@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMain.c,v 1.283 2018/12/28 14:21:31 tom Exp $
+ * $LynxId: LYMain.c,v 1.285 2019/01/25 00:06:42 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTP.h>
@@ -587,6 +587,7 @@ BOOLEAN LYQuitDefaultYes = QUIT_DEFAULT_YES;
 BOOLEAN dont_wrap_pre = FALSE;
 
 int cookie_noprompt;
+int cookie_version = COOKIES_RFC_6265;
 
 #ifdef USE_SSL
 int ssl_noprompt = FORCE_PROMPT_DFT;

@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYCookie.c,v 1.137 2019/01/19 01:40:16 tom Exp $
+ * $LynxId: LYCookie.c,v 1.146 2019/01/25 14:16:47 tom Exp $
  *
  *			       Lynx Cookie Support		   LYCookie.c
  *			       ===================
@@ -25,6 +25,9 @@
  *
  *	Modified to follow RFC-6265 regarding leading dot of Domain, and
  *	matching of hostname vs domain (2011/06/10 -TD)
+ *
+ *	Modified to address differences between RFC-6262 versus RFC-2109 and
+ * 	RFC-2965 by making the older behavior optional (2019/01/25 -TD)
  *
  *  FM's TO DO: (roughly in order of decreasing priority)
       * Persistent cookies are still experimental.  Presently cookies
@@ -82,6 +85,11 @@
 
 #define LeadingDot(s)     ((s)[0] == '.')
 #define SkipLeadingDot(s) (LeadingDot(s) ? ((s) + 1) : (s))
+
+#define AssumeCookieVersion(p) \
+	if (USE_RFC_2965 && (p)->version < 1) { \
+	    (p)->version = 1; \
+	}
 
 /*
  *  The first level of the cookie list is a list indexed by the domain
@@ -210,13 +218,63 @@ static void LYCookieJar_free(void)
 }
 #endif /* LY_FIND_LEAKS */
 
-static BOOLEAN has_embedded_dot(char *value)
+/*
+ * RFC 2109 -
+ * 4.2.2  Set-Cookie Syntax
+ * An explicitly specified domain must always start with a dot.
+ * 4.3.2  Rejecting Cookies
+ * ...rejects a cookie (shall not store its information) if any of the
+ * following is true:
+ * ...
+ * The value for the Domain attribute contains no embedded dots or does not
+ * start with a dot.
+ *
+ * RFC 2965 -
+ * 3.2.2  Set-Cookie2 Syntax
+ * Domain=value
+ *    OPTIONAL.  The value of the Domain attribute specifies the domain
+ *    for which the cookie is valid.  If an explicitly specified value
+ *    does not start with a dot, the user agent supplies a leading dot.
+ */
+static BOOLEAN has_embedded_dot(const char *value)
+{
+    BOOLEAN leading = NO;
+    BOOLEAN embedded = NO;
+    const char *p;
+
+    for (p = value; *p != '\0'; ++p) {
+	if (*p == '.') {
+	    if (p == value) {
+		leading = YES;
+	    } else if (p[1] != '\0') {
+		embedded = YES;
+	    } else {
+		embedded = NO;
+	    }
+	}
+    }
+    return (leading || USE_RFC_2965) && embedded;
+}
+
+/*
+ * RFC 6265 -
+ * 4.1.2.3.  The Domain Attribute
+ * (Note that a leading %x2E ("."), if present, is ignored even though that
+ * character is not permitted, but a trailing %x2E ("."), if present, will
+ * cause the user agent to ignore the attribute.)
+ */
+static BOOLEAN has_trailing_dot(const char *value)
 {
     BOOLEAN result = NO;
-    char *first_dot = StrChr(value, '.');
+    const char *p;
 
-    if (first_dot != NULL && first_dot[1] != '\0') {
-	result = YES;
+    for (p = value; *p != '\0'; ++p) {
+	if (*p == '.') {
+	    if (p[1] == '\0') {
+		result = YES;
+		break;
+	    }
+	}
     }
     return result;
 }
@@ -400,14 +458,29 @@ static void store_cookie(cookie * co, const char *hostname,
      * Apply sanity checks.
      *
      * RFC 2109 -
-     * Section 4.3.2, condition 1:  The value for the Path attribute is
-     * not a prefix of the request-URI.
+     * Section 4.3.2, condition 1:  The value for the Path attribute is not a
+     * prefix of the request-URI.
      *
-     * If cookie checking for this domain is set to INVCHECK_LOOSE,
-     * then we want to bypass this check.  The user should be queried
-     * if set to INVCHECK_QUERY.
+     * If cookie checking for this domain is set to INVCHECK_LOOSE, then we
+     * want to bypass this check.  The user should be queried if set to
+     * INVCHECK_QUERY.
+     *
+     * RFC 6265 -
+     * Section 4.1.2.4 describes Path, but omits any mention of the user agent
+     * rejecting a cookie because of Path.  Instead, it deals only with the
+     * cases where a cookie returned by the user agent would be valid, based on
+     * Path.  In section 8.6, RFC 6265 presents an example which would not have
+     * been valid with RFC 2109 to claim that the Path attribute is unreliable
+     * from the standpoint of the user agent.
+     *
+     * RFC 6265 does not go into any detail regarding its differences from the
+     * older RFCs 2109 / 2965.  The relevant text covering all of these changes
+     * is just this (no case studies are cited):
+     * User agents MUST implement the more liberal processing rules defined in
+     * Section 5, in order to maximize interoperability with existing servers
+     * that do not conform to the well-behaved profile defined in Section 4.
      */
-    if (!is_prefix(co->path, path)) {
+    if (!USE_RFC_6265 && !is_prefix(co->path, path)) {
 	invcheck_behaviour_t invcheck_bv = (de ? de->invcheck_bv
 					    : DEFAULT_INVCHECK_BV);
 
@@ -470,15 +543,30 @@ static void store_cookie(cookie * co, const char *hostname,
 	    freeCookie(co);
 	    return;
 	}
-	if (!has_embedded_dot(co->ddomain)) {
-	    CTrace((tfp, "store_cookie: Rejecting domain '%s'.\n", co->ddomain));
-	    freeCookie(co);
-	    return;
+	if (!USE_RFC_6265) {
+	    if (!has_embedded_dot(co->ddomain)) {
+		CTrace((tfp, "store_cookie: Rejecting domain '%s'.\n", co->ddomain));
+		freeCookie(co);
+		return;
+	    }
+	} else {
+	    if (has_trailing_dot(co->ddomain)) {
+		CTrace((tfp, "store_cookie: Rejecting domain '%s'.\n", co->ddomain));
+		freeCookie(co);
+		return;
+	    }
 	}
 
 	/*
+	 * RFC 2109 -
 	 * Section 4.3.2, condition 3:  The value for the request-host does not
 	 * domain-match the Domain attribute.
+	 *
+	 * RFC 6265 -
+	 * Section 4.1.2.3,
+	 * The user agent will reject cookies unless the Domain attribute
+	 * specifies a scope for the cookie that would include the origin
+	 * server.
 	 */
 	if (!domain_matches(hostname, co->ddomain)) {
 	    CTrace((tfp,
@@ -497,26 +585,34 @@ static void store_cookie(cookie * co, const char *hostname,
 	 * If cookie checking for this domain is set to INVCHECK_LOOSE, then we
 	 * want to bypass this check.  The user should be queried if set to
 	 * INVCHECK_QUERY.
+	 *
+	 * RFC 6265 -
+	 * There is nothing comparable in RFC 6265, since this check appears to
+	 * have reflected assumptions about how domain names were constructed
+	 * when RFC 2109 was written.  Section 5.1.3.  (Domain Matching) is
+	 * loosely related to these assumptions.
 	 */
-	ptr = ((hostname + strlen(hostname)) - strlen(co->domain));
-	if (StrChr(hostname, '.') < ptr) {
-	    invcheck_behaviour_t invcheck_bv = (de ? de->invcheck_bv
-						: DEFAULT_INVCHECK_BV);
+	if (!USE_RFC_6265) {
+	    ptr = ((hostname + strlen(hostname)) - strlen(co->domain));
+	    if (StrChr(hostname, '.') < ptr) {
+		invcheck_behaviour_t invcheck_bv = (de ? de->invcheck_bv
+						    : DEFAULT_INVCHECK_BV);
 
-	    switch (invcheck_bv) {
-	    case INVCHECK_LOOSE:
-		break;		/* continue as if nothing were wrong */
+		switch (invcheck_bv) {
+		case INVCHECK_LOOSE:
+		    break;	/* continue as if nothing were wrong */
 
-	    case INVCHECK_QUERY:
-		invprompt_reasons |= FAILS_COND4;
-		break;		/* will prompt later if we get that far */
+		case INVCHECK_QUERY:
+		    invprompt_reasons |= FAILS_COND4;
+		    break;	/* will prompt later if we get that far */
 
-	    case INVCHECK_STRICT:
-		CTrace((tfp,
-			"store_cookie: Rejecting because '%s' is not a prefix of '%s'.\n",
-			co->path, path));
-		freeCookie(co);
-		return;
+		case INVCHECK_STRICT:
+		    CTrace((tfp,
+			    "store_cookie: Rejecting because '%s' is not a prefix of '%s'.\n",
+			    co->path, path));
+		    freeCookie(co);
+		    return;
+		}
 	    }
 	}
     }
@@ -681,7 +777,7 @@ static void store_cookie(cookie * co, const char *hostname,
 	 * Get confirmation if we need it, and add cookie if confirmed or
 	 * 'allow' is set to always.  - FM
 	 *
-	 * Cookies read from file are accepted without confirmation prompting. 
+	 * Cookies read from file are accepted without confirmation prompting.
 	 * (Prompting may actually not be possible if LYLoadCookies is called
 	 * before curses is setup.) Maybe this should instead depend on
 	 * LYSetCookies and/or LYCookieAcceptDomains and/or
@@ -776,7 +872,7 @@ static char *scan_cookie_sublist(char *hostname,
 	    }
 
 	    /*
-	     * Skip if we have a port list and the current port is not listed. 
+	     * Skip if we have a port list and the current port is not listed.
 	     * - FM
 	     */
 	    if (co->PortList && !port_matches(port, co->PortList)) {
@@ -809,7 +905,7 @@ static char *scan_cookie_sublist(char *hostname,
 		 * Section 2.2 of RFC1945 says:
 		 *
 		 * HTTP/1.0 headers may be folded onto multiple lines if each
-		 * continuation line begins with a space or horizontal tab. 
+		 * continuation line begins with a space or horizontal tab.
 		 * All linear whitespace, including folding, has the same
 		 * semantics as SP.  [...] However, folding of header lines is
 		 * not expected by some applications, and should not be
@@ -929,18 +1025,18 @@ static unsigned parse_attribute(unsigned flags,
 	    }
 	} else {
 	    /*
-	     * If secure has a value, assume someone misused it as cookie name. 
+	     * If secure has a value, assume someone misused it as cookie name.
 	     * - FM
 	     */
 	    known_attr = NO;
 	}
-    } else if (is_attr("httponly", 8)) {
+    } else if (USE_RFC_6265 && is_attr("httponly", 8)) {
 	if (value == NULL) {
 	    known_attr = YES;	/* known, but irrelevant to lynx */
 	} else {
 	    known_attr = NO;
 	}
-    } else if (is_attr("discard", 7)) {
+    } else if (USE_RFC_2965 && is_attr("discard", 7)) {
 	if (value == NULL) {
 	    known_attr = YES;
 	    if (cur_cookie != NULL) {
@@ -948,12 +1044,12 @@ static unsigned parse_attribute(unsigned flags,
 	    }
 	} else {
 	    /*
-	     * If discard has a value, assume someone used it as a cookie name. 
+	     * If discard has a value, assume someone used it as a cookie name.
 	     * - FM
 	     */
 	    known_attr = NO;
 	}
-    } else if (is_attr("comment", 7)) {
+    } else if ((USE_RFC_2109 || USE_RFC_2965) && is_attr("comment", 7)) {
 	known_attr = YES;
 	if (cur_cookie != NULL && value &&
 	/*
@@ -963,7 +1059,7 @@ static unsigned parse_attribute(unsigned flags,
 	    StrAllocCopy(cur_cookie->comment, value);
 	    *cookie_len += (int) strlen(cur_cookie->comment);
 	}
-    } else if (is_attr("commentURL", 10)) {
+    } else if (USE_RFC_2965 && is_attr("commentURL", 10)) {
 	known_attr = YES;
 	if (cur_cookie != NULL && value &&
 	/*
@@ -1045,7 +1141,7 @@ static unsigned parse_attribute(unsigned flags,
 	    cur_cookie->flags |= COOKIE_FLAG_PATH_SET;
 	    CTrace((tfp, " ->%.*s\n", cur_cookie->pathlen, cur_cookie->path));
 	}
-    } else if (is_attr("port", 4)) {
+    } else if (USE_RFC_2965 && is_attr("port", 4)) {
 	if (cur_cookie != NULL && value &&
 	/*
 	 * Don't process a repeat port.  - FM
@@ -1064,6 +1160,7 @@ static unsigned parse_attribute(unsigned flags,
 		} else {
 		    StrAllocCopy(cur_cookie->PortList, value);
 		    *cookie_len += (int) strlen(cur_cookie->PortList);
+		    CTrace((tfp, " ->%s\n", cur_cookie->PortList));
 		}
 		known_attr = YES;
 	    } else {
@@ -1079,7 +1176,7 @@ static unsigned parse_attribute(unsigned flags,
 	    }
 	    known_attr = YES;
 	}
-    } else if (is_attr("version", 7)) {
+    } else if ((USE_RFC_2109 || USE_RFC_2965) && is_attr("version", 7)) {
 	known_attr = YES;
 	if (cur_cookie != NULL && value &&
 	/*
@@ -1390,12 +1487,7 @@ static void LYProcessSetCookies(const char *SetCookie,
 		if (cookie_len <= max_cookies_buffer
 		    && cur_cookie != NULL
 		    && !(parse_flags & FLAGS_INVALID_PORT)) {
-		    /*
-		     * Assume version 1 if not set to that or higher.  - FM
-		     */
-		    if (cur_cookie->version < 1) {
-			cur_cookie->version = 1;
-		    }
+		    AssumeCookieVersion(cur_cookie);
 		    HTList_appendObject(CombinedCookies, cur_cookie);
 		} else if (cur_cookie != NULL) {
 		    CTrace((tfp,
@@ -1444,9 +1536,7 @@ static void LYProcessSetCookies(const char *SetCookie,
     if (NumCookies <= max_cookies_domain
 	&& cookie_len <= max_cookies_buffer
 	&& cur_cookie != NULL && !(parse_flags & FLAGS_INVALID_PORT)) {
-	if (cur_cookie->version < 1) {
-	    cur_cookie->version = 1;
-	}
+	AssumeCookieVersion(cur_cookie);
 	HTList_appendObject(CombinedCookies, cur_cookie);
     } else if (cur_cookie != NULL && !(parse_flags & FLAGS_INVALID_PORT)) {
 	CTrace((tfp, "LYProcessSetCookies: Rejecting Set-Cookie2: %s=%s\n",
@@ -1689,9 +1779,7 @@ static void LYProcessSetCookies(const char *SetCookie,
 		     * at least 1, and mark it for quoting.  - FM
 		     */
 		    if (SetCookie2 != NULL) {
-			if (cur_cookie->version < 1) {
-			    cur_cookie->version = 1;
-			}
+			AssumeCookieVersion(cur_cookie);
 			cur_cookie->quoted = TRUE;
 		    }
 		    HTList_appendObject(CombinedCookies, cur_cookie);
@@ -1738,9 +1826,7 @@ static void LYProcessSetCookies(const char *SetCookie,
 	&& cookie_len <= max_cookies_buffer
 	&& cur_cookie != NULL) {
 	if (SetCookie2 != NULL) {
-	    if (cur_cookie->version < 1) {
-		cur_cookie->version = 1;
-	    }
+	    AssumeCookieVersion(cur_cookie);
 	    cur_cookie->quoted = TRUE;
 	}
 	HTList_appendObject(CombinedCookies, cur_cookie);
@@ -1759,7 +1845,7 @@ static void LYProcessSetCookies(const char *SetCookie,
     }
 
     /*
-     * OK, now we can actually store any cookies in the CombinedCookies list. 
+     * OK, now we can actually store any cookies in the CombinedCookies list.
      * - FM
      */
     cl = CombinedCookies;
@@ -2263,7 +2349,7 @@ static int LYHandleCookies(const char *arg,
 	    FREE(domain);
 	} else {
 	    /*
-	     * If there is a path string (not just a slash) in the LYNXCOOKIE: 
+	     * If there is a path string (not just a slash) in the LYNXCOOKIE:
 	     * URL, that's a cookie's lynxID and this is a request to delete it
 	     * from the Cookie Jar.  - FM
 	     */
@@ -2332,7 +2418,7 @@ static int LYHandleCookies(const char *arg,
 		/*
 		 * Prompt whether to delete all of the cookies in this domain,
 		 * or the domain if no cookies in it, or to change its 'allow'
-		 * setting, or to cancel, and then act on the user's response. 
+		 * setting, or to cancel, and then act on the user's response.
 		 * - FM
 		 */
 		if (HTList_isEmpty(de->cookie_list)) {

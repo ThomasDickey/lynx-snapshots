@@ -1,4 +1,4 @@
-/* $LynxId: LYOptions.c,v 1.179 2018/12/26 01:23:33 tom Exp $ */
+/* $LynxId: LYOptions.c,v 1.181 2019/01/25 00:06:30 tom Exp $ */
 #include <HTUtils.h>
 #include <HTFTP.h>
 #include <HTTP.h>		/* 'reloading' flag */
@@ -2244,8 +2244,19 @@ static OptValues prompt_values[] =
     {FORCE_PROMPT_NO, prompt_no_string, prompt_no_string},
     END_OPTIONS
 };
-
 static const char *cookie_prompt_string = RC_FORCE_COOKIE_PROMPT;
+
+static const char RFC_2109_string[] = N_("RFC 2109");
+static const char RFC_2965_string[] = N_("RFC 2965");
+static const char RFC_6265_string[] = N_("RFC 6265");
+static OptValues cookies_values[] =
+{
+    {COOKIES_RFC_2109, RFC_2109_string, RFC_2109_string},
+    {COOKIES_RFC_2965, RFC_2965_string, RFC_2965_string},
+    {COOKIES_RFC_6265, RFC_6265_string, RFC_6265_string},
+    END_OPTIONS
+};
+static const char *cookie_version_string = RC_COOKIE_VERSION;
 
 #ifdef USE_SSL
 static const char *ssl_prompt_string = RC_FORCE_SSL_PROMPT;
@@ -3088,6 +3099,10 @@ int postoptions(DocInfo *newdoc)
 	}
 #endif
 
+	/* Cookie Version: SELECT */
+	if (!strcmp(data[i].tag, cookie_version_string))
+	    GetOptValues(cookies_values, data[i].value, &cookie_version);
+
 	/* Cookie Prompting: SELECT */
 	if (!strcmp(data[i].tag, cookie_prompt_string))
 	    GetOptValues(prompt_values, data[i].value, &cookie_noprompt);
@@ -3797,6 +3812,12 @@ static int gen_options(char **newfile)
     PutOption(fp0, LYSetCookies && LYAcceptAllCookies,
 	      cookies_accept_all_string,
 	      cookies_accept_all_string);
+    EndSelect(fp0);
+
+    /* Cookie Version: SELECT */
+    PutLabel(fp0, gettext("Cookie RFC-version"), cookie_version_string);
+    BeginSelect(fp0, cookie_version_string);
+    PutOptValues(fp0, cookie_version, cookies_values);
     EndSelect(fp0);
 
     /* Cookie Prompting: SELECT */
