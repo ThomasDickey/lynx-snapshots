@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYReadCFG.c,v 1.193 2018/05/11 00:03:10 tom Exp $
+ * $LynxId: LYReadCFG.c,v 1.194 2019/01/25 13:43:17 tom Exp $
  */
 #ifndef NO_RULES
 #include <HTRules.h>
@@ -1483,6 +1483,7 @@ static Config_Type Config_Table [] =
      PARSE_STR(RC_COOKIE_SAVE_FILE,     LYCookieSaveFile),
 #endif /* USE_PERSISTENT_COOKIES */
      PARSE_STR(RC_COOKIE_STRICT_INVALID_DOMAIN, LYCookieSStrictCheckDomains),
+     PARSE_ENU(RC_COOKIE_VERSION,       cookie_version, tbl_cookie_version),
      PARSE_Env(RC_CSO_PROXY,            0),
 #ifdef VMS
      PARSE_PRG(RC_CSWING_PATH,          ppCSWING),

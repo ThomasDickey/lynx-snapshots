@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTP.c,v 1.176 2018/12/26 01:24:09 tom Exp $
+ * $LynxId: HTTP.c,v 1.177 2019/01/25 01:37:35 tom Exp $
  *
  * HyperText Tranfer Protocol	- Client implementation		HTTP.c
  * ==========================
@@ -1637,7 +1637,7 @@ static int HTLoadHTTP(const char *arg,
 	     * If we do have a cookie set, add it to the request buffer.  - FM
 	     */
 	    if (cookie != NULL) {
-		if (*cookie != '$') {
+		if (*cookie != '$' && USE_RFC_2965) {
 		    /*
 		     * It's a historical cookie, so signal to the server that
 		     * we support modern cookies.  - FM

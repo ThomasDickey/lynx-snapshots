@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYGlobalDefs.h,v 1.146 2018/03/27 23:05:13 tom Exp $
+ * $LynxId: LYGlobalDefs.h,v 1.150 2019/01/25 02:00:58 tom Exp $
  *
  * global variable definitions
  */
@@ -584,6 +584,18 @@ extern "C" {
 	,FORCE_PROMPT_YES	/* assume "yes" where a prompt would be used */
 	,FORCE_PROMPT_NO	/* assume "no" where a prompt would be used */
     } FORCE_PROMPT;
+
+    extern int cookie_version;
+
+    typedef enum {
+	COOKIES_RFC_2109
+	,COOKIES_RFC_2965
+	,COOKIES_RFC_6265
+    } COOKIES_VERSION;
+
+#define USE_RFC_2109 (cookie_version == (COOKIES_RFC_2109))
+#define USE_RFC_2965 (cookie_version == (COOKIES_RFC_2965))
+#define USE_RFC_6265 (cookie_version == (COOKIES_RFC_6265))
 
 #ifdef USE_SSL
     extern int ssl_noprompt;
