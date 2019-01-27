@@ -1,5 +1,5 @@
 /*
- * $LynxId: SGML.c,v 1.167 2019/01/02 21:06:28 tom Exp $
+ * $LynxId: SGML.c,v 1.168 2019/01/27 19:14:06 tom Exp $
  *
  *			General SGML Parser code		SGML.c
  *			========================
@@ -1852,7 +1852,7 @@ static void SGML_character(HTStream *me, int c_in)
     if (TOASCII(clong) < 32 &&
 	c != '\t' && c != '\n' && c != '\r' &&
 	!IS_CJK_TTY &&
-	!(UTF8_TTY_ISO2022JP && TOASCII(c) == '\033'))
+	!(UTF8_TTY_ISO2022JP && (TOASCII(c) == '\033')))
 	goto after_switch;
 
     /*
