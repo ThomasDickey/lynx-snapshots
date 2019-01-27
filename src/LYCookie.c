@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYCookie.c,v 1.146 2019/01/25 14:16:47 tom Exp $
+ * $LynxId: LYCookie.c,v 1.147 2019/01/26 00:50:13 tom Exp $
  *
  *			       Lynx Cookie Support		   LYCookie.c
  *			       ===================
@@ -875,7 +875,9 @@ static char *scan_cookie_sublist(char *hostname,
 	     * Skip if we have a port list and the current port is not listed.
 	     * - FM
 	     */
-	    if (co->PortList && !port_matches(port, co->PortList)) {
+	    if (USE_RFC_2965
+		&& co->PortList
+		&& !port_matches(port, co->PortList)) {
 		continue;
 	    }
 

@@ -1,5 +1,5 @@
 /*
- * $LynxId: GridText.c,v 1.319 2019/01/03 00:14:15 tom Exp $
+ * $LynxId: GridText.c,v 1.320 2019/01/27 16:12:59 Keith.Bowes Exp $
  *
  *		Character grid hypertext object
  *		===============================
@@ -1716,7 +1716,7 @@ static void display_title(HText *text)
 	percent[0] = '\0';
     } else if ((display_lines) <= 0 && LYlines > 0 &&
 	       text->top_of_screen <= 99999 && text->Lines <= 999999) {
-	sprintf(percent, " (l%d of %d)",
+	sprintf(percent, gettext(" (l%d of %d)"),
 		text->top_of_screen, text->Lines);
     } else if ((text->Lines >= display_lines) && (display_lines > 0)) {
 	int total_pages = ((text->Lines + display_lines)
@@ -1725,7 +1725,7 @@ static void display_title(HText *text)
 				  ? 0
 				  : (text->Lines - display_lines));
 
-	sprintf(percent, " (p%d of %d)",
+	sprintf(percent, gettext(" (p%d of %d)"),
 		((text->top_of_screen > start_of_last_page)
 		 ? total_pages
 		 : ((text->top_of_screen + display_lines) / (display_lines))),

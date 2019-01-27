@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTInit.c,v 1.90 2018/03/05 22:35:07 tom Exp $
+ * $LynxId: HTInit.c,v 1.91 2018/03/05 22:52:26 Keith.Bowes Exp $
  *
  *		Configuration-specific Initialization		HTInit.c
  *		----------------------------------------
@@ -179,6 +179,7 @@ void HTFormatInit(void)
      * text/html
      */
     SET_INTERNL("application/xhtml+xml", "www/present", HTMLPresent, 1.0);
+    SET_INTERNL("application/xhtml+xml", "www/source", HTPlainPresent, 1.0);
     SET_INTERNL("text/css", "www/present", HTPlainPresent, 1.0);
     SET_INTERNL(STR_HTML, "www/present", HTMLPresent, 1.0);
     SET_INTERNL(STR_PLAINTEXT, "www/present", HTPlainPresent, 1.0);
