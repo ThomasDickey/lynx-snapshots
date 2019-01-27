@@ -1,4 +1,4 @@
-# $LynxId: def7_uni.tbl,v 1.31 2015/04/06 10:45:42 tom Exp $
+# $LynxId: def7_uni.tbl,v 1.32 2017/07/06 17:47:27 Keith.Bowes Exp $
 # Default 7bit replacements.
 #
 # This table is very important and should not be excluded from the distribution
@@ -108,28 +108,32 @@ U+00fe:th
 # end of latin-1 repertoire
 0x41	U+0100	U+0102	U+0104			# A
 0x61	U+0101	U+0103	U+0105			# a
-0x43	U+0106	U+0108	U+010a	U+010c		# C
+0x43	U+0106	U+010a	U+010c		# C
+U+0108 "Ch"
 # The following line is an example for mapping several accented versions
 # of small letter 'c' to 'c':
-0x63	U+0107	U+0109	U+010b	U+010d		# c
+0x63	U+0107	U+010b	U+010d		# c
+U+0109 "ch"
 0x44	U+010e
 0x64	U+010f
 U+0110:D/
 U+0111:d/
 0x45	U+0112	U+0114	U+0116	U+0118	U+011a	# E
 0x65	U+0113	U+0115	U+0117	U+0119	U+011b	# e
-0x47	U+011c	U+011e	U+0120	U+0122		# G
-0x67	U+011d	U+011f	U+0121	U+0123		# g
-0x48	U+0124
-0x68	U+0125
+0x47	U+011e	U+0120	U+0122		# G
+0x67	U+011f	U+0121	U+0123		# g
+U+011C "Gh"
+U+011D "gh"
+U+0124 "Hh"
+U+0125" "hh"
 U+0126:H/
 0x48	U+0127 #	LATIN SMALL LETTER H BAR	-> H
 0x49	U+0128	U+012a	U+012c	U+012e	U+0130	# I
 0x69	U+0129	U+012b	U+012d	U+012f	U+0131	# i
 U+0132:IJ
 U+0133:ij
-0x4a	U+0134
-0x6a	U+0135
+U+0134 "Jh"
+U+0135 "jh"
 0x4b	U+0136
 0x6b	U+0137
 U+0138:kk
@@ -152,8 +156,10 @@ U+0152:OE
 U+0153:oe
 0x52	U+0154	U+0156	U+0158			# R
 0x72	U+0155	U+0157	U+0159			# r
-0x53	U+015a	U+015c	U+015e	U+0160	U+0218	# S
-0x73	U+015b	U+015d	U+015f	U+0161	U+0219	# s
+0x53	U+015a	U+015e	U+0160	U+0218	# S
+0x73	U+015b	U+015f	U+0161	U+0219	# s
+U+015C "Sh"
+U+015d "sh"
 0x54	U+0162	U+0164	U+021a			# T
 0x74	U+0163	U+0165	U+021b			# t
 U+0166:T/

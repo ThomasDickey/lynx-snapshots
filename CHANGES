@@ -1,9 +1,14 @@
--- $LynxId: CHANGES,v 1.1008 2019/01/25 14:28:10 tom Exp $
+-- $LynxId: CHANGES,v 1.1010 2019/01/27 16:23:02 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2019-01-25 (2.9.0dev.1)
+2019-01-27 (2.9.0dev.1)
+* add/adapt changes from Keith Bowes' github:
+  * updated eo.po
+  * modify GridText to make page/line percentages translatable
+  + modify HTInit.c to make it possible to view the source of XHTML documents
+  + modify def7_uni.tbl adding ch, gh, hh, jh, sh to replace some single-chars
 * implement features of RFC 6265 (prompted by discussion on mailing list) -TD
   * recognize but ignore "HttpOnly" attribute
   * add COOKIE_VERSION to lynx.cfg, which can be used to specify older cookie
