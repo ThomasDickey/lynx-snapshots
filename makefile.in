@@ -1,4 +1,4 @@
-# $LynxId: makefile.in,v 1.176 2019/05/26 00:22:19 tom Exp $
+# $LynxId: makefile.in,v 1.177 2019/07/31 23:06:14 tom Exp $
 ##makefile for lynx
 
 SHELL		= @CONFIG_SHELL@
@@ -157,7 +157,6 @@ SITE_DEFS = # Your defines here
 # defines for which there are no configure options:
 # -DIGNORE_CTRL_C  Define if Control-C shouldn't exit lynx.
 # -DNO_RULES       Disables CERN-style access rules (see lynx.cfg).
-# -DUSE_VASPRINT   Use vasprintf() function
 #
 # if you are linking to freeWAIS-0.202 or older, you should define this
 # in SITE_DEFS
