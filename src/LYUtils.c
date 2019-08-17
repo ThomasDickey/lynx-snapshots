@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYUtils.c,v 1.293 2018/12/26 01:23:05 tom Exp $
+ * $LynxId: LYUtils.c,v 1.294 2019/08/16 22:44:10 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTCP.h>
@@ -4955,7 +4955,7 @@ void LYTrimRelFromAbsPath(char *path)
     /*
      * Simplify the path and then do any necessary trimming.  - FM
      */
-    HTSimplify(path);
+    HTSimplify(path, TRUE);
     cp = path;
     while (cp[1] == '.') {
 	if (cp[2] == '\0') {
@@ -5362,7 +5362,7 @@ BOOLEAN LYPathOffHomeOK(char *fbuffer,
     /*
      * Simplify it.  - FM
      */
-    HTSimplify(cp);
+    HTSimplify(cp, FALSE);
 
     /*
      * Check if it has a pointless "./".  - FM

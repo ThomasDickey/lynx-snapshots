@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTParse.c,v 1.78 2016/11/24 15:29:50 tom Exp $
+ * $LynxId: HTParse.c,v 1.88 2019/08/17 00:58:20 tom Exp $
  *
  *		Parse HyperText Document Address		HTParse.c
  *		================================
@@ -326,6 +326,8 @@ static void convert_to_idna(char *host)
  *	This returns those parts of a name which are given (and requested)
  *	substituting bits from the related name where necessary.
  *
+ *	Originally based on RFC 1808, some details in RFC 3986 are used.
+ *
  * On entry,
  *	aName		A filename given
  *	relatedName	A name relative to which aName is to be parsed
@@ -613,9 +615,12 @@ char *HTParse(const char *aName,
 	}
 
 	if (given.absolute) {	/* All is given */
+	    char *base = tail;
+
 	    if (wanted & PARSE_PUNCTUATION)
 		*tail++ = '/';
 	    strcpy(tail, given.absolute);
+	    HTSimplify(base, TRUE);
 	    CTRACE((tfp, "HTParse: (ABS)\n"));
 	} else if (related.absolute) {	/* Adopt path not name */
 	    char *base = tail;
@@ -641,16 +646,20 @@ char *HTParse(const char *aName,
 		    p[1] = '\0';	/* Remove filename */
 		    strcat(p, given.relative);	/* Add given one */
 		}
-		HTSimplify(base);
+		HTSimplify(base, FALSE);
 		if (*base == '\0')
 		    strcpy(base, "/");
+	    } else {
+		HTSimplify(base, TRUE);
 	    }
 	    CTRACE((tfp, "HTParse: (Related-ABS)\n"));
 	} else if (given.relative) {
 	    strcpy(tail, given.relative);	/* what we've got */
+	    HTSimplify(tail, FALSE);
 	    CTRACE((tfp, "HTParse: (REL)\n"));
 	} else if (related.relative) {
 	    strcpy(tail, related.relative);
+	    HTSimplify(tail, FALSE);
 	    CTRACE((tfp, "HTParse: (Related-REL)\n"));
 	} else {		/* No inheritance */
 	    if (!isLYNXCGI(aName) &&
@@ -658,6 +667,8 @@ char *HTParse(const char *aName,
 		!isLYNXPROG(aName)) {
 		*tail++ = '/';
 		*tail = '\0';
+	    } else {
+		HTSimplify(tail, FALSE);
 	    }
 	    if (!strcmp(result, "news:/"))
 		result[5] = '*';
@@ -805,143 +816,127 @@ const char *HTParseAnchor(const char *aName)
  *  be replaced by "" , and the sequence "/./" which may be replaced by "/".
  *  Simplification helps us recognize duplicate filenames.
  *
- *	Thus,	/etc/junk/../fred	becomes /etc/fred
- *		/etc/junk/./fred	becomes /etc/junk/fred
- *
- *	but we should NOT change
- *		http://fred.xxx.edu/../..
- *
- *	or	../../albert.html
+ *  RFC 3986 section 5.2.4 says to do this whether or not the path was relative.
  */
-void HTSimplify(char *filename)
+void HTSimplify(char *filename, BOOL absolute)
 {
+#define MY_FMT "HTParse HTSimplify\t(%s)"
+#ifdef NO_LYNX_TRACE
+#define debug_at()		/* nothing */
+#else
+    const char *atln;
+
+#define debug_at(at)	atln = at
+#endif
+    char *mark;
     char *p;
-    char *q, *q1;
+    size_t limit;
 
-    if (filename == NULL)
-	return;
+    CTRACE2(TRACE_HTPARSE,
+	    (tfp, MY_FMT " %s\n",
+	     filename,
+	     absolute ? "ABS" : "REL"));
 
-    if (!(filename[0] && filename[1]) ||
-	filename[0] == '?' || filename[1] == '?' || filename[2] == '?')
-	return;
+    if (LYIsPathSep(*filename) && !absolute)
+	++filename;
+    mark = filename;
+    limit = strlen(filename);
 
-    if (StrChr(filename, '/') != NULL) {
-	for (p = (filename + 2); *p; p++) {
-	    if (*p == '?') {
-		/*
-		 * We're still treating a ?searchpart as part of the path in
-		 * HTParse() and scan(), but if we encounter a '?' here, assume
-		 * it's the delimiter and break.  We also could check for a
-		 * parameter delimiter (';') here, but the current Fielding
-		 * draft (wisely or ill-advisedly :) says that it should be
-		 * ignored and collapsing be allowed in it's value).  The only
-		 * defined parameter at present is ;type=[A, I, or D] for ftp
-		 * URLs, so if there's a "/..", "/../", "/./", or terminal '.'
-		 * following the ';', it must be due to the ';' being an
-		 * unescaped path character and not actually a parameter
-		 * delimiter.  - FM
-		 */
-		break;
-	    }
-	    if (*p == '/') {
-		if ((p[1] == '.') && (p[2] == '.') &&
-		    (p[3] == '/' || p[3] == '?' || p[3] == '\0')) {
-		    /*
-		     * Handle "../", "..?" or "..".
-		     */
-		    for (q = (p - 1); (q >= filename) && (*q != '/'); q--)
-			/*
-			 * Back up to previous slash or beginning of string.
-			 */
-			;
-		    if ((q[0] == '/') &&
-			(StrNCmp(q, "/../", 4) &&
-			 StrNCmp(q, "/..?", 4)) &&
-			!((q - 1) > filename && q[-1] == '/')) {
-			/*
-			 * Not at beginning of string or in a host field, so
-			 * remove the "/xxx/..".
-			 */
-			q1 = (p + 3);
-			p = q;
-			while (*q1 != '\0')
-			    *p++ = *q1++;
-			*p = '\0';	/* terminate */
-			/*
-			 * Start again with previous slash.
-			 */
-			p = (q - 1);
-		    }
-		} else if (p[1] == '.' && p[2] == '/') {
-		    /*
-		     * Handle "./" by removing both characters.
-		     */
-		    q = p;
-		    q1 = (p + 2);
-		    while (*q1 != '\0')
-			*q++ = *q1++;
-		    *q = '\0';	/* terminate */
-		    p--;
-		} else if (p[1] == '.' && p[2] == '?') {
-		    /*
-		     * Handle ".?" by removing the dot.
-		     */
-		    q = (p + 1);
-		    q1 = (p + 2);
-		    while (*q1 != '\0')
-			*q++ = *q1++;
-		    *q = '\0';	/* terminate */
-		    p--;
-		} else if (p[1] == '.' && p[2] == '\0') {
-		    /*
-		     * Handle terminal "." by removing the character.
-		     */
-		    p[1] = '\0';
+    for (p = filename; *p; ++p) {
+	if (*p == '?' || *p == '#') {
+	    limit = (size_t)(p - filename);
+	    break;
+	}
+    }
+    while ((limit != 0) && (*filename != '\0')) {
+	size_t trim = 0;
+	size_t skip = 0;
+	size_t last = 0;
+
+	debug_at("?");
+	p = filename;
+	if (limit >= 2 && !memcmp(p, "./", 2)) {	/* 2A */
+	    debug_at("2A");
+	    trim = 2;
+	} else if (limit >= 3 && !memcmp(p, "../", 3)) {
+	    debug_at("2A2");
+	    trim = 3;
+	} else if (limit >= 3 && !memcmp(p, "/./", 3)) {	/* 2B */
+	    debug_at("2B");
+	    trim = 2;
+	    skip = 1;
+	} else if (limit == 2 && !memcmp(p, "/.", 2)) {
+	    debug_at("2B2");
+	    trim = 1;
+	    skip = 1;
+	} else if (limit >= 4 && !memcmp(p, "/../", 4)) {	/* 2C */
+	    debug_at("2C");
+	    trim = 3;
+	    skip = 1;
+	    last = 1;
+	} else if (limit == 3 && !memcmp(p, "/..", 3)) {
+	    debug_at("2C2");
+	    trim = 2;
+	    skip = 1;
+	    last = 1;
+	} else if (limit == 2 && !memcmp(p, "..", 2)) {		/* 2D */
+	    debug_at("2D");
+	    trim = 2;
+	} else if (limit == 1 && !memcmp(p, ".", 1)) {
+	    debug_at("2D2");
+	    trim = 1;
+	}
+	if (trim) {
+	    CTRACE2(TRACE_HTPARSE,
+		    (tfp, MY_FMT " trim %lu/%lu (%.*s) '%.*s' @%s\n",
+		     mark, (unsigned long)trim, (unsigned long)limit,
+		     (int) trim, p + skip, (int) limit, p, atln));
+	}
+	if (last) {
+	    char *prior = filename;
+
+	    if (prior != mark) {
+		--prior;
+		while (prior != mark && *prior != '/') {
+		    --prior;
 		}
+	    }
+	    if (prior != filename) {
+		trim += (size_t)(filename - prior);
+		limit += (size_t)(filename - prior);
+		filename = p = prior;
+		CTRACE2(TRACE_HTPARSE,
+			(tfp, MY_FMT " TRIM %lu/%lu (%.*s)\n",
+			 mark, (unsigned long) trim, (unsigned long) limit,
+			 (int) trim, filename + skip));
 	    }
 	}
-	if (p >= filename + 2 && *p == '?' && *(p - 1) == '.') {
-	    if (*(p - 2) == '/') {
-		/*
-		 * Handle "/.?" by removing the dot.
-		 */
-		q = p - 1;
-		q1 = p;
-		while (*q1 != '\0')
-		    *q++ = *q1++;
-		*q = '\0';
-	    } else if (*(p - 2) == '.' &&
-		       p >= filename + 4 && *(p - 3) == '/' &&
-		       (*(p - 4) != '/' ||
-			(p > filename + 4 && *(p - 5) != ':'))) {
-		/*
-		 * Handle "xxx/..?"
-		 */
-		for (q = (p - 4); (q > filename) && (*q != '/'); q--)
-		    /*
-		     * Back up to previous slash or beginning of string.
-		     */
-		    ;
-		if (*q == '/') {
-		    if (q > filename && *(q - 1) == '/' &&
-			!(q > filename + 1 && *(q - 1) != ':'))
-			return;
-		    q++;
+	if (trim) {
+	    limit -= trim;
+	    for (p = filename;; ++p) {
+		if ((p[0] = p[trim]) == '\0') {
+		    break;
 		}
-		if (StrNCmp(q, "../", 3) && StrNCmp(q, "./", 2)) {
-		    /*
-		     * Not after "//" at beginning of string or after "://",
-		     * and xxx is not ".." or ".", so remove the "xxx/..".
-		     */
-		    q1 = p;
-		    p = q;
-		    while (*q1 != '\0')
-			*p++ = *q1++;
-		    *p = '\0';	/* terminate */
+		if (skip) {
+		    p[0] = '/';
+		    skip = 0;
 		}
+	    }
+	    CTRACE2(TRACE_HTPARSE,
+		    (tfp, MY_FMT " loop %lu\n", mark, (unsigned long) limit));
+	} else {
+	    if (*filename == '/') {
+		++filename;
+		--limit;
+	    }
+	    while ((limit != 0) && (*filename != '/')) {
+		++filename;
+		--limit;
 	    }
 	}
     }
+    CTRACE2(TRACE_HTPARSE, (tfp, MY_FMT " done\n", mark));
+#undef MY_FMT
 }
 
 /*	Make Relative Name.					HTRelative()

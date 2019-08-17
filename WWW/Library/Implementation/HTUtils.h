@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTUtils.h,v 1.129 2018/05/16 22:16:05 tom Exp $
+ * $LynxId: HTUtils.h,v 1.130 2019/08/17 00:37:51 tom Exp $
  *
  * Utility macros for the W3 code library
  * MACROS FOR GENERAL USE
@@ -573,6 +573,7 @@ extern int WWW_TraceMask;
 #define TRACE_CHARSETS  (TRACE_bit(6))
 #define TRACE_GRIDTEXT  (TRACE_bit(7))
 #define TRACE_TIMING    (TRACE_bit(8))
+#define TRACE_HTPARSE   (TRACE_bit(9))
 
 /*
  * Get printing/scanning formats.

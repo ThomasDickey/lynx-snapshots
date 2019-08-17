@@ -1,7 +1,11 @@
--- $LynxId: CHANGES,v 1.1013 2019/07/31 07:29:27 tom Exp $
+-- $LynxId: CHANGES,v 1.1015 2019/08/17 00:50:32 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
+
+2019-08-16 (2.9.0dev.3)
+* revise HTSimplify to eliminate a redundant "." segment at the beginning of a
+  path, referring to RFC 3986 5.2.4 (report by Alejandro Lieber) -TD
 
 2019-07-31 (2.9.0dev.2)
 * improved several configure macros, including workaround for non-POSIX

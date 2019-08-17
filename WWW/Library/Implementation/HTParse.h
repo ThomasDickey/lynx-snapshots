@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTParse.h,v 1.22 2016/11/23 21:06:50 tom Exp $
+ * $LynxId: HTParse.h,v 1.23 2019/08/16 22:42:06 tom Exp $
  *				HTParse:  URL parsing in the WWW Library
  *				HTPARSE
  *
@@ -99,26 +99,18 @@ extern "C" {
 /*	Simplify a filename.				HTSimplify()
  *	--------------------
  *
- *  A unix-style file is allowed to contain the seqeunce xxx/../ which may
- *  be replaced by "" , and the seqeunce "/./" which may be replaced by "/".
+ *  A unix-style file is allowed to contain the sequence xxx/../ which may
+ *  be replaced by "" , and the sequence "/./" which may be replaced by "/".
  *  Simplification helps us recognize duplicate filenames.
- *
- *	Thus,	/etc/junk/../fred	becomes /etc/fred
- *		/etc/junk/./fred	becomes	/etc/junk/fred
- *
- *      but we should NOT change
- *		http://fred.xxx.edu/../..
- *
- *	or	../../albert.html
  */
-    extern void HTSimplify(char *filename);
+    extern void HTSimplify(char *filename, BOOL absolute);
 
 /*	Make Relative Name.					HTRelative()
  *	-------------------
  *
  * This function creates and returns a string which gives an expression of
  * one address as related to another.  Where there is no relation, an absolute
- * address is retured.
+ * address is returned.
  *
  *  On entry,
  *	Both names must be absolute, fully qualified names of nodes
