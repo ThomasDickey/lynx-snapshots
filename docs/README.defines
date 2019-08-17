@@ -1,4 +1,4 @@
--- $LynxId: README.defines,v 1.19 2018/03/11 22:48:09 tom Exp $
+-- $LynxId: README.defines,v 1.20 2019/07/31 23:06:09 tom Exp $
 
 This file lists preprocessor macros (symbols) which are tested in the
 code (typically with ifdef).
@@ -100,7 +100,6 @@ Other general
 # -DINACTIVE_INPUT_STYLE_VH  Different style for showing inactive text fields
 # -DNO_DUMP_WITH_BACKSPACES Disables -with_backspaces code
 # -DNO_RULES	   Disables code for CERN-style rules files
-# -DUSE_VASPRINT   Use vasprintf() function
 
 Untested
 --------

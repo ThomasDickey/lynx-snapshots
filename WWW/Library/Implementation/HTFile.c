@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFile.c,v 1.151 2018/05/11 23:20:35 tom Exp $
+ * $LynxId: HTFile.c,v 1.152 2019/08/16 22:53:10 tom Exp $
  *
  *			File Access				HTFile.c
  *			===========
@@ -2139,7 +2139,7 @@ static int print_local_dir(DIR *dp, char *localname,
 	     * Append the current entry's filename to the path.
 	     */
 	    StrAllocCat(tmpfilename, entry->file_name);
-	    HTSimplify(tmpfilename);
+	    HTSimplify(tmpfilename, LYIsPathSep(*tmpfilename));
 	    /*
 	     * Output the directory entry.
 	     */

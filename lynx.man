@@ -1,4 +1,4 @@
-.\" $LynxId: lynx.man,v 1.123 2018/07/08 10:54:20 tom Exp $
+.\" $LynxId: lynx.man,v 1.124 2019/08/17 01:07:24 tom Exp $
 .\" **************************************************************************
 .\" Escape single quotes in literal strings from groff's Unicode transform.
 .ie \n(.g .ds AQ \(aq
@@ -909,6 +909,9 @@ GridText parsing
 .TP
 .B 256
 timing
+.TP
+.B 512
+detailed URL parsing
 .RE
 .TP
 .B \-traversal
