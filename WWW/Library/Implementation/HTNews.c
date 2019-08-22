@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTNews.c,v 1.73 2018/02/26 00:28:40 tom Exp $
+ * $LynxId: HTNews.c,v 1.74 2019/08/20 09:03:18 tom Exp $
  *
  *			NEWS ACCESS				HTNews.c
  *			===========
@@ -56,9 +56,19 @@ static SSL *Handle = NULL;
 static int channel_s = 1;
 
 #define NEWS_NETWRITE(sock, buff, size) \
-	(Handle ? SSL_write(Handle, buff, size) : NETWRITE(sock, buff, size))
+	((Handle != NULL) \
+	 ? SSL_write(Handle, buff, size) \
+	 : NETWRITE(sock, buff, size))
 #define NEWS_NETCLOSE(sock) \
-	{ (void)NETCLOSE(sock); if (Handle) { SSL_free(Handle); Handle = NULL; } }
+	{ \
+	    if ((int)(sock) >= 0) { \
+	        (void)NETCLOSE(sock); \
+	    } \
+	    if (Handle != NULL) { \
+	        SSL_free(Handle); \
+	        Handle = NULL; \
+	    } \
+	}
 static int HTNewsGetCharacter(void);
 
 #define NEXT_CHAR HTNewsGetCharacter()

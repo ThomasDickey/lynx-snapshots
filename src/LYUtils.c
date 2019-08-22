@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYUtils.c,v 1.294 2019/08/16 22:44:10 tom Exp $
+ * $LynxId: LYUtils.c,v 1.296 2019/08/22 09:17:59 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTCP.h>
@@ -2967,13 +2967,14 @@ BOOLEAN inlocaldomain(void)
 		    break;
 	    }
 	    if (ulen > strlen(LYLocalDomain) &&
-		STREQ(LYLocalDomain,
-		      me.ut_host + ulen - strlen(LYLocalDomain))) {
+		!memcmp(LYLocalDomain,
+			me.ut_host + ulen - strlen(LYLocalDomain),
+			ulen)) {
 		result = TRUE;
 	    }
 #ifdef LINUX
 	    /* Linux fix to check for local user. J.Cullen 11Jul94              */
-	    else if (strlen(me.ut_host) == 0) {
+	    else if (ulen == 0) {
 		result = TRUE;
 	    }
 #endif /* LINUX */

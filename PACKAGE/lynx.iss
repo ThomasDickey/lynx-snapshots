@@ -1,4 +1,4 @@
-; $LynxId: lynx.iss,v 1.32 2019/01/27 22:56:58 tom Exp $
+; $LynxId: lynx.iss,v 1.33 2019/08/22 00:27:18 tom Exp $
 ; vile:ts=4 sw=4 notabinsert fk=8bit
 ;
 ; This is the BASE script for different flavors of the installer for Lynx.
@@ -138,8 +138,6 @@ Name: "{app}\icon"
 #ifndef NoScreenDll
 #emit 'Source: "' + DllsSrcDir + '\' + ScreenDllName + '"; DestDir: "{app}"; DestName: ' + ScreenDllName + '; Flags: ignoreversion'
 #endif
-#emit 'Source: "' + DllsSrcDir + '\' + ZlibDllName + '"; DestDir: "{app}"; DestName: ' + ZlibDllName + '; Flags: ignoreversion'
-#emit 'Source: "' + DllsSrcDir + '\' + BzipDllName + '"; DestDir: "{app}"; DestName: ' + BzipDllName + '; Flags: ignoreversion'
 #emit 'Source: "' + DllsSrcDir + '\' + BzipExeName + '"; DestDir: "{app}"; DestName: ' + BzipExeName + '; Flags: ignoreversion'
 #emit 'Source: "' + DllsSrcDir + '\' + GzipExeName + '"; DestDir: "{app}"; DestName: ' + GzipExeName + '; Flags: ignoreversion'
 #emit 'Source: "' + DocsSrcDir + '\*.*"; DestDir: "{app}\doc"; Flags: '
@@ -442,11 +440,14 @@ end;
 
 procedure ReallyDelete(const fullPath: string);
 begin
-    if DeleteFile( fullPath ) then
-        Log( '...successful' )
-    else
+    if FileExists( fullpath ) then
         begin
-        MsgBox('Failed to delete ' + fullPath, mbError, MB_OK);
+        if DeleteFile( fullPath ) then
+            Log( '...successful' )
+        else
+            begin
+            MsgBox('Failed to delete ' + fullPath, mbError, MB_OK);
+            end;
         end;
 end;
 
