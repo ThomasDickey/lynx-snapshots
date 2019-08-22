@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYCharUtils.c,v 1.131 2018/03/05 22:32:14 tom Exp $
+ * $LynxId: LYCharUtils.c,v 1.132 2019/08/20 09:22:40 tom Exp $
  *
  *  Functions associated with LYCharSets.c and the Lynx version of HTML.c - FM
  *  ==========================================================================
@@ -1123,6 +1123,12 @@ char **LYUCFullyTranslateString(char **str,
      */
     if (isEmpty(*str))
 	return str;
+
+    if (cs_from < 0 || cs_to < 0) {
+	CTRACE((tfp, "BUG: LYUCFullyTranslateString from=%d, to=%d\n",
+		cs_from, cs_to));
+	return str;
+    }
 
     /*
      * FIXME: something's wrong with the limit checks here (clearing the
