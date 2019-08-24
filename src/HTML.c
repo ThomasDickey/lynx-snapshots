@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTML.c,v 1.192 2018/04/01 23:26:24 tom Exp $
+ * $LynxId: HTML.c,v 1.193 2019/08/23 23:20:31 tom Exp $
  *
  *		Structured stream to Rich hypertext converter
  *		============================================
@@ -1081,9 +1081,6 @@ static int HTML_start_element(HTStructured * me, int element_number,
 	    if (!(url_type = LYLegitimizeHREF(me, &base, TRUE, TRUE))) {
 		CTRACE((tfp, "HTML: BASE '%s' is not an absolute URL.\n",
 			NonNull(base)));
-		if (me->inBadBASE == FALSE)
-		    HTAlert(BASE_NOT_ABSOLUTE);
-		me->inBadBASE = TRUE;
 	    }
 
 	    if (url_type == LYNXIMGMAP_URL_TYPE) {
@@ -7600,7 +7597,6 @@ HTStructured *HTML_new(HTParentAnchor *anchor,
     me->inA = FALSE;
     me->inAPPLET = FALSE;
     me->inAPPLETwithP = FALSE;
-    me->inBadBASE = FALSE;
     me->inBadHREF = FALSE;
     me->inBadHTML = FALSE;
     me->inBASE = FALSE;

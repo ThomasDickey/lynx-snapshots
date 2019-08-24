@@ -1,9 +1,9 @@
 /*
- * $LynxId: LYMessages_en.h,v 1.79 2015/12/15 01:35:44 tom Exp $
+ * $LynxId: LYMessages_en.h,v 1.82 2019/08/24 00:37:02 tom Exp $
  *
  * Lynx - Hypertext navigation system
  *
- *   Copyright 1997-2015 Thomas E. Dickey
+ *   Copyright 1997-2019 Thomas E. Dickey
  *   Copyright 1992, 1993, 1994 University of Kansas
  *   Released 1995 using GNU General Public License
  */
@@ -631,7 +631,7 @@
 #define ERROR_UNCOMPRESSING_TEMP gettext("Error uncompressing temporary file!")
 #define UNSUPPORTED_URL_SCHEME gettext("Unsupported URL scheme!")
 #define UNSUPPORTED_DATA_URL gettext("Unsupported data: URL!  Use SHOWINFO, for now.")
-#define TOO_MANY_REDIRECTIONS gettext("Redirection limit of 10 URL's reached.")
+#define TOO_MANY_REDIRECTIONS gettext("Redirection limit of %d URL's reached.")
 #define ILLEGAL_REDIRECTION_URL gettext("Illegal redirection URL received from server!")
 #define	SERVER_ASKED_FOR_REDIRECTION \
  gettext("Server asked for %d redirection of POST content to")
@@ -689,7 +689,6 @@
 #define MEMORY_EXHAUSTED_ABORTING gettext("Memory exhausted!  Aborting...")
 #define NOT_ENOUGH_MEMORY gettext("Not enough memory!")
 #define DFM_NOT_AVAILABLE gettext("Directory/File Manager not available")
-#define BASE_NOT_ABSOLUTE gettext("HREF in BASE tag is not an absolute URL.")
 #define LOCATION_NOT_ABSOLUTE gettext("Location URL is not absolute.")
 #define REFRESH_URL_NOT_ABSOLUTE gettext("Refresh URL is not absolute.")
 #define SENDING_MESSAGE_WITH_BODY_TO \
