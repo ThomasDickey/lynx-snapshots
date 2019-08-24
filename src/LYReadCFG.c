@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYReadCFG.c,v 1.194 2019/01/25 13:43:17 tom Exp $
+ * $LynxId: LYReadCFG.c,v 1.195 2019/08/24 00:25:43 tom Exp $
  */
 #ifndef NO_RULES
 #include <HTRules.h>
@@ -1674,6 +1674,7 @@ static Config_Type Config_Table [] =
      PARSE_ADD(RC_PRINTER,              printers),
      PARSE_SET(RC_QUIT_DEFAULT_YES,     LYQuitDefaultYes),
      PARSE_INT(RC_READ_TIMEOUT,         reading_timeout),
+     PARSE_INT(RC_REDIRECTION_LIMIT,    redirection_limit),
      PARSE_FUN(RC_REFERER_WITH_QUERY,   referer_with_query_fun),
 #ifdef USE_CMD_LOGGING
      PARSE_TIM(RC_REPLAYSECS,           ReplaySecs),
@@ -2342,6 +2343,14 @@ static void do_read_cfg(const char *cfg_filename,
      * And for query/strict/loose invalid cookie checking. - BJP
      */
     LYConfigCookies();
+
+    /*
+     * Do not allow infinite redirection loops.
+     */
+    if (redirection_limit < 5)
+	redirection_limit = 5;
+    if (redirection_limit > 25)
+	redirection_limit = 25;
 }
 
 /* this is a public interface to do_read_cfg */

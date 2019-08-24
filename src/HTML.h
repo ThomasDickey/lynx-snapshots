@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTML.h,v 1.33 2011/05/19 09:57:53 tom Exp $
+ * $LynxId: HTML.h,v 1.34 2019/08/23 23:18:06 tom Exp $
  *
  *					HTML to rich text converter for libwww
  *
@@ -148,7 +148,6 @@ extern "C" {
 	BOOL inA;
 	BOOL inAPPLET;
 	BOOL inAPPLETwithP;
-	BOOL inBadBASE;
 	BOOL inBadHREF;
 	BOOL inBadHTML;
 	BOOL inBASE;

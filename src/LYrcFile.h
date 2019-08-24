@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYrcFile.h,v 1.53 2019/01/25 13:40:18 tom Exp $
+ * $LynxId: LYrcFile.h,v 1.54 2019/08/24 00:08:45 tom Exp $
  */
 #ifndef LYRCFILE_H
 #define LYRCFILE_H
@@ -203,6 +203,7 @@
 #define RC_QUIT_DEFAULT_YES             "quit_default_yes"
 #define RC_RAW_MODE                     "raw_mode"
 #define RC_READ_TIMEOUT                 "read_timeout"
+#define RC_REDIRECTION_LIMIT            "redirection_limit"
 #define RC_REFERER_WITH_QUERY           "referer_with_query"
 #define RC_REPLAYSECS                   "replaysecs"
 #define RC_REUSE_TEMPFILES              "reuse_tempfiles"
