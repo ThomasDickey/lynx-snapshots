@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFWriter.c,v 1.118 2018/12/27 10:33:52 tom Exp $
+ * $LynxId: HTFWriter.c,v 1.119 2019/08/25 22:57:03 tom Exp $
  *
  *		FILE WRITER				HTFWrite.h
  *		===========
@@ -1237,10 +1237,10 @@ HTStream *HTCompressed(HTPresentation *pres,
 	middle = HTML_SUFFIX;
 	middle++;		/* point to 'h' of .htm(l) - kw */
     } else if (!strncasecomp(anchor->content_type, "text/", 5)) {
-	middle = TEXT_SUFFIX + 1;
+	middle = &TEXT_SUFFIX[1];
     } else if (!strncasecomp(anchor->content_type, "application/", 12)) {
 	/* FIXME: why is this BEFORE HTFileSuffix? */
-	middle = BIN_SUFFIX + 1;
+	middle = &BIN_SUFFIX[1];
     } else if ((suffix =
 		HTFileSuffix(HTAtom_for(anchor->content_type), NULL)) &&
 	       *suffix == '.') {

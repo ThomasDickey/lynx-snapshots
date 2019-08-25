@@ -1,9 +1,12 @@
--- $LynxId: CHANGES,v 1.1019 2019/08/23 23:58:51 tom Exp $
+-- $LynxId: CHANGES,v 1.1020 2019/08/25 20:04:11 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2019-08-23 (2.9.0dev.3)
+2019-08-25 (2.9.0dev.3)
+* modify gophermap menu-parsing to handle "h" HTML selectors similarly to the
+  command-line parsing, which avoids hex-encoding the parameter delimiters
+  "?", "=", ";" as well as "#" (report by Tobias Girstmair) -TD
 * make redirection-limit configurable, defaulting to 10 -TD
 * remove alert when relative base href is seen, since HTML5 allows for this
   (report by Sylvain Bertrand) -TD

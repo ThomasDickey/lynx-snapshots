@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYUtils.c,v 1.296 2019/08/22 09:17:59 tom Exp $
+ * $LynxId: LYUtils.c,v 1.297 2019/08/25 22:54:34 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTCP.h>
@@ -5095,7 +5095,7 @@ static char *CheckDir(char *path)
 	    || !S_ISDIR(stat_info.st_mode))) {
 	path = NULL;
     }
-    CTRACE((tfp, "CheckDir(%s) %s\n", path, path ? "OK" : "ERR"));
+    CTRACE((tfp, "CheckDir(%s) %s\n", NonNull(path), path ? "OK" : "ERR"));
     return path;
 }
 
