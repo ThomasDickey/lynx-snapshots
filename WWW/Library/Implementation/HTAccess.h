@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTAccess.h,v 1.20 2008/01/03 00:24:16 tom Exp $
+ * $LynxId: HTAccess.h,v 1.21 2019/08/23 23:51:45 tom Exp $
  *					HTAccess:  Access manager for libwww
  *			ACCESS MANAGER
  *
@@ -24,6 +24,7 @@ extern "C" {
 #endif
     extern char *use_this_url_instead;
 
+    extern int redirection_limit;
     extern int redirection_attempts;
 
 /*      Return codes from load routines:

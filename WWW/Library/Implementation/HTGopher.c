@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTGopher.c,v 1.71 2018/12/28 16:58:59 tom Exp $
+ * $LynxId: HTGopher.c,v 1.73 2019/08/25 19:59:48 tom Exp $
  *
  *			GOPHER ACCESS				HTGopher.c
  *			=============
@@ -140,7 +140,8 @@ typedef struct _CSOformgen_context {	/* For form-based CSO gateway - FM */
 /*	Matrix of allowed characters in filenames
  *	=========================================
  */
-static BOOL acceptable[256];
+static BOOL acceptable_html[256];
+static BOOL acceptable_file[256];
 static BOOL acceptable_inited = NO;
 
 static void init_acceptable(void)
@@ -149,10 +150,17 @@ static void init_acceptable(void)
     const char *good =
     "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789./-_$";
 
-    for (i = 0; i < 256; i++)
-	acceptable[i] = NO;
-    for (; *good; good++)
-	acceptable[(unsigned int) *good] = YES;
+    for (i = 0; i < 256; i++) {
+	acceptable_html[i] = NO;
+	acceptable_file[i] = NO;
+    }
+    for (; *good; good++) {
+	acceptable_html[(unsigned int) *good] = YES;
+	acceptable_file[(unsigned int) *good] = YES;
+    }
+    for (good = ";?=#"; *good; ++good) {
+	acceptable_html[(unsigned int) *good] = YES;
+    }
     acceptable_inited = YES;
 }
 
@@ -224,6 +232,7 @@ static void parse_menu(const char *arg GCC_UNUSED,
     int bytes = 0;
     int BytesReported = 0;
     char buffer[128];
+    BOOL *valid_chars;
 
 #define TAB		'\t'
 #define HEX_ESCAPE	'%'
@@ -432,10 +441,22 @@ static void parse_menu(const char *arg GCC_UNUSED,
 
 		    if (gtype != GOPHER_DUPLICATE)
 			this_type = gtype;
-		    HTSprintf0(&address, "//%s/%c", host, this_type);
+
+		    if (gtype == GOPHER_HTML) {
+			valid_chars = acceptable_html;
+			HTSprintf0(&address, "//%s:%s/%c",
+				   host,
+				   isEmpty(port) ? "80" : port,
+				   this_type);
+			if (*selector == '/')
+			    ++selector;
+		    } else {
+			valid_chars = acceptable_file;
+			HTSprintf0(&address, "//%s/%c", host, this_type);
+		    }
 
 		    for (r = selector; *r; r++) {	/* Encode selector string */
-			if (acceptable[UCH(*r)]) {
+			if (valid_chars[UCH(*r)]) {
 			    HTSprintf(&address, "%c", *r);
 			} else {
 			    HTSprintf(&address, "%c%c%c",
