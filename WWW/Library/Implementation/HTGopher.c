@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTGopher.c,v 1.73 2019/08/25 19:59:48 tom Exp $
+ * $LynxId: HTGopher.c,v 1.74 2019/08/26 22:44:21 tom Exp $
  *
  *			GOPHER ACCESS				HTGopher.c
  *			=============
@@ -442,17 +442,13 @@ static void parse_menu(const char *arg GCC_UNUSED,
 		    if (gtype != GOPHER_DUPLICATE)
 			this_type = gtype;
 
+		    HTSprintf0(&address, "//%s/%c", host, this_type);
 		    if (gtype == GOPHER_HTML) {
 			valid_chars = acceptable_html;
-			HTSprintf0(&address, "//%s:%s/%c",
-				   host,
-				   isEmpty(port) ? "80" : port,
-				   this_type);
 			if (*selector == '/')
 			    ++selector;
 		    } else {
 			valid_chars = acceptable_file;
-			HTSprintf0(&address, "//%s/%c", host, this_type);
 		    }
 
 		    for (r = selector; *r; r++) {	/* Encode selector string */
