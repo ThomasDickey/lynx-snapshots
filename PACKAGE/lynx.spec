@@ -1,8 +1,8 @@
-# $LynxId: lynx.spec,v 1.55 2019/08/17 01:07:23 tom Exp $
+# $LynxId: lynx.spec,v 1.56 2019/08/26 20:21:48 tom Exp $
 Summary: A text-based Web browser
 Name: lynx-dev
 Version: 2.9.0
-Release: dev.3
+Release: dev.4
 License: GPLv2
 Group: Applications/Internet
 Source: lynx%{version}%{release}.tgz
