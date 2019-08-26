@@ -1,9 +1,11 @@
--- $LynxId: CHANGES,v 1.1022 2019/08/26 20:23:28 tom Exp $
+-- $LynxId: CHANGES,v 1.1023 2019/08/26 22:55:54 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
 2019-08-26 (2.9.0dev.4)
+* revert change to port-handling in 2.9.0dev.3 changes for gophermap (report by
+  Martijn Dekker).
 * add ro.po, update de.po, et.po, tr.po, vi.po from
     http://translationproject.org/latest/lynx
 
@@ -2036,8 +2038,8 @@ Changes since Lynx 2.8 release
   the same effect with the wide-character ncursesw (report by Karl-Heinz
   Weirich) -TD
 * fixes for de.po (Debian #313789, patch by Jens Seidel).
-* add a null pointer check for HTCurSelectedOptionValue in HText_setLastOptionValue()
-  to improve handling of this fragment:
+* add a null pointer check for HTCurSelectedOptionValue in
+  HText_setLastOptionValue() to improve handling of this fragment:
     <FORM><SELECT><OPTION><FORM><SELECT>
   (Alexey Dobriyan).
 * add a null pointer check in HTML_TAB case of HTML_start_element() to handle
