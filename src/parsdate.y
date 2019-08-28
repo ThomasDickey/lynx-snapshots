@@ -3,7 +3,7 @@
 #include <LYLeaks.h>
 
 /*
- *  $LynxId: parsdate.y,v 1.29 2018/12/28 01:53:17 tom Exp $
+ *  $LynxId: parsdate.y,v 1.30 2019/08/28 23:00:39 tom Exp $
  *
  *  This module is adapted and extended from tin, to use for LYmktime().
  *
@@ -11,7 +11,7 @@
  *  Module    : parsedate.y
  *  Author    : S. Bellovin, R. $alz, J. Berets, P. Eggert
  *  Created   : 1990-08-01
- *  Updated   : 2018-12-27 (by Thomas Dickey, for Lynx)
+ *  Updated   : 2019-08-28 (by Thomas Dickey, for Lynx)
  *  Notes     : This grammar has 8 shift/reduce conflicts.
  *
  *              Originally written by Steven M. Bellovin <smb@research.att.com>
@@ -67,7 +67,7 @@ extern int date_parse(void);
 
     /* See the LeapYears table in Convert. */
 #define EPOCH		1970
-#define END_OF_TIME	2038
+#define END_OF_TIME	2200
 
     /* Constants for general time calculations. */
 #define DST_OFFSET	1
@@ -560,11 +560,18 @@ static time_t Convert(time_t Month, time_t Day, time_t Year, time_t Hours,
     {
 	0, 31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31
     };
+    /* *INDENT-OFF* */
     static const int LeapYears[] =
     {
 	1972, 1976, 1980, 1984, 1988, 1992, 1996,
-	2000, 2004, 2008, 2012, 2016, 2020, 2024, 2028, 2032, 2036
+	2000, 2004, 2008, 2012, 2016, 2020, 2024, 2028, 2032, 2036,
+	2040, 2044, 2048, 2052, 2056, 2060, 2064, 2068, 2072, 2076,
+	2080, 2084, 2088, 2092, 2096, /***/ 2104, 2108, 2112, 2116,
+	2120, 2124, 2128, 2132, 2136, 2140, 2144, 2148, 2152, 2156,
+	2160, 2164, 2168, 2172, 2176, 2180, 2184, 2188, 2192, 2196,
     };
+    /* *INDENT-ON* */
+
     const int *yp;
     const int *mp;
     int i;

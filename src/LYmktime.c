@@ -1,4 +1,4 @@
-/* $LynxId: LYmktime.c,v 1.19 2019/01/03 02:07:48 tom Exp $ */
+/* $LynxId: LYmktime.c,v 1.20 2019/08/28 22:54:45 tom Exp $ */
 
 #include <LYStrings.h>
 #include <LYUtils.h>
@@ -351,7 +351,13 @@ int main(void)
     /* problems with 32-bits */
     test_mktime("Fri Jan 01 07:00:00 2038 GMT");
     test_mktime("Sun Jul 06 07:00:00 2038 GMT");
+    test_mktime("Mon, 22-Aug-2039 15:13:56 GMT");
+    test_mktime("Sat, 28 Aug 2066 18:41:53 -0400");
+    test_mktime("Fri, 28 Aug 2099 18:41:53 -0400");
+    test_mktime("Sat, 28 Aug 2100 18:41:53 -0400");
     test_mktime("Sun Jul 06 07:00:00 2138 GMT");
+    test_mktime("Sat, 28 Aug 2150 18:41:53 -0400");
+    test_mktime("Sat, 28 Aug 2200 18:41:53 -0400");
     printf("DONE!\n");
     return 0;
 }
