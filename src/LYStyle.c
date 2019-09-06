@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYStyle.c,v 1.109 2018/03/10 01:54:30 tom Exp $
+ * $LynxId: LYStyle.c,v 1.110 2019/09/06 09:00:48 tom Exp $
  *
  * character level styles for Lynx
  * (c) 1996 Rob Partington -- donated to the Lyncei (if they want it :-)
@@ -932,10 +932,12 @@ void init_color_styles(char **from_cmdline, const char *default_styles)
     }
     CTRACE1((tfp, "init_color_styles(%s)\n", NonNull(lynx_lss_file)));
 
+    if (isEmpty(lynx_lss_file))
+	return;
     /*
      * If the lynx-style file is not available, inform the user and exit.
      */
-    if (isEmpty(lynx_lss_file) || !LYCanReadFile(lynx_lss_file)) {
+    if (!LYCanReadFile(lynx_lss_file)) {
 	fprintf(stderr, gettext("\nLynx file \"%s\" is not available.\n\n"),
 		NonNull(cp));
 	exit_immediately(EXIT_FAILURE);
