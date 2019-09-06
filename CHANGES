@@ -1,11 +1,11 @@
--- $LynxId: CHANGES,v 1.1026 2019/08/28 23:17:32 tom Exp $
+-- $LynxId: CHANGES,v 1.1027 2019/09/06 08:36:32 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2019-08-26 (2.9.0dev.5)
+2019-09-06 (2.9.0dev.5)
 * extend table/limit in parsdate.y to 2200 (report by Ian Collier) -TD
-* update fr.po from
+* update eo.po, fr.po from
     http://translationproject.org/latest/lynx
 
 2019-08-26 (2.9.0dev.4)
