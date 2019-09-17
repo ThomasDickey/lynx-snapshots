@@ -1,13 +1,13 @@
--- $LynxId: CHANGES,v 1.1028 2019/09/06 09:07:57 tom Exp $
+-- $LynxId: CHANGES,v 1.1029 2019/09/17 11:17:02 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2019-09-06 (2.9.0dev.5)
+2019-09-17 (2.9.0dev.5)
 * if --without-lss-file is used, the configured lss filename is empty and
   should be ignored (report by Cory Krell) -TD
 * extend table/limit in parsdate.y to 2200 (report by Ian Collier) -TD
-* update eo.po, fr.po from
+* update eo.po, fr.po, nl.po from
     http://translationproject.org/latest/lynx
 
 2019-08-26 (2.9.0dev.4)
