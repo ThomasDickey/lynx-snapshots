@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMain.c,v 1.285 2019/01/25 00:06:42 tom Exp $
+ * $LynxId: LYMain.c,v 1.286 2019/09/18 22:20:44 Steffen.Nurpmeso Exp $
  */
 #include <HTUtils.h>
 #include <HTTP.h>
@@ -635,6 +635,8 @@ BOOLEAN display_partial_flag = TRUE;	/* Display document during download */
 BOOLEAN debug_display_partial = FALSE;	/* Show with MessageSecs delay */
 int partial_threshold = -1;	/* # of lines to be d/l'ed until we repaint */
 #endif
+
+char *socks5_proxy = NULL;
 
 BOOLEAN LYNonRestartingSIGWINCH = FALSE;
 BOOLEAN LYReuseTempfiles = FALSE;
@@ -3907,6 +3909,10 @@ saves session to that file on exit"
       "toggles display of transfer rate"
    ),
 #endif
+   PARSE_STR(
+      "socks5-proxy",	2|NEED_LYSTRING_ARG,	socks5_proxy,
+      "=URL\n(via which) SOCKS5 proxy to connect (unrelated to -nosocks!)"
+   ),
    PARSE_SET(
       "soft_dquotes",	4|TOGGLE_ARG,		soft_dquotes,
       "toggles emulation of the old Netscape and Mosaic\n\

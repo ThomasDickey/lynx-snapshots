@@ -1,4 +1,4 @@
-.\" $LynxId: lynx.man,v 1.124 2019/08/17 01:07:24 tom Exp $
+.\" $LynxId: lynx.man,v 1.125 2019/09/18 22:20:44 Steffen.Nurpmeso Exp $
 .\" **************************************************************************
 .\" Escape single quotes in literal strings from groff's Unicode transform.
 .ie \n(.g .ds AQ \(aq
@@ -803,6 +803,11 @@ The command line switch toggles the default.
 If enabled the transfer rate is shown in bytes/second.
 If disabled, no transfer rate is shown.
 Use lynx.cfg or the options menu to select KB/second and/or ETA.
+.TP
+.B \-socks5-proxy=URL
+(Via which) SOCKS5 proxy to connect.
+This controls the builtin SOCKS5 support, and is therefore unrelated to
+the option \fB\-nosocks\fP.
 .TP
 .B \-soft_dquotes
 toggles emulation of the old Netscape and Mosaic bug which

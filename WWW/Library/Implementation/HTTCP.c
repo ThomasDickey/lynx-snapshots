@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTCP.c,v 1.151 2018/12/26 13:16:59 tom Exp $
+ * $LynxId: HTTCP.c,v 1.152 2019/09/19 00:27:19 Steffen.Nurpmeso Exp $
  *
  *			Generic Communication Code		HTTCP.c
  *			==========================
@@ -1825,10 +1825,17 @@ int HTDoConnect(const char *url,
 		int default_port,
 		int *s)
 {
-    int status = 0;
+    char *socks5_host;
+    unsigned socks5_host_len = 0;
+    int socks5_port;
+    const char *socks5_orig_url;
+    char *socks5_new_url = NULL;
+    char *socks5_protocol = NULL;
+    int status = HT_OK;
     char *line = NULL;
     char *p1 = NULL;
     char *host = NULL;
+    char const *emsg;
 
 #ifdef INET6
     LYNX_ADDRINFO *res = 0, *res0 = 0;
@@ -1836,7 +1843,49 @@ int HTDoConnect(const char *url,
 #else
     struct sockaddr_in sock_A;
     struct sockaddr_in *soc_in = &sock_A;
+#endif
 
+    *s = -1;			/* nothing is open yet */
+
+    /* In case of a present SOCKS5 proxy, marshal */
+    if ((socks5_orig_url = socks5_proxy) != NULL) {
+	int xport;
+
+	xport = default_port;
+	socks5_orig_url = url;
+	StrAllocCopy(socks5_new_url, url);
+
+	/* Get node name and optional port number of wanted URL */
+	p1 = HTParse(socks5_new_url, "", PARSE_HOST);
+	socks5_host = NULL;
+	StrAllocCopy(socks5_host, p1);
+	strip_userid(socks5_host, FALSE);
+	FREE(p1);
+
+	if (strlen(socks5_host) > 255) {
+	    emsg = gettext("SOCKS5: hostname too long.");
+	    status = HT_ERROR;
+	    goto report_error;
+	}
+	socks5_host_len = (unsigned) strlen(socks5_host);
+
+	if (HTParsePort(socks5_new_url, &socks5_port) == NULL)
+	    socks5_port = xport;
+	FREE(socks5_new_url);
+
+	/* And switch over to our SOCKS5 config; in order to embed that into
+	 * lynx environment, prepend protocol prefix */
+	default_port = 1080;	/* RFC 1928 */
+	HTSACat(&socks5_new_url, "socks://");
+	HTSACat(&socks5_new_url, socks5_proxy);
+	url = socks5_new_url;
+
+	socks5_protocol = HTSprintf0(NULL,
+				     gettext("(for %s at %s) SOCKS5"),
+				     protocol, socks5_host);
+	protocol = socks5_protocol;
+    }
+#ifndef INET6
     /*
      * Set up defaults.
      */
@@ -1861,9 +1910,8 @@ int HTDoConnect(const char *url,
     if (res0 == NULL) {
 	HTSprintf0(&line, gettext("Unable to locate remote host %s."), host);
 	_HTProgress(line);
-	FREE(host);
-	FREE(line);
-	return HT_NO_DATA;
+	status = HT_NO_DATA;
+	goto cleanup;
     }
 #else
     status = HTParseInet(soc_in, host);
@@ -1882,16 +1930,12 @@ int HTDoConnect(const char *url,
 	    }
 	    status = HT_NO_DATA;
 	}
-	FREE(host);
-	FREE(line);
-	return status;
+	goto cleanup;
     }
 #endif /* INET6 */
 
     HTSprintf0(&line, gettext("Making %s connection to %s"), protocol, host);
     _HTProgress(line);
-    FREE(host);
-    FREE(line);
 
     /*
      * Now, let's get a socket set up from the server for the data.
@@ -1899,8 +1943,9 @@ int HTDoConnect(const char *url,
 #ifndef INET6
     *s = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     if (*s == -1) {
-	HTAlert(gettext("socket failed."));
-	return HT_NO_DATA;
+	status = HT_NO_DATA;
+	emsg = gettext("socket failed.");
+	goto report_error;
     }
 #else
     for (res = res0; res; res = res->ai_next) {
@@ -1916,7 +1961,6 @@ int HTDoConnect(const char *url,
 		       gettext("socket failed: family %d addr %s port %s."),
 		       res->ai_family, hostbuf, portbuf);
 	    _HTProgress(line);
-	    FREE(line);
 	    continue;
 	}
 #endif /* INET6 */
@@ -2005,13 +2049,13 @@ int HTDoConnect(const char *url,
 		if ((tries++ / TRIES_PER_SECOND) >= connect_timeout) {
 		    HTAlert(gettext("Connection failed (too many retries)."));
 #ifdef INET6
-		    FREE(line);
 #ifndef NSL_FORK
 		    if (res0)
 			freeaddrinfo(res0);
 #endif
 #endif /* INET6 */
-		    return HT_NO_DATA;
+		    status = HT_NO_DATA;
+		    goto cleanup;
 		}
 		set_timeout(&select_timeout);
 		FD_ZERO(&writefds);
@@ -2204,7 +2248,6 @@ int HTDoConnect(const char *url,
 #endif /* !DOSPATH || __DJGPP__ */
 
 #ifdef INET6
-    FREE(line);
 #ifdef NSL_FORK
     FREE_NSL_FORK(res0);
 #else
@@ -2212,11 +2255,149 @@ int HTDoConnect(const char *url,
 	freeaddrinfo(res0);
 #endif
 #endif /* INET6 */
+
+    /* Now if this was a SOCKS5 proxy connection, go for the real one */
+    if (status >= 0 && socks5_orig_url != NULL) {
+	unsigned char pbuf[4 + 1 + 255 + 2];
+	unsigned i;
+
+	/* RFC 1928: version identifier/method selection message */
+	pbuf[0] = 0x05;		/* VER: protocol version: X'05' */
+	pbuf[1] = 0x01;		/* NMETHODS: 1 */
+	pbuf[2] = 0x00;		/* METHOD: X'00' NO AUTHENTICATION REQUIRED */
+	if (write(*s, pbuf, 3) != 3) {
+	    goto report_system_err;
+	} else if (HTDoRead(*s, pbuf, 2) != 2) {
+	    goto report_system_err;
+	} else if (pbuf[0] != 0x05 || pbuf[1] != 0x00) {
+	    goto report_unexpected_reply;
+	}
+
+	/* RFC 1928: CONNECT request */
+	HTSprintf0(&line, gettext("SOCKS5: connecting to %s"), socks5_host);
+	_HTProgress(line);
+	pbuf[0] = 0x05;		/* VER: protocol version: X'05' */
+	pbuf[1] = 0x01;		/* CMD: CONNECT X'01' */
+	pbuf[2] = 0x00;		/* RESERVED */
+	pbuf[3] = 0x03;		/* ATYP: domain name */
+	pbuf[4] = (unsigned char) socks5_host_len;
+	memcpy(&pbuf[i = 5], socks5_host, socks5_host_len);
+	i += socks5_host_len;
+	/* C99 */  {
+	    unsigned short x;	/* XXX 16-bit? */
+
+	    x = htons(socks5_port);
+	    memcpy(&pbuf[i], (unsigned char *) &x, sizeof x);
+	    i += (unsigned) sizeof(x);
+	}
+	if ((size_t) write(*s, pbuf, i) != i) {
+	    goto report_system_err;
+	} else if ((i = (unsigned) HTDoRead(*s, pbuf, 4)) != 4) {
+	    goto report_system_err;
+	}
+	/* Version 5, reserved must be 0 */
+	if (pbuf[0] == 0x05 && pbuf[2] == 0x00) {
+	    /* Result */
+	    switch (pbuf[1]) {
+	    case 0x00:
+		emsg = NULL;
+		break;
+	    case 0x01:
+		emsg = gettext("SOCKS server failure");
+		break;
+	    case 0x02:
+		emsg = gettext("connection not allowed by ruleset");
+		break;
+	    case 0x03:
+		emsg = gettext("network unreachable");
+		break;
+	    case 0x04:
+		emsg = gettext("host unreachable");
+		break;
+	    case 0x05:
+		emsg = gettext("connection refused");
+		break;
+	    case 0x06:
+		emsg = gettext("TTL expired");
+		break;
+	    case 0x07:
+		emsg = gettext("command not supported");
+		break;
+	    case 0x08:
+		emsg = gettext("address type not supported");
+		break;
+	    default:
+		emsg = gettext("unknown SOCKS error code");
+		break;
+	    }
+	    if (emsg != NULL) {
+		goto report_no_connection;
+	    }
+	} else {
+	    goto report_unexpected_reply;
+	}
+
+	/* Address type variable; read the BND.PORT with it.
+	 * This is actually false since RFC 1928 says that the BND.ADDR reply
+	 * to CONNECT contains the IP address, so only 0x01 and 0x04 are
+	 * allowed */
+	switch (pbuf[3]) {
+	case 0x01:
+	    i = 4;
+	    break;
+	case 0x03:
+	    i = 1;
+	    break;
+	case 0x04:
+	    i = 16;
+	    break;
+	default:
+	    goto report_unexpected_reply;
+	}
+	i += (unsigned) sizeof(unsigned short);
+
+	if ((size_t) HTDoRead(*s, pbuf, i) != i) {
+	    goto report_system_err;
+	} else if (i == 1 + sizeof(unsigned short)) {
+	    i = pbuf[0];
+	    if ((size_t) HTDoRead(*s, pbuf, i) != i) {
+		goto report_system_err;
+	    }
+	}
+    }
+    goto cleanup;
+
+  report_system_err:
+    emsg = LYStrerror(errno);
+    goto report_no_connection;
+
+  report_unexpected_reply:
+    emsg = gettext("unexpected reply\n");
+    /* FALLTHRU */
+
+  report_no_connection:
+    status = HT_NO_CONNECTION;
+    /* FALLTHRU */
+
+  report_error:
+    HTAlert(emsg);
+    if (*s != -1) {
+	NETCLOSE(*s);
+    }
+
+  cleanup:
+    if (socks5_proxy != NULL) {
+	FREE(socks5_new_url);
+	FREE(socks5_protocol);
+	FREE(socks5_host);
+    }
+    FREE(host);
+    FREE(line);
     return status;
 }
 
 /*
- *  This is so interruptible reads can be implemented cleanly.
+ *  This is interruptible so reads can be implemented cleanly.
  */
 int HTDoRead(int fildes,
 	     void *buf,
