@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYGlobalDefs.h,v 1.150 2019/01/25 02:00:58 tom Exp $
+ * $LynxId: LYGlobalDefs.h,v 1.151 2019/09/18 22:20:44 Steffen.Nurpmeso Exp $
  *
  * global variable definitions
  */
@@ -441,6 +441,7 @@ extern "C" {
     extern BOOLEAN debug_display_partial;	/* show with MessageSecs delay */
     extern BOOLEAN display_partial_flag;	/* permanent flag, not mutable */
 #endif
+    extern char *socks5_proxy;
     extern char *form_post_data;	/* User data for post form */
     extern char *form_get_data;	/* User data for get form */
     extern char *http_error_file;	/* Place HTTP status code in this file */
