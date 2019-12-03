@@ -1469,7 +1469,7 @@
 		icontains: FONTlike EMlike MATHlike Alike formula TRlike SELECTlike FORMlike Plike DIVlike LIlike ULlike BRlike APPLETlike HRlike MAPlike same
 		contained: TRlike FORMlike DIVlike LIlike APPLETlike HRlike outer BODYlike same
 		icontained: FONTlike EMlike MATHlike Alike formula TRlike SELECTlike FORMlike Plike DIVlike LIlike ULlike BRlike APPLETlike HRlike outer BODYlike same
-		canclose: FONTlike EMlike MATHlike Alike formula Plike DIVlike same
+		canclose: FONTlike EMlike MATHlike formula Plike DIVlike same
 		flags: mafse
 	37:DL
 		justify
@@ -1492,7 +1492,7 @@
 		icontains: FONTlike EMlike MATHlike Alike formula TRlike SELECTlike FORMlike Plike DIVlike LIlike ULlike BRlike APPLETlike HRlike MAPlike same
 		contained: FORMlike DIVlike LIlike APPLETlike HRlike outer BODYlike
 		icontained: FONTlike EMlike MATHlike formula TRlike FORMlike Plike DIVlike LIlike ULlike BRlike APPLETlike HRlike outer BODYlike same
-		canclose: FONTlike EMlike MATHlike Alike formula SELECTlike Plike DIVlike LIlike
+		canclose: FONTlike EMlike MATHlike formula SELECTlike Plike DIVlike LIlike
 		flags:
 	38:DLC
 		justify
