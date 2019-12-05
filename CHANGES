@@ -1,9 +1,11 @@
--- $LynxId: CHANGES,v 1.1031 2019/12/03 20:52:56 tom Exp $
+-- $LynxId: CHANGES,v 1.1032 2019/12/05 01:19:28 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
 2019-12-03 (2.9.0dev.5)
+* remove a ruler in the user's guide that was added in 2.8.3dev.10 as a
+  conversion aid (report by Edward McGuire) -TD
 * modify HTML DTD to allow <div> in <a> -KH
 * add -socks5-proxy option (Steffen Nurpmeso)
 * if --without-lss-file is used, the configured lss filename is empty and
