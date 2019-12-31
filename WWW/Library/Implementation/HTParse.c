@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTParse.c,v 1.88 2019/08/17 00:58:20 tom Exp $
+ * $LynxId: HTParse.c,v 1.89 2019/12/31 19:18:16 tom Exp $
  *
  *		Parse HyperText Document Address		HTParse.c
  *		================================
@@ -822,7 +822,8 @@ void HTSimplify(char *filename, BOOL absolute)
 {
 #define MY_FMT "HTParse HTSimplify\t(%s)"
 #ifdef NO_LYNX_TRACE
-#define debug_at()		/* nothing */
+#define debug_at(at)	/* nothing */
+#define atln		"?"
 #else
     const char *atln;
 
@@ -844,7 +845,7 @@ void HTSimplify(char *filename, BOOL absolute)
 
     for (p = filename; *p; ++p) {
 	if (*p == '?' || *p == '#') {
-	    limit = (size_t)(p - filename);
+	    limit = (size_t) (p - filename);
 	    break;
 	}
     }
@@ -889,7 +890,7 @@ void HTSimplify(char *filename, BOOL absolute)
 	if (trim) {
 	    CTRACE2(TRACE_HTPARSE,
 		    (tfp, MY_FMT " trim %lu/%lu (%.*s) '%.*s' @%s\n",
-		     mark, (unsigned long)trim, (unsigned long)limit,
+		     mark, (unsigned long) trim, (unsigned long) limit,
 		     (int) trim, p + skip, (int) limit, p, atln));
 	}
 	if (last) {
@@ -902,8 +903,8 @@ void HTSimplify(char *filename, BOOL absolute)
 		}
 	    }
 	    if (prior != filename) {
-		trim += (size_t)(filename - prior);
-		limit += (size_t)(filename - prior);
+		trim += (size_t) (filename - prior);
+		limit += (size_t) (filename - prior);
 		filename = p = prior;
 		CTRACE2(TRACE_HTPARSE,
 			(tfp, MY_FMT " TRIM %lu/%lu (%.*s)\n",

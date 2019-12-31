@@ -1,4 +1,4 @@
-dnl $LynxId: aclocal.m4,v 1.256 2019/08/01 00:07:38 tom Exp $
+dnl $LynxId: aclocal.m4,v 1.258 2019/12/31 15:31:32 tom Exp $
 dnl Macros for auto-configure script.
 dnl by Thomas E. Dickey <dickey@invisible-island.net>
 dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
@@ -835,7 +835,7 @@ if test -n "$1" ; then
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_ADD_LIBS version: 2 updated: 2014/07/13 14:33:27
+dnl CF_ADD_LIBS version: 3 updated: 2019/11/02 16:47:33
 dnl -----------
 dnl Add one or more libraries, used to enforce consistency.  Libraries are
 dnl prepended to an existing list, since their dependencies are assumed to
@@ -844,19 +844,19 @@ dnl
 dnl $1 = libraries to add, with the "-l", etc.
 dnl $2 = variable to update (default $LIBS)
 AC_DEFUN([CF_ADD_LIBS],[
-cf_add_libs="$1"
-# Filter out duplicates - this happens with badly-designed ".pc" files...
-for cf_add_1lib in [$]ifelse($2,,LIBS,[$2])
-do
-	for cf_add_2lib in $cf_add_libs
-	do
-		if test "x$cf_add_1lib" = "x$cf_add_2lib"
-		then
+cf_add_libs="[$]ifelse($2,,LIBS,[$2])"
+# reverse order
+cf_add_0lib=
+for cf_add_1lib in $1; do cf_add_0lib="$cf_add_1lib $cf_add_0lib"; done
+# filter duplicates
+for cf_add_1lib in $cf_add_0lib; do
+	for cf_add_2lib in $cf_add_libs; do
+		if test "x$cf_add_1lib" = "x$cf_add_2lib"; then
 			cf_add_1lib=
 			break
 		fi
 	done
-	test -n "$cf_add_1lib" && cf_add_libs="$cf_add_libs $cf_add_1lib"
+	test -n "$cf_add_1lib" && cf_add_libs="$cf_add_1lib $cf_add_libs"
 done
 ifelse($2,,LIBS,[$2])="$cf_add_libs"
 ])dnl
@@ -2928,13 +2928,13 @@ AC_TRY_LINK([
 test "$cf_cv_func_sigaction" = yes && AC_DEFINE(HAVE_SIGACTION,1,[Define to 1 if we have sigaction])
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_FUNC_VASPRINTF version: 1 updated: 2019/07/31 20:03:22
+dnl CF_FUNC_VASPRINTF version: 2 updated: 2019/12/31 10:27:03
 dnl -----------------
 dnl Check if vasprintf is available, and if it is (or can be) declared.
 AC_DEFUN([CF_FUNC_VASPRINTF],[
 AC_REQUIRE([CF_GNU_SOURCE])
 AC_CHECK_FUNC(vasprintf,[
-	AC_DEFINE(HAVE_VASPRINTF)
+	AC_DEFINE(HAVE_VASPRINTF,1,[Define to 1 if we have vasprintf])
 	AC_MSG_CHECKING(if vasprintf requires workaround)
 	AC_TRY_COMPILE([
 		#include <stdio.h>
@@ -3110,9 +3110,10 @@ rm -rf conftest*
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_GCC_VERSION version: 7 updated: 2012/10/18 06:46:33
+dnl CF_GCC_VERSION version: 8 updated: 2019/09/07 13:38:36
 dnl --------------
-dnl Find version of gcc
+dnl Find version of gcc, and (because icc/clang pretend to be gcc without being
+dnl compatible), attempt to determine if icc/clang is actually used.
 AC_DEFUN([CF_GCC_VERSION],[
 AC_REQUIRE([AC_PROG_CC])
 GCC_VERSION=none
@@ -3122,9 +3123,11 @@ if test "$GCC" = yes ; then
 	test -z "$GCC_VERSION" && GCC_VERSION=unknown
 	AC_MSG_RESULT($GCC_VERSION)
 fi
+CF_INTEL_COMPILER(GCC,INTEL_COMPILER,CFLAGS)
+CF_CLANG_COMPILER(GCC,CLANG_COMPILER,CFLAGS)
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_GCC_WARNINGS version: 35 updated: 2019/06/16 09:45:01
+dnl CF_GCC_WARNINGS version: 36 updated: 2019/09/07 13:38:36
 dnl ---------------
 dnl Check if the compiler supports useful warning options.  There's a few that
 dnl we don't use, simply because they're too noisy:
@@ -3146,8 +3149,6 @@ dnl
 AC_DEFUN([CF_GCC_WARNINGS],
 [
 AC_REQUIRE([CF_GCC_VERSION])
-CF_INTEL_COMPILER(GCC,INTEL_COMPILER,CFLAGS)
-CF_CLANG_COMPILER(GCC,CLANG_COMPILER,CFLAGS)
 if test "x$have_x" = xyes; then CF_CONST_X_STRING fi
 cat > conftest.$ac_ext <<EOF
 #line __oline__ "${as_me:-configure}"
@@ -3240,7 +3241,7 @@ rm -rf conftest*
 AC_SUBST(EXTRA_CFLAGS)
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_GNUTLS version: 25 updated: 2016/04/15 20:48:40
+dnl CF_GNUTLS version: 26 updated: 2019/12/31 10:27:03
 dnl ---------
 dnl Check for gnutls library (TLS "is" SSL)
 dnl $1 = the [optional] directory in which the library may be found
@@ -3338,7 +3339,7 @@ AC_DEFUN([CF_GNUTLS],[
 		CF_ADD_LIBS(-lgnutls)
 		AC_CHECK_FUNCS(gnutls_protocol_set_priority)
 		AC_CHECK_FUNC(gnutls_rnd,
-				[AC_DEFINE(HAVE_GNUTLS_RND)],
+				[AC_DEFINE(HAVE_GNUTLS_RND,1,[Define to 1 if we have gnutls_rnd])],
 				[CF_ADD_LIBS(-lgcrypt)])
 
 		ifelse([$2],,
@@ -3511,11 +3512,12 @@ test -d "$oldincludedir" && {
 $1="[$]$1 $cf_header_path_list"
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_HELP_MESSAGE version: 3 updated: 1998/01/14 10:56:23
+dnl CF_HELP_MESSAGE version: 4 updated: 2019/12/31 08:53:54
 dnl ---------------
 dnl Insert text into the help-message, for readability, from AC_ARG_WITH.
 AC_DEFUN([CF_HELP_MESSAGE],
-[AC_DIVERT_HELP([$1])dnl
+[CF_ACVERSION_CHECK(2.53,[],[
+AC_DIVERT_HELP($1)])dnl
 ])dnl
 dnl ---------------------------------------------------------------------------
 dnl CF_INET_ADDR version: 7 updated: 2013/10/08 17:47:05
@@ -4712,7 +4714,7 @@ case ".[$]$1" in
 esac
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_PDCURSES_W32 version: 1 updated: 2013/10/07 06:13:11
+dnl CF_PDCURSES_W32 version: 2 updated: 2019/12/31 10:27:03
 dnl ---------------
 dnl Configure for PDCurses' Win32 library, checking for definitions as well
 dnl which are needed to use its header file correctly.
@@ -4722,8 +4724,8 @@ AC_CHECK_LIB(pdcurses,initscr,[
 	CF_ADD_LIBS(-lpdcurses)
 	cf_cv_term_header=no
 	cf_cv_unctrl_header=no
-	AC_CHECK_FUNC(winwstr,[AC_DEFINE(PDC_WIDE)])
-	AC_CHECK_FUNC(pdcurses_dll_iname,[AC_DEFINE(PDC_DLL_BUILD)])
+	AC_CHECK_FUNC(winwstr,[AC_DEFINE(PDC_WIDE,1,[Define to 1 if PDCurses has winwstr])])
+	AC_CHECK_FUNC(pdcurses_dll_iname,[AC_DEFINE(PDC_DLL_BUILD,1,[Define to 1 if PDCurses has pdcurses_dll_iname])])
 ])
 
 ])dnl
@@ -4922,11 +4924,15 @@ AC_DEFUN([CF_PROG_AR],[
 AC_CHECK_TOOL(AR, ar, ar)
 ])
 dnl ---------------------------------------------------------------------------
-dnl CF_PROG_CC version: 4 updated: 2014/07/12 18:57:58
+dnl CF_PROG_CC version: 5 updated: 2019/12/31 08:53:54
 dnl ----------
 dnl standard check for CC, plus followup sanity checks
 dnl $1 = optional parameter to pass to AC_PROG_CC to specify compiler name
 AC_DEFUN([CF_PROG_CC],[
+CF_ACVERSION_CHECK(2.53,
+	[AC_MSG_WARN(this will incorrectly handle gnatgcc choice)
+	 AC_REQUIRE([AC_PROG_CC])],
+	[])
 ifelse($1,,[AC_PROG_CC],[AC_PROG_CC($1)])
 CF_GCC_VERSION
 CF_ACVERSION_CHECK(2.52,
@@ -4991,11 +4997,16 @@ AC_SUBST(PROG_EXT)
 test -n "$PROG_EXT" && AC_DEFINE_UNQUOTED(PROG_EXT,"$PROG_EXT",[Define to the program extension (normally blank)])
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_PROG_LINT version: 3 updated: 2016/05/22 15:25:54
+dnl CF_PROG_LINT version: 4 updated: 2019/11/20 18:55:37
 dnl ------------
 AC_DEFUN([CF_PROG_LINT],
 [
 AC_CHECK_PROGS(LINT, lint cppcheck splint)
+case "x$LINT" in
+(xcppcheck|x*/cppcheck)
+	test -z "$LINT_OPTS" && LINT_OPTS="--enable=all"
+	;;
+esac
 AC_SUBST(LINT_OPTS)
 ])dnl
 dnl ---------------------------------------------------------------------------
