@@ -1,9 +1,11 @@
--- $LynxId: CHANGES,v 1.1032 2019/12/05 01:19:28 tom Exp $
+-- $LynxId: CHANGES,v 1.1034 2019/12/31 19:44:05 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2019-12-03 (2.9.0dev.5)
+2019-12-31 (2.9.0dev.5)
+* improved several configure macros, including a fix for clang
+  compiler-warnings, and library order when linking -TD
 * remove a ruler in the user's guide that was added in 2.8.3dev.10 as a
   conversion aid (report by Edward McGuire) -TD
 * modify HTML DTD to allow <div> in <a> -KH
@@ -13,6 +15,7 @@ Changes since Lynx 2.8 release
 * extend table/limit in parsdate.y to 2200 (report by Ian Collier) -TD
 * update eo.po, fr.po, nl.po from
     http://translationproject.org/latest/lynx
+* update config.guess (2019-12-21), config.sub (2019-09-11)
 
 2019-08-26 (2.9.0dev.4)
 * revert change to port-handling in 2.9.0dev.3 changes for gophermap (report by
