@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYCharSets.c,v 1.69 2014/12/07 14:42:48 tom Exp $
+ * $LynxId: LYCharSets.c,v 1.70 2020/01/21 21:33:55 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTCJK.h>
@@ -22,7 +22,7 @@ BOOLEAN DisplayCharsetMatchLocale = TRUE;
 BOOL force_old_UCLYhndl_on_reload = FALSE;
 int forced_UCLYhdnl;
 int LYNumCharsets = 0;		/* Will be initialized later by UC_Register. */
-int current_char_set = -1;	/* will be intitialized later in LYMain.c */
+int current_char_set = -1;	/* will be initialized later in LYMain.c */
 int linedrawing_char_set = -1;
 STRING2PTR p_entity_values = NULL;	/* Pointer, for HTML_put_entity() */
 

@@ -34,12 +34,12 @@ Note on startpage:
                   If a startpage is specified and contains any uppercase
 		  characters, on VMS it should be enclosed in double-quotes.
 		  The code that extracts the access and host fields from
-                  startpage for comparsions with links to ensure they are
+                  startpage for comparisons with links to ensure they are
                   not on another server, and the comparisons with already
                   traversed links, are case sensitive, and the startpage
                   will go to all lowercase on VMS if no double-quotes are
                   supplied, such that it might be treated as a new link if
-                  encounted with uppercase letters.
+                  encountered with uppercase letters.
 
 
 Files created and/or used with the -traversal switch, based on definitions

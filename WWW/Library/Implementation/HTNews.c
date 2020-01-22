@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTNews.c,v 1.74 2019/08/20 09:03:18 tom Exp $
+ * $LynxId: HTNews.c,v 1.75 2020/01/21 22:12:00 tom Exp $
  *
  *			NEWS ACCESS				HTNews.c
  *			===========
@@ -3015,7 +3015,7 @@ static int HTLoadNews(const char *arg,
 #if 0
     HTAlert(gettext("Sorry, could not load requested news."));
     NXRunAlertPanel(NULL, "Sorry, could not load `%s'.", NULL, NULL, NULL, arg);
-    /* No -- message earlier wil have covered it */
+    /* No -- message earlier will have covered it */
 #endif
 
     if (!(post_wanted || reply_wanted ||

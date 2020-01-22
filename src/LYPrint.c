@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYPrint.c,v 1.107 2018/03/18 19:06:06 tom Exp $
+ * $LynxId: LYPrint.c,v 1.108 2020/01/21 21:33:17 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTAccess.h>
@@ -550,7 +550,7 @@ static void send_file_to_mail(DocInfo *newdoc,
 
     if (newdoc->isHEAD) {
 	/*
-	 * Special case for mailing HEAD responce:  this is rather technical
+	 * Special case for mailing HEAD response:  this is rather technical
 	 * information, show URL.
 	 */
 	FREE(subject);

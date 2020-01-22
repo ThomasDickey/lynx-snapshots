@@ -55,8 +55,8 @@ Making a secure connection is like sending your valuables (for storage or
 consumption) to somebody who agreed to be at a prearranged place.  To
 guard the valuables on the way there, you can ask for a police escort; this is
 what https:// connections are about.  However, it does not make any sense to
-have an escort if the goods are transfered to a random person who happens to be
-at this place; one needs to certify the identity of the receiver as well.
+have an escort if the goods are transferred to a random person who happens to
+be at this place; one needs to certify the identity of the receiver as well.
 
 The certification process is a chain; when site A wants to certify that it is
 actually what it claims, it actually says "Check this certificate with site B";
@@ -71,7 +71,7 @@ you don't trust anyone to vouch for the authenticity of the site.
 So one should have a collection of known certificates from several well-known
 sites known as "Root Certification Authorities".  Most sites for large-scale
 businesses have certificates which will eventually resolve to these places.
-Such certicates represent people like Verisign that are in the business of
+Such certificates represent people like Verisign that are in the business of
 confirming the identity of servers, etc.
 
 Additionally, since having yourself certified through another site costs,
@@ -270,7 +270,7 @@ Q. How to use c_rehash?
 
 One needs a working port of Perl and cp.exe to run this.  Set OPENSSL to the
 full name of openssl executable.  One may also need to change some ':' to
-$Config{path_sep}.  c_rehash finds certs from enviroment variables and allows
+$Config{path_sep}.  c_rehash finds certs from environment variables and allows
 them to be recognized by openssl.
 
 Q. How to extract certificates from Internet Explorer?

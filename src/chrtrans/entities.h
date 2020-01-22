@@ -1,5 +1,5 @@
 /*
- * $LynxId: entities.h,v 1.5 2007/07/31 20:40:07 Tim.Larson Exp $
+ * $LynxId: entities.h,v 1.6 2020/01/21 21:31:36 tom Exp $
  *
  *     Entity Names to Unicode table
  *     -----------------------------
@@ -14,7 +14,7 @@ Unlike the numeric entities &#234 which may be for any Unicode character, the
 character references should be defined within HTML standards to get a
 compatibility between browsers.
 
-Now we have a choice:  use clean HTML4.0 entities list (and reject everithing
+Now we have a choice:  use clean HTML4.0 entities list (and reject everything
 others), or use a relaxed list with lots of synonyms and new symbols found at
 
 ftp://ftp.unicode.org/Public/MAPPINGS/VENDORS/MISC/SGML.TXT

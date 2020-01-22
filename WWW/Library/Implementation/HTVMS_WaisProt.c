@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTVMS_WaisProt.c,v 1.9 2010/09/24 23:51:22 tom Exp $
+ * $LynxId: HTVMS_WaisProt.c,v 1.10 2020/01/21 22:10:03 tom Exp $
  *
  *							  HTVMS_WAISProt.c
  *
@@ -89,7 +89,7 @@ static char *writeUserInfoHeader(data_tag tag,
 /* write the tag and size, making sure the info fits.  return the true end
    of the info (after adjustment) note that the argument infoSize includes
    estHeaderSize.  Note that the argument len is the number of bytes remaining
-   in the buffer.  Since we write the tag and size at the begining of the
+   in the buffer.  Since we write the tag and size at the beginning of the
    buffer (in space that we reserved) we don't want to pass len the calls which
    do that writing.
  */
@@ -414,7 +414,7 @@ static char *writeDocObj(DocObj *doc,
 {
     char *buf = buffer;
 
-    /* we alwasy have to write the id, but its tag depends on if its a chunk */
+    /* we always have to write the id, but its tag depends on if it's a chunk */
     if (doc->ChunkCode == CT_document)
 	buf = writeAny(doc->DocumentID, DT_DocumentID, buf, len);
     else

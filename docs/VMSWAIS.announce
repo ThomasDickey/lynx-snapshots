@@ -4,7 +4,7 @@
 modified freeWAIS modules, collected into HTVMS_WaisUI.c, HTVMS_WaisUI.h,
 HTVMS_WaisProt.c, and HTVMS_WaisProt.h, interfaced to HTWAIS.c and HTWSRC.c
 of the WWWLib.  The socket reads and writes use the code for VMS in the Lynx
-version of the WWWLib, and thus are non-blocking (interruptable via the 'z'
+version of the WWWLib, and thus are non-blocking (interruptible via the 'z'
 command), and "already" ported to all the VMS TCPIP packages supported by
 Lynx.   All messaging associated with WAIS searches and document fetches go to
 the Lynx statusline as Progress() or Alarm() reports.

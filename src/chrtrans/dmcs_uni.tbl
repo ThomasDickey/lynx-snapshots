@@ -120,7 +120,7 @@ ODEC Multinational
 U+00A6:|
 0xA7    U+00A7  # section sign (&#167;) - sect
 0xA8    U+00A4  # currency sign (&#164;) - curren
-# spacing diaresis (&#168;) - uml, die
+# spacing diaeresis (&#168;) - uml, die
 U+00A8:"
 0xA9    U+00A9  # copyright sign (&#169;) - copy
 0xAA    U+00AA  # feminine ordinal indicator (&#170;) - ordf
@@ -177,7 +177,7 @@ U+00D0:DH
 0xD4    U+00D4  # capital O, circumflex accent (&#212;) - Ocirc
 0xD5    U+00D5  # capital O, tilde (&#213;) - Otilde
 0xD6    U+00D6  # capital O, dieresis or umlaut mark (&#214;) - Ouml
-0xD7    U+0152  # captial OE ligature (&#338;) - OElig
+0xD7    U+0152  # capital OE ligature (&#338;) - OElig
 # multiplication sign (&#215;) - times
 U+00D7:*
 0xD8    U+00D8  # capital O, slash (&#216;) - Oslash

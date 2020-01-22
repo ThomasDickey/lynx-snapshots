@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTGopher.c,v 1.74 2019/08/26 22:44:21 tom Exp $
+ * $LynxId: HTGopher.c,v 1.75 2020/01/21 22:04:23 tom Exp $
  *
  *			GOPHER ACCESS				HTGopher.c
  *			=============
@@ -186,7 +186,7 @@ static char from_hex(int c)
  * On entry,
  *	HT	is in append mode.
  *	text	points to the text to be put into the file, 0 terminated.
- *	addr	points to the hypertext refernce address 0 terminated.
+ *	addr	points to the hypertext reference address 0 terminated.
  */
 BOOLEAN HT_Is_Gopher_URL = FALSE;
 
@@ -576,7 +576,7 @@ static void parse_cso(const char *arg,
 		 * where # is the search result number and can be multiple
 		 * digits (infinite?).
 		 * Find the second colon and check the digit to the left of it
-		 * to see if they are diferent.  If they are then a different
+		 * to see if they are different.  If they are then a different
 		 * person is starting.  Make this line an <h2>.
 		 */
 
@@ -592,7 +592,7 @@ static void parse_cso(const char *arg,
 		if (second_colon != NULL) {	/* error check */
 
 		    if (*(second_colon - 1) != last_char)
-			/* print seperator */
+			/* print separator */
 		    {
 			END(HTML_PRE);
 			START(HTML_H2);
@@ -620,7 +620,7 @@ static void parse_cso(const char *arg,
 		    PUTC('\n');
 
 		    if (*(second_colon - 1) != last_char)
-			/* end seperator */
+			/* end separator */
 		    {
 			END(HTML_H2);
 			START(HTML_PRE);
@@ -734,7 +734,7 @@ static void display_index(const char *arg,
 /*	De-escape a selector into a command.
  *	====================================
  *
- *	The % hex escapes are converted. Otheriwse, the string is copied.
+ *	The % hex escapes are converted. Otherwise, the string is copied.
  */
 static void de_escape(char *command, const char *selector)
 {
@@ -1202,7 +1202,7 @@ static int generate_cso_form(char *host,
 		    ;
 		}
 		/*
-		 * Save context, interpet command and restore updated context.
+		 * Save context, interpret command and restore updated context.
 		 */
 		ctx.cur_line = i;
 		ctx.cur_off = j;
@@ -1505,7 +1505,7 @@ static int HTLoadCSO(const char *arg,
 	init_acceptable();
 
     if (!arg)
-	return -3;		/* Bad if no name sepcified     */
+	return -3;		/* Bad if no name specified     */
     if (!*arg)
 	return -2;		/* Bad if name had zero length  */
     CTRACE((tfp, "HTLoadCSO: Looking for %s\n", arg));
@@ -1785,7 +1785,7 @@ static int HTLoadGopher(const char *arg,
 	init_acceptable();
 
     if (!arg)
-	return -3;		/* Bad if no name sepcified     */
+	return -3;		/* Bad if no name specified     */
     if (!*arg)
 	return -2;		/* Bad if name had zero length  */
     CTRACE((tfp, "HTGopher: Looking for %s\n", arg));

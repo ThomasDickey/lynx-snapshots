@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTVMSUtils.c,v 1.39 2013/11/28 11:15:31 tom Exp $
+ * $LynxId: HTVMSUtils.c,v 1.40 2020/01/21 21:58:29 tom Exp $
  *
  * MODULE							HTVMSUtil.c
  *		VMS Utility Routines
@@ -140,7 +140,7 @@ void HTVMS_disableSysPrv(void)
  *	FileName	The file to be accessed
  *	UserName	Name of the user to check access for.
  *			User nobody, represented by "" is given NO for an answer
- *	Method		Name of the method to be chceked
+ *	Method		Name of the method to be checked
  *
  * ON EXIT:
  *	returns YES if access is allowed
@@ -371,7 +371,7 @@ int HTStat(const char *filename,
 }
 
 #ifndef	_POSIX_SOURCE
-#define	d_ino	d_fileno	/* compatability */
+#define	d_ino	d_fileno	/* compatibility */
 #ifndef	NULL
 #define	NULL	0
 #endif
@@ -597,7 +597,7 @@ static void free_VMSEntryInfo_contents(VMSEntryInfo * entry_info)
 	FREE(entry_info->type);
 	FREE(entry_info->date);
     }
-    /* dont free the struct */
+    /* don't free the struct */
 }
 
 int compare_VMSEntryInfo_structs(VMSEntryInfo * entry1, VMSEntryInfo * entry2)

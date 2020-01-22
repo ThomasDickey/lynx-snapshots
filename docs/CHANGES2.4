@@ -28,7 +28,7 @@
   in patch posted by Danny Meyer (mayer@ljsrv2.enet.dec.com) but does
   not seek lynx.cfg in the user's HOME directory without an explicit
   directive to do so.  Issue a screen message and then exit if the
-  configuration file is not readeable (rather than continuing as if
+  configuration file is not readable (rather than continuing as if
   one had been found and read). - FM
 * Added protections from NAMEless INPUT or TEXTAREA tags. - FM
 05-29-95
@@ -41,7 +41,7 @@
 05-10-95
 * If a startfile specified on the command line maps to a MIME type
   which invokes an alternate display device, allow -homepage, if also
-  specified, to be substituted for startfile on quiting from the display
+  specified, to be substituted for startfile on quitting from the display
   device, rather than forcing an exit due to the original startfile having
   been neither text/html nor text/plain.  Based on a patch from GL, with
   protections against possible infinite getfile() loops added. - FM
@@ -91,7 +91,7 @@
 04-12-95
 * Makefile tweaks for bsdi and aix4. - FM
 04-11-95
-* Mods for building with BSD Interative (bsdi). - FM
+* Mods for building with BSD Interactive (bsdi). - FM
 04-08-95
 * Added translation of HTML entities and decimal escaping for the
   VALUEs of INPUT and OPTION tags. - FM
@@ -183,7 +183,7 @@
 * Added (unsigned char) type casts in addch() calls for proper handling of
   high value ISOLATIN1 characters. - FM
 * Limited the while() loop for select()'s in HTTCP.c to 50 tries, to help
-  reduce likelyhood of a runaway CPU on undetected terminal disconnects. - FM
+  reduce likelihood of a runaway CPU on undetected terminal disconnects. - FM
 * Fixed typo in build.com. - FM
 * Added Craig's lynx_help and about_lynx files for the lynx2-3-7 distribution,
   updated for lynx2-3-9 BETA. - FM
@@ -197,7 +197,7 @@
 * Further updates of lynx.man, lynx.hlp and documentation.  Indicate
   that the inside_foo and outside_foo restrictions are not selective
   on systems which lack utmp. - FM
-* Changed yesterday's DGUX define fo DGUX_OLD, because only older
+* Changed yesterday's DGUX define to DGUX_OLD, because only older
   Data General systems need it. - FM
 02-16-95
 * Added Jeff's updates of lynx.man and lynx.hlp, further updated for
@@ -249,7 +249,7 @@ Worked in mods from David Trueman (david@cs.dal.ca) - FM:
 02-08-95
 * Fixed glitch in HTInit.c which mis-casted the default MIME type for
   files with a .sh extension, causing the EXEC_SCRIPT function to be
-  disfunctional. - FM
+  dysfunctional. - FM
 * I think I finally have Lynx showing "(p# of N)" properly in the title
   lines (we'll see if perfection has really been achieved 8-). - FM
 * Extended directory browsing on VMS to the -homepage specification,
@@ -354,7 +354,7 @@ Worked in mods from David Trueman (david@cs.dal.ca) - FM:
   are better off building Lynx normally, and instead using a SOCKSified
   proxy server to get through a firewall. - FM
 * Added instructions in INSTALLATION for setting up proxy service. - FM
-* Fixed multiple submit button handling to distiguish which button was
+* Fixed multiple submit button handling to distinguish which button was
   activated when they have the same name, and include only that button's
   name/value pair in the submission. - FM
 * Figured out how to apply all security and restrictions checks for
@@ -515,7 +515,7 @@ Worked in mods from David Trueman (david@cs.dal.ca) - FM:
   the search string is not retained when the current document is changed,
   and added recall buffering of the search string so that it's offered as
   the default for editing or reuse on subsequent '/' commands.  Also, we
-  now force redraws on invokations of such searches so that hits will be
+  now force redraws on invocations of such searches so that hits will be
   highlighted even if they occur on the current page.  Links with hits such
   that they have embedded highlighting of the search strings will not have
   the embedded highlighting restored when the cursor is moved onto and then
@@ -543,7 +543,7 @@ Worked in mods from David Trueman (david@cs.dal.ca) - FM:
 * Further tweaked explanatory comments in the configuration and samples
   files, and updated the instruction files. - FM
 12-09-94
-* Modifed PassesTest() in HTInit.c to avoid the overhead of system() calls
+* Modified PassesTest() in HTInit.c to avoid the overhead of system() calls
   by using getenv() when   test -n "$DISPLAY"   and   test -z "$DISPLAY"
   commands are encountered in the mailcap file.  Otherwise, needlessly
   expensive system() calls potentially could be made for virtually every
@@ -557,7 +557,7 @@ Worked in mods from David Trueman (david@cs.dal.ca) - FM:
   also uses the file. - FM
 * The above two mods make it unnecessary to actually use a "test" script for
   differentially setting viewers in XWINDOWS versus NON_XWINDOWS environments,
-  so VMSers also can use the mailcap files for differential assigments of
+  so VMSers also can use the mailcap files for differential assignments of
   viewers, without those DCL error messages about "test" which have been
   mystifying so many people.  However, yesterday's mods do make it possible
   for VMSers to use a "test" script for checking other environment or system
@@ -591,12 +591,12 @@ Worked in mods from David Trueman (david@cs.dal.ca) - FM:
   defined as a foreign command).  If you don't have a "test" script, don't
   include that instruction in .mailcap. - FM
 * The tmpaddress pointer in do_www_search() of GridText.c needed to be
-  initalized to NULL. - FM
+  initialized to NULL. - FM
 12-07-94
 * Made sufficiently ANSI compliant to build with DECC on VMS without using
   the /stand=vaxc qualifier, and further modified so that Lynx will build
   and run (extremely well 8-) with DECC/VAX.  Whooh, that took some doing!
-  These mods are also desireable for builds on Unix. - FM
+  These mods are also desirable for builds on Unix. - FM
 12-02-94
 * Fixed the query recall buffer in do_www_search() of GridText.c to restore
   the +'s to spaces and unescape properly. - FM
@@ -686,7 +686,7 @@ Worked in mods from David Trueman (david@cs.dal.ca) - FM:
 --- RELEASE of 2.3.5 BETA ---
 11-05-94
 * Numerous wonderful enhancements based on patches from David Trueman, and
-  entensions of those mods.  Briefly:
+  extensions of those mods.  Briefly:
 * Implemented 'K'eymap command for showing all of the key bindings currently
   in effect, with a description of their functions.  This is faster and
   more helpful than the online help's description of the default key
@@ -704,7 +704,7 @@ Worked in mods from David Trueman (david@cs.dal.ca) - FM:
   'J' if VI keys are ON, otherwise the command is case-insensitive.  Try it,
   you'll love this too! - FM
 * Added a CHECKMAIL symbol which if set TRUE in userdefs.h or lynx.cfg will
-  report the existance of unread mail at Lynx startup, and arrivals of new
+  report the existence of unread mail at Lynx startup, and arrivals of new
   mail, via statusline messages.  VMSers can block unsoliticed system NEWMAIL
   screen broadcasts ($ SET BROADCAST/NOMAIL) when using this feature.  It
   can be disabled at run time via the -restrictions=mail switch, which also
@@ -714,7 +714,7 @@ Worked in mods from David Trueman (david@cs.dal.ca) - FM:
   hackers will really love this! - FM
 * Added ability to toggle the novice help line to show all of the principle
   commands. - FM
-* Miscellanous bugs and memory leaks found and fixed in conjuction with
+* Miscelleanous bugs and memory leaks found and fixed in conjunction with
   adding and enhancing the above features. - FM
 * The code may need some tweaking to build and run properly on some flavors
   of Unix (appears to be all set for VMS). - FM
@@ -741,7 +741,7 @@ Worked in mods from David Trueman (david@cs.dal.ca) - FM:
 10-26-94
 * Problems when deleting anchors have been reported, apparently for
   documents which have been (re)loaded with LYforce_no_cache.  So,
-  we'll retore the bypass until that problem is tracked down. - FM
+  we'll restore the bypass until that problem is tracked down. - FM
 10-25-94
 * Added coded for disabling mail for -anonymous via CAN_ANONYMOUS_MAIL in
   userdefs.h, and via -restrictions=mail (default is enabled). - FM
@@ -822,12 +822,12 @@ Mods based on patches from George Lindholm (lindholm@ucs.ubc.ca) - FM:
   slow compared to DECC on AXPen). - FM
 09-13-94
 * If an ISINDEX document is one returned by a previous search, the 's'
-  command puts up the query which returned it, for editting as a new query
+  command puts up the query which returned it, for editing as a new query
   (use Control-U to erase, Control-G to abort)  Otherwise, no string is
   offered in the prompt for a database query.  If the previous query is
   submitted without modification, a message to use Control-R to resubmit
   the same query is display (so that the search will not be repeated
-  inadvertantly). - FM
+  inadvertently). - FM
 09-12-94
 * Fixed failure to load the popped menu properly when a gopher search was
   selected and a NULL string, Control-G, or arrow key is entered to cancel
@@ -851,7 +851,7 @@ Mods based on patches from George Lindholm (lindholm@ucs.ubc.ca) - FM:
 * Command line file specs on VMS can now be any valid explicit, wildcarded,
   partial, or relative VMS specification, and will be converted to a valid
   file://localhost/ URL, so that partial or relative URL's within the file
-  also will be interpretted properly. - FM
+  also will be interpreted properly. - FM
 * Now trims trailing white space and won't get tripped up by '=' characters
   when reading configuration files. - FM
 * Miscellaneous bug fixes and enhancements. - FM

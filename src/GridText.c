@@ -1,5 +1,5 @@
 /*
- * $LynxId: GridText.c,v 1.320 2019/01/27 16:12:59 Keith.Bowes Exp $
+ * $LynxId: GridText.c,v 1.321 2020/01/21 22:19:23 tom Exp $
  *
  *		Character grid hypertext object
  *		===============================
@@ -549,7 +549,7 @@ typedef struct {
 
 static int justify_start_position;	/* this is an index of char from which
 
-					   justification can start (eg after "* " preceeding <li> text) */
+					   justification can start (eg after "* " preceding <li> text) */
 
 static int ht_num_runs;		/*the number of runs filled */
 static ht_run_info ht_runs[MAX_LINE];
@@ -4450,7 +4450,7 @@ void HText_appendCharacter(HText *text, int ch)
 	text->have_8bit_chars = YES;
 
     /*
-     * Kanji charactor handling.
+     * Kanji character handling.
      */
     {
 	HTFont font = style->font;
@@ -10603,7 +10603,7 @@ void HText_endInput(HText *text)
  * Note that results are not normalised to 1.0, but results from
  * different calls of this function can be compared.  - kw
  *
- * Obsolete, it was planned to use here a quality parametr UCTQ_t,
+ * Obsolete, it was planned to use here a quality parameter UCTQ_t,
  * which is boolean now.
  */
 static double get_trans_q(int cs_from,
@@ -12237,10 +12237,10 @@ void HText_setKcode(HText *text, const char *charset,
      * so check the charset value and set the text->kcode element
      * appropriately.  -FM
      */
-    /*  If charset isn't specified explicitely nor assumed,
+    /*  If charset isn't specified explicitly nor assumed,
      * p_in->MIMEname would be set as display charset.
      * So text->kcode sholud be set as SJIS or EUC here only if charset
-     * is specified explicitely, otherwise text->kcode would cause
+     * is specified explicitly, otherwise text->kcode would cause
      * mishandling Japanese strings.  -- TH
      */
     if (charset_explicit && (!strcmp(charset, "shift_jis") ||
@@ -13859,7 +13859,7 @@ static BOOL DidWrap(int y0, int x0)
  * drawn.
  *
  * This code is based on display_line.  This code was tested with ncurses only
- * (since no support for lss is availble for Slang) -HV.
+ * (since no support for lss is available for Slang) -HV.
  */
 #ifdef USE_COLOR_STYLE
 static void redraw_part_of_line(HTLine *line, const char *str,

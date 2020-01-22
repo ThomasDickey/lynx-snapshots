@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTAnchor.c,v 1.81 2018/03/11 18:34:50 tom Exp $
+ * $LynxId: HTAnchor.c,v 1.82 2020/01/21 21:58:52 tom Exp $
  *
  *	Hypertext "Anchor" Object				HTAnchor.c
  *	==========================
@@ -684,7 +684,7 @@ BOOL HTAnchor_delete(HTParentAnchor0 *me)
 }
 
 /*
- * Unnamed children (children_notag) have no sence without HText - delete them
+ * Unnamed children (children_notag) have no sense without HText - delete them
  * and their links if we are about to free HText.  Document currently exists. 
  * Called within HText_free().
  */
@@ -1340,9 +1340,9 @@ static void setup_switch_display_charset(HTParentAnchor *me, int h)
     if (!Switch_Display_Charset(h, SWITCH_DISPLAY_CHARSET_MAYBE))
 	return;
     HTAnchor_setUCInfoStage(me, current_char_set,
-			    UCT_STAGE_HTEXT, UCT_SETBY_MIME);	/* highest priorty! */
+			    UCT_STAGE_HTEXT, UCT_SETBY_MIME);	/* highest priority! */
     HTAnchor_setUCInfoStage(me, current_char_set,
-			    UCT_STAGE_STRUCTURED, UCT_SETBY_MIME);	/* highest priorty! */
+			    UCT_STAGE_STRUCTURED, UCT_SETBY_MIME);	/* highest priority! */
     CTRACE((tfp,
 	    "changing UCInfoStage: HTEXT/STRUCTURED stages charset='%s'.\n",
 	    LYCharSet_UC[current_char_set].MIMEname));

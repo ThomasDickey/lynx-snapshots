@@ -1,5 +1,5 @@
 /*
- * $LynxId: TRSTable.c,v 1.37 2016/11/24 18:14:41 tom Exp $
+ * $LynxId: TRSTable.c,v 1.38 2020/01/21 22:19:58 tom Exp $
  *		Simple table object
  *		===================
  * Authors
@@ -190,7 +190,7 @@ struct _STable_info {
  *  - Support for COLGROUP/COL
  *  - Tables wider than display.  The limitation is not here but in GridText.c
  *    etc.  If horizontal scrolling were implemented there, the mechanisms
- *    here coudl deal with wide tables (just change MAX_STBL_POS code).
+ *    here could deal with wide tables (just change MAX_STBL_POS code).
  *  Missing, unlikely to add:
  *  - Support for non-LTR directionality.  A general problem, support is
  *    lacking throughout the lynx code.

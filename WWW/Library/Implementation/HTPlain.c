@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTPlain.c,v 1.60 2016/11/24 15:29:50 tom Exp $
+ * $LynxId: HTPlain.c,v 1.61 2020/01/21 22:05:46 tom Exp $
  *
  *		Plain text object		HTWrite.c
  *		=================
@@ -502,7 +502,7 @@ static void HTPlain_write(HTStream *me, const char *s, int l)
 						UCGetLYhndl_byMIME("us-ascii"),
 						0) >= 0)) {
 		/*
-		 * Got a repacement string (yippey).  - FM
+		 * Got a replacement string (yippey).  - FM
 		 */
 		HText_appendText(me->text, replace_buf);
 	    } else if (code == 8204 || code == 8205) {

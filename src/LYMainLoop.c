@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMainLoop.c,v 1.242 2019/01/02 23:31:19 tom Exp $
+ * $LynxId: LYMainLoop.c,v 1.243 2020/01/21 22:19:58 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTAccess.h>
@@ -683,7 +683,7 @@ static void do_check_goto_URL(bstring **user_input,
 	    newdoc.isHEAD = FALSE;
 	    /*
 	     * Might be an anchor in the same doc from a POST form.  If so,
-	     * dont't free the content.  -- FM
+	     * don't free the content.  -- FM
 	     */
 	    if (are_different(&curdoc, &newdoc)) {
 		/*

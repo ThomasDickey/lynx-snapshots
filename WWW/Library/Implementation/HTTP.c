@@ -1,8 +1,8 @@
 /*
- * $LynxId: HTTP.c,v 1.177 2019/01/25 01:37:35 tom Exp $
+ * $LynxId: HTTP.c,v 1.178 2020/01/21 22:09:33 tom Exp $
  *
- * HyperText Tranfer Protocol	- Client implementation		HTTP.c
- * ==========================
+ * HyperText Transfer Protocol	- Client implementation		HTTP.c
+ * ===========================
  * Modified:
  * 27 Jan 1994	PDM  Added Ari Luotonen's Fix for Reload when using proxy
  *		     servers.
@@ -1855,7 +1855,7 @@ static int HTLoadHTTP(const char *arg,
 			    SOCKET_ERRNO == EPIPE) &&
 			   !already_retrying && !do_post) {
 		    /*
-		     * Arrrrgh, HTTP 0/1 compability problem, maybe.
+		     * Arrrrgh, HTTP 0/1 compatibility problem, maybe.
 		     */
 		    CTRACE((tfp,
 			    "HTTP: BONZO Trying again with HTTP0 request.\n"));
@@ -2269,10 +2269,10 @@ static int HTLoadHTTP(const char *arg,
 		/*
 		 * We do not load the file, but read the headers for the
 		 * "Location:", check out that redirecting_url and if it's
-		 * acceptible (e.g., not a telnet URL when we have that
+		 * acceptable (e.g., not a telnet URL when we have that
 		 * disabled), initiate a new fetch.  If that's another
 		 * redirecting_url, we'll repeat the checks, and fetch
-		 * initiations if acceptible, until we reach the actual URL, or
+		 * initiations if acceptable, until we reach the actual URL, or
 		 * the redirection limit set in HTAccess.c is exceeded.  If the
 		 * status was 301 indicating that the relocation is permanent,
 		 * we set the permanent_redirection flag to make it permanent

@@ -251,7 +251,7 @@ extern "C" {
 
 /* for internal error handling */
 
-    extern char *readErrorPosition;	/* pos where buf stoped making sense */
+    extern char *readErrorPosition;	/* pos where buf stopped making sense */
 
 /* the following are macros so that they can return OUT of the function
    which calls them

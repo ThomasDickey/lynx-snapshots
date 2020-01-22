@@ -314,7 +314,7 @@
 * Make sure the traversal code doesn't get tripped up by any HREFs
   which contain newline characters due to misparsing (e.g., because a
   close-double-quote wasn't present where required, and soft_dquotes
-  wasn't toggled ON, or invalid comments were present, and mimimal or
+  wasn't toggled ON, or invalid comments were present, and minimal or
   historical comment parsing weren't toggled ON). - FM
 * Renamed LYK_RESUBMIT ('x' or 'X') to LYK_NOCACHE and modified it's code
   so that it applies to normal links as well as form submit buttons.  If
@@ -349,7 +349,7 @@
   is FALSE, but we'll set it TRUE in lynx.cfg until Netscape gets its
   comment parsing right, and "decorative" dashes in comment elements
   cease to be so common in "Enhance for Netscape" pages.  Also added
-  a '-minimal' command line switch for toggling the Mininal or Valid
+  a '-minimal' command line switch for toggling the Minimal or Valid
   configuration setting, and an LYK_MINIMAL command key toggle (mapped
   by default to backquote).  Note that setting Historical comments on
   will override the Minimal or Valid setting (i.e., any '>' will be
@@ -433,7 +433,7 @@
   and make sure external logicals don't defeat a choice of DECC via
   descrip.mms. - FM
 02-02-96
-* Mods to handle lone CRs as newlines when dislaying text/plain files
+* Mods to handle lone CRs as newlines when displaying text/plain files
   from MAC servers.  Note that they'll stay CRs when downloading, or
   fetching with -source, but be handled as newlines when the '\' source
   toggle is used for text/html files and their source is displayed as
@@ -494,8 +494,8 @@
 * Added ability to set the NNTPSERVER environment variable via lynx.cfg if
   it has not been set externally (analogously to the proxy variables). - FM
 * Tweaks of proxy handling. - FM
-* Modifed the "Accept-Language: " header handling so that is uses the
-  "perferred document lang(G)uage" string without any modifications.
+* Modified the "Accept-Language: " header handling so that it uses the
+  "preferred document lang(G)uage" string without any modifications.
   This allows the user to specify a comma-separated string with quality
   values included, exactly to his/her requirements. - FM
 01-16-96
@@ -504,8 +504,8 @@
 * Added target "sun4-ncurses" to the Makefile. - Bennett E. Todd
   (bet@nyc.fcmc.com)
 * Tweaks of "preferred document lan(G)uage" and "preferred document c(H)arset"
-  'o'ptions handling.  Send only the preferrence or comma-separated list of
-  preferrences in the "Accept-Language: " and "Accept-Charset: " headers.
+  'o'ptions handling.  Send only the preference or comma-separated list of
+  preferences in the "Accept-Language: " and "Accept-Charset: " headers.
   Append ", en" if "en" isn't present, and ", ISO-8859-1" and/or ", US-ASCII"
   if those aren't present, rather than relying on servers to honor defaults,
   but still don't send an "Accept-Charset: " header at all if no preference
@@ -617,7 +617,7 @@
   and parsing their LIST output (tested on ftp://emoryi.jpl.nasa.gov/) - FM
 * Another typo fix for VMS GNUC in HTFinger.c. - FM
 * Modified HTFTP.c to use personal_mail_address, if available, for the
-  password with anoymous FTP.  It will still use "user@" (trim off the
+  password with anonymous FTP.  It will still use "user@" (trim off the
   host) if the host does not contain a dot and thus could not be a fully
   qualified domain name, so it will work with Unix servers such as
   ftp.uu.net (see get_connection() in HTFTP.c), but this will cause it
@@ -647,7 +647,7 @@
   old versions of Netscape). - FM
 12-15-95
 * Added PARAM, and its attributes in the W3C draft for EMBED, to the DTD,
-  and code in HTML.c to minimize the possiblity of an INPUT belonging to
+  and code in HTML.c to minimize the possibility of an INPUT belonging to
   an EMBED being misassociated with a standard FORM container. - FM
 * Added "first pass" EMBED handling.  Should be OK with both the W3C
   container version and the Netscape "attribute soup" version (we'll
@@ -733,7 +733,7 @@
   link for its SRC. - FM
 * Fixed parsing of square-bracketted DOCTYPE fields. - FM
 12-01-95
-* Improvments of logic for indentations within lists. - FM
+* Improvements of logic for indentations within lists. - FM
 11-30-95
 * For resiliency, treat upper case letters as equivalent to lower case in
   scheme names (e.g., allow "HTTP" as well as "http"), by converting them
@@ -847,7 +847,7 @@
   except that the user is not prompted to enter RETURN before returning
   to Lynx.  Use lynxprog for scripts or programs such as mail which do not
   need an enforced pause to let the user read the screen output. - FM
-* Removed code in HTFile.c for treating ',' as a synomym of '.' for
+* Removed code in HTFile.c for treating ',' as a synonym of '.' for
   hidden files (nobody seems to know why that was being done 8-). - FM
 * Moved inclusions from LYBookmark to tcp.h. - FM
 11-08-95
@@ -1421,10 +1421,10 @@
   Gilmartin (pg@sweng.stortek.com)
 * Fixed typo in check for news vs. nntp URLs in HTNews.c. - Wilson Cheung
   (wcheung@netcom.com)
-* Added code to the VMS setup() for dealing with curses conficts if someone
+* Added code to the VMS setup() for dealing with curses conflicts if someone
   used -post_data or -get_data without specifying -dump under conditions
   which require it, so it's not forced in LYMain.c as on Unix.  If fact,
-  -get_data and -post_data are very useful in interactive invokations. - FM
+  -get_data and -post_data are very useful in interactive invocations. - FM
 * Fixed memory leak in the -post_data and -get_data handling. - FM
 * Added LYNX_HOST_NAME in userdefs.h and lynx.cfg for defining an alias
   which will be treated equivalently to "localhost" and HTHostName (the
@@ -1470,7 +1470,7 @@
 07-12-95
 * Added code for proxying https and snews URLs.  The Netsite proxy server
   can proxy them without need for SSL code in the clients themselves, i.e.,
-  for Lynx as publically distributed (need client-resident SSL code and
+  for Lynx as publicly distributed (need client-resident SSL code and
   tunneling for the CERN proxy server, sorry). - FM
 * Added the CONNECT protocol to our local code, so that SSL URLs can be
   tunneled through proxy servers, and reorganized some code so that patches
@@ -1558,7 +1558,7 @@
   binary files with a download offer when their links are activated
   (just issue a statusline message that the file can't be displayed),
   and issue a "disabled" statusline message for any overt 'd'ownload
-  attemps. - FM
+  attempts. - FM
 * For disk saves in LYDownload.c, on VMS attempt a rename() first, and then
   a spawned DCL copy if that fails. - FM
 * Added memory exhaustion checks for all mallocs, reallocs and callocs in
@@ -1572,7 +1572,7 @@
   line switch, -image_links, e.g., use  lynx -dump -image_links  to get links
   for all images, as well as standard links, listed in the output.  Can be
   toggled on and off at run time via LYK_IMAGE_TOGGLE (mapped by default to
-  '*').  Use that in conjuction with the LYK_LIST command to get a list of
+  '*').  Use that in conjunction with the LYK_LIST command to get a list of
   links that includes all images, e.g., for adding them as bookmarks.  The
   toggle also invokes a reload, so that the change will be implemented for
   the current and any future documents, but if you return to cached

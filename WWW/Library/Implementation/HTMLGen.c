@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTMLGen.c,v 1.45 2018/05/11 22:41:59 tom Exp $
+ * $LynxId: HTMLGen.c,v 1.46 2020/01/21 22:02:35 tom Exp $
  *
  *		HTML Generator
  *		==============
@@ -11,7 +11,7 @@
  *		Should convert old XMP, LISTING and PLAINTEXT to PRE.
  *
  *	It is not obvious to me right now whether the HEAD should be generated
- *	from the incomming data or the anchor.	Currently it is from the former
+ *	from the incoming data or the anchor.	Currently it is from the former
  *	which is cleanest.
  */
 
@@ -249,7 +249,7 @@ static void HTMLGen_put_character(HTStructured * me, int c)
 		    *q++ = *p++;
 	    }
 	    me->cleanness = 0;
-	    /* Now we have to check whether ther are any perfectly good breaks
+	    /* Now we have to check whether there are any perfectly good breaks
 	     * which weren't good enough for the last line but may be good
 	     * enough for the next
 	     */
@@ -686,7 +686,7 @@ HTStructured *HTMLGenerator(HTStream *output)
  *	-------------------
  *
  *	This object just converts a plain text stream into HTML
- *	It is officially a structured strem but only the stream bits exist.
+ *	It is officially a structured stream but only the stream bits exist.
  *	This is just the easiest way of typecasting all the routines.
  */
 static const HTStructuredClass PlainToHTMLConversion =

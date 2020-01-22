@@ -1,4 +1,4 @@
-dnl $LynxId: configure.in,v 1.313 2019/08/28 22:59:25 tom Exp $
+dnl $LynxId: configure.in,v 1.314 2020/01/21 23:38:32 tom Exp $
 dnl
 dnl Process this file with autoconf to produce a configure script.
 dnl
@@ -7,7 +7,7 @@ dnl by T.E.Dickey <dickey@invisible-island.net>
 dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
 dnl
 dnl ---------------------------------------------------------------------------
-dnl Copyright 1997-2018,2019 by Thomas E. Dickey
+dnl Copyright 1997-2019,2020 by Thomas E. Dickey
 dnl
 dnl Permission to use, copy, modify, and distribute this software and its
 dnl documentation for any purpose and without fee is hereby granted,
@@ -40,7 +40,7 @@ ORIGINAL_CFLAGS="$CFLAGS"
 # run to the next, as well as with tests that are order-dependent.
 rm -f config.cache
 
-AC_PREREQ(2.13.20020210)
+AC_PREREQ(2.25.20200111)
 AC_INIT(userdefs.h)
 
 # autoconf 2.5x defaults to no cache file; we need the cache file's information
@@ -200,6 +200,10 @@ CF_ARG_ENABLE(warnings,
 AC_MSG_RESULT($with_warnings)
 if test "$with_warnings" = "yes"
 then
+	if test "x$with_x" = "xyes"
+	then
+		AC_PATH_XTRA
+	fi
 	CF_GCC_ATTRIBUTES
 	CF_GCC_WARNINGS
 fi

@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYPrettySrc.h,v 1.12 2010/09/24 09:42:58 tom Exp $
+ * $LynxId: LYPrettySrc.h,v 1.13 2020/01/21 21:38:33 tom Exp $
  */
 #ifndef LYPrettySrc_H
 #define LYPrettySrc_H
@@ -31,7 +31,7 @@ extern "C" {
 
     extern BOOL psrc_first_tag;	/* this is also used in HTML.c to trigger the 
 
-				   1st tag to preform special.
+				   1st tag to perform special.
 				 */
 
     extern BOOL mark_htext_as_source;

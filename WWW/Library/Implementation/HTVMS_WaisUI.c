@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTVMS_WaisUI.c,v 1.20 2018/12/27 10:28:12 tom Exp $
+ * $LynxId: HTVMS_WaisUI.c,v 1.21 2020/01/21 22:00:50 tom Exp $
  *								HTVMS_WAISUI.c
  *
  *	Adaptation for Lynx by F.Macrides (macrides@sci.wfeb.edu)
@@ -998,12 +998,12 @@ char *readSearchResponseAPDU(SearchResponseAPDU **queryResponse, char *buffer)
  * 3.7.91   Jonny Goldman.  Replaced "short" in makeBitMap with "int" line 632.
  */
 
-char *readErrorPosition = NULL;	/* pos where buf stoped making sense */
+char *readErrorPosition = NULL;	/* pos where buf stopped making sense */
 
 /*----------------------------------------------------------------------*/
 /* A note on error handling
    read - these are low level routines, they do not check the type tags
-   which (sometimes) preceed the data (this is done by the higher
+   which (sometimes) precede the data (this is done by the higher
    level functions which call these functions).  There is no
    attempt made to check that the reading does not exceed the read
    buffer.  Such cases should be very rare and usually will be
@@ -1011,7 +1011,7 @@ char *readErrorPosition = NULL;	/* pos where buf stoped making sense */
    a series of low level reads will go far off the edge without
    triggering a type error.  However, it is possible for a single
    bad read in an array function (eg. readAny) to attempt to read a
-   large ammount, possibly causing a segmentation violation or out
+   large amount, possibly causing a segmentation violation or out
    of memory condition.
  */
 /*----------------------------------------------------------------------*/
@@ -1211,8 +1211,8 @@ char *writeCompressedIntWithPadding(unsigned long num,
 /*----------------------------------------------------------------------*/
 
 unsigned long writtenCompressedIntSize(unsigned long num)
-/* return the number of bytes needed to represnet the value num in
-   compressed format.  curently limited to 4 bytes
+/* return the number of bytes needed to represent the value num in
+   compressed format.  currently limited to 4 bytes
  */
 {
     if (num < CompressedInt1Byte)
@@ -1403,7 +1403,7 @@ char *anyToString(any *a)
 char *writeString(char *s, data_tag tag, char *buffer, long *len)
 /* Write a C style string.  The terminating null is not written.
    This function is not part of the Z39.50 spec.  It is provided
-   for the convienience of those wishing to pass C strings in
+   for the convenience of those wishing to pass C strings in
    the place of an any.
  */
 {
@@ -1426,7 +1426,7 @@ char *writeString(char *s, data_tag tag, char *buffer, long *len)
 char *readString(char **s, char *buffer)
 /* Read an any and convert it into a C style string.
    This function is not part of the Z39.50 spec.  It is provided
-   for the convienience of those wishing to pass C strings in
+   for the convenience of those wishing to pass C strings in
    the place of an any.
  */
 {
@@ -1456,7 +1456,7 @@ unsigned long writtenStringSize(data_tag tag, char *s)
 /*----------------------------------------------------------------------*/
 
 any *longToAny(long num)
-/* a convienience function */
+/* a convenience function */
 {
     char s[40];
 
@@ -1468,7 +1468,7 @@ any *longToAny(long num)
 /*----------------------------------------------------------------------*/
 
 long anyToLong(any *a)
-/* a convienience function */
+/* a convenience function */
 {
     long num;
     char *str = NULL;
@@ -2200,7 +2200,7 @@ void *fs_realloc(void *ptr, size_t size)
 void fs_free(void *ptr)
 /* does safety checks and optional accounting */
 {
-    if (ptr != NULL)		/* some non-ansi compilers/os's cant handle freeing null */
+    if (ptr != NULL)		/* some non-ansi compilers/os's can't handle freeing null */
     {				/* if we knew the size of this block of memory, we could clear it - oh well */
 	free(ptr);
 	ptr = NULL;
@@ -2219,7 +2219,7 @@ char *s_strdup(char *s)
     unsigned long len;
     char *copy = NULL;
 
-    if (s == NULL)		/* saftey check to postpone stupid errors */
+    if (s == NULL)		/* safety check to postpone stupid errors */
 	return (NULL);
 
     len = strlen(s);		/* length of string - terminator */

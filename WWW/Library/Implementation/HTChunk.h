@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTChunk.h,v 1.20 2010/09/24 08:37:39 tom Exp $
+ * $LynxId: HTChunk.h,v 1.21 2020/01/21 22:02:43 tom Exp $
  *
  *				     HTChunk: Flexible array handling for libwww
  *					CHUNK HANDLING:
@@ -61,7 +61,7 @@ extern "C" {
  *  error if failok != 0, but merely resets the chunk.  When using a chunk
  *  created this way, the caller should always check whether the contents
  *  are ok each time after data have been appended.
- *  The create call may also fail and will reurn NULL in that case. - kw
+ *  The create call may also fail and will return NULL in that case. - kw
  */
     extern HTChunk *HTChunkCreateMayFail(int growby, int failok);
 
@@ -211,7 +211,7 @@ extern "C" {
  *   ON EXIT,
  *
  *   returns           original chunk or a pointer to the new chunk
- *                     (orginal chunk is referenced to the new one
+ *                     (original chunk is referenced to the new one
  *                     by the field 'next')
  *
  */

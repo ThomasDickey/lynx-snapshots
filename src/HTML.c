@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTML.c,v 1.193 2019/08/23 23:20:31 tom Exp $
+ * $LynxId: HTML.c,v 1.194 2020/01/21 22:19:23 tom Exp $
  *
  *		Structured stream to Rich hypertext converter
  *		============================================
@@ -11,7 +11,7 @@
  *
  *	Override this module if making a new GUI browser.
  *
- *   Being Overidden
+ *   Being Overridden
  *
  */
 
@@ -852,7 +852,7 @@ static void LYHandleFIG(HTStructured * me, const BOOL *present,
 	    if (*href) {
 		me->CurrentA = HTAnchor_findChildAndLink(me->node_anchor,	/* Parent */
 							 NULL,	/* Tag */
-							 href,	/* Addresss */
+							 href,	/* Address */
 							 INTERN_CHK(*intern_flag));	/* Type */
 		HText_beginAnchor(me->text, me->inUnderline, me->CurrentA);
 		if (me->inBoldH == FALSE)
@@ -1393,7 +1393,7 @@ static int HTML_start_element(HTStructured * me, int element_number,
 	     */
 	    me->CurrentA = HTAnchor_findChildAndLink(me->node_anchor,	/* Parent */
 						     NULL,	/* Tag */
-						     href,	/* Addresss */
+						     href,	/* Address */
 						     (temp
 						      ? (HTLinkType *)
 						      HTAtom_for(temp)
@@ -1423,7 +1423,7 @@ static int HTML_start_element(HTStructured * me, int element_number,
 	    if (!HText_hasToolbar(me->text) &&
 		(ID_A = HTAnchor_findChildAndLink(me->node_anchor,	/* Parent */
 						  LYToolbarName,	/* Tag */
-						  NULL,		/* Addresss */
+						  NULL,		/* Address */
 						  (HTLinkType *) 0))) {		/* Type */
 		HText_appendCharacter(me->text, '#');
 		HText_setLastChar(me->text, ' ');	/* absorb white space */
@@ -1582,7 +1582,7 @@ static int HTML_start_element(HTStructured * me, int element_number,
 	    }
 	    me->CurrentA = HTAnchor_findChildAndLink(me->node_anchor,	/* Parent */
 						     NULL,	/* Tag */
-						     href,	/* Addresss */
+						     href,	/* Address */
 						     (HTLinkType *) 0);		/* Type */
 	    CAN_JUSTIFY_PUSH(FALSE);
 	    LYEnsureSingleSpace(me);
@@ -1634,7 +1634,7 @@ static int HTML_start_element(HTStructured * me, int element_number,
 
 	    me->CurrentA = HTAnchor_findChildAndLink(me->node_anchor,	/* Parent */
 						     NULL,	/* Tag */
-						     href,	/* Addresss */
+						     href,	/* Address */
 						     (HTLinkType *) 0);		/* Type */
 	    LYEnsureDoubleSpace(me);
 	    CAN_JUSTIFY_PUSH_F
@@ -1678,7 +1678,7 @@ static int HTML_start_element(HTStructured * me, int element_number,
 	     HText_getLines(me->text) < (display_lines / 2)) &&
 	    (ID_A = HTAnchor_findChildAndLink(me->node_anchor,	/* Parent */
 					      LYToolbarName,	/* Tag */
-					      NULL,	/* Addresss */
+					      NULL,	/* Address */
 					      (HTLinkType *) 0))) {	/* Type */
 	    HText_beginAnchor(me->text, me->inUnderline, ID_A);
 	    HText_endAnchor(me->text, 0);
@@ -3162,7 +3162,7 @@ static int HTML_start_element(HTStructured * me, int element_number,
 		    if (id_string) {
 			if ((ID_A = HTAnchor_findChildAndLink(me->node_anchor,	/* Parent */
 							      id_string,	/* Tag */
-							      NULL,	/* Addresss */
+							      NULL,	/* Address */
 							      0)) != NULL) {	/* Type */
 			    HText_beginAnchor(me->text, me->inUnderline, ID_A);
 			    HText_endAnchor(me->text, 0);
@@ -3170,7 +3170,7 @@ static int HTML_start_element(HTStructured * me, int element_number,
 		    }
 		    me->CurrentA = HTAnchor_findChildAndLink(me->node_anchor,	/* Parent */
 							     NULL,	/* Tag */
-							     map_href,	/* Addresss */
+							     map_href,	/* Address */
 							     INTERN_LT);	/* Type */
 		    if (me->CurrentA && title) {
 			if ((dest = HTAnchor_parent(HTAnchor_followLink(me->CurrentA)
@@ -3208,7 +3208,7 @@ static int HTML_start_element(HTStructured * me, int element_number,
 		if (id_string && !map_href) {
 		    if ((ID_A = HTAnchor_findChildAndLink(me->node_anchor,	/* Parent */
 							  id_string,	/* Tag */
-							  NULL,		/* Addresss */
+							  NULL,		/* Address */
 							  0)) != NULL) {	/* Type */
 			HText_beginAnchor(me->text, me->inUnderline, ID_A);
 			HText_endAnchor(me->text, 0);
@@ -3220,7 +3220,7 @@ static int HTML_start_element(HTStructured * me, int element_number,
 		if (id_string) {
 		    if ((ID_A = HTAnchor_findChildAndLink(me->node_anchor,	/* Parent */
 							  id_string,	/* Tag */
-							  NULL,		/* Addresss */
+							  NULL,		/* Address */
 							  0)) != NULL) {	/* Type */
 			HText_beginAnchor(me->text, me->inUnderline, ID_A);
 			HText_endAnchor(me->text, 0);
@@ -3228,7 +3228,7 @@ static int HTML_start_element(HTStructured * me, int element_number,
 		}
 		me->CurrentA = HTAnchor_findChildAndLink(me->node_anchor,	/* Parent */
 							 NULL,	/* Tag */
-							 map_href,	/* Addresss */
+							 map_href,	/* Address */
 							 INTERN_LT);	/* Type */
 		if (me->CurrentA && title) {
 		    if ((dest = HTAnchor_parent(HTAnchor_followLink(me->CurrentA)
@@ -3263,7 +3263,7 @@ static int HTML_start_element(HTStructured * me, int element_number,
 		if (id_string) {
 		    if ((ID_A = HTAnchor_findChildAndLink(me->node_anchor,	/* Parent */
 							  id_string,	/* Tag */
-							  NULL,		/* Addresss */
+							  NULL,		/* Address */
 							  0)) != NULL) {	/* Type */
 			HText_beginAnchor(me->text, me->inUnderline, ID_A);
 			HText_endAnchor(me->text, 0);
@@ -3276,7 +3276,7 @@ static int HTML_start_element(HTStructured * me, int element_number,
 	     */
 	    me->CurrentA = HTAnchor_findChildAndLink(me->node_anchor,	/* Parent */
 						     NULL,	/* Tag */
-						     href,	/* Addresss */
+						     href,	/* Address */
 						     (HTLinkType *) 0);		/* Type */
 	    FREE(href);
 	    me->CurrentANum = HText_beginAnchor(me->text,
@@ -3328,7 +3328,7 @@ static int HTML_start_element(HTStructured * me, int element_number,
 	    }
 	    me->CurrentA = HTAnchor_findChildAndLink(me->node_anchor,	/* Parent */
 						     NULL,	/* Tag */
-						     map_href,	/* Addresss */
+						     map_href,	/* Address */
 						     INTERN_LT);	/* Type */
 	    if (me->CurrentA && title) {
 		if ((dest = HTAnchor_parent(HTAnchor_followLink(me->CurrentA)
@@ -3363,7 +3363,7 @@ static int HTML_start_element(HTStructured * me, int element_number,
 	    if (id_string) {
 		if ((ID_A = HTAnchor_findChildAndLink(me->node_anchor,	/* Parent */
 						      id_string,	/* Tag */
-						      NULL,	/* Addresss */
+						      NULL,	/* Address */
 						      (HTLinkType *) 0)) != NULL) {	/* Type */
 		    HText_beginAnchor(me->text, me->inUnderline, ID_A);
 		    HText_endAnchor(me->text, 0);
@@ -3738,7 +3738,7 @@ static int HTML_start_element(HTStructured * me, int element_number,
 		}
 		me->CurrentA = HTAnchor_findChildAndLink(me->node_anchor,	/* Parent */
 							 NULL,	/* Tag */
-							 href,	/* Addresss */
+							 href,	/* Address */
 							 (HTLinkType *) 0);	/* Type */
 		HTML_put_character(me, ' ');
 		HText_appendCharacter(me->text, '+');
@@ -3851,7 +3851,7 @@ static int HTML_start_element(HTStructured * me, int element_number,
 		}
 		me->CurrentA = HTAnchor_findChildAndLink(me->node_anchor,	/* Parent */
 							 NULL,	/* Tag */
-							 href,	/* Addresss */
+							 href,	/* Address */
 							 (HTLinkType *) 0);	/* Type */
 		me->CurrentANum = HText_beginAnchor(me->text,
 						    me->inUnderline,
@@ -3905,7 +3905,7 @@ static int HTML_start_element(HTStructured * me, int element_number,
 	    }
 	    me->CurrentA = HTAnchor_findChildAndLink(me->node_anchor,	/* Parent */
 						     NULL,	/* Tag */
-						     href,	/* Addresss */
+						     href,	/* Address */
 						     (HTLinkType *) 0);		/* Type */
 	    me->CurrentANum = HText_beginAnchor(me->text,
 						me->inUnderline,
@@ -3990,7 +3990,7 @@ static int HTML_start_element(HTStructured * me, int element_number,
 		}
 		me->CurrentA = HTAnchor_findChildAndLink(me->node_anchor,	/* Parent */
 							 NULL,	/* Tag */
-							 href,	/* Addresss */
+							 href,	/* Address */
 							 (HTLinkType *) 0);	/* Type */
 		me->CurrentANum = HText_beginAnchor(me->text,
 						    me->inUnderline,
@@ -4565,7 +4565,7 @@ static int HTML_start_element(HTStructured * me, int element_number,
 		    }
 		    me->CurrentA = HTAnchor_findChildAndLink(me->node_anchor,	/* Parent */
 							     NULL,	/* Tag */
-							     href,	/* Addresss */
+							     href,	/* Address */
 							     (HTLinkType *) 0);		/* Type */
 		    HText_beginAnchor(me->text, me->inUnderline, me->CurrentA);
 		    if (me->inBoldH == FALSE)
@@ -4938,7 +4938,7 @@ static int HTML_start_element(HTStructured * me, int element_number,
 	    if ((*id_string != '\0') &&
 		(ID_A = HTAnchor_findChildAndLink(me->node_anchor,	/* Parent */
 						  id_string,	/* Tag */
-						  NULL,		/* Addresss */
+						  NULL,		/* Address */
 						  (HTLinkType *) 0))) {		/* Type */
 		HText_beginAnchor(me->text, me->inUnderline, ID_A);
 		HText_endAnchor(me->text, 0);
@@ -5080,7 +5080,7 @@ static int HTML_start_element(HTStructured * me, int element_number,
 		    && non_empty(value[HTML_OPTION_ID])) {
 		    if ((ID_A = HTAnchor_findChildAndLink(me->node_anchor,	/* Parent */
 							  value[HTML_OPTION_ID],	/* Tag */
-							  NULL,		/* Addresss */
+							  NULL,		/* Address */
 							  0)) != NULL) {	/* Type */
 			HText_beginAnchor(me->text, me->inUnderline, ID_A);
 			HText_endAnchor(me->text, 0);
@@ -6301,7 +6301,7 @@ static int HTML_end_element(HTStructured * me, int element_number,
 		if (start != NULL &&
 		    first_end != NULL && first_end > start) {
 		    /*
-		     * Minumum requirements for the ad hoc parsing to have
+		     * Minimum requirements for the ad hoc parsing to have
 		     * succeeded are met.  We'll hope that it did succeed.  -
 		     * FM
 		     */

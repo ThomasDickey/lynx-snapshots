@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMail.c,v 1.99 2018/03/18 19:16:29 tom Exp $
+ * $LynxId: LYMail.c,v 1.100 2020/01/21 21:33:27 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTParse.h>
@@ -369,7 +369,7 @@ Blat <filename> -t <recipient> [optional switches (see below)]
 -b <recipient>    : blind carbon copy recipient list (comma separated)
 -help             : displays the help message.
 -mime             : MIME Quoted-Printable Content-Transfer-Encoding.
--q                : supresses *all* output.
+-q                : suppresses *all* output.
 -server <addr>    : overrides the default SMTP server to be used.
 
 */

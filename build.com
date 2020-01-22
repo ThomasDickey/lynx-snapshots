@@ -1,6 +1,6 @@
 $ v0 = 0
 $ v = f$verify(v0)
-$! $LynxId: build.com,v 1.19 2011/05/23 23:49:53 tom Exp $
+$! $LynxId: build.com,v 1.20 2020/01/21 21:54:23 tom Exp $
 $!			BUILD.COM
 $!
 $!   Command file to build LYNX.EXE on VMS systems.
@@ -385,7 +385,7 @@ $ cc UCAuto
 $ cc UCAux
 $ cc UCdomap
 $!
-$!	Link the objects and libaries.
+$!	Link the objects and libraries.
 $!
 $ IF f$getsyi("ARCH_NAME") .eqs. "IA64"
 $ THEN

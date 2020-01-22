@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYHistory.c,v 1.90 2018/03/05 22:32:14 tom Exp $
+ * $LynxId: LYHistory.c,v 1.91 2020/01/21 21:34:20 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTP.h>
@@ -35,7 +35,7 @@
 HTList *Visited_Links = NULL;	/* List of safe popped docs. */
 int Visited_Links_As = VISITED_LINKS_AS_LATEST | VISITED_LINKS_REVERSE;
 
-static VisitedLink *PrevVisitedLink = NULL;	/* NULL on auxillary */
+static VisitedLink *PrevVisitedLink = NULL;	/* NULL on auxiliary */
 static VisitedLink *PrevActiveVisitedLink = NULL;	/* Last non-auxillary */
 static VisitedLink Latest_first;
 static VisitedLink Latest_last;

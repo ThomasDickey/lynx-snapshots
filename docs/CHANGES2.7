@@ -127,7 +127,7 @@
 * Portability tweaks for the mini inews utility. - FM
 * Fixed an old and irrelevant typo in HTWriter.c. - JS
 01-29-97
-* Added more REL tokens that are acceptible for banner links. - FM
+* Added more REL tokens that are acceptable for banner links. - FM
 * Ifdef'ed the standard foo_PATH definitions for FreeBSD at the bottom of
   userdefs.h, based on a patch from AAC, and assuming they also apply for
   NetBSD, BSDI, and Linux (we'll see 8-). - FM
@@ -267,7 +267,7 @@
   (dl9rdz@cip.e-technik.uni-erlangen.de). - FM
 * Tweaks of the body= handling in mailto URLs. - FM
 * Tweaks of the ftp gateway. - FM
-* Restored inheritence when resolving versus a base with the same scheme,
+* Restored inheritance when resolving versus a base with the same scheme,
   because the RFC1808 and Fielding Draft behavior of not doing so yields
   too many failures in the real world (sigh...). - FM
 01-09-97
@@ -277,7 +277,7 @@
   now. - FM
 * Mods to resolve the HREFs for LINKs with REV="made" or REV="owner"
   versus the base (a many, many year old bug finally caught 8-). - FM 
-* Added HTAlert messages about BASE HREF vaules, Location header values,
+* Added HTAlert messages about BASE HREF values, Location header values,
   and Refresh URL values that were not received as absolute URLs.  We
   still resolve them versus the RequestURI, since that's invariably
   what is intended, and thus the optimum "error recovery" strategy. - FM
@@ -448,11 +448,11 @@
 * Block Unix relative path strings in lynxexec and lynxprog URLs. - DT
 12-14-96
 * Added a COLLAPSE_BR_TAGS compilation and configuration symbol for
-  determinining whether Lynx collapses serial BR tags.  Note that the
+  determining whether Lynx collapses serial BR tags.  Note that the
   valid way to create extra blank lines in HTML is with PRE blocks that
   contain only newlines. - FM
 * Fixed a longstanding glitch in the alignment handling which could
-  cause a Paragraph's ALIGN value to cross embebbed blocks, rather than
+  cause a Paragraph's ALIGN value to cross embedded blocks, rather than
   restoring the appropriate alignment for the outer division or block
   on close of the embedded block. - FM 
 * Modified HR handling so that it inserts the same before and after
@@ -729,7 +729,7 @@
 11-04-96
 * Tweaks of host parsing when a password and/or username is present
   in override_proxy() of HTAccess.c. - FM
-* Tweaks of the UNDERSCORES and STARS macro setup and useage to avoid
+* Tweaks of the UNDERSCORES and STARS macro setup and usage to avoid
   possible crashes for FORMs with long values. - FM
 * Worked in Tom Zerucha's (tz@execpc.com) code for fork-based name
   server lookups that can be 'z'apped.  May not yet be portable to
@@ -751,7 +751,7 @@
 * Adding info about -DNO_TTYTYPE in top level Makefile. - FM
 * Use clrtoeol() in LYOptions.c to ensure that no terminals which use
   reverse video for standout() will have trailing reverse fields on
-  edits of option vaules. - DK
+  edits of option values. - DK
 * Offer user@host instead of WebMaster@host for the 'c'omment command
   if the path for the URL begins with a tilde and there is no
   LINK REV="made" present. - FM
@@ -764,7 +764,7 @@
   was present in a text/html document, and save a known owner URL when
   toggling to source ('\') so that the 'c'omment command can still be
   used with that owner's (mailto or homepage) URL, but the source can
-  be included in the comment, as would be desireable (instead of a bad
+  be included in the comment, as would be desirable (instead of a bad
   rendering) when sending a comment about bad HTML in the document. - FM
 10-20-96
 * Added code for traversing the pseudo-documents created for client-side

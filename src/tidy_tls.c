@@ -1,6 +1,6 @@
 /*
- * $LynxId: tidy_tls.c,v 1.39 2019/01/03 00:18:31 tom Exp $
- * Copyright 2008-2018,2019 Thomas E. Dickey
+ * $LynxId: tidy_tls.c,v 1.40 2020/01/21 22:26:43 tom Exp $
+ * Copyright 2008-2019,2020 Thomas E. Dickey
  * with fix Copyright 2008 by Thomas Viehmann
  *
  * Required libraries:
@@ -538,7 +538,7 @@ int SSL_write(SSL * ssl, const void *buffer, int length)
 }
 
 /*
- * Return method-data for SSL verion 3, with the option of rollback to SSL
+ * Return method-data for SSL version 3, with the option of rollback to SSL
  * version 2.
  */
 SSL_METHOD *SSLv23_client_method(void)

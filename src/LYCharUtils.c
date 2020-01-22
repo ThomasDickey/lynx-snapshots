@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYCharUtils.c,v 1.132 2019/08/20 09:22:40 tom Exp $
+ * $LynxId: LYCharUtils.c,v 1.133 2020/01/21 21:36:01 tom Exp $
  *
  *  Functions associated with LYCharSets.c and the Lynx version of HTML.c - FM
  *  ==========================================================================
@@ -2117,11 +2117,11 @@ void LYHandleMETA(HTStructured * me, const BOOL *present,
 		HTAnchor_setUCInfoStage(me->node_anchor,
 					current_char_set,
 					UCT_STAGE_HTEXT,
-					UCT_SETBY_MIME);	/* highest priorty! */
+					UCT_SETBY_MIME);	/* highest priority! */
 		HTAnchor_setUCInfoStage(me->node_anchor,
 					current_char_set,
 					UCT_STAGE_STRUCTURED,
-					UCT_SETBY_MIME);	/* highest priorty! */
+					UCT_SETBY_MIME);	/* highest priority! */
 		me->outUCI = HTAnchor_getUCInfoStage(me->node_anchor,
 						     UCT_STAGE_HTEXT);
 		/* The SGML stage will be reset in change_chartrans_handling */
@@ -2457,7 +2457,7 @@ void LYHandleMETA(HTStructured * me, const BOOL *present,
 		(
 		    me->node_anchor,	/* Parent */
 		    id_string,	/* Tag */
-		    href,	/* Addresss */
+		    href,	/* Address */
 		    (HTLinkType *) 0);	/* Type */
 	    if (id_string)
 		*cp = '#';
@@ -3092,7 +3092,7 @@ void LYCheckForID(HTStructured * me, const BOOL *present,
 	     (
 		 me->node_anchor,	/* Parent */
 		 temp,		/* Tag */
-		 NULL,		/* Addresss */
+		 NULL,		/* Address */
 		 (HTLinkType *) 0))) {	/* Type */
 	    HText_beginAnchor(me->text, me->inUnderline, ID_A);
 	    HText_endAnchor(me->text, 0);
@@ -3121,7 +3121,7 @@ void LYHandleID(HTStructured * me, const char *id)
 	 (
 	     me->node_anchor,	/* Parent */
 	     id,		/* Tag */
-	     NULL,		/* Addresss */
+	     NULL,		/* Address */
 	     (HTLinkType *) 0)) != NULL) {	/* Type */
 	HText_beginAnchor(me->text, me->inUnderline, ID_A);
 	HText_endAnchor(me->text, 0);
