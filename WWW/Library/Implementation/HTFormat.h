@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFormat.h,v 1.36 2018/03/05 22:25:50 tom Exp $
+ * $LynxId: HTFormat.h,v 1.37 2020/01/21 22:02:59 tom Exp $
  *
  *                                            HTFormat: The format manager in the WWW Library
  *                          MANAGE DIFFERENT DOCUMENT FORMATS
@@ -269,7 +269,7 @@ HTSetPresentation: Register a system command to present a format
 
 /*
 
-HTSetConversion:   Register a converstion routine
+HTSetConversion:   Register a conversion routine
 
   ON ENTRY,
 
@@ -332,7 +332,7 @@ HTStackValue: Find the cost of a filter stack
 
   ON ENTRY,
 
-  format_in               The fomat of the data to be converted
+  format_in               The format of the data to be converted
 
   format_out              The format required
 

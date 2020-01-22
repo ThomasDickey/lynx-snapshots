@@ -11,7 +11,7 @@
  *	Purpose:	Provide an atexit function for libraries without such.
  *	Remarks/Portability/Dependencies/Restrictions:
  *		Include this header in every file that you have an exit or
- *			atexit statment.
+ *			atexit statement.
  *	Revision History:
  *		06-15-94	created Lynx 2-3-1 Garrett Arch Blythe
  */

@@ -167,7 +167,7 @@ inc : $(HFILES)
 	echo Include files generated from hypertext.
 
 binary : /pub/www/bin/$(WWW_MACH)/libwww_$(VC).a
-	echo FTP archive binary Libray $(VC) for $(WWW_MACH) up to date.
+	echo FTP archive binary Library $(VC) for $(WWW_MACH) up to date.
 
 
 /pub/www/bin/$(WWW_MACH)/libwww_$(VC).a : libwww.a

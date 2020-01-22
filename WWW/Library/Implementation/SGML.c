@@ -1,5 +1,5 @@
 /*
- * $LynxId: SGML.c,v 1.168 2019/01/27 19:14:06 tom Exp $
+ * $LynxId: SGML.c,v 1.169 2020/01/21 22:06:39 tom Exp $
  *
  *			General SGML Parser code		SGML.c
  *			========================
@@ -51,7 +51,7 @@ static int sgml_offset;
 
 static char *entity_string;	/* this is used for printing entity name.
 
-				   Unconditionally added since redundant assigments don't hurt much */
+				   Unconditionally added since redundant assignments don't hurt much */
 
 static void fake_put_character(HTStream *p GCC_UNUSED,
 			       int c GCC_UNUSED)
@@ -2271,7 +2271,7 @@ static void SGML_character(HTStream *me, int c_in)
 	goto case_S_litteral;
 
 	/*
-	 * In litteral mode, waits only for specific end tag (for compatibility
+	 * In literal mode, waits only for specific end tag (for compatibility
 	 * with old servers, and for Lynx).  - FM
 	 */
       case_S_litteral:
@@ -2308,7 +2308,7 @@ static void SGML_character(HTStream *me, int c_in)
 	    int i;
 
 	    /*
-	     * If complete match, end litteral.
+	     * If complete match, end literal.
 	     */
 	    if ((c == '>') &&
 		testlast >= 0 && !testtag->name[testlast]) {

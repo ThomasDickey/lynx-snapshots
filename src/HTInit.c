@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTInit.c,v 1.91 2018/03/05 22:52:26 Keith.Bowes Exp $
+ * $LynxId: HTInit.c,v 1.92 2020/01/21 22:20:09 tom Exp $
  *
  *		Configuration-specific Initialization		HTInit.c
  *		----------------------------------------
@@ -934,7 +934,7 @@ static int PassesTest(struct MailcapEntry *mc)
 
     /*
      *  Free the test command as well since
-     *  we wont be needing it anymore.
+     *  we won't be needing it anymore.
      */
     if (result != 1)
 	FREE(mc->testcommand);

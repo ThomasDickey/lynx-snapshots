@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYLeaks.h,v 1.18 2018/12/27 10:27:01 tom Exp $
+ * $LynxId: LYLeaks.h,v 1.19 2020/01/21 22:05:46 tom Exp $
  */
 #ifndef __LYLEAKS_H
 /*
@@ -15,7 +15,7 @@
  *  Purpose:		Header to convert requests for allocation to Lynx
  *			custom functions to track memory leaks.
  *  Remarks/Portability/Dependencies/Restrictions:
- *	For the stdlib.h allocation functions to be overriden by the
+ *	For the stdlib.h allocation functions to be overridden by the
  *		Lynx memory tracking functions all modules allocating,
  *		freeing, or resizing memory must have LY_FIND_LEAKS
  *		defined before including this file.

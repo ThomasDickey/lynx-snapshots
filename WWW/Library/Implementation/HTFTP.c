@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFTP.c,v 1.140 2018/12/27 10:24:31 tom Exp $
+ * $LynxId: HTFTP.c,v 1.141 2020/01/21 22:07:13 tom Exp $
  *
  *			File Transfer Protocol (FTP) Client
  *			for a WorldWideWeb browser
@@ -1457,7 +1457,7 @@ static void free_entryinfo_struct_contents(EntryInfo *entry_info)
 	FREE(entry_info->type);
 	FREE(entry_info->date);
     }
-    /* dont free the struct */
+    /* don't free the struct */
 }
 
 /*

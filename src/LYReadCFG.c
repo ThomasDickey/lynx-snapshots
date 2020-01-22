@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYReadCFG.c,v 1.195 2019/08/24 00:25:43 tom Exp $
+ * $LynxId: LYReadCFG.c,v 1.196 2020/01/21 21:33:37 tom Exp $
  */
 #ifndef NO_RULES
 #include <HTRules.h>
@@ -1011,7 +1011,7 @@ static int suffix_fun(char *value)
     /*
      * mime-type is not converted to lowercase on input, to make it possible to
      * reproduce the equivalent of some of the HTInit.c defaults that use mixed
-     * case, although that is not recomended.  - kw
+     * case, although that is not recommended.  - kw
      */
     if (!*mime_type) {		/* that's ok now, with an encoding!  */
 	CTRACE((tfp, "SUFFIX:%s without MIME type for %s\n", value,

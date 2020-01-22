@@ -26,7 +26,7 @@ extern "C" {
 
 Escaping Strings
 
-   HTDeSlash takes out the invlaid characters in a URL path ELEMENT by
+   HTDeSlash takes out the invalid characters in a URL path ELEMENT by
    converting them into hex-escaped characters.  HTEnSlash does the reverse.
 
    Each returns a pointer to a newly allocated string which must eventually be

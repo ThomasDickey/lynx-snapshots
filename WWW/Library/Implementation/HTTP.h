@@ -1,8 +1,8 @@
 /*
- * $LynxId: HTTP.h,v 1.11 2012/02/23 00:41:07 tom Exp $
+ * $LynxId: HTTP.h,v 1.12 2020/01/21 21:59:06 tom Exp $
  *
  * /Net/dxcern/userd/timbl/hypertext/WWW/Library/Implementation/HTTP.html
- *                                HYPERTEXT TRANFER PROTOCOL
+ *                                HYPERTEXT TRANSFER PROTOCOL
  */
 #ifndef HTTP_H
 #define HTTP_H

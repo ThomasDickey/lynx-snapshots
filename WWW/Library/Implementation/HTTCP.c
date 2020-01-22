@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTCP.c,v 1.152 2019/09/19 00:27:19 Steffen.Nurpmeso Exp $
+ * $LynxId: HTTCP.c,v 1.155 2020/01/22 01:58:28 tom Exp $
  *
  *			Generic Communication Code		HTTCP.c
  *			==========================
@@ -1856,11 +1856,18 @@ int HTDoConnect(const char *url,
 	StrAllocCopy(socks5_new_url, url);
 
 	/* Get node name and optional port number of wanted URL */
-	p1 = HTParse(socks5_new_url, "", PARSE_HOST);
 	socks5_host = NULL;
-	StrAllocCopy(socks5_host, p1);
-	strip_userid(socks5_host, FALSE);
-	FREE(p1);
+	if ((p1 = HTParse(socks5_new_url, "", PARSE_HOST)) != NULL) {
+	    StrAllocCopy(socks5_host, p1);
+	    strip_userid(socks5_host, FALSE);
+	    FREE(p1);
+	}
+
+	if (isEmpty(socks5_host)) {
+	    emsg = gettext("SOCKS5: no hostname found.");
+	    status = HT_ERROR;
+	    goto report_error;
+	}
 
 	if (strlen(socks5_host) > 255) {
 	    emsg = gettext("SOCKS5: hostname too long.");
@@ -2286,7 +2293,7 @@ int HTDoConnect(const char *url,
 	/* C99 */  {
 	    unsigned short x;	/* XXX 16-bit? */
 
-	    x = htons(socks5_port);
+	    x = htons((unsigned) socks5_port);
 	    memcpy(&pbuf[i], (unsigned char *) &x, sizeof x);
 	    i += (unsigned) sizeof(x);
 	}

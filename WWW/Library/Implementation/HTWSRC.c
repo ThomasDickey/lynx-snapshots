@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTWSRC.c,v 1.30 2016/11/24 15:29:50 tom Exp $
+ * $LynxId: HTWSRC.c,v 1.31 2020/01/21 22:05:46 tom Exp $
  *
  *			Parse WAIS Source file			HTWSRC.c
  *			======================
@@ -303,7 +303,7 @@ static void give_parameter(HTStream *me, int p)
     }
 }
 
-/*			Generate Outout
+/*			Generate Output
  *			===============
  */
 static void WSRC_gen_html(HTStream *me, int source_file)

@@ -1,13 +1,13 @@
 /*
- * $LynxId: userdefs.h,v 1.348 2019/08/28 22:59:25 tom Exp $
+ * $LynxId: userdefs.h,v 1.350 2020/01/21 23:42:06 tom Exp $
  *
  * Lynx - Hypertext navigation system
  *
+ *   Copyright 1996-2019,2020 Thomas E. Dickey and Lynx Developers Group
+ *   Note: GNU General Public License is not a copyright.
+ *
  *   (c) Copyright 1992, 1993, 1994 University of Kansas
  *	 1995, 1996: GNU General Public License
- *
- *   Copyright 1996-2018,2019 Thomas E. Dickey and Lynx Developers Group
- *   Note: GNU General Public License is not a copyright.
  */
 
 /*******************************************************************
@@ -1845,7 +1845,7 @@
  */
 
 /*****************************
- * These can be uncommmented to get more detail when debugging changes to
+ * These can be uncommented to get more detail when debugging changes to
  * the color-style and layout logic.
  */
 /*#define DEBUG_APPCH 1*/

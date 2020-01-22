@@ -1,4 +1,4 @@
-# $LynxId: def7_uni.tbl,v 1.32 2017/07/06 17:47:27 Keith.Bowes Exp $
+# $LynxId: def7_uni.tbl,v 1.33 2020/01/21 22:21:19 tom Exp $
 # Default 7bit replacements.
 #
 # This table is very important and should not be excluded from the distribution
@@ -1376,7 +1376,7 @@ U+2027:.
 U+2028 "\015"
 U+2029 "\015\012"
 
-# Dont wanna see these:
+# Don't want to see these:
 # POP DIRECTIONAL FORMATTING      202C
 U+202c:
 # LEFT-TO-RIGHT OVERRIDE  202D

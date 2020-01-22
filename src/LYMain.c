@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMain.c,v 1.286 2019/09/18 22:20:44 Steffen.Nurpmeso Exp $
+ * $LynxId: LYMain.c,v 1.287 2020/01/21 22:19:23 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTP.h>
@@ -1789,7 +1789,7 @@ int main(int argc,
 #endif
 
     /*
-     * Check for a help file URL in the environment. Overiding
+     * Check for a help file URL in the environment. Overriding
      * compiled-in default and configuration file setting, if found.
      */
     if ((cp = LYGetEnv("LYNX_HELPFILE")) != NULL)

@@ -123,7 +123,7 @@
 # doubled as "%%".
 #
 # Rules are processed sequentially first to last for each request, a rule
-# applies if the current URL matches URL1.  The current URL is initally the
+# applies if the current URL matches URL1.  The current URL is initially the
 # URL for the resource the user is trying to access, but may change as the
 # result of applied Map rules.  case-sensitive (!) string comparison is used,
 # in addition URL1 can contain one '*' which is interpreted as a wildcard
@@ -277,7 +277,7 @@
 # You have downloaded a bunch of HTML documents, and compressed them
 # to save space.  Then you discover that links between the files don't
 # work, because they all use the names of the uncompressed files.  The
-# following kind of rule will alow you to navigate, invisibly accessing
+# following kind of rule will allow you to navigate, invisibly accessing
 # the compressed files:
 #   Map file://localhost/somedir/*.html file://localhost/somedir/*.html.gz
 # or, perhaps better:

@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYUtils.c,v 1.297 2019/08/25 22:54:34 tom Exp $
+ * $LynxId: LYUtils.c,v 1.298 2020/01/21 21:35:17 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTCP.h>
@@ -2311,7 +2311,7 @@ UrlTypes is_url(char *filename)
 
     /*
      * Can't be a URL if it lacks a colon and if it starts with '[' it's
-     * probably IPv6 adress.
+     * probably IPv6 address.
      */
     if (NULL == StrChr(cp, ':') || cp[0] == '[')
 	return (result);

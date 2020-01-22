@@ -1,4 +1,4 @@
-/* $LynxId: LYStyle.h,v 1.19 2013/10/22 00:42:18 tom Exp $ */
+/* $LynxId: LYStyle.h,v 1.20 2020/01/21 21:35:25 tom Exp $ */
 #ifndef LYSTYLE_H
 #define LYSTYLE_H
 
@@ -61,7 +61,7 @@ extern "C" {
      */
     extern void cache_tag_styles(void);
 
-    /* use this for reading the end of string found during last invokation of
+    /* use this for reading the end of string found during last invocation of
      * TrimColorClass.
      */
     extern void FastTrimColorClass(const char *tag_name,

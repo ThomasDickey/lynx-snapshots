@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTStyle.h,v 1.17 2011/06/06 09:12:01 tom Exp $
+ * $LynxId: HTStyle.h,v 1.18 2020/01/21 22:02:35 tom Exp $
 					    HTStyle: Style management for libwww
                               STYLE DEFINITION FOR HYPERTEXT
 
@@ -97,7 +97,7 @@ extern "C" {
 
 	HTAnchor *anchor;	/* Anchor id if any, else zero */
 
-/*      Paragraph Attribtes     (a la NXTextStyle)
+/*      Paragraph Attributes    (a la NXTextStyle)
 */
 	HTCoord indent1st;	/* how far first line in paragraph is
 				   * indented */

@@ -205,7 +205,7 @@ they will be outlined in this file.
     existing one.  See `terminfo', `infocmp', `tic' etc. man pages if
     necessary.
     Alternatively, compiling Lynx with the slang library may avoid problems
-    with theses terminals.
+    with these terminals.
 
     The Sun console driver (aka wscons(7)) implements "reverse" and "bold"
     as "reverse", causing confusion where Lynx uses the distinction between

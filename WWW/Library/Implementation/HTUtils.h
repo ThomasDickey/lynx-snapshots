@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTUtils.h,v 1.130 2019/08/17 00:37:51 tom Exp $
+ * $LynxId: HTUtils.h,v 1.131 2020/01/21 22:08:40 tom Exp $
  *
  * Utility macros for the W3 code library
  * MACROS FOR GENERAL USE
@@ -131,7 +131,7 @@ char *alloca();
 
 #include <assert.h>
 
-/* suppress inadvertant use of gettext in makeuctb when cross-compiling */
+/* suppress inadvertent use of gettext in makeuctb when cross-compiling */
 #ifdef DONT_USE_GETTEXT
 #undef HAVE_GETTEXT
 #undef HAVE_LIBGETTEXT_H
@@ -292,7 +292,7 @@ typedef unsigned short mode_t;
   ERROR TYPE
 
    This is passed back when streams are aborted. It might be nice to have some structure
-   of error messages, numbers, and recursive pointers to reasons.  Curently this is a
+   of error messages, numbers, and recursive pointers to reasons.  Currently this is a
    placeholder for something more sophisticated.
 
  */

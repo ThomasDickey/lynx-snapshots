@@ -44,7 +44,7 @@
   USAGE: (UNIX)
      setenv no_proxy "domain1.dom, domain2.dom, domain3, etc"
 3-?-94
-* Fixed Referer: field handleing so that it doesn't crash on really
+* Fixed Referer: field handling so that it doesn't crash on really
   long URL's
 3-?-94
 * True popup menus are now supported for non-multiple SELECT lists.
@@ -62,7 +62,7 @@
 * Found the bug in the HTTP redirection code that was causing it
   not to work.  So HTTP redirection appears to work now!
 * Added Referer: header to HTTP requests to list the URL of
-  the document listing the requsted URL.   Here's an extract from CERN:
+  the document listing the requested URL.   Here's an extract from CERN:
      This optional header field allows the client to specify,
      for the server's benefit, the address ( URI ) of the document
      (or element within the document) from which the URI in the
@@ -102,7 +102,7 @@
   I've tried this out and it seems to work alright.  I don't think
   that users unfamiliar with this will have too hard a time figureing
   it out.  Once you see numbers or letter appearing it becomes fairly
-  obvious whats going on.  I'll put a message at the bottom of the
+  obvious what's going on.  I'll put a message at the bottom of the
   screen saying "use tab or arrow keys to move off of link."
 * added mods by David Trueman to implement -restrictions commandline
   option.  -restrictions allows a list of services to be disabled
@@ -135,14 +135,14 @@
 1-11-93
 * fixed -dump and -source options so that they work for
   binary files now.
-* Interruptable I/0 now completely works for UNIX systems.
+* Interruptible I/0 now completely works for UNIX systems.
   VMS is next.  Just hit an 'a' for abort anytime during a
   transfer to abort.  If there is a partial file to show, it
   will be shown.
-* Added command line option -show_curser.  If enabled the curser
+* Added command line option -show_cursor.  If enabled the cursor
   will not be hidden in the right hand corner but will instead
   be positioned at the start of the currently selected link.
-  show curser is the default for systems without FANCY_CURSES
+  show cursor is the default for systems without FANCY_CURSES
   capibilities, and the default configuration can be changed in
   userdefs.h
 1-9-93
@@ -151,7 +151,7 @@
   Would someone like to patch in some freeware inews code, or
   send me some?
 1-7-93
-* fixed bug in password handling which cuased it to be displayed
+* fixed bug in password handling which caused it to be displayed
   accidentally :(  (Danny Mayer)
 1-6-94
 * bold and emphasis now use curses underlining to represent
@@ -159,12 +159,12 @@
   the text is now removed.
 1-5-94
 * Added configurable download menu so that binary files may
-  be downloaded using any protocal.  Download menu is displayed
+  be downloaded using any protocol.  Download menu is displayed
   after selecting a non-displayable file.
 * Added exec links.  4 types currently defined:
     files ending in:  .csh, .ksh, .sh, (for UNIX)  and .com (for VMS);
   Use exec link controls to turn on and off exec links.
-* Gopher menues are now within PRE so that spaces are not
+* Gopher menus are now within PRE so that spaces are not
   collapsed in menu entries.
 * added configurable character sets.  Can be set in lynx.cfg
   by the user in the options screen or in the users .lynxrc file
@@ -174,7 +174,7 @@
 ----------RELEASE of Lynx 2.1 and 2.1.1----------------------
 -grey area-
 * Ability to FTP to VMS systems. (Foteos Macrides)
-* Fixed lots of display and interupt problems (Foteos Macrides)
+* Fixed lots of display and interrupt problems (Foteos Macrides)
 * The Lynx Bookmark file is now interpreted as an HTML document.
   Old Lynx bookmark files must be converted using the lynx2html
   program or deleted.
@@ -195,13 +195,13 @@
 * '/' now only searches through the current displayed document for
   strings and can not be used for searchable index documents.
 * Capital 'Q' now quits without asking for confirmation.
-* 'm' for Main Menu now askes for confirmation and does NOT clear
+* 'm' for Main Menu now asks for confirmation and does NOT clear
   the history stack.
 * Blockquote style changed slightly.
 * fixed bug with A and other tags messing up formatting
-  withing PRE segments.
+  within PRE segments.
 * Verbose Gopher option removed, verbose gopher functionality
-  is now set permenantly on.
+  is now set permanently on.
 * Default editor is now configurable in the lynx.cfg file.
 * Default bookmark file is now configurable in the lynx.cfg file.
 
@@ -252,7 +252,7 @@
 10-19-93
 * Added preloaded searches to gopher URL's.  They previously
   didn't work.  This is readily apparent as preloaded CSO
-  searches, which alot of people wanted.
+  searches, which a lot of people wanted.
 * removed old hytelnet compatibility code which looked in
   multiple directories to find the correct file.  If you still
   need this capibility talk to me.
@@ -307,7 +307,7 @@
 8-27-93
 * Caused major international incident when a large bug was discovered after
   release. :)
-* Fixed internal document hypertext refernces with URL's.  '#selector'
+* Fixed internal document hypertext references with URL's.  '#selector'
   strings now work again.
 
 8-24-93
@@ -377,14 +377,14 @@
   The BR tag inserts a line break and maintains the current style!
   The BR tag may be used anywhere.
 * added HR (horizontal rule tag!)
-  The HR tag puts a horizontal line seperating two bodies of text.
+  The HR tag puts a horizontal line separating two bodies of text.
   The HR tag may be used anywhere.
 
 8-8-93
 * All spaces, tabs and returns are now collapsed down do one
   space.
 * fixed bug whiched caused certain links beginning at the
-  begining of a line to be bad.
+  beginning of a line to be bad.
 * added '*' (stars) to unordered lists and numbers to ordered
   lists.
 * changed dir lists to be more like menu lists.
@@ -428,7 +428,7 @@ Added an option to turn on link numbering
 
 4-7-93
 Fixed read_rc() bug which caused .lynxrc files to be read incorrectly
-Fixed file cacheing bug which only allowed searching to be performed
+Fixed file caching bug which only allowed searching to be performed
 once.  (it cached the answer and displayed that each time a new
 search was requested)
 

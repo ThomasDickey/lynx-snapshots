@@ -1,10 +1,10 @@
-<!-- $LynxId: Lynx_users_guide.html,v 1.142 2019/12/05 01:19:28 tom Exp $ -->
+<!-- $LynxId: Lynx_users_guide.html,v 1.144 2020/01/21 23:22:55 tom Exp $ -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN">
 
 <html>
 <head>
   <meta name="generator" content=
-  "HTML Tidy for Linux (vers 25 March 2009), see www.w3.org">
+  "HTML Tidy for HTML5 for Linux version 5.2.0">
 
   <title>Lynx Users Guide v2.8.9</title>
   <link rev="made" href="mailto:lynx-dev@nongnu.org">
@@ -12,7 +12,7 @@
   "text/html; charset=us-ascii">
   <meta name="description" content=
   "This is the user's guide to Lynx, giving detailed information on how to use the program, and how to change its configuration using the options menu.">
-  </head>
+</head>
 
 <body>
   <h1>Lynx Users Guide v2.8.9</h1>
@@ -58,8 +58,7 @@
     Lynx with the WWW_HOME environment variable.</a></li>
 
     <li><a href="#IntraDocNav" name="ToC-IntraDocNav" id=
-    "ToC-IntraDocNav">Navigating hypertext documents with
-    Lynx</a></li>
+    "ToC-IntraDocNav">Navigating hypertext documents with Lynx</a></li>
 
     <li><a href="#Disposing" name="ToC-Disposing" id=
     "ToC-Disposing">Printing, Mailing, and Saving rendered files to
@@ -70,8 +69,7 @@
     documents</a></li>
 
     <li><a href="#RemoteSource" name="ToC-RemoteSource" id=
-    "ToC-RemoteSource">Downloading and Saving source
-    files.</a></li>
+    "ToC-RemoteSource">Downloading and Saving source files.</a></li>
 
     <li><a href="#ReDo" name="ToC-ReDo" id="ToC-ReDo">Reloading
     files and refreshing the display</a></li>
@@ -157,8 +155,7 @@
     development history</a></li>
   </ul>
 
-  <h2 id="id-Help"><a name="Help" id="Help">Lynx online
-  help</a></h2>
+  <h2 id="id-Help"><a name="Help" id="Help">Lynx online help</a></h2>
 
   <p>Online help is available while viewing any document. Press the
   &ldquo;<samp>?</samp>&rdquo; or &ldquo;<samp>H</samp>&rdquo; key
@@ -190,35 +187,48 @@
   <dl>
     <dt>UNIX</dt>
 
-    <dd><code>lynx filename</code></dd>
+    <dd><code>lynx filename</code>
+    </dd>
 
-    <dd><code>lynx /home/my-dir/filename</code></dd>
+    <dd><code>lynx /home/my-dir/filename</code>
+    </dd>
 
-    <dd><code>lynx ~/filename</code></dd>
+    <dd><code>lynx ~/filename</code>
+    </dd>
 
     <dt>VMS</dt>
 
-    <dd><code>lynx filename</code></dd>
+    <dd><code>lynx filename</code>
+    </dd>
 
-    <dd><code>lynx dua5:[my-directory]filename</code></dd>
+    <dd><code>lynx dua5:[my-directory]filename</code>
+    </dd>
 
-    <dd><code>lynx /dua5/my-directory/filename</code></dd>
+    <dd><code>lynx /dua5/my-directory/filename</code>
+    </dd>
 
-    <dd><code>lynx ~/filename</code></dd>
+    <dd><code>lynx ~/filename</code>
+    </dd>
 
-    <dd><code>lynx sys$login:filename</code></dd>
+    <dd><code>lynx sys$login:filename</code>
+    </dd>
 
-    <dd><code>lynx /sys$login/filename</code></dd>
+    <dd><code>lynx /sys$login/filename</code>
+    </dd>
 
     <dt>Win32/DOS</dt>
 
-    <dd><code>lynx file:///filename</code></dd>
+    <dd><code>lynx file:///filename</code>
+    </dd>
 
-    <dd><code>lynx filename</code></dd>
+    <dd><code>lynx filename</code>
+    </dd>
 
-    <dd><code>lynx c:/dir/filename</code></dd>
+    <dd><code>lynx c:/dir/filename</code>
+    </dd>
 
-    <dd><code>lynx //n/dir/filename</code></dd>
+    <dd><code>lynx //n/dir/filename</code>
+    </dd>
   </dl>
 
   <p>When executed, Lynx will clear the screen and display as much
@@ -305,13 +315,15 @@
   URLs take the general form:</p>
 
   <blockquote>
-    <p><code>PROTOCOL :// HOST / PATH</code></p>
+    <p><code>PROTOCOL :// HOST / PATH</code>
+    </p>
   </blockquote>
 
   <p>where</p>
 
   <dl>
-    <dt><code>PROTOCOL</code></dt>
+    <dt><code>PROTOCOL</code>
+    </dt>
 
     <dd>
       <p>identifies the communications protocol (<em>scheme</em>)
@@ -320,14 +332,16 @@
       variety of servers, each with its own protocol.</p>
     </dd>
 
-    <dt><code>HOST</code></dt>
+    <dt><code>HOST</code>
+    </dt>
 
     <dd>
       <p>is the Internet address of the computer system on which
       the server is running, and</p>
     </dd>
 
-    <dt><code>PATH</code></dt>
+    <dt><code>PATH</code>
+    </dt>
 
     <dd>
       <p>is a scheme-specific field which for some schemes may
@@ -340,30 +354,36 @@
   <dl>
     <dt>HTTP (HyperText Transfer Protocol)</dt>
 
-    <dd><code>https://invisible-island.net/lynx/</code></dd>
+    <dd><code>https://invisible-island.net/lynx/</code>
+    </dd>
 
     <dt>Gopher</dt>
 
-    <dd><code>gopher://gopher.micro.umn.edu/11/</code></dd>
+    <dd><code>gopher://gopher.micro.umn.edu/11/</code>
+    </dd>
 
     <dt>FTP (File Transfer Protocol)</dt>
 
-    <dd><code>ftp://ftp2.cc.ukans.edu/pub/lynx/README</code></dd>
+    <dd><code>ftp://ftp2.cc.ukans.edu/pub/lynx/README</code>
+    </dd>
 
     <dt>WAIS (Wide Area Information Service protocol)</dt>
 
-    <dd><code>wais://cnidr.org/directory-of-servers</code></dd>
+    <dd><code>wais://cnidr.org/directory-of-servers</code>
+    </dd>
 
     <dt>A URL may be specified to Lynx on the command line, as
     in:</dt>
 
     <dd><code>lynx
-    http://kufacts.cc.ukans.edu/cwis/kufacts_start.html</code></dd>
+    http://kufacts.cc.ukans.edu/cwis/kufacts_start.html</code>
+    </dd>
   </dl>
 
   <p>Lynx also will attempt to create a complete URL if you include
   adequate portions of it in the startfile argument. For
   example:</p>
+
   <pre>
                  <em>wfbr</em>          will be expanded to:
       <em>http://www.wfbr.edu/</em>     and:
@@ -389,22 +409,25 @@
       <dl>
         <dt>ksh</dt>
 
-        <dd><code>export WWW_HOME=http://www.w3.org/</code></dd>
+        <dd><code>export WWW_HOME=http://www.w3.org/</code>
+        </dd>
 
         <dt>csh</dt>
 
-        <dd><code>setenv WWW_HOME http://www.w3.org/</code></dd>
+        <dd><code>setenv WWW_HOME http://www.w3.org/</code>
+        </dd>
       </dl>
     </dd>
 
     <dt>VMS</dt>
 
-    <dd><code>define "WWW_HOME" "http://www.w3.org/"</code></dd>
+    <dd><code>define "WWW_HOME" "http://www.w3.org/"</code>
+    </dd>
 
     <dt>win32</dt>
 
-    <dd><code>WWW_HOME=http://www.w3.org/ [or in
-    registry]</code></dd>
+    <dd><code>WWW_HOME=http://www.w3.org/ [or in registry]</code>
+    </dd>
   </dl>
 
   <p>Note that on VMS the double-quoting <em>must</em> be included
@@ -419,6 +442,7 @@
   displaying links is known as "navigation." With Lynx almost all
   navigation can be accomplished with the arrow keys and the
   numeric keypad.</p>
+
   <pre>
                                        +-------+-------+-------+
                                        | TOP   |  /|\  | Page  |
@@ -563,9 +587,11 @@
   <dl>
     <dt>Command</dt>
 
-    <dd><code>lynx file://localhost/FULL/PATH/FILENAME</code></dd>
+    <dd><code>lynx file://localhost/FULL/PATH/FILENAME</code>
+    </dd>
 
-    <dd><code>lynx path/filename.html</code></dd>
+    <dd><code>lynx path/filename.html</code>
+    </dd>
   </dl>
 
   <p>In addition, the user must also specify an editor in the
@@ -694,6 +720,7 @@
   <em>cover page</em> describing a WAIS database and how to
   formulate query strings for searching it, and include an element
   such as:</p>
+
   <pre>
       <em>&lt;ISINDEX PROMPT="Enter WAIS query:"
                HREF="wais://net.bio.net/biologists-addresses"&gt;</em>
@@ -718,6 +745,7 @@
   form-based. The form-based menu shown below is an HTML file
   generated at runtime, in which the user fills in choices as in
   any ordinary HTML form.</p>
+
   <pre>
                     Options Menu (Lynx Version 2.8.9dev.15)
 
@@ -795,7 +823,6 @@
 
   View the file lynx.cfg.
 
-
         Accept Changes - Reset Changes - Left Arrow cancels changes
 
 </pre>
@@ -804,6 +831,7 @@
   which the user wants to change. It is compiled into Lynx and is
   accessed by setting FORMS_OPTIONS to TRUE in <a href=
   "#lynx.cfg">lynx.cfg</a>.</p>
+
   <pre>
              Options Menu (Lynx Version 2.8.9dev.15)
 
@@ -1487,7 +1515,8 @@
 
         <li><em>as links</em>, which allows you to use an external
         viewer</li>
-      </ul><br>
+      </ul>
+      <br>
     </dd>
 
     <dt>Show scrollbar</dt>
@@ -1517,7 +1546,8 @@
         <li>Pause when showing message</li>
 
         <li>Show transfer rate</li>
-      </ul><br>
+      </ul>
+      <br>
     </dd>
 
     <dt>SSL Prompting</dt>
@@ -1678,7 +1708,8 @@
         <dt>By Last Visit</dt>
 
         <dt>By Last Visit Reversed</dt>
-      </dl><br>
+      </dl>
+      <br>
     </dd>
 
     <dt>X Display</dt>
@@ -1704,6 +1735,7 @@
   HEAD section a LINK element with appropriate value for REV
   attribute. Two values are recognized: <em>owner</em> and
   <em>made</em> (these are case insensitive). For example,</p>
+
   <pre>
 &lt;HEAD&gt;
     &hellip;
@@ -1745,8 +1777,7 @@
 
   <p>[<a href="#ToC-Mail">ToC</a>]</p>
 
-  <h2 id="id-News"><a name="News" id="News">USENET News
-  posting</a></h2>
+  <h2 id="id-News"><a name="News" id="News">USENET News posting</a></h2>
 
   <p>While reading <a href=
   "http://www.w3.org/LineMode/User/AboutNewsServers.html">news</a>
@@ -1858,8 +1889,7 @@
   selection menu, or <em>RETURN</em> for the default bookmark file.
   [<a href="#ToC-Bookmarks">ToC</a>]</p>
 
-  <h2 id="id-Jumps"><a name="Jumps" id="Jumps">Jump
-  Command</a></h2>
+  <h2 id="id-Jumps"><a name="Jumps" id="Jumps">Jump Command</a></h2>
 
   <p>Similar to the bookmarks file is the jumps file: for an
   example, look in the <em>samples</em> subdirectory in the
@@ -1911,21 +1941,24 @@
   available in DIRED mode are</p>
 
   <dl>
-    <dt><code>C)reate</code></dt>
+    <dt><code>C)reate</code>
+    </dt>
 
     <dd>
       <p>Type &ldquo;<samp>c</samp>&rdquo; to create a new file.
       New file will be empty.</p>
     </dd>
 
-    <dt><code>D)ownload</code></dt>
+    <dt><code>D)ownload</code>
+    </dt>
 
     <dd>
       <p>Type &ldquo;<samp>d</samp>&rdquo; to download using one of
       the pre-defined options.</p>
     </dd>
 
-    <dt><code>E)dit</code></dt>
+    <dt><code>E)dit</code>
+    </dt>
 
     <dd>
       <p>Type &ldquo;<samp>e</samp>&rdquo; to spawn the editor
@@ -1933,7 +1966,8 @@
       editing.</p>
     </dd>
 
-    <dt><code>F)ull Menu</code></dt>
+    <dt><code>F)ull Menu</code>
+    </dt>
 
     <dd>
       <p>Type &ldquo;<samp>f</samp>&rdquo; to show full menu of
@@ -1942,7 +1976,8 @@
       <!-- List of full menu options --></p>
     </dd>
 
-    <dt><code>M)odify</code></dt>
+    <dt><code>M)odify</code>
+    </dt>
 
     <dd>
       <p>Type &ldquo;<samp>m</samp>&rdquo; to modify the name or
@@ -1951,14 +1986,16 @@
       file to a different location.</p>
     </dd>
 
-    <dt><code>R)emove</code></dt>
+    <dt><code>R)emove</code>
+    </dt>
 
     <dd>
       <p>Type &ldquo;<samp>r</samp>&rdquo; to remove the selected
       file or directory.</p>
     </dd>
 
-    <dt><code>T)ag</code></dt>
+    <dt><code>T)ag</code>
+    </dt>
 
     <dd>
       <p>Type &ldquo;<samp>t</samp>&rdquo; to tag highlighted file.
@@ -1966,7 +2003,8 @@
       of highlighted ones.</p>
     </dd>
 
-    <dt><code>U)pload</code></dt>
+    <dt><code>U)pload</code>
+    </dt>
 
     <dd>
       <p>Type &ldquo;<samp>u</samp>&rdquo; to upload a file to the
@@ -1994,7 +2032,8 @@
   commands.</p>
 
   <dl>
-    <dt><strong><em>^A</em></strong></dt>
+    <dt><strong><em>^A</em></strong>
+    </dt>
 
     <dd>
       <p><em>Control-A</em> jumps you to the beginning of the
@@ -2006,7 +2045,8 @@
       Enhanced Keyboard.</p>
     </dd>
 
-    <dt><strong><em>^E</em></strong></dt>
+    <dt><strong><em>^E</em></strong>
+    </dt>
 
     <dd>
       <p><em>Control-E</em> jumps you to the end of the current
@@ -2018,7 +2058,8 @@
       Keyboard.</p>
     </dd>
 
-    <dt><strong><em>^B</em></strong></dt>
+    <dt><strong><em>^B</em></strong>
+    </dt>
 
     <dd>
       <p><em>Control-B</em> normally jumps you to the previous page
@@ -2029,7 +2070,8 @@
       "#InteractiveOptions">Lynx Options Menu</a>).</p>
     </dd>
 
-    <dt><strong><em>^F</em></strong></dt>
+    <dt><strong><em>^F</em></strong>
+    </dt>
 
     <dd>
       <p><em>Control-F</em> normally jumps you to the next page of
@@ -2039,7 +2081,8 @@
       emacs-like key movement is enabled.</p>
     </dd>
 
-    <dt><strong><em>^N</em></strong></dt>
+    <dt><strong><em>^N</em></strong>
+    </dt>
 
     <dd>
       <p><em>Control-N</em> normally jumps you forward two lines in
@@ -2050,7 +2093,8 @@
       emacs-like key movement is enabled.</p>
     </dd>
 
-    <dt><strong><em>^P</em></strong></dt>
+    <dt><strong><em>^P</em></strong>
+    </dt>
 
     <dd>
       <p><em>Control-P</em> normally jumps you back two lines in
@@ -2059,7 +2103,8 @@
       emacs-like key movement is enabled.</p>
     </dd>
 
-    <dt><strong><em>^K</em></strong></dt>
+    <dt><strong><em>^K</em></strong>
+    </dt>
 
     <dd>
       <p><em>Control-K</em> invokes the <a href=
@@ -2067,7 +2112,8 @@
       contains cookies.</p>
     </dd>
 
-    <dt><strong><em>^T</em></strong></dt>
+    <dt><strong><em>^T</em></strong>
+    </dt>
 
     <dd>
       <p><em>Control-T</em> toggles Lynx trace mode on and off.
@@ -2084,14 +2130,16 @@
       author.</p>
     </dd>
 
-    <dt><strong><em>^X</em></strong></dt>
+    <dt><strong><em>^X</em></strong>
+    </dt>
 
     <dd>
       <p><em>Control-X</em> invokes the <a href="#Cache">Cache Jar
       Page</a> if it contains cached documents.</p>
     </dd>
 
-    <dt><strong><samp>E</samp></strong></dt>
+    <dt><strong><samp>E</samp></strong>
+    </dt>
 
     <dd>
       <p>The &ldquo;<samp>E</samp>&rdquo; command allows you to
@@ -2108,7 +2156,8 @@
       editor for the current document.</p>
     </dd>
 
-    <dt><strong><samp>g</samp></strong></dt>
+    <dt><strong><samp>g</samp></strong>
+    </dt>
 
     <dd>
       <p>The &ldquo;<samp>g</samp>&rdquo; command allows any URL to
@@ -2120,7 +2169,8 @@
       keys.</p>
     </dd>
 
-    <dt><strong><samp>G</samp></strong></dt>
+    <dt><strong><samp>G</samp></strong>
+    </dt>
 
     <dd>
       <p>The &ldquo;<samp>G</samp>&rdquo; command allows you to
@@ -2140,7 +2190,8 @@
       &ldquo;<samp>g</samp>&rdquo; command.</p>
     </dd>
 
-    <dt><strong><samp>z</samp></strong></dt>
+    <dt><strong><samp>z</samp></strong>
+    </dt>
 
     <dd>
       <p>Lynx supports completely interruptible I/O processes.
@@ -2150,21 +2201,24 @@
       displayed.</p>
     </dd>
 
-    <dt><strong><samp>)</samp></strong></dt>
+    <dt><strong><samp>)</samp></strong>
+    </dt>
 
     <dd>
       <p>The <samp>)</samp> command jumps you forward half a page
       in the current document.</p>
     </dd>
 
-    <dt><strong><samp>(</samp></strong></dt>
+    <dt><strong><samp>(</samp></strong>
+    </dt>
 
     <dd>
       <p>The <samp>(</samp> command jumps you back half a page in
       the current document.</p>
     </dd>
 
-    <dt><strong><samp>#</samp></strong></dt>
+    <dt><strong><samp>#</samp></strong>
+    </dt>
 
     <dd>
       <p>The &ldquo;<samp>#</samp>&rdquo; command jumps you to the
@@ -2173,7 +2227,8 @@
       position in the document.</p>
     </dd>
 
-    <dt><strong><samp>!</samp></strong></dt>
+    <dt><strong><samp>!</samp></strong>
+    </dt>
 
     <dd>
       <p>When &ldquo;<samp>!</samp>&rdquo; is pressed your default
@@ -2184,7 +2239,8 @@
       normally is a synonym.</p>
     </dd>
 
-    <dt><strong><samp>=</samp></strong></dt>
+    <dt><strong><samp>=</samp></strong>
+    </dt>
 
     <dd>
       <p>The &ldquo;<samp>=</samp>&rdquo; command shows information
@@ -2206,7 +2262,8 @@
       </ul>
     </dd>
 
-    <dt><strong><samp>;</samp></strong></dt>
+    <dt><strong><samp>;</samp></strong>
+    </dt>
 
     <dd>
       <p>The <samp>;</samp> command shows the <em>Lynx Trace
@@ -2225,7 +2282,8 @@
     </dd>
 
     <dt><a name="asterisk-key" id=
-    "asterisk-key"><strong><samp>*</samp></strong></a></dt>
+    "asterisk-key"><strong><samp>*</samp></strong></a>
+    </dt>
 
     <dd>
       <p>The &ldquo;<samp>*</samp>&rdquo; command toggles
@@ -2236,7 +2294,8 @@
       mode toggled off.</p>
     </dd>
 
-    <dt><strong><samp>@</samp></strong></dt>
+    <dt><strong><samp>@</samp></strong>
+    </dt>
 
     <dd>
       <p>The &ldquo;<samp>@</samp>&rdquo; command toggles raw 8-bit
@@ -2247,7 +2306,8 @@
     </dd>
 
     <dt><a name="lbracket-key" id=
-    "lbracket-key"><strong><samp>[</samp></strong></a></dt>
+    "lbracket-key"><strong><samp>[</samp></strong></a>
+    </dt>
 
     <dd>
       <p>The &ldquo;<samp>[</samp>&rdquo; command toggles
@@ -2260,7 +2320,8 @@
       images' sources.</p>
     </dd>
 
-    <dt><strong><samp>]</samp></strong></dt>
+    <dt><strong><samp>]</samp></strong>
+    </dt>
 
     <dd>
       <p>The &ldquo;<samp>]</samp>&rdquo; command is used to send
@@ -2275,7 +2336,8 @@
       treat it as invalid and return an error message.</p>
     </dd>
 
-    <dt><strong><samp>{</samp></strong></dt>
+    <dt><strong><samp>{</samp></strong>
+    </dt>
 
     <dd>
       <p>If the line-wrapping margin is wider than the terminal's
@@ -2285,7 +2347,8 @@
       slang library.</p>
     </dd>
 
-    <dt><strong><samp>|</samp></strong></dt>
+    <dt><strong><samp>|</samp></strong>
+    </dt>
 
     <dd>
       <p>&ldquo;<samp>|</samp>&rdquo; toggles Lynx line-wrapping
@@ -2318,7 +2381,8 @@
       slang library.</p>
     </dd>
 
-    <dt><strong><samp>}</samp></strong></dt>
+    <dt><strong><samp>}</samp></strong>
+    </dt>
 
     <dd>
       <p>If the line-wrapping margin is wider than the terminal's
@@ -2328,7 +2392,8 @@
       slang library.</p>
     </dd>
 
-    <dt><em>numbers</em></dt>
+    <dt><em>numbers</em>
+    </dt>
 
     <dd>
       <p>Lynx offers other, advanced navigation features when
@@ -2455,7 +2520,8 @@
       &nbsp;&nbsp;stty lnext undef<br>
       &nbsp;&nbsp;$HOME/bin/lynx "$@"<br>
       &nbsp;&nbsp;stty lnext ^V<br>
-      &nbsp;&nbsp;exit</code></p>
+      &nbsp;&nbsp;exit</code>
+      </p>
 
       <p>NB when NOT in the Line Editor, <em>^V</em> is by default
       bound to the command to switch between SortaSGML and TagSoup
@@ -2504,6 +2570,7 @@
       <p>TEXTAREA fields can be edited using an external editor.
       The statusline should tell you when this is possible and what
       key to use, it might for example say</p>
+
       <pre>
           <strong>(Textarea) Enter text. </strong>[ ..... ]<strong> (^Xe for editor).</strong>
 </pre>
@@ -2528,9 +2595,9 @@
       not conflict</em>).</p>
 
       <p>Please see the <a href="#CtrlVNote">note above</a> for
-      details about <em>^V</em> behavior.</p>You can also use two
-      other special TEXTAREA functions. Again, these are already
-      bound to key sequences in the <a href=
+      details about <em>^V</em> behavior.</p>
+      You can also use two other special TEXTAREA functions. Again,
+      these are already bound to key sequences in the <a href=
       "keystrokes/edit_help.html#TASpecial">Line-Editor
       Bindings</a>, by default <em>^Xg</em> and <em>^Xi</em>. You
       can use different keys by adding KEYMAP bindings to your
@@ -2589,6 +2656,7 @@
   will invoke a no-cache resubmission if the reply from a form
   submission included a META element with a no-cache Pragma or
   Cache-Control directive:</p>
+
   <pre>
       <em>&lt;META HTTP-EQUIV="Pragma" CONTENT="no-cache"&gt;</em>
       <em>&lt;META HTTP-EQUIV="Cache-Control" CONTENT="no-cache"&gt;</em>
@@ -2758,6 +2826,7 @@
   the FORM's ACTION, which is normally the script, itself, or a
   PATH_INFO field, and thus might be misleading. This also can be
   done via a META element in any document:</p>
+
   <pre>
       <em>&lt;META HTTP-EQUIV="Content-Disposition"
             CONTENT="file; filename=name.suffix"&gt;</em>
@@ -2774,6 +2843,7 @@
 
   <p>There are 3 choices in <em>lynx.cfg</em>, with 2 corresponding
   keys:</p>
+
   <pre>
      MAKE_LINKS_FOR_ALL_IMAGES        *  IMAGE_TOGGLE
      MAKE_PSEUDO_ALTS_FOR_INLINES     [  INLINE_TOGGLE
@@ -2782,6 +2852,7 @@
 
   <p>You can also use the <em>Options Menu</em>, as outlined
   below:</p>
+
   <pre>
      key  lynx.cfg       FM KM .lynxrc    variable in source
 
@@ -2797,6 +2868,7 @@ the other two cannot be saved between sessions.
   <p>In the Form-based Menu, the 3-way &ldquo;Show images&rdquo;
   selection combines the effects of the &ldquo;*&rdquo; &amp;
   &ldquo;[&rdquo; keys, as follows:</p>
+
   <pre>
      Ignore      clickable_images = FALSE, pseudo_inline_alts = FALSE
      As labels   clickable_images = FALSE, pseudo_inline_alts = TRUE
@@ -2885,8 +2957,7 @@ the other two cannot be saved between sessions.
 
   <p>[<a href="#ToC-Tables">ToC</a>]</p>
 
-  <h2 id="id-Tabs"><a name="Tabs" id="Tabs">Lynx and HTML
-  Tabs</a></h2>
+  <h2 id="id-Tabs"><a name="Tabs" id="Tabs">Lynx and HTML Tabs</a></h2>
 
   <p>Lynx implements the <a href=
   "http://www.w3.org/MarkUp/html3/Contents.html">HTML 3.0</a> TAB
@@ -3036,6 +3107,7 @@ the other two cannot be saved between sessions.
   is indicated in its content) with greater than normal left and
   right margins, and the block will begin with a <em>FOOTNOTE:</em>
   label. For example, if the document contains:</p>
+
   <pre>
         See the <em>&lt;A HREF="#fn1"&gt;</em><a href=
 "#an1">footnote</a><em>&lt;/A&gt;</em>.
@@ -3043,6 +3115,7 @@ the other two cannot be saved between sessions.
 
   <p>activating that link will take you to the labeled rendering
   of:</p>
+
   <pre>
         <em>&lt;FN ID="fn1"&gt;</em>&lt;p&gt;<a name="an1" id=
 "an1">Lynx does not use popups for FN blocks.</a>&lt;/p&gt;<em>&lt;/FN&gt;</em>
@@ -3076,6 +3149,7 @@ the other two cannot be saved between sessions.
   bottom of the document. The content of a NOTE block can be any
   HTML markup that is valid in the BODY of the document. This is an
   example:</p>
+
   <pre>
       <em>&lt;NOTE CLASS="warning" ID="too-bad"&gt;
         &lt;p&gt;The W3C vendors did not retain NOTE in the HTML 3.2 draft.&lt;/p&gt;
@@ -3294,6 +3368,7 @@ the other two cannot be saved between sessions.
   at a specified number of seconds following receipt of the current
   document. This procedure has been termed
   <em>client-side-pull</em>. An example of such an element is:</p>
+
   <pre>
       <em>&lt;META HTTP-EQUIV="Refresh" CONTENT="3; URL=http://host/path"&gt;</em>
 </pre>
@@ -3405,8 +3480,7 @@ the other two cannot be saved between sessions.
 
   <p>[<a href="#ToC-Cookies">ToC</a>]</p>
 
-  <h2 id="id-Cache"><a name="Cache" id="Cache">Cached
-  Documents</a></h2>
+  <h2 id="id-Cache"><a name="Cache" id="Cache">Cached Documents</a></h2>
 
   <p>A list of documents which are in lynx's internal cache is
   accessible through hypothetical <em>Cache Jar</em> which can be
@@ -3521,17 +3595,21 @@ the other two cannot be saved between sessions.
   of the following:</p>
 
   <dl>
-    <dt><code>Command</code></dt>
+    <dt><code>Command</code>
+    </dt>
 
-    <dd><code>lynx [options]</code></dd>
+    <dd><code>lynx [options]</code>
+    </dd>
 
-    <dd><code>lynx [options] startfile</code></dd>
+    <dd><code>lynx [options] startfile</code>
+    </dd>
   </dl>
 
   <p>where</p>
 
   <dl>
-    <dt><code>startfile</code></dt>
+    <dt><code>startfile</code>
+    </dt>
 
     <dd>
       <p>is the file or URL that Lynx will load at start-up.</p>
@@ -3556,7 +3634,8 @@ the other two cannot be saved between sessions.
       </ul>
     </dd>
 
-    <dt><code>options</code></dt>
+    <dt><code>options</code>
+    </dt>
 
     <dd>
       <p>Lynx uses only long option names. Option names can begin
@@ -3599,7 +3678,8 @@ the other two cannot be saved between sessions.
       substitution must be made. These are the options:</p>
 
       <dl>
-        <dt><code><strong>-</strong></code></dt>
+        <dt><code><strong>-</strong></code>
+        </dt>
 
         <dd>
           <p>If the argument is only
@@ -3620,13 +3700,15 @@ the other two cannot be saved between sessions.
           [???].</p>
         </dd>
 
-        <dt><code><strong>-accept_all_cookies</strong></code></dt>
+        <dt><code><strong>-accept_all_cookies</strong></code>
+        </dt>
 
         <dd>
           <p>accept all cookies.</p>
         </dd>
 
-        <dt><code><strong>-anonymous</strong></code></dt>
+        <dt><code><strong>-anonymous</strong></code>
+        </dt>
 
         <dd>
           <p>apply restrictions appropriate for an anonymous
@@ -3635,14 +3717,16 @@ the other two cannot be saved between sessions.
         </dd>
 
         <dt>
-        <code><strong>-assume_charset=</strong><em>MIMENAME</em></code></dt>
+        <code><strong>-assume_charset=</strong><em>MIMENAME</em></code>
+        </dt>
 
         <dd>
           <p>charset for documents that do not specify it.</p>
         </dd>
 
         <dt>
-        <code><strong>-assume_local_charset=</strong><em>MIMENAME</em></code></dt>
+        <code><strong>-assume_local_charset=</strong><em>MIMENAME</em></code>
+        </dt>
 
         <dd>
           <p>charset assumed for local files, i.e., files which
@@ -3651,13 +3735,15 @@ the other two cannot be saved between sessions.
         </dd>
 
         <dt>
-        <code><strong>-assume_unrec_charset=</strong><em>MIMENAME</em></code></dt>
+        <code><strong>-assume_unrec_charset=</strong><em>MIMENAME</em></code>
+        </dt>
 
         <dd>
           <p>use this instead of unrecognized charsets.</p>
         </dd>
 
-        <dt><code><strong>-auth=</strong><em>ID:PW</em></code></dt>
+        <dt><code><strong>-auth=</strong><em>ID:PW</em></code>
+        </dt>
 
         <dd>
           <p>set authorization <em>identifier</em> and
@@ -3666,21 +3752,24 @@ the other two cannot be saved between sessions.
           switch.</p>
         </dd>
 
-        <dt><code><strong>-base</strong></code></dt>
+        <dt><code><strong>-base</strong></code>
+        </dt>
 
         <dd>
           <p>prepend a request URL comment and BASE tag to
           text/html outputs for -source dumps.</p>
         </dd>
 
-        <dt><code><strong>-bibp=</strong><em>URL</em></code></dt>
+        <dt><code><strong>-bibp=</strong><em>URL</em></code>
+        </dt>
 
         <dd>
           <p>specify a local bibp server (default
           http://bibhost/).</p>
         </dd>
 
-        <dt><code><strong>-blink</strong></code></dt>
+        <dt><code><strong>-blink</strong></code>
+        </dt>
 
         <dd>
           <p>forces high intensity background colors for color
@@ -3689,7 +3778,8 @@ the other two cannot be saved between sessions.
           emulators), or to OS/2 EMX with ncurses.</p>
         </dd>
 
-        <dt><code><strong>-book</strong></code></dt>
+        <dt><code><strong>-book</strong></code>
+        </dt>
 
         <dd>
           <p>use the bookmark page as the startfile. The default or
@@ -3698,7 +3788,8 @@ the other two cannot be saved between sessions.
           unavailable or blank.</p>
         </dd>
 
-        <dt><code><strong>-buried_news</strong></code></dt>
+        <dt><code><strong>-buried_news</strong></code>
+        </dt>
 
         <dd>
           <p>toggles scanning of news articles for buried
@@ -3708,42 +3799,46 @@ the other two cannot be saved between sessions.
           uuencoded messages can be trashed.</p>
         </dd>
 
-        <dt>
-        <code><strong>-cache=</strong><em>NUMBER</em></code></dt>
+        <dt><code><strong>-cache=</strong><em>NUMBER</em></code>
+        </dt>
 
         <dd>
           <p>set the <em>NUMBER</em> of documents cached in memory.
           The default is 10.</p>
         </dd>
 
-        <dt><code><strong>-center</strong></code></dt>
+        <dt><code><strong>-center</strong></code>
+        </dt>
 
         <dd>
           <p>Toggle center alignment in HTML TABLE.</p>
         </dd>
 
-        <dt><code><strong>-case</strong></code></dt>
+        <dt><code><strong>-case</strong></code>
+        </dt>
 
         <dd>
           <p>enable case-sensitive string searching.</p>
         </dd>
 
-        <dt>
-        <code><strong>-cfg=</strong><em>FILENAME</em></code></dt>
+        <dt><code><strong>-cfg=</strong><em>FILENAME</em></code>
+        </dt>
 
         <dd>
           <p>specifies a Lynx configuration file other than the
           default <a href="#lynx.cfg">lynx.cfg</a>.</p>
         </dd>
 
-        <dt><code><strong>-child</strong></code></dt>
+        <dt><code><strong>-child</strong></code>
+        </dt>
 
         <dd>
           <p>exit on left-arrow in startfile, and disable save to
           disk.</p>
         </dd>
 
-        <dt><code><strong>-child_relaxed</strong></code></dt>
+        <dt><code><strong>-child_relaxed</strong></code>
+        </dt>
 
         <dd>
           <p>exit on left-arrow in startfile, but allow save to
@@ -3751,7 +3846,8 @@ the other two cannot be saved between sessions.
         </dd>
 
         <dt>
-        <code><strong>-cmd_log=</strong><em>FILENAME</em></code></dt>
+        <code><strong>-cmd_log=</strong><em>FILENAME</em></code>
+        </dt>
 
         <dd>
           <p>write keystroke commands and related information to
@@ -3759,7 +3855,8 @@ the other two cannot be saved between sessions.
         </dd>
 
         <dt>
-        <code><strong>-cmd_script=</strong><em>FILENAME</em></code></dt>
+        <code><strong>-cmd_script=</strong><em>FILENAME</em></code>
+        </dt>
 
         <dd>
           <p>read keystroke commands from the specified file. You
@@ -3770,14 +3867,16 @@ the other two cannot be saved between sessions.
           beginning with "#", or a keyword:</p>
 
           <dl>
-            <dt><code><strong>exit</strong></code></dt>
+            <dt><code><strong>exit</strong></code>
+            </dt>
 
             <dd>
               <p>causes the script to stop, and forces lynx to exit
               immediately.</p>
             </dd>
 
-            <dt><code><strong>key</strong></code></dt>
+            <dt><code><strong>key</strong></code>
+            </dt>
 
             <dd>
               <p>the character value, in printable form. Cursor and
@@ -3787,7 +3886,8 @@ the other two cannot be saved between sessions.
               values represent other 8-bit codes.</p>
             </dd>
 
-            <dt><code><strong>set</strong></code></dt>
+            <dt><code><strong>set</strong></code>
+            </dt>
 
             <dd>
               <p>followed by a "name=value" allows one to override
@@ -3796,12 +3896,13 @@ the other two cannot be saved between sessions.
           </dl>
         </dd>
 
-        <dt><code><strong>-color</strong></code></dt>
+        <dt><code><strong>-color</strong></code>
+        </dt>
 
         <dd>
           <p>forces color mode on. This feature is only available
           if Lynx is built using the slang library. The slang
-          library will send ANSI color sequences irregardless of
+          library will send ANSI color sequences without regard to
           the type of terminal which is being used.</p>
 
           <p>If color support is instead provided by a
@@ -3817,7 +3918,8 @@ the other two cannot be saved between sessions.
         </dd>
 
         <dt>
-        <code><strong>-connect_timeout</strong>=<em>N</em></code></dt>
+        <code><strong>-connect_timeout</strong>=<em>N</em></code>
+        </dt>
 
         <dd>
           <p>Sets the connection timeout, where <em>N</em> is given
@@ -3825,7 +3927,8 @@ the other two cannot be saved between sessions.
         </dd>
 
         <dt>
-        <code><strong>-cookie_file=</strong><em>FILENAME</em></code></dt>
+        <code><strong>-cookie_file=</strong><em>FILENAME</em></code>
+        </dt>
 
         <dd>
           <p>specifies a file to use to read cookies. If none is
@@ -3834,7 +3937,8 @@ the other two cannot be saved between sessions.
         </dd>
 
         <dt>
-        <code><strong>-cookie_save_file=</strong><em>FILENAME</em></code></dt>
+        <code><strong>-cookie_save_file=</strong><em>FILENAME</em></code>
+        </dt>
 
         <dd>
           <p>specifies a file to use to store cookies. If none is
@@ -3842,20 +3946,23 @@ the other two cannot be saved between sessions.
           <code><strong>-cookie_file</strong></code> is used.</p>
         </dd>
 
-        <dt><code><strong>-cookies</strong></code></dt>
+        <dt><code><strong>-cookies</strong></code>
+        </dt>
 
         <dd>
           <p>toggles handling of Set-Cookie headers.</p>
         </dd>
 
-        <dt><code><strong>-core</strong></code></dt>
+        <dt><code><strong>-core</strong></code>
+        </dt>
 
         <dd>
           <p>toggles forced core dumps on fatal errors. (Unix
           only)</p>
         </dd>
 
-        <dt><code><strong>-crawl</strong></code></dt>
+        <dt><code><strong>-crawl</strong></code>
+        </dt>
 
         <dd>
           <p>with <em>-traversal</em>, output each page to a
@@ -3865,35 +3972,39 @@ the other two cannot be saved between sessions.
           <em>-traversal</em>, but to stdout.</p>
         </dd>
 
-        <dt><code><strong>-curses_pads</strong></code></dt>
+        <dt><code><strong>-curses_pads</strong></code>
+        </dt>
 
         <dd>
           <p>toggles the use of curses "pad" feature which supports
           left/right scrolling of the display.</p>
         </dd>
 
-        <dt><code><strong>-debug_partial</strong></code></dt>
+        <dt><code><strong>-debug_partial</strong></code>
+        </dt>
 
         <dd>
           <p>separate incremental display stages with MessageSecs
           delay</p>
         </dd>
 
-        <dt>
-        <code><strong>-display=</strong><em>DISPLAY</em></code></dt>
+        <dt><code><strong>-display=</strong><em>DISPLAY</em></code>
+        </dt>
 
         <dd>
           <p>set the display variable for X rexe-ced programs.</p>
         </dd>
 
         <dt>
-        <code><strong>-display_charset=</strong><em>MIMEname</em></code></dt>
+        <code><strong>-display_charset=</strong><em>MIMEname</em></code>
+        </dt>
 
         <dd>
           <p>set the charset for the terminal output.</p>
         </dd>
 
-        <dt><code><strong>-dont_wrap_pre</strong></code></dt>
+        <dt><code><strong>-dont_wrap_pre</strong></code>
+        </dt>
 
         <dd>
           <p>inhibit wrapping of text in &lt;pre&gt; when -dump'ing
@@ -3901,7 +4012,8 @@ the other two cannot be saved between sessions.
           session.</p>
         </dd>
 
-        <dt><code><strong>-dump</strong></code></dt>
+        <dt><code><strong>-dump</strong></code>
+        </dt>
 
         <dd>
           <p>dumps the formatted output of the default document or
@@ -3909,25 +4021,28 @@ the other two cannot be saved between sessions.
           can be used in the following way:</p>
 
           <blockquote>
-            <p><em>lynx -dump http://www.w3.org/</em></p>
+            <p><em>lynx -dump http://www.w3.org/</em>
+            </p>
           </blockquote>
         </dd>
 
-        <dt>
-        <code><strong>-editor=</strong><em>EDITOR</em></code></dt>
+        <dt><code><strong>-editor=</strong><em>EDITOR</em></code>
+        </dt>
 
         <dd>
           <p>enable external editing using the specified
           <em>EDITOR</em>. (vi, ed, emacs, etc.)</p>
         </dd>
 
-        <dt><code><strong>-emacskeys</strong></code></dt>
+        <dt><code><strong>-emacskeys</strong></code>
+        </dt>
 
         <dd>
           <p>enable emacs-like key movement.</p>
         </dd>
 
-        <dt><code><strong>-enable_scrollback</strong></code></dt>
+        <dt><code><strong>-enable_scrollback</strong></code>
+        </dt>
 
         <dd>
           <p>toggles behavior compatible with the scrollback keys
@@ -3936,28 +4051,32 @@ the other two cannot be saved between sessions.
         </dd>
 
         <dt>
-        <code><strong>-error_file=</strong><em>FILENAME</em></code></dt>
+        <code><strong>-error_file=</strong><em>FILENAME</em></code>
+        </dt>
 
         <dd>
           <p>the status code from the HTTP request is placed in
           this file.</p>
         </dd>
 
-        <dt><code><strong>-exec</strong></code></dt>
+        <dt><code><strong>-exec</strong></code>
+        </dt>
 
         <dd>
           <p>enable local program execution (normally not
           configured).</p>
         </dd>
 
-        <dt><code><strong>-fileversions</strong></code></dt>
+        <dt><code><strong>-fileversions</strong></code>
+        </dt>
 
         <dd>
           <p>include all versions of files in local VMS directory
           listings.</p>
         </dd>
 
-        <dt><code><strong>-find_leaks</strong></code></dt>
+        <dt><code><strong>-find_leaks</strong></code>
+        </dt>
 
         <dd>
           <p>toggles the memory leak checking off. Normally this is
@@ -3965,49 +4084,55 @@ the other two cannot be saved between sessions.
           be disabled for a session.</p>
         </dd>
 
-        <dt>
-        <code><strong>-force_empty_hrefless_a</strong></code></dt>
+        <dt><code><strong>-force_empty_hrefless_a</strong></code>
+        </dt>
 
         <dd>
           <p>force HREF-less &ldquo;A&rdquo; elements to be empty
           (close them as soon as they are seen).</p>
         </dd>
 
-        <dt><code><strong>-force_html</strong></code></dt>
+        <dt><code><strong>-force_html</strong></code>
+        </dt>
 
         <dd>
           <p>forces the first document to be interpreted as
           HTML.</p>
         </dd>
 
-        <dt><code><strong>-force_secure</strong></code></dt>
+        <dt><code><strong>-force_secure</strong></code>
+        </dt>
 
         <dd>
           <p>toggles forcing of the secure flag for SSL
           cookies.</p>
         </dd>
 
-        <dt><code><strong>-forms_options</strong></code></dt>
+        <dt><code><strong>-forms_options</strong></code>
+        </dt>
 
         <dd>
           <p>toggles whether the Options Menu is key-based or
           form-based.</p>
         </dd>
 
-        <dt><code><strong>-from</strong></code></dt>
+        <dt><code><strong>-from</strong></code>
+        </dt>
 
         <dd>
           <p>toggles transmissions of From headers to HTTP or HTTPS
           servers.</p>
         </dd>
 
-        <dt><code><strong>-ftp</strong></code></dt>
+        <dt><code><strong>-ftp</strong></code>
+        </dt>
 
         <dd>
           <p>disable ftp access.</p>
         </dd>
 
-        <dt><code><strong>-get_data</strong></code></dt>
+        <dt><code><strong>-get_data</strong></code>
+        </dt>
 
         <dd>
           <p>properly formatted data for a get form are read in
@@ -4015,27 +4140,31 @@ the other two cannot be saved between sessions.
           a line that starts with &ldquo;---&rdquo;.</p>
         </dd>
 
-        <dt><code><strong>-head</strong></code></dt>
+        <dt><code><strong>-head</strong></code>
+        </dt>
 
         <dd>
           <p>send a HEAD request for the mime headers.</p>
         </dd>
 
-        <dt><code><strong>-help</strong></code></dt>
+        <dt><code><strong>-help</strong></code>
+        </dt>
 
         <dd>
           <p>print this Lynx command syntax usage message.</p>
         </dd>
 
         <dt>
-        <code><strong>-hiddenlinks=</strong><em>option</em></code></dt>
+        <code><strong>-hiddenlinks=</strong><em>option</em></code>
+        </dt>
 
         <dd>
           <p>control the display of hidden links. Option values
           are:</p>
 
           <dl>
-            <dt><code><strong>merge</strong></code></dt>
+            <dt><code><strong>merge</strong></code>
+            </dt>
 
             <dd>
               <p>hidden links show up as bracketed numbers and are
@@ -4043,7 +4172,8 @@ the other two cannot be saved between sessions.
               their occurrence in the document.</p>
             </dd>
 
-            <dt><code><strong>listonly</strong></code></dt>
+            <dt><code><strong>listonly</strong></code>
+            </dt>
 
             <dd>
               <p>hidden links are shown only on <em>L</em>ist
@@ -4053,7 +4183,8 @@ the other two cannot be saved between sessions.
               of those lists. This is the default behavior.</p>
             </dd>
 
-            <dt><code><strong>ignore</strong></code></dt>
+            <dt><code><strong>ignore</strong></code>
+            </dt>
 
             <dd>
               <p>hidden links do not appear even in listings.</p>
@@ -4061,15 +4192,16 @@ the other two cannot be saved between sessions.
           </dl>
         </dd>
 
-        <dt><code><strong>-historical</strong></code></dt>
+        <dt><code><strong>-historical</strong></code>
+        </dt>
 
         <dd>
           <p>toggles use of &ldquo;&gt;&rdquo; or
           &ldquo;--&gt;&rdquo; as a terminator for comments.</p>
         </dd>
 
-        <dt>
-        <code><strong>-homepage=</strong><em>URL</em></code></dt>
+        <dt><code><strong>-homepage=</strong><em>URL</em></code>
+        </dt>
 
         <dd>
           <p>set homepage separate from start page. Will be used if
@@ -4079,68 +4211,76 @@ the other two cannot be saved between sessions.
           &ldquo;<samp>m</samp>&rdquo;ain menu command.</p>
         </dd>
 
-        <dt><code><strong>-image_links</strong></code></dt>
+        <dt><code><strong>-image_links</strong></code>
+        </dt>
 
         <dd>
           <p>toggles inclusion of links for all images.</p>
         </dd>
 
-        <dt><code><strong>-ismap</strong></code></dt>
+        <dt><code><strong>-ismap</strong></code>
+        </dt>
 
         <dd>
           <p>toggles inclusion of ISMAP links when client-side MAPs
           are present.</p>
         </dd>
 
-        <dt><code><strong>-index=</strong><em>URL</em></code></dt>
+        <dt><code><strong>-index=</strong><em>URL</em></code>
+        </dt>
 
         <dd>
           <p>set the default index file to the specified
           <em>URL</em></p>
         </dd>
 
-        <dt><code><strong>-justify</strong></code></dt>
+        <dt><code><strong>-justify</strong></code>
+        </dt>
 
         <dd>
           <p>do justification of text.</p>
         </dd>
 
-        <dt>
-        <code><strong>-link=</strong><em>NUMBER</em></code></dt>
+        <dt><code><strong>-link=</strong><em>NUMBER</em></code>
+        </dt>
 
         <dd>
           <p>starting count for lnk#.dat files produced by
           <em>-crawl</em>.</p>
         </dd>
 
-        <dt><code><strong>-localhost</strong></code></dt>
+        <dt><code><strong>-localhost</strong></code>
+        </dt>
 
         <dd>
           <p>disable URLs that point to remote hosts.</p>
         </dd>
 
-        <dt><code><strong>-locexec</strong></code></dt>
+        <dt><code><strong>-locexec</strong></code>
+        </dt>
 
         <dd>
           <p>enable local program execution from local files only
           (if lynx was compiled with local execution enabled).</p>
         </dd>
 
-        <dt>
-        <code><strong>-lss=</strong><em>FILENAME</em></code></dt>
+        <dt><code><strong>-lss=</strong><em>FILENAME</em></code>
+        </dt>
 
         <dd>
           <p>specify filename containing color-style information.
           The default is lynx.lss.</p>
         </dd>
 
-        <dt><code><strong>-mime_header</strong></code></dt>
+        <dt><code><strong>-mime_header</strong></code>
+        </dt>
 
         <dd>
           <p>include mime headers and force source dump.</p>
         </dd>
 
-        <dt><code><strong>-minimal</strong></code></dt>
+        <dt><code><strong>-minimal</strong></code>
+        </dt>
 
         <dd>
           <p>toggles minimal versus valid comment parsing. When
@@ -4152,39 +4292,45 @@ the other two cannot be saved between sessions.
           comment parsing.</p>
         </dd>
 
-        <dt><code><strong>-nested_tables</strong></code></dt>
+        <dt><code><strong>-nested_tables</strong></code>
+        </dt>
 
         <dd>
           <p>toggles nested-tables logic (for debugging).</p>
         </dd>
 
         <dt>
-        <code><strong>-newschunksize=</strong><em>NUMBER</em></code></dt>
+        <code><strong>-newschunksize=</strong><em>NUMBER</em></code>
+        </dt>
 
         <dd>
           <p>number of articles in chunked news listings.</p>
         </dd>
 
         <dt>
-        <code><strong>-newsmaxchunk=</strong><em>NUMBER</em></code></dt>
+        <code><strong>-newsmaxchunk=</strong><em>NUMBER</em></code>
+        </dt>
 
         <dd>
           <p>maximum news articles in listings before chunking.</p>
         </dd>
 
-        <dt><code><strong>-nobold</strong></code></dt>
+        <dt><code><strong>-nobold</strong></code>
+        </dt>
 
         <dd>
           <p>disable bold video-attribute.</p>
         </dd>
 
-        <dt><code><strong>-nobrowse</strong></code></dt>
+        <dt><code><strong>-nobrowse</strong></code>
+        </dt>
 
         <dd>
           <p>disable directory browsing.</p>
         </dd>
 
-        <dt><code><strong>-nocc</strong></code></dt>
+        <dt><code><strong>-nocc</strong></code>
+        </dt>
 
         <dd>
           <p>disable Cc: prompts for self copies of mailings. Note
@@ -4192,7 +4338,8 @@ the other two cannot be saved between sessions.
           within a mailto URL or form ACTION.</p>
         </dd>
 
-        <dt><code><strong>-nocolor</strong></code></dt>
+        <dt><code><strong>-nocolor</strong></code>
+        </dt>
 
         <dd>
           <p>force color mode off, overriding terminal capabilities
@@ -4200,47 +4347,53 @@ the other two cannot be saved between sessions.
           variable, and saved .lynxrc settings.</p>
         </dd>
 
-        <dt><code><strong>-noexec</strong></code></dt>
+        <dt><code><strong>-noexec</strong></code>
+        </dt>
 
         <dd>
           <p>disable local program execution. (DEFAULT)</p>
         </dd>
 
-        <dt><code><strong>-nofilereferer</strong></code></dt>
+        <dt><code><strong>-nofilereferer</strong></code>
+        </dt>
 
         <dd>
           <p>disable transmissions of Referer headers for file
           URLs.</p>
         </dd>
 
-        <dt><code><strong>-nolist</strong></code></dt>
+        <dt><code><strong>-nolist</strong></code>
+        </dt>
 
         <dd>
           <p>disable the link list feature in dumps.</p>
         </dd>
 
-        <dt><code><strong>-nolog</strong></code></dt>
+        <dt><code><strong>-nolog</strong></code>
+        </dt>
 
         <dd>
           <p>disable mailing of error messages to document
           owners.</p>
         </dd>
 
-        <dt><code><strong>-nomargins</strong></code></dt>
+        <dt><code><strong>-nomargins</strong></code>
+        </dt>
 
         <dd>
           <p>disable left/right margins in the default style
           sheet.</p>
         </dd>
 
-        <dt><code><strong>-nomore</strong></code></dt>
+        <dt><code><strong>-nomore</strong></code>
+        </dt>
 
         <dd>
           <p>disable -more- string in statusline messages.</p>
         </dd>
 
-        <dt>
-        <code><strong>-nonrestarting_sigwinch</strong></code></dt>
+        <dt><code><strong>-nonrestarting_sigwinch</strong></code>
+        </dt>
 
         <dd>
           <p>make window size change handler non-restarting. This
@@ -4250,89 +4403,102 @@ the other two cannot be saved between sessions.
           window changes when run within an xterm.</p>
         </dd>
 
-        <dt><code><strong>-nopause</strong></code></dt>
+        <dt><code><strong>-nopause</strong></code>
+        </dt>
 
         <dd>
           <p>disable forced pauses for statusline messages.</p>
         </dd>
 
-        <dt><code><strong>-noprint</strong></code></dt>
+        <dt><code><strong>-noprint</strong></code>
+        </dt>
 
         <dd>
           <p>disable most print functions.</p>
         </dd>
 
-        <dt><code><strong>-noredir</strong></code></dt>
+        <dt><code><strong>-noredir</strong></code>
+        </dt>
 
         <dd>
           <p>do not follow URL redirections</p>
         </dd>
 
-        <dt><code><strong>-noreferer</strong></code></dt>
+        <dt><code><strong>-noreferer</strong></code>
+        </dt>
 
         <dd>
           <p>disable transmissions of Referer headers.</p>
         </dd>
 
-        <dt><code><strong>-noreverse</strong></code></dt>
+        <dt><code><strong>-noreverse</strong></code>
+        </dt>
 
         <dd>
           <p>disable reverse video-attribute.</p>
         </dd>
 
-        <dt><code><strong>-nosocks</strong></code></dt>
+        <dt><code><strong>-nosocks</strong></code>
+        </dt>
 
         <dd>
           <p>disable SOCKS proxy usage by a SOCKSified Lynx.</p>
         </dd>
 
-        <dt><code><strong>-nostatus</strong></code></dt>
+        <dt><code><strong>-nostatus</strong></code>
+        </dt>
 
         <dd>
           <p>disable the retrieval status messages.</p>
         </dd>
 
-        <dt><code><strong>-notitle</strong></code></dt>
+        <dt><code><strong>-notitle</strong></code>
+        </dt>
 
         <dd>
           <p>disable title and blank line from top of page.</p>
         </dd>
 
-        <dt><code><strong>-nounderline</strong></code></dt>
+        <dt><code><strong>-nounderline</strong></code>
+        </dt>
 
         <dd>
           <p>disable underline video-attribute.</p>
         </dd>
 
-        <dt><code><strong>-number_fields</strong></code></dt>
+        <dt><code><strong>-number_fields</strong></code>
+        </dt>
 
         <dd>
           <p>force numbering of links as well as form input
           fields.</p>
         </dd>
 
-        <dt><code><strong>-number_links</strong></code></dt>
+        <dt><code><strong>-number_links</strong></code>
+        </dt>
 
         <dd>
           <p>force numbering of links.</p>
         </dd>
 
-        <dt><code><strong>-partial</strong></code></dt>
+        <dt><code><strong>-partial</strong></code>
+        </dt>
 
         <dd>
           <p>toggles displaying of partial pages while loading.</p>
         </dd>
 
         <dt>
-        <code><strong>-partial_thres=</strong><em>NUMBER</em></code></dt>
+        <code><strong>-partial_thres=</strong><em>NUMBER</em></code>
+        </dt>
 
         <dd>
           <p>number of lines to render before repainting display
           with partial-display logic.</p>
         </dd>
 
-        <dt>
-        <code><strong>-pauth=</strong><em>ID:PW</em></code></dt>
+        <dt><code><strong>-pauth=</strong><em>ID:PW</em></code>
+        </dt>
 
         <dd>
           <p>set authorization <em>identifier</em> and
@@ -4341,7 +4507,8 @@ the other two cannot be saved between sessions.
           this switch.</p>
         </dd>
 
-        <dt><code><strong>-popup</strong></code></dt>
+        <dt><code><strong>-popup</strong></code>
+        </dt>
 
         <dd>
           <p>toggles handling of single-choice SELECT options via
@@ -4352,7 +4519,8 @@ the other two cannot be saved between sessions.
           switch toggles the default.</p>
         </dd>
 
-        <dt><code><strong>-post_data</strong></code></dt>
+        <dt><code><strong>-post_data</strong></code>
+        </dt>
 
         <dd>
           <p>properly formatted data for a post form are read in
@@ -4360,7 +4528,8 @@ the other two cannot be saved between sessions.
           a line that starts with &ldquo;---&rdquo;.</p>
         </dd>
 
-        <dt><code><strong>-preparsed</strong></code></dt>
+        <dt><code><strong>-preparsed</strong></code>
+        </dt>
 
         <dd>
           <p>show source preparsed and reformatted when used with
@@ -4371,27 +4540,31 @@ the other two cannot be saved between sessions.
           modes</a>, switched by &ldquo;<samp>^V</samp>&rdquo;.</p>
         </dd>
 
-        <dt><code><strong>-prettysrc</strong></code></dt>
+        <dt><code><strong>-prettysrc</strong></code>
+        </dt>
 
         <dd>
           <p>do syntax highlighting and hyperlink handling in
           source view.</p>
         </dd>
 
-        <dt><code><strong>-print</strong></code></dt>
+        <dt><code><strong>-print</strong></code>
+        </dt>
 
         <dd>
           <p>enable print functions. (default)</p>
         </dd>
 
-        <dt><code><strong>-pseudo_inlines</strong></code></dt>
+        <dt><code><strong>-pseudo_inlines</strong></code>
+        </dt>
 
         <dd>
           <p>toggles pseudo-ALTs for inline images with no ALT
           string.</p>
         </dd>
 
-        <dt><code><strong>-raw</strong></code></dt>
+        <dt><code><strong>-raw</strong></code>
+        </dt>
 
         <dd>
           <p>toggles default setting of 8-bit character
@@ -4399,20 +4572,23 @@ the other two cannot be saved between sessions.
           set.</p>
         </dd>
 
-        <dt><code><strong>-realm</strong></code></dt>
+        <dt><code><strong>-realm</strong></code>
+        </dt>
 
         <dd>
           <p>restricts access to URLs in the starting realm.</p>
         </dd>
 
-        <dt><code><strong>-reload</strong></code></dt>
+        <dt><code><strong>-reload</strong></code>
+        </dt>
 
         <dd>
           <p>flushes the cache on a proxy server (only the first
           document affected).</p>
         </dd>
 
-        <dt><code><strong>-restrictions</strong></code></dt>
+        <dt><code><strong>-restrictions</strong></code>
+        </dt>
 
         <dd>
           <p>allows a list of services to be disabled selectively
@@ -4421,7 +4597,8 @@ the other two cannot be saved between sessions.
 
         <dd>
           <p><em>lynx
-          -restrictions=[option][,option][,option]...</em></p>
+          -restrictions=[option][,option][,option]...</em>
+          </p>
         </dd>
 
         <dd>
@@ -4429,34 +4606,38 @@ the other two cannot be saved between sessions.
           specified.</p>
 
           <dl>
-            <dt><strong><samp>?</samp></strong></dt>
+            <dt><strong><samp>?</samp></strong>
+            </dt>
 
             <dd>
               <p>if used alone, lists restrictions in effect.</p>
             </dd>
 
-            <dt><strong><samp>all</samp></strong></dt>
+            <dt><strong><samp>all</samp></strong>
+            </dt>
 
             <dd>
               <p>restricts all options listed below.</p>
             </dd>
 
-            <dt><strong><samp>bookmark</samp></strong></dt>
+            <dt><strong><samp>bookmark</samp></strong>
+            </dt>
 
             <dd>
               <p>disallow changing the location of the bookmark
               file.</p>
             </dd>
 
-            <dt><strong><samp>bookmark_exec</samp></strong></dt>
+            <dt><strong><samp>bookmark_exec</samp></strong>
+            </dt>
 
             <dd>
               <p>disallow execution links via the bookmark
               file.</p>
             </dd>
 
-            <dt>
-            <strong><samp>change_exec_perms</samp></strong></dt>
+            <dt><strong><samp>change_exec_perms</samp></strong>
+            </dt>
 
             <dd>
               <p>disallow changing the eXecute permission on files
@@ -4464,14 +4645,16 @@ the other two cannot be saved between sessions.
               management is enabled.</p>
             </dd>
 
-            <dt><strong><samp>chdir</samp></strong></dt>
+            <dt><strong><samp>chdir</samp></strong>
+            </dt>
 
             <dd>
               <p>disallow command which changes Lynx's working
               directory.</p>
             </dd>
 
-            <dt><strong><samp>default</samp></strong></dt>
+            <dt><strong><samp>default</samp></strong>
+            </dt>
 
             <dd>
               <p>same as command line option <em>-anonymous</em>.
@@ -4499,27 +4682,31 @@ the other two cannot be saved between sessions.
               happen.</p>
             </dd>
 
-            <dt><strong><samp>dired_support</samp></strong></dt>
+            <dt><strong><samp>dired_support</samp></strong>
+            </dt>
 
             <dd>
               <p>disallow local file management.</p>
             </dd>
 
-            <dt><strong><samp>disk_save</samp></strong></dt>
+            <dt><strong><samp>disk_save</samp></strong>
+            </dt>
 
             <dd>
               <p>disallow saving to disk in the download and print
               menus.</p>
             </dd>
 
-            <dt><strong><samp>dotfiles</samp></strong></dt>
+            <dt><strong><samp>dotfiles</samp></strong>
+            </dt>
 
             <dd>
               <p>disallow access to, or creation of, hidden (dot)
               files.</p>
             </dd>
 
-            <dt><strong><samp>download</samp></strong></dt>
+            <dt><strong><samp>download</samp></strong>
+            </dt>
 
             <dd>
               <p>disallow some downloaders in the download menu.
@@ -4535,26 +4722,30 @@ the other two cannot be saved between sessions.
               is used).</p>
             </dd>
 
-            <dt><strong><samp>editor</samp></strong></dt>
+            <dt><strong><samp>editor</samp></strong>
+            </dt>
 
             <dd>
               <p>disallow external editing.</p>
             </dd>
 
-            <dt><strong><samp>exec</samp></strong></dt>
+            <dt><strong><samp>exec</samp></strong>
+            </dt>
 
             <dd>
               <p>disable execution scripts.</p>
             </dd>
 
-            <dt><strong><samp>exec_frozen</samp></strong></dt>
+            <dt><strong><samp>exec_frozen</samp></strong>
+            </dt>
 
             <dd>
               <p>disallow the user from changing the local
               execution option.</p>
             </dd>
 
-            <dt><strong><samp>externals</samp></strong></dt>
+            <dt><strong><samp>externals</samp></strong>
+            </dt>
 
             <dd>
               <p>disallow some "EXTERNAL" configuration lines, if
@@ -4563,28 +4754,32 @@ the other two cannot be saved between sessions.
               compiled in.</p>
             </dd>
 
-            <dt><strong><samp>file_url</samp></strong></dt>
+            <dt><strong><samp>file_url</samp></strong>
+            </dt>
 
             <dd>
               <p>disallow using G)oto, served links or bookmarks
               for file: URLs.</p>
             </dd>
 
-            <dt><strong><samp>goto</samp></strong></dt>
+            <dt><strong><samp>goto</samp></strong>
+            </dt>
 
             <dd>
               <p>disable the &ldquo;<samp>g</samp>&rdquo; (goto)
               command.</p>
             </dd>
 
-            <dt><strong><samp>inside_ftp</samp></strong></dt>
+            <dt><strong><samp>inside_ftp</samp></strong>
+            </dt>
 
             <dd>
               <p>disallow ftps for people coming from inside your
               domain.</p>
             </dd>
 
-            <dt><strong><samp>inside_news</samp></strong></dt>
+            <dt><strong><samp>inside_news</samp></strong>
+            </dt>
 
             <dd>
               <p>disallow USENET news reading and posting for
@@ -4594,65 +4789,75 @@ the other two cannot be saved between sessions.
               they are supported.</p>
             </dd>
 
-            <dt><strong><samp>inside_rlogin</samp></strong></dt>
+            <dt><strong><samp>inside_rlogin</samp></strong>
+            </dt>
 
             <dd>
               <p>disallow rlogins for people coming from inside
               your domain.</p>
             </dd>
 
-            <dt><strong><samp>inside_telnet</samp></strong></dt>
+            <dt><strong><samp>inside_telnet</samp></strong>
+            </dt>
 
             <dd>
               <p>disallow telnets for people coming from inside
               your domain.</p>
             </dd>
 
-            <dt><strong><samp>jump</samp></strong></dt>
+            <dt><strong><samp>jump</samp></strong>
+            </dt>
 
             <dd>
               <p>disable the &ldquo;<samp>j</samp>&rdquo; (jump)
               command.</p>
             </dd>
 
-            <dt><strong><samp>lynxcgi</samp></strong></dt>
+            <dt><strong><samp>lynxcgi</samp></strong>
+            </dt>
 
             <dd>
               <p>disallow execution of Lynx CGI URLs.</p>
             </dd>
 
-            <dt><strong><samp>mail</samp></strong></dt>
+            <dt><strong><samp>mail</samp></strong>
+            </dt>
 
             <dd>
               <p>disallow mailing feature.</p>
             </dd>
 
-            <dt><strong><samp>multibook</samp></strong></dt>
+            <dt><strong><samp>multibook</samp></strong>
+            </dt>
 
             <dd>
               <p>disallow multiple bookmarks.</p>
             </dd>
 
-            <dt><strong><samp>news_post</samp></strong></dt>
+            <dt><strong><samp>news_post</samp></strong>
+            </dt>
 
             <dd>
               <p>disallow USENET News posting,</p>
             </dd>
 
-            <dt><strong><samp>options_save</samp></strong></dt>
+            <dt><strong><samp>options_save</samp></strong>
+            </dt>
 
             <dd>
               <p>disallow saving options in .lynxrc.</p>
             </dd>
 
-            <dt><strong><samp>outside_ftp</samp></strong></dt>
+            <dt><strong><samp>outside_ftp</samp></strong>
+            </dt>
 
             <dd>
               <p>disallow ftps for people coming from outside your
               domain.</p>
             </dd>
 
-            <dt><strong><samp>outside_news</samp></strong></dt>
+            <dt><strong><samp>outside_news</samp></strong>
+            </dt>
 
             <dd>
               <p>disallow USENET news reading and posting for
@@ -4662,46 +4867,53 @@ the other two cannot be saved between sessions.
               case they are supported.</p>
             </dd>
 
-            <dt><strong><samp>outside_rlogin</samp></strong></dt>
+            <dt><strong><samp>outside_rlogin</samp></strong>
+            </dt>
 
             <dd>
               <p>disallow rlogins for people coming from outside
               your domain.</p>
             </dd>
 
-            <dt><strong><samp>outside_telnet</samp></strong></dt>
+            <dt><strong><samp>outside_telnet</samp></strong>
+            </dt>
 
             <dd>
               <p>disallow telnets for people coming from outside
               your domain.</p>
             </dd>
 
-            <dt><strong><samp>print</samp></strong></dt>
+            <dt><strong><samp>print</samp></strong>
+            </dt>
 
             <dd>
               <p>disallow most print options.</p>
             </dd>
 
-            <dt><strong><samp>shell</samp></strong></dt>
+            <dt><strong><samp>shell</samp></strong>
+            </dt>
 
             <dd>
               <p>disallow shell escapes.</p>
             </dd>
 
-            <dt><strong><samp>suspend</samp></strong></dt>
+            <dt><strong><samp>suspend</samp></strong>
+            </dt>
 
             <dd>
               <p>disallow <em>Control-Z</em> suspends with escape
               to shell on Unix.</p>
             </dd>
 
-            <dt><strong><samp>telnet_port</samp></strong></dt>
+            <dt><strong><samp>telnet_port</samp></strong>
+            </dt>
 
             <dd>
               <p>disallow specifying a port in telnet G)oto's.</p>
             </dd>
 
-            <dt><strong><samp>useragent</samp></strong></dt>
+            <dt><strong><samp>useragent</samp></strong>
+            </dt>
 
             <dd>
               <p>disallow modifications of the User-Agent
@@ -4710,7 +4922,8 @@ the other two cannot be saved between sessions.
           </dl>
         </dd>
 
-        <dt><code><strong>-resubmit_posts</strong></code></dt>
+        <dt><code><strong>-resubmit_posts</strong></code>
+        </dt>
 
         <dd>
           <p>toggles forced resubmissions (no-cache) of forms with
@@ -4719,25 +4932,29 @@ the other two cannot be saved between sessions.
           the <em>History Page</em>.</p>
         </dd>
 
-        <dt><code><strong>-rlogin</strong></code></dt>
+        <dt><code><strong>-rlogin</strong></code>
+        </dt>
 
         <dd>
           <p>disable recognition of rlogin commands.</p>
         </dd>
 
-        <dt><code><strong>-scrollbar</strong></code></dt>
+        <dt><code><strong>-scrollbar</strong></code>
+        </dt>
 
         <dd>
           <p>toggles showing scrollbar.</p>
         </dd>
 
-        <dt><code><strong>-scrollbar_arrow</strong></code></dt>
+        <dt><code><strong>-scrollbar_arrow</strong></code>
+        </dt>
 
         <dd>
           <p>toggles showing arrows at ends of the scrollbar.</p>
         </dd>
 
-        <dt><code><strong>-selective</strong></code></dt>
+        <dt><code><strong>-selective</strong></code>
+        </dt>
 
         <dd>
           <p>require .www_browsable files to browse
@@ -4745,7 +4962,8 @@ the other two cannot be saved between sessions.
         </dd>
 
         <dt>
-        <code><strong>-session=</strong><em>FILENAME</em></code></dt>
+        <code><strong>-session=</strong><em>FILENAME</em></code>
+        </dt>
 
         <dd>
           <p>resumes from specified file on startup and saves
@@ -4753,20 +4971,23 @@ the other two cannot be saved between sessions.
         </dd>
 
         <dt>
-        <code><strong>-sessionin=</strong><em>FILENAME</em></code></dt>
+        <code><strong>-sessionin=</strong><em>FILENAME</em></code>
+        </dt>
 
         <dd>
           <p>resumes session from specified file.</p>
         </dd>
 
         <dt>
-        <code><strong>-sessionout=</strong><em>FILENAME</em></code></dt>
+        <code><strong>-sessionout=</strong><em>FILENAME</em></code>
+        </dt>
 
         <dd>
           <p>saves session to specified file.</p>
         </dd>
 
-        <dt><code><strong>-short_url</strong></code></dt>
+        <dt><code><strong>-short_url</strong></code>
+        </dt>
 
         <dd>
           <p>show very long URLs in the status line with "..." to
@@ -4775,7 +4996,8 @@ the other two cannot be saved between sessions.
           suppressing the end.</p>
         </dd>
 
-        <dt><code><strong>-show_cursor</strong></code></dt>
+        <dt><code><strong>-show_cursor</strong></code>
+        </dt>
 
         <dd>
           <p>If enabled the cursor will not be hidden in the right
@@ -4788,7 +5010,8 @@ the other two cannot be saved between sessions.
           line switch toggles the default.</p>
         </dd>
 
-        <dt><code><strong>-show_rate</strong></code></dt>
+        <dt><code><strong>-show_rate</strong></code>
+        </dt>
 
         <dd>
           <p>If enabled the transfer rate is shown in bytes/second.
@@ -4796,7 +5019,8 @@ the other two cannot be saved between sessions.
           the options menu to select KiB/second and/or ETA.</p>
         </dd>
 
-        <dt><code><strong>-soft_dquotes</strong></code></dt>
+        <dt><code><strong>-soft_dquotes</strong></code>
+        </dt>
 
         <dd>
           <p>toggles emulation of the old Netscape and Mosaic bug
@@ -4804,7 +5028,8 @@ the other two cannot be saved between sessions.
           co-terminator for double-quotes and tags.</p>
         </dd>
 
-        <dt><code><strong>-source</strong></code></dt>
+        <dt><code><strong>-source</strong></code>
+        </dt>
 
         <dd>
           <p>works the same as dump but outputs HTML source instead
@@ -4828,20 +5053,23 @@ lynx -source ./ &gt;foo.html
           </blockquote>
         </dd>
 
-        <dt><code><strong>-stack_dump</strong></code></dt>
+        <dt><code><strong>-stack_dump</strong></code>
+        </dt>
 
         <dd>
           <p>disable SIGINT cleanup handler.</p>
         </dd>
 
-        <dt><code><strong>-startfile_ok</strong></code></dt>
+        <dt><code><strong>-startfile_ok</strong></code>
+        </dt>
 
         <dd>
           <p>allow non-http startfile and homepage with
           <em>-validate</em>.</p>
         </dd>
 
-        <dt><code><strong>-stderr</strong></code></dt>
+        <dt><code><strong>-stderr</strong></code>
+        </dt>
 
         <dd>
           <p>When dumping a document using
@@ -4853,27 +5081,30 @@ lynx -source ./ &gt;foo.html
           to write these messages to the standard error.</p>
         </dd>
 
-        <dt><code><strong>-stdin</strong></code></dt>
+        <dt><code><strong>-stdin</strong></code>
+        </dt>
 
         <dd>
           <p>read the startfile from standard input (UNIX
           only).</p>
         </dd>
 
-        <dt>
-        <code><strong>-syslog=</strong><em>text</em></code></dt>
+        <dt><code><strong>-syslog=</strong><em>text</em></code>
+        </dt>
 
         <dd>
           <p>information for syslog call.</p>
         </dd>
 
-        <dt><code><strong>-syslog-urls</strong></code></dt>
+        <dt><code><strong>-syslog-urls</strong></code>
+        </dt>
 
         <dd>
           <p>log requested URLs with syslog.</p>
         </dd>
 
-        <dt><code><strong>-tagsoup</strong></code></dt>
+        <dt><code><strong>-tagsoup</strong></code>
+        </dt>
 
         <dd>
           <p>initialize DTD with "TagSoup" tables, <a href=
@@ -4881,13 +5112,15 @@ lynx -source ./ &gt;foo.html
           details</a>.</p>
         </dd>
 
-        <dt><code><strong>-telnet</strong></code></dt>
+        <dt><code><strong>-telnet</strong></code>
+        </dt>
 
         <dd>
           <p>disable recognition of telnet commands.</p>
         </dd>
 
-        <dt><code><strong>-term=</strong><em>TERM</em></code></dt>
+        <dt><code><strong>-term=</strong><em>TERM</em></code>
+        </dt>
 
         <dd>
           <p>tell Lynx what terminal type to assume it is talking
@@ -4897,14 +5130,16 @@ lynx -source ./ &gt;foo.html
           process.)</p>
         </dd>
 
-        <dt><code><strong>-timeout=</strong><em>N</em></code></dt>
+        <dt><code><strong>-timeout=</strong><em>N</em></code>
+        </dt>
 
         <dd>
           <p>For win32, sets the network read-timeout, where
           <em>N</em> is given in seconds.</p>
         </dd>
 
-        <dt><code><strong>-tlog</strong></code></dt>
+        <dt><code><strong>-tlog</strong></code>
+        </dt>
 
         <dd>
           <p>toggles use of a <em>Lynx Trace Log</em> for the
@@ -4921,14 +5156,16 @@ lynx -source ./ &gt;foo.html
           go to the standard error stream.</p>
         </dd>
 
-        <dt><code><strong>-tna</strong></code></dt>
+        <dt><code><strong>-tna</strong></code>
+        </dt>
 
         <dd>
           <p>turns on <a href="#tna">"Textfields Need
           Activation"</a> mode.</p>
         </dd>
 
-        <dt><code><strong>-trace</strong></code></dt>
+        <dt><code><strong>-trace</strong></code>
+        </dt>
 
         <dd>
           <p>turns on Lynx trace mode. If a Lynx Trace Log
@@ -4941,7 +5178,8 @@ lynx -source ./ &gt;foo.html
         </dd>
 
         <dt>
-        <code><strong>-trace_mask=</strong><em>value</em></code></dt>
+        <code><strong>-trace_mask=</strong><em>value</em></code>
+        </dt>
 
         <dd>
           <p>turn on optional traces, which may result in very
@@ -4982,7 +5220,8 @@ lynx -source ./ &gt;foo.html
           </dl>
         </dd>
 
-        <dt><code><strong>-traversal</strong></code></dt>
+        <dt><code><strong>-traversal</strong></code>
+        </dt>
 
         <dd>
           <p>traverse all http links derived from startfile. When
@@ -4992,26 +5231,30 @@ lynx -source ./ &gt;foo.html
           information.</p>
         </dd>
 
-        <dt><code><strong>-trim_input_fields</strong></code></dt>
+        <dt><code><strong>-trim_input_fields</strong></code>
+        </dt>
 
         <dd>
           <p>trim input text/textarea fields in forms.</p>
         </dd>
 
-        <dt><code><strong>-underscore</strong></code></dt>
+        <dt><code><strong>-underscore</strong></code>
+        </dt>
 
         <dd>
           <p>toggles use of _underline_ format in dumps.</p>
         </dd>
 
-        <dt><code><strong>-use_mouse</strong></code></dt>
+        <dt><code><strong>-use_mouse</strong></code>
+        </dt>
 
         <dd>
           <p>turn on mouse support, if available.</p>
         </dd>
 
         <dt>
-        <code><strong>-useragent=</strong><em>STRING</em></code></dt>
+        <code><strong>-useragent=</strong><em>STRING</em></code>
+        </dt>
 
         <dd>
           <p>set different Lynx User-Agent header. Lynx produces a
@@ -5021,7 +5264,8 @@ lynx -source ./ &gt;foo.html
           rationale.</p>
         </dd>
 
-        <dt><code><strong>-validate</strong></code></dt>
+        <dt><code><strong>-validate</strong></code>
+        </dt>
 
         <dd>
           <p>accept only http URLs (meant for validation).</p>
@@ -5042,30 +5286,34 @@ lynx -source ./ &gt;foo.html
           an also present (or implied) <em>-anonymous</em> flag is
           overridden, the only way to possibly relax <em>some</em>
           of the restrictions to the level applicable for
-          "anononymous" accounts is with an explicit
+          "anonymous" accounts is with an explicit
           <em>-restrictions=default</em>.</p>
         </dd>
 
-        <dt><code><strong>-verbose</strong></code></dt>
+        <dt><code><strong>-verbose</strong></code>
+        </dt>
 
         <dd>
           <p>toggles [LINK], [IMAGE] and [INLINE] comments with
           filenames of these images.</p>
         </dd>
 
-        <dt><code><strong>-version</strong></code></dt>
+        <dt><code><strong>-version</strong></code>
+        </dt>
 
         <dd>
           <p>print version information.</p>
         </dd>
 
-        <dt><code><strong>-vikeys</strong></code></dt>
+        <dt><code><strong>-vikeys</strong></code>
+        </dt>
 
         <dd>
           <p>enable vi-like key movement.</p>
         </dd>
 
-        <dt><code><strong>-wdebug</strong></code></dt>
+        <dt><code><strong>-wdebug</strong></code>
+        </dt>
 
         <dd>
           <p>enable Waterloo tcp/ip packet debug (print to watt
@@ -5073,15 +5321,16 @@ lynx -source ./ &gt;foo.html
           with WATTCP or WATT-32.</p>
         </dd>
 
-        <dt>
-        <code><strong>-width=</strong><em>NUMBER</em></code></dt>
+        <dt><code><strong>-width=</strong><em>NUMBER</em></code>
+        </dt>
 
         <dd>
           <p>number of columns for formatting of dumps, default is
           80.</p>
         </dd>
 
-        <dt><code><strong>-with_backspaces</strong></code></dt>
+        <dt><code><strong>-with_backspaces</strong></code>
+        </dt>
 
         <dd>
           <p>emit backspaces in output if -dumping or -crawling
@@ -5102,8 +5351,7 @@ lynx -source ./ &gt;foo.html
   <p>[<a href="#ToC-Invoking">ToC</a>]</p>
 
   <h2 id="Environments"><a name="Environment" id=
-  "Environment"><em>Environment variables used by
-  Lynx</em></a></h2>
+  "Environment"><em>Environment variables used by Lynx</em></a></h2>
 
   <p>Lynx uses certain environment variables and sets a few of
   them. Please visit a <a href=
@@ -5135,8 +5383,8 @@ lynx -source ./ &gt;foo.html
   comments for hundreds of options, most of them commented out
   because they are built-in defaults. You may visit an index of
   options: <a href=
-  "https://lynx.invisible-island.net/release/lynx_help/cattoc.html">by
-  category</a> or <a href=
+  "https://lynx.invisible-island.net/release/lynx_help/cattoc.html">
+  by category</a> or <a href=
   "https://lynx.invisible-island.net/release/lynx_help/alphatoc.html">
   by alphabet</a>.</p>
 
@@ -5251,8 +5499,8 @@ lynx -source ./ &gt;foo.html
 
   <p>Information on obtaining the most current version of Lynx is
   available at <a href=
-  "https://lynx.invisible-island.net/current/index.html">the current
-  distribution page</a>.</p>
+  "https://lynx.invisible-island.net/current/index.html">the
+  current distribution page</a>.</p>
 
   <p>[<a href="#Contents">ToC</a>]</p>
 </body>

@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFile.h,v 1.33 2012/02/10 00:59:15 tom Exp $
+ * $LynxId: HTFile.h,v 1.34 2020/01/21 22:08:07 tom Exp $
  *							File access in libwww
  *				FILE ACCESS
  *
@@ -33,7 +33,7 @@ extern "C" {
 
 #define HT_DIR_FORBID           0	/* Altogether forbidden */
 #define HT_DIR_SELECTIVE        1	/* If HT_DIR_ENABLE_FILE exists */
-#define HT_DIR_OK               2	/* Any accesible directory */
+#define HT_DIR_OK               2	/* Any accessible directory */
 
 #define HT_DIR_ENABLE_FILE      ".www_browsable"	/* If exists, can browse */
 
@@ -135,7 +135,7 @@ extern "C" {
  *  Examples:   HTSetSuffix(".ps", "application/postscript", "8bit", 1.0);
  *  Examples:   HTSetSuffix(".psz", "application/postscript", "gzip", 1.0);
  *  A MIME type could also indicate a non-trivial encoding on its own
- *  ("application/x-compressed-tar"), but in that case don't use enconding
+ *  ("application/x-compressed-tar"), but in that case don't use encoding
  *  to also indicate it but use "binary" etc.
  */
     extern void HTSetSuffix5(const char *suffix,

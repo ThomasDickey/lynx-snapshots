@@ -1,4 +1,4 @@
-/* $LynxId: LYOptions.c,v 1.181 2019/01/25 00:06:30 tom Exp $ */
+/* $LynxId: LYOptions.c,v 1.182 2020/01/21 21:36:31 tom Exp $ */
 #include <HTUtils.h>
 #include <HTFTP.h>
 #include <HTTP.h>		/* 'reloading' flag */
@@ -3581,7 +3581,7 @@ static char *NewSecureValue(void)
 
 /*
  * Note: the 'value' we are passing here is a local copy of the "same" string
- * as is used in LYrcFile.c to index the savable options.
+ * as is used in LYrcFile.c to index the saveable options.
  */
 static void PutLabel(FILE *fp, const char *name,
 		     const char *value)

@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTString.c,v 1.75 2018/12/27 10:28:12 tom Exp $
+ * $LynxId: HTString.c,v 1.76 2020/01/21 21:58:09 tom Exp $
  *
  *	Case-independent string comparison		HTString.c
  *
@@ -378,7 +378,7 @@ char *HTSACopy_extra(char **dest,
  *	---------------
  *
  * On entry,
- *	*pstr	points to a string containig white space separated
+ *	*pstr	points to a string containing white space separated
  *		field, optionlly quoted.
  *
  * On exit,
@@ -428,8 +428,8 @@ char *HTNextField(char **pstr)
  *		If NULL, default is white space "," ";" or "=".
  *		The word can optionally be quoted or enclosed with
  *		chars from bracks.
- *		Comments surrrounded by '(' ')' are filtered out
- *		unless they are specifically reqested by including
+ *		Comments surrounded by '(' ')' are filtered out
+ *		unless they are specifically requested by including
  *		' ' or '(' in delims or bracks.
  *	bracks	lists bracketing chars.  Some are recognized as
  *		special, for those give the opening char.

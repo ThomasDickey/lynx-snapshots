@@ -1,4 +1,4 @@
-/* $LynxId: LYCurses.c,v 1.195 2018/12/26 01:28:15 tom Exp $ */
+/* $LynxId: LYCurses.c,v 1.196 2020/01/21 21:35:05 tom Exp $ */
 #include <HTUtils.h>
 #include <HTAlert.h>
 
@@ -1271,7 +1271,7 @@ void start_curses(void)
 
 #ifdef VMS
     /*
-     * If we are VMS then do initscr() everytime start_curses() is called!
+     * If we are VMS then do initscr() every time start_curses() is called!
      */
     CTRACE((tfp, "Screen size: initscr()\n"));
     initscr();			/* start curses */
@@ -1362,7 +1362,7 @@ void start_curses(void)
 #if defined(USE_KEYMAPS) && defined(NCURSES_VERSION)
 #  ifdef HAVE_KEYPAD
 	/* Need to switch keypad on before initializing keymaps, otherwise
-	   when the keypad is switched on, some keybindings may be overriden. */
+	   when the keypad is switched on, some keybindings may be overridden. */
 	keypad(LYwin, TRUE);
 	keypad_on = 1;
 #  endif /* HAVE_KEYPAD */
@@ -2659,7 +2659,7 @@ int typeahead(void)
  *		 to Ctrl-T disabled.  If called with a sig other than SIGINT,
  *		 it will use the C library's system(sig, func).
  *		The equivalent of VMSsignal(SIGINT, cleanup_sig) is done on
- *		 intialization by ttopen(), so don't do it again.
+ *		 initialization by ttopen(), so don't do it again.
  *		VMSsignal(SIGINT, SIG_DFL) is treated as a call to ttclose().
  *		Call VMSsignal(SIGINT, SIG_IGN) before system() calls to
  *		 enable Ctrl-C and Ctrl-Y in the subprocess, and then call
@@ -3169,7 +3169,7 @@ void LYstowCursor(WINDOW * win, int row, int col)
 #endif /* USE_SLANG  */
 }
 
-#if defined(USE_BLINK) && defined(__EMX__)	/* Can't put it earler due to BOOLEAN conflict */
+#if defined(USE_BLINK) && defined(__EMX__)	/* Can't put it earlier due to BOOLEAN conflict */
 #  define BOOLEAN os2BOOLEAN
 #  define INCL_VIO
 #  include "os2.h"

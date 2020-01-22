@@ -1,5 +1,5 @@
 /*
- * $LynxId: HText.h,v 1.16 2010/09/25 11:41:08 tom Exp $
+ * $LynxId: HText.h,v 1.17 2020/01/21 22:08:07 tom Exp $
  *                                                           Rich Hypertext object for libWWW
  *                                RICH HYPERTEXT OBJECT
  *
@@ -119,7 +119,7 @@ Object Building methods
 
 /*
 
-   The anchor object is created and passed to HText_beginAnchor.  The senstive
+   The anchor object is created and passed to HText_beginAnchor.  The sensitive
    text is added to the text object, and then HText_endAnchor is called. 
    Anchors may not be nested.
 
@@ -174,7 +174,7 @@ Browsing functions
 Editing functions
 
    These are called from the application.  There are many more functions not
-   included here from the orginal text object.  These functions NEED NOT BE
+   included here from the original text object.  These functions NEED NOT BE
    IMPLEMENTED in a browser which cannot edit.
 
  */

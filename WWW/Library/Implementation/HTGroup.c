@@ -463,7 +463,7 @@ static void print_group_def_list(GroupDefList *group_list)
  */
 
 /* static						part_match()
- *		MATCH ONE PART OF INET ADDRESS AGAIST
+ *		MATCH ONE PART OF INET ADDRESS AGAINST
  *		A PART OF MASK (inet address has 4 parts)
  * ON ENTRY:
  *	tcur	pointer to the beginning of template part.
@@ -507,7 +507,7 @@ static BOOL part_match(const char *tcur,
 /* static						ip_number_match()
  *		MATCH INET NUMBER AGAINST AN INET NUMBER MASK
  * ON ENTRY:
- *	template	mask to match agaist, e.g., 128.141.*.*
+ *	template	mask to match against, e.g., 128.141.*.*
  *	the_inet_addr	actual inet address, e.g., 128.141.201.74
  *
  * ON EXIT:

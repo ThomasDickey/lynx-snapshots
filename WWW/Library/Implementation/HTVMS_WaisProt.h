@@ -371,7 +371,7 @@ void CSTFreeWAISTextQuery(any *query);
  * the past that only handle one case can at least read the header.
  *
  * 7.5.90 HWM - added constants
- * 7/5/90 brewster added funtion prototypes and comments
+ * 7/5/90 brewster added function prototypes and comments
  * 11/30/90 HWM - went to version 2 (inits and typed retrieval)
  */
 

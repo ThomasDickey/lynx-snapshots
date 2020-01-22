@@ -114,7 +114,7 @@ HTTranslate: Translate by rules
 
   ON ENTRY,
 
-  required                points to a string whose equivalent value is neeed
+  required                points to a string whose equivalent value is needed
 
   ON EXIT,
 

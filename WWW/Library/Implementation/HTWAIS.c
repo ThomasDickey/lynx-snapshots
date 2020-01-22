@@ -1,7 +1,7 @@
 /*
- * $LynxId: HTWAIS.c,v 1.39 2018/03/05 22:33:35 tom Exp $
+ * $LynxId: HTWAIS.c,v 1.40 2020/01/21 22:22:15 tom Exp $
  *
- *	WorldWideWeb - Wide Area Informaion Server Access	HTWAIS.c
+ *	WorldWideWeb - Wide Area Information Server Access	HTWAIS.c
  *	==================================================
  *
  *	This module allows a WWW server or client to read data from a
@@ -929,7 +929,7 @@ int HTLoadWAIS(const char *arg,
 	    return HTLoadError(sink, 500,
 			       gettext("Can't convert format of WAIS document"));
 	/*
-	 * Decode hex or litteral format for document ID.
+	 * Decode hex or literal format for document ID.
 	 */
 	WAIS_from_WWW(docid, docname);
 
