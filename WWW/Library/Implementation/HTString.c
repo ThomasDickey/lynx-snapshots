@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTString.c,v 1.76 2020/01/21 21:58:09 tom Exp $
+ * $LynxId: HTString.c,v 1.79 2020/01/23 01:10:36 tom Exp $
  *
  *	Case-independent string comparison		HTString.c
  *
@@ -12,6 +12,7 @@
  */
 
 #include <HTUtils.h>
+#include <HTFile.h>
 
 #include <LYLeaks.h>
 #include <LYUtils.h>
@@ -1044,6 +1045,47 @@ static const char *HTAfterCommandArg(const char *command,
     return command;
 }
 
+#if USE_QUOTED_PARAMETER
+/*
+ * Recursively trim possible parameters of the source until an existing file
+ * is found.  If no file is found, return -1.  If a file is found, return
+ * the offset to a blank just after the filename.
+ *
+ * TODO: this could be smarter about trimming, e.g., matching quotes.
+ */
+static int skipPathname(const char *target, const char *source)
+{
+    int result = -1;
+    const char *last;
+    struct stat stat_info;
+
+    if (HTStat(target, &stat_info) == 0
+	&& S_ISREG(stat_info.st_mode)) {
+	result = 0;
+    } else if (*target != ' ' && (last = strrchr(target, ' ')) != NULL) {
+	char *temp = NULL;
+	int inner;
+
+	while (last != target && last[-1] == ' ')
+	    --last;
+
+	StrAllocCopy(temp, target);
+	result = (int) (last - target);
+	temp[result] = '\0';
+
+	if ((inner = skipPathname(temp, source)) < 0) {
+	    result = -1;
+	} else if (inner > 0) {
+	    result = inner;
+	}
+
+	FREE(temp);
+    }
+    CTRACE((tfp, "skip/recur %d '%s'\n", result, target));
+    return result;
+}
+#endif
+
 /*
  * Like HTAddParam, but the parameter may be an environment variable, which we
  * will expand and append.  Do this only for things like the command-verb,
@@ -1079,7 +1121,32 @@ void HTAddXpand(char **result,
 		    HTSACat(result, last);
 		    (*result)[len] = 0;
 		}
-		HTSACat(result, parameter);
+		if (LYisAbsPath(parameter)) {
+		    int skip = skipPathname(parameter, parameter);
+		    char *quoted;
+
+		    if (skip > 0) {
+			char *temp = NULL;
+
+			StrAllocCopy(temp, parameter);
+			temp[skip] = 0;
+
+			quoted = HTQuoteParameter(temp);
+			HTSACat(result, quoted);
+			FREE(quoted);
+
+			temp[skip] = ' ';
+			HTSACat(result, temp + skip);
+			FREE(temp);
+		    } else {
+			quoted = HTQuoteParameter(parameter);
+			HTSACat(result, quoted);
+			FREE(quoted);
+		    }
+		} else {
+		    /* leave it unquoted, e.g., environment variable expanded */
+		    HTSACat(result, parameter);
+		}
 		CTRACE((tfp, "PARAM-EXP:%s\n", *result));
 		return;
 	    }

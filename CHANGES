@@ -1,9 +1,12 @@
--- $LynxId: CHANGES,v 1.1036 2020/01/22 02:02:15 tom Exp $
+-- $LynxId: CHANGES,v 1.1037 2020/01/23 01:20:57 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2020-01-21 (2.9.0dev.5)
+2020-01-22 (2.9.0dev.5)
+* modify HTAddXpand() to provide for the case when the command is a full
+  pathname with embedded blanks, etc., versus an expansion of an environment
+  variable containing parameters (report by Edward McGuire) -TD
 * fix typos found with codespell -TD
 * improved several configure macros, including a fix for clang
   compiler-warnings, and library order when linking -TD
