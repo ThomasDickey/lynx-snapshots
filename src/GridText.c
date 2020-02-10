@@ -1734,6 +1734,10 @@ static void display_title(HText *text)
 	percent[0] = '\0';
     }
 
+    /* Update the terminal-emulator title */
+    fprintf(stdout, "\033]0;%s%sLynx\007", title, strlen(title) > 0 ? " - " : "");
+    fflush(stdout);
+
     /*
      * Generate and display the title string, with page indicator
      * if appropriate, preceded by the toolbar token if appropriate,
