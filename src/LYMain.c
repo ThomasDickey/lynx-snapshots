@@ -4011,6 +4011,10 @@ bug which treated '>' as a co-terminator for\ndouble-quotes and tags"
       "unique_urls",	4|TOGGLE_ARG,		unique_urls,
       "toggles use of unique-urls setting for -dump and -listonly options"
    ),
+   PARSE_SET(
+       "update_term_title", 4|SET_ARG, update_term_title,
+       "enables updating the title of terminal emulators"
+   ),
 #if defined(USE_MOUSE)
    PARSE_SET(
       "use_mouse",	4|SET_ARG,		LYUseMouse,
