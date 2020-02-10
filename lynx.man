@@ -960,6 +960,11 @@ a simple menu.
 Mouse clicks may only work reliably while \fILynx\fP is
 idle waiting for input.
 .TP
+.B \-update_term_title
+enables updating the title in terminal emulators.
+Use only if your terminal emulator supports that escape code.
+Has no effect when used with -notitle.
+.TP
 .B \-useragent=Name
 set alternate \fILynx\fP User-Agent header.
 .TP

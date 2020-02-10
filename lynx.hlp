@@ -803,6 +803,11 @@
               check  for duplicate link numbers in each page and corresponding
               lists, and reuse the original link number.
 
+       -update_term_title
+               enables updating the title in terminal emulators.  Use only if
+               your terminal emulator supports that escape code.  Has no effect
+               when used with -notitle.
+
        -use_mouse
               turn on mouse support, if available.  Clicking  the  left  mouse
               button  on a link traverses it.  Clicking the right mouse button
