@@ -404,6 +404,7 @@ extern "C" {
     extern BOOLEAN no_margins;
     extern BOOLEAN no_pause;
     extern BOOLEAN no_title;
+    extern BOOLEAN update_term_title;
     extern BOOLEAN historical_comments;
     extern BOOLEAN html5_charsets;
     extern BOOLEAN minimal_comments;

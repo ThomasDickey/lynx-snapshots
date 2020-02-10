@@ -1735,8 +1735,10 @@ static void display_title(HText *text)
     }
 
     /* Update the terminal-emulator title */
-    fprintf(stdout, "\033]0;%s%sLynx\007", title, strlen(title) > 0 ? " - " : "");
-    fflush(stdout);
+    if (update_term_title) {
+        fprintf(stdout, "\033]0;%s%sLynx\007", title, strlen(title) > 0 ? " - " : "");
+        fflush(stdout);
+    }
 
     /*
      * Generate and display the title string, with page indicator

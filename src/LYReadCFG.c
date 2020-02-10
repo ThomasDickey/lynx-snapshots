@@ -1647,6 +1647,7 @@ static Config_Type Config_Table [] =
      PARSE_SET(RC_NO_REFERER_HEADER,    LYNoRefererHeader),
      PARSE_SET(RC_NO_TABLE_CENTER,      no_table_center),
      PARSE_SET(RC_NO_TITLE,             no_title),
+     PARSE_SET(RC_UPDATE_TERM_TITLE,    update_term_title),
      PARSE_FUN(RC_NONRESTARTING_SIGWINCH, nonrest_sigwinch_fun),
      PARSE_FUN(RC_OUTGOING_MAIL_CHARSET, outgoing_mail_charset_fun),
 #ifdef DISP_PARTIAL

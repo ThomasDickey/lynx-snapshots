@@ -409,6 +409,7 @@ BOOLEAN no_list = FALSE;
 BOOLEAN no_margins = FALSE;
 BOOLEAN no_pause = FALSE;
 BOOLEAN no_title = FALSE;
+BOOLEAN update_term_title = FALSE;
 BOOLEAN no_url_redirection = FALSE;	/* Don't follow URL redirections */
 BOOLEAN pseudo_inline_alts = MAKE_PSEUDO_ALTS_FOR_INLINES;
 BOOLEAN scan_for_buried_news_references = TRUE;
