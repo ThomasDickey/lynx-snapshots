@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYReadCFG.c,v 1.196 2020/01/21 21:33:37 tom Exp $
+ * $LynxId: LYReadCFG.c,v 1.197 2020/02/23 21:15:14 tom Exp $
  */
 #ifndef NO_RULES
 #include <HTRules.h>
@@ -1574,6 +1574,7 @@ static Config_Type Config_Table [] =
      PARSE_FUN(RC_KEYMAP,               keymap_fun),
      PARSE_SET(RC_LEFTARROW_IN_TEXTFLD_PROMPT, textfield_prompt_at_left_edge),
      PARSE_SET(RC_LISTONLY,             dump_links_only),
+     PARSE_SET(RC_LIST_DECODED,         dump_links_decoded),
 #ifndef VMS
      PARSE_STR(RC_LIST_FORMAT,          list_format),
 #endif

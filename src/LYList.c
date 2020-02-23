@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYList.c,v 1.54 2018/06/10 20:27:01 tom Exp $
+ * $LynxId: LYList.c,v 1.55 2020/02/23 21:20:05 tom Exp $
  *
  *			Lynx Document Reference List Support	      LYList.c
  *			====================================
@@ -294,7 +294,8 @@ static int print_refs(FILE *fp, int titles, int refs)
 		    fprintf(fp, "%s\n", title);
 		} else {
 		    address = HTAnchor_short_address(dest);
-		    if (LYCharSet_UC[current_char_set].enc == UCT_ENC_UTF8) {
+		    if (dump_links_decoded
+			&& LYCharSet_UC[current_char_set].enc == UCT_ENC_UTF8) {
 			(void) HTUnEscape(address);
 		    }
 		    fprintf(fp, "%s\n", address);

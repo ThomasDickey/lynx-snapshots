@@ -1,8 +1,6 @@
-.\" $LynxId: lynx.man,v 1.125 2019/09/18 22:20:44 Steffen.Nurpmeso Exp $
+.\" $LynxId: lynx.man,v 1.126 2020/02/23 21:57:02 tom Exp $
 .\" **************************************************************************
 .\" Escape single quotes in literal strings from groff's Unicode transform.
-.ie \n(.g .ds AQ \(aq
-.el       .ds AQ '
 .ie \n(.g .ds `` \(lq
 .el       .ds `` ``
 .ie \n(.g .ds '' \(rq
@@ -444,6 +442,9 @@ do justification of text.
 .B \-link\fR=\fINUMBER
 starting count for lnk#.dat files produced by \fB\-crawl\fR.
 .TP
+.B \-list_decoded
+for \fB\-dump\fR, show URL-encoded links decoded.
+.TP
 .B \-list_inline
 for \fB\-dump\fR, show the links inline with the text.
 .TP
@@ -818,7 +819,7 @@ works the same as dump but outputs HTML source instead of
 formatted text.
 For example
 .NS
-lynx \-source . >foo.html
+lynx \-source\ .\ >foo.html
 .NE
 .IP
 generates HTML source listing the files in the current directory.
