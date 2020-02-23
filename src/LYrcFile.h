@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYrcFile.h,v 1.54 2019/08/24 00:08:45 tom Exp $
+ * $LynxId: LYrcFile.h,v 1.55 2020/02/23 21:13:14 tom Exp $
  */
 #ifndef LYRCFILE_H
 #define LYRCFILE_H
@@ -127,6 +127,7 @@
 #define RC_LEFTARROW_IN_TEXTFLD_PROMPT  "leftarrow_in_textfield_prompt"
 #define RC_LINEEDIT_MODE                "lineedit_mode"
 #define RC_LISTONLY                     "listonly"
+#define RC_LIST_DECODED                 "list_decoded"
 #define RC_LIST_FORMAT                  "list_format"
 #define RC_LIST_INLINE                  "list_inline"
 #define RC_LIST_NEWS_DATES              "list_news_dates"
