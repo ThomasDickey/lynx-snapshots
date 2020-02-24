@@ -1,4 +1,4 @@
-.\" $LynxId: lynx.man,v 1.126 2020/02/23 21:57:02 tom Exp $
+.\" $LynxId: lynx.man,v 1.128 2020/02/24 00:12:25 tom Exp $
 .\" **************************************************************************
 .\" Escape single quotes in literal strings from groff's Unicode transform.
 .ie \n(.g .ds `` \(lq
@@ -946,6 +946,11 @@ check for duplicate link numbers in
 each page and corresponding lists,
 and reuse the original link number.
 .TP
+.B \-update_term_title
+enables updating the title in terminal emulators.
+Use only if your terminal emulator supports that escape code.
+Has no effect when used with \fB-notitle\fP.
+.TP
 .B \-use_mouse
 turn on mouse support, if available.
 Clicking the left mouse button on a link traverses it.
@@ -1303,7 +1308,7 @@ Currently, it is hard-coded to a wish list.
 .B NLSPATH
 This variable, if set, is used as the path prefix for message catalogs.
 .SH NOTES
-This is the \fILynx\fP v2.8.9 Release; development is in progress for 2.9.0.
+This is the manual for \fILynx\fP v2.9.0dev.5; development is in progress for 2.9.0.
 .PP
 If you wish to contribute to the further development
 of \fILynx\fR, subscribe to our mailing list.

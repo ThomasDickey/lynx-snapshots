@@ -354,6 +354,9 @@
        -link=NUMBER
               starting count for lnk#.dat files produced by -crawl.
 
+       -list_decoded
+              for -dump, show URL-encoded links decoded.
+
        -list_inline
               for -dump, show the links inline with the text.
 
@@ -693,6 +696,11 @@
               disabled,  no  transfer  rate  is  shown.   Use  lynx.cfg or the
               options menu to select KB/second and/or ETA.
 
+       -socks5-proxy=URL
+              (Via which) SOCKS5 proxy to connect.  This controls the  builtin
+              SOCKS5  support,  and  is  therefore  unrelated  to  the  option
+              -nosocks.
+
        -soft_dquotes
               toggles emulation of the  old  Netscape  and  Mosaic  bug  which
               treated ">" as a co-terminator for double-quotes and tags.
@@ -779,6 +787,9 @@
               256
                  timing
 
+              512
+                 detailed URL parsing
+
        -traversal
               traverse all http links derived from startfile.  When used  with
               -crawl,  each link that begins with the same string as startfile
@@ -813,6 +824,11 @@
               ncurses is used, clicking the middle  mouse  button  pops  up  a
               simple  menu.  Mouse clicks may only work reliably while Lynx is
               idle waiting for input.
+
+       -update_term_title
+              enables updating the title in terminal emulators.  Use  only  if
+              your terminal emulator supports that escape code.  Has no effect
+              when used with -notitle.
 
        -useragent=Name
               set alternate Lynx User-Agent header.

@@ -1,9 +1,12 @@
--- $LynxId: CHANGES,v 1.1038 2020/02/23 22:04:08 tom Exp $
+-- $LynxId: CHANGES,v 1.1040 2020/02/24 00:59:22 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
 2020-02-23 (2.9.0dev.5)
+* add/adapt changes from Keith Bowes' github:
+  * updated eo.po
+  * add "-update_term_title" option
 * add "-list_decoded" option to toggle feature of "-dump" option which decodes
   URL-encoded links in the list of "References", from change made in
   2.8.8dev.17, for Debian #398274 (prompted by patch by Hiltjo Posthuma) -TD

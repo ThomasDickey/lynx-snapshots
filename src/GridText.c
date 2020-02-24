@@ -1,5 +1,5 @@
 /*
- * $LynxId: GridText.c,v 1.321 2020/01/21 22:19:23 tom Exp $
+ * $LynxId: GridText.c,v 1.324 2020/02/24 00:30:01 tom Exp $
  *
  *		Character grid hypertext object
  *		===============================
@@ -1732,6 +1732,13 @@ static void display_title(HText *text)
 		total_pages);
     } else {
 	percent[0] = '\0';
+    }
+
+    /* Update the terminal-emulator title */
+    if (update_term_title) {
+	CTRACE((tfp, "update_term_title:%s\n", title));
+	fprintf(stderr, "\033]0;%s%sLynx\007", title, *title ? " - " : "");
+	fflush(stderr);
     }
 
     /*
