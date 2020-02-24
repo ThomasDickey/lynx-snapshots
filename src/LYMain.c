@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMain.c,v 1.288 2020/02/23 21:20:05 tom Exp $
+ * $LynxId: LYMain.c,v 1.289 2020/02/24 00:17:10 Keith.Bowes Exp $
  */
 #include <HTUtils.h>
 #include <HTTP.h>
@@ -410,6 +410,7 @@ BOOLEAN no_list = FALSE;
 BOOLEAN no_margins = FALSE;
 BOOLEAN no_pause = FALSE;
 BOOLEAN no_title = FALSE;
+BOOLEAN update_term_title = FALSE;
 BOOLEAN no_url_redirection = FALSE;	/* Don't follow URL redirections */
 BOOLEAN pseudo_inline_alts = MAKE_PSEUDO_ALTS_FOR_INLINES;
 BOOLEAN scan_for_buried_news_references = TRUE;
@@ -4014,6 +4015,10 @@ bug which treated '>' as a co-terminator for\ndouble-quotes and tags"
    PARSE_SET(
       "unique_urls",	4|TOGGLE_ARG,		unique_urls,
       "toggles use of unique-urls setting for -dump and -listonly options"
+   ),
+   PARSE_SET(
+       "update_term_title", 4|SET_ARG, update_term_title,
+       "enables updating the title of terminal emulators"
    ),
 #if defined(USE_MOUSE)
    PARSE_SET(

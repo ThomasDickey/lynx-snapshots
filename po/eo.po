@@ -1,13 +1,13 @@
 # Esperanto translation of Lynx.
 # This file is distributed under the same license as the lynx package.
 # Translators:
-# Keith Bowes <zooplah@gmail.com>, 2011, 2014, 2015, 2016, 2017, 2018, 2019.
+# Keith Bowes <zooplah@gmail.com>, 2011, 2014-2020.
 msgid ""
 msgstr ""
 "Project-Id-Version: lynx 2.9.0-dev3\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-08-23 19:59-0400\n"
-"PO-Revision-Date: 2019-08-26 10:40-0400\n"
+"POT-Creation-Date: 2020-02-02 14:35-0500\n"
+"PO-Revision-Date: 2020-02-02 14:58-0500\n"
 "Last-Translator: Keith Bowes <zooplah@gmail.com>\n"
 "Language-Team: Esperanto <translation-team-eo@lists.sourceforge.net>\n"
 "Language: eo\n"
@@ -99,13 +99,19 @@ msgstr ", helpo pri "
 
 #. #define HELP
 #: LYMessages.c:47
-msgid "Commands: Use arrow keys to move, '?' for help, 'q' to quit, '<-' to go back."
-msgstr "Komandoj: Uzu la sagoklavojn por movi, '?' por la helpilo, 'q' por eliri, '<-' por retroiri."
+msgid ""
+"Commands: Use arrow keys to move, '?' for help, 'q' to quit, '<-' to go back."
+msgstr ""
+"Komandoj: Uzu la sagoklavojn por movi, '?' por la helpilo, 'q' por eliri, "
+"'<-' por retroiri."
 
 #. #define MOREHELP
 #: LYMessages.c:49
-msgid "-- press space for more, use arrow keys to move, '?' for help, 'q' to quit."
-msgstr "-- premu spacetklavon por la sekva ekranpleno, uzu sagoklavojn por movi, '?' por la helpilo, 'q' por eliri."
+msgid ""
+"-- press space for more, use arrow keys to move, '?' for help, 'q' to quit."
+msgstr ""
+"-- premu spacetklavon por la sekva ekranpleno, uzu sagoklavojn por movi, '?' "
+"por la helpilo, 'q' por eliri."
 
 #: LYMessages.c:50
 msgid "-- press space for next page --"
@@ -141,14 +147,19 @@ msgstr "(Tekstregiono) Neaktiva. Premu enen-klavon por aktivigi."
 #. #define FORM_LINK_TEXTAREA_ADV_MSG_INA_E
 #: LYMessages.c:65
 #, c-format
-msgid "(Textarea \"%s\"); Inactive.  Press <return> to activate (%s for editor)."
-msgstr "(Tekstregiono \"%s\") Neaktiva. Premu enen-klavon por aktivigi (%s por tekstoredaktilo)."
+msgid ""
+"(Textarea \"%s\"); Inactive.  Press <return> to activate (%s for editor)."
+msgstr ""
+"(Tekstregiono \"%s\") Neaktiva. Premu enen-klavon por aktivigi (%s por "
+"tekstoredaktilo)."
 
 #. #define FORM_LINK_TEXTAREA_MESSAGE_INA_E
 #: LYMessages.c:67
 #, c-format
 msgid "(Textarea) Inactive.  Press <return> to activate (%s for editor)."
-msgstr "(Tekstregiono) Neaktiva. Premu enen-klavon por aktivigi (%s por tekstoredaktilo)."
+msgstr ""
+"(Tekstregiono) Neaktiva. Premu enen-klavon por aktivigi (%s por "
+"tekstoredaktilo)."
 
 #. #define FORM_LINK_TEXT_SUBMIT_MESSAGE_INA
 #: LYMessages.c:69
@@ -158,13 +169,20 @@ msgstr "(Formulara kampo) Neaktiva. Uzu enen-klavon por redakti."
 #. #define FORM_TEXT_SUBMIT_MESSAGE_INA_X
 #: LYMessages.c:71
 #, c-format
-msgid "(Form field) Inactive.  Use <return> to edit (%s to submit with no cache)."
-msgstr "(Formulara kampo) Neaktiva. Uzu enen-klavon por redakti (%s por sendi ignorante la tenejon)."
+msgid ""
+"(Form field) Inactive.  Use <return> to edit (%s to submit with no cache)."
+msgstr ""
+"(Formulara kampo) Neaktiva. Uzu enen-klavon por redakti (%s por sendi "
+"ignorante la tenejon)."
 
 #. #define FORM_TEXT_RESUBMIT_MESSAGE_INA
 #: LYMessages.c:73
-msgid "(Form field) Inactive. Press <return> to edit, press <return> twice to submit."
-msgstr "(Formulara kampo) Neaktiva. Premu enen-klavon por redakti. Premu enen-klavon dufoje por sendi."
+msgid ""
+"(Form field) Inactive. Press <return> to edit, press <return> twice to "
+"submit."
+msgstr ""
+"(Formulara kampo) Neaktiva. Premu enen-klavon por redakti. Premu enen-klavon "
+"dufoje por sendi."
 
 #. #define FORM_TEXT_SUBMIT_MAILTO_MSG_INA
 #: LYMessages.c:75
@@ -178,48 +196,71 @@ msgstr "(Pasvorta kampo) Neaktiva. Premu enen-klavon por aktivigi."
 
 #. #define FORM_LINK_FILE_UNM_MSG
 #: LYMessages.c:80
-msgid "UNMODIFIABLE file entry field.  Use UP or DOWN arrows or tab to move off."
-msgstr "NEŜANĜEBLA kampo. Uzu la supran aŭ malsupran sagoklavojn aŭ tabon por movi de ĝi."
+msgid ""
+"UNMODIFIABLE file entry field.  Use UP or DOWN arrows or tab to move off."
+msgstr ""
+"NEŜANĜEBLA kampo. Uzu la supran aŭ malsupran sagoklavojn aŭ tabon por movi "
+"de ĝi."
 
 #. #define FORM_LINK_FILE_MESSAGE
 #: LYMessages.c:82
-msgid "(File entry field) Enter filename.  Use UP or DOWN arrows or tab to move off."
-msgstr "(Dosiera kampo) Enmetu dosiernomon. Uzu la supran aŭ malsupran sagoklavojn aŭ tabon por movi de ĝi."
+msgid ""
+"(File entry field) Enter filename.  Use UP or DOWN arrows or tab to move off."
+msgstr ""
+"(Dosiera kampo) Enmetu dosiernomon. Uzu la supran aŭ malsupran sagoklavojn "
+"aŭ tabon por movi de ĝi."
 
 #. #define FORM_LINK_TEXT_ADV_MSG
 #. #define FORM_LINK_TEXT_MESSAGE
 #: LYMessages.c:84 LYMessages.c:86
 #, c-format
-msgid "(Textfield \"%s\"); Enter text.  Use UP or DOWN arrows or tab to move off."
-msgstr "(Teksta kampo \"%s\") Enmetu tekston. Uzu la supran aŭ malsupran sagoklavojn aŭ tabon por movi de ĝi."
+msgid ""
+"(Textfield \"%s\"); Enter text.  Use UP or DOWN arrows or tab to move off."
+msgstr ""
+"(Teksta kampo \"%s\") Enmetu tekston. Uzu la supran aŭ malsupran sagoklavojn "
+"aŭ tabon por movi de ĝi."
 
 #. #define FORM_LINK_TEXTAREA_ADV_MSG
 #: LYMessages.c:88
 #, c-format
 msgid "(Textarea \"%s\"); Enter text. Use UP/DOWN arrows or TAB to move off."
-msgstr "(Tekstregiono \"%s\") Enmetu tekston. Uzu la supran aŭ malsupran sagoklavojn aŭ tabon por movi de ĝi."
+msgstr ""
+"(Tekstregiono \"%s\") Enmetu tekston. Uzu la supran aŭ malsupran sagoklavojn "
+"aŭ tabon por movi de ĝi."
 
 #. #define FORM_LINK_TEXTAREA_MESSAGE
 #: LYMessages.c:90
 msgid "(Textarea) Enter text. Use UP/DOWN arrows or TAB to move off."
-msgstr "(Tekstregiono) Enmetu tekston. Uzu la supran aŭ malsupran sagoklavojn aŭ tabon por movi de ĝi."
+msgstr ""
+"(Tekstregiono) Enmetu tekston. Uzu la supran aŭ malsupran sagoklavojn aŭ "
+"tabon por movi de ĝi."
 
 #. #define FORM_LINK_TEXTAREA_ADV_MSG_E
 #: LYMessages.c:92
 #, c-format
-msgid "(Textarea \"%s\"); Enter text. Use UP/DOWN arrows or TAB to move off (%s for editor)."
-msgstr "(Tekstregiono \"%s\") Enmetu tekston. Uzu la supran aŭ malsupran sagoklavojn aŭ tabon por movi de ĝi (%s por tekstoredaktilo)."
+msgid ""
+"(Textarea \"%s\"); Enter text. Use UP/DOWN arrows or TAB to move off (%s for "
+"editor)."
+msgstr ""
+"(Tekstregiono \"%s\") Enmetu tekston. Uzu la supran aŭ malsupran sagoklavojn "
+"aŭ tabon por movi de ĝi (%s por tekstoredaktilo)."
 
 #. #define FORM_LINK_TEXTAREA_MESSAGE_E
 #: LYMessages.c:94
 #, c-format
-msgid "(Textarea) Enter text. Use UP/DOWN arrows or TAB to move off (%s for editor)."
-msgstr "(Tekstregiono) Enmetu tekston. Uzu la supran aŭ malsupran sagoklavojn aŭ tabon por movi de ĝi (%s por tekstoredaktilo)."
+msgid ""
+"(Textarea) Enter text. Use UP/DOWN arrows or TAB to move off (%s for editor)."
+msgstr ""
+"(Tekstregiono) Enmetu tekston. Uzu la supran aŭ malsupran sagoklavojn aŭ "
+"tabon por movi de ĝi (%s por tekstoredaktilo)."
 
 #. #define FORM_LINK_TEXT_UNM_MSG
 #: LYMessages.c:96
-msgid "UNMODIFIABLE form text field.  Use UP or DOWN arrows or tab to move off."
-msgstr "NEŜANĜEBLA teksta kampo. Uzu la supran aŭ malsupran sagoklavojn aŭ tabon por movi de ĝi (%s por tekstoredaktilo)."
+msgid ""
+"UNMODIFIABLE form text field.  Use UP or DOWN arrows or tab to move off."
+msgstr ""
+"NEŜANĜEBLA teksta kampo. Uzu la supran aŭ malsupran sagoklavojn aŭ tabon por "
+"movi de ĝi (%s por tekstoredaktilo)."
 
 #. #define FORM_LINK_TEXT_SUBMIT_MESSAGE
 #: LYMessages.c:98
@@ -230,22 +271,32 @@ msgstr "(Teksta kampo) Enmetu tekston. Uzu enen-klavon por sendi."
 #: LYMessages.c:100
 #, c-format
 msgid "(Form field) Enter text.  Use <return> to submit (%s for no cache)."
-msgstr "(Formulara kampo) Enmetu tekston. Uzu enen-klavon por sendi (%s por neniu tenejo)."
+msgstr ""
+"(Formulara kampo) Enmetu tekston. Uzu enen-klavon por sendi (%s por neniu "
+"tenejo)."
 
 #. #define FORM_LINK_TEXT_RESUBMIT_MESSAGE
 #: LYMessages.c:102
-msgid "(Form field) Enter text.  Use <return> to submit, arrows or tab to move off."
-msgstr "(Formulara kampo) Enmetu tekston. Uzu enen-klavon por sendi, sagoklavojn aŭ tabon por movi de ĝi."
+msgid ""
+"(Form field) Enter text.  Use <return> to submit, arrows or tab to move off."
+msgstr ""
+"(Formulara kampo) Enmetu tekston. Uzu enen-klavon por sendi, sagoklavojn aŭ "
+"tabon por movi de ĝi."
 
 #. #define FORM_LINK_TEXT_SUBMIT_UNM_MSG
 #: LYMessages.c:104
 msgid "UNMODIFIABLE form field.  Use UP or DOWN arrows or tab to move off."
-msgstr "NEŜANĜEBLA formularia kampo. Uzu supran aŭ malsupran sagoklavojn por movi de ĝi."
+msgstr ""
+"NEŜANĜEBLA formularia kampo. Uzu supran aŭ malsupran sagoklavojn por movi de "
+"ĝi."
 
 #. #define FORM_LINK_TEXT_SUBMIT_MAILTO_MSG
 #: LYMessages.c:106
-msgid "(mailto form field) Enter text.  Use <return> to submit, arrows to move off."
-msgstr "(retpoŝta kampo) Enmetu tekston. Uzu enen-klavon por sendi, sagoklavojn por movi de ĝi."
+msgid ""
+"(mailto form field) Enter text.  Use <return> to submit, arrows to move off."
+msgstr ""
+"(retpoŝta kampo) Enmetu tekston. Uzu enen-klavon por sendi, sagoklavojn por "
+"movi de ĝi."
 
 #. #define FORM_LINK_TEXT_SUBMIT_MAILTO_DIS_MSG
 #: LYMessages.c:108
@@ -254,19 +305,24 @@ msgstr "(retpoŝta kampo) Retpoŝto estas malaktiva. Vi ne rajtas sendi tion."
 
 #. #define FORM_LINK_PASSWORD_MESSAGE
 #: LYMessages.c:110
-msgid "(Password entry field) Enter text.  Use UP or DOWN arrows or tab to move off."
-msgstr "(Pasvorta kampo) Enmetu tekston. Uzu supran aŭ malsupran sagoklavojn por movi de ĝi."
+msgid ""
+"(Password entry field) Enter text.  Use UP or DOWN arrows or tab to move off."
+msgstr ""
+"(Pasvorta kampo) Enmetu tekston. Uzu supran aŭ malsupran sagoklavojn por "
+"movi de ĝi."
 
 #. #define FORM_LINK_PASSWORD_UNM_MSG
 #: LYMessages.c:112
 msgid "UNMODIFIABLE form password.  Use UP or DOWN arrows or tab to move off."
-msgstr "NEŜANĜEBLA pasvorto. Uzu supran aŭ malsupran sagoklavojn por movi de ĝi."
+msgstr ""
+"NEŜANĜEBLA pasvorto. Uzu supran aŭ malsupran sagoklavojn por movi de ĝi."
 
 #. #define FORM_LINK_CHECKBOX_ADV_MSG
 #: LYMessages.c:114
 #, c-format
 msgid "(Checkbox \"%s\");   Use right-arrow or <return> to toggle."
-msgstr "(Markobutono \"%s\") Uzu la dekstran sagoklavon aŭ enen-klavon por inversigi."
+msgstr ""
+"(Markobutono \"%s\") Uzu la dekstran sagoklavon aŭ enen-klavon por inversigi."
 
 #. #define FORM_LINK_CHECKBOX_MESSAGE
 #: LYMessages.c:116
@@ -276,23 +332,30 @@ msgstr "(Markobutono) Uzu la dekstran sagoklavon aŭ enen-klavon por inversigi."
 #. #define FORM_LINK_CHECKBOX_UNM_MSG
 #: LYMessages.c:118
 msgid "UNMODIFIABLE form checkbox.  Use UP or DOWN arrows or tab to move off."
-msgstr "NEŜANĜEBLA markobutono. Uzu supran aŭ malsupran sagoklavon aŭ tabon por movi de ĝi."
+msgstr ""
+"NEŜANĜEBLA markobutono. Uzu supran aŭ malsupran sagoklavon aŭ tabon por movi "
+"de ĝi."
 
 #. #define FORM_LINK_RADIO_ADV_MSG
 #: LYMessages.c:120
 #, c-format
 msgid "(Radio Button \"%s\");   Use right-arrow or <return> to toggle."
-msgstr "(Radiobutono \"%s\") Uzu la dekstran sagoklavon aŭ la enen-klavon por inversigi."
+msgstr ""
+"(Radiobutono \"%s\") Uzu la dekstran sagoklavon aŭ la enen-klavon por "
+"inversigi."
 
 #. #define FORM_LINK_RADIO_MESSAGE
 #: LYMessages.c:122
 msgid "(Radio Button)   Use right-arrow or <return> to toggle."
-msgstr "(Radiobutono) Uzu la dekstran sagoklavon aŭ la enen-klavon por inversigi."
+msgstr ""
+"(Radiobutono) Uzu la dekstran sagoklavon aŭ la enen-klavon por inversigi."
 
 #. #define FORM_LINK_RADIO_UNM_MSG
 #: LYMessages.c:124
-msgid "UNMODIFIABLE form radio button.  Use UP or DOWN arrows or tab to move off."
-msgstr "NEŜANĜEBLA radiobutono. Uzu supran aŭ malsupran sagoklavojn por movi de ĝi."
+msgid ""
+"UNMODIFIABLE form radio button.  Use UP or DOWN arrows or tab to move off."
+msgstr ""
+"NEŜANĜEBLA radiobutono. Uzu supran aŭ malsupran sagoklavojn por movi de ĝi."
 
 #. #define FORM_LINK_SUBMIT_PREFIX
 #: LYMessages.c:126
@@ -306,8 +369,12 @@ msgstr "Sendi al "
 
 #. #define FORM_LINK_SUBMIT_MESSAGE
 #: LYMessages.c:130
-msgid "(Form submit button) Use right-arrow or <return> to submit ('x' for no cache)."
-msgstr "(Sendobutono) Uzu la dekstran sagoklavon aŭ enen-klavon por sendi ('x' por neniu tenejo)."
+msgid ""
+"(Form submit button) Use right-arrow or <return> to submit ('x' for no "
+"cache)."
+msgstr ""
+"(Sendobutono) Uzu la dekstran sagoklavon aŭ enen-klavon por sendi ('x' por "
+"neniu tenejo)."
 
 #. #define FORM_LINK_RESUBMIT_MESSAGE
 #: LYMessages.c:132
@@ -317,7 +384,8 @@ msgstr "(Sendobutono) Uzu la dekstran sagoklavon aŭ enen-klavon por sendi."
 #. #define FORM_LINK_SUBMIT_DIS_MSG
 #: LYMessages.c:134
 msgid "DISABLED form submit button.  Use UP or DOWN arrows or tab to move off."
-msgstr "MALAKTIVA sendobutono. Uzu supran aŭ malsupran sagoklavojn por movi de ĝi."
+msgstr ""
+"MALAKTIVA sendobutono. Uzu supran aŭ malsupran sagoklavojn por movi de ĝi."
 
 #. #define FORM_LINK_SUBMIT_MAILTO_PREFIX
 #: LYMessages.c:136
@@ -327,38 +395,50 @@ msgstr "Sendi retpoŝtan formularion al "
 #. #define FORM_LINK_SUBMIT_MAILTO_MSG
 #: LYMessages.c:138
 msgid "(mailto form submit button) Use right-arrow or <return> to submit."
-msgstr "(retpoŝta sendobutono) Uzu la dekstran sagoklavon aŭ enen-klavon por sendi."
+msgstr ""
+"(retpoŝta sendobutono) Uzu la dekstran sagoklavon aŭ enen-klavon por sendi."
 
 #. #define FORM_LINK_SUBMIT_MAILTO_DIS_MSG
 #: LYMessages.c:140
 msgid "(mailto form submit button) Mail is disallowed so you cannot submit."
-msgstr "(retpoŝta sendobutono) Retpoŝto estas malaktiva. Vi ne rajtas sendi tion."
+msgstr ""
+"(retpoŝta sendobutono) Retpoŝto estas malaktiva. Vi ne rajtas sendi tion."
 
 #. #define FORM_LINK_RESET_MESSAGE
 #: LYMessages.c:142
-msgid "(Form reset button)   Use right-arrow or <return> to reset form to defaults."
-msgstr "(Restarigobutono) Uzu la dekstran sagoklavon aŭ enen-klavon por restarigi la kampojn."
+msgid ""
+"(Form reset button)   Use right-arrow or <return> to reset form to defaults."
+msgstr ""
+"(Restarigobutono) Uzu la dekstran sagoklavon aŭ enen-klavon por restarigi la "
+"kampojn."
 
 #. #define FORM_LINK_RESET_DIS_MSG
 #: LYMessages.c:144
 msgid "DISABLED form reset button.  Use UP or DOWN arrows or tab to move off."
-msgstr "MALAKTIVA restarigobutono. Uzu supran aŭ malsupran sagoklavojn aŭ tabon por movi de ĝi."
+msgstr ""
+"MALAKTIVA restarigobutono. Uzu supran aŭ malsupran sagoklavojn aŭ tabon por "
+"movi de ĝi."
 
 #. #define FORM_LINK_BUTTON_MESSAGE
 #: LYMessages.c:146
 msgid "(Script button)   Use UP or DOWN arrows or tab to move off."
-msgstr "(Skriptobutono) Uzu supran aŭ malsupran sagoklavojn aŭ tabon por movi de ĝi."
+msgstr ""
+"(Skriptobutono) Uzu supran aŭ malsupran sagoklavojn aŭ tabon por movi de ĝi."
 
 #. #define FORM_LINK_BUTTON_ADV_MSG
 #: LYMessages.c:148
 #, c-format
 msgid "(Script button \"%s\");   Use UP or DOWN arrows or tab to move off."
-msgstr "(Skriptobutono \"%s\") Uzu supran aŭ malsupran sagoklavojn aŭ tabon por movi de ĝi."
+msgstr ""
+"(Skriptobutono \"%s\") Uzu supran aŭ malsupran sagoklavojn aŭ tabon por movi "
+"de ĝi."
 
 #. #define FORM_LINK_BUTTON_DIS_MSG
 #: LYMessages.c:150
 msgid "DISABLED Script button.  Use UP or DOWN arrows or tab to move off."
-msgstr "MALAKTIVA skriptobutono. Uzu supran aŭ malsupran sagoklavojn aŭ tabon por movi de ĝi."
+msgstr ""
+"MALAKTIVA skriptobutono. Uzu supran aŭ malsupran sagoklavojn aŭ tabon por "
+"movi de ĝi."
 
 #. #define FORM_LINK_OPTION_LIST_ADV_MSG
 #: LYMessages.c:152
@@ -368,19 +448,27 @@ msgstr "(Elekto-list \"%s\") Premu enen-klavon por elekti."
 
 #. #define FORM_LINK_OPTION_LIST_MESSAGE
 #: LYMessages.c:154
-msgid "(Option list) Hit return and use arrow keys and return to select option."
-msgstr "(Elekto-listo) Premu enen-klavon kaj uzu sagoklavojn kaj enen-klavon por elekti."
+msgid ""
+"(Option list) Hit return and use arrow keys and return to select option."
+msgstr ""
+"(Elekto-listo) Premu enen-klavon kaj uzu sagoklavojn kaj enen-klavon por "
+"elekti."
 
 #. #define CHOICE_LIST_ADV_MSG
 #: LYMessages.c:156
 #, c-format
 msgid "(Choice entry \"%s\"); Use arrow keys and return to select option."
-msgstr "(Elekto-listero \"%s\") Premu enen-klavon kaj uzu sagoklavojn kaj enen-klavon por elekti."
+msgstr ""
+"(Elekto-listero \"%s\") Premu enen-klavon kaj uzu sagoklavojn kaj enen-"
+"klavon por elekti."
 
 #. #define CHOICE_LIST_MESSAGE
 #: LYMessages.c:158
-msgid "(Choice list) Hit return and use arrow keys and return to select option."
-msgstr "(Elekto-listo) Premu enen-klavon kaj uzu sagoklavojn kaj enen-klavon por elekti."
+msgid ""
+"(Choice list) Hit return and use arrow keys and return to select option."
+msgstr ""
+"(Elekto-listo) Premu enen-klavon kaj uzu sagoklavojn kaj enen-klavon por "
+"elekti."
 
 #. #define MOUSE_CHOICE_MESSAGE
 #: LYMessages.c:160
@@ -390,12 +478,16 @@ msgstr "Maldekstra musbutono aŭ enen-klavo por elekti, sagoklavoj por rulumi."
 #. #define FORM_LINK_OPTION_LIST_UNM_MSG
 #: LYMessages.c:162
 msgid "UNMODIFIABLE option list.  Use return or arrow keys to review or leave."
-msgstr "NEŜANĜEBLA elekto-listo. Uzu la enen-klavon aŭ sagoklavoj por kontroli aŭ forlasi."
+msgstr ""
+"NEŜANĜEBLA elekto-listo. Uzu la enen-klavon aŭ sagoklavoj por kontroli aŭ "
+"forlasi."
 
 #. #define CHOICE_LIST_UNM_MSG
 #: LYMessages.c:164
 msgid "UNMODIFIABLE choice list.  Use return or arrow keys to review or leave."
-msgstr "NEŜANĜEBLA elekto-listo. Uzu la enen-klavon aŭ sagoklavoj por kontroli aŭ foriri."
+msgstr ""
+"NEŜANĜEBLA elekto-listo. Uzu la enen-klavon aŭ sagoklavoj por kontroli aŭ "
+"foriri."
 
 #: LYMessages.c:165
 msgid "Submitting form..."
@@ -423,7 +515,8 @@ msgstr "Averto: Ne eblas ŝanĝi la kodoprezenton de la formulario al %s!"
 #. #define NORMAL_LINK_MESSAGE
 #: LYMessages.c:174
 msgid "(NORMAL LINK)   Use right-arrow or <return> to activate."
-msgstr "(Ordinara ligilo) Uzu la dekstran sagoklavon aŭ la enen-klavon por aktivigi."
+msgstr ""
+"(Ordinara ligilo) Uzu la dekstran sagoklavon aŭ la enen-klavon por aktivigi."
 
 #: LYMessages.c:175
 msgid "The resource requested is not available at this time."
@@ -488,53 +581,82 @@ msgstr "Vi enmetis nevalidan ligilan numeron."
 
 #. #define SOURCE_HELP
 #: LYMessages.c:190
-msgid "Currently viewing document source.  Press '\\' to return to rendered version."
-msgstr "Nune vidatan dokumentan fontotekston. Premu la klavon '\\' por reveni al interpretita versio."
+msgid ""
+"Currently viewing document source.  Press '\\' to return to rendered version."
+msgstr ""
+"Nune vidatan dokumentan fontotekston. Premu la klavon '\\' por reveni al "
+"interpretita versio."
 
 #. #define NOVICE_LINE_ONE
 #: LYMessages.c:192
-msgid "  Arrow keys: Up and Down to move.  Right to follow a link; Left to go back.  \n"
-msgstr "Sagoklavoj: Supra kaj malsupra por movi. Dekstra por sekvi ligilon. Maldekstra por retroiri.\n"
+msgid ""
+"  Arrow keys: Up and Down to move.  Right to follow a link; Left to go "
+"back.  \n"
+msgstr ""
+"Sagoklavoj: Supra kaj malsupra por movi. Dekstra por sekvi ligilon. "
+"Maldekstra por retroiri.\n"
 
 #. #define NOVICE_LINE_TWO
 #: LYMessages.c:194
-msgid " H)elp O)ptions P)rint G)o M)ain screen Q)uit /=search [delete]=history list \n"
-msgstr "H)elpo O) Agordo P)rinti G) Iri M) Ĉefa fako Q) Eliri /=serĉi [retropaŝo]=historio \n"
+msgid ""
+" H)elp O)ptions P)rint G)o M)ain screen Q)uit /=search [delete]=history "
+"list \n"
+msgstr ""
+"H)elpo O) Agordo P)rinti G) Iri M) Ĉefa fako Q) Eliri /=serĉi "
+"[retropaŝo]=historio \n"
 
 #. #define NOVICE_LINE_TWO_A
 #: LYMessages.c:196
-msgid "  O)ther cmds  H)elp  K)eymap  G)oto  P)rint  M)ain screen  o)ptions  Q)uit  \n"
-msgstr "O) Aliaj komandoj H)elpo K)lavomapo G) Ŝalti P)rinti M) Ĉefa fako O) Agordaĵoj Q) Eliri  \n"
+msgid ""
+"  O)ther cmds  H)elp  K)eymap  G)oto  P)rint  M)ain screen  o)ptions  "
+"Q)uit  \n"
+msgstr ""
+"O) Aliaj komandoj H)elpo K)lavomapo G) Ŝalti P)rinti M) Ĉefa fako O) "
+"Agordaĵoj Q) Eliri  \n"
 
 #. #define NOVICE_LINE_TWO_B
 #: LYMessages.c:198
-msgid "  O)ther cmds  B)ack  E)dit  D)ownload ^R)eload ^W)ipe screen  search doc: / \n"
-msgstr "  O) Aliaj komandoj B) Retropaŝi E) Redakti D) Elŝuti ^R)eŝargi ^W) Forviŝi ekranon  serĉi en dokumento: / \n"
+msgid ""
+"  O)ther cmds  B)ack  E)dit  D)ownload ^R)eload ^W)ipe screen  search "
+"doc: / \n"
+msgstr ""
+"  O) Aliaj komandoj B) Retropaŝi E) Redakti D) Elŝuti ^R)eŝargi ^W) Forviŝi "
+"ekranon  serĉi en dokumento: / \n"
 
 #. #define NOVICE_LINE_TWO_C
 #: LYMessages.c:200
-msgid "O)ther cmds  C)omment  History: <backspace>  Bookmarks: V)iew, A)dd, R)emove \n"
-msgstr "O) Aliaj komandoj C) Komenti Historio: <Retropaŝo> Legosignoj: V)idi, A)ldoni, R) Forigi \n"
+msgid ""
+"O)ther cmds  C)omment  History: <backspace>  Bookmarks: V)iew, A)dd, "
+"R)emove \n"
+msgstr ""
+"O) Aliaj komandoj C) Komenti Historio: <Retropaŝo> Legosignoj: V)idi, "
+"A)ldoni, R) Forigi \n"
 
 #. #define FORM_NOVICELINE_ONE
 #: LYMessages.c:202
-msgid "            Enter text into the field by typing on the keyboard              "
-msgstr "           Enmetu tekston en la kampon per tajpado en la klavaro              "
+msgid ""
+"            Enter text into the field by typing on the keyboard              "
+msgstr ""
+"           Enmetu tekston en la kampon per tajpado en la "
+"klavaro              "
 
 #. #define FORM_NOVICELINE_TWO
 #: LYMessages.c:204
-msgid "    Ctrl-U to delete all text in field, [Backspace] to delete a character    "
+msgid ""
+"    Ctrl-U to delete all text in field, [Backspace] to delete a character    "
 msgstr "    ^U por forviŝi la kampon, [Retropaŝo] por forigi signon    "
 
 #. #define FORM_NOVICELINE_TWO_DELBL
 #: LYMessages.c:206
-msgid "      Ctrl-U to delete text in field, [Backspace] to delete a character    "
+msgid ""
+"      Ctrl-U to delete text in field, [Backspace] to delete a character    "
 msgstr "    ^U por forviŝi la kampon, [Retropaŝo] por forigi signon    "
 
 #. #define FORM_NOVICELINE_TWO_VAR
 #: LYMessages.c:208
 #, c-format
-msgid "    %s to delete all text in field, [Backspace] to delete a character    "
+msgid ""
+"    %s to delete all text in field, [Backspace] to delete a character    "
 msgstr "    %s por forviŝi la kampon, [Retropaŝo] por forigi signon    "
 
 #. #define FORM_NOVICELINE_TWO_DELBL_VAR
@@ -661,7 +783,8 @@ msgstr "Tajpu la vorton EXIT por reiri al Lynx.\n"
 #. #define SPAWNING_MSG
 #: LYMessages.c:256
 msgid "Spawning your default shell.  Use 'exit' to return to Lynx.\n"
-msgstr "Kreante vian aprioran ŝelon. Tajpu la vorton 'exit' por reiri al Lynx.\n"
+msgstr ""
+"Kreante vian aprioran ŝelon. Tajpu la vorton 'exit' por reiri al Lynx.\n"
 
 #: LYMessages.c:259
 msgid "Spawning is currently disabled."
@@ -727,8 +850,10 @@ msgstr "Kutima bildo-traktado restarigita! Reŝarganta..."
 
 #. #define PSEUDO_INLINE_ALTS_ON
 #: LYMessages.c:277
-msgid "Pseudo_ALTs will be inserted for inlines without ALT strings!  Reloading..."
-msgstr "Afabla anstataŭ teksto por bildoj estas enmetita kiam necesa! Reŝarganta..."
+msgid ""
+"Pseudo_ALTs will be inserted for inlines without ALT strings!  Reloading..."
+msgstr ""
+"Afabla anstataŭ teksto por bildoj estas enmetita kiam necesa! Reŝarganta..."
 
 #. #define PSEUDO_INLINE_ALTS_OFF
 #: LYMessages.c:279
@@ -822,12 +947,14 @@ msgstr "Plenumo per legosignoj estas malaktivigita."
 #: LYMessages.c:304
 #, c-format
 msgid "Bookmark file is not defined. Use %s to see options."
-msgstr "Legosigna dosiero ne estas difinita. Uzu la klavon %s por vidi agordaĵojn."
+msgstr ""
+"Legosigna dosiero ne estas difinita. Uzu la klavon %s por vidi agordaĵojn."
 
 #. #define NO_TEMP_FOR_HOTLIST
 #: LYMessages.c:306
 msgid "Unable to open tempfile for X Mosaic hotlist conversion."
-msgstr "Ne eblas malfermi provizoran dosieron por konvertado de X-Mosaic legosignojn."
+msgstr ""
+"Ne eblas malfermi provizoran dosieron por konvertado de X-Mosaic legosignojn."
 
 #: LYMessages.c:307
 msgid "ERROR - unable to open bookmark file."
@@ -878,7 +1005,9 @@ msgstr "Legosignaj dosieroj ne eblas esti travenitaj (nur HTTP-adresoj)."
 #. #define BOOKMARKS_NOT_OPEN
 #: LYMessages.c:327
 msgid "Unable to open bookmark file, use 'a' to save a link first"
-msgstr "Ne eblas malfermi legosignan dosieron. Uzu la klavon 'a' por konservi ligilon."
+msgstr ""
+"Ne eblas malfermi legosignan dosieron. Uzu la klavon 'a' por konservi "
+"ligilon."
 
 #: LYMessages.c:328
 msgid "There are no links in this bookmark file!"
@@ -892,7 +1021,9 @@ msgstr "D)okumunton en la tenejo forigu aŭ C) Nuligi? (d,c)"
 #. #define BOOK_D_L_OR_CANCEL
 #: LYMessages.c:332
 msgid "Save D)ocument or L)ink to bookmark file or C)ancel? (d,l,c): "
-msgstr "Konservi D)okumenton aŭ L)igilon al legosigna dosiero aŭ C) Nuligi? (d, l, c): "
+msgstr ""
+"Konservi D)okumenton aŭ L)igilon al legosigna dosiero aŭ C) Nuligi? (d, l, "
+"c): "
 
 #: LYMessages.c:333
 msgid "Save D)ocument to bookmark file or C)ancel? (d,c): "
@@ -905,7 +1036,9 @@ msgstr "Konservi L)igilon al legosigna dosiero aŭ C) Nuligi? (l,c)"
 #. #define NOBOOK_POST_FORM
 #: LYMessages.c:336
 msgid "Documents from forms with POST content cannot be saved as bookmarks."
-msgstr "Dokumentoj de formularioj kun kaŝita enhavo ne eblas esti konservitaj kiel legosignoj."
+msgstr ""
+"Dokumentoj de formularioj kun kaŝita enhavo ne eblas esti konservitaj kiel "
+"legosignoj."
 
 #: LYMessages.c:337
 msgid "Cannot save form fields/links"
@@ -914,7 +1047,9 @@ msgstr "Ne eblas konservi formulariajn kampojn/ligilojn"
 #. #define NOBOOK_HSML
 #: LYMessages.c:339
 msgid "History, showinfo, menu and list files cannot be saved as bookmarks."
-msgstr "Historio, informoj, menuo kaj listoj ne eblas estis konservitaj kiel legosignoj."
+msgstr ""
+"Historio, informoj, menuo kaj listoj ne eblas estis konservitaj kiel "
+"legosignoj."
 
 #. #define CONFIRM_BOOKMARK_DELETE
 #: LYMessages.c:341
@@ -1181,13 +1316,16 @@ msgstr "Vi jam estas en la ĉefa fako!"
 
 #. #define NOT_ISINDEX
 #: LYMessages.c:417
-msgid "Not a searchable indexed document -- press '/' to search for a text string"
-msgstr "Ne serĉebla indicita dokumento. Prume la klavon '/' por serĉi tekstan ĉenon"
+msgid ""
+"Not a searchable indexed document -- press '/' to search for a text string"
+msgstr ""
+"Ne serĉebla indicita dokumento. Prume la klavon '/' por serĉi tekstan ĉenon"
 
 #. #define NO_OWNER
 #: LYMessages.c:419
 msgid "No owner is defined for this file so you cannot send a comment"
-msgstr "Neniu estro estas difinita por ĉi tiu dosiero, do vi ne eblas sendi komenton."
+msgstr ""
+"Neniu estro estas difinita por ĉi tiu dosiero, do vi ne eblas sendi komenton."
 
 #: LYMessages.c:420
 #, c-format
@@ -1629,7 +1767,9 @@ msgstr "Retpoŝta peto nuligita!"
 #. #define CONFIRM_MAIL_SOURCE_PREPARSED
 #: LYMessages.c:548
 msgid "Viewing preparsed source.  Are you sure you want to mail it?"
-msgstr "Vidanta interpretitan fontotekston. Ĉu vi certas, ke vi volas sendi ĝin per retpoŝto?"
+msgstr ""
+"Vidanta interpretitan fontotekston. Ĉu vi certas, ke vi volas sendi ĝin per "
+"retpoŝto?"
 
 #: LYMessages.c:549
 msgid "Please wait..."
@@ -1670,7 +1810,8 @@ msgstr "Dosiero estas %d ekranplenoj. Ĉu vi certas, ke vi volas printi?"
 #. #define CHECK_PRINTER
 #: LYMessages.c:560
 msgid "Be sure your printer is on-line.  Press <return> to start printing:"
-msgstr "Certigu, ke via printilo estas konektita. Premu enen-klavon por printi:"
+msgstr ""
+"Certigu, ke via printilo estas konektita. Premu enen-klavon por printi:"
 
 #: LYMessages.c:561
 msgid "ERROR - Unable to allocate file space!!!"
@@ -1819,7 +1960,9 @@ msgstr "Premu enen-klavon por akcepti enmetitajn datumojn."
 #. #define ACCEPT_DATA_OR_DEFAULT
 #: LYMessages.c:602
 msgid "Hit RETURN to accept entered data.  Delete data to invoke the default."
-msgstr "Enmetu enen-klavon por akcepti enmetitajn datumojn. Forigi datumojn por alvoki la aprioran."
+msgstr ""
+"Enmetu enen-klavon por akcepti enmetitajn datumojn. Forigi datumojn por "
+"alvoki la aprioran."
 
 #: LYMessages.c:603
 msgid "Value accepted!"
@@ -1828,12 +1971,14 @@ msgstr "Valoro akceptita!"
 #. #define VALUE_ACCEPTED_WARNING_X
 #: LYMessages.c:605
 msgid "Value accepted! -- WARNING: Lynx is configured for XWINDOWS!"
-msgstr "Valoro akceptita! -- AVERTO: Lynx estas agordita por la fenestrosistemo X"
+msgstr ""
+"Valoro akceptita! -- AVERTO: Lynx estas agordita por la fenestrosistemo X"
 
 #. #define VALUE_ACCEPTED_WARNING_NONX
 #: LYMessages.c:607
 msgid "Value accepted! -- WARNING: Lynx is NOT configured for XWINDOWS!"
-msgstr "Valoro akceptita! -- AVERTO: Lynx NE estas agordita por la fenestrosistemo X"
+msgstr ""
+"Valoro akceptita! -- AVERTO: Lynx NE estas agordita por la fenestrosistemo X"
 
 #: LYMessages.c:608
 msgid "You are not allowed to change which editor to use!"
@@ -1872,8 +2017,12 @@ msgstr "Via TTT-legila ĉeno enhavas nek \"Lynx\" nek \"L_y_n_x\""
 
 #. #define UA_PLEASE_USE_LYNX
 #: LYMessages.c:619
-msgid "Use \"L_y_n_x\" or \"Lynx\" in User-Agent, or it looks like intentional deception!"
-msgstr "Uzu la ĉenojn \"L_y_n_x\" aŭ \"Lynx\" por identigi la TTT-legilon por eviti aspekti intence trompa."
+msgid ""
+"Use \"L_y_n_x\" or \"Lynx\" in User-Agent, or it looks like intentional "
+"deception!"
+msgstr ""
+"Uzu la ĉenojn \"L_y_n_x\" aŭ \"Lynx\" por identigi la TTT-legilon por eviti "
+"aspekti intence trompa."
 
 #. #define UA_CHANGE_DISABLED
 #: LYMessages.c:621
@@ -1948,12 +2097,15 @@ msgstr "P) Daŭrigi, aŭ C) Nuligi"
 #. #define ADVANCED_POST_GET_REDIRECT
 #: LYMessages.c:643
 msgid "Redirection of POST content.  P)roceed, see U)RL, use G)ET or C)ancel"
-msgstr "Alidirektado de kaŝita enhavo. P) Daŭrigi, U) vidi URL-on, G) Malkaŝi, aŭ C) Nuligi"
+msgstr ""
+"Alidirektado de kaŝita enhavo. P) Daŭrigi, U) vidi URL-on, G) Malkaŝi, aŭ C) "
+"Nuligi"
 
 #. #define ADVANCED_POST_REDIRECT
 #: LYMessages.c:645
 msgid "Redirection of POST content.  P)roceed, see U)RL, or C)ancel"
-msgstr "Alidirektado de kaŝita enhavo. P) Daŭrigi, U) Vidi URL-on, aŭ C) Nuligi"
+msgstr ""
+"Alidirektado de kaŝita enhavo. P) Daŭrigi, U) Vidi URL-on, aŭ C) Nuligi"
 
 #. #define CONFIRM_POST_RESUBMISSION
 #: LYMessages.c:647
@@ -1975,12 +2127,14 @@ msgstr "Listo el dokumento kun kaŝitaj datumoj. Ĉu reŝargi je %s ?"
 #. #define CONFIRM_POST_DOC_HEAD
 #: LYMessages.c:653
 msgid "Document from POST action, HEAD may not be understood.  Proceed?"
-msgstr "Dokumento kun kaŝita enhavo, ricevado de kapo eble ne kompreniĝos. Ĉu daŭri?"
+msgstr ""
+"Dokumento kun kaŝita enhavo, ricevado de kapo eble ne kompreniĝos. Ĉu daŭri?"
 
 #. #define CONFIRM_POST_LINK_HEAD
 #: LYMessages.c:655
 msgid "Form submit action is POST, HEAD may not be understood.  Proceed?"
-msgstr "Formularo kun kaŝita enhavo, ricevado de kapo eble ne kompreniĝos. Ĉu daŭri?"
+msgstr ""
+"Formularo kun kaŝita enhavo, ricevado de kapo eble ne kompreniĝos. Ĉu daŭri?"
 
 #: LYMessages.c:656
 msgid "Proceed without a username and password?"
@@ -2078,7 +2232,9 @@ msgstr "Uzu dosiervojon de via hejmdosierujo."
 #. #define MAXLINKS_REACHED
 #: LYMessages.c:686
 msgid "Maximum links per page exceeded!  Use half-page or two-line scrolling."
-msgstr "Maksimumaj ligiloj je ĉiu ekranpleno preteriris! Uzu duonekranplenan aŭ dulinian rulumadon."
+msgstr ""
+"Maksimumaj ligiloj je ĉiu ekranpleno preteriris! Uzu duonekranplenan aŭ "
+"dulinian rulumadon."
 
 #: LYMessages.c:687
 msgid "No previously visited links available!"
@@ -2354,8 +2510,10 @@ msgstr "La domajno estis manĝita!"
 
 #. #define DELETE_COOKIES_SET_ALLOW_OR_CANCEL
 #: LYMessages.c:749
-msgid "D)elete domain's cookies, set allow A)lways/P)rompt/neV)er, or C)ancel? "
-msgstr "D)omajnan kuketon forigi, permesu A) Ĉiam/P) Demandi/V) Neniam, aŭ C) Nuligi?"
+msgid ""
+"D)elete domain's cookies, set allow A)lways/P)rompt/neV)er, or C)ancel? "
+msgstr ""
+"D)omajnan kuketon forigi, permesu A) Ĉiam/P) Demandi/V) Neniam, aŭ C) Nuligi?"
 
 #. #define DELETE_DOMAIN_SET_ALLOW_OR_CANCEL
 #: LYMessages.c:751
@@ -2434,7 +2592,8 @@ msgstr "La maksimuma nombro provizoraj dosieroj estis atingita!"
 #. #define FORM_VALUE_TOO_LONG
 #: LYMessages.c:771
 msgid "Form field value exceeds buffer length!  Trim the tail."
-msgstr "Valoro de formularia kampo estas tro granda por la bufro. Tranĉu la voston!"
+msgstr ""
+"Valoro de formularia kampo estas tro granda por la bufro. Tranĉu la voston!"
 
 #. #define FORM_TAIL_COMBINED_WITH_HEAD
 #: LYMessages.c:773
@@ -2539,7 +2698,7 @@ msgid ""
 "This is a searchable Gopher index.\n"
 msgstr ""
 "\n"
-"Ĉi tiu estas serĉebla Gopher-indekso.\n"
+"Ĉi tio estas serĉebla Gopher-indekso.\n"
 
 #: LYMessages.c:801
 msgid "Gopher index"
@@ -2606,7 +2765,7 @@ msgstr "Ĉi tiu kliento ne regas afiŝi al novaĵgrupaj serviloj kun SSL."
 #: LYMessages.c:818
 #, c-format
 msgid "Style %d `%s' SGML:%s.  Font %s %.1f point.\n"
-msgstr "Silo %d '%s' SGML:%s. Tiparo %s %.lf punktoj.\n"
+msgstr "Stilo %d '%s' SGML:%s. Tiparo %s %.lf punktoj.\n"
 
 #: LYMessages.c:820
 #, c-format
@@ -2790,7 +2949,8 @@ msgid ""
 "of this page."
 msgstr ""
 "La sekvaj datumoj estis derivitaj dum la aŭtomata muntada procezo\n"
-"de ĉi tiu ekzemplero de Lynx. Dum raportado de eraro, bonvolu inkluzivi ekzempleron\n"
+"de ĉi tiu ekzemplero de Lynx. Dum raportado de eraro, bonvolu inkluzivi "
+"ekzempleron\n"
 "de ĉi tiu paĝo."
 
 #. #define AUTOCONF_LYNXCFG_H
@@ -2804,8 +2964,12 @@ msgstr ""
 
 #. #define DIRED_NOVICELINE
 #: LYMessages.c:881
-msgid "  C)reate  D)ownload  E)dit  F)ull menu  M)odify  R)emove  T)ag  U)pload     \n"
-msgstr "  C) Krei D) Elŝuti E) Redakti F) Plena menuo M)odifi R) Forigi T) Marki U) Alŝuti\n"
+msgid ""
+"  C)reate  D)ownload  E)dit  F)ull menu  M)odify  R)emove  T)ag  "
+"U)pload     \n"
+msgstr ""
+"  C) Krei D) Elŝuti E) Redakti F) Plena menuo M)odifi R) Forigi T) Marki U) "
+"Alŝuti\n"
 
 #: LYMessages.c:882
 msgid "Failed to obtain status of current link!"
@@ -2870,11 +3034,15 @@ msgid "Username for '%s' at %s '%s%s':"
 msgstr "Salutnomo por '%s' ĉe %s '%s%s':"
 
 #: WWW/Library/Implementation/HTAABrow.c:976
-msgid "This client doesn't know how to compose proxy authorization information for scheme"
-msgstr "Ĉi tiu kliento ne scias kiel komponi prokurilajn atesto-informojn por skemo"
+msgid ""
+"This client doesn't know how to compose proxy authorization information for "
+"scheme"
+msgstr ""
+"Ĉi tiu kliento ne scias kiel komponi prokurilajn atesto-informojn por skemo"
 
 #: WWW/Library/Implementation/HTAABrow.c:1053
-msgid "This client doesn't know how to compose authorization information for scheme"
+msgid ""
+"This client doesn't know how to compose authorization information for scheme"
 msgstr "Ĉi tiu kliento ne scias kiel komponi atesto-informojn por skemo"
 
 #: WWW/Library/Implementation/HTAABrow.c:1162
@@ -2908,13 +3076,19 @@ msgstr "Ŝargo nekompleta."
 
 #: WWW/Library/Implementation/HTAccess.c:1093
 #, c-format
-msgid "**** HTAccess: socket or file number returned by obsolete load routine!\n"
-msgstr "**** HTAccess: konektingo aŭ dosiernomo returnita de malaktuala ŝargo-funkcio!\n"
+msgid ""
+"**** HTAccess: socket or file number returned by obsolete load routine!\n"
+msgstr ""
+"**** HTAccess: konektingo aŭ dosiernomo returnita de malaktuala ŝargo-"
+"funkcio!\n"
 
 #: WWW/Library/Implementation/HTAccess.c:1095
 #, c-format
-msgid "**** HTAccess: Internal software error.  Please mail lynx-dev@nongnu.org!\n"
-msgstr "**** HTAccess: Interna programa eraro. Bonvolu sendi retleteron al lynx-dev@nongnu.org!\n"
+msgid ""
+"**** HTAccess: Internal software error.  Please mail lynx-dev@nongnu.org!\n"
+msgstr ""
+"**** HTAccess: Interna programa eraro. Bonvolu sendi retleteron al lynx-"
+"dev@nongnu.org!\n"
 
 #: WWW/Library/Implementation/HTAccess.c:1096
 #, c-format
@@ -3122,8 +3296,21 @@ msgstr "URL havas nevalidan pordon"
 msgid "Address length looks invalid"
 msgstr "URL-longo ŝajnas nevalida"
 
-#: WWW/Library/Implementation/HTTCP.c:1862
-#: WWW/Library/Implementation/HTTCP.c:1880
+#: WWW/Library/Implementation/HTTCP.c:1867
+msgid "SOCKS5: no hostname found."
+msgstr "SOCKS5: neniu retnodnomo troveblas."
+
+#: WWW/Library/Implementation/HTTCP.c:1873
+msgid "SOCKS5: hostname too long."
+msgstr "SOCKS5: retnodnomo tro longas."
+
+#: WWW/Library/Implementation/HTTCP.c:1891
+#, c-format
+msgid "(for %s at %s) SOCKS5"
+msgstr "(por %s ĉe %s) SOCKS5"
+
+#: WWW/Library/Implementation/HTTCP.c:1918
+#: WWW/Library/Implementation/HTTCP.c:1935
 #, c-format
 msgid "Unable to locate remote host %s."
 msgstr "Ne eblas loki foran retnodon %s."
@@ -3132,39 +3319,85 @@ msgstr "Ne eblas loki foran retnodon %s."
 #. * but not HTAlert, because typically there will be other
 #. * alerts from the callers.  - kw
 #.
-#: WWW/Library/Implementation/HTTCP.c:1877
+#: WWW/Library/Implementation/HTTCP.c:1932
 #: WWW/Library/Implementation/HTTelnet.c:115
 #, c-format
 msgid "Invalid hostname %s"
 msgstr "Nevalida retnodonomo %s"
 
-#: WWW/Library/Implementation/HTTCP.c:1891
+#: WWW/Library/Implementation/HTTCP.c:1944
 #, c-format
 msgid "Making %s connection to %s"
 msgstr "Faranta konekto-tipon %s al %s"
 
-#: WWW/Library/Implementation/HTTCP.c:1902
+#: WWW/Library/Implementation/HTTCP.c:1954
 msgid "socket failed."
 msgstr "konektingo malsukcesis."
 
-#: WWW/Library/Implementation/HTTCP.c:1916
+#: WWW/Library/Implementation/HTTCP.c:1968
 #, c-format
 msgid "socket failed: family %d addr %s port %s."
 msgstr "konektingo malsukcesis: familio %d adreso %s pordo %s."
 
-#: WWW/Library/Implementation/HTTCP.c:1940
+#: WWW/Library/Implementation/HTTCP.c:1991
 msgid "Could not make connection non-blocking."
 msgstr "Ne eblas fari konekton senbloka."
 
-#: WWW/Library/Implementation/HTTCP.c:2006
+#: WWW/Library/Implementation/HTTCP.c:2057
 msgid "Connection failed (too many retries)."
 msgstr "Konekto malsukcesis (tro da reprovoj.)"
 
-#: WWW/Library/Implementation/HTTCP.c:2201
+#: WWW/Library/Implementation/HTTCP.c:2252
 msgid "Could not restore socket to blocking."
 msgstr "Ne povis restarigi konektingon je bloka."
 
-#: WWW/Library/Implementation/HTTCP.c:2271
+#. RFC 1928: CONNECT request
+#: WWW/Library/Implementation/HTTCP.c:2284
+#, c-format
+msgid "SOCKS5: connecting to %s"
+msgstr "SOCKS5: konektiĝanta al %s"
+
+#: WWW/Library/Implementation/HTTCP.c:2313
+msgid "SOCKS server failure"
+msgstr "SOCKS-servila fiaskis"
+
+#: WWW/Library/Implementation/HTTCP.c:2316
+msgid "connection not allowed by ruleset"
+msgstr "konekto ne permesata per regularo"
+
+#: WWW/Library/Implementation/HTTCP.c:2319
+msgid "network unreachable"
+msgstr "reto neatingebla"
+
+#: WWW/Library/Implementation/HTTCP.c:2322
+msgid "host unreachable"
+msgstr "retnodo neatingebla"
+
+#: WWW/Library/Implementation/HTTCP.c:2325
+msgid "connection refused"
+msgstr "konekto malakceptita"
+
+#: WWW/Library/Implementation/HTTCP.c:2328
+msgid "TTL expired"
+msgstr "Vivdaŭro eksvalidiĝis"
+
+#: WWW/Library/Implementation/HTTCP.c:2331
+msgid "command not supported"
+msgstr "komando ne komprenita"
+
+#: WWW/Library/Implementation/HTTCP.c:2334
+msgid "address type not supported"
+msgstr "adreso-tipo ne komprenita"
+
+#: WWW/Library/Implementation/HTTCP.c:2337
+msgid "unknown SOCKS error code"
+msgstr "nekonata SOCKS-erarkodo"
+
+#: WWW/Library/Implementation/HTTCP.c:2382
+msgid "unexpected reply\n"
+msgstr "neatendita respondo\n"
+
+#: WWW/Library/Implementation/HTTCP.c:2459
 msgid "Socket read failed (too many tries)."
 msgstr "Legado de konektingo malsukcesis (tro da provoj)."
 
@@ -3778,7 +4011,8 @@ msgid ""
 "     the 'R' key but may have been remapped by you or your system\n"
 "     administrator."
 msgstr ""
-"     Vi povas forigi ligilojn uzante la komandon 'forigi legosignon'. Ĝi ordinare\n"
+"     Vi povas forigi ligilojn uzante la komandon 'forigi legosignon'. Ĝi "
+"ordinare\n"
 "     estas la klavo 'R', sed eble vi aŭ via sistemestro ŝanĝis ĝin."
 
 #: src/LYBookmark.c:387
@@ -3786,7 +4020,8 @@ msgid ""
 "     This file also may be edited with a standard text editor to delete\n"
 "     outdated or invalid links, or to change their order."
 msgstr ""
-"     Oni povas ankaŭ redakti ĉi tiun dosieron per ordinara tekstoredaktilo por forigi\n"
+"     Oni povas ankaŭ redakti ĉi tiun dosieron per ordinara tekstoredaktilo "
+"por forigi\n"
 "     malaktualajn aŭ nevalidajn ligilojn aŭ por ŝanĝi ilian ordon."
 
 #: src/LYBookmark.c:390
@@ -3863,27 +4098,27 @@ msgstr "Terminala restartigo malsukcesis - ĉu nekonata terminala tipo?"
 msgid "Terminal initialisation failed - unknown terminal type?"
 msgstr "Terminala startigo malsukcesis - ĉu nekonata terminala tipo?"
 
-#: src/LYCurses.c:1828
+#: src/LYCurses.c:1839
 msgid "Terminal ="
 msgstr "Terminalo ="
 
-#: src/LYCurses.c:1832
+#: src/LYCurses.c:1843
 msgid "You must use a vt100, 200, etc. terminal with this program."
 msgstr "Vi devas uzi terminalon vt100, 200 ktp kun ĉi tiu programo."
 
-#: src/LYCurses.c:1881
+#: src/LYCurses.c:1892
 msgid "Your Terminal type is unknown!"
 msgstr "Via terminala tipo estas nekonata!"
 
-#: src/LYCurses.c:1882
+#: src/LYCurses.c:1893
 msgid "Enter a terminal type:"
 msgstr "Enmetu terminalan tipon:"
 
-#: src/LYCurses.c:1896
+#: src/LYCurses.c:1907
 msgid "TERMINAL TYPE IS SET TO"
 msgstr "TERMINALA TIPO ESTAS AGORDITA AL"
 
-#: src/LYCurses.c:2455
+#: src/LYCurses.c:2466
 #, c-format
 msgid ""
 "\n"
@@ -3892,7 +4127,7 @@ msgstr ""
 "\n"
 "Paneanta eraro okazis en %s Eldono %s\n"
 
-#: src/LYCurses.c:2458
+#: src/LYCurses.c:2469
 #, c-format
 msgid ""
 "\n"
@@ -3904,7 +4139,8 @@ msgid ""
 msgstr ""
 "\n"
 "Bonvolo sciigi vian sistemestron por konfirmi eraron, kaj se\n"
-"konfirmita, sciigi la dissendoliston lynx-dev. Eraraj raportoj havu koncizajn\n"
+"konfirmita, sciigi la dissendoliston lynx-dev. Eraraj raportoj havu "
+"koncizajn\n"
 "priskribojn de la komando kajaŭ URL, kio kaŭzis la problemon, la\n"
 "operaciuma nomo kaj eldonnumero, kaj aliaj koncernaj informoj.\n"
 
@@ -3980,7 +4216,8 @@ msgstr "(El Historio)"
 
 #: src/LYHistory.c:849
 msgid "You visited (POSTs, bookmark, menu and list files excluded):"
-msgstr "Vi vizitis (kaŝaj petoj, legosigno, menuo kaj listoj ne estas inkluzivitaj):"
+msgstr ""
+"Vi vizitis (kaŝaj petoj, legosigno, menuo kaj listoj ne estas inkluzivitaj):"
 
 #: src/LYHistory.c:1151
 msgid "(No messages yet)"
@@ -4248,7 +4485,8 @@ msgstr "Nevalida sintaksa formato."
 
 #: src/LYLocal.c:1743
 msgid "Warning!  UUDecoded file will exist in the directory you started Lynx."
-msgstr "Averto! UUDecoded-dosiero ekzistos en la dosierujo en kiu vi plenumigis Lynx."
+msgstr ""
+"Averto! UUDecoded-dosiero ekzistos en la dosierujo en kiu vi plenumigis Lynx."
 
 #: src/LYLocal.c:1933
 msgid "NULL URL pointer"
@@ -4359,19 +4597,21 @@ msgstr "La mesaĝo estis aŭtomate generita per"
 msgid "No system mailer configured"
 msgstr "Neniu sistema retpoŝto-servilo agordita"
 
-#: src/LYMain.c:1088
+#: src/LYMain.c:1090
 msgid "No Winsock found, sorry."
 msgstr "Bedaŭrinde neniu Winsock"
 
-#: src/LYMain.c:1278
+#: src/LYMain.c:1280
 msgid "You MUST define a valid TMP or TEMP area!"
-msgstr "Vi devas difini validan provizoran dosierujon per la medivariabloj TMP aŭ TEMP!"
+msgstr ""
+"Vi devas difini validan provizoran dosierujon per la medivariabloj TMP aŭ "
+"TEMP!"
 
-#: src/LYMain.c:1331 src/LYMainLoop.c:5285
+#: src/LYMain.c:1333 src/LYMainLoop.c:5285
 msgid "No such directory"
 msgstr "Ne ekzistas tiu dosiero"
 
-#: src/LYMain.c:1525
+#: src/LYMain.c:1527
 #, c-format
 msgid ""
 "\n"
@@ -4382,7 +4622,7 @@ msgstr ""
 "Agorda dosiero \"%s\" ne disponeblas.\n"
 "\n"
 
-#: src/LYMain.c:1535
+#: src/LYMain.c:1537
 #, c-format
 msgid ""
 "\n"
@@ -4393,66 +4633,72 @@ msgstr ""
 "Lynx-kodoprezentoj ne deklaritaj.\n"
 "\n"
 
-#: src/LYMain.c:1691
+#: src/LYMain.c:1693
 #, c-format
 msgid "Ignored %d characters from standard input.\n"
 msgstr "Ignoris %d signojn el la ĉefenigujo.\n"
 
-#: src/LYMain.c:1693
+#: src/LYMain.c:1695
 #, c-format
 msgid "Use \"-stdin\" or \"-\" to tell how to handle piped input.\n"
-msgstr "Uzu parametrojn \"-stdin\" aŭ \"-\" por specifi, kiel trakti enigojn tubajn.\n"
+msgstr ""
+"Uzu parametrojn \"-stdin\" aŭ \"-\" por specifi, kiel trakti enigojn "
+"tubajn.\n"
 
-#: src/LYMain.c:1851
+#: src/LYMain.c:1853
 msgid "Warning:"
 msgstr "Averto:"
 
-#: src/LYMain.c:2419
+#: src/LYMain.c:2421
 msgid "persistent cookies state will be changed in next session only."
 msgstr "stato de daŭrantaj kuketoj ŝanĝiĝos nur en la sekva seanco."
 
-#: src/LYMain.c:2654 src/LYMain.c:2698
+#: src/LYMain.c:2656 src/LYMain.c:2700
 #, c-format
 msgid "Lynx: ignoring unrecognized charset=%s\n"
 msgstr "Lynx: ignoranta nekonatan kodoprezenton=%s\n"
 
-#: src/LYMain.c:3215
+#: src/LYMain.c:3217
 #, c-format
 msgid "%s Version %s (%s)"
 msgstr "%s Versio %s (%s)"
 
-#: src/LYMain.c:3256
+#: src/LYMain.c:3258
 #, c-format
 msgid "Built on %s%s.\n"
 msgstr "Muntita je %s%s.\n"
 
-#: src/LYMain.c:3270
+#: src/LYMain.c:3272
 msgid "Copyrights held by the Lynx Developers Group,"
 msgstr "Kopirajtoj estas tenataj de la Grupo pri Lynx-disvolvado,"
 
-#: src/LYMain.c:3271
+#: src/LYMain.c:3273
 msgid "the University of Kansas, CERN, and other contributors."
 msgstr "la Universitato de Kansaso, CERN kaj aliaj kontribuintoj."
 
-#: src/LYMain.c:3272
+#: src/LYMain.c:3274
 msgid "Distributed under the GNU General Public License (Version 2)."
 msgstr "Distribuita laŭ la GPL de GNU (Eldono 2)."
 
-#: src/LYMain.c:3273
-msgid "See https://lynx.invisible-island.net/ and the online help for more information."
-msgstr "Vidu al https://lynx.invisible-island.net/ kaj la enreta helpilo por pliaj informoj."
+#: src/LYMain.c:3275
+msgid ""
+"See https://lynx.invisible-island.net/ and the online help for more "
+"information."
+msgstr ""
+"Vidu al https://lynx.invisible-island.net/ kaj la enreta helpilo por pliaj "
+"informoj."
 
-#: src/LYMain.c:4120
+#: src/LYMain.c:4126
 #, c-format
 msgid "USAGE: %s [options] [file]\n"
 msgstr "UZO: %s [parametroj] [dosiero]\n"
 
-#: src/LYMain.c:4121
+#: src/LYMain.c:4127
 #, c-format
 msgid "Options are:\n"
 msgstr "Parametroj estas:\n"
 
-#: src/LYMain.c:4424
+#: src/LYMain.c:4430
 #, c-format
 msgid "%s: Invalid Option: %s\n"
 msgstr "%s: Nevalida parametro: %s\n"
@@ -4468,7 +4714,9 @@ msgstr "URL specifita de la uzanto"
 
 #: src/LYMainLoop.c:1142
 msgid "Enctype multipart/form-data not yet supported!  Cannot submit."
-msgstr "La ĉifro-tipo multipart/form-data ankoraŭ ne estas komprenata! Ne eblas sendi."
+msgstr ""
+"La ĉifro-tipo multipart/form-data ankoraŭ ne estas komprenata! Ne eblas "
+"sendi."
 
 #.
 #. * Make a name for this help file.
@@ -5372,13 +5620,17 @@ msgstr "nevalida linio-redaktila elekto %s por klavo %s, elektanta ĉion\n"
 
 #: src/LYReadCFG.c:817 src/LYReadCFG.c:829
 #, c-format
-msgid "setting of line-editor binding for key %s (0x%x) to 0x%x for %s failed\n"
-msgstr "agordi linio-redaktilan bindadon por klavo %s (0x%x) al 0x(%x) por %s malsukcesis\n"
+msgid ""
+"setting of line-editor binding for key %s (0x%x) to 0x%x for %s failed\n"
+msgstr ""
+"agordi linio-redaktilan bindadon por klavo %s (0x%x) al 0x(%x) por %s "
+"malsukcesis\n"
 
 #: src/LYReadCFG.c:833
 #, c-format
 msgid "setting of line-editor binding for key %s (0x%x) for %s failed\n"
-msgstr "agordi linio-redaktilon bindadon por klavo %s (0x%x) por %s malsukcesis\n"
+msgstr ""
+"agordi linio-redaktilon bindadon por klavo %s (0x%x) por %s malsukcesis\n"
 
 #: src/LYReadCFG.c:929
 #, c-format
@@ -5656,7 +5908,7 @@ msgstr ""
 "ELEMENTO estas unu el EM,STRONG,I,U,BLINK ktp.\n"
 "\n"
 
-#: src/LYStyle.c:939
+#: src/LYStyle.c:941
 #, c-format
 msgid ""
 "\n"
@@ -5801,7 +6053,8 @@ msgid ""
 msgstr ""
 "cookie_accept_domains kaj cookie_reject domains estas listoj de domajnoj\n"
 "el kiuj Lynx aŭtomate akceptu aŭ rifuzu (respektive) ĉiujn kuketojn,\n"
-"apartigita per komoj. Se domajno estas specifita en ambaŭ agordaĵoj, rifuzado\n"
+"apartigita per komoj. Se domajno estas specifita en ambaŭ agordaĵoj, "
+"rifuzado\n"
 "regos. La parametro accept_all_cookies superregos ĉiujn\n"
 "agordaĵojn ĉi tie.\n"
 
@@ -5824,7 +6077,8 @@ msgid ""
 "querying the user for an invalid path or domain.\n"
 msgstr ""
 "cookie_loose_invalid_domains, cookie_strict_invalid_domains, kaj\n"
-"cookie_query_invalid_domains estas listoj, apartigita per komoj, de kiuj domajnoj\n"
+"cookie_query_invalid_domains estas listoj, apartigita per komoj, de kiuj "
+"domajnoj\n"
 "estu submetitaj al variantaj gradoj de kontrolado. Se vi specifas,\n"
 "ke domajno ricevos severan kontroladon, severa konformado al RFC2109\n"
 "aplikiĝos. Domajno kun malsevera kontrolado estos permesita doni al kuketoj\n"
@@ -5870,9 +6124,12 @@ msgid ""
 "unless it is activated from the command line, and the built-in line editor\n"
 "will be used for sending mail.\n"
 msgstr ""
-"file_editor specifas la tekstoredaktilon plenumontan por redakti lokajn dosierojn\n"
-"aŭ sendi retleterojn. So neniu estas specifita, do redakti dosierojn estos malaktivigitaj\n"
-"se ĝi ne estas aktivigita laŭ la komanda linio, kaj la integra liniredaktilo\n"
+"file_editor specifas la tekstoredaktilon plenumontan por redakti lokajn "
+"dosierojn\n"
+"aŭ sendi retleterojn. So neniu estas specifita, do redakti dosierojn estos "
+"malaktivigitaj\n"
+"se ĝi ne estas aktivigita laŭ la komanda linio, kaj la integra "
+"liniredaktilo\n"
 "estos uzata por sendi retleterojn.\n"
 
 #: src/LYrcFile.c:451
@@ -5926,8 +6183,10 @@ msgid ""
 msgstr ""
 "La sekvaj permesas, ke vi difinu sublegosignajn dosierojn kaj priskribojn.\n"
 "La formato estas multi_bookmark<majusklo>=<dosiernomo>,<priskribo>\n"
-"Maksimume 26 legosignaj dosieroj (por la askiaj ĉefliteroj) estas permesitaj.\n"
-"Oni komencas kun \"multi_bookmarkB\" pro tio, ke 'A' estas la ĉefa (vidu supran).\n"
+"Maksimume 26 legosignaj dosieroj (por la askiaj ĉefliteroj) estas "
+"permesitaj.\n"
+"Oni komencas kun \"multi_bookmarkB\" pro tio, ke 'A' estas la ĉefa (vidu "
+"supran).\n"
 
 #: src/LYrcFile.c:502
 msgid ""
@@ -5964,7 +6223,8 @@ msgstr ""
 "Ĉi tio ne estas nepre la sama kiel la nomo provizita kiel parto de la\n"
 "personal_mail_address.\n"
 "Lynx ne devos konservi viajn ŝanĝojn al tiu valoro kiel kromefiko\n"
-"de sendi retleterojn. Por ĝisdatigi la aŭtomatan valorono, vi devas uzi la agordojn\n"
+"de sendi retleterojn. Por ĝisdatigi la aŭtomatan valorono, vi devas uzi la "
+"agordojn\n"
 "aŭ modifi ĉi tiun dosieron permane.\n"
 
 #: src/LYrcFile.c:521
@@ -6071,11 +6331,13 @@ msgid ""
 msgstr ""
 "select_popups specifas ĉu la elektoj en elekto-listoj, kiuj\n"
 "povas havi nur unu elekton, estas prezentitaj kiel vertikala listo da\n"
-"radiobutonoj aŭ ŝprucmenuo. Notu, ke se la elekto permesas plurajn elektojn,\n"
+"radiobutonoj aŭ ŝprucmenuo. Notu, ke se la elekto permesas plurajn "
+"elektojn,\n"
 "Lynx ĉiam kreos vertikalan liston de markobutonoj por la elektoj.\n"
 "Valoro de \"on\" specifas, ke aro da ŝprucmenuoj estas preferataj.\n"
 "Valoro de \"off\" specifas, ke aro da radiobutonoj estas preferataj.\n"
-"La aŭtomatan valoron oni povas nuligi per la komandlinian parametron -popup.\n"
+"La aŭtomatan valoron oni povas nuligi per la komandlinian parametron -"
+"popup.\n"
 
 #: src/LYrcFile.c:590
 msgid ""
@@ -6096,7 +6358,8 @@ msgid ""
 "\"off\" \"show color\" settings will be treated as \"default\".\n"
 msgstr ""
 "show_color specifas, kiel agordi kolorreĝimon dum plenumo. Valoro de\n"
-"\"never\" devigos kolorreĝimon malŝaltita (trakti la terminalon kiel unukoloran)\n"
+"\"never\" devigos kolorreĝimon malŝaltita (trakti la terminalon kiel "
+"unukoloran)\n"
 "dum plenumo, eĉ se la terminalo ŝajnas esti plurkolora. Valoro de\n"
 "\"always\" devigos kolorreĝimon ŝaltita eĉ se la terminalo ŝajnas esti\n"
 "unuklora, se tio estas regata de la biblioteko uzata por munti Lynx-on.\n"
@@ -6107,8 +6370,10 @@ msgstr ""
 "uzita en sennomaj kontoj aŭ se la limigo \"option_save\" estas valorizita.\n"
 "La efikon de la konservita voloro oni povas nuligi per\n"
 "la komandliniaj parametroj -color kaj -nocolor.\n"
-"La reĝimo aŭtomata je plenumo povos ŝanĝita per la agordaĵo \"montri kolorojn\" en\n"
-"la agordoj. Se la agordaĵoj estas konservitaj, la agordaĵoj \"on\" kaj \"off\"\n"
+"La reĝimo aŭtomata je plenumo povos ŝanĝita per la agordaĵo \"montri kolorojn"
+"\" en\n"
+"la agordoj. Se la agordaĵoj estas konservitaj, la agordaĵoj \"on\" kaj \"off"
+"\"\n"
 "agordaĵoj de \"montri kolorojn\" estos traktitaj same al \"default\".\n"
 
 #: src/LYrcFile.c:607
@@ -6131,7 +6396,8 @@ msgstr ""
 "tia, kia ne distingas la nunan ligilon bazita sur prilumado\n"
 "aŭ koloro. Valoro de \"on\" metos ĝin ĉe la maldekstro aŭtomate.\n"
 "La valoro de \"off\" metos la kursoron 'kaŝanta'.\n"
-"La aŭtomatan valoron oni povas nuligi per la komandlinia parametro -show_cursor.\n"
+"La aŭtomatan valoron oni povas nuligi per la komandlinia parametro -"
+"show_cursor.\n"
 
 #: src/LYrcFile.c:618
 msgid ""
@@ -6145,7 +6411,8 @@ msgstr ""
 "\"kaŝatajn\" (punktajn) dosier(uj)ojn. Valoro de \"on\" estos\n"
 "obeataj nur se aktivigitaj per userdefs.h kajaŭ lynx.cfg, kaj ne\n"
 "malŝaltita per komandlinia parametro. Se montrado de kaŝataj dosieroj\n"
-"estas malaktivigita, kredado de tiaj dosieroj en Lynx ankaŭ estas malaktivigita.\n"
+"estas malaktivigita, kredado de tiaj dosieroj en Lynx ankaŭ estas "
+"malaktivigita.\n"
 
 #: src/LYrcFile.c:629
 msgid ""
@@ -6159,13 +6426,15 @@ msgid ""
 "user modes.  When this option is set to \"standard\", the menu will be\n"
 "presented regardless of user mode.\n"
 msgstr ""
-"Se sub_bookmarks ne havas valoron de \"off\", kaj pluraj legosignaj dosieroj\n"
+"Se sub_bookmarks ne havas valoron de \"off\", kaj pluraj legosignaj "
+"dosieroj\n"
 "estis difinitaj (vidu sube), do ĉiuj legosignaj operacioj unue demandos\n"
 "ke la uzanto elektu aktiva sublegosigna dosiero. Se la aŭtomata\n"
 "Lynx-bookmark_file estas difinita (vidu supre), ĝi estos uzita kiel la\n"
 "aŭtomata elekto. Kiam la valoro de tiu agordaĵo estas \"advanced\", kaj la\n"
 "uzantoreĝimo estas altnivela, la komandon \"'v'idi legosignojn\" kreos\n"
-"statlinian demandilon anstataŭ la menuo vidata en la uzantoreĝimoj novula kaj meznivela\n"
+"statlinian demandilon anstataŭ la menuo vidata en la uzantoreĝimoj novula "
+"kaj meznivela\n"
 "Kiam tiu elekto estas \"standard\", la menuo estos\n"
 "prezentita senkonsidere de uzantoreĝimo.\n"
 
@@ -6285,7 +6554,8 @@ msgid ""
 "checkbox:\n"
 msgstr ""
 "Ĉi tiu dosiero enhavas agordaĵojn konservitajn de la agordilo de Lynx\n"
-"(ordinare per la klavo 'o'). Por konservi agordaĵojn en tio, oni devas elekti la\n"
+"(ordinare per la klavo 'o'). Por konservi agordaĵojn en tio, oni devas "
+"elekti la\n"
 "markobutonon:\n"
 
 #: src/LYrcFile.c:980
@@ -6299,10 +6569,12 @@ msgstr ""
 #: src/LYrcFile.c:987
 msgid ""
 "You may also use the command-line option \"-forms_options\", which displays\n"
-"the simpler Options Menu instead.  Save options with that using the '>' key.\n"
+"the simpler Options Menu instead.  Save options with that using the '>' "
+"key.\n"
 "\n"
 msgstr ""
-"Vi povas ankaŭ uzi la komandlinian parametron \"-forms_options\", kiu anstataŭe\n"
+"Vi povas ankaŭ uzi la komandlinian parametron \"-forms_options\", kiu "
+"anstataŭe\n"
 "montras la pli mallongan menuon. Konservi agordaĵojn per la klavo '>'.\n"
 "\n"
 
@@ -6327,7 +6599,8 @@ msgid ""
 "called \"lynx.cfg\".  It has different content and a different format.\n"
 "It is not this file.\n"
 msgstr ""
-"Ordinare ekzistas neniu bezono por permane redakti ĉi tiun dosieron pro tio, ke la aŭtomataj valoroj\n"
+"Ordinare ekzistas neniu bezono por permane redakti ĉi tiun dosieron pro tio, "
+"ke la aŭtomataj valoroj\n"
 "en ĝi povas esti regata de la agordilo, kaj je la sekva fojo, ke agordaĵoj\n"
 "estas konservitaj de la agordilo, ĉi tiu dosiero estos reskribita.\n"
 "Mi avertis vin...\n"

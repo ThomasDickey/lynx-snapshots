@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYrcFile.h,v 1.55 2020/02/23 21:13:14 tom Exp $
+ * $LynxId: LYrcFile.h,v 1.56 2020/02/23 23:08:55 Keith.Bowes Exp $
  */
 #ifndef LYRCFILE_H
 #define LYRCFILE_H
@@ -179,6 +179,7 @@
 #define RC_NO_REFERER_HEADER            "no_referer_header"
 #define RC_NO_TABLE_CENTER              "no_table_center"
 #define RC_NO_TITLE                     "no_title"
+#define RC_UPDATE_TERM_TITLE            "update_term_title"
 #define RC_NUMBER_FIELDS_ON_LEFT        "number_fields_on_left"
 #define RC_NUMBER_LINKS_ON_LEFT         "number_links_on_left"
 #define RC_OUTGOING_MAIL_CHARSET        "outgoing_mail_charset"
