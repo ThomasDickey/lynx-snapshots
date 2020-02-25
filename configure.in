@@ -1,4 +1,4 @@
-dnl $LynxId: configure.in,v 1.314 2020/01/21 23:38:32 tom Exp $
+dnl $LynxId: configure.in,v 1.315 2020/02/25 10:14:21 tom Exp $
 dnl
 dnl Process this file with autoconf to produce a configure script.
 dnl
@@ -1537,6 +1537,7 @@ if test $cf_cv_screen != slang ; then
 		wresize \
 		)
 	AC_CHECK_FUNCS( \
+		curses_exit \
 		_nc_free_and_exit \
 		_nc_freeall \
 		)
