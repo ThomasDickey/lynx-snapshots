@@ -1,5 +1,5 @@
 /*
- * $LynxId: config.hin,v 1.146 2019/07/31 23:31:32 tom Exp $
+ * $LynxId: config.hin,v 1.147 2020/02/25 10:15:54 tom Exp $
  * vile:cmode
  *
  * The configure script translates "config.hin" into "lynx_cfg.h"
@@ -64,6 +64,7 @@
 #undef HAVE_CBREAK
 #undef HAVE_CTERMID
 #undef HAVE_CURSESX_H
+#undef HAVE_CURSES_EXIT		/* ncurses debugging extension */
 #undef HAVE_CURSES_VERSION	/* CF_FUNC_CURSES_VERSION */
 #undef HAVE_CUSERID
 #undef HAVE_DCGETTEXT		/* AM_GNU_GETTEXT */
