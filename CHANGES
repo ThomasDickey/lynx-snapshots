@@ -1,9 +1,11 @@
--- $LynxId: CHANGES,v 1.1040 2020/02/24 00:59:22 tom Exp $
+-- $LynxId: CHANGES,v 1.1041 2020/02/25 01:47:59 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2020-02-23 (2.9.0dev.5)
+2020-02-24 (2.9.0dev.5)
+* amend workaround in 2.8.6dev.19 for "-notitle" option, fixing an off-by-one
+  display (report by Keith Bowes) -TD
 * add/adapt changes from Keith Bowes' github:
   * updated eo.po
   * add "-update_term_title" option

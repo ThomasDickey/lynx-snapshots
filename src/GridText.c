@@ -1,5 +1,5 @@
 /*
- * $LynxId: GridText.c,v 1.324 2020/02/24 00:30:01 tom Exp $
+ * $LynxId: GridText.c,v 1.325 2020/02/25 01:41:00 tom Exp $
  *
  *		Character grid hypertext object
  *		===============================
@@ -1384,7 +1384,7 @@ static int display_line(HTLine *line,
      * the output line wraps, foiling our attempt to just use newlines to
      * advance to the next page.
      */
-    LYmove(scrline + TITLE_LINES - 1, 0);
+    LYmove(scrline + (no_title ? 0 : TITLE_LINES) - 1, 0);
 #endif
 
     /*
