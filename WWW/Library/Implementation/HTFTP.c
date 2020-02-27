@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFTP.c,v 1.141 2020/01/21 22:07:13 tom Exp $
+ * $LynxId: HTFTP.c,v 1.142 2020/02/26 23:40:14 tom Exp $
  *
  *			File Transfer Protocol (FTP) Client
  *			for a WorldWideWeb browser
@@ -235,7 +235,7 @@ static PortNumber port_number = FIRST_TCP_PORT;
 static BOOL have_socket = FALSE;	/* true if master_socket is valid */
 static LYNX_FD master_socket;	/* Listening socket = invalid */
 
-static char port_command[255];	/* Command for setting the port */
+static char *port_command;	/* Command for setting the port */
 static fd_set open_sockets;	/* Mask of active channels */
 static LYNX_FD num_sockets;	/* Number of sockets to scan */
 static PortNumber passive_port;	/* Port server specified for data */
@@ -918,7 +918,7 @@ static int get_connection(const char *arg,
 
     /*  Now we log in           Look up username, prompt for pw.
      */
-    status = response((char *) 0);	/* Get greeting */
+    status = response(NULL);	/* Get greeting */
     CheckForInterrupt("at beginning of login");
 
     server_type = GENERIC_SERVER;	/* reset */
@@ -1167,6 +1167,7 @@ static int get_listen_socket(void)
     FD_ZERO(&open_sockets);	/* Clear our record of open sockets */
     num_sockets = 0;
 
+    FREE(port_command);
 #ifndef REPEAT_LISTEN
     if (have_socket)
 	return master_socket;	/* Done already */
@@ -1327,14 +1328,14 @@ static int get_listen_socket(void)
     switch (SOCKADDR_OF(soc_A)->sa_family) {
     case AF_INET:
 #endif /* INET6 */
-	sprintf(port_command, "PORT %d,%d,%d,%d,%d,%d%c%c",
-		(int) *((unsigned char *) (&soc_A.soc_in.sin_addr) + 0),
-		(int) *((unsigned char *) (&soc_A.soc_in.sin_addr) + 1),
-		(int) *((unsigned char *) (&soc_A.soc_in.sin_addr) + 2),
-		(int) *((unsigned char *) (&soc_A.soc_in.sin_addr) + 3),
-		(int) *((unsigned char *) (&soc_A.soc_in.sin_port) + 0),
-		(int) *((unsigned char *) (&soc_A.soc_in.sin_port) + 1),
-		CR, LF);
+	HTSprintf0(&port_command, "PORT %d,%d,%d,%d,%d,%d%c%c",
+		   (int) *((unsigned char *) (&soc_A.soc_in.sin_addr) + 0),
+		   (int) *((unsigned char *) (&soc_A.soc_in.sin_addr) + 1),
+		   (int) *((unsigned char *) (&soc_A.soc_in.sin_addr) + 2),
+		   (int) *((unsigned char *) (&soc_A.soc_in.sin_addr) + 3),
+		   (int) *((unsigned char *) (&soc_A.soc_in.sin_port) + 0),
+		   (int) *((unsigned char *) (&soc_A.soc_in.sin_port) + 1),
+		   CR, LF);
 
 #ifdef INET6
 	break;
@@ -1351,15 +1352,17 @@ static int get_listen_socket(void)
 			portbuf,
 			(socklen_t) sizeof(portbuf),
 			NI_NUMERICHOST | NI_NUMERICSERV);
-	    sprintf(port_command, "EPRT |%d|%s|%s|%c%c", 2, hostbuf, portbuf,
-		    CR, LF);
+	    HTSprintf0(&port_command, "EPRT |%d|%s|%s|%c%c", 2, hostbuf, portbuf,
+		       CR, LF);
 	    break;
 	}
     default:
-	sprintf(port_command, "JUNK%c%c", CR, LF);
+	HTSprintf0(&port_command, "JUNK%c%c", CR, LF);
 	break;
     }
 #endif /* INET6 */
+    if (port_command == NULL)
+	return -1;
 
     /*  Inform TCP that we will accept connections
      */
@@ -3206,7 +3209,7 @@ static int read_directory(HTParentAnchor *parent,
 
     if (WasInterrupted || data_soc != -1) {	/* should always be true */
 	/*
-	 * Without closing the data socket first, the response(0) later may
+	 * Without closing the data socket first, the response(NULL) later may
 	 * hang.  Some servers expect the client to fin/ack the close of the
 	 * data connection before proceeding with the conversation on the
 	 * control connection.  - kw
@@ -3271,6 +3274,7 @@ static int setup_connection(const char *name,
 	    /*  Inform the server of the port number we will listen on
 	     */
 	    status = response(port_command);
+	    FREE(port_command);
 	    if (status == HT_INTERRUPTED) {
 		CTRACE((tfp, "HTFTP: Interrupted in response (port_command)\n"));
 		_HTProgress(CONNECTION_INTERRUPTED);
@@ -4023,7 +4027,7 @@ int HTFTPLoad(const char *name,
 	if (final_status > 0) {
 	    if (server_type != CMS_SERVER)
 		if (outstanding-- > 0) {
-		    status = response(0);
+		    status = response(NULL);
 		    if (status < 0 ||
 			(status == 2 && !StrNCmp(response_text, "221", 3)))
 			outstanding = 0;
@@ -4115,7 +4119,7 @@ int HTFTPLoad(const char *name,
 	    (void) HTInetStatus("close");	/* Comment only */
 	} else {
 	    if (rv != HT_LOADED && outstanding--) {
-		status = response(0);	/* Pick up final reply */
+		status = response(NULL);	/* Pick up final reply */
 		if (status != 2 && rv != HT_INTERRUPTED && rv != -1) {
 		    data_soc = -1;	/* invalidate it */
 		    init_help_message_cache();	/* to free memory */
@@ -4129,7 +4133,7 @@ int HTFTPLoad(const char *name,
     }
     while (outstanding-- > 0 &&
 	   (status > 0)) {
-	status = response(0);
+	status = response(NULL);
 	if (status == 2 && !StrNCmp(response_text, "221", 3))
 	    break;
     }
