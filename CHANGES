@@ -1,9 +1,11 @@
--- $LynxId: CHANGES,v 1.1042 2020/02/25 10:16:56 tom Exp $
+-- $LynxId: CHANGES,v 1.1045 2020/02/27 09:51:17 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2020-02-25 (2.9.0dev.5)
+2020-02-27 (2.9.0dev.5)
+* fix gcc9 warning about sprintf in HTFTP.c -TD
+* workaround for MacOS clang wrapper c99 "-W" option, in configure script -TD
 * use curses_exit() from ncurses 6.2 for leak-checking -TD
 * amend workaround in 2.8.6dev.19 for "-notitle" option, fixing an off-by-one
   display (report by Keith Bowes) -TD
