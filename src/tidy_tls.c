@@ -1,5 +1,5 @@
 /*
- * $LynxId: tidy_tls.c,v 1.40 2020/01/21 22:26:43 tom Exp $
+ * $LynxId: tidy_tls.c,v 1.41 2020/03/03 11:46:07 Gisle.Vanem Exp $
  * Copyright 2008-2019,2020 Thomas E. Dickey
  * with fix Copyright 2008 by Thomas Viehmann
  *
@@ -499,12 +499,32 @@ int SSL_read(SSL * ssl, void *buffer, int length)
     return rc;
 }
 
+#ifdef _WINDOWS
+static int Lynx_gtls_push(void *s, const void *buf, size_t len)
+{
+    return NETWRITE((SOCKET) s, buf, len);
+}
+
+/* This calls 'recv()' in a thread for every GnuTls pull. Maybe too much overhead?
+ */
+static int Lynx_gtls_pull(void *s, void *buf, size_t len)
+{
+    return NETREAD((SOCKET) s, buf, len);
+}
+#endif
+
 /*
  * Connect the SSL object with a file descriptor.
  * This always returns 1 (success) since GNU TLS does not check for errors.
  */
 int SSL_set_fd(SSL * ssl, int fd)
 {
+#ifdef _WINDOWS
+    /* register callback functions to send and receive data. */
+    gnutls_transport_set_push_function(ssl->gnutls_state, Lynx_gtls_push);
+    gnutls_transport_set_pull_function(ssl->gnutls_state, Lynx_gtls_pull);
+#endif
+
     gnutls_transport_set_ptr(ssl->gnutls_state,
 			     (gnutls_transport_ptr_t) (intptr_t) (fd));
     return 1;
