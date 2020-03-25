@@ -18,6 +18,8 @@
 #include <UCAux.h>
 #include <HTAnchor.h>
 #include <HTMLDTD.h>
+#include <HText.h>
+#include <HTStyle.h>
 
 #ifdef __cplusplus
 extern "C" {
