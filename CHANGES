@@ -1,9 +1,11 @@
--- $LynxId: CHANGES,v 1.1048 2020/03/03 11:46:07 tom Exp $
+-- $LynxId: CHANGES,v 1.1049 2020/04/04 20:16:13 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2020-03-03 (2.9.0dev.6)
+2020-04-04 (2.9.0dev.6)
+* update autoconf macros, mostly changes to reduce unused-variable warnings
+  in the compile-checks -TD
 * add Windows-specific initialization in tidy_tls.c -GV
 * update eo.po from
     http://translationproject.org/latest/lynx

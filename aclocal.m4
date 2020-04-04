@@ -1,4 +1,4 @@
-dnl $LynxId: aclocal.m4,v 1.265 2020/02/27 10:21:59 tom Exp $
+dnl $LynxId: aclocal.m4,v 1.266 2020/04/04 20:16:13 tom Exp $
 dnl Macros for auto-configure script.
 dnl by Thomas E. Dickey <dickey@invisible-island.net>
 dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
@@ -177,7 +177,7 @@ size_t iconv();
   AC_SUBST(LIBICONV)
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl AM_LANGINFO_CODESET version: 4 updated: 2015/04/18 08:56:57
+dnl AM_LANGINFO_CODESET version: 5 updated: 2020/03/10 18:53:47
 dnl -------------------
 dnl Inserted as requested by gettext 0.10.40
 dnl File from /usr/share/aclocal
@@ -190,7 +190,7 @@ AC_DEFUN([AM_LANGINFO_CODESET],
 [
 AC_CACHE_CHECK([for nl_langinfo and CODESET], am_cv_langinfo_codeset,
 	[AC_TRY_LINK([#include <langinfo.h>],
-	[char* cs = nl_langinfo(CODESET);],
+	[char* cs = nl_langinfo(CODESET); (void)cs],
 	am_cv_langinfo_codeset=yes,
 	am_cv_langinfo_codeset=no)
 	])
@@ -648,10 +648,11 @@ define([CF_ACVERSION_COMPARE],
 [ifelse([$8], , ,[$8])],
 [ifelse([$9], , ,[$9])])])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_ADD_CFLAGS version: 13 updated: 2017/02/25 18:57:40
+dnl CF_ADD_CFLAGS version: 14 updated: 2020/04/04 16:16:13
 dnl -------------
 dnl Copy non-preprocessor flags to $CFLAGS, preprocessor flags to $CPPFLAGS
-dnl The second parameter if given makes this macro verbose.
+dnl $1 = flags to add
+dnl $2 = if given makes this macro verbose.
 dnl
 dnl Put any preprocessor definitions that use quoted strings in $EXTRA_CPPFLAGS,
 dnl to simplify use of $CPPFLAGS in compiler checks, etc., that are easily
@@ -1089,7 +1090,7 @@ ifelse([$3],,[    :]dnl
 ])dnl
 ])])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_AR_FLAGS version: 6 updated: 2015/10/10 15:25:05
+dnl CF_AR_FLAGS version: 7 updated: 2020/04/04 11:37:29
 dnl -----------
 dnl Check for suitable "ar" (archiver) options for updating an archive.
 dnl
@@ -1100,39 +1101,55 @@ AC_DEFUN([CF_AR_FLAGS],[
 AC_REQUIRE([CF_PROG_AR])
 
 AC_CACHE_CHECK(for options to update archives, cf_cv_ar_flags,[
-	cf_cv_ar_flags=unknown
-	for cf_ar_flags in -curvU -curv curv -crv crv -cqv cqv -rv rv
-	do
+	case $cf_cv_system_name in
+	(*-msvc*)
+		cf_cv_ar_flags=''
+		cat >mk_static_lib.sh <<-EOF
+		#!$SHELL
+		MSVC_BIN="[$]AR"
+		out="\[$]1"
+		shift
+		exec \[$]MSVC_BIN -out:"\[$]out" \[$]@
+		EOF
+		chmod +x mk_static_lib.sh
+		AR=`pwd`/mk_static_lib.sh
+		;;
+	(*)
+		cf_cv_ar_flags=unknown
+		for cf_ar_flags in -curvU -curv curv -crv crv -cqv cqv -rv rv
+		do
 
-		# check if $ARFLAGS already contains this choice
-		if test "x$ARFLAGS" != "x" ; then
-			cf_check_ar_flags=`echo "x$ARFLAGS" | sed -e "s/$cf_ar_flags\$//" -e "s/$cf_ar_flags / /"`
-			if test "x$ARFLAGS" != "$cf_check_ar_flags" ; then
-				cf_cv_ar_flags=
-				break
+			# check if $ARFLAGS already contains this choice
+			if test "x$ARFLAGS" != "x" ; then
+				cf_check_ar_flags=`echo "x$ARFLAGS" | sed -e "s/$cf_ar_flags\$//" -e "s/$cf_ar_flags / /"`
+				if test "x$ARFLAGS" != "$cf_check_ar_flags" ; then
+					cf_cv_ar_flags=
+					break
+				fi
 			fi
-		fi
 
-		rm -f conftest.$ac_cv_objext
-		rm -f conftest.a
+			rm -f conftest.$ac_cv_objext
+			rm -f conftest.a
 
-		cat >conftest.$ac_ext <<EOF
+			cat >conftest.$ac_ext <<EOF
 #line __oline__ "configure"
 int	testdata[[3]] = { 123, 456, 789 };
 EOF
-		if AC_TRY_EVAL(ac_compile) ; then
-			echo "$AR $ARFLAGS $cf_ar_flags conftest.a conftest.$ac_cv_objext" >&AC_FD_CC
-			$AR $ARFLAGS $cf_ar_flags conftest.a conftest.$ac_cv_objext 2>&AC_FD_CC 1>/dev/null
-			if test -f conftest.a ; then
-				cf_cv_ar_flags=$cf_ar_flags
+			if AC_TRY_EVAL(ac_compile) ; then
+				echo "$AR $ARFLAGS $cf_ar_flags conftest.a conftest.$ac_cv_objext" >&AC_FD_CC
+				$AR $ARFLAGS $cf_ar_flags conftest.a conftest.$ac_cv_objext 2>&AC_FD_CC 1>/dev/null
+				if test -f conftest.a ; then
+					cf_cv_ar_flags=$cf_ar_flags
+					break
+				fi
+			else
+				CF_VERBOSE(cannot compile test-program)
 				break
 			fi
-		else
-			CF_VERBOSE(cannot compile test-program)
-			break
-		fi
-	done
-	rm -f conftest.a conftest.$ac_ext conftest.$ac_cv_objext
+		done
+		rm -f conftest.a conftest.$ac_ext conftest.$ac_cv_objext
+		;;
+	esac
 ])
 
 if test -n "$ARFLAGS" ; then
@@ -1508,7 +1525,7 @@ AC_TRY_LINK([#include <stdio.h>],[printf("Hello world");],,
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_CHECK_ERRNO version: 12 updated: 2015/04/18 08:56:57
+dnl CF_CHECK_ERRNO version: 13 updated: 2020/03/10 18:53:47
 dnl --------------
 dnl Check for data that is usually declared in <stdio.h> or <errno.h>, e.g.,
 dnl the 'errno' variable.  Define a DECL_xxx symbol if we must declare it
@@ -1526,7 +1543,7 @@ AC_CACHE_CHECK(if external $1 is declared, cf_cv_dcl_$1,[
 #include <stdio.h>
 #include <sys/types.h>
 #include <errno.h> ],
-	ifelse([$2],,int,[$2]) x = (ifelse([$2],,int,[$2])) $1,
+	ifelse([$2],,int,[$2]) x = (ifelse([$2],,int,[$2])) $1; (void)x,
 	[cf_cv_dcl_$1=yes],
 	[cf_cv_dcl_$1=no])
 ])
@@ -1788,7 +1805,7 @@ if test $cf_cv_color_curses = yes ; then
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_CONST_X_STRING version: 3 updated: 2020/01/11 18:39:22
+dnl CF_CONST_X_STRING version: 4 updated: 2020/03/10 18:53:47
 dnl -----------------
 dnl The X11R4-X11R6 Xt specification uses an ambiguous String type for most
 dnl character-strings.
@@ -1818,7 +1835,7 @@ AC_TRY_COMPILE(
 #include <stdlib.h>
 #include <X11/Intrinsic.h>
 ],
-[String foo = malloc(1)],[
+[String foo = malloc(1); (void)foo],[
 
 AC_CACHE_CHECK(for X11/Xt const-feature,cf_cv_const_x_string,[
 	AC_TRY_COMPILE(
@@ -1848,7 +1865,7 @@ esac
 ])
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_CURSES_CHTYPE version: 8 updated: 2012/10/06 08:57:51
+dnl CF_CURSES_CHTYPE version: 10 updated: 2020/03/19 20:46:13
 dnl ----------------
 dnl Test if curses defines 'chtype' (usually a 'long' type for SysV curses).
 AC_DEFUN([CF_CURSES_CHTYPE],
@@ -1856,14 +1873,14 @@ AC_DEFUN([CF_CURSES_CHTYPE],
 AC_REQUIRE([CF_CURSES_CPPFLAGS])dnl
 AC_CACHE_CHECK(for chtype typedef,cf_cv_chtype_decl,[
 	AC_TRY_COMPILE([#include <${cf_cv_ncurses_header:-curses.h}>],
-		[chtype foo],
+		[chtype foo; (void)foo],
 		[cf_cv_chtype_decl=yes],
 		[cf_cv_chtype_decl=no])])
 if test $cf_cv_chtype_decl = yes ; then
 	AC_DEFINE(HAVE_TYPE_CHTYPE,1,[Define to 1 if chtype is declared])
 	AC_CACHE_CHECK(if chtype is scalar or struct,cf_cv_chtype_type,[
 		AC_TRY_COMPILE([#include <${cf_cv_ncurses_header:-curses.h}>],
-			[chtype foo; long x = foo],
+			[static chtype foo; long x = foo; (void)x],
 			[cf_cv_chtype_type=scalar],
 			[cf_cv_chtype_type=struct])])
 	if test $cf_cv_chtype_type = scalar ; then
@@ -2115,7 +2132,7 @@ fi
 
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_CURSES_TERM_H version: 11 updated: 2015/04/15 19:08:48
+dnl CF_CURSES_TERM_H version: 12 updated: 2020/03/19 20:23:48
 dnl ----------------
 dnl SVr4 curses should have term.h as well (where it puts the definitions of
 dnl the low-level interface).  This may not be true in old/broken implementations,
@@ -2144,7 +2161,7 @@ do
 	AC_TRY_COMPILE([
 #include <${cf_cv_ncurses_header:-curses.h}>
 #include <${cf_header}>],
-	[WINDOW *x],
+	[WINDOW *x; (void)x],
 	[cf_cv_term_header=$cf_header
 	 break],
 	[cf_cv_term_header=no])
@@ -2163,7 +2180,7 @@ case $cf_cv_term_header in
 #else
 make an error
 #endif],
-			[WINDOW *x],
+			[WINDOW *x; (void)x],
 			[cf_cv_term_header=$cf_header
 			 break],
 			[cf_cv_term_header=no])
@@ -2185,7 +2202,7 @@ case $cf_cv_term_header in
 esac
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_CURSES_UNCTRL_H version: 4 updated: 2015/04/15 19:08:48
+dnl CF_CURSES_UNCTRL_H version: 5 updated: 2020/03/19 20:23:48
 dnl ------------------
 dnl Any X/Open curses implementation must have unctrl.h, but ncurses packages
 dnl may put it in a subdirectory (along with ncurses' other headers, of
@@ -2214,7 +2231,7 @@ do
 	AC_TRY_COMPILE([
 #include <${cf_cv_ncurses_header:-curses.h}>
 #include <${cf_header}>],
-	[WINDOW *x],
+	[WINDOW *x; (void)x],
 	[cf_cv_unctrl_header=$cf_header
 	 break],
 	[cf_cv_unctrl_header=no])
@@ -3010,7 +3027,7 @@ if test $cf_cv_type_unionwait = yes; then
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_GCC_ATTRIBUTES version: 17 updated: 2015/04/12 15:39:00
+dnl CF_GCC_ATTRIBUTES version: 18 updated: 2020/03/10 18:53:47
 dnl -----------------
 dnl Test for availability of useful gcc __attribute__ directives to quiet
 dnl compiler warnings.  Though useful, not all are supported -- and contrary
@@ -3054,7 +3071,7 @@ cat > conftest.$ac_ext <<EOF
 extern void wow(char *,...) GCC_SCANFLIKE(1,2);
 extern void oops(char *,...) GCC_PRINTFLIKE(1,2) GCC_NORETURN;
 extern void foo(void) GCC_NORETURN;
-int main(int argc GCC_UNUSED, char *argv[[]] GCC_UNUSED) { return 0; }
+int main(int argc GCC_UNUSED, char *argv[[]] GCC_UNUSED) { (void)argc; (void)argv; return 0; }
 EOF
 	cf_printf_attribute=no
 	cf_scanf_attribute=no
@@ -3615,7 +3632,7 @@ cf_save_CFLAGS="$cf_save_CFLAGS -we147"
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_LARGEFILE version: 11 updated: 2018/06/20 20:23:13
+dnl CF_LARGEFILE version: 12 updated: 2020/03/19 20:23:48
 dnl ------------
 dnl Add checks for large file support.
 AC_DEFUN([CF_LARGEFILE],[
@@ -3655,6 +3672,7 @@ ifdef([AC_FUNC_FSEEKO],[
 		struct dirent64 *x = readdir((DIR *)0);
 		struct dirent *y = readdir((DIR *)0);
 		int z = x - y;
+		(void)z;
 		],
 		[cf_cv_struct_dirent64=yes],
 		[cf_cv_struct_dirent64=no])
@@ -3664,7 +3682,7 @@ ifdef([AC_FUNC_FSEEKO],[
 ])
 ])
 dnl ---------------------------------------------------------------------------
-dnl CF_LASTLOG version: 5 updated: 2012/10/04 20:12:20
+dnl CF_LASTLOG version: 6 updated: 2020/03/10 18:53:47
 dnl ----------
 dnl Check for header defining _PATH_LASTLOG, or failing that, see if the lastlog
 dnl file exists.
@@ -3680,7 +3698,7 @@ AC_TRY_COMPILE([
 #ifdef HAVE_PATHS_H
 #include <paths.h>
 #endif
-#endif],[char *path = _PATH_LASTLOG],
+#endif],[char *path = _PATH_LASTLOG; (void)path],
 	[cf_cv_path_lastlog="_PATH_LASTLOG"],
 	[if test -f /usr/adm/lastlog ; then
 	 	cf_cv_path_lastlog=/usr/adm/lastlog
@@ -5317,7 +5335,7 @@ int main(void)
 test "$cf_cv_set_errno" != no && AC_DEFINE(CAN_SET_ERRNO,1,[Define to 1 if we can set errno])
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_SIGWINCH version: 2 updated: 2019/03/23 19:54:44
+dnl CF_SIGWINCH version: 3 updated: 2020/03/10 18:53:47
 dnl -----------
 dnl Use this macro after CF_XOPEN_SOURCE, but do not require it (not all
 dnl programs need this test).
@@ -5332,7 +5350,7 @@ AC_CACHE_CHECK(if SIGWINCH is defined,cf_cv_define_sigwinch,[
 	AC_TRY_COMPILE([
 #include <sys/types.h>
 #include <sys/signal.h>
-],[int x = SIGWINCH],
+],[int x = SIGWINCH; (void)x],
 	[cf_cv_define_sigwinch=yes],
 	[AC_TRY_COMPILE([
 #undef _XOPEN_SOURCE
@@ -5340,7 +5358,7 @@ AC_CACHE_CHECK(if SIGWINCH is defined,cf_cv_define_sigwinch,[
 #undef _POSIX_C_SOURCE
 #include <sys/types.h>
 #include <sys/signal.h>
-],[int x = SIGWINCH],
+],[int x = SIGWINCH; (void)x],
 	[cf_cv_define_sigwinch=maybe],
 	[cf_cv_define_sigwinch=no])
 ])
@@ -5362,7 +5380,7 @@ do
 #if SIGWINCH != $cf_sigwinch
 make an error
 #endif
-int x = SIGWINCH],
+int x = SIGWINCH; (void)x],
 	[cf_cv_fixup_sigwinch=$cf_sigwinch
 	 break])
 
@@ -5376,7 +5394,7 @@ done
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_SIZECHANGE version: 14 updated: 2018/06/20 20:23:13
+dnl CF_SIZECHANGE version: 16 updated: 2020/03/19 20:46:13
 dnl -------------
 dnl Check for definitions & structures needed for window size-changing
 dnl
@@ -5419,13 +5437,17 @@ do
 ],[
 #ifdef TIOCGSIZE
 	struct ttysize win;	/* SunOS 3.0... */
-	int y = win.ts_lines;
-	int x = win.ts_cols;
+	int y = win.ts_lines = 2;
+	int x = win.ts_cols = 1;
+	(void)y;
+	(void)x;
 #else
 #ifdef TIOCGWINSZ
 	struct winsize win;	/* everything else */
-	int y = win.ws_row;
-	int x = win.ws_col;
+	int y = win.ws_row = 2;
+	int x = win.ws_col = 1;
+	(void)y;
+	(void)x;
 #else
 	no TIOCGSIZE or TIOCGWINSZ
 #endif /* TIOCGWINSZ */
@@ -5947,7 +5969,7 @@ AC_DEFUN([CF_STRIP_O_OPT],[
 $1=`echo ${$1} | sed -e 's/-O[[1-9]]\? //' -e 's/-O[[1-9]]\?$//'`
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_STRUCT_TERMIOS version: 9 updated: 2018/06/08 21:57:23
+dnl CF_STRUCT_TERMIOS version: 11 updated: 2020/03/19 20:46:13
 dnl -----------------
 dnl Some machines require _POSIX_SOURCE to completely define struct termios.
 AC_DEFUN([CF_STRUCT_TERMIOS],[
@@ -5970,12 +5992,12 @@ if test "$ac_cv_header_termios_h" = yes ; then
 	if test "$termios_bad" = maybe ; then
 	AC_MSG_CHECKING(whether termios.h needs _POSIX_SOURCE)
 	AC_TRY_COMPILE([#include <termios.h>],
-		[struct termios foo; int x = foo.c_iflag],
+		[struct termios foo; int x = foo.c_iflag = 1; (void)x],
 		termios_bad=no, [
 		AC_TRY_COMPILE([
 #define _POSIX_SOURCE
 #include <termios.h>],
-			[struct termios foo; int x = foo.c_iflag],
+			[struct termios foo; int x = foo.c_iflag = 2; (void)x],
 			termios_bad=unknown,
 			termios_bad=yes AC_DEFINE(_POSIX_SOURCE,1,[Define to 1 if we must define _POSIX_SOURCE]))
 			])
@@ -6195,7 +6217,7 @@ AC_MSG_RESULT($cf_cv_termio_and_termios)
 test $cf_cv_termio_and_termios = no && AC_DEFINE(TERMIO_AND_TERMIOS,1,[Define to 1 if we can include termio.h and termios.h])
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_TERM_HEADER version: 4 updated: 2015/04/15 19:08:48
+dnl CF_TERM_HEADER version: 5 updated: 2020/03/19 20:23:48
 dnl --------------
 dnl Look for term.h, which is part of X/Open curses.  It defines the interface
 dnl to terminfo database.  Usually it is in the same include-path as curses.h,
@@ -6216,7 +6238,7 @@ do
 AC_TRY_COMPILE([#include <stdio.h>
 #include <${cf_cv_ncurses_header:-curses.h}>
 #include <$cf_test>
-],[int x = auto_left_margin],[
+],[int x = auto_left_margin; (void)x],[
 	cf_cv_term_header="$cf_test"],[
 	cf_cv_term_header=unknown
 	])
@@ -6466,7 +6488,7 @@ if test "$cf_cv_type_long_long" = yes ; then
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_UNION_WAIT version: 6 updated: 2012/10/06 08:57:51
+dnl CF_UNION_WAIT version: 7 updated: 2020/03/19 20:23:48
 dnl -------------
 dnl Check to see if the BSD-style union wait is declared.  Some platforms may
 dnl use this, though it is deprecated in favor of the 'int' type in Posix.
@@ -6490,6 +6512,9 @@ AC_CACHE_VAL(cf_cv_type_unionwait,[
 	 int y = WEXITSTATUS(x);
 	 int z = WTERMSIG(x);
 	 wait(&x);
+	 (void)x;
+	 (void)y;
+	 (void)z;
 	],
 	[cf_cv_type_unionwait=no
 	 echo compiles ok w/o union wait 1>&AC_FD_CC
@@ -6503,6 +6528,13 @@ AC_CACHE_VAL(cf_cv_type_unionwait,[
 	 int z = WTERMSIG(x);
 #endif
 	 wait(&x);
+	 (void)x;
+#ifdef WEXITSTATUS
+	 (void)y;
+#endif
+#ifdef WTERMSIG
+	 (void)z;
+#endif
 	],
 	[cf_cv_type_unionwait=yes
 	 echo compiles ok with union wait and possibly macros too 1>&AC_FD_CC
@@ -6547,7 +6579,7 @@ if test "$cf_cv_utf8_lib" = "add-on" ; then
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_UTMP version: 10 updated: 2012/10/04 20:12:20
+dnl CF_UTMP version: 11 updated: 2020/03/10 18:53:47
 dnl -------
 dnl Check for UTMP/UTMPX headers
 AC_DEFUN([CF_UTMP],
@@ -6568,6 +6600,8 @@ cf_utmp_includes="
 	AC_TRY_COMPILE([$cf_utmp_includes],
 	[struct $cf_header x;
 	 char *name = x.ut_name; /* utmp.h and compatible definitions */
+	 (void)x;
+	 (void)name;
 	],
 	[cf_cv_have_utmp=$cf_header
 	 break],
@@ -6575,6 +6609,8 @@ cf_utmp_includes="
 	AC_TRY_COMPILE([$cf_utmp_includes],
 	[struct $cf_header x;
 	 char *name = x.ut_user; /* utmpx.h must declare this */
+	 (void)x;
+	 (void)name;
 	],
 	[cf_cv_have_utmp=$cf_header
 	 break
@@ -6595,7 +6631,7 @@ if test $cf_cv_have_utmp != no ; then
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_UTMP_UT_HOST version: 8 updated: 2012/10/04 20:12:20
+dnl CF_UTMP_UT_HOST version: 9 updated: 2020/03/10 18:53:47
 dnl ---------------
 dnl Check if UTMP/UTMPX struct defines ut_host member
 AC_DEFUN([CF_UTMP_UT_HOST],
@@ -6606,7 +6642,10 @@ AC_CACHE_VAL(cf_cv_have_utmp_ut_host,[
 	AC_TRY_COMPILE([
 #include <sys/types.h>
 #include <${cf_cv_have_utmp}.h>],
-	[struct $cf_cv_have_utmp x; char *y = &x.ut_host[0]],
+	[struct $cf_cv_have_utmp x;
+	 char *y = &x.ut_host[0];
+	 (void)x;
+	 (void)y],
 	[cf_cv_have_utmp_ut_host=yes],
 	[cf_cv_have_utmp_ut_host=no])
 	])
@@ -6615,7 +6654,7 @@ test $cf_cv_have_utmp_ut_host != no && AC_DEFINE(HAVE_UTMP_UT_HOST,1,[Define to 
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_UTMP_UT_NAME version: 6 updated: 2015/04/12 15:39:00
+dnl CF_UTMP_UT_NAME version: 7 updated: 2020/03/10 18:53:47
 dnl ---------------
 dnl Check if UTMP/UTMPX struct defines ut_name member
 AC_DEFUN([CF_UTMP_UT_NAME],
@@ -6635,6 +6674,8 @@ for cf_header in ut_name ut_user ; do
 	AC_TRY_COMPILE([$cf_utmp_includes],
 	[struct $cf_cv_have_utmp x;
 	 char *name = x.$cf_header;
+	 (void)x;
+	 (void)name;
 	],
 	[cf_cv_have_utmp_ut_name=$cf_header
 	 break])
@@ -6652,7 +6693,7 @@ esac
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_UTMP_UT_SESSION version: 6 updated: 2012/10/04 20:12:20
+dnl CF_UTMP_UT_SESSION version: 7 updated: 2020/03/10 18:53:47
 dnl ------------------
 dnl Check if UTMP/UTMPX struct defines ut_session member
 AC_DEFUN([CF_UTMP_UT_SESSION],
@@ -6662,7 +6703,10 @@ AC_CACHE_CHECK(if ${cf_cv_have_utmp}.ut_session is declared, cf_cv_have_utmp_ut_
 	AC_TRY_COMPILE([
 #include <sys/types.h>
 #include <${cf_cv_have_utmp}.h>],
-	[struct $cf_cv_have_utmp x; long y = x.ut_session],
+	[struct $cf_cv_have_utmp x;
+	 long y = x.ut_session;
+	 (void)x;
+	 (void)y],
 	[cf_cv_have_utmp_ut_session=yes],
 	[cf_cv_have_utmp_ut_session=no])
 ])
@@ -6672,7 +6716,7 @@ fi
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_UTMP_UT_SYSLEN version: 2 updated: 2012/10/04 20:12:20
+dnl CF_UTMP_UT_SYSLEN version: 3 updated: 2020/03/10 18:53:47
 dnl -----------------
 dnl Check if UTMP/UTMPX struct defines ut_syslen member
 AC_DEFUN([CF_UTMP_UT_SYSLEN],
@@ -6683,7 +6727,10 @@ AC_CACHE_VAL(cf_cv_have_utmp_ut_syslen,[
 	AC_TRY_COMPILE([
 #include <sys/types.h>
 #include <${cf_cv_have_utmp}.h>],
-	[struct $cf_cv_have_utmp x; int y = x.ut_syslen],
+	[struct $cf_cv_have_utmp x;
+	 int y = x.ut_syslen;
+	 (void)x;
+	 (void)y],
 	[cf_cv_have_utmp_ut_syslen=yes],
 	[cf_cv_have_utmp_ut_syslen=no])
 	])
@@ -6692,7 +6739,7 @@ test $cf_cv_have_utmp_ut_syslen != no && AC_DEFINE(HAVE_UTMP_UT_SYSLEN,1,[Define
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_UTMP_UT_XSTATUS version: 4 updated: 2012/10/04 20:12:20
+dnl CF_UTMP_UT_XSTATUS version: 5 updated: 2020/03/10 18:53:47
 dnl ------------------
 dnl Check for known variants on the UTMP/UTMPX struct's exit-status as reported
 dnl by various people:
@@ -6717,7 +6764,10 @@ do
 AC_TRY_COMPILE([
 #include <sys/types.h>
 #include <${cf_cv_have_utmp}.h>],
-	[struct $cf_cv_have_utmp x; long y = x.$cf_result = 0],
+	[struct $cf_cv_have_utmp x;
+	 long y = x.$cf_result = 0;
+	 (void)x;
+	 (void)y],
 	[cf_cv_have_utmp_ut_xstatus=$cf_result
 	 break],
 	[cf_cv_have_utmp_ut_xstatus=no])
@@ -6730,7 +6780,7 @@ fi
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_UTMP_UT_XTIME version: 9 updated: 2012/10/04 20:12:20
+dnl CF_UTMP_UT_XTIME version: 10 updated: 2020/03/10 18:53:47
 dnl ----------------
 dnl Check if UTMP/UTMPX struct defines ut_xtime member
 AC_DEFUN([CF_UTMP_UT_XTIME],
@@ -6740,12 +6790,18 @@ AC_CACHE_CHECK(if ${cf_cv_have_utmp}.ut_xtime is declared, cf_cv_have_utmp_ut_xt
 	AC_TRY_COMPILE([
 #include <sys/types.h>
 #include <${cf_cv_have_utmp}.h>],
-	[struct $cf_cv_have_utmp x; long y = x.ut_xtime = 0],
+	[struct $cf_cv_have_utmp x;
+	 long y = x.ut_xtime = 0;
+	 (void)x;
+	 (void)y],
 	[cf_cv_have_utmp_ut_xtime=yes],
 	[AC_TRY_COMPILE([
 #include <sys/types.h>
 #include <${cf_cv_have_utmp}.h>],
-	[struct $cf_cv_have_utmp x; long y = x.ut_tv.tv_sec],
+	[struct $cf_cv_have_utmp x;
+	 long y = x.ut_tv.tv_sec;
+	 (void)x;
+	 (void)y],
 	[cf_cv_have_utmp_ut_xtime=define],
 	[cf_cv_have_utmp_ut_xtime=no])
 	])
@@ -6798,7 +6854,7 @@ fi
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_WIDEC_CURSES version: 5 updated: 2012/11/08 20:57:52
+dnl CF_WIDEC_CURSES version: 6 updated: 2020/03/19 20:23:48
 dnl ---------------
 dnl Check for curses implementations that can handle wide-characters
 AC_DEFUN([CF_WIDEC_CURSES],
@@ -6824,13 +6880,13 @@ if test "$cf_cv_widec_curses" = yes ; then
 	AC_TRY_COMPILE([
 #include <stdlib.h>
 #include <${cf_cv_ncurses_header:-curses.h}>],
-[mbstate_t state],
+[mbstate_t state; (void)state],
 [cf_cv_widec_mbstate=no],
 [AC_TRY_COMPILE([
 #include <stdlib.h>
 #include <wchar.h>
 #include <${cf_cv_ncurses_header:-curses.h}>],
-[mbstate_t state],
+[mbstate_t state; (void)state],
 [cf_cv_widec_mbstate=yes],
 [cf_cv_widec_mbstate=unknown])])])
 
@@ -6974,7 +7030,7 @@ AC_CHECK_FUNCS( \
 )
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_XOPEN_CURSES version: 14 updated: 2018/06/20 20:23:13
+dnl CF_XOPEN_CURSES version: 15 updated: 2020/03/19 20:23:48
 dnl ---------------
 dnl Test if we should define X/Open source for curses, needed on Digital Unix
 dnl 4.x, to see the extended functions, but breaks on IRIX 6.x.
@@ -7000,7 +7056,14 @@ AC_TRY_LINK([
 #endif
 	long x = winnstr(stdscr, "", 0);
 	int x1, y1;
-	getbegyx(stdscr, y1, x1)],
+#ifdef NCURSES_VERSION
+	(void)check2;
+#endif
+	getbegyx(stdscr, y1, x1);
+	(void)x;
+	(void)y1;
+	(void)x1;
+	],
 	[cf_cv_need_xopen_extension=none],
 	[
 	for cf_try_xopen_extension in _XOPEN_SOURCE_EXTENDED NCURSES_WIDECHAR
@@ -7015,7 +7078,14 @@ AC_TRY_LINK([
 #endif
 		long x = winnstr(stdscr, "", 0);
 		int x1, y1;
-		getbegyx(stdscr, y1, x1)],
+		getbegyx(stdscr, y1, x1);
+#ifdef NCURSES_VERSION
+		(void)check2;
+#endif
+		(void)x;
+		(void)y1;
+		(void)x1;
+		],
 		[cf_cv_need_xopen_extension=$cf_try_xopen_extension; break])
 	done
 	])
@@ -7160,7 +7230,7 @@ fi
 fi # cf_cv_posix_visible
 ])
 dnl ---------------------------------------------------------------------------
-dnl CF_X_ATHENA version: 23 updated: 2015/04/12 15:39:00
+dnl CF_X_ATHENA version: 24 updated: 2020/03/10 18:53:47
 dnl -----------
 dnl Check for Xaw (Athena) libraries
 dnl
@@ -7236,7 +7306,8 @@ AC_CACHE_CHECK(for usable $cf_x_athena/Xmu package,cf_cv_xaw_compat,[
 AC_TRY_LINK([
 #include <X11/Xmu/CharSet.h>
 ],[
-int check = XmuCompareISOLatin1("big", "small")
+int check = XmuCompareISOLatin1("big", "small");
+(void)check;
 ],[cf_cv_xaw_compat=yes],[cf_cv_xaw_compat=no])])
 
 			if test "$cf_cv_xaw_compat" = no
@@ -7388,7 +7459,7 @@ CF_TRY_PKG_CONFIG(Xext,,[
 		[CF_ADD_LIB(Xext)])])
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_X_TOOLKIT version: 24 updated: 2019/03/23 19:54:44
+dnl CF_X_TOOLKIT version: 25 updated: 2020/03/10 17:26:15
 dnl ------------
 dnl Check for X Toolkit libraries
 AC_DEFUN([CF_X_TOOLKIT],
@@ -7408,6 +7479,8 @@ then
 	CF_TRY_PKG_CONFIG(ice,,[AC_MSG_WARN(unable to find ICE library)])
 	CF_TRY_PKG_CONFIG(sm,,[AC_MSG_WARN(unable to find SM library)])
 	CF_TRY_PKG_CONFIG(xt,,[AC_MSG_WARN(unable to find Xt library)])
+else
+	LIBS="$X_PRE_LIBS $LIBS $X_EXTRA_LIBS"
 fi
 
 cf_have_X_LIBS=no
@@ -7440,7 +7513,7 @@ AC_TRY_LINK([
 AC_CACHE_CHECK(for usable X Toolkit package,cf_cv_xt_ice_compat,[
 AC_TRY_LINK([
 #include <X11/Shell.h>
-],[int num = IceConnectionNumber(0)
+],[int num = IceConnectionNumber(0); (void) num
 ],[cf_cv_xt_ice_compat=yes],[cf_cv_xt_ice_compat=no])])
 
 	if test "$cf_cv_xt_ice_compat" = no
@@ -7470,15 +7543,13 @@ AC_TRY_LINK([
 
 	AC_CHECK_FUNC(XOpenDisplay,,[
 	AC_CHECK_LIB(X11,XOpenDisplay,
-		[CF_ADD_LIB(X11)],,
-		[$X_PRE_LIBS $LIBS $X_EXTRA_LIBS])])
+		[CF_ADD_LIB(X11)])])
 
 	AC_CHECK_FUNC(XtAppInitialize,,[
 	AC_CHECK_LIB(Xt, XtAppInitialize,
 		[AC_DEFINE(HAVE_LIBXT,1,[Define to 1 if we can compile with the Xt library])
 		 cf_have_X_LIBS=Xt
-		 LIBS="-lXt $X_PRE_LIBS $LIBS $X_EXTRA_LIBS"],,
-		[$X_PRE_LIBS $LIBS $X_EXTRA_LIBS])])
+		 LIBS="-lXt $LIBS"])])
 ])
 
 if test $cf_have_X_LIBS = no ; then
