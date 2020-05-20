@@ -1,4 +1,4 @@
-.\" $LynxId: lynx.man,v 1.128 2020/02/24 00:12:25 tom Exp $
+.\" $LynxId: lynx.man,v 1.130 2020/05/20 00:34:04 tom Exp $
 .\" **************************************************************************
 .\" Escape single quotes in literal strings from groff's Unicode transform.
 .ie \n(.g .ds `` \(lq
@@ -805,7 +805,7 @@ If enabled the transfer rate is shown in bytes/second.
 If disabled, no transfer rate is shown.
 Use lynx.cfg or the options menu to select KB/second and/or ETA.
 .TP
-.B \-socks5-proxy=URL
+.B \-socks5\-proxy=URL
 (Via which) SOCKS5 proxy to connect.
 This controls the builtin SOCKS5 support, and is therefore unrelated to
 the option \fB\-nosocks\fP.
@@ -949,7 +949,7 @@ and reuse the original link number.
 .B \-update_term_title
 enables updating the title in terminal emulators.
 Use only if your terminal emulator supports that escape code.
-Has no effect when used with \fB-notitle\fP.
+Has no effect when used with \fB\-notitle\fP.
 .TP
 .B \-use_mouse
 turn on mouse support, if available.
@@ -1000,7 +1000,6 @@ tells \fILynx\fP that it can ignore certain tags which have no content
 in an XHTML 1.0 document.
 For example \*(``<p/>\*('' will be discarded.
 .SH COMMANDS
-.PP
 More than one key can be mapped to a given command.
 Here are some of the most useful:
 .bP
@@ -1114,8 +1113,8 @@ Each protocol used by \fILynx\fR,
 (http, ftp, gopher, etc), can be mapped separately by setting environment
 variables of the form \fIPROTOCOL\fP_proxy.
 Protocols are indicated in a URI by the name before \*(``:\*('', e.g.,
-\*(``http\*('' in 
-\*(``http://some.server.dom:port/\*('' for HTML. 
+\*(``http\*('' in
+\*(``http://some.server.dom:port/\*('' for HTML.
 .IP
 Depending on your system configuration and supported protocols,
 the environment variables recognized by \fIlynx\fP may include
@@ -1266,7 +1265,7 @@ the following variables may be set for simulating a CGI environment:
 Other environment variables are not inherited by the script, unless they
 are provided via a LYNXCGI_ENVIRONMENT statement in the configuration file.
 See the \fBlynx.cfg\fR file, and the (draft) CGI 1.1 Specification
-<http://Web.Golux.Com/coar/cgi/draft-coar-cgi-v11-00.txt> for the
+<http://Web.Golux.Com/coar/cgi/draft\-coar\-cgi\-v11\-00.txt> for the
 definition and usage of these variables.
 .PP
 The CGI Specification, and other associated documentation, should be consulted
@@ -1308,20 +1307,22 @@ Currently, it is hard-coded to a wish list.
 .B NLSPATH
 This variable, if set, is used as the path prefix for message catalogs.
 .SH NOTES
-This is the manual for \fILynx\fP v2.9.0dev.5; development is in progress for 2.9.0.
+This is the manual for \fILynx\fP v2.9.0dev.5;
+development is in progress for 2.9.0.
 .PP
 If you wish to contribute to the further development
 of \fILynx\fR, subscribe to our mailing list.
 Send email to
-<lynx-dev-request@nongnu.org> with \*(``subscribe lynx-dev\*('' as the only line
+<lynx\-dev\-request@nongnu.org>
+with \*(``subscribe lynx\-dev\*('' as the only line
 in the body of your message.
 .PP
-Send bug reports, comments, suggestions to <lynx-dev@nongnu.org>
+Send bug reports, comments, suggestions to <lynx\-dev@nongnu.org>
 after subscribing.
 .PP
-Unsubscribe by sending email to <lynx-dev-request@nongnu.org> with
-\*(``unsubscribe lynx-dev\*('' as the only line in the body of your message.
-Do not send the unsubscribe message to the lynx-dev list, itself.
+Unsubscribe by sending email to <lynx\-dev\-request@nongnu.org> with
+\*(``unsubscribe lynx\-dev\*('' as the only line in the body of your message.
+Do not send the unsubscribe message to the lynx\-dev list, itself.
 .SH SEE ALSO
 .hy 0
 \fBcatgets\fR(3),
@@ -1385,4 +1386,4 @@ Shrewsbury, Massachusetts 01545
 .PP
 Thomas E.\& Dickey
 .br
-<dickey@invisible-island.net>
+<dickey@invisible\-island.net>
