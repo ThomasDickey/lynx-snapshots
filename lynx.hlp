@@ -814,6 +814,11 @@
               check  for duplicate link numbers in each page and corresponding
               lists, and reuse the original link number.
 
+       -update_term_title
+              enables updating the title in terminal emulators.  Use  only  if
+              your terminal emulator supports that escape code.  Has no effect
+              when used with -notitle.
+
        -use_mouse
               turn on mouse support, if available.  Clicking  the  left  mouse
               button  on a link traverses it.  Clicking the right mouse button
@@ -824,11 +829,6 @@
               ncurses is used, clicking the middle  mouse  button  pops  up  a
               simple  menu.  Mouse clicks may only work reliably while Lynx is
               idle waiting for input.
-
-       -update_term_title
-              enables updating the title in terminal emulators.  Use  only  if
-              your terminal emulator supports that escape code.  Has no effect
-              when used with -notitle.
 
        -useragent=Name
               set alternate Lynx User-Agent header.
@@ -1163,55 +1163,56 @@
                            for message catalogs.
 
 2 Notes
-       This is the Lynx v2.8.9 Release; development is in progress for 2.9.0.
+       This is the manual for Lynx v2.9.0dev.5; development is in progress for
+       2.9.0.
 
        If you wish to contribute to the further development of Lynx, subscribe
-       to our mailing list.  Send email to <lynx-dev-request@nongnu.org>  with
+       to  our mailing list.  Send email to <lynx-dev-request@nongnu.org> with
        "subscribe lynx-dev" as the only line in the body of your message.
 
-       Send  bug reports, comments, suggestions to <lynx-dev@nongnu.org> after
+       Send bug reports, comments, suggestions to <lynx-dev@nongnu.org>  after
        subscribing.
 
-       Unsubscribe by  sending  email  to  <lynx-dev-request@nongnu.org>  with
-       "unsubscribe  lynx-dev"  as  the only line in the body of your message.
+       Unsubscribe  by  sending  email  to  <lynx-dev-request@nongnu.org> with
+       "unsubscribe lynx-dev" as the only line in the body  of  your  message.
        Do not send the unsubscribe message to the lynx-dev list, itself.
 
 2 See Also
-       catgets(3), curses(3),  environ(7),  execve(2),  ftp(1),  gettext(GNU),
-       localeconv(3),    ncurses(3),   setlocale(3),   slang(?),   termcap(5),
+       catgets(3),  curses(3),  environ(7),  execve(2),  ftp(1), gettext(GNU),
+       localeconv(3),   ncurses(3),   setlocale(3),   slang(?),    termcap(5),
        terminfo(5), wget(GNU)
 
        Note that man page availability and section numbering is somewhat platform
        dependent, and may vary from the above references.
 
-       A  section  shown as (GNU), is intended to denote that the topic may be
+       A section shown as (GNU), is intended to denote that the topic  may  be
        available via an info page, instead of a man page (i.e., try "info subject",
        rather than "man subject").
 
-       A  section shown as (?) denotes that documentation on the topic exists,
-       but is not part of an established documentation retrieval  system  (see
-       the  distribution files associated with the topic, or contact your System
+       A section shown as (?) denotes that documentation on the topic  exists,
+       but  is  not part of an established documentation retrieval system (see
+       the distribution files associated with the topic, or contact your  System
        Administrator for further information).
 
 2 Acknowledgments
-       Lynx has incorporated code from a variety of  sources  along  the  way.
-       The  earliest versions of Lynx included code from Earl Fogel of Comput-
-       ing Services at the University of Saskatchewan, who implemented  HYPER-
-       REZ  in the Unix environment.  HYPERREZ was developed by Niel Larson of
-       Think.com and served as the model  for  the  early  versions  of  Lynx.
+       Lynx  has  incorporated  code  from a variety of sources along the way.
+       The earliest versions of Lynx included code from Earl Fogel of  Comput-
+       ing  Services at the University of Saskatchewan, who implemented HYPER-
+       REZ in the Unix environment.  HYPERREZ was developed by Niel Larson  of
+       Think.com  and  served  as  the  model  for the early versions of Lynx.
        Those versions also incorporated libraries from the Unix Gopher clients
-       developed at the University of Minnesota, and  the  later  versions  of
-       Lynx  rely  on the WWW client library code developed by Tim Berners-Lee
-       and the WWW community.  Also a special thanks to  Foteos  Macrides  who
+       developed  at  the  University  of Minnesota, and the later versions of
+       Lynx rely on the WWW client library code developed by  Tim  Berners-Lee
+       and  the  WWW  community.  Also a special thanks to Foteos Macrides who
        ported much of Lynx to VMS and did or organized most of its development
-       since the departures of Lou Montulli and Garrett Blythe from  the  Uni-
-       versity  of Kansas in the summer of 1994 through the release of v2.7.2,
-       and to everyone on the net who has contributed  to  Lynx's  development
+       since  the  departures of Lou Montulli and Garrett Blythe from the Uni-
+       versity of Kansas in the summer of 1994 through the release of  v2.7.2,
+       and  to  everyone  on the net who has contributed to Lynx's development
        either directly (through patches, comments or bug reports) or indirect-
        ly (through inspiration and development of other systems).
 
 2 Authors
-       Lou Montulli, Garrett Blythe, Craig Lavender,  Michael  Grobe,  Charles
+       Lou  Montulli,  Garrett  Blythe, Craig Lavender, Michael Grobe, Charles
        Rezac
        Academic Computing Services
        University of Kansas
