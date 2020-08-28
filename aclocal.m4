@@ -1,4 +1,4 @@
-dnl $LynxId: aclocal.m4,v 1.266 2020/04/04 20:16:13 tom Exp $
+dnl $LynxId: aclocal.m4,v 1.269 2020/08/28 20:56:27 tom Exp $
 dnl Macros for auto-configure script.
 dnl by Thomas E. Dickey <dickey@invisible-island.net>
 dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
@@ -1742,7 +1742,7 @@ if test $ac_cv_type_$1 = no; then
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_CLANG_COMPILER version: 2 updated: 2013/11/19 19:23:35
+dnl CF_CLANG_COMPILER version: 3 updated: 2020/08/28 04:10:22
 dnl -----------------
 dnl Check if the given compiler is really clang.  clang's C driver defines
 dnl __GNUC__ (fooling the configure script into setting $GCC to yes) but does
@@ -1772,6 +1772,10 @@ cf_save_CFLAGS="$cf_save_CFLAGS -Qunused-arguments"
 ],[])
 	ifelse([$3],,CFLAGS,[$3])="$cf_save_CFLAGS"
 	AC_MSG_RESULT($ifelse([$2],,CLANG_COMPILER,[$2]))
+fi
+
+if test "x$CLANG_COMPILER" = "xyes" ; then
+	CF_APPEND_TEXT(CFLAGS,-Wno-error=implicit-function-declaration)
 fi
 ])
 dnl ---------------------------------------------------------------------------
@@ -2396,6 +2400,29 @@ if test "$cf_disable_rpath_hack" = no ; then
 fi
 ])
 dnl ---------------------------------------------------------------------------
+dnl CF_ENABLE_WARNINGS version: 6 updated: 2020/08/28 04:10:22
+dnl ------------------
+dnl Configure-option to enable gcc warnings
+AC_DEFUN([CF_ENABLE_WARNINGS],[
+if ( test "$GCC" = yes || test "$GXX" = yes )
+then
+CF_FIX_WARNINGS(CFLAGS)
+CF_FIX_WARNINGS(CPPFLAGS)
+CF_FIX_WARNINGS(LDFLAGS)
+AC_MSG_CHECKING(if you want to turn on gcc warnings)
+CF_ARG_ENABLE(warnings,
+	[  --enable-warnings       test: turn on gcc compiler warnings],
+	[with_warnings=yes],
+	[with_warnings=no])
+AC_MSG_RESULT($with_warnings)
+if test "$with_warnings" = "yes"
+then
+	CF_GCC_ATTRIBUTES
+	CF_GCC_WARNINGS($1)
+fi
+fi
+])dnl
+dnl ---------------------------------------------------------------------------
 dnl CF_ERRNO version: 5 updated: 1997/11/30 12:44:39
 dnl --------
 dnl Check if 'errno' is declared in <errno.h>
@@ -2797,6 +2824,40 @@ AC_TRY_LINK([
 test "$cf_cv_fionbio" = "fcntl" && AC_DEFINE(USE_FCNTL,1,[Define to 1 if we should use fcntl])
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl CF_FIX_WARNINGS version: 2 updated: 2020/08/28 15:08:28
+dnl ---------------
+dnl Warning flags do not belong in CFLAGS, CPPFLAGS, etc.  Any of gcc's
+dnl "-Werror" flags can interfere with configure-checks.  Those go into
+dnl EXTRA_CFLAGS.
+dnl
+dnl $1 = variable name to repair
+define([CF_FIX_WARNINGS],[
+if ( test "$GCC" = yes || test "$GXX" = yes )
+then
+	case [$]$1 in
+	(*-Werror=*)
+		CF_VERBOSE(repairing $1: [$]$1)
+		cf_temp_flags=
+		for cf_temp_scan in [$]$1
+		do
+			case "x$cf_temp_scan" in
+			(x-Werror=*)
+				CF_APPEND_TEXT(EXTRA_CFLAGS,"$cf_temp_scan")
+				;;
+			(*)
+				CF_APPEND_TEXT(cf_temp_flags,"$cf_temp_scan")
+				;;
+			esac
+		done
+		$1="$cf_temp_flags"
+		CF_VERBOSE(... fixed [$]$1)
+		CF_VERBOSE(... extra $EXTRA_CFLAGS)
+		;;
+	esac
+fi
+AC_SUBST(EXTRA_CFLAGS)
+])dnl
+dnl ---------------------------------------------------------------------------
 dnl CF_FUNC_CURSES_VERSION version: 7 updated: 2017/05/10 18:31:29
 dnl ----------------------
 dnl Solaris has a data item 'curses_version', which confuses AC_CHECK_FUNCS.
@@ -3154,7 +3215,7 @@ CF_INTEL_COMPILER(GCC,INTEL_COMPILER,CFLAGS)
 CF_CLANG_COMPILER(GCC,CLANG_COMPILER,CFLAGS)
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_GCC_WARNINGS version: 37 updated: 2020/01/05 20:04:12
+dnl CF_GCC_WARNINGS version: 38 updated: 2020/08/28 15:08:28
 dnl ---------------
 dnl Check if the compiler supports useful warning options.  There's a few that
 dnl we don't use, simply because they're too noisy:
@@ -3197,7 +3258,7 @@ then
 
 	AC_CHECKING([for $CC warning options])
 	cf_save_CFLAGS="$CFLAGS"
-	EXTRA_CFLAGS="-Wall"
+	EXTRA_CFLAGS="$EXTRA_CFLAGS -Wall"
 	for cf_opt in \
 		wd1419 \
 		wd1683 \
@@ -3220,7 +3281,6 @@ elif test "$GCC" = yes && test "$GCC_VERSION" != "unknown"
 then
 	AC_CHECKING([for $CC warning options])
 	cf_save_CFLAGS="$CFLAGS"
-	EXTRA_CFLAGS=
 	cf_warn_CONST=""
 	test "$with_ext_const" = yes && cf_warn_CONST="Wwrite-strings"
 	cf_gcc_warnings="Wignored-qualifiers Wlogical-op Wvarargs"
@@ -5700,7 +5760,7 @@ AC_MSG_RESULT($cf_use_socks5p_h)
 test "$cf_use_socks5p_h" = yes && AC_DEFINE(INCLUDE_PROTOTYPES,1,[Define to 1 if needed to declare prototypes in socks headers])
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_SRAND version: 13 updated: 2016/09/05 12:39:46
+dnl CF_SRAND version: 14 updated: 2020/07/30 16:32:36
 dnl --------
 dnl Check for functions similar to srand() and rand().  lrand48() and random()
 dnl return a 31-bit value, while rand() returns a value less than RAND_MAX
@@ -5754,7 +5814,7 @@ if test "$cf_cv_srand_func" != unknown ; then
 #ifdef HAVE_LIMITS_H
 #include <limits.h>
 #endif
-		],[long x = $cf_cv_rand_max],,
+		],[long x = $cf_cv_rand_max; (void)x],,
 		[cf_cv_rand_max="(1UL<<$cf_rand_max)-1"])
 	])
 
@@ -5763,10 +5823,10 @@ if test "$cf_cv_srand_func" != unknown ; then
 		AC_MSG_CHECKING(if <bsd/stdlib.h> should be included)
 		AC_TRY_COMPILE([#include <bsd/stdlib.h>],
 					   [void *arc4random(int);
-						void *x = arc4random(1)],
+						void *x = arc4random(1); (void)x],
 					   [cf_bsd_stdlib_h=no],
 					   [AC_TRY_COMPILE([#include <bsd/stdlib.h>],
-									   [unsigned x = arc4random()],
+									   [unsigned x = arc4random(); (void)x],
 									   [cf_bsd_stdlib_h=yes],
 									   [cf_bsd_stdlib_h=no])])
 	    AC_MSG_RESULT($cf_bsd_stdlib_h)
@@ -5777,10 +5837,10 @@ if test "$cf_cv_srand_func" != unknown ; then
 			AC_MSG_CHECKING(if <bsd/random.h> should be included)
 			AC_TRY_COMPILE([#include <bsd/random.h>],
 						   [void *arc4random(int);
-							void *x = arc4random(1)],
+							void *x = arc4random(1); (void)x],
 						   [cf_bsd_random_h=no],
 						   [AC_TRY_COMPILE([#include <bsd/random.h>],
-										   [unsigned x = arc4random()],
+										   [unsigned x = arc4random(); (void)x],
 										   [cf_bsd_random_h=yes],
 										   [cf_bsd_random_h=no])])
 			AC_MSG_RESULT($cf_bsd_random_h)
@@ -7011,6 +7071,23 @@ CF_PATH_SYNTAX(withval)
 fi
 eval $3="$withval"
 AC_SUBST($3)dnl
+])dnl
+dnl ---------------------------------------------------------------------------
+dnl CF_WITH_SCREEN_PDCURSES version: 1 updated: 2020/08/28 16:56:27
+dnl -----------------------
+dnl Call this macro before CF_ENABLE_WARNINGS for configure scripts which use
+dnl the "--with-screen=pdcurses" selection.  Doing that allows the configure
+dnl script to search for the X11/Xt header files to declare (or not) the
+dnl symbol needed to enable "const" in those header files.  If that configure
+dnl option is not used, then those checks are unnecessary.
+AC_DEFUN([CF_WITH_SCREEN_PDCURSES],[
+AC_PROVIDE([AC_PATH_XTRA])
+AC_PROVIDE([AC_PATH_X])
+if test -n "$with_screen" && test "x$with_screen" = "xpdcurses"
+then
+	AC_PATH_X
+	AC_PATH_XTRA
+fi
 ])dnl
 dnl ---------------------------------------------------------------------------
 dnl CF_WITH_ZLIB version: 4 updated: 2011/05/28 12:10:58

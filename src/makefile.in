@@ -1,4 +1,4 @@
-# $LynxId: makefile.in,v 1.75 2017/07/02 18:15:25 tom Exp $
+# $LynxId: makefile.in,v 1.76 2020/08/28 18:45:56 tom Exp $
 # template-makefile for Lynx src directory
 
 SHELL		= @CONFIG_SHELL@
@@ -20,10 +20,9 @@ localedir	= @NLS_DATADIR@/locale
 # Symbols which the configure script can set in each makefile:
 CC		= @CC@
 CPP		= @CPP@
-CFLAGS		= @CFLAGS@
+CFLAGS		= @CFLAGS@ @EXTRA_CPPFLAGS@
 DEFS		= @DEFS@
 CHARSET_DEFS	= @CHARSET_DEFS@
-EXTRA_CPPFLAGS	= @EXTRA_CPPFLAGS@
 CPPFLAGS	= @CPPFLAGS@
 
 x		= @EXEEXT@
@@ -66,8 +65,8 @@ CPP_OPTS	= $(DEFS) $(CHARSET_DEFS) \
 		-I$(top_srcdir) \
 		-I$(top_srcdir)/src \
 		-I$(top_srcdir)/$(WWWINC) \
-		$(INTLDIR_CPPFLAGS) $(SITE_DEFS) $(EXTRA_CPPFLAGS) $(CPPFLAGS)
-CC_OPTS		= $(CPP_OPTS) $(CFLAGS)
+		$(INTLDIR_CPPFLAGS) $(SITE_DEFS) $(CPPFLAGS)
+CC_OPTS		= $(CFLAGS) $(CPP_OPTS)
 
 LINT		= @LINT@
 LINTOPTS	=
