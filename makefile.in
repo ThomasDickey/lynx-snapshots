@@ -1,4 +1,4 @@
-# $LynxId: makefile.in,v 1.181 2020/03/01 13:47:14 tom Exp $
+# $LynxId: makefile.in,v 1.182 2020/08/28 18:43:41 tom Exp $
 ##makefile for lynx
 
 SHELL		= @CONFIG_SHELL@
@@ -14,7 +14,7 @@ builddir	= .
 VPATH		= $(srcdir)
 
 CC		= @CC@
-CFLAGS		= @CFLAGS@
+CFLAGS		= @CFLAGS@ @EXTRA_CFLAGS@
 DEFS		= @DEFS@
 CPPFLAGS	= @CPPFLAGS@
 LINT		= @LINT@

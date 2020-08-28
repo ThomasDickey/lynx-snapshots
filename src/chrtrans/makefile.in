@@ -1,4 +1,4 @@
-# $LynxId: makefile.in,v 1.43 2018/05/08 00:45:34 tom Exp $
+# $LynxId: makefile.in,v 1.44 2020/08/28 18:45:03 tom Exp $
 #
 # Makefile for the makeuctb and unicode tables.
 #
@@ -18,8 +18,7 @@ top_builddir	= ../..
 
 CC		= @CC@
 CPP		= @CPP@
-CFLAGS		= @CFLAGS@
-EXTRA_CPPFLAGS	= @EXTRA_CPPFLAGS@
+CFLAGS		= @CFLAGS@ @EXTRA_CPPFLAGS@
 CPPFLAGS	= @CPPFLAGS@
 
 WWWINC		= WWW/Library/Implementation

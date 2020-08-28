@@ -1,4 +1,4 @@
-dnl $LynxId: configure.in,v 1.316 2020/03/01 13:47:14 tom Exp $
+dnl $LynxId: configure.in,v 1.317 2020/08/28 19:05:45 tom Exp $
 dnl
 dnl Process this file with autoconf to produce a configure script.
 dnl
@@ -190,25 +190,7 @@ CF_ARG_ENABLE(vertrace,
 AC_MSG_RESULT($with_vertrace)
 test $with_vertrace = yes && AC_DEFINE(LY_TRACELINE,__LINE__,[Define to __LINE__ if you want verbose trace code])
 
-if test -n "$GCC"
-then
-AC_MSG_CHECKING(if you want to turn on gcc warnings)
-CF_ARG_ENABLE(warnings,
-	[  --enable-warnings       GCC compiler warnings],
-	[with_warnings=yes],
-	[with_warnings=no])
-AC_MSG_RESULT($with_warnings)
-if test "$with_warnings" = "yes"
-then
-	if test "x$with_x" = "xyes"
-	then
-		AC_PATH_XTRA
-	fi
-	CF_GCC_ATTRIBUTES
-	CF_GCC_WARNINGS
-fi
-fi
-
+CF_ENABLE_WARNINGS
 CF_WITH_DBMALLOC
 CF_WITH_DMALLOC
 
@@ -1567,7 +1549,6 @@ CF_DISABLE_RPATH_HACK
 test -z "$CONFIG_SHELL" && CONFIG_SHELL=/bin/sh
 AC_SUBST(CONFIG_SHELL)
 
-CFLAGS="$CFLAGS $EXTRA_CFLAGS"
 srcdir="$srcdir"
 SRCDIR_CLEAN="#"
 if test -n "$srcdir" ; then
