@@ -1,9 +1,9 @@
--- $LynxId: CHANGES,v 1.1052 2020/08/28 18:35:31 tom Exp $
+-- $LynxId: CHANGES,v 1.1053 2020/09/01 08:23:58 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2020-08-28 (2.9.0dev.6)
+2020-09-01 (2.9.0dev.6)
 * in configure script, filter out gcc -Werror options where they would interere
   with configure checks (report by Ryan Schmidt) -TD
 * minor formatting fixes for manual page (Debian #961080)
