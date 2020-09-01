@@ -1,4 +1,4 @@
-dnl $LynxId: aclocal.m4,v 1.269 2020/08/28 20:56:27 tom Exp $
+dnl $LynxId: aclocal.m4,v 1.270 2020/09/01 08:19:14 tom Exp $
 dnl Macros for auto-configure script.
 dnl by Thomas E. Dickey <dickey@invisible-island.net>
 dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
@@ -3973,6 +3973,19 @@ then
 ifelse($1,,[
 	CF_ADD_LIB(m)
 ],[$1=-lm])
+fi
+])
+dnl ---------------------------------------------------------------------------
+dnl CF_MERGE_EXTRA_CFLAGS version: 1 updated: 2020/09/01 04:00:32
+dnl ---------------------
+dnl CF_FIX_WARNINGS moves problematic flags into EXTRA_CFLAGS, but some scripts
+dnl may depend on being able to override that variable at build-time.  Move it
+dnl all back.
+define([CF_MERGE_EXTRA_CFLAGS],[
+if ( test "$GCC" = yes || test "$GXX" = yes )
+then
+	CF_APPEND_TEXT(CFLAGS,$EXTRA_CFLAGS)
+	EXTRA_CFLAGS=
 fi
 ])
 dnl ---------------------------------------------------------------------------
