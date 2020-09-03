@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMain.c,v 1.289 2020/02/24 00:17:10 Keith.Bowes Exp $
+ * $LynxId: LYMain.c,v 1.290 2020/09/03 00:05:23 Steffen.Nurpmeso Exp $
  */
 #include <HTUtils.h>
 #include <HTTP.h>
@@ -3916,7 +3916,7 @@ saves session to that file on exit"
    ),
 #endif
    PARSE_STR(
-      "socks5-proxy",	2|NEED_LYSTRING_ARG,	socks5_proxy,
+      "socks5_proxy",	2|NEED_LYSTRING_ARG,	socks5_proxy,
       "=URL\n(via which) SOCKS5 proxy to connect (unrelated to -nosocks!)"
    ),
    PARSE_SET(
