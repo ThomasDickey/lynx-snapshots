@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTCP.c,v 1.155 2020/01/22 01:58:28 tom Exp $
+ * $LynxId: HTTCP.c,v 1.156 2020/09/03 00:05:23 Thorsten.Glaser Exp $
  *
  *			Generic Communication Code		HTTCP.c
  *			==========================
@@ -1848,6 +1848,8 @@ int HTDoConnect(const char *url,
     *s = -1;			/* nothing is open yet */
 
     /* In case of a present SOCKS5 proxy, marshal */
+    if (socks5_proxy == NULL)
+	socks5_proxy = LYGetEnv("SOCKS5_PROXY");
     if ((socks5_orig_url = socks5_proxy) != NULL) {
 	int xport;
 
