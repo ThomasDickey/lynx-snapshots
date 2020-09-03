@@ -1,5 +1,5 @@
 /*
- * $LynxId: makeuctb.c,v 1.50 2018/12/26 01:17:22 tom Exp $
+ * $LynxId: makeuctb.c,v 1.51 2020/09/03 22:09:36 tom Exp $
  *
  *  makeuctb.c, derived from conmakehash.c   - kw
  *
@@ -30,6 +30,15 @@
 #define DONT_USE_SOCKS5
 #include <UCDefs.h>
 #include <UCkd.h>
+
+#ifdef LY_FIND_LEAKS		/* CF_ARG_ENABLE(find-leaks) */
+#define FreeLeak(p) FREE(p)
+#else
+#define FreeLeak(p)		/* nothing */
+#endif
+
+#define L_CURL '{'
+#define R_CURL '}'
 
 /*
  *  Don't try to use LYexit() since this is a standalone file.
@@ -168,8 +177,8 @@ static void addpair_str(char *str, int un)
 	    /*
 	     *  Initialize the map for replacement strings.
 	     */
-	    themap_str.entries = (struct unipair_str *) malloc(MAX_UNIPAIRS
-							       * sizeof(struct unipair_str));
+	    themap_str.entries = (struct unipair_str *) calloc(MAX_UNIPAIRS,
+							       sizeof(struct unipair_str));
 
 	    if (!themap_str.entries) {
 		fprintf(stderr,
@@ -182,6 +191,7 @@ static void addpair_str(char *str, int un)
 	     */
 	    for (i = 0; i < themap_str.entry_ct; i++) {
 		if (themap_str.entries[i].unicode == un) {
+		    FreeLeak(themap_str.entries[i].replace_str);
 		    themap_str.entries[i].replace_str = str;
 		    return;
 		}
@@ -197,6 +207,7 @@ static void addpair_str(char *str, int un)
 		    MAX_UNIPAIRS);
 	    done(EX_DATAERR);
 	}
+	FreeLeak(themap_str.entries[themap_str.entry_ct].replace_str);
 	themap_str.entries[themap_str.entry_ct].unicode = (u16) un;
 	themap_str.entries[themap_str.entry_ct].replace_str = str;
 	themap_str.entry_ct++;
@@ -303,7 +314,7 @@ int main(int argc, char **argv)
     int i, nuni, nent;
     int fp0 = 0, fp1 = 0, un0, un1;
     char *p, *p1;
-    char *tbuf, ch;
+    char *tbuf = NULL, ch;
 
     if (argc < 2 || argc > 5) {
 	usage();
@@ -796,7 +807,7 @@ int main(int argc, char **argv)
  */\n\
 \n\
 static const u8 dfont_unicount%s[%d] = \n\
-{\n\t", argv[0], argv[1], id_append, fontlen);
+%c\n\t", argv[0], argv[1], id_append, fontlen, L_CURL);
 
     for (i = 0; i < fontlen; i++) {
 	if (i >= 128 && unicount[i] > 0 && i < lowest_eight) {
@@ -804,7 +815,7 @@ static const u8 dfont_unicount%s[%d] = \n\
 	}
 	fprintf(chdr, "%3d", unicount[i]);
 	if (i == (fontlen - 1)) {
-	    fprintf(chdr, "\n};\n");
+	    fprintf(chdr, "\n%c;\n", R_CURL);
 	} else if ((i % 8) == 7) {
 	    fprintf(chdr, ",\n\t");
 	} else {
@@ -821,8 +832,8 @@ static const u8 dfont_unicount%s[%d] = \n\
     }
 
     if (nuni) {
-	fprintf(chdr, "\nstatic const u16 dfont_unitable%s[%d] = \n{\n\t",
-		id_append, nuni);
+	fprintf(chdr, "\nstatic const u16 dfont_unitable%s[%d] = \n%c\n\t",
+		id_append, nuni, L_CURL);
     } else {
 	fprintf(chdr,
 		"\nstatic const u16 dfont_unitable%s[1] = {0}; /* dummy */\n", id_append);
@@ -837,7 +848,7 @@ static const u8 dfont_unicount%s[%d] = \n\
 	}
 	fprintf(chdr, "0x%04x", unitable[fp0][nent++]);
 	if (i == (nuni - 1)) {
-	    fprintf(chdr, "\n};\n");
+	    fprintf(chdr, "\n%c;\n", R_CURL);
 	} else if ((i % 8) == 7) {
 	    fprintf(chdr, ",\n\t");
 	} else {
@@ -848,18 +859,20 @@ static const u8 dfont_unicount%s[%d] = \n\
     if (themap_str.entry_ct) {
 	fprintf(chdr, "\n\
 static struct unipair_str repl_map%s[%d] = \n\
-{\n\t", id_append, themap_str.entry_ct);
+%c\n\t", id_append, themap_str.entry_ct, L_CURL);
     } else {
 	fprintf(chdr, "\n\
 /* static struct unipair_str repl_map%s[]; */\n", id_append);
     }
 
     for (i = 0; i < themap_str.entry_ct; i++) {
-	fprintf(chdr, "{0x%x,\"%s\"}",
+	fprintf(chdr, "%c0x%x,\"%s\"%c",
+		L_CURL,
 		themap_str.entries[i].unicode,
-		themap_str.entries[i].replace_str);
+		themap_str.entries[i].replace_str,
+		R_CURL);
 	if (i == (themap_str.entry_ct - 1)) {
-	    fprintf(chdr, "\n};\n");
+	    fprintf(chdr, "\n%c;\n", R_CURL);
 	} else if ((i % 4) == 3) {
 	    fprintf(chdr, ",\n\t");
 	} else {
@@ -868,16 +881,16 @@ static struct unipair_str repl_map%s[%d] = \n\
     }
     if (themap_str.entry_ct) {
 	fprintf(chdr, "\n\
-static const struct unimapdesc_str dfont_replacedesc%s = {%d,repl_map%s,",
-		id_append, themap_str.entry_ct, id_append);
+static const struct unimapdesc_str dfont_replacedesc%s = %c%d,repl_map%s,",
+		id_append, L_CURL, themap_str.entry_ct, id_append);
     } else {
 	fprintf(chdr, "\n\
-static const struct unimapdesc_str dfont_replacedesc%s = {0,NULL,", id_append);
+static const struct unimapdesc_str dfont_replacedesc%s = %c0,NULL,", id_append, L_CURL);
     }
-    fprintf(chdr, "%d,%d};\n",
+    fprintf(chdr, "%d,%d%c;\n",
 	    this_isDefaultMap ? 1 : 0,
-	    (useDefaultMap && !this_isDefaultMap) ? 1 : 0
-	);
+	    (useDefaultMap && !this_isDefaultMap) ? 1 : 0,
+	    R_CURL);
 
     fprintf(chdr, "#define UC_CHARSET_SETUP%s UC_Charset_Setup(\
 \"%s\",\\\n\"%s\",\\\n\
@@ -892,5 +905,10 @@ dfont_replacedesc%s,%d,%d,%d)\n",
     }
 
     done(EX_OK);
+#ifdef LY_FIND_LEAKS		/* CF_ARG_ENABLE(find-leaks) */
+    for (i = 0; i < themap_str.entry_ct; i++) {
+	FreeLeak(themap_str.entries[i].replace_str);
+    }
+#endif
     return 0;
 }
