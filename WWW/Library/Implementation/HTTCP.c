@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTCP.c,v 1.156 2020/09/03 00:05:23 Thorsten.Glaser Exp $
+ * $LynxId: HTTCP.c,v 1.157 2020/09/03 22:57:14 tom Exp $
  *
  *			Generic Communication Code		HTTCP.c
  *			==========================
@@ -2295,7 +2295,7 @@ int HTDoConnect(const char *url,
 	/* C99 */  {
 	    unsigned short x;	/* XXX 16-bit? */
 
-	    x = htons((unsigned) socks5_port);
+	    x = htons((PortNumber) socks5_port);
 	    memcpy(&pbuf[i], (unsigned char *) &x, sizeof x);
 	    i += (unsigned) sizeof(x);
 	}

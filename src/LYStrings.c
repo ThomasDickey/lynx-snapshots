@@ -1,4 +1,4 @@
-/* $LynxId: LYStrings.c,v 1.276 2019/01/02 23:42:50 tom Exp $ */
+/* $LynxId: LYStrings.c,v 1.277 2020/09/04 00:34:02 tom Exp $ */
 #include <HTUtils.h>
 #include <HTCJK.h>
 #include <UCAux.h>
@@ -592,7 +592,7 @@ char *LYstrncpy(char *target,
     if (n > 0) {
 	if (n > len)
 	    n = len;
-	(void) StrNCpy(target, source, n);
+	(void) memcpy(target, source, (size_t) n);
     } else {
 	n = 0;
     }
