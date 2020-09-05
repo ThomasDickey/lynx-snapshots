@@ -1,9 +1,11 @@
--- $LynxId: CHANGES,v 1.1056 2020/09/03 22:17:31 tom Exp $
+-- $LynxId: CHANGES,v 1.1058 2020/09/05 14:11:12 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2020-09-03 (2.9.0dev.6)
+2020-09-05 (2.9.0dev.6)
+* remove commented ENABLE_LYNXRC for SHOW_COLOR:ON, and SHOW_DOTFILES since
+  those are normally saved to .lynxrc -TD
 * modify makeuctb to allow builds with asan2 when the configure option
   --enable-find-leaks is used-TD
 * add SOCKS5_PROXY environment variable, document the corresponding command

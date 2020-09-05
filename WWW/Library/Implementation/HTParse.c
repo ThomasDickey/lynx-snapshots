@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTParse.c,v 1.89 2019/12/31 19:18:16 tom Exp $
+ * $LynxId: HTParse.c,v 1.90 2020/09/05 00:19:54 tom Exp $
  *
  *		Parse HyperText Document Address		HTParse.c
  *		================================
@@ -185,11 +185,11 @@ static void scan(char *name,
 }				/*scan */
 
 #if defined(HAVE_ALLOCA) && !defined(LY_FIND_LEAKS)
-#define LYalloca(x)        alloca(x)
+#define LYalloca(x)        alloca((size_t)(x))
 #define LYalloca_free(x)   {}
 #else
-#define LYalloca(x)        malloc(x)
-#define LYalloca_free(x)   free(x)
+#define LYalloca(x)        malloc((size_t)(x))
+#define LYalloca_free(x)   free((void *)(x))
 #endif
 
 static char *strchr_or_end(char *string, int ch)
