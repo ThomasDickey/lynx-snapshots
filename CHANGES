@@ -1,7 +1,13 @@
--- $LynxId: CHANGES,v 1.1058 2020/09/05 14:11:12 tom Exp $
+-- $LynxId: CHANGES,v 1.1059 2020/11/26 22:37:55 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
+
+2020-12-26 (2.9.0dev.7)
+* configure-script improvements -TD
+  + improve configure script workaround for unwanted
+    -Werror=implicit-function-declaration by clang
+  + add "darwin" (macOS) to list of case-insensitive filesystems
 
 2020-09-05 (2.9.0dev.6)
 * remove commented ENABLE_LYNXRC for SHOW_COLOR:ON, and SHOW_DOTFILES since
