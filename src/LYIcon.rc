@@ -1,4 +1,4 @@
-// $LynxId: LYIcon.rc,v 1.47 2020/11/26 19:25:38 tom Exp $
+// $LynxId: LYIcon.rc,v 1.48 2021/01/01 14:54:29 tom Exp $
 
 #include <windows.h>
 
@@ -21,7 +21,7 @@ BEGIN
       VALUE "FileDescription",  "Lynx - web browser"
       VALUE "FileVersion",      "2.9.0.1007"
       VALUE "InternalName",     "Lynx"
-      VALUE "LegalCopyright",   "©1997-2020 Thomas E. Dickey"
+      VALUE "LegalCopyright",   "©1997-2021 Thomas E. Dickey"
       VALUE "OriginalFilename", "lynx.exe"
       VALUE "ProductName",      "Lynx - web browser"
       VALUE "ProductVersion",   "2.9.0.1007"
