@@ -1,10 +1,11 @@
--- $LynxId: CHANGES,v 1.1059 2020/11/26 22:37:55 tom Exp $
+-- $LynxId: CHANGES,v 1.1061 2021/01/02 11:52:55 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2020-12-26 (2.9.0dev.7)
+2021-01-02 (2.9.0dev.7)
 * configure-script improvements -TD
+  + various quoting/escaping fixes suggested by shellcheck.
   + improve configure script workaround for unwanted
     -Werror=implicit-function-declaration by clang
   + add "darwin" (macOS) to list of case-insensitive filesystems

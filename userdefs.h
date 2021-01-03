@@ -1,9 +1,9 @@
 /*
- * $LynxId: userdefs.h,v 1.354 2020/11/26 19:25:38 tom Exp $
+ * $LynxId: userdefs.h,v 1.355 2021/01/01 14:53:50 tom Exp $
  *
  * Lynx - Hypertext navigation system
  *
- *   Copyright 1996-2019,2020 Thomas E. Dickey and Lynx Developers Group
+ *   Copyright 1996-2020,2021 Thomas E. Dickey and Lynx Developers Group
  *   Note: GNU General Public License is not a copyright.
  *
  *   (c) Copyright 1992, 1993, 1994 University of Kansas
