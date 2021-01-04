@@ -1,4 +1,4 @@
-dnl $LynxId: aclocal.m4,v 1.288 2021/01/03 00:24:20 tom Exp $
+dnl $LynxId: aclocal.m4,v 1.292 2021/01/04 23:07:18 tom Exp $
 dnl Macros for auto-configure script.
 dnl by Thomas E. Dickey <dickey@invisible-island.net>
 dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
@@ -290,7 +290,7 @@ fi
 AC_SUBST($1)dnl
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl AM_WITH_NLS version: 30 updated: 2021/01/02 09:31:20
+dnl AM_WITH_NLS version: 31 updated: 2021/01/04 17:48:08
 dnl -----------
 dnl Inserted as requested by gettext 0.10.40
 dnl File from /usr/share/aclocal
@@ -394,13 +394,13 @@ AC_DEFUN([AM_WITH_NLS],
 
       dnl Search for GNU msgfmt in the PATH.
       AM_PATH_PROG_WITH_TEST(MSGFMT, msgfmt,
-          [$ac_dir/$ac_word --statistics /dev/null >/dev/null 2>&1], :)
+          ["$ac_dir/$ac_word" --statistics /dev/null >/dev/null 2>&1], :)
       AC_PATH_PROG(GMSGFMT, gmsgfmt, $MSGFMT)
       AC_SUBST(MSGFMT)
 
       dnl Search for GNU xgettext in the PATH.
       AM_PATH_PROG_WITH_TEST(XGETTEXT, xgettext,
-          [$ac_dir/$ac_word --omit-header /dev/null >/dev/null 2>&1], :)
+          ["$ac_dir/$ac_word" --omit-header /dev/null >/dev/null 2>&1], :)
 
       cf_save_OPTS_1="$CPPFLAGS"
       if test "x$cf_save_msgfmt_path" = "x$MSGFMT" && \
@@ -3126,13 +3126,14 @@ if test "$cf_cv_type_unionwait" = yes; then
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_GCC_ATTRIBUTES version: 22 updated: 2021/01/01 13:31:04
+dnl CF_GCC_ATTRIBUTES version: 23 updated: 2021/01/03 18:30:50
 dnl -----------------
 dnl Test for availability of useful gcc __attribute__ directives to quiet
 dnl compiler warnings.  Though useful, not all are supported -- and contrary
 dnl to documentation, unrecognized directives cause older compilers to barf.
 AC_DEFUN([CF_GCC_ATTRIBUTES],
-[
+[AC_REQUIRE([AC_PROG_FGREP])dnl
+
 if test "$GCC" = yes || test "$GXX" = yes
 then
 cat > conftest.i <<EOF
@@ -3230,7 +3231,7 @@ EOF
 		fi
 	done
 else
-	fgrep define conftest.i >>confdefs.h
+	${FGREP-fgrep} define conftest.i >>confdefs.h
 fi
 rm -rf ./conftest*
 fi
@@ -3910,14 +3911,15 @@ AC_MSG_RESULT($cf_cv_locale)
 test "$cf_cv_locale" = yes && { ifelse($1,,AC_DEFINE(LOCALE,1,[Define to 1 if we have locale support]),[$1]) }
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_MAKEFLAGS version: 19 updated: 2020/12/31 20:19:42
+dnl CF_MAKEFLAGS version: 20 updated: 2021/01/03 19:29:49
 dnl ------------
 dnl Some 'make' programs support ${MAKEFLAGS}, some ${MFLAGS}, to pass 'make'
 dnl options to lower-levels.  It's very useful for "make -n" -- if we have it.
 dnl (GNU 'make' does both, something POSIX 'make', which happens to make the
 dnl ${MAKEFLAGS} variable incompatible because it adds the assignments :-)
 AC_DEFUN([CF_MAKEFLAGS],
-[
+[AC_REQUIRE([AC_PROG_FGREP])dnl
+
 AC_CACHE_CHECK(for makeflags variable, cf_cv_makeflags,[
 	cf_cv_makeflags=''
 	for cf_option in '-${MAKEFLAGS}' '${MFLAGS}'
@@ -3927,7 +3929,7 @@ SHELL = $SHELL
 all :
 	@ echo '.$cf_option'
 CF_EOF
-		cf_result=`${MAKE:-make} -k -f cf_makeflags.tmp 2>/dev/null | fgrep -v "ing directory" | sed -e 's,[[ 	]]*$,,'`
+		cf_result=`${MAKE:-make} -k -f cf_makeflags.tmp 2>/dev/null | ${FGREP-fgrep} -v "ing directory" | sed -e 's,[[ 	]]*$,,'`
 		case "$cf_result" in
 		(.*k|.*kw)
 			cf_result="`${MAKE:-make} -k -f cf_makeflags.tmp CC=cc 2>/dev/null`"
@@ -4127,7 +4129,7 @@ printf("old\\n");
 	,[$1=no])
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_NCURSES_CONFIG version: 25 updated: 2021/01/01 18:21:19
+dnl CF_NCURSES_CONFIG version: 26 updated: 2021/01/03 08:05:37
 dnl -----------------
 dnl Tie together the configure-script macros for ncurses, preferring these in
 dnl order:
@@ -4166,7 +4168,7 @@ if test "x${PKG_CONFIG:=none}" != xnone; then
 			CF_ADD_LIBS($cf_pkg_libs)
 
 			AC_TRY_LINK([#include <${cf_cv_ncurses_header:-curses.h}>],
-				[initscr(); mousemask(0,0); tgoto((char *)0, 0, 0);],
+				[initscr(); mousemask(0,0); tigetstr((char *)0);],
 				[AC_TRY_RUN([#include <${cf_cv_ncurses_header:-curses.h}>
 					int main(void)
 					{ char *xx = curses_version(); return (xx == 0); }],
@@ -4192,7 +4194,7 @@ if test "x${PKG_CONFIG:=none}" != xnone; then
 		CF_ADD_LIBS($cf_pkg_libs)
 
 		AC_TRY_LINK([#include <${cf_cv_ncurses_header:-curses.h}>],
-			[initscr(); mousemask(0,0); tgoto((char *)0, 0, 0);],
+			[initscr(); mousemask(0,0); tigetstr((char *)0);],
 			[AC_TRY_RUN([#include <${cf_cv_ncurses_header:-curses.h}>
 				int main(void)
 				{ char *xx = curses_version(); return (xx == 0); }],
@@ -4374,7 +4376,7 @@ esac
 
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_NCURSES_LIBS version: 19 updated: 2021/01/02 09:31:20
+dnl CF_NCURSES_LIBS version: 20 updated: 2021/01/03 08:05:37
 dnl ---------------
 dnl Look for the ncurses library.  This is a little complicated on Linux,
 dnl because it may be linked with the gpm (general purpose mouse) library.
@@ -4432,7 +4434,7 @@ if test -n "$cf_ncurses_LIBS" ; then
 		fi
 	done
 	AC_TRY_LINK([#include <${cf_cv_ncurses_header:-curses.h}>],
-		[initscr(); mousemask(0,0); tgoto((char *)0, 0, 0);],
+		[initscr(); mousemask(0,0); tigetstr((char *)0);],
 		[AC_MSG_RESULT(yes)],
 		[AC_MSG_RESULT(no)
 		 LIBS="$cf_ncurses_SAVE"])
@@ -5280,11 +5282,12 @@ CFLAGS="$cf_save_CFLAGS_$1"
 CPPFLAGS="$cf_save_CPPFLAGS_$1"
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_RPATH_HACK version: 12 updated: 2020/12/31 10:54:15
+dnl CF_RPATH_HACK version: 13 updated: 2021/01/03 18:30:50
 dnl -------------
 AC_DEFUN([CF_RPATH_HACK],
-[
-AC_REQUIRE([CF_LD_RPATH_OPT])
+[AC_REQUIRE([AC_PROG_FGREP])dnl
+AC_REQUIRE([CF_LD_RPATH_OPT])dnl
+
 AC_MSG_CHECKING(for updated LDFLAGS)
 if test -n "$LD_RPATH_OPT" ; then
 	AC_MSG_RESULT(maybe)
@@ -5297,8 +5300,8 @@ if test -n "$LD_RPATH_OPT" ; then
 
 AC_TRY_LINK([#include <stdio.h>],
 		[printf("Hello");],
-		[cf_rpath_oops=`"$cf_ldd_prog" "conftest$ac_exeext" | fgrep ' not found' | sed -e 's% =>.*$%%' |sort | uniq`
-		 cf_rpath_list=`"$cf_ldd_prog" "conftest$ac_exeext" | fgrep / | sed -e 's%^.*[[ 	]]/%/%' -e 's%/[[^/]][[^/]]*$%%' |sort | uniq`])
+		[cf_rpath_oops=`"$cf_ldd_prog" "conftest$ac_exeext" | ${FGREP-fgrep} ' not found' | sed -e 's% =>.*$%%' |sort | uniq`
+		 cf_rpath_list=`"$cf_ldd_prog" "conftest$ac_exeext" | ${FGREP-fgrep} / | sed -e 's%^.*[[ 	]]/%/%' -e 's%/[[^/]][[^/]]*$%%' |sort | uniq`])
 
 		# If we passed the link-test, but get a "not found" on a given library,
 		# this could be due to inept reconfiguration of gcc to make it only
@@ -5585,14 +5588,15 @@ if test "$cf_cv_sizechange" != no ; then
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_SLANG_CPPFLAGS version: 12 updated: 2021/01/02 09:31:20
+dnl CF_SLANG_CPPFLAGS version: 13 updated: 2021/01/04 17:48:08
 dnl -----------------
 dnl Look for the slang header files in the standard places, adjusting the
 dnl CPPFLAGS variable.
 dnl
 dnl $1 = parameter to search for "slang2" class, e.g., for pkgsrc.
 AC_DEFUN([CF_SLANG_CPPFLAGS],
-[
+[AC_REQUIRE([AC_PROG_EGREP])dnl
+
 AC_CACHE_CHECK(for $1 header file,cf_cv_$1_header,[
 	cf_cv_$1_header=no
 	AC_TRY_COMPILE([#include <slang.h>],
@@ -5605,7 +5609,7 @@ AC_CACHE_CHECK(for $1 header file,cf_cv_$1_header,[
 			slang.h
 		do
 			echo trying "$cf_incdir/$cf_header" 1>&AC_FD_CC
-			if egrep "SLANG_VERSION" "$cf_incdir/$cf_header" 1>&AC_FD_CC 2>&1; then
+			if ${EGREP-egrep} "SLANG_VERSION" "$cf_incdir/$cf_header" 1>&AC_FD_CC 2>&1; then
 				cf_cv_$1_header=$cf_incdir/$cf_header
 				break
 			fi
@@ -6564,10 +6568,12 @@ AC_MSG_RESULT($cf_cv_have_ttytype)
 test "$cf_cv_have_ttytype" = yes && AC_DEFINE(HAVE_TTYTYPE,1,[Define to 1 if ttytype is declared in curses library])
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_TYPE_LONG_LONG version: 4 updated: 2021/01/02 09:31:20
+dnl CF_TYPE_LONG_LONG version: 5 updated: 2021/01/04 17:48:08
 dnl -----------------
 dnl Check for long long type.
 AC_DEFUN([CF_TYPE_LONG_LONG],[
+AC_REQUIRE([AC_PROG_FGREP])dnl
+
 AC_CACHE_CHECK(for long long type,cf_cv_type_long_long,[
 	cat >conftest.$ac_ext <<_CFEOF
 #include "confdefs.h"
@@ -6578,11 +6584,11 @@ main (void)
 	return (foo == 0);
 }
 _CFEOF
-	(eval [$]ac_compile) 2>conftest.err
+	(eval "[$]ac_compile") 2>conftest.err
 	ac_status=$?
 	if test "$ac_status" = 0 && test -s conftest.err
 	then
-		fgrep warning conftest.err >/dev/null 2>&1 && ac_status=1
+		${FGREP-fgrep} warning conftest.err >/dev/null 2>&1 && ac_status=1
 	fi
 	if test "$ac_status" != 0
 	then

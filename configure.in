@@ -1,4 +1,4 @@
-dnl $LynxId: configure.in,v 1.323 2021/01/02 13:47:23 tom Exp $
+dnl $LynxId: configure.in,v 1.327 2021/01/04 22:45:05 tom Exp $
 dnl
 dnl Process this file with autoconf to produce a configure script.
 dnl
@@ -40,7 +40,7 @@ ORIGINAL_CFLAGS="$CFLAGS"
 # run to the next, as well as with tests that are order-dependent.
 rm -f config.cache
 
-AC_PREREQ(2.25.20200111)
+AC_PREREQ(2.25.20210101)
 AC_INIT(userdefs.h)
 
 # autoconf 2.5x defaults to no cache file; we need the cache file's information
@@ -106,6 +106,7 @@ esac
 AC_PROG_MAKE_SET
 AC_PROG_INSTALL
 AC_PROG_YACC
+AC_PROG_EGREP
 CF_PROG_LINT
 CF_MAKEFLAGS
 CF_MAKE_TAGS
@@ -354,7 +355,7 @@ dnl Set of available languages (based on source distribution)
 if test -z "$ALL_LINGUAS" ; then
 	ALL_LINGUAS=`test -d "$srcdir/po" && cd "$srcdir/po" && echo *.po|sed -e 's/\.po//g' -e 's/*//'`
 	AM_PATH_PROG_WITH_TEST(MSGINIT, msginit,
-		[$ac_dir/$ac_word --no-translator --version /dev/null >/dev/null 2>&1], :)
+		["$ac_dir/$ac_word" --no-translator --version /dev/null >/dev/null 2>&1], :)
 	if test "$MSGINIT" != ":" ; then
 		CF_VERBOSE(adding en.po)
 		ALL_LINGUAS="$ALL_LINGUAS en"
@@ -700,7 +701,7 @@ if test -n "$cf_charsets" ; then
 		cf_def_charset=`echo "$cf_charset" | sed -e 's/+/_/g' -e 's/-/_/g'`
 		cf_use_charset=no
 		# check charsets that are defined via .tbl files
-		if ( egrep '^M'$cf_charset'$' "$srcdir"/src/chrtrans/*.tbl 2>/dev/null >/dev/null )
+		if ( ${EGREP-egrep} '^M'"$cf_charset"'$' "$srcdir"/src/chrtrans/*.tbl 2>/dev/null >/dev/null )
 		then
 			cf_use_charset=yes
 		# check charsets that are "built-in"
