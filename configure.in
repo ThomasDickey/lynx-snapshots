@@ -1,4 +1,4 @@
-dnl $LynxId: configure.in,v 1.327 2021/01/04 22:45:05 tom Exp $
+dnl $LynxId: configure.in,v 1.328 2021/01/06 23:44:30 tom Exp $
 dnl
 dnl Process this file with autoconf to produce a configure script.
 dnl
@@ -40,7 +40,7 @@ ORIGINAL_CFLAGS="$CFLAGS"
 # run to the next, as well as with tests that are order-dependent.
 rm -f config.cache
 
-AC_PREREQ(2.25.20210101)
+AC_PREREQ(2.25.20210105)
 AC_INIT(userdefs.h)
 
 # autoconf 2.5x defaults to no cache file; we need the cache file's information

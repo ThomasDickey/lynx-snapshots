@@ -1,5 +1,5 @@
 #!/bin/sh
-# $LynxId: indent.sh,v 1.5 2018/07/08 15:22:44 tom Exp $
+# $LynxId: indent.sh,v 1.6 2021/01/07 00:23:01 tom Exp $
 # Indent LYNX files (for reference).  See "lnx-indent" from
 #	https://invisible-island.net/cindent/
 NOOP=no
@@ -18,85 +18,85 @@ OPTS='
 --space-after-cast
 --space-special-semicolon
 --swallow-optional-blank-lines
--T AddressDefList 
+-T AddressDefList
 -T BOOL
 -T BOOLEAN
--T CSOfield_info 
+-T CSOfield_info
 -T DIR
--T DocAddress 
--T DocInfo 
+-T DocAddress
+-T DocInfo
 -T DocObj
--T EntryInfo 
--T EditFieldData 
+-T EntryInfo
+-T EditFieldData
 -T FILE
--T GCC_NORETURN 
--T GCC_UNUSED 
--T GLOBALREF 
--T GroupDef 
--T GroupDefList 
--T HTAAFailReasonType 
--T HTAAProt 
--T HTAARealm 
--T HTAAServer 
--T HTAssoc 
--T HTAssocList 
--T HTAtom 
--T HTBTElement 
--T HTBTree 
--T HTChildAnchor 
--T HTChunk 
--T HTConverter 
--T HTFormat 
--T HTLine 
--T HTLinkType 
--T HTList 
--T HTParentAnchor 
--T HTParentAnchor0 
--T HTPresentation 
+-T GCC_NORETURN
+-T GCC_UNUSED
+-T GLOBALREF
+-T GroupDef
+-T GroupDefList
+-T HTAAFailReasonType
+-T HTAAProt
+-T HTAARealm
+-T HTAAServer
+-T HTAssoc
+-T HTAssocList
+-T HTAtom
+-T HTBTElement
+-T HTBTree
+-T HTChildAnchor
+-T HTChunk
+-T HTConverter
+-T HTFormat
+-T HTLine
+-T HTLinkType
+-T HTList
+-T HTParentAnchor
+-T HTParentAnchor0
+-T HTPresentation
 -T HTStream
--T HTStyle 
--T HTStyleChange 
--T HTStyleSheet 
--T HText 
--T HyperDoc 
--T InitResponseAPDU 
--T Item 
--T ItemList 
+-T HTStyle
+-T HTStyleChange
+-T HTStyleSheet
+-T HText
+-T HyperDoc
+-T InitResponseAPDU
+-T Item
+-T ItemList
 -T LYNX_ADDRINFO
 -T LYNX_HOSTENT
--T LYUCcharset 
--T LexItem 
--T ProgramPaths 
--T STable_cellinfo 
--T STable_info 
--T STable_rowinfo 
--T STable_states 
--T SearchAPDU 
--T SearchResponseAPDU 
--T TextAnchor 
--T UCode_t 
--T UserDefList 
--T WAISDocumentCodes 
--T WAISDocumentHeader 
--T WAISDocumentHeadlines 
--T WAISDocumentLongHeader 
--T WAISDocumentShortHeader 
--T WAISDocumentText 
--T WAISInitResponse 
--T WAISSearch 
+-T LYUCcharset
+-T LexItem
+-T ProgramPaths
+-T STable_cellinfo
+-T STable_info
+-T STable_rowinfo
+-T STable_states
+-T SearchAPDU
+-T SearchResponseAPDU
+-T TextAnchor
+-T UCode_t
+-T UserDefList
+-T WAISDocumentCodes
+-T WAISDocumentHeader
+-T WAISDocumentHeadlines
+-T WAISDocumentLongHeader
+-T WAISDocumentShortHeader
+-T WAISDocumentText
+-T WAISInitResponse
+-T WAISSearch
 -T _cdecl
--T any 
--T bit_map 
--T boolean 
--T bstring 
+-T any
+-T bit_map
+-T boolean
+-T bstring
 -T data_tag
--T eServerType 
--T lynx_list_item_type 
+-T eServerType
+-T lynx_list_item_type
 -T pdu_type
--T query_term 
+-T query_term
 -nbacc
 '
-for name in $*
+for name in "$@"
 do
 	case $name in
 	-n)	NOOP=yes
@@ -128,9 +128,9 @@ do
 		mv "$test" "$name"
 		rm -f "${name}~"
 		if test $NOOP = yes ; then
-			if ! ( cmp -s "$name" $save )
+			if ! ( cmp -s "$name" "$save" )
 			then
-				diff -u $save "$name"
+				diff -u "$save" "$name"
 			fi
 			mv "$save" "$name"
 			rm -f "${name}~"
