@@ -1,4 +1,4 @@
-dnl $LynxId: configure.in,v 1.328 2021/01/06 23:44:30 tom Exp $
+dnl $LynxId: configure.in,v 1.330 2021/02/28 14:15:40 tom Exp $
 dnl
 dnl Process this file with autoconf to produce a configure script.
 dnl
@@ -109,6 +109,7 @@ AC_PROG_YACC
 AC_PROG_EGREP
 CF_PROG_LINT
 CF_MAKEFLAGS
+CF_MAKE_PHONY
 CF_MAKE_TAGS
 
 CF_ACVERSION_CHECK(2.52,
@@ -634,10 +635,14 @@ CF_ARG_ENABLE(htmlized-cfg,
 AC_MSG_RESULT($use_htmlized_cfg)
 
 LYNXCFG_MAKE=''
+LYNXCFG_NO_MAKE=''
 if test "$use_htmlized_cfg" = no ; then
 	LYNXCFG_MAKE='#'
+else
+	LYNXCFG_NO_MAKE='#'
 fi
 AC_SUBST(LYNXCFG_MAKE)
+AC_SUBST(LYNXCFG_NO_MAKE)
 
 dnl --------------------------------------------------------------------------
 AC_MSG_CHECKING(if local doc directory should be linked to help page)

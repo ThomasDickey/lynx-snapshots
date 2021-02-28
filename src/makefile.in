@@ -1,4 +1,4 @@
-# $LynxId: makefile.in,v 1.76 2020/08/28 18:45:56 tom Exp $
+# $LynxId: makefile.in,v 1.77 2021/02/28 15:56:53 tom Exp $
 # template-makefile for Lynx src directory
 
 SHELL		= @CONFIG_SHELL@
@@ -117,20 +117,20 @@ message:
 	@echo "Compiling Lynx sources"
 
 do_chartrans_stuff:
-	-cd chrtrans && $(MAKE_RECUR) \
+	-( cd chrtrans && $(MAKE_RECUR) \
 		SITE_DEFS="$(SITE_DEFS)" \
 		BUILD_CFLAGS="$(BUILD_CFLAGS)" \
 		BUILD_CPPFLAGS="$(BUILD_CPPFLAGS)" \
 		BUILD_LDFLAGS="$(BUILD_LDFLAGS)" \
 		BUILD_LIBS="$(BUILD_LIBS)" \
-		BUILD_CC="$(BUILD_CC)" tables
+		BUILD_CC="$(BUILD_CC)" tables )
 
 lint:
 	$(LINT) $(LINTOPTS) $(CPP_OPTS) $(C_SRC)  2>&1 |tee $(top_builddir)/lint.lynx
 
 clean:
 	rm -f lynx$x core *.core *.leaks *.i *$o *.bak tags TAGS test_*
-	cd chrtrans && $(MAKE_RECUR) clean
+	( cd chrtrans && $(MAKE_RECUR) clean )
 
 tags:
 	$(CTAGS) *.[ch]
@@ -209,7 +209,7 @@ TABLES= \
  $(CHRTR)viscii_uni.h
 
 $(TABLES):
-	-cd chrtrans && $(MAKE_RECUR) tables
+	-( cd chrtrans && $(MAKE_RECUR) tables )
 
 UCdomap$o :	UCdomap.c \
 		chrtrans/UCkd.h \
@@ -218,7 +218,7 @@ UCdomap$o :	UCdomap.c \
 	UCdomap.h $(CMN)UCMap.h $(TABLES) $(top_srcdir)/userdefs.h
 
 chrtrans/makeuctb$(BUILD_EXEEXT):
-	cd chrtrans && $(MAKE_RECUR) makeuctb$(BUILD_EXEEXT)
+	( cd chrtrans && $(MAKE_RECUR) makeuctb$(BUILD_EXEEXT) )
 
 UCAux$o : UCAux.c $(CMN)UCAux.h $(CMN)UCDefs.h
 LYCookie$o : $(top_srcdir)/userdefs.h

@@ -1,9 +1,11 @@
--- $LynxId: CHANGES,v 1.1063 2021/01/07 00:19:39 tom Exp $
+-- $LynxId: CHANGES,v 1.1064 2021/02/28 19:24:21 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2021-01-06 (2.9.0dev.7)
+2021-02-28 (2.9.0dev.7)
+* modify configure script and makefiles to work around pmake "jobs"
+  misfeature -TD
 * configure-script improvements -TD
   + various quoting/escaping fixes suggested by shellcheck.
   + improve configure script workaround for unwanted
