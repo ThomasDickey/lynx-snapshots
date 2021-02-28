@@ -1,4 +1,4 @@
-# $LynxId: makefile.inn,v 1.31 2018/02/20 02:13:41 tom Exp $
+# $LynxId: makefile.inn,v 1.32 2021/02/28 15:56:25 tom Exp $
 #
 # Makefile for program source directory in GNU NLS utilities package.
 # Copyright (C) 1995, 1996, 1997 by Ulrich Drepper <drepper@gnu.ai.mit.edu>
@@ -153,7 +153,7 @@ $(srcdir)/stamp-cat-id: $(PACKAGE).pot
 	  rm -f $(srcdir)/cat-id-tbl.c; \
 	  mv cat-id-tbl.tmp $(srcdir)/cat-id-tbl.c; \
 	fi
-	cd $(srcdir) && rm -f stamp-cat-id && echo timestamp > stamp-cat-id
+	( cd $(srcdir) && rm -f stamp-cat-id && echo timestamp > stamp-cat-id )
 
 
 install: install-exec install-data
@@ -249,19 +249,19 @@ dist distdir: update-po $(DISTFILES)
 
 # GNU msgfmt -C option can also check for X/Open compat.
 check-po:
-	cd $(srcdir); \
+	( cd $(srcdir); \
 	catalogs='$(CATALOGS)'; \
 	for cat in $$catalogs; do \
 	  cat=`basename $$cat`; \
 	  lang=`echo $$cat | sed 's/\$(CATOBJEXT)$$//'`; \
 	  echo "$$lang:"; \
 	  $(MSGFMT) -f -c -v $$lang.po; \
-	done
+	done )
 
 update-po: makefile
 	$(MAKE) $(PACKAGE).pot
 	PATH=`pwd`/../src:$$PATH; \
-	cd $(srcdir); \
+	( cd $(srcdir); \
 	catalogs='$(CATALOGS)'; \
 	for cat in $$catalogs; do \
 	  cat=`basename $$cat`; \
@@ -275,7 +275,7 @@ update-po: makefile
 	    rm -f $$lang.po; \
 	    mv $$lang.old.po $$lang.po; \
 	  fi; \
-	done
+	done )
 
 POTFILES: POTFILES.in
 	( if test 'x$(srcdir)' != 'x.'; then \
@@ -291,9 +291,9 @@ POTFILES: POTFILES.in
 	    && mv $@-t $@ )
 
 makefile: makefile.inn ../config.status POTFILES
-	cd .. \
+	( cd .. \
 	  && CONFIG_FILES=$(subdir)/$@.in:$(subdir)/$@.inn CONFIG_HEADERS= \
-	       $(SHELL) ./config.status
+	       $(SHELL) ./config.status )
 
 # Tell versions [3.59,3.63) of GNU make not to export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
