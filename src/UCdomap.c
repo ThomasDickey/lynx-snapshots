@@ -1,5 +1,5 @@
 /*
- * $LynxId: UCdomap.c,v 1.104 2018/12/29 00:20:33 Kihara.Hideto Exp $
+ * $LynxId: UCdomap.c,v 1.105 2021/03/14 17:14:26 emil Exp $
  *
  *  UCdomap.c
  *  =========
@@ -77,6 +77,7 @@
 #include <iso13_uni.h>		/* ISO 8859-13 (Latin 7) */
 #include <iso14_uni.h>		/* ISO 8859-14 (Latin 8) */
 #include <iso15_uni.h>		/* ISO 8859-15 (Latin 9) */
+#include <iso16_uni.h>		/* ISO 8859-16 (Latin 10) */
 #include <koi8r_uni.h>		/* KOI8-R Cyrillic      */
 #include <mac_uni.h>		/* Macintosh (8 bit)    */
 #include <mnem2_suni.h>		/* RFC 1345 Mnemonic    */
@@ -2232,6 +2233,7 @@ void UCInit(void)
     UC_CHARSET_SETUP_iso_8859_9;	/* ISO 8859-9 (Latin 5) */
     UC_CHARSET_SETUP_cp857;	/* DosTurkish (cp857) */
     UC_CHARSET_SETUP_iso_8859_10;	/* ISO 8859-10 North European */
+    UC_CHARSET_SETUP_iso_8859_16;	/* ISO 8859-16 (Latin 10) */
 
     UC_CHARSET_SETUP_utf_8;		  /*** UNICODE UTF-8	  */
     UC_CHARSET_SETUP_mnemonic_ascii_0;	/* RFC 1345 w/o Intro   */

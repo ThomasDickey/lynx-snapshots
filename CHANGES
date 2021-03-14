@@ -1,9 +1,12 @@
--- $LynxId: CHANGES,v 1.1064 2021/02/28 19:24:21 tom Exp $
+-- $LynxId: CHANGES,v 1.1066 2021/03/14 20:45:45 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2021-02-28 (2.9.0dev.7)
+2021-03-14 (2.9.0dev.7)
+* document the NO_TABLE_CENTER setting and explain the corresponding -center
+  option in the manual page (report by Dan Jacobson) -TD
+* add Latin 10 aka ISO-8859-16 (patch by emil@vajn.icu)
 * modify configure script and makefiles to work around pmake "jobs"
   misfeature -TD
 * configure-script improvements -TD

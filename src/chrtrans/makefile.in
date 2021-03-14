@@ -1,4 +1,4 @@
-# $LynxId: makefile.in,v 1.44 2020/08/28 18:45:03 tom Exp $
+# $LynxId: makefile.in,v 1.45 2021/03/14 17:14:26 emil Exp $
 #
 # Makefile for the makeuctb and unicode tables.
 #
@@ -96,6 +96,7 @@ TABLES= \
  iso13_uni.h \
  iso14_uni.h \
  iso15_uni.h \
+ iso16_uni.h \
  koi8r_uni.h \
  koi8u_uni.h \
  mac_uni.h \
@@ -169,6 +170,7 @@ iso10_uni.h:		$(srcdir)/iso10_uni.tbl		$(MAKEUCTB)
 iso13_uni.h:		$(srcdir)/iso13_uni.tbl		$(MAKEUCTB)
 iso14_uni.h:		$(srcdir)/iso14_uni.tbl		$(MAKEUCTB)
 iso15_uni.h:		$(srcdir)/iso15_uni.tbl		$(MAKEUCTB)
+iso16_uni.h:		$(srcdir)/iso16_uni.tbl		$(MAKEUCTB)
 koi8r_uni.h:		$(srcdir)/koi8r_uni.tbl		$(MAKEUCTB)
 koi8u_uni.h:		$(srcdir)/koi8u_uni.tbl		$(MAKEUCTB)
 mac_uni.h:		$(srcdir)/mac_uni.tbl		$(MAKEUCTB)

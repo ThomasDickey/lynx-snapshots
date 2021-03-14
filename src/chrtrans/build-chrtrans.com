@@ -119,6 +119,7 @@ $ makeuctb iso10_uni.tbl
 $ makeuctb iso13_uni.tbl
 $ makeuctb iso14_uni.tbl
 $ makeuctb iso15_uni.tbl
+$ makeuctb iso16_uni.tbl
 $ makeuctb koi8r_uni.tbl
 $ makeuctb koi8u_uni.tbl
 $ makeuctb mac_uni.tbl
