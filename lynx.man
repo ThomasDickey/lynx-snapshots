@@ -1,4 +1,4 @@
-.\" $LynxId: lynx.man,v 1.131 2020/09/03 00:05:23 Steffen.Nurpmeso Exp $
+.\" $LynxId: lynx.man,v 1.132 2021/03/14 20:42:46 tom Exp $
 .\" **************************************************************************
 .\" Escape single quotes in literal strings from groff's Unicode transform.
 .ie \n(.g .ds `` \(lq
@@ -192,7 +192,10 @@ The default is 10.
 enable case-sensitive string searching.
 .TP
 .B \-center
-Toggle center alignment in HTML TABLE.
+toggles center alignment in HTML TABLE.
+Normally table cells are centered on the table grid.
+Set this option \*(``on\*('' to disable centering.
+The default is \*(``off\*(''.
 .TP
 .B \-cfg\fR=\fIFILENAME
 specifies a \fILynx\fP configuration file other than the default

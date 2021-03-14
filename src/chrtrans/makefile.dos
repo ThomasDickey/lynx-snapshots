@@ -60,6 +60,7 @@ TABLES= \
  iso13_uni.h \
  iso14_uni.h \
  iso15_uni.h \
+ iso16_uni.h \
  koi8r_uni.h \
  koi8u_uni.h \
  mac_uni.h \
@@ -116,6 +117,7 @@ iso10_uni.h:		iso10_uni.tbl		makeuctb.exe
 iso13_uni.h:		iso13_uni.tbl		makeuctb.exe
 iso14_uni.h:		iso14_uni.tbl		makeuctb.exe
 iso15_uni.h:		iso15_uni.tbl		makeuctb.exe
+iso16_uni.h:		iso16_uni.tbl		makeuctb.exe
 koi8r_uni.h:		koi8r_uni.tbl		makeuctb.exe
 koi8u_uni.h:		koi8u_uni.tbl		makeuctb.exe
 mac_uni.h:		mac_uni.tbl		makeuctb.exe

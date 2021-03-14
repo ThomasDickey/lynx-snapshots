@@ -1,4 +1,4 @@
-@rem $LynxId: makehdrs.bat,v 1.1 2007/06/28 21:50:29 tom Exp $
+@rem $LynxId: makehdrs.bat,v 1.2 2021/03/14 17:14:26 emil Exp $
 @echo If .tbl files are added or removed you will need to hand edit
 @echo this batch file.
 @echo .
@@ -38,6 +38,7 @@ makeuctb iso10_uni.tbl
 makeuctb iso13_uni.tbl
 makeuctb iso14_uni.tbl
 makeuctb iso15_uni.tbl
+makeuctb iso16_uni.tbl
 makeuctb koi8r_uni.tbl
 makeuctb koi8u_uni.tbl
 makeuctb mac_uni.tbl

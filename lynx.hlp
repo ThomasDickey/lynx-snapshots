@@ -129,7 +129,9 @@
        -case  enable case-sensitive string searching.
 
        -center
-              Toggle center alignment in HTML TABLE.
+              toggles  center  alignment  in HTML TABLE.  Normally table cells
+              are centered on the table grid.  Set this option "on" to disable
+              centering.  The default is "off".
 
        -cfg=FILENAME
               specifies  a  Lynx  configuration  file  other  than the default
