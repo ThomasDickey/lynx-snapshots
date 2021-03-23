@@ -524,6 +524,10 @@ II. Compile instructions -- UNIX
 	Disabled by default, this allows interruption of NSL requests,
 	so that `z' will stop the `look-up' phase of a connection.
 
+  --enable-stdnoreturn			(define HAVE_STDNORETURN_H)
+	Check for C11 _Noreturn feature, using that rather than gcc-specific
+	__attribute__((noreturn)), to improve compiler diagnostics.
+
   --enable-syslog			(define SYSLOG_REQUESTED_URLS)
 	Use this option to log NSL requests via syslog().
 
@@ -1487,4 +1491,4 @@ VIII. Acknowledgment
 
 -- 1999/04/24 - H. Nelson <lynx-admin@irm.nara.kindai.ac.jp>
 -- vile:txtmode
--- $LynxId: INSTALLATION,v 1.131 2018/12/28 21:40:38 tom Exp $
+-- $LynxId: INSTALLATION,v 1.132 2021/03/23 00:37:21 tom Exp $
