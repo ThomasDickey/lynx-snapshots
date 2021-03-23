@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMain.c,v 1.290 2020/09/03 00:05:23 Steffen.Nurpmeso Exp $
+ * $LynxId: LYMain.c,v 1.291 2021/03/22 22:52:58 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTP.h>
@@ -688,7 +688,7 @@ static char *nonoption = 0;
 #endif
 
 static BOOL parse_arg(char **arg, unsigned mask, int *countp);
-static void print_help_and_exit(int exit_status) GCC_NORETURN;
+static GCC_NORETURN void print_help_and_exit(int exit_status);
 static void print_help_strings(const char *name,
 			       const char *help,
 			       const char *value,

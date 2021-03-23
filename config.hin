@@ -1,5 +1,5 @@
 /*
- * $LynxId: config.hin,v 1.147 2020/02/25 10:15:54 tom Exp $
+ * $LynxId: config.hin,v 1.148 2021/03/22 22:54:43 tom Exp $
  * vile:cmode
  *
  * The configure script translates "config.hin" into "lynx_cfg.h"
@@ -133,6 +133,7 @@
 #undef HAVE_SLEEP
 #undef HAVE_STDARG_H		/* CF_VARARGS */
 #undef HAVE_STDLIB_H
+#undef HAVE_STDNORETURN_H	/* CF_C11_NORETURN */
 #undef HAVE_STPCPY		/* AM_GNU_GETTEXT */
 #undef HAVE_STRCASECMP		/* AM_GNU_GETTEXT */
 #undef HAVE_STRCHR		/* AM_GNU_GETTEXT */
@@ -243,6 +244,7 @@
 #undef SLtt_Char_Type		/* CF_SLANG_UNIX_DEFS */
 #undef SOCKS			/* CF_SOCKS, CF_SOCKS5 */
 #undef STDC_HEADERS
+#undef STDC_NORETURN		/* CF_C11_NORETURN */
 #undef SYSTEM_MAIL		/* CF_DEFINE_PROG */
 #undef SYSTEM_MAIL_FLAGS	/* CF_SYSTEM_MAIL_FLAGS */
 #undef SYSTEM_NAME		/* CF_CHECK_CACHE */

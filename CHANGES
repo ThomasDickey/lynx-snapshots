@@ -1,9 +1,11 @@
--- $LynxId: CHANGES,v 1.1066 2021/03/14 20:45:45 tom Exp $
+-- $LynxId: CHANGES,v 1.1067 2021/03/22 23:06:34 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2021-03-14 (2.9.0dev.7)
+2021-03-22 (2.9.0dev.7)
+* update configure script to work with _Noreturn changes in ncurses 20210320
+  development snapshot -TD
 * document the NO_TABLE_CENTER setting and explain the corresponding -center
   option in the manual page (report by Dan Jacobson) -TD
 * add Latin 10 aka ISO-8859-16 (patch by emil@vajn.icu)

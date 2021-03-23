@@ -55,10 +55,10 @@ extern "C" {
 /*
  * Function declarations
  */
-    extern void outofmem(const char *fname, const char *func) GCC_NORETURN;
+    extern GCC_NORETURN void outofmem(const char *fname, const char *func);
     extern void reset_signals(void);
-    extern void exit_immediately(int status) GCC_NORETURN;
-    extern void LYexit(int status) GCC_NORETURN;
+    extern GCC_NORETURN void exit_immediately(int status);
+    extern GCC_NORETURN void LYexit(int status);
     extern int LYatexit(void (*function) (void));
 
 #ifdef __cplusplus

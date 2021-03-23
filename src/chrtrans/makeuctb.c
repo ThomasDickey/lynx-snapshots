@@ -1,5 +1,5 @@
 /*
- * $LynxId: makeuctb.c,v 1.51 2020/09/03 22:09:36 tom Exp $
+ * $LynxId: makeuctb.c,v 1.52 2021/03/22 22:52:58 tom Exp $
  *
  *  makeuctb.c, derived from conmakehash.c   - kw
  *
@@ -65,7 +65,7 @@ static FILE *chdr = 0;
  * everything before leaving, since some old (and a few not-so-old) platforms
  * do not properly implement POSIX 'exit()'.
  */
-static void done(int code) GCC_NORETURN;
+static GCC_NORETURN void done(int code);
 
 static void done(int code)
 {
