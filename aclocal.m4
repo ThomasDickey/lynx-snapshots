@@ -1,4 +1,4 @@
-dnl $LynxId: aclocal.m4,v 1.296 2021/03/23 00:37:21 tom Exp $
+dnl $LynxId: aclocal.m4,v 1.297 2021/03/28 15:36:23 tom Exp $
 dnl Macros for auto-configure script.
 dnl by Thomas E. Dickey <dickey@invisible-island.net>
 dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
@@ -1404,7 +1404,7 @@ if test "$USE_INCLUDED_LIBINTL" = yes ; then
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_C11_NORETURN version: 2 updated: 2021/03/22 20:37:21
+dnl CF_C11_NORETURN version: 3 updated: 2021/03/28 11:36:23
 dnl ---------------
 AC_DEFUN([CF_C11_NORETURN],
 [
@@ -1421,7 +1421,7 @@ AC_CACHE_CHECK([for C11 _Noreturn feature], cf_cv_c11_noreturn,
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdnoreturn.h>
-static void giveup(void) { exit(0); }
+static _Noreturn void giveup(void) { exit(0); }
 	],
 	[if (feof(stdin)) giveup()],
 	cf_cv_c11_noreturn=yes,
@@ -1432,7 +1432,7 @@ else
 fi
 
 if test "$cf_cv_c11_noreturn" = yes; then
-	AC_DEFINE(HAVE_STDNORETURN_H, 1)
+	AC_DEFINE(HAVE_STDNORETURN_H, 1,[Define if <stdnoreturn.h> header is available and working])
 	AC_DEFINE_UNQUOTED(STDC_NORETURN,_Noreturn,[Define if C11 _Noreturn keyword is supported])
 	HAVE_STDNORETURN_H=1
 else
@@ -1440,6 +1440,7 @@ else
 fi
 
 AC_SUBST(HAVE_STDNORETURN_H)
+AC_SUBST(STDC_NORETURN)
 ])dnl
 dnl ---------------------------------------------------------------------------
 dnl CF_CC_ENV_FLAGS version: 10 updated: 2020/12/31 18:40:20
