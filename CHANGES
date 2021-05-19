@@ -1,9 +1,9 @@
--- $LynxId: CHANGES,v 1.1068 2021/03/28 15:36:23 tom Exp $
+-- $LynxId: CHANGES,v 1.1071 2021/05/19 23:34:05 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2021-03-22 (2.9.0dev.7)
+2021-05-19 (2.9.0dev.7)
 * update configure script to work with _Noreturn changes in ncurses 20210320
   development snapshot -TD
 * document the NO_TABLE_CENTER setting and explain the corresponding -center
@@ -12,11 +12,13 @@ Changes since Lynx 2.8 release
 * modify configure script and makefiles to work around pmake "jobs"
   misfeature -TD
 * configure-script improvements -TD
+  + suppress check for mktemp if mkdtemp is found.
+  + suppress check for sys_errlist[] if strerror is found.
   + various quoting/escaping fixes suggested by shellcheck.
   + improve configure script workaround for unwanted
     -Werror=implicit-function-declaration by clang
   + add "darwin" (macOS) to list of case-insensitive filesystems
-* update config.guess (2021-01-25), config.sub (2021-03-10)
+* update config.guess (2021-04-21), config.sub (2021-04-30)
 
 2020-09-05 (2.9.0dev.6)
 * remove commented ENABLE_LYNXRC for SHOW_COLOR:ON, and SHOW_DOTFILES since
