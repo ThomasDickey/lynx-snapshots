@@ -1,4 +1,4 @@
-dnl $LynxId: configure.in,v 1.330 2021/02/28 14:15:40 tom Exp $
+dnl $LynxId: configure.in,v 1.331 2021/05/19 23:28:59 tom Exp $
 dnl
 dnl Process this file with autoconf to produce a configure script.
 dnl
@@ -801,18 +801,19 @@ AC_CHECK_FUNCS( \
 	getgroups \
 	gettimeofday \
 	getuid \
-	mktemp \
-	mkdtemp \
 	popen \
 	putenv \
 	readdir \
 	setuid \
-	strerror \
 	truncate \
 	ttyname \
 	unsetenv \
-	sleep usleep \
+	sleep \
+	usleep \
 	waitpid \
+)
+AC_CHECK_FUNCS( \
+	mkdtemp,,[AC_CHECK_FUNCS(mktemp)]
 )
 AC_REPLACE_FUNCS( \
 	mktime \
@@ -843,7 +844,7 @@ CF_ERRNO
 CF_SET_ERRNO
 CF_LOCALE
 CF_NGROUPS
-CF_SYS_ERRLIST
+AC_CHECK_FUNCS(strerror,,[CF_SYS_ERRLIST])
 CF_UTMP
 CF_CHECK_EXTERN_DATA(h_errno,int)
 
