@@ -1,4 +1,4 @@
-/* $LynxId: LYStrings.c,v 1.277 2020/09/04 00:34:02 tom Exp $ */
+/* $LynxId: LYStrings.c,v 1.278 2021/06/09 22:29:17 tom Exp $ */
 #include <HTUtils.h>
 #include <HTCJK.h>
 #include <UCAux.h>
@@ -1353,10 +1353,11 @@ static int setkey_cmd(char *parse)
 		    return 0;	/* Trace the failure and continue. */
 		}
 		if (LYTraceLogFP == 0) {
-		    MY_TRACE((tfp, "KEYMAP(DEF) keysym=%#x\n", keysym));
+		    MY_TRACE((tfp, "KEYMAP(DEF) keysym=%#x\n",
+			      (unsigned) keysym));
 		} else {
 		    MY_TRACE((tfp, "KEYMAP(DEF) keysym=%#x, seq='%s'\n",
-			      keysym, buf));
+			      (unsigned) keysym, buf));
 		}
 		return define_key(buf, keysym);
 	    } else {
@@ -1830,7 +1831,7 @@ static int LYgetch_for(int code)
     }
 #endif /* !USE_SLANG || VMS */
 
-    CTRACE((tfp, "GETCH%d: Got %#x.\n", code, c));
+    CTRACE((tfp, "GETCH%d: Got %#x.\n", code, (unsigned) c));
     if (LYNoZapKey > 1 && errno != EINTR &&
 	(c == EOF
 #ifdef USE_SLANG
@@ -6200,7 +6201,7 @@ int LYReadCmdKey(int mode)
 	ch = LYgetch_for(mode);
     }
     CTRACE((tfp, "LYReadCmdKey(%d) ->%s (%#x)\n",
-	    mode, LYKeycodeToString(ch, TRUE), ch));
+	    mode, LYKeycodeToString(ch, TRUE), (unsigned) ch));
     LYWriteCmdKey(ch);
     return ch;
 }

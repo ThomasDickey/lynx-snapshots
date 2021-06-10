@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYStyle.c,v 1.110 2019/09/06 09:00:48 tom Exp $
+ * $LynxId: LYStyle.c,v 1.111 2021/06/09 22:00:35 tom Exp $
  *
  * character level styles for Lynx
  * (c) 1996 Rob Partington -- donated to the Lyncei (if they want it :-)
@@ -238,7 +238,7 @@ static void parse_attributes(const char *mono,
 	int iBlink = !!((unsigned) cA & M_BLINK);
 
 	CTRACE2(TRACE_STYLE, (tfp, "parse_attributes %d/%d %d/%d %#x\n",
-			      fA, default_fg, bA, default_bg, cA));
+			      fA, default_fg, bA, default_bg, (unsigned) cA));
 	if (fA < MAX_COLOR
 	    && bA < MAX_COLOR
 #ifdef USE_CURSES_PAIR_0

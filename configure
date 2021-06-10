@@ -5627,7 +5627,7 @@ cat >"conftest.$ac_ext" <<_ACEOF
 int
 main (void)
 {
-String foo = malloc(1); (void)foo
+String foo = malloc(1); free((void*)foo)
   ;
   return 0;
 }
@@ -31384,7 +31384,7 @@ $cf_wait_headers
 int
 main (void)
 {
-int x;
+static int x;
 	 int y = WEXITSTATUS(x);
 	 int z = WTERMSIG(x);
 	 wait(&x);
@@ -32056,8 +32056,8 @@ int
 main (void)
 {
 
-	struct tm foo;
-	long bar = foo.tm_gmtoff
+	static struct tm foo;
+	long bar = foo.tm_gmtoff; (void) bar
   ;
   return 0;
 }
@@ -34074,7 +34074,7 @@ int
 main (void)
 {
 
-        int ret = ioctl(0, FIONBIO, (char *)0);
+        int ret = ioctl(0, FIONBIO, (char *)0); (void) ret
 
   ;
   return 0;
@@ -34243,7 +34243,7 @@ cat >"conftest.$ac_ext" <<_ACEOF
 int
 main (void)
 {
-lstat(".", (struct stat *)0)
+struct stat sb; lstat(".", &sb); (void) sb
   ;
   return 0;
 }
@@ -34772,7 +34772,7 @@ cat >"conftest.$ac_ext" <<_ACEOF
 int
 main (void)
 {
-long seed = 1; $cf_srand_func(seed); seed = $cf_rand_func()
+long seed = 1; $cf_srand_func(seed); seed = $cf_rand_func(); (void)seed
   ;
   return 0;
 }
@@ -36629,7 +36629,7 @@ else
 int
 main (void)
 {
-struct $cf_cv_have_utmp x;
+static struct $cf_cv_have_utmp x;
 	 long y = x.ut_session;
 	 (void)x;
 	 (void)y
@@ -47001,7 +47001,7 @@ do
 int
 main (void)
 {
-chtype x = ${mapname}['l']; ${mapname}['m'] = 0
+chtype x = ${mapname}['l']; ${mapname}['m'] = 0; (void)x
   ;
   return 0;
 }

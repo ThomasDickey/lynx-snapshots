@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYUtils.c,v 1.298 2020/01/21 21:35:17 tom Exp $
+ * $LynxId: LYUtils.c,v 1.299 2021/06/09 21:46:53 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTCP.h>
@@ -6074,7 +6074,9 @@ FILE *LYOpenTemp(char *result,
 		make_it = TRUE;
 		CTRACE((tfp,
 			"lynx_temp_space is not our directory %s owner %d mode %03o\n",
-			lynx_temp_space, (int) sb.st_uid, (int) sb.st_mode & 0777));
+			lynx_temp_space,
+			(int) sb.st_uid,
+			(unsigned) (sb.st_mode & 0777)));
 	    }
 	} else {
 	    make_it = TRUE;

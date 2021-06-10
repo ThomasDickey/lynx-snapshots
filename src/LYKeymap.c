@@ -1,4 +1,4 @@
-/* $LynxId: LYKeymap.c,v 1.120 2018/12/27 10:33:52 tom Exp $ */
+/* $LynxId: LYKeymap.c,v 1.122 2021/06/09 21:58:11 tom Exp $ */
 #include <HTUtils.h>
 #include <LYUtils.h>
 #include <LYGlobalDefs.h>
@@ -633,6 +633,7 @@ static Kcmd revmap[] =
 	    "")
 };
 
+
 #undef DATA
 /* *INDENT-OFF* */
 static const struct {
@@ -781,9 +782,9 @@ char *LYKeycodeToString(int c,
 	else if (TOASCII(c) < TOASCII(' '))
 	    sprintf(buf, "^%c", FROMASCII(TOASCII(c) | 0100));
 	else if (c >= 0400)
-	    sprintf(buf, "key-0x%x", c);
+	    sprintf(buf, "key-0x%x", (unsigned) c);
 	else
-	    sprintf(buf, "0x%x", c);
+	    sprintf(buf, "0x%x", (unsigned) c);
     }
     return buf;
 }

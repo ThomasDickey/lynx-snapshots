@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTCP.c,v 1.157 2020/09/03 22:57:14 tom Exp $
+ * $LynxId: HTTCP.c,v 1.160 2021/06/08 23:44:43 tom Exp $
  *
  *			Generic Communication Code		HTTCP.c
  *			==========================
@@ -1600,7 +1600,7 @@ static void really_getaddrinfo(const char *host,
 #ifdef DEBUG_HOSTENT_CHILD
 	dump_addrinfo("CHILD fill_addrinfo", (const LYNX_ADDRINFO *) (*result));
 #endif
-	if (statuses->rehostentlen <= sizeof(LYNX_ADDRINFO)) {
+	if (statuses->rehostentlen <= sizeof(LYNX_ADDRINFO) || (*result) == NULL) {
 	    statuses->rehostentlen = 0;
 	    statuses->h_length = 0;
 	} else {
@@ -1825,7 +1825,7 @@ int HTDoConnect(const char *url,
 		int default_port,
 		int *s)
 {
-    char *socks5_host;
+    char *socks5_host = NULL;
     unsigned socks5_host_len = 0;
     int socks5_port;
     const char *socks5_orig_url;
@@ -1858,7 +1858,6 @@ int HTDoConnect(const char *url,
 	StrAllocCopy(socks5_new_url, url);
 
 	/* Get node name and optional port number of wanted URL */
-	socks5_host = NULL;
 	if ((p1 = HTParse(socks5_new_url, "", PARSE_HOST)) != NULL) {
 	    StrAllocCopy(socks5_host, p1);
 	    strip_userid(socks5_host, FALSE);
@@ -2301,7 +2300,7 @@ int HTDoConnect(const char *url,
 	}
 	if ((size_t) write(*s, pbuf, i) != i) {
 	    goto report_system_err;
-	} else if ((i = (unsigned) HTDoRead(*s, pbuf, 4)) != 4) {
+	} else if ((unsigned) HTDoRead(*s, pbuf, 4) != 4) {
 	    goto report_system_err;
 	}
 	/* Version 5, reserved must be 0 */

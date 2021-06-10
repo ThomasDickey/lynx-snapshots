@@ -1,5 +1,5 @@
 /*
- * $LynxId: UCdomap.c,v 1.105 2021/03/14 17:14:26 emil Exp $
+ * $LynxId: UCdomap.c,v 1.106 2021/06/09 22:29:08 tom Exp $
  *
  *  UCdomap.c
  *  =========
@@ -984,7 +984,7 @@ int UCTransUniCharStr(char *outbuf,
 		if ((pout - outbuf) == 3) {
 		    CTRACE((tfp,
 			    "It seems to be a JIS X 0201 code(%" PRI_UCode_t
-			    "). Not supported.\n", unicode));
+			    "). Not supported.\n", CAST_UCode_t (unicode)));
 		    pin = str;
 		    inleft = 2;
 		    pout = outbuf;

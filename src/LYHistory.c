@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYHistory.c,v 1.91 2020/01/21 21:34:20 tom Exp $
+ * $LynxId: LYHistory.c,v 1.94 2021/06/09 22:55:43 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTP.h>
@@ -82,7 +82,7 @@ static void Visited_Links_free(void)
 static void trace_history(const char *tag)
 {
     if (TRACE) {
-	CTRACE((tfp, "HISTORY %s %d/%d (%d extra)\n",
+	CTRACE((tfp, "HISTORY %s %d/%u (%d extra)\n",
 		tag, nhist, size_history, nhist_extra));
 	CTRACE_FLUSH(tfp);
     }
@@ -338,29 +338,26 @@ static int are_identical(HistInfo * doc, DocInfo *doc1)
 	    && doc1->isHEAD == doc->hdoc.isHEAD);
 }
 
-void LYAllocHistory(int entries)
+void LYAllocHistory(unsigned entries)
 {
-    CTRACE((tfp, "LYAllocHistory %d vs %d\n", entries, size_history));
+    CTRACE((tfp, "LYAllocHistory %u vs %u\n", entries, size_history));
     if (entries + 1 >= size_history) {
-	unsigned want;
-	int save = size_history;
+	size_t want;
+	unsigned save = size_history;
 
-	size_history = (entries + 2) * 2;
-	want = (unsigned) size_history *(unsigned) sizeof(*history);
+	size_history += (entries + 2) * 2;
+	want = ((size_t) size_history) * sizeof(*history);
 
 	if (history == 0) {
-	    history = typeMallocn(HistInfo, want);
+	    history = typecallocn(HistInfo, want);
 	} else {
 	    history = typeRealloc(HistInfo, history, want);
+	    memset(&history[save], 0, size_history - save);
 	}
 	if (history == 0)
 	    outofmem(__FILE__, "LYAllocHistory");
-
-	while (save < size_history) {
-	    memset(&history[save++], 0, sizeof(history[0]));
-	}
     }
-    CTRACE((tfp, "...LYAllocHistory %d vs %d\n", entries, size_history));
+    CTRACE((tfp, "...LYAllocHistory %u vs %u\n", entries, size_history));
 }
 
 /*
@@ -410,7 +407,7 @@ int LYpush(DocInfo *doc, int force_push)
 	HDOC(nhist).link = doc->link;
 	HDOC(nhist).line = doc->line;
 	nhist_extra--;
-	LYAllocHistory(nhist);
+	LYAllocHistory((unsigned) nhist);
 	nhist++;
 	trace_history("LYpush: just move the cursor");
 	return 1;
@@ -427,7 +424,7 @@ int LYpush(DocInfo *doc, int force_push)
     /*
      * OK, push it...
      */
-    LYAllocHistory(nhist);
+    LYAllocHistory((unsigned) nhist);
     HDOC(nhist).link = doc->link;
     HDOC(nhist).line = doc->line;
 
@@ -571,7 +568,7 @@ void LYpop(DocInfo *doc)
 void LYhist_prev(DocInfo *doc)
 {
     trace_history("LYhist_prev");
-    if (nhist > 0 && (nhist_extra || nhist < size_history)) {
+    if (nhist > 0 && (nhist_extra || (unsigned) nhist < size_history)) {
 	nhist--;
 	nhist_extra++;
 	LYpop_num(nhist, doc);
@@ -608,7 +605,7 @@ int LYhist_next(DocInfo *doc, DocInfo *newdoc)
     /* Store the new position */
     HDOC(nhist).link = doc->link;
     HDOC(nhist).line = doc->line;
-    LYAllocHistory(nhist);
+    LYAllocHistory((unsigned) nhist);
     nhist++;
     nhist_extra--;
     LYpop_num(nhist, newdoc);

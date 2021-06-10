@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTParse.c,v 1.90 2020/09/05 00:19:54 tom Exp $
+ * $LynxId: HTParse.c,v 1.92 2021/06/09 19:30:55 tom Exp $
  *
  *		Parse HyperText Document Address		HTParse.c
  *		================================
@@ -822,7 +822,7 @@ void HTSimplify(char *filename, BOOL absolute)
 {
 #define MY_FMT "HTParse HTSimplify\t(%s)"
 #ifdef NO_LYNX_TRACE
-#define debug_at(at)	/* nothing */
+#define debug_at(at)		/* nothing */
 #define atln		"?"
 #else
     const char *atln;
@@ -905,7 +905,7 @@ void HTSimplify(char *filename, BOOL absolute)
 	    if (prior != filename) {
 		trim += (size_t) (filename - prior);
 		limit += (size_t) (filename - prior);
-		filename = p = prior;
+		filename = prior;
 		CTRACE2(TRACE_HTPARSE,
 			(tfp, MY_FMT " TRIM %lu/%lu (%.*s)\n",
 			 mark, (unsigned long) trim, (unsigned long) limit,

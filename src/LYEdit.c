@@ -1,4 +1,4 @@
-/* $LynxId: LYEdit.c,v 1.42 2013/11/28 11:18:19 tom Exp $ */
+/* $LynxId: LYEdit.c,v 1.43 2021/06/09 21:39:57 tom Exp $ */
 #include <HTUtils.h>
 #include <HTParse.h>
 #include <HTAlert.h>
@@ -263,7 +263,7 @@ void edit_temporary_file(char *filename,
 	    int save_err = errno;
 
 	    CTRACE((tfp, "ExtEditForm: system() returned %d (0x%x), %s\n",
-		    rv, rv,
+		    rv, (unsigned) rv,
 		    (save_err
 		     ? LYStrerror(save_err)
 		     : "reason unknown")));

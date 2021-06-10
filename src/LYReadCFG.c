@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYReadCFG.c,v 1.198 2020/02/23 23:09:33 Keith.Bowes Exp $
+ * $LynxId: LYReadCFG.c,v 1.199 2021/06/09 21:49:32 tom Exp $
  */
 #ifndef NO_RULES
 #include <HTRules.h>
@@ -815,7 +815,10 @@ static int keymap_fun(char *key)
 		    if (!success)
 			fprintf(stderr,
 				gettext("setting of line-editor binding for key %s (0x%x) to 0x%x for %s failed\n"),
-				key, lkc, lec, efunc);
+				key,
+				(unsigned) lkc,
+				(unsigned) lec,
+				efunc);
 		    else
 			return 0;
 		}
@@ -827,11 +830,16 @@ static int keymap_fun(char *key)
 		    if (lec != -1) {
 			fprintf(stderr,
 				gettext("setting of line-editor binding for key %s (0x%x) to 0x%x for %s failed\n"),
-				key, lkc, lec, efunc);
+				key,
+				(unsigned) lkc,
+				(unsigned) lec,
+				efunc);
 		    } else {
 			fprintf(stderr,
 				gettext("setting of line-editor binding for key %s (0x%x) for %s failed\n"),
-				key, lkc, efunc);
+				key,
+				(unsigned) lkc,
+				efunc);
 		    }
 		}
 	    }

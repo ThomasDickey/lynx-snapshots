@@ -1,5 +1,5 @@
 /*
- * $LynxId: GridText.c,v 1.325 2020/02/25 01:41:00 tom Exp $
+ * $LynxId: GridText.c,v 1.328 2021/06/09 23:35:23 tom Exp $
  *
  *		Character grid hypertext object
  *		===============================
@@ -5935,10 +5935,12 @@ static void HText_trimHightext(HText *text,
 	/*
 	 * Find the right line.
 	 */
-	for (; anchor_ptr->line_num > cur_line;
+	for (; line_ptr != NULL && anchor_ptr->line_num > cur_line;
 	     line_ptr = line_ptr->next, cur_line++) {
 	    ;			/* null body */
 	}
+	if (line_ptr == NULL)
+	    continue;
 
 	if (!final) {
 	    /*
@@ -8308,7 +8310,9 @@ void print_wwwfile_to_fd(FILE *fp,
 			     off2, cur->length,
 			     FieldFirst(cur, this_wrap),
 			     FieldLast(cur, this_wrap) - 1,
-			     byte_offset, cell_chr, temp_chr));
+			     byte_offset,
+			     (unsigned) cell_chr,
+			     (unsigned) temp_chr));
 		    cell_chr = temp_chr;
 		    cell_ptr = temp_ptr;
 		    cell_len = temp_len;
@@ -10958,7 +10962,7 @@ static int check_if_base64_needed(int submit_method,
 	    int ch = UCH(text[n]);
 
 	    if (is8bits(ch) || ((ch < 32 && ch != '\n'))) {
-		CTRACE((tfp, "nonprintable %d:%#x\n", n, ch));
+		CTRACE((tfp, "nonprintable %d:%#x\n", n, (unsigned) ch));
 		printable = FALSE;
 	    }
 	    if (ch == '\n' || ch == '\r') {
@@ -13483,6 +13487,9 @@ void HText_ExpandTextarea(LinkInfo * form_link, int newlines)
 	}
 	anchor_ptr = anchor_ptr->next;
     }
+
+    if (end_anchor == NULL)
+	return;
 
     for (i = 1; i <= newlines; i++) {
 	insert_new_textarea_anchor(&end_anchor, &htline);
