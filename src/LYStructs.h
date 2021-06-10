@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYStructs.h,v 1.31 2013/10/03 08:56:47 tom Exp $
+ * $LynxId: LYStructs.h,v 1.32 2021/06/09 20:56:05 tom Exp $
  */
 #ifndef LYSTRUCTS_H
 #define LYSTRUCTS_H
@@ -86,7 +86,7 @@ extern "C" {
 
     extern HistInfo *history;
     extern int nhist;
-    extern int size_history;
+    extern unsigned size_history;
 
 /******************************************************************************/
 

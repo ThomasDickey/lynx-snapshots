@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYCharUtils.c,v 1.133 2020/01/21 21:36:01 tom Exp $
+ * $LynxId: LYCharUtils.c,v 1.135 2021/06/09 22:29:03 tom Exp $
  *
  *  Functions associated with LYCharSets.c and the Lynx version of HTML.c - FM
  *  ==========================================================================
@@ -1665,7 +1665,7 @@ char **LYUCFullyTranslateString(char **str,
 	    } else if (code == 8204 || code == 8205 ||
 		       code == 8206 || code == 8207) {
 		CTRACE((tfp, "LYUCFullyTranslateString: Ignoring '%"
-			PRI_UCode_t "'.\n", code));
+			PRI_UCode_t "'.\n", CAST_UCode_t (code)));
 		replace_buf[0] = '\0';
 		state = S_got_outstring;
 		break;
@@ -1739,7 +1739,7 @@ char **LYUCFullyTranslateString(char **str,
 	    } else if (!T.output_utf8 && stype == st_HTML && !hidden &&
 		       !(HTPassEightBitRaw &&
 			 UCH(*p) >= lowest_8)) {
-		sprintf(replace_buf, "U%.2" PRI_UCode_t "", code);
+		sprintf(replace_buf, "U%.2" PRI_UCode_t "", CAST_UCode_t (code));
 
 		state = S_got_outstring;
 	    } else {

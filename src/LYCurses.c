@@ -1,4 +1,4 @@
-/* $LynxId: LYCurses.c,v 1.196 2020/01/21 21:35:05 tom Exp $ */
+/* $LynxId: LYCurses.c,v 1.197 2021/06/09 21:44:35 tom Exp $ */
 #include <HTUtils.h>
 #include <HTAlert.h>
 
@@ -408,7 +408,7 @@ void setHashStyle(int style,
 
     CTRACE2(TRACE_STYLE,
 	    (tfp, "CSS(SET): <%s> hash=%d, ca=%#x, ma=%#x\n",
-	     element, style, color, mono));
+	     element, style, (unsigned) color, (unsigned) mono));
 
     ds->used = TRUE;
     ds->color = color;
@@ -428,11 +428,13 @@ static void LYAttrset(WINDOW * win, int color,
 	&& LYShowColor >= SHOW_COLOR_ON
 	&& color >= 0) {
 	CTRACE2(TRACE_STYLE, (tfp, "CSS:LYAttrset color %#x -> (%s)\n",
-			      color, shown = attr_to_string(color)));
+			      (unsigned) color,
+			      shown = attr_to_string(color)));
 	(void) wattrset(win, color);
     } else if (mono >= 0) {
 	CTRACE2(TRACE_STYLE, (tfp, "CSS:LYAttrset mono %#x -> (%s)\n",
-			      mono, shown = attr_to_string(mono)));
+			      (unsigned) mono,
+			      shown = attr_to_string(mono)));
 	(void) wattrset(win, mono);
     } else {
 	CTRACE2(TRACE_STYLE, (tfp, "CSS:LYAttrset (A_NORMAL)\n"));
@@ -468,7 +470,9 @@ void curses_w_style(WINDOW * win, int style,
 
     CTRACE2(TRACE_STYLE, (tfp, "CSS.CS:<%s%s> style %d color %#x\n",
 			  (dir ? "" : "/"),
-			  ds->name, style, ds->color));
+			  ds->name,
+			  style,
+			  (unsigned) ds->color));
 
     getyx(win, YP, XP);
 
@@ -496,7 +500,7 @@ void curses_w_style(WINDOW * win, int style,
 	if (last_colorattr_ptr >= MAX_LAST_STYLES) {
 	    CTRACE2(TRACE_STYLE, (tfp, "........... %s (0x%x) %s\r\n",
 				  "attribute cache FULL, dropping last",
-				  last_styles[last_colorattr_ptr],
+				  (unsigned) last_styles[last_colorattr_ptr],
 				  "in LynxChangeStyle(curses_w_style)"));
 	    last_colorattr_ptr = MAX_LAST_STYLES - 1;
 	}
@@ -721,8 +725,13 @@ char *LYgetTableString(int code)
     if (fg == 0 && bg == 0) {
 	fg = COLOR_WHITE;
     }
+
     CTRACE((tfp, "%#x -> %#x (mono %#x pair %d) fg=%d, bg=%d\n",
-	    mask, second, mono, pair, fg, bg));
+	    (unsigned) mask,
+	    (unsigned) second,
+	    (unsigned) mono,
+	    pair, fg, bg));
+
     for (n = 0; n < TABLESIZE(Mono_Attrs); ++n) {
 	if ((Mono_Attrs[n].code & mono) != 0) {
 	    if (result != 0)

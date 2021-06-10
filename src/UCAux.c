@@ -1,5 +1,5 @@
 /*
- * $LynxId: UCAux.c,v 1.51 2016/04/17 22:18:15 tom Exp $
+ * $LynxId: UCAux.c,v 1.52 2021/06/09 22:29:39 tom Exp $
  */
 #include <HTUtils.h>
 
@@ -394,8 +394,8 @@ void UCSetBoxChars(int cset,
 				CTRACE((tfp,
 					"  map[%c] %#" PRI_UCode_t " -> %#x\n",
 					table[n].mapping,
-					table[n].internal,
-					table[n].external));
+					CAST_UCode_t (table[n].internal),
+					(unsigned)table[n].external));
 				break;
 			    }
 			}
@@ -419,7 +419,8 @@ void UCSetBoxChars(int cset,
 			CTRACE((tfp,
 				"line-drawing map %c mismatch (have %#x, want %#x)\n",
 				table[n].mapping,
-				test, table[n].external));
+				(unsigned) test,
+				(unsigned) table[n].external));
 			fix_lines = TRUE;
 			break;
 		    }

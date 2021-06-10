@@ -3,7 +3,7 @@
 #include <LYLeaks.h>
 
 /*
- *  $LynxId: parsdate.y,v 1.30 2019/08/28 23:00:39 tom Exp $
+ *  $LynxId: parsdate.y,v 1.31 2021/06/08 23:01:28 tom Exp $
  *
  *  This module is adapted and extended from tin, to use for LYmktime().
  *
@@ -869,6 +869,7 @@ static int GetTimeInfo(TIMEINFO * Now)
 #endif /* !defined(DONT_HAVE_TM_GMTOFF) */
 
     /* Get the basic time. */
+    memset(Now, 0, sizeof(TIMEINFO));
 #if defined(HAVE_GETTIMEOFDAY)
     if (gettimeofday(&tv, (struct timezone *) NULL) == -1)
 	return -1;

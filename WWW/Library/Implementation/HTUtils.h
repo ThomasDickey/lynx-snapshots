@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTUtils.h,v 1.132 2021/03/22 23:03:56 tom Exp $
+ * $LynxId: HTUtils.h,v 1.133 2021/06/09 22:17:19 tom Exp $
  *
  * Utility macros for the W3 code library
  * MACROS FOR GENERAL USE
@@ -685,6 +685,7 @@ extern int WWW_TraceMask;
  * Printing-format for "UCode_t".
  */
 #define PRI_UCode_t	"lX"
+#define CAST_UCode_t(n)	(unsigned long)(n)
 
 /*
  * Verbose-tracing.

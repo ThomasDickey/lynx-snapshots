@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTNews.c,v 1.75 2020/01/21 22:12:00 tom Exp $
+ * $LynxId: HTNews.c,v 1.78 2021/06/09 19:29:36 tom Exp $
  *
  *			NEWS ACCESS				HTNews.c
  *			===========
@@ -2300,7 +2300,7 @@ static int HTLoadNews(const char *arg,
 	    } else if (*(arg + 5) == '/' && *(arg + 6) != '/') {
 		p1 = (arg + 6);
 	    } else {
-		p1 = (cp + 1);
+		p1 = (cp ? (cp + 1) : (arg + 6));
 	    }
 	    if (!(cp = HTParse(arg, "", PARSE_HOST)) || *cp == '\0') {
 		if (s >= 0 && NewsHost && strcasecomp(NewsHost, HTNewsHost)) {
@@ -2334,7 +2334,7 @@ static int HTLoadNews(const char *arg,
 	    } else if (*(arg + 6) == '/' && *(arg + 7) != '/') {
 		p1 = (arg + 7);
 	    } else {
-		p1 = (cp + 1);
+		p1 = (cp ? (cp + 1) : (arg + 7));
 	    }
 	    if (!(cp = HTParse(arg, "", PARSE_HOST)) || *cp == '\0') {
 		if (s >= 0 && NewsHost && strcasecomp(NewsHost, HTNewsHost)) {
@@ -2368,7 +2368,7 @@ static int HTLoadNews(const char *arg,
 	    } else if (*(arg + 6) != '/') {
 		p1 = (arg + 6);
 	    } else {
-		p1 = (cp + 1);
+		p1 = (cp ? (cp + 1) : (arg + 6));
 	    }
 	    if (!(cp = HTParse(arg, "", PARSE_HOST)) || *cp == '\0') {
 		if (s >= 0 && NewsHost && strcasecomp(NewsHost, HTNewsHost)) {
@@ -2436,16 +2436,18 @@ static int HTLoadNews(const char *arg,
 		    p1 = (strrchr(arg, ':') + 1);
 		}
 	    } else {
+		char *cp2;
+
 		/*
 		 * Reset p1 so that it points to the newsgroup (or a wildcard),
 		 * or the article.
 		 */
-		if (!(cp = strrchr((p1 + 6), '/')) || *(cp + 1) == '\0') {
+		if (!(cp2 = strrchr((p1 + 6), '/')) || *(cp2 + 1) == '\0') {
 		    p1 = "*";
 		    group_wanted = FALSE;
 		    list_wanted = TRUE;
 		} else {
-		    p1 = (cp + 1);
+		    p1 = (cp2 + 1);
 		}
 	    }
 	}

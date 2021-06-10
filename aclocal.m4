@@ -1,4 +1,4 @@
-dnl $LynxId: aclocal.m4,v 1.299 2021/05/19 23:37:29 tom Exp $
+dnl $LynxId: aclocal.m4,v 1.301 2021/06/08 22:08:14 tom Exp $
 dnl Macros for auto-configure script.
 dnl by Thomas E. Dickey <dickey@invisible-island.net>
 dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
@@ -963,7 +963,7 @@ for mapname in acs_map _acs_map
 do
 	AC_TRY_LINK([
 #include <${cf_cv_ncurses_header:-curses.h}>
-	],[chtype x = ${mapname}['l']; ${mapname}['m'] = 0],
+	],[chtype x = ${mapname}['l']; ${mapname}['m'] = 0; (void)x],
 	[cf_cv_alt_char_set=$mapname
 	 break],
 	[cf_cv_alt_char_set=no])
@@ -1879,7 +1879,7 @@ if test "$cf_cv_color_curses" = yes ; then
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_CONST_X_STRING version: 6 updated: 2021/01/01 13:31:04
+dnl CF_CONST_X_STRING version: 7 updated: 2021/06/07 17:39:17
 dnl -----------------
 dnl The X11R4-X11R6 Xt specification uses an ambiguous String type for most
 dnl character-strings.
@@ -1909,7 +1909,7 @@ AC_TRY_COMPILE(
 #include <stdlib.h>
 #include <X11/Intrinsic.h>
 ],
-[String foo = malloc(1); (void)foo],[
+[String foo = malloc(1); free((void*)foo)],[
 
 AC_CACHE_CHECK(for X11/Xt const-feature,cf_cv_const_x_string,[
 	AC_TRY_COMPILE(
@@ -2885,7 +2885,7 @@ AC_TRY_LINK([
 #include <sys/types.h>
 #include <sys/ioctl.h>
 ],[
-        int ret = ioctl(0, FIONBIO, (char *)0);
+        int ret = ioctl(0, FIONBIO, (char *)0); (void) ret
 	],[cf_cv_fionbio=ioctl],[
 AC_TRY_LINK([
 #include <sys/types.h>
@@ -3065,7 +3065,7 @@ AC_CACHE_VAL(ac_cv_func_lstat,[
 AC_TRY_LINK([
 #include <sys/types.h>
 #include <sys/stat.h>],
-	[lstat(".", (struct stat *)0)],
+	[struct stat sb; lstat(".", &sb); (void) sb],
 	[ac_cv_func_lstat=yes],
 	[ac_cv_func_lstat=no])
 	])
@@ -5967,7 +5967,7 @@ AC_TRY_LINK([
 #ifdef HAVE_LIMITS_H
 #include <limits.h>
 #endif
-],[long seed = 1; $cf_srand_func(seed); seed = $cf_rand_func()],
+],[long seed = 1; $cf_srand_func(seed); seed = $cf_rand_func(); (void)seed],
 [cf_cv_srand_func=$cf_func
  break])
 done
@@ -6525,8 +6525,8 @@ AC_CACHE_VAL(cf_cv_tm_gmtoff,[
 #	endif
 #endif
 ],[
-	struct tm foo;
-	long bar = foo.tm_gmtoff],
+	static struct tm foo;
+	long bar = foo.tm_gmtoff; (void) bar],
 	[cf_cv_tm_gmtoff=yes],
 	[cf_cv_tm_gmtoff=no])])
 AC_MSG_RESULT($cf_cv_tm_gmtoff)
@@ -6751,7 +6751,7 @@ AC_REQUIRE([CF_WAIT_HEADERS])
 AC_MSG_CHECKING([for union wait])
 AC_CACHE_VAL(cf_cv_type_unionwait,[
 	AC_TRY_LINK($cf_wait_headers,
-	[int x;
+	[static int x;
 	 int y = WEXITSTATUS(x);
 	 int z = WTERMSIG(x);
 	 wait(&x);
@@ -6942,7 +6942,7 @@ esac
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_UTMP_UT_SESSION version: 8 updated: 2021/01/02 09:31:20
+dnl CF_UTMP_UT_SESSION version: 9 updated: 2021/06/07 17:39:17
 dnl ------------------
 dnl Check if UTMP/UTMPX struct defines ut_session member
 AC_DEFUN([CF_UTMP_UT_SESSION],
@@ -6952,7 +6952,7 @@ AC_CACHE_CHECK(if ${cf_cv_have_utmp}.ut_session is declared, cf_cv_have_utmp_ut_
 	AC_TRY_COMPILE([
 #include <sys/types.h>
 #include <${cf_cv_have_utmp}.h>],
-	[struct $cf_cv_have_utmp x;
+	[static struct $cf_cv_have_utmp x;
 	 long y = x.ut_session;
 	 (void)x;
 	 (void)y],

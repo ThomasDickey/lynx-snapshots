@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMain.c,v 1.291 2021/03/22 22:52:58 tom Exp $
+ * $LynxId: LYMain.c,v 1.293 2021/06/09 20:55:53 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTP.h>
@@ -492,7 +492,7 @@ char *x_display = NULL;		/* display environment variable */
 
 HistInfo *history;
 int nhist = 0;			/* number of used history entries */
-int size_history;		/* number of allocated history entries */
+unsigned size_history;		/* number of allocated history entries */
 
 LinkInfo links[MAXLINKS];
 
@@ -2367,7 +2367,7 @@ void reload_read_cfg(void)
 	return;			/* can not write the very own file :( */
     }
 #ifdef USE_PERSISTENT_COOKIES
-    if (LYCookieFile != 0 && LYCookieSaveFile != 0) {
+    if (LYCookieFile != NULL && LYCookieSaveFile != NULL) {
 	/* set few safe flags: */
 	BOOLEAN persistent_cookies_flag = persistent_cookies;
 	char *LYCookieFile_flag = NULL;
@@ -2422,7 +2422,7 @@ void reload_read_cfg(void)
 	    persistent_cookies = persistent_cookies_flag;
 	    HTAlert(gettext("persistent cookies state will be changed in next session only."));
 	}
-	if (persistent_cookies) {
+	if (persistent_cookies && LYCookieFile_flag != NULL) {
 	    if (strcmp(LYCookieFile, LYCookieFile_flag)) {
 		StrAllocCopy(LYCookieFile, LYCookieFile_flag);
 		CTRACE((tfp,
@@ -2500,17 +2500,17 @@ static int parse_authentication(char *next_arg,
     /*
      * Authentication information for protected documents.
      */
-    char *auth_info = 0;
+    char *auth_info = NULL;
 
-    if (next_arg != 0) {
+    if (next_arg != NULL) {
 	StrAllocCopy(auth_info, next_arg);
 	memset(next_arg, ' ', strlen(next_arg));	/* Let's not show too much */
     }
 
-    if (auth_info != 0) {
+    if (auth_info != NULL) {
 	char *cp;
 
-	if ((cp = StrChr(auth_info, ':')) != 0) {	/* Pw */
+	if ((cp = StrChr(auth_info, ':')) != NULL) {	/* Pw */
 	    *cp++ = '\0';	/* Terminate ID */
 	    HTUnEscape(cp);
 	    StrAllocCopy(result[1], cp);

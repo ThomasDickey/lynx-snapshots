@@ -1,9 +1,10 @@
--- $LynxId: CHANGES,v 1.1071 2021/05/19 23:34:05 tom Exp $
+-- $LynxId: CHANGES,v 1.1073 2021/06/10 00:37:08 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2021-05-19 (2.9.0dev.7)
+2021-06-09 (2.9.0dev.7)
+* fix warnings from scan-build -TD
 * update configure script to work with _Noreturn changes in ncurses 20210320
   development snapshot -TD
 * document the NO_TABLE_CENTER setting and explain the corresponding -center
@@ -18,7 +19,7 @@ Changes since Lynx 2.8 release
   + improve configure script workaround for unwanted
     -Werror=implicit-function-declaration by clang
   + add "darwin" (macOS) to list of case-insensitive filesystems
-* update config.guess (2021-04-21), config.sub (2021-04-30)
+* update config.guess (2021-05-24), config.sub (2021-04-30)
 
 2020-09-05 (2.9.0dev.6)
 * remove commented ENABLE_LYNXRC for SHOW_COLOR:ON, and SHOW_DOTFILES since

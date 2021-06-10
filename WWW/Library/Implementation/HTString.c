@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTString.c,v 1.79 2020/01/23 01:10:36 tom Exp $
+ * $LynxId: HTString.c,v 1.81 2021/06/09 20:16:06 tom Exp $
  *
  *	Case-independent string comparison		HTString.c
  *
@@ -624,7 +624,7 @@ typedef enum {
 PUBLIC_IF_FIND_LEAKS char *StrAllocVsprintf(char **pstr,
 					    size_t dst_len,
 					    const char *fmt,
-					    va_list * ap)
+					    va_list *ap)
 {
 #ifdef HAVE_VASPRINTF
     /*
@@ -1102,6 +1102,8 @@ void HTAddXpand(char **result,
 		int number,
 		const char *parameter)
 {
+    if (parameter == NULL)
+	parameter = "";
     if (number > 0) {
 	const char *last = HTAfterCommandArg(command, number - 1);
 	const char *next = last;

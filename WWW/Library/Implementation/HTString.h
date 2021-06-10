@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTString.h,v 1.40 2018/12/27 10:27:01 tom Exp $
+ * $LynxId: HTString.h,v 1.41 2021/06/09 19:30:55 tom Exp $
  *						String handling for libwww
  *                                         STRINGS
  *                                            
@@ -97,7 +97,7 @@ extern "C" {
     extern char *StrAllocVsprintf(char **pstr,
 				  size_t len,
 				  const char *fmt,
-				  va_list * ap);
+				  va_list *ap);
 #endif
 
 #if defined(__CYGWIN__)

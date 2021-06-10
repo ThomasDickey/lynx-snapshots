@@ -3,9 +3,9 @@
 /* (use YYMAJOR/YYMINOR for ifdefs dependent on parser version) */
 
 #define YYBYACC 1
-#define YYMAJOR 1
-#define YYMINOR 9
-#define YYPATCH 20190617
+#define YYMAJOR 2
+#define YYMINOR 0
+#define YYPATCH 20210520
 
 #define YYEMPTY        (-1)
 #define yyclearin      (yychar = YYEMPTY)
@@ -22,7 +22,7 @@
 #include <LYLeaks.h>
 
 /*
- *  $LynxId: parsdate.c,v 1.28 2019/08/28 23:01:49 tom Exp $
+ *  $LynxId: parsdate.c,v 1.29 2021/06/08 23:03:24 tom Exp $
  *
  *  This module is adapted and extended from tin, to use for LYmktime().
  *
@@ -160,7 +160,7 @@ static void date_error(const char GCC_UNUSED *s)
 #ifndef YYSTYPE_IS_DECLARED
 #define YYSTYPE_IS_DECLARED 1
 #line 139 "./parsdate.y"
-typedef union {
+typedef union YYSTYPE {
     time_t		Number;
     enum _MERIDIAN	Meridian;
 } YYSTYPE;
@@ -213,7 +213,7 @@ extern int YYPARSE_DECL();
 #define tZONE 265
 #define tDST 266
 #define YYERRCODE 256
-typedef short YYINT;
+typedef int YYINT;
 static const YYINT yylhs[] = {                           -1,
     0,    0,    4,    4,    4,    4,    4,    4,    5,    5,
     5,    5,    5,    2,    2,    2,    2,    2,    1,    6,
@@ -929,6 +929,7 @@ static int GetTimeInfo(TIMEINFO * Now)
 #endif /* !defined(DONT_HAVE_TM_GMTOFF) */
 
     /* Get the basic time. */
+    memset(Now, 0, sizeof(TIMEINFO));
 #if defined(HAVE_GETTIMEOFDAY)
     if (gettimeofday(&tv, (struct timezone *) NULL) == -1)
 	return -1;
@@ -1048,7 +1049,7 @@ time_t parsedate(char *p,
      * from the error return value.  (Alternately could set errno on error.) */
     return (Start == BAD_TIME) ? 0 : Start;
 }
-#line 1052 "y.tab.c"
+#line 1053 "y.tab.c"
 
 #if YYDEBUG
 #include <stdio.h>	/* needed for printf */
@@ -1533,7 +1534,7 @@ case 35:
 	    yyval.Meridian = yystack.l_mark[0].Meridian;
 	}
 break;
-#line 1537 "y.tab.c"
+#line 1538 "y.tab.c"
     }
     yystack.s_mark -= yym;
     yystate = *yystack.s_mark;

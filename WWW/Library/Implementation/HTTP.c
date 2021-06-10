@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTP.c,v 1.178 2020/01/21 22:09:33 tom Exp $
+ * $LynxId: HTTP.c,v 1.179 2021/06/08 23:28:23 tom Exp $
  *
  * HyperText Transfer Protocol	- Client implementation		HTTP.c
  * ===========================
@@ -755,7 +755,9 @@ static char *StripIpv6Brackets(char *host)
 	p = host + strlen(host) - 1;
 	if (*p == ']') {
 	    *p = '\0';
-	    ++host;
+	    for (p = host; (p[0] = p[1]) != '\0'; ++p) {
+		;		/* EMPTY */
+	    }
 	}
     }
     return host;

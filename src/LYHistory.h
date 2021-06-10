@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYHistory.h,v 1.21 2010/09/25 00:45:55 tom Exp $
+ * $LynxId: LYHistory.h,v 1.22 2021/06/09 22:33:06 tom Exp $
  */
 #ifndef LYHISTORY_H
 #define LYHISTORY_H
@@ -18,7 +18,7 @@ extern "C" {
     extern int LYpush(DocInfo *doc, int force_push);
     extern int showhistory(char **newfile);
     extern void LYAddVisitedLink(DocInfo *doc);
-    extern void LYAllocHistory(int entries);
+    extern void LYAllocHistory(unsigned entries);
     extern void LYFreePostData(DocInfo *data);
     extern void LYFreeDocInfo(DocInfo *data);
     extern void LYhist_prev(DocInfo *doc);
