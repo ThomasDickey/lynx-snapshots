@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYCharUtils.c,v 1.135 2021/06/09 22:29:03 tom Exp $
+ * $LynxId: LYCharUtils.c,v 1.136 2021/06/29 22:01:12 tom Exp $
  *
  *  Functions associated with LYCharSets.c and the Lynx version of HTML.c - FM
  *  ==========================================================================
@@ -1142,7 +1142,7 @@ char **LYUCFullyTranslateString(char **str,
      * CJK mode.
      */
     if (IS_CJK_TTY
-#ifdef EXP_JAPANESEUTF8_SUPPORT
+#ifdef USE_JAPANESEUTF8_SUPPORT
 	&& (strcmp(LYCharSet_UC[cs_from].MIMEname, "utf-8") != 0)
 	&& (strcmp(LYCharSet_UC[cs_to].MIMEname, "utf-8") != 0)
 #endif
@@ -1390,7 +1390,7 @@ char **LYUCFullyTranslateString(char **str,
 		    } else {
 			*(unsigned char *) p = UCH(173);
 		    }
-#ifdef EXP_JAPANESEUTF8_SUPPORT
+#ifdef USE_JAPANESEUTF8_SUPPORT
 		} else if (output_utf8) {
 		    if ((!strcmp(LYCharSet_UC[cs_from].MIMEname, "euc-jp") &&
 			 (IS_EUC((unsigned char) (*p),
@@ -2179,7 +2179,7 @@ void LYHandleMETA(HTStructured * me, const BOOL *present,
 					    UCT_SETBY_DEFAULT);
 		}
 		if ((p_in->enc != UCT_ENC_CJK)
-#ifdef EXP_JAPANESEUTF8_SUPPORT
+#ifdef USE_JAPANESEUTF8_SUPPORT
 		    && (p_in->enc != UCT_ENC_UTF8)
 #endif
 		    ) {

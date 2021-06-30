@@ -1,5 +1,5 @@
 /*
- * $LynxId: GridText.c,v 1.328 2021/06/09 23:35:23 tom Exp $
+ * $LynxId: GridText.c,v 1.329 2021/06/29 22:01:12 tom Exp $
  *
  *		Character grid hypertext object
  *		===============================
@@ -12259,7 +12259,7 @@ void HText_setKcode(HText *text, const char *charset,
 			     !strcmp(charset, "x-shift-jis"))) {
 	text->kcode = SJIS;
     } else if (charset_explicit
-#ifdef EXP_JAPANESEUTF8_SUPPORT
+#ifdef USE_JAPANESEUTF8_SUPPORT
 	       && strcmp(charset, "utf-8")
 #endif
 	       && ((p_in && (p_in->enc == UCT_ENC_CJK)) ||
@@ -12283,7 +12283,7 @@ void HText_setKcode(HText *text, const char *charset,
 	text->kcode = NOKANJI;
 	if (IS_CJK_TTY) {
 	    if (!p_in || ((p_in->enc != UCT_ENC_CJK)
-#ifdef EXP_JAPANESEUTF8_SUPPORT
+#ifdef USE_JAPANESEUTF8_SUPPORT
 			  && (p_in->enc != UCT_ENC_UTF8)
 #endif
 		)) {
@@ -12293,7 +12293,7 @@ void HText_setKcode(HText *text, const char *charset,
     }
 
     if (charset_explicit
-#ifdef EXP_JAPANESEUTF8_SUPPORT
+#ifdef USE_JAPANESEUTF8_SUPPORT
 	&& strcmp(charset, "utf-8")
 #endif
 	) {

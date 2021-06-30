@@ -1,5 +1,5 @@
 /*
- * $LynxId: SGML.c,v 1.169 2020/01/21 22:06:39 tom Exp $
+ * $LynxId: SGML.c,v 1.172 2021/06/30 20:25:01 tom Exp $
  *
  *			General SGML Parser code		SGML.c
  *			========================
@@ -36,6 +36,12 @@
 #endif
 #ifdef USE_PRETTYSRC
 # include <LYPrettySrc.h>
+#endif
+
+/* a global variable doesn't work with info-stages which convert encoding */
+#if defined(EXP_CHINESEUTF8_SUPPORT)
+#undef IS_CJK_TTY
+#define IS_CJK_TTY me->T.do_cjk
 #endif
 
 #define AssumeCP1252(me) \
@@ -93,7 +99,7 @@ static void fake_put_character(HTStream *p GCC_UNUSED,
 /*the following macros are used for pretty source view. */
 #define IS_C(attr) (attr.type == HTMLA_CLASS)
 
-#if defined(EXP_JAPANESEUTF8_SUPPORT)
+#if defined(USE_JAPANESEUTF8_SUPPORT)
 # define UTF8_TTY_ISO2022JP (me->T.output_utf8)
 #else
 # define UTF8_TTY_ISO2022JP 0
@@ -402,7 +408,7 @@ static void set_chartrans_handling(HTStream *me,
      * would be better to call a Lynx_HTML_parser function to set an element in
      * its HTStructured object, itself, if this were needed.  - FM
      */
-#ifndef EXP_JAPANESEUTF8_SUPPORT
+#ifndef USE_JAPANESEUTF8_SUPPORT
     if (IS_CJK_TTY) {
 	me->current_tag_charset = -1;
     } else
@@ -1640,6 +1646,12 @@ static void SGML_character(HTStream *me, int c_in)
     c = UCH(c_in);
     clong = UCH(c);
 
+#if 0
+    CTRACE((tfp, "%s:%d PUTC %02x %c\n",
+	    LYCharSet_UC[me->inUCLYhndl].MIMEname, me->T.do_cjk, c, (c > 32 &&
+								     c < 127)
+	    ? c : '#'));
+#endif
     if (me->T.decode_utf8) {
 	switch (HTDecodeUTF8(&(me->U), &c_in, &clong)) {
 	case dUTF8_ok:
@@ -1665,7 +1677,7 @@ static void SGML_character(HTStream *me, int c_in)
     /*
      * If we want the raw input converted to Unicode, try that now.  - FM
      */
-#ifdef EXP_JAPANESEUTF8_SUPPORT
+#ifdef USE_JAPANESEUTF8_SUPPORT
     /* Convert ISO-2022-JP to Unicode (charset=iso-2022-jp is unrecognized) */
 #define IS_JIS7_HILO(c) (0x20<(c)&&(c)<0x7F)
     if (UTF8_TTY_ISO2022JP && (me->state == S_nonascii_text
@@ -1698,18 +1710,18 @@ static void SGML_character(HTStream *me, int c_in)
 	}
 	goto top1;
     }
-#endif /* EXP_JAPANESEUTF8_SUPPORT */
+#endif /* USE_JAPANESEUTF8_SUPPORT */
+#ifdef USE_JAPANESEUTF8_SUPPORT
     if (me->T.trans_to_uni &&
-#ifdef EXP_JAPANESEUTF8_SUPPORT
 	((strcmp(LYCharSet_UC[me->inUCLYhndl].MIMEname, "euc-jp") == 0) ||
 	 (strcmp(LYCharSet_UC[me->inUCLYhndl].MIMEname, "shift_jis") == 0))) {
 	if (strcmp(LYCharSet_UC[me->inUCLYhndl].MIMEname, "shift_jis") == 0) {
 	    if (me->U.utf_count == 0) {
-		if (IS_SJIS_HI1((unsigned char) c) ||
-		    IS_SJIS_HI2((unsigned char) c)) {
+		if (IS_SJIS_HI1(c) ||
+		    IS_SJIS_HI2(c)) {
 		    me->U.utf_buf[0] = (char) c;
 		    me->U.utf_count = 1;
-		    clong = -11;
+		    clong = ucCannotConvert;
 		} else if (IS_SJIS_X0201KANA(c)) {
 		    if (conv_jisx0201kana) {
 			JISx0201TO0208_SJIS(c,
@@ -1721,7 +1733,7 @@ static void SGML_character(HTStream *me, int c_in)
 		    }
 		}
 	    } else {
-		if (IS_SJIS_LO((unsigned char) c)) {
+		if (IS_SJIS_LO(c)) {
 		    me->U.utf_buf[1] = (char) c;
 		    clong = UCTransJPToUni(me->U.utf_buf, 2, me->inUCLYhndl);
 		}
@@ -1729,13 +1741,13 @@ static void SGML_character(HTStream *me, int c_in)
 	    }
 	} else {
 	    if (me->U.utf_count == 0) {
-		if (IS_EUC_HI((unsigned char) c) || c == 0x8E) {
+		if (IS_EUC_HI(c) || c == 0x8E) {
 		    me->U.utf_buf[0] = (char) c;
 		    me->U.utf_count = 1;
-		    clong = -11;
+		    clong = ucCannotConvert;
 		}
 	    } else {
-		if (IS_EUC_LOX((unsigned char) c)) {
+		if (IS_EUC_LOX(c)) {
 		    me->U.utf_buf[1] = (char) c;
 		    clong = UCTransJPToUni(me->U.utf_buf, 2, me->inUCLYhndl);
 		}
@@ -1743,12 +1755,45 @@ static void SGML_character(HTStream *me, int c_in)
 	    }
 	}
 	goto top1;
-    } else if (me->T.trans_to_uni &&
-#endif /* EXP_JAPANESEUTF8_SUPPORT */
+    } else
+#endif /* USE_JAPANESEUTF8_SUPPORT */
+#ifdef EXP_CHINESEUTF8_SUPPORT
+	if (me->T.trans_to_uni &&
+	    ((strcmp(LYCharSet_UC[me->inUCLYhndl].MIMEname, "euc-cn") == 0))) {
+	if (me->U.utf_count == 0) {
+	    if (IS_GBK_HI(c) ||
+		IS_GBK_HI(c)) {
+		me->U.utf_buf[0] = (char) c;
+		me->U.utf_count = 1;
+		clong = ucCannotConvert;
+		CTRACE((tfp, "Get EUC-CN: 0x%02X\n", c & 0xff));
+	    }
+	} else {
+	    if (IS_GBK_LO(c)) {
+		me->U.utf_buf[1] = (char) c;
+		clong = UCTransJPToUni(me->U.utf_buf, 2, me->inUCLYhndl);
+		if (clong > 0) {
+		    CTRACE((tfp, "... second: [%02X%02X] U+%04lX\n",
+			    me->U.utf_buf[0] & 0xff,
+			    me->U.utf_buf[1] & 0xff,
+			    clong));
+		} else {
+		    CTRACE((tfp, "... second: [%02X%02X] %ld\n",
+			    me->U.utf_buf[0] & 0xff,
+			    me->U.utf_buf[1] & 0xff,
+			    clong));
+		}
+	    }
+	    me->U.utf_count = 0;
+	}
+	goto top1;
+    } else
+#endif /* EXP_CHINESEUTF8_SUPPORT */
+	if (me->T.trans_to_uni &&
 	/* S/390 -- gil -- 0744 */
-	       ((TOASCII(clong) >= LYlowest_eightbit[me->inUCLYhndl]) ||
-		(clong < ' ' && clong != 0 &&
-		 me->T.trans_C0_to_uni))) {
+	    ((TOASCII(clong) >= LYlowest_eightbit[me->inUCLYhndl]) ||
+	     (clong < ' ' && clong != 0 &&
+	      me->T.trans_C0_to_uni))) {
 	/*
 	 * Convert the octet to Unicode.  - FM
 	 */
@@ -1890,7 +1935,7 @@ static void SGML_character(HTStream *me, int c_in)
      */
     if ((HTCJK == JAPANESE) && (me->state == S_in_kanji) &&
 	!IS_JAPANESE_2BYTE(me->kanji_buf, UCH(c))
-#ifdef EXP_JAPANESEUTF8_SUPPORT
+#ifdef USE_JAPANESEUTF8_SUPPORT
 	&& !me->T.decode_utf8
 #endif
 	) {
@@ -1944,9 +1989,22 @@ static void SGML_character(HTStream *me, int c_in)
 	}
 	/* FALLTHRU */
     case S_text:
-	if (IS_CJK_TTY && ((TOASCII(c) & 0200) != 0)
-#ifdef EXP_JAPANESEUTF8_SUPPORT
-	    && !me->T.decode_utf8
+#ifdef EXP_CHINESEUTF8_SUPPORT
+	if (IS_CJK_TTY &&
+	    !strcmp(LYCharSet_UC[me->inUCLYhndl].MIMEname, "euc-cn")) {
+	    /*
+	     * Leave the case statement if we have not collected both of the
+	     * bytes for the EUC-CN character.  If we have, then continue on
+	     * to convert it to Unicode.
+	     */
+	    if (clong == ucCannotConvert) {
+		break;
+	    }
+	} else
+#endif
+	    if (IS_CJK_TTY && ((TOASCII(c) & 0200) != 0)
+#ifdef USE_JAPANESEUTF8_SUPPORT
+		&& !me->T.decode_utf8
 #endif
 	    ) {			/* S/390 -- gil -- 0864 */
 	    /*
@@ -2461,8 +2519,6 @@ static void SGML_character(HTStream *me, int c_in)
 #ifdef USE_PRETTYSRC
 	    entity_string = string->data;
 #endif
-	    /* S/390 -- gil -- 1039 */
-	    /* CTRACE((tfp, "%s: %d: %s\n", __FILE__, __LINE__, string->data)); */
 	    if (!strcmp(string->data, "zwnj") &&
 		(!me->element_stack ||
 		 (me->element_stack->tag &&

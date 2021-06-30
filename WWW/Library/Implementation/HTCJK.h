@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTCJK.h,v 1.19 2012/08/15 23:11:03 tom Exp $
+ * $LynxId: HTCJK.h,v 1.21 2021/06/30 17:16:36 tom Exp $
  *
  *			CJK character converter		HTCJK.h
  *			=======================
@@ -32,21 +32,29 @@ extern "C" {
 #define TO_HANJI	"\033$A"
 #define TO_HANGUL	"\033$(C"
 #define TO_ASCII	"\033(B"
-#define IS_SJIS_LO(lo)	((0x40<=lo)&&(lo!=0x7F)&&(lo<=0xFC))
+
+#define IS_GBK_LO(lo)	((0xA1 <= (lo)) && ((lo) <= 0xFE))
+#define IS_GBK_HI(hi)	((0xA1 <= (hi)) && ((hi) <= 0xF7))
+
+#define IS_SJIS_LO(lo)	((0x40 <= (lo)) && ((lo) != 0x7F) && ((lo) <= 0xFC))
 #define IS_SJIS_HI1(hi) ((0x81 <= (hi)) && ((hi) <= 0x9F))	/* 1st lev. */
 #define IS_SJIS_HI2(hi) ((0xE0 <= (hi)) && ((hi) <= 0xEF))	/* 2nd lev. */
-#define IS_SJIS(hi,lo,in_sjis) (!IS_SJIS_LO(lo)?0:IS_SJIS_HI1(hi)?(in_sjis=1):in_sjis&&IS_SJIS_HI2(hi))
-#define IS_SJIS_2BYTE(hi,lo) (IS_SJIS_LO(lo)&&(IS_SJIS_HI1(hi)||IS_SJIS_HI2(hi)))
-#define IS_SJIS_X0201KANA(lo) ((0xA1<=lo)&&(lo<=0xDF))
-#define IS_EUC_LOX(lo)	((0xA1<=lo)&&(lo<=0xFE))	/* extended */
-#define IS_EUC_HI(hi)	((0xA1<=hi)&&(hi<=0xFE))
-#define IS_EUC_X0201KANA(hi,lo) ((hi==0x8E)&&(0xA1<=lo)&&(lo<=0xDF))
-#define IS_EUC(hi,lo) ((IS_EUC_HI(hi) && IS_EUC_LOX(lo))||IS_EUC_X0201KANA(hi,lo))
+#define IS_SJIS(hi,lo,in_sjis) (!IS_SJIS_LO(lo) ? 0 : IS_SJIS_HI1(hi) ? (in_sjis=1) : in_sjis && IS_SJIS_HI2(hi))
+#define IS_SJIS_2BYTE(hi,lo)   (IS_SJIS_LO(lo) && (IS_SJIS_HI1(hi) || IS_SJIS_HI2(hi)))
+#define IS_SJIS_X0201KANA(lo)  ((0xA1 <= (lo)) && ((lo) <= 0xDF))
+
+#define IS_EUC_LOX(lo)	((0xA1 <= (lo)) && ((lo) <= 0xFE))	/* extended */
+#define IS_EUC_HI(hi)	((0xA1 <= (hi)) && ((hi) <= 0xFE))
+#define IS_EUC_X0201KANA(hi,lo) (((hi) == 0x8E) && (0xA1 <= (lo)) && ((lo) <= 0xDF))
+#define IS_EUC(hi,lo) ((IS_EUC_HI(hi) && IS_EUC_LOX(lo)) || IS_EUC_X0201KANA(hi,lo))
+
 #define IS_JAPANESE_2BYTE(hi,lo) (IS_SJIS_2BYTE(hi,lo) || IS_EUC(hi,lo))
-#define IS_BIG5_LOS(lo)	((0x40<=lo)&&(lo<=0x7E))	/* standard */
-#define IS_BIG5_LOX(lo)	((0xA1<=lo)&&(lo<=0xFE))	/* extended */
-#define IS_BIG5_HI(hi)	((0xA1<=hi)&&(hi<=0xFE))
-#define IS_BIG5(hi,lo) (IS_BIG5_HI(hi) && (IS_BIG5_LOS(lo) || IS_BIG5_LOX(lo)))
+
+#define IS_BIG5_LOS(lo)	((0x40 <= (lo)) && ((lo) <= 0x7E))	/* standard */
+#define IS_BIG5_LOX(lo)	((0xA1 <= (lo)) && ((lo) <= 0xFE))	/* extended */
+#define IS_BIG5_HI(hi)	((0xA1 <= (hi)) && ((hi) <= 0xFE))
+#define IS_BIG5(hi,lo)	(IS_BIG5_HI(hi) && (IS_BIG5_LOS(lo) || IS_BIG5_LOX(lo)))
+
     typedef enum {
 	NOKANJI = 0, EUC, SJIS, JIS
     } HTkcode;

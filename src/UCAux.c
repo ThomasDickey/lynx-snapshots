@@ -1,5 +1,5 @@
 /*
- * $LynxId: UCAux.c,v 1.52 2021/06/09 22:29:39 tom Exp $
+ * $LynxId: UCAux.c,v 1.56 2021/06/30 16:53:30 tom Exp $
  */
 #include <HTUtils.h>
 
@@ -16,7 +16,7 @@ BOOL UCCanUniTranslateFrom(int from)
 {
     if (from < 0)
 	return NO;
-#ifndef EXP_JAPANESEUTF8_SUPPORT
+#ifndef USE_JAPANESEUTF8_SUPPORT
     if (LYCharSet_UC[from].enc == UCT_ENC_CJK)
 	return NO;
 #endif
@@ -197,7 +197,14 @@ void UCSetTransParams(UCTransParams * pT, int cs_in,
 	/*
 	 * Set this element if we want to treat the input as CJK.  - FM
 	 */
-	pT->do_cjk = (BOOL) ((p_in->enc == UCT_ENC_CJK) && IS_CJK_TTY);
+	pT->do_cjk = (BOOL) ((p_in->enc == UCT_ENC_CJK) &&
+			     (
+				 IS_CJK_TTY
+#ifdef EXP_CHINESEUTF8_SUPPORT
+				 || !strcmp(p_in->MIMEname, "euc-cn")
+#endif
+			     )
+	    );
 	/*
 	 * Set these elements based on whether we are dealing with UTF-8.  - FM
 	 */
@@ -209,6 +216,11 @@ void UCSetTransParams(UCTransParams * pT, int cs_in,
 	     * a CJK output (IS_CJK_TTY).  - FM
 	     */
 	    pT->trans_to_uni = FALSE;
+#ifdef EXP_CHINESEUTF8_SUPPORT
+	    if (!strcmp(p_in->MIMEname, "euc-cn")) {
+		pT->trans_to_uni = (BOOL) UCCanUniTranslateFrom(cs_in);
+	    }
+#endif
 	    pT->do_8bitraw = FALSE;
 	    pT->pass_160_173_raw = TRUE;
 	    pT->use_raw_char_in = FALSE;	/* Not used for CJK. - KW */
@@ -288,6 +300,19 @@ void UCSetTransParams(UCTransParams * pT, int cs_in,
 					 UCCanTranslateUniTo(cs_out));
 	}
     }
+    CTRACE((tfp, "UCSetTransParams (done):\n"));
+    CTRACE((tfp, "  transp:             %d\n", pT->transp));
+    CTRACE((tfp, "  do_cjk:             %d\n", pT->do_cjk));
+    CTRACE((tfp, "  decode_utf8:        %d\n", pT->decode_utf8));
+    CTRACE((tfp, "  output_utf8:        %d\n", pT->output_utf8));
+    CTRACE((tfp, "  do_8bitraw:         %d\n", pT->do_8bitraw));
+    CTRACE((tfp, "  use_raw_char_in:    %d\n", pT->use_raw_char_in));
+    CTRACE((tfp, "  strip_raw_char_in:  %d\n", pT->strip_raw_char_in));
+    CTRACE((tfp, "  pass_160_173_raw:   %d\n", pT->pass_160_173_raw));
+    CTRACE((tfp, "  trans_to_uni:       %d\n", pT->trans_to_uni));
+    CTRACE((tfp, "  trans_C0_to_uni:    %d\n", pT->trans_C0_to_uni));
+    CTRACE((tfp, "  repl_translated_C0: %d\n", pT->repl_translated_C0));
+    CTRACE((tfp, "  trans_from_uni:     %d\n", pT->trans_from_uni));
 }
 
 /*

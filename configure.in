@@ -1,4 +1,4 @@
-dnl $LynxId: configure.in,v 1.331 2021/05/19 23:28:59 tom Exp $
+dnl $LynxId: configure.in,v 1.335 2021/06/30 23:12:13 tom Exp $
 dnl
 dnl Process this file with autoconf to produce a configure script.
 dnl
@@ -926,27 +926,54 @@ AC_MSG_RESULT($use_addrlist_page)
 test "$use_addrlist_page" != no && AC_DEFINE(USE_ADDRLIST_PAGE,1,[Define to 1 if address-list page should be used])
 
 dnl --------------------------------------------------------------------------
-AC_MSG_CHECKING(if experimental CJK logic should be used)
-CF_ARG_ENABLE(cjk,
-[  --enable-cjk            use experimental CJK logic],
+AC_MSG_CHECKING(if support for CJK should be used)
+CF_ARG_DISABLE(cjk,
+[  --disable-cjk           do not use CJK logic],
 	[use_cjk=$enableval],
-	[use_cjk=no])
+	[use_cjk=yes])
 AC_MSG_RESULT($use_cjk)
-test "$use_cjk" != no && AC_DEFINE(CJK_EX,1,[Define to 1 if experimental CJK logic should be used])
+test "$use_cjk" != no && AC_DEFINE(CJK_EX,1,[Define to 1 if CJK logic should be used])
+
+use_cjk_utf8=no
+
+AM_ICONV
+if test "x$am_cv_func_iconv" = "xyes"
+then
 
 dnl --------------------------------------------------------------------------
-AC_MSG_CHECKING(if experimental Japanese UTF-8 logic should be used)
-CF_ARG_ENABLE(japanese-utf8,
-[  --enable-japanese-utf8  use experimental Japanese UTF-8 logic],
+AC_MSG_CHECKING(if experimental support for Chinese UTF-8 should be used)
+CF_ARG_ENABLE(chinese-utf8,
+[  --enable-chinese-utf8   use Chinese UTF-8 logic],
+	[use_cn_utf8=$enableval],
+	[use_cn_utf8=yes])
+AC_MSG_RESULT($use_cn_utf8)
+if test "$use_cn_utf8" != no ; then
+	AC_DEFINE(EXP_CHINESEUTF8_SUPPORT,1,[Define to 1 if Chinese UTF-8 logic should be used])
+	use_cjk_utf8=yes
+fi
+
+dnl --------------------------------------------------------------------------
+AC_MSG_CHECKING(if support for Japanese UTF-8 should be used)
+CF_ARG_DISABLE(japanese-utf8,
+[  --disable-japanese-utf8 do not use Japanese UTF-8 logic],
 	[use_ja_utf8=$enableval],
-	[use_ja_utf8=no])
+	[use_ja_utf8=yes])
 AC_MSG_RESULT($use_ja_utf8)
 if test "$use_ja_utf8" != no ; then
-	AC_DEFINE(EXP_JAPANESEUTF8_SUPPORT,1,[Define to 1 if experimental Japanese UTF-8 logic should be used])
-	AM_ICONV
+	AC_DEFINE(USE_JAPANESEUTF8_SUPPORT,1,[Define to 1 if Japanese UTF-8 logic should be used])
+	use_cjk_utf8=yes
+fi
+
+dnl --------------------------------------------------------------------------
+if test $use_cjk_utf8 = yes
+then
 	if test "$USE_NLS" != yes ; then
 	  LIBS="$LIBICONV $LIBS"
 	fi
+fi
+
+else
+	CF_VERBOSE(skipping CJK features which depend on iconv)
 fi
 
 dnl --------------------------------------------------------------------------

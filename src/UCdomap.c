@@ -1,5 +1,5 @@
 /*
- * $LynxId: UCdomap.c,v 1.106 2021/06/09 22:29:08 tom Exp $
+ * $LynxId: UCdomap.c,v 1.109 2021/06/30 22:28:59 tom Exp $
  *
  *  UCdomap.c
  *  =========
@@ -35,7 +35,7 @@
 #include <langinfo.h>
 #endif
 
-#ifdef EXP_JAPANESEUTF8_SUPPORT
+#ifdef USE_JAPANESEUTF8_SUPPORT
 #include <iconv.h>
 #endif
 
@@ -940,7 +940,7 @@ int UCTransUniCharStr(char *outbuf,
 	}
     }
     if (isdefault || trydefault) {
-#ifdef EXP_JAPANESEUTF8_SUPPORT
+#ifdef USE_JAPANESEUTF8_SUPPORT
 	if (LYCharSet_UC[charset_out].codepage == 0 &&
 	    LYCharSet_UC[charset_out].codepoints == 0) {
 	    iconv_t cd;
@@ -1132,7 +1132,7 @@ int UCTransChar(int ch_in,
     return rc;
 }
 
-#ifdef EXP_JAPANESEUTF8_SUPPORT
+#if defined(USE_JAPANESEUTF8_SUPPORT) || defined(EXP_CHINESEUTF8_SUPPORT)
 UCode_t UCTransJPToUni(char *inbuf,
 		       int buflen,
 		       int charset_in)
@@ -1201,7 +1201,7 @@ UCode_t UCTransToUni(int ch_in,
 	    inx = 0;
 	}
     }
-#ifdef EXP_JAPANESEUTF8_SUPPORT
+#ifdef USE_JAPANESEUTF8_SUPPORT
     if ((strcmp(LYCharSet_UC[charset_in].MIMEname, "shift_jis") == 0) ||
 	(strcmp(LYCharSet_UC[charset_in].MIMEname, "euc-jp") == 0)) {
 	char obuffer[3], *pin, *pout;
