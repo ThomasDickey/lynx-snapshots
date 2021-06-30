@@ -1,4 +1,4 @@
-# $LynxId: lynx.spec,v 1.59 2020/11/26 19:25:38 tom Exp $
+# $LynxId: lynx.spec,v 1.60 2021/06/30 21:01:24 tom Exp $
 Summary: A text-based Web browser
 Name: lynx-dev
 Version: 2.9.0
@@ -69,6 +69,7 @@ HTTP, FTP, WAIS, and NNTP servers.
 	--enable-htmlized-cfg \
 	--enable-internal-links \
 	--enable-ipv6 \
+	--enable-chinese-utf8 \
 	--enable-japanese-utf8 \
 	--enable-justify-elts \
 	--enable-kbd-layout \

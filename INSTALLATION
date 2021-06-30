@@ -199,6 +199,9 @@ II. Compile instructions -- UNIX
   --disable-bibp-urls			(define DISABLE_BIBP)
 	Disable (do not compile code) support for bibp: URLs.
 
+  --disable-cjk				(define CJK_EX)
+	Disable logic for supporting CJK documents.
+
   --disable-color-style			(define USE_COLOR_STYLE)
 	Use this option to disable optional color style.  This is implemented
 	for modern curses implementations, e.g., those that support color.
@@ -320,6 +323,9 @@ II. Compile instructions -- UNIX
 	requested, the configure script will otherwise use the messages in the
 	./po subdirectory.
 
+  --disable-japanese-utf8		(define USE_JAPANESEUTF8_SUPPORT)
+	use Japanese UTF-8 logic.
+
   --disable-justify-elts		(define USE_JUSTIFY_ELTS)
 	Do not use element-justification logic.
 
@@ -420,9 +426,8 @@ II. Compile instructions -- UNIX
 	lynx.cfg, allowing user to configure a subset of the compiled-in
 	charsets for normal use.
 
-  --enable-cjk				(define CJK_EX)
-	Add experimental logic for supporting CJK documents.  (This is not
-	necessary for CJK support and may go away in a future release.)
+  --enable-chinese-utf8			(define EXP_CHINESEUTF8_SUPPORT)
+	use Chinese UTF-8 logic.
 
   --enable-debug			(The symbol DEBUG is always defined.)
         Use this option to compile-in support for debugging.
@@ -482,9 +487,6 @@ II. Compile instructions -- UNIX
 
   --enable-ipv6         		(define ENABLE_IPV6)
 	use IPV6 (with IPV4) logic.
-
-  --enable-japanese-utf8		(define EXP_JAPANESEUTF8_SUPPORT)
-	use experimental Japanese UTF-8 logic.
 
   --enable-kbd-layout			(define EXP_KEYBOARD_LAYOUT)
 	Disabled by default, this option allows you to use translation
@@ -1491,4 +1493,4 @@ VIII. Acknowledgment
 
 -- 1999/04/24 - H. Nelson <lynx-admin@irm.nara.kindai.ac.jp>
 -- vile:txtmode
--- $LynxId: INSTALLATION,v 1.132 2021/03/23 00:37:21 tom Exp $
+-- $LynxId: INSTALLATION,v 1.134 2021/06/29 22:59:06 tom Exp $

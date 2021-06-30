@@ -1,5 +1,5 @@
 /*
- * $LynxId: config.hin,v 1.148 2021/03/22 22:54:43 tom Exp $
+ * $LynxId: config.hin,v 1.150 2021/06/29 23:02:57 tom Exp $
  * vile:cmode
  *
  * The configure script translates "config.hin" into "lynx_cfg.h"
@@ -15,7 +15,7 @@
 #undef BZIP2_PATH		/* CF_PATH_PROG(bzip2) */
 #undef CAN_SET_ERRNO		/* CF_SET_ERRNO */
 #undef CHMOD_PATH		/* CF_PATH_PROG(chmod) */
-#undef CJK_EX			/* CF_ARG_ENABLE(cjk) */
+#undef CJK_EX			/* CF_ARG_DISABLE(cjk) */
 #undef COLOR_CURSES		/* CF_COLOR_CURSES */
 #undef COMPRESS_PATH		/* CF_PATH_PROG(compress) */
 #undef COPY_PATH		/* CF_PATH_PROG(cp) */
@@ -41,7 +41,7 @@
 #undef EXEC_LINKS		/* CF_ARG_ENABLE(exec-links) */
 #undef EXEC_SCRIPTS		/* CF_ARG_ENABLE(exec-scripts) */
 #undef EXP_CHARTRANS_AUTOSWITCH	/* CF_ARG_ENABLE(font-switch) */
-#undef EXP_JAPANESEUTF8_SUPPORT	/* CF_ARG_ENABLE(japanese-utf8) */
+#undef EXP_CHINESEUTF8_SUPPORT	/* CF_ARG_ENABLE(chinese-utf8) */
 #undef EXP_KEYBOARD_LAYOUT	/* CF_ARG_ENABLE(kbd-layout) */
 #undef EXP_NESTED_TABLES	/* CF_ARG_ENABLE(nested-tables) */
 #undef EXP_WCWIDTH_SUPPORT	/* CF_ARG_ENABLE(wcwidth-support) */
@@ -280,6 +280,7 @@
 #undef USE_GNUTLS_FUNCS		/* CF_GNUTLS */
 #undef USE_GNUTLS_INCL		/* CF_GNUTLS */
 #undef USE_IDNA			/* CF_ARG_DISABLE(idna) */
+#undef USE_JAPANESEUTF8_SUPPORT	/* CF_ARG_DISABLE(japanese-utf8) */
 #undef USE_JUSTIFY_ELTS		/* CF_ARG_DISABLE(justify-elts) */
 #undef USE_LOCALE_CHARSET	/* CF_ARG_DISABLE(locale-charset) */
 #undef USE_OPENSSL_INCL		/* CF_SSL */

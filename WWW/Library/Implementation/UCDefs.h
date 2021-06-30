@@ -1,5 +1,5 @@
 /*
- * $LynxId: UCDefs.h,v 1.17 2009/03/10 20:02:44 tom Exp $
+ * $LynxId: UCDefs.h,v 1.18 2021/06/29 00:21:51 tom Exp $
  *
  * Definitions for Unicode character-translations
  */
@@ -46,7 +46,7 @@ typedef enum {
 #define UCT_REP_SUPERSETOF_LAT1 0x02
 #define UCT_REP_IS_LAT1 UCT_REP_SUBSETOF_LAT1 | UCT_REP_SUPERSETOF_LAT1
 /*
- *  Assume everything we deal with is included in the UCS2 reperoire,
+ *  Assume everything we deal with is included in the UCS2 repertoire,
  *  so a flag for _REP_SUBSETOF_UCS2 would be redundant.
  */
 

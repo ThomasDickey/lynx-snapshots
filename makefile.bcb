@@ -1,4 +1,4 @@
-# $LynxId: makefile.bcb,v 1.20 2012/07/06 23:34:14 tom Exp $
+# $LynxId: makefile.bcb,v 1.21 2021/06/29 22:01:12 tom Exp $
 #
 # Borland C++ / C++ builder
 # 1997/11/08 (Sat) 10:45:37
@@ -48,7 +48,7 @@ DEBUG=
 #SSL_LIBS = $(ETC_LIB)\libeay32.lib $(ETC_LIB)\libssl32.lib
 
 # Uncomment these lines if you wish to build with iconv
-#I18N_DEFS = -DHAVE_GETTEXT -DHAVE_LIBINTL_H -DICONV_CONST=const -DEXP_JAPANESEUTF8_SUPPORT
+#I18N_DEFS = -DHAVE_GETTEXT -DHAVE_LIBINTL_H -DICONV_CONST=const -DUSE_JAPANESEUTF8_SUPPORT
 #I18N_LIBS = $(ETC_LIB)\libiconv2.lib $(ETC_LIB)\libintl3.lib
 
 CC_FLAGS = $(DEBUG) $(CS_DEFS) $(SOCK_DEFS) $(SSL_DEFS) $(I18N_DEFS) \

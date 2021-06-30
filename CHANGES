@@ -1,9 +1,12 @@
--- $LynxId: CHANGES,v 1.1073 2021/06/10 00:37:08 tom Exp $
+-- $LynxId: CHANGES,v 1.1076 2021/06/30 20:28:04 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2021-06-09 (2.9.0dev.7)
+2021-06-30 (2.9.0dev.7)
+* add chinese-utf8 optional feature for gb2312 changes -TD
+* enable cjk and japanese-utf8 features by default, renaming the symbol
+  EXP_JAPANESEUTF8_SUPPORT -> USE_JAPANESEUTF8_SUPPORT -TD
 * fix warnings from scan-build -TD
 * update configure script to work with _Noreturn changes in ncurses 20210320
   development snapshot -TD

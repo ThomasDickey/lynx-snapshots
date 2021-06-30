@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYCharSets.c,v 1.70 2020/01/21 21:33:55 tom Exp $
+ * $LynxId: LYCharSets.c,v 1.71 2021/06/29 22:01:12 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTCJK.h>
@@ -523,7 +523,7 @@ void Set_HTCJK(const char *inMIMEname,
 
     if (LYRawMode) {
 	if ((!strcmp(inMIMEname, "euc-jp") ||
-#ifdef EXP_JAPANESEUTF8_SUPPORT
+#ifdef USE_JAPANESEUTF8_SUPPORT
 	     !strcmp(inMIMEname, "utf-8") ||
 #endif
 	     !strcmp(inMIMEname, "shift_jis")) &&

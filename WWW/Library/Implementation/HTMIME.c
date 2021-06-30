@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTMIME.c,v 1.100 2018/03/11 21:32:38 tom Exp $
+ * $LynxId: HTMIME.c,v 1.101 2021/06/29 22:01:12 tom Exp $
  *
  *			MIME Message Parse			HTMIME.c
  *			==================
@@ -389,7 +389,7 @@ static int pumpData(HTStream *me)
 						UCT_SETBY_DEFAULT);
 		    }
 		    if ((p_in->enc != UCT_ENC_CJK)
-#ifdef EXP_JAPANESEUTF8_SUPPORT
+#ifdef USE_JAPANESEUTF8_SUPPORT
 			&& ((p_in->enc != UCT_ENC_UTF8)
 			    || (p_out->enc != UCT_ENC_CJK))
 #endif

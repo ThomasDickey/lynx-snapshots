@@ -1,4 +1,4 @@
-dnl $LynxId: aclocal.m4,v 1.301 2021/06/08 22:08:14 tom Exp $
+dnl $LynxId: aclocal.m4,v 1.302 2021/06/13 23:45:41 tom Exp $
 dnl Macros for auto-configure script.
 dnl by Thomas E. Dickey <dickey@invisible-island.net>
 dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
@@ -950,7 +950,7 @@ ifelse([$5],NONE,,[{ test -z "$5" || test "x$5" = xNONE || test "x$4" != "x$5"; 
 }
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_ALT_CHAR_SET version: 9 updated: 2021/01/02 09:31:20
+dnl CF_ALT_CHAR_SET version: 10 updated: 2021/06/08 18:08:14
 dnl ---------------
 dnl Check for existence of alternate-character-set support in curses, so we
 dnl can decide to use it for box characters.
@@ -2874,7 +2874,7 @@ ifelse([$5],,AC_MSG_WARN(Cannot find $3 library),[$5])
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_FIONBIO version: 3 updated: 2012/11/08 20:57:52
+dnl CF_FIONBIO version: 4 updated: 2021/06/08 18:08:14
 dnl ----------
 dnl Check for availability of fcntl versus ioctl(,FIONBIO,).  Lynx uses this
 dnl for Sequent (ptx), and it is needed for OS/2 EMX.
@@ -3051,7 +3051,7 @@ if test "$cf_cv_getaddrinfo" = yes ; then
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_FUNC_LSTAT version: 4 updated: 2021/01/02 09:31:20
+dnl CF_FUNC_LSTAT version: 5 updated: 2021/06/08 18:08:14
 dnl -------------
 dnl A conventional existence-check for 'lstat' won't work with the Linux
 dnl version of gcc 2.7.0, since the symbol is defined only within <sys/stat.h>
@@ -4763,19 +4763,29 @@ elif test "$cf_cv_ngroups" = NGROUPS_MAX ; then
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_NO_LEAKS_OPTION version: 8 updated: 2021/01/05 20:05:09
+dnl CF_NO_LEAKS_OPTION version: 9 updated: 2021/06/13 19:45:41
 dnl ------------------
 dnl see CF_WITH_NO_LEAKS
+dnl
+dnl $1 = option/name
+dnl $2 = help-text
+dnl $3 = symbol to define if the option is set
+dnl $4 = additional actions to take if the option is set
 AC_DEFUN([CF_NO_LEAKS_OPTION],[
 AC_MSG_CHECKING(if you want to use $1 for testing)
 AC_ARG_WITH($1,
 	[$2],
-	[AC_DEFINE_UNQUOTED($3,1,"Define to 1 if you want to use $1 for testing.")ifelse([$4],,[
+	[case "x$withval" in
+	(x|xno) ;;
+	(*)
+		: "${with_cflags:=-g}"
+		: "${enable_leaks:=no}"
+		with_$1=yes
+		AC_DEFINE_UNQUOTED($3,1,"Define to 1 if you want to use $1 for testing.")ifelse([$4],,[
 	 $4
 ])
-	: "${with_cflags:=-g}"
-	: "${enable_leaks:=no}"
-	 with_$1=yes],
+		;;
+	esac],
 	[with_$1=])
 AC_MSG_RESULT(${with_$1:-no})
 
@@ -5941,7 +5951,7 @@ AC_MSG_RESULT($cf_use_socks5p_h)
 test "$cf_use_socks5p_h" = yes && AC_DEFINE(INCLUDE_PROTOTYPES,1,[Define to 1 if needed to declare prototypes in socks headers])
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_SRAND version: 15 updated: 2021/01/02 09:31:20
+dnl CF_SRAND version: 16 updated: 2021/06/08 18:08:14
 dnl --------
 dnl Check for functions similar to srand() and rand().  lrand48() and random()
 dnl return a 31-bit value, while rand() returns a value less than RAND_MAX
@@ -6505,7 +6515,7 @@ case "$cf_cv_term_header" in
 esac
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_TM_GMTOFF version: 4 updated: 2021/01/02 09:31:20
+dnl CF_TM_GMTOFF version: 5 updated: 2021/06/08 18:08:14
 dnl ------------
 dnl Check if the tm-struct defines the '.tm_gmtoff' member (useful in decoding
 dnl dates).
@@ -6731,7 +6741,7 @@ if test "$cf_cv_type_long_long" = yes ; then
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_UNION_WAIT version: 8 updated: 2021/01/02 09:31:20
+dnl CF_UNION_WAIT version: 9 updated: 2021/06/08 18:08:14
 dnl -------------
 dnl Check to see if the BSD-style union wait is declared.  Some platforms may
 dnl use this, though it is deprecated in favor of the 'int' type in Posix.

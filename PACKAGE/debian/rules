@@ -81,6 +81,7 @@ configure-stamp:
 		--enable-gzip-help \
 		--enable-htmlized-cfg \
 		--enable-ipv6 \
+		--enable-chinese-utf8 \
 		--enable-japanese-utf8 \
 		--enable-justify-elts \
 		--enable-local-docs \
