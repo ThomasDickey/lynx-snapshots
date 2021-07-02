@@ -1,5 +1,5 @@
 /*
- * $LynxId: UCdomap.c,v 1.109 2021/06/30 22:28:59 tom Exp $
+ * $LynxId: UCdomap.c,v 1.110 2021/07/01 23:37:52 tom Exp $
  *
  *  UCdomap.c
  *  =========
@@ -1571,7 +1571,8 @@ int UCGetLYhndl_byMIME(const char *value)
     }
 #endif
 #if !NO_CHARSET_euc_kr
-    if (!strcasecomp(value, "iso-2022-kr")) {
+    if ((!strcasecomp(value, "iso-2022-kr")) ||
+	(!strcasecomp(value, "ks_c_5601-1987"))) {
 	return UCGetLYhndl_byMIME("euc-kr");
     }
 #endif

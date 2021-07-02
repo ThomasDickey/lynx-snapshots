@@ -1,5 +1,5 @@
 /*
- * $LynxId: UCAux.c,v 1.56 2021/06/30 16:53:30 tom Exp $
+ * $LynxId: UCAux.c,v 1.58 2021/07/01 23:34:24 tom Exp $
  */
 #include <HTUtils.h>
 
@@ -202,6 +202,8 @@ void UCSetTransParams(UCTransParams * pT, int cs_in,
 				 IS_CJK_TTY
 #ifdef EXP_CHINESEUTF8_SUPPORT
 				 || !strcmp(p_in->MIMEname, "euc-cn")
+				 || !strcmp(p_in->MIMEname, "big5")
+				 || !strcmp(p_in->MIMEname, "euc-kr")
 #endif
 			     )
 	    );
@@ -217,7 +219,9 @@ void UCSetTransParams(UCTransParams * pT, int cs_in,
 	     */
 	    pT->trans_to_uni = FALSE;
 #ifdef EXP_CHINESEUTF8_SUPPORT
-	    if (!strcmp(p_in->MIMEname, "euc-cn")) {
+	    if (!strcmp(p_in->MIMEname, "euc-cn") ||
+		!strcmp(p_in->MIMEname, "big5") ||
+		!strcmp(p_in->MIMEname, "euc-kr")) {
 		pT->trans_to_uni = (BOOL) UCCanUniTranslateFrom(cs_in);
 	    }
 #endif

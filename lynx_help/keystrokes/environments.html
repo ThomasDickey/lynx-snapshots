@@ -1,19 +1,16 @@
-<!-- $LynxId: environments.html,v 1.21 2017/04/28 22:16:55 tom Exp $ -->
+<!-- $LynxId: environments.html,v 1.22 2021/07/01 21:02:38 tom Exp $ -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN">
-
 <html>
 <head>
   <meta name="generator" content=
-  "HTML Tidy for Linux (vers 25 March 2009), see www.w3.org">
-
+  "HTML Tidy for HTML5 for Linux version 5.6.0">
   <title>Help on Lynx's Environment variables</title>
   <link rev="made" href="mailto:lynx-dev@nongnu.org">
   <meta http-equiv="Content-Type" content=
   "text/html; charset=us-ascii">
   <meta name="description" content=
   "Describes environment variables used by Lynx. Some are specific to Lynx, others are common with similar programs.">
-  </head>
-
+</head>
 <body>
   <div class="nav">
     <ul>
@@ -21,8 +18,7 @@
 
       <li><a href="#env">Variables Used By Lynx</a></li>
 
-      <li><a href="#setenv">Variables Set or Modified By
-      Lynx</a></li>
+      <li><a href="#setenv">Variables Set or Modified By Lynx</a></li>
 
       <li><a href="#cgi">Simulated CGI Support</a></li>
 
@@ -34,8 +30,8 @@
     </ul>
   </div>
 
-  <h2><a name="overview" id="overview">Environment
-  Variables</a></h2>
+  <h2><a name="overview" id="overview">Environment Variables</a></h2>
+
   <pre>
        In addition to various  &ldquo;standard&rdquo;  environment  variables
        such as HOME, PATH, USER, DISPLAY, TMPDIR, etc, <strong>Lynx</strong> utilizes
@@ -55,8 +51,8 @@
 "#dos">win32/dos</a> specific
        variables.
 </pre>
-
   <h2><a name="env" id="env">Variables Used By Lynx</a></h2>
+
   <pre>
        COLORTERM
                            If set, color capability for the terminal
@@ -182,9 +178,9 @@
                            the default startup URL  specified  in
                            any of the <strong>Lynx</strong> configuration files.
 </pre>
-
   <h2><a name="setenv" id="setenv">Variables Set or Modified By
   Lynx</a></h2>
+
   <pre>
        LYNX_PRINT_DATE     This  variable  is  set  by  the  <strong>Lynx</strong>
                            p(rint) function, to the &ldquo;Date:&rdquo;  string
@@ -256,7 +252,6 @@
                            the LINES and/or  COLUMNS  environment
                            variables may also be changed.
 </pre>
-
   <h2><a name="cgi" id="cgi">Simulated CGI Support</a></h2>
 
   <p>If built with the cgi-links option enabled,
@@ -266,6 +261,7 @@
   <p>When executing such &ldquo;lynxcgi scripts&rdquo; (if
   enabled), the following variables may be set for simulating a CGI
   environment:</p>
+
   <pre>
        CONTENT_LENGTH
 
@@ -293,7 +289,6 @@
 
        SERVER_SOFTWARE
 </pre>
-
   <p>Other environment variables are not inherited by the script,
   unless they are provided via a LYNXCGI_ENVIRONMENT statement in
   the configuration file. See the lynx.cfg file, and the (draft)
@@ -305,8 +300,7 @@
   should be consulted for general information on CGI script
   programming.</p>
 
-  <h2><a name="language" id="language">Native Language
-  Support</a></h2>
+  <h2><a name="language" id="language">Native Language Support</a></h2>
 
   <p>If configured and installed with Native Language Support,
   <strong>Lynx</strong> will display status and other messages in
@@ -316,6 +310,7 @@
 
   <p>The following environment variables may be used to alter
   default settings:</p>
+
   <pre>
        LANG                This variable, if set,  will  override
                            the  default  message language.  It is
@@ -344,9 +339,7 @@
        NLSPATH             This variable, if set, is used as  the
                            path prefix for message catalogs.
 </pre>
-
-  <h2><a name="proxy" id="proxy">Proxy details and
-  examples</a></h2>
+  <h2><a name="proxy" id="proxy">Proxy details and examples</a></h2>
 
   <p>To set your site's NTTP server as the default host for news
   reading and posting via <strong>Lynx</strong>, set the
@@ -520,18 +513,18 @@ define "no_proxy" "host.domain.dom, domain1.dom, domain2"
   put a line like this in your AUTOEXEC.BAT file also &ldquo;SET
   SHELL=C:\COMMAND.COM /E:2048&rdquo;. It should match
   CONFIG.SYS.</p>
+
   <pre>
     HOME         Where to keep the bookmark file and personal config files.
     TEMP or TMP  Bookmarks are kept here with no HOME.  Temp files here.
     USER         Set to your login name
     LYNX_CFG     Set to the full path and filename for lynx.cfg
 </pre>
-
   <p>386 version only:<br></p>
+
   <pre>
     WATTCP.CFG   Set to the full path for the WATTCP.CFG directory
 </pre>
-
   <p>(Depending on how you compiled libtcp.a, you may have to use
   WATCONF.)</p>
 
@@ -539,6 +532,7 @@ define "no_proxy" "host.domain.dom, domain1.dom, domain2"
   <strong>Lynx</strong>. For example, if your application line is
   &ldquo;D:\win32\lynx.bat&rdquo;, lynx.bat for Win32 may look
   like:</p>
+
   <pre>
         @ECHO OFF
         set home=d:\win32
@@ -546,8 +540,8 @@ define "no_proxy" "host.domain.dom, domain1.dom, domain2"
         set lynx_cfg=d:\win32\lynx.cfg
         d:\win32\lynx.exe %1 %2 %3 %4 %5
 </pre>
-
   <p>In lynx_386, a typical batch file might look like:</p>
+
   <pre>
         @echo off
         set HOME=f:/lynx2-8
@@ -556,7 +550,6 @@ define "no_proxy" "host.domain.dom, domain1.dom, domain2"
         set WATTCP.CFG=%HOME%
         f:\lynx2-8\lynx %1 %2 %3 %4 %5 %6 %7 %8 %9
 </pre>
-
   <p>You will also need to make sure that the WATTCP.CFG file has
   the correct information for IP number, Gateway, Netmask, and
   Domain Name Server. This can also be automated in the batch
