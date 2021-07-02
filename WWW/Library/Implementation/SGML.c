@@ -1,5 +1,5 @@
 /*
- * $LynxId: SGML.c,v 1.172 2021/06/30 20:25:01 tom Exp $
+ * $LynxId: SGML.c,v 1.176 2021/07/02 00:08:26 tom Exp $
  *
  *			General SGML Parser code		SGML.c
  *			========================
@@ -1646,12 +1646,6 @@ static void SGML_character(HTStream *me, int c_in)
     c = UCH(c_in);
     clong = UCH(c);
 
-#if 0
-    CTRACE((tfp, "%s:%d PUTC %02x %c\n",
-	    LYCharSet_UC[me->inUCLYhndl].MIMEname, me->T.do_cjk, c, (c > 32 &&
-								     c < 127)
-	    ? c : '#'));
-#endif
     if (me->T.decode_utf8) {
 	switch (HTDecodeUTF8(&(me->U), &c_in, &clong)) {
 	case dUTF8_ok:
@@ -1761,12 +1755,11 @@ static void SGML_character(HTStream *me, int c_in)
 	if (me->T.trans_to_uni &&
 	    ((strcmp(LYCharSet_UC[me->inUCLYhndl].MIMEname, "euc-cn") == 0))) {
 	if (me->U.utf_count == 0) {
-	    if (IS_GBK_HI(c) ||
-		IS_GBK_HI(c)) {
+	    if (IS_GBK_HI(c)) {
 		me->U.utf_buf[0] = (char) c;
 		me->U.utf_count = 1;
 		clong = ucCannotConvert;
-		CTRACE((tfp, "Get EUC-CN: 0x%02X\n", c & 0xff));
+		CTRACE((tfp, "Get EUC-CN: 0x%02X\n", UCH(c)));
 	    }
 	} else {
 	    if (IS_GBK_LO(c)) {
@@ -1774,13 +1767,77 @@ static void SGML_character(HTStream *me, int c_in)
 		clong = UCTransJPToUni(me->U.utf_buf, 2, me->inUCLYhndl);
 		if (clong > 0) {
 		    CTRACE((tfp, "... second: [%02X%02X] U+%04lX\n",
-			    me->U.utf_buf[0] & 0xff,
-			    me->U.utf_buf[1] & 0xff,
+			    UCH(me->U.utf_buf[0]),
+			    UCH(me->U.utf_buf[1]),
 			    clong));
 		} else {
 		    CTRACE((tfp, "... second: [%02X%02X] %ld\n",
-			    me->U.utf_buf[0] & 0xff,
-			    me->U.utf_buf[1] & 0xff,
+			    UCH(me->U.utf_buf[0]),
+			    UCH(me->U.utf_buf[1]),
+			    clong));
+		}
+	    }
+	    me->U.utf_count = 0;
+	}
+	goto top1;
+    } else
+#endif /* EXP_CHINESEUTF8_SUPPORT */
+#ifdef EXP_CHINESEUTF8_SUPPORT
+	if (me->T.trans_to_uni &&
+	    ((strcmp(LYCharSet_UC[me->inUCLYhndl].MIMEname, "euc-kr") == 0))) {
+	if (me->U.utf_count == 0) {
+	    if (IS_EUC_HI(c)) {
+		me->U.utf_buf[0] = (char) c;
+		me->U.utf_count = 1;
+		clong = ucCannotConvert;
+		CTRACE((tfp, "Get EUC-KR: 0x%02X\n", UCH(c)));
+	    }
+	} else {
+	    if (IS_EUC_LOS(c) ||
+		IS_EUC_LOX(c)) {
+		me->U.utf_buf[1] = (char) c;
+		clong = UCTransJPToUni(me->U.utf_buf, 2, me->inUCLYhndl);
+		if (clong > 0) {
+		    CTRACE((tfp, "... second: [%02X%02X] U+%04lX\n",
+			    UCH(me->U.utf_buf[0]),
+			    UCH(me->U.utf_buf[1]),
+			    clong));
+		} else {
+		    CTRACE((tfp, "... second: [%02X%02X] %ld\n",
+			    UCH(me->U.utf_buf[0]),
+			    UCH(me->U.utf_buf[1]),
+			    clong));
+		}
+	    }
+	    me->U.utf_count = 0;
+	}
+	goto top1;
+    } else
+#endif /* EXP_CHINESEUTF8_SUPPORT */
+#ifdef EXP_CHINESEUTF8_SUPPORT
+	if (me->T.trans_to_uni &&
+	    ((strcmp(LYCharSet_UC[me->inUCLYhndl].MIMEname, "big5") == 0))) {
+	if (me->U.utf_count == 0) {
+	    if (IS_BIG5_HI(c)) {
+		me->U.utf_buf[0] = (char) c;
+		me->U.utf_count = 1;
+		clong = ucCannotConvert;
+		CTRACE((tfp, "Get BIG5: 0x%02X\n", UCH(c)));
+	    }
+	} else {
+	    if (IS_BIG5_LOS(c) ||
+		IS_BIG5_LOX(c)) {
+		me->U.utf_buf[1] = (char) c;
+		clong = UCTransJPToUni(me->U.utf_buf, 2, me->inUCLYhndl);
+		if (clong > 0) {
+		    CTRACE((tfp, "... second: [%02X%02X] U+%04lX\n",
+			    UCH(me->U.utf_buf[0]),
+			    UCH(me->U.utf_buf[1]),
+			    clong));
+		} else {
+		    CTRACE((tfp, "... second: [%02X%02X] %ld\n",
+			    UCH(me->U.utf_buf[0]),
+			    UCH(me->U.utf_buf[1]),
 			    clong));
 		}
 	    }
@@ -1991,7 +2048,9 @@ static void SGML_character(HTStream *me, int c_in)
     case S_text:
 #ifdef EXP_CHINESEUTF8_SUPPORT
 	if (IS_CJK_TTY &&
-	    !strcmp(LYCharSet_UC[me->inUCLYhndl].MIMEname, "euc-cn")) {
+	    (!strcmp(LYCharSet_UC[me->inUCLYhndl].MIMEname, "euc-cn") ||
+	     !strcmp(LYCharSet_UC[me->inUCLYhndl].MIMEname, "big5") ||
+	     !strcmp(LYCharSet_UC[me->inUCLYhndl].MIMEname, "euc-kr"))) {
 	    /*
 	     * Leave the case statement if we have not collected both of the
 	     * bytes for the EUC-CN character.  If we have, then continue on

@@ -1,11 +1,9 @@
-<!-- $LynxId: Lynx_users_guide.html,v 1.147 2020/02/24 00:55:25 tom Exp $ -->
+<!-- $LynxId: Lynx_users_guide.html,v 1.148 2021/07/01 20:55:09 tom Exp $ -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN">
-
 <html>
 <head>
   <meta name="generator" content=
-  "HTML Tidy for HTML5 for Linux version 5.2.0">
-
+  "HTML Tidy for HTML5 for Linux version 5.6.0">
   <title>Lynx Users Guide v2.8.9</title>
   <link rev="made" href="mailto:lynx-dev@nongnu.org">
   <meta http-equiv="Content-Type" content=
@@ -13,7 +11,6 @@
   <meta name="description" content=
   "This is the user's guide to Lynx, giving detailed information on how to use the program, and how to change its configuration using the options menu.">
 </head>
-
 <body>
   <h1>Lynx Users Guide v2.8.9</h1>
 
@@ -390,7 +387,6 @@
              <em>ftp.more.net/pub</em>  will be expanded to:
        <em>ftp://ftp.more.net/pub</em>
 </pre>
-
   <p>See <a href="lynx_url_support.html">URL Schemes Supported by
   Lynx</a> for more detailed information.</p>
 
@@ -458,7 +454,6 @@
     |    doc. | link \|/| link    |    | text 1|  \|/ 2|      3|
     +---------+---------+---------+    +-------+-------+-------+
 </pre>
-
   <p>There are also a few other keyboard commands to aid in
   navigation. The Control and Function keys used for navigation
   within the current document are described in <a href=
@@ -725,7 +720,6 @@
       <em>&lt;ISINDEX PROMPT="Enter WAIS query:"
                HREF="wais://net.bio.net/biologists-addresses"&gt;</em>
 </pre>
-
   <p>for submitting a search of the Biologist's Addresses database
   directly to the net.bio.net WAIS server.</p>
 
@@ -826,7 +820,6 @@
         Accept Changes - Reset Changes - Left Arrow cancels changes
 
 </pre>
-
   <p>The key-based menu depends on key-strokes to identify options
   which the user wants to change. It is compiled into Lynx and is
   accessed by setting FORMS_OPTIONS to TRUE in <a href=
@@ -854,7 +847,6 @@
      user (A)gent                 : [User-Agent header]
      local e(X)ecution links      : FOR LOCAL FILES ONLY
 </pre>
-
   <p>An option can be changed by entering the capital letter or
   character in parentheses for the option you wish to change (e.g.,
   &ldquo;<samp>E</samp>&rdquo; for Editor or
@@ -1749,7 +1741,6 @@
     &hellip;
 &lt;/HEAD&gt;
 </pre>
-
   <p>You may also add a TITLE attribute with, for example, the name
   of your page) If no ownership is specified then comments are
   disabled. Certain links called <a href=
@@ -2580,7 +2571,6 @@
       <pre>
           <strong>(Textarea) Enter text. </strong>[ ..... ]<strong> (^Xe for editor).</strong>
 </pre>
-
       <p>An external editor has to be defined, for example in the
       <a href="#InteractiveOptions">Options Menu</a>, before you
       can start using this function.</p>
@@ -2608,7 +2598,6 @@
       Bindings</a>, by default <em>^Xg</em> and <em>^Xi</em>. You
       can use different keys by adding KEYMAP bindings to your
       <em>lynx.cfg</em> file, e.g.
-
       <p>&nbsp;&nbsp;KEYMAP:$:GROWTEXTAREA<br>
       &nbsp;&nbsp;KEYMAP:#:INSERTFILE</p>
 
@@ -2667,7 +2656,6 @@
       <em>&lt;META HTTP-EQUIV="Pragma" CONTENT="no-cache"&gt;</em>
       <em>&lt;META HTTP-EQUIV="Cache-Control" CONTENT="no-cache"&gt;</em>
 </pre>
-
   <p>or the server sent a "Pragma" or "Cache-Control" MIME header
   with a no-cache directive.</p>
 
@@ -2837,7 +2825,6 @@
       <em>&lt;META HTTP-EQUIV="Content-Disposition"
             CONTENT="file; filename=name.suffix"&gt;</em>
 </pre>
-
   <p>[<a href="#ToC-Forms">ToC</a>]</p>
 
   <h2 id="id-Images"><a name="Images" id="Images">Lynx and HTML
@@ -2855,7 +2842,6 @@
      MAKE_PSEUDO_ALTS_FOR_INLINES     [  INLINE_TOGGLE
      VERBOSE_IMAGES                   no corresponding key
 </pre>
-
   <p>You can also use the <em>Options Menu</em>, as outlined
   below:</p>
 
@@ -2870,7 +2856,6 @@ FM = Form-based Menu ; KM = Key-based Menu ;
 in  .lynxrc ,  VERBOSE_IMAGES  is called &ldquo;verbose_images&rdquo;:
 the other two cannot be saved between sessions.
 </pre>
-
   <p>In the Form-based Menu, the 3-way &ldquo;Show images&rdquo;
   selection combines the effects of the &ldquo;*&rdquo; &amp;
   &ldquo;[&rdquo; keys, as follows:</p>
@@ -2880,7 +2865,6 @@ the other two cannot be saved between sessions.
      As labels   clickable_images = FALSE, pseudo_inline_alts = TRUE
      As links    clickable_images = TRUE,  pseudo_inline_alts = unchanged
 </pre>
-
   <h2 id="id-Tables"><a name="Tables" id="Tables">Lynx and HTML
   Tables</a></h2>
 
@@ -3118,7 +3102,6 @@ the other two cannot be saved between sessions.
         See the <em>&lt;A HREF="#fn1"&gt;</em><a href=
 "#an1">footnote</a><em>&lt;/A&gt;</em>.
 </pre>
-
   <p>activating that link will take you to the labeled rendering
   of:</p>
 
@@ -3126,7 +3109,6 @@ the other two cannot be saved between sessions.
         <em>&lt;FN ID="fn1"&gt;</em>&lt;p&gt;<a name="an1" id=
 "an1">Lynx does not use popups for FN blocks.</a>&lt;/p&gt;<em>&lt;/FN&gt;</em>
 </pre>
-
   <p>i.e., position it at the top of the page. Then, upon reading
   the footnote, you can return to your previous position in the
   document by pressing the <em>left-arrow</em> key. The content of
@@ -3161,7 +3143,6 @@ the other two cannot be saved between sessions.
         &lt;p&gt;The W3C vendors did not retain NOTE in the HTML 3.2 draft.&lt;/p&gt;
       &lt;/NOTE&gt;</em>
 </pre>
-
   <p>It will <em>degrade gracefully</em> for WWW browsers which do
   not support NOTE, except for recognition of the ID attribute as a
   named <em>A</em>nchor.</p>
@@ -3378,7 +3359,6 @@ the other two cannot be saved between sessions.
   <pre>
       <em>&lt;META HTTP-EQUIV="Refresh" CONTENT="3; URL=http://host/path"&gt;</em>
 </pre>
-
   <p>which instructs a client to fetch the indicated URL in 3
   seconds after receiving the current document. If the
   <em>URL=</em> field is omitted, the URL defaults to that of the
@@ -3517,7 +3497,6 @@ the other two cannot be saved between sessions.
 
     <li>Below each cached document URL lynx shows the document
     properties which include:
-
       <ul>
         <li>Lines,</li>
 

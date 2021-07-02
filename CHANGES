@@ -1,10 +1,12 @@
--- $LynxId: CHANGES,v 1.1076 2021/06/30 20:28:04 tom Exp $
+-- $LynxId: CHANGES,v 1.1078 2021/07/02 00:15:34 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2021-06-30 (2.9.0dev.7)
-* add chinese-utf8 optional feature for gb2312 changes -TD
+2021-07-01 (2.9.0dev.7)
+* add euc-kr charset support to the chinese-utf8 option -TD
+* add chinese-utf8 optional feature for big5 charset -TD
+* add chinese-utf8 optional feature for gb2312 charset -TD
 * enable cjk and japanese-utf8 features by default, renaming the symbol
   EXP_JAPANESEUTF8_SUPPORT -> USE_JAPANESEUTF8_SUPPORT -TD
 * fix warnings from scan-build -TD
