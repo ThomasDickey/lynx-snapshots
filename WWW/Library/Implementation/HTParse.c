@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTParse.c,v 1.92 2021/06/09 19:30:55 tom Exp $
+ * $LynxId: HTParse.c,v 1.95 2021/07/08 22:54:00 tom Exp $
  *
  *		Parse HyperText Document Address		HTParse.c
  *		================================
@@ -22,9 +22,12 @@
 #endif /* __MINGW32__ */
 #endif
 
-#ifdef USE_IDNA
-#include <idna.h>
-#include <idn-free.h>
+#ifdef USE_IDN2
+#include <idn2.h>
+#define FreeIdna(out)             idn2_free(out)
+#elif defined(USE_IDNA)
+#include <idn2.h>
+#define FreeIdna(out)             idn_free(out)
 #endif
 
 #define HEX_ESCAPE '%'
@@ -242,7 +245,7 @@ char *HTParsePort(char *host, int *portp)
     return result;
 }
 
-#ifdef USE_IDNA
+#if defined(USE_IDNA) || defined(USE_IDN2)
 static int hex_decode(int ch)
 {
     int result = -1;
@@ -299,8 +302,42 @@ static void convert_to_idna(char *host)
 	}
 	if (code) {
 	    *dst = '\0';
+#ifdef USE_IDN2
+#if (!defined(IDN2_VERSION_NUMBER) || IDN2_VERSION_NUMBER < 0x02000003)
+	    /*
+	     * Older libidn2 mishandles STD3, stripping underscores.
+	     */
+	    if (strchr(buffer, '_') != NULL) {
+		code = -1;
+	    } else
+#endif
+		switch (LYidnaMode) {
+		case LYidna2003:
+		    code = idn2_to_ascii_8z(buffer, &output, IDN2_TRANSITIONAL);
+		    break;
+		case LYidna2008:
+		    /* IDNA2008 rules without the TR46 amendments */
+		    code = idn2_to_ascii_8z(buffer, &output, 0);
+		    break;
+		case LYidnaTR46:
+		    code = idn2_to_ascii_8z(buffer, &output, IDN2_NONTRANSITIONAL
+					    | IDN2_NFC_INPUT);
+		    break;
+		case LYidnaCompat:
+		    /* IDNA2008 */
+		    code = idn2_to_ascii_8z(buffer, &output, IDN2_NONTRANSITIONAL
+					    | IDN2_NFC_INPUT);
+		    if (code == IDN2_DISALLOWED) {
+			/* IDNA2003 - compatible */
+			code = idn2_to_ascii_8z(buffer, &output, IDN2_TRANSITIONAL);
+		    }
+		    break;
+		}
+#else
 	    code = idna_to_ascii_8z(buffer, &output, IDNA_USE_STD3_ASCII_RULES);
-	    if (code == IDNA_SUCCESS) {
+#endif
+	    if (code == IDN2_OK) {
+		CTRACE((tfp, "convert_to_idna: `%s' -> `%s': OK\n", buffer, output));
 		strcpy(host, output);
 		strcat(host, params);
 	    } else {
@@ -309,7 +346,7 @@ static void convert_to_idna(char *host)
 			idna_strerror((Idna_rc) code)));
 	    }
 	    if (output)
-		idn_free(output);
+		FreeIdna(output);
 	}
     }
     free(buffer);
@@ -541,7 +578,7 @@ char *HTParse(const char *aName,
 		    }
 		}
 	    }
-#ifdef USE_IDNA
+#if defined(USE_IDNA) || defined(USE_IDN2)
 	    /*
 	     * Depending on locale-support, we could have a literal UTF-8
 	     * string as a host name, or a URL-encoded form of that.

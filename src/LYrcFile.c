@@ -1,4 +1,4 @@
-/* $LynxId: LYrcFile.c,v 1.104 2019/01/25 01:47:06 tom Exp $ */
+/* $LynxId: LYrcFile.c,v 1.105 2021/07/05 20:29:10 tom Exp $ */
 #include <HTUtils.h>
 #include <HTFTP.h>
 #include <LYUtils.h>
@@ -70,6 +70,16 @@ static Config_Enum tbl_file_sort[] = {
     { "BY_DATE",	FILE_BY_DATE },
     { NULL,		-1 },
 };
+
+#ifdef USE_IDN2
+static Config_Enum tbl_idna_mode[] = {
+    { "IDNA2003",	LYidna2003 },
+    { "IDNA2008",	LYidna2008 },
+    { "TR46",		LYidnaTR46 },
+    { "Compatible",	LYidnaCompat },
+    { NULL,		-1 },
+};
+#endif
 
 Config_Enum tbl_keypad_mode[] = {
     { "FIELDS_ARE_NUMBERED", FIELDS_ARE_NUMBERED },
@@ -471,6 +481,10 @@ file lists such as FTP directories.  The options are:\n\
     MAYBE_SET(RC_HTML5_CHARSETS,        html5_charsets,     MSG_ENABLE_LYNXRC),
     MAYBE_FUN(RC_HTTP_PROTOCOL,         get_http_protocol,  put_http_protocol,
 	      MSG_ENABLE_LYNXRC),
+#ifdef USE_IDN2
+    MAYBE_ENU(RC_IDNA_MODE,             LYidnaMode,         tbl_idna_mode,
+	      MSG_ENABLE_LYNXRC),
+#endif
 #ifdef EXP_KEYBOARD_LAYOUT
     PARSE_ARY(RC_KBLAYOUT,              current_layout,     LYKbLayoutNames, NULL),
 #endif

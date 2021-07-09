@@ -1,10 +1,23 @@
--- $LynxId: CHANGES,v 1.1078 2021/07/02 00:15:34 tom Exp $
+-- $LynxId: CHANGES,v 1.1083 2021/07/09 00:00:24 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2021-07-01 (2.9.0dev.7)
-* add euc-kr charset support to the chinese-utf8 option -TD
+2021-07-08 (2.9.0dev.7)
+* modify configure script to check for libidn2, add options menu setting for
+  selecting old/new/compat behavior (prompted by patch by Robert Scheck, Redhat
+  #1910971) -TD
+  Further reading:
+    https://nikmav.blogspot.com/2017/04/the-mess-with-internationalized-domain.html
+    https://unicode.org/reports/tr46/
+    https://datatracker.ietf.org/doc/html/rfc5890
+    https://datatracker.ietf.org/doc/html/draft-iab-protocol-transitions-01
+* add euc-kr charset support to the chinese-utf8 option, noting issue with
+  the charset here:
+    https://lists.w3.org/Archives/Public/ietf-charsets/2001AprJun/0030.html
+    http://unicode.org/mail-arch/unicode-ml/y2002-m03/0641.html
+    https://docs.microsoft.com/en-us/previous-versions/office/developer/office-2003/aa171439(v=office.11)
+  i.e., "ks_c_5601-1987" -TD
 * add chinese-utf8 optional feature for big5 charset -TD
 * add chinese-utf8 optional feature for gb2312 charset -TD
 * enable cjk and japanese-utf8 features by default, renaming the symbol

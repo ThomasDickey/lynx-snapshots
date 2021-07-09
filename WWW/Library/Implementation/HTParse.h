@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTParse.h,v 1.23 2019/08/16 22:42:06 tom Exp $
+ * $LynxId: HTParse.h,v 1.26 2021/07/05 20:56:50 tom Exp $
  *				HTParse:  URL parsing in the WWW Library
  *				HTPARSE
  *
@@ -49,13 +49,26 @@ extern "C" {
 #define URL_XALPHAS     UCH(1)
 #define URL_XPALPHAS    UCH(2)
 #define URL_PATH        UCH(4)
+
+#ifdef USE_IDN2
+    typedef enum {
+	LYidna2003 = 1,
+	LYidna2008,
+	LYidnaTR46,
+	LYidnaCompat
+    } HTIdnaModes;
+
+    extern int LYidnaMode;
+#endif
+
 /*	Strip white space off a string.				HTStrip()
  *	-------------------------------
  *
  * On exit,
  *	Return value points to first non-white character, or to 0 if none.
  *	All trailing white space is OVERWRITTEN with zero.
- */ extern char *HTStrip(char *s);
+ */
+    extern char *HTStrip(char *s);
 
 /*
  *	Parse a port number

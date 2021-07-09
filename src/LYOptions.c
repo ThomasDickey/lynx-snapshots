@@ -1,4 +1,4 @@
-/* $LynxId: LYOptions.c,v 1.182 2020/01/21 21:36:31 tom Exp $ */
+/* $LynxId: LYOptions.c,v 1.183 2021/07/05 21:17:42 tom Exp $ */
 #include <HTUtils.h>
 #include <HTFTP.h>
 #include <HTTP.h>		/* 'reloading' flag */
@@ -2367,6 +2367,18 @@ static const char *assume_char_set_string = RC_ASSUME_CHARSET;
 static const char *display_char_set_string = RC_CHARACTER_SET;
 static const char *raw_mode_string = RC_RAW_MODE;
 
+#ifdef USE_IDN2
+static const char *idna_mode_string = RC_IDNA_MODE;
+static OptValues idna_values[] =
+{
+    {LYidna2003, N_("IDNA 2003"), "idna2003"},
+    {LYidna2008, N_("IDNA 2008"), "idna2008"},
+    {LYidnaTR46, N_("IDNA TR46"), "idnaTR46"},
+    {LYidnaCompat, N_("IDNA Compatible"), "idnaCompat"},
+    END_OPTIONS
+};
+#endif
+
 #ifdef USE_LOCALE_CHARSET
 static const char *locale_charset_string = RC_LOCALE_CHARSET;
 #endif
@@ -3248,6 +3260,13 @@ int postoptions(DocInfo *newdoc)
 		    current_char_set = newval;
 	    }
 	}
+#ifdef USE_IDN2
+	/* Internationalized Domain Names: SELECT */
+	if (!strcmp(data[i].tag, idna_mode_string)
+	    && GetOptValues(idna_values, data[i].value, &code)) {
+	    LYidnaMode = code;
+	}
+#endif
 
 	/* Raw Mode: ON/OFF */
 	if (!strcmp(data[i].tag, raw_mode_string)
@@ -3418,9 +3437,7 @@ int postoptions(DocInfo *newdoc)
 	need_reload = TRUE;
     }
     /* end of charset settings */
-    /*
-     * FIXME: Golly gee, we need to write all of this out now, don't we?
-     */
+
     BStrFree(newdoc->post_data);
     FREE(data);
     if (save_all) {
@@ -3953,6 +3970,20 @@ static int gen_options(char **newfile)
 	}
 	EndSelect(fp0);
     }
+
+#ifdef USE_IDN2
+    /* Internationalized Domain Names: SELECT */
+    {
+	PutLabel(fp0, gettext("Internationalized domain names"), idna_mode_string);
+	BeginSelect(fp0, idna_mode_string);
+	for (i = 0; idna_values[i].value != 0; i++) {
+	    PutOption(fp0, idna_values[i].value == LYidnaMode,
+		      idna_values[i].HtmlName,
+		      idna_values[i].LongName);
+	}
+	EndSelect(fp0);
+    }
+#endif
 
     /* Raw Mode: ON/OFF */
     if (LYHaveCJKCharacterSet) {

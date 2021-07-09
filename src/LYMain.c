@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMain.c,v 1.293 2021/06/09 20:55:53 tom Exp $
+ * $LynxId: LYMain.c,v 1.295 2021/07/05 20:26:11 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTP.h>
@@ -177,6 +177,9 @@ lynx_list_item_type *downloaders = NULL;
 lynx_list_item_type *externals = NULL;
 
 			    /* linked list of external options */
+#endif
+#ifdef USE_IDN2
+int LYidnaMode = LYidnaTR46;
 #endif
 
 lynx_list_item_type *uploaders = NULL;
