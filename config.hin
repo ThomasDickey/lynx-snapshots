@@ -1,5 +1,5 @@
 /*
- * $LynxId: config.hin,v 1.150 2021/06/29 23:02:57 tom Exp $
+ * $LynxId: config.hin,v 1.151 2021/07/05 13:25:57 tom Exp $
  * vile:cmode
  *
  * The configure script translates "config.hin" into "lynx_cfg.h"
@@ -279,6 +279,7 @@
 #undef USE_FILE_UPLOAD		/* CF_ARG_DISABLE(file-upload) */
 #undef USE_GNUTLS_FUNCS		/* CF_GNUTLS */
 #undef USE_GNUTLS_INCL		/* CF_GNUTLS */
+#undef USE_IDN2			/* CF_ARG_DISABLE(idna) */
 #undef USE_IDNA			/* CF_ARG_DISABLE(idna) */
 #undef USE_JAPANESEUTF8_SUPPORT	/* CF_ARG_DISABLE(japanese-utf8) */
 #undef USE_JUSTIFY_ELTS		/* CF_ARG_DISABLE(justify-elts) */

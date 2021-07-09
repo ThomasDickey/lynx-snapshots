@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYrcFile.h,v 1.56 2020/02/23 23:08:55 Keith.Bowes Exp $
+ * $LynxId: LYrcFile.h,v 1.58 2021/07/05 20:23:51 tom Exp $
  */
 #ifndef LYRCFILE_H
 #define LYRCFILE_H
@@ -99,8 +99,8 @@
 #define RC_GLOBAL_MAILCAP               "global_mailcap"
 #define RC_GOPHER_PROXY                 "gopher_proxy"
 #define RC_GOTOBUFFER                   "gotobuffer"
-#define RC_GZIP_PATH                    "gzip_path"
 #define RC_GUESS_SCHEME                 "guess_scheme"
+#define RC_GZIP_PATH                    "gzip_path"
 #define RC_HELPFILE                     "helpfile"
 #define RC_HIDDENLINKS                  "hiddenlinks"
 #define RC_HIDDEN_LINK_MARKER           "hidden_link_marker"
@@ -111,6 +111,7 @@
 #define RC_HTTPS_PROXY                  "https_proxy"
 #define RC_HTTP_PROTOCOL                "http_protocol"
 #define RC_HTTP_PROXY                   "http_proxy"
+#define RC_IDNA_MODE                    "idna_mode"
 #define RC_INCLUDE                      "include"
 #define RC_INFLATE_PATH                 "inflate_path"
 #define RC_INFOSECS                     "infosecs"
@@ -179,7 +180,6 @@
 #define RC_NO_REFERER_HEADER            "no_referer_header"
 #define RC_NO_TABLE_CENTER              "no_table_center"
 #define RC_NO_TITLE                     "no_title"
-#define RC_UPDATE_TERM_TITLE            "update_term_title"
 #define RC_NUMBER_FIELDS_ON_LEFT        "number_fields_on_left"
 #define RC_NUMBER_LINKS_ON_LEFT         "number_links_on_left"
 #define RC_OUTGOING_MAIL_CHARSET        "outgoing_mail_charset"
@@ -271,6 +271,7 @@
 #define RC_UNDERLINE_LINKS              "underline_links"
 #define RC_UNIQUE_URLS                  "unique_urls"
 #define RC_UNZIP_PATH                   "unzip_path"
+#define RC_UPDATE_TERM_TITLE            "update_term_title"
 #define RC_UPLOADER                     "uploader"
 #define RC_URL_DOMAIN_PREFIXES          "url_domain_prefixes"
 #define RC_URL_DOMAIN_SUFFIXES          "url_domain_suffixes"

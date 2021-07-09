@@ -1,4 +1,4 @@
-<!-- $LynxId: Lynx_users_guide.html,v 1.148 2021/07/01 20:55:09 tom Exp $ -->
+<!-- $LynxId: Lynx_users_guide.html,v 1.155 2021/07/09 00:27:04 tom Exp $ -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN">
 <html>
 <head>
@@ -735,13 +735,27 @@
   the form-based menu (as below). Many other options are stored in
   the <a href="#lynx.cfg">lynx.cfg</a> file.</p>
 
-  <p>Lynx supports two styles of Options Menu, key-based &amp;
-  form-based. The form-based menu shown below is an HTML file
-  generated at runtime, in which the user fills in choices as in
-  any ordinary HTML form.</p>
+  <p>Lynx supports two styles of Options Menu:</p>
+
+  <ul>
+    <li><a name="item-form_based_options" href=
+    "#explain-form_based_options" id=
+    "item-form_based_options">form-based</a></li>
+
+    <li><a name="item-key_based_options" href=
+    "#explain-key_based_options" id=
+    "item-key_based_options">key-based</a></li>
+  </ul>
+
+  <p id="explain-form_based_options">The form-based menu shown
+  below is an HTML file generated at runtime, in which the user
+  fills in choices as in any ordinary HTML form.</p>
 
   <pre>
-                    Options Menu (Lynx Version 2.8.9dev.15)
+
+                    <a href="#item-form_based_options" name=
+"example-form_based_options" id=
+"example-form_based_options">Options Menu (Lynx Version 2.9.0dev.7)</a>
 
     Accept Changes - Reset Changes - Left Arrow cancels changes - HELP!
 
@@ -749,103 +763,176 @@
                 (options marked with (!) will not be saved)
 
   General Preferences
-  User mode                        : [Advanced____]
-  Editor                           : vile______________________________________
-  Type of Search                   : [Case insensitive]
+  User mode                        : <a href=
+"#optinfo-user_mode">[Advanced____]</a>
+  Editor                           : <a href=
+"#optinfo-editor">vile______________________________________</a>
+  Type of Search                   : <a href=
+"#optinfo-type_of_search">[Case insensitive]</a>
 
   Security and Privacy
-  Cookies                          : [ask user__]
-  Invalid-Cookie Prompting (!)     : [prompt normally___]
-  SSL Prompting (!)                : [prompt normally___]
+  Cookies                          : <a href=
+"#optinfo-cookies">[ask user__]</a>
+  Invalid-Cookie Prompting (!)     : <a href=
+"#optinfo-invalid_cookie_prompting">[prompt normally___]</a>
+  SSL Prompting (!)                : <a href=
+"#optinfo-ssl_prompting">[prompt normally___]</a>
 
   Keyboard Input
-  Keypad mode                      : [Numbers act as arrows_____________]
-  Emacs keys                       : [OFF]
-  VI keys                          : [OFF]
-  Line edit style                  : [Bash-like Bindings]
+  Keypad mode                      : <a href=
+"#optinfo-keypad_mode">[Numbers act as arrows_____________]</a>
+  Emacs keys                       : <a href=
+"#optinfo-emacs_keys">[OFF]</a>
+  VI keys                          : <a href=
+"#optinfo-vi_keys">[OFF]</a>
+  Line edit style                  : <a href=
+"#optinfo-line_edit_style">[Bash-like Bindings]</a>
 
   Display and Character Set
-  Use locale-based character set   : [ON_]
-  Use HTML5 charset replacements(!): [OFF]
-  Display character set            : [UNICODE (UTF-8)________________]
-  Assumed document character set(!): [iso-8859-1______]
-  Raw 8-bit                        : [OFF]
-  X Display                        : localhost:0.0_____________________________
+  Use locale-based character set   : <a href=
+"#optinfo-locale_based_charset">[ON_]</a>
+  Use HTML5 charset replacements(!): <a href=
+"#optinfo-use_html5_charset">[OFF]</a>
+  Display character set            : <a href=
+"#optinfo-display_charset">[UNICODE (UTF-8)________________]</a>
+  Assumed document character set(!): <a href=
+"#optinfo-assumed_document_charset">[iso-8859-1______]</a>
+  Internationalized domain names(!): <a href=
+"#optinfo-idna_mode">[IDNA TR46______]</a>
+  Raw 8-bit                        : <a href=
+"#optinfo-raw_8_bit">[OFF]</a>
+  X Display                        : <a href=
+"#optinfo-x_display">localhost:0.0_____________________________</a>
 
   Document Appearance
-  Show color                       : [ON____]
+  Show color                       : <a href=
+"#optinfo-show_color">[ON____]</a>
   Color style (!)                  : [lynx.lss___________]
   Default colors (!)               : [ON_]
-  Show cursor                      : [OFF]
-  Underline links (!)              : [OFF]
-  Show scrollbar                   : [ON_]
-  Popups for select fields         : [ON_]
-  HTML error recovery              : [strict (SortaSGML mode)]
-  Bad HTML messages (!)            : [Warn, point to trace-file]
-  Show images                      : [ignore___]
-  Verbose images                   : [OFF__________]
-  Collapse BR tags (!)             : [OFF_____]
-  Trim blank lines (!)             : [trim-lines]
+  Show cursor                      : <a href=
+"#optinfo-show_cursor">[OFF]</a>
+  Underline links (!)              : <a href=
+"#optinfo-underline_links">[OFF]</a>
+  Show scrollbar                   : <a href=
+"#optinfo-show_scrollbar">[ON_]</a>
+  Popups for select fields         : <a href=
+"#optinfo-popups_for_select">[ON_]</a>
+  HTML error recovery              : <a href=
+"#optinfo-html_error_recovery">[strict (SortaSGML mode)]</a>
+  Bad HTML messages (!)            : <a href=
+"#optinfo-bad_html_messages">[Warn, point to trace-file]</a>
+  Show images                      : <a href=
+"#optinfo-show_images">[ignore___]</a>
+  Verbose images                   : <a href=
+"#optinfo-verbose_images">[OFF__________]</a>
+  Collapse BR tags (!)             : <a href=
+"#optinfo-collapse_br_tags">[OFF_____]</a>
+  Trim blank lines (!)             : <a href=
+"#optinfo-trim_blank_lines">[trim-lines]</a>
 
   Headers Transferred to Remote Servers
-  Personal mail address            : __________________________________________
-  Personal name for mail           : __________________________________________
-  Password for anonymous ftp       : __________________________________________
-  Preferred media type (!)         : [Accept lynx's internal types]
-  Preferred encoding (!)           : [All_____]
-  Preferred document character set : _________________________________
-  Preferred document language      : en_______________________________
-  HTTP protocol (!)                : [HTTP 1.0]
-  Send User-Agent header (!)       : [X]
-  User-Agent header (!)            : Lynx/2.8.9rel.1 libwww-FM/2.14 SSL-MM/1.4.
+  Personal mail address            : <a href=
+"#optinfo-personal_mail_address">__________________________________________</a>
+  Personal name for mail           : <a href=
+"#optinfo-personal_name_for_mail">__________________________________________</a>
+  Password for anonymous ftp       : <a href=
+"#optinfo-password_for_anon_ftp">__________________________________________</a>
+  Preferred media type (!)         : <a href=
+"#optinfo-preferred_media_type">[Accept lynx's internal types]</a>
+  Preferred encoding (!)           : <a href=
+"#optinfo-preferred_encoding">[All_____]</a>
+  Preferred document character set : <a href=
+"#optinfo-preferred_doc_charset">_________________________________</a>
+  Preferred document language      : <a href=
+"#optinfo-preferred_doc_language">en_______________________________</a>
+  HTTP protocol (!)                : <a href=
+"#optinfo-http_protocol">[HTTP 1.0]</a>
+  Send User-Agent header (!)       : <a href=
+"#optinfo-send_user_agent">[X]</a>
+  User-Agent header (!)            : <a href=
+"#optinfo-user_agent">Lynx/2.8.9rel.1 libwww-FM/2.14 SSL-MM/1.4.</a>
 
   Listing and Accessing Files
-  Use Passive FTP (!)              : [ON_]
-  FTP sort criteria                : [By Date]
-  Local directory sort criteria    : [Directories first]
-  Local directory sort order       : [By Date_]
-  Show dot files                   : [OFF]
-  Pause when showing message (!)   : [ON_]
-  Show transfer rate               : [Show KiB/sec (2-digits), ETA__]
+  Use Passive FTP (!)              : <a href=
+"#optinfo-use_passive_ftp">[ON_]</a>
+  FTP sort criteria                : <a href=
+"#optinfo-ftp_sort_criteria">[By Date]</a>
+  Local directory sort criteria    : <a href=
+"#optinfo-local_directory_sort_criteria">[Directories first]</a>
+  Local directory sort order       : <a href=
+"#optinfo-local_directory_sort_order">[By Date_]</a>
+  Show dot files                   : <a href=
+"#optinfo-show_dot_files">[OFF]</a>
+  Pause when showing message (!)   : <a href=
+"#optinfo-pause_when_showing_message">[ON_]</a>
+  Show transfer rate               : <a href=
+"#optinfo-show_transfer_rate">[Show KiB/sec (2-digits), ETA__]</a>
 
   Special Files and Screens
-  Multi-bookmarks                  : [ADVANCED]
+  Multi-bookmarks                  : <a href=
+"#optinfo-multi_bookmarks">[ADVANCED]</a>
   Review/edit Bookmarks files      : Goto multi-bookmark menu
-  Auto Session (!)                 : [OFF]
-  Session file (!)                 : __________________________________________
-  Visited Pages                    : [By Last Visit Reversed_]
+  Auto Session (!)                 : <a href=
+"#optinfo-auto_session">[OFF]</a>
+  Session file (!)                 : <a href=
+"#optinfo-session_file">__________________________________________</a>
+  Visited Pages                    : <a href=
+"#optinfo-visited_pages">[By Last Visit Reversed_]</a>
 
   View the file lynx.cfg.
 
         Accept Changes - Reset Changes - Left Arrow cancels changes
-
 </pre>
-  <p>The key-based menu depends on key-strokes to identify options
-  which the user wants to change. It is compiled into Lynx and is
-  accessed by setting FORMS_OPTIONS to TRUE in <a href=
-  "#lynx.cfg">lynx.cfg</a>.</p>
+  <p id="explain-key_based_options">The key-based menu depends on
+  key-strokes to identify options which the user wants to change.
+  It is compiled into Lynx and is accessed by setting FORMS_OPTIONS
+  to TRUE in <code>lynx.cfg</code>.</p>
 
   <pre>
-             Options Menu (Lynx Version 2.8.9dev.15)
 
-     (E)ditor                     : emacs
-     (D)ISPLAY variable           : aixtest.cc.ukans.edu:0.0
-     mu(L)ti-bookmarks: OFF       B)ookmark file: lynx_bookmarks.html
-     (F)TP sort criteria          : By Filename
-     (P)ersonal mail address      : montulli@netscape.com
-     (S)earching type             : CASE INSENSITIVE
-     preferred document lan(G)uage: en
-     preferred document c(H)arset : NONE
-     display (C)haracter set      : Western (ISO-8859-1)
-     raw 8-bit or CJK m(O)de      : ON      show color (&amp;)  : OFF
-     (V)I keys: OFF   e(M)acs keys: OFF     sho(W) dot files: OFF
-     popups for selec(T) fields   : ON      show cursor (@) : OFF
-     (K)eypad mode                : Numbers act as arrows
-     li(N)e edit style            : Default Binding
-     l(I)st directory style       : Mixed style
-     (U)ser mode                  : Advanced      verbose images (!) : ON
-     user (A)gent                 : [User-Agent header]
-     local e(X)ecution links      : FOR LOCAL FILES ONLY
+             <a href="#item-key_based_options" name=
+"example-key_based_options" id=
+"example-key_based_options">Options Menu (Lynx Version 2.9.0dev.7)</a>
+
+     <a href=
+"#optinfo-editor">(E)</a>ditor                     : emacs
+     <a href=
+"#optinfo-x_display">(D)</a>ISPLAY variable           : aixtest.cc.ukans.edu:0.0
+     mu<a href=
+"#optinfo-multi_bookmarks">(L)</a>ti-bookmarks: OFF       <a href=
+"#optinfo-bookmark_file">B)</a>ookmark file: lynx_bookmarks.html
+     <a href=
+"#optinfo-ftp_sort_criteria">(F)</a>TP sort criteria          : By Filename
+     <a href=
+"#optinfo-personal_mail_address">(P)</a>ersonal mail address      : montulli@netscape.com
+     <a href=
+"#optinfo-type_of_search">(S)</a>earching type             : CASE INSENSITIVE
+     preferred document lan<a href=
+"#optinfo-preferred_doc_language">(G)</a>uage: en
+     preferred document c<a href=
+"#optinfo-preferred_doc_charset">(H)</a>arset : NONE
+     display <a href=
+"#optinfo-display_charset">(C)</a>haracter set      : Western (ISO-8859-1)
+     raw 8-bit or CJK m<a href=
+"#optinfo-raw_8_bit">(O)</a>de      : ON      show color <a href=
+"#optinfo-show_color">(&amp;)</a>  : OFF
+     <a href="#optinfo-vi_keys">(V)</a>I keys: OFF   e<a href=
+"#optinfo-emacs_keys">(M)</a>acs keys: OFF     sho<a href=
+"#optinfo-show_dot_files">(W)</a> dot files: OFF
+     popups for selec<a href=
+"#optinfo-popups_for_select">(T)</a> fields   : ON      show cursor <a href="#optinfo-show_cursor">(@)</a> : OFF
+     <a href=
+"#optinfo-keypad_mode">(K)</a>eypad mode                : Numbers act as arrows
+     li<a href=
+"#optinfo-line_edit_style">(N)</a>e edit style            : Default Binding
+     l<a href=
+"#optinfo-local_directory_sort_criteria">(I)</a>st directory style       : Mixed style
+     <a href=
+"#optinfo-user_mode">(U)</a>ser mode                  : Advanced      verbose images <a href="#optinfo-verbose_images">(!)</a> : ON
+     user <a href=
+"#optinfo-user_agent">(A)</a>gent                 : [User-Agent header]
+     local e<a href=
+"#optinfo-execution_links">(X)</a>ecution links      : FOR LOCAL FILES ONLY
 </pre>
   <p>An option can be changed by entering the capital letter or
   character in parentheses for the option you wish to change (e.g.,
@@ -880,7 +967,10 @@
   <em>Options Menu</em>:</p>
 
   <dl>
-    <dt>Assumed document character set</dt>
+    <dt><a name="optinfo-assumed_document_charset" id=
+    "optinfo-assumed_document_charset">Assumed document character
+    set</a>
+    </dt>
 
     <dd>
       <p>This option changes the handling of documents which do not
@@ -898,7 +988,9 @@
       8-bit or CJK Mode&rdquo; is OFF.</p>
     </dd>
 
-    <dt>Auto Session</dt>
+    <dt><a name="optinfo-auto_session" id=
+    "optinfo-auto_session">Auto Session</a>
+    </dt>
 
     <dd>
       <p>Lynx can save and restore useful information about your
@@ -906,7 +998,9 @@
       feature.</p>
     </dd>
 
-    <dt>Bad HTML messages</dt>
+    <dt><a name="optinfo-bad_html_messages" id=
+    "optinfo-bad_html_messages">Bad HTML messages</a>
+    </dt>
 
     <dd>
       <p>Suppress or redirect Lynx's messages about "Bad HTML":</p>
@@ -942,7 +1036,9 @@
       </dl>
     </dd>
 
-    <dt>Bookmark file</dt>
+    <dt><a name="optinfo-bookmark_file" id=
+    "optinfo-bookmark_file">Bookmark file</a>
+    </dt>
 
     <dd>
       <p>When multi-bookmarks is OFF, this is the filename and
@@ -975,7 +1071,9 @@
       [.BM]lynx_bookmarks.html).</p>
     </dd>
 
-    <dt>Collapse BR tags</dt>
+    <dt><a name="optinfo-collapse_br_tags" id=
+    "optinfo-collapse_br_tags">Collapse BR tags</a>
+    </dt>
 
     <dd>
       <p>If <em>Collapse BR tags</em> is turned off, Lynx will not
@@ -987,7 +1085,8 @@
       block.</p>
     </dd>
 
-    <dt>Cookies</dt>
+    <dt><a name="optinfo-cookies" id="optinfo-cookies">Cookies</a>
+    </dt>
 
     <dd>
       <p>This option allows you to tell how to handle cookies:
@@ -995,7 +1094,9 @@
       all</em>.</p>
     </dd>
 
-    <dt>Display Character set</dt>
+    <dt><a name="optinfo-display_charset" id=
+    "optinfo-display_charset">Display Character set</a>
+    </dt>
 
     <dd>
       <p>This option allows you to set up the default character set
@@ -1011,7 +1112,8 @@
       windows-xxxx within native MS-Windows apps.)</p>
     </dd>
 
-    <dt>Editor</dt>
+    <dt><a name="optinfo-editor" id="optinfo-editor">Editor</a>
+    </dt>
 
     <dd>
       <p>The editor to be invoked when editing browsable files,
@@ -1027,7 +1129,9 @@
       confuse the shell which starts the editor program.</p>
     </dd>
 
-    <dt>Emacs keys</dt>
+    <dt><a name="optinfo-emacs_keys" id="optinfo-emacs_keys">Emacs
+    keys</a>
+    </dt>
 
     <dd>
       <p>If set to ON then the CTRL-P, CTRL-N, CTRL-F, and CTRL-B
@@ -1040,7 +1144,9 @@
       bindings.</p>
     </dd>
 
-    <dt>Execution links<br></dt>
+    <dt><a name="optinfo-execution_links" id=
+    "optinfo-execution_links">Execution links</a>
+    </dt>
 
     <dd>
       <p>This deals with execution of local scripts or links. Local
@@ -1084,7 +1190,9 @@
       executed and will ask the user to check his/her options.</p>
     </dd>
 
-    <dt>FTP sort criteria</dt>
+    <dt><a name="optinfo-ftp_sort_criteria" id=
+    "optinfo-ftp_sort_criteria">FTP sort criteria</a>
+    </dt>
 
     <dd>
       <p>This option allows you to specify how files will be sorted
@@ -1093,7 +1201,9 @@
       Type</code>", and "<code>By Date</code>".</p>
     </dd>
 
-    <dt>HTML error recovery</dt>
+    <dt><a name="optinfo-html_error_recovery" id=
+    "optinfo-html_error_recovery">HTML error recovery</a>
+    </dt>
 
     <dd>
       <p>Select the <a href=
@@ -1101,7 +1211,9 @@
       by Lynx.</p>
     </dd>
 
-    <dt>HTTP protocol</dt>
+    <dt><a name="optinfo-http_protocol" id=
+    "optinfo-http_protocol">HTTP protocol</a>
+    </dt>
 
     <dd>
       <p>Normally Lynx negotiates HTTP/1.0, because it does not
@@ -1112,7 +1224,39 @@
       protocol.</p>
     </dd>
 
-    <dt>Invalid-Cookie Prompting</dt>
+    <dt><a name="optinfo-idna_mode" id=
+    "optinfo-idna_mode">Internationalized domain names</a>
+    </dt>
+
+    <dd>
+      Convert internationalized domain names to and from ASCII.
+      <dl>
+        <dt>IDNA 2003</dt>
+
+        <dd>Convert using the older &ldquo;transitional&rdquo;
+        scheme.</dd>
+
+        <dt>IDNA 2008</dt>
+
+        <dd>Convert using the newer &ldquo;non-transitional&rdquo;
+        scheme.</dd>
+
+        <dt>IDNA TR46</dt>
+
+        <dd>Use IDNA 2008 with the amendments from Unicode <a href=
+        "http://www.unicode.org/reports/tr46">Technical Report
+        46</a>.</dd>
+
+        <dt>IDNA Compatible</dt>
+
+        <dd>First try converting using IDNA 2008, and if
+        unsuccessful, try IDNA 2003.</dd>
+      </dl>
+    </dd>
+
+    <dt><a name="optinfo-invalid_cookie_prompting" id=
+    "optinfo-invalid_cookie_prompting">Invalid-Cookie Prompting</a>
+    </dt>
 
     <dd>
       <p>This allows you to tell how to handle invalid cookies:
@@ -1121,7 +1265,9 @@
       no-response</em> to reply "no" to each prompt.</p>
     </dd>
 
-    <dt>Keypad mode</dt>
+    <dt><a name="optinfo-keypad_mode" id=
+    "optinfo-keypad_mode">Keypad mode</a>
+    </dt>
 
     <dd>
       <p>This option gives the choice among navigating with the
@@ -1138,7 +1284,9 @@
       help for more information.</p>
     </dd>
 
-    <dt>Line edit style</dt>
+    <dt><a name="optinfo-line_edit_style" id=
+    "optinfo-line_edit_style">Line edit style</a>
+    </dt>
 
     <dd>
       <p>This option allows you to set alternative key bindings for
@@ -1147,7 +1295,10 @@
       "keystrokes/edit_help.html">Default Binding</a>.</p>
     </dd>
 
-    <dt>Local directory sort criteria</dt>
+    <dt><a name="optinfo-local_directory_sort_criteria" id=
+    "optinfo-local_directory_sort_criteria">Local directory sort
+    criteria</a>
+    </dt>
 
     <dd>
       <p>This applies to directory editing. Files and directories
@@ -1177,7 +1328,10 @@
       </dl>
     </dd>
 
-    <dt>Local directory sort order</dt>
+    <dt><a name="optinfo-local_directory_sort_order" id=
+    "optinfo-local_directory_sort_order">Local directory sort
+    order</a>
+    </dt>
 
     <dd>
       <p>The Options Form also allows you to sort by the file
@@ -1229,7 +1383,9 @@
       </dl>
     </dd>
 
-    <dt>Multi-bookmarks</dt>
+    <dt><a name="optinfo-multi_bookmarks" id=
+    "optinfo-multi_bookmarks">Multi-bookmarks</a>
+    </dt>
 
     <dd>
       <p>Lynx supports a default bookmark file, and up to 26 total
@@ -1249,7 +1405,9 @@
       the default bookmark file.</p>
     </dd>
 
-    <dt>Password for anonymous ftp</dt>
+    <dt><a name="optinfo-password_for_anon_ftp" id=
+    "optinfo-password_for_anon_ftp">Password for anonymous ftp</a>
+    </dt>
 
     <dd>
       <p>If this is blank, Lynx will use your personal mail address
@@ -1262,7 +1420,10 @@
       even the environment variable is unset.</p>
     </dd>
 
-    <dt>Pause when showing message</dt>
+    <dt><a name="optinfo-pause_when_showing_message" id=
+    "optinfo-pause_when_showing_message">Pause when showing
+    message</a>
+    </dt>
 
     <dd>
       <p>If set to "off", this overrides the INFOSECS setting in
@@ -1270,7 +1431,9 @@
       messages, like the "-nopause" command line option.</p>
     </dd>
 
-    <dt>Personal mail address</dt>
+    <dt><a name="optinfo-personal_mail_address" id=
+    "optinfo-personal_mail_address">Personal mail address</a>
+    </dt>
 
     <dd>
       <p>This mail address will be used to help you send files to
@@ -1283,7 +1446,9 @@
       line toggle.</p>
     </dd>
 
-    <dt>Personal mail name</dt>
+    <dt><a name="optinfo-personal_name_for_mail" id=
+    "optinfo-personal_name_for_mail">Personal mail name</a>
+    </dt>
 
     <dd>
       <p>This mail name will be included as the "X-Personal_Name"
@@ -1292,7 +1457,9 @@
       in <a href="#lynx.cfg">lynx.cfg</a>.</p>
     </dd>
 
-    <dt>Popups for select fields</dt>
+    <dt><a name="optinfo-popups_for_select" id=
+    "optinfo-popups_for_select">Popups for select fields</a>
+    </dt>
 
     <dd>
       <p>Lynx normally uses a popup window for the OPTIONs in form
@@ -1305,7 +1472,10 @@
       OPTIONs always are rendered as a list of checkboxes.</p>
     </dd>
 
-    <dt>Preferred document language</dt>
+    <dt><a name="optinfo-preferred_doc_language" id=
+    "optinfo-preferred_doc_language">Preferred document
+    language</a>
+    </dt>
 
     <dd>
       <p>The language you prefer if multi-language files are
@@ -1318,7 +1488,9 @@
       da,&nbsp;en-gb;q=0.8,&nbsp;en;q=0.7</p>
     </dd>
 
-    <dt>Preferred document charset</dt>
+    <dt><a name="optinfo-preferred_doc_charset" id=
+    "optinfo-preferred_doc_charset">Preferred document charset</a>
+    </dt>
 
     <dd>
       <p>The character set you prefer if sets in addition to
@@ -1332,7 +1504,9 @@
       it, for example: iso-8859-5,&nbsp;utf-8;q=0.8</p>
     </dd>
 
-    <dt>Preferred encoding</dt>
+    <dt><a name="optinfo-preferred_encoding" id=
+    "optinfo-preferred_encoding">Preferred encoding</a>
+    </dt>
 
     <dd>
       <p>When doing a GET, lynx tells what types of compressed data
@@ -1342,7 +1516,9 @@
       none, one or all of the supported decompression types.</p>
     </dd>
 
-    <dt>Preferred media type</dt>
+    <dt><a name="optinfo-preferred_media_type" id=
+    "optinfo-preferred_media_type">Preferred media type</a>
+    </dt>
 
     <dd>
       <p>When doing a GET, lynx lists the MIME types which it knows
@@ -1391,7 +1567,9 @@
       </dl>
     </dd>
 
-    <dt>Raw 8-bit or CJK Mode</dt>
+    <dt><a name="optinfo-raw_8_bit" id="optinfo-raw_8_bit">Raw
+    8-bit or CJK Mode</a>
+    </dt>
 
     <dd>
       <p>Tells Lynx whether 8-bit characters are assumed to
@@ -1421,13 +1599,17 @@
       at startup via the <em>-raw</em> switch.</p>
     </dd>
 
-    <dt>Send User-Agent header</dt>
+    <dt><a name="optinfo-send_user_agent" id=
+    "optinfo-send_user_agent">Send User-Agent header</a>
+    </dt>
 
     <dd>
       <p>Controls whether the user-agent string will be sent.</p>
     </dd>
 
-    <dt>Session file</dt>
+    <dt><a name="optinfo-session_file" id=
+    "optinfo-session_file">Session file</a>
+    </dt>
 
     <dd>
       <p>Define the file name where lynx will store user sessions.
@@ -1435,7 +1617,9 @@
       enabled.</p>
     </dd>
 
-    <dt>Show color</dt>
+    <dt><a name="optinfo-show_color" id="optinfo-show_color">Show
+    color</a>
+    </dt>
 
     <dd>
       <p>This option will be present if color support is available.
@@ -1476,7 +1660,9 @@
       appropriately on or off via this option.</p>
     </dd>
 
-    <dt>Show cursor</dt>
+    <dt><a name="optinfo-show_cursor" id="optinfo-show_cursor">Show
+    cursor</a>
+    </dt>
 
     <dd>
       <p>Lynx normally hides the cursor by positioning it to the
@@ -1491,7 +1677,9 @@
       others in the screen display.</p>
     </dd>
 
-    <dt>Show dot files</dt>
+    <dt><a name="optinfo-show_dot_files" id=
+    "optinfo-show_dot_files">Show dot files</a>
+    </dt>
 
     <dd>
       <p>If display/creation of hidden (dot) files/directories is
@@ -1499,7 +1687,9 @@
       setting.</p>
     </dd>
 
-    <dt>Show images</dt>
+    <dt><a name="optinfo-show_images" id="optinfo-show_images">Show
+    images</a>
+    </dt>
 
     <dd>
       <p>This allows you to select the way in which Lynx shows
@@ -1517,7 +1707,9 @@
       <br>
     </dd>
 
-    <dt>Show scrollbar</dt>
+    <dt><a name="optinfo-show_scrollbar" id=
+    "optinfo-show_scrollbar">Show scrollbar</a>
+    </dt>
 
     <dd>
       <p>This allows you to enable (show) or disable (hide) the
@@ -1525,7 +1717,9 @@
       available with ncurses or slang libraries.</p>
     </dd>
 
-    <dt>Show transfer rate</dt>
+    <dt><a name="optinfo-show_transfer_rate" id=
+    "optinfo-show_transfer_rate">Show transfer rate</a>
+    </dt>
 
     <dd>
       <p>This allows you to select the way in which Lynx shows its
@@ -1548,7 +1742,9 @@
       <br>
     </dd>
 
-    <dt>SSL Prompting</dt>
+    <dt><a name="optinfo-ssl_prompting" id=
+    "optinfo-ssl_prompting">SSL Prompting</a>
+    </dt>
 
     <dd>
       <p>This allows you to tell how to handle errors detected in
@@ -1558,7 +1754,9 @@
       prompt.</p>
     </dd>
 
-    <dt>Trim blank lines</dt>
+    <dt><a name="optinfo-trim_blank_lines" id=
+    "optinfo-trim_blank_lines">Trim blank lines</a>
+    </dt>
 
     <dd>
       <p>If <em>Trim blank lines</em> is turned off, Lynx will not
@@ -1568,7 +1766,9 @@
       tags</em> feature.</p>
     </dd>
 
-    <dt>Type of Search</dt>
+    <dt><a name="optinfo-type_of_search" id=
+    "optinfo-type_of_search">Type of Search</a>
+    </dt>
 
     <dd>
       <p>Searching type has two possible values: CASE INSENSITIVE
@@ -1578,7 +1778,9 @@
       or case-insensitive manner.</p>
     </dd>
 
-    <dt>Use HTML5 charset replacements</dt>
+    <dt><a name="optinfo-use_html5_charset" id=
+    "optinfo-use_html5_charset">Use HTML5 charset replacements</a>
+    </dt>
 
     <dd>
       <p>This option allows lynx to treat pages with ISO-8859-1
@@ -1586,7 +1788,10 @@
       allows a few punctuation characters to be shown.</p>
     </dd>
 
-    <dt>Use locale-based character set</dt>
+    <dt><a name="optinfo-locale_based_charset" id=
+    "optinfo-locale_based_charset">Use locale-based character
+    set</a>
+    </dt>
 
     <dd>
       <p>This option allows you to request lynx to obtain a MIME
@@ -1595,20 +1800,26 @@
       setting of the display character set.</p>
     </dd>
 
-    <dt>Underline links</dt>
+    <dt><a name="optinfo-underline_links" id=
+    "optinfo-underline_links">Underline links</a>
+    </dt>
 
     <dd>
       <p>Use underline-attribute rather than bold for links.</p>
     </dd>
 
-    <dt>Use Passive FTP</dt>
+    <dt><a name="optinfo-use_passive_ftp" id=
+    "optinfo-use_passive_ftp">Use Passive FTP</a>
+    </dt>
 
     <dd>
       <p>This allows you to change whether Lynx uses passive ftp
       connections.</p>
     </dd>
 
-    <dt>User Agent header</dt>
+    <dt><a name="optinfo-user_agent" id=
+    "optinfo-user_agent">User-Agent header</a>
+    </dt>
 
     <dd>
       <p>The header string which Lynx sends to HTTP servers to
@@ -1637,7 +1848,9 @@
       "Lynx" or "L_y_n_x".</p>
     </dd>
 
-    <dt>User Mode</dt>
+    <dt><a name="optinfo-user_mode" id="optinfo-user_mode">User
+    Mode</a>
+    </dt>
 
     <dd>
       <p>There are three possible choices: Novice, Intermediate,
@@ -1666,7 +1879,9 @@
       </dl>
     </dd>
 
-    <dt>Verbose Images</dt>
+    <dt><a name="optinfo-verbose_images" id=
+    "optinfo-verbose_images">Verbose Images</a>
+    </dt>
 
     <dd>
       <p>Controls whether or not Lynx replaces the [LINK], [INLINE]
@@ -1678,7 +1893,8 @@
       <em>-verbose</em> switch.</p>
     </dd>
 
-    <dt>VI keys</dt>
+    <dt><a name="optinfo-vi_keys" id="optinfo-vi_keys">VI keys</a>
+    </dt>
 
     <dd>
       <p>If set to ON then the lowercase h, j, k, and l keys will
@@ -1691,7 +1907,9 @@
       bindings.</p>
     </dd>
 
-    <dt>Visited Pages</dt>
+    <dt><a name="optinfo-visited_pages" id=
+    "optinfo-visited_pages">Visited Pages</a>
+    </dt>
 
     <dd>
       <p>Enable several different views of the visited links:</p>
@@ -1710,7 +1928,9 @@
       <br>
     </dd>
 
-    <dt>X Display</dt>
+    <dt><a name="optinfo-x_display" id="optinfo-x_display">X
+    Display</a>
+    </dt>
 
     <dd>
       <p>This option is only relevant to X Window users. The

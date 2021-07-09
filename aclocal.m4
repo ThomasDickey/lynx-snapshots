@@ -1,4 +1,4 @@
-dnl $LynxId: aclocal.m4,v 1.302 2021/06/13 23:45:41 tom Exp $
+dnl $LynxId: aclocal.m4,v 1.303 2021/07/05 13:09:42 tom Exp $
 dnl Macros for auto-configure script.
 dnl by Thomas E. Dickey <dickey@invisible-island.net>
 dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
@@ -7232,22 +7232,38 @@ fi
 dnl ---------------------------------------------------------------------------
 dnl CF_WITH_IDNA version: 10 updated: 2015/04/15 19:08:48
 dnl ------------
-dnl Check for libidn, use it if found.
+dnl Check for libidn2, use it if found.  Otherwise, check for libidn, use that.
 dnl
 dnl $1 = optional path for headers/library
 AC_DEFUN([CF_WITH_IDNA],[
-  CF_ADD_OPTIONAL_PATH($1)
+CF_ADD_OPTIONAL_PATH($1)
 
-  CF_FIND_LINKAGE([
+CF_FIND_LINKAGE([
+#include <stdio.h>
+#include <idn2.h>
+],[
+	char *output = 0;
+	int code = idn2_to_ascii_8z("name", &output, IDN2_USE_STD3_ASCII_RULES);
+	(void) code;
+],idn2,,[CF_VERBOSE([unsuccessful, will try idn (older)])],,[$LIBICONV])
+
+if test "x$cf_cv_find_linkage_idn2" = xyes ; then
+	CF_VERBOSE(found idn2 library)
+	AC_DEFINE(USE_IDN2,1,[Define to 1 if we should use IDN2 library])
+else
+	CF_FIND_LINKAGE([
 #include <stdio.h>
 #include <idna.h>
 ],[
 	char *output = 0;
-    int code = idna_to_ascii_8z("name", &output, IDNA_USE_STD3_ASCII_RULES);
+	int code = idna_to_ascii_8z("name", &output, IDNA_USE_STD3_ASCII_RULES);
+	(void) code;
 ],idn,,,,[$LIBICONV])
 
 if test "x$cf_cv_find_linkage_idn" = xyes ; then
+	CF_VERBOSE(found idn library)
 	AC_DEFINE(USE_IDNA,1,[Define to 1 if we should use IDNA library])
+fi
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
