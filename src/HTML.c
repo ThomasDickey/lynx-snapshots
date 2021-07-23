@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTML.c,v 1.194 2020/01/21 22:19:23 tom Exp $
+ * $LynxId: HTML.c,v 1.195 2021/07/23 20:23:54 tom Exp $
  *
  *		Structured stream to Rich hypertext converter
  *		============================================
@@ -2160,6 +2160,7 @@ static int HTML_start_element(HTStructured * me, int element_number,
 	CHECK_ID(HTML_GEN_ID);
 	break;
 
+    case HTML_DEL_2:
     case HTML_DEL:
     case HTML_S:
     case HTML_STRIKE:
@@ -2173,6 +2174,7 @@ static int HTML_start_element(HTStructured * me, int element_number,
 	me->in_word = NO;
 	break;
 
+    case HTML_INS_2:
     case HTML_INS:
 	CHECK_ID(HTML_GEN_ID);
 	if (me->inUnderline == FALSE)
@@ -5977,6 +5979,7 @@ static int HTML_end_element(HTStructured * me, int element_number,
 	HText_appendCharacter(me->text, ']');
 	break;
 
+    case HTML_DEL_2:
     case HTML_DEL:
     case HTML_S:
     case HTML_STRIKE:
@@ -5990,6 +5993,7 @@ static int HTML_end_element(HTStructured * me, int element_number,
 	me->in_word = NO;
 	break;
 
+    case HTML_INS_2:
     case HTML_INS:
 	HTML_put_character(me, ' ');
 	if (me->inUnderline == FALSE)

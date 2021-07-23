@@ -1,5 +1,5 @@
 /*
- * $LynxId: SGML.c,v 1.176 2021/07/02 00:08:26 tom Exp $
+ * $LynxId: SGML.c,v 1.177 2021/07/23 20:36:47 tom Exp $
  *
  *			General SGML Parser code		SGML.c
  *			========================
@@ -981,6 +981,8 @@ static void handle_sgmlatt(HTStream *me)
 #define ALT_TAGP(t) ALT_TAGP_OF_TAGNUM(TAGNUM_OF_TAGP(t))
 #define NORMAL_TAGP(t) NORMAL_TAGP_OF_TAGNUM(TAGNUM_OF_TAGP(t))
 
+#define IsTagAlias(a,b) (((a) == (b)) || ((a) - (a)->alias == (b) - (b)->alias))
+
 static BOOL element_valid_within(HTTag * new_tag, HTTag * stacked_tag, int direct)
 {
     BOOL result = YES;
@@ -989,12 +991,32 @@ static BOOL element_valid_within(HTTag * new_tag, HTTag * stacked_tag, int direc
     if (stacked_tag && new_tag) {
 	usecontains = (direct ? stacked_tag->contains : stacked_tag->icontains);
 	usecontained = (direct ? new_tag->contained : new_tag->icontained);
-	if (new_tag == stacked_tag) {
+	if (IsTagAlias(new_tag, stacked_tag)) {
 	    result = (BOOL) ((Tgc_same & usecontains) &&
 			     (Tgc_same & usecontained));
 	} else {
 	    result = (BOOL) ((new_tag->tagclass & usecontains) &&
 			     (stacked_tag->tagclass & usecontained));
+	}
+    }
+    return result;
+}
+
+static BOOL element_really_within(HTTag * new_tag, HTTag * stacked_tag, int direct)
+{
+    BOOL result = YES;
+    TagClass usecontains, usecontained;
+
+    if (stacked_tag && new_tag) {
+	usecontains = (direct ? stacked_tag->contains : stacked_tag->icontains);
+	usecontained = (direct ? new_tag->contained : new_tag->icontained);
+	if (IsTagAlias(new_tag, stacked_tag)) {
+	    result = (BOOL) ((Tgc_same & usecontains) &&
+			     (Tgc_same & usecontained));
+	} else {
+	    result = (BOOL) ((new_tag->tagclass & usecontains) ==
+			     new_tag->tagclass &&
+			     (stacked_tag->tagclass & usecontained) == stacked_tag->tagclass);
 	}
     }
     return result;
@@ -1014,7 +1036,7 @@ static canclose_t can_close(HTTag * new_tag, HTTag * stacked_tag)
 	result = close_NO;
     } else if (stacked_tag->flags & Tgf_endO) {
 	result = close_valid;
-    } else if (new_tag == stacked_tag) {
+    } else if (IsTagAlias(new_tag, stacked_tag)) {
 	result = ((Tgc_same & new_tag->canclose)
 		  ? close_error
 		  : close_NO);
@@ -1057,7 +1079,7 @@ static int is_on_stack(HTStream *me, HTTag * old_tag)
     int i = 1;
 
     for (; stacked; stacked = stacked->next, i++) {
-	if (stacked->tag == old_tag ||
+	if (IsTagAlias(stacked->tag, old_tag) ||
 	    stacked->tag == ALT_TAGP(old_tag))
 	    return i;
     }
@@ -1072,8 +1094,21 @@ static void end_element(HTStream *me, HTTag * old_tag)
     BOOL extra_action_taken = NO;
     canclose_t canclose_check = close_valid;
     int stackpos = is_on_stack(me, old_tag);
+    BOOL direct_container = YES;
 
     if (!Old_DTD) {
+	if (old_tag->aliases) {
+	    if (me->element_stack) {
+		if (!element_really_within(old_tag,
+					   me->element_stack->tag,
+					   direct_container) &&
+		    element_really_within(old_tag + 1,
+					  me->element_stack->tag,
+					  direct_container)) {
+		    ++old_tag;
+		}
+	    }
+	}
 	while (canclose_check != close_NO &&
 	       me->element_stack &&
 	       (stackpos > 1 || (!extra_action_taken && stackpos == 0))) {
@@ -1195,7 +1230,7 @@ static void end_element(HTStream *me, HTTag * old_tag)
 		    ? (me->element_stack->tag->flags & Tgf_nolyspcl)
 		    : NO);
 #ifdef WIND_DOWN_STACK
-	if (old_tag == t)
+	if (IsTagAlias(old_tag, t))
 	    return;		/* Correct sequence */
 #else
 	return;
@@ -1223,10 +1258,22 @@ static void start_element(HTStream *me)
     canclose_t canclose_check = close_valid;
 
     if (!Old_DTD) {
+	if (new_tag->aliases) {
+	    if (me->element_stack) {
+		if (!element_really_within(new_tag,
+					   me->element_stack->tag,
+					   direct_container) &&
+		    element_really_within(new_tag + 1,
+					  me->element_stack->tag,
+					  direct_container)) {
+		    ++new_tag;
+		}
+	    }
+	}
 	while (me->element_stack &&
 	       (canclose_check == close_valid ||
 		(canclose_check == close_error &&
-		 new_tag == me->element_stack->tag)) &&
+		 IsTagAlias(new_tag, me->element_stack->tag))) &&
 	       !(valid = element_valid_within(new_tag,
 					      me->element_stack->tag,
 					      direct_container))) {
@@ -1417,6 +1464,7 @@ HTTag *SGMLFindTag(const SGML_dtd * dtd,
 	/* my_casecomp() - optimized by the first character, NOT_ASCII ok */
 	diff = my_casecomp(dtd->tags[i].name, s);	/* Case insensitive */
 	if (diff == 0) {	/* success: found it */
+	    i -= dtd->tags[i].alias;
 	    *res = &dtd->tags[i];
 	    return *res;
 	}
