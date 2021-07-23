@@ -1,4 +1,4 @@
-/* $LynxId: hdr_HTMLDTD.h,v 1.23 2015/12/13 23:08:45 Kihara.Hideto Exp $ */
+/* $LynxId: hdr_HTMLDTD.h,v 1.24 2021/07/16 00:40:16 tom Exp $ */
 #ifndef hdr_HTMLDTD_H
 #define hdr_HTMLDTD_H 1
 
@@ -49,6 +49,7 @@ extern "C" {
 	HTML_CREDIT,
 	HTML_DD,
 	HTML_DEL,
+	HTML_DEL_2,
 	HTML_DFN,
 	HTML_DIR,
 	HTML_DIV,
@@ -82,6 +83,7 @@ extern "C" {
 	HTML_IMG,
 	HTML_INPUT,
 	HTML_INS,
+	HTML_INS_2,
 	HTML_ISINDEX,
 	HTML_KBD,
 	HTML_KEYGEN,
@@ -156,10 +158,10 @@ extern "C" {
  */
 
 /* # of elements generally visible to Lynx code */
-#define HTML_ELEMENTS 126
+#define HTML_ELEMENTS 128
 
 /* # of elements visible to SGML parser */
-#define HTML_ALL_ELEMENTS 127
+#define HTML_ALL_ELEMENTS 129
 
 /*
 

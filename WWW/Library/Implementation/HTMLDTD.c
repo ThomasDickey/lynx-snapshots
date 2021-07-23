@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTMLDTD.c,v 1.57 2010/09/25 00:30:56 tom Exp $
+ * $LynxId: HTMLDTD.c,v 1.58 2021/07/23 00:00:03 tom Exp $
  *
  *		Our Static DTD for HTML
  *		-----------------------
@@ -243,7 +243,7 @@ void HTSwitchDTD(int new_flag)
 
 HTTag HTTag_unrecognized =
 
-{NULL_HTTag, NULL, 0, 0, SGML_EMPTY, T__UNREC_};
+{NULL_HTTag, NULL, 0, 0, SGML_EMPTY, T__UNREC_, 0, 0};
 
 /*
  *	Utility Routine:  Useful for people building HTML objects.

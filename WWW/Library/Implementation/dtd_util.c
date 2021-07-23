@@ -1,5 +1,5 @@
 /*
- * $LynxId: dtd_util.c,v 1.79 2018/12/27 10:28:12 tom Exp $
+ * $LynxId: dtd_util.c,v 1.80 2021/07/23 00:23:04 tom Exp $
  *
  * Given a SGML_dtd structure, write a corresponding flat file, or "C" source.
  * Given the flat-file, write the "C" source.
@@ -25,7 +25,7 @@ FILE *TraceFP(void)
 /*
  * Begin the actual utility.
  */
-#define GETOPT "chl:o:ts"
+#define GETOPT "chl:o:tsx"
 
 #define NOTE(message) fprintf(output, message "\n");
 /* *INDENT-OFF* */
@@ -41,6 +41,36 @@ FILE *TraceFP(void)
 #endif
 
 #define ATTR_TYPE(name) { #name, name##_attr_list }
+
+static const char alias_codes[] = "!@#$%^&*";
+
+#define DATA(name) { #name, Tgc_##name }
+static const struct {
+    const char *name;
+    TagClass tagclass;
+} class_list[] = {
+	DATA(APPLETlike),
+	DATA(Alike),
+	DATA(BODYlike),
+	DATA(BRlike),
+	DATA(DELlike),
+	DATA(DIVlike),
+	DATA(EMlike),
+	DATA(FONTlike),
+	DATA(FORMlike),
+	DATA(HEADstuff),
+	DATA(HRlike),
+	DATA(LIlike),
+	DATA(MAPlike),
+	DATA(MATHlike),
+	DATA(Plike),
+	DATA(SELECTlike),
+	DATA(TRlike),
+	DATA(ULlike),
+	DATA(formula),
+	DATA(outer),
+	DATA(same)
+};
 
 static const attr core_attr_list[] = {
 	{ "CLASS"         T(c) },
@@ -110,6 +140,7 @@ static void usage(void)
 	"  -o filename  specify output (default: stdout)",
 	"  -s           strict (HTML DTD 0)",
 	"  -t           tagsoup (HTML DTD 1)",
+	"  -x           cross-check contains/contained data (repeat for more)"
     };
     unsigned n;
 
@@ -284,12 +315,31 @@ static const char *NameOfAttrs(const SGML_dtd * dtd, int which)
     return result;
 }
 
-static const char *DEF_name(const SGML_dtd * dtd, int which)
+static const char *DEF_name(const SGML_dtd * dtd, int which, unsigned alias)
 {
     const char *result = dtd->tags[which].name;
 
-    if (!strcmp(result, "OBJECT") && !first_object(dtd, which))
+    if (!strcmp(result, "OBJECT") && !first_object(dtd, which)) {
 	result = "OBJECT_PCDATA";
+    } else if (alias) {
+	char buffer[1024];
+
+	sprintf(buffer, "%s_%d", result, alias + 1);
+	result = strdup(buffer);
+    }
+    return result;
+}
+
+static const char *EXT_name(HTTag * tag)
+{
+    const char *result = tag->name;
+
+    if (tag->alias) {
+	char buffer[1024];
+
+	sprintf(buffer, "%s%c", result, alias_codes[tag->alias - 1]);
+	result = strdup(buffer);
+    }
     return result;
 }
 
@@ -487,7 +537,7 @@ static void dump_src_HTTag_Defines(FILE *output, const SGML_dtd * dtd, int which
 	    "#define T_%-13s "
 	    myFMT "," myFMT "," myFMT "," myFMT "," myFMT "," myFMT
 	    "," myFMT "\n",
-	    DEF_name(dtd, which),
+	    DEF_name(dtd, which, tag->alias),
 	    tag->tagclass,
 	    tag->contains,
 	    tag->icontains,
@@ -589,7 +639,9 @@ static void dump_src_HTTag(FILE *output, const SGML_dtd * dtd, int which)
     PrintF(output, 19, " { %s(%s),", P_macro, tag->name);
     PrintF(output, 24, "ATTR_DATA(%s), ", NameOfAttrs(dtd, which));
     PrintF(output, 14, "%s,", SGMLContent2s(tag->contents));
-    fprintf(output, "T_%s", DEF_name(dtd, which));
+    fprintf(output, "T_%s", DEF_name(dtd, which, tag->alias));
+    fprintf(output, ", %d", tag->alias);
+    fprintf(output, ", %d", tag->aliases);
     fprintf(output, "},\n");
 }
 
@@ -606,9 +658,11 @@ static void dump_source(FILE *output, const SGML_dtd * dtd, int dtd_version)
 	{0, 0}
     };
     AttrType *gt;
+    TagAlias aliases;
 
     const char *marker = "src_HTMLDTD_H";
     int j;
+    int inalias;
 
     unsigned count = 0;
     AttrInfo *data = sorted_attrs(dtd, &count);
@@ -711,8 +765,9 @@ static void dump_source(FILE *output, const SGML_dtd * dtd, int dtd_version)
     NOTE("#undef T");
     NOTE("");
     NOTE("/* tag-names */");
+    /* FIXME - are these needed other than as parameters to macros? */
     for (j = 0; j <= dtd->number_of_tags; ++j) {
-	fprintf(output, "#undef %s\n", DEF_name(dtd, j));
+	fprintf(output, "#undef %s\n", DEF_name(dtd, j, 0));
     }
     NOTE("");
     NOTE("/* these definitions are used in the tags-tables */");
@@ -745,6 +800,20 @@ static void dump_source(FILE *output, const SGML_dtd * dtd, int dtd_version)
     fprintf(output,
 	    "static const HTTag tags_table%d[HTML_ALL_ELEMENTS] = {\n",
 	    dtd_version);
+    aliases = 0;
+    inalias = -1;
+    for (j = dtd->number_of_tags - 1; j >= 0; --j) {
+	dtd->tags[j].aliases = aliases;
+	if (aliases != 0) {
+	    if ((inalias - aliases) >= j) {
+		aliases = 0;
+		inalias = -1;
+	    }
+	} else if ((aliases = dtd->tags[j].alias) != 0) {
+	    inalias = j;
+	    dtd->tags[j].aliases = aliases;
+	}
+    }
     for (j = 0; j <= dtd->number_of_tags; ++j) {
 	if (j == dtd->number_of_tags) {
 	    NOTE("/* additional (alternative variants), not counted in HTML_ELEMENTS: */");
@@ -806,7 +875,12 @@ static void dump_header(FILE *output, const SGML_dtd * dtd)
 
     fprintf(output, "    typedef enum {\n");
     for (j = 0; j < dtd->number_of_tags; ++j) {
-	fprintf(output, "\tHTML_%s,\n", dtd->tags[j].name);
+	if (dtd->tags[j].alias) {
+	    fprintf(output, "\tHTML_%s_%d,\n", dtd->tags[j].name,
+		    dtd->tags[j].alias + 1);
+	} else {
+	    fprintf(output, "\tHTML_%s,\n", dtd->tags[j].name);
+	}
     }
     NOTE("\tHTML_ALT_OBJECT");
     NOTE("    } HTMLElement;\n");
@@ -921,6 +995,7 @@ static void dump_flat_TagClass(FILE *output, const char *name, TagClass theClass
     DUMP(BODYlike);
     DUMP(HEADstuff);
     DUMP(same);
+    DUMP(DELlike);
     if (theClass)
 	fprintf(output, " OOPS:%#x", theClass);
     fprintf(output, "\n");
@@ -953,7 +1028,7 @@ static void dump_flat_TagFlags(FILE *output, const char *name, TagFlags theFlags
 
 static void dump_flat_HTTag(FILE *output, unsigned n, HTTag * tag)
 {
-    fprintf(output, "\t%u:%s\n", n, tag->name);
+    fprintf(output, "\t%u:%s\n", n, EXT_name(tag));
 #ifdef USE_JUSTIFY_ELTS
     fprintf(output, "\t\t%s\n", tag->can_justify ? "justify" : "nojustify");
 #endif
@@ -1086,6 +1161,7 @@ static int load_flat_TagClass(FILE *input, const char *name, TagClass * theClass
 		LOAD(BODYlike);
 		LOAD(HEADstuff);
 		LOAD(same);
+		LOAD(DELlike);
 
 		fprintf(stderr, "Unexpected TagClass '%s'\n", data);
 		result = 0;
@@ -1186,7 +1262,7 @@ static int load_flat_AttrList(FILE *input, AttrList * attrs, int *length)
     return result;
 }
 
-static int load_flat_HTTag(FILE *input, unsigned nref, HTTag * tag, AttrType * allTypes)
+static int load_flat_HTTag(FILE *input, HTTag * tag, AttrType * allTypes)
 {
     int result = 0;
     unsigned ncmp = 0;
@@ -1195,8 +1271,23 @@ static int load_flat_HTTag(FILE *input, unsigned nref, HTTag * tag, AttrType * a
     int j;
 
     code = fscanf(input, "%d:%s\n", &ncmp, name);
-    if (code == 2 && (nref == ncmp)) {
+    if (code == 2) {
 	result = 1;
+	tag->alias = 0;
+	tag->aliases = 0;
+	for (j = 0; name[j] != '\0'; ++j) {
+	    int ch = UCH(name[j]);
+
+	    if (!isalnum(ch)) {
+		if (strchr(alias_codes, ch) != NULL) {
+		    tag->alias = (ch - '!') + 1;
+		    name[j] = '\0';
+		} else {
+		    result = 0;
+		}
+		break;
+	    }
+	}
 	tag->name = strdup(name);
 #ifdef USE_COLOR_STYLE
 	tag->name_len = strlen(tag->name);
@@ -1297,6 +1388,18 @@ static int load_flat_AttrType(FILE *input, AttrType * types, size_t ncmp)
     return result;
 }
 
+static int compare_tags(const void *a, const void *b)
+{
+    const HTTag *p = (const HTTag *) a;
+    const HTTag *q = (const HTTag *) b;
+    int result = 0;
+
+    if ((result = strcmp(p->name, q->name)) == 0) {
+	result = p->alias - q->alias;
+    }
+    return result;
+}
+
 static SGML_dtd *load_flatfile(FILE *input)
 {
     AttrType *attr_types = 0;
@@ -1323,7 +1426,7 @@ static SGML_dtd *load_flatfile(FILE *input)
 	if ((result = typecalloc(SGML_dtd)) != 0
 	    && (result->tags = typecallocn(HTTag, (number_of_tags + 2))) != 0) {
 	    for (n = 0; n < (size_t) number_of_tags; ++n) {
-		if (load_flat_HTTag(input, n, &(result->tags[n]), attr_types)) {
+		if (load_flat_HTTag(input, &(result->tags[n]), attr_types)) {
 		    result->number_of_tags = (n + 1);
 		} else {
 		    break;
@@ -1343,10 +1446,112 @@ static SGML_dtd *load_flatfile(FILE *input)
 	    if (tag == 0) {
 		fprintf(stderr, "Did not find OBJECT tag\n");
 		result = 0;
+	    } else {
+		qsort(result->tags, number_of_tags, sizeof(HTTag), compare_tags);
 	    }
 	}
     }
     return result;
+}
+
+static void cross_check(FILE *output, const SGML_dtd * the_dtd, int level)
+{
+    int ft;
+
+    fprintf(output, "Cross-check HTML DTD:\n");
+    fprintf(output, "\n");
+    /* make a sorted list of tags */
+    /* for each tag in the list, find the classes it might contain */
+    for (ft = 0; ft < the_dtd->number_of_tags; ++ft) {
+	int xc;
+	HTTag *ftag = &(the_dtd->tags[ft]);
+
+	/* for each contained-class, check if it says it can be contained */
+	fprintf(output, "tag %s\n", EXT_name(ftag));
+	for (xc = 0; class_list[xc].name != 0; ++xc) {
+	    int rt;
+	    int direct;
+	    int passes = 2;
+
+	    /* most of the tags are (should be) symmetric */
+	    if (level <= 1) {
+		BOOL same = TRUE;
+
+		if ((ftag->contains & class_list[xc].tagclass)
+		    != (ftag->icontains & class_list[xc].tagclass)) {
+		    same = FALSE;
+		} else if ((ftag->contains & class_list[xc].tagclass) == 0) {
+		    continue;
+		} else if (0) {
+		    HTTag *rtag;
+
+		    for (rt = 0; rt < the_dtd->number_of_tags; ++rt) {
+			rtag = &(the_dtd->tags[rt]);
+			if (ftag == rtag)
+			    continue;
+			if ((ftag->contains & rtag->tagclass) == 0)
+			    continue;
+			if ((rtag->contained & ftag->tagclass)
+			    != (rtag->icontained & ftag->tagclass)) {
+			    same = FALSE;
+			    break;
+			}
+		    }
+		}
+		if (same)
+		    passes = 1;
+	    }
+
+	    for (direct = 0; direct < passes; ++direct) {
+		TagClass check = (direct ? ftag->contains : ftag->icontains);
+		BOOL first = TRUE;
+
+		if ((check &= class_list[xc].tagclass) == 0)
+		    continue;
+
+		for (rt = 0; rt < the_dtd->number_of_tags; ++rt) {
+		    HTTag *rtag = &(the_dtd->tags[rt]);
+		    TagClass check2 = (direct ? rtag->contained : rtag->icontained);
+
+		    if (rt == ft)
+			continue;
+		    if ((check & rtag->tagclass) == 0)
+			continue;
+		    if ((check2 & ftag->tagclass) == 0)
+			continue;
+		    if (first) {
+			if (passes == 2) {
+			    fprintf(output, "\t%s (%s)\n",
+				    class_list[xc].name,
+				    direct ? "direct" : "indirect");
+			} else {
+			    fprintf(output, "\t%s\n",
+				    class_list[xc].name);
+			}
+		    }
+		    fprintf(output, "%s%s",
+			    first ? "\t\t" : " ",
+			    EXT_name(rtag));
+		    first = FALSE;
+		}
+		if (first) {
+		    if (level > 1) {
+			if (passes == 2) {
+			    fprintf(output, "\t%s (%s)\n",
+				    class_list[xc].name,
+				    direct ? "direct" : "indirect");
+			} else {
+			    fprintf(output, "\t%s\n",
+				    class_list[xc].name);
+			}
+			fprintf(output, "\t\t(missing)\n");
+		    }
+		} else {
+		    fprintf(output, "\n");
+		}
+	    }
+	}
+    }
 }
 
 int main(int argc, char *argv[])
@@ -1357,6 +1562,7 @@ int main(int argc, char *argv[])
     int c_option = FALSE;
     int h_option = FALSE;
     int l_option = FALSE;
+    int x_option = 0;
     FILE *input = stdin;
     FILE *output = stdout;
 
@@ -1385,6 +1591,9 @@ int main(int argc, char *argv[])
 	case 's':
 	    dtd_version = 0;
 	    break;
+	case 'x':
+	    ++x_option;
+	    break;
 	default:
 	    usage();
 	}
@@ -1399,7 +1608,9 @@ int main(int argc, char *argv[])
 	    dump_source(output, the_dtd, dtd_version);
 	if (h_option)
 	    dump_header(output, the_dtd);
-	if (!c_option && !h_option)
+	if (x_option)
+	    cross_check(output, the_dtd, x_option);
+	if (!c_option && !h_option && !x_option)
 	    dump_flatfile(output, the_dtd);
     }
 

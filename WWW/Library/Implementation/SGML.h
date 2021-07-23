@@ -1,5 +1,5 @@
 /*
- * $LynxId: SGML.h,v 1.46 2012/02/10 18:32:26 tom Exp $
+ * $LynxId: SGML.h,v 1.47 2021/07/22 23:34:13 tom Exp $
  *			       SGML parse and stream definition for libwww
  *                             SGML AND STRUCTURED STREAMS
  *
@@ -99,6 +99,9 @@ extern "C" {
 #define Tgc_HEADstuff	0x40000	/* HEAD,BASE,STYLE,TITLE; */
     /* special relations */
 #define Tgc_same	0x80000
+#define Tgc_DELlike	0x100000
+    /* DELlike is a class of aliases for inline DEL/INS */
+    typedef unsigned char TagAlias;
 
 /*
  * Groups for contains-data.
@@ -163,6 +166,8 @@ extern "C" {
 	TagClass canclose;	/* which classes of elements can this one close
 				   if something looks wrong ? */
 	TagFlags flags;
+	TagAlias alias;		/* extra levels, e.g, DEL/INS */
+	TagAlias aliases;	/* number of extra levels, e.g, DEL/INS */
     };
 
 /*		DTD Information

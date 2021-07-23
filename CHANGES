@@ -1,9 +1,11 @@
--- $LynxId: CHANGES,v 1.1083 2021/07/09 00:00:24 tom Exp $
+-- $LynxId: CHANGES,v 1.1084 2021/07/23 23:38:38 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2021-07-08 (2.9.0dev.7)
+2021-07-23 (2.9.0dev.7)
+* modify SGML parsing to allow DEL and INS tags to work on a block-level rather
+  than only inline (Debian #981351) -TD
 * modify configure script to check for libidn2, add options menu setting for
   selecting old/new/compat behavior (prompted by patch by Robert Scheck, Redhat
   #1910971) -TD
