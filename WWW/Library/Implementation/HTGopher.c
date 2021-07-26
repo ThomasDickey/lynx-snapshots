@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTGopher.c,v 1.75 2020/01/21 22:04:23 tom Exp $
+ * $LynxId: HTGopher.c,v 1.76 2021/07/25 23:51:30 tom Exp $
  *
  *			GOPHER ACCESS				HTGopher.c
  *			=============
@@ -377,9 +377,13 @@ static void parse_menu(const char *arg GCC_UNUSED,
 
 		if (gtype == GOPHER_TELNET) {
 		    PUTS(" (TEL) ");
+		    if (*selector == '/')
+			++selector;
 		    HTSprintf0(&address, format, STR_TELNET_URL, selector, host);
 		} else if (gtype == GOPHER_TN3270) {
 		    PUTS("(3270) ");
+		    if (*selector == '/')
+			++selector;
 		    HTSprintf0(&address, format, STR_TN3270_URL, selector, host);
 		} else {	/* If parsed ok */
 		    char *r;
