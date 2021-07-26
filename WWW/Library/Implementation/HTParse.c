@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTParse.c,v 1.95 2021/07/08 22:54:00 tom Exp $
+ * $LynxId: HTParse.c,v 1.96 2021/07/26 19:52:58 tom Exp $
  *
  *		Parse HyperText Document Address		HTParse.c
  *		================================
@@ -688,6 +688,11 @@ char *HTParse(const char *aName,
 		    strcpy(base, "/");
 	    } else {
 		HTSimplify(base, TRUE);
+	    }
+	    if (base[0] == '/' && base[1] == '/') {
+		char *pz;
+
+		for (pz = base; (pz[0] = pz[1]) != '\0'; ++pz) ;
 	    }
 	    CTRACE((tfp, "HTParse: (Related-ABS)\n"));
 	} else if (given.relative) {
