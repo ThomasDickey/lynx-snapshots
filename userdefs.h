@@ -1,5 +1,5 @@
 /*
- * $LynxId: userdefs.h,v 1.355 2021/01/01 14:53:50 tom Exp $
+ * $LynxId: userdefs.h,v 1.357 2021/07/27 18:51:59 tom Exp $
  *
  * Lynx - Hypertext navigation system
  *
@@ -1445,11 +1445,11 @@
  * the version definition with the Project Version on checkout.  Just
  * ignore it. - kw */
 /* $Format: "#define LYNX_VERSION \"$ProjectVersion$\""$ */
-#define LYNX_VERSION "2.9.0dev.7"
+#define LYNX_VERSION "2.9.0dev.8"
 #define LYNX_WWW_HOME "https://lynx.invisible-island.net/"
 #define LYNX_WWW_DIST "https://lynx.invisible-island.net/current/"
 /* $Format: "#define LYNX_DATE \"$ProjectDate$\""$ */
-#define LYNX_DATE "Sat, 26 Dec 2020 12:25:38 -0500"
+#define LYNX_DATE "Tue, 27 Jul 2021 14:51:59 -0400"
 #define LYNX_DATE_OFF 5		/* truncate the automatically-generated date */
 #define LYNX_DATE_LEN 11	/* truncate the automatically-generated date */
 
