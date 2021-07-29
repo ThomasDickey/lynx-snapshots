@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYLocal.c,v 1.132 2018/12/27 10:33:52 tom Exp $
+ * $LynxId: LYLocal.c,v 1.133 2021/07/29 21:15:21 tom Exp $
  *
  *  Routines to manipulate the local filesystem.
  *  Written by: Rick Mallett, Carleton University
@@ -1700,7 +1700,7 @@ static char *match_op(const char *prefix,
     size_t len = strlen(prefix);
 
     if (!StrNCmp("LYNXDIRED://", data, 12)
-	&& !StrNCmp(prefix, data + 12, len)) {
+	&& !strncasecomp(prefix, data + 12, len)) {
 	len += 12;
 #if defined(USE_DOS_DRIVES)
 	if (data[len] == '/') {	/* this is normal */

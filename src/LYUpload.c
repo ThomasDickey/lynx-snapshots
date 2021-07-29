@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYUpload.c,v 1.40 2013/11/28 11:22:34 tom Exp $
+ * $LynxId: LYUpload.c,v 1.41 2021/07/29 20:32:26 tom Exp $
  *
  *  Routines to upload files to the local filesystem.
  *  Created by: Rick Mallett, Carleton University
@@ -53,16 +53,16 @@ int LYUpload(char *line)
     /*
      * Use configured upload commands.
      */
-    if ((directory = strstr(line, "TO=")) == NULL)
+    if ((directory = LYstrstr(line, "TO=")) == NULL)
 	goto failed;
     *(directory - 1) = '\0';
-    /* go past "Directory=" */
+    /* go past "TO=" */
     directory += 3;
 
-    if ((method = strstr(line, "UPLOAD=")) == NULL)
+    if ((method = LYstrstr(line, "UPLOAD=")) == NULL)
 	goto failed;
     /*
-     * Go past "Method=".
+     * Go past "UPLOAD=".
      */
     method += 7;
     method_number = atoi(method);
