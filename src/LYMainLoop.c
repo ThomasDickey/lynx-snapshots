@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMainLoop.c,v 1.243 2020/01/21 22:19:58 tom Exp $
+ * $LynxId: LYMainLoop.c,v 1.244 2021/07/29 20:33:05 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTAccess.h>
@@ -2207,7 +2207,7 @@ static int handle_LYK_DOWNLOAD(int *cmd,
 	    }
 
 	} else if (lynx_edit_mode && !no_dired_support &&
-		   !strstr(links[curdoc.link].lname, "/SugFile=")) {
+		   !LYstrstr(links[curdoc.link].lname, "/SugFile=")) {
 	    /*
 	     * Don't bother making a /tmp copy of the local file.
 	     */

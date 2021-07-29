@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYPrint.c,v 1.108 2020/01/21 21:33:17 tom Exp $
+ * $LynxId: LYPrint.c,v 1.109 2021/07/29 20:38:35 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTAccess.h>
@@ -1111,7 +1111,7 @@ int printfile(DocInfo *newdoc)
     /*
      * Get the number of lines in the file.
      */
-    if ((cp = strstr(link_info, "lines=")) != NULL) {
+    if ((cp = LYstrstr(link_info, "lines=")) != NULL) {
 	/*
 	 * Terminate prev string here.
 	 */
@@ -1127,24 +1127,24 @@ int printfile(DocInfo *newdoc)
     /*
      * Determine the type.
      */
-    if (strstr(link_info, "LOCAL_FILE")) {
+    if (LYstrstr(link_info, "LOCAL_FILE")) {
 	type = TO_FILE;
-    } else if (strstr(link_info, "TO_SCREEN")) {
+    } else if (LYstrstr(link_info, "TO_SCREEN")) {
 	type = TO_SCREEN;
-    } else if (strstr(link_info, "LPANSI")) {
+    } else if (LYstrstr(link_info, "LPANSI")) {
 	Lpansi = TRUE;
 	type = TO_SCREEN;
-    } else if (strstr(link_info, "MAIL_FILE")) {
+    } else if (LYstrstr(link_info, "MAIL_FILE")) {
 	type = MAIL;
-    } else if (strstr(link_info, "PRINTER")) {
+    } else if (LYstrstr(link_info, "PRINTER")) {
 	type = PRINTER;
 
-	if ((cp = strstr(link_info, "number=")) != NULL) {
+	if ((cp = LYstrstr(link_info, "number=")) != NULL) {
 	    /* number of characters in "number=" */
 	    cp += 7;
 	    printer_number = atoi(cp);
 	}
-	if ((cp = strstr(link_info, "pagelen=")) != NULL) {
+	if ((cp = LYstrstr(link_info, "pagelen=")) != NULL) {
 	    /* number of characters in "pagelen=" */
 	    cp += 8;
 	    pagelen = atoi(cp);
