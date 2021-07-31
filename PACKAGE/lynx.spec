@@ -1,4 +1,4 @@
-# $LynxId: lynx.spec,v 1.61 2021/07/27 18:51:59 tom Exp $
+# $LynxId: lynx.spec,v 1.62 2021/07/31 10:25:21 tom Exp $
 Summary: A text-based Web browser
 Name: lynx-dev
 Version: 2.9.0
@@ -48,12 +48,7 @@ HTTP, FTP, WAIS, and NNTP servers.
 	--sysconfdir=%{lynx_etc} \
 	--with-cfg-path=%{lynx_etc}:%{lynx_doc}/samples \
 	--with-textdomain=%{name} \
-	--disable-font-switch \
-	--disable-internal-links \
 	--enable-8bit-toupper \
-	--enable-addrlist-page \
-	--enable-alt-bindings \
-	--enable-ascii-ctypes \
 	--enable-cgi-links \
 	--enable-change-exec \
 	--enable-charset-choice \
@@ -62,7 +57,6 @@ HTTP, FTP, WAIS, and NNTP servers.
 	--enable-exec-links \
 	--enable-exec-scripts \
 	--enable-externs \
-	--enable-file-upload \
 	--enable-font-switch \
 	--enable-forms-options \
 	--enable-gzip-help \
@@ -74,18 +68,14 @@ HTTP, FTP, WAIS, and NNTP servers.
 	--enable-justify-elts \
 	--enable-kbd-layout \
 	--enable-local-docs \
-	--enable-locale-charset \
 	--enable-nested-tables \
 	--enable-nls \
 	--enable-nsl-fork \
 	--enable-partial \
 	--enable-persistent-cookies \
 	--enable-prettysrc \
-	--enable-progressbar \
 	--enable-read-eta \
 	--enable-scrollbar \
-	--enable-session-cache \
-	--enable-sessions \
 	--enable-source-cache \
 	--enable-syslog \
 	--enable-warnings \
@@ -122,6 +112,10 @@ rm -rf $RPM_BUILD_ROOT
 %config %{lynx_etc}/*.lss
 
 %changelog
+
+* Sat Jul 31 2021 Thomas E. Dickey
+- align configure-options with Debian package, removing some which are not
+  needed because they correspond to the default settings.
 
 * Thu May 17 2018 Thomas E. Dickey
 - use "ncursesw6dev", reflecting renaming of ncurses test-packages to avoid

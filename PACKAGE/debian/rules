@@ -1,7 +1,5 @@
 #!/usr/bin/make -f
-# Made with the aid of dh_make, by Craig Small
-# Sample debian/rules that uses debhelper. GNU copyright 1997 by Joey Hess.
-# Some lines taken from debmake, by Cristoph Lameter.
+# $LynxId: rules,v 1.16 2021/07/31 10:23:45 tom Exp $
 
 # Uncomment this to turn on verbose mode.
 #export DH_VERBOSE=1
@@ -72,18 +70,23 @@ configure-stamp:
 		--libdir=/etc/$(PACKAGE) \
 		--enable-8bit-toupper \
 		--enable-cgi-links \
+		--enable-change-exec \
+		--enable-charset-choice \
 		--enable-cjk \
 		--enable-default-colors \
 		--enable-exec-links \
 		--enable-exec-scripts \
 		--enable-externs \
+		--enable-font-switch \
 		--enable-forms-options \
 		--enable-gzip-help \
 		--enable-htmlized-cfg \
+		--enable-internal-links \
 		--enable-ipv6 \
 		--enable-chinese-utf8 \
 		--enable-japanese-utf8 \
 		--enable-justify-elts \
+		--enable-kbd-layout \
 		--enable-local-docs \
 		--enable-nested-tables \
 		--enable-nls \
@@ -95,6 +98,8 @@ configure-stamp:
 		--enable-scrollbar \
 		--enable-source-cache \
 		--enable-syslog \
+		--enable-warnings \
+		--with-bzlib \
 		--with-gnutls=/usr \
 		--with-screen=ncursesw6dev \
 		--with-textdomain=$(PACKAGE) \
@@ -135,7 +140,7 @@ install: install-stamp
 install-stamp: build-stamp
 	dh_testdir
 	dh_testroot
-	dh_clean -k
+	dh_prep
 	dh_installdirs
 
 	$(MAKE) install \
