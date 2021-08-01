@@ -1,7 +1,11 @@
--- $LynxId: CHANGES,v 1.1090 2021/07/31 14:06:26 tom Exp $
+-- $LynxId: CHANGES,v 1.1092 2021/08/01 22:27:02 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
+
+2021-07-31 (2.9.0dev.9)
+* update de.po eo.po et.po sv.po tr.po from
+    http://translationproject.org/latest/lynx
 
 2021-07-31 (2.9.0dev.8)
 * regenerated lynx.pot, sent to translation project -TD
