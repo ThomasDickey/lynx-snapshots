@@ -1,9 +1,11 @@
--- $LynxId: CHANGES,v 1.1092 2021/08/01 22:27:02 tom Exp $
+-- $LynxId: CHANGES,v 1.1093 2021/08/07 14:33:33 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2021-07-31 (2.9.0dev.9)
+2021-08-07 (2.9.0dev.9)
+* strip user/password from ssl_host in HTLoadHTTP, incorrectly passed as
+  part of the server name indicator (Debian #991971) -TD
 * update de.po eo.po et.po sv.po tr.po from
     http://translationproject.org/latest/lynx
 
