@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTP.c,v 1.179 2021/06/08 23:28:23 tom Exp $
+ * $LynxId: HTTP.c,v 1.180 2021/08/07 14:33:59 tom Exp $
  *
  * HyperText Transfer Protocol	- Client implementation		HTTP.c
  * ===========================
@@ -764,6 +764,23 @@ static char *StripIpv6Brackets(char *host)
 }
 #endif
 
+/*
+ * Remove user/password, if any, from the given host-string.
+ */
+#ifdef USE_SSL
+static char *StripUserAuthents(char *host)
+{
+    char *p = strchr(host, '@');
+
+    if (p != NULL) {
+	char *q = host;
+
+	while ((*q++ = *++p) != '\0') ;
+    }
+    return host;
+}
+#endif
+
 /*		Load Document from HTTP Server			HTLoadHTTP()
  *		==============================
  *
@@ -959,6 +976,7 @@ static int HTLoadHTTP(const char *arg,
 	/* get host we're connecting to */
 	ssl_host = HTParse(url, "", PARSE_HOST);
 	ssl_host = StripIpv6Brackets(ssl_host);
+	ssl_host = StripUserAuthents(ssl_host);
 #if defined(USE_GNUTLS_FUNCS)
 	ret = gnutls_server_name_set(handle->gnutls_state,
 				     GNUTLS_NAME_DNS,
