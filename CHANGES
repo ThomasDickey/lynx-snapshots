@@ -1,7 +1,13 @@
--- $LynxId: CHANGES,v 1.1093 2021/08/07 14:33:33 tom Exp $
+-- $LynxId: CHANGES,v 1.1096 2021/08/22 15:24:27 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
+
+2021-08-22 (2.9.0dev.10)
+* re-signed copyright/copying files -TD
+* update fr.po, nl.po, sv.po from
+    http://translationproject.org/latest/lynx
+* update config.sub (2021-08-14)
 
 2021-08-07 (2.9.0dev.9)
 * strip user/password from ssl_host in HTLoadHTTP, incorrectly passed as

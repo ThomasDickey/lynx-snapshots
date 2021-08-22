@@ -1,24 +1,23 @@
 # Swedish translation for Lynx
 # Copyright © 2000, 2001, 2002, 2003, 2004, 2008, 2015, 2021 Free Software Foundation, Inc.
 # This file is distributed under the same license as the lynx package.
-# Peter Krefting <peter@softwolves.pp.se>, 2000-2015, 2015.
-# Anders Jonsson <anders.jonsson@norsjovallen.se>, 2021.
+# Peter Krefting <peter@softwolves.pp.se>, 2000-2021.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: lynx 2.9.0-dev8\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2021-07-31 10:04-0400\n"
-"PO-Revision-Date: 2021-08-02 00:02+0200\n"
-"Last-Translator: Anders Jonsson <anders.jonsson@norsjovallen.se>\n"
+"PO-Revision-Date: 2021-08-09 21:13+0100\n"
+"Last-Translator: Peter Krefting <peter@softwolves.pp.se>\n"
 "Language-Team: Swedish <tp-sv@listor.tp-sv.se>\n"
 "Language: sv\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=utf-8\n"
+"Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "X-Bugs: Report translation errors to the Language-Team address.\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 2.4.2\n"
+"X-Generator: Gtranslator 3.30.1\n"
 
 #. ******************************************************************
 #. * The following definitions are for status line prompts, messages, or
@@ -122,7 +121,7 @@ msgstr "Adressen för lång"
 #: LYMessages.c:57
 #, c-format
 msgid "(Textfield \"%s\"); Inactive.  Press <return> to activate."
-msgstr "(Textinmatningsfält \"%s\"); Inaktivt. Tryck <Enter> för att aktivera."
+msgstr "(Textfält \"%s\"); Inaktivt. Tryck <Enter> för att aktivera."
 
 #. #define FORM_LINK_TEXT_MESSAGE_INA
 #: LYMessages.c:59
@@ -133,24 +132,24 @@ msgstr "(Textinmatningsfält) Inaktivt. Tryck <Enter> för att aktivera."
 #: LYMessages.c:61
 #, c-format
 msgid "(Textarea \"%s\"); Inactive.  Press <return> to activate."
-msgstr "(Textfält \"%s\"); Inaktivt. Tryck <Enter> för att aktivera."
+msgstr "(Textruta \"%s\"); Inaktivt. Tryck <Enter> för att aktivera."
 
 #. #define FORM_LINK_TEXTAREA_MESSAGE_INA
 #: LYMessages.c:63
 msgid "(Textarea) Inactive.  Press <return> to activate."
-msgstr "(Textfält) Inaktivt. Tryck <Enter> för att aktivera."
+msgstr "(Textruta) Inaktivt. Tryck <Enter> för att aktivera."
 
 #. #define FORM_LINK_TEXTAREA_ADV_MSG_INA_E
 #: LYMessages.c:65
 #, c-format
 msgid "(Textarea \"%s\"); Inactive.  Press <return> to activate (%s for editor)."
-msgstr "(Textfält \"%s\"); Inaktivt. Tryck <Enter> för att aktivera (%s för redigeringsprogram)."
+msgstr "(Textruta \"%s\"); Inaktivt. Tryck <Enter> för att aktivera (%s för redigeringsprogram)."
 
 #. #define FORM_LINK_TEXTAREA_MESSAGE_INA_E
 #: LYMessages.c:67
 #, c-format
 msgid "(Textarea) Inactive.  Press <return> to activate (%s for editor)."
-msgstr "(Textfält) Inaktivt. Tryck <Enter> för att aktivera (%s för redigeringsprogram)."
+msgstr "(Textruta) Inaktivt. Tryck <Enter> för att aktivera (%s för redigeringsprogram)."
 
 #. #define FORM_LINK_TEXT_SUBMIT_MESSAGE_INA
 #: LYMessages.c:69
@@ -193,30 +192,30 @@ msgstr "(Filinmatningsfält) Ange filnamn. Använd UPP-/NED-pil eller tabb för 
 #: LYMessages.c:84 LYMessages.c:86
 #, c-format
 msgid "(Textfield \"%s\"); Enter text.  Use UP or DOWN arrows or tab to move off."
-msgstr "(Textinmatningsfält \"%s\"); Ange text. Använd UPP-/NED-pil eller tabb för att lämna."
+msgstr "(Textfält \"%s\"); Ange text. Använd UPP-/NED-pil eller tabb för att lämna."
 
 #. #define FORM_LINK_TEXTAREA_ADV_MSG
 #: LYMessages.c:88
 #, c-format
 msgid "(Textarea \"%s\"); Enter text. Use UP/DOWN arrows or TAB to move off."
-msgstr "(Textfält \"%s\"); Ange text. Använd UPP-/NED-pil eller tabb för att lämna."
+msgstr "(Textruta \"%s\"); Ange text. Använd UPP-/NED-pil eller tabb för att lämna."
 
 #. #define FORM_LINK_TEXTAREA_MESSAGE
 #: LYMessages.c:90
 msgid "(Textarea) Enter text. Use UP/DOWN arrows or TAB to move off."
-msgstr "(Textfält) Ange text. Använd UPP-/NED-pil eller tabb för att lämna."
+msgstr "(Textruta) Ange text. Använd UPP-/NED-pil eller tabb för att lämna."
 
 #. #define FORM_LINK_TEXTAREA_ADV_MSG_E
 #: LYMessages.c:92
 #, c-format
 msgid "(Textarea \"%s\"); Enter text. Use UP/DOWN arrows or TAB to move off (%s for editor)."
-msgstr "(Textfält \"%s\"); Ange text. Använd UPP-/NED-pil eller tabb för att lämna (%s för redigeringsprogram)."
+msgstr "(Textruta \"%s\"); Ange text. UPP-/NED-pil eller tabb lämnar (%s för redigeringsprogram)."
 
 #. #define FORM_LINK_TEXTAREA_MESSAGE_E
 #: LYMessages.c:94
 #, c-format
 msgid "(Textarea) Enter text. Use UP/DOWN arrows or TAB to move off (%s for editor)."
-msgstr "(Textfält) Ange text. UPP-/NED-pil eller tabb lämnar (%s redigerar med program)."
+msgstr "(Textruta) Ange text. UPP-/NED-pil eller tabb lämnar (%s för redigeringsprogram)."
 
 #. #define FORM_LINK_TEXT_UNM_MSG
 #: LYMessages.c:96
@@ -366,7 +365,7 @@ msgstr "INAKTIV skriptknapp. Använd UPP-/NED-pil eller tabb för att lämna."
 #: LYMessages.c:152
 #, c-format
 msgid "(Option list \"%s\"); Hit return to select option."
-msgstr "(Alternativlista \"%s\"); Tryck Enter för att välja."
+msgstr "(Alternativlista \"%s\"); Tryck Enter och använd pilar och Enter för att välja."
 
 #. #define FORM_LINK_OPTION_LIST_MESSAGE
 #: LYMessages.c:154
@@ -377,7 +376,7 @@ msgstr "(Alternativlista) Tryck Enter och använd pilar och Enter för att välj
 #: LYMessages.c:156
 #, c-format
 msgid "(Choice entry \"%s\"); Use arrow keys and return to select option."
-msgstr "(Vallista \"%s\"); Använd piltangenter och Enter för att välja."
+msgstr "(Valpost \"%s\"); Använd piltangenter och Enter för att välja."
 
 #. #define CHOICE_LIST_MESSAGE
 #: LYMessages.c:158
@@ -552,7 +551,7 @@ msgstr "Trasig \"mailto\" i formulär! Avbryter!"
 
 #: LYMessages.c:214
 msgid "Warning!  Control codes in mail address replaced by ?"
-msgstr "Varning!  Kontrollkoder i e-postadress ersatta med \"?\""
+msgstr "Varning!  Kontrollkoder i e-postadress ersatta med frågetecken"
 
 #: LYMessages.c:215
 msgid "Mail disallowed!  Cannot submit."
@@ -782,7 +781,7 @@ msgstr "Denna speciella adress kan inte vara formulärmål!"
 
 #: LYMessages.c:293
 msgid "URL is not in starting realm!"
-msgstr "Adressen är inte i startriket!"
+msgstr "Adressen är inte i startmängden!"
 
 #: LYMessages.c:294
 msgid "News posting is disabled!"
@@ -981,7 +980,7 @@ msgstr "Tolkar nu HTML enligt \"TagSoup\"-modellen."
 
 #: LYMessages.c:362
 msgid "Now using SortaSGML parsing of HTML!"
-msgstr "Tolkar nu HTML enligt \"SortaSGML\"-modellen!"
+msgstr "Tolkar nu HTML enligt \"SortaSGML\"-modellen."
 
 #: LYMessages.c:363
 msgid "You are already at the end of this document."
@@ -1003,7 +1002,7 @@ msgstr "Länk nummer %d är redan nuvarande."
 
 #: LYMessages.c:367
 msgid "You are already at the first document"
-msgstr "Du är redan i det första dokumentet"
+msgstr "Du är redan i det första dokumentet."
 
 #: LYMessages.c:368
 msgid "There are no links above this line of the document."
@@ -1141,7 +1140,7 @@ msgstr "Redigera föregående genväg: "
 
 #: LYMessages.c:405
 msgid "Edit a previous shortcut: "
-msgstr "Redigera en tidigare genväg: "
+msgstr "Redigera en tidigare genväg:"
 
 #: LYMessages.c:406
 #, c-format
@@ -1242,7 +1241,7 @@ msgstr "Kan inte öppna avvisningsfilen."
 
 #: LYMessages.c:432
 msgid "Unable to open traversal errors output file"
-msgstr "Kan inte öppna traverseringens felfil"
+msgstr "Kan inte öppna traverseringens felfil."
 
 #: LYMessages.c:433
 msgid "TRAVERSAL WAS INTERRUPTED"
@@ -1796,7 +1795,7 @@ msgstr " index"
 
 #: LYMessages.c:595
 msgid " to return to Lynx."
-msgstr " för att återgå till Lynx."
+msgstr " för att återgå till Lynx"
 
 #: LYMessages.c:596
 msgid "Accept Changes"
@@ -1875,7 +1874,7 @@ msgstr "Identifieringssträngen innehåller inte \"Lynx\" eller \"L_y_n_x\""
 #. #define UA_PLEASE_USE_LYNX
 #: LYMessages.c:619
 msgid "Use \"L_y_n_x\" or \"Lynx\" in User-Agent, or it looks like intentional deception!"
-msgstr "Använd \"L_y_n_x\" eller \"Lynx\" i identifieringen, annars ser det ut som medvetet bedrägeri!"
+msgstr "Använd \"L_y_n_x\" eller \"Lynx\" i identifieringen, annars ser det ut som medvetet bedrägeri"
 
 #. #define UA_CHANGE_DISABLED
 #: LYMessages.c:621
@@ -1941,7 +1940,7 @@ msgstr "Servern bad om %d-omdirigering för POST-data till"
 
 #: LYMessages.c:640
 msgid "P)roceed, use G)ET or C)ancel "
-msgstr "P=Fortsätt, G=använd Get, C=Avbryt "
+msgstr "P=Fortsätt, G=använd Get, C=Avbryt"
 
 #: LYMessages.c:641
 msgid "P)roceed, or C)ancel "
@@ -2859,12 +2858,12 @@ msgstr "\tIndrag: första=%.0f övriga=%.0f, Höjd=%.1f Djup=%.1f\n"
 #: WWW/Library/Implementation/HTAABrow.c:575
 #, c-format
 msgid "username for realm %s changed from %s to %s"
-msgstr "användarnamn för rike %s ändrades från %s till %s"
+msgstr "användar-id för sfären %s ändrades från %s till %s"
 
 #: WWW/Library/Implementation/HTAABrow.c:591
 #, c-format
 msgid "password for realm %s user %s changed"
-msgstr "lösenord för rike %s användare %s ändrades"
+msgstr "lösenordet för sfär %s användare %s ändrades"
 
 #: WWW/Library/Implementation/HTAABrow.c:703
 #, c-format
@@ -3126,11 +3125,11 @@ msgstr "Adresslängden verkar ogiltig"
 
 #: WWW/Library/Implementation/HTTCP.c:1868
 msgid "SOCKS5: no hostname found."
-msgstr "SOCKS5: inget värdnamn hittades."
+msgstr "SOCKS5: inget värdnamn upptäcktes."
 
 #: WWW/Library/Implementation/HTTCP.c:1874
 msgid "SOCKS5: hostname too long."
-msgstr "SOCKS5: värdnamnet är för långt."
+msgstr "SOCKS5: värdnamnet för långt."
 
 #: WWW/Library/Implementation/HTTCP.c:1892
 #, c-format
@@ -3191,23 +3190,23 @@ msgstr "SOCKS-serverfel"
 
 #: WWW/Library/Implementation/HTTCP.c:2317
 msgid "connection not allowed by ruleset"
-msgstr "anslutningen tillåts inte av regeluppsättningen"
+msgstr "anslutning inte tillåten av regeluppsättning"
 
 #: WWW/Library/Implementation/HTTCP.c:2320
 msgid "network unreachable"
-msgstr "nätverket är inte nåbart"
+msgstr "nätverket kan inte nås"
 
 #: WWW/Library/Implementation/HTTCP.c:2323
 msgid "host unreachable"
-msgstr "värden är inte nåbar"
+msgstr "värden kan inte nås"
 
 #: WWW/Library/Implementation/HTTCP.c:2326
 msgid "connection refused"
-msgstr "anslutningen nekades"
+msgstr "anslutningen avslogs"
 
 #: WWW/Library/Implementation/HTTCP.c:2329
 msgid "TTL expired"
-msgstr "TTL har gått ut"
+msgstr "TTL utlöpte"
 
 #: WWW/Library/Implementation/HTTCP.c:2332
 msgid "command not supported"
@@ -3215,7 +3214,7 @@ msgstr "kommandot stöds ej"
 
 #: WWW/Library/Implementation/HTTCP.c:2335
 msgid "address type not supported"
-msgstr "adresstypen stöds ej"
+msgstr "addresstypen stöds ej"
 
 #: WWW/Library/Implementation/HTTCP.c:2338
 msgid "unknown SOCKS error code"
@@ -3237,12 +3236,12 @@ msgstr "SSL-återanrop:%s, preverify_ok=%d, ssl_okay=%d"
 #: WWW/Library/Implementation/HTTP.c:668
 #, c-format
 msgid "User/password contains only punctuation: %s"
-msgstr "Användare/lösenord innehåller endast skiljetecken: %s"
+msgstr "Användar-id/lösenord innehåller endast interpunktion: %s"
 
 #: WWW/Library/Implementation/HTTP.c:672
 #, c-format
 msgid "User/password may be confused with hostname: '%s' (e.g, '%s')"
-msgstr "Användare/lösenord kan förväxlas med värdnamn: \"%s\" (t.ex., \"%s\")"
+msgstr "Användar-id/lösenord kan förväxlas med värdnamn: \"%s\" (d.v.s., \"%s\")"
 
 #: WWW/Library/Implementation/HTTP.c:733
 #, c-format
@@ -3432,7 +3431,7 @@ msgstr "Den första siffran efter varje post är dess relativa poäng, "
 
 #: WWW/Library/Implementation/HTWAIS.c:473
 msgid "the second is the number of lines in the item."
-msgstr "den andra är antalet rader i posten."
+msgstr "den andra är antalet rader i posten"
 
 #: WWW/Library/Implementation/HTWAIS.c:515
 msgid " (bad file name)"
@@ -3592,11 +3591,13 @@ msgstr "Minnet slut, visning avbruten!"
 msgid "Memory exhausted, will interrupt transfer!"
 msgstr "Minnet slut, avbryter överföring!"
 
+# l = line
 #: src/GridText.c:1719
 #, c-format
 msgid " (l%d of %d)"
 msgstr " (r%d av %d)"
 
+# p = page
 #: src/GridText.c:1728
 #, c-format
 msgid " (p%d of %d)"
@@ -3695,7 +3696,7 @@ msgstr "Ombryt rader så att de passar i visat fält?"
 
 #: src/GridText.c:13772
 msgid "Very long lines have been truncated!"
-msgstr "Mycket långa rader har trunkerats!"
+msgstr "mycket långa rader har trunkerats!"
 
 #: src/HTAlert.c:164 src/LYShowInfo.c:389 src/LYShowInfo.c:393
 msgid "bytes"
@@ -4185,7 +4186,7 @@ msgstr "Målet är inte en giltig katalog! Begäran avvisas."
 
 #: src/LYLocal.c:711
 msgid "Source and destination are the same location!  Request ignored!"
-msgstr "Källa och mål är samma plats! Begäran ignorerad!"
+msgstr "Källa och mål är samma plats! Begäran ignorerad."
 
 #: src/LYLocal.c:735
 msgid "Remove all tagged files and directories?"
@@ -4489,7 +4490,7 @@ msgstr "%s version %s (%s)"
 #: src/LYMain.c:3263
 #, c-format
 msgid "Built on %s%s.\n"
-msgstr "Byggd på %s%s.\n"
+msgstr "Byggd den %s%s.\n"
 
 #: src/LYMain.c:3277
 msgid "Copyrights held by the Lynx Developers Group,"
@@ -4505,7 +4506,7 @@ msgstr "Distribuerad enligt GNU General Public License (version 2)."
 
 #: src/LYMain.c:3280
 msgid "See https://lynx.invisible-island.net/ and the online help for more information."
-msgstr "Se https://lynx.invisible-island.net/ och direkthjälpen för ytterligare information."
+msgstr "Se http://lynx.invisible-island.net/ och direkthjälpen för ytterligare information."
 
 #: src/LYMain.c:4139
 #, c-format
@@ -4870,7 +4871,7 @@ msgstr "fäll ihop"
 
 #: src/LYOptions.c:2340
 msgid "trim-lines"
-msgstr "radborttagning"
+msgstr "beskär-rader"
 
 #: src/LYOptions.c:2351
 msgid "STANDARD"
@@ -5063,11 +5064,11 @@ msgstr "Fråga för SSL"
 
 #: src/LYOptions.c:3853
 msgid "SSL client certificate file"
-msgstr "SSL-klientcertifikatfil"
+msgstr "Fil för SSL-klientcertifikat"
 
 #: src/LYOptions.c:3857
 msgid "SSL client key file"
-msgstr "SSL-klientnyckelfil"
+msgstr "Fil för SSL-klientnyckel"
 
 #: src/LYOptions.c:3863
 msgid "Keyboard Input"
@@ -5127,7 +5128,7 @@ msgstr "Förvald dokumentteckenuppsättning"
 
 #: src/LYOptions.c:3977
 msgid "Internationalized domain names"
-msgstr "Internationaliserade domännamn"
+msgstr "Internationella domännamn"
 
 #.
 #. * Since CJK people hardly mixed with other world
@@ -5214,7 +5215,7 @@ msgstr "Fäll ihop BR-taggar"
 #. Trim blank lines: ON/OFF
 #: src/LYOptions.c:4125
 msgid "Trim blank lines"
-msgstr "Ta bort tomma rader"
+msgstr "Beskär tomrader"
 
 #.
 #. * Headers Transferred to Remote Servers
@@ -5300,7 +5301,7 @@ msgstr "Sortering för lokala kataloger"
 #. Local Directory Order: SELECT
 #: src/LYOptions.c:4225
 msgid "Local directory sort order"
-msgstr "Sorteringsordning för lokala kataloger"
+msgstr "Sortering för lokala kataloger"
 
 #: src/LYOptions.c:4234
 msgid "Show dot files"
@@ -5400,7 +5401,7 @@ msgstr "Fördefinierade utskriftsalternativ:"
 
 #: src/LYPrint.c:1299
 msgid "Print options:"
-msgstr "Utskriftsalternativ:"
+msgstr "Utskriftsalternativ"
 
 #: src/LYPrint.c:1306
 msgid "Save to a local file"
