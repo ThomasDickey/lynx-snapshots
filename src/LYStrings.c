@@ -1,4 +1,4 @@
-/* $LynxId: LYStrings.c,v 1.278 2021/06/09 22:29:17 tom Exp $ */
+/* $LynxId: LYStrings.c,v 1.279 2021/10/24 09:05:19 tom Exp $ */
 #include <HTUtils.h>
 #include <HTCJK.h>
 #include <UCAux.h>
@@ -2755,8 +2755,10 @@ char *LYRemoveBlanks(char *buffer)
  */
 char *LYSkipBlanks(char *buffer)
 {
-    while (isspace(UCH((*buffer))))
-	buffer++;
+    if (buffer != NULL) {
+	while (isspace(UCH((*buffer))))
+	    buffer++;
+    }
     return buffer;
 }
 
@@ -2765,8 +2767,10 @@ char *LYSkipBlanks(char *buffer)
  */
 char *LYSkipNonBlanks(char *buffer)
 {
-    while (*buffer != 0 && !isspace(UCH((*buffer))))
-	buffer++;
+    if (buffer != NULL) {
+	while (*buffer != 0 && !isspace(UCH((*buffer))))
+	    buffer++;
+    }
     return buffer;
 }
 

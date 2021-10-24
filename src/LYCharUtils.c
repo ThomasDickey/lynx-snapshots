@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYCharUtils.c,v 1.136 2021/06/29 22:01:12 tom Exp $
+ * $LynxId: LYCharUtils.c,v 1.137 2021/10/24 00:47:08 tom Exp $
  *
  *  Functions associated with LYCharSets.c and the Lynx version of HTML.c - FM
  *  ==========================================================================
@@ -2912,8 +2912,11 @@ int LYLegitimizeHREF(HTStructured * me, char **href,
 		    p = StrChr(p, '\0');
 		    *pound = '#';	/* restore */
 		    convert_to_spaces(pound, FALSE);
-		    if (p < pound)
-			strcpy(p, pound);
+		    if (p < pound) {
+			int n;
+
+			for (n = 0; (p[n] = pound[n]) != '\0'; ++n) ;
+		    }
 		}
 	    }
 	}

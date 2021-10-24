@@ -1,5 +1,5 @@
 /*
- * $LynxId: SGML.c,v 1.177 2021/07/23 20:36:47 tom Exp $
+ * $LynxId: SGML.c,v 1.182 2021/10/24 22:18:29 tom Exp $
  *
  *			General SGML Parser code		SGML.c
  *			========================
@@ -2467,9 +2467,17 @@ static void SGML_character(HTStream *me, int c_in)
 	 */
 	testlast = string->size - 2 - me->trailing_spaces - me->leading_spaces;
 
+#ifdef USE_COLOR_STYLE
+#define TagSize(p) ((p)->name_len)
+#else
+#define TagSize(p) (strlen((p)->name))
+#endif
+
 	if (TOUPPER(c) != ((testlast < 0)
 			   ? '/'
-			   : testtag->name[testlast])) {
+			   : ((testlast < (int) TagSize(testtag))
+			      ? testtag->name[testlast]
+			      : 0))) {
 	    int i;
 
 	    /*

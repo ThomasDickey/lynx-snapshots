@@ -1,5 +1,5 @@
 /*
- * $LynxId: GridText.c,v 1.329 2021/06/29 22:01:12 tom Exp $
+ * $LynxId: GridText.c,v 1.334 2021/10/24 16:13:59 tom Exp $
  *
  *		Character grid hypertext object
  *		===============================
@@ -784,8 +784,7 @@ static int StyleToCols(HText *text, HTLine *line, int nstyle)
  */
 static void LYClearHiText(TextAnchor *a)
 {
-    FREE(a->lites.hl_info);
-
+    a->lites.hl_info = NULL;
     a->lites.hl_base.hl_text = NULL;
     a->lites.hl_len = 0;
 }
@@ -849,7 +848,7 @@ static int LYAdjHiTextPos(TextAnchor *a, int count)
     else
 	result = a->lites.hl_base.hl_text;
 
-    return (result != 0) ? (int) (LYSkipBlanks(result) - result) : 0;
+    return (result != NULL) ? (int) (LYSkipBlanks(result) - result) : 0;
 }
 
 #else
@@ -3006,7 +3005,7 @@ static void split_line(HText *text, unsigned split)
 	    ctrl_chars_on_this_line += utfxtra_on_this_line;
 
 	    /* Add the data to the new line. -FM */
-	    strcat(linedata, p);
+	    for (i = 0; (linedata[i] = p[i]) != '\0'; ++i) ;
 	    line->size = (unsigned short) (line->size + plen);
 	}
     }
@@ -4109,8 +4108,10 @@ void HText_appendCharacter(HText *text, int ch)
 	return;
 #endif
     } else if (ch == LY_SOFT_NEWLINE) {
-	line->data[line->size++] = LY_SOFT_NEWLINE;
-	line->data[line->size] = '\0';
+	if (line->size < MAX_LINE) {
+	    line->data[line->size++] = LY_SOFT_NEWLINE;
+	    line->data[line->size] = '\0';
+	}
 	return;
     }
 
@@ -4147,10 +4148,12 @@ void HText_appendCharacter(HText *text, int ch)
 		    + UTFXTRA_ON_THIS_LINE == 0)
 		    HText_appendCharacter(text, LY_SOFT_NEWLINE);
 	    }
-	    line->data[line->size++] = (char) ch;
-	    line->data[line->size] = '\0';
-	    utfxtra_on_this_line++;
-	    ctrl_chars_on_this_line++;
+	    if (line->size < MAX_LINE) {
+		line->data[line->size++] = (char) ch;
+		line->data[line->size] = '\0';
+		utfxtra_on_this_line++;
+		ctrl_chars_on_this_line++;
+	    }
 #ifdef EXP_WCWIDTH_SUPPORT
 	    /* update utfxtracells_on_this_line on last byte of UTF-8 sequence */
 	    {
@@ -4302,6 +4305,8 @@ void HText_appendCharacter(HText *text, int ch)
 	    } else {
 		for (; here < target; here++) {
 		    /* Put character into line */
+		    if (line->size >= MAX_LINE)
+			break;
 		    line->data[line->size++] = ' ';
 		    line->data[line->size] = '\0';
 		}
@@ -4465,7 +4470,9 @@ void HText_appendCharacter(HText *text, int ch)
 
 	line = text->last_line;	/* May have changed */
 
-	if (IS_CJK_TTY && text->kanji_buf) {
+	if (line->size >= MAX_LINE) {
+	    ;
+	} else if (IS_CJK_TTY && text->kanji_buf) {
 	    hi = UCH(text->kanji_buf);
 	    lo = UCH(ch);
 
@@ -8091,7 +8098,7 @@ static AnchorIndex **allocAnchorIndex(unsigned *size)
 			p->filler = ' ';
 			break;
 		    }
-		    p->length = (int) strlen(p->value);
+		    p->length = p->value ? (int) strlen(p->value) : 0;
 
 		    if ((q = result[anchor->line_num]) != NULL) {
 			/* insert, ordering by offset */
@@ -8197,7 +8204,7 @@ void print_wwwfile_to_fd(FILE *fp,
     inx = allocAnchorIndex(&inx_size);
 
     line = FirstHTLine(HTMainText);
-    for (line_num = 0;; ++line_num, line = line->next) {
+    for (line_num = 0; line != NULL; ++line_num, line = line->next) {
 	if (in_field >= 0) {
 	    this_wrap = next_wrap;
 	    next_wrap = 0;	/* FIXME - allow for multiple continuations */
