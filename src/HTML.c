@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTML.c,v 1.195 2021/07/23 20:23:54 tom Exp $
+ * $LynxId: HTML.c,v 1.196 2021/10/24 19:10:57 tom Exp $
  *
  *		Structured stream to Rich hypertext converter
  *		============================================
@@ -6753,7 +6753,8 @@ static int HTML_end_element(HTStructured * me, int element_number,
 		*cp = '\0';
 		StrAllocCopy(temp, data);
 		*cp = '\n';
-		data = (cp + 1);
+		data = NULL;	/* HTML_put_characters may overwrite this */
+		StrAllocCopy(data, cp + 1);
 	    } else {
 		if (*data != '\0') {
 		    StrAllocCopy(temp, data);
@@ -6826,6 +6827,9 @@ static int HTML_end_element(HTStructured * me, int element_number,
 		} else {
 		    FREE(temp);
 		}
+	    }
+	    if (data != empty) {
+		FREE(data);
 	    }
 	    FREE(temp);
 	    cp = NULL;

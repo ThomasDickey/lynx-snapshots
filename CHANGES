@@ -1,9 +1,11 @@
--- $LynxId: CHANGES,v 1.1097 2021/08/27 08:22:42 tom Exp $
+-- $LynxId: CHANGES,v 1.1098 2021/10/24 17:46:32 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2021-08-27 (2.9.0dev.10)
+2021-10-24 (2.9.0dev.10)
+* several fixes for problems found using asan2 with fuzzer-generated data
+  (report/testcases by Kuang-che Wu) -TD
 * re-signed copyright/copying files -TD
 * update fr.po, id.po, nl.po, sv.po from
     http://translationproject.org/latest/lynx

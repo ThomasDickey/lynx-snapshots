@@ -1,5 +1,5 @@
 /*
- * $LynxId: TRSTable.c,v 1.38 2020/01/21 22:19:58 tom Exp $
+ * $LynxId: TRSTable.c,v 1.39 2021/10/24 18:05:05 tom Exp $
  *		Simple table object
  *		===================
  * Authors
@@ -444,7 +444,7 @@ static int Stbl_addCellToRow(STable_rowinfo *me, STable_cellinfo *colinfo, int n
     {
 	int growby = 0;
 
-	while (me->ncells + colspan + 1 > me->allocated + growby)
+	while (me->ncells + colspan + 1 >= me->allocated + growby)
 	    growby += CELLS_GROWBY;
 	if (growby) {
 	    if (me->allocated == 0 && !me->cells) {
@@ -1064,7 +1064,7 @@ int Stbl_addRowToTable(STable_info *me, int alignment,
 	int i;
 	int growby = 0;
 
-	while (me->nrows + 2 > me->allocated_rows + growby)
+	while (me->nrows + 2 >= me->allocated_rows + growby)
 	    growby += ROWS_GROWBY;
 	if (growby) {
 	    if (me->allocated_rows == 0 && !me->rows) {
@@ -1473,7 +1473,7 @@ int Stbl_addCellToTable(STable_info *me, int colspan,
     {
 	int growby = 0;
 
-	while (icell + colspan + 1 > me->allocated_sumcols + growby)
+	while (icell + colspan + 1 >= me->allocated_sumcols + growby)
 	    growby += CELLS_GROWBY;
 	if (growby) {
 	    if (me->allocated_sumcols == 0 && !me->sumcols) {
@@ -1669,7 +1669,7 @@ int Stbl_addColInfo(STable_info *me,
     {
 	int growby = 0;
 
-	while (icolinfo + colspan + 1 > me->allocated_sumcols + growby)
+	while (icolinfo + colspan + 1 >= me->allocated_sumcols + growby)
 	    growby += CELLS_GROWBY;
 	if (growby) {
 	    if (me->allocated_sumcols == 0) {

@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYUtils.c,v 1.299 2021/06/09 21:46:53 tom Exp $
+ * $LynxId: LYUtils.c,v 1.300 2021/10/24 16:25:12 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTCP.h>
@@ -2969,7 +2969,7 @@ BOOLEAN inlocaldomain(void)
 	    if (ulen > strlen(LYLocalDomain) &&
 		!memcmp(LYLocalDomain,
 			me.ut_host + ulen - strlen(LYLocalDomain),
-			ulen)) {
+			strlen(LYLocalDomain))) {
 		result = TRUE;
 	    }
 #ifdef LINUX
