@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTP.c,v 1.180 2021/08/07 14:33:59 tom Exp $
+ * $LynxId: HTTP.c,v 1.181 2021/11/04 22:15:26 Sylvain.Bertrand Exp $
  *
  * HyperText Transfer Protocol	- Client implementation		HTTP.c
  * ===========================
@@ -1741,13 +1741,13 @@ static int HTLoadHTTP(const char *arg,
 		anAnchor->post_content_type
 		? anAnchor->post_content_type
 		: "lose"));
-	HTBprintf(&command, "Content-type: %s%c%c",
+	HTBprintf(&command, "Content-Type: %s%c%c",
 		  anAnchor->post_content_type
 		  ? anAnchor->post_content_type
 		  : "lose",
 		  CR, LF);
 
-	HTBprintf(&command, "Content-length: %d%c%c",
+	HTBprintf(&command, "Content-Length: %d%c%c",
 		  !isBEmpty(anAnchor->post_data)
 		  ? BStrLen(anAnchor->post_data)
 		  : 0,
