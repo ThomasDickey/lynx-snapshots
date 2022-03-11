@@ -1,16 +1,18 @@
--- $LynxId: CHANGES,v 1.1100 2021/11/05 00:04:05 tom Exp $
+-- $LynxId: CHANGES,v 1.1101 2022/03/11 01:29:33 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2021-11-04 (2.9.0dev.11)
+2022-03-10 (2.9.0dev.11)
 * change capitalization of "Content-type" sent to the remote server to work
   around "HeavyThing" server which does not follow RFC 2616 in treating field
   name as case insensitive (report/patch by Sylvain Bertrand)
 * improved several configure macros:
-  CF_ADD_INCDIR, CF_CHECK_EXTERN_DATA, CF_DISABLE_ECHO, CF_MAKEFLAGS,
-  CF_NCURSES_CONFIG, CF_NCURSES_LIBS, CF_PKG_CONFIG, CF_SIZECHANGE,
-  CF_TRY_XOPEN_SOURCE, CF_WITH_PATH, CF_XOPEN_SOURCE
+  AM_WITH_NLS, CF_ADD_INCDIR, CF_CHECK_EXTERN_DATA, CF_DISABLE_ECHO,
+  CF_FIX_WARNINGS, CF_MAKEFLAGS, CF_NCURSES_CONFIG, CF_NCURSES_LIBS,
+  CF_PKG_CONFIG, CF_SIZECHANGE, CF_TRY_XOPEN_SOURCE, CF_WITH_PATH,
+  CF_XOPEN_SOURCE
+* update config.guess (2022-01-09), config.sub (2022-01-03)
 
 2021-10-24 (2.9.0dev.10)
 * several fixes for problems found using asan2 with fuzzer-generated data
