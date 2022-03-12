@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFTP.c,v 1.142 2020/02/26 23:40:14 tom Exp $
+ * $LynxId: HTFTP.c,v 1.143 2022/03/12 12:06:13 tom Exp $
  *
  *			File Transfer Protocol (FTP) Client
  *			for a WorldWideWeb browser
@@ -1175,12 +1175,12 @@ static int get_listen_socket(void)
 
 #ifdef INET6
     /* query address family of control connection */
+    memset(&soc_A, 0, sizeof(soc_A));
     slen = (LY_SOCKLEN) sizeof(soc_A);
     if (getsockname(control->socket, SOCKADDR_OF(soc_A), &slen) < 0) {
 	return HTInetStatus("getsockname failed");
     }
     af = SOCKADDR_OF(soc_A)->sa_family;
-    memset(&soc_A, 0, sizeof(soc_A));
 #endif /* INET6 */
 
 /*  Create internet socket

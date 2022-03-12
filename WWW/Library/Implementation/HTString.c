@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTString.c,v 1.81 2021/06/09 20:16:06 tom Exp $
+ * $LynxId: HTString.c,v 1.82 2022/03/12 12:19:10 Gisle.Vanem Exp $
  *
  *	Case-independent string comparison		HTString.c
  *
@@ -677,7 +677,7 @@ PUBLIC_IF_FIND_LEAKS char *StrAllocVsprintf(char **pstr,
     char *fmt_ptr;
 #endif /* SAVE_TIME_NOT_SPACE */
     size_t have, need;
-    char *dst_ptr = *pstr;
+    char *dst_ptr = pstr ? *pstr : NULL;
     const char *format = fmt;
 
     if (isEmpty(fmt))
