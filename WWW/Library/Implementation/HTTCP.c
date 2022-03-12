@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTCP.c,v 1.160 2021/06/08 23:44:43 tom Exp $
+ * $LynxId: HTTCP.c,v 1.162 2022/03/12 16:45:47 tom Exp $
  *
  *			Generic Communication Code		HTTCP.c
  *			==========================
@@ -1888,9 +1888,9 @@ int HTDoConnect(const char *url,
 	HTSACat(&socks5_new_url, socks5_proxy);
 	url = socks5_new_url;
 
-	socks5_protocol = HTSprintf0(NULL,
-				     gettext("(for %s at %s) SOCKS5"),
-				     protocol, socks5_host);
+	HTSprintf0(&socks5_protocol,
+		   gettext("(for %s at %s) SOCKS5"),
+		   protocol, socks5_host);
 	protocol = socks5_protocol;
     }
 #ifndef INET6
@@ -2032,6 +2032,8 @@ int HTDoConnect(const char *url,
 	 *                      write  service  procedure.  This will be
 	 *                      the normal case.
 	 */
+	CTRACE((tfp, "connect(): status: %d, SOCK_ERRNO: %d\n", status, SOCKET_ERRNO));
+
 	if ((status < 0) &&
 	    (SOCKET_ERRNO == EINPROGRESS
 #ifdef EAGAIN
@@ -2091,7 +2093,7 @@ int HTDoConnect(const char *url,
 		 * If we suspend, then it is possible that select will be
 		 * interrupted.  Allow for this possibility.  - JED
 		 */
-		if ((ret == -1) && (errno == EINTR))
+		if ((ret == -1) && (SOCKET_ERRNO == EINTR))
 		    continue;
 
 #ifdef SOCKET_DEBUG_TRACE
@@ -2273,7 +2275,7 @@ int HTDoConnect(const char *url,
 	pbuf[0] = 0x05;		/* VER: protocol version: X'05' */
 	pbuf[1] = 0x01;		/* NMETHODS: 1 */
 	pbuf[2] = 0x00;		/* METHOD: X'00' NO AUTHENTICATION REQUIRED */
-	if (write(*s, pbuf, 3) != 3) {
+	if (NETWRITE(*s, (char *) pbuf, 3) != 3) {
 	    goto report_system_err;
 	} else if (HTDoRead(*s, pbuf, 2) != 2) {
 	    goto report_system_err;
@@ -2298,7 +2300,7 @@ int HTDoConnect(const char *url,
 	    memcpy(&pbuf[i], (unsigned char *) &x, sizeof x);
 	    i += (unsigned) sizeof(x);
 	}
-	if ((size_t) write(*s, pbuf, i) != i) {
+	if ((size_t) NETWRITE(*s, (char *) pbuf, i) != i) {
 	    goto report_system_err;
 	} else if ((unsigned) HTDoRead(*s, pbuf, 4) != 4) {
 	    goto report_system_err;
@@ -2534,7 +2536,7 @@ int HTDoRead(int fildes,
 	    break;
 	}
 #else /* UNIX */
-	result = SOCKET_READ(fildes, buf, nbyte);
+	result = NETREAD(fildes, (char *) buf, nbyte);
 #endif /* !UNIX */
 #endif /* UCX && VAXC */
     }

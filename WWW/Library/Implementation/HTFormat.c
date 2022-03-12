@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFormat.c,v 1.91 2019/01/02 23:25:10 tom Exp $
+ * $LynxId: HTFormat.c,v 1.92 2022/03/12 14:40:38 tom Exp $
  *
  *		Manage different file formats			HTFormat.c
  *		=============================
@@ -1183,9 +1183,7 @@ static int HTZzFileCopy(FILE *zzfp, HTStream *sink)
      */
     targetClass = *(sink->isa);	/* Copy pointers to procedures */
 
-    s.zalloc = Z_NULL;
-    s.zfree = Z_NULL;
-    s.opaque = Z_NULL;
+    memset(&s, 0, sizeof(s));
     status = inflateInit(&s);
     if (status != Z_OK) {
 	CTRACE((tfp, "HTZzFileCopy inflateInit() %s\n", zError(status)));

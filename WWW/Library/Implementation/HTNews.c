@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTNews.c,v 1.78 2021/06/09 19:29:36 tom Exp $
+ * $LynxId: HTNews.c,v 1.79 2022/03/12 15:45:16 tom Exp $
  *
  *			NEWS ACCESS				HTNews.c
  *			===========
@@ -1609,7 +1609,7 @@ static int read_list(char *arg)
     PUTS("Newsgroups");
     END(HTML_H1);
     PUTC('\n');
-    p = line;
+    *(p = line) = '\0';
     START(HTML_DLC);
     PUTC('\n');
     while (!done) {

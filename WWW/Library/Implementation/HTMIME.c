@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTMIME.c,v 1.101 2021/06/29 22:01:12 tom Exp $
+ * $LynxId: HTMIME.c,v 1.102 2022/03/12 14:47:02 tom Exp $
  *
  *			MIME Message Parse			HTMIME.c
  *			==================
@@ -2394,7 +2394,7 @@ void HTmmdecode(char **target,
     if ((buf = typeMallocn(char, strlen(source) + 1)) == 0)
 	  outofmem(__FILE__, "HTmmdecode");
 
-    for (s = source, u = buf; *s;) {
+    for (s = source, *(u = buf) = '\0'; *s;) {
 	if (!strncasecomp(s, "=?ISO-2022-JP?B?", 16)) {
 	    base64 = 1;
 	} else {
