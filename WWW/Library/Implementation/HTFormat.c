@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFormat.c,v 1.92 2022/03/12 14:40:38 tom Exp $
+ * $LynxId: HTFormat.c,v 1.95 2022/03/30 00:29:50 tom Exp $
  *
  *		Manage different file formats			HTFormat.c
  *		=============================
@@ -55,6 +55,10 @@ static float HTMaxSecs = 1e10;	/* No effective limit */
 
 #ifdef DISP_PARTIAL
 #include <LYMainLoop.h>
+#endif
+
+#ifdef USE_BROTLI
+#include <brotli/decode.h>
 #endif
 
 BOOL HTOutputSource = NO;	/* Flag: shortcut parser to stdout */
@@ -375,6 +379,8 @@ static HTPresentation *HTFindPresentation(HTFormat rep_in,
 					  HTPresentation *fill_in,
 					  HTParentAnchor *anchor)
 {
+#undef THIS_FUNC
+#define THIS_FUNC "HTFindPresentation"
     HTAtom *wildcard = NULL;	/* = HTAtom_for("*"); lookup when needed - kw */
     int n;
     int i;
@@ -385,7 +391,7 @@ static HTPresentation *HTFindPresentation(HTFormat rep_in,
     HTPresentation *last_default_match = 0;
     HTPresentation *strong_subtype_wildcard_match = 0;
 
-    CTRACE((tfp, "HTFormat: Looking up presentation for %s to %s\n",
+    CTRACE((tfp, THIS_FUNC ": Looking up presentation for %s to %s\n",
 	    HTAtom_name(rep_in), HTAtom_name(rep_out)));
 
     n = HTList_count(HTPresentations);
@@ -395,7 +401,7 @@ static HTPresentation *HTFindPresentation(HTFormat rep_in,
 	    if (pres->rep_out == rep_out) {
 		if (failsMailcap(pres, anchor))
 		    continue;
-		CTRACE((tfp, "FindPresentation: found exact match: %s -> %s\n",
+		CTRACE((tfp, THIS_FUNC ": found exact match: %s -> %s\n",
 			HTAtom_name(pres->rep),
 			HTAtom_name(pres->rep_out)));
 		return pres;
@@ -411,8 +417,8 @@ static HTPresentation *HTFindPresentation(HTFormat rep_in,
 		    if (!strong_wildcard_match)
 			strong_wildcard_match = pres;
 		    /* otherwise use the first one */
-		    CTRACE((tfp,
-			    "StreamStack: found strong wildcard match: %s -> %s\n",
+		    CTRACE((tfp, THIS_FUNC
+			    ": found strong wildcard match: %s -> %s\n",
 			    HTAtom_name(pres->rep),
 			    HTAtom_name(pres->rep_out)));
 		}
@@ -429,8 +435,8 @@ static HTPresentation *HTFindPresentation(HTFormat rep_in,
 		if (!strong_subtype_wildcard_match)
 		    strong_subtype_wildcard_match = pres;
 		/* otherwise use the first one */
-		CTRACE((tfp,
-			"StreamStack: found strong subtype wildcard match: %s -> %s\n",
+		CTRACE((tfp, THIS_FUNC
+			": found strong subtype wildcard match: %s -> %s\n",
 			HTAtom_name(pres->rep),
 			HTAtom_name(pres->rep_out)));
 	    }
@@ -444,7 +450,7 @@ static HTPresentation *HTFindPresentation(HTFormat rep_in,
 		    weak_wildcard_match = pres;
 		/* otherwise use the first one */
 		CTRACE((tfp,
-			"StreamStack: found weak wildcard match: %s\n",
+			THIS_FUNC ": found weak wildcard match: %s\n",
 			HTAtom_name(pres->rep_out)));
 
 	    } else if (!last_default_match) {
@@ -476,6 +482,7 @@ static HTPresentation *HTFindPresentation(HTFormat rep_in,
     }
 
     return NULL;
+#undef THIS_FUNC
 }
 
 /*		Create a filter stack
@@ -493,11 +500,13 @@ HTStream *HTStreamStack(HTFormat rep_in,
 			HTStream *sink,
 			HTParentAnchor *anchor)
 {
+#undef THIS_FUNC
+#define THIS_FUNC "HTStreamStack"
     HTPresentation temp;
     HTPresentation *match;
     HTStream *result;
 
-    CTRACE((tfp, "StreamStack: Constructing stream stack for %s to %s (%s)\n",
+    CTRACE((tfp, THIS_FUNC ": Constructing stream stack for %s to %s (%s)\n",
 	    HTAtom_name(rep_in),
 	    HTAtom_name(rep_out),
 	    NONNULL(anchor->content_type_params)));
@@ -507,9 +516,9 @@ HTStream *HTStreamStack(HTFormat rep_in,
 
     } else if ((match = HTFindPresentation(rep_in, rep_out, &temp, anchor))) {
 	if (match == &temp) {
-	    CTRACE((tfp, "StreamStack: Using %s\n", HTAtom_name(temp.rep_out)));
+	    CTRACE((tfp, THIS_FUNC ": Using %s\n", HTAtom_name(temp.rep_out)));
 	} else {
-	    CTRACE((tfp, "StreamStack: found exact match: %s -> %s\n",
+	    CTRACE((tfp, THIS_FUNC ": found exact match: %s -> %s\n",
 		    HTAtom_name(match->rep),
 		    HTAtom_name(match->rep_out)));
 	}
@@ -519,15 +528,16 @@ HTStream *HTStreamStack(HTFormat rep_in,
     }
     if (TRACE) {
 	if (result && result->isa && result->isa->name) {
-	    CTRACE((tfp, "StreamStack: Returning \"%s\"\n", result->isa->name));
+	    CTRACE((tfp, THIS_FUNC ": Returning \"%s\"\n", result->isa->name));
 	} else if (result) {
-	    CTRACE((tfp, "StreamStack: Returning *unknown* stream!\n"));
+	    CTRACE((tfp, THIS_FUNC ": Returning *unknown* stream!\n"));
 	} else {
-	    CTRACE((tfp, "StreamStack: Returning NULL!\n"));
+	    CTRACE((tfp, THIS_FUNC ": Returning NULL!\n"));
 	    CTRACE_FLUSH(tfp);	/* a crash may be imminent... - kw */
 	}
     }
     return result;
+#undef THIS_FUNC
 }
 
 /*		Put a presentation near start of list
@@ -590,7 +600,7 @@ void HTFilterPresentations(void)
 /*		Find the cost of a filter stack
  *		-------------------------------
  *
- *	Must return the cost of the same stack which StreamStack would set up.
+ *	Must return the cost of the same stack which HTStreamStack would set up.
  *
  * On entry,
  *	length	The size of the data to be converted
@@ -1330,6 +1340,142 @@ static int HTBzFileCopy(BZFILE * bzfp, HTStream *sink)
 }
 #endif /* USE_BZLIB */
 
+#ifdef USE_BROTLI
+/*	Push data from a brotli file pointer down a stream
+ *	-------------------------------------
+ *
+ *   This routine is responsible for creating and PRESENTING any
+ *   graphic (or other) objects described by the file.
+ *
+ *
+ *  State of file and target stream on entry:
+ *		      BZFILE (bzfp) assumed open (should have bzipped content),
+ *		      target (sink) assumed valid.
+ *
+ *  Return values:
+ *	HT_INTERRUPTED  Interruption after some data read.
+ *	HT_PARTIAL_CONTENT	Error after some data read.
+ *	-1		Error before any data read.
+ *	HT_LOADED	Normal end of file indication on reading.
+ *
+ *  State of file and target stream on return:
+ *	always		bzfp still open, target stream still valid.
+ */
+static int HTBrFileCopy(FILE *brfp, HTStream *sink)
+{
+#undef THIS_FUNC
+#define THIS_FUNC "HTBrFileCopy"
+    HTStreamClass targetClass;
+    int status;
+    off_t bytes;
+    int rv = HT_OK;
+    BrotliDecoderResult status2 = BROTLI_DECODER_RESULT_ERROR;
+
+    char *brotli_buffer = NULL;
+    char *normal_buffer = NULL;
+    size_t brotli_size;
+    size_t brotli_limit = 0;
+    size_t brotli_offset = brotli_limit;
+    size_t normal_size;
+    size_t normal_limit = 0;
+
+    /*  Push the data down the stream
+     */
+    targetClass = *(sink->isa);	/* Copy pointers to procedures */
+
+    /*  read and inflate brotli'd file, and push binary down sink
+     */
+    HTReadProgress(bytes = 0, (off_t) 0);
+    /*
+     * first, read all of the brotli'd file into memory, to work with the
+     * library's limitations.
+     */
+    for (;;) {
+	size_t input_chunk = INPUT_BUFFER_SIZE;
+
+	brotli_offset = brotli_limit;
+	brotli_limit += input_chunk;
+	brotli_buffer = realloc(brotli_buffer, brotli_limit);
+	if (brotli_buffer == NULL)
+	    outofmem(__FILE__, THIS_FUNC);
+	status = (int) fread(brotli_buffer + brotli_offset, sizeof(char),
+			     input_chunk, brfp);
+
+	if (status <= 0) {	/* EOF or error */
+	    if (status == 0) {
+		rv = HT_LOADED;
+		break;
+	    }
+	    CTRACE((tfp, THIS_FUNC ": Read error, fread returns %d\n", status));
+	    if (bytes) {
+		if (!feof(brfp))
+		    rv = HT_PARTIAL_CONTENT;
+	    } else {
+		rv = -1;
+	    }
+	    break;
+	}
+	bytes += status;
+    }
+
+    /*
+     * next, unless we encountered an error (and have no data), try
+     * decompressing with increasing output buffer sizes until the brotli
+     * library succeeds.
+     */
+    if (bytes > 0) {
+	do {
+	    if (normal_limit == 0)
+		normal_limit = (10 * brotli_limit) + INPUT_BUFFER_SIZE;
+	    else
+		normal_limit *= 2;
+	    normal_buffer = realloc(normal_buffer, normal_limit);
+	    if (normal_buffer == NULL)
+		outofmem(__FILE__, THIS_FUNC);
+	    brotli_size = (size_t) bytes;
+	    normal_size = normal_limit;
+	    status2 = BrotliDecoderDecompress(brotli_size,
+					      (uint8_t *) brotli_buffer,
+					      &normal_size,
+					      (uint8_t *) normal_buffer);
+	    /*
+	     * brotli library should return
+	     *  BROTLI_DECODER_RESULT_NEEDS_MORE_OUTPUT,
+	     * but actually returns
+	     *  BROTLI_DECODER_RESULT_ERROR 
+	     *
+	     * Accommodate possible improvements...
+	     */
+	} while (status2 != BROTLI_DECODER_RESULT_SUCCESS);
+    }
+
+    /*
+     * finally, pump that data into the output stream.
+     */
+    if (status2 == BROTLI_DECODER_RESULT_SUCCESS) {
+	CTRACE((tfp, THIS_FUNC ": decompressed %ld -> %ld (1:%.1f)\n",
+		brotli_size, normal_size,
+		(double) normal_size / (double) brotli_size));
+	(*targetClass.put_block) (sink, normal_buffer, (int) normal_size);
+	bytes += status;
+	HTReadProgress(bytes, (off_t) -1);
+	HTDisplayPartial();
+
+	if (HTCheckForInterrupt()) {
+	    _HTProgress(TRANSFER_INTERRUPTED);
+	    rv = HT_INTERRUPTED;
+	}
+    }
+    free(brotli_buffer);
+    free(normal_buffer);
+
+    /* next bufferload */
+    HTFinishDisplayPartial();
+    return rv;
+#undef THIS_FUNC
+}
+#endif /* USE_BZLIB */
+
 /*	Push data from a socket down a stream STRIPPING CR
  *	--------------------------------------------------
  *
@@ -1816,6 +1962,81 @@ int HTParseBzFile(HTFormat rep_in,
     return result;
 }
 #endif /* USE_BZLIB */
+
+#ifdef USE_BROTLI
+/*	HTParseBrFile
+ *
+ *  State of file and target stream on entry:
+ *			FILE* (brfp) assumed open,
+ *			target (sink) usually NULL (will call stream stack).
+ *
+ *  Return values:
+ *	-501		Stream stack failed (cannot present or convert).
+ *	-1		Download cancelled.
+ *	HT_NO_DATA	Error before any data read.
+ *	HT_PARTIAL_CONTENT	Interruption or error after some data read.
+ *	HT_LOADED	Normal end of file indication on reading.
+ *
+ *  State of file and target stream on return:
+ *	always		bzfp closed; target freed, aborted, or NULL.
+ */
+int HTParseBrFile(HTFormat rep_in,
+		  HTFormat format_out,
+		  HTParentAnchor *anchor,
+		  FILE *brfp,
+		  HTStream *sink)
+{
+    HTStream *stream;
+    HTStreamClass targetClass;
+    int rv;
+    int result;
+
+    stream = HTStreamStack(rep_in, format_out, sink, anchor);
+
+    if (!stream || !stream->isa) {
+	char *buffer = 0;
+
+	fclose(brfp);
+	if (LYCancelDownload) {
+	    LYCancelDownload = FALSE;
+	    result = -1;
+	} else {
+	    HTSprintf0(&buffer, CANNOT_CONVERT_I_TO_O,
+		       HTAtom_name(rep_in), HTAtom_name(format_out));
+	    CTRACE((tfp, "HTFormat(in HTParseBzFile): %s\n", buffer));
+	    rv = HTLoadError(sink, 501, buffer);
+	    FREE(buffer);
+	    result = rv;
+	}
+    } else {
+
+	/*
+	 * Push the data down the stream
+	 *
+	 * @@ Bug:  This decision ought to be made based on "encoding" rather than
+	 * on content-type.  @@@ When we handle encoding.  The current method
+	 * smells anyway.
+	 */
+	targetClass = *(stream->isa);	/* Copy pointers to procedures */
+	rv = HTBrFileCopy(brfp, stream);
+	if (rv == -1 || rv == HT_INTERRUPTED) {
+	    (*targetClass._abort) (stream, NULL);
+	} else {
+	    (*targetClass._free) (stream);
+	}
+
+	fclose(brfp);
+	if (rv == -1) {
+	    result = HT_NO_DATA;
+	} else if (rv == HT_INTERRUPTED || (rv > 0 && rv != HT_LOADED)) {
+	    result = HT_PARTIAL_CONTENT;
+	} else {
+	    result = HT_LOADED;
+	}
+    }
+    return result;
+}
+#endif /* USE_BROTLI */
 
 /*	Converter stream: Network Telnet to internal character text
  *	-----------------------------------------------------------

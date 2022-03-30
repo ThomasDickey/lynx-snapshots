@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFile.c,v 1.152 2019/08/16 22:53:10 tom Exp $
+ * $LynxId: HTFile.c,v 1.153 2022/03/29 23:48:38 tom Exp $
  *
  *			File Access				HTFile.c
  *			===========
@@ -1281,9 +1281,14 @@ CompressFileType HTCompressFileType(const char *filename,
 	len = strlen(filename);
 	ftype = filename + len;
 
-	if ((len > 4)
-	    && !strcasecomp((ftype - 3), "bz2")
-	    && StrChr(dots, ftype[-4]) != 0) {
+	if ((len > 3)
+	    && !strcasecomp((ftype - 2), "br")
+	    && StrChr(dots, ftype[-3]) != 0) {
+	    result = cftBrotli;
+	    ftype -= 3;
+	} else if ((len > 4)
+		   && !strcasecomp((ftype - 3), "bz2")
+		   && StrChr(dots, ftype[-4]) != 0) {
 	    result = cftBzip2;
 	    ftype -= 4;
 	} else if ((len > 3)
@@ -1335,6 +1340,9 @@ const char *HTCompressTypeToSuffix(CompressFileType method)
     case cftDeflate:
 	result = ".zz";
 	break;
+    case cftBrotli:
+	result = ".br";
+	break;
     }
     return result;
 }
@@ -1363,6 +1371,9 @@ const char *HTCompressTypeToEncoding(CompressFileType method)
     case cftDeflate:
 	result = "deflate";
 	break;
+    case cftBrotli:
+	result = "brotli";
+	break;
     }
     return result;
 }
@@ -1390,6 +1401,10 @@ CompressFileType HTEncodingToCompressType(const char *coding)
     } else if (!strcasecomp(coding, "bzip2") ||
 	       !strcasecomp(coding, "x-bzip2")) {
 	result = cftBzip2;
+    } else if (!strcasecomp(coding, "br") ||	/* actual */
+	       !strcasecomp(coding, "brotli") ||	/* expected */
+	       !strcasecomp(coding, "x-brotli")) {
+	result = cftBrotli;
     } else if (!strcasecomp(coding, "deflate") ||
 	       !strcasecomp(coding, "x-deflate")) {
 	result = cftDeflate;
@@ -1412,6 +1427,10 @@ CompressFileType HTContentTypeToCompressType(const char *ct)
     } else if (!strncasecomp(ct, "application/bzip2", 17) ||
 	       !strncasecomp(ct, "application/x-bzip2", 19)) {
 	method = cftBzip2;
+    } else if (!strncasecomp(ct, "application/br", 14) ||
+	       !strncasecomp(ct, "application/brotli", 18) ||
+	       !strncasecomp(ct, "application/x-brotli", 20)) {
+	method = cftBrotli;
     }
     return method;
 }
@@ -2420,6 +2439,15 @@ static BOOL isBzip2Stream(FILE *fp)
 #define DOT_STRING "."
 #endif
 
+#ifdef USE_BROTLI
+static FILE *
+brotli_open(const char *localname, const char *mode)
+{
+    CTRACE((tfp, "brotli_open file=%s, mode=%s\n", localname, mode));
+    return fopen(localname, mode);
+}
+#endif
+
 static int decompressAndParse(HTParentAnchor *anchor,
 			      HTFormat format_out,
 			      HTStream *sink,
@@ -2437,7 +2465,10 @@ static int decompressAndParse(HTParentAnchor *anchor,
 #endif /* USE_ZLIB */
 #ifdef USE_BZLIB
     BZFILE *bzfp = 0;
-#endif /* USE_ZLIB */
+#endif /* USE_BZLIB */
+#ifdef USE_BROTLI
+    FILE *brfp = 0;
+#endif /* USE_BROTLI */
 #if defined(USE_ZLIB) || defined(USE_BZLIB)
     CompressFileType internal_decompress = cftNone;
     BOOL failed_decompress = NO;
@@ -2536,6 +2567,17 @@ static int decompressAndParse(HTParentAnchor *anchor,
 		internal_decompress = cftBzip2;
 	    } else
 #endif /* USE_BZLIB */
+#ifdef USE_BROTLI
+	    if (isDOWNLOAD(cftBrotli)) {
+		fclose(fp);
+		fp = 0;
+		brfp = brotli_open(localname, BIN_R);
+
+		CTRACE((tfp, "HTLoadFile: brotli_open of `%s' gives %p\n",
+			localname, (void *) brfp));
+		internal_decompress = cftBrotli;
+	    } else
+#endif /* USE_BROTLI */
 	    {
 		StrAllocCopy(anchor->content_type, format->name);
 		StrAllocCopy(anchor->content_encoding, HTAtom_name(myEncoding));
@@ -2614,6 +2656,22 @@ static int decompressAndParse(HTParentAnchor *anchor,
 		format = HTAtom_for("www/compressed");
 #endif /* USE_BZLIB */
 		break;
+	    case cftBrotli:
+		StrAllocCopy(anchor->content_encoding, "x-brotli");
+#ifdef USE_BROTLI
+		if (strcmp(format_out->name, "www/download") != 0) {
+		    fclose(fp);
+		    fp = 0;
+		    brfp = brotli_open(localname, BIN_R);
+
+		    CTRACE((tfp, "HTLoadFile: brotli_open of `%s' gives %p\n",
+			    localname, (void *) brfp));
+		    internal_decompress = cftBrotli;
+		}
+#else /* USE_BROTLI */
+		format = HTAtom_for("www/compressed");
+#endif /* USE_BROTLI */
+		break;
 	    case cftNone:
 		break;
 	    }
@@ -2633,6 +2691,11 @@ static int decompressAndParse(HTParentAnchor *anchor,
 #ifdef USE_BZLIB
 	    case cftBzip2:
 		failed_decompress = (BOOLEAN) (bzfp == NULL);
+		break;
+#endif
+#ifdef USE_BROTLI
+	    case cftBrotli:
+		failed_decompress = (BOOLEAN) (brfp == NULL);
 		break;
 #endif
 	    default:
@@ -2666,6 +2729,12 @@ static int decompressAndParse(HTParentAnchor *anchor,
 		if (sugfname && *sugfname)
 		    StrAllocCopy(anchor->SugFname, sugfname);
 		FREE(sugfname);
+#ifdef USE_BROTLI
+		if (brfp)
+		    *statusp = HTParseBrFile(format, format_out,
+					     anchor,
+					     brfp, sink);
+#endif
 #ifdef USE_BZLIB
 		if (bzfp)
 		    *statusp = HTParseBzFile(format, format_out,
@@ -2954,6 +3023,9 @@ int HTLoadFile(const char *addr,
 			case cftBzip2:
 			    atomname = "application/x-bzip2";
 			    break;
+			case cftBrotli:
+			    atomname = "application/x-brotli";
+			    break;
 			case cftNone:
 			    break;
 			}
@@ -3182,6 +3254,11 @@ void HTInitProgramPaths(BOOL init)
 
     for (n = (int) ppUnknown + 1; n < (int) pp_Last; ++n) {
 	switch (code = (ProgramPaths) n) {
+#ifdef BROTLI_PATH
+	case ppBROTLI:
+	    path = BROTLI_PATH;
+	    break;
+#endif
 #ifdef BZIP2_PATH
 	case ppBZIP2:
 	    path = BZIP2_PATH;

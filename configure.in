@@ -1,4 +1,4 @@
-dnl $LynxId: configure.in,v 1.340 2021/11/05 00:11:32 tom Exp $
+dnl $LynxId: configure.in,v 1.341 2022/03/17 20:10:18 tom Exp $
 dnl
 dnl Process this file with autoconf to produce a configure script.
 dnl
@@ -7,7 +7,7 @@ dnl by T.E.Dickey <dickey@invisible-island.net>
 dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
 dnl
 dnl ---------------------------------------------------------------------------
-dnl Copyright 1997-2020,2021 by Thomas E. Dickey
+dnl Copyright 1997-2021,2022 by Thomas E. Dickey
 dnl
 dnl Permission to use, copy, modify, and distribute this software and its
 dnl documentation for any purpose and without fee is hereby granted,
@@ -1313,6 +1313,19 @@ if test ".$use_zlib" != ".no" ; then
 fi
 
 dnl --------------------------------------------------------------------------
+AC_MSG_CHECKING(if you want to use brotli decompression)
+AC_ARG_WITH(brotli,
+[  --with-brotli           use brotli decompression],
+	[use_brotli=$withval],
+	[use_brotli=no])
+AC_MSG_RESULT($use_brotli)
+
+if test ".$use_brotli" != ".no" ; then
+	CF_WITH_BROTLI($use_brotli)
+	test "x$cf_cv_find_linkage_brotlidec" = "xyes" && AC_DEFINE(USE_BROTLI,1,[Define to 1 if you want to use libbrotli decompression])
+fi
+
+dnl --------------------------------------------------------------------------
 CF_HELP_MESSAGE(
 Other Network Services:)
 
@@ -1459,6 +1472,7 @@ CF_PATH_PROG(GZIP,	gzip)
 CF_PATH_PROG(UNCOMPRESS,gunzip)
 CF_PATH_PROG(UNZIP,	unzip)
 CF_PATH_PROG(BZIP2,	bzip2)
+CF_PATH_PROG(BROTLI,	brotli)
 
 CF_PATH_PROG(TAR,	tar, pax gtar gnutar bsdtar star)
 CF_TAR_OPTIONS($TAR)

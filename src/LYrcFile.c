@@ -1,4 +1,4 @@
-/* $LynxId: LYrcFile.c,v 1.105 2021/07/05 20:29:10 tom Exp $ */
+/* $LynxId: LYrcFile.c,v 1.106 2022/03/27 23:01:26 tom Exp $ */
 #include <HTUtils.h>
 #include <HTFTP.h>
 #include <LYUtils.h>
@@ -120,6 +120,9 @@ Config_Enum tbl_preferred_encoding[] = {
 #if defined(USE_BZLIB) || defined(BZIP2_PATH)
     { "bzip2",		encodingBZIP2 },
 #endif
+#if defined(USE_BROTLI) || defined(BROTLI_PATH)
+    { "br",		encodingBROTLI },
+#endif
     { "all",		encodingALL },
     { NULL,		-1 }
 };
@@ -234,6 +237,7 @@ BOOL LYgetEnum(Config_Enum * table, const char *name,
 	    return TRUE;
 	}
     }
+    CTRACE((tfp, "LYgetEnum: no match found for \"%s\"\n", name));
     return FALSE;		/* no match */
 }
 

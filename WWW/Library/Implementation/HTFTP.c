@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFTP.c,v 1.143 2022/03/12 12:06:13 tom Exp $
+ * $LynxId: HTFTP.c,v 1.144 2022/03/17 20:04:17 tom Exp $
  *
  *			File Transfer Protocol (FTP) Client
  *			for a WorldWideWeb browser
@@ -4088,6 +4088,9 @@ int HTFTPLoad(const char *name,
 		break;
 	    case cftBzip2:
 		StrAllocCopy(anchor->content_encoding, "x-bzip2");
+		break;
+	    case cftBrotli:
+		StrAllocCopy(anchor->content_encoding, "x-brotli");
 		break;
 	    case cftNone:
 		break;

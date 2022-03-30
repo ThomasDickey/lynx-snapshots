@@ -1,4 +1,4 @@
-dnl $LynxId: aclocal.m4,v 1.306 2022/01/28 13:32:11 tom Exp $
+dnl $LynxId: aclocal.m4,v 1.307 2022/03/17 19:59:12 tom Exp $
 dnl Macros for auto-configure script.
 dnl by Thomas E. Dickey <dickey@invisible-island.net>
 dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
@@ -7209,6 +7209,26 @@ if test "$cf_cv_widec_mbstate" != unknown ; then
 fi
 
 fi
+])dnl
+dnl ---------------------------------------------------------------------------
+dnl Check for Brotli decoder library
+dnl
+dnl $1 = optional path for headers/library
+AC_DEFUN([CF_WITH_BROTLI],[
+  CF_ADD_OPTIONAL_PATH($1)
+
+  CF_FIND_LINKAGE([
+#include <brotli/decode.h>
+],[
+    BrotliDecoderDecompressStream(
+		NULL,	/* BrotliDecoderState* state */
+		NULL,	/* size_t* available_in */
+		NULL,	/* const uint8_t** next_in */
+		NULL,	/* size_t* available_out */
+		NULL,	/* uint8_t** next_out */
+		NULL	/* size_t* total_out */
+	);
+],brotlidec,,,brotlilib)
 ])dnl
 dnl ---------------------------------------------------------------------------
 dnl CF_WITH_BZLIB version: 4 updated: 2007/07/29 13:19:54

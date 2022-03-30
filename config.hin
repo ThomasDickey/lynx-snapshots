@@ -1,5 +1,5 @@
 /*
- * $LynxId: config.hin,v 1.151 2021/07/05 13:25:57 tom Exp $
+ * $LynxId: config.hin,v 1.152 2021/07/29 23:16:41 tom Exp $
  * vile:cmode
  *
  * The configure script translates "config.hin" into "lynx_cfg.h"
@@ -12,6 +12,7 @@
 #undef ALL_CHARSETS		/* AC_ARG_WITH(charsets) */
 #undef ALT_CHAR_SET		/* CF_ALT_CHAR_SET */
 #undef ARCHIVE_ONLY		/* CF_ARG_DISABLE(dired-archive) */
+#undef BROTLI_PATH		/* CF_PATH_PROG(brotli) */
 #undef BZIP2_PATH		/* CF_PATH_PROG(bzip2) */
 #undef CAN_SET_ERRNO		/* CF_SET_ERRNO */
 #undef CHMOD_PATH		/* CF_PATH_PROG(chmod) */
@@ -268,6 +269,7 @@
 #undef USE_ADDRLIST_PAGE	/* CF_ARG_DISABLE(addrlist-page) */
 #undef USE_ALT_BINDINGS		/* CF_ARG_DISABLE(alt-bindings) */
 #undef USE_ASCII_CTYPES		/* CF_ARG_DISABLE(ascii-ctypes) */
+#undef USE_BROTLI		/* AC_ARG_WITH(brotli) */
 #undef USE_BZLIB		/* AC_ARG_WITH(bzlib) */
 #undef USE_CACHEJAR		/* CF_ARG_DISABLE(session-cache) */
 #undef USE_CHARSET_CHOICE	/* CF_ARG_DISABLE(charset-choice) */

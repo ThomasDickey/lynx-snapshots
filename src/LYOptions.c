@@ -1,4 +1,4 @@
-/* $LynxId: LYOptions.c,v 1.183 2021/07/05 21:17:42 tom Exp $ */
+/* $LynxId: LYOptions.c,v 1.184 2021/07/30 00:17:54 tom Exp $ */
 #include <HTUtils.h>
 #include <HTFTP.h>
 #include <HTTP.h>		/* 'reloading' flag */
@@ -2489,6 +2489,9 @@ static OptValues encoding_values[] =
 #endif
 #if defined(USE_BZLIB) || defined(BZIP2_PATH)
     {encodingBZIP2, N_("bzip2"), "encoding_bzip2"},
+#endif
+#if defined(USE_BROTLI) || defined(BROTLI_PATH)
+    {encodingBROTLI, N_("brotli"), "encoding_brotli"},
 #endif
     {encodingALL, N_("All"), "encoding_all"},
     END_OPTIONS

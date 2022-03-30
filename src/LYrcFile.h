@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYrcFile.h,v 1.58 2021/07/05 20:23:51 tom Exp $
+ * $LynxId: LYrcFile.h,v 1.59 2021/07/29 22:53:37 tom Exp $
  */
 #ifndef LYRCFILE_H
 #define LYRCFILE_H
@@ -33,6 +33,7 @@
 #define RC_BOOKMARK_FILE                "bookmark_file"
 #define RC_BROKEN_FTP_EPSV              "broken_ftp_epsv"
 #define RC_BROKEN_FTP_RETR              "broken_ftp_retr"
+#define RC_BROTLI_PATH                  "brotli_path"
 #define RC_BZIP2_PATH                   "bzip2_path"
 #define RC_CASE_SENSITIVE_ALWAYS_ON     "case_sensitive_always_on"
 #define RC_CASE_SENSITIVE_SEARCHING     "case_sensitive_searching"
