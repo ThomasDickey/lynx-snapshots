@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTP.c,v 1.181 2021/11/04 22:15:26 Sylvain.Bertrand Exp $
+ * $LynxId: HTTP.c,v 1.182 2022/03/17 20:02:41 tom Exp $
  *
  * HyperText Transfer Protocol	- Client implementation		HTTP.c
  * ===========================
@@ -709,6 +709,9 @@ static BOOL acceptEncoding(int code)
 	    break;
 	case encodingBZIP2:
 	    program = HTGetProgramPath(ppBZIP2);
+	    break;
+	case encodingBROTLI:
+	    program = HTGetProgramPath(ppBROTLI);
 	    break;
 	default:
 	    break;

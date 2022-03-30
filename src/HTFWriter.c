@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFWriter.c,v 1.119 2019/08/25 22:57:03 tom Exp $
+ * $LynxId: HTFWriter.c,v 1.120 2022/03/28 00:04:50 tom Exp $
  *
  *		FILE WRITER				HTFWrite.h
  *		===========
@@ -310,6 +310,21 @@ static void HTFWriter_free(HTStream *me)
 			path[len - 4] = '\0';
 			(void) remove(path);
 		    }
+		} else if (len > 3 && !strcasecomp(&path[len - 2], "br")) {
+#ifdef USE_BROTLI
+		    if (!skip_loadfile) {
+			use_zread = YES;
+		    } else
+#endif /* USE_BROTLI */
+		    {
+			char FIXME[1024];
+
+			sprintf(FIXME, "brotli -d -j -f %s", path);
+			path[len - 3] = '\0';
+			(void) remove(path);
+			system(FIXME);
+		    }
+		    CTRACE((tfp, "FIXME %s@%d\n", __FILE__, __LINE__));
 		} else if (len > 2 && !strcasecomp(&path[len - 1], "Z")) {
 		    path[len - 2] = '\0';
 		    (void) remove(path);
@@ -813,7 +828,7 @@ HTStream *HTSaveAndExecute(HTPresentation *pres,
     /*
      * Make command to delete file.
      */
-    me->remove_command = 0;
+    me->remove_command = NULL;
     HTAddParam(&(me->remove_command), REMOVE_COMMAND, 1, fnam);
     HTEndParam(&(me->remove_command), REMOVE_COMMAND, 1);
 
@@ -980,7 +995,7 @@ HTStream *HTSaveToFile(HTPresentation *pres,
     /*
      * Make command to delete file.
      */
-    ret_obj->remove_command = 0;
+    ret_obj->remove_command = NULL;
     HTAddParam(&(ret_obj->remove_command), REMOVE_COMMAND, 1, fnam);
     HTEndParam(&(ret_obj->remove_command), REMOVE_COMMAND, 1);
 
@@ -1156,6 +1171,13 @@ HTStream *HTCompressed(HTPresentation *pres,
 		    compress_suffix = "bz2";
 		}
 		break;
+	    case cftBrotli:
+		if ((program = HTGetProgramPath(ppBROTLI)) != NULL) {
+		    StrAllocCopy(uncompress_mask, program);
+		    StrAllocCat(uncompress_mask, " -d %s");
+		    compress_suffix = "br";
+		}
+		break;
 	    case cftCompress:
 		if ((program = HTGetProgramPath(ppUNCOMPRESS)) != NULL) {
 		    /*
@@ -1300,9 +1322,21 @@ HTStream *HTCompressed(HTPresentation *pres,
     /*
      * Make command to process file.  - FM
      */
-#ifdef USE_BZLIB
-    if (compress_suffix[0] == 'b'	/* must be bzip2 */
+#ifdef USE_BROTLI
+    if (compress_suffix[0] == 'b'	/* e.g., ".br" */
+	&& compress_suffix[1] == 'r'
 	&& !me->viewer_command) {
+	/*
+	 * We won't call brotli externally, so we don't need to supply a
+	 * command for it.
+	 */
+	StrAllocCopy(me->end_command, "");
+    } else
+#endif
+#ifdef USE_BZLIB
+	if (compress_suffix[0] == 'b'	/* must be bzip2 */
+	    && compress_suffix[1] == 'z'
+	    && !me->viewer_command) {
 	/*
 	 * We won't call bzip2 externally, so we don't need to supply a command
 	 * for it.
@@ -1322,7 +1356,7 @@ HTStream *HTCompressed(HTPresentation *pres,
     } else
 #endif /* USE_ZLIB */
     {
-	me->end_command = 0;
+	me->end_command = NULL;
 	HTAddParam(&(me->end_command), uncompress_mask, 1, fnam);
 	HTEndParam(&(me->end_command), uncompress_mask, 1);
     }
@@ -1331,7 +1365,7 @@ HTStream *HTCompressed(HTPresentation *pres,
     /*
      * Make command to delete file.  - FM
      */
-    me->remove_command = 0;
+    me->remove_command = NULL;
     HTAddParam(&(me->remove_command), REMOVE_COMMAND, 1, fnam);
     HTEndParam(&(me->remove_command), REMOVE_COMMAND, 1);
 

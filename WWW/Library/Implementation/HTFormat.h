@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFormat.h,v 1.37 2020/01/21 22:02:59 tom Exp $
+ * $LynxId: HTFormat.h,v 1.38 2022/03/28 08:09:44 tom Exp $
  *
  *                                            HTFormat: The format manager in the WWW Library
  *                          MANAGE DIFFERENT DOCUMENT FORMATS
@@ -229,10 +229,12 @@ The HTPresentation and HTConverter types
 	,encodingDEFLATE = 2
 	,encodingCOMPRESS = 4
 	,encodingBZIP2 = 8
+	,encodingBROTLI = 16
 	,encodingALL = (encodingGZIP
 			+ encodingDEFLATE
 			+ encodingCOMPRESS
-			+ encodingBZIP2)
+			+ encodingBZIP2
+			+ encodingBROTLI)
     } AcceptEncoding;
 
 /*
@@ -512,7 +514,7 @@ HTParseZzFile: Parse a deflate'd File through a file pointer
 HTParseBzFile: Parse a bzip2'ed File through a file pointer
 
    This routine is called by protocols modules to load an object.  uses
-   HTStreamStack and HTGzFileCopy.  Returns HT_LOADED if successful, can also
+   HTStreamStack and HTBzFileCopy.  Returns HT_LOADED if successful, can also
    return HT_PARTIAL_CONTENT, HT_NO_DATA, or other <0 for failure.
  */
     extern int HTParseBzFile(HTFormat format_in,
@@ -522,6 +524,22 @@ HTParseBzFile: Parse a bzip2'ed File through a file pointer
 			     HTStream *sink);
 
 #endif				/* USE_BZLIB */
+
+#ifdef USE_BROTLI
+/*
+HTParseBzFile: Parse a brotli'ed File through a file pointer
+
+   This routine is called by protocols modules to load an object.  uses
+   HTStreamStack and HTBrFileCopy.  Returns HT_LOADED if successful, can also
+   return HT_PARTIAL_CONTENT, HT_NO_DATA, or other <0 for failure.
+ */
+    extern int HTParseBrFile(HTFormat format_in,
+			     HTFormat format_out,
+			     HTParentAnchor *anchor,
+			     FILE * brfp,
+			     HTStream *sink);
+
+#endif				/* USE_BROTLI */
 
 /*
 

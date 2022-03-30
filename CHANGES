@@ -1,9 +1,10 @@
--- $LynxId: CHANGES,v 1.1104 2022/03/12 16:16:34 tom Exp $
+-- $LynxId: CHANGES,v 1.1106 2022/03/29 23:53:57 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2022-03-12 (2.9.0dev.11)
+2022-03-29 (2.9.0dev.11)
+* changes for using brotli stream decompression -TD
 * changes for working with SOCKS5 on Windows 10 -GV, -TD
 * fix a few coverity and clang warnings -TD
 * add a null-pointer check in StrAllocVsprintf() to work with existing SOCKS5

@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFile.h,v 1.34 2020/01/21 22:08:07 tom Exp $
+ * $LynxId: HTFile.h,v 1.35 2021/07/29 22:54:21 tom Exp $
  *							File access in libwww
  *				FILE ACCESS
  *
@@ -213,6 +213,7 @@ extern "C" {
 	,cftGzip
 	,cftBzip2
 	,cftDeflate
+	,cftBrotli
     } CompressFileType;
 
 /*
@@ -307,6 +308,7 @@ extern "C" {
  */
     typedef enum {
 	ppUnknown = 0
+	,ppBROTLI
 	,ppBZIP2
 	,ppCHMOD
 	,ppCOMPRESS

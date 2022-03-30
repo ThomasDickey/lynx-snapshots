@@ -296,10 +296,12 @@ II. Compile instructions -- UNIX
   	Use this option to control whether full pathnames are compiled in for
 	various utilities invoked by lynx as external commands.  By default,
 	full pathnames are compiled in for the the locations where configure
-	finds these commands at configure time.  Affected commands are chmod,
-	compress, cp, gzip, install, mkdir, mv, rm, tar, touch, gunzip, unzip,
-	bzip2, uudecode, zcat, zip, telnet, tn3270, rlogin.  (Not all of them
-	are used on all systems or in all configurations.)
+	finds these commands at configure time.
+	
+	Affected commands include
+		chmod compress cp gzip install mkdir mv rm tar touch gunzip
+		unzip brotli bzip2 uudecode zcat zip telnet tn3270 rlogin
+	(Not all commands are used on all systems or in all configurations.)
 
 	This option makes Lynx simpler to install, but potentially less secure,
 	since the commands are then set in the user's $PATH.  All of these
@@ -573,6 +575,14 @@ II. Compile instructions -- UNIX
   --with-XawPlus
 	This option allows you to specify the X libraries used if you
 	are configuring lynx to use PDCurses on a Unix platform.
+
+  --with-brotli[=XXX]			(define USE_BROTLI)
+	Use brotli decompression.
+
+	The optional value XXX specifies the directory in which the library
+	can be found, and may be either the path of the "lib" directory,
+	or one level above.  In either case, the corresponding header files
+	are assumed to be in the parallel "include" directory.
 
   --with-build-cc=XXX
 	If cross-compiling, specify a host C compiler, which is needed to
@@ -1496,4 +1506,4 @@ VIII. Acknowledgment
 
 -- 1999/04/24 - H. Nelson <lynx-admin@irm.nara.kindai.ac.jp>
 -- vile:txtmode
--- $LynxId: INSTALLATION,v 1.135 2021/07/02 00:15:34 tom Exp $
+-- $LynxId: INSTALLATION,v 1.136 2021/07/29 23:35:35 tom Exp $
