@@ -1,9 +1,10 @@
--- $LynxId: CHANGES,v 1.1106 2022/03/29 23:53:57 tom Exp $
+-- $LynxId: CHANGES,v 1.1107 2022/03/31 23:30:44 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2022-03-29 (2.9.0dev.11)
+2022-03-31 (2.9.0dev.11)
+* add ".br", ".lz", ".lzip", and ".xz" to binary-suffixes list -TD
 * changes for using brotli stream decompression -TD
 * changes for working with SOCKS5 on Windows 10 -GV, -TD
 * fix a few coverity and clang warnings -TD

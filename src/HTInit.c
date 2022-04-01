@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTInit.c,v 1.92 2020/01/21 22:20:09 tom Exp $
+ * $LynxId: HTInit.c,v 1.97 2022/04/01 07:55:02 tom Exp $
  *
  *		Configuration-specific Initialization		HTInit.c
  *		----------------------------------------
@@ -99,46 +99,46 @@ void HTFormatInit(void)
      * Add our header handlers.
      */
     SET_INTERNL("message/x-http-redirection", "*", HTMIMERedirect, 2.0);
-    SET_INTERNL("message/x-http-redirection", "www/present", HTMIMERedirect, 2.0);
+    SET_INTERNL("message/x-http-redirection", STR_PRESENT, HTMIMERedirect, 2.0);
     SET_INTERNL("message/x-http-redirection", "www/debug", HTMIMERedirect, 1.0);
-    SET_INTERNL("www/mime", "www/present", HTMIMEConvert, 1.0);
-    SET_INTERNL("www/mime", "www/download", HTMIMEConvert, 1.0);
-    SET_INTERNL("www/mime", "www/source", HTMIMEConvert, 1.0);
-    SET_INTERNL("www/mime", "www/dump", HTMIMEConvert, 1.0);
+    SET_INTERNL("www/mime", STR_PRESENT, HTMIMEConvert, 1.0);
+    SET_INTERNL("www/mime", STR_DOWNLOAD, HTMIMEConvert, 1.0);
+    SET_INTERNL("www/mime", STR_SOURCE, HTMIMEConvert, 1.0);
+    SET_INTERNL("www/mime", STR_DUMP, HTMIMEConvert, 1.0);
 
     /*
      * Add our compressed file handlers.
      */
-    SET_INTERNL("www/compressed", "www/download", HTCompressed, 1.0);
-    SET_INTERNL("www/compressed", "www/present", HTCompressed, 1.0);
-    SET_INTERNL("www/compressed", "www/source", HTCompressed, 1.0);
-    SET_INTERNL("www/compressed", "www/dump", HTCompressed, 1.0);
+    SET_INTERNL("www/compressed", STR_DOWNLOAD, HTCompressed, 1.0);
+    SET_INTERNL("www/compressed", STR_PRESENT, HTCompressed, 1.0);
+    SET_INTERNL("www/compressed", STR_SOURCE, HTCompressed, 1.0);
+    SET_INTERNL("www/compressed", STR_DUMP, HTCompressed, 1.0);
 
     /*
      * The following support some content types seen here/there:
      */
     SET_INTERNL("application/html", "text/x-c", HTMLToC, 0.5);
     SET_INTERNL("application/html", STR_PLAINTEXT, HTMLToPlain, 0.5);
-    SET_INTERNL("application/html", "www/present", HTMLPresent, 2.0);
-    SET_INTERNL("application/html", "www/source", HTPlainPresent, 1.0);
-    SET_INTERNL("application/xml", "www/present", HTMLPresent, 2.0);
-    SET_INTERNL("application/x-wais-source", "www/source", HTPlainPresent, 1.0);
-    SET_INTERNL("application/x-wais-source", "www/present", HTWSRCConvert, 2.0);
-    SET_INTERNL("application/x-wais-source", "www/download", HTWSRCConvert, 1.0);
-    SET_INTERNL("application/x-wais-source", "www/dump", HTWSRCConvert, 1.0);
+    SET_INTERNL("application/html", STR_PRESENT, HTMLPresent, 2.0);
+    SET_INTERNL("application/html", STR_SOURCE, HTPlainPresent, 1.0);
+    SET_INTERNL("application/xml", STR_PRESENT, HTMLPresent, 2.0);
+    SET_INTERNL("application/x-wais-source", STR_SOURCE, HTPlainPresent, 1.0);
+    SET_INTERNL("application/x-wais-source", STR_PRESENT, HTWSRCConvert, 2.0);
+    SET_INTERNL("application/x-wais-source", STR_DOWNLOAD, HTWSRCConvert, 1.0);
+    SET_INTERNL("application/x-wais-source", STR_DUMP, HTWSRCConvert, 1.0);
 
     /*
      * Save all unknown mime types to disk.
      */
-    SET_EXTERNL("www/source", "www/present", HTSaveToFile, 1.0);
-    SET_EXTERNL("www/source", "www/source", HTSaveToFile, 1.0);
-    SET_EXTERNL("www/source", "www/download", HTSaveToFile, 1.0);
-    SET_EXTERNL("www/source", "*", HTSaveToFile, 1.0);
+    SET_EXTERNL(STR_SOURCE, STR_PRESENT, HTSaveToFile, 1.0);
+    SET_EXTERNL(STR_SOURCE, STR_SOURCE, HTSaveToFile, 1.0);
+    SET_EXTERNL(STR_SOURCE, STR_DOWNLOAD, HTSaveToFile, 1.0);
+    SET_EXTERNL(STR_SOURCE, "*", HTSaveToFile, 1.0);
 
     /*
      * Output all www/dump presentations to stdout.
      */
-    SET_EXTERNL("www/source", "www/dump", HTDumpToStdout, 1.0);
+    SET_EXTERNL(STR_SOURCE, STR_DUMP, HTDumpToStdout, 1.0);
 
     /*
      * Other internal types, which must precede the "www/present" entries
@@ -147,10 +147,10 @@ void HTFormatInit(void)
     SET_INTERNL("text/css", STR_PLAINTEXT, HTMLToPlain, 0.5);
     SET_INTERNL(STR_HTML, STR_PLAINTEXT, HTMLToPlain, 0.5);
     SET_INTERNL(STR_HTML, "text/x-c", HTMLToC, 0.5);
-    SET_INTERNL(STR_HTML, "www/source", HTPlainPresent, 1.0);
-    SET_INTERNL(STR_PLAINTEXT, "www/source", HTPlainPresent, 1.0);
-    SET_INTERNL("text/sgml", "www/source", HTPlainPresent, 1.0);
-    SET_INTERNL("text/x-sgml", "www/source", HTPlainPresent, 1.0);
+    SET_INTERNL(STR_HTML, STR_SOURCE, HTPlainPresent, 1.0);
+    SET_INTERNL(STR_PLAINTEXT, STR_SOURCE, HTPlainPresent, 1.0);
+    SET_INTERNL("text/sgml", STR_SOURCE, HTPlainPresent, 1.0);
+    SET_INTERNL("text/x-sgml", STR_SOURCE, HTPlainPresent, 1.0);
 
     /*
      * Now add our basic conversions.  These include the types which will
@@ -178,14 +178,14 @@ void HTFormatInit(void)
      * application/xhtml+xml
      * text/html
      */
-    SET_INTERNL("application/xhtml+xml", "www/present", HTMLPresent, 1.0);
-    SET_INTERNL("application/xhtml+xml", "www/source", HTPlainPresent, 1.0);
-    SET_INTERNL("text/css", "www/present", HTPlainPresent, 1.0);
-    SET_INTERNL(STR_HTML, "www/present", HTMLPresent, 1.0);
-    SET_INTERNL(STR_PLAINTEXT, "www/present", HTPlainPresent, 1.0);
-    SET_INTERNL("text/sgml", "www/present", HTMLPresent, 1.0);
-    SET_INTERNL("text/x-sgml", "www/present", HTMLPresent, 2.0);
-    SET_INTERNL("text/xml", "www/present", HTMLPresent, 2.0);
+    SET_INTERNL("application/xhtml+xml", STR_PRESENT, HTMLPresent, 1.0);
+    SET_INTERNL("application/xhtml+xml", STR_SOURCE, HTPlainPresent, 1.0);
+    SET_INTERNL("text/css", STR_PRESENT, HTPlainPresent, 1.0);
+    SET_INTERNL(STR_HTML, STR_PRESENT, HTMLPresent, 1.0);
+    SET_INTERNL(STR_PLAINTEXT, STR_PRESENT, HTPlainPresent, 1.0);
+    SET_INTERNL("text/sgml", STR_PRESENT, HTMLPresent, 1.0);
+    SET_INTERNL("text/x-sgml", STR_PRESENT, HTMLPresent, 2.0);
+    SET_INTERNL("text/xml", STR_PRESENT, HTMLPresent, 2.0);
 
     if (LYisAbsPath(global_type_map)) {
 	/* These should override the default types as necessary.  */
@@ -218,8 +218,8 @@ void HTPreparsedFormatInit(void)
 {
     CTrace((tfp, "HTPreparsedFormatInit\n"));
     if (LYPreparsedSource) {
-	SET_INTERNL(STR_HTML, "www/source", HTMLParsedPresent, 1.0);
-	SET_INTERNL(STR_HTML, "www/dump", HTMLParsedPresent, 1.0);
+	SET_INTERNL(STR_HTML, STR_SOURCE, HTMLParsedPresent, 1.0);
+	SET_INTERNL(STR_HTML, STR_DUMP, HTMLParsedPresent, 1.0);
     }
 }
 
@@ -1139,6 +1139,13 @@ void HTFileInit(void)
 
 	SET_SUFFIX1(".bz2",	"application/x-bzip2",		"binary");
 	SET_SUFFIX1(".bz2",	"application/bzip2",		"binary");
+
+	SET_SUFFIX1(".br",	"application/x-brotli",		"binary");
+
+	SET_SUFFIX1(".xz",	"application/x-xz",		"binary");
+
+	SET_SUFFIX1(".lz",	"application/x-lzip",		"binary");
+	SET_SUFFIX1(".lzma",	"application/x-lzma",		"binary");
 
 #ifdef TRADITIONAL_SUFFIXES
 	SET_SUFFIX1(".uu",	"application/x-UUencoded",	"8bit");

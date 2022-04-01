@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFile.c,v 1.153 2022/03/29 23:48:38 tom Exp $
+ * $LynxId: HTFile.c,v 1.156 2022/04/01 00:17:51 tom Exp $
  *
  *			File Access				HTFile.c
  *			===========
@@ -1583,7 +1583,7 @@ static BOOL view_structured(HTFormat format_out)
 
 #ifdef USE_PRETTYSRC
     if (psrc_view
-	|| (format_out == HTAtom_for("www/dump")))
+	|| (format_out == WWW_DUMP))
 	result = TRUE;
 #else
     if (format_out == WWW_SOURCE)
@@ -2440,8 +2440,7 @@ static BOOL isBzip2Stream(FILE *fp)
 #endif
 
 #ifdef USE_BROTLI
-static FILE *
-brotli_open(const char *localname, const char *mode)
+static FILE *brotli_open(const char *localname, const char *mode)
 {
     CTRACE((tfp, "brotli_open file=%s, mode=%s\n", localname, mode));
     return fopen(localname, mode);
@@ -2531,7 +2530,7 @@ static int decompressAndParse(HTParentAnchor *anchor,
 	    CompressFileType method = HTEncodingToCompressType(HTAtom_name(myEncoding));
 #endif
 
-#define isDOWNLOAD(m) (strcmp(format_out->name, "www/download") && (method == m))
+#define isDOWNLOAD(m) (strcmp(format_out->name, STR_DOWNLOAD) && (method == m))
 #ifdef USE_ZLIB
 	    if (isDOWNLOAD(cftGzip)) {
 		if (isGzipStream(fp)) {
@@ -2606,7 +2605,7 @@ static int decompressAndParse(HTParentAnchor *anchor,
 	    case cftDeflate:
 		StrAllocCopy(anchor->content_encoding, "x-deflate");
 #ifdef USE_ZLIB
-		if (strcmp(format_out->name, "www/download") != 0) {
+		if (strcmp(format_out->name, STR_DOWNLOAD) != 0) {
 		    if (isDeflateStream(fp)) {
 			zzfp = fp;
 			fp = 0;
@@ -2623,7 +2622,7 @@ static int decompressAndParse(HTParentAnchor *anchor,
 	    case cftGzip:
 		StrAllocCopy(anchor->content_encoding, "x-gzip");
 #ifdef USE_ZLIB
-		if (strcmp(format_out->name, "www/download") != 0) {
+		if (strcmp(format_out->name, STR_DOWNLOAD) != 0) {
 		    if (isGzipStream(fp)) {
 			fclose(fp);
 			fp = 0;
@@ -2641,7 +2640,7 @@ static int decompressAndParse(HTParentAnchor *anchor,
 	    case cftBzip2:
 		StrAllocCopy(anchor->content_encoding, "x-bzip2");
 #ifdef USE_BZLIB
-		if (strcmp(format_out->name, "www/download") != 0) {
+		if (strcmp(format_out->name, STR_DOWNLOAD) != 0) {
 		    if (isBzip2Stream(fp)) {
 			fclose(fp);
 			fp = 0;
@@ -2659,7 +2658,7 @@ static int decompressAndParse(HTParentAnchor *anchor,
 	    case cftBrotli:
 		StrAllocCopy(anchor->content_encoding, "x-brotli");
 #ifdef USE_BROTLI
-		if (strcmp(format_out->name, "www/download") != 0) {
+		if (strcmp(format_out->name, STR_DOWNLOAD) != 0) {
 		    fclose(fp);
 		    fp = 0;
 		    brfp = brotli_open(localname, BIN_R);

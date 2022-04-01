@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMainLoop.c,v 1.244 2021/07/29 20:33:05 tom Exp $
+ * $LynxId: LYMainLoop.c,v 1.246 2022/04/01 07:55:02 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTAccess.h>
@@ -1207,7 +1207,7 @@ static int handle_LYK_ACTIVATE(int *c,
 		    }
 		}
 	    } else {
-		if (HTOutputFormat == HTAtom_for("www/download") &&
+		if (HTOutputFormat == WWW_DOWNLOAD &&
 		    newdoc.post_data != NULL &&
 		    newdoc.safe == FALSE) {
 
@@ -2173,7 +2173,7 @@ static int handle_LYK_DOWNLOAD(int *cmd,
 		    }
 		    return 0;
 		}
-		HTOutputFormat = HTAtom_for("www/download");
+		HTOutputFormat = WWW_DOWNLOAD;
 		LYforce_no_cache = TRUE;
 		*cmd = LYK_ACTIVATE;
 		return 2;
@@ -2254,7 +2254,7 @@ static int handle_LYK_DOWNLOAD(int *cmd,
 	    newdoc.safe = HDOC(number).safe;
 	    newdoc.internal_link = FALSE;
 	    newdoc.link = (user_mode == NOVICE_MODE) ? 1 : 0;
-	    HTOutputFormat = HTAtom_for("www/download");
+	    HTOutputFormat = WWW_DOWNLOAD;
 	    LYUserSpecifiedURL = TRUE;
 	    /*
 	     * Force the document to be reloaded.
@@ -2330,7 +2330,7 @@ static int handle_LYK_DOWNLOAD(int *cmd,
 	    }
 	    newdoc.internal_link = FALSE;
 	    newdoc.link = (user_mode == NOVICE_MODE) ? 1 : 0;
-	    HTOutputFormat = HTAtom_for("www/download");
+	    HTOutputFormat = WWW_DOWNLOAD;
 	    /*
 	     * Force the document to be reloaded.
 	     */
@@ -5541,7 +5541,7 @@ int mainloop(void)
     HTInternalLink = HTAtom_for("internal link");	/* init, used as const */
 
 #ifndef WWW_SOURCE
-    WWW_SOURCE = HTAtom_for("www/source");	/* init, used as const */
+    WWW_SOURCE = HTAtom_for(STR_SOURCE);	/* init, used as const */
 #endif
 
     /*

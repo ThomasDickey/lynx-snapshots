@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFormat.h,v 1.38 2022/03/28 08:09:44 tom Exp $
+ * $LynxId: HTFormat.h,v 1.42 2022/04/01 07:54:14 tom Exp $
  *
  *                                            HTFormat: The format manager in the WWW Library
  *                          MANAGE DIFFERENT DOCUMENT FORMATS
@@ -46,10 +46,8 @@ extern "C" {
 
 																	 */
 /* Internal ones */
-/* #define WWW_SOURCE HTAtom_for("www/source") */
-/* Whatever it was originally */
-    extern HTAtom *WWW_SOURCE;
-    /* calculated once, heavy used */
+#define STR_SOURCE 	"www/source"
+    extern HTAtom *WWW_SOURCE;	/* calculated once, heavy used */
 
 /*
 
@@ -57,7 +55,8 @@ extern "C" {
    convert to www/present, you present the material to the user.
 
  */
-#define WWW_PRESENT HTAtom_for("www/present")	/* The user's perception */
+#define STR_PRESENT	"www/present"
+#define WWW_PRESENT	HTAtom_for(STR_PRESENT)		/* The user's perception */
 
 #define WWW_DEBUG       HTAtom_for("www/debug")
 /*
@@ -100,6 +99,15 @@ extern "C" {
 */
 #define WWW_DIRED      HTAtom_for("www/dired")
 #endif
+
+/*
+ * Miscellaneous internal MIME types.
+ */
+#define STR_DOWNLOAD    "www/download"
+#define WWW_DOWNLOAD    HTAtom_for(STR_DOWNLOAD)
+
+#define STR_DUMP        "www/dump"
+#define WWW_DUMP        HTAtom_for(STR_DUMP)
 
 /*
 
@@ -527,7 +535,7 @@ HTParseBzFile: Parse a bzip2'ed File through a file pointer
 
 #ifdef USE_BROTLI
 /*
-HTParseBzFile: Parse a brotli'ed File through a file pointer
+HTParseBrFile: Parse a brotli'ed File through a file pointer
 
    This routine is called by protocols modules to load an object.  uses
    HTStreamStack and HTBrFileCopy.  Returns HT_LOADED if successful, can also
@@ -536,7 +544,7 @@ HTParseBzFile: Parse a brotli'ed File through a file pointer
     extern int HTParseBrFile(HTFormat format_in,
 			     HTFormat format_out,
 			     HTParentAnchor *anchor,
-			     FILE * brfp,
+			     FILE *brfp,
 			     HTStream *sink);
 
 #endif				/* USE_BROTLI */

@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFWriter.c,v 1.120 2022/03/28 00:04:50 tom Exp $
+ * $LynxId: HTFWriter.c,v 1.123 2022/04/01 00:15:05 tom Exp $
  *
  *		FILE WRITER				HTFWrite.h
  *		===========
@@ -317,14 +317,9 @@ static void HTFWriter_free(HTStream *me)
 		    } else
 #endif /* USE_BROTLI */
 		    {
-			char FIXME[1024];
-
-			sprintf(FIXME, "brotli -d -j -f %s", path);
 			path[len - 3] = '\0';
 			(void) remove(path);
-			system(FIXME);
 		    }
-		    CTRACE((tfp, "FIXME %s@%d\n", __FILE__, __LINE__));
 		} else if (len > 2 && !strcasecomp(&path[len - 1], "Z")) {
 		    path[len - 2] = '\0';
 		    (void) remove(path);
@@ -339,7 +334,7 @@ static void HTFWriter_free(HTStream *me)
 		    /*
 		     * Uncompress it.  - FM
 		     */
-		    if (me->end_command && me->end_command[0])
+		    if (!isEmpty(me->end_command))
 			LYSystem(me->end_command);
 		    found = LYCanReadFile(me->anchor->FileCache);
 		}
@@ -480,7 +475,7 @@ static void HTFWriter_free(HTStream *me)
 					  me->sink);
 		    }
 		    if (dump_output_immediately &&
-			me->output_format == HTAtom_for("www/present")) {
+			me->output_format == WWW_PRESENT) {
 			FREE(addr);
 			(void) remove(me->anchor->FileCache);
 			FREE(me->anchor->FileCache);
@@ -881,13 +876,13 @@ HTStream *HTSaveToFile(HTPresentation *pres,
 
     if (dump_output_immediately) {
 	ret_obj->fp = stdout;	/* stdout */
-	if (HTOutputFormat == HTAtom_for("www/download"))
+	if (HTOutputFormat == WWW_DOWNLOAD)
 	    goto Prepend_BASE;
 	return ret_obj;
     }
 
     LYCancelDownload = FALSE;
-    if (HTOutputFormat != HTAtom_for("www/download")) {
+    if (HTOutputFormat != WWW_DOWNLOAD) {
 	if (traversal ||
 	    (no_download && !override_no_download && no_disk_save)) {
 	    if (!traversal) {
@@ -1196,8 +1191,8 @@ HTStream *HTCompressed(HTPresentation *pres,
     if (can_present == FALSE ||	/* no presentation mapping */
 	uncompress_mask == NULL ||	/* not gzip or compress */
 	StrChr(anchor->content_type, ';') ||	/* wrong charset */
-	HTOutputFormat == HTAtom_for("www/download") ||		/* download */
-	!strcasecomp(pres->rep_out->name, "www/download") ||	/* download */
+	HTOutputFormat == WWW_DOWNLOAD ||	/* download */
+	!strcasecomp(pres->rep_out->name, STR_DOWNLOAD) ||	/* download */
 	(traversal &&		/* only handle html or plain text for traversals */
 	 strcasecomp(anchor->content_type, STR_HTML) &&
 	 strcasecomp(anchor->content_type, STR_PLAINTEXT))) {

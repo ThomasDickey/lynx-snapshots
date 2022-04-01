@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTNews.c,v 1.79 2022/03/12 15:45:16 tom Exp $
+ * $LynxId: HTNews.c,v 1.81 2022/04/01 00:18:22 tom Exp $
  *
  *			NEWS ACCESS				HTNews.c
  *			===========
@@ -2176,8 +2176,8 @@ static int HTLoadNews(const char *arg,
 #endif /* USE_SSL */
 
     diagnostic = (format_out == WWW_SOURCE ||	/* set global flag */
-		  format_out == HTAtom_for("www/download") ||
-		  format_out == HTAtom_for("www/dump"));
+		  format_out == WWW_DOWNLOAD ||
+		  format_out == WWW_DUMP);
     rawtext = NO;
 
     CTRACE((tfp, "HTNews: Looking for %s\n", arg));

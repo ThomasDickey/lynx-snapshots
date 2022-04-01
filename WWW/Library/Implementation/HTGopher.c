@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTGopher.c,v 1.76 2021/07/25 23:51:30 tom Exp $
+ * $LynxId: HTGopher.c,v 1.77 2022/04/01 00:18:09 tom Exp $
  *
  *			GOPHER ACCESS				HTGopher.c
  *			=============
@@ -279,7 +279,7 @@ static void parse_menu(const char *arg GCC_UNUSED,
 	     * Gopher menu.
 	     */
 	    if (dump_output_immediately
-		&& HTOutputFormat == HTAtom_for("www/dump")) {
+		&& HTOutputFormat == WWW_DUMP) {
 		if (ich == '<') {
 		    ss = "&lt;";
 		} else if (ich == '>') {
