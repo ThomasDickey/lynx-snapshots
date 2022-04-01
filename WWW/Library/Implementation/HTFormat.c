@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFormat.c,v 1.95 2022/03/30 00:29:50 tom Exp $
+ * $LynxId: HTFormat.c,v 1.96 2022/03/31 23:39:38 tom Exp $
  *
  *		Manage different file formats			HTFormat.c
  *		=============================
@@ -1173,6 +1173,8 @@ static const char *zError(int status)
  */
 static int HTZzFileCopy(FILE *zzfp, HTStream *sink)
 {
+#undef THIS_FUNC
+#define THIS_FUNC "HTZzFileCopy"
     static char dummy_head[1 + 1] =
     {
 	0x8 + 0x7 * 0x10,
@@ -1196,7 +1198,7 @@ static int HTZzFileCopy(FILE *zzfp, HTStream *sink)
     memset(&s, 0, sizeof(s));
     status = inflateInit(&s);
     if (status != Z_OK) {
-	CTRACE((tfp, "HTZzFileCopy inflateInit() %s\n", zError(status)));
+	CTRACE((tfp, THIS_FUNC " inflateInit() %s\n", zError(status)));
 	exit_immediately(EXIT_FAILURE);
     }
     s.avail_in = 0;
@@ -1229,7 +1231,7 @@ static int HTZzFileCopy(FILE *zzfp, HTStream *sink)
 	} else if (status == Z_DATA_ERROR && !retry++) {
 	    status = inflateReset(&s);
 	    if (status != Z_OK) {
-		CTRACE((tfp, "HTZzFileCopy inflateReset() %s\n", zError(status)));
+		CTRACE((tfp, THIS_FUNC " inflateReset() %s\n", zError(status)));
 		rv = -1;
 		break;
 	    }
@@ -1240,7 +1242,7 @@ static int HTZzFileCopy(FILE *zzfp, HTStream *sink)
 	    s.avail_in = (unsigned) len;
 	    continue;
 	} else if (status != Z_OK) {
-	    CTRACE((tfp, "HTZzFileCopy inflate() %s\n", zError(status)));
+	    CTRACE((tfp, THIS_FUNC " inflate() %s\n", zError(status)));
 	    rv = bytes ? HT_PARTIAL_CONTENT : -1;
 	    break;
 	} else if (s.avail_out == 0) {
@@ -1265,6 +1267,7 @@ static int HTZzFileCopy(FILE *zzfp, HTStream *sink)
     inflateEnd(&s);
     HTFinishDisplayPartial();
     return rv;
+#undef THIS_FUNC
 }
 #endif /* USE_ZLIB */
 
@@ -1978,7 +1981,7 @@ int HTParseBzFile(HTFormat rep_in,
  *	HT_LOADED	Normal end of file indication on reading.
  *
  *  State of file and target stream on return:
- *	always		bzfp closed; target freed, aborted, or NULL.
+ *	always		brfp closed; target freed, aborted, or NULL.
  */
 int HTParseBrFile(HTFormat rep_in,
 		  HTFormat format_out,
@@ -1986,6 +1989,8 @@ int HTParseBrFile(HTFormat rep_in,
 		  FILE *brfp,
 		  HTStream *sink)
 {
+#undef THIS_FUNC
+#define THIS_FUNC "HTParseBrFile"
     HTStream *stream;
     HTStreamClass targetClass;
     int rv;
@@ -2003,7 +2008,7 @@ int HTParseBrFile(HTFormat rep_in,
 	} else {
 	    HTSprintf0(&buffer, CANNOT_CONVERT_I_TO_O,
 		       HTAtom_name(rep_in), HTAtom_name(format_out));
-	    CTRACE((tfp, "HTFormat(in HTParseBzFile): %s\n", buffer));
+	    CTRACE((tfp, "HTFormat(in " THIS_FUNC "): %s\n", buffer));
 	    rv = HTLoadError(sink, 501, buffer);
 	    FREE(buffer);
 	    result = rv;
@@ -2035,6 +2040,7 @@ int HTParseBrFile(HTFormat rep_in,
 	}
     }
     return result;
+#undef THIS_FUNC
 }
 #endif /* USE_BROTLI */
 

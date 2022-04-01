@@ -1,4 +1,4 @@
-# $LynxId: lynx.spec,v 1.65 2021/11/04 20:00:16 tom Exp $
+# $LynxId: lynx.spec,v 1.66 2022/03/30 00:34:53 tom Exp $
 Summary: A text-based Web browser
 Name: lynx-dev
 Version: 2.9.0
@@ -79,6 +79,7 @@ HTTP, FTP, WAIS, and NNTP servers.
 	--enable-source-cache \
 	--enable-syslog \
 	--enable-warnings \
+	--with-brotli \
 	--with-bzlib \
 	--with-screen=ncursesw6dev \
 	--with-ssl \
@@ -112,6 +113,9 @@ rm -rf $RPM_BUILD_ROOT
 %config %{lynx_etc}/*.lss
 
 %changelog
+
+* Tue Mar 29 2022 Thomas E. Dickey
+- add brotli compression
 
 * Sat Jul 31 2021 Thomas E. Dickey
 - align configure-options with Debian package, removing some which are not

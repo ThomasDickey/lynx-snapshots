@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFTP.c,v 1.144 2022/03/17 20:04:17 tom Exp $
+ * $LynxId: HTFTP.c,v 1.147 2022/04/01 00:18:09 tom Exp $
  *
  *			File Transfer Protocol (FTP) Client
  *			for a WorldWideWeb browser
@@ -3589,8 +3589,8 @@ int HTFTPLoad(const char *name,
 	    format = HTFileFormat(filename, &encoding, NULL);
 	}
 	format = HTCharsetFormat(format, anchor, -1);
-	binary = (BOOL) (encoding != HTAtom_for("8bit") &&
-			 encoding != HTAtom_for("7bit"));
+	binary = (BOOL) (encoding != WWW_ENC_8BIT &&
+			 encoding != WWW_ENC_7BIT);
 	if (!binary &&
 	/*
 	 * Force binary if we're in source, download or dump mode and this is
@@ -3599,8 +3599,8 @@ int HTFTPLoad(const char *name,
 	 * EBCDIC.  - FM
 	 */
 	    (format_out == WWW_SOURCE ||
-	     format_out == HTAtom_for("www/download") ||
-	     format_out == HTAtom_for("www/dump")) &&
+	     format_out == WWW_DOWNLOAD ||
+	     format_out == WWW_DUMP) &&
 	    (server_type != CMS_SERVER))
 	    binary = TRUE;
 	if (!binary && type && *type == 'I') {

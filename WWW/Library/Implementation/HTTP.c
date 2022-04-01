@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTP.c,v 1.182 2022/03/17 20:02:41 tom Exp $
+ * $LynxId: HTTP.c,v 1.183 2022/04/01 00:10:19 tom Exp $
  *
  * HyperText Transfer Protocol	- Client implementation		HTTP.c
  * ===========================
@@ -2244,7 +2244,7 @@ static int HTLoadHTTP(const char *arg,
 			goto clean_up;
 		    }
 		    if (!dump_output_immediately &&
-			format_out == HTAtom_for("www/download")) {
+			format_out == WWW_DOWNLOAD) {
 			/*
 			 * Convert a download request to a presentation request
 			 * for interactive users.  - FM
@@ -2279,7 +2279,7 @@ static int HTLoadHTTP(const char *arg,
 			goto clean_up;
 		    }
 		    if (!dump_output_immediately &&
-			format_out == HTAtom_for("www/download")) {
+			format_out == WWW_DOWNLOAD) {
 			/*
 			 * Convert a download request to a presentation request
 			 * for interactive users.  - FM
@@ -2442,7 +2442,7 @@ static int HTLoadHTTP(const char *arg,
 		    } else if (!(traversal || dump_output_immediately) &&
 			       HTConfirm(gettext("Show the 407 message body?"))) {
 			if (!dump_output_immediately &&
-			    format_out == HTAtom_for("www/download")) {
+			    format_out == WWW_DOWNLOAD) {
 			    /*
 			     * Convert a download request to a presentation
 			     * request for interactive users.  - FM
@@ -2495,7 +2495,7 @@ static int HTLoadHTTP(const char *arg,
 			goto clean_up;
 		    }
 		    if (!dump_output_immediately &&
-			format_out == HTAtom_for("www/download")) {
+			format_out == WWW_DOWNLOAD) {
 			/*
 			 * Convert a download request to a presentation request
 			 * for interactive users.  - FM
@@ -2526,7 +2526,7 @@ static int HTLoadHTTP(const char *arg,
 		    goto clean_up;
 		}
 		if (!dump_output_immediately &&
-		    format_out == HTAtom_for("www/download")) {
+		    format_out == WWW_DOWNLOAD) {
 		    /*
 		     * Convert a download request to a presentation request for
 		     * interactive users.  - FM
@@ -2548,7 +2548,7 @@ static int HTLoadHTTP(const char *arg,
 		    goto clean_up;
 		}
 		if (!dump_output_immediately &&
-		    format_out == HTAtom_for("www/download")) {
+		    format_out == WWW_DOWNLOAD) {
 		    /*
 		     * Convert a download request to a presentation request for
 		     * interactive users.  - FM
@@ -2606,7 +2606,7 @@ static int HTLoadHTTP(const char *arg,
 	    if (!sink)
 		sink = HTErrorStream();
 	} else if (!dump_output_immediately &&
-		   format_out == HTAtom_for("www/download")) {
+		   format_out == WWW_DOWNLOAD) {
 	    /*
 	     * Convert a download request to a presentation request for
 	     * interactive users.  - FM

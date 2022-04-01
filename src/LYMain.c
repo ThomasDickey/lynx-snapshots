@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMain.c,v 1.295 2021/07/05 20:26:11 tom Exp $
+ * $LynxId: LYMain.c,v 1.298 2022/04/01 07:50:45 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTP.h>
@@ -1932,7 +1932,7 @@ int main(int argc,
     /*
      * Check the -base command line switch with -source.  - FM
      */
-    if (LYPrependBase && HTOutputFormat == HTAtom_for("www/download")) {
+    if (LYPrependBase && HTOutputFormat == WWW_DOWNLOAD) {
 	LYPrependBaseToSource = TRUE;
     }
 
@@ -2582,8 +2582,8 @@ static int base_fun(char *next_arg GCC_UNUSED)
      * later, if LYPrependBase is set TRUE here.  - FM
      */
     LYPrependBase = TRUE;
-    if (HTOutputFormat == HTAtom_for("www/dump"))
-	HTOutputFormat = HTAtom_for("www/download");
+    if (HTOutputFormat == WWW_DUMP)
+	HTOutputFormat = WWW_DOWNLOAD;
 
     return 0;
 }
@@ -2832,7 +2832,7 @@ static int mime_header_fun(char *next_arg GCC_UNUSED)
     keep_mime_headers = TRUE;
     force_dump_mode();
     HTOutputFormat = (LYPrependBase ?
-		      HTAtom_for("www/download") : HTAtom_for("www/dump"));
+		      WWW_DOWNLOAD : WWW_DUMP);
     LYcols = MAX_COLS;
     return 0;
 }
@@ -3193,7 +3193,7 @@ static int source_fun(char *next_arg GCC_UNUSED)
 {
     force_dump_mode();
     HTOutputFormat = (LYPrependBase ?
-		      HTAtom_for("www/download") : HTAtom_for("www/dump"));
+		      WWW_DOWNLOAD : WWW_DUMP);
     LYcols = MAX_COLS;
     return 0;
 }
