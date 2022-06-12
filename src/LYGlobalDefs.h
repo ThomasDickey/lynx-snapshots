@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYGlobalDefs.h,v 1.153 2020/02/23 23:10:16 Keith.Bowes Exp $
+ * $LynxId: LYGlobalDefs.h,v 1.154 2022/04/02 00:12:18 Paul.G.Fox Exp $
  *
  * global variable definitions
  */
@@ -151,6 +151,7 @@ extern "C" {
 #define NOVICE_MODE 	  0
 #define INTERMEDIATE_MODE 1
 #define ADVANCED_MODE 	  2
+#define MINIMAL_MODE 	  3
     extern BOOLEAN LYUseNoviceLineTwo;	/* True if TOGGLE_HELP is not mapped */
 
 #define MAX_LINE 1024		/* No window can be wider than this */

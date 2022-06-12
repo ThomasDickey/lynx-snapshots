@@ -1,5 +1,5 @@
 /*
- * $LynxId: userdefs.h,v 1.362 2022/03/11 01:29:33 tom Exp $
+ * $LynxId: userdefs.h,v 1.363 2022/04/01 23:56:33 Paul.G.Fox Exp $
  *
  * Lynx - Hypertext navigation system
  *
@@ -1238,6 +1238,16 @@
  * and all three can be changed via the Options Menu.
  */
 #define DEFAULT_KEYPAD_MODE	NUMBERS_AS_ARROWS
+
+/********************************
+ * If PREVENT_KEYBOARD_WRAPAROUND is defined, using the keyboard to
+ * move past the end (or beginning) of a page results in a warning. 
+ * Otherwise, such motions cause the cursor to wrap from bottom to top
+ * (or top to bottom) of page.  Note that for pages which fit
+ * completely on one screen, wraparound always occurs, so this only
+ * affects multi-screen pages.
+ */
+#define PREVENT_KEYBOARD_WRAPAROUND
 
 /********************************
  * The default search.

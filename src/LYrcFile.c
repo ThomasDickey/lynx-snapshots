@@ -1,4 +1,4 @@
-/* $LynxId: LYrcFile.c,v 1.106 2022/03/27 23:01:26 tom Exp $ */
+/* $LynxId: LYrcFile.c,v 1.107 2022/04/02 00:12:18 Paul.G.Fox Exp $ */
 #include <HTUtils.h>
 #include <HTFTP.h>
 #include <LYUtils.h>
@@ -167,6 +167,7 @@ Config_Enum tbl_transfer_rate[] = {
 };
 
 Config_Enum tbl_user_mode[] = {
+    { "MINIMAL",	MINIMAL_MODE },
     { "ADVANCED",	ADVANCED_MODE },
     { "INTERMEDIATE",	INTERMEDIATE_MODE },
     { "NOVICE",		NOVICE_MODE },

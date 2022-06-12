@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYBookmark.c,v 1.80 2019/01/02 21:14:08 tom Exp $
+ * $LynxId: LYBookmark.c,v 1.81 2022/04/02 00:12:18 Paul.G.Fox Exp $
  */
 #include <HTUtils.h>
 #include <HTAlert.h>
@@ -712,7 +712,7 @@ int select_multi_bookmarks(void)
      * redraws of the screen, if LYMBMAdvnced is TRUE.  '=' will still show the
      * screen and let them do it the "long" way.
      */
-    if (LYMultiBookmarks == MBM_ADVANCED && user_mode == ADVANCED_MODE) {
+    if (LYMultiBookmarks == MBM_ADVANCED && (user_mode == ADVANCED_MODE)) {
 	LYMBM_statusline(MULTIBOOKMARKS_SELECT);
       get_advanced_choice:
 	c = LYgetch();

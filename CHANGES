@@ -1,9 +1,23 @@
--- $LynxId: CHANGES,v 1.1107 2022/03/31 23:30:44 tom Exp $
+-- $LynxId: CHANGES,v 1.1112 2022/06/12 17:05:20 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2022-03-31 (2.9.0dev.11)
+2022-06-12 (2.9.0dev.11)
+* improve line-breaks and whitespace for Japanese characters -KH
+  + permit line breaks after any Japanese character (enabled by
+    --enable-wcwidth-support configuration and only called on last byte of
+    multibyte UTF-8 sequence)
+  + avoid adding spaces when joining lines after Japanese characters.
+* add new "Minimal" user mode, to minimize on-screen help/status.
+  Eliminates the URL on the bottom line, the forward/backward indicator in the
+  upper left, and most status-line messages - Paul G Fox
+* add PREVENT_KEYBOARD_WRAPAROUND symbol to userdefs.h 
+  Undefing this will allow cursor to wrap from bottom to/from top, when there's
+  more content than a single page.  (It can already wrap when the content
+  already fits on a page.) - Paul G Fox
+* modify NSL-fork to call freeaddrinfo only if getaddrinfo returns successfully
+  (patch by Rajeev V Pillai)
 * add ".br", ".lz", ".lzip", and ".xz" to binary-suffixes list -TD
 * changes for using brotli stream decompression -TD
 * changes for working with SOCKS5 on Windows 10 -GV, -TD
@@ -18,7 +32,7 @@ Changes since Lynx 2.8 release
   CF_FIX_WARNINGS, CF_MAKEFLAGS, CF_NCURSES_CONFIG, CF_NCURSES_LIBS,
   CF_PKG_CONFIG, CF_SIZECHANGE, CF_TRY_XOPEN_SOURCE, CF_WITH_PATH,
   CF_XOPEN_SOURCE
-* update config.guess (2022-01-09), config.sub (2022-01-03)
+* update config.guess (2022-05-25), config.sub (2022-01-03)
 
 2021-10-24 (2.9.0dev.10)
 * several fixes for problems found using asan2 with fuzzer-generated data

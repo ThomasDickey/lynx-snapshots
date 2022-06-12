@@ -1,4 +1,4 @@
-/* $LynxId: LYOptions.c,v 1.184 2021/07/30 00:17:54 tom Exp $ */
+/* $LynxId: LYOptions.c,v 1.185 2022/04/02 00:13:48 Paul.G.Fox Exp $ */
 #include <HTUtils.h>
 #include <HTFTP.h>
 #include <HTTP.h>		/* 'reloading' flag */
@@ -337,6 +337,7 @@ void LYoptions(void)
 	"Novice",
 	"Intermediate",
 	"Advanced",
+	"Minimal",
 	NULL
     };
 
@@ -572,7 +573,8 @@ void LYoptions(void)
     addlbl("(U)ser mode                  : ");
     LYaddstr((user_mode == NOVICE_MODE) ? "Novice      " :
 	     ((user_mode == INTERMEDIATE_MODE) ? "Intermediate" :
-	      "Advanced    "));
+	      ((user_mode == ADVANCED_MODE) ? "Advanced    " :
+	       "Minimal     ")));
 
     addlbl("  verbose images (!) : ");
     ShowBool(verbose_img);
@@ -1396,13 +1398,13 @@ void LYoptions(void)
 		user_mode = LYChooseEnum(user_mode,
 					 L_User_Mode, -1,
 					 userMode_choices);
-		use_assume_charset = (BOOLEAN) (user_mode >= 2);
+		use_assume_charset = (BOOLEAN) (user_mode == ADVANCED_MODE);
 	    } else {
 		user_mode = LYChoosePopup(user_mode,
 					  L_User_Mode, -1,
 					  userMode_choices,
 					  3, FALSE, FALSE);
-		use_assume_charset = (BOOLEAN) (user_mode >= 2);
+		use_assume_charset = (BOOLEAN) (user_mode == ADVANCED_MODE);
 #if defined(VMS) || defined(USE_SLANG)
 		if (use_assume_charset == old_use_assume_charset) {
 		    LYmove(L_User_Mode, COL_OPTION_VALUES);
@@ -2268,6 +2270,7 @@ static OptValues user_mode_values[] =
     {NOVICE_MODE, N_("Novice"), "Novice"},
     {INTERMEDIATE_MODE, N_("Intermediate"), "Intermediate"},
     {ADVANCED_MODE, N_("Advanced"), "Advanced"},
+    {MINIMAL_MODE, N_("Minimal"), "Minimal"},
     END_OPTIONS
 };
 

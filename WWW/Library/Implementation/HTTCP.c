@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTCP.c,v 1.162 2022/03/12 16:45:47 tom Exp $
+ * $LynxId: HTTCP.c,v 1.163 2022/04/01 23:18:35 Rajeev.V.Pillai Exp $
  *
  *			Generic Communication Code		HTTCP.c
  *			==========================
@@ -1583,7 +1583,7 @@ static void really_getaddrinfo(const char *host,
     hints.ai_family = PF_UNSPEC;
     hints.ai_socktype = SOCK_STREAM;
     error = getaddrinfo(host, port, &hints, &res);
-    if (error || !res) {
+    if (error) {
 	CTRACE((tfp, "HTGetAddrInfo: getaddrinfo(%s, %s): %s\n", host, port,
 		gai_strerror(error)));
     } else {
@@ -1606,8 +1606,8 @@ static void really_getaddrinfo(const char *host,
 	} else {
 	    statuses->h_length = (int) (((LYNX_ADDRINFO *) (*result))->ai_addrlen);
 	}
+	freeaddrinfo(res);
     }
-    freeaddrinfo(res);
 }
 #endif /* NSL_FORK */
 

@@ -1,5 +1,5 @@
 /*
- * $LynxId: GridText.h,v 1.69 2012/02/12 23:25:38 tom Exp $
+ * $LynxId: GridText.h,v 1.70 2022/06/12 16:38:03 KIHARA.Hideto Exp $
  *
  * Specialities of GridText as subclass of HText
  */
@@ -93,6 +93,9 @@ US-ASCII control characters <32 which are not defined in Unicode standard
 
     extern void HText_setLastChar(HText *text, int ch);
     extern char HText_getLastChar(HText *text);
+#ifdef EXP_JAPANESE_SPACES
+    extern BOOL HText_checkLastChar_needSpaceOnJoinLines(HText *text);
+#endif
 
     extern int HText_sourceAnchors(HText *text);
     extern void HText_setStale(HText *text);
@@ -288,6 +291,10 @@ US-ASCII control characters <32 which are not defined in Unicode standard
     extern void HText_updateKcode(HText *text, HTkcode kcode);
     extern HTkcode HText_getSpecifiedKcode(HText *text);
     extern void HText_updateSpecifiedKcode(HText *text, HTkcode kcode);
+
+#if defined(EXP_WCWIDTH_SUPPORT) || defined(EXP_JAPANESE_SPACES)
+    extern BOOL isUTF8CJChar(const char *s);
+#endif
 
 #ifdef __cplusplus
 }

@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTML.c,v 1.196 2021/10/24 19:10:57 tom Exp $
+ * $LynxId: HTML.c,v 1.198 2022/06/12 16:48:05 tom Exp $
  *
  *		Structured stream to Rich hypertext converter
  *		============================================
@@ -275,18 +275,6 @@ void LYShowBadHTML(const char *message)
  *			A C T I O N	R O U T I N E S
  */
 
-/* FIXME:  this should be amended to do the substitution only when not in a
- * multibyte stream.
- */
-#ifdef EXP_JAPANESE_SPACES
-#define FIX_JAPANESE_SPACES \
-	(HTCJK == CHINESE || HTCJK == JAPANESE || HTCJK == TAIPEI)
-	/* don't replace '\n' with ' ' if Chinese or Japanese - HN
-	 */
-#else
-#define FIX_JAPANESE_SPACES 0
-#endif
-
 /*	Character handling
  *	------------------
  */
@@ -333,12 +321,26 @@ void HTML_put_character(HTStructured * me, int c)
 	    return;
 	if (c != '\n' && c != '\t' && c != '\r') {
 	    HTChunkPutc(&me->title, uc);
-	} else if (FIX_JAPANESE_SPACES) {
-	    if (c == '\t') {
-		HTChunkPutc(&me->title, ' ');
-	    } else {
+#ifdef EXP_JAPANESE_SPACES
+	} else if (c == '\t') {
+	    HTChunkPutc(&me->title, ' ');
+	    /* don't replace '\n' with ' ' if Chinese or Japanese - HN */
+	} else if (me->title.size > 0 &&
+		   is8bits(me->title.data[me->title.size - 1])) {
+	    if (HTCJK == CHINESE || HTCJK == JAPANESE) {
+		/* TODO: support 2nd byte of SJIS (!is8bits && IS_SJIS_LO) */
 		return;
+	    } else if (IS_UTF8_TTY) {
+		/* find start position of UTF-8 sequence */
+		int i = me->title.size - 1;
+
+		while (i > 0 && (me->title.data[i] & 0xc0) == 0x80)	/* UTF_EXTRA */
+		    i--;
+		if (isUTF8CJChar(&(me->title.data[i])))
+		    return;
 	    }
+	    HTChunkPutc(&me->title, ' ');
+#endif
 	} else {
 	    HTChunkPutc(&me->title, ' ');
 	}
@@ -453,15 +455,17 @@ void HTML_put_character(HTStructured * me, int c)
 		UPDATE_STYLE;
 	    }
 	    if (c == '\n') {
-		if (!FIX_JAPANESE_SPACES) {
-		    if (me->in_word) {
-			if (HText_getLastChar(me->text) != ' ') {
-			    me->inP = TRUE;
-			    me->inLABEL = FALSE;
-			    HText_appendCharacter(me->text, ' ');
-			}
-			me->in_word = NO;
+		if (me->in_word) {
+#ifdef EXP_JAPANESE_SPACES
+		    if (HText_checkLastChar_needSpaceOnJoinLines(me->text)) {
+#else
+		    if (HText_getLastChar(me->text) != ' ') {
+#endif
+			me->inP = TRUE;
+			me->inLABEL = FALSE;
+			HText_appendCharacter(me->text, ' ');
 		    }
+		    me->in_word = NO;
 		}
 
 	    } else if (c == ' ' || c == '\t') {
@@ -607,12 +611,14 @@ void HTML_put_string(HTStructured * me, const char *s)
 		    UPDATE_STYLE;
 		}
 		if (c == '\n') {
-		    if (!FIX_JAPANESE_SPACES) {
-			if (me->in_word) {
-			    if (HText_getLastChar(me->text) != ' ')
-				HText_appendCharacter(me->text, ' ');
-			    me->in_word = NO;
-			}
+		    if (me->in_word) {
+#ifdef EXP_JAPANESE_SPACES
+			if (HText_checkLastChar_needSpaceOnJoinLines(me->text))
+#else
+			if (HText_getLastChar(me->text) != ' ')
+#endif
+			    HText_appendCharacter(me->text, ' ');
+			me->in_word = NO;
 		    }
 
 		} else if (c == ' ' || c == '\t') {
