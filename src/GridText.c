@@ -1,5 +1,5 @@
 /*
- * $LynxId: GridText.c,v 1.334 2021/10/24 16:13:59 tom Exp $
+ * $LynxId: GridText.c,v 1.340 2022/06/12 16:45:35 tom Exp $
  *
  *		Character grid hypertext object
  *		===============================
@@ -453,7 +453,11 @@ struct _HText {
     HTList *hidden_links;	/* Content-less links ... */
     int hiddenlinkflag;		/*  ... and how to treat them */
     BOOL no_cache;		/* Always refresh? */
+#ifdef EXP_JAPANESE_SPACES
+    char LastChars[7];		/* utf-8 buffer */
+#else
     char LastChar;		/* For absorbing white space */
+#endif
 
 /* For Internal use: */
     HTStyle *style;		/* Current style */
@@ -600,12 +604,11 @@ char star_string[MAX_LINE + 1];
 
 static int ctrl_chars_on_this_line = 0;		/* num of ctrl chars in current line */
 static int utfxtra_on_this_line = 0;	/* num of UTF-8 extra bytes in line,
-
 					   they *also* count as ctrl chars. */
 #ifdef EXP_WCWIDTH_SUPPORT
 static int utfxtracells_on_this_line = 0;	/* num of UTF-8 extra cells in line */
-static int utfextracells(const char *s);
 #endif
+
 #ifdef WIDEC_CURSES
 # ifdef EXP_WCWIDTH_SUPPORT	/* TODO: support for !WIDEC_CURSES */
 #define UTFXTRA_ON_THIS_LINE utfxtracells_on_this_line
@@ -735,6 +738,47 @@ static void *LY_check_calloc(size_t nmemb, size_t size)
 }
 
 #endif /* CHECK_FREE_MEM */
+
+#ifdef EXP_WCWIDTH_SUPPORT
+static int utfextracells(const char *s)
+{
+    UCode_t ucs = UCGetUniFromUtf8String(&s);
+    int result = 0;
+
+    if (ucs > 0) {
+	int cells = wcwidth((wchar_t) ucs);
+
+	if (cells > 1)
+	    result = (cells - 1);
+    }
+    return result;
+}
+
+static void permit_split_after_CJchar(HText *text, const char *s, unsigned short pos)
+{
+    /* Can split after almost any CJ char (Korean uses space) */
+    /* TODO: UAX#14 Unicode Line Breaking Algorithm (use ICU4C?) */
+    if (isUTF8CJChar(s))
+	text->permissible_split = pos;
+}
+#endif /* EXP_WCWIDTH_SUPPORT */
+
+#if defined(EXP_WCWIDTH_SUPPORT) || defined(EXP_JAPANESE_SPACES)
+BOOL isUTF8CJChar(const char *s)
+{
+    UCode_t u = UCGetUniFromUtf8String(&s);
+
+    if ((u >= 0x4e00 && u <= 0x9fff) ||		/* CJK Unified Ideographs */
+	(u >= 0x3000 && u <= 0x30ff) ||		/* CJK Symbols and Punctuation, Hiragana, Katakana */
+	(u >= 0xff00 && u <= 0xffef) ||		/* Halfwidth and Fullwidth Forms. Fullwidth ?! are often used */
+    /* rare characters */
+	(u >= 0x3400 && u <= 0x4dbf) ||		/* CJK Unified Ideographs Extension A */
+	(u >= 0xf900 && u <= 0xfaff) ||		/* CJK Compatibility Ideographs */
+	(u >= 0x20000 && u <= 0x3ffff))		/* {Supplementary,Tertiary} Ideographic Plane */
+	return YES;
+    return NO;
+}
+#endif /* EXP_WCWIDTH_SUPPORT || EXP_JAPANESE_SPACES */
 
 #ifdef USE_COLOR_STYLE
 /*
@@ -1133,7 +1177,11 @@ HText *HText_new(HTParentAnchor *anchor)
 				 anchor->post_data)
 				? YES
 				: NO);
+#ifdef EXP_JAPANESE_SPACES
+    memset(self->LastChars, 0, sizeof(self->LastChars));
+#else
     self->LastChar = '\0';
+#endif
 
 #ifndef USE_PRETTYSRC
     if (HTOutputFormat == WWW_SOURCE)
@@ -1776,7 +1824,8 @@ static void display_title(HText *text)
 #endif
     }
 #ifdef USE_COLOR_STYLE
-    if (s_forw_backw != NOSTYLE && (nhist || nhist_extra > 1)) {
+    if (s_forw_backw != NOSTYLE && user_mode != MINIMAL_MODE &&
+	(nhist || nhist_extra > 1)) {
 	chtype c = nhist ? ACS_LARROW : ' ';
 
 	/* turn the FORWBACKW.ARROW style on */
@@ -2866,7 +2915,7 @@ static void split_line(HText *text, unsigned split)
 #ifdef EXP_WCWIDTH_SUPPORT
     utfxtracells_on_this_line = 0;
 #endif
-    text->LastChar = ' ';
+    HText_setLastChar(text, ' ');
 
 #ifdef DEBUG_APPCH
     CTRACE((tfp, "GridText: split_line(%p,%d) called\n", text, split));
@@ -4165,8 +4214,10 @@ void HText_appendCharacter(HText *text, int ch)
 		    utff--;
 		utf_xlen = UTF_XLEN(line->data[utff]);
 
-		if (line->size - utff == utf_xlen + 1)	/* have last byte */
+		if (line->size - utff == utf_xlen + 1) {	/* have last byte */
 		    utfxtracells_on_this_line += utfextracells(&(line->data[utff]));
+		    permit_split_after_CJchar(text, &(line->data[utff]), line->size);
+		}
 	    }
 #endif
 	    return;
@@ -4645,7 +4696,24 @@ void HText_setLastChar(HText *text, int ch)
     if (!text)
 	return;
 
+#ifdef EXP_JAPANESE_SPACES
+    if (IS_UTF_EXTRA(ch) && IS_UTF_FIRST(text->LastChars[0])) {
+	int i;
+
+	for (i = 1;
+	     text->LastChars[i] != '\0' && i < sizeof(text->LastChars) - 1;
+	     i++) {
+	    ;
+	}
+	text->LastChars[i] = (char) ch;
+	text->LastChars[i + 1] = '\0';
+	return;
+    }
+    memset(text->LastChars, 0, sizeof(text->LastChars));
+    text->LastChars[0] = (char) ch;
+#else
     text->LastChar = (char) ch;
+#endif
 }
 
 /*	Get LastChar element in the text object.
@@ -4656,8 +4724,40 @@ char HText_getLastChar(HText *text)
     if (!text)
 	return ('\0');
 
+#ifdef EXP_JAPANESE_SPACES
+    if (IS_UTF_FIRST(text->LastChars[0])) {
+	int i;
+
+	for (i = 1;
+	     text->LastChars[i] != '\0' && i < sizeof(text->LastChars);
+	     i++) {
+	    ;
+	}
+	return ((char) text->LastChars[i - 1]);
+    }
+    return ((char) text->LastChars[0]);
+#else
     return ((char) text->LastChar);
+#endif
 }
+
+#ifdef EXP_JAPANESE_SPACES
+BOOL HText_checkLastChar_needSpaceOnJoinLines(HText *text)
+{
+    if (!text)
+	return YES;
+
+    if (IS_UTF_FIRST(text->LastChars[0]) && isUTF8CJChar(text->LastChars))
+	return NO;
+    if ((HTCJK == CHINESE || HTCJK == JAPANESE) && is8bits(text->LastChars[0])) {
+	/* TODO: support 2nd byte of some SJIS kanji (!is8bits && IS_SJIS_LO) */
+	return NO;
+    }
+    if (text->LastChars[0] != ' ')
+	return YES;
+    return NO;
+}
+#endif
 
 /*		Simple table handling - private
  *		-------------------------------
@@ -5201,7 +5301,7 @@ static void add_link_number(HText *text, TextAnchor *a, int save_position)
 	&& (text->source ? !psrcview_no_anchor_numbering : 1)
 #endif
 	&& links_are_numbered()) {
-	char saved_lastchar = text->LastChar;
+	char saved_lastchar = HText_getLastChar(text);
 	int saved_linenum = text->Lines;
 	HTAnchor *link_dest;
 	char *link_text;
@@ -5219,7 +5319,7 @@ static void add_link_number(HText *text, TextAnchor *a, int save_position)
 	    HText_appendText(text, marker);
 	}
 	if (saved_linenum && text->Lines && saved_lastchar != ' ')
-	    text->LastChar = ']';	/* if marker not after space caused split */
+	    HText_setLastChar(text, ']');	/* if marker not after space caused split */
 	if (save_position) {
 	    a->line_num = text->Lines;
 	    a->line_pos = (short) text->last_line->size;
@@ -14950,19 +15050,3 @@ GLOBALDEF HTProtocol LYLynxCache =
 {"LYNXCACHE", LYHandleCache, 0};
 #endif /* GLOBALDEF_IS_MACRO */
 #endif /* USE_CACHEJAR */
-
-#ifdef EXP_WCWIDTH_SUPPORT
-static int utfextracells(const char *s)
-{
-    UCode_t ucs = UCGetUniFromUtf8String(&s);
-    int result = 0;
-
-    if (ucs > 0) {
-	int cells = wcwidth((wchar_t) ucs);
-
-	if (cells > 1)
-	    result = (cells - 1);
-    }
-    return result;
-}
-#endif

@@ -1,4 +1,4 @@
-/* $LynxId: LYForms.c,v 1.118 2018/05/08 20:51:57 tom Exp $ */
+/* $LynxId: LYForms.c,v 1.119 2022/04/02 00:13:32 Paul.G.Fox Exp $ */
 #include <HTUtils.h>
 #include <HTCJK.h>
 #include <HTTP.h>
@@ -954,7 +954,9 @@ void show_formlink_statusline(const FormInfo * form,
 	    if (no_mail) {
 		statusline(FORM_LINK_SUBMIT_MAILTO_DIS_MSG);
 	    } else {
-		if (user_mode == ADVANCED_MODE) {
+		if (user_mode == MINIMAL_MODE) {
+		    statusline("");
+		} else if (user_mode == ADVANCED_MODE) {
 		    char *submit_str = NULL;
 
 		    StrAllocCopy(submit_str, FORM_LINK_SUBMIT_MAILTO_PREFIX);
@@ -966,7 +968,9 @@ void show_formlink_statusline(const FormInfo * form,
 		}
 	    }
 	} else if (form->no_cache) {
-	    if (user_mode == ADVANCED_MODE) {
+	    if (user_mode == MINIMAL_MODE) {
+		statusline("");
+	    } else if (user_mode == ADVANCED_MODE) {
 		char *submit_str = NULL;
 
 		StrAllocCopy(submit_str, FORM_LINK_RESUBMIT_PREFIX);
@@ -977,7 +981,9 @@ void show_formlink_statusline(const FormInfo * form,
 		statusline(FORM_LINK_RESUBMIT_MESSAGE);
 	    }
 	} else {
-	    if (user_mode == ADVANCED_MODE) {
+	    if (user_mode == MINIMAL_MODE) {
+		statusline("");
+	    } else if (user_mode == ADVANCED_MODE) {
 		char *submit_str = NULL;
 
 		StrAllocCopy(submit_str, FORM_LINK_SUBMIT_PREFIX);

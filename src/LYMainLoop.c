@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMainLoop.c,v 1.246 2022/04/01 07:55:02 tom Exp $
+ * $LynxId: LYMainLoop.c,v 1.248 2022/04/02 00:12:18 Paul.G.Fox Exp $
  */
 #include <HTUtils.h>
 #include <HTAccess.h>
@@ -48,6 +48,25 @@
 
 #ifdef KANJI_CODE_OVERRIDE
 #include <HTCJK.h>
+#endif
+
+#ifdef PREVENT_KEYBOARD_WRAPAROUND
+#define HandleForwardWraparound() \
+	*old_c = real_c; \
+	HTInfoMsg(ALREADY_AT_END)
+#define HandleReverseWraparound() \
+	*old_c = real_c; \
+	HTInfoMsg(ALREADY_AT_BEGIN)
+#else
+#define HandleForwardWraparound() \
+	LYSetNewline(1)
+#define HandleReverseWraparound() \
+	int i; \
+	i = HText_getNumOfLines() - display_lines + 2; \
+	if (i >= 1 && Newline != i) { \
+	    LYSetNewline(i); \
+	    *arrowup = TRUE; \
+	}
 #endif
 
 #define LinkIsTextarea(linkNumber) \
@@ -2358,8 +2377,7 @@ static void handle_LYK_DOWN_xxx(int *old_c,
 		--newdoc.link;
 	}
     } else if (*old_c != real_c) {
-	*old_c = real_c;
-	HTInfoMsg(ALREADY_AT_END);
+	HandleForwardWraparound();
     }
 }
 
@@ -2398,8 +2416,7 @@ static void handle_LYK_DOWN_LINK(int *follow_col,
     } else if (more_text) {	/* next page */
 	LYChgNewline(display_lines);
     } else if (*old_c != real_c) {
-	*old_c = real_c;
-	HTInfoMsg(ALREADY_AT_END);
+	HandleForwardWraparound();
     }
 }
 
@@ -4101,8 +4118,7 @@ static void handle_LYK_NEXT_LINK(int c,
     } else if (more_text) {	/* next page */
 	LYChgNewline(display_lines);
     } else if (*old_c != real_c) {
-	*old_c = real_c;
-	HTInfoMsg(ALREADY_AT_END);
+	HandleForwardWraparound();
     }
 }
 
@@ -4175,8 +4191,7 @@ static void handle_LYK_PREV_LINK(int *arrowup,
 	}
 
     } else if (*old_c != real_c) {
-	*old_c = real_c;
-	HTInfoMsg(ALREADY_AT_BEGIN);
+	HandleReverseWraparound();
     }
 }
 
@@ -4860,8 +4875,7 @@ static void handle_LYK_UP_xxx(int *arrowup,
 	    }
 	}
     } else if (*old_c != real_c) {
-	*old_c = real_c;
-	HTInfoMsg(ALREADY_AT_BEGIN);
+	HandleReverseWraparound();
     }
 }
 
@@ -4918,8 +4932,7 @@ static void handle_LYK_UP_LINK(int *follow_col,
 	}
 
     } else if (*old_c != real_c) {
-	*old_c = real_c;
-	HTInfoMsg(ALREADY_AT_BEGIN);
+	HandleReverseWraparound();
     }
 }
 
@@ -6720,7 +6733,7 @@ int mainloop(void)
 		    set_ws_title(p);
 		}
 	    } else {
-		if (user_mode == ADVANCED_MODE) {
+		if (user_mode == ADVANCED_MODE || user_mode == MINIMAL_MODE) {
 		    p = curdoc.title;
 		} else {
 		    p = links[curdoc.link].lname;
@@ -6737,7 +6750,7 @@ int mainloop(void)
 	    }
 	} else {
 	    if (strlen(curdoc.address) < sizeof(temp_buff) - 1) {
-		if (user_mode == ADVANCED_MODE) {
+		if (user_mode == ADVANCED_MODE || user_mode == MINIMAL_MODE) {
 		    str_sjis(temp_buff, curdoc.title);
 		} else {
 		    strcpy(temp_buff, curdoc.address);
@@ -7945,7 +7958,7 @@ static void show_main_statusline(const LinkInfo curlink,
 	       !(curlink.type & WWW_LINK_TYPE)) {
 #else
     } else if (lynx_mode == FORMS_LYNX_MODE && nlinks > 0 &&
-	       !(user_mode == ADVANCED_MODE &&
+	       !((user_mode == ADVANCED_MODE || user_mode == MINIMAL_MODE) &&
 		 (curlink.type & WWW_LINK_TYPE))) {
 #endif /* NORMAL_NON_FORM_LINK_STATUSLINES_FOR_ALL_USER_MODES */
 #endif /* INDICATE_FORMS_MODE_FOR_ALL_LINKS_ON_PAGE */
@@ -7967,7 +7980,7 @@ static void show_main_statusline(const LinkInfo curlink,
 	    lynx_stop_reverse();
 	}
 
-    } else if (user_mode == ADVANCED_MODE && nlinks > 0) {
+    } else if ((user_mode == ADVANCED_MODE) && nlinks > 0) {
 	/*
 	 * Show the URL or, for some internal links, the fragment
 	 */
@@ -7980,6 +7993,11 @@ static void show_main_statusline(const LinkInfo curlink,
 	if (!cp)
 	    cp = curlink.lname;
 	status_link(cp, more_text, is_www_index);
+    } else if ((user_mode == MINIMAL_MODE) && nlinks > 0) {
+	/*
+	 *  no URL
+	 */
+	status_link("", more_text, is_www_index);
     } else if (is_www_index && more_text) {
 	char buf[128];
 
@@ -7995,8 +8013,10 @@ static void show_main_statusline(const LinkInfo curlink,
 	    _statusline(MORE);
 	else
 	    _statusline(MOREHELP);
-    } else {
+    } else if (user_mode != MINIMAL_MODE) {
 	_statusline(HELP);
+    } else {
+	_statusline("");
     }
 
     /* turn off cursor since now it's probably on statusline -HV */
