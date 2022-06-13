@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTML.h,v 1.34 2019/08/23 23:18:06 tom Exp $
+ * $LynxId: HTML.h,v 1.35 2022/06/12 20:19:04 tom Exp $
  *
  *					HTML to rich text converter for libwww
  *
@@ -250,6 +250,11 @@ extern "C" {
     extern HTStream *HTMLPresent(HTPresentation *pres,
 				 HTParentAnchor *anchor,
 				 HTStream *sink);
+
+    extern HTStream *XHTMLPresent(HTPresentation *pres,
+				 HTParentAnchor *anchor,
+				 HTStream *sink);
+
 
     extern HTStructured *HTML_new(HTParentAnchor *anchor,
 				  HTFormat format_out,

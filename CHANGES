@@ -1,9 +1,11 @@
--- $LynxId: CHANGES,v 1.1112 2022/06/12 17:05:20 tom Exp $
+-- $LynxId: CHANGES,v 1.1113 2022/06/13 00:23:57 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
 2022-06-12 (2.9.0dev.11)
+* add presentation type for xhtml, related state information to better handle
+  things such as "<script src=foo />" -Sholmi Fish, TD
 * improve line-breaks and whitespace for Japanese characters -KH
   + permit line breaks after any Japanese character (enabled by
     --enable-wcwidth-support configuration and only called on last byte of
