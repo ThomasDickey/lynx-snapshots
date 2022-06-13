@@ -1,5 +1,5 @@
 /*
- * $LynxId: SGML.h,v 1.47 2021/07/22 23:34:13 tom Exp $
+ * $LynxId: SGML.h,v 1.48 2022/06/12 20:19:04 tom Exp $
  *			       SGML parse and stream definition for libwww
  *                             SGML AND STRUCTURED STREAMS
  *
@@ -281,7 +281,9 @@ Create an SGML parser
  */
     extern HTStream *SGML_new(const SGML_dtd * dtd,
 			      HTParentAnchor *anchor,
-			      HTStructured * target);
+			      HTStructured * target,
+			      int extended_html)
+        ;
 
     extern const HTStreamClass SGMLParser;
 

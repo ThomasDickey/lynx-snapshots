@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTML.c,v 1.198 2022/06/12 16:48:05 tom Exp $
+ * $LynxId: HTML.c,v 1.199 2022/06/13 00:23:57 tom Exp $
  *
  *		Structured stream to Rich hypertext converter
  *		============================================
@@ -7963,7 +7963,7 @@ HTStream *HTMLToPlain(HTPresentation *pres,
     CTRACE((tfp, "HTMLToPlain calling CacheThru_new\n"));
     return CacheThru_new(anchor,
 			 SGML_new(&HTML_dtd, anchor,
-				  HTML_new(anchor, pres->rep_out, sink)));
+				  HTML_new(anchor, pres->rep_out, sink), FALSE));
 }
 
 /*	HTConverter for HTML source to plain text
@@ -8026,7 +8026,7 @@ HTStream *HTMLParsedPresent(HTPresentation *pres,
     CTRACE((tfp, "HTMLParsedPresent calling CacheThru_new\n"));
     return CacheThru_new(anchor,
 			 SGML_new(&HTML_dtd, anchor,
-				  HTMLGenerator(intermediate)));
+				  HTMLGenerator(intermediate), FALSE));
 }
 
 /*	HTConverter for HTML to C code
@@ -8054,7 +8054,7 @@ HTStream *HTMLToC(HTPresentation *pres GCC_UNUSED,
 	HTML_put_string(html, html->comment_start);
     CTRACE((tfp, "HTMLToC calling CacheThru_new\n"));
     return CacheThru_new(anchor,
-			 SGML_new(&HTML_dtd, anchor, html));
+			 SGML_new(&HTML_dtd, anchor, html, FALSE));
 }
 
 /*	Presenter for HTML
@@ -8073,7 +8073,17 @@ HTStream *HTMLPresent(HTPresentation *pres GCC_UNUSED,
     CTRACE((tfp, "HTMLPresent calling CacheThru_new\n"));
     return CacheThru_new(anchor,
 			 SGML_new(&HTML_dtd, anchor,
-				  HTML_new(anchor, WWW_PRESENT, NULL)));
+				  HTML_new(anchor, WWW_PRESENT, NULL), FALSE));
+}
+
+HTStream *XHTMLPresent(HTPresentation *pres GCC_UNUSED,
+		      HTParentAnchor *anchor,
+		      HTStream *sink GCC_UNUSED)
+{
+    CTRACE((tfp, "XHTMLPresent calling CacheThru_new\n"));
+    return CacheThru_new(anchor,
+			 SGML_new(&HTML_dtd, anchor,
+				  HTML_new(anchor, WWW_PRESENT, NULL), TRUE));
 }
 #endif /* !GUI */
 
