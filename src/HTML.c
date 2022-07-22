@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTML.c,v 1.199 2022/06/13 00:23:57 tom Exp $
+ * $LynxId: HTML.c,v 1.200 2022/07/22 20:22:13 tom Exp $
  *
  *		Structured stream to Rich hypertext converter
  *		============================================
@@ -8077,8 +8077,8 @@ HTStream *HTMLPresent(HTPresentation *pres GCC_UNUSED,
 }
 
 HTStream *XHTMLPresent(HTPresentation *pres GCC_UNUSED,
-		      HTParentAnchor *anchor,
-		      HTStream *sink GCC_UNUSED)
+		       HTParentAnchor *anchor,
+		       HTStream *sink GCC_UNUSED)
 {
     CTRACE((tfp, "XHTMLPresent calling CacheThru_new\n"));
     return CacheThru_new(anchor,

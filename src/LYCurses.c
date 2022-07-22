@@ -1,4 +1,4 @@
-/* $LynxId: LYCurses.c,v 1.197 2021/06/09 21:44:35 tom Exp $ */
+/* $LynxId: LYCurses.c,v 1.199 2022/07/22 19:58:13 tom Exp $ */
 #include <HTUtils.h>
 #include <HTAlert.h>
 
@@ -897,10 +897,32 @@ void LYnoVideo(int a)
 
 #define NEWTERM_NAME "newterm"
 
+#ifndef USE_SLANG
+static WINDOW *my_subwindow;
+
+#define delete_subwindow() if (my_subwindow) { delwin(my_subwindow); my_subwindow = NULL; }
+#endif
+
+#ifdef WIDEC_CURSES
+static WINDOW *fake_win;
+static int fake_max;
+
+#define delete_fake_win() if (fake_win) { delwin(fake_win); fake_win = NULL; fake_max = 0; }
+#else
+#define delete_fake_win()	/* nothing */
+#endif
+
 #if !defined(VMS) && !defined(USE_SLANG)
 #if defined(NCURSES) && defined(HAVE_RESIZETERM)
 
 static SCREEN *LYscreen = NULL;
+
+static void delete_screen(SCREEN * screen)
+{
+    delete_fake_win();
+    delete_subwindow();
+    delscreen(screen);
+}
 
 #define LYDELSCR()		/* ncurses does not need this */
 
@@ -908,10 +930,19 @@ static SCREEN *LYscreen = NULL;
 
 static SCREEN *LYscreen = NULL;
 
+#if defined(USE_DEFAULT_COLORS)
+static void delete_screen(SCREEN * screen)
+{
+    delete_fake_win();
+    delete_subwindow();
+    delscreen(screen);
+}
+#endif
+
 #define LYDELSCR() { \
 if (recent_sizechange) { \
     CTRACE((tfp, "Screen size: delscreen()\n")); \
-    delscreen(LYscreen); \
+    delete_screen(LYscreen); \
     LYscreen = NULL; } }
 
 #else /* HAVE_NEWTERM   */
@@ -1157,7 +1188,7 @@ void restart_curses(void)
 	start_color();
     }
 
-    delscreen(oldscreen);
+    delete_screen(oldscreen);
 }
 #endif
 
@@ -2026,8 +2057,6 @@ void LYpaddstr(WINDOW * the_window, int width, const char *the_string)
  * FIXME: the associated call on 'keypad()' is not needed for Unix, but
  * something in the OS/2 EMX port requires it.
  */
-static WINDOW *my_subwindow;
-
 void LYsubwindow(WINDOW * param)
 {
     if (param != 0) {
@@ -2270,9 +2299,6 @@ int LYstrExtent0(const char *string,
     result = used;
 #ifdef WIDEC_CURSES
     if (non_empty(string) && used > 0 && lynx_called_initscr) {
-	static WINDOW *fake_win;
-	static int fake_max;
-
 	if (fake_max < maxCells) {
 	    fake_max = (maxCells + 1) * 2;
 	    if (fake_win != 0) {
