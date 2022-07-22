@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMainLoop.c,v 1.248 2022/04/02 00:12:18 Paul.G.Fox Exp $
+ * $LynxId: LYMainLoop.c,v 1.249 2022/07/22 19:55:13 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTAccess.h>
@@ -176,7 +176,7 @@ HTAtom *WWW_SOURCE = 0;
 	(track_internal_links || are_different(c,n))
 
 static void exit_immediately_with_error_message(int state, int first_file);
-static void status_link(char *curlink_name, int show_more, int show_indx);
+static void status_link(const char *curlink_name, int show_more, int show_indx);
 static void show_main_statusline(const LinkInfo curlink, int for_what);
 static void form_noviceline(int);
 static int are_different(DocInfo *doc1, DocInfo *doc2);
@@ -8130,7 +8130,7 @@ static void exit_immediately_with_error_message(int state, int first_file)
     /* else: return(EXIT_FAILURE) in mainloop */
 }
 
-static void status_link(char *curlink_name,
+static void status_link(const char *curlink_name,
 			int show_more,
 			int show_indx)
 {
