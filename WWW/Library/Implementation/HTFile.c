@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFile.c,v 1.156 2022/04/01 00:17:51 tom Exp $
+ * $LynxId: HTFile.c,v 1.157 2022/07/24 09:47:02 tom Exp $
  *
  *			File Access				HTFile.c
  *			===========
@@ -173,15 +173,7 @@ static HTSuffix unknown_suffix =
 static void free_suffixes(void);
 #endif
 
-static char *FindSearch(const char *filename)
-{
-    char *result = 0;
-
-    if ((result = strchr(filename, '?')) == 0) {
-	result = strstr(filename, "%3F");
-    }
-    return result;
-}
+#define FindSearch(filename) strchr(filename, '?')
 
 #ifdef LONG_LIST
 static char *FormatStr(char **bufp,

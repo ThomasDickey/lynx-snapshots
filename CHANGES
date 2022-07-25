@@ -1,9 +1,12 @@
--- $LynxId: CHANGES,v 1.1115 2022/07/22 08:17:16 tom Exp $
+-- $LynxId: CHANGES,v 1.1118 2022/07/24 18:38:15 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2022-07-21 (2.9.0dev.11)
+2022-07-24 (2.9.0dev.11)
+* correct workaround for asan2 report of overlapping strcpy (report by KH) -TD
+* amend fix for Debian #738121; URL-encoded "?" in HTFile.c corresponds to an
+  actual "?" in a file path (report by TG) -TD
 * before calling delscreen, delete the private working windows in case delwin
   invalidates those (Debian #1015756) -TD
 * add presentation type for xhtml, related state information to better handle

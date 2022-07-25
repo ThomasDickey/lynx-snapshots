@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFWriter.c,v 1.123 2022/04/01 00:15:05 tom Exp $
+ * $LynxId: HTFWriter.c,v 1.124 2022/07/25 00:16:38 tom Exp $
  *
  *		FILE WRITER				HTFWrite.h
  *		===========
@@ -1169,7 +1169,7 @@ HTStream *HTCompressed(HTPresentation *pres,
 	    case cftBrotli:
 		if ((program = HTGetProgramPath(ppBROTLI)) != NULL) {
 		    StrAllocCopy(uncompress_mask, program);
-		    StrAllocCat(uncompress_mask, " -d %s");
+		    StrAllocCat(uncompress_mask, " -j -d %s");
 		    compress_suffix = "br";
 		}
 		break;
