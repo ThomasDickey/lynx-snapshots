@@ -1,5 +1,5 @@
 /*
- * $LynxId: GridText.c,v 1.340 2022/06/12 16:45:35 tom Exp $
+ * $LynxId: GridText.c,v 1.341 2022/07/24 18:35:46 tom Exp $
  *
  *		Character grid hypertext object
  *		===============================
@@ -3001,7 +3001,7 @@ static void split_line(HText *text, unsigned split)
     if (split > 0) {		/* Delete space at "split" splitting line */
 	char *prevdata = previous->data, *linedata = line->data;
 	unsigned plen;
-	int i;
+	int i, j;
 
 	/* Split the line. -FM */
 	prevdata[previous->size] = '\0';
@@ -3054,7 +3054,9 @@ static void split_line(HText *text, unsigned split)
 	    ctrl_chars_on_this_line += utfxtra_on_this_line;
 
 	    /* Add the data to the new line. -FM */
-	    for (i = 0; (linedata[i] = p[i]) != '\0'; ++i) ;
+	    for (i = 0, j = (int) strlen(linedata);
+		 (linedata[j++] = p[i++]) != '\0';
+		) ;
 	    line->size = (unsigned short) (line->size + plen);
 	}
     }
