@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYBookmark.c,v 1.81 2022/04/02 00:12:18 Paul.G.Fox Exp $
+ * $LynxId: LYBookmark.c,v 1.86 2022/07/26 14:39:20 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTAlert.h>
@@ -16,6 +16,10 @@
 #include <LYCurses.h>
 #include <GridText.h>
 #include <HTCJK.h>
+
+#ifdef _WINDOWS
+#include <io.h>			/* for _chsize() */
+#endif
 
 #ifdef VMS
 #include <nam.h>
@@ -176,10 +180,10 @@ static const char *convert_mosaic_bookmark_file(const char *filename_buffer)
 	    if ((line % 2) == 0) {	/* even lines */
 		if (*buf != '\0') {
 		    strtok(buf, " ");	/* kill everything after the space */
-		    fprintf(nfp, "<LI><a href=\"%s\">", buf);	/* the URL */
+		    fprintf(nfp, "<li><a href=\"%s\">", buf);	/* the URL */
 		}
 	    } else {		/* odd lines */
-		fprintf(nfp, "%s</a>\n", buf);	/* the title */
+		fprintf(nfp, "%s</a></li>\n", buf);	/* the title */
 	    }
 	}
 	/* else - ignore the line (this gets rid of first two lines) */
@@ -193,6 +197,10 @@ static const char *convert_mosaic_bookmark_file(const char *filename_buffer)
 static BOOLEAN havevisible(const char *Title);
 static BOOLEAN have8bit(const char *Title);
 static char *title_convert8bit(const char *Title);
+
+#ifdef _WINDOWS
+#define ftruncate(fd, len) _chsize(fd, len)
+#endif
 
 /*
  * Adds a link to a bookmark file, creating the file if it doesn't already
@@ -358,28 +366,58 @@ void save_bookmark_link(const char *address,
     StrAllocCopy(Address, address);
     LYEntify(&Address, FALSE);
 
+    if (!first_time) {
+	BOOLEAN empty_file = TRUE;
+	FILE *bp = tmpfile();
+	char *buffer = NULL;
+
+	while (LYSafeGets(&buffer, fp)) {
+	    empty_file = FALSE;
+	    if (LYstrstr(buffer, "</ol>"))
+		break;
+	    fprintf(bp, "%s", buffer);
+	}
+
+	fflush(bp);
+	rewind(bp);
+
+	rewind(fp);
+	ftruncate(fileno(fp), 0);
+
+	while (LYSafeGets(&buffer, bp)) {
+	    fprintf(fp, "%s", buffer);
+	}
+	fclose(bp);
+
+	if (empty_file)
+	    first_time = TRUE;
+    }
+
     /*
      * If we created a new bookmark file, write the headers.  - FM
      * Once and forever...
      */
     if (first_time) {
+	fprintf(fp, "%s\n", LYNX_DOCTYPE);
+	fprintf(fp, "<html>\n");
 	fprintf(fp, "<head>\n");
 #if defined(SH_EX) && !defined(_WINDOWS)	/* 1997/12/11 (Thu) 19:13:40 */
 	if (HTCJK != JAPANESE)
 	    LYAddMETAcharsetToFD(fp, -1);
 	else
-	    fprintf(fp, "<META %s %s>\n",
+	    fprintf(fp, "<meta %s %s>\n",
 		    "http-equiv=\"content-type\"",
 		    "content=\"" STR_HTML ";charset=iso-2022-jp\"");
 #else
 	LYAddMETAcharsetToFD(fp, -1);
 #endif /* !_WINDOWS */
 	fprintf(fp, "<title>%s</title>\n</head>\n", BOOKMARK_TITLE);
+	fprintf(fp, "<body>\n");
 #ifdef _WINDOWS
-	fprintf(fp,
+	fprintf(fp, "<p>%s",
 		gettext("     You can delete links by the 'R' key<br>\n<ol>\n"));
 #else
-	fprintf(fp, "%s<br>\n%s\n\n<!--\n%s\n-->\n\n<p>\n<ol>\n",
+	fprintf(fp, "<p>%s<br>\n%s\n\n<!--\n%s\n--></p>\n\n<ol>\n",
 		gettext("\
      You can delete links using the remove bookmark command.  It is usually\n\
      the 'R' key but may have been remapped by you or your system\n\
@@ -407,7 +445,8 @@ Note: if you edit this file manually\n\
 	 */
 	fprintf(fp, "%s %s%s\n", Address, TimeString, Title);
     } else {
-	fprintf(fp, "<LI><a href=\"%s\">%s</a>\n", Address, Title);
+	fprintf(fp, "<li><a href=\"%s\">%s</a></li>\n", Address, Title);
+	fprintf(fp, "</ol></body></html>\n");
     }
     LYCloseOutput(fp);
 
@@ -536,7 +575,7 @@ void remove_bookmark_link(int cur,
 	    retain = TRUE;
 	    seen = 0;
 	    cp = buf;
-	    if ((cur == 0) && LYstrstr(cp, "<ol><LI>"))
+	    if ((cur == 0) && LYstrstr(cp, "<ol><li>"))
 		keep_ol = TRUE;	/* Do not erase, this corrects a bug in an
 				   older version */
 	    while (n < cur && (cp = LYstrstr(cp, "<a href="))) {

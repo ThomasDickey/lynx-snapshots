@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFile.c,v 1.157 2022/07/24 09:47:02 tom Exp $
+ * $LynxId: HTFile.c,v 1.158 2022/07/25 23:52:05 tom Exp $
  *
  *			File Access				HTFile.c
  *			===========
@@ -1592,7 +1592,7 @@ static BOOL view_structured(HTFormat format_out)
 void HTStructured_doctype(HTStructured * target, HTFormat format_out)
 {
     if (view_structured(format_out))
-	PUTS("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\">\n");
+	PUTS(LYNX_DOCTYPE "\n");
 }
 
 void HTStructured_meta(HTStructured * target, HTFormat format_out)
