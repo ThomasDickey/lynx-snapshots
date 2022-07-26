@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYUtils.c,v 1.300 2021/10/24 16:25:12 tom Exp $
+ * $LynxId: LYUtils.c,v 1.301 2022/07/25 07:52:04 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTCP.h>
@@ -6812,7 +6812,6 @@ void LYLocalFileToURL(char **target,
     StrAllocCat(*target, leaf);
 }
 
-#define MY_DOCTYPE "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\">\n"
 #define PUT_STRING(buf)    (*(target)->isa->put_string)(target, buf)
 
 /*
@@ -6823,7 +6822,7 @@ void WriteStreamTitle(HTStream *target, const char *Title)
 {
     char *buf = 0;
 
-    PUT_STRING(MY_DOCTYPE);
+    PUT_STRING(LYNX_DOCTYPE);
     PUT_STRING("<html>\n<head>\n");
     LYAddMETAcharsetToStream(target, -1);
     HTSprintf0(&buf, "<title>%s</title>\n</head>\n<body>\n", Title);
@@ -6857,7 +6856,7 @@ FILE *InternalPageFP(char *filename,
  */
 void WriteInternalTitle(FILE *fp0, const char *Title)
 {
-    fprintf(fp0, MY_DOCTYPE);
+    fprintf(fp0, LYNX_DOCTYPE);
 
     fprintf(fp0, "<html>\n<head>\n");
     LYAddMETAcharsetToFD(fp0, -1);

@@ -1,5 +1,5 @@
 /*
- * $LynxId: userdefs.h,v 1.363 2022/04/01 23:56:33 Paul.G.Fox Exp $
+ * $LynxId: userdefs.h,v 1.364 2022/07/25 07:51:38 tom Exp $
  *
  * Lynx - Hypertext navigation system
  *
@@ -1469,6 +1469,10 @@
 #define W32_STRING(s) s
 #endif
 
+/* default, for generated files such as bookmarks */
+#define LYNX_DOCTYPE "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\">\n"
+
+/* registry-key for Windows installer */
 #define LYNX_SUBKEY W32_STRING("Software\\Lynx")
 
 #define LINESIZE 1024		/* max length of line to read from file */

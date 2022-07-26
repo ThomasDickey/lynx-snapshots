@@ -1,9 +1,10 @@
--- $LynxId: CHANGES,v 1.1118 2022/07/24 18:38:15 tom Exp $
+-- $LynxId: CHANGES,v 1.1119 2022/07/25 23:49:15 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2022-07-24 (2.9.0dev.11)
+2022-07-25 (2.9.0dev.11)
+* improve formatting of bookmark file, e.g., to fix warnings by tidy -TD
 * correct workaround for asan2 report of overlapping strcpy (report by KH) -TD
 * amend fix for Debian #738121; URL-encoded "?" in HTFile.c corresponds to an
   actual "?" in a file path (report by TG) -TD
