@@ -1,5 +1,5 @@
 /*
- * $LynxId: dtd_util.c,v 1.80 2021/07/23 00:23:04 tom Exp $
+ * $LynxId: dtd_util.c,v 1.89 2022/09/29 23:51:16 tom Exp $
  *
  * Given a SGML_dtd structure, write a corresponding flat file, or "C" source.
  * Given the flat-file, write the "C" source.
@@ -10,6 +10,7 @@
 #include <HTUtils.h>
 #include <HTMLDTD.h>
 #include <string.h>
+#include <stdarg.h>
 
 /*
  * Tweaks to build standalone.
@@ -41,6 +42,13 @@ FILE *TraceFP(void)
 #endif
 
 #define ATTR_TYPE(name) { #name, name##_attr_list }
+
+#define MY_LIMIT		1024
+#define FMT_WS			"%[ \t\n]"
+#define FMT_NUM_ATTR_TYPES	"%d attr_types"
+#define FMT_NUM_ATTRS		"%d attributes:"
+#define FMT_ONE_ATTR		"%d:%d:%s"
+#define NUM_ONE_ATTR		4
 
 static const char alias_codes[] = "!@#$%^&*";
 
@@ -121,10 +129,32 @@ static const attr bgcolor_attr_list[] = {
 #undef T
 /* *INDENT-ON* */
 
+static const char *input_filename;
+static int input_lineno;
+
 static void failed(const char *s)
 {
+    if (input_lineno) {
+	int save = errno;
+
+	fprintf(stderr, "%s:%d ", input_filename, input_lineno);
+	errno = save;
+    }
     perror(s);
     exit(EXIT_FAILURE);
+}
+
+static void warning(const char *, ...) GCC_PRINTFLIKE(1, 2);
+
+static void warning(const char *fmt, ...)
+{
+    va_list ap;
+
+    va_start(ap, fmt);
+    fprintf(stderr, "%s:%d: ", input_filename, input_lineno);
+    vfprintf(stderr, fmt, ap);
+    fputc('\n', stderr);
+    va_end(ap);
 }
 
 static void usage(void)
@@ -220,6 +250,33 @@ static void PrintF(FILE *output, int width, const char *fmt, ...)
     va_end(ap);
 
     fprintf(output, "%-*s", width, buffer);
+}
+
+static char *get_line(FILE *input)
+{
+    char temp[MY_LIMIT];
+    char *result = 0;
+
+    if (fgets(temp, (int) sizeof(temp), input) != 0) {
+	result = strdup(temp);
+	++input_lineno;
+    }
+    return result;
+}
+
+static int read_num_attr_types(FILE *input)
+{
+    char *next = get_line(input);
+    int count;
+    int code;
+    char trail[MY_LIMIT];
+
+    if (next == 0
+	|| (code = sscanf(next, FMT_NUM_ATTR_TYPES FMT_WS, &count, trail)) < 2
+	|| !count) {
+	warning("expected attr_types");
+    }
+    return count;
 }
 
 static int same_AttrList(AttrList a, AttrList b)
@@ -322,7 +379,7 @@ static const char *DEF_name(const SGML_dtd * dtd, int which, unsigned alias)
     if (!strcmp(result, "OBJECT") && !first_object(dtd, which)) {
 	result = "OBJECT_PCDATA";
     } else if (alias) {
-	char buffer[1024];
+	char buffer[MY_LIMIT];
 
 	sprintf(buffer, "%s_%d", result, alias + 1);
 	result = strdup(buffer);
@@ -335,7 +392,7 @@ static const char *EXT_name(HTTag * tag)
     const char *result = tag->name;
 
     if (tag->alias) {
-	char buffer[1024];
+	char buffer[MY_LIMIT];
 
 	sprintf(buffer, "%s%c", result, alias_codes[tag->alias - 1]);
 	result = strdup(buffer);
@@ -743,6 +800,8 @@ static void dump_source(FILE *output, const SGML_dtd * dtd, int dtd_version)
 	    from_attr[from_size] = 0;
 
 	    if (list != 0) {
+		/* FIXME check if each remaining attribute is defined in XXX */
+
 		dump_src_AttrType(output, name, list, from_attr);
 		free(list);
 	    }
@@ -765,7 +824,7 @@ static void dump_source(FILE *output, const SGML_dtd * dtd, int dtd_version)
     NOTE("#undef T");
     NOTE("");
     NOTE("/* tag-names */");
-    /* FIXME - are these needed other than as parameters to macros? */
+    /* these may be needed as parameters to macros */
     for (j = 0; j <= dtd->number_of_tags; ++j) {
 	fprintf(output, "#undef %s\n", DEF_name(dtd, j, 0));
     }
@@ -923,19 +982,15 @@ static void dump_header(FILE *output, const SGML_dtd * dtd)
     fprintf(output, "#endif\t\t\t\t/* %s */\n", marker);
 }
 
-#define FMT_NUM_ATTRS "%d attributes:\n"
-#define FMT_ONE_ATTR  "%d:%d:%s\n"
-#define NUM_ONE_ATTR  3
-
 static void dump_flat_attrs(FILE *output,
 			    const attr * attributes,
 			    int number_of_attributes)
 {
     int n;
 
-    fprintf(output, "\t\t" FMT_NUM_ATTRS, number_of_attributes);
+    fprintf(output, "\t\t" FMT_NUM_ATTRS "\n", number_of_attributes);
     for (n = 0; n < number_of_attributes; ++n) {
-	fprintf(output, "\t\t\t" FMT_ONE_ATTR, n,
+	fprintf(output, "\t\t\t" FMT_ONE_ATTR "\n", n,
 #ifdef USE_PRETTYSRC
 		attributes[n].type,
 #else
@@ -951,7 +1006,7 @@ static void dump_flat_attr_types(FILE *output, const AttrType * attr_types)
     const AttrType *p = sorted_AttrTypes(attr_types);
     int number = len_AttrTypes(attr_types);
 
-    fprintf(output, "\t\t%d attr_types\n", number);
+    fprintf(output, "\t\t" FMT_NUM_ATTR_TYPES "\n", number);
 
     if (p != 0) {
 	while (p->name != 0) {
@@ -1087,7 +1142,7 @@ static void dump_flatfile(FILE *output, const SGML_dtd * dtd)
 	} else {
 	    count = len_AttrTypes(attr_types);
 	    qsort(attr_types, count, sizeof(*attr_types), compare_attr_types);
-	    fprintf(output, "%d attr_types\n", count);
+	    fprintf(output, FMT_NUM_ATTR_TYPES "\n", count);
 	    for (n = 0; n < count; ++n) {
 		fprintf(output, "\t%d:%s\n", n, attr_types[n].name);
 		dump_flat_attrs(output, attr_types[n].list,
@@ -1105,17 +1160,6 @@ static void dump_flatfile(FILE *output, const SGML_dtd * dtd)
     for (n = 0; n < dtd->number_of_entities; ++n) {
     }
 #endif
-}
-
-static char *get_line(FILE *input)
-{
-    char temp[1024];
-    char *result = 0;
-
-    if (fgets(temp, (int) sizeof(temp), input) != 0) {
-	result = strdup(temp);
-    }
-    return result;
 }
 
 #define LOAD(name) \
@@ -1163,16 +1207,16 @@ static int load_flat_TagClass(FILE *input, const char *name, TagClass * theClass
 		LOAD(same);
 		LOAD(DELlike);
 
-		fprintf(stderr, "Unexpected TagClass '%s'\n", data);
+		warning("Unexpected TagClass '%s'", data);
 		result = 0;
 		break;
 	    }
 	} else if (data) {
-	    fprintf(stderr, "load_flat_TagClass: '%s' vs '%s'\n", data, prefix);
+	    warning("load_flat_TagClass: '%s' vs '%s'", data, prefix);
 	}
 	free(next);
     } else {
-	fprintf(stderr, "Did not find contents\n");
+	warning("Did not find contents");
     }
     return result;
 }
@@ -1210,12 +1254,12 @@ static int load_flat_TagFlags(FILE *input, const char *name, TagFlags * flags)
 		LOAD(frecyc);
 		LOAD(nolyspcl);
 
-		fprintf(stderr, "Unexpected TagFlag '%s'\n", data);
+		warning("Unexpected TagFlag '%s'", data);
 		result = 0;
 		break;
 	    }
 	} else if (data) {
-	    fprintf(stderr, "load_flat_TagFlags: '%s' vs '%s'\n", data, prefix);
+	    warning("load_flat_TagFlags: '%s' vs '%s'", data, prefix);
 	}
 	free(next);
     }
@@ -1229,49 +1273,79 @@ static int load_flat_AttrList(FILE *input, AttrList * attrs, int *length)
     attr *attributes;
     int j, jcmp, code;
     int result = 1;
-    char name[1024];
+    char name[MY_LIMIT];
+    char *next;
+    char trail[MY_LIMIT];
 
 #ifdef USE_PRETTYSRC
     int atype;
 #endif
 
-    if (fscanf(input, FMT_NUM_ATTRS, length) == 1
+    next = get_line(input);
+    if (sscanf(next, FMT_NUM_ATTRS FMT_WS, length, trail) == 2
 	&& *length > 0
-	&& (attributes = typecallocn(attr, (size_t) (*length + 1))) != 0) {
+	&& (attributes = typecallocn(attr, *length + 1)) != 0) {
 	*attrs = attributes;
 	for (j = 0; j < *length; ++j) {
-	    code = fscanf(input, FMT_ONE_ATTR,
-			  &jcmp,
-			  &atype,
-			  name
-		);
-	    if (code == NUM_ONE_ATTR && (j == jcmp)) {
+	    next = get_line(input);
+	    code = sscanf(next, FMT_ONE_ATTR FMT_WS, &jcmp, &atype, name, trail);
+	    if (code == NUM_ONE_ATTR) {
+		if (j != jcmp)
+		    warning("resequence %s from %d to %d", name, jcmp, j);
 		attributes[j].name = strdup(name);
 #ifdef USE_PRETTYSRC
 		attributes[j].type = atype;
 #endif
 	    } else {
-		fprintf(stderr, "Did not find attributes\n");
+		warning("Did not find attributes");
 		result = 0;
 		break;
 	    }
 	}
-	if (*length > 1)
+	if (*length > 1 && result)
 	    qsort(attributes, *length, sizeof(attributes[0]), compare_attr);
+    } else {
+	warning("expected attribute count:\n%s", next);
     }
     return result;
+}
+
+/* find the given attribute in the list of attr_types */
+static int find_attribute(const char *attribute, const AttrType * attr_types)
+{
+    int j, k;
+    int found = -1;
+
+    for (j = 0; attr_types[j].name; ++j) {
+	AttrList list = attr_types[j].list;
+
+	for (k = 0; list[k].name; ++k) {
+	    if (!strcmp(attribute, list[k].name)) {
+		if (found >= 0)
+		    warning("attribute %s is in attr_types %s and %s",
+			    attribute,
+			    attr_types[found].name,
+			    attr_types[j].name);
+		found = j;
+	    }
+	}
+    }
+    return (found >= 0);
 }
 
 static int load_flat_HTTag(FILE *input, HTTag * tag, AttrType * allTypes)
 {
     int result = 0;
     unsigned ncmp = 0;
-    char name[1024];
+    char name[MY_LIMIT];
+    char trail[MY_LIMIT];
+    char *next;
     int code;
     int j;
 
-    code = fscanf(input, "%d:%s\n", &ncmp, name);
-    if (code == 2) {
+    next = get_line(input);
+    code = sscanf(next, "%d:%s" FMT_WS, &ncmp, name, trail);
+    if (code == 3) {
 	result = 1;
 	tag->alias = 0;
 	tag->aliases = 0;
@@ -1293,10 +1367,11 @@ static int load_flat_HTTag(FILE *input, HTTag * tag, AttrType * allTypes)
 	tag->name_len = strlen(tag->name);
 #endif
 #ifdef USE_JUSTIFY_ELTS
-	if (fscanf(input, "%s\n", name) == 1) {
+	next = get_line(input);
+	if (sscanf(next, "%s" FMT_WS, name, trail) == 2) {
 	    tag->can_justify = !strcmp(name, "justify");
 	} else {
-	    fprintf(stderr, "Did not find can_justify\n");
+	    warning("Did not find can_justify");
 	    result = 0;
 	}
 #endif
@@ -1306,42 +1381,57 @@ static int load_flat_HTTag(FILE *input, HTTag * tag, AttrType * allTypes)
 	if (result) {
 	    AttrType *myTypes;
 	    int k, count;
-	    char *next = get_line(input);
 
-	    if (next != 0
-		&& sscanf(next, "%d attr_types\n", &count)
-		&& (myTypes = typecallocn(AttrType, (size_t) (count + 1)))
-		!= 0) {
+	    if ((count = read_num_attr_types(input)) > 0
+		&& (myTypes = typecallocn(AttrType, count + 1)) != 0) {
 		tag->attr_types = myTypes;
 		for (k = 0; k < count; ++k) {
 		    next = get_line(input);
 		    if (next != 0
-			&& sscanf(next, "%s\n", name)) {
+			&& sscanf(next, "%s" FMT_WS, name, trail)) {
+			int found = -1;
+
 			for (j = 0; allTypes[j].name != 0; ++j) {
 			    if (!strcmp(allTypes[j].name, name)) {
 				myTypes[k].name = strdup(name);
 				myTypes[k].list = allTypes[j].list;
+				found = k;
 				break;
 			    }
+			}
+			if (found < 0) {
+			    warning("not found in attr_types: %s", name);
+			    continue;
 			}
 		    } else {
 			result = 0;
 			break;
 		    }
 		}
-		if (result && count > 1)
-		    qsort(myTypes, count, sizeof(myTypes[0]), compare_attr_types);
+		if (result) {
+		    if (count > 1)
+			qsort(myTypes,
+			      count,
+			      sizeof(myTypes[0]),
+			      compare_attr_types);
+		    for (k = 0; k < tag->number_of_attributes; ++k) {
+			if (!find_attribute(tag->attributes[k].name, tag->attr_types)) {
+			    warning("%s attribute %s not found in attr_types",
+				    tag->name, tag->attributes[k].name);
+			}
+		    }
+		}
 	    }
 	}
 	if (result) {
-	    char *next = get_line(input);
 
+	    next = get_line(input);
 	    if (next != 0
-		&& sscanf(next, "\t\tcontents: %s\n", name)) {
+		&& sscanf(next, "\t\tcontents: %s" FMT_WS, name, trail)) {
 		tag->contents = s2SGMLContent(name);
 		free(next);
 	    } else {
-		fprintf(stderr, "Did not find contents\n");
+		warning("Did not find contents");
 		result = 0;
 	    }
 	}
@@ -1367,7 +1457,7 @@ static int load_flat_HTTag(FILE *input, HTTag * tag, AttrType * allTypes)
 	    result = load_flat_TagFlags(input, "flags", &(tag->flags));
 	}
     } else {
-	fprintf(stderr, "load_flat_HTTag error\n");
+	warning("load_flat_HTTag error");
     }
     return result;
 }
@@ -1376,14 +1466,19 @@ static int load_flat_AttrType(FILE *input, AttrType * types, size_t ncmp)
 {
     int result = 0;
     int ntst;
-    char name[1024];
+    char name[MY_LIMIT];
+    char trail[MY_LIMIT];
+    char *next;
 
-    if (fscanf(input, "%d:%s\n", &ntst, name) == 2
+    next = get_line(input);
+    if (sscanf(next, "%d:%s" FMT_WS, &ntst, name, trail) == 3
 	&& (ntst == (int) ncmp)) {
 	result = 1;
 	types->name = strdup(name);
 	if (!load_flat_AttrList(input, &(types->list), &ntst))
 	    result = 0;
+    } else {
+	warning("expected a tag:\n%s", next);
     }
     return result;
 }
@@ -1404,27 +1499,31 @@ static SGML_dtd *load_flatfile(FILE *input)
 {
     AttrType *attr_types = 0;
     SGML_dtd *result = 0;
+    char *next;
     size_t n;
     int number_of_attrs = 0;
     int number_of_tags = 0;
     HTTag *tag;
     int code;
+    char trail[MY_LIMIT];
 
-    code = fscanf(input, "%d attr_types\n", &number_of_attrs);
-    if (code
-	&& number_of_attrs
-	&& (attr_types = typecallocn(AttrType, number_of_attrs + 1)) != 0) {
-	for (n = 0; n < (size_t) number_of_attrs; ++n) {
-	    if (!load_flat_AttrType(input, attr_types + n, n)) {
-		break;
-	    }
+    if ((number_of_attrs = read_num_attr_types(input)) <= 0) {
+	;
+    } else if ((attr_types = typecallocn(AttrType, number_of_attrs + 1)) == 0) {
+	failed("calloc attr_types");
+    }
+
+    for (n = 0; n < (size_t) number_of_attrs; ++n) {
+	if (!load_flat_AttrType(input, attr_types + n, n)) {
+	    break;
 	}
     }
 
-    code = fscanf(input, "%d tags\n", &number_of_tags);
-    if (code == 1) {
+    next = get_line(input);
+    code = sscanf(next, "%d tags" FMT_WS, &number_of_tags, trail);
+    if (code == 2) {
 	if ((result = typecalloc(SGML_dtd)) != 0
-	    && (result->tags = typecallocn(HTTag, (number_of_tags + 2))) != 0) {
+	    && (result->tags = typecallocn(HTTag, number_of_tags + 2)) != 0) {
 	    for (n = 0; n < (size_t) number_of_tags; ++n) {
 		if (load_flat_HTTag(input, &(result->tags[n]), attr_types)) {
 		    result->number_of_tags = (n + 1);
@@ -1444,12 +1543,14 @@ static SGML_dtd *load_flatfile(FILE *input)
 		}
 	    }
 	    if (tag == 0) {
-		fprintf(stderr, "Did not find OBJECT tag\n");
+		warning("Did not find OBJECT tag");
 		result = 0;
 	    } else {
 		qsort(result->tags, number_of_tags, sizeof(HTTag), compare_tags);
 	    }
 	}
+    } else {
+	warning("expected tag count:\n%s", next);
     }
     return result;
 }
@@ -1566,6 +1667,9 @@ int main(int argc, char *argv[])
     FILE *input = stdin;
     FILE *output = stdout;
 
+    input_filename = "<builtin>";
+    input_lineno = 0;
+
     while ((ch = getopt(argc, argv, GETOPT)) != -1) {
 	switch (ch) {
 	case 'c':
@@ -1576,7 +1680,7 @@ int main(int argc, char *argv[])
 	    break;
 	case 'l':
 	    l_option = TRUE;
-	    input = fopen(optarg, "r");
+	    input = fopen((input_filename = optarg), "r");
 	    if (input == 0)
 		failed(optarg);
 	    break;

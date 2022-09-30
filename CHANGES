@@ -1,9 +1,10 @@
--- $LynxId: CHANGES,v 1.1119 2022/07/25 23:49:15 tom Exp $
+-- $LynxId: CHANGES,v 1.1120 2022/09/30 07:53:11 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2022-07-25 (2.9.0dev.11)
+2022-09-29 (2.9.0dev.11)
+* add some consistency-checks to dtd_util to make it easier to use -TD
 * improve formatting of bookmark file, e.g., to fix warnings by tidy -TD
 * correct workaround for asan2 report of overlapping strcpy (report by KH) -TD
 * amend fix for Debian #738121; URL-encoded "?" in HTFile.c corresponds to an
@@ -36,11 +37,11 @@ Changes since Lynx 2.8 release
   around "HeavyThing" server which does not follow RFC 2616 in treating field
   name as case insensitive (report/patch by Sylvain Bertrand)
 * improved several configure macros:
-  AM_WITH_NLS, CF_ADD_INCDIR, CF_CHECK_EXTERN_DATA, CF_DISABLE_ECHO,
-  CF_FIX_WARNINGS, CF_MAKEFLAGS, CF_NCURSES_CONFIG, CF_NCURSES_LIBS,
-  CF_PKG_CONFIG, CF_SIZECHANGE, CF_TRY_XOPEN_SOURCE, CF_WITH_PATH,
-  CF_XOPEN_SOURCE
-* update config.guess (2022-05-25), config.sub (2022-01-03)
+  AM_WITH_NLS, CF_ADD_INCDIR, CF_BUILD_CC, CF_CHECK_EXTERN_DATA,
+  CF_DISABLE_ECHO, CF_FIX_WARNINGS, CF_MAKEFLAGS, CF_MATH_LIB,
+  CF_NCURSES_CONFIG, CF_NCURSES_LIBS, CF_PKG_CONFIG, CF_PROG_LINT,
+  CF_SIZECHANGE, CF_TRY_XOPEN_SOURCE, CF_WITH_PATH, CF_XOPEN_SOURCE
+* update config.guess (2022-08-01), config.sub (2022-08-01)
 
 2021-10-24 (2.9.0dev.10)
 * several fixes for problems found using asan2 with fuzzer-generated data

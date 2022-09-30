@@ -119,17 +119,18 @@
 			1:0:CLEAR
 			2:0:NOWRAP
 	15:BUTTON
-		10 attributes:
+		11 attributes:
 			0:0:ACCESSKEY
 			1:0:CLEAR
 			2:0:DISABLED
-			3:0:NAME
-			4:0:ONBLUR
-			5:0:ONFOCUS
-			6:0:READONLY
-			7:0:TABINDEX
-			8:0:TYPE
-			9:0:VALUE
+			3:0:FORMACTION
+			4:0:NAME
+			5:0:ONBLUR
+			6:0:ONFOCUS
+			7:0:READONLY
+			8:0:TABINDEX
+			9:0:TYPE
+			10:0:VALUE
 	16:CAPTION
 		2 attributes:
 			0:0:ACCESSKEY
@@ -1116,23 +1117,24 @@
 		flags: endO
 	23:BUTTON
 		justify
-		16 attributes:
+		17 attributes:
 			0:0:ACCESSKEY
 			1:4:CLASS
 			2:0:CLEAR
 			3:0:DIR
 			4:0:DISABLED
-			5:1:ID
-			6:0:LANG
-			7:0:NAME
-			8:0:ONBLUR
-			9:0:ONFOCUS
-			10:0:READONLY
-			11:0:STYLE
-			12:0:TABINDEX
-			13:0:TITLE
-			14:0:TYPE
-			15:0:VALUE
+			5:0:FORMACTION
+			6:1:ID
+			7:0:LANG
+			8:0:NAME
+			9:0:ONBLUR
+			10:0:ONFOCUS
+			11:0:READONLY
+			12:0:STYLE
+			13:0:TABINDEX
+			14:0:TITLE
+			15:0:TYPE
+			16:0:VALUE
 		4 attr_types
 			core
 			events

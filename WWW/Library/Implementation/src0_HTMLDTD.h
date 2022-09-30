@@ -1,4 +1,4 @@
-/* $LynxId: src0_HTMLDTD.h,v 1.48 2021/07/23 21:36:23 tom Exp $ */
+/* $LynxId: src0_HTMLDTD.h,v 1.49 2022/09/30 00:04:06 tom Exp $ */
 #ifndef src_HTMLDTD_H0
 #define src_HTMLDTD_H0 1
 
@@ -401,6 +401,7 @@ static const attr BUTTON_attr_list[] = {
 	{ "ACCESSKEY"     T(N) },
 	{ "CLEAR"         T(N) },
 	{ "DISABLED"      T(N) },
+	{ "FORMACTION"    T(N) },
 	{ "NAME"          T(N) },
 	{ "ONBLUR"        T(N) },
 	{ "ONFOCUS"       T(N) },
@@ -1403,6 +1404,7 @@ static const attr BUTTON_attr[] = {     /* BUTTON attributes */
 	{ "CLEAR"         T(N) },
 	{ "DIR"           T(N) },
 	{ "DISABLED"      T(N) },
+	{ "FORMACTION"    T(N) },
 	{ "ID"            T(i) },
 	{ "LANG"          T(N) },
 	{ "NAME"          T(N) },

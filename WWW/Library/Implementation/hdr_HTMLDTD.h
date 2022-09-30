@@ -1,4 +1,4 @@
-/* $LynxId: hdr_HTMLDTD.h,v 1.24 2021/07/16 00:40:16 tom Exp $ */
+/* $LynxId: hdr_HTMLDTD.h,v 1.25 2022/09/28 22:26:32 tom Exp $ */
 #ifndef hdr_HTMLDTD_H
 #define hdr_HTMLDTD_H 1
 
@@ -315,18 +315,19 @@ extern "C" {
 #define HTML_BUTTON_CLEAR         2
 #define HTML_BUTTON_DIR           3
 #define HTML_BUTTON_DISABLED      4
-#define HTML_BUTTON_ID            5
-#define HTML_BUTTON_LANG          6
-#define HTML_BUTTON_NAME          7
-#define HTML_BUTTON_ONBLUR        8
-#define HTML_BUTTON_ONFOCUS       9
-#define HTML_BUTTON_READONLY     10
-#define HTML_BUTTON_STYLE        11
-#define HTML_BUTTON_TABINDEX     12
-#define HTML_BUTTON_TITLE        13
-#define HTML_BUTTON_TYPE         14
-#define HTML_BUTTON_VALUE        15
-#define HTML_BUTTON_ATTRIBUTES   16
+#define HTML_BUTTON_FORMACTION    5
+#define HTML_BUTTON_ID            6
+#define HTML_BUTTON_LANG          7
+#define HTML_BUTTON_NAME          8
+#define HTML_BUTTON_ONBLUR        9
+#define HTML_BUTTON_ONFOCUS      10
+#define HTML_BUTTON_READONLY     11
+#define HTML_BUTTON_STYLE        12
+#define HTML_BUTTON_TABINDEX     13
+#define HTML_BUTTON_TITLE        14
+#define HTML_BUTTON_TYPE         15
+#define HTML_BUTTON_VALUE        16
+#define HTML_BUTTON_ATTRIBUTES   17
 
 #define HTML_CAPTION_ACCESSKEY    0
 #define HTML_CAPTION_ALIGN        1
