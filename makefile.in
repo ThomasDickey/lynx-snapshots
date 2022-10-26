@@ -1,4 +1,4 @@
-# $LynxId: makefile.in,v 1.190 2021/11/05 00:11:32 tom Exp $
+# $LynxId: makefile.in,v 1.191 2022/10/26 23:39:31 tom Exp $
 ##makefile for lynx
 
 SHELL		= @CONFIG_SHELL@
@@ -19,6 +19,8 @@ DEFS		= @DEFS@
 CPPFLAGS	= @CPPFLAGS@
 LINT		= @LINT@
 ETAGS		= @ETAGS@
+EGREP		= @EGREP@
+FGREP		= @FGREP@
 
 BUILD_CC	= @BUILD_CC@
 BUILD_CPP	= @BUILD_CPP@
@@ -439,10 +441,10 @@ LYHelp.h : help_files.sed $(srcdir)/LYHelp.hin
 
 cfg_defs.h : $(scripts_dir)/cfg_defs.sh $(scripts_dir)/cfg_edit.sh config.cache lynx_cfg.h
 	@rm -f $@
-	$(SHELL) -c 'SHELL=$(SHELL) $(SHELL) $(scripts_dir)/cfg_defs.sh $(srcdir)'
+	@$(SHELL) -c 'SHELL=$(SHELL) FGREP="$(FGREP)" $(SHELL) $(scripts_dir)/cfg_defs.sh $(srcdir)'
 
 install-cfg : $(SYSCONFDIR)
-	@$(SHELL) $(scripts_dir)/install-cfg.sh "$(INSTALL_DATA)" $(srcdir)/lynx.cfg $(SYSCONFDIR)/lynx.cfg
+	@$(SHELL) -c 'SHELL=$(SHELL) EGREP="$(EGREP)" FGREP="$(FGREP)" $(SHELL) $(scripts_dir)/install-cfg.sh "$(INSTALL_DATA)" $(srcdir)/lynx.cfg $(SYSCONFDIR)/lynx.cfg'
 
 install-lss : $(SYSCONFDIR)
 	@$(SHELL) $(scripts_dir)/install-lss.sh "$(INSTALL_DATA)" $(srcdir)/samples/lynx.lss $(SYSCONFDIR)/lynx.lss
