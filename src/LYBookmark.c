@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYBookmark.c,v 1.86 2022/07/26 14:39:20 tom Exp $
+ * $LynxId: LYBookmark.c,v 1.87 2022/12/04 20:41:31 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTAlert.h>
@@ -198,7 +198,7 @@ static BOOLEAN havevisible(const char *Title);
 static BOOLEAN have8bit(const char *Title);
 static char *title_convert8bit(const char *Title);
 
-#ifdef _WINDOWS
+#if defined(_WINDOWS) && !defined(ftruncate)
 #define ftruncate(fd, len) _chsize(fd, len)
 #endif
 

@@ -1,4 +1,4 @@
-dnl $LynxId: configure.in,v 1.341 2022/03/17 20:10:18 tom Exp $
+dnl $LynxId: configure.in,v 1.342 2022/12/03 00:58:19 tom Exp $
 dnl
 dnl Process this file with autoconf to produce a configure script.
 dnl
@@ -1526,7 +1526,7 @@ if test "$cf_cv_screen" = pdcurses ; then
 		;;
 	esac
 else
-	CF_TERMIO_AND_CURSES(LYCurses.h)
+	CF_TERMIO_AND_CURSES(LYCurses.h,lynx_cfg.h)
 fi
 
 ### These tests must be run after establishing the curses library.

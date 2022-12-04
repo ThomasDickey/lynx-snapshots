@@ -1,4 +1,4 @@
-dnl $LynxId: aclocal.m4,v 1.310 2022/10/02 23:55:56 tom Exp $
+dnl $LynxId: aclocal.m4,v 1.314 2022/12/04 21:39:19 tom Exp $
 dnl Macros for auto-configure script.
 dnl by Thomas E. Dickey <dickey@invisible-island.net>
 dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
@@ -1207,7 +1207,7 @@ if test "$cf_cv_bool_defs" = no ; then
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_BUILD_CC version: 10 updated: 2022/09/24 16:36:41
+dnl CF_BUILD_CC version: 11 updated: 2022/12/04 15:40:08
 dnl -----------
 dnl If we're cross-compiling, allow the user to override the tools and their
 dnl options.  The configure script is oriented toward identifying the host
@@ -1278,7 +1278,9 @@ if test "$cross_compiling" = yes ; then
 	cf_save_crossed=$cross_compiling
 	cf_save_ac_link=$ac_link
 	cross_compiling=no
-	ac_link='$BUILD_CC -o "conftest$ac_exeext" $BUILD_CFLAGS $BUILD_CPPFLAGS $BUILD_LDFLAGS "conftest.$ac_ext" $BUILD_LIBS >&AS_MESSAGE_LOG_FD'
+	cf_build_cppflags=$BUILD_CPPFLAGS
+	test "$cf_build_cppflags" = "#" && cf_build_cppflags=
+	ac_link='$BUILD_CC -o "conftest$ac_exeext" $BUILD_CFLAGS $cf_build_cppflags $BUILD_LDFLAGS "conftest.$ac_ext" $BUILD_LIBS >&AS_MESSAGE_LOG_FD'
 
 	AC_TRY_RUN([#include <stdio.h>
 		int main(int argc, char *argv[])
@@ -2097,7 +2099,7 @@ if (foo + 1234L > 5678L)
 done
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_CURSES_HEADER version: 5 updated: 2015/04/23 20:35:30
+dnl CF_CURSES_HEADER version: 6 updated: 2022/12/02 20:06:52
 dnl ----------------
 dnl Find a "curses" header file, e.g,. "curses.h", or one of the more common
 dnl variations of ncurses' installs.
@@ -2111,7 +2113,7 @@ for cf_header in \
 	curses.h ifelse($1,,,[$1/curses.h]) ifelse($1,,[ncurses/ncurses.h ncurses/curses.h])
 do
 AC_TRY_COMPILE([#include <${cf_header}>],
-	[initscr(); tgoto("?", 0,0)],
+	[initscr(); endwin()],
 	[cf_cv_ncurses_header=$cf_header; break],[])
 done
 ])
@@ -2124,7 +2126,7 @@ fi
 AC_CHECK_HEADERS($cf_cv_ncurses_header)
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_CURSES_LIBS version: 44 updated: 2021/01/02 09:31:20
+dnl CF_CURSES_LIBS version: 45 updated: 2022/12/02 20:06:52
 dnl --------------
 dnl Look for the curses libraries.  Older curses implementations may require
 dnl termcap/termlib to be linked as well.  Call CF_CURSES_CPPFLAGS first.
@@ -2133,7 +2135,7 @@ AC_DEFUN([CF_CURSES_LIBS],[
 AC_REQUIRE([CF_CURSES_CPPFLAGS])dnl
 AC_MSG_CHECKING(if we have identified curses libraries)
 AC_TRY_LINK([#include <${cf_cv_ncurses_header:-curses.h}>],
-	[initscr(); tgoto("?", 0,0)],
+	[initscr(); endwin()],
 	cf_result=yes,
 	cf_result=no)
 AC_MSG_RESULT($cf_result)
@@ -2234,7 +2236,7 @@ if test ".$ac_cv_func_initscr" != .yes ; then
 			elif test "$cf_term_lib" != predefined ; then
 				AC_MSG_CHECKING(if we need both $cf_curs_lib and $cf_term_lib libraries)
 				AC_TRY_LINK([#include <${cf_cv_ncurses_header:-curses.h}>],
-					[initscr(); tgoto((char *)0, 0, 0);],
+					[initscr(); endwin();],
 					[cf_result=no],
 					[
 					LIBS="-l$cf_curs_lib -l$cf_term_lib $cf_save_LIBS"
@@ -3129,7 +3131,7 @@ if test "$ac_cv_func_lstat" = yes; then
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_FUNC_SIGACTION version: 3 updated: 2012/11/08 20:57:52
+dnl CF_FUNC_SIGACTION version: 4 updated: 2022/12/02 19:55:38
 dnl -----------------
 dnl Check if we have the sigaction function and related structures.
 AC_DEFUN([CF_FUNC_SIGACTION],[
@@ -3140,7 +3142,7 @@ AC_TRY_LINK([
 	[struct sigaction act;
 	act.sa_handler = SIG_DFL;
 #ifdef SA_RESTART
-	act.sa_flags |= SA_RESTART;
+	act.sa_flags = SA_RESTART;
 #endif /* SA_RESTART */
 	sigaction(1, &act, 0);
 	],
@@ -6050,7 +6052,7 @@ AC_MSG_RESULT($cf_use_socks5p_h)
 test "$cf_use_socks5p_h" = yes && AC_DEFINE(INCLUDE_PROTOTYPES,1,[Define to 1 if needed to declare prototypes in socks headers])
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_SRAND version: 16 updated: 2021/06/08 18:08:14
+dnl CF_SRAND version: 17 updated: 2022/12/02 19:55:38
 dnl --------
 dnl Check for functions similar to srand() and rand().  lrand48() and random()
 dnl return a 31-bit value, while rand() returns a value less than RAND_MAX
@@ -6070,9 +6072,7 @@ do
 	CF_SRAND_PARSE($cf_func,cf_srand_func,cf_rand_func)
 
 AC_TRY_LINK([
-#ifdef HAVE_STDLIB_H
-#include <stdlib.h>
-#endif
+$ac_includes_default
 #ifdef HAVE_LIMITS_H
 #include <limits.h>
 #endif
@@ -6464,7 +6464,7 @@ AC_SUBST(TAR_FILE_OPTIONS)
 AC_SUBST(TAR_PIPE_OPTIONS)
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_TERMCAP_LIBS version: 15 updated: 2015/04/15 19:08:48
+dnl CF_TERMCAP_LIBS version: 16 updated: 2022/12/02 20:06:52
 dnl ---------------
 dnl Look for termcap libraries, or the equivalent in terminfo.
 dnl
@@ -6473,8 +6473,8 @@ AC_DEFUN([CF_TERMCAP_LIBS],
 [
 AC_CACHE_VAL(cf_cv_termlib,[
 cf_cv_termlib=none
-AC_TRY_LINK([],[char *x=(char*)tgoto("",0,0)],
-[AC_TRY_LINK([],[int x=tigetstr("")],
+AC_TRY_LINK([extern char *tgoto(const char*,int,int);],[char *x=tgoto("",0,0)],
+[AC_TRY_LINK([extern char *tigetstr(const char *)],[char *x=tigetstr("")],
 	[cf_cv_termlib=terminfo],
 	[cf_cv_termlib=termcap])
 	CF_VERBOSE(using functions in predefined $cf_cv_termlib LIBS)
@@ -6523,16 +6523,20 @@ if test "$cf_cv_termlib" = none; then
 fi
 ])])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_TERMIO_AND_CURSES version: 6 updated: 2021/01/02 09:31:20
+dnl CF_TERMIO_AND_CURSES version: 7 updated: 2022/12/02 19:55:38
 dnl --------------------
 dnl Check if including termio.h with <curses.h> dies like on sysv68
-dnl FIXME: this is too Lynx-specific
+dnl
+dnl $1 = application header which must include <stdio.h>
+dnl $2 = optional, defaulting to config.h
+dnl
+dnl FIXME: CPPFLAGS is Lynx-specific.
 AC_DEFUN([CF_TERMIO_AND_CURSES],
 [
 AC_CACHE_CHECK(if we can include termio.h with curses,cf_cv_termio_and_curses,[
     cf_save_CFLAGS="$CPPFLAGS"
     CPPFLAGS="$CPPFLAGS -DHAVE_CONFIG_H -I. -I${srcdir:-.} -I${srcdir:-.}/src -I${srcdir:-.}/WWW/Library/Implementation"
-    touch lynx_cfg.h
+    touch ifelse([$2],,config.h,[$2])
     AC_TRY_COMPILE([
 #include <$1>
 #include <termio.h>],
@@ -6540,13 +6544,13 @@ AC_CACHE_CHECK(if we can include termio.h with curses,cf_cv_termio_and_curses,[
     [cf_cv_termio_and_curses=yes],
     [cf_cv_termio_and_curses=no])
     CPPFLAGS="$cf_save_CFLAGS"
-    rm -f lynx_cfg.h
+    rm -f ifelse([$2],,config.h,[$2])
 ])
 
 test "$cf_cv_termio_and_curses" = yes && AC_DEFINE(TERMIO_AND_CURSES,1,[Define to 1 if we can include termio.h with curses.h])
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_TERMIO_AND_TERMIOS version: 4 updated: 2021/01/02 09:31:20
+dnl CF_TERMIO_AND_TERMIOS version: 5 updated: 2022/12/02 19:55:38
 dnl ---------------------
 dnl Check if including both termio.h and termios.h die like on DG.UX
 AC_DEFUN([CF_TERMIO_AND_TERMIOS],
@@ -6554,6 +6558,7 @@ AC_DEFUN([CF_TERMIO_AND_TERMIOS],
 AC_MSG_CHECKING([termio.h and termios.h])
 AC_CACHE_VAL(cf_cv_termio_and_termios,[
     AC_TRY_COMPILE([
+#include <stdio.h>
 #if HAVE_TERMIO_H
 #include <termio.h>
 #endif
@@ -8019,10 +8024,11 @@ define([CF__ICONV_HEAD],[
 #include <iconv.h>]
 )dnl
 dnl ---------------------------------------------------------------------------
-dnl CF__INET_HEAD version: 1 updated: 2013/10/08 17:47:05
+dnl CF__INET_HEAD version: 2 updated: 2022/12/04 16:36:15
 dnl -------------
 dnl Header-files needed for inet.h compile-checks
 define([CF__INET_HEAD],[
+$ac_includes_default
 #if defined(__MINGW32__)
 
 #undef WIN32_LEAN_AND_MEAN
