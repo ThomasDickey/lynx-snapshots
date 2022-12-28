@@ -36,7 +36,7 @@ HOW TO GET LYNX
 
    For the latest release of Lynx go to:
        <URL: https://lynx.invisible-island.net/release>;
-       <URL: ftp://ftp.invisible-island.net/lynx/tarballs>;
+       <URL: https://invisible-island.net/archives/lynx/tarballs>;
 
    The latest development version is at:
        <URL: https://lynx.invisible-island.net/current/>.
@@ -150,5 +150,5 @@ LYNX-DEV MAILING LIST
 
 ------------------------------------------------------------------------------
 -- vile:txtmode fc=72 noti
--- $LynxId: README,v 1.35 2018/07/09 20:00:20 tom Exp $
+-- $LynxId: README,v 1.36 2022/12/28 13:41:40 tom Exp $
 ------------------------------------------------------------------------------

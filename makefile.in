@@ -1,4 +1,4 @@
-# $LynxId: makefile.in,v 1.191 2022/10/26 23:39:31 tom Exp $
+# $LynxId: makefile.in,v 1.192 2022/12/28 13:44:04 tom Exp $
 ##makefile for lynx
 
 SHELL		= @CONFIG_SHELL@
@@ -140,8 +140,8 @@ MAKE_RECUR = $(MAKE) @cf_cv_makeflags@ DESTDIR="$(DESTDIR)" CC="$(CC)"
 
 # !!!!!!!!!!!!! NCURSES Support (For color version of Lynx). !!!!!!!!!!!!!!
 # If you need ncurses, the latest version can always be found
-# in ftp://ftp.invisible-island.net/ncurses/
-# or ftp://ftp.gnu.org/pub/gnu/
+# in https://invisible-island.net/ncurses/
+# or https://ftp.gnu.org/pub/gnu/
 
 # Also be sure to check out the compilation symbols in userdefs.h
 # before building Lynx!

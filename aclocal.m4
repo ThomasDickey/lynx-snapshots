@@ -1,4 +1,4 @@
-dnl $LynxId: aclocal.m4,v 1.314 2022/12/04 21:39:19 tom Exp $
+dnl $LynxId: aclocal.m4,v 1.315 2022/12/22 00:42:05 tom Exp $
 dnl Macros for auto-configure script.
 dnl by Thomas E. Dickey <dickey@invisible-island.net>
 dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
@@ -3254,6 +3254,7 @@ then
 	AC_CHECKING([for $CC __attribute__ directives])
 cat > "conftest.$ac_ext" <<EOF
 #line __oline__ "${as_me:-configure}"
+#include <stdio.h>
 #include "confdefs.h"
 #include "conftest.h"
 #include "conftest.i"
@@ -6464,7 +6465,7 @@ AC_SUBST(TAR_FILE_OPTIONS)
 AC_SUBST(TAR_PIPE_OPTIONS)
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_TERMCAP_LIBS version: 16 updated: 2022/12/02 20:06:52
+dnl CF_TERMCAP_LIBS version: 17 updated: 2022/12/21 19:42:05
 dnl ---------------
 dnl Look for termcap libraries, or the equivalent in terminfo.
 dnl
@@ -6473,8 +6474,12 @@ AC_DEFUN([CF_TERMCAP_LIBS],
 [
 AC_CACHE_VAL(cf_cv_termlib,[
 cf_cv_termlib=none
-AC_TRY_LINK([extern char *tgoto(const char*,int,int);],[char *x=tgoto("",0,0)],
-[AC_TRY_LINK([extern char *tigetstr(const char *)],[char *x=tigetstr("")],
+AC_TRY_LINK(
+	[extern char *tgoto(const char*,int,int);],
+	[char *x=tgoto("",0,0); (void)x;],
+[AC_TRY_LINK(
+	[extern char *tigetstr(const char *);],
+	[char *x=tigetstr(""); (void)x;],
 	[cf_cv_termlib=terminfo],
 	[cf_cv_termlib=termcap])
 	CF_VERBOSE(using functions in predefined $cf_cv_termlib LIBS)
@@ -6497,7 +6502,11 @@ if test "$cf_cv_termlib" = none; then
 		for cf_func in tigetstr tgetstr
 		do
 			AC_MSG_CHECKING(for $cf_func in -l$cf_lib)
-			AC_TRY_LINK([],[int x=$cf_func("")],[cf_result=yes],[cf_result=no])
+			AC_TRY_LINK(
+				[extern char *$cf_func(const char *);],
+				[int x=$cf_func(""); (void)x],
+				[cf_result=yes],
+				[cf_result=no])
 			AC_MSG_RESULT($cf_result)
 			if test "$cf_result" = yes ; then
 				if test "$cf_func" = tigetstr ; then

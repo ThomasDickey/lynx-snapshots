@@ -1,9 +1,10 @@
--- $LynxId: CHANGES,v 1.1122 2022/12/04 21:25:47 tom Exp $
+-- $LynxId: CHANGES,v 1.1123 2022/12/28 13:45:05 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2022-12-04 (2.9.0dev.11)
+2022-12-28 (2.9.0dev.11)
+* update ncurses/lynx homepage URLs to deprecate ftp -TD
 * modify configure script to reduce implicit-function warnings (report by
   Florian Weimer) -TD
 * update configure script to work around regression in grep 3.8 -TD

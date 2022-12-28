@@ -135,7 +135,7 @@ II. Compile instructions -- UNIX
     installed) are often broken, so you may get superior performance if you
     have either
     
-	    "ncurses" ("ftp://ftp.invisible-island.net/ncurses") or
+	    "ncurses" ("https://invisible-island.net/ncurses") or
 	    "slang"   ("ftp://space.mit.edu/pub/davis/slang").
     
     If you install these libraries in your home directory or a non-default
@@ -1506,4 +1506,4 @@ VIII. Acknowledgment
 
 -- 1999/04/24 - H. Nelson <lynx-admin@irm.nara.kindai.ac.jp>
 -- vile:txtmode
--- $LynxId: INSTALLATION,v 1.136 2021/07/29 23:35:35 tom Exp $
+-- $LynxId: INSTALLATION,v 1.137 2022/12/28 13:40:56 tom Exp $
