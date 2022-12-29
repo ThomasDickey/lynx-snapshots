@@ -1,4 +1,4 @@
-; $LynxId: lynx.iss,v 1.36 2022/03/11 01:29:33 tom Exp $
+; $LynxId: lynx.iss,v 1.37 2022/12/29 00:23:53 tom Exp $
 ; vile:ts=4 sw=4 notabinsert fk=8bit
 ;
 ; This is the BASE script for different flavors of the installer for Lynx.
@@ -515,12 +515,14 @@ begin
                 // new-ssl matches "libssl-x-x-z", s/libssl/libcrypto/
                 SslFilename := 'libcrypto' + Copy(SslFilename, 7, Length(SslFilename));
                 CopyFromTo( SslDirectory, TargetDir, SslFilename );
+#ifdef RuntimeBundle
             // older releases of OpenSSL bundled the Visual Studio runtime
-            SslFilename := SslDirectory + '\' + 'msvcr120.dll';
+            SslFilename := SslDirectory + '\' + 'msvcr120.dll' ;
             if FileExists(SslFilename) then
                 begin
                 CopyFromTo( SslDirectory, TargetDir, 'msvcr120.dll' );
                 end
+#endif
             end
         else
             begin
