@@ -570,7 +570,7 @@
   this behavior is retained if INPUT TYPE="hidden" fields are present. - FM
 * Tweaks of bookmark deletion sanity checks. - DT
 01-01-96 (Happy New Year!!!!)
-* Added circular recall buffer for ISINDEX queries.  Up-Arrow will cylce
+* Added circular recall buffer for ISINDEX queries.  Up-Arrow will cycle
   you from the most current query in the list to previous ones, and roll
   from the oldest to the most current.  Down-Arrow will cycle from the
   oldest query to subsequent ones, and roll from the most current to the
@@ -1091,7 +1091,7 @@
 * Tweak of list paragraphing.  Added HText_PeviousLineSize() in GridText.c
   for determining if the previous line had only non-printing characters. - FM
 09-09-95
-* Impelemented true paragraphing and the P ALIGN attribute within lists (UL,
+* Implemented true paragraphing and the P ALIGN attribute within lists (UL,
   OL and DL blocks) and within ADDRESS blocks.  Paragraphs within lists have
   one blank line inserted.  Within ADDRESS blocks, a newline will be created
   if needed, but no blank lines are inserted.  Use BR, not P, to force extra
@@ -1308,7 +1308,7 @@
   document if there are no links on the page (but still prompt if the user
   makes a HEAD request when positioned on an inappropriate form link). - FM
 08-05-95
-* Added code in SGML.c for storing Identfiers (e.g., !DOCTYPE) and Comments
+* Added code in SGML.c for storing Identifiers (e.g., !DOCTYPE) and Comments
   (i.e., tags beginning with !--) and for reporting them in trace mode.
   Serves as a model for actually using them someday (i.e, functions for
   analyzing them could be called where we presently just invoke a trace

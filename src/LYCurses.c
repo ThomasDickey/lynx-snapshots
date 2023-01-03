@@ -1,4 +1,4 @@
-/* $LynxId: LYCurses.c,v 1.199 2022/07/22 19:58:13 tom Exp $ */
+/* $LynxId: LYCurses.c,v 1.200 2023/01/02 23:52:18 tom Exp $ */
 #include <HTUtils.h>
 #include <HTAlert.h>
 
@@ -1174,7 +1174,7 @@ void restart_curses(void)
     wrefresh(LYwin);
 
     LYwin = stdscr;
-    /* reenable xterm mouse-mode in the new screen */
+    /* re-enable xterm mouse-mode in the new screen */
     keypad(LYwin, TRUE);
     lynx_enable_mouse(1);
 

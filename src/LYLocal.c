@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYLocal.c,v 1.134 2021/07/30 08:23:29 tom Exp $
+ * $LynxId: LYLocal.c,v 1.135 2023/01/02 23:52:10 tom Exp $
  *
  *  Routines to manipulate the local filesystem.
  *  Written by: Rick Mallett, Carleton University
@@ -1918,7 +1918,7 @@ static char *build_command(char *line,
 int local_dired(DocInfo *doc)
 {
     char *line_url;		/* will point to doc's address, which is a URL */
-    char *line = NULL;		/* same as line_url, but HTUnEscaped, will be alloced */
+    char *line = NULL;		/* same as line_url, but HTUnEscaped, will be allocated */
     char *arg = NULL;		/* ...will point into line[] */
     char *tp = NULL;
     char *tmpbuf = NULL;

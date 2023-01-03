@@ -1,7 +1,12 @@
--- $LynxId: CHANGES,v 1.1123 2022/12/28 13:45:05 tom Exp $
+-- $LynxId: CHANGES,v 1.1125 2023/01/03 00:15:35 Jens.Schleusener Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
+
+2022-12-28 (2.9.0dev.12)
+* fix spelling errors found with codespell (report by Jens Schleusener) -TD
+* update es.po from
+    http://translationproject.org/latest/lynx
 
 2022-12-28 (2.9.0dev.11)
 * update ncurses/lynx homepage URLs to deprecate ftp -TD
@@ -1685,7 +1690,7 @@ Changes since Lynx 2.8 release
   OpenSSL-compatible interface (patch by Zdenek Prikryl)
 * minor fix for version message to ensure WWW version shows when not building
   with OpenSSL -GV
-* make "--more--" message configuable -PBM
+* make "--more--" message configurable -PBM
 * improve multibyte editing (patch by Sergej Kvachonok)
 * add XWINDOWS / NON_XWINDOWS environment-variable field to DOWNLOAD, etc., in
   lynx.cfg to specify whether a downloader (printer, etc) is enabled when
@@ -2648,7 +2653,7 @@ Changes since Lynx 2.8 release
   with servers that do not accept long Accept strings (prompted by discussion
   on lynx-dev mailing list) -TD
 * Remove logic from HTFilterPresentations() which reduced the Accept strings
-  based on wildcards since RFC 2616 says wildcards are lower precedance than
+  based on wildcards since RFC 2616 says wildcards are lower precedence than
   other settings -TD
 * improve matching for mailcap test-commands in HTInit.c by eliminating
   unnecessary whitespace with TrimCommand() -TD
@@ -5266,7 +5271,7 @@ recently, FreeBSD 4.1, NetBSD 1.5 and OpenBSD 2.8 (curses/ncurses).
         enable kanji code override routine.
         The code can be changed by ^L.
         More precisely, this enables us to change the assumption kanji
-        code for the document. This assumption overrides the charaset
+        code for the document. This assumption overrides the charset
         by META tag and HTTP responses.
 * ensure lynx_doc is writable when doing install, since it is not necessarily
   done as root -TD

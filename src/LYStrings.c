@@ -1,4 +1,4 @@
-/* $LynxId: LYStrings.c,v 1.279 2021/10/24 09:05:19 tom Exp $ */
+/* $LynxId: LYStrings.c,v 1.280 2023/01/03 00:11:49 Jens.Schleusener Exp $ */
 #include <HTUtils.h>
 #include <HTCJK.h>
 #include <UCAux.h>
@@ -5961,7 +5961,7 @@ char *SNACopy(char **target,
 }
 
 /*
- * Combinate string allocation and concatenation.
+ * Combine string allocation and concatenation.
  * see StrAllocCat
  */
 char *SNACat(char **target,

@@ -1,5 +1,5 @@
 /*
- * $LynxId: SGML.h,v 1.48 2022/06/12 20:19:04 tom Exp $
+ * $LynxId: SGML.h,v 1.49 2023/01/03 00:01:32 tom Exp $
  *			       SGML parse and stream definition for libwww
  *                             SGML AND STRUCTURED STREAMS
  *
@@ -139,11 +139,6 @@ extern "C" {
  *
  *	attributes	points to a zero-terminated array
  *			of attribute names.
- *
- *	litteral	determines how the SGML engine parses the characters
- *			within the element.  If set, tag openers are ignored
- *			except for that which opens a matching closing tag.
- *
  */
     typedef struct _tag HTTag;
     struct _tag {

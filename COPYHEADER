@@ -1,4 +1,4 @@
-Copyright 1997-2021,2022 Thomas E. Dickey
+Copyright 1997-2022,2023 Thomas E. Dickey
 
 This copyright notice must be included in all copies or substantial
 portions of Lynx.  It outlines rights and restrictions for Lynx which
@@ -14,7 +14,7 @@ conditions.  You may choose to follow that advice.
 The copyright owners and developers for Lynx grant their express
 permission for using any version of these common libraries (which are
 known to have problematic licensing issues) with any operating system or
-platform, irregardless of the manner in which the libraries are
+platform, regardless of the manner in which the libraries are
 connected to the Lynx program:
 
         GNUTLS
@@ -80,5 +80,5 @@ For reference, below is the original copyright notice for Lynx (2.4.2).
 */
 ------------------------------------------------------------------------------
 -- vile:txtmode fc=72 noti
--- $LynxId: COPYHEADER,v 1.20 2022/03/11 01:17:23 tom Exp $
+-- $LynxId: COPYHEADER,v 1.21 2023/01/02 23:56:18 tom Exp $
 ------------------------------------------------------------------------------

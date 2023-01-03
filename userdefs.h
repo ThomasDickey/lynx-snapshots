@@ -1,9 +1,9 @@
 /*
- * $LynxId: userdefs.h,v 1.365 2022/12/29 00:13:21 tom Exp $
+ * $LynxId: userdefs.h,v 1.367 2023/01/03 00:17:33 tom Exp $
  *
  * Lynx - Hypertext navigation system
  *
- *   Copyright 1996-2021,2022 Thomas E. Dickey and Lynx Developers Group
+ *   Copyright 1996-2022,2023 Thomas E. Dickey and Lynx Developers Group
  *   Note: GNU General Public License is not a copyright.
  *
  *   (c) Copyright 1992, 1993, 1994 University of Kansas
@@ -1455,11 +1455,11 @@
  * the version definition with the Project Version on checkout.  Just
  * ignore it. - kw */
 /* $Format: "#define LYNX_VERSION \"$ProjectVersion$\""$ */
-#define LYNX_VERSION "2.9.0dev.11"
+#define LYNX_VERSION "2.9.0dev.12"
 #define LYNX_WWW_HOME "https://lynx.invisible-island.net/"
 #define LYNX_WWW_DIST "https://lynx.invisible-island.net/current/"
 /* $Format: "#define LYNX_DATE \"$ProjectDate$\""$ */
-#define LYNX_DATE "Wed, 28 Dec 2022 17:13:33 -0400"
+#define LYNX_DATE "Mon, 02 Jan 2023 18:47:08 -0500"
 #define LYNX_DATE_OFF 5		/* truncate the automatically-generated date */
 #define LYNX_DATE_LEN 11	/* truncate the automatically-generated date */
 
