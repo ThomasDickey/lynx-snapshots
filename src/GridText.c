@@ -1,5 +1,5 @@
 /*
- * $LynxId: GridText.c,v 1.341 2022/07/24 18:35:46 tom Exp $
+ * $LynxId: GridText.c,v 1.342 2023/01/05 09:17:47 tom Exp $
  *
  *		Character grid hypertext object
  *		===============================
@@ -4785,7 +4785,6 @@ static int HText_insertBlanksInStblLines(HText *me, int ncols)
 #ifdef EXP_NESTED_TABLES
     int last_nonempty = -1;
 #endif
-    int added_chars_before = 0;
     int lines_changed = 0;
     int max_width = 0, indent, spare, table_offset;
     HTStyle *style;
@@ -4862,8 +4861,6 @@ static int HText_insertBlanksInStblLines(HText *me, int ncols)
 	if (mod_line) {
 	    if (line == me->last_line) {
 		me->last_line = mod_line;
-	    } else {
-		added_chars_before += (mod_line->size - line->size);
 	    }
 	    line->prev->next = mod_line;
 	    line->next->prev = mod_line;
@@ -12967,7 +12964,6 @@ static void update_subsequent_anchors(int newlines,
     HTLine *htline = start_htline;
 
     int line_adj = 0;
-    int tag_adj = 0;
     int lx = 0;
     int hang = 0;		/* for HANG detection of a nasty intermittent */
     int hang_detect = 100000;	/* ditto */
@@ -13059,7 +13055,6 @@ static void update_subsequent_anchors(int newlines,
 						   &start_tag, newlines,
 						   NOCHOP);
 		htline->size = (unsigned short) (htline->size + line_adj);
-		tag_adj += line_adj;
 
 	    } else {
 

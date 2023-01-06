@@ -1,9 +1,11 @@
--- $LynxId: CHANGES,v 1.1125 2023/01/03 00:15:35 Jens.Schleusener Exp $
+-- $LynxId: CHANGES,v 1.1126 2023/01/06 00:33:43 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2022-12-28 (2.9.0dev.12)
+2023-01-05 (2.9.0dev.12)
+* improve compiler-warnings in configure script checks -TD
+* fix a few ifdef'ing problems (prompted by discussion with Klatt Volkmar) -TD
 * fix spelling errors found with codespell (report by Jens Schleusener) -TD
 * update es.po from
     http://translationproject.org/latest/lynx

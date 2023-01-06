@@ -1,4 +1,4 @@
-/* $LynxId: LYOptions.c,v 1.185 2022/04/02 00:13:48 Paul.G.Fox Exp $ */
+/* $LynxId: LYOptions.c,v 1.186 2023/01/05 09:17:16 tom Exp $ */
 #include <HTUtils.h>
 #include <HTFTP.h>
 #include <HTTP.h>		/* 'reloading' flag */
@@ -93,9 +93,9 @@ static void summarize_x_display(char *display_option)
     }
 }
 
+#if defined(USE_SLANG) || defined(COLOR_CURSES)
 static void SetupChosenShowColor(void)
 {
-#if defined(USE_SLANG) || defined(COLOR_CURSES)
     can_do_colors = TRUE;
 #if defined(COLOR_CURSES)
     if (LYCursesON)		/* could crash if called before initialization */
@@ -126,8 +126,8 @@ static void SetupChosenShowColor(void)
 	    }
 	}
     }
-#endif /* USE_SLANG || COLOR_CURSES */
 }
+#endif /* USE_SLANG || COLOR_CURSES */
 
 #ifndef NO_OPTION_MENU
 static int boolean_choice(int status,

@@ -1,5 +1,5 @@
 /*
- * $LynxId: UCdomap.c,v 1.110 2021/07/01 23:37:52 tom Exp $
+ * $LynxId: UCdomap.c,v 1.111 2023/01/05 09:17:16 tom Exp $
  *
  *  UCdomap.c
  *  =========
@@ -35,7 +35,7 @@
 #include <langinfo.h>
 #endif
 
-#ifdef USE_JAPANESEUTF8_SUPPORT
+#if defined(USE_JAPANESEUTF8_SUPPORT) || defined(EXP_CHINESEUTF8_SUPPORT)
 #include <iconv.h>
 #endif
 

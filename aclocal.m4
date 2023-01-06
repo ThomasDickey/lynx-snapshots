@@ -1,4 +1,4 @@
-dnl $LynxId: aclocal.m4,v 1.315 2022/12/22 00:42:05 tom Exp $
+dnl $LynxId: aclocal.m4,v 1.317 2023/01/06 00:37:36 tom Exp $
 dnl Macros for auto-configure script.
 dnl by Thomas E. Dickey <dickey@invisible-island.net>
 dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
@@ -12,7 +12,7 @@ dnl https://invisible-island.net/autoconf/autoconf.html
 dnl
 dnl ---------------------------------------------------------------------------
 dnl
-dnl Copyright 1997-2021,2022 by Thomas E. Dickey
+dnl Copyright 1997-2022,2023 by Thomas E. Dickey
 dnl
 dnl Permission to use, copy, modify, and distribute this software and its
 dnl documentation for any purpose and without fee is hereby granted,
@@ -2994,7 +2994,7 @@ fi
 AC_SUBST(EXTRA_CFLAGS)
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_FUNC_CURSES_VERSION version: 8 updated: 2021/01/02 09:31:20
+dnl CF_FUNC_CURSES_VERSION version: 9 updated: 2023/01/05 18:06:10
 dnl ----------------------
 dnl Solaris has a data item 'curses_version', which confuses AC_CHECK_FUNCS.
 dnl It's a character string "SVR4", not documented.
@@ -3002,11 +3002,14 @@ AC_DEFUN([CF_FUNC_CURSES_VERSION],
 [
 AC_CACHE_CHECK(for function curses_version, cf_cv_func_curses_version,[
 AC_TRY_RUN([
+$ac_includes_default
+
 #include <${cf_cv_ncurses_header:-curses.h}>
+
 int main(void)
 {
 	char temp[1024];
-	sprintf(temp, "%s\\n", curses_version());
+	sprintf(temp, "%.999s\\n", curses_version());
 	${cf_cv_main_return:-return}(0);
 }]
 ,[cf_cv_func_curses_version=yes]
@@ -3016,15 +3019,15 @@ rm -f core])
 test "$cf_cv_func_curses_version" = yes && AC_DEFINE(HAVE_CURSES_VERSION,1,[Define to 1 if we have curses_version function])
 ])
 dnl ---------------------------------------------------------------------------
-dnl CF_FUNC_GETADDRINFO version: 9 updated: 2017/05/10 18:31:29
+dnl CF_FUNC_GETADDRINFO version: 10 updated: 2023/01/05 18:06:22
 dnl -------------------
 dnl Look for a working version of getaddrinfo(), for IPV6 support.
 AC_DEFUN([CF_FUNC_GETADDRINFO],[
 AC_CACHE_CHECK(working getaddrinfo, cf_cv_getaddrinfo,[
 AC_TRY_RUN([
-#include <sys/types.h>
+$ac_includes_default
+
 #include <netdb.h>
-#include <string.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 
@@ -4651,7 +4654,7 @@ CF_UPPER(cf_nculib_ROOT,HAVE_LIB$cf_nculib_root)
 AC_DEFINE_UNQUOTED($cf_nculib_ROOT)
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_NCURSES_VERSION version: 16 updated: 2020/12/31 20:19:42
+dnl CF_NCURSES_VERSION version: 17 updated: 2023/01/05 18:54:02
 dnl ------------------
 dnl Check for the version of ncurses, to aid in reporting bugs, etc.
 dnl Call CF_CURSES_CPPFLAGS first, or CF_NCURSES_CPPFLAGS.  We don't use
@@ -4664,8 +4667,10 @@ AC_CACHE_CHECK(for ncurses version, cf_cv_ncurses_version,[
 	cf_tempfile=out$$
 	rm -f "$cf_tempfile"
 	AC_TRY_RUN([
+$ac_includes_default
+
 #include <${cf_cv_ncurses_header:-curses.h}>
-#include <stdio.h>
+
 int main(void)
 {
 	FILE *fp = fopen("$cf_tempfile", "w");
@@ -5663,14 +5668,17 @@ do
 done
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_SET_ERRNO version: 6 updated: 2017/05/10 18:31:29
+dnl CF_SET_ERRNO version: 7 updated: 2023/01/05 17:57:28
 dnl ------------
 dnl Check if 'errno' is declared in a fashion that lets us set it.
 AC_DEFUN([CF_SET_ERRNO],
 [
 AC_CACHE_CHECK(if we can set errno,cf_cv_set_errno,[
 AC_TRY_RUN([
+$ac_includes_default
+
 #include <errno.h>
+
 int main(void)
 {
 	errno = 255;
@@ -7507,7 +7515,7 @@ esac
 
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_XOPEN_SOURCE version: 62 updated: 2022/10/02 19:55:56
+dnl CF_XOPEN_SOURCE version: 63 updated: 2022/12/29 10:10:26
 dnl ---------------
 dnl Try to get _XOPEN_SOURCE defined properly that we can use POSIX functions,
 dnl or adapt to the vendor's definitions to get equivalent functionality,
@@ -7610,10 +7618,12 @@ case "$host_os" in
 	cf_save_xopen_cppflags="$CPPFLAGS"
 	CF_POSIX_C_SOURCE($cf_POSIX_C_SOURCE)
 	# Some of these niche implementations use copy/paste, double-check...
-	CF_VERBOSE(checking if _POSIX_C_SOURCE inteferes)
-	AC_TRY_COMPILE(CF__XOPEN_SOURCE_HEAD,CF__XOPEN_SOURCE_BODY,,[
-		AC_MSG_WARN(_POSIX_C_SOURCE definition is not usable)
-		CPPFLAGS="$cf_save_xopen_cppflags"])
+	if test "$cf_cv_xopen_source" != no ; then
+		CF_VERBOSE(checking if _POSIX_C_SOURCE inteferes)
+		AC_TRY_COMPILE(CF__XOPEN_SOURCE_HEAD,CF__XOPEN_SOURCE_BODY,,[
+			AC_MSG_WARN(_POSIX_C_SOURCE definition is not usable)
+			CPPFLAGS="$cf_save_xopen_cppflags"])
+	fi
 	;;
 esac
 
@@ -7982,11 +7992,11 @@ to makefile.])
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF__CHECK_RUN version: 1 updated: 2018/02/21 21:26:03
+dnl CF__CHECK_RUN version: 2 updated: 2023/01/05 17:58:44
 dnl -------------
 dnl Check if a simple program can be made to run with the existing libraries.
 define([CF__CHECK_RUN],[
-AC_TRY_RUN([#include <stdio.h>
+AC_TRY_RUN([$ac_includes_default
 int main(void) {
 	fflush(stderr);
 	${cf_cv_main_return:-return}(0);

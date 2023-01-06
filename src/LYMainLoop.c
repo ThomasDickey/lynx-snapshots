@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMainLoop.c,v 1.249 2022/07/22 19:55:13 tom Exp $
+ * $LynxId: LYMainLoop.c,v 1.250 2023/01/05 09:17:16 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTAccess.h>
@@ -4029,6 +4029,8 @@ static BOOLEAN handle_LYK_OPTIONS(int *cmd,
 	*refresh_screen = TRUE;	/* to repaint screen */
 	return FALSE;
     }				/* end if !LYUseFormsOptions */
+#else
+    (void) refresh_screen;
 #endif /* !NO_OPTION_MENU */
 #ifndef NO_OPTION_FORMS
     /*
@@ -4068,6 +4070,8 @@ static BOOLEAN handle_LYK_OPTIONS(int *cmd,
 	*cmd = LYK_PREV_DOC;
 	return TRUE;
     }
+#else
+    (void) cmd;
 #endif /* !NO_OPTION_FORMS */
     return FALSE;
 }

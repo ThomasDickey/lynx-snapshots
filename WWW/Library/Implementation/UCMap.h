@@ -1,5 +1,5 @@
 /*
- * $LynxId: UCMap.h,v 1.29 2021/06/29 22:01:12 tom Exp $
+ * $LynxId: UCMap.h,v 1.30 2023/01/05 09:17:15 tom Exp $
  */
 #ifndef UCMAP_H
 #define UCMAP_H
@@ -50,7 +50,7 @@ extern "C" {
 			      int charset_in,
 			      int charset_out,
 			      int chk_single_flag);
-#ifdef USE_JAPANESEUTF8_SUPPORT
+#ifdef EXP_CHINESEUTF8_SUPPORT
     extern UCode_t UCTransJPToUni(char *inbuf,
 				  int buflen,
 				  int charset_in);

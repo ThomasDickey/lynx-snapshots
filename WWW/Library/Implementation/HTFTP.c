@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFTP.c,v 1.147 2022/04/01 00:18:09 tom Exp $
+ * $LynxId: HTFTP.c,v 1.148 2023/01/05 09:17:15 tom Exp $
  *
  *			File Transfer Protocol (FTP) Client
  *			for a WorldWideWeb browser
@@ -3182,10 +3182,10 @@ static int read_directory(HTParentAnchor *parent,
 #else
 		    if (entry_info->size < 1024)
 			sprintf(string_buffer, "  %lu bytes",
-				entry_info->size);
+				(unsigned long) entry_info->size);
 		    else
 			sprintf(string_buffer, "  %luKb",
-				entry_info->size / 1024);
+				(unsigned long) entry_info->size / 1024);
 #endif
 		    PUTS(string_buffer);
 		} else if (entry_info->linkname != 0) {
