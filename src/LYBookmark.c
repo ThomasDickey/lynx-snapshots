@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYBookmark.c,v 1.87 2022/12/04 20:41:31 tom Exp $
+ * $LynxId: LYBookmark.c,v 1.88 2023/01/07 16:09:53 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTAlert.h>
@@ -371,6 +371,7 @@ void save_bookmark_link(const char *address,
 	FILE *bp = tmpfile();
 	char *buffer = NULL;
 
+	rewind(fp);
 	while (LYSafeGets(&buffer, fp)) {
 	    empty_file = FALSE;
 	    if (LYstrstr(buffer, "</ol>"))
