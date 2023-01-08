@@ -1,4 +1,4 @@
-dnl $LynxId: configure.in,v 1.344 2023/01/03 00:17:17 tom Exp $
+dnl $LynxId: configure.in,v 1.345 2023/01/08 14:06:03 tom Exp $
 dnl
 dnl Process this file with autoconf to produce a configure script.
 dnl
@@ -736,7 +736,7 @@ dnl --------------------------------------------------------------------------
 dnl Checks for standard headers
 dnl --------------------------------------------------------------------------
 
-AC_HEADER_STDC
+AC_CHECK_DECL(exit)
 AC_HEADER_TIME
 AC_HEADER_DIRENT
 dnl Don't check for sys/wait.h here since it is covered by another test.
@@ -744,8 +744,6 @@ AC_CHECK_HEADERS( \
 	arpa/inet.h \
 	fcntl.h \
 	limits.h \
-	stdlib.h \
-	string.h \
 	sys/fcntl.h \
 	sys/filio.h \
 	sys/ioctl.h \
@@ -755,7 +753,6 @@ AC_CHECK_HEADERS( \
 	syslog.h \
 	termio.h \
 	termios.h \
-	unistd.h \
 	vfork.h \
 	wchar.h \
 )
