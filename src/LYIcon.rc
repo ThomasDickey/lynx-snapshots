@@ -1,12 +1,12 @@
-// $LynxId: LYIcon.rc,v 1.55 2023/01/03 00:18:32 tom Exp $
+// $LynxId: LYIcon.rc,v 1.56 2023/01/23 21:39:23 tom Exp $
 
 #include <windows.h>
 
 100	ICON	"../samples/lynx.ico"
 
 VS_VERSION_INFO VERSIONINFO
-FILEVERSION    2,9,0,1012
-PRODUCTVERSION 2,9,0,1012
+FILEVERSION    2,9,0,1013
+PRODUCTVERSION 2,9,0,1013
 FILEFLAGSMASK  VS_FFI_FILEFLAGSMASK
 FILEFLAGS      0
 FILEOS         VOS_NT_WINDOWS32
@@ -19,12 +19,12 @@ BEGIN
     BEGIN
       VALUE "CompanyName",      "https://invisible-island.net/lynx"
       VALUE "FileDescription",  "Lynx - web browser"
-      VALUE "FileVersion",      "2.9.0.1012"
+      VALUE "FileVersion",      "2.9.0.1013"
       VALUE "InternalName",     "Lynx"
       VALUE "LegalCopyright",   "©1997-2023 Thomas E. Dickey"
       VALUE "OriginalFilename", "lynx.exe"
       VALUE "ProductName",      "Lynx - web browser"
-      VALUE "ProductVersion",   "2.9.0.1012"
+      VALUE "ProductVersion",   "2.9.0.1013"
     END
   END
   BLOCK "VarFileInfo"

@@ -1,4 +1,4 @@
-dnl $LynxId: aclocal.m4,v 1.317 2023/01/06 00:37:36 tom Exp $
+dnl $LynxId: aclocal.m4,v 1.321 2023/01/24 09:23:33 tom Exp $
 dnl Macros for auto-configure script.
 dnl by Thomas E. Dickey <dickey@invisible-island.net>
 dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
@@ -177,7 +177,7 @@ size_t iconv();
   AC_SUBST(LIBICONV)
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl AM_LANGINFO_CODESET version: 6 updated: 2021/01/01 16:53:59
+dnl AM_LANGINFO_CODESET version: 7 updated: 2023/01/11 04:05:23
 dnl -------------------
 dnl Inserted as requested by gettext 0.10.40
 dnl File from /usr/share/aclocal
@@ -189,7 +189,9 @@ dnl From Bruno Haible.
 AC_DEFUN([AM_LANGINFO_CODESET],
 [
 AC_CACHE_CHECK([for nl_langinfo and CODESET], am_cv_langinfo_codeset,
-	[AC_TRY_LINK([#include <langinfo.h>],
+	[AC_TRY_LINK([
+$ac_includes_default
+#include <langinfo.h>],
 	[char* cs = nl_langinfo(CODESET); (void)cs],
 	am_cv_langinfo_codeset=yes,
 	am_cv_langinfo_codeset=no)
@@ -1324,7 +1326,7 @@ AC_SUBST(BUILD_EXEEXT)
 AC_SUBST(BUILD_OBJEXT)
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_BUNDLED_INTL version: 20 updated: 2021/01/02 09:31:20
+dnl CF_BUNDLED_INTL version: 21 updated: 2023/01/10 19:35:04
 dnl ---------------
 dnl Top-level macro for configuring an application with a bundled copy of
 dnl the intl and po directories for gettext.
@@ -1395,7 +1397,7 @@ CF_OUR_MESSAGES($1)
 if test "$USE_INCLUDED_LIBINTL" = yes ; then
 	if test "$nls_cv_force_use_gnu_gettext" = yes ; then
 		:
-	elif test "$nls_cv_use_gnu_gettext" = yes ; then
+	elif test "$nls_cv_use_gnu_gettext" != no ; then
 		:
 	else
 		INTLDIR_MAKE="#"
@@ -1671,7 +1673,7 @@ fi
 
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_CHECK_FUNCDECL version: 7 updated: 2009/10/15 19:39:18
+dnl CF_CHECK_FUNCDECL version: 8 updated: 2023/01/24 04:22:19
 dnl -----------------
 dnl Check if a function is declared by including a set of include files.
 dnl Invoke the corresponding actions according to whether it is found or not.
@@ -1685,13 +1687,15 @@ AC_DEFUN([CF_CHECK_FUNCDECL],
 [
 AC_MSG_CHECKING([for $2 declaration])
 AC_CACHE_VAL(ac_cv_func_decl_$2,
-[AC_TRY_COMPILE([$1],
+[AC_TRY_COMPILE([
+$ac_includes_default
+$1],
 [#ifndef $2
-extern	int	$2();
+extern	int	$2(void);
 #endif],[
 AC_TRY_COMPILE([$1],
 [#ifndef $2
-int	(*p)() = $2;
+int	(*p)(struct cf_check_funcdecl*) = $2;
 #endif],[
 eval "ac_cv_func_decl_$2=yes"],[
 eval "ac_cv_func_decl_$2=no"])],[
@@ -3110,7 +3114,7 @@ if test "$cf_cv_getaddrinfo" = yes ; then
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_FUNC_LSTAT version: 5 updated: 2021/06/08 18:08:14
+dnl CF_FUNC_LSTAT version: 6 updated: 2023/01/11 04:05:23
 dnl -------------
 dnl A conventional existence-check for 'lstat' won't work with the Linux
 dnl version of gcc 2.7.0, since the symbol is defined only within <sys/stat.h>
@@ -3121,9 +3125,7 @@ AC_DEFUN([CF_FUNC_LSTAT],
 [
 AC_MSG_CHECKING(for lstat)
 AC_CACHE_VAL(ac_cv_func_lstat,[
-AC_TRY_LINK([
-#include <sys/types.h>
-#include <sys/stat.h>],
+AC_TRY_LINK([$ac_includes_default],
 	[struct stat sb; lstat(".", &sb); (void) sb],
 	[ac_cv_func_lstat=yes],
 	[ac_cv_func_lstat=no])
@@ -3997,7 +3999,7 @@ CF_SUBDIR_PATH($1,$2,lib)
 $1="$cf_library_path_list [$]$1"
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_LOCALE version: 6 updated: 2021/01/02 09:31:20
+dnl CF_LOCALE version: 7 updated: 2023/01/11 04:05:23
 dnl ---------
 dnl Check if we have setlocale() and its header, <locale.h>
 dnl The optional parameter $1 tells what to do if we do have locale support.
@@ -4005,7 +4007,9 @@ AC_DEFUN([CF_LOCALE],
 [
 AC_MSG_CHECKING(for setlocale())
 AC_CACHE_VAL(cf_cv_locale,[
-AC_TRY_LINK([#include <locale.h>],
+AC_TRY_LINK([
+$ac_includes_default
+#include <locale.h>],
 	[setlocale(LC_ALL, "")],
 	[cf_cv_locale=yes],
 	[cf_cv_locale=no])
@@ -5834,7 +5838,7 @@ if test "$cf_cv_sizechange" != no ; then
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_SLANG_CPPFLAGS version: 13 updated: 2021/01/04 17:48:08
+dnl CF_SLANG_CPPFLAGS version: 14 updated: 2023/01/24 04:22:19
 dnl -----------------
 dnl Look for the slang header files in the standard places, adjusting the
 dnl CPPFLAGS variable.
@@ -5846,7 +5850,7 @@ AC_DEFUN([CF_SLANG_CPPFLAGS],
 AC_CACHE_CHECK(for $1 header file,cf_cv_$1_header,[
 	cf_cv_$1_header=no
 	AC_TRY_COMPILE([#include <slang.h>],
-	[printf("%s\\n", SLANG_VERSION)],
+	[printf("%s\\n", SLANG_VERSION_STRING)],
 	[cf_cv_$1_header=predefined],[
 	CF_HEADER_PATH(cf_search,$1)
 	for cf_incdir in $cf_search
@@ -6473,7 +6477,7 @@ AC_SUBST(TAR_FILE_OPTIONS)
 AC_SUBST(TAR_PIPE_OPTIONS)
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_TERMCAP_LIBS version: 17 updated: 2022/12/21 19:42:05
+dnl CF_TERMCAP_LIBS version: 18 updated: 2023/01/14 07:19:05
 dnl ---------------
 dnl Look for termcap libraries, or the equivalent in terminfo.
 dnl
@@ -6512,7 +6516,7 @@ if test "$cf_cv_termlib" = none; then
 			AC_MSG_CHECKING(for $cf_func in -l$cf_lib)
 			AC_TRY_LINK(
 				[extern char *$cf_func(const char *);],
-				[int x=$cf_func(""); (void)x],
+				[char *x = $cf_func(""); (void)x],
 				[cf_result=yes],
 				[cf_result=no])
 			AC_MSG_RESULT($cf_result)
@@ -6913,7 +6917,7 @@ AC_DEFUN([CF_UPPER],
 $1=`echo "$2" | sed y%abcdefghijklmnopqrstuvwxyz./-%ABCDEFGHIJKLMNOPQRSTUVWXYZ___%`
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_UTF8_LIB version: 9 updated: 2021/05/19 19:35:25
+dnl CF_UTF8_LIB version: 10 updated: 2023/01/11 04:05:23
 dnl -----------
 dnl Check for multibyte support, and if not found, utf8 compatibility library
 AC_DEFUN([CF_UTF8_LIB],
@@ -6922,8 +6926,7 @@ AC_HAVE_HEADERS(wchar.h)
 AC_CACHE_CHECK(for multibyte character support,cf_cv_utf8_lib,[
 	cf_save_LIBS="$LIBS"
 	AC_TRY_LINK([
-#include <stdlib.h>
-#include <stdio.h>
+$ac_includes_default
 #ifdef HAVE_WCHAR_H
 #include <wchar.h>
 #endif
@@ -7451,7 +7454,7 @@ AC_CHECK_FUNCS( \
 )
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_XOPEN_CURSES version: 17 updated: 2021/07/10 12:22:27
+dnl CF_XOPEN_CURSES version: 18 updated: 2023/01/11 04:05:23
 dnl ---------------
 dnl Test if we should define X/Open source for curses, needed on Digital Unix
 dnl 4.x, to see the extended functions, but breaks on IRIX 6.x.
@@ -7464,7 +7467,7 @@ AC_REQUIRE([CF_CURSES_CPPFLAGS])dnl
 AC_CACHE_CHECK(definition to turn on extended curses functions,cf_cv_need_xopen_extension,[
 cf_cv_need_xopen_extension=unknown
 AC_TRY_LINK([
-#include <stdlib.h>
+$ac_includes_default
 #include <${cf_cv_ncurses_header:-curses.h}>],[
 #if defined(NCURSES_VERSION_PATCH)
 #if (NCURSES_VERSION_PATCH < 20100501) && (NCURSES_VERSION_PATCH >= 20100403)
@@ -7490,7 +7493,7 @@ make an error	/* prefer to fall-through on the second checks */
 	do
 		AC_TRY_LINK([
 #define $cf_try_xopen_extension 1
-#include <stdlib.h>
+$ac_includes_default
 #include <${cf_cv_ncurses_header:-curses.h}>],[
 		cchar_t check;
 		int check2 = curs_set((int)sizeof(check));
@@ -7662,7 +7665,7 @@ fi
 fi # cf_cv_posix_visible
 ])
 dnl ---------------------------------------------------------------------------
-dnl CF_X_ATHENA version: 24 updated: 2020/03/10 18:53:47
+dnl CF_X_ATHENA version: 25 updated: 2023/01/11 04:05:23
 dnl -----------
 dnl Check for Xaw (Athena) libraries
 dnl
@@ -7736,6 +7739,7 @@ if test "$PKG_CONFIG" != none ; then
 
 AC_CACHE_CHECK(for usable $cf_x_athena/Xmu package,cf_cv_xaw_compat,[
 AC_TRY_LINK([
+$ac_includes_default
 #include <X11/Xmu/CharSet.h>
 ],[
 int check = XmuCompareISOLatin1("big", "small");
@@ -7822,7 +7826,7 @@ elif test "$cf_x_athena_inc" != default ; then
 fi
 ])
 dnl ---------------------------------------------------------------------------
-dnl CF_X_ATHENA_LIBS version: 13 updated: 2020/01/11 18:16:10
+dnl CF_X_ATHENA_LIBS version: 14 updated: 2023/01/11 04:05:23
 dnl ----------------
 dnl Normally invoked by CF_X_ATHENA, with $1 set to the appropriate flavor of
 dnl the Athena widgets, e.g., Xaw, Xaw3d, neXtaw.
@@ -7855,6 +7859,7 @@ do
 		CF_ADD_LIBS($cf_libs)
 		AC_MSG_CHECKING(for $cf_test in $cf_libs)
 		AC_TRY_LINK([
+$ac_includes_default
 #include <X11/Intrinsic.h>
 #include <X11/$cf_x_athena_root/SimpleMenu.h>
 ],[
@@ -7891,7 +7896,7 @@ CF_TRY_PKG_CONFIG(Xext,,[
 		[CF_ADD_LIB(Xext)])])
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_X_TOOLKIT version: 26 updated: 2021/01/02 09:31:20
+dnl CF_X_TOOLKIT version: 27 updated: 2023/01/11 04:05:23
 dnl ------------
 dnl Check for X Toolkit libraries
 AC_DEFUN([CF_X_TOOLKIT],
@@ -7926,6 +7931,7 @@ CF_TRY_PKG_CONFIG(xt,[
 # we have an "xt" package, but it may omit Xt's dependency on X11
 AC_CACHE_CHECK(for usable X dependency,cf_cv_xt_x11_compat,[
 AC_TRY_LINK([
+$ac_includes_default
 #include <X11/Xlib.h>
 ],[
 	int rc1 = XDrawLine((Display*) 0, (Drawable) 0, (GC) 0, 0, 0, 0, 0);
@@ -7944,6 +7950,7 @@ AC_TRY_LINK([
 
 AC_CACHE_CHECK(for usable X Toolkit package,cf_cv_xt_ice_compat,[
 AC_TRY_LINK([
+$ac_includes_default
 #include <X11/Shell.h>
 ],[int num = IceConnectionNumber(0); (void) num
 ],[cf_cv_xt_ice_compat=yes],[cf_cv_xt_ice_compat=no])])

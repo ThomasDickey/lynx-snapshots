@@ -1,7 +1,10 @@
--- $LynxId: CHANGES,v 1.1128 2023/01/08 14:08:16 tom Exp $
+-- $LynxId: CHANGES,v 1.1130 2023/01/24 09:24:00 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
+
+2023-01-24 (2.9.0dev.13)
+* modify configure script to reduce implicit-function warnings -TD
 
 2023-01-08 (2.9.0dev.12)
 * add a rewind() call before reading existing bookmark file opened for append
@@ -10,7 +13,7 @@ Changes since Lynx 2.8 release
 * improve compiler-warnings in configure script checks -TD
 * fix a few ifdef'ing problems (prompted by discussion with Klatt Volkmar) -TD
 * fix spelling errors found with codespell (report by Jens Schleusener) -TD
-* update es.po from
+* update eo.po from
     http://translationproject.org/latest/lynx
 
 2022-12-28 (2.9.0dev.11)

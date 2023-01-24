@@ -1,4 +1,4 @@
-dnl $LynxId: configure.in,v 1.345 2023/01/08 14:06:03 tom Exp $
+dnl $LynxId: configure.in,v 1.346 2023/01/24 09:25:46 tom Exp $
 dnl
 dnl Process this file with autoconf to produce a configure script.
 dnl
@@ -29,7 +29,7 @@ dnl ---------------------------------------------------------------------------
 dnl
 dnl ask PRCS to plug-in the project-version for the configure-script.
 dnl $Format: "AC_REVISION($ProjectVersion$)"$
-AC_REVISION(2.9.0dev.12)
+AC_REVISION(2.9.0dev.13)
 
 # Save the original $CFLAGS so we can distinguish whether the user set those
 # in the environment, or whether autoconf added -O and -g options:
@@ -64,7 +64,7 @@ AC_ARG_PROGRAM
 PACKAGE=lynx
 dnl ask PRCS to plug-in the project-version for the packages.
 # $Format: "VERSION=$ProjectVersion$"$
-VERSION=2.9.0dev.12
+VERSION=2.9.0dev.13
 
 AC_SUBST(PACKAGE)
 AC_SUBST(VERSION)
