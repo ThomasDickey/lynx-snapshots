@@ -1,5 +1,5 @@
 /*
- * $LynxId: config.hin,v 1.152 2021/07/29 23:16:41 tom Exp $
+ * $LynxId: config.hin,v 1.153 2023/02/16 09:09:51 tom Exp $
  * vile:cmode
  *
  * The configure script translates "config.hin" into "lynx_cfg.h"
@@ -90,7 +90,7 @@
 #undef HAVE_H_ERRNO
 #undef HAVE_ICONV		/* AM_ICONV */
 #undef HAVE_INET_ATON		/* CF_INET_ADDR */
-#undef HAVE_INTTYPES_H
+#undef HAVE_INTTYPES_H		/* AC_CHECK_DECL(exit) */
 #undef HAVE_JCURSES_H
 #undef HAVE_KEYPAD
 #undef HAVE_LANGINFO_CODESET	/* AM_LANGINFO_CODESET */
@@ -106,6 +106,7 @@
 #undef HAVE_LSTAT		/* CF_FUNC_LSTAT */
 #undef HAVE_MALLOC_H		/* AM_GNU_GETTEXT */
 #undef HAVE_MBSTATE_T		/* CF_WIDEC_CURSES */
+#undef HAVE_MEMORY_H		/* AC_CHECK_DECL(exit) */
 #undef HAVE_MKDTEMP
 #undef HAVE_MKTEMP
 #undef HAVE_MKTIME		/* AC_REPLACE_FUNCS(mktime) */
@@ -133,13 +134,15 @@
 #undef HAVE_SIZECHANGE		/* CF_SIZECHANGE */
 #undef HAVE_SLEEP
 #undef HAVE_STDARG_H		/* CF_VARARGS */
-#undef HAVE_STDLIB_H
+#undef HAVE_STDINT_H		/* AC_CHECK_DECL(exit) */
+#undef HAVE_STDLIB_H		/* AC_CHECK_DECL(exit) */
 #undef HAVE_STDNORETURN_H	/* CF_C11_NORETURN */
 #undef HAVE_STPCPY		/* AM_GNU_GETTEXT */
 #undef HAVE_STRCASECMP		/* AM_GNU_GETTEXT */
 #undef HAVE_STRCHR		/* AM_GNU_GETTEXT */
 #undef HAVE_STRERROR
-#undef HAVE_STRING_H
+#undef HAVE_STRINGS_H		/* AC_CHECK_DECL(exit) */
+#undef HAVE_STRING_H		/* AC_CHECK_DECL(exit) */
 #undef HAVE_STRUCT_DIRENT64	/* CF_LARGEFILE */
 #undef HAVE_SYSLOG_H
 #undef HAVE_SYSV_TOUCHLINE	/* CF_CURS_TOUCHLINE */
@@ -149,8 +152,10 @@
 #undef HAVE_SYS_IOCTL_H		/* have <sys/ioctl.h> */
 #undef HAVE_SYS_NDIR_H		/* AC_HEADER_DIRENT */
 #undef HAVE_SYS_PARAM_H		/* AM_GNU_GETTEXT */
+#undef HAVE_SYS_STAT_H		/* AC_CHECK_DECL(exit) */
 #undef HAVE_SYS_TIMEB_H		/* have <sys/timeb.h> */
 #undef HAVE_SYS_TIME_H		/* have <sys/time.h> */
+#undef HAVE_SYS_TYPES_H		/* AC_CHECK_DECL(exit) */
 #undef HAVE_SYS_WAIT_H		/* have <sys/wait.h> */
 #undef HAVE_TERMIOS_H		/* have <termios.h> */
 #undef HAVE_TERMIO_H		/* have <termio.h> */
@@ -162,7 +167,7 @@
 #undef HAVE_TTYTYPE
 #undef HAVE_TYPE_CHTYPE		/* CF_CURSES_CHTYPE */
 #undef HAVE_TYPE_UNIONWAIT	/* CF_UNION_WAIT */
-#undef HAVE_UNISTD_H		/* have <unistd.h> */
+#undef HAVE_UNISTD_H		/* AC_CHECK_DECL(exit) */
 #undef HAVE_UNSETENV
 #undef HAVE_USE_DEFAULT_COLORS	/* ncurses extension */
 #undef HAVE_USE_LEGACY_CODING	/* ncurses extension */
@@ -244,7 +249,7 @@
 #undef SLsmg_Color_Type		/* CF_SLANG_UNIX_DEFS */
 #undef SLtt_Char_Type		/* CF_SLANG_UNIX_DEFS */
 #undef SOCKS			/* CF_SOCKS, CF_SOCKS5 */
-#undef STDC_HEADERS
+#undef STDC_HEADERS		/* AC_CHECK_DECL(exit) */
 #undef STDC_NORETURN		/* CF_C11_NORETURN */
 #undef SYSTEM_MAIL		/* CF_DEFINE_PROG */
 #undef SYSTEM_MAIL_FLAGS	/* CF_SYSTEM_MAIL_FLAGS */

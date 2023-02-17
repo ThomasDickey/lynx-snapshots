@@ -1,10 +1,11 @@
--- $LynxId: CHANGES,v 1.1130 2023/01/24 09:24:00 tom Exp $
+-- $LynxId: CHANGES,v 1.1132 2023/02/17 22:10:26 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2023-01-24 (2.9.0dev.13)
+2023-02-17 (2.9.0dev.13)
 * modify configure script to reduce implicit-function warnings -TD
+* add viewport meta-tag to documentation/test files -TD
 
 2023-01-08 (2.9.0dev.12)
 * add a rewind() call before reading existing bookmark file opened for append

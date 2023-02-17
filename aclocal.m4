@@ -1,4 +1,4 @@
-dnl $LynxId: aclocal.m4,v 1.321 2023/01/24 09:23:33 tom Exp $
+dnl $LynxId: aclocal.m4,v 1.322 2023/02/16 09:03:26 tom Exp $
 dnl Macros for auto-configure script.
 dnl by Thomas E. Dickey <dickey@invisible-island.net>
 dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
@@ -6065,7 +6065,7 @@ AC_MSG_RESULT($cf_use_socks5p_h)
 test "$cf_use_socks5p_h" = yes && AC_DEFINE(INCLUDE_PROTOTYPES,1,[Define to 1 if needed to declare prototypes in socks headers])
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_SRAND version: 17 updated: 2022/12/02 19:55:38
+dnl CF_SRAND version: 18 updated: 2023/02/15 19:14:44
 dnl --------
 dnl Check for functions similar to srand() and rand().  lrand48() and random()
 dnl return a 31-bit value, while rand() returns a value less than RAND_MAX
@@ -6111,9 +6111,7 @@ if test "$cf_cv_srand_func" != unknown ; then
 			;;
 		esac
 		AC_TRY_COMPILE([
-#ifdef HAVE_STDLIB_H
-#include <stdlib.h>
-#endif
+$ac_includes_default
 #ifdef HAVE_LIMITS_H
 #include <limits.h>
 #endif
