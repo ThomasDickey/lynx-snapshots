@@ -1,9 +1,14 @@
--- $LynxId: CHANGES,v 1.1132 2023/02/17 22:10:26 tom Exp $
+-- $LynxId: CHANGES,v 1.1133 2023/04/10 22:59:30 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2023-02-17 (2.9.0dev.13)
+2023-04-10 (2.9.0dev.13)
++ modify HTChunkPutb2() to avoid passing a zero-size or null pointer to
+  memcpy() -TD
+* correct loop in fill_addrinfo() which adds sizes of struct addrinfo's found
+  in getaddrinfo() call; the 2.8.8dev.15 change did not update the pointer to
+  the struct addrinfo's (Redhat #2185402) -TD
 * modify configure script to reduce implicit-function warnings -TD
 * add viewport meta-tag to documentation/test files -TD
 

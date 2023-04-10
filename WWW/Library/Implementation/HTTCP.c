@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTCP.c,v 1.163 2022/04/01 23:18:35 Rajeev.V.Pillai Exp $
+ * $LynxId: HTTCP.c,v 1.164 2023/04/10 22:41:21 tom Exp $
  *
  *			Generic Communication Code		HTTCP.c
  *			==========================
@@ -1494,7 +1494,7 @@ static size_t fill_addrinfo(void **buffer,
     CTRACE((tfp, "filladdr_info %p\n", (const void *) phost));
     for (q = phost; q != 0; q = q->ai_next) {
 	++limit;
-	need += phost->ai_addrlen;
+	need += q->ai_addrlen;
 	need += sizeof(LYNX_ADDRINFO);
     }
     CTRACE((tfp, "...fill_addrinfo %d:%lu\n", limit, (unsigned long) need));

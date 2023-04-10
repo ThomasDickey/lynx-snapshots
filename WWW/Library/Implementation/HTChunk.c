@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTChunk.c,v 1.28 2016/11/24 15:29:50 tom Exp $
+ * $LynxId: HTChunk.c,v 1.29 2023/04/10 22:58:51 tom Exp $
  *
  *		Chunk handling:	Flexible arrays
  *		===============================
@@ -197,13 +197,16 @@ HTChunk *HTChunkPutb2(HTChunk *ch, const char *b, int l)
 	HTChunk *chunk;
 	int m = ch->allocated - ch->size;
 
-	MemCpy(ch->data + ch->size, b, (unsigned) m);
-	ch->size += m;
+	if (m != 0 && b != 0) {
+	    MemCpy(ch->data + ch->size, b, (unsigned) m);
+	    ch->size += m;
+	}
 
 	chunk = HTChunkCreateMayFail(ch->growby, ch->failok);
 	ch->next = chunk;
 	ch = chunk;
-	HTChunkPutb(ch, b + m, l - m);
+	if (b != 0)
+	    HTChunkPutb(ch, b + m, l - m);
     } else {
 	MemCpy(ch->data + ch->size, b, (unsigned) l);
 	ch->size += l;
