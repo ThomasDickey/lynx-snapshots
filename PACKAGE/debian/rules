@@ -1,5 +1,5 @@
 #!/usr/bin/make -f
-# $LynxId: rules,v 1.17 2022/03/30 00:33:39 tom Exp $
+# $LynxId: rules,v 1.18 2023/05/26 22:51:25 tom Exp $
 
 # Uncomment this to turn on verbose mode.
 #export DH_VERBOSE=1
@@ -99,12 +99,9 @@ configure-stamp:
 		--enable-source-cache \
 		--enable-syslog \
 		--enable-warnings \
-		--with-brotli \
-		--with-bzlib \
 		--with-gnutls=/usr \
 		--with-screen=ncursesw6dev \
 		--with-textdomain=$(PACKAGE) \
-		--with-zlib \
 		--without-included-gettext \
 		${DEBOP}
 

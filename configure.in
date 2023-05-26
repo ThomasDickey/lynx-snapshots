@@ -1,4 +1,4 @@
-dnl $LynxId: configure.in,v 1.346 2023/01/24 09:25:46 tom Exp $
+dnl $LynxId: configure.in,v 1.347 2023/05/26 22:50:24 tom Exp $
 dnl
 dnl Process this file with autoconf to produce a configure script.
 dnl
@@ -1288,7 +1288,7 @@ AC_MSG_CHECKING(if you want to use libbz2 for decompression of some bzip2 files)
 AC_ARG_WITH(bzlib,
 [  --with-bzlib            use libbz2 for decompression of some bzip2 files],
 	[use_bzlib=$withval],
-	[use_bzlib=no])
+	[use_bzlib=yes])
 AC_MSG_RESULT($use_bzlib)
 
 if test ".$use_bzlib" != ".no" ; then
@@ -1301,7 +1301,7 @@ AC_MSG_CHECKING(if you want to use zlib for decompression of some gzip files)
 AC_ARG_WITH(zlib,
 [  --with-zlib             use zlib for decompression of some gzip files],
 	[use_zlib=$withval],
-	[use_zlib=no])
+	[use_zlib=yes])
 AC_MSG_RESULT($use_zlib)
 
 if test ".$use_zlib" != ".no" ; then
@@ -1314,7 +1314,7 @@ AC_MSG_CHECKING(if you want to use brotli decompression)
 AC_ARG_WITH(brotli,
 [  --with-brotli           use brotli decompression],
 	[use_brotli=$withval],
-	[use_brotli=no])
+	[use_brotli=yes])
 AC_MSG_RESULT($use_brotli)
 
 if test ".$use_brotli" != ".no" ; then

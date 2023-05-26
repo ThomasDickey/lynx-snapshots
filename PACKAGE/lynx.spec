@@ -1,4 +1,4 @@
-# $LynxId: lynx.spec,v 1.68 2023/01/23 21:39:22 tom Exp $
+# $LynxId: lynx.spec,v 1.69 2023/05/26 22:52:47 tom Exp $
 Summary: A text-based Web browser
 Name: lynx-dev
 Version: 2.9.0
@@ -79,11 +79,8 @@ HTTP, FTP, WAIS, and NNTP servers.
 	--enable-source-cache \
 	--enable-syslog \
 	--enable-warnings \
-	--with-brotli \
-	--with-bzlib \
 	--with-screen=ncursesw6dev \
-	--with-ssl \
-	--with-zlib
+	--with-ssl
 make \
 	docdir=%{lynx_doc}
 
