@@ -1,9 +1,10 @@
--- $LynxId: CHANGES,v 1.1135 2023/05/26 22:50:24 tom Exp $
+-- $LynxId: CHANGES,v 1.1136 2023/06/18 19:10:39 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2023-05-29 (2.9.0dev.13)
+2023-06-18 (2.9.0dev.13)
+* formatting fixes for manpage (Debian #1037353).
 * change defaults in configure script to use compression -TD
 * modify HTChunkPutb2() to avoid passing a zero-size or null pointer to
   memcpy() -TD

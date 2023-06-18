@@ -1,4 +1,4 @@
-.\" $LynxId: lynx.man,v 1.132 2021/03/14 20:42:46 tom Exp $
+.\" $LynxId: lynx.man,v 1.136 2023/06/18 18:49:34 tom Exp $
 .\" **************************************************************************
 .\" Escape single quotes in literal strings from groff's Unicode transform.
 .ie \n(.g .ds `` \(lq
@@ -15,7 +15,7 @@
 .ie n  .in +4
 .el    .in +2
 .nf
-.ft C			\" Courier
+.ft CR			\" Courier
 ..
 .de NE
 .fi
@@ -24,7 +24,7 @@
 .el    .in -2
 ..
 .\" **************************************************************************
-.TH LYNX 1
+.TH LYNX 1 2023-06-18 "Lynx 2.9.0" "Lynx \(en the \fItext\fP web browser"
 .SH NAME
 lynx \- a general purpose distributed information browser for the World Wide Web
 .SH SYNOPSIS
@@ -261,8 +261,8 @@ Sets the connection timeout, where N is given in seconds.
 .TP
 .B \-cookie_file\fR=\fIFILENAME
 specifies a file to use to read cookies.
-If none is specified, the default value is ~/.lynx_cookies
-for most systems, but ~/cookies for MS-DOS.
+If none is specified, the default value is \s+3~\s-3/.lynx_cookies
+for most systems, but \s+3~\s-3/cookies for MS-DOS.
 .TP
 .B \-cookie_save_file\fR=\fIFILENAME
 specifies a file to use to store cookies.
