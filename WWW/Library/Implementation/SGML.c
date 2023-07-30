@@ -1,5 +1,5 @@
 /*
- * $LynxId: SGML.c,v 1.183 2022/06/13 00:20:50 tom Exp $
+ * $LynxId: SGML.c,v 1.184 2023/07/30 18:12:21 Hiltjo.Posthuma Exp $
  *
  *			General SGML Parser code		SGML.c
  *			========================
@@ -3502,9 +3502,13 @@ static void SGML_character(HTStream *me, int c_in)
 	    me->state = S_text;
 	    break;
 	}
-	HTChunkPutc(string, c);
-	break;
 
+	if (me->T.decode_utf8) {
+	    HTChunkPutUtf8Char(string, clong);
+	} else {
+	    HTChunkPutc(string, c);
+	}
+	break;
     case S_sgmlent:		/* Expecting ENTITY. - FM */
 	if (!me->first_dash && c == '-') {
 	    HTChunkPutc(string, c);
@@ -4662,9 +4666,8 @@ HTStream *SGML_new(const SGML_dtd * dtd,
 	sgml_in_psrc_was_initialized = TRUE;
     }
 #endif
-    if (extended_html)
-    {
-        me->extended_html = TRUE;
+    if (extended_html) {
+	me->extended_html = TRUE;
     }
 
     sgml_offset = 0;

@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTP.c,v 1.183 2022/04/01 00:10:19 tom Exp $
+ * $LynxId: HTTP.c,v 1.184 2023/07/23 20:02:58 tom Exp $
  *
  * HyperText Transfer Protocol	- Client implementation		HTTP.c
  * ===========================
@@ -2213,7 +2213,8 @@ static int HTLoadHTTP(const char *arg,
 		 * 305 Use Proxy.
 		 * 306 Set Proxy.
 		 * 307 Temporary Redirect with method retained.
-		 * > 308 is unknown.
+		 * 308 Permanent Redirect
+		 * > 309 is unknown.
 		 */
 		if (no_url_redirection || do_head || keep_mime_headers) {
 		    /*
@@ -2267,7 +2268,7 @@ static int HTLoadHTTP(const char *arg,
 
 		if (server_status == 305 ||
 		    server_status == 306 ||
-		    server_status > 307) {
+		    server_status > 308) {
 		    /*
 		     * Show user the content, if any, for 305, 306, or unknown
 		     * status.  - FM
@@ -2330,7 +2331,8 @@ static int HTLoadHTTP(const char *arg,
 		    }
 
 		    HTProgress(line_buffer);
-		    if (server_status == 301) {		/* Moved Permanently */
+		    if ((server_status == 301) ||	/* Moved Permanently */
+			(server_status == 308)) {	/* Permanent Redirect */
 			if (do_post) {
 			    /*
 			     * Don't make the redirection permanent if we have
