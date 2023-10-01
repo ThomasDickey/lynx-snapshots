@@ -1,9 +1,9 @@
--- $LynxId: CHANGES,v 1.1138 2023/07/30 19:11:11 tom Exp $
+-- $LynxId: CHANGES,v 1.1140 2023/10/01 10:57:43 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2023-07-30 (2.9.0dev.13)
+2023-10-02 (2.9.0dev.13)
 * fix for decoding utf-8 in CDATA sections (patch by Hiltjo Posthuma)
 * treat HTTP 308 permanently redirected the same as HTTP 301 permanently moved
   (Debian #1041686).
@@ -16,7 +16,9 @@ Changes since Lynx 2.8 release
   the struct addrinfo's (Redhat #2185402) -TD
 * modify configure script to reduce implicit-function warnings -TD
 * add viewport meta-tag to documentation/test files -TD
-* update config.guess (2023-01-01), config.sub (2023-01-21)
+* update config.guess (2023-08-22), config.sub (2023-09-15)
+* update ro.po from
+    http://translationproject.org/latest/lynx
 
 2023-01-08 (2.9.0dev.12)
 * add a rewind() call before reading existing bookmark file opened for append
