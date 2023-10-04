@@ -1,5 +1,5 @@
 /*
- * $LynxId: SGML.c,v 1.184 2023/07/30 18:12:21 Hiltjo.Posthuma Exp $
+ * $LynxId: SGML.c,v 1.185 2023/10/04 23:42:42 tom Exp $
  *
  *			General SGML Parser code		SGML.c
  *			========================
@@ -902,10 +902,13 @@ static void handle_processing_instruction(HTStream *me)
 	    char *t = strstr(s, "encoding=");
 
 	    if (t != 0) {
+		char delim = 0;
+
 		t += 9;
-		if (*t == '"')
-		    ++t;
-		flag = !StrNCmp(t, "utf-8", 5);
+		if (*t == '"' || *t == '\'')
+		    delim = *t++;
+		flag = (!strncasecomp(t, "utf-8", 5) &&
+			(delim == 0 || t[5] == delim));
 	    }
 	    if (flag) {
 		CTRACE((tfp, "...Use UTF-8 for XML\n"));
