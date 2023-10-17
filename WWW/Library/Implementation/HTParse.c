@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTParse.c,v 1.98 2021/07/27 21:29:49 tom Exp $
+ * $LynxId: HTParse.c,v 1.100 2023/10/17 23:38:48 tom Exp $
  *
  *		Parse HyperText Document Address		HTParse.c
  *		================================
@@ -417,12 +417,13 @@ char *HTParse(const char *aName,
     len1 = strlen(aName) + 1;
     len2 = strlen(relatedName) + 1;
     len = len1 + len2 + MIN_PARSE;	/* Lots of space: more than enough */
-
     need = (len * 2 + len1 + len2);
-    if (need > (size_t) max_uri_size ||
-	(int) need < (int) len1 ||
-	(int) need < (int) len2)
+
+    if ((int) need < (int) len1 ||
+	(int) need < (int) len2) {
+	CTRACE((tfp, "HTParse: overflow\n"));
 	return StrAllocCopy(return_value, "");
+    }
 
     result = tail = (char *) LYalloca(need);
     if (result == NULL) {
@@ -794,7 +795,14 @@ char *HTParse(const char *aName,
     }
     CTRACE((tfp, "HTParse:      result:`%s'\n", result));
 
-    StrAllocCopy(return_value, result);
+    need = strlen(result);
+    if (need > (size_t) max_uri_size) {
+	CTRACE((tfp, "HTParse too-long address (have %ld vs limit %d)\n",
+		need, max_uri_size));
+	StrAllocCopy(return_value, "");
+    } else {
+	StrAllocCopy(return_value, result);
+    }
     LYalloca_free(result);
 
     /* FIXME: could be optimized using HTParse() internals */
