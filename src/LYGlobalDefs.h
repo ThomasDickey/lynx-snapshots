@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYGlobalDefs.h,v 1.154 2022/04/02 00:12:18 Paul.G.Fox Exp $
+ * $LynxId: LYGlobalDefs.h,v 1.155 2023/10/23 08:04:43 tom Exp $
  *
  * global variable definitions
  */
@@ -252,8 +252,9 @@ extern "C" {
     extern BOOLEAN news_ok;
     extern BOOLEAN number_fields_on_left;
     extern BOOLEAN number_links_on_left;
-    extern BOOLEAN recent_sizechange;
+    extern BOOLEAN recent_sizechange;	/* valid size_is_changed */
     extern BOOLEAN rlogin_ok;
+    extern BOOLEAN size_is_changed;	/* SIGWINCH was caught */
     extern BOOLEAN syslog_requested_urls;
     extern BOOLEAN system_editor;	/* True if locked-down editor */
     extern BOOLEAN telnet_ok;

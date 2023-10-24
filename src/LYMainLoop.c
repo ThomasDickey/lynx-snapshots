@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMainLoop.c,v 1.250 2023/01/05 09:17:16 tom Exp $
+ * $LynxId: LYMainLoop.c,v 1.253 2023/10/23 23:36:31 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTAccess.h>
@@ -6369,6 +6369,7 @@ int mainloop(void)
 	 * If the recent_sizechange variable is set to TRUE then the window
 	 * size changed recently.
 	 */
+	CheckScreenSize();
 	if (recent_sizechange) {
 	    /*
 	     * First we need to make sure the display library - curses, slang,
@@ -6385,20 +6386,14 @@ int mainloop(void)
 	     * are already filled based on the old size.  So we notify the
 	     * ncurses library directly here.  - kw
 	     */
-#if defined(NCURSES) && defined(HAVE_RESIZETERM) && defined(HAVE_WRESIZE)
+#if defined(USE_CURSES_RESIZE)
 	    resizeterm(LYlines, LYcols);
 	    wresize(LYwin, LYlines, LYcols);
-#else
-#if 0				/* defined(PDCURSES) && defined(HAVE_XCURSES) */
-	    resize_term(LYlines, LYcols);
-	    if (LYwin != 0)
-		LYwin = resize_window(LYwin, LYlines, LYcols);
-	    refresh();
+	    wgetch(LYtopwindow());	/* eat the KEY_RESIZE */
 #else
 	    stop_curses();
 	    start_curses();
 	    LYclear();
-#endif
 #endif
 	    refresh_screen = TRUE;	/* to force a redraw */
 	    if (HTMainText)	/* to REALLY force it... - kw */
@@ -7054,6 +7049,7 @@ int mainloop(void)
 	    c = DO_NOTHING;
 	}
 #else
+	CheckScreenSize();
 	if (recent_sizechange) {
 	    if (c <= 0)
 		c = DO_NOTHING;
@@ -7098,7 +7094,7 @@ int mainloop(void)
 	if (cmd != LYK_UP_LINK && cmd != LYK_DOWN_LINK)
 	    follow_col = -1;
 
-	CTRACE((tfp, "Handling key as %s\n",
+	CTRACE((tfp, "Handling key %d as %s\n", cmd,
 		((LYKeycodeToKcmd((LYKeymapCode) cmd) != 0)
 		 ? LYKeycodeToKcmd((LYKeymapCode) cmd)->name
 		 : "unknown")));

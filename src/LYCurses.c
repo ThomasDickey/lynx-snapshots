@@ -1,4 +1,4 @@
-/* $LynxId: LYCurses.c,v 1.200 2023/01/02 23:52:18 tom Exp $ */
+/* $LynxId: LYCurses.c,v 1.201 2023/10/23 23:39:38 tom Exp $ */
 #include <HTUtils.h>
 #include <HTAlert.h>
 
@@ -209,6 +209,7 @@ static void sl_suspend(int sig)
     r = SLtt_Screen_Rows;
     c = SLtt_Screen_Cols;
     size_change(0);
+    LYGetScreenSize(0);
     if ((r != SLtt_Screen_Rows) || (c != SLtt_Screen_Cols)) {
 	recent_sizechange = TRUE;
     }
@@ -940,6 +941,7 @@ static void delete_screen(SCREEN * screen)
 #endif
 
 #define LYDELSCR() { \
+CheckScreenSize(); \
 if (recent_sizechange) { \
     CTRACE((tfp, "Screen size: delscreen()\n")); \
     delete_screen(LYscreen); \
@@ -1131,6 +1133,7 @@ void maxmizeWindowSize(void)
     CTRACE((tfp, "...actual maximum screen size: %dx%d\n",
 	    LYcols, LYlines));
     LYStatusLine = -1;
+    LYGetScreenSize(0);
     recent_sizechange = TRUE;
 }
 
@@ -1348,6 +1351,7 @@ void start_curses(void)
 
 	savesize = recent_sizechange;
 	size_change(0);
+	LYGetScreenSize(0);
 	recent_sizechange = savesize;	/* avoid extra redraw */
 #if defined(__MVS__)
 	{
@@ -1384,6 +1388,7 @@ void start_curses(void)
 
 #if defined(SIGWINCH) && defined(NCURSES_VERSION)
 	size_change(0);
+	LYGetScreenSize(0);
 	recent_sizechange = FALSE;	/* prevent mainloop drawing 1st doc twice */
 #endif /* SIGWINCH */
 	CTRACE((tfp, "Screen size is now %d x %d\n", LYcols, LYlines));

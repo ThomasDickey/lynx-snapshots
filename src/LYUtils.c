@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYUtils.c,v 1.301 2022/07/25 07:52:04 tom Exp $
+ * $LynxId: LYUtils.c,v 1.306 2023/10/24 00:12:43 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTCP.h>
@@ -3087,7 +3087,7 @@ static BOOLEAN LYToggleSigDfl(int sig,
 # endif	/* TERMIO_AND_TERMIOS */
 #endif /* TERMIO_AND_CURSES */
 
-void size_change(int sig GCC_UNUSED)
+void LYGetScreenSize(int sig GCC_UNUSED)
 {
     int old_lines = LYlines;
     int old_cols = LYcols;
@@ -3099,22 +3099,13 @@ void size_change(int sig GCC_UNUSED)
     LYlines = SLtt_Screen_Rows;
     LYcols = SLtt_Screen_Cols;
     if (sig == 0)
-	/*
-	 * Called from start_curses().
-	 */
+	/* If called from start_curses(), no need to record size-changed */
 	return;
 #else /* Curses: */
 #ifdef HAVE_SIZECHANGE
-#ifdef TIOCGSIZE
+#if defined(TIOCGSIZE)
     struct ttysize win;
 
-#else
-#ifdef TIOCGWINSZ
-    struct winsize win;
-#endif /* TIOCGWINSZ */
-#endif /* TIOCGSIZE */
-
-#ifdef TIOCGSIZE
     if (ioctl(0, TIOCGSIZE, &win) == 0) {
 	if (win.ts_lines != 0) {
 	    LYlines = win.ts_lines;
@@ -3123,8 +3114,9 @@ void size_change(int sig GCC_UNUSED)
 	    LYcols = win.ts_cols;
 	}
     }
-#else
-#ifdef TIOCGWINSZ
+#elif defined(TIOCGWINSZ)
+    struct winsize win;
+
     if (ioctl(0, (long) TIOCGWINSZ, &win) == 0) {
 	if (win.ws_row != 0) {
 	    LYlines = win.ws_row;
@@ -3133,8 +3125,9 @@ void size_change(int sig GCC_UNUSED)
 	    LYcols = win.ws_col;
 	}
     }
-#endif /* TIOCGWINSZ */
-#endif /* TIOCGSIZE */
+#else
+#error inconsistent settings for TIOCGSIZE/TIOCGWINSZ
+#endif /* TIOCGSIZE/TIOCGWINSZ */
 #endif /* HAVE_SIZECHANGE */
 
 #ifdef __EMX__
@@ -3166,11 +3159,19 @@ void size_change(int sig GCC_UNUSED)
 	    Switch_Display_Charset(current_char_set, SWITCH_DISPLAY_CHARSET_RESIZE);
 #endif
     }
+}
+
+/*
+ * curses/slang functions call this to start catching SIGWINCH when sig==0,
+ * and continue catching when sig!=0.
+ */
+void size_change(int sig GCC_UNUSED)
+{
 #ifdef SIGWINCH
+    if (sig)
+	size_is_changed = TRUE;
     LYExtSignal(SIGWINCH, size_change);
 #endif /* SIGWINCH */
-
-    return;
 }
 
 /*

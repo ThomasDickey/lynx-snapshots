@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMain.c,v 1.298 2022/04/01 07:50:45 tom Exp $
+ * $LynxId: LYMain.c,v 1.299 2023/10/23 08:05:32 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTP.h>
@@ -229,6 +229,7 @@ BOOLEAN minimal_comments = FALSE;
 BOOLEAN number_fields_on_left = TRUE;
 BOOLEAN number_links_on_left = TRUE;
 BOOLEAN recent_sizechange = FALSE;	/* the window size changed recently? */
+BOOLEAN size_is_changed = FALSE;	/* SIGWINCH is caught recently? */
 BOOLEAN soft_dquotes = FALSE;
 BOOLEAN unique_urls = FALSE;
 BOOLEAN use_underscore = SUBSTITUTE_UNDERSCORES;

@@ -1,4 +1,4 @@
-/* $LynxId: LYCurses.h,v 1.96 2018/03/11 22:19:36 tom Exp $ */
+/* $LynxId: LYCurses.h,v 1.98 2023/10/23 23:35:36 tom Exp $ */
 #ifndef LYCURSES_H
 #define LYCURSES_H
 
@@ -258,8 +258,8 @@ typedef char chtype;
 #else
 # if defined(VMS) && defined(__GNUC__)
 #  include <LYGCurses.h>
-#  else
-#   include <curses.h>		/* everything else */
+# else
+#  include <curses.h>		/* everything else */
 # endif	/* VMS && __GNUC__ */
 #endif /* HAVE_CONFIG_H */
 
@@ -429,6 +429,30 @@ extern "C" {
 
     extern int LYlines;		/* replaces LINES */
     extern int LYcols;		/* replaces COLS */
+
+/*
+ * Check if the SIGWINCH handler has caught a signal, before testing the
+ * recent_sizechange variable.
+ */
+#ifdef SIGWINCH
+#if defined(KEY_RESIZE) && defined(HAVE_RESIZETERM) && defined(HAVE_WRESIZE)
+#define USE_CURSES_RESIZE 1
+#endif
+
+#if defined(USE_CURSES_RESIZE) || defined(USE_SLANG)
+#define CheckScreenSize() \
+	do { \
+	    if (size_is_changed) { \
+		size_is_changed = FALSE; \
+		LYGetScreenSize(SIGWINCH); \
+	    } \
+	} while (0)
+#endif
+#endif
+
+#ifndef CheckScreenSize
+#define CheckScreenSize()	/* nothing */
+#endif
 
 /*
  * The scrollbar, if used, occupies the rightmost column.

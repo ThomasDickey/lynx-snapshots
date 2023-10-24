@@ -1,5 +1,5 @@
 /*
- * $LynxId: GridText.c,v 1.342 2023/01/05 09:17:47 tom Exp $
+ * $LynxId: GridText.c,v 1.344 2023/10/23 23:40:09 tom Exp $
  *
  *		Character grid hypertext object
  *		===============================
@@ -512,10 +512,10 @@ struct _HText {
     BOOL historical_comments;
     BOOL minimal_comments;
     BOOL soft_dquotes;
-    short old_dtd;
-    short keypad_mode;
-    short disp_lines;		/* Screen size */
-    short disp_cols;		/* Used for reports only */
+    int old_dtd;
+    int keypad_mode;
+    int disp_lines;		/* Screen size */
+    int disp_cols;		/* Used for reports only */
 #endif
 };
 
@@ -1145,18 +1145,20 @@ HText *HText_new(HTParentAnchor *anchor)
     /*
      * Remember the parse settings.
      */
-    self->clickable_images = clickable_images;
-    self->pseudo_inline_alts = pseudo_inline_alts;
-    self->verbose_img = verbose_img;
-    self->raw_mode = LYUseDefaultRawMode;
+    /* *INDENT-EQLS* */
+    self->clickable_images    = clickable_images;
+    self->pseudo_inline_alts  = pseudo_inline_alts;
+    self->verbose_img         = verbose_img;
+    self->raw_mode            = LYUseDefaultRawMode;
     self->historical_comments = historical_comments;
-    self->minimal_comments = minimal_comments;
-    self->soft_dquotes = soft_dquotes;
-    self->old_dtd = (short) Old_DTD;
-    self->keypad_mode = (short) keypad_mode;
-    self->disp_lines = (short) LYlines;
-    self->disp_cols = (short) DISPLAY_COLS;
+    self->minimal_comments    = minimal_comments;
+    self->soft_dquotes        = soft_dquotes;
+    self->old_dtd             = Old_DTD;
+    self->keypad_mode         = keypad_mode;
+    self->disp_lines          = LYlines;
+    self->disp_cols           = DISPLAY_COLS;
 #endif
+
     /*
      * If we are going to render the List Page, always merge in hidden
      * links to get the numbering consistent if form fields are numbered
@@ -2065,6 +2067,7 @@ static void display_page(HText *text,
 	return;
     }
 #ifdef DISP_PARTIAL
+    CheckScreenSize();
     if (display_partial || recent_sizechange || text->stale) {
 	/*  Reset them, will be set near end if all is okay. - kw */
 	ResetPartialLinenos(text);

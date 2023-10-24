@@ -1,4 +1,4 @@
-/* $LynxId: LYStrings.c,v 1.280 2023/01/03 00:11:49 Jens.Schleusener Exp $ */
+/* $LynxId: LYStrings.c,v 1.282 2023/10/23 23:41:44 tom Exp $ */
 #include <HTUtils.h>
 #include <HTCJK.h>
 #include <UCAux.h>
@@ -736,6 +736,7 @@ int LYmbcsstrlen(const char *str,
 }
 
 #undef GetChar
+#undef USE_CURSES_RESIZE
 
 #ifdef USE_SLANG
 #if defined(VMS)
@@ -752,9 +753,24 @@ int LYmbcsstrlen(const char *str,
 #define GetChar() (djgpp_idle_loop(), wgetch(LYtopwindow()))
 #elif defined(NCURSES_VERSION) && defined(__BEOS__)
 #define GetChar() myGetCharNodelay()
-#elif defined(NCURSES)
-#define GetChar() wgetch(LYtopwindow())
 #endif
+#endif
+
+#ifdef USE_CURSES_RESIZE
+static int myGetCharResize(void)
+{
+    int c;
+    WINDOW *win = LYtopwindow();
+
+    do {
+	wtimeout(win, 20);
+	c = wgetch(win);
+	wtimeout(win, -1);
+	CheckScreenSize();
+    } while (c <= 0);
+    return c;
+}
+#define GetChar() myGetCharResize()
 #endif
 
 #ifdef USE_CURSES_NODELAY
@@ -776,6 +792,7 @@ static int myGetCharNodelay(void)
 
     if (c == -1)
 	c = 0;
+    CheckScreenSize();
 
     return c;
 }
@@ -831,7 +848,7 @@ static int myGetChar(void)
 #if defined(USE_SLANG) && defined(USE_MOUSE)
 static int sl_parse_mouse_event(int *x, int *y, int *button)
 {
-    /* "ESC [ M" has already been processed.  There more characters are
+    /* "ESC [ M" has already been processed.  Three more characters are
      * expected:  BUTTON X Y
      */
     *button = (int) SLang_getkey();
@@ -1858,18 +1875,15 @@ static int LYgetch_for(int code)
 #else
     if (c == EOF && errno == EINTR) {
 
-#if defined(HAVE_SIZECHANGE) || defined(USE_SLANG)
-	CTRACE((tfp, "Got EOF with EINTR, recent_sizechange so far is %d\n",
+	CTRACE((tfp, "Got EOF with EINTR, recent_sizechange is %d\n",
 		recent_sizechange));
+#if defined(HAVE_SIZECHANGE) || defined(USE_SLANG)
+	CheckScreenSize();
 	if (!recent_sizechange) {	/* not yet detected by ourselves */
 	    size_change(0);
 	    CTRACE((tfp, "Now recent_sizechange is %d\n", recent_sizechange));
 	}
-#else /* HAVE_SIZECHANGE || USE_SLANG */
-	CTRACE((tfp, "Got EOF with EINTR, recent_sizechange is %d\n",
-		recent_sizechange));
-#endif /* HAVE_SIZECHANGE || USE_SLANG */
-#if !defined(UCX) || !defined(VAXC)	/* errno not modifiable ? */
+#elif !defined(UCX) || !defined(VAXC) /* errno not modifiable ? */
 	set_errno(0);		/* reset - kw */
 #endif /* UCX && VAXC */
 	return (DO_NOTHING);
@@ -1888,6 +1902,7 @@ static int LYgetch_for(int code)
     }
 #else /* not USE_SLANG: */
     if (feof(stdin) || ferror(stdin) || c == EOF) {
+	CheckScreenSize();
 	if (recent_sizechange)
 	    return (LYCharINTERRUPT2);	/* use ^G to cancel whatever called us. */
 #ifdef IGNORE_CTRL_C
@@ -2235,41 +2250,7 @@ static int LYgetch_for(int code)
 	    break;
 #endif /* KEY_BTAB */
 #ifdef KEY_RESIZE
-	case KEY_RESIZE:	/* size change detected by ncurses */
-#if defined(HAVE_SIZECHANGE) || defined(USE_SLANG)
-	    /* Make call to detect new size, if that may be implemented.
-	     * The call may set recent_sizechange (except for USE_SLANG),
-	     * which will tell mainloop() to refresh. - kw
-	     */
-	    CTRACE((tfp, "Got KEY_RESIZE, recent_sizechange so far is %d\n",
-		    recent_sizechange));
-	    size_change(0);
-	    CTRACE((tfp, "Now recent_sizechange is %d\n", recent_sizechange));
-#else /* HAVE_SIZECHANGE || USE_SLANG */
-	    CTRACE((tfp, "Got KEY_RESIZE, recent_sizechange is %d\n",
-		    recent_sizechange));
-#endif /* HAVE_SIZECHANGE || USE_SLANG */
-	    if (!recent_sizechange) {
-#if defined(NCURSES)
-		/*
-		 * Work-around for scenario (Linux libc5) where we got a
-		 * recent sizechange before reading KEY_RESIZE.  If we do
-		 * not reset the flag, we'll next get an EOF read, which
-		 * causes Lynx to exit.
-		 */
-		recent_sizechange = TRUE;
-#endif
-		/*
-		 * May be just the delayed effect of mainloop()'s call to
-		 * resizeterm().  Pretend we haven't read anything yet, don't
-		 * return.  - kw
-		 */
-		goto re_read;
-	    }
-	    /*
-	     * Yep, we agree there was a change.  Return now so that the caller
-	     * can react to it.  - kw
-	     */
+	case KEY_RESIZE:
 	    c = DO_NOTHING;
 	    break;
 #endif /* KEY_RESIZE */

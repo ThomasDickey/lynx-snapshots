@@ -1,4 +1,4 @@
-/* $LynxId: LYUtils.h,v 1.100 2018/03/27 21:19:21 tom Exp $ */
+/* $LynxId: LYUtils.h,v 1.102 2023/10/23 08:04:01 tom Exp $ */
 #ifndef LYUTILS_H
 #define LYUTILS_H
 
@@ -197,6 +197,7 @@ extern "C" {
     extern void LYFixCursesOn(const char *reason);
     extern void LYFreeHilites(int first, int last);
     extern void LYFreeStringList(HTList *list);
+    extern void LYGetScreenSize(int sig);
     extern void LYLocalFileToURL(char **target, const char *source);
     extern void LYLocalhostAliases_free(void);
     extern void LYRenamedTemp(char *oldname, char *newname);

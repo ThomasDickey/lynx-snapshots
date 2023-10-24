@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTParse.c,v 1.100 2023/10/17 23:38:48 tom Exp $
+ * $LynxId: HTParse.c,v 1.101 2023/10/24 00:11:42 tom Exp $
  *
  *		Parse HyperText Document Address		HTParse.c
  *		================================
@@ -798,7 +798,7 @@ char *HTParse(const char *aName,
     need = strlen(result);
     if (need > (size_t) max_uri_size) {
 	CTRACE((tfp, "HTParse too-long address (have %ld vs limit %d)\n",
-		need, max_uri_size));
+		(long) need, max_uri_size));
 	StrAllocCopy(return_value, "");
     } else {
 	StrAllocCopy(return_value, result);
