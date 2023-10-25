@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTStyle.h,v 1.18 2020/01/21 22:02:35 tom Exp $
+ * $LynxId: HTStyle.h,v 1.20 2023/10/24 08:14:54 tom Exp $
 					    HTStyle: Style management for libwww
                               STYLE DEFINITION FOR HYPERTEXT
 
@@ -148,10 +148,6 @@ extern "C" {
     extern HTStyle *HTStyleNewNamed(const char *name);
     extern HTStyle *HTStyleFree(HTStyle *self);
 
-#ifdef SUPRESS
-    extern HTStyle *HTStyleRead(HTStyle *self, HTStream *stream);
-    extern HTStyle *HTStyleWrite(HTStyle *self, HTStream *stream);
-#endif
 /*              Style Sheet
  *              -----------
  */
@@ -172,10 +168,6 @@ extern "C" {
     extern HTStyleSheet *HTStyleSheetAddStyle(HTStyleSheet *self, HTStyle *style);
     extern HTStyleSheet *HTStyleSheetRemoveStyle(HTStyleSheet *self, HTStyle *style);
 
-#ifdef SUPPRESS
-    extern HTStyleSheet *HTStyleSheetRead(HTStyleSheet *self, HTStream *stream);
-    extern HTStyleSheet *HTStyleSheetWrite(HTStyleSheet *self, HTStream *stream);
-#endif
 #define CLEAR_POINTER ((void *)-1)	/* Pointer value means "clear me" */
 
 /* DefaultStyle.c */

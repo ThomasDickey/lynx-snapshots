@@ -1,7 +1,7 @@
 /*                  /Net/dxcern/userd/timbl/hypertext/WWW/Library/Implementation/HTMLGen.html
                                       HTML GENERATOR
                                              
-   This module converts structed stream into stream.  That is, given a stream
+   This module converts structured stream into stream.  That is, given a stream
    to write to, it will give you a structured stream to
    
  */

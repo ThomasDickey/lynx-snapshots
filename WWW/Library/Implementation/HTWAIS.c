@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTWAIS.c,v 1.40 2020/01/21 22:22:15 tom Exp $
+ * $LynxId: HTWAIS.c,v 1.42 2023/10/24 08:10:31 tom Exp $
  *
  *	WorldWideWeb - Wide Area Information Server Access	HTWAIS.c
  *	==================================================
@@ -8,7 +8,7 @@
  *	remote	WAIS
  *  server, and provide that data to a WWW client in hypertext form.
  *  Source files, once retrieved, are stored and used to provide
- *  information about the index when that is acessed.
+ *  information about the index when that is accessed.
  *
  *  Authors
  *	BK	Brewster Kahle, Thinking Machines, <Brewster@think.com>
@@ -330,7 +330,7 @@ static any *WAIS_from_WWW(any *docid, char *docname)
     char *z;			/* Output pointer */
     char *sor;			/* Start of record - points to size field. */
     char *p;			/* Input pointer */
-    char *q;			/* Poisition of "=" */
+    char *q;			/* Position of "=" */
     char *s;			/* Position of semicolon */
     int n;			/* size */
 

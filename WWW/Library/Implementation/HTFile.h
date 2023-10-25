@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFile.h,v 1.35 2021/07/29 22:54:21 tom Exp $
+ * $LynxId: HTFile.h,v 1.36 2023/10/24 08:07:39 tom Exp $
  *							File access in libwww
  *				FILE ACCESS
  *
@@ -151,7 +151,7 @@ extern "C" {
  *
  *  ON EXIT,
  *
- *  return		The represntation it imagines the file is in.
+ *  return		The representation it imagines the file is in.
  *
  *  *pEncoding		The encoding (binary, 7bit, etc). See HTSetSuffix.
  */

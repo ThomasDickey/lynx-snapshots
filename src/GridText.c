@@ -1,5 +1,5 @@
 /*
- * $LynxId: GridText.c,v 1.344 2023/10/23 23:40:09 tom Exp $
+ * $LynxId: GridText.c,v 1.345 2023/10/24 22:50:05 tom Exp $
  *
  *		Character grid hypertext object
  *		===============================
@@ -9179,7 +9179,8 @@ BOOLEAN HTdocument_settings_changed(void)
 		      HTMainText->soft_dquotes != soft_dquotes ||
 		      HTMainText->old_dtd != Old_DTD ||
 		      HTMainText->keypad_mode != keypad_mode ||
-		      HTMainText->disp_cols != DISPLAY_COLS);
+		      HTMainText->disp_cols != DISPLAY_COLS ||
+		      HTMainText->disp_lines != LYlines);
 }
 #endif
 

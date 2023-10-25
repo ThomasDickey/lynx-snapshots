@@ -608,7 +608,7 @@ static BOOL ip_in_def_list(AddressDefList *address_def_list,
 
 	while (NULL != (ref = (Ref *) HTList_nextObject(cur))) {
 	    /* Value of ref->translation is ignored, i.e., */
-	    /* no recursion for ip address tamplates.     */
+	    /* no recursion for ip address templates.     */
 	    if (ip_mask_match(ref->name, ip_number, ip_name))
 		return YES;
 	}

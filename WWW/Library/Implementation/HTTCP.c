@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTCP.c,v 1.164 2023/04/10 22:41:21 tom Exp $
+ * $LynxId: HTTCP.c,v 1.165 2023/10/24 08:15:04 tom Exp $
  *
  *			Generic Communication Code		HTTCP.c
  *			==========================
@@ -1323,16 +1323,6 @@ static int HTParseInet(SockA *soc_in, const char *str)
 	    soc_in->sin_port = htons((PortNumber) strtol(port, &strptr, 10));
 #endif /* Decnet */
 #endif /* Unix vs. VMS */
-#ifdef SUPPRESS			/* 1. crashes!?!.  2. URL syntax has number not name */
-	} else {
-	    struct servent *serv = getservbyname(port, (char *) 0);
-
-	    if (serv) {
-		soc_in->sin_port = serv->s_port;
-	    } else {
-		CTRACE((tfp, "TCP: Unknown service %s\n", port));
-	    }
-#endif /* SUPPRESS */
 	}
 	if (strptr && *strptr != '\0') {
 	    FREE(host);

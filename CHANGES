@@ -1,9 +1,12 @@
--- $LynxId: CHANGES,v 1.1144 2023/10/23 23:51:12 tom Exp $
+-- $LynxId: CHANGES,v 1.1145 2023/10/25 22:44:54 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2023-10-23 (2.9.0dev.13)
+2023-10-25 (2.9.0dev.13)
+* add a NUL after "/" in the SGML parser when the next character is ">", to
+  make PRETTYSRC view display correctly (report by "Dima") -TD
+* trim some obsolete style code for NeXT -TD
 * improve responsiveness with respect to SIGWINCH (report by Mark Zaharov) -TD
 * improve check for MAX_URI_SIZE -TD
 * improve check for UTF-8 character encoding in XML Text Declaration (report by

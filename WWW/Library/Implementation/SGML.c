@@ -1,5 +1,5 @@
 /*
- * $LynxId: SGML.c,v 1.185 2023/10/04 23:42:42 tom Exp $
+ * $LynxId: SGML.c,v 1.186 2023/10/25 22:35:29 tom Exp $
  *
  *			General SGML Parser code		SGML.c
  *			========================
@@ -3657,6 +3657,8 @@ static void SGML_character(HTStream *me, int c_in)
 		if ((LYxhtml_parsing || me->extended_html)
 		    && ignore_when_empty(me->current_tag)) {
 		    discard_empty(me);
+		} else {
+		    HTChunkTerminate(string);
 		}
 	    } else {
 		HTChunkTerminate(string);
