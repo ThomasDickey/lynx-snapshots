@@ -1,9 +1,11 @@
--- $LynxId: CHANGES,v 1.1145 2023/10/25 22:44:54 tom Exp $
+-- $LynxId: CHANGES,v 1.1146 2023/10/27 00:25:32 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2023-10-25 (2.9.0dev.13)
+2023-10-26 (2.9.0dev.13)
+* handle errno EINPROGRESS in HTDoRead() from nonresponsive server (Debian
+  #1033423) -TD
 * add a NUL after "/" in the SGML parser when the next character is ">", to
   make PRETTYSRC view display correctly (report by "Dima") -TD
 * trim some obsolete style code for NeXT -TD
