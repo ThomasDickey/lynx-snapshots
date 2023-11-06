@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYUtils.c,v 1.306 2023/10/24 00:12:43 tom Exp $
+ * $LynxId: LYUtils.c,v 1.308 2023/10/27 21:48:46 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTCP.h>
@@ -7560,118 +7560,7 @@ void get_clip_release(void)
     unmorph_PM();
 }
 
-#else /* !( defined __EMX__ ) */
-
-#  if !defined(WIN_EX) && defined(HAVE_POPEN)
-
-static FILE *paste_handle = 0;
-static char *paste_buf = NULL;
-
-void get_clip_release(void)
-{
-    if (paste_handle != 0)
-	pclose(paste_handle);
-    if (paste_buf)
-	FREE(paste_buf);
-}
-
-static int clip_grab(void)
-{
-    char *cmd = LYGetEnv("RL_PASTE_CMD");
-
-    if (paste_handle)
-	pclose(paste_handle);
-    if (!cmd)
-	return 0;
-
-    paste_handle = popen(cmd, TXT_R);
-    if (!paste_handle)
-	return 0;
-    return 1;
-}
-
-#define PASTE_BUFFER 1008
-#define CF_TEXT 0		/* Not used */
-
-char *get_clip_grab(void)
-{
-    int len;
-    unsigned size = PASTE_BUFFER;
-    int off = 0;
-
-    if (!clip_grab())
-	return NULL;
-    if (!paste_handle)
-	return NULL;
-    if (paste_buf)
-	FREE(paste_buf);
-    paste_buf = typeMallocn(char, PASTE_BUFFER);
-
-    while (1) {
-	len = (int) fread(paste_buf + off,
-			  (size_t) 1,
-			  (size_t) PASTE_BUFFER - 1,
-			  paste_handle);
-	paste_buf[off + len] = '\0';
-	if (len < PASTE_BUFFER - 1)
-	    break;
-	if (StrChr(paste_buf + off, '\r')
-	    || StrChr(paste_buf + off, '\n'))
-	    break;
-	paste_buf = typeRealloc(char, paste_buf, size += PASTE_BUFFER - 1);
-
-	off += len;
-    }
-    return paste_buf;
-}
-
-int put_clip(const char *s)
-{
-    char *cmd = LYGetEnv("RL_CLCOPY_CMD");
-    FILE *fh;
-    size_t l = strlen(s), res;
-
-    if (!cmd)
-	return -1;
-
-    fh = popen(cmd, TXT_W);
-    if (!fh)
-	return -1;
-    res = fwrite(s, (size_t) 1, l, fh);
-    if (pclose(fh) != 0 || res != l)
-	return -1;
-    return 0;
-}
-
-#  endif /* !defined(WIN_EX) && defined(HAVE_POPEN) */
-
-#endif /* __EMX__ */
-
-/*
- * Sleep for a number of milli-sec.
- */
-void LYmsec_delay(unsigned msec)
-{
-#if defined(_WINDOWS)
-    Sleep(msec);
-
-#elif defined(HAVE_NAPMS)
-    napms((int) msec);
-
-#elif defined(DJGPP) || defined(HAVE_USLEEP)
-    usleep(1000 * msec);
-
-#else
-    struct timeval tv;
-    unsigned long usec = 1000UL * msec;
-
-    tv.tv_sec = usec / 1000000UL;
-    tv.tv_usec = usec % 1000000UL;
-    select(0, NULL, NULL, NULL, &tv);
-#endif
-}
-
-#if defined(WIN_EX)		/* 1997/10/16 (Thu) 20:13:28 */
+#elif defined(WIN_EX) /* 1997/10/16 (Thu) 20:13:28 */
 
 int put_clip(const char *szBuffer)
 {
@@ -7759,8 +7648,114 @@ void get_clip_release()
     CloseClipboard();
     m_locked = 0;
 }
-#endif /* WIN_EX */
+
+#elif defined(HAVE_POPEN)
+
+static FILE *paste_handle = 0;
+static char *paste_buf = NULL;
+
+void get_clip_release(void)
+{
+    if (paste_handle != 0)
+	pclose(paste_handle);
+    if (paste_buf)
+	FREE(paste_buf);
+}
+
+static int clip_grab(void)
+{
+    char *cmd = LYGetEnv("RL_PASTE_CMD");
+
+    if (paste_handle)
+	pclose(paste_handle);
+    if (!cmd)
+	return 0;
+
+    paste_handle = popen(cmd, TXT_R);
+    if (!paste_handle)
+	return 0;
+    return 1;
+}
+
+#define PASTE_BUFFER 1008
+#define CF_TEXT 0		/* Not used */
+
+char *get_clip_grab(void)
+{
+    int len;
+    unsigned size = PASTE_BUFFER;
+    int off = 0;
+
+    if (!clip_grab())
+	return NULL;
+    if (!paste_handle)
+	return NULL;
+    if (paste_buf)
+	FREE(paste_buf);
+    paste_buf = typeMallocn(char, PASTE_BUFFER);
+
+    while (1) {
+	len = (int) fread(paste_buf + off,
+			  (size_t) 1,
+			  (size_t) PASTE_BUFFER - 1,
+			  paste_handle);
+	paste_buf[off + len] = '\0';
+	if (len < PASTE_BUFFER - 1)
+	    break;
+	if (StrChr(paste_buf + off, '\r')
+	    || StrChr(paste_buf + off, '\n'))
+	    break;
+	paste_buf = typeRealloc(char, paste_buf, size += PASTE_BUFFER - 1);
+
+	off += len;
+    }
+    return paste_buf;
+}
+
+int put_clip(const char *s)
+{
+    char *cmd = LYGetEnv("RL_CLCOPY_CMD");
+    FILE *fh;
+    size_t l = strlen(s), res;
+
+    if (!cmd)
+	return -1;
+
+    fh = popen(cmd, TXT_W);
+    if (!fh)
+	return -1;
+    res = fwrite(s, (size_t) 1, l, fh);
+    if (pclose(fh) != 0 || res != l)
+	return -1;
+    return 0;
+}
+
+#endif /* __EMX__ ... HAVE_POPEN */
 #endif /* CAN_CUT_AND_PASTE */
+
+/*
+ * Sleep for a number of milli-sec.
+ */
+void LYmsec_delay(unsigned msec)
+{
+#if defined(_WINDOWS)
+    Sleep(msec);
+
+#elif defined(HAVE_NAPMS)
+    napms((int) msec);
+
+#elif defined(DJGPP) || defined(HAVE_USLEEP)
+    usleep(1000 * msec);
+
+#else
+    struct timeval tv;
+    unsigned long usec = 1000UL * msec;
+
+    tv.tv_sec = usec / 1000000UL;
+    tv.tv_usec = usec % 1000000UL;
+    select(0, NULL, NULL, NULL, &tv);
+#endif
+}
 
 #if defined(WIN_EX)
 

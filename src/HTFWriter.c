@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFWriter.c,v 1.124 2022/07/25 00:16:38 tom Exp $
+ * $LynxId: HTFWriter.c,v 1.125 2023/11/05 23:46:45 tom Exp $
  *
  *		FILE WRITER				HTFWrite.h
  *		===========
@@ -368,7 +368,7 @@ static void HTFWriter_free(HTStream *me)
 			char *the_dash = me->idash ? strrchr(path, '-') : 0;
 
 			if (the_dash != 0) {
-			    unsigned off = (the_dash - path);
+			    unsigned off = (unsigned) (the_dash - path);
 
 			    StrAllocCopy(new_path, path);
 			    new_path[off] = '.';

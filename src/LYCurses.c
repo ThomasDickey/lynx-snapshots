@@ -1,4 +1,4 @@
-/* $LynxId: LYCurses.c,v 1.201 2023/10/23 23:39:38 tom Exp $ */
+/* $LynxId: LYCurses.c,v 1.204 2023/11/06 01:21:57 tom Exp $ */
 #include <HTUtils.h>
 #include <HTAlert.h>
 
@@ -1386,16 +1386,36 @@ void start_curses(void)
 	LYlines = LYscreenHeight();
 	LYcols = LYscreenWidth();
 
-#if defined(SIGWINCH) && defined(NCURSES_VERSION)
+#if defined(NCURSES_VERSION)
+#ifdef CAN_CUT_AND_PASTE
+	/*
+	 * User-defined keymaps are loaded after this check, but since the
+	 * ifdef is enabled, we know that at least the copy/paste commands
+	 * are enabled.  However, binding the copy to ^S is inconvenient,
+	 * so ask curses to permit that (saving an external tweak with stty).
+	 */
+	{
+	    struct termios alter_tty;
+
+	    if (tcgetattr(fileno(stdin), &alter_tty) == 0) {
+		alter_tty.c_iflag &= (unsigned) ~(IXON | IXOFF);
+		tcsetattr(fileno(stdout), TCSAFLUSH, &alter_tty);
+		def_prog_mode();
+	    }
+	}
+#endif
+#if defined(SIGWINCH)
 	size_change(0);
 	LYGetScreenSize(0);
 	recent_sizechange = FALSE;	/* prevent mainloop drawing 1st doc twice */
 #endif /* SIGWINCH */
+#endif /* NCURSES_VERSION */
 	CTRACE((tfp, "Screen size is now %d x %d\n", LYcols, LYlines));
 
 #ifdef USE_CURSES_PADS
 	if (LYuseCursesPads) {
 	    CTRACE((tfp, "using curses-pads\n"));
+	    keypad(stdscr, TRUE);
 	    LYwin = newpad(LYlines, MAX_COLS);
 	    LYshiftWin = 0;
 	    LYwideLines = FALSE;
@@ -1672,6 +1692,8 @@ void lynx_enable_mouse(int state)
 #endif /* NOT USE_SLANG */
 
 /***********************************************************************/
+#else
+    (void) state;
 #endif /* USE_MOUSE */
 }
 

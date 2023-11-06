@@ -1,4 +1,4 @@
-/* $LynxId: LYKeymap.c,v 1.122 2021/06/09 21:58:11 tom Exp $ */
+/* $LynxId: LYKeymap.c,v 1.123 2023/10/27 20:10:32 tom Exp $ */
 #include <HTUtils.h>
 #include <LYUtils.h>
 #include <LYGlobalDefs.h>
@@ -74,7 +74,9 @@ static const LYEditInit initKeymapData[] =
     {KTL('P'), LYK_UP_TWO},
     {KTL('Q'), LYK_CHANGE_CENTER},
     {KTL('R'), LYK_RELOAD},
+#ifdef CAN_CUT_AND_PASTE
     {KTL('S'), LYK_TO_CLIPBOARD},
+#endif
     {KTL('T'), LYK_TRACE_TOGGLE},
     {KTL('U'), LYK_NEXT_DOC},
     {KTL('V'), LYK_SWITCH_DTD},

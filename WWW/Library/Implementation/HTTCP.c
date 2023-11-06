@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTCP.c,v 1.166 2023/10/27 00:16:33 tom Exp $
+ * $LynxId: HTTCP.c,v 1.167 2023/11/06 00:44:34 tom Exp $
  *
  *			Generic Communication Code		HTTCP.c
  *			==========================
@@ -662,7 +662,7 @@ static unsigned long __stdcall _fork_func(void *arg)
     }
 
     donelookup = TRUE;
-    return (unsigned long) (gbl_phost);
+    return (unsigned long) 1;	/* nonzero for successful exit */
 }
 #endif /* __CYGWIN__ */
 #endif /* _WINDOWS_NSL */

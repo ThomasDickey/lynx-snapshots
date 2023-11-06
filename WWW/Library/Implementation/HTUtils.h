@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTUtils.h,v 1.134 2021/06/29 22:01:12 tom Exp $
+ * $LynxId: HTUtils.h,v 1.135 2023/11/05 23:09:43 tom Exp $
  *
  * Utility macros for the W3 code library
  * MACROS FOR GENERAL USE
@@ -120,7 +120,7 @@ char *alloca();
 #define HAVE_PUTENV 1
 #endif
 
-#ifndef NO_SIZECHANGE
+#if !defined(NO_SIZECHANGE) && defined(UNIX)
 #define HAVE_SIZECHANGE 1
 #endif
 

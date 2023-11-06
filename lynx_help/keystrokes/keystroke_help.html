@@ -1,4 +1,4 @@
-<!-- $LynxId: keystroke_help.html,v 1.22 2021/07/01 21:02:38 tom Exp $ -->
+<!-- $LynxId: keystroke_help.html,v 1.24 2023/11/05 10:04:26 tom Exp $ -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN">
 <html>
 <head>
@@ -135,6 +135,14 @@
        "              - Toggle valid or "soft" double-quote parsing
        CTRL-R         - Reload current file and refresh the screen
        CTRL-L         - Refresh the screen
+       CTRL-S         - For UNIX hosts:
+                        Copy the URL for the current document or link to
+                        the clipboard using command in $RL_CLCOPY_CMD. as
+                        illustrated in the <a href=
+"https://metacpan.org/dist/Term-ReadLine-Perl/source/ReadLine/readline.pm#L4451">clipboard_set</a> function
+                        of the (undated) Perl Term-ReadLine-Perl script.
+                        The clipboard contents can be retrieved using Lynx's
+                        PASTE_URL command (in turn, via $RL_PASTE_CMD).
 
        CTRL-V         - Outside of a text input line or field,
                         switch to <a href=

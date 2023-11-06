@@ -1,9 +1,12 @@
--- $LynxId: CHANGES,v 1.1146 2023/10/27 00:25:32 tom Exp $
+-- $LynxId: CHANGES,v 1.1148 2023/11/05 22:43:27 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2023-10-26 (2.9.0dev.13)
+2023-11-05 (2.9.0dev.13)
+* modify curses initialization to permit ^S built-in keymap to work without
+  needing external stty changes -TD
+* correct ifdef for LYmsec_delay() (report by Alexander Arkhipov) -TD
 * handle errno EINPROGRESS in HTDoRead() from nonresponsive server (Debian
   #1033423) -TD
 * add a NUL after "/" in the SGML parser when the next character is ">", to
