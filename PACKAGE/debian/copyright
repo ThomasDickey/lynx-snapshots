@@ -4,7 +4,7 @@ Current maintainer: Thomas Dickey <dickey@invisible-island.net>
 
 -------------------------------------------------------------------------------
 
-Copyright 1997-2022,2023 Thomas E. Dickey
+Copyright 1997-2023,2024 Thomas E. Dickey
 Copyright (C) 1995 University of Kansas.
 
 Most of the content of the lynx release (and corresponding copyright) is
@@ -26,7 +26,7 @@ or to the maintainer (Thomas E. Dickey):
 
 Files: aclocal.m4
 License: other-BSD
-Copyright: 1997-2022,2023 by Thomas E. Dickey
+Copyright: 1997-2023,2024 by Thomas E. Dickey
     Permission to use, copy, modify, and distribute this software and its
     documentation for any purpose and without fee is hereby granted,
     provided that the above copyright notice appear in all copies and that

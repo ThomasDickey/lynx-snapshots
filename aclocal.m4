@@ -1,4 +1,4 @@
-dnl $LynxId: aclocal.m4,v 1.324 2023/09/06 22:55:27 tom Exp $
+dnl $LynxId: aclocal.m4,v 1.328 2024/01/07 15:29:15 tom Exp $
 dnl Macros for auto-configure script.
 dnl by Thomas E. Dickey <dickey@invisible-island.net>
 dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
@@ -12,7 +12,7 @@ dnl https://invisible-island.net/autoconf/autoconf.html
 dnl
 dnl ---------------------------------------------------------------------------
 dnl
-dnl Copyright 1997-2022,2023 by Thomas E. Dickey
+dnl Copyright 1997-2023,2024 by Thomas E. Dickey
 dnl
 dnl Permission to use, copy, modify, and distribute this software and its
 dnl documentation for any purpose and without fee is hereby granted,
@@ -981,7 +981,7 @@ AC_MSG_RESULT($cf_cv_alt_char_set)
 test "$cf_cv_alt_char_set" != no && AC_DEFINE_UNQUOTED(ALT_CHAR_SET,$cf_cv_alt_char_set,[Define to 1 if if curses supports alternate-character set])
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_ANSI_CC_CHECK version: 13 updated: 2012/10/06 11:17:15
+dnl CF_ANSI_CC_CHECK version: 14 updated: 2024/01/07 06:34:16
 dnl ----------------
 dnl This was originally adapted from the macros 'fp_PROG_CC_STDC' and
 dnl 'fp_C_PROTOTYPES' in the sharutils 4.2 distribution.
@@ -1016,8 +1016,8 @@ do
 choke me
 #endif
 #endif
+extern int test (int i, double x);
 ],[
-	int test (int i, double x);
 	struct s1 {int (*f) (int a);};
 	struct s2 {int (*f) (double a);};],
 	[cf_cv_ansi_cc="$cf_arg"; break])
@@ -1190,7 +1190,7 @@ fi
 AC_SUBST(ARFLAGS)
 ])
 dnl ---------------------------------------------------------------------------
-dnl CF_BOOL_DEFS version: 5 updated: 2012/11/08 20:57:52
+dnl CF_BOOL_DEFS version: 6 updated: 2024/01/07 06:34:16
 dnl ------------
 dnl Check if curses.h defines TRUE/FALSE (it does under SVr4).
 AC_DEFUN([CF_BOOL_DEFS],
@@ -1199,7 +1199,7 @@ AC_MSG_CHECKING(if TRUE/FALSE are defined)
 AC_CACHE_VAL(cf_cv_bool_defs,[
 AC_TRY_COMPILE([
 #include <${cf_cv_ncurses_header:-curses.h}>
-#include <stdio.h>],[int x = TRUE, y = FALSE],
+#include <stdio.h>],[int x = TRUE, y = FALSE; (void)x; (void)y],
 	[cf_cv_bool_defs=yes],
 	[cf_cv_bool_defs=no])])
 AC_MSG_RESULT($cf_cv_bool_defs)
@@ -1898,7 +1898,7 @@ if test "x$ifelse([$2],,CLANG_COMPILER,[$2])" = "xyes" ; then
 fi
 ])
 dnl ---------------------------------------------------------------------------
-dnl CF_COLOR_CURSES version: 9 updated: 2021/01/02 09:31:20
+dnl CF_COLOR_CURSES version: 10 updated: 2024/01/07 06:54:12
 dnl ---------------
 dnl Check if curses supports color.  (Note that while SVr3 curses supports
 dnl color, it does this differently from SVr4 curses; more work would be needed
@@ -1910,14 +1910,14 @@ AC_MSG_CHECKING(if curses supports color attributes)
 AC_CACHE_VAL(cf_cv_color_curses,[
 	AC_TRY_LINK([
 #include <${cf_cv_ncurses_header:-curses.h}>
-],
-	[chtype x = COLOR_BLUE;
-	 has_colors();
-	 start_color();
+],[
+	chtype x = COLOR_BLUE; (void)x;
+	has_colors();
+	start_color();
 #ifndef NCURSES_BROKEN
-	 wbkgd(curscr, getbkgd(stdscr)); /* X/Open XPG4 aka SVr4 Curses */
+	wbkgd(curscr, getbkgd(stdscr)); /* X/Open XPG4 aka SVr4 Curses */
 #endif
-	],
+],
 	[cf_cv_color_curses=yes],
 	[cf_cv_color_curses=no])
 	])
@@ -1928,7 +1928,7 @@ if test "$cf_cv_color_curses" = yes ; then
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_CONST_X_STRING version: 7 updated: 2021/06/07 17:39:17
+dnl CF_CONST_X_STRING version: 8 updated: 2023/12/01 17:22:50
 dnl -----------------
 dnl The X11R4-X11R6 Xt specification uses an ambiguous String type for most
 dnl character-strings.
@@ -1963,6 +1963,7 @@ AC_TRY_COMPILE(
 AC_CACHE_CHECK(for X11/Xt const-feature,cf_cv_const_x_string,[
 	AC_TRY_COMPILE(
 		[
+#undef  _CONST_X_STRING
 #define _CONST_X_STRING	/* X11R7.8 (perhaps) */
 #undef  XTSTRINGDEFINES	/* X11R5 and later */
 #include <stdlib.h>
@@ -2255,7 +2256,7 @@ fi
 
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_CURSES_TERM_H version: 15 updated: 2021/01/02 09:31:20
+dnl CF_CURSES_TERM_H version: 16 updated: 2024/01/07 06:34:16
 dnl ----------------
 dnl SVr4 curses should have term.h as well (where it puts the definitions of
 dnl the low-level interface).  This may not be true in old/broken implementations,
@@ -2301,7 +2302,7 @@ case "$cf_cv_term_header" in
 #ifdef NCURSES_VERSION
 #include <${cf_header}>
 #else
-make an error
+#error expected NCURSES_VERSION to be defined
 #endif],
 			[WINDOW *x; (void)x],
 			[cf_cv_term_header=$cf_header
@@ -3109,6 +3110,29 @@ if test "$cf_cv_getaddrinfo" = yes ; then
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl CF_FUNC_GETPWUID version: 1 updated: 2024/01/07 10:28:51
+dnl ----------------
+dnl Check for getpwuid()
+AC_DEFUN([CF_FUNC_GETPWUID],
+[
+AC_CACHE_CHECK(for getpwuid, ac_cv_func_getpwuid,[
+AC_TRY_LINK([
+$ac_includes_default
+#include <pwd.h>
+],[
+	struct passwd *foo = getpwuid(0);
+	(void) foo
+],
+	[ac_cv_func_getpwuid=yes],
+	[ac_cv_func_getpwuid=no])
+])
+if test "$ac_cv_func_getpwuid" = yes; then
+	ac_cv_header_pwd_h=yes
+	AC_DEFINE(HAVE_PWD_H,1,[Define to 1 if we have pwd.h header])
+	AC_DEFINE(HAVE_GETPWUID,1,[Define to 1 if we have getpwuid function])
+fi
+])dnl
+dnl ---------------------------------------------------------------------------
 dnl CF_FUNC_LSTAT version: 6 updated: 2023/01/11 04:05:23
 dnl -------------
 dnl A conventional existence-check for 'lstat' won't work with the Linux
@@ -3831,7 +3855,7 @@ cf_save_CFLAGS="$cf_save_CFLAGS -we147"
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_LARGEFILE version: 12 updated: 2020/03/19 20:23:48
+dnl CF_LARGEFILE version: 13 updated: 2023/12/03 19:09:59
 dnl ------------
 dnl Add checks for large file support.
 AC_DEFUN([CF_LARGEFILE],[
@@ -3865,11 +3889,15 @@ ifdef([AC_FUNC_FSEEKO],[
 #pragma GCC diagnostic error "-Wincompatible-pointer-types"
 #include <sys/types.h>
 #include <dirent.h>
+
+#ifndef __REDIRECT
+/* if transitional largefile support is setup, this is true */
+extern struct dirent64 * readdir(DIR *);
+#endif
 		],[
-		/* if transitional largefile support is setup, this is true */
-		extern struct dirent64 * readdir(DIR *);
-		struct dirent64 *x = readdir((DIR *)0);
-		struct dirent *y = readdir((DIR *)0);
+		DIR *dp = opendir(".");
+		struct dirent64 *x = readdir(dp);
+		struct dirent *y = readdir(dp);
 		int z = x - y;
 		(void)z;
 		],
@@ -3881,7 +3909,7 @@ ifdef([AC_FUNC_FSEEKO],[
 ])
 ])
 dnl ---------------------------------------------------------------------------
-dnl CF_LASTLOG version: 7 updated: 2021/01/02 09:31:20
+dnl CF_LASTLOG version: 8 updated: 2023/12/01 17:22:50
 dnl ----------
 dnl Check for header defining _PATH_LASTLOG, or failing that, see if the lastlog
 dnl file exists.
@@ -3897,7 +3925,7 @@ AC_TRY_COMPILE([
 #ifdef HAVE_PATHS_H
 #include <paths.h>
 #endif
-#endif],[char *path = _PATH_LASTLOG; (void)path],
+#endif],[static char path[] = _PATH_LASTLOG; (void)path],
 	[cf_cv_path_lastlog="_PATH_LASTLOG"],
 	[if test -f /usr/adm/lastlog ; then
 	 	cf_cv_path_lastlog=/usr/adm/lastlog
@@ -4276,7 +4304,7 @@ AC_DEFUN([CF_MSG_LOG],[
 echo "${as_me:-configure}:__oline__: testing $* ..." 1>&AC_FD_CC
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_NCURSES_BROKEN version: 8 updated: 2012/11/08 20:57:52
+dnl CF_NCURSES_BROKEN version: 10 updated: 2024/01/07 06:54:12
 dnl -----------------
 dnl Check for pre-1.9.9g ncurses (among other problems, the most obvious is
 dnl that color combinations don't work).
@@ -4289,9 +4317,9 @@ AC_CACHE_VAL(cf_cv_ncurses_broken,[
 AC_TRY_COMPILE([
 #include <${cf_cv_ncurses_header:-curses.h}>],[
 #if defined(NCURSES_VERSION) && defined(wgetbkgd)
-	make an error
+	#error expected wgetbkgd to be defined with ncurses
 #else
-	int x = 1
+	int x = 1; (void)x;
 #endif
 ],
 	[cf_cv_ncurses_broken=no],
@@ -4653,7 +4681,7 @@ CF_UPPER(cf_nculib_ROOT,HAVE_LIB$cf_nculib_root)
 AC_DEFINE_UNQUOTED($cf_nculib_ROOT)
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_NCURSES_VERSION version: 17 updated: 2023/01/05 18:54:02
+dnl CF_NCURSES_VERSION version: 18 updated: 2024/01/07 06:34:16
 dnl ------------------
 dnl Check for the version of ncurses, to aid in reporting bugs, etc.
 dnl Call CF_CURSES_CPPFLAGS first, or CF_NCURSES_CPPFLAGS.  We don't use
@@ -4683,7 +4711,7 @@ int main(void)
 # ifdef __NCURSES_H
 	fprintf(fp, "old\\n");
 # else
-	make an error
+	#error expected ncurses header to define __NCURSES_H
 # endif
 #endif
 	${cf_cv_main_return:-return}(0);
@@ -4812,7 +4840,7 @@ CF_ADD_LIBS($cf_cv_netlibs)
 test "$cf_test_netlibs" = no && echo "$cf_cv_netlibs" >&AC_FD_MSG
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_NGROUPS version: 4 updated: 2012/11/08 20:57:52
+dnl CF_NGROUPS version: 5 updated: 2024/01/07 06:34:16
 dnl ----------
 dnl Check for the symbol NGROUPS
 AC_DEFUN([CF_NGROUPS],
@@ -4826,7 +4854,7 @@ AC_TRY_COMPILE([
 #if HAVE_LIMITS_H
 #include <limits.h>
 #endif
-],[int x = NGROUPS],
+],[int x = NGROUPS; (void)x],
 	[cf_cv_ngroups=yes],
 	[AC_TRY_COMPILE([
 #if HAVE_SYS_PARAM_H
@@ -5174,7 +5202,7 @@ else
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_PKG_CONFIG version: 12 updated: 2021/10/10 20:18:09
+dnl CF_PKG_CONFIG version: 13 updated: 2023/10/28 11:59:01
 dnl -------------
 dnl Check for the package-config program, unless disabled by command-line.
 dnl
@@ -5183,7 +5211,7 @@ AC_DEFUN([CF_PKG_CONFIG],
 [
 AC_MSG_CHECKING(if you want to use pkg-config)
 AC_ARG_WITH(pkg-config,
-	[  --with-pkg-config{=path} enable/disable use of pkg-config],
+	[[  --with-pkg-config[=CMD] enable/disable use of pkg-config and its name CMD]],
 	[cf_pkg_config=$withval],
 	[cf_pkg_config=yes])
 AC_MSG_RESULT($cf_pkg_config)
@@ -5421,6 +5449,24 @@ dnl versions of autoconf use check-tool.
 AC_DEFUN([CF_PROG_RANLIB],[
 AC_CHECK_TOOL(RANLIB, ranlib, ':')
 ])
+dnl ---------------------------------------------------------------------------
+dnl CF_PW_GECOS version: 4 updated: 2023/12/17 10:59:59
+dnl -----------
+dnl Check if the passwd-struct defines the '.pw_gecos' member (useful
+dnl in decoding user names).
+AC_DEFUN([CF_PW_GECOS],
+[
+AC_CACHE_CHECK([for passwd.pw_gecos], cf_cv_pw_gecos,[
+	AC_TRY_COMPILE([
+#include <pwd.h>
+],[
+	static struct passwd foo;
+	char *bar = foo.pw_gecos;
+	(void)bar],
+	[cf_cv_pw_gecos=yes],
+	[cf_cv_pw_gecos=no])])
+test $cf_cv_pw_gecos = no && AC_DEFINE(DONT_HAVE_PW_GECOS,1,[Define this to 1 if passwd struct has .pw_gecos])
+])dnl
 dnl ---------------------------------------------------------------------------
 dnl CF_RECHECK_FUNC version: 3 updated: 2000/10/18 19:29:13
 dnl ---------------
@@ -5918,7 +5964,7 @@ AC_MSG_RESULT($cf_result)
 test "$cf_result" = no && LIBS="$cf_slang_LIBS3"
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_SLANG_UNIX_DEFS version: 7 updated: 2021/01/02 09:31:20
+dnl CF_SLANG_UNIX_DEFS version: 8 updated: 2024/01/07 06:54:12
 dnl ------------------
 dnl Slang's header files rely on some predefined symbols to declare variables
 dnl that we might find useful.  This check is needed, because those symbols
@@ -5963,7 +6009,7 @@ AC_CACHE_CHECK(if we must tell slang this is UNIX,cf_cv_slang_unix,[
 AC_TRY_LINK([#include <slang.h>],
 	[
 #ifdef REAL_UNIX_SYSTEM
-make an error
+#error this may not be a "real" unix system
 #else
 extern int SLang_TT_Baud_Rate;
 SLang_TT_Baud_Rate = 1
@@ -6060,7 +6106,7 @@ AC_MSG_RESULT($cf_use_socks5p_h)
 test "$cf_use_socks5p_h" = yes && AC_DEFINE(INCLUDE_PROTOTYPES,1,[Define to 1 if needed to declare prototypes in socks headers])
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_SRAND version: 18 updated: 2023/02/15 19:14:44
+dnl CF_SRAND version: 20 updated: 2024/01/07 06:54:12
 dnl --------
 dnl Check for functions similar to srand() and rand().  lrand48() and random()
 dnl return a 31-bit value, while rand() returns a value less than RAND_MAX
@@ -6073,6 +6119,8 @@ dnl $1 = optional prefix for resulting shell variables.  The default "my_"
 dnl      gives $my_srand and $my_rand to the caller, as well as MY_RAND_MAX.
 dnl      These are all AC_SUBST'd and AC_DEFINE'd.
 AC_DEFUN([CF_SRAND],[
+AC_CHECK_HEADERS(limits.h)
+AC_CHECK_FUNC(arc2random,,[AC_CHECK_LIB(bsd,arc4random,CF_ADD_LIB(bsd))])
 AC_CACHE_CHECK(for random-integer functions, cf_cv_srand_func,[
 cf_cv_srand_func=unknown
 for cf_func in arc4random_push/arc4random arc4random_stir/arc4random srandom/random srand48/lrand48 srand/rand
@@ -6117,12 +6165,22 @@ $ac_includes_default
 	case "$cf_cv_srand_func" in
 	(*/arc4random)
 		AC_MSG_CHECKING(if <bsd/stdlib.h> should be included)
-		AC_TRY_COMPILE([#include <bsd/stdlib.h>],
+		AC_TRY_COMPILE([
+$ac_includes_default
+#ifdef HAVE_LIMITS_H
+#include <limits.h>
+#endif
+#include <bsd/stdlib.h>],
 					   [void *arc4random(int);
 						void *x = arc4random(1); (void)x],
 					   [cf_bsd_stdlib_h=no],
-					   [AC_TRY_COMPILE([#include <bsd/stdlib.h>],
-									   [unsigned x = arc4random(); (void)x],
+					   [AC_TRY_COMPILE([
+$ac_includes_default
+#ifdef HAVE_LIMITS_H
+#include <limits.h>
+#endif
+#include <bsd/stdlib.h>],
+									   [unsigned long x = arc4random(); (void)x],
 									   [cf_bsd_stdlib_h=yes],
 									   [cf_bsd_stdlib_h=no])])
 	    AC_MSG_RESULT($cf_bsd_stdlib_h)
@@ -6131,12 +6189,17 @@ $ac_includes_default
 			AC_DEFINE(HAVE_BSD_STDLIB_H,1,[Define to 1 if bsd/stdlib.h header should be used])
 		else
 			AC_MSG_CHECKING(if <bsd/random.h> should be included)
-			AC_TRY_COMPILE([#include <bsd/random.h>],
+			AC_TRY_COMPILE([
+$ac_includes_default
+#ifdef HAVE_LIMITS_H
+#include <limits.h>
+#endif
+#include <bsd/random.h>],
 						   [void *arc4random(int);
 							void *x = arc4random(1); (void)x],
 						   [cf_bsd_random_h=no],
 						   [AC_TRY_COMPILE([#include <bsd/random.h>],
-										   [unsigned x = arc4random(); (void)x],
+										   [unsigned long x = arc4random(); (void)x],
 										   [cf_bsd_random_h=yes],
 										   [cf_bsd_random_h=no])])
 			AC_MSG_RESULT($cf_bsd_random_h)
@@ -6325,7 +6388,7 @@ AC_DEFUN([CF_STRIP_O_OPT],[
 $1=`echo "${$1}" | CF__SED_TRIMBLANKS(-e 's%-O[[1-9]]\? %%' -e 's%-O[[1-9]]\?$%%')`
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_STRUCT_TERMIOS version: 11 updated: 2020/03/19 20:46:13
+dnl CF_STRUCT_TERMIOS version: 13 updated: 2023/12/03 19:38:54
 dnl -----------------
 dnl Some machines require _POSIX_SOURCE to completely define struct termios.
 AC_DEFUN([CF_STRUCT_TERMIOS],[
@@ -6348,12 +6411,12 @@ if test "$ac_cv_header_termios_h" = yes ; then
 	if test "$termios_bad" = maybe ; then
 	AC_MSG_CHECKING(whether termios.h needs _POSIX_SOURCE)
 	AC_TRY_COMPILE([#include <termios.h>],
-		[struct termios foo; int x = foo.c_iflag = 1; (void)x],
+		[struct termios foo; int x = (int)(foo.c_iflag = 1); (void)x],
 		termios_bad=no, [
 		AC_TRY_COMPILE([
 #define _POSIX_SOURCE
 #include <termios.h>],
-			[struct termios foo; int x = foo.c_iflag = 2; (void)x],
+			[struct termios foo; int x = (int)(foo.c_iflag = 2); (void)x],
 			termios_bad=unknown,
 			termios_bad=yes AC_DEFINE(_POSIX_SOURCE,1,[Define to 1 if we must define _POSIX_SOURCE]))
 			])
@@ -7447,7 +7510,7 @@ AC_CHECK_FUNCS( \
 )
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_XOPEN_CURSES version: 18 updated: 2023/01/11 04:05:23
+dnl CF_XOPEN_CURSES version: 20 updated: 2024/01/07 06:54:12
 dnl ---------------
 dnl Test if we should define X/Open source for curses, needed on Digital Unix
 dnl 4.x, to see the extended functions, but breaks on IRIX 6.x.
@@ -7464,15 +7527,16 @@ $ac_includes_default
 #include <${cf_cv_ncurses_header:-curses.h}>],[
 #if defined(NCURSES_VERSION_PATCH)
 #if (NCURSES_VERSION_PATCH < 20100501) && (NCURSES_VERSION_PATCH >= 20100403)
-	make an error
+	#error disallow ncurses versions between 2020/04/03 and 2010/05/01
 #endif
 #endif
 #ifdef NCURSES_WIDECHAR
-make an error	/* prefer to fall-through on the second checks */
+#error prefer to fall-through on the second checks
 #endif
+	static char dummy[10];
 	cchar_t check;
 	int check2 = curs_set((int)sizeof(check));
-	long x = winnstr(stdscr, "", 0);
+	long x = winnstr(stdscr, dummy, 5);
 	int x1, y1;
 	(void)check2;
 	getbegyx(stdscr, y1, x1);
@@ -7488,9 +7552,10 @@ make an error	/* prefer to fall-through on the second checks */
 #define $cf_try_xopen_extension 1
 $ac_includes_default
 #include <${cf_cv_ncurses_header:-curses.h}>],[
+		static char dummy[10];
 		cchar_t check;
 		int check2 = curs_set((int)sizeof(check));
-		long x = winnstr(stdscr, "", 0);
+		long x = winnstr(stdscr, dummy, 5);
 		int x1, y1;
 		getbegyx(stdscr, y1, x1);
 		(void)check2;

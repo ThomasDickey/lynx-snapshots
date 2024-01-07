@@ -1,9 +1,12 @@
--- $LynxId: CHANGES,v 1.1148 2023/11/05 22:43:27 tom Exp $
+-- $LynxId: CHANGES,v 1.1150 2024/01/07 18:57:37 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2023-11-05 (2.9.0dev.13)
+2024-01-07 (2.9.0dev.13)
+* repair docs/OS-390.announce and docs/README.jp -TD
+* make the test-files non-empty, to appease some packaging tools -TD
+* check for getpwuid(), use in preference to deprecated cuserid() -TD
 * modify curses initialization to permit ^S built-in keymap to work without
   needing external stty changes -TD
 * correct ifdef for LYmsec_delay() (report by Alexander Arkhipov) -TD

@@ -51,15 +51,7 @@ o Build Lynx
 	gmake
 
   (I have been unable to build Lynx with IBM's make.  gmake is not
-  shipped with OS/390.  You may obtain gmake from:
-
-   Linkname: Mortice Kern Systems (MKS) Inc. - S/390 ®
-	     OpenEdition--GNU Utilities
-	URL: http://www.mks.com/s390/gnu/index.htm
-
-   Linkname: Other
-	URL: http://www.mks.com/s390/gnu/register.htm
-  )
+  shipped with OS/390)
 
 ========================================================================
 o Test Lynx:

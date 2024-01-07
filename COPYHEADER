@@ -1,4 +1,4 @@
-Copyright 1997-2022,2023 Thomas E. Dickey
+Copyright 1997-2023,2024 Thomas E. Dickey
 
 This copyright notice must be included in all copies or substantial
 portions of Lynx.  It outlines rights and restrictions for Lynx which
@@ -80,5 +80,5 @@ For reference, below is the original copyright notice for Lynx (2.4.2).
 */
 ------------------------------------------------------------------------------
 -- vile:txtmode fc=72 noti
--- $LynxId: COPYHEADER,v 1.21 2023/01/02 23:56:18 tom Exp $
+-- $LynxId: COPYHEADER,v 1.22 2024/01/07 11:13:00 tom Exp $
 ------------------------------------------------------------------------------

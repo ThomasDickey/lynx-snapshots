@@ -1,5 +1,5 @@
 /*
- * $LynxId: TRSTable.c,v 1.39 2021/10/24 18:05:05 tom Exp $
+ * $LynxId: TRSTable.c,v 1.43 2023/11/10 01:01:54 tom Exp $
  *		Simple table object
  *		===================
  * Authors
@@ -232,7 +232,7 @@ struct _STable_info *Stbl_startTABLE(int alignment)
     STable_info *me = typecalloc(STable_info);
 
     CTRACE2(TRACE_TRST,
-	    (tfp, "TRST:Stbl_startTABLE(align=%d)\n", (int) alignment));
+	    (tfp, "TRST:Stbl_startTABLE(align=%d)\n", alignment));
     if (me) {
 	me->alignment = (short) alignment;
 	me->rowgroup_align = HT_ALIGN_NONE;
@@ -556,7 +556,7 @@ static int Stbl_finishCellInRow(STable_rowinfo *me, STable_states *s, int end_td
     CTRACE2(TRACE_TRST,
 	    (tfp,
 	     "TRST:Stbl_finishCellInRow line=%d pos=%d end_td=%d ncells=%d pnd_len=%d\n",
-	     lineno, pos, (int) end_td, me->ncells, s->pending_len));
+	     lineno, pos, end_td, me->ncells, s->pending_len));
 
     if (me->ncells <= 0)
 	return -1;
@@ -566,7 +566,7 @@ static int Stbl_finishCellInRow(STable_rowinfo *me, STable_states *s, int end_td
 
     CTRACE2(TRACE_TRST,
 	    (tfp,
-	     " [lines: lastCell=%d state=%d multi=%d] empty=%d (prev)state=(%s) %s\n",
+	     " [lines: lastCell=%d stateLine=%d multi=%d] empty=%d (prev)state=(%s) %s\n",
 	     lastcell->cLine, s->lineno, multiline, empty,
 	     cellstate_s(s->prev_state), cellstate_s(s->state)));
 
@@ -911,7 +911,6 @@ static int Stbl_finishCellInRow(STable_rowinfo *me, STable_states *s, int end_td
     }
 #endif
 
-/*    lastcell->len = pos - lastcell->pos; */
   trace_and_return:
     CTRACE2(TRACE_TRST,
 	    (tfp, " => prev_state=%s, state=%s, return=%d\n",
@@ -1044,7 +1043,7 @@ int Stbl_addRowToTable(STable_info *me, int alignment,
     STable_states *s = &me->s;
 
     CTRACE2(TRACE_TRST,
-	    (tfp, "TRST:Stbl_addRowToTable(alignment=%d, lineno=%d)\n",
+	    (tfp, "TRST:Stbl_addRowToTable(alignment=%d, line=%d)\n",
 	     alignment, lineno));
     if (me->nrows > 0 && me->rows[me->nrows - 1].ncells > 0) {
 	if (s->pending_len > 0)
@@ -1282,7 +1281,7 @@ static int Stbl_fakeFinishCellInTable(STable_info *me,
 
 	CTRACE2(TRACE_TRST,
 		(tfp,
-		 "TRST:Stbl_fakeFinishCellInTable(lineno=%d, finishing=%d) START FAKING\n",
+		 "TRST:Stbl_fakeFinishCellInTable(line=%d, finishing=%d) START FAKING\n",
 		 lineno, finishing));
 
 	/* Although here we use pos=0, this may commit the previous
@@ -1296,10 +1295,6 @@ static int Stbl_fakeFinishCellInTable(STable_info *me,
 		return -1;
 	    }
 	}
-
-	/* Fake </TR> at BOL */
-	/* Stbl_finishCellInTable(lineno, 0, 0); */
-	/* Needed? */
 
 	/* Fake <TR> at BOL */
 	if (Stbl_addRowToTable(me, al, lineno) < 0) {
@@ -1396,7 +1391,7 @@ static int Stbl_fakeFinishCellInTable(STable_info *me,
 	}
 	CTRACE2(TRACE_TRST,
 		(tfp,
-		 "TRST:Stbl_fakeFinishCellInTable(lineno=%d) FINISH FAKING\n",
+		 "TRST:Stbl_fakeFinishCellInTable(line=%d) FINISH FAKING\n",
 		 lineno));
 	return 1;
     }
@@ -1422,8 +1417,8 @@ int Stbl_addCellToTable(STable_info *me, int colspan,
 
     CTRACE2(TRACE_TRST,
 	    (tfp,
-	     "TRST:Stbl_addCellToTable(lineno=%d, pos=%d, isheader=%d, cs=%d, rs=%d, al=%d)\n",
-	     lineno, pos, (int) isheader, colspan, rowspan, alignment));
+	     "TRST:Stbl_addCellToTable(line=%d, pos=%d, isheader=%d, cs=%d, rs=%d, al=%d)\n",
+	     lineno, pos, isheader, colspan, rowspan, alignment));
     if (!me->rows || !me->nrows)
 	return -1;		/* no row started! */
     /* ##850_fail_if_fail?? */
@@ -1532,8 +1527,8 @@ int Stbl_finishCellInTable(STable_info *me, int end_td,
 
     CTRACE2(TRACE_TRST,
 	    (tfp,
-	     "TRST:Stbl_finishCellInTable(lineno=%d, pos=%d, off=%d, end_td=%d)\n",
-	     lineno, pos, offset, (int) end_td));
+	     "TRST:Stbl_finishCellInTable(line=%d, pos=%d, off=%d, end_td=%d)\n",
+	     lineno, pos, offset, end_td));
     if (me->nrows == 0)
 	return -1;
     lastrow = me->rows + (me->nrows - 1);
@@ -1648,7 +1643,7 @@ int Stbl_addColInfo(STable_info *me,
 
     CTRACE2(TRACE_TRST,
 	    (tfp, "TRST:Stbl_addColInfo(cs=%d, al=%d, isgroup=%d)\n",
-	     colspan, alignment, (int) isgroup));
+	     colspan, alignment, isgroup));
     if (isgroup) {
 	if (me->pending_colgroup_next > me->ncolinfo)
 	    me->ncolinfo = me->pending_colgroup_next;

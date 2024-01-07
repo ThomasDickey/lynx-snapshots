@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMain.c,v 1.299 2023/10/23 08:05:32 tom Exp $
+ * $LynxId: LYMain.c,v 1.300 2024/01/07 15:31:25 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTP.h>
@@ -68,6 +68,13 @@
 
 #include <LYexit.h>
 #include <LYLeaks.h>
+
+#if defined(HAVE_PWD_H) && defined(HAVE_GETPWUID) && !defined(DONT_HAVE_PW_GECOS)
+#define USE_GETPWUID 1
+#include <pwd.h>
+#else
+#define USE_GETPWUID 0
+#endif
 
 /* ahhhhhhhhhh!! Global variables :-< */
 #ifdef SOCKS
@@ -1041,6 +1048,10 @@ int main(int argc,
     char filename[LY_MAXPATH];
     BOOL LYGetStdinArgs = FALSE;
 
+#if USE_GETPWUID
+    struct passwd *my_pwd;
+#endif
+
 #ifdef _WINDOWS
     WSADATA WSAData;
 #endif /* _WINDOWS */
@@ -1450,13 +1461,14 @@ int main(int argc,
 #if defined (VMS) || defined (NOUSERS)
 	!strcasecomp((LYGetEnv("USER") == NULL ? " " : LYGetEnv("USER")),
 		     ANONYMOUS_USER)
-#else
-#ifdef HAVE_CUSERID
-	STREQ((char *) cuserid((char *) NULL), ANONYMOUS_USER)
+#elif USE_GETPWUID
+	((my_pwd = getpwuid(getuid())) == NULL
+	 || STREQ(my_pwd->pw_gecos, ANONYMOUS_USER))
+#elif defined(HAVE_CUSERID)
+	STREQ((char *) cuserid(NULL), ANONYMOUS_USER)
 #else
 	STREQ(((char *) getlogin() == NULL ? " " : getlogin()), ANONYMOUS_USER)
-#endif /* HAVE_CUSERID */
-#endif /* VMS */
+#endif /* checks for user-id */
 	) {
 	parse_restrictions("default");
 	LYRestricted = TRUE;

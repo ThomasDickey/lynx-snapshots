@@ -1,5 +1,5 @@
 /*
- * $LynxId: config.hin,v 1.153 2023/02/16 09:09:51 tom Exp $
+ * $LynxId: config.hin,v 1.154 2024/01/07 15:13:24 tom Exp $
  * vile:cmode
  *
  * The configure script translates "config.hin" into "lynx_cfg.h"
@@ -35,6 +35,7 @@
 #undef DISABLE_GOPHER		/* CF_ARG_DISABLE(gopher) */
 #undef DISABLE_NEWS		/* CF_ARG_DISABLE(news) */
 #undef DISP_PARTIAL		/* CF_ARG_ENABLE(partial) */
+#undef DONT_HAVE_PW_GECOS	/* CF_PW_GECOS */
 #undef DONT_HAVE_TM_GMTOFF	/* CF_TM_GMTOFF */
 #undef ENABLE_IPV6		/* CF_CHECK_IPV6 */
 #undef ENABLE_NLS		/* defined if NLS is requested */
@@ -82,6 +83,7 @@
 #undef HAVE_GETBKGD		/* CF_COLOR_CURSES */
 #undef HAVE_GETCWD
 #undef HAVE_GETGROUPS
+#undef HAVE_GETPWUID		/* CF_FUNC_GETPWUID */
 #undef HAVE_GETTEXT		/* defined if you want to use non-GNU gettext */
 #undef HAVE_GETTIMEOFDAY
 #undef HAVE_GETUID
@@ -124,6 +126,7 @@
 #undef HAVE_PNOUTREFRESH
 #undef HAVE_POPEN
 #undef HAVE_PUTENV
+#undef HAVE_PWD_H		/* CF_FUNC_GETPWUID */
 #undef HAVE_READDIR
 #undef HAVE_RESIZETERM
 #undef HAVE_RESOLV_H

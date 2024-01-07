@@ -1,5 +1,5 @@
 /*
- * $LynxId: GridText.c,v 1.345 2023/10/24 22:50:05 tom Exp $
+ * $LynxId: GridText.c,v 1.346 2023/11/09 09:18:27 tom Exp $
  *
  *		Character grid hypertext object
  *		===============================
@@ -14072,7 +14072,7 @@ static void redraw_part_of_line(HTLine *line, const char *str,
 		LastDisplayChar == '-') {
 		/*
 		 * Ignore the soft hyphen if it is not the last character in
-		 * the line.  Also ignore it if it first character following
+		 * the line.  Also ignore it if it is first character following
 		 * the margin, or if it is preceded by a white character (we
 		 * loaded 'M' into LastDisplayChar if it was a multibyte
 		 * character) or hyphen, though it should have been excluded by

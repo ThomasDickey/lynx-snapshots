@@ -1,4 +1,4 @@
-/* $LynxId: LYCurses.c,v 1.204 2023/11/06 01:21:57 tom Exp $ */
+/* $LynxId: LYCurses.c,v 1.205 2024/01/07 23:03:23 tom Exp $ */
 #include <HTUtils.h>
 #include <HTAlert.h>
 
@@ -1387,7 +1387,7 @@ void start_curses(void)
 	LYcols = LYscreenWidth();
 
 #if defined(NCURSES_VERSION)
-#ifdef CAN_CUT_AND_PASTE
+#if defined(CAN_CUT_AND_PASTE) && defined(IXON) && defined(IXOFF)
 	/*
 	 * User-defined keymaps are loaded after this check, but since the
 	 * ifdef is enabled, we know that at least the copy/paste commands

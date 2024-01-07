@@ -1,4 +1,4 @@
-# $LynxId: lynx.spec,v 1.69 2023/05/26 22:52:47 tom Exp $
+# $LynxId: lynx.spec,v 1.70 2024/01/07 18:30:52 tom Exp $
 Summary: A text-based Web browser
 Name: lynx-dev
 Version: 2.9.0
@@ -97,19 +97,24 @@ DEFAULT_INDEX_FILE:http://www.google.com/
 LOCALE_CHARSET:TRUE
 EOF
 
-%clean
-rm -rf $RPM_BUILD_ROOT
+strip $RPM_BUILD_ROOT%{_bindir}/%{name}
 
-%files
+%find_lang %{name}
+
+%files -f %{name}.lang
 %defattr(-,root,root,-)
 %{_bindir}/%{name}
 %{_mandir}/*/*
-%{_datadir}/locale/*
 %{lynx_doc}/*
-%config %{lynx_etc}/*.cfg
-%config %{lynx_etc}/*.lss
+%config(noreplace) %{lynx_etc}/*.cfg
+%config(noreplace) %{lynx_etc}/*.lss
 
 %changelog
+
+* Sun Jan 07 2024 Thomas E. Dickey
+- use rpm #find_lang macro for configuring language files
+- use noreplace flag for *.cfg and *.lss config files
+- remove obsolete #clean section
 
 * Tue Mar 29 2022 Thomas E. Dickey
 - add brotli compression

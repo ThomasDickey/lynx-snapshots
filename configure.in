@@ -1,4 +1,4 @@
-dnl $LynxId: configure.in,v 1.347 2023/05/26 22:50:24 tom Exp $
+dnl $LynxId: configure.in,v 1.349 2024/01/07 15:33:23 tom Exp $
 dnl
 dnl Process this file with autoconf to produce a configure script.
 dnl
@@ -7,7 +7,7 @@ dnl by T.E.Dickey <dickey@invisible-island.net>
 dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
 dnl
 dnl ---------------------------------------------------------------------------
-dnl Copyright 1997-2022,2023 by Thomas E. Dickey
+dnl Copyright 1997-2023,2024 by Thomas E. Dickey
 dnl
 dnl Permission to use, copy, modify, and distribute this software and its
 dnl documentation for any purpose and without fee is hereby granted,
@@ -788,6 +788,8 @@ AC_FUNC_VFORK
 CF_FIONBIO
 CF_REMOVE_BROKEN
 CF_FUNC_LSTAT
+CF_FUNC_GETPWUID
+CF_PW_GECOS
 CF_FUNC_VASPRINTF
 AC_CHECK_FUNCS( \
 	atoll \
