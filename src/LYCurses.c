@@ -1,4 +1,4 @@
-/* $LynxId: LYCurses.c,v 1.205 2024/01/07 23:03:23 tom Exp $ */
+/* $LynxId: LYCurses.c,v 1.207 2024/01/09 00:30:44 tom Exp $ */
 #include <HTUtils.h>
 #include <HTAlert.h>
 
@@ -1387,23 +1387,6 @@ void start_curses(void)
 	LYcols = LYscreenWidth();
 
 #if defined(NCURSES_VERSION)
-#if defined(CAN_CUT_AND_PASTE) && defined(IXON) && defined(IXOFF)
-	/*
-	 * User-defined keymaps are loaded after this check, but since the
-	 * ifdef is enabled, we know that at least the copy/paste commands
-	 * are enabled.  However, binding the copy to ^S is inconvenient,
-	 * so ask curses to permit that (saving an external tweak with stty).
-	 */
-	{
-	    struct termios alter_tty;
-
-	    if (tcgetattr(fileno(stdin), &alter_tty) == 0) {
-		alter_tty.c_iflag &= (unsigned) ~(IXON | IXOFF);
-		tcsetattr(fileno(stdout), TCSAFLUSH, &alter_tty);
-		def_prog_mode();
-	    }
-	}
-#endif
 #if defined(SIGWINCH)
 	size_change(0);
 	LYGetScreenSize(0);
@@ -1436,6 +1419,26 @@ void start_curses(void)
 	    endwin();
 	    exit_immediately(EXIT_FAILURE);
 	}
+#if defined(CAN_CUT_AND_PASTE) && defined(IXON) && defined(IXOFF)
+	/*
+	 * Since the ifdef is enabled, we know that at least the copy/paste
+	 * commands are enabled.  Binding the copy to ^S is inconvenient, so
+	 * ask curses to permit that (saving an external tweak with stty).
+	 *
+	 * Disable the feature in lynx.cfg with
+	 *    KEYMAP:^S:UNMAPPED
+	 */
+	if (keymap[KTL('S')] != LYK_UNKNOWN) {
+	    struct termios alter_tty;
+
+	    CTRACE((tfp, "Allowing ^S as key-binding\n"));
+	    if (tcgetattr(fileno(stdin), &alter_tty) == 0) {
+		alter_tty.c_iflag &= (unsigned) ~(IXON | IXOFF);
+		tcsetattr(fileno(stdout), TCSAFLUSH, &alter_tty);
+		def_prog_mode();
+	    }
+	}
+#endif
 #endif /* ncurses-keymaps */
 
 	/*

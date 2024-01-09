@@ -1,4 +1,4 @@
-/* $LynxId: LYKeymap.c,v 1.123 2023/10/27 20:10:32 tom Exp $ */
+/* $LynxId: LYKeymap.c,v 1.124 2024/01/08 23:53:57 tom Exp $ */
 #include <HTUtils.h>
 #include <LYUtils.h>
 #include <LYGlobalDefs.h>
@@ -228,27 +228,28 @@ static LYEditConfig myKeymapData =
 
 LYKeymap_t key_override[KEYMAP_SIZE];
 
+#define EDIT_INIT(c,l) {(c)+1, (l)}
 static const LYEditInit initOverrideData[] =
 {
-    {22, LYK_NEXT_DOC},		/* ^V */
-    {47, LYK_TAG_LINK},		/* . */
+    EDIT_INIT(CTL('V'), LYK_NEXT_DOC),
+    EDIT_INIT('.', LYK_TAG_LINK),
 #ifndef SUPPORT_CHDIR
-    {68, LYK_CREATE},		/* C */
+    EDIT_INIT('C', LYK_CREATE),
 #else
-    {68, LYK_CHDIR},		/* C */
+    EDIT_INIT('C', LYK_CHDIR),
 #endif
-    {71, LYK_DIRED_MENU},	/* F */
-    {78, LYK_MODIFY},		/* M */
-    {83, LYK_REMOVE},		/* R */
-    {85, LYK_TAG_LINK},		/* T */
-    {86, LYK_UPLOAD},		/* U */
-    {100, LYK_CREATE},		/* c */
-    {103, LYK_DIRED_MENU},	/* f */
-    {110, LYK_MODIFY},		/* m */
-    {115, LYK_REMOVE},		/* r */
-    {117, LYK_TAG_LINK},	/* t */
-    {118, LYK_UPLOAD},		/* u */
-    {271, LYK_DO_NOTHING},	/* DO_NOTHING */
+    EDIT_INIT('F', LYK_DIRED_MENU),
+    EDIT_INIT('M', LYK_MODIFY),
+    EDIT_INIT('R', LYK_REMOVE),
+    EDIT_INIT('T', LYK_TAG_LINK),
+    EDIT_INIT('U', LYK_UPLOAD),
+    EDIT_INIT('c', LYK_CREATE),
+    EDIT_INIT('f', LYK_DIRED_MENU),
+    EDIT_INIT('m', LYK_MODIFY),
+    EDIT_INIT('r', LYK_REMOVE),
+    EDIT_INIT('t', LYK_TAG_LINK),
+    EDIT_INIT('u', LYK_UPLOAD),
+    EDIT_INIT(DO_NOTHING, LYK_DO_NOTHING),
     {-1, LYE_UNKNOWN}
 };
 
