@@ -4,10 +4,6 @@ lynx-dev: rc-version-greater-than-expected-version
 # This is intentional because it is referenced from the documentation.
 lynx-dev: extra-license-file usr/share/doc/lynx-dev/COPYING
 
-# These are intentional, part of the sample files:
-lynx-dev: zero-byte-file-in-doc-directory usr/share/doc/lynx-dev/test/X
-lynx-dev: zero-byte-file-in-doc-directory usr/share/doc/lynx-dev/test/nobody
-
 lynx-dev: national-encoding usr/share/doc/lynx-dev/test/ALT88592.html
 lynx-dev: national-encoding usr/share/doc/lynx-dev/test/iso-8859-1.html
 lynx-dev: national-encoding usr/share/doc/lynx-dev/test/iso-8859-2.html

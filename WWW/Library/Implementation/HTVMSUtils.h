@@ -85,7 +85,7 @@ extern "C" {
  *
  *
  */
-    const extern char *HTVMS_wwwName(const char *vmsname);
+    extern const char *HTVMS_wwwName(const char *vmsname);
 
     extern int HTVMSBrowseDir(const char *address,
 			      HTParentAnchor *anchor,

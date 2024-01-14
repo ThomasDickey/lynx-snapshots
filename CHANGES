@@ -1,9 +1,9 @@
--- $LynxId: CHANGES,v 1.1151 2024/01/09 00:34:35 tom Exp $
+-- $LynxId: CHANGES,v 1.1152 2024/01/14 11:02:21 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2024-01-08 (2.9.0dev.13)
+2024-01-14 (2.9.0dev.13)
 * allow the ^S keymap to be disabled in the configuration file, e.g.,
     KEYMAP:^S:UNMAPPED
   (report by TG) -TD
@@ -13,8 +13,6 @@ Changes since Lynx 2.8 release
 * modify curses initialization to permit ^S built-in keymap to work without
   needing external stty changes -TD
 * correct ifdef for LYmsec_delay() (report by Alexander Arkhipov) -TD
-* handle errno EINPROGRESS in HTDoRead() from nonresponsive server (Debian
-  #1033423) -TD
 * add a NUL after "/" in the SGML parser when the next character is ">", to
   make PRETTYSRC view display correctly (report by "Dima") -TD
 * trim some obsolete style code for NeXT -TD

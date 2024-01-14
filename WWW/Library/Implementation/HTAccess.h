@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTAccess.h,v 1.21 2019/08/23 23:51:45 tom Exp $
+ * $LynxId: HTAccess.h,v 1.22 2024/01/10 23:54:11 tom Exp $
  *					HTAccess:  Access manager for libwww
  *			ACCESS MANAGER
  *
@@ -134,38 +134,6 @@ Load a document from absolute name
 
  */
     extern BOOL HTLoadAbsolute(const DocAddress *addr);
-
-/*
-
-Load a document from absolute name to a stream
-
-  ON ENTRY,
-  addr                    The absolute address of the document to be accessed.
-  filter_it               if YES, treat document as HTML
-
-  ON EXIT,
-  returns YES             Success in opening document
-  NO                      Failure
-
-   Note: This is equivalent to HTLoadDocument
-
- */
-    extern BOOL HTLoadToStream(const char *addr, BOOL filter_it,
-			       HTStream *sink);
-
-/*
-
-Load if necessary, and select an anchor
-
-  ON ENTRY,
-  destination                The child or parent anchor to be loaded.
-
-  ON EXIT,
-  returns YES             Success
-  returns NO              Failure
-
- */
-    extern BOOL HTLoadAnchor(HTAnchor * destination);
 
 /*
 

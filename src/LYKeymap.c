@@ -1,4 +1,4 @@
-/* $LynxId: LYKeymap.c,v 1.124 2024/01/08 23:53:57 tom Exp $ */
+/* $LynxId: LYKeymap.c,v 1.125 2024/01/10 08:53:58 tom Exp $ */
 #include <HTUtils.h>
 #include <LYUtils.h>
 #include <LYGlobalDefs.h>
@@ -228,7 +228,7 @@ static LYEditConfig myKeymapData =
 
 LYKeymap_t key_override[KEYMAP_SIZE];
 
-#define EDIT_INIT(c,l) {(c)+1, (l)}
+#define EDIT_INIT(c,l) {KHR(c), (l)}
 static const LYEditInit initOverrideData[] =
 {
     EDIT_INIT(CTL('V'), LYK_NEXT_DOC),
@@ -832,6 +832,7 @@ static char *pretty_html(int c)
 {
     char *src = LYKeycodeToString(c, TRUE);
 
+
     if (src != 0) {
 	/* *INDENT-OFF* */
 	static const struct {
@@ -1022,7 +1023,7 @@ static int LYLoadKeymap(const char *arg GCC_UNUSED,
     HTSprintf0(&buf, "<pre>\n");
     PUTS(buf);
 
-    for (i = 'a' + 1; i <= 'z' + 1; i++) {
+    for (i = KHR('a'); i <= KHR('z'); i++) {
 	print_binding(target, i, TRUE);
     }
     for (i = 1; i < KEYMAP_SIZE; i++) {
@@ -1085,10 +1086,10 @@ int remap(char *key,
 		if ((mp = LYStringToKcmd(func)) != 0) {
 #if defined(DIRED_SUPPORT) && defined(OK_OVERRIDE)
 		    if (for_dired)
-			key_override[c + 1] = mp->code;
+			key_override[KHR(c)] = mp->code;
 		    else
 #endif
-			keymap[c + 1] = (LYKeymap_t) mp->code;
+			keymap[KHR(c)] = (LYKeymap_t) mp->code;
 		    /* don't return 0, successful */
 		    result = (c ? c : (int) LAC_TO_LKC0(mp->code));
 		}
@@ -1109,12 +1110,13 @@ typedef struct {
  */
 static void set_any_keys(ANY_KEYS * table, size_t size)
 {
-    size_t j, k;
+    size_t j;
 
     for (j = 0; j < size; ++j) {
-	k = (size_t) (table[j].code + 1);
-	table[j].save = keymap[k];
-	keymap[k] = table[j].map;
+	int c = KHR(table[j].code);
+
+	table[j].save = keymap[c];
+	keymap[c] = table[j].map;
     }
 }
 
@@ -1123,11 +1125,12 @@ static void set_any_keys(ANY_KEYS * table, size_t size)
  */
 static void reset_any_keys(ANY_KEYS * table, size_t size)
 {
-    size_t j, k;
+    size_t j;
 
     for (j = 0; j < size; ++j) {
-	k = (size_t) (table[j].code + 1);
-	keymap[k] = table[j].save;
+	int c = KHR(table[j].code);
+
+	keymap[c] = table[j].save;
     }
 }
 
@@ -1364,12 +1367,12 @@ BOOLEAN LYisNonAlnumKeyname(int ch,
 {
     BOOLEAN result = FALSE;
 
-    if (ch >= 0 && (ch + 1) < KEYMAP_SIZE) {
+    if (ch >= 0 && KHR(ch) < KEYMAP_SIZE) {
 	if ((ch <= 0
 	     || StrChr("0123456789"
 		       "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 		       "abcdefghijklmnopqrstuvwxyz", ch) == NULL)
-	    && (keymap[ch + 1] == KeyName)) {
+	    && (keymap[KHR(ch)] == KeyName)) {
 	    result = TRUE;
 	}
     }

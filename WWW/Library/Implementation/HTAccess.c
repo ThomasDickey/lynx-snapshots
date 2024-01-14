@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTAccess.c,v 1.85 2019/08/24 00:27:06 tom Exp $
+ * $LynxId: HTAccess.c,v 1.87 2024/01/10 23:52:47 tom Exp $
  *
  *		Access Manager					HTAccess.c
  *		==============
@@ -1137,29 +1137,6 @@ BOOL HTLoadAbsolute(const DocAddress *docaddr)
     return result;
 }
 
-#ifdef NOT_USED_CODE
-/*	Load a document from absolute name to stream.	HTLoadToStream()
- *	---------------------------------------------
- *
- *  On Entry,
- *	  addr	   The absolute address of the document to be accessed.
- *	  sink	   if non-NULL, send data down this stream
- *
- *  On Exit,
- *	  returns    YES     Success in opening document
- *		     NO      Failure
- */
-BOOL HTLoadToStream(const char *addr,
-		    BOOL filter,
-		    HTStream *sink)
-{
-    return HTLoadDocument(addr,
-			  HTAnchor_findSimpleAddress(addr),
-			  (HTOutputFormat ? HTOutputFormat : WWW_PRESENT),
-			  sink);
-}
-#endif /* NOT_USED_CODE */
-
 /*	Load a document from relative name.		HTLoadRelative()
  *	-----------------------------------
  *
@@ -1203,55 +1180,6 @@ BOOL HTLoadRelative(const char *relative_name,
     FREE(mycopy);		/* Memory leak fixed 10/7/92 -- JFG */
     return result;
 }
-
-/*	Load if necessary, and select an anchor.	HTLoadAnchor()
- *	----------------------------------------
- *
- *  On Entry,
- *	  destination		    The child or parent anchor to be loaded.
- *
- *  On Exit,
- *	  returns    YES     Success
- *		     NO      Failure
- */
-BOOL HTLoadAnchor(HTAnchor * destination)
-{
-    HTParentAnchor *parent;
-    BOOL loaded = NO;
-
-    if (!destination)
-	return NO;		/* No link */
-
-    parent = HTAnchor_parent(destination);
-
-    if (HTAnchor_document(parent) == NULL) {	/* If not already loaded */
-	/* TBL 921202 */
-	BOOL result;
-
-	result = HTLoadDocument(parent->address,
-				parent,
-				HTOutputFormat ?
-				HTOutputFormat : WWW_PRESENT,
-				HTOutputStream);
-	if (!result)
-	    return NO;
-	loaded = YES;
-    } {
-	HText *text = (HText *) HTAnchor_document(parent);
-
-	if ((destination != (HTAnchor *) parent) &&
-	    (destination != (HTAnchor *) (parent->parent))) {
-	    /* If child anchor */
-	    HText_selectAnchor(text,	/* Double display? @@ */
-			       (HTChildAnchor *) destination);
-	} else {
-	    if (!loaded)
-		HText_select(text);
-	}
-    }
-    return YES;
-
-}				/* HTLoadAnchor */
 
 /*	Search.						HTSearch()
  *	-------
@@ -1373,88 +1301,3 @@ BOOL HTSearchAbsolute(const char *keywords,
     anchor = HTAnchor_findAddress(&abs_doc);
     return HTSearch(keywords, anchor);
 }
-
-#ifdef NOT_USED_CODE
-/*	Generate the anchor for the home page.		HTHomeAnchor()
- *	--------------------------------------
- *
- *	As it involves file access, this should only be done once
- *	when the program first runs.
- *	This is a default algorithm -- browser don't HAVE to use this.
- *	But consistency between browsers is STRONGLY recommended!
- *
- *  Priority order is:
- *		1	WWW_HOME environment variable (logical name, etc)
- *		2	~/WWW/default.html
- *		3	/usr/local/bin/default.html
- *		4	http://www.w3.org/default.html
- */
-HTParentAnchor *HTHomeAnchor(void)
-{
-    char *my_home_document = NULL;
-    char *home = LYGetEnv(LOGICAL_DEFAULT);
-    char *ref;
-    HTParentAnchor *anchor;
-
-    if (home) {
-	StrAllocCopy(my_home_document, home);
-#define MAX_FILE_NAME 1024	/* @@@ */
-    } else if (HTClientHost) {	/* Telnet server */
-	/*
-	 * Someone telnets in, they get a special home.
-	 */
-	FILE *fp = fopen(REMOTE_POINTER, "r");
-	char *status;
-
-	if (fp) {
-	    my_home_document = typecallocn(char, MAX_FILE_NAME);
-
-	    if (my_home_document == NULL)
-		outofmem(__FILE__, "HTHomeAnchor");
-	    status = fgets(my_home_document, MAX_FILE_NAME, fp);
-	    if (!status) {
-		FREE(my_home_document);
-	    }
-	    fclose(fp);
-	}
-	if (my_home_document == NULL)
-	    StrAllocCopy(my_home_document, REMOTE_ADDRESS);
-    }
-#ifdef UNIX
-    if (my_home_document == NULL) {
-	FILE *fp = NULL;
-	char *home = LYGetEnv("HOME");
-
-	if (home != 0) {
-	    HTSprintf0(&my_home_document, "%s/%s", home, PERSONAL_DEFAULT);
-	    fp = fopen(my_home_document, "r");
-	}
-
-	if (!fp) {
-	    StrAllocCopy(my_home_document, LOCAL_DEFAULT_FILE);
-	    fp = fopen(my_home_document, "r");
-	}
-	if (fp) {
-	    fclose(fp);
-	} else {
-	    CTRACE((tfp, "HTBrowse: No local home document ~/%s or %s\n",
-		    PERSONAL_DEFAULT, LOCAL_DEFAULT_FILE));
-	    FREE(my_home_document);
-	}
-    }
-#endif /* UNIX */
-    ref = HTParse((my_home_document ?
-		   my_home_document : (HTClientHost ?
-				       REMOTE_ADDRESS : LAST_RESORT)),
-		  STR_FILE_URL,
-		  PARSE_ALL_WITHOUT_ANCHOR);
-    if (my_home_document) {
-	CTRACE((tfp, "HTAccess: Using custom home page %s i.e., address %s\n",
-		my_home_document, ref));
-	FREE(my_home_document);
-    }
-    anchor = HTAnchor_findSimpleAddress(ref);
-    FREE(ref);
-    return anchor;
-}
-#endif /* NOT_USED_CODE */
