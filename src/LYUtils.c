@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYUtils.c,v 1.308 2023/10/27 21:48:46 tom Exp $
+ * $LynxId: LYUtils.c,v 1.309 2024/01/15 17:10:52 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTCP.h>
@@ -3125,7 +3125,7 @@ void LYGetScreenSize(int sig GCC_UNUSED)
 	    LYcols = win.ws_col;
 	}
     }
-#else
+#elif !defined(PDCURSES)
 #error inconsistent settings for TIOCGSIZE/TIOCGWINSZ
 #endif /* TIOCGSIZE/TIOCGWINSZ */
 #endif /* HAVE_SIZECHANGE */

@@ -1,5 +1,5 @@
 /*
- * $LynxId: UCAux.c,v 1.58 2021/07/01 23:34:24 tom Exp $
+ * $LynxId: UCAux.c,v 1.59 2024/01/15 11:24:17 tom Exp $
  */
 #include <HTUtils.h>
 
@@ -669,9 +669,7 @@ dUTF8 HTDecodeUTF8(UTFDecodeState * me, int *c_in_out, UCode_t *result)
 	 * continue a multibyte character...
 	 */
 	if (me->utf_count > 0 && (TOASCII(c) & 0xc0) == 0x80) {
-	    if (me->utf_count <= 0) {
-		me->utf_char = UCS_REPL;
-	    } else if (me->utf_count == 1) {
+	    if (me->utf_count == 1) {
 		int limit = (int) (me->utf_buf_p - me->utf_buf) + 1;
 		int maybe = 0;
 

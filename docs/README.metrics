@@ -1,4 +1,4 @@
--- $LynxId: README.metrics,v 1.17 2018/07/08 16:43:30 tom Exp $
+-- $LynxId: README.metrics,v 1.18 2024/01/15 01:51:51 tom Exp $
 
 This is a short summary of code metrics showing how lynx has grown from
 release to release.  It also shows how the original codebase has
@@ -47,15 +47,15 @@ scripts.
 Here is a count of contributions (from CHANGES and docs/CHANGES2.8) since the
 start of the 2.8 series:
 
-    0.5 AJL
     3   Al Gilman
     1   Al Walker
+    0.5 Alex J Lyons
     1   Alexei Anatski
     2   Alexey Dobriyan
-    2   Andreas Metzler
+    3   Andreas Metzler
     2   Andrew Belov
     3.5 Andrey A Chernov
-    1   Arkadiusz Miskiewicz
+    1   Arkadiusz
     1   Arnaud Giersch
     2   Atsuhito Kohda
     2   Axel Beckert
@@ -64,6 +64,7 @@ start of the 2.8 series:
     1   Bill Nottingham
     3.5 Bill Schiavo
     2   Binh Do
+    1   Bjarni I Gislason
     1   Brett Lymn
    46.3 Brian J Pardy
     1   Carlton Anderson
@@ -74,6 +75,7 @@ start of the 2.8 series:
     3   Christian Weisgerber
     1   Christoph J Gartmann
     1   Chuck Houpt
+    1   Chuck Martin
     1   Crouton
     1   Dan Jacobson
     1   Daniel Dickman
@@ -88,7 +90,7 @@ start of the 2.8 series:
     1   Elliot Thomas
     2   Emanuele Giaquinta
     1   Eric Brun
-   70   External
+   84   External
     1   Fabian Fingerle
   280.5 Foteos Macrides
     2   Frank Heckenbach
@@ -96,13 +98,14 @@ start of the 2.8 series:
     1   Frederick P Herrmann
     1   Georg Drenkhahn
     1   George Lindholm
-   27   Gisle Vanem
+   29   Gisle Vanem
     1   Glenn Nielsen
     1   Hans Wurst
    28.5 Hataguchi Takeshi
     1   Heikki Kantola
     0.5 Helen Sommer
    23   Henry Nelson
+    1   Hiltjo Posthuma
     1   Hiram Lester Jr
     8.5 Hiroyuki Senshu
     3   Hynek Med
@@ -129,14 +132,14 @@ start of the 2.8 series:
     2   Jonathan Sergent
     1   Josef Sontgen
     2   Julian Coleman
-    2   Kamil Dudka
+    3   Kamil Dudka
     3   Karl Eichwalder
     1   Karl-Andre Skevik
-    4   Kihara Hideto
+    8   Kihara Hideto
    29.3 Kim DeVaughn
   706.3 Klaus Weide
     1   Lalo Martins
-    1   Larry Hynes
+    2   Larry Hynes
     1   Larry Virden
    15.8 Larry W Virden
    11   Laura Eaves
@@ -153,14 +156,18 @@ start of the 2.8 series:
     6.5 Michael Warner
     1   Michel Such
     1   Mike Castle
+    1   Mike Gorse
+    1   Mike Knight
     2   Munechika Sumikawa
     1   Nigel Horne
     0.5 Nikos Chantziaras
+   11   OOPS
     1   OpenBSD CVS
     1   Owen Leibman
     1   Pat Walsh
    13.5 Paul B Mahol
     1   Paul D Smith
+    2   Paul G Fox
    52.5 Paul Gilmartin
     1   Peter Backes
     1   Peter Canning
@@ -169,43 +176,50 @@ start of the 2.8 series:
    14   Philippe De Muyter
     1   Quentin Minster
     5.5 Rado Smiljanic
+    1   Rajeev V Pillai
     2   Ralph Babel
     1   Randall
     1   Reiner Hermann
     1   Risto Widenius
     1   Rob Cameron
+    1   Robert Bell
     1   Ruda Moura
     1   Ryan Nielsen
     2   Scott Bigham
     1   Sergej Kvachonok
     6   Sergey Svishchev
     1   Serhii Hlodin
+    0.5 Shlomi Fish
     2   Simon Kainz
    15   Sinan Kaan Yerli
     7.8 Stefan Caunter
+    1.5 Steffen Nurpmeso
     1   Stepan Kasal
+    1   Sylvain Bertrand
     1   Tadayoshi Okuma
     1   Takao Fujiwara
     1   Taketo Kabe
     1   Thomas Braun
- 2188.3 Thomas E Dickey
+ 2269.8 Thomas E Dickey
     1.5 Thomas Klausner
     1   Thomas Petazzoni
     1   Thomas Viehmann
-   21   Thorsten Glaser
+   21.5 Thorsten Glaser
     1   Tim Chase
     4   Tim Larson
     1   Timur Birsh
     2   Tomas Vanhala
     1.5 Ulf Harnhammar
+    1   Viatrix
     6.5 Victor Schneider
     2   Ville Herva
    86   Vlad Harchev
    37.5 Wayne Buttles
     1   Wesley Morgan
     1   Zdenek Prikryl
+    1   emil@vajn icu
     1.5 nsh@horae.dti.ne.jp
- 4563   Total
+ 4689   Total
 
 -------------------------------------------------------------------------------
 

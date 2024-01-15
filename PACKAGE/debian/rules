@@ -1,5 +1,5 @@
 #!/usr/bin/make -f
-# $LynxId: rules,v 1.18 2023/05/26 22:51:25 tom Exp $
+# $LynxId: rules,v 1.19 2024/01/15 01:16:07 tom Exp $
 
 # Uncomment this to turn on verbose mode.
 #export DH_VERBOSE=1
@@ -67,6 +67,7 @@ configure-stamp:
 		--sysconfdir=/etc/$(PACKAGE) \
 		--with-cfg-path=/etc/$(PACKAGE):$(docdir)/samples \
 		--localstatedir=/var \
+		--disable-rpath-hack \
 		--libdir=/etc/$(PACKAGE) \
 		--enable-8bit-toupper \
 		--enable-cgi-links \

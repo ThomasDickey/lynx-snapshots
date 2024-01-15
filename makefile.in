@@ -1,4 +1,4 @@
-# $LynxId: makefile.in,v 1.194 2023/01/24 09:25:46 tom Exp $
+# $LynxId: makefile.in,v 1.198 2024/01/15 16:06:06 tom Exp $
 ##makefile for lynx
 
 SHELL		= @CONFIG_SHELL@
@@ -46,12 +46,11 @@ TAR		= @TAR@
 TAR_UP		= $(TAR) @TAR_UP_OPTIONS@ @TAR_PIPE_OPTIONS@
 TAR_DOWN	= $(TAR) @TAR_DOWN_OPTIONS@ @TAR_PIPE_OPTIONS@
 
-# $Format: "LYNX_VERSION	= $ProjectVersion$"$
-LYNX_VERSION	= 2.9.0dev.13
+LYNX_VERSION	= @PACKAGE_VERSION@
 
 ## This is the version which we are developing (or, upon release, make this
 ## the same).  Use no dots in the name, since it must work on VMS and MS-DOS.
-VERSION		= 2-8-9
+PORT_VERSION	= @NO_DOTS_VERSION@
 
 ##this is the name of the directory the lynx source code is in.
 ##(e.g., lynx2-8-9, not the full path)
@@ -312,7 +311,7 @@ install-man : $(MANDIR)
 
 install-doc : $(DOCDIR) $(HELPDIR)
 	@echo "Copying sample files";\
-	$(SHELL) -c 'set -x; \
+	$(SHELL) -c '\
 		( umask 022; \
 		  cd $(srcdir) && \
 		  $(TAR_UP) C[HO]* PROBLEMS README docs samples test ) | \
@@ -322,15 +321,20 @@ install-doc : $(DOCDIR) $(HELPDIR)
 	$(SHELL) -c 'if test "$(COMPRESS_PROG)" != "" ; then \
 		(cd $(DOCDIR) && $(COMPRESS_PROG) -f docs/CHANGES*.[0-9] docs/*.announce ) \
 	fi';\
-	$(SHELL) -c 'set -x; \
+	echo "Copying copyright files";\
+	$(SHELL) -c '\
+		r="`$(SHELL) $(scripts_dir)/relpath.sh "$(docdir)" "$(helpdir)"`"; \
+		echo ".. docdir:   $(docdir)"; \
+		echo ".. helpdir:  $(helpdir)"; \
+		echo ".. relative: $$r"; \
 		for name in COPYING COPYHEADER; do \
-		cd $(HELPDIR) && rm -f $$name ;\
-		r= ;\
-		test "$(LN_S)" = "ln -s" || r=`echo $(helpdir)|sed -e "s%[^/]\+%..%g" -e "s%^.%%"`; \
-		cd $(HELPDIR) && ( $(LN_S) $$r$(docdir)/$$name . || cp $(DOCDIR)/$$name . );\
+		cd $(HELPDIR) && rm -f $$name;\
+		cd $(HELPDIR) && ( $(LN_S) $$r/$$name $$name || cp $(DOCDIR)/$$name . );\
 		done';\
-	$(SHELL) -c 'set -x; \
-		case `id|sed -e "s/(.*//"` in \
+	$(SHELL) -c '\
+		i=`id|sed -e "s/(.*//"`; \
+		echo "Checking owner: $$i"; \
+		case $$i in \
 		uid=0) \
 			chown -R root $(DOCDIR);; \
 		esac'

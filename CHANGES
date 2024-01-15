@@ -1,9 +1,16 @@
--- $LynxId: CHANGES,v 1.1152 2024/01/14 11:02:21 tom Exp $
+-- $LynxId: CHANGES,v 1.1159 2024/01/15 21:41:51 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2024-01-14 (2.9.0dev.13)
+2024-01-15 (2.9.0)
+* change version of OpenSSL used in Windows installers to 3.x and 1.1.1x,
+  for new/old respectively -TD
+* fixes for UBSAN/ASAN issues with clang on Windows -GV
+* modify install-doc rule to use relative path for symbolic links -TD
+* add support for gopher's hURL functionality (patch by Viatrix).
+* allow ^G interrupt to end read from a stalled connection without exiting
+  Lynx (Debian #1033423) -TD
 * allow the ^S keymap to be disabled in the configuration file, e.g.,
     KEYMAP:^S:UNMAPPED
   (report by TG) -TD

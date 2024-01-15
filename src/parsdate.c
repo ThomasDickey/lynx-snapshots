@@ -5,7 +5,7 @@
 #define YYBYACC 1
 #define YYMAJOR 2
 #define YYMINOR 0
-#define YYPATCH 20220128
+#define YYPATCH 20240109
 
 #define YYEMPTY        (-1)
 #define yyclearin      (yychar = YYEMPTY)
@@ -25,7 +25,7 @@
 #include <LYLeaks.h>
 
 /*
- *  $LynxId: parsdate.c,v 1.30 2022/03/12 12:54:09 tom Exp $
+ *  $LynxId: parsdate.y,v 1.32 2024/01/15 11:09:08 tom Exp $
  *
  *  This module is adapted and extended from tin, to use for LYmktime().
  *
@@ -2030,7 +2030,7 @@ case 19:
 	    int	i;
 
 	    /* Unix and GMT and numeric timezones -- a little confusing. */
-	    if ((int)yystack.l_mark[0].Number < 0) {
+	    if ((long)yystack.l_mark[0].Number < 0) {
 		/* Don't work with negative modulus. */
 		yystack.l_mark[0].Number = -(int)yystack.l_mark[0].Number;
 		if (yystack.l_mark[0].Number > 9999 || (i = (int) (yystack.l_mark[0].Number % 100)) >= 60) {

@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMainLoop.c,v 1.253 2023/10/23 23:36:31 tom Exp $
+ * $LynxId: LYMainLoop.c,v 1.254 2024/01/15 19:10:04 Gisle.Vanem Exp $
  */
 #include <HTUtils.h>
 #include <HTAccess.h>
@@ -6769,7 +6769,7 @@ int mainloop(void)
 	 * If help is not on the screen, then put a message on the screen to
 	 * tell the user other misc info.
 	 */
-	if (!show_help) {
+	if (!show_help && curdoc.link >= 0) {
 	    show_main_statusline(links[curdoc.link],
 				 ((curlink_is_editable &&
 				   textinput_activated)

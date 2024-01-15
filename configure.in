@@ -1,4 +1,4 @@
-dnl $LynxId: configure.in,v 1.349 2024/01/07 15:33:23 tom Exp $
+dnl $LynxId: configure.in,v 1.355 2024/01/14 22:24:38 tom Exp $
 dnl
 dnl Process this file with autoconf to produce a configure script.
 dnl
@@ -27,9 +27,14 @@ dnl ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 dnl OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 dnl ---------------------------------------------------------------------------
 dnl
-dnl ask PRCS to plug-in the project-version for the configure-script.
-dnl $Format: "AC_REVISION($ProjectVersion$)"$
-AC_REVISION(2.9.0dev.13)
+AC_REVISION($Revision: 1.355 $)
+
+AC_PREREQ(2.52.20231210)
+AC_INIT(lynx,2.9.0,lynx-dev@nongnu.org)
+
+AC_CONFIG_SRCDIR(userdefs.h)
+
+echo "Configuring $PACKAGE_NAME version $PACKAGE_VERSION"
 
 # Save the original $CFLAGS so we can distinguish whether the user set those
 # in the environment, or whether autoconf added -O and -g options:
@@ -39,9 +44,6 @@ ORIGINAL_CFLAGS="$CFLAGS"
 # script.  That fixes problems with tests whose cached values change from one
 # run to the next, as well as with tests that are order-dependent.
 rm -f config.cache
-
-AC_PREREQ(2.25.20210105)
-AC_INIT(userdefs.h)
 
 # autoconf 2.5x defaults to no cache file; we need the cache file's information
 # for building the config page.  But start with it empty to avoid confusion by
@@ -61,13 +63,14 @@ AC_ARG_WITH(system-type,
 
 AC_ARG_PROGRAM
 
-PACKAGE=lynx
-dnl ask PRCS to plug-in the project-version for the packages.
-# $Format: "VERSION=$ProjectVersion$"$
-VERSION=2.9.0dev.13
+PACKAGE=$PACKAGE_NAME
+VERSION=$PACKAGE_VERSION
 
 AC_SUBST(PACKAGE)
 AC_SUBST(VERSION)
+
+NO_DOTS_VERSION=`echo "$PACKAGE_VERSION" | sed -e 's,\.,-,g'`
+AC_SUBST(NO_DOTS_VERSION)
 
 AC_MSG_CHECKING(for DESTDIR)
 CF_WITH_PATH(destdir,

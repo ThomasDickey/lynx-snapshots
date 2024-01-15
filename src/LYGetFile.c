@@ -1,4 +1,4 @@
-/* $LynxId: LYGetFile.c,v 1.96 2018/04/01 15:27:18 tom Exp $ */
+/* $LynxId: LYGetFile.c,v 1.97 2024/01/14 20:02:21 Viatrix Exp $ */
 #include <HTUtils.h>
 #include <HTTP.h>
 #include <HTAnchor.h>		/* Anchor class */
@@ -740,6 +740,18 @@ int getfile(DocInfo *doc, int *target)
 			doc->address));
 		FREE(tmp);
 		url_type = HTTP_URL_TYPE;
+	    } else if ((cp = StrChr(doc->address + 9, '/')) != NULL &&
+		       0 == StrNCmp(++cp, "hURL", 4)) {
+		StrAllocCopy(tmp, cp + 4);
+		HTUnEscape(tmp);
+		if (*tmp == ':') {
+		    CTRACE((tfp, "getfile: URL '%s'\n", doc->address));
+		    StrAllocCopy(doc->address, tmp + 1);
+		    FREE(tmp);
+		    CTRACE((tfp, "  changed to '%s'\n", doc->address));
+		    return getfile(doc, target);
+		} else
+		    FREE(tmp);
 	    }
 	}
 

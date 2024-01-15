@@ -19,13 +19,15 @@
 2 Description
        Lynx is a fully-featured World Wide Web (WWW) client for users  running
        cursor-addressable,   character-cell   display   devices  (e.g.,  vt100
-       terminals, vt100 emulators running on Windows 95/NT/XP/7/8 or any POSIX
-       platform,  or  any  other  "curses-oriented" display).  It will display
-       hypertext markup language (HTML) documents containing  links  to  files
-       residing  on  the  local  system,  as  well as files residing on remote
-       systems running Gopher, HTTP, FTP, WAIS,  and  NNTP  servers.   Current
-       versions  of Lynx run on Unix, VMS, Windows 95/NT/XP/7/8, DOS DJGPP and
-       OS/2.
+       terminals, vt100 emulators running on Windows or any POSIX platform, or
+       any other "curses-oriented" display).  It will display hypertext markup
+       language (HTML) documents containing links to  files  residing  on  the
+       local  system,  as  well  as  files  residing on remote systems running
+       Gopher, HTTP, FTP, WAIS, and NNTP servers.
+
+       Lynx has been ported to many systems, including all variants  of  Unix,
+       Windows  (since  Windows  95),  DOS  DJGPP and OS/2, as well as VMS and
+       OS/390.
 
        Lynx can be used to access information on the World  Wide  Web,  or  to
        build  information  systems  intended  primarily for local access.  For
@@ -894,9 +896,9 @@
        *   Type Delete to view history list.
 
 2 Environment
-       In  addition  to various "standard" environment variables such as HOME,
-       PATH, USER, DISPLAY, TMPDIR, etc, Lynx utilizes  several  Lynx-specific
-       environment variables, if they exist.
+       In  addition  to  various  "standard"  environment  variables  such  as
+       DISPLAY, HOME, PATH, SHELL, TMPDIR, USER, etc., Lynx  utilizes  several
+       Lynx-specific environment variables, if they exist.
 
        Others  may  be created or modified by Lynx to pass data to an external
        program, or for other reasons.  These are listed separately below.
@@ -993,20 +995,29 @@
                                finger_proxy
                                ftp_proxy
                                gopher_proxy
-                               https_proxy
                                http_proxy
+                               https_proxy
+                               news_proxy
                                newspost_proxy
                                newsreply_proxy
-                               news_proxy
                                nntp_proxy
                                no_proxy
+                               rlogin_proxy
+                               snews_proxy
                                snewspost_proxy
                                snewsreply_proxy
-                               snews_proxy
+                               telnet_proxy
+                               tn3270_proxy
                                wais_proxy
 
                            See Lynx Users Guide  for  additional  details  and
                            examples.
+
+       RL_CLCOPY_CMD       Pipe  the  contents  of the current link using this
+                           command as the target.
+
+       RL_PASTE_CMD        Open a pipe to read from this command,  pasting  it
+                           into the current editable-field or command-prompt.
 
        SOCKS5_PROXY        Is  inspected  if  -socks5_proxy  has not been used
                            (for the same content).
@@ -1097,7 +1108,7 @@
                            values  of  the  LINES  and/or  COLUMNS environment
                            variables may also be changed.
 
-2 Simulated Cgi Support
+   Simulated CGI Support
        If built with the cgi-links option enabled, Lynx allows access to a cgi
        script directly without the need for an http daemon.
 
@@ -1139,7 +1150,7 @@
        The CGI Specification, and other associated  documentation,  should  be
        consulted for general information on CGI script programming.
 
-2 Native Language Support
+   Native Language Support
        If  configured  and  installed  with Native Language Support, Lynx will
        display status and other messages in your local language.  See the file
        ABOUT_NLS  in  the  source distribution, or at your local GNU site, for
@@ -1173,56 +1184,37 @@
                            for message catalogs.
 
 2 Notes
-       This is the manual for Lynx v2.9.0dev.5; development is in progress for
-       2.9.0.
-
+   Mailing Lists
        If you wish to contribute to the further development of Lynx, subscribe
-       to  our mailing list.  Send email to <lynx-dev-request@nongnu.org> with
+       to our mailing list.  Send email to <lynx-dev-request@nongnu.org>  with
        "subscribe lynx-dev" as the only line in the body of your message.
 
-       Send bug reports, comments, suggestions to <lynx-dev@nongnu.org>  after
+       Send  bug reports, comments, suggestions to <lynx-dev@nongnu.org> after
        subscribing.
 
-       Unsubscribe  by  sending  email  to  <lynx-dev-request@nongnu.org> with
-       "unsubscribe lynx-dev" as the only line in the body  of  your  message.
+       Unsubscribe by  sending  email  to  <lynx-dev-request@nongnu.org>  with
+       "unsubscribe  lynx-dev"  as  the only line in the body of your message.
        Do not send the unsubscribe message to the lynx-dev list, itself.
 
-2 See Also
-       catgets(3),  curses(3),  environ(7),  execve(2),  ftp(1), gettext(GNU),
-       localeconv(3),   ncurses(3),   setlocale(3),   slang(?),    termcap(5),
-       terminfo(5), wget(GNU)
-
-       Note that man page availability and section numbering is somewhat platform
-       dependent, and may vary from the above references.
-
-       A section shown as (GNU), is intended to denote that the topic  may  be
-       available via an info page, instead of a man page (i.e., try "info subject",
-       rather than "man subject").
-
-       A section shown as (?) denotes that documentation on the topic  exists,
-       but  is  not part of an established documentation retrieval system (see
-       the distribution files associated with the topic, or contact your  System
-       Administrator for further information).
-
-2 Acknowledgments
-       Lynx  has  incorporated  code  from a variety of sources along the way.
-       The earliest versions of Lynx included code from Earl Fogel of  Comput-
-       ing  Services at the University of Saskatchewan, who implemented HYPER-
-       REZ in the Unix environment.  HYPERREZ was developed by Niel Larson  of
-       Think.com  and  served  as  the  model  for the early versions of Lynx.
-       Those versions also incorporated libraries from the Unix Gopher clients
-       developed  at  the  University  of Minnesota, and the later versions of
-       Lynx rely on the WWW client library code developed by  Tim  Berners-Lee
-       and  the  WWW  community.  Also a special thanks to Foteos Macrides who
-       ported much of Lynx to VMS and did or organized most of its development
-       since  the  departures of Lou Montulli and Garrett Blythe from the Uni-
-       versity of Kansas in the summer of 1994 through the release of  v2.7.2,
-       and  to  everyone  on the net who has contributed to Lynx's development
-       either directly (through patches, comments or bug reports) or indirect-
-       ly (through inspiration and development of other systems).
+   Acknowledgments
+       Lynx has incorporated code from a variety of  sources  along  the  way.
+       The  earliest  versions  of  Lynx  included  code  from  Earl  Fogel of
+       Computing Services at the University of Saskatchewan,  who  implemented
+       HYPERREZ  in  the  Unix  environment.   HYPERREZ  was developed by Niel
+       Larson of Think.com and served as the model for the early  versions  of
+       Lynx.   Those versions also incorporated libraries from the Unix Gopher
+       clients developed  at  the  University  of  Minnesota,  and  the  later
+       versions  of  Lynx rely on the WWW client library code developed by Tim
+       Berners-Lee and the WWW community.  Also a  special  thanks  to  Foteos
+       Macrides  who  ported  much of Lynx to VMS and did or organized most of
+       its development since the departures of Lou Montulli and Garrett Blythe
+       from the University of Kansas in the summer of 1994 through the release
+       of v2.7.2, and to everyone on the net who  has  contributed  to  Lynx's
+       development  either directly (through patches, comments or bug reports)
+       or indirectly (through inspiration and development of other systems).
 
 2 Authors
-       Lou  Montulli,  Garrett  Blythe, Craig Lavender, Michael Grobe, Charles
+       Lou Montulli, Garrett Blythe, Craig Lavender,  Michael  Grobe,  Charles
        Rezac
        Academic Computing Services
        University of Kansas
@@ -1234,3 +1226,7 @@
 
        Thomas E. Dickey
        <dickey@invisible-island.net>
+
+2 See Also
+       catgets(3), curses(3), environ(7), ftp(1), gettext(GNU), localeconv(3),
+       ncurses(3), setlocale(3), termcap(5), terminfo(5)

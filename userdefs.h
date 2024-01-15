@@ -1,5 +1,5 @@
 /*
- * $LynxId: userdefs.h,v 1.370 2024/01/07 11:13:00 tom Exp $
+ * $LynxId: userdefs.h,v 1.373 2024/01/15 11:31:22 tom Exp $
  *
  * Lynx - Hypertext navigation system
  *
@@ -1450,18 +1450,11 @@
  *  		  have a good knowledge of the program
  */
 
-#define LYNX_NAME "Lynx"
-/* The strange-looking comments on the next line tell PRCS to replace
- * the version definition with the Project Version on checkout.  Just
- * ignore it. - kw */
-/* $Format: "#define LYNX_VERSION \"$ProjectVersion$\""$ */
-#define LYNX_VERSION "2.9.0dev.13"
+#define LYNX_NAME     "Lynx"
+#define LYNX_VERSION  "2.9.0"
 #define LYNX_WWW_HOME "https://lynx.invisible-island.net/"
 #define LYNX_WWW_DIST "https://lynx.invisible-island.net/current/"
-/* $Format: "#define LYNX_DATE \"$ProjectDate$\""$ */
-#define LYNX_DATE "Tue, 24 Jan 2023 04:25:46 -0500"
-#define LYNX_DATE_OFF 5		/* truncate the automatically-generated date */
-#define LYNX_DATE_LEN 11	/* truncate the automatically-generated date */
+#define LYNX_DATE     "15 Jan 2024"
 
 #ifdef UNICODE
 #define W32_STRING(s) L##s

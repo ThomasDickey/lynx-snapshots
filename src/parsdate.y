@@ -3,7 +3,7 @@
 #include <LYLeaks.h>
 
 /*
- *  $LynxId: parsdate.y,v 1.31 2021/06/08 23:01:28 tom Exp $
+ *  $LynxId: parsdate.y,v 1.32 2024/01/15 11:09:08 tom Exp $
  *
  *  This module is adapted and extended from tin, to use for LYmktime().
  *
@@ -255,7 +255,7 @@ numzone	: tSNUMBER {
 	    int	i;
 
 	    /* Unix and GMT and numeric timezones -- a little confusing. */
-	    if ((int)$1 < 0) {
+	    if ((long)$1 < 0) {
 		/* Don't work with negative modulus. */
 		$1 = -(int)$1;
 		if ($1 > 9999 || (i = (int) ($1 % 100)) >= 60) {

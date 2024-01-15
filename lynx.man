@@ -1,6 +1,7 @@
-.\" $LynxId: lynx.man,v 1.142 2023/10/30 22:31:08 tom Exp $
+.\" $LynxId: lynx.man,v 1.147 2024/01/14 20:53:14 tom Exp $
 .\" **************************************************************************
-.\" Escape single quotes in literal strings from groff's Unicode transform.
+.TH LYNX 1 2024-01-14 "Lynx 2.9.0" "Lynx \(en the \fItext\fP web browser"
+.
 .ie \n(.g \{\
 .ds `` \(lq
 .ds '' \(rq
@@ -15,6 +16,12 @@
 .el   .ds '  '
 .\}
 .
+.ie n .ds CW R
+.el   \{
+.ie \n(.g .ds CW CR
+.el       .ds CW CW
+.\}
+.
 .de bP
 .ie n  .IP \(bu 4
 .el    .IP \(bu 2
@@ -25,7 +32,7 @@
 .ie n  .in +4
 .el    .in +2
 .nf
-.ft CR			\" Courier
+.ft \*(CW
 ..
 .de NE
 .fi
@@ -34,7 +41,6 @@
 .el    .in -2
 ..
 .\" **************************************************************************
-.TH LYNX 1 2023-10-30 "Lynx 2.9.0" "Lynx \(en the \fItext\fP web browser"
 .SH NAME
 lynx \-
 a general purpose distributed information browser for the World Wide Web
@@ -61,17 +67,20 @@ Lynx
 is a fully-featured World Wide Web (WWW) client for users
 running cursor-addressable, character-cell display devices
 (e.g., vt100 terminals,
-vt100 emulators running on Windows 95/NT/XP/7/8 or any POSIX platform,
+vt100 emulators running on Windows or any POSIX platform,
 or any other \*(``curses-oriented\*('' display).
 It will display hypertext
 markup language (HTML) documents containing links to
 files residing on the local system, as well as files residing on
 remote systems running Gopher, HTTP, FTP, WAIS, and NNTP servers.
-Current versions of
+.PP
 .I
 Lynx
-run on
-Unix, VMS, Windows 95/NT/XP/7/8, DOS DJGPP and OS/2.
+has been ported to many systems,
+including all variants of Unix,
+Windows (since Windows 95),
+DOS DJGPP and OS/2,
+as well as VMS and OS/390.
 .PP
 .I
 Lynx
@@ -1271,7 +1280,7 @@ above), \fILynx\fR will set or modify its value to the user specified
 terminal type (for the \fILynx\fR execution environment).
 Note: If set/modified by \fILynx\fR, the values of the \fBLINES\fR and/or
 \fBCOLUMNS\fR environment variables may also be changed.
-.SH SIMULATED CGI SUPPORT
+.SS "Simulated CGI Support"
 If built with the \fBcgi-links\fR option enabled, \fILynx\fR allows access
 to a cgi script directly without the need for an http daemon.
 .PP
@@ -1312,7 +1321,7 @@ definition and usage of these variables.
 .PP
 The CGI Specification, and other associated documentation, should be consulted
 for general information on CGI script programming.
-.SH NATIVE LANGUAGE SUPPORT
+.SS "Native Language Support"
 If configured and installed with \fBNative Language Support\fR, \fILynx\fR
 will display status and other messages in your local language.
 See the
@@ -1349,9 +1358,7 @@ Currently, it is hard-coded to a wish list.
 .B NLSPATH
 This variable, if set, is used as the path prefix for message catalogs.
 .SH NOTES
-This is the manual for \fILynx\fP v2.9.0dev.5;
-development is in progress for 2.9.0.
-.PP
+.SS "Mailing Lists"
 If you wish to contribute to the further development
 of \fILynx\fR, subscribe to our mailing list.
 Send email to
@@ -1365,35 +1372,7 @@ after subscribing.
 Unsubscribe by sending email to <lynx\-dev\-request@nongnu.org> with
 \*(``unsubscribe lynx\-dev\*('' as the only line in the body of your message.
 Do not send the unsubscribe message to the lynx\-dev list, itself.
-.SH SEE ALSO
-.hy 0
-\fBcatgets\fR(3),
-\fBcurses\fR(3),
-\fBenviron\fR(7),
-\fBexecve\fR(2),
-\fBftp\fR(1),
-\fBgettext\fR(GNU),
-\fBlocaleconv\fR(3),
-\fBncurses\fR(3),
-\fBsetlocale\fR(3),
-\fBslang\fR(?),
-\fBtermcap\fR(5),
-\fBterminfo\fR(5),
-\fBwget\fR(GNU)
-.hy 1
-.PP
-Note that man page availability and section numbering is somewhat
-platform dependent, and may vary from the above references.
-.PP
-A section shown as (GNU), is intended to denote that the topic
-may be available via an info page, instead of a man page (i.e., try
-\*(``info subject\*('', rather than \*(``man subject\*('').
-.PP
-A section shown as \fB(?)\fP denotes that documentation on the topic exists,
-but is not part of an established documentation retrieval system (see
-the distribution files associated with the topic, or contact your
-System Administrator for further information).
-.SH ACKNOWLEDGMENTS
+.SS Acknowledgments
 \fILynx\fP has incorporated code from a variety of sources along the way.
 The earliest versions of \fILynx\fP included code from Earl Fogel of Computing
 Services at the University of Saskatchewan, who implemented HYPERREZ
@@ -1429,3 +1408,14 @@ Shrewsbury, Massachusetts 01545
 Thomas E.\& Dickey
 .br
 <dickey@invisible\-island.net>
+.SH SEE ALSO
+\fB\%catgets\fR(3),
+\fB\%curses\fR(3),
+\fB\%environ\fR(7),
+\fB\%ftp\fR(1),
+\fB\%gettext\fR(GNU),
+\fB\%localeconv\fR(3),
+\fB\%ncurses\fR(3),
+\fB\%setlocale\fR(3),
+\fB\%termcap\fR(5),
+\fB\%terminfo\fR(5)

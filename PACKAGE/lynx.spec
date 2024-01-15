@@ -1,11 +1,11 @@
-# $LynxId: lynx.spec,v 1.70 2024/01/07 18:30:52 tom Exp $
+# $LynxId: lynx.spec,v 1.72 2024/01/15 11:47:26 tom Exp $
 Summary: A text-based Web browser
 Name: lynx-dev
 Version: 2.9.0
-Release: dev.13
+Release: 1
 License: GPLv2
 Group: Applications/Internet
-Source: lynx%{version}%{release}.tgz
+Source: lynx%{version}.tgz
 URL: https://lynx.invisible-island.net
 Provides: webclient >= 0.0
 Provides: text-www-browser >= 0.0
@@ -34,7 +34,7 @@ HTTP, FTP, WAIS, and NNTP servers.
 %prep
 
 %define debug_package %{nil}
-%setup -q -n lynx%{version}%{release}
+%setup -q -n lynx%{version}
 
 %build
 %configure \
@@ -110,6 +110,9 @@ strip $RPM_BUILD_ROOT%{_bindir}/%{name}
 %config(noreplace) %{lynx_etc}/*.lss
 
 %changelog
+
+* Mon Jan 15 2024 Thomas E. Dickey
+- simplified tarball name
 
 * Sun Jan 07 2024 Thomas E. Dickey
 - use rpm #find_lang macro for configuring language files

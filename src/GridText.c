@@ -1,5 +1,5 @@
 /*
- * $LynxId: GridText.c,v 1.346 2023/11/09 09:18:27 tom Exp $
+ * $LynxId: GridText.c,v 1.347 2024/01/15 19:11:55 Gisle.Vanem Exp $
  *
  *		Character grid hypertext object
  *		===============================
@@ -912,7 +912,8 @@ static char *LYGetHiTextStr(TextAnchor *a, int count)
 	result = a->lites.hl_info[count - 1].hl_text;
     else
 	result = a->lites.hl_base.hl_text;
-    result += LYAdjHiTextPos(a, count);
+    if (result)
+	result += LYAdjHiTextPos(a, count);
     return result;
 }
 

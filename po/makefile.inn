@@ -1,4 +1,4 @@
-# $LynxId: makefile.inn,v 1.32 2021/02/28 15:56:25 tom Exp $
+# $LynxId: makefile.inn,v 1.33 2024/01/14 21:39:14 tom Exp $
 #
 # Makefile for program source directory in GNU NLS utilities package.
 # Copyright (C) 1995, 1996, 1997 by Ulrich Drepper <drepper@gnu.ai.mit.edu>
@@ -13,8 +13,8 @@
 SHELL = /bin/sh
 @SET_MAKE@
 
-PACKAGE		= @PACKAGE@
-VERSION		= @VERSION@
+PACKAGE		= @PACKAGE_NAME@
+VERSION		= @PACKAGE_VERSION@
 NLS_TEXTDOMAIN	= @NLS_TEXTDOMAIN@
 
 srcdir		= @srcdir@

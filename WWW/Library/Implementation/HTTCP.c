@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTCP.c,v 1.168 2024/01/14 11:00:25 tom Exp $
+ * $LynxId: HTTCP.c,v 1.169 2024/01/14 19:19:39 tom Exp $
  *
  *			Generic Communication Code		HTTCP.c
  *			==========================
@@ -2490,6 +2490,10 @@ int HTDoRead(int fildes,
 	} else if (ret > 0) {
 	    ready = TRUE;
 	} else if (HTWasInterrupted(&result)) {
+#ifdef USE_READPROGRESS
+	    if (tries > TRIES_PER_SECOND)
+		result = 0;
+#endif
 	    break;
 	}
     }
