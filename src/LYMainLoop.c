@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMainLoop.c,v 1.254 2024/01/15 19:10:04 Gisle.Vanem Exp $
+ * $LynxId: LYMainLoop.c,v 1.255 2024/03/13 13:51:20 Thorsten.Glaser Exp $
  */
 #include <HTUtils.h>
 #include <HTAccess.h>
@@ -177,7 +177,7 @@ HTAtom *WWW_SOURCE = 0;
 
 static void exit_immediately_with_error_message(int state, int first_file);
 static void status_link(const char *curlink_name, int show_more, int show_indx);
-static void show_main_statusline(const LinkInfo curlink, int for_what);
+static void show_main_statusline(const LinkInfo *curlink, int for_what);
 static void form_noviceline(int);
 static int are_different(DocInfo *doc1, DocInfo *doc2);
 
@@ -1061,7 +1061,7 @@ static int handle_LYK_ACTIVATE(int *c,
 		F_TEXTLIKE(links[curdoc.link].l_form->type)) {
 
 		textinput_activated = TRUE;
-		show_main_statusline(links[curdoc.link], FOR_INPUT);
+		show_main_statusline(&links[curdoc.link], FOR_INPUT);
 		textfields_need_activation = textfields_activation_option;
 
 		return 0;
@@ -6769,8 +6769,8 @@ int mainloop(void)
 	 * If help is not on the screen, then put a message on the screen to
 	 * tell the user other misc info.
 	 */
-	if (!show_help && curdoc.link >= 0) {
-	    show_main_statusline(links[curdoc.link],
+	if (!show_help) {
+	    show_main_statusline(curdoc.link >= 0 ? &links[curdoc.link] : NULL,
 				 ((curlink_is_editable &&
 				   textinput_activated)
 				  ? FOR_INPUT
@@ -7109,13 +7109,13 @@ int mainloop(void)
 
 #ifdef TEXTFIELDS_MAY_NEED_ACTIVATION
 		if (textfields_need_activation) {
-		    show_main_statusline(links[curdoc.link], FOR_PANEL);
+		    show_main_statusline(&links[curdoc.link], FOR_PANEL);
 #ifdef INACTIVE_INPUT_STYLE_VH
 		    textinput_redrawn = FALSE;
 #endif
 		} else
 #endif
-		    show_main_statusline(links[curdoc.link], FOR_INPUT);
+		    show_main_statusline(&links[curdoc.link], FOR_INPUT);
 	    } else if (more_text) {
 		HTInfoMsg(MOREHELP);
 	    } else {
@@ -7930,7 +7930,7 @@ void HTAddGotoURL(char *url)
  * When help is not on the screen, put a message on the screen to tell the user
  * other misc info.
  */
-static void show_main_statusline(const LinkInfo curlink,
+static void show_main_statusline(const LinkInfo *curlink,
 				 int for_what)
 {
     /*
@@ -7954,16 +7954,16 @@ static void show_main_statusline(const LinkInfo curlink,
     } else if (lynx_mode == FORMS_LYNX_MODE && nlinks > 0) {
 #else
 #ifdef NORMAL_NON_FORM_LINK_STATUSLINES_FOR_ALL_USER_MODES
-    } else if (lynx_mode == FORMS_LYNX_MODE && nlinks > 0 &&
-	       !(curlink.type & WWW_LINK_TYPE)) {
+    } else if (lynx_mode == FORMS_LYNX_MODE && nlinks > 0 && curlink &&
+	       !(curlink->type & WWW_LINK_TYPE)) {
 #else
-    } else if (lynx_mode == FORMS_LYNX_MODE && nlinks > 0 &&
+    } else if (lynx_mode == FORMS_LYNX_MODE && nlinks > 0 && curlink &&
 	       !((user_mode == ADVANCED_MODE || user_mode == MINIMAL_MODE) &&
-		 (curlink.type & WWW_LINK_TYPE))) {
+		 (curlink->type & WWW_LINK_TYPE))) {
 #endif /* NORMAL_NON_FORM_LINK_STATUSLINES_FOR_ALL_USER_MODES */
 #endif /* INDICATE_FORMS_MODE_FOR_ALL_LINKS_ON_PAGE */
-	if (curlink.type == WWW_FORM_LINK_TYPE) {
-	    show_formlink_statusline(curlink.l_form, for_what);
+	if (curlink->type == WWW_FORM_LINK_TYPE) {
+	    show_formlink_statusline(curlink->l_form, for_what);
 	} else {
 	    statusline(NORMAL_LINK_MESSAGE);
 	}
@@ -7980,18 +7980,18 @@ static void show_main_statusline(const LinkInfo curlink,
 	    lynx_stop_reverse();
 	}
 
-    } else if ((user_mode == ADVANCED_MODE) && nlinks > 0) {
+    } else if ((user_mode == ADVANCED_MODE) && nlinks > 0 && curlink) {
 	/*
 	 * Show the URL or, for some internal links, the fragment
 	 */
 	char *cp = NULL;
 
-	if (curlink.type == WWW_INTERN_LINK_TYPE &&
-	    !isLYNXIMGMAP(curlink.lname)) {
-	    cp = findPoundSelector(curlink.lname);
+	if (curlink->type == WWW_INTERN_LINK_TYPE &&
+	    !isLYNXIMGMAP(curlink->lname)) {
+	    cp = findPoundSelector(curlink->lname);
 	}
 	if (!cp)
-	    cp = curlink.lname;
+	    cp = curlink->lname;
 	status_link(cp, more_text, is_www_index);
     } else if ((user_mode == MINIMAL_MODE) && nlinks > 0) {
 	/*
@@ -8037,7 +8037,7 @@ static void show_main_statusline(const LinkInfo curlink,
 void repaint_main_statusline(int for_what)
 {
     if (curdoc.link >= 0 && curdoc.link < nlinks)
-	show_main_statusline(links[curdoc.link], for_what);
+	show_main_statusline(&links[curdoc.link], for_what);
 }
 
 static void form_noviceline(int disabled)

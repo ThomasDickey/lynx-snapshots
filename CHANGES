@@ -1,7 +1,11 @@
--- $LynxId: CHANGES,v 1.1159 2024/01/15 21:41:51 tom Exp $
+-- $LynxId: CHANGES,v 1.1161 2024/03/13 16:23:10 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
+
+2024-03-13 (2.9.0a)
+* fix special case of main status line on a page without links, broken by fix
+  for UBSAN/ASAN issue -TG
 
 2024-01-15 (2.9.0)
 * change version of OpenSSL used in Windows installers to 3.x and 1.1.1x,
