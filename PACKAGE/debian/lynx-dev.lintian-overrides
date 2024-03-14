@@ -1,15 +1,17 @@
-# This is intentional because it is referenced from the documentation.
-lynx-dev: extra-license-file usr/share/doc/lynx-dev/COPYING
-
-lynx-dev: national-encoding usr/share/doc/lynx-dev/test/ALT88592.html
-lynx-dev: national-encoding usr/share/doc/lynx-dev/test/iso-8859-1.html
-lynx-dev: national-encoding usr/share/doc/lynx-dev/test/iso-8859-2.html
+# These are sample/test-files:
+lynx-dev: national-encoding [usr/share/doc/lynx-dev/test/ALT88592.html]
+lynx-dev: national-encoding [usr/share/doc/lynx-dev/test/iso-8859-1.html]
+lynx-dev: national-encoding [usr/share/doc/lynx-dev/test/iso-8859-2.html]
 
 # These are a known problem with lintian:
 # https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=891301
-lynx-dev: privacy-breach-generic usr/share/doc/lynx-dev/test/ALT88592.html [<link rev="owner" href="http://mail.gnu.org/mailman/listinfo/lynx-dev/">] (http://mail.gnu.org/mailman/listinfo/lynx-dev/)
-lynx-dev: privacy-breach-generic usr/share/doc/lynx-dev/test/bad-html.html [<link rev="owner" href="http://mail.gnu.org/mailman/listinfo/lynx-dev/">] (http://mail.gnu.org/mailman/listinfo/lynx-dev/)
-lynx-dev: privacy-breach-generic usr/share/doc/lynx-dev/test/cp-1252.html [<link rev="owner" href="http://mail.gnu.org/mailman/listinfo/lynx-dev/">] (http://mail.gnu.org/mailman/listinfo/lynx-dev/)
-lynx-dev: privacy-breach-generic usr/share/doc/lynx-dev/test/cp-1252a.html [<link rev="owner" href="http://mail.gnu.org/mailman/listinfo/lynx-dev/">] (http://mail.gnu.org/mailman/listinfo/lynx-dev/)
-lynx-dev: privacy-breach-generic usr/share/doc/lynx-dev/test/iso-8859-2.html [<link rev="owner" href="http://mail.gnu.org/mailman/listinfo/lynx-dev/">] (http://mail.gnu.org/mailman/listinfo/lynx-dev/)
-lynx-dev: privacy-breach-generic usr/share/doc/lynx-dev/test/iso-8859-2a.html [<link rev="owner" href="http://mail.gnu.org/mailman/listinfo/lynx-dev/">] (http://mail.gnu.org/mailman/listinfo/lynx-dev/)
+lynx-dev: privacy-breach-generic [<link rev="owner" href="http://mail.gnu.org/mailman/listinfo/lynx-dev/">] (http://mail.gnu.org/mailman/listinfo/lynx-dev/) [usr/share/doc/lynx-dev/test/ALT88592.html]
+lynx-dev: privacy-breach-generic [<link rev="owner" href="http://mail.gnu.org/mailman/listinfo/lynx-dev/">] (http://mail.gnu.org/mailman/listinfo/lynx-dev/) [usr/share/doc/lynx-dev/test/bad-html.html]
+lynx-dev: privacy-breach-generic [<link rev="owner" href="http://mail.gnu.org/mailman/listinfo/lynx-dev/">] (http://mail.gnu.org/mailman/listinfo/lynx-dev/) [usr/share/doc/lynx-dev/test/cp-1252.html]
+lynx-dev: privacy-breach-generic [<link rev="owner" href="http://mail.gnu.org/mailman/listinfo/lynx-dev/">] (http://mail.gnu.org/mailman/listinfo/lynx-dev/) [usr/share/doc/lynx-dev/test/cp-1252a.html]
+lynx-dev: privacy-breach-generic [<link rev="owner" href="http://mail.gnu.org/mailman/listinfo/lynx-dev/">] (http://mail.gnu.org/mailman/listinfo/lynx-dev/) [usr/share/doc/lynx-dev/test/iso-8859-2.html]
+lynx-dev: privacy-breach-generic [<link rev="owner" href="http://mail.gnu.org/mailman/listinfo/lynx-dev/">] (http://mail.gnu.org/mailman/listinfo/lynx-dev/) [usr/share/doc/lynx-dev/test/iso-8859-2a.html]
+
+# These are intentional:
+lynx-dev: extra-license-file [usr/share/doc/lynx-dev/COPYING]
+lynx-dev: spelling-error-in-binary XWINDOWS X [usr/bin/lynx-dev]

@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTMLGen.c,v 1.46 2020/01/21 22:02:35 tom Exp $
+ * $LynxId: HTMLGen.c,v 1.47 2024/03/13 23:48:59 tom Exp $
  *
  *		HTML Generator
  *		==============
@@ -160,7 +160,7 @@ static void allow_break(HTStructured * me, int new_cleanness, int dlbc)
  *	------------------
  *
  *	The tricky bits are the line break handling.  This attempts
- *	to synchrononise line breaks on sentence or phrase ends.  This
+ *	to synchronize line breaks on sentence or phrase ends.  This
  *	is important if one stores SGML files in a line-oriented code
  *	repository, so that if a small change is made, line ends don't
  *	shift in a ripple-through to apparently change a large part of the
@@ -466,7 +466,7 @@ static int HTMLGen_start_element(HTStructured * me, int element_number,
     /*
      * Make very specific HTML assumption that PRE can't be nested!
      */
-    me->preformatted = (BOOL) ((element_number == HTML_PRE)
+    me->preformatted = (BOOL) ((element_number == HTML_PRE || element_number == HTML_XMP)
 			       ? YES
 			       : was_preformatted);
 
@@ -538,7 +538,7 @@ static int HTMLGen_end_element(HTStructured * me, int element_number,
     HTMLGen_put_string(me, "</");
     HTMLGen_put_string(me, HTML_dtd.tags[element_number].name);
     HTMLGen_put_character(me, '>');
-    if (element_number == HTML_PRE) {
+    if (element_number == HTML_PRE || element_number == HTML_XMP) {
 	me->preformatted = NO;
     }
 #ifdef USE_COLOR_STYLE

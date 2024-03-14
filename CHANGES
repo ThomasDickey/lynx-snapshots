@@ -1,9 +1,12 @@
--- $LynxId: CHANGES,v 1.1161 2024/03/13 16:23:10 tom Exp $
+-- $LynxId: CHANGES,v 1.1165 2024/03/14 14:29:49 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2024-03-13 (2.9.0a)
+2024-03-14 (2.9.0b)
+* update/cleanup test-packages -TD
+* correct logic in HTMLGen.c where XMP was not treated as a preformatted
+  style, causing NNTP headers to be formatted (report by Marco Moock) -TD
 * fix special case of main status line on a page without links, broken by fix
   for UBSAN/ASAN issue -TG
 

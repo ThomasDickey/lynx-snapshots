@@ -1,25 +1,28 @@
-# $LynxId: lynx.spec,v 1.73 2024/03/13 20:52:04 tom Exp $
+# $LynxId: lynx.spec,v 1.76 2024/03/14 16:57:47 tom Exp $
 Summary: A text-based Web browser
 Name: lynx-dev
 Version: 2.9.1
-Release: 1
+Release: 2
 License: GPLv2
 Group: Applications/Internet
-Source: lynx%{version}.tgz
+Source: https://invisible-island.net/archives/lynx/lynx%{version}.tgz
 URL: https://lynx.invisible-island.net
 Provides: webclient >= 0.0
 Provides: text-www-browser >= 0.0
 
 # Fedora:
-BuildRequires: openssl-devel, pkgconfig, ncurses-devel >= 5.3-5,
+BuildRequires: pkgconfig, ncurses-devel >= 5.3-5,
 BuildRequires: zlib-devel, gettext
 BuildRequires: libidn-devel
+# BuildRequires: openssl-devel
 # BuildRequires: bzip2-devel
 
 # SuSE:
 # BuildRequires: libbz2-devel
+# BuildRequires: libopenssl-1_1-devel, or
+# BuildRequires: libopenssl-3-devel                   
 
-Requires: gzip, bzip2, tar, zip, unzip
+Requires: brotli, gzip, bzip2, tar, zip, unzip
 
 %description
 Lynx is a fully-featured World Wide Web (WWW) client for users running
@@ -48,35 +51,23 @@ HTTP, FTP, WAIS, and NNTP servers.
 	--sysconfdir=%{lynx_etc} \
 	--with-cfg-path=%{lynx_etc}:%{lynx_doc}/samples \
 	--with-textdomain=%{name} \
-	--enable-8bit-toupper \
 	--enable-cgi-links \
 	--enable-change-exec \
 	--enable-charset-choice \
-	--enable-cjk \
 	--enable-default-colors \
 	--enable-exec-links \
 	--enable-exec-scripts \
 	--enable-externs \
 	--enable-font-switch \
-	--enable-forms-options \
 	--enable-gzip-help \
 	--enable-htmlized-cfg \
 	--enable-internal-links \
 	--enable-ipv6 \
-	--enable-chinese-utf8 \
-	--enable-japanese-utf8 \
-	--enable-justify-elts \
 	--enable-kbd-layout \
 	--enable-local-docs \
 	--enable-nested-tables \
 	--enable-nls \
 	--enable-nsl-fork \
-	--enable-partial \
-	--enable-persistent-cookies \
-	--enable-prettysrc \
-	--enable-read-eta \
-	--enable-scrollbar \
-	--enable-source-cache \
 	--enable-syslog \
 	--enable-warnings \
 	--with-screen=ncursesw6dev \
@@ -110,6 +101,9 @@ strip $RPM_BUILD_ROOT%{_bindir}/%{name}
 %config(noreplace) %{lynx_etc}/*.lss
 
 %changelog
+
+* Thu Mar 14 2024 Thomas E. Dickey
+- trim redundant options
 
 * Mon Jan 15 2024 Thomas E. Dickey
 - simplified tarball name
