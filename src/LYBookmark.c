@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYBookmark.c,v 1.88 2023/01/07 16:09:53 tom Exp $
+ * $LynxId: LYBookmark.c,v 1.89 2024/03/15 10:04:29 KIHARA.Hideto Exp $
  */
 #include <HTUtils.h>
 #include <HTAlert.h>
@@ -1029,6 +1029,7 @@ static BOOLEAN havevisible(const char *Title)
     unsigned char c;
     long unicode;
 
+    UCTransToUni(0, -1);	/* reset internal state */
     for (; *p; p++) {
 	c = UCH(TOASCII(*p));
 	if (c > 32 && c < 127) {

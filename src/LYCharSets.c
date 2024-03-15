@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYCharSets.c,v 1.71 2021/06/29 22:01:12 tom Exp $
+ * $LynxId: LYCharSets.c,v 1.74 2024/03/15 16:15:07 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTCJK.h>
@@ -605,34 +605,15 @@ static void HTMLSetDisplayCharsetMatchLocale(int i)
 	 * We have no intention to pass CJK via UCTransChar if that happened.
 	 * Let someone from CJK correct this if necessary.
 	 */
-	DisplayCharsetMatchLocale = TRUE;	/* old-style */
-	return;
-
-    } else if (strncasecomp(LYCharSet_UC[i].MIMEname, "cp", 2) ||
-	       strncasecomp(LYCharSet_UC[i].MIMEname, "windows", 7)) {
-	/*
-	 * Assume dos/windows displays usually on remote terminal, hence it
-	 * rarely matches locale.  (In fact, MS Windows codepoints locale are
-	 * never seen on UNIX).
-	 */
-	match = FALSE;
+	match = TRUE;		/* old-style */
+    } else if (!strncasecomp(LYCharSet_UC[i].MIMEname, "cp", 2) ||
+	       !strncasecomp(LYCharSet_UC[i].MIMEname, "windows", 7)) {
+	match = FALSE;		/* Windows locale is never seen on UNIX */
     } else {
-	match = TRUE;		/* guess, but see below */
-
-#if !defined(LOCALE)
-	if (LYCharSet_UC[i].enc != UCT_ENC_UTF8)
-	    /*
-	     * Leave true for utf-8 display - the code doesn't deal very well
-	     * with this case.  - kw
-	     */
-	    match = FALSE;
+#if defined(LOCALE)
+	match = !UCForce8bitTOUPPER;	/* disable locale (from lynx.cfg) */
 #else
-	if (UCForce8bitTOUPPER) {
-	    /*
-	     * Force disable locale (from lynx.cfg)
-	     */
-	    match = FALSE;
-	}
+	match = (LYCharSet_UC[i].enc == UCT_ENC_UTF8);
 #endif
     }
 

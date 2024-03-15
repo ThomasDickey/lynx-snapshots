@@ -1,9 +1,15 @@
--- $LynxId: CHANGES,v 1.1165 2024/03/14 14:29:49 tom Exp $
+-- $LynxId: CHANGES,v 1.1168 2024/03/15 19:08:31 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2024-03-14 (2.9.0b)
+2024-03-15 (2.9.0c)
+* add configure check for ssp library, needed in some MinGW configurations -TD
+* fixes for saving a UTF-8 bookmark title -KH
+  + correct comparison of Windows codepage values when setting
+    DisplayCharsetMatchLocale, to handle UTF-8
+  + reset the internal state of UCTransToUni() before using it for bookmark
+    title check.
 * update/cleanup test-packages -TD
 * correct logic in HTMLGen.c where XMP was not treated as a preformatted
   style, causing NNTP headers to be formatted (report by Marco Moock) -TD
