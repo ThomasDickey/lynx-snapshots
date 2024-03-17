@@ -1,4 +1,4 @@
-# $LynxId: makefile.in,v 1.35 2021/07/16 20:01:00 tom Exp $
+# $LynxId: makefile.in,v 1.36 2024/03/17 22:13:00 tom Exp $
 # Make WWW under unix for a.n.other unix system (bsd)
 # Use this as a template
 
@@ -31,15 +31,13 @@ RANLIB		= @RANLIB@
 o		= .@OBJEXT@
 x		= @EXEEXT@
 
-INTLDIR_CPPFLAGS= @INTLDIR_CPPFLAGS@ -I$(top_srcdir)/intl
-
 CPP		= @CPP@
 CPPOPTS		= $(DEFS) $(LYFLAGS) \
 		-I../../.. \
 		-I../../../src \
 		-I$(top_srcdir) \
 		-I$(top_srcdir)/src \
-		$(INTLDIR_CPPFLAGS) -I$(WWWINC) $(EXTRA_CPPFLAGS) $(CPPFLAGS)
+		-I$(WWWINC) $(EXTRA_CPPFLAGS) $(CPPFLAGS)
 
 LY_CFLAGS	= @CFLAGS@ @EXTRA_CFLAGS@
 CFLAGS		= $(CPPOPTS) $(LY_CFLAGS)

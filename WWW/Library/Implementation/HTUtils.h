@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTUtils.h,v 1.135 2023/11/05 23:09:43 tom Exp $
+ * $LynxId: HTUtils.h,v 1.137 2024/03/17 23:04:27 tom Exp $
  *
  * Utility macros for the W3 code library
  * MACROS FOR GENERAL USE
@@ -140,7 +140,6 @@ char *alloca();
 /* suppress inadvertent use of gettext in makeuctb when cross-compiling */
 #ifdef DONT_USE_GETTEXT
 #undef HAVE_GETTEXT
-#undef HAVE_LIBGETTEXT_H
 #undef HAVE_LIBINTL_H
 #endif
 
@@ -618,7 +617,7 @@ extern int WWW_TraceMask;
 
 #ifndef PRI_off_t
 #define GUESS_PRI_off_t
-#if (SIZEOF_OFF_T == SIZEOF_LONG)
+#if defined(SIZEOF_OFF_T) && defined(SIZEOF_LONG) && (SIZEOF_OFF_T == SIZEOF_LONG)
 #define PRI_off_t	"ld"
 #define SCN_off_t	"ld"
 #define CAST_off_t(n)	(long)(n)

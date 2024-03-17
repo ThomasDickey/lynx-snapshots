@@ -1,4 +1,4 @@
-dnl $LynxId: configure.in,v 1.359 2024/03/15 19:03:29 tom Exp $
+dnl $LynxId: configure.in,v 1.363 2024/03/17 22:06:53 tom Exp $
 dnl
 dnl Process this file with autoconf to produce a configure script.
 dnl
@@ -27,10 +27,10 @@ dnl ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 dnl OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 dnl ---------------------------------------------------------------------------
 dnl
-AC_REVISION($Revision: 1.359 $)
+AC_REVISION($Revision: 1.363 $)
 
 AC_PREREQ(2.52.20231210)
-AC_INIT(lynx,2.9.0c,lynx-dev@nongnu.org)
+AC_INIT(lynx,2.9.0d,lynx-dev@nongnu.org)
 
 AC_CONFIG_SRCDIR(userdefs.h)
 
@@ -96,6 +96,7 @@ case "$host_os" in
 esac
 
 CF_PROG_CC
+AC_C_INLINE
 CF_PROG_CPP_COMMENTS
 AC_PROG_LN_S
 case "$host_os" in
@@ -343,14 +344,15 @@ case "$host_os" in
 esac
 
 CF_ANSI_CC_REQD
+CF_XOPEN_SOURCE(500,199506L)
+CF_LARGEFILE
+AC_CHECK_DECL(exit)
 
 dnl --------------------------------------------------------------------------
 dnl --------------------------------------------------------------------------
 
 CF_HELP_MESSAGE(
 Basic Configuration Options:)
-
-CF_LARGEFILE
 
 dnl --------------------------------------------------------------------------
 dnl internationalization macros
@@ -368,13 +370,6 @@ if test -z "$ALL_LINGUAS" ; then
 fi
 
 CF_BUNDLED_INTL(makefile,disable)
-
-INTLDIR_CPPFLAGS="#"
-if test -z "$INTLDIR_MAKE" ; then
-	INTLDIR_CPPFLAGS=
-fi
-
-AC_SUBST(INTLDIR_CPPFLAGS)
 
 CF_WITH_PATH(nls-datadir,
 [  --with-nls-datadir=DIR  NLS data, parent of locale],
@@ -404,7 +399,6 @@ fi
 fi
 
 dnl --------------------------------------------------------------------------
-CF_XOPEN_SOURCE(500,199506L)
 CF_SIGWINCH
 
 dnl Collect tests for compiler options into one place
@@ -740,7 +734,6 @@ dnl --------------------------------------------------------------------------
 dnl Checks for standard headers
 dnl --------------------------------------------------------------------------
 
-AC_CHECK_DECL(exit)
 AC_HEADER_TIME
 AC_HEADER_DIRENT
 dnl Don't check for sys/wait.h here since it is covered by another test.

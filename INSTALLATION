@@ -665,12 +665,6 @@ II. Compile instructions -- UNIX
 
 	See the "--enable-gnutls-compat" option.
 
-  --with-included-gettext
-	not supported in this package.  The configure script uses macros which
-	are bundled together with more useful features.
-
-	See the "--enable-nls" option.
-
   --with-libiconv-prefix=DIR
 	search for libiconv in DIR/include and DIR/lib
 
@@ -1506,4 +1500,4 @@ VIII. Acknowledgment
 
 -- 1999/04/24 - H. Nelson <lynx-admin@irm.nara.kindai.ac.jp>
 -- vile:txtmode
--- $LynxId: INSTALLATION,v 1.137 2022/12/28 13:40:56 tom Exp $
+-- $LynxId: INSTALLATION,v 1.138 2024/03/17 16:01:22 tom Exp $

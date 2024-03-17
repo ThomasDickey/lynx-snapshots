@@ -1,9 +1,14 @@
--- $LynxId: CHANGES,v 1.1168 2024/03/15 19:08:31 tom Exp $
+-- $LynxId: CHANGES,v 1.1172 2024/03/17 16:05:02 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2024-03-15 (2.9.0c)
+2024-03-17 (2.9.0d)
+* remove obsolete option --with-included-gettext -TD
+* override $BUILD_CPPFLAGS and $BUILD_LIBS when not cross-compiling, to help
+  build Lynx with PDCurses -TD
+* re-order configure check for _XOPEN_SOURCE, etc., to reduce compiler warnings
+  with gcc 14 -TD
 * add configure check for ssp library, needed in some MinGW configurations -TD
 * fixes for saving a UTF-8 bookmark title -KH
   + correct comparison of Windows codepage values when setting

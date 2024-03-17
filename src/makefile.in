@@ -1,4 +1,4 @@
-# $LynxId: makefile.in,v 1.77 2021/02/28 15:56:53 tom Exp $
+# $LynxId: makefile.in,v 1.79 2024/03/17 22:06:22 tom Exp $
 # template-makefile for Lynx src directory
 
 SHELL		= @CONFIG_SHELL@
@@ -53,9 +53,6 @@ WAISLIB		= # FIXME: set in parent makefile
 WWWINC		= WWW/Library/Implementation
 WWWLIB		= $(top_builddir)/WWW/Library/Implementation/libwww.a
 
-INTLLIB		= @INTLLIBS@
-INTLDIR_CPPFLAGS= @INTLDIR_CPPFLAGS@-I$(top_srcdir)/intl
-
 CPP_OPTS	= $(DEFS) $(CHARSET_DEFS) \
 		-DLOCALEDIR=\"$(localedir)\" \
 		-I. \
@@ -65,7 +62,7 @@ CPP_OPTS	= $(DEFS) $(CHARSET_DEFS) \
 		-I$(top_srcdir) \
 		-I$(top_srcdir)/src \
 		-I$(top_srcdir)/$(WWWINC) \
-		$(INTLDIR_CPPFLAGS) $(SITE_DEFS) $(CPPFLAGS)
+		$(SITE_DEFS) $(CPPFLAGS)
 CC_OPTS		= $(CFLAGS) $(CPP_OPTS)
 
 LINT		= @LINT@
@@ -107,7 +104,7 @@ all: lynx$x
 
 lynx$x:   message $(top_builddir)/LYHelp.h $(OBJS) $(WWWLIB)
 	@echo "Linking and creating Lynx executable"
-	$(CC) $(CC_OPTS) $(LDFLAGS) -o $@  $(OBJS) $(WWWLIB) $(LIBS) $(INTLLIB)
+	$(CC) $(CC_OPTS) $(LDFLAGS) -o $@  $(OBJS) $(WWWLIB) $(LIBS)
 	@echo "Copying Lynx executable into top-level directory"
 	rm -f $(top_builddir)/$@
 	cp $@ $(top_builddir)/

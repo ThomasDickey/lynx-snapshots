@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMain.c,v 1.300 2024/01/07 15:31:25 tom Exp $
+ * $LynxId: LYMain.c,v 1.301 2024/03/17 23:10:41 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTP.h>
@@ -1003,7 +1003,7 @@ static void append_ssl_version(char **target,
 /* Set the text message domain.  */
 void LYSetTextDomain(void)
 {
-#if defined(HAVE_LIBINTL_H) || defined(HAVE_LIBGETTEXT_H)
+#if defined(HAVE_LIBINTL_H)
     const char *cp;
 
     if ((cp = LYGetEnv("LYNX_LOCALEDIR")) == 0) {
@@ -1221,6 +1221,7 @@ int main(int argc,
      * Zero the links and history struct arrays.
      */
     memset((void *) links, 0, sizeof(LinkInfo) * MAXLINKS);
+
     LYAllocHistory(8);
     /*
      * Zero the MultiBookmark arrays.

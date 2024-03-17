@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYReadCFG.c,v 1.200 2021/07/29 22:52:55 tom Exp $
+ * $LynxId: LYReadCFG.c,v 1.201 2024/03/17 23:04:33 tom Exp $
  */
 #ifndef NO_RULES
 #include <HTRules.h>
@@ -1406,7 +1406,7 @@ static int screen_size_fun(char *value)
 }
 #endif
 
-#if defined(HAVE_LIBINTL_H) || defined(HAVE_LIBGETTEXT_H)
+#if defined(HAVE_LIBINTL_H)
 static int message_language_fun(char *value)
 {
     char *tmp = NULL;
@@ -1621,7 +1621,7 @@ static Config_Type Config_Table [] =
      PARSE_INT(RC_MAX_COOKIES_GLOBAL,   max_cookies_global),
      PARSE_INT(RC_MAX_URI_SIZE,         max_uri_size),
      PARSE_TIM(RC_MESSAGESECS,          MessageSecs),
-#if defined(HAVE_LIBINTL_H) || defined(HAVE_LIBGETTEXT_H)
+#if defined(HAVE_LIBINTL_H)
      PARSE_FUN(RC_MESSAGE_LANGUAGE,     message_language_fun),
 #endif
      PARSE_SET(RC_MINIMAL_COMMENTS,     minimal_comments),

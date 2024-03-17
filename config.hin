@@ -1,5 +1,5 @@
 /*
- * $LynxId: config.hin,v 1.154 2024/01/07 15:13:24 tom Exp $
+ * $LynxId: config.hin,v 1.155 2024/03/17 23:09:41 tom Exp $
  * vile:cmode
  *
  * The configure script translates "config.hin" into "lynx_cfg.h"
@@ -53,9 +53,8 @@
 #undef GCC_UNUSED		/* CF_GCC_ATTRIBUTES */
 #undef GETGROUPS_T		/* AC_TYPE_GETGROUPS */
 #undef GZIP_PATH		/* CF_PATH_PROG(gzip) */
-#undef HAVE_ALLOCA		/* AM_GNU_GETTEXT/AC_FUNC_ALLOCA */
-#undef HAVE_ALLOCA_H		/* AM_GNU_GETTEXT/AC_FUNC_ALLOCA */
-#undef HAVE_ARGZ_H		/* AM_GNU_GETTEXT */
+#undef HAVE_ALLOCA		/* AC_FUNC_ALLOCA */
+#undef HAVE_ALLOCA_H		/* AC_FUNC_ALLOCA */
 #undef HAVE_ARPA_INET_H
 #undef HAVE_ASSUME_DEFAULT_COLORS /* ncurses extension */
 #undef HAVE_ATOLL
@@ -69,7 +68,6 @@
 #undef HAVE_CURSES_EXIT		/* ncurses debugging extension */
 #undef HAVE_CURSES_VERSION	/* CF_FUNC_CURSES_VERSION */
 #undef HAVE_CUSERID
-#undef HAVE_DCGETTEXT		/* AM_GNU_GETTEXT */
 #undef HAVE_DEFINE_KEY
 #undef HAVE_DELSCREEN		/* CF_CURSES_FUNCS  */
 #undef HAVE_DIRENT_H		/* AC_HEADER_DIRENT */
@@ -84,7 +82,7 @@
 #undef HAVE_GETCWD
 #undef HAVE_GETGROUPS
 #undef HAVE_GETPWUID		/* CF_FUNC_GETPWUID */
-#undef HAVE_GETTEXT		/* defined if you want to use non-GNU gettext */
+#undef HAVE_GETTEXT		/* AM_WITH_NLS */
 #undef HAVE_GETTIMEOFDAY
 #undef HAVE_GETUID
 #undef HAVE_GNUTLS_PROTOCOL_SET_PRIORITY
@@ -99,21 +97,17 @@
 #undef HAVE_LC_MESSAGES		/* locale messages */
 #undef HAVE_LIBDBMALLOC		/* --with-dbmalloc */
 #undef HAVE_LIBDMALLOC		/* --with-dmalloc */
-#undef HAVE_LIBGETTEXT_H	/* defined if you want to use bundled gettext */
 #undef HAVE_LIBINTL_H		/* AM_GNU_GETTEXT, or cleanup from that */
 #undef HAVE_LIBUTF8_H		/* may be needed for libncursesw */
-#undef HAVE_LIMITS_H
+#undef HAVE_LIMITS_H		/* CF_NGROUP */
 #undef HAVE_LOCALE_H
 #undef HAVE_LONG_LONG		/* CF_TYPE_LONG_LONG */
 #undef HAVE_LSTAT		/* CF_FUNC_LSTAT */
-#undef HAVE_MALLOC_H		/* AM_GNU_GETTEXT */
 #undef HAVE_MBSTATE_T		/* CF_WIDEC_CURSES */
 #undef HAVE_MEMORY_H		/* AC_CHECK_DECL(exit) */
 #undef HAVE_MKDTEMP
 #undef HAVE_MKTEMP
 #undef HAVE_MKTIME		/* AC_REPLACE_FUNCS(mktime) */
-#undef HAVE_MMAP		/* AM_GNU_GETTEXT */
-#undef HAVE_MUNMAP		/* AM_GNU_GETTEXT */
 #undef HAVE_NAPMS
 #undef HAVE_NCURSESW_NCURSES_H	/* defined if we include <ncursesw/ncurses.h> */
 #undef HAVE_NCURSESW_TERM_H	/* have <ncursesw/term.h> */
@@ -122,7 +116,6 @@
 #undef HAVE_NCURSES_TERM_H	/* have <ncurses/term.h> */
 #undef HAVE_NEWPAD
 #undef HAVE_NEWTERM
-#undef HAVE_NL_TYPES_H		/* AM_GNU_GETTEXT */
 #undef HAVE_PNOUTREFRESH
 #undef HAVE_POPEN
 #undef HAVE_PUTENV
@@ -130,7 +123,6 @@
 #undef HAVE_READDIR
 #undef HAVE_RESIZETERM
 #undef HAVE_RESOLV_H
-#undef HAVE_SETENV		/* AM_GNU_GETTEXT */
 #undef HAVE_SETLOCALE
 #undef HAVE_SETUID
 #undef HAVE_SIGACTION		/* CF_FUNC_SIGACTION */
@@ -140,9 +132,6 @@
 #undef HAVE_STDINT_H		/* AC_CHECK_DECL(exit) */
 #undef HAVE_STDLIB_H		/* AC_CHECK_DECL(exit) */
 #undef HAVE_STDNORETURN_H	/* CF_C11_NORETURN */
-#undef HAVE_STPCPY		/* AM_GNU_GETTEXT */
-#undef HAVE_STRCASECMP		/* AM_GNU_GETTEXT */
-#undef HAVE_STRCHR		/* AM_GNU_GETTEXT */
 #undef HAVE_STRERROR
 #undef HAVE_STRINGS_H		/* AC_CHECK_DECL(exit) */
 #undef HAVE_STRING_H		/* AC_CHECK_DECL(exit) */
@@ -154,7 +143,7 @@
 #undef HAVE_SYS_FILIO_H		/* have <sys/filio.h> */
 #undef HAVE_SYS_IOCTL_H		/* have <sys/ioctl.h> */
 #undef HAVE_SYS_NDIR_H		/* AC_HEADER_DIRENT */
-#undef HAVE_SYS_PARAM_H		/* AM_GNU_GETTEXT */
+#undef HAVE_SYS_PARAM_H		/* CF_NGROUP */
 #undef HAVE_SYS_STAT_H		/* AC_CHECK_DECL(exit) */
 #undef HAVE_SYS_TIMEB_H		/* have <sys/timeb.h> */
 #undef HAVE_SYS_TIME_H		/* have <sys/time.h> */
@@ -180,8 +169,6 @@
 #undef HAVE_UTMP_UT_SESSION	/* CF_UTMP_UT_SESSION */
 #undef HAVE_UTMP_UT_XSTATUS	/* CF_UTMP_UT_XSTATUS */
 #undef HAVE_UTMP_UT_XTIME	/* CF_UTMP_UT_XTIME */
-#undef HAVE_VALUES_H		/* AM_GNU_GETTEXT */
-#undef HAVE_VARARGS_H		/* CF_VARARGS */
 #undef HAVE_VASPRINTF		/* CF_FUNC_VASPRINTF */
 #undef HAVE_VFORK_H		/* have <vfork.h> */
 #undef HAVE_WAIS_H
@@ -199,9 +186,6 @@
 #undef HAVE_ZERROR
 #undef HAVE__NC_FREEALL		/* ncurses debugging extension */
 #undef HAVE__NC_FREE_AND_EXIT	/* ncurses debugging extension */
-#undef HAVE___ARGZ_COUNT	/* AM_GNU_GETTEXT */
-#undef HAVE___ARGZ_NEXT		/* AM_GNU_GETTEXT */
-#undef HAVE___ARGZ_STRINGIFY	/* AM_GNU_GETTEXT */
 #undef ICONV_CONST
 #undef IGNORE_CTRL_C		/* FIXME: make tests? */
 #undef INCLUDE_PROTOTYPES	/* CF_SOCKS5 */

@@ -1,5 +1,5 @@
 /*                System dependencies in the W3 library
- * $LynxId: www_tcp.h,v 1.61 2018/12/26 12:30:14 tom Exp $
+ * $LynxId: www_tcp.h,v 1.63 2024/03/17 23:04:27 tom Exp $
  *
                                    SYSTEM DEPENDENCIES
 
@@ -804,7 +804,7 @@ typedef unsigned short mode_t;
 
 #if defined(VMS)
 #define socklen_t unsigned
-#else
+#elif defined(_WINDOWS)
 #define socklen_t int		/* used for default LY_SOCKLEN definition */
 #endif
 
@@ -812,10 +812,6 @@ typedef unsigned short mode_t;
 
 #ifdef HAVE_LIBINTL_H
 #include <libintl.h>
-#endif
-
-#ifdef HAVE_LIBGETTEXT_H
-#include <libgettext.h>
 #endif
 
 #define N_(s) s
