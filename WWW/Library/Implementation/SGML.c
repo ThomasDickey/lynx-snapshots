@@ -1,5 +1,5 @@
 /*
- * $LynxId: SGML.c,v 1.186 2023/10/25 22:35:29 tom Exp $
+ * $LynxId: SGML.c,v 1.187 2024/03/18 07:56:43 tom Exp $
  *
  *			General SGML Parser code		SGML.c
  *			========================
@@ -5023,11 +5023,9 @@ unsigned char *TO_EUC(const unsigned char *jis,
     unsigned char *d;
     int to1B, to2B;
     int in_sjis = 0;
-    static int nje;
     int n8bits;
     int is_JIS;
 
-    nje++;
     n8bits = 0;
     s = jis;
     d = euc;

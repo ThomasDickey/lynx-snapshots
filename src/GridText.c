@@ -1,5 +1,5 @@
 /*
- * $LynxId: GridText.c,v 1.347 2024/01/15 19:11:55 Gisle.Vanem Exp $
+ * $LynxId: GridText.c,v 1.348 2024/03/18 07:57:58 tom Exp $
  *
  *		Character grid hypertext object
  *		===============================
@@ -6002,7 +6002,7 @@ static void HText_trimHightext(HText *text,
 			       int final,
 			       int stop_before)
 {
-    int cur_line, cur_shift;
+    int cur_line;
     TextAnchor *anchor_ptr;
     TextAnchor *prev_a = NULL;
     HTLine *line_ptr;
@@ -6097,7 +6097,6 @@ static void HText_trimHightext(HText *text,
 		anchor_ptr->number,
 		anchor_ptr->extent));
 
-	cur_shift = 0;
 	/*
 	 * Strip off any spaces or SpecialAttrChars at the beginning,
 	 * if they exist, but only on HYPERTEXT_ANCHORS.
@@ -6108,7 +6107,6 @@ static void HText_trimHightext(HText *text,
 		   IsSpecialAttrChar(ch)) {
 		anchor_ptr->line_pos++;
 		anchor_ptr->extent--;
-		cur_shift++;
 		ch = UCH(line_ptr->data[anchor_ptr->line_pos]);
 	    }
 	}

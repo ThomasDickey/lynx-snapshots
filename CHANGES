@@ -1,9 +1,11 @@
--- $LynxId: CHANGES,v 1.1172 2024/03/17 16:05:02 tom Exp $
+-- $LynxId: CHANGES,v 1.1176 2024/03/21 08:19:13 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2024-03-17 (2.9.0d)
+2024-03-21 (2.9.0e)
+* improve bookmark file-updates, allowing for users to add HTML markup
+  (report by TG) -TD
 * remove obsolete option --with-included-gettext -TD
 * override $BUILD_CPPFLAGS and $BUILD_LIBS when not cross-compiling, to help
   build Lynx with PDCurses -TD

@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYBookmark.c,v 1.89 2024/03/15 10:04:29 KIHARA.Hideto Exp $
+ * $LynxId: LYBookmark.c,v 1.92 2024/03/21 07:34:18 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTAlert.h>
@@ -202,6 +202,159 @@ static char *title_convert8bit(const char *Title);
 #define ftruncate(fd, len) _chsize(fd, len)
 #endif
 
+static const char *visible_char(int ch)
+{
+    static char result[8];
+
+    if (ch < 32) {
+	sprintf(result, "^%c", ch | '@');
+    } else if (ch == 32) {
+	strcpy(result, "SP");
+    } else if (ch < 127) {
+	sprintf(result, "%c", ch);
+    } else if (ch == 127) {
+	strcpy(result, "DEL");
+    } else {
+	sprintf(result, "\\%03o", ch & 0xff);
+    }
+    return result;
+}
+
+typedef enum {
+    scanUnknown			/* markup which we do not care about */
+    ,scanHeadOL
+    ,scanHeadUL
+    ,scanTailOL
+    ,scanTailUL
+    ,scanTailBody
+    ,scanTailHtml
+    ,scanIgnore			/* whitespace */
+} SCAN_TRAILING;
+
+#define SCAN_LEN 10		/* longest interesting tag is 6 characters */
+
+/*
+ * Scan the bookmark file data, looking for a trailing "</ul>" or "</ol>".
+ * Keep track of "<ul> and "<ol>", and allow for comments.
+ */
+static int scan_trailing(FILE *ofp,
+			 FILE *ifp,
+			 char chunk[SCAN_LEN],
+			 int *matched,
+			 int *comment,
+			 SCAN_TRAILING * scanned)
+{
+    /* *INDENT-OFF* */
+    static const struct {
+	SCAN_TRAILING code;
+	const char name[SCAN_LEN];
+    } table[] = {
+	{ scanHeadOL, "<OL>" },
+	{ scanHeadUL, "<UL>" },
+	{ scanTailOL, "</OL>" },
+	{ scanTailUL, "</UL>" },
+	{ scanTailBody, "</BODY>" },
+	{ scanTailHtml, "</HTML>" },
+    };
+    /* *INDENT-ON* */
+
+    int status = FALSE;
+    int ch = fgetc(ifp);
+
+    *scanned = scanUnknown;
+    if (!feof(ifp) && !ferror(ifp)) {
+	int uc = TOUPPER(ch);
+	int keep = FALSE;
+
+	if (isspace(UCH(uc)))
+	    *scanned = scanIgnore;
+
+	switch (uc) {
+	case '<':
+	    if (!*comment) {
+		*matched = 0;
+		keep = TRUE;
+	    }
+	    break;
+	case '!':
+	    if (!*comment && *matched == 1) {
+		keep = TRUE;
+	    } else
+		CTRACE((tfp, "...comment %d matched %d\n", *comment, *matched));
+	    break;
+	case '-':
+	    if (*comment) {
+		/* look for "-->" */
+		if (*matched == 0 || (*matched == 1 && chunk[0] == '-'))
+		    keep = TRUE;
+	    } else {
+		/* look for "<!--" */
+		if (*matched == 3) {
+		    if (!strncmp(chunk, "<!-", 3)) {
+			*comment = TRUE;
+			keep = TRUE;
+		    }
+		} else if (*matched == 2) {
+		    keep = TRUE;
+		}
+	    }
+	    break;
+	case '>':
+	    if (*comment) {
+		/* look for "-->" */
+		if ((*matched == 1 || *matched == 2) && chunk[0] == '-') {
+		    *comment = FALSE;
+		    keep = TRUE;
+		}
+	    } else {
+		keep = TRUE;
+	    }
+	    break;
+	default:
+	    if (isalpha(uc) || uc == '/') {
+		keep = !*comment;
+	    } else {
+		keep = FALSE;
+	    }
+	    break;
+	}
+
+	if (keep) {
+	    if (*matched < (SCAN_LEN - 2)) {
+		chunk[*matched] = (char) uc;
+		*matched += 1;
+		if (uc == '>') {
+		    unsigned n;
+
+		    chunk[*matched] = 0;
+		    for (n = 0; n < TABLESIZE(table); ++n) {
+			if (!strcmp(chunk, table[n].name)) {
+			    *scanned = table[n].code;
+			    CTRACE2(TRACE_SGML, (tfp, "...matched '%s'\n",
+						 chunk));
+			    break;
+			}
+		    }
+		}
+	    } else {
+		*matched = 0;
+	    }
+	} else {
+	    *matched = 0;
+	}
+	chunk[*matched] = 0;
+
+	CTRACE2(TRACE_SGML, (tfp, "%s %s%s:%d:%s\n",
+			     keep ? "KEEP" : "SKIP",
+			     *comment ? "*" : "",
+			     visible_char(uc), *matched, chunk));
+
+	fputc(ch, ofp);
+	status = TRUE;
+    }
+    return status;
+}
+
 /*
  * Adds a link to a bookmark file, creating the file if it doesn't already
  * exist, and making sure that no_cache is set for a pre-existing, cached file,
@@ -217,6 +370,7 @@ void save_bookmark_link(const char *address,
     char filename_buffer[LY_MAXPATH];
     char *Address = NULL;
     char *Title = NULL;
+    char *trailing_tag = NULL;
     int i, c;
     bstring *string_data = NULL;
     bstring *tmp_data = NULL;
@@ -366,29 +520,122 @@ void save_bookmark_link(const char *address,
     StrAllocCopy(Address, address);
     LYEntify(&Address, FALSE);
 
+    /*
+     * Copy the existing bookmark file to a temporary file, to allow update.
+     */
     if (!first_time) {
 	BOOLEAN empty_file = TRUE;
 	FILE *bp = tmpfile();
-	char *buffer = NULL;
+	char chunk[SCAN_LEN];
+	int ch;
+	int offset_Chr = 0;
+	int offset_Tag = 0;
+	int limit_Edit = -1;
+	int last_OL = -1;
+	int last_UL = -1;
+	int count_OL = 0;
+	int count_UL = 0;
+	int matched = 0;
+	int comment = FALSE;
+	char found_tag[scanIgnore + 1];
+	SCAN_TRAILING scanned = scanUnknown;
 
 	rewind(fp);
-	while (LYSafeGets(&buffer, fp)) {
+	memset(found_tag, 0, sizeof(found_tag));
+	while (scan_trailing(bp, fp, chunk, &matched, &comment, &scanned)) {
 	    empty_file = FALSE;
-	    if (LYstrstr(buffer, "</ol>"))
+
+	    /* remember where the most recent tag starts */
+	    if (matched == 0)
+		offset_Tag = offset_Chr;
+
+	    found_tag[scanned] = TRUE;
+	    switch (scanned) {
+	    case scanUnknown:
+	    case scanIgnore:
 		break;
-	    fprintf(bp, "%s", buffer);
+	    case scanHeadOL:
+		++count_OL;
+		break;
+	    case scanHeadUL:
+		++count_UL;
+		break;
+	    case scanTailOL:
+		count_OL--;
+		last_OL = offset_Tag;
+		break;
+	    case scanTailUL:
+		count_UL--;
+		last_UL = offset_Tag;
+		break;
+	    case scanTailBody:
+	    case scanTailHtml:
+		if (limit_Edit < 0)
+		    limit_Edit = offset_Tag;
+		break;
+	    }
+
+	    ++offset_Chr;
 	}
 
 	fflush(bp);
 	rewind(bp);
 
-	rewind(fp);
-	ftruncate(fileno(fp), 0);
+	/* if no BODY/HTML tag ends the file, treat it as the whole file */
+	if (limit_Edit < 0)
+	    limit_Edit = offset_Chr;
 
-	while (LYSafeGets(&buffer, bp)) {
-	    fprintf(fp, "%s", buffer);
+	/* if the last UL/OL offsets differ, at least one is valid */
+	if (last_UL > last_OL) {
+	    if (limit_Edit > last_UL)
+		limit_Edit = last_UL;
+	} else if (last_OL > last_UL) {
+	    if (limit_Edit > last_OL)
+		limit_Edit = last_OL;
+	} else {
+	    /* the initial file uses an ordered list; users may edit */
+	    if (count_UL > count_OL)
+		StrAllocCopy(trailing_tag, "</ul>");
+	    else
+		StrAllocCopy(trailing_tag, "</ol>");
+	}
+
+	if (TRACE) {
+	    CTRACE((tfp, "Existing file length %d, insert at %d\n",
+		    offset_Chr, limit_Edit));
+	    if (limit_Edit == last_UL) {
+		CTRACE((tfp, "...insert before last </UL>: %d\n", last_UL));
+	    } else if (limit_Edit == last_OL) {
+		CTRACE((tfp, "...insert before last </OL>: %d\n", last_OL));
+	    } else if (trailing_tag != NULL) {
+		CTRACE((tfp, "...append with %s\n", trailing_tag));
+	    }
+	}
+
+	rewind(fp);
+	if (ftruncate(fileno(fp), 0) == -1) {
+	    CTRACE((tfp, "%s: %s\n", filename_buffer, strerror(errno)));
+	}
+
+	offset_Chr = 0;
+	while ((ch = fgetc(bp)) != EOF && !ferror(bp)) {
+	    if (offset_Chr <= limit_Edit)
+		fputc(ch, fp);
+	    else {
+		char buffer[2];
+
+		buffer[0] = (char) ch;
+		buffer[1] = 0;
+		StrAllocCat(trailing_tag, buffer);
+	    }
+	    ++offset_Chr;
 	}
 	fclose(bp);
+
+	if (!found_tag[scanTailBody])
+	    StrAllocCat(trailing_tag, "</body>");
+	if (!found_tag[scanTailHtml])
+	    StrAllocCat(trailing_tag, "</html>");
 
 	if (empty_file)
 	    first_time = TRUE;
@@ -447,8 +694,10 @@ Note: if you edit this file manually\n\
 	fprintf(fp, "%s %s%s\n", Address, TimeString, Title);
     } else {
 	fprintf(fp, "<li><a href=\"%s\">%s</a></li>\n", Address, Title);
-	fprintf(fp, "</ol></body></html>\n");
+	if (trailing_tag != NULL)
+	    fputs(trailing_tag, fp);
     }
+    free(trailing_tag);
     LYCloseOutput(fp);
 
     SetDefaultMode(O_BINARY);

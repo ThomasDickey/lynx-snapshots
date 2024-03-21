@@ -1,6 +1,6 @@
 ; version used for Inno Setup files.
 
-#define LYNX_VERSION "2.9.0d"
+#define LYNX_VERSION "2.9.0e"
 
 #define MyAppProg "Lynx"
 #define MyAppName "Lynx - web browser"

@@ -71,6 +71,6 @@ Lynx, a `make clean' should not be necessary if you have *only* made
 changes to the files in src/chrtrans.  On VMS, add entries for new
 tables to build-chrtrans.com, but you can update the particular file
 with build-header.com, then use the top directory's build.com and
-answer 'n' to it's prompts about whether to update the WWWlibrary
+answer 'n' to its prompts about whether to update the WWW library
 and chrtrans modules.
 

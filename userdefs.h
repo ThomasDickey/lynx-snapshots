@@ -1,5 +1,5 @@
 /*
- * $LynxId: userdefs.h,v 1.379 2024/03/17 09:48:59 tom Exp $
+ * $LynxId: userdefs.h,v 1.382 2024/03/21 07:53:42 tom Exp $
  *
  * Lynx - Hypertext navigation system
  *
@@ -1451,10 +1451,10 @@
  */
 
 #define LYNX_NAME     "Lynx"
-#define LYNX_VERSION  "2.9.0d"
+#define LYNX_VERSION  "2.9.0e"
 #define LYNX_WWW_HOME "https://lynx.invisible-island.net/"
 #define LYNX_WWW_DIST "https://lynx.invisible-island.net/current/"
-#define LYNX_DATE     "17 Mar 2024"
+#define LYNX_DATE     "21 Mar 2024"
 
 #ifdef UNICODE
 #define W32_STRING(s) L##s

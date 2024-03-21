@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFTP.c,v 1.148 2023/01/05 09:17:15 tom Exp $
+ * $LynxId: HTFTP.c,v 1.149 2024/03/21 07:51:10 tom Exp $
  *
  *			File Transfer Protocol (FTP) Client
  *			for a WorldWideWeb browser
@@ -2189,7 +2189,10 @@ static void parse_cms_dir_entry(char *line,
 	set_years_and_date();
     }
 
-    /* Track down the date. */
+    /* Track down the date using the ":" separating hours/minutes:
+     * mm/dd/yy hh:mm
+     * 01234567890123
+     */
     cpd = cps;
     if (((cps < end) &&
 	 (cps = StrChr(cpd, ':')) != NULL) &&
