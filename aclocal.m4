@@ -1,4 +1,4 @@
-dnl $LynxId: aclocal.m4,v 1.336 2024/03/17 23:35:41 tom Exp $
+dnl $LynxId: aclocal.m4,v 1.338 2024/04/02 22:44:58 tom Exp $
 dnl Macros for auto-configure script.
 dnl by Thomas E. Dickey <dickey@invisible-island.net>
 dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
@@ -273,7 +273,7 @@ fi
 AC_SUBST($1)dnl
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl AM_WITH_NLS version: 34 updated: 2024/03/17 19:34:20
+dnl AM_WITH_NLS version: 35 updated: 2024/04/02 18:44:26
 dnl -----------
 dnl Inserted as requested by gettext 0.10.40
 dnl File from /usr/share/aclocal
@@ -369,6 +369,16 @@ AC_DEFUN([AM_WITH_NLS],
 		  [Define if the GNU gettext() function is already present or preinstalled.])
 
 	  CF_ADD_INCDIR($cf_cv_header_path_intl)
+
+	  if test -n "$cf_cv_library_file_intl" ; then
+		dnl If iconv() is in a separate libiconv library, then anyone
+		dnl linking with libintl{.a,.so} also needs to link with
+		dnl libiconv.
+		INTLLIBS="$cf_cv_library_file_intl $LIBICONV"
+		CF_ADD_LIBDIR($cf_cv_library_path_intl,INTLLIBS)
+	  fi
+
+	  LIBS="$LIBS $INTLLIBS"
 	  AC_CHECK_FUNCS(dcgettext)
 	  CATOBJEXT=.gmo
 	elif test -z "$MSGFMT" || test -z "$XGETTEXT" ; then

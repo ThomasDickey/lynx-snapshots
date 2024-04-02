@@ -1,9 +1,9 @@
--- $LynxId: CHANGES,v 1.1176 2024/03/21 08:19:13 tom Exp $
+-- $LynxId: CHANGES,v 1.1177 2024/04/02 22:43:45 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2024-03-21 (2.9.0e)
+2024-04-02 (2.9.0f)
 * improve bookmark file-updates, allowing for users to add HTML markup
   (report by TG) -TD
 * remove obsolete option --with-included-gettext -TD
