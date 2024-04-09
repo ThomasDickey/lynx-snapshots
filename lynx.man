@@ -1,6 +1,6 @@
-.\" $LynxId: lynx.man,v 1.155 2024/04/02 22:43:45 tom Exp $
+.\" $LynxId: lynx.man,v 1.158 2024/04/09 07:55:44 tom Exp $
 .\" **************************************************************************
-.TH LYNX 1 2024-04-02 "Lynx 2.9.0f" "Lynx \(en the \fItext\fP web browser"
+.TH LYNX 1 2024-04-09 "Lynx 2.9.0g" "Lynx \(en the \fItext\fP web browser"
 .
 .ie \n(.g \{\
 .ds `` \(lq
@@ -836,7 +836,7 @@ URL may be given as \*(``proxy.example.com\*('',
 \*(``proxy.example.com:1080\*('', \*(``192.168.0.1\*('', or
 \*(``192.168.0.1:1080\*('' (and IPv6 notation if so supported).
 A SOCKS5 proxy may also be specified via the environment variable
-.B SOCKS5_PROXY.
+.BR SOCKS5_PROXY .
 This option controls the builtin SOCKS5 support, which is unrelated to
 the option \fB\-nosocks\fP.
 .TP

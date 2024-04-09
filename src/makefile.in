@@ -1,4 +1,4 @@
-# $LynxId: makefile.in,v 1.79 2024/03/17 22:06:22 tom Exp $
+# $LynxId: makefile.in,v 1.80 2024/04/03 23:50:55 tom Exp $
 # template-makefile for Lynx src directory
 
 SHELL		= @CONFIG_SHELL@
@@ -10,7 +10,7 @@ datarootdir	= @datarootdir@
 exec_prefix	= @exec_prefix@
 top_srcdir	= @top_srcdir@
 srcdir		= @srcdir@
-VPATH		= .:$(srcdir)
+VPATH		= $(srcdir)
 
 top_builddir	= ..
 

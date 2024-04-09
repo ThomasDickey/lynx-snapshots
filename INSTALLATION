@@ -668,6 +668,9 @@ II. Compile instructions -- UNIX
   --with-libiconv-prefix=DIR
 	search for libiconv in DIR/include and DIR/lib
 
+  --with-libintl-prefix=DIR
+	search for libintl in DIR/include and DIR/lib
+
   --with-lss-file{=path}		(define LYNX_LSS_FILE)
 	Specify the default style-sheet file's name.  Use --without-lss-file
 	to make the default behavior match the non-color-style (if no --lss
@@ -1500,4 +1503,4 @@ VIII. Acknowledgment
 
 -- 1999/04/24 - H. Nelson <lynx-admin@irm.nara.kindai.ac.jp>
 -- vile:txtmode
--- $LynxId: INSTALLATION,v 1.138 2024/03/17 16:01:22 tom Exp $
+-- $LynxId: INSTALLATION,v 1.139 2024/04/09 23:18:16 tom Exp $
