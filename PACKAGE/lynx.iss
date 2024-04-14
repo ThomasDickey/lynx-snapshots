@@ -1,4 +1,4 @@
-; $LynxId: lynx.iss,v 1.41 2024/01/15 23:28:41 tom Exp $
+; $LynxId: lynx.iss,v 1.42 2024/04/14 23:28:50 tom Exp $
 ; vile:ts=4 sw=4 notabinsert fk=8bit
 ;
 ; This is the BASE script for different flavors of the installer for Lynx.
@@ -95,7 +95,7 @@ AppCopyright=© 1997-2023,2024, Thomas E. Dickey
 AppPublisherURL={#MyAppURL}
 AppSupportURL={#MyAppURL}
 AppUpdatesURL={#MyAppURL}
-DefaultDirName={pf}\{#MyAppName}
+DefaultDirName={commonpf}\{#MyAppName}
 DefaultGroupName={#MyAppName}
 AllowNoIcons=yes
 LicenseFile=..\COPYHEADER
@@ -176,7 +176,7 @@ Type: dirifempty; Name: {app}
 
 function isGuru(): Boolean;
 begin
-    Result := isAdminLoggedOn();
+    Result := isAdmin();
 end;
 
 function environRootKey(): Integer;
@@ -232,7 +232,7 @@ end;
 
 function selectedVarsRootKey(): Integer;
 begin
-    if isTaskSelected('for_all_users') then
+    if WizardisTaskSelected('for_all_users') then
         Result := HKEY_LOCAL_MACHINE
     else
         Result := HKEY_CURRENT_USER;
@@ -240,15 +240,15 @@ end;
 
 function selectedVarsSubKey(): String;
 begin
-    if isTaskSelected('for_all_users') then
+    if WizardisTaskSelected('for_all_users') then
     begin
-        if isTaskSelected('register_vars') then
+        if WizardisTaskSelected('register_vars') then
             Result := appSubKey()
         else
             Result := envSysKey();
     end else
     begin
-        if isTaskSelected('register_vars') then
+        if WizardisTaskSelected('register_vars') then
             Result := appSubKey()
         else
             Result := envSubKey();
@@ -308,13 +308,13 @@ begin
   if not RegWriteStringValue(selectedVarsRootKey(), Keypath, '', AppDir) then
     Log('Failed to set key');
 
-  if isTaskSelected('use_sendto') then
+  if WizardisTaskSelected('use_sendto') then
     begin
     AddSendTo();
     Log('** added Send-To link');
     end;
 
-  if isTaskSelected('quicklaunchicon') then
+  if WizardisTaskSelected('quicklaunchicon') then
     begin
     AddQuickLaunch();
     Log('** added Quick-launch link');
@@ -346,7 +346,7 @@ begin
 
   Log('** customized ' + CfgFile);
 
-  if isTaskSelected('use_sendto') then
+  if WizardisTaskSelected('use_sendto') then
     begin
     AddSendTo();
     Log('** added Send-To link');

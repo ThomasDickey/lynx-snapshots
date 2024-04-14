@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMainLoop.c,v 1.255 2024/03/13 13:51:20 Thorsten.Glaser Exp $
+ * $LynxId: LYMainLoop.c,v 1.256 2024/04/11 21:53:34 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTAccess.h>
@@ -7745,6 +7745,8 @@ int mainloop(void)
 	    if (handle_LYK_LINEWRAP_TOGGLE(&cmd, &refresh_screen))
 		goto new_cmd;
 	    break;
+#else
+	(void) key_count;
 #endif
 
 #ifdef USE_MAXSCREEN_TOGGLE

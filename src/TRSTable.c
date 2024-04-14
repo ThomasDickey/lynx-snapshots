@@ -1,5 +1,5 @@
 /*
- * $LynxId: TRSTable.c,v 1.43 2023/11/10 01:01:54 tom Exp $
+ * $LynxId: TRSTable.c,v 1.45 2024/04/11 20:41:16 tom Exp $
  *		Simple table object
  *		===================
  * Authors
@@ -205,9 +205,10 @@ static int Stbl_finishRowInTable(STable_info *me);
 
 static const char *cellstate_s(cellstate_t state)
 {
-    const char *result = "?";
+    const char *result;
     /* *INDENT-OFF* */
     switch (state) {
+    default:
     case CS_invalid:	result = "CS_invalid";	break;
     case CS__new:	result = "CS__new";	break;
     case CS__0new:	result = "CS__0new";	break;

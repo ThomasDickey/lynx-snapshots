@@ -1,5 +1,5 @@
 /*
- * $LynxId: GridText.c,v 1.348 2024/03/18 07:57:58 tom Exp $
+ * $LynxId: GridText.c,v 1.349 2024/04/11 20:24:32 tom Exp $
  *
  *		Character grid hypertext object
  *		===============================
@@ -7105,7 +7105,7 @@ void HTCheckFnameForCompression(char **fname,
     char *fn = *fname;
     char *dot = NULL;
     char *cp = NULL;
-    const char *suffix = "";
+    const char *suffix;
     CompressFileType method;
     CompressFileType second;
 
@@ -11125,7 +11125,7 @@ int HText_SubmitForm(FormInfo * submit_item, DocInfo *doc,
     char *escaped1 = NULL;
     char *escaped2 = NULL;
     char *last_textarea_name = NULL;
-    const char *name_used = "";
+    const char *name_used;
     char *previous_blanks = NULL;
     const char *val_used = "";
     int anchor_count = 0;
@@ -13165,7 +13165,7 @@ static char *readEditedFile(char *ed_temp)
     return ebuf;
 }
 
-static int finish_ExtEditForm(LinkInfo * form_link, TextAnchor *start_anchor,
+static int finish_ExtEditForm(LinkInfo *form_link, TextAnchor *start_anchor,
 			      char *ed_temp,
 			      int orig_cnt)
 {
@@ -13399,7 +13399,7 @@ static int finish_ExtEditForm(LinkInfo * form_link, TextAnchor *start_anchor,
  *
  * --KED 02/01/99
  */
-int HText_EditTextArea(LinkInfo * form_link)
+int HText_EditTextArea(LinkInfo *form_link)
 {
     char *ed_temp;
     FILE *fp;
@@ -13492,7 +13492,7 @@ int HText_EditTextArea(LinkInfo * form_link)
 /*
  * Similar to HText_EditTextArea, but assume a single-line text field -TD
  */
-void HText_EditTextField(LinkInfo * form_link)
+void HText_EditTextField(LinkInfo *form_link)
 {
     char *ed_temp;
     FILE *fp;
@@ -13554,7 +13554,7 @@ void HText_EditTextField(LinkInfo * form_link)
  *
  * --KED 02/14/99
  */
-void HText_ExpandTextarea(LinkInfo * form_link, int newlines)
+void HText_ExpandTextarea(LinkInfo *form_link, int newlines)
 {
     TextAnchor *anchor_ptr;
     TextAnchor *end_anchor = NULL;
@@ -13637,7 +13637,7 @@ void HText_ExpandTextarea(LinkInfo * form_link, int newlines)
  *
  * --KED 02/21/99
  */
-int HText_InsertFile(LinkInfo * form_link)
+int HText_InsertFile(LinkInfo *form_link)
 {
     struct stat stat_info;
     size_t size;

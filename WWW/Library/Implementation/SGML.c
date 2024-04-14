@@ -1,5 +1,5 @@
 /*
- * $LynxId: SGML.c,v 1.187 2024/03/18 07:56:43 tom Exp $
+ * $LynxId: SGML.c,v 1.188 2024/04/11 20:22:19 tom Exp $
  *
  *			General SGML Parser code		SGML.c
  *			========================
@@ -242,9 +242,10 @@ struct _HTStream {
 #else
 static const char *state_name(sgml_state n)
 {
-    const char *result = "?";
+    const char *result;
     /* *INDENT-OFF* */
     switch (n) {
+    default:
     case S_attr:                result = "S_attr";              break;
     case S_attr_gap:            result = "S_attr_gap";          break;
     case S_comment:             result = "S_comment";           break;

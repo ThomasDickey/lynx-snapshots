@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFWriter.c,v 1.125 2023/11/05 23:46:45 tom Exp $
+ * $LynxId: HTFWriter.c,v 1.126 2024/04/11 20:21:33 tom Exp $
  *
  *		FILE WRITER				HTFWrite.h
  *		===========
@@ -1121,7 +1121,7 @@ HTStream *HTCompressed(HTPresentation *pres,
 	Pnow = (HTPresentation *) HTList_objectAt(HTPresentations, i);
 	if (!strcasecomp(Pnow->rep->name, anchor->content_type) &&
 	    Pnow->rep_out == WWW_PRESENT) {
-	    const char *program = "";
+	    const char *program;
 
 	    /*
 	     * Pick the best presentation.  User-defined mappings are at the

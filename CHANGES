@@ -1,9 +1,9 @@
--- $LynxId: CHANGES,v 1.1182 2024/04/09 23:30:22 tom Exp $
+-- $LynxId: CHANGES,v 1.1184 2024/04/14 19:11:23 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2024-04-09 (2.9.0g)
+2024-04-14 (2.9.0h)
 * add samples/mhtml-tool, from
     https://github.com/ThomasDickey/mhtml-tool
   which can use Lynx to display an "mhtml" file, e.g., foo.mht by

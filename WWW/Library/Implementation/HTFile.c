@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFile.c,v 1.158 2022/07/25 23:52:05 tom Exp $
+ * $LynxId: HTFile.c,v 1.159 2024/04/11 20:19:06 tom Exp $
  *
  *			File Access				HTFile.c
  *			===========
@@ -1313,7 +1313,7 @@ CompressFileType HTCompressFileType(const char *filename,
  */
 const char *HTCompressTypeToSuffix(CompressFileType method)
 {
-    const char *result = "";
+    const char *result;
 
     switch (method) {
     default:

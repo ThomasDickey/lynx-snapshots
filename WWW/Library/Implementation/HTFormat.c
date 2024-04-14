@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFormat.c,v 1.96 2022/03/31 23:39:38 tom Exp $
+ * $LynxId: HTFormat.c,v 1.97 2024/04/11 20:19:35 tom Exp $
  *
  *		Manage different file formats			HTFormat.c
  *		=============================
@@ -1378,7 +1378,7 @@ static int HTBrFileCopy(FILE *brfp, HTStream *sink)
     char *normal_buffer = NULL;
     size_t brotli_size;
     size_t brotli_limit = 0;
-    size_t brotli_offset = brotli_limit;
+    size_t brotli_offset;
     size_t normal_size;
     size_t normal_limit = 0;
 
