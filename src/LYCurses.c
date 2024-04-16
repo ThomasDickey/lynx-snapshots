@@ -1,4 +1,4 @@
-/* $LynxId: LYCurses.c,v 1.207 2024/01/09 00:30:44 tom Exp $ */
+/* $LynxId: LYCurses.c,v 1.209 2024/04/16 21:43:44 tom Exp $ */
 #include <HTUtils.h>
 #include <HTAlert.h>
 
@@ -931,14 +931,12 @@ static void delete_screen(SCREEN * screen)
 
 static SCREEN *LYscreen = NULL;
 
-#if defined(USE_DEFAULT_COLORS)
 static void delete_screen(SCREEN * screen)
 {
     delete_fake_win();
     delete_subwindow();
     delscreen(screen);
 }
-#endif
 
 #define LYDELSCR() { \
 CheckScreenSize(); \
