@@ -1,9 +1,13 @@
--- $LynxId: CHANGES,v 1.1188 2024/04/16 21:46:21 tom Exp $
+-- $LynxId: CHANGES,v 1.1190 2024/05/24 21:42:06 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2024-04-16 (2.9.1a)
+2024-05-24 (2.9.1b)
+* adapt special case of gzip decompression in 2.8.9dev.12 to brotli, to handle
+  downloads from websites which support "br" (report by Rajeev V Pillai) -TD
+* updated configure macro CF_ANSI_CC_C, to reset flags on test-failure, to
+  keep options from accumulating. 
 * build-fix for NetBSD and Solaris system curses libraries, removing an ifdef
   added in 2.9.0dev.11 (report by Nelson Beebe) -TD
 

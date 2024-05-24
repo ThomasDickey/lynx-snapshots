@@ -1,4 +1,4 @@
-dnl $LynxId: aclocal.m4,v 1.341 2024/04/09 22:40:58 tom Exp $
+dnl $LynxId: aclocal.m4,v 1.342 2024/05/01 19:00:19 tom Exp $
 dnl Macros for auto-configure script.
 dnl by Thomas E. Dickey <dickey@invisible-island.net>
 dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
@@ -829,7 +829,7 @@ AC_MSG_RESULT($cf_cv_alt_char_set)
 test "$cf_cv_alt_char_set" != no && AC_DEFINE_UNQUOTED(ALT_CHAR_SET,$cf_cv_alt_char_set,[Define to 1 if if curses supports alternate-character set])
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_ANSI_CC_CHECK version: 14 updated: 2024/01/07 06:34:16
+dnl CF_ANSI_CC_CHECK version: 15 updated: 2024/05/01 15:00:19
 dnl ----------------
 dnl This was originally adapted from the macros 'fp_PROG_CC_STDC' and
 dnl 'fp_C_PROTOTYPES' in the sharutils 4.2 distribution.
@@ -856,6 +856,8 @@ for cf_arg in "-DCC_HAS_PROTOS" \
 	"-Aa -D_HPUX_SOURCE" \
 	-Xc
 do
+	CFLAGS="$cf_save_CFLAGS"
+	CPPFLAGS="$cf_save_CPPFLAGS"
 	CF_ADD_CFLAGS($cf_arg)
 	AC_TRY_COMPILE(
 [

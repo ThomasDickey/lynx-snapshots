@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFWriter.c,v 1.126 2024/04/11 20:21:33 tom Exp $
+ * $LynxId: HTFWriter.c,v 1.127 2024/05/24 20:54:51 tom Exp $
  *
  *		FILE WRITER				HTFWrite.h
  *		===========
@@ -43,6 +43,10 @@
 
 #ifdef USE_PERSISTENT_COOKIES
 #include <LYCookie.h>
+#endif
+
+#ifdef USE_BROTLI
+#include <brotli/decode.h>
 #endif
 
 /* contains the name of the temp file which is being downloaded into */
@@ -218,6 +222,146 @@ static void decompress_gzip(HTStream *me)
     }
 }
 
+static void decompress_br(HTStream *me)
+{
+#undef THIS_FUNC
+#define THIS_FUNC "decompress_br\n"
+    char *in_name = me->anchor->FileCache;
+    char copied[LY_MAXPATH];
+    FILE *fp = LYOpenTemp(copied, ".br", BIN_W);
+
+    if (fp != 0) {
+#ifdef USE_BROTLI
+#define INPUT_BUFFER_SIZE BUFSIZ
+	char *brotli_buffer = NULL;
+	char *normal_buffer = NULL;
+	size_t brotli_size;
+	size_t brotli_limit = 0;
+	size_t brotli_offset;
+	size_t normal_size;
+	size_t normal_limit = 0;
+	BrotliDecoderResult status2 = BROTLI_DECODER_RESULT_ERROR;
+	int status;
+	off_t bytes = 0;
+	FILE *ifp = fopen(in_name, BIN_R);
+
+	if (ifp != NULL) {
+	    CTRACE((tfp, "reading '%s'\n", in_name));
+	    for (;;) {
+		size_t input_chunk = INPUT_BUFFER_SIZE;
+
+		brotli_offset = brotli_limit;
+		brotli_limit += input_chunk;
+		brotli_buffer = realloc(brotli_buffer, brotli_limit);
+		if (brotli_buffer == NULL)
+		    outofmem(__FILE__, THIS_FUNC);
+		status = (int) fread(brotli_buffer + brotli_offset,
+				     sizeof(char),
+				     input_chunk,
+				     ifp);
+
+		if (status <= 0) {	/* EOF or error */
+		    if (status == 0) {
+			break;
+		    }
+		    CTRACE((tfp, THIS_FUNC ": Read error, fread returns %d\n", status));
+		    break;
+		}
+		bytes += status;
+	    }
+	    fclose(ifp);
+
+	    CTRACE((tfp, "decompressing '%s'\n", in_name));
+	    /*
+	     * next, unless we encountered an error (and have no data), try
+	     * decompressing with increasing output buffer sizes until the brotli
+	     * library succeeds.
+	     */
+	    if (bytes > 0) {
+		do {
+		    if (normal_limit == 0)
+			normal_limit = (10 * brotli_limit) + INPUT_BUFFER_SIZE;
+		    else
+			normal_limit *= 2;
+		    normal_buffer = realloc(normal_buffer, normal_limit);
+		    if (normal_buffer == NULL)
+			outofmem(__FILE__, THIS_FUNC);
+		    brotli_size = (size_t) bytes;
+		    normal_size = normal_limit;
+		    status2 = BrotliDecoderDecompress(brotli_size,
+						      (uint8_t *) brotli_buffer,
+						      &normal_size,
+						      (uint8_t *) normal_buffer);
+		    /*
+		     * brotli library should return
+		     *  BROTLI_DECODER_RESULT_NEEDS_MORE_OUTPUT,
+		     * but actually returns
+		     *  BROTLI_DECODER_RESULT_ERROR 
+		     *
+		     * Accommodate possible improvements...
+		     */
+		} while (status2 != BROTLI_DECODER_RESULT_SUCCESS);
+	    }
+
+	    /*
+	     * finally, pump that data into the output stream.
+	     */
+	    if (status2 == BROTLI_DECODER_RESULT_SUCCESS) {
+		CTRACE((tfp, THIS_FUNC ": decompressed %ld -> %ld (1:%.1f)\n",
+			brotli_size, normal_size,
+			(double) normal_size / (double) brotli_size));
+		fwrite(normal_buffer, sizeof(char), normal_size, fp);
+	    }
+	    free(brotli_buffer);
+	    free(normal_buffer);
+
+	    LYCloseTempFP(fp);
+
+	    CTRACE((tfp, "...decompress %" PRI_off_t " to %lu\n",
+		    CAST_off_t (me->anchor->actual_length),
+		    (unsigned long)normal_size));
+	    if (status2 == BROTLI_DECODER_RESULT_SUCCESS) {
+		if (LYRenameFile(copied, in_name) == 0)
+		    me->anchor->actual_length = (off_t) normal_size;
+	    }
+	    (void) LYRemoveTemp(copied);
+	}
+#else
+#define FMT "%s -j -d %s"
+	const char *program;
+
+	if (LYCopyFile(in_name, copied) == 0) {
+	    char expanded[LY_MAXPATH];
+	    char *command = NULL;
+
+	    if ((program = HTGetProgramPath(ppBROTLI)) != NULL) {
+		HTAddParam(&command, FMT, 1, program);
+		HTAddParam(&command, FMT, 2, copied);
+		HTEndParam(&command, FMT, 2);
+	    }
+	    if (LYSystem(command) == 0) {
+		struct stat stat_buf;
+
+		strcpy(expanded, copied);
+		*strrchr(expanded, '.') = '\0';
+		if (LYRenameFile(expanded, in_name) != 0) {
+		    CTRACE((tfp, "rename failed %s to %s\n", expanded, in_name));
+		} else if (stat(in_name, &stat_buf) != 0) {
+		    CTRACE((tfp, "stat failed for %s\n", in_name));
+		} else {
+		    me->anchor->actual_length = stat_buf.st_size;
+		}
+	    } else {
+		CTRACE((tfp, "command failed: %s\n", command));
+	    }
+	    free(command);
+	    (void) LYRemoveTemp(copied);
+	}
+#undef FMT
+#endif
+    }
+}
+
 /*	Free an HTML object
  *	-------------------
  *
@@ -255,9 +399,14 @@ static void HTFWriter_free(HTStream *me)
 	    && me->input_format == HTAtom_for("application/x-gzip")
 	    && !strcmp(me->anchor->content_encoding, "gzip")) {
 	    decompress_gzip(me);
+	} else if (me->anchor->FileCache != NULL
+		   && me->anchor->no_content_encoding == FALSE
+		   && me->input_format == HTAtom_for("application/x-br")
+		   && !strcmp(me->anchor->content_encoding, "br")) {
+	    decompress_br(me);
 	}
 #ifdef VMS
-	if (0 == strcmp(me->end_command, "SaveVMSBinaryFile")) {
+	else if (0 == strcmp(me->end_command, "SaveVMSBinaryFile")) {
 	    /*
 	     * It's a binary file saved to disk on VMS, which
 	     * we want to convert to fixed records format.  - FM
