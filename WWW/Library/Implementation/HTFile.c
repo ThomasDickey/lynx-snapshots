@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFile.c,v 1.159 2024/04/11 20:19:06 tom Exp $
+ * $LynxId: HTFile.c,v 1.165 2024/05/28 00:35:41 tom Exp $
  *
  *			File Access				HTFile.c
  *			===========
@@ -1384,6 +1384,9 @@ CompressFileType HTEncodingToCompressType(const char *coding)
 
     if (coding == NULL) {
 	result = cftNone;
+    } else if (!strcasecomp(coding, "deflate") ||
+	       !strcasecomp(coding, "x-deflate")) {
+	result = cftDeflate;
     } else if (!strcasecomp(coding, "gzip") ||
 	       !strcasecomp(coding, "x-gzip")) {
 	result = cftGzip;
@@ -1394,12 +1397,9 @@ CompressFileType HTEncodingToCompressType(const char *coding)
 	       !strcasecomp(coding, "x-bzip2")) {
 	result = cftBzip2;
     } else if (!strcasecomp(coding, "br") ||	/* actual */
-	       !strcasecomp(coding, "brotli") ||	/* expected */
-	       !strcasecomp(coding, "x-brotli")) {
+	       !strcasecomp(coding, "x-br") ||
+	       !strcasecomp(coding, "brotli")) {	/* expected */
 	result = cftBrotli;
-    } else if (!strcasecomp(coding, "deflate") ||
-	       !strcasecomp(coding, "x-deflate")) {
-	result = cftDeflate;
     }
     return result;
 }
@@ -1410,6 +1410,9 @@ CompressFileType HTContentTypeToCompressType(const char *ct)
 
     if (ct == NULL) {
 	method = cftNone;
+    } else if (!strncasecomp(ct, "application/deflate", 19) ||
+	       !strncasecomp(ct, "application/x-deflate", 21)) {
+	method = cftGzip;
     } else if (!strncasecomp(ct, "application/gzip", 16) ||
 	       !strncasecomp(ct, "application/x-gzip", 18)) {
 	method = cftGzip;
@@ -1420,11 +1423,46 @@ CompressFileType HTContentTypeToCompressType(const char *ct)
 	       !strncasecomp(ct, "application/x-bzip2", 19)) {
 	method = cftBzip2;
     } else if (!strncasecomp(ct, "application/br", 14) ||
-	       !strncasecomp(ct, "application/brotli", 18) ||
-	       !strncasecomp(ct, "application/x-brotli", 20)) {
+	       !strncasecomp(ct, "application/x-br", 16) ||
+	       !strncasecomp(ct, "application/brotli", 18)) {
 	method = cftBrotli;
     }
     return method;
+}
+
+/*
+ * "Encoding" is jargon for compression-type.  Provide a reverse mapping.
+ */
+BOOL IsCompressionFormat(HTAtom *format, CompressFileType check)
+{
+    BOOL result = FALSE;
+
+    switch (check) {
+    case cftDeflate:
+	result = (format == HTAtom_for("application/deflate") ||
+		  format == HTAtom_for("application/x-deflate"));
+	break;
+    case cftGzip:
+	result = (format == HTAtom_for("application/gzip") ||
+		  format == HTAtom_for("application/x-gzip"));
+	break;
+    case cftCompress:
+	result = (format == HTAtom_for("application/compress") ||
+		  format == HTAtom_for("application/x-compress"));
+	break;
+    case cftBzip2:
+	result = (format == HTAtom_for("application/bzip2") ||
+		  format == HTAtom_for("application/x-bzip2"));
+	break;
+    case cftBrotli:
+	result = (format == HTAtom_for("application/br") ||
+		  format == HTAtom_for("application/x-br") ||
+		  format == HTAtom_for("application/brotli"));
+	break;
+    case cftNone:
+	break;
+    }
+    return result;
 }
 
 /*
@@ -3210,6 +3248,28 @@ int HTLoadFile(const char *addr,
 
 static const char *program_paths[pp_Last];
 
+#if defined(UNIX) || defined(_WINDOWS)
+#ifndef X_OK
+#define X_OK 0
+#endif
+static int VerifyProgram(const char *path)
+{
+    int result = 0;
+    struct stat info;
+
+    if (stat(path, &info) == 0) {
+	if (S_ISREG(info.st_mode) &&
+	    info.st_size != 0 &&
+	    access(path, X_OK) == 0) {
+	    result = 1;
+	} else {
+	    result = -1;
+	}
+    }
+    return result;
+}
+#endif
+
 /*
  * Given a program number, return its path
  */
@@ -3217,8 +3277,59 @@ const char *HTGetProgramPath(ProgramPaths code)
 {
     const char *result = NULL;
 
-    if (code > ppUnknown && code < pp_Last)
+    if (code > ppUnknown && code < pp_Last) {
 	result = program_paths[code];
+#if defined(UNIX) || defined(_WINDOWS)
+#define VERIFY_FMT "not a program: %s\n"
+#define EXISTS_FMT "no file found: %s\n"
+	if (result != NULL) {
+	    char *path;
+
+	    switch (VerifyProgram(result)) {
+	    case -1:
+		CTRACE((tfp, VERIFY_FMT, result));
+		result = NULL;
+		break;
+	    case 0:
+		if (*result == '/') {
+		    CTRACE((tfp, EXISTS_FMT, result));
+		    result = NULL;
+		} else if ((path = getenv("PATH")) != NULL) {
+		    int check = 0;
+		    char *list = NULL;
+
+		    StrAllocCopy(list, path);
+		    if (list != NULL) {
+			char *item;
+
+			path = list;
+			while ((item = strtok(path, PATH_SEPARATOR)) != NULL) {
+			    path = NULL;
+			    if (*item != '\0') {
+				char *full = NULL;
+
+				HTSprintf0(&full, "%s%s%s",
+					   item, FILE_SEPARATOR, result);
+				check = VerifyProgram(full);
+				free(full);
+				if (check != 0)
+				    break;
+			    }
+			}
+			free(list);
+		    }
+		    if (check <= 0) {
+			CTRACE((tfp, check ? VERIFY_FMT : EXISTS_FMT, result));
+			result = NULL;
+		    }
+		}
+		break;
+	    default:
+		break;
+	    }
+	}
+#endif
+    }
     return result;
 }
 

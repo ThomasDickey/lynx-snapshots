@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFile.h,v 1.36 2023/10/24 08:07:39 tom Exp $
+ * $LynxId: HTFile.h,v 1.37 2024/05/27 10:08:57 tom Exp $
  *							File access in libwww
  *				FILE ACCESS
  *
@@ -231,6 +231,10 @@ extern "C" {
  *  Determine compression type from the content-encoding.
  */
     extern CompressFileType HTContentTypeToCompressType(const char *ct);
+/*
+ *  Check if a given content-encoding (format) matches something we support.
+ */
+    extern BOOL IsCompressionFormat(HTAtom *format, CompressFileType check);
 /*
  *  Determine compression type from the content-type and/or content-encoding.
  */

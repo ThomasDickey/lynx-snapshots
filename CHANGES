@@ -1,9 +1,11 @@
--- $LynxId: CHANGES,v 1.1190 2024/05/24 21:42:06 tom Exp $
+-- $LynxId: CHANGES,v 1.1192 2024/05/27 19:50:51 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2024-05-24 (2.9.1b)
+2024-05-27 (2.9.1c)
+* in POSIX environments, check paths for external programs to ensure that they
+  are executable, non-empty files -TD
 * adapt special case of gzip decompression in 2.8.9dev.12 to brotli, to handle
   downloads from websites which support "br" (report by Rajeev V Pillai) -TD
 * updated configure macro CF_ANSI_CC_C, to reset flags on test-failure, to

@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFWriter.c,v 1.127 2024/05/24 20:54:51 tom Exp $
+ * $LynxId: HTFWriter.c,v 1.129 2024/05/27 17:02:24 tom Exp $
  *
  *		FILE WRITER				HTFWrite.h
  *		===========
@@ -190,15 +190,15 @@ static void decompress_gzip(HTStream *me)
 #define FMT "%s %s"
 	const char *program;
 
-	if (LYCopyFile(in_name, copied) == 0) {
+	if ((program = HTGetProgramPath(ppUNCOMPRESS)) == NULL) {
+	    HTAlert(ERROR_UNCOMPRESSING_TEMP);
+	} else if (LYCopyFile(in_name, copied) == 0) {
 	    char expanded[LY_MAXPATH];
 	    char *command = NULL;
 
-	    if ((program = HTGetProgramPath(ppUNCOMPRESS)) != NULL) {
-		HTAddParam(&command, FMT, 1, program);
-		HTAddParam(&command, FMT, 2, copied);
-		HTEndParam(&command, FMT, 2);
-	    }
+	    HTAddParam(&command, FMT, 1, program);
+	    HTAddParam(&command, FMT, 2, copied);
+	    HTEndParam(&command, FMT, 2);
 	    if (LYSystem(command) == 0) {
 		struct stat stat_buf;
 
@@ -330,15 +330,15 @@ static void decompress_br(HTStream *me)
 #define FMT "%s -j -d %s"
 	const char *program;
 
-	if (LYCopyFile(in_name, copied) == 0) {
+	if ((program = HTGetProgramPath(ppBROTLI)) == NULL) {
+	    HTAlert(ERROR_UNCOMPRESSING_TEMP);
+	} else if (LYCopyFile(in_name, copied) == 0) {
 	    char expanded[LY_MAXPATH];
 	    char *command = NULL;
 
-	    if ((program = HTGetProgramPath(ppBROTLI)) != NULL) {
-		HTAddParam(&command, FMT, 1, program);
-		HTAddParam(&command, FMT, 2, copied);
-		HTEndParam(&command, FMT, 2);
-	    }
+	    HTAddParam(&command, FMT, 1, program);
+	    HTAddParam(&command, FMT, 2, copied);
+	    HTEndParam(&command, FMT, 2);
 	    if (LYSystem(command) == 0) {
 		struct stat stat_buf;
 
@@ -396,12 +396,12 @@ static void HTFWriter_free(HTStream *me)
 	 */
 	if (me->anchor->FileCache != NULL
 	    && me->anchor->no_content_encoding == FALSE
-	    && me->input_format == HTAtom_for("application/x-gzip")
+	    && IsCompressionFormat(me->input_format, cftGzip)
 	    && !strcmp(me->anchor->content_encoding, "gzip")) {
 	    decompress_gzip(me);
 	} else if (me->anchor->FileCache != NULL
 		   && me->anchor->no_content_encoding == FALSE
-		   && me->input_format == HTAtom_for("application/x-br")
+		   && IsCompressionFormat(me->input_format, cftBrotli)
 		   && !strcmp(me->anchor->content_encoding, "br")) {
 	    decompress_br(me);
 	}
