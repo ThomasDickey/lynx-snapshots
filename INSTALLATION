@@ -136,7 +136,7 @@ II. Compile instructions -- UNIX
     have either
     
 	    "ncurses" ("https://invisible-island.net/ncurses") or
-	    "slang"   ("ftp://space.mit.edu/pub/davis/slang").
+	    "slang"   ("https://www.jedsoft.org/slang/").
     
     If you install these libraries in your home directory or a non-default
     location, you may need to set the CPPFLAGS (full path to include files) and
@@ -1503,4 +1503,4 @@ VIII. Acknowledgment
 
 -- 1999/04/24 - H. Nelson <lynx-admin@irm.nara.kindai.ac.jp>
 -- vile:txtmode
--- $LynxId: INSTALLATION,v 1.139 2024/04/09 23:18:16 tom Exp $
+-- $LynxId: INSTALLATION,v 1.140 2024/05/29 22:41:52 tom Exp $

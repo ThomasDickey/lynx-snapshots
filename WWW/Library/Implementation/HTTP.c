@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTP.c,v 1.184 2023/07/23 20:02:58 tom Exp $
+ * $LynxId: HTTP.c,v 1.185 2024/05/29 21:02:14 tom Exp $
  *
  * HyperText Transfer Protocol	- Client implementation		HTTP.c
  * ===========================
@@ -716,11 +716,7 @@ static BOOL acceptEncoding(int code)
 	default:
 	    break;
 	}
-	/*
-	 * FIXME:  if lynx did not rely upon external programs to decompress
-	 * files for external viewers, this check could be relaxed.
-	 */
-	result = (BOOL) (program != 0);
+	result = (BOOL) (program != NULL);
     }
     return result;
 }

@@ -1,9 +1,9 @@
--- $LynxId: CHANGES,v 1.1192 2024/05/27 19:50:51 tom Exp $
+-- $LynxId: CHANGES,v 1.1196 2024/05/31 00:35:08 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2024-05-27 (2.9.1c)
+2024-05-30 (2.9.1d)
 * in POSIX environments, check paths for external programs to ensure that they
   are executable, non-empty files -TD
 * adapt special case of gzip decompression in 2.8.9dev.12 to brotli, to handle

@@ -191,8 +191,8 @@ mandir='${datarootdir}/man'
 # Identity of this package.
 PACKAGE_NAME='lynx'
 PACKAGE_TARNAME='lynx'
-PACKAGE_VERSION='2.9.1c'
-PACKAGE_STRING='lynx 2.9.1c'
+PACKAGE_VERSION='2.9.1d'
+PACKAGE_STRING='lynx 2.9.1d'
 PACKAGE_BUGREPORT='lynx-dev@nongnu.org'
 
 ac_prev=
