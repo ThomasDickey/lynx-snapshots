@@ -1,9 +1,11 @@
--- $LynxId: CHANGES,v 1.1196 2024/05/31 00:35:08 tom Exp $
+-- $LynxId: CHANGES,v 1.1198 2024/05/31 22:09:16 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2024-05-30 (2.9.1d)
+2024-05-31 (2.9.2)
+* modify makefile.in install-help to only remove files, leaving existing
+  directories and symbolic links -TD
 * in POSIX environments, check paths for external programs to ensure that they
   are executable, non-empty files -TD
 * adapt special case of gzip decompression in 2.8.9dev.12 to brotli, to handle

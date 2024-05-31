@@ -1,4 +1,4 @@
-# $LynxId: makefile.in,v 1.198 2024/01/15 16:06:06 tom Exp $
+# $LynxId: makefile.in,v 1.200 2024/05/31 23:03:20 tom Exp $
 ##makefile for lynx
 
 SHELL		= @CONFIG_SHELL@
@@ -392,7 +392,7 @@ install-help : htmlized_cfg help_files.sed $(HELPDIR) $(SYSCONFDIR)
 		WD=`pwd` ; \
 		TAIL=`basename "$(helpdir)"` ; \
 		HEAD=`echo "$$WD"|sed -e "s,/$${TAIL}$$,,"` ; \
-		test "x$$WD" != "x$$HEAD" && rm -fr * ; \
+		test "x$$WD" != "x$$HEAD" && find . -type f -exec rm -f {} \; ; \
 		fi';\
 	test -d $(HELPDIR)/keystrokes || mkdir $(HELPDIR)/keystrokes
 	@echo "Translating/copying html files"
