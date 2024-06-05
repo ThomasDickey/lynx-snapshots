@@ -1,4 +1,4 @@
-dnl $LynxId: configure.in,v 1.374 2024/05/31 22:09:16 tom Exp $
+dnl $LynxId: configure.in,v 1.376 2024/06/05 00:29:45 tom Exp $
 dnl
 dnl Process this file with autoconf to produce a configure script.
 dnl
@@ -27,10 +27,10 @@ dnl ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 dnl OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 dnl ---------------------------------------------------------------------------
 dnl
-AC_REVISION($Revision: 1.374 $)
+AC_REVISION($Revision: 1.376 $)
 
 AC_PREREQ(2.52.20231210)
-AC_INIT(lynx,2.9.2,lynx-dev@nongnu.org)
+AC_INIT(lynx,2.9.2a,lynx-dev@nongnu.org)
 
 AC_CONFIG_SRCDIR(userdefs.h)
 
@@ -400,6 +400,7 @@ fi
 
 dnl --------------------------------------------------------------------------
 CF_SIGWINCH
+CF_PKG_CONFIG
 
 dnl Collect tests for compiler options into one place
 if test -n "$TRY_CFLAGS" ; then
@@ -460,12 +461,16 @@ if test "x$cf_cv_use_libsocks" != xno ; then
 elif test "x$cf_cv_use_libsocks5" != xno ; then
 	CF_SOCKS5($cf_cv_use_libsocks5)
 else
+	cf_cv_socks_lib=no
 	CF_NETLIBS
 fi
 
-CF_INET_ADDR
+# dante(socks5) interferes with configure-checks
+if test "x$cf_cv_socks_lib" != xno ; then
+	LIBS=`echo "x$LIBS" | sed -e "s,x-l$cf_cv_socks_lib[ ][ ]*,,"`
+fi
 
-CF_PKG_CONFIG
+CF_INET_ADDR
 
 if test "x$cf_cv_use_libssl"  != xno ; then
 	CF_SSL($cf_cv_use_libssl)
@@ -1591,6 +1596,10 @@ fi
 CF_DISABLE_RPATH_HACK
 
 CF_MERGE_EXTRA_CFLAGS
+
+if test "x$cf_cv_socks_lib" != xno ; then
+	CF_ADD_LIBS(-l$cf_cv_socks_lib)
+fi
 
 ### Finally, build config.h and the makefiles
 test -z "$CONFIG_SHELL" && CONFIG_SHELL=/bin/sh

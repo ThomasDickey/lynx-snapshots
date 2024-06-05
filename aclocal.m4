@@ -1,4 +1,4 @@
-dnl $LynxId: aclocal.m4,v 1.342 2024/05/01 19:00:19 tom Exp $
+dnl $LynxId: aclocal.m4,v 1.345 2024/06/05 00:32:18 tom Exp $
 dnl Macros for auto-configure script.
 dnl by Thomas E. Dickey <dickey@invisible-island.net>
 dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
@@ -4535,7 +4535,7 @@ EOF
 test "$cf_cv_ncurses_version" = no || AC_DEFINE(NCURSES,1,[Define to 1 if we are using ncurses headers/libraries])
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_NETLIBS version: 12 updated: 2021/01/02 09:31:20
+dnl CF_NETLIBS version: 13 updated: 2024/06/04 20:31:17
 dnl ----------
 dnl After checking for functions in the default $LIBS, make a further check
 dnl for the functions that are netlib-related (these aren't always in the
@@ -4597,7 +4597,7 @@ case "$host_os" in
 		CF_RECHECK_FUNC(gethostname,nsl,cf_cv_netlibs,[
 			CF_RECHECK_FUNC(gethostname,socket,cf_cv_netlibs)])])
 
-	AC_CHECK_LIB(inet, main, cf_cv_netlibs="-linet $cf_cv_netlibs")
+	AC_CHECK_LIB(inet, inet_ntoa, cf_cv_netlibs="-linet $cf_cv_netlibs")
 
 	if test "$ac_cv_func_lsocket" != no ; then
 	AC_CHECK_FUNCS(socket,,[
@@ -5844,32 +5844,39 @@ AC_DEFUN([CF_SOCKS],[
   fi
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_SOCKS5 version: 12 updated: 2012/11/08 20:57:52
+dnl CF_SOCKS5 version: 13 updated: 2024/06/02 16:00:53
 dnl ---------
-dnl Check for socks5 configuration
+dnl Check for socks5 configuration (allowing for socks4 and dante variants)
 dnl $1 = the [optional] directory in which the library may be found
 AC_DEFUN([CF_SOCKS5],[
   CF_ADD_OPTIONAL_PATH($1, [socks5 library])
 
-CF_ADD_LIBS(-lsocks5)
+AC_CHECK_LIB(socks5, SOCKSinit, cf_cv_socks_lib=socks5,[
+AC_CHECK_LIB(socksd, SOCKSinit, cf_cv_socks_lib=socksd,[
+AC_CHECK_LIB(socks, SOCKSinit, cf_cv_socks_lib=socks,[
+cf_cv_socks_lib=no])])])
+
+if test "$cf_cv_socks_lib" = no ; then
+	AC_MSG_ERROR(cannot find socks5 library)
+else
+	CF_ADD_LIBS(-l$cf_cv_socks_lib)
+fi
 
 AC_DEFINE(USE_SOCKS5,1,[Define to 1 if we are using socks5 library])
 AC_DEFINE(SOCKS,1,[Define to 1 if we are using socks library])
 
-AC_MSG_CHECKING(if the socks library uses socks4 prefix)
+AC_CACHE_CHECK([if the socks library uses socks4 prefix],cf_use_socks4,[
 cf_use_socks4=error
 AC_TRY_LINK([
 #include <socks.h>],[
 	Rinit((char *)0)],
-	[AC_DEFINE(USE_SOCKS4_PREFIX,1,[Define to 1 if socks library uses socks4 prefix])
-	 cf_use_socks4=yes],
+	[cf_use_socks4=yes],
 	[AC_TRY_LINK([#include <socks.h>],
 		[SOCKSinit((char *)0)],
-		[cf_use_socks4=no],
-		[AC_MSG_ERROR(Cannot link with socks5 library)])])
-AC_MSG_RESULT($cf_use_socks4)
+		[cf_use_socks4=no])])])
 
 if test "$cf_use_socks4" = "yes" ; then
+	AC_DEFINE(USE_SOCKS4_PREFIX,1,[Define to 1 if socks library uses socks4 prefix])
 	AC_DEFINE(accept,Raccept)
 	AC_DEFINE(bind,Rbind)
 	AC_DEFINE(connect,Rconnect)
@@ -5878,11 +5885,13 @@ if test "$cf_use_socks4" = "yes" ; then
 	AC_DEFINE(listen,Rlisten)
 	AC_DEFINE(recvfrom,Rrecvfrom)
 	AC_DEFINE(select,Rselect)
-else
+elif test "$cf_use_socks4" = "no" ; then
 	AC_DEFINE(accept,SOCKSaccept)
 	AC_DEFINE(getpeername,SOCKSgetpeername)
 	AC_DEFINE(getsockname,SOCKSgetsockname)
 	AC_DEFINE(recvfrom,SOCKSrecvfrom)
+else
+	AC_MSG_ERROR(Cannot link with socks5 library)
 fi
 
 AC_MSG_CHECKING(if socks5p.h is available)

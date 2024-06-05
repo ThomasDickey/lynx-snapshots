@@ -1,7 +1,10 @@
--- $LynxId: CHANGES,v 1.1198 2024/05/31 22:09:16 tom Exp $
+-- $LynxId: CHANGES,v 1.1200 2024/06/05 00:32:54 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
+
+2024-06-04 (2.9.2a)
+* improve configure check for SOCKS library -TD
 
 2024-05-31 (2.9.2)
 * modify makefile.in install-help to only remove files, leaving existing
