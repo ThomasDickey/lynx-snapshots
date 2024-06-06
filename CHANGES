@@ -1,9 +1,12 @@
--- $LynxId: CHANGES,v 1.1200 2024/06/05 00:32:54 tom Exp $
+-- $LynxId: CHANGES,v 1.1202 2024/06/06 00:37:24 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2024-06-04 (2.9.2a)
+2024-06-05 (2.9.2b)
+* modify mailcap "test=" handling to redirect stdout/stderr to /dev/null
+  (Debian #1072504) -TD
+* implement "%t" substitution for mailcap -TD
 * improve configure check for SOCKS library -TD
 
 2024-05-31 (2.9.2)

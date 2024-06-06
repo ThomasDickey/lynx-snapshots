@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFormat.c,v 1.97 2024/04/11 20:19:35 tom Exp $
+ * $LynxId: HTFormat.c,v 1.98 2024/06/05 22:44:14 tom Exp $
  *
  *		Manage different file formats			HTFormat.c
  *		=============================
@@ -351,14 +351,18 @@ static int half_match(char *trial_type, char *target)
  */
 static BOOL failsMailcap(HTPresentation *pres, HTParentAnchor *anchor)
 {
-    if (pres->testcommand != NULL &&
-	anchor != NULL &&
-	anchor->content_type_params != NULL) {
+    BOOL result = FALSE;
+
+    if (pres->testcommand != NULL) {
 	if (LYTestMailcapCommand(pres->testcommand,
-				 anchor->content_type_params) != 0)
-	    return TRUE;
+				 HTAtom_name(pres->rep),
+				 (anchor
+				  ? anchor->content_type_params
+				  : NULL)) != 0) {
+	    result = TRUE;
+	}
     }
-    return FALSE;
+    return result;
 }
 
 #define WWW_WILDCARD_REP_OUT HTAtom_for("*")

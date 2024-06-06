@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTInit.c,v 1.98 2022/06/12 21:17:37 tom Exp $
+ * $LynxId: HTInit.c,v 1.103 2024/06/06 00:29:36 tom Exp $
  *
  *		Configuration-specific Initialization		HTInit.c
  *		----------------------------------------
@@ -516,14 +516,14 @@ static int ProcessMailcapEntry(FILE *fp, struct MailcapEntry *mc, AcceptMedia me
 
 static const char *LYSkipQuoted(const char *s)
 {
-    int escaped = 0;
+    BOOL escaping = FALSE;
 
     ++s;			/* skip first quote */
     while (*s != 0) {
-	if (escaped) {
-	    escaped = 0;
+	if (escaping) {
+	    escaping = FALSE;
 	} else if (*s == ESCAPE) {
-	    escaped = 1;
+	    escaping = TRUE;
 	} else if (*s == DQUOTE) {
 	    ++s;
 	    break;
@@ -642,21 +642,21 @@ BOOL LYMailcapUsesPctS(const char *controlstring)
     BOOL result = FALSE;
     const char *from;
     const char *next;
-    int prefixed = 0;
-    int escaped = 0;
+    BOOL prefixed = FALSE;
+    BOOL escaping = FALSE;
 
     for (from = controlstring; *from != '\0'; from++) {
-	if (escaped) {
-	    escaped = 0;
+	if (escaping) {
+	    escaping = FALSE;
 	} else if (*from == ESCAPE) {
-	    escaped = 1;
+	    escaping = TRUE;
 	} else if (prefixed) {
-	    prefixed = 0;
+	    prefixed = FALSE;
 	    switch (*from) {
 	    case '%':		/* not defined */
 	    case 'n':
 	    case 'F':
-	    case 't':
+	    case 't':		/* content-type */
 		break;
 	    case 's':
 		result = TRUE;
@@ -672,7 +672,7 @@ BOOL LYMailcapUsesPctS(const char *controlstring)
 		break;
 	    }
 	} else if (*from == '%') {
-	    prefixed = 1;
+	    prefixed = TRUE;
 	}
     }
     return result;
@@ -688,24 +688,32 @@ BOOL LYMailcapUsesPctS(const char *controlstring)
 static int BuildCommand(HTChunk *cmd,
 			const char *controlstring,
 			const char *TmpFileName,
-			const char *params)
+			const char *content_type,
+			const char *params,
+			BOOL allow_out)
 {
+#ifdef UNIX
+    const char *discard = " >/dev/null 2>&1 ";
+#else
+    const char *discard = "";
+#endif
     int result = 0;
     size_t TmpFileLen = strlen(TmpFileName);
     const char *from;
     const char *next;
     char *name, *value;
-    int prefixed = 0;
-    int escaped = 0;
+    BOOL prefixed = FALSE;
+    BOOL escaping = FALSE;
+    BOOL redirect = FALSE;
 
     for (from = controlstring; *from != '\0'; from++) {
-	if (escaped) {
-	    escaped = 0;
+	if (escaping) {
+	    escaping = FALSE;
 	    HTChunkPutc(cmd, UCH(*from));
 	} else if (*from == ESCAPE) {
-	    escaped = 1;
+	    escaping = TRUE;
 	} else if (prefixed) {
-	    prefixed = 0;
+	    prefixed = FALSE;
 	    switch (*from) {
 	    case '%':		/* not defined */
 		HTChunkPutc(cmd, UCH(*from));
@@ -717,9 +725,10 @@ static int BuildCommand(HTChunk *cmd,
 			controlstring));
 		break;
 	    case 't':
-		if ((value = LYGetContentType(NULL, params)) != 0) {
-		    HTChunkPuts(cmd, value);
-		    FREE(value);
+		if (params == 0)
+		    result = 1;
+		if (content_type != NULL) {
+		    HTChunkPuts(cmd, content_type);
 		}
 		break;
 	    case 's':
@@ -759,9 +768,19 @@ static int BuildCommand(HTChunk *cmd,
 		break;
 	    }
 	} else if (*from == '%') {
-	    prefixed = 1;
+	    prefixed = TRUE;
 	} else {
+	    if (*from == RBRACK) {
+		redirect = TRUE;
+	    } else if ((!strncmp(from, "&&", 2) ||
+			!strncmp(from, "||", 2))) {
+		if (!redirect && !allow_out)
+		    HTChunkPuts(cmd, discard);
+		redirect = FALSE;
+	    }
 	    HTChunkPutc(cmd, UCH(*from));
+	    if (from[1] == '\0' && !redirect && !allow_out)
+		HTChunkPuts(cmd, discard);
 	}
     }
     HTChunkTerminate(cmd);
@@ -775,11 +794,18 @@ static int BuildCommand(HTChunk *cmd,
  * Returns 0 for success, -1 for error and 1 for deferred.
  */
 int LYTestMailcapCommand(const char *testcommand,
+			 const char *content_type,
 			 const char *params)
 {
+    int rc;
     int result;
     char TmpFileName[LY_MAXPATH];
     HTChunk *expanded = 0;
+
+    CTrace((tfp, "LYTestMailcapCommand:\n\ttest=%s\n\ttype=%s\n\targs=%s\n",
+	    NONNULL(testcommand),
+	    NONNULL(content_type),
+	    NONNULL(params)));
 
     if (LYMailcapUsesPctS(testcommand)) {
 	if (LYOpenTemp(TmpFileName, HTML_SUFFIX, "w") == 0)
@@ -790,7 +816,14 @@ int LYTestMailcapCommand(const char *testcommand,
 	TmpFileName[0] = '\0';
     }
     expanded = HTChunkCreate(1024);
-    if (BuildCommand(expanded, testcommand, TmpFileName, params) != 0) {
+
+    rc = BuildCommand(expanded,
+		      testcommand,
+		      TmpFileName,
+		      content_type,
+		      params,
+		      FALSE);
+    if (rc != 0) {
 	result = 1;
 	CTrace((tfp, "PassesTest: Deferring test command: %s\n", expanded->data));
     } else {
@@ -810,14 +843,20 @@ int LYTestMailcapCommand(const char *testcommand,
 }
 
 char *LYMakeMailcapCommand(const char *command,
+			   const char *content_type,
 			   const char *params,
 			   const char *filename)
 {
     HTChunk *expanded = 0;
     char *result = 0;
 
+    CTrace((tfp, "LYMakeMailcapCommand:\n\ttest=%s\n\ttype=%s\n\targs=%s\n",
+	    NONNULL(command),
+	    NONNULL(content_type),
+	    NONNULL(params)));
+
     expanded = HTChunkCreate(1024);
-    BuildCommand(expanded, command, filename, params);
+    BuildCommand(expanded, command, filename, content_type, params, TRUE);
     StrAllocCopy(result, expanded->data);
     HTChunkFree(expanded);
     return result;
@@ -928,7 +967,7 @@ static int PassesTest(struct MailcapEntry *mc)
 
     result = RememberTestResult(RTR_lookup, mc->testcommand, 0);
     if (result == -1) {
-	result = LYTestMailcapCommand(mc->testcommand, NULL);
+	result = LYTestMailcapCommand(mc->testcommand, NULL, NULL);
 	RememberTestResult(RTR_add, mc->testcommand, result ? 1 : 0);
     }
 

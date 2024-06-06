@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYStrings.h,v 1.117 2018/05/04 22:47:10 tom Exp $
+ * $LynxId: LYStrings.h,v 1.118 2024/06/06 00:00:13 tom Exp $
  */
 #ifndef LYSTRINGS_H
 #define LYSTRINGS_H
@@ -15,6 +15,8 @@ extern "C" {
 #define ESCAPE '\\'
 #define LPAREN '('
 #define RPAREN ')'
+#define LBRACK '<'
+#define RBRACK '>'
 
     typedef const char *const Const2CharPtr;
     typedef enum {

@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFWriter.c,v 1.129 2024/05/27 17:02:24 tom Exp $
+ * $LynxId: HTFWriter.c,v 1.130 2024/06/05 23:21:57 tom Exp $
  *
  *		FILE WRITER				HTFWrite.h
  *		===========
@@ -804,6 +804,7 @@ static char *mailcap_substitute(HTParentAnchor *anchor,
 				char *fnam)
 {
     char *result = LYMakeMailcapCommand(pres->command,
+					HTAtom_name(pres->rep),
 					anchor->content_type_params,
 					fnam);
 
