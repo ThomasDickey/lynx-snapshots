@@ -1,9 +1,10 @@
--- $LynxId: CHANGES,v 1.1202 2024/06/06 00:37:24 tom Exp $
+-- $LynxId: CHANGES,v 1.1203 2024/06/15 22:59:11 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2024-06-05 (2.9.2b)
+2024-06-15 (2.9.2c)
+* update Debian test-package for renamed test-package of ncurses -TD
 * modify mailcap "test=" handling to redirect stdout/stderr to /dev/null
   (Debian #1072504) -TD
 * implement "%t" substitution for mailcap -TD

@@ -1,5 +1,5 @@
 #!/usr/bin/make -f
-# $LynxId: rules,v 1.24 2024/03/14 13:48:36 tom Exp $
+# $LynxId: rules,v 1.25 2024/06/15 22:58:31 tom Exp $
 
 export DEB_BUILD_MAINT_OPTIONS = hardening=+all
 DPKG_EXPORT_BUILDFLAGS = 1
@@ -101,7 +101,7 @@ configure-stamp:
 		--enable-syslog \
 		--enable-warnings \
 		--with-gnutls=/usr \
-		--with-screen=ncursesw6dev \
+		--with-screen=ncursesw6td \
 		--with-textdomain=$(PACKAGE) \
 		--without-included-gettext \
 		${DEBOP}
