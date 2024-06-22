@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTAccess.c,v 1.87 2024/01/10 23:52:47 tom Exp $
+ * $LynxId: HTAccess.c,v 1.88 2024/06/22 14:22:25 tom Exp $
  *
  *		Access Manager					HTAccess.c
  *		==============
@@ -1089,9 +1089,9 @@ static BOOL HTLoadDocument(const char *full_address,	/* may include #fragment */
 	 * If you get this, then please find which routine is returning a
 	 * positive unrecognized error code!
 	 */
-	fprintf(stderr,
+	fprintf(stderr, "%s", 
 		gettext("**** HTAccess: socket or file number returned by obsolete load routine!\n"));
-	fprintf(stderr,
+	fprintf(stderr, "%s", 
 		gettext("**** HTAccess: Internal software error.  Please mail lynx-dev@nongnu.org!\n"));
 	fprintf(stderr, gettext("**** HTAccess: Status returned was: %d\n"), status);
 	exit_immediately(EXIT_FAILURE);

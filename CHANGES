@@ -1,9 +1,18 @@
--- $LynxId: CHANGES,v 1.1203 2024/06/15 22:59:11 tom Exp $
+-- $LynxId: CHANGES,v 1.1204 2024/06/22 11:19:58 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2024-06-15 (2.9.2c)
+2024-06-22 (2.9.2d)
+* changes to configure script:
+  + AM_WITH_NLS - don't define IGNOTE_MSGFMT_HACK on the command-line because
+    that goes into the ".pc" and "*-config" files.  Replace this by a check
+    which can define HAVE__NL_MSG_CAT_CNTR, which is more informative -- should
+    only occur with GNU gettext.
+  + CF_BUILD_CC - revert build-fix for PDCurses, because it interferes with
+    other scripts
+  + CF_CURSES_FUNCS - modify to work with autoheader (Debian #1071581)
+  + CF__INTL_BODY - replace ifdef for _nc_msg_cat_cntr
 * update Debian test-package for renamed test-package of ncurses -TD
 * modify mailcap "test=" handling to redirect stdout/stderr to /dev/null
   (Debian #1072504) -TD
