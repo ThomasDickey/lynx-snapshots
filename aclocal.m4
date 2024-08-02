@@ -1,4 +1,4 @@
-dnl $LynxId: aclocal.m4,v 1.348 2024/07/16 20:43:33 tom Exp $
+dnl $LynxId: aclocal.m4,v 1.349 2024/08/01 23:58:49 Steffen.Nurpmeso Exp $
 dnl Macros for auto-configure script.
 dnl by Thomas E. Dickey <dickey@invisible-island.net>
 dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
@@ -7185,6 +7185,27 @@ AC_DEFUN([CF_WITH_BZLIB],[
 ],[
     BZ2_bzopen("name","mode")
 ],bz2,,,bzlib)
+])dnl
+dnl ---------------------------------------------------------------------------
+dnl CF_WITH_ZSTD version: 1 updated: 2024/06/29 21:30:00
+dnl --------------
+dnl Check for Zstd decoder library
+dnl
+dnl $1 = optional path for headers/library
+AC_DEFUN([CF_WITH_ZSTD],[
+  CF_ADD_OPTIONAL_PATH($1, [zstd library])
+
+  CF_FIND_LINKAGE([
+#include <zstd.h>
+],[
+
+    ZSTD_DStream *izsp = ZSTD_createDStream();
+    ZSTD_inBuffer ib;
+    ZSTD_outBuffer ob;
+    ZSTD_initDStream(izsp);
+    ZSTD_decompressStream(izsp, &ob, &ib);
+    ZSTD_freeDStream(izsp);
+],zstd,,,zstd)
 ])dnl
 dnl ---------------------------------------------------------------------------
 dnl CF_WITH_CURSES_DIR version: 4 updated: 2021/01/02 19:22:58

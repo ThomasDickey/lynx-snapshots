@@ -1,5 +1,5 @@
 /*
- * $LynxId: config.hin,v 1.155 2024/03/17 23:09:41 tom Exp $
+ * $LynxId: config.hin,v 1.156 2024/08/01 23:58:49 Steffen.Nurpmeso Exp $
  * vile:cmode
  *
  * The configure script translates "config.hin" into "lynx_cfg.h"
@@ -293,6 +293,7 @@
 #undef USE_SYSV_UTMP		/* CF_UTMP */
 #undef USE_X509_SUPPORT		/* CF_GNUTLS, CF_SSL */
 #undef USE_ZLIB			/* AC_ARG_WITH(zlib) */
+#undef USE_ZSTD			/* AC_ARG_WITH(zstd) */
 #undef UTF8			/* CF_SLANG_CPPFLAGS */
 #undef UTMPX_FOR_UTMP		/* use <utmpx.h> since <utmp.h> not found */
 #undef UUDECODE_PATH		/* CF_PATH_PROG(uudecode) */
@@ -302,6 +303,7 @@
 #undef XCURSES			/* CF_PDCURSES_X11 */
 #undef ZCAT_PATH		/* CF_PATH_PROG(zcat) */
 #undef ZIP_PATH			/* CF_PATH_PROG(zip) */
+#undef ZSTD_PATH		/* CF_PATH_PROG(zstd) */
 #undef _WINDOWS_NSL		/* CF_ARG_ENABLE(nsl-fork) */
 #undef inline			/* AC_C_INLINE */
 #undef intptr_t			/* AC_CHECK_TYPE(intptr_t,...) */

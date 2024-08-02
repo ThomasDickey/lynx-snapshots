@@ -1,9 +1,10 @@
--- $LynxId: CHANGES,v 1.1206 2024/07/16 20:43:33 tom Exp $
+-- $LynxId: CHANGES,v 1.1208 2024/08/02 07:50:27 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2024-07-16 (2.9.2e)
+2024-08-02 (2.9.2f)
+* add support for zstd encoding / compression (patch by Steffen Nurpmeso).
 * changes to configure script:
   + add option --enable-arc4random, normally enabled, to accommodate mawk's
     use of the CF_SRAND macro -TD

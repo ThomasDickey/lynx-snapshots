@@ -1,8 +1,8 @@
-# $LynxId: lynx.spec,v 1.96 2024/07/16 20:16:34 tom Exp $
+# $LynxId: lynx.spec,v 1.98 2024/08/02 00:33:17 tom Exp $
 Summary: A text-based Web browser
 Name: lynx-dev
 Version: 2.9.2
-Release: 6
+Release: 7
 License: GPLv2
 Group: Applications/Internet
 Source: https://invisible-island.net/archives/lynx/lynx%{version}.tgz
@@ -22,7 +22,7 @@ BuildRequires: libidn-devel
 # BuildRequires: libopenssl-1_1-devel, or
 # BuildRequires: libopenssl-3-devel                   
 
-Requires: brotli, gzip, bzip2, tar, zip, unzip
+Requires: brotli, gzip, bzip2, tar, zip, unzip, zstd
 
 %description
 Lynx is a fully-featured World Wide Web (WWW) client for users running
@@ -101,6 +101,9 @@ strip $RPM_BUILD_ROOT%{_bindir}/%{name}
 %config(noreplace) %{lynx_etc}/*.lss
 
 %changelog
+
+* Sat Jul 03 2024 Thomas E. Dickey
+- add zstd compression
 
 * Thu Mar 14 2024 Thomas E. Dickey
 - trim redundant options

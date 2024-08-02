@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTInit.c,v 1.103 2024/06/06 00:29:36 tom Exp $
+ * $LynxId: HTInit.c,v 1.104 2024/08/02 00:21:34 Steffen.Nurpmeso Exp $
  *
  *		Configuration-specific Initialization		HTInit.c
  *		----------------------------------------
@@ -1182,6 +1182,8 @@ void HTFileInit(void)
 	SET_SUFFIX1(".br",	"application/x-brotli",		"binary");
 
 	SET_SUFFIX1(".xz",	"application/x-xz",		"binary");
+
+	SET_SUFFIX1(".zst",	"application/zstd",		"binary");
 
 	SET_SUFFIX1(".lz",	"application/x-lzip",		"binary");
 	SET_SUFFIX1(".lzma",	"application/x-lzma",		"binary");

@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYReadCFG.c,v 1.201 2024/03/17 23:04:33 tom Exp $
+ * $LynxId: LYReadCFG.c,v 1.202 2024/08/01 23:58:49 Steffen.Nurpmeso Exp $
  */
 #ifndef NO_RULES
 #include <HTRules.h>
@@ -1790,6 +1790,7 @@ static Config_Type Config_Table [] =
      PARSE_SET(RC_XHTML_PARSING,        LYxhtml_parsing),
      PARSE_PRG(RC_ZCAT_PATH,            ppZCAT),
      PARSE_PRG(RC_ZIP_PATH,             ppZIP),
+     PARSE_PRG(RC_ZSTD_PATH,            ppZSTD),
 
      PARSE_NIL
 };

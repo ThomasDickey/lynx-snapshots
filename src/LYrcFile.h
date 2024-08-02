@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYrcFile.h,v 1.59 2021/07/29 22:53:37 tom Exp $
+ * $LynxId: LYrcFile.h,v 1.60 2024/08/01 23:58:49 Steffen.Nurpmeso Exp $
  */
 #ifndef LYRCFILE_H
 #define LYRCFILE_H
@@ -294,6 +294,7 @@
 #define RC_XLOADIMAGE_COMMAND           "xloadimage_command"
 #define RC_ZCAT_PATH                    "zcat_path"
 #define RC_ZIP_PATH                     "zip_path"
+#define RC_ZSTD_PATH                    "zstd_path"
 
 extern Config_Enum tbl_cookie_version[];
 extern Config_Enum tbl_force_prompt[];

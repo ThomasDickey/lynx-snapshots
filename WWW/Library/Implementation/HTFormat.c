@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFormat.c,v 1.98 2024/06/05 22:44:14 tom Exp $
+ * $LynxId: HTFormat.c,v 1.100 2024/08/02 07:51:09 tom Exp $
  *
  *		Manage different file formats			HTFormat.c
  *		=============================
@@ -59,6 +59,10 @@ static float HTMaxSecs = 1e10;	/* No effective limit */
 
 #ifdef USE_BROTLI
 #include <brotli/decode.h>
+#endif
+
+#ifdef USE_ZSTD
+# include <zstd.h>
 #endif
 
 BOOL HTOutputSource = NO;	/* Flag: shortcut parser to stdout */
@@ -1481,7 +1485,110 @@ static int HTBrFileCopy(FILE *brfp, HTStream *sink)
     return rv;
 #undef THIS_FUNC
 }
-#endif /* USE_BZLIB */
+#endif /* USE_BROTLI */
+
+#ifdef USE_ZSTD
+/*	Push data from a zstd file pointer down a stream
+ *	-------------------------------------
+ *
+ *   This routine is responsible for creating and PRESENTING any
+ *   graphic (or other) objects described by the file.
+ *
+ *
+ *  State of file and target stream on entry:
+ *		      ZFILE (zfp) assumed open (should have zstd content),
+ *		      target (sink) assumed valid.
+ *
+ *  Return values:
+ *	HT_INTERRUPTED  Interruption after some data read.
+ *	HT_PARTIAL_CONTENT	Error after some data read.
+ *	-1		Error before any data read.
+ *	HT_LOADED	Normal end of file indication on reading.
+ *
+ *  State of file and target stream on return:
+ *	always		zfp still open, target stream still valid.
+ */
+static int HTZstdFileCopy(FILE *zfp, HTStream *sink)
+{
+    off_t bytes;
+    HTStreamClass targetClass;
+    ZSTD_DStream *izsp;
+    void *ibp, *obp;
+    size_t ibl, obl;
+    int rv;
+
+    rv = -1;
+
+    ibl = ZSTD_DStreamInSize();
+    ibp = malloc(ibl);
+    if (ibp == NULL)
+	goto jout0;
+
+    obl = ZSTD_DStreamOutSize();
+    obp = malloc(obl);
+    if (obp == NULL)
+	goto jout1;
+
+    if ((izsp = ZSTD_createDStream()) == NULL)
+	goto jout2;
+    ZSTD_initDStream(izsp);
+
+    /* Push the data down the stream */
+    targetClass = *(sink->isa);	/* Copy pointers to procedures */
+
+    /* read and inflate file, and push binary down sink */
+    HTReadProgress(bytes = 0, (off_t) 0);
+
+    for (;;) {
+	ZSTD_outBuffer ob;
+	ZSTD_inBuffer ib;
+	size_t r;
+
+	r = fread(ibp, 1, ibl, zfp);
+	if (r == 0) {
+	    if (feof(zfp))
+		rv = HT_LOADED;
+	    else if (bytes > 0)
+		rv = HT_PARTIAL_CONTENT;
+	    break;
+	}
+
+	ib.src = ibp;
+	ib.size = r;
+	ib.pos = 0;
+	ob.dst = obp;
+	ob.size = obl;
+	ob.pos = 0;
+
+	r = ZSTD_decompressStream(izsp, &ob, &ib);
+	if (ZSTD_isError(r)) {
+	    if (bytes > 0)
+		rv = HT_PARTIAL_CONTENT;
+	    break;
+	}
+
+	(*targetClass.put_block) (sink, ob.dst, (int) ob.pos);
+	bytes += (off_t) ob.pos;
+	HTReadProgress(bytes, (off_t) -1);
+	HTDisplayPartial();
+
+	if (HTCheckForInterrupt()) {
+	    _HTProgress(TRANSFER_INTERRUPTED);
+	    rv = HT_INTERRUPTED;
+	    break;
+	}
+    }				/* next bufferload */
+
+    ZSTD_freeDStream(izsp);
+  jout2:
+    free(obp);
+  jout1:
+    free(ibp);
+  jout0:
+    HTFinishDisplayPartial();
+    return rv;
+}
+#endif /* USE_ZSTD */
 
 /*	Push data from a socket down a stream STRIPPING CR
  *	--------------------------------------------------
@@ -2047,6 +2154,80 @@ int HTParseBrFile(HTFormat rep_in,
 #undef THIS_FUNC
 }
 #endif /* USE_BROTLI */
+
+#ifdef USE_ZSTD
+/*	HTParseZstdFile
+ *
+ *  State of file and target stream on entry:
+ *			FILE* (zfp) assumed open,
+ *			target (sink) usually NULL (will call stream stack).
+ *
+ *  Return values:
+ *	-501		Stream stack failed (cannot present or convert).
+ *	-1		Download cancelled.
+ *	HT_NO_DATA	Error before any data read.
+ *	HT_PARTIAL_CONTENT	Interruption or error after some data read.
+ *	HT_LOADED	Normal end of file indication on reading.
+ *
+ *  State of file and target stream on return:
+ *	always		zfp closed; target freed, aborted, or NULL.
+ */
+int HTParseZstdFile(HTFormat rep_in,
+		    HTFormat format_out,
+		    HTParentAnchor *anchor,
+		    FILE *zfp,
+		    HTStream *sink)
+{
+    HTStream *stream;
+    HTStreamClass targetClass;
+    int rv;
+    int result;
+
+    stream = HTStreamStack(rep_in, format_out, sink, anchor);
+
+    if (!stream || !stream->isa) {
+	char *buffer = 0;
+
+	fclose(zfp);
+	if (LYCancelDownload) {
+	    LYCancelDownload = FALSE;
+	    result = -1;
+	} else {
+	    HTSprintf0(&buffer, CANNOT_CONVERT_I_TO_O,
+		       HTAtom_name(rep_in), HTAtom_name(format_out));
+	    CTRACE((tfp, "HTFormat(in HTParseZstdFile): %s\n", buffer));
+	    rv = HTLoadError(sink, 501, buffer);
+	    FREE(buffer);
+	    result = rv;
+	}
+    } else {
+	/*
+	 * Push the data down the stream
+	 *
+	 * @@ Bug:  This decision ought to be made based on "encoding" rather than
+	 * on content-type.  @@@ When we handle encoding.  The current method
+	 * smells anyway.
+	 */
+	targetClass = *(stream->isa);	/* Copy pointers to procedures */
+	rv = HTZstdFileCopy(zfp, stream);
+	if (rv == -1 || rv == HT_INTERRUPTED) {
+	    (*targetClass._abort) (stream, NULL);
+	} else {
+	    (*targetClass._free) (stream);
+	}
+
+	fclose(zfp);
+	if (rv == -1) {
+	    result = HT_NO_DATA;
+	} else if (rv == HT_INTERRUPTED || (rv > 0 && rv != HT_LOADED)) {
+	    result = HT_PARTIAL_CONTENT;
+	} else {
+	    result = HT_LOADED;
+	}
+    }
+    return result;
+}
+#endif /* USE_ZSTD */
 
 /*	Converter stream: Network Telnet to internal character text
  *	-----------------------------------------------------------

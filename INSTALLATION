@@ -300,7 +300,7 @@ II. Compile instructions -- UNIX
 	
 	Affected commands include
 		chmod compress cp gzip install mkdir mv rm tar touch gunzip
-		unzip brotli bzip2 uudecode zcat zip telnet tn3270 rlogin
+		unzip brotli bzip2 uudecode zcat zip zstd telnet tn3270 rlogin
 	(Not all commands are used on all systems or in all configurations.)
 
 	This option makes Lynx simpler to install, but potentially less secure,
@@ -784,6 +784,14 @@ II. Compile instructions -- UNIX
 
   --with-zlib[=XXX]			(define USE_ZLIB)
 	Use zlib for decompression of some gzip files.
+
+	The optional value XXX specifies the directory in which the library
+	can be found, and may be either the path of the "lib" directory,
+	or one level above.  In either case, the corresponding header files
+	are assumed to be in the parallel "include" directory.
+
+  --with-zstd[=XXX]			(define USE_ZSTD)
+	Use zstd decompression.
 
 	The optional value XXX specifies the directory in which the library
 	can be found, and may be either the path of the "lib" directory,
@@ -1506,4 +1514,4 @@ VIII. Acknowledgment
 
 -- 1999/04/24 - H. Nelson <lynx-admin@irm.nara.kindai.ac.jp>
 -- vile:txtmode
--- $LynxId: INSTALLATION,v 1.141 2024/07/16 20:43:33 tom Exp $
+-- $LynxId: INSTALLATION,v 1.142 2024/08/01 23:58:49 Steffen.Nurpmeso Exp $

@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFile.h,v 1.37 2024/05/27 10:08:57 tom Exp $
+ * $LynxId: HTFile.h,v 1.38 2024/08/01 23:58:49 Steffen.Nurpmeso Exp $
  *							File access in libwww
  *				FILE ACCESS
  *
@@ -214,6 +214,7 @@ extern "C" {
 	,cftBzip2
 	,cftDeflate
 	,cftBrotli
+	,cftZstd
     } CompressFileType;
 
 /*
@@ -336,6 +337,7 @@ extern "C" {
 	,ppUUDECODE
 	,ppZCAT
 	,ppZIP
+	,ppZSTD
 	,pp_Last
     } ProgramPaths;
 

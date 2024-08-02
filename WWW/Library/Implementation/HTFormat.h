@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFormat.h,v 1.42 2022/04/01 07:54:14 tom Exp $
+ * $LynxId: HTFormat.h,v 1.43 2024/08/01 23:58:49 Steffen.Nurpmeso Exp $
  *
  *                                            HTFormat: The format manager in the WWW Library
  *                          MANAGE DIFFERENT DOCUMENT FORMATS
@@ -238,11 +238,13 @@ The HTPresentation and HTConverter types
 	,encodingCOMPRESS = 4
 	,encodingBZIP2 = 8
 	,encodingBROTLI = 16
+	,encodingZSTD = 32
 	,encodingALL = (encodingGZIP
 			+ encodingDEFLATE
 			+ encodingCOMPRESS
 			+ encodingBZIP2
-			+ encodingBROTLI)
+			+ encodingBROTLI
+			+ encodingZSTD)
     } AcceptEncoding;
 
 /*
@@ -548,6 +550,21 @@ HTParseBrFile: Parse a brotli'ed File through a file pointer
 			     HTStream *sink);
 
 #endif				/* USE_BROTLI */
+
+#ifdef USE_ZSTD
+/*
+HTParseZstdFile: Parse a zstd'ed File through a file pointer
+
+   This routine is called by protocols modules to load an object.  uses
+   HTStreamStack and HTZstdFileCopy.  Returns HT_LOADED if successful, can also
+   return HT_PARTIAL_CONTENT, HT_NO_DATA, or other <0 for failure.
+ */
+    extern int HTParseZstdFile(HTFormat format_in,
+			       HTFormat format_out,
+			       HTParentAnchor *anchor,
+			       FILE *brfp,
+			       HTStream *sink);
+#endif				/* USE_ZSTD */
 
 /*
 

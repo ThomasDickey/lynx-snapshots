@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFWriter.c,v 1.130 2024/06/05 23:21:57 tom Exp $
+ * $LynxId: HTFWriter.c,v 1.133 2024/08/02 07:50:14 tom Exp $
  *
  *		FILE WRITER				HTFWrite.h
  *		===========
@@ -47,6 +47,10 @@
 
 #ifdef USE_BROTLI
 #include <brotli/decode.h>
+#endif
+
+#ifdef USE_ZSTD
+# include <zstd.h>
 #endif
 
 /* contains the name of the temp file which is being downloaded into */
@@ -186,7 +190,7 @@ static void decompress_gzip(HTStream *me)
 		(void) LYRemoveTemp(copied);
 	    }
 	}
-#else
+#else /* !USE_ZLIB */
 #define FMT "%s %s"
 	const char *program;
 
@@ -218,7 +222,7 @@ static void decompress_gzip(HTStream *me)
 	    (void) LYRemoveTemp(copied);
 	}
 #undef FMT
-#endif
+#endif /* USE_ZLIB/!USE_ZLIB */
     }
 }
 
@@ -362,6 +366,123 @@ static void decompress_br(HTStream *me)
     }
 }
 
+static void decompress_zstd(HTStream *me)	/* XXX too small a buffer; EINTR? */
+{
+    char *in_name = me->anchor->FileCache;
+    char copied[LY_MAXPATH];
+    FILE *ofp = LYOpenTemp(copied, ".tmp.zst", BIN_W);
+
+    if (ofp != NULL) {
+#ifdef USE_ZSTD
+	off_t dsize;
+	FILE *ifp;
+	ZSTD_DStream *izsp;
+	void *ibp, *obp;
+	size_t ibl, obl;
+
+	CTRACE((tfp, "decompressing '%s'\n", in_name));
+
+	ibl = ZSTD_DStreamInSize();
+	ibp = malloc(ibl);
+	if (ibp == NULL)
+	    goto jout0;
+
+	obl = ZSTD_DStreamOutSize();
+	obp = malloc(obl);
+	if (obp == NULL)
+	    goto jout1;
+
+	if ((izsp = ZSTD_createDStream()) == NULL)
+	    goto jout2;
+	ZSTD_initDStream(izsp);
+
+	if ((ifp = fopen(in_name, BIN_R)) == NULL)
+	    goto jout3;
+	CTRACE((tfp, "...opened '%s'\n", copied));
+
+	for (dsize = 0;;) {
+	    ZSTD_inBuffer ib;
+	    size_t r;
+
+	    r = fread(ibp, 1, ibl, ifp);
+	    if (r == 0)
+		break;
+	    ib.src = ibp;
+	    ib.size = r;
+	    ib.pos = 0;
+
+	    do {
+		ZSTD_outBuffer ob;
+		size_t w;
+
+		ob.dst = obp;
+		ob.size = obl;
+		ob.pos = 0;
+		r = ZSTD_decompressStream(izsp, &ob, &ib);
+		if (ZSTD_isError(r))
+		    goto jout4;
+
+		for (w = 0; w < ob.pos;) {
+		    size_t x;
+
+		    x = fwrite(&((char *) obp)[w], 1, ob.pos - w, ofp);
+		    if (x == 0)
+			goto jout4;
+		    w += x;
+		}
+		dsize += (off_t) w;
+	    } while (ib.pos < ib.size);
+	}
+
+	LYCloseTempFP(ofp);
+	CTRACE((tfp, "...decompress %" PRI_off_t " to %" PRI_off_t "\n",
+		CAST_off_t (me->anchor->actual_length), CAST_off_t (dsize)));
+	if (LYRenameFile(copied, in_name) == 0)
+	    me->anchor->actual_length = dsize;
+	(void) LYRemoveTemp(copied);
+
+      jout4:fclose(ifp);
+      jout3:ZSTD_freeDStream(izsp);
+      jout2:free(obp);
+      jout1:free(ibp);
+      jout0:;
+
+#else
+# define FMT "%s -d --rm %s"
+	const char *program;
+
+	if ((program = HTGetProgramPath(ppZSTD)) == NULL) {
+	    HTAlert(ERROR_UNCOMPRESSING_TEMP);
+	} else if (LYCopyFile(in_name, copied) == 0) {
+	    char expanded[LY_MAXPATH];
+	    char *command = NULL;
+
+	    HTAddParam(&command, FMT, 1, program);
+	    HTAddParam(&command, FMT, 2, copied);
+	    HTEndParam(&command, FMT, 2);
+	    if (LYSystem(command) == 0) {
+		struct stat stat_buf;
+
+		strcpy(expanded, copied);
+		*strrchr(expanded, '.') = '\0';
+		if (LYRenameFile(expanded, in_name) != 0) {
+		    CTRACE((tfp, "rename failed %s to %s\n", expanded, in_name));
+		} else if (stat(in_name, &stat_buf) != 0) {
+		    CTRACE((tfp, "stat failed for %s\n", in_name));
+		} else {
+		    me->anchor->actual_length = stat_buf.st_size;
+		}
+	    } else {
+		CTRACE((tfp, "command failed: %s\n", command));
+	    }
+	    free(command);
+	    (void) LYRemoveTemp(copied);
+	}
+# undef FMT
+#endif
+    }
+}
+
 /*	Free an HTML object
  *	-------------------
  *
@@ -404,6 +525,11 @@ static void HTFWriter_free(HTStream *me)
 		   && IsCompressionFormat(me->input_format, cftBrotli)
 		   && !strcmp(me->anchor->content_encoding, "br")) {
 	    decompress_br(me);
+	} else if (me->anchor->FileCache != NULL
+		   && me->anchor->no_content_encoding == FALSE
+		   && IsCompressionFormat(me->input_format, cftZstd)
+		   && !strcmp(me->anchor->content_encoding, "zstd")) {
+	    decompress_zstd(me);
 	}
 #ifdef VMS
 	else if (0 == strcmp(me->end_command, "SaveVMSBinaryFile")) {
@@ -467,6 +593,16 @@ static void HTFWriter_free(HTStream *me)
 #endif /* USE_BROTLI */
 		    {
 			path[len - 3] = '\0';
+			(void) remove(path);
+		    }
+		} else if (len > 4 && !strcasecomp(&path[len - 3], "zst")) {
+#ifdef USE_ZSTD
+		    if (!skip_loadfile) {
+			use_zread = YES;
+		    } else
+#endif /* USE_ZSTD */
+		    {
+			path[len - 4] = '\0';
 			(void) remove(path);
 		    }
 		} else if (len > 2 && !strcasecomp(&path[len - 1], "Z")) {
@@ -1323,6 +1459,13 @@ HTStream *HTCompressed(HTPresentation *pres,
 		    compress_suffix = "br";
 		}
 		break;
+	    case cftZstd:
+		if ((program = HTGetProgramPath(ppZSTD)) != NULL) {
+		    StrAllocCopy(uncompress_mask, program);
+		    StrAllocCat(uncompress_mask, " --rm -d %s");
+		    compress_suffix = "zst";
+		}
+		break;
 	    case cftCompress:
 		if ((program = HTGetProgramPath(ppUNCOMPRESS)) != NULL) {
 		    /*
@@ -1500,6 +1643,20 @@ HTStream *HTCompressed(HTPresentation *pres,
 	StrAllocCopy(me->end_command, "");
     } else
 #endif /* USE_ZLIB */
+#ifdef USE_ZSTD
+	if (compress_suffix[0] == 'z'	/* must be gzip */
+	    && compress_suffix[1] == 's'
+	    && compress_suffix[2] == 't'
+	    && compress_suffix[3] == '\0'
+	    && !me->viewer_command) {
+	/*
+	 * We won't call gzip or compress externally, so we don't need to
+	 * supply a command for it.
+	 */
+	StrAllocCopy(me->end_command, "");
+    } else
+#endif /* USE_ZSTD */
+
     {
 	me->end_command = NULL;
 	HTAddParam(&(me->end_command), uncompress_mask, 1, fnam);

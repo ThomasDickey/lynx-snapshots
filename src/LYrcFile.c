@@ -1,4 +1,4 @@
-/* $LynxId: LYrcFile.c,v 1.107 2022/04/02 00:12:18 Paul.G.Fox Exp $ */
+/* $LynxId: LYrcFile.c,v 1.108 2024/08/02 00:20:16 Steffen.Nurpmeso Exp $ */
 #include <HTUtils.h>
 #include <HTFTP.h>
 #include <LYUtils.h>
@@ -122,6 +122,9 @@ Config_Enum tbl_preferred_encoding[] = {
 #endif
 #if defined(USE_BROTLI) || defined(BROTLI_PATH)
     { "br",		encodingBROTLI },
+#endif
+#if defined(USE_ZSTD) || defined(ZSTD_PATH)
+    { "zstd",		encodingZSTD },
 #endif
     { "all",		encodingALL },
     { NULL,		-1 }

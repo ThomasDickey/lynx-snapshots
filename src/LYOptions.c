@@ -1,4 +1,4 @@
-/* $LynxId: LYOptions.c,v 1.186 2023/01/05 09:17:16 tom Exp $ */
+/* $LynxId: LYOptions.c,v 1.187 2024/08/02 07:52:49 tom Exp $ */
 #include <HTUtils.h>
 #include <HTFTP.h>
 #include <HTTP.h>		/* 'reloading' flag */
@@ -2495,6 +2495,9 @@ static OptValues encoding_values[] =
 #endif
 #if defined(USE_BROTLI) || defined(BROTLI_PATH)
     {encodingBROTLI, N_("brotli"), "encoding_brotli"},
+#endif
+#if defined(USE_ZSTD) || defined(ZSTD_PATH)
+    {encodingZSTD, N_("zstd"), "encoding_zstd"},
 #endif
     {encodingALL, N_("All"), "encoding_all"},
     END_OPTIONS
