@@ -1,11 +1,15 @@
--- $LynxId: CHANGES,v 1.1208 2024/08/02 07:50:27 tom Exp $
+-- $LynxId: CHANGES,v 1.1212 2024/09/15 20:17:44 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2024-08-02 (2.9.2f)
+2024-09-15 (2.9.2g)
+* update config.guess (2024-07-28), config.sub (2024-06-03)
+* add ka.po from
+    http://translationproject.org/latest/lynx
 * add support for zstd encoding / compression (patch by Steffen Nurpmeso).
 * changes to configure script:
+  + improve file-globbing checks, e.g., for MingW
   + add option --enable-arc4random, normally enabled, to accommodate mawk's
     use of the CF_SRAND macro -TD
   + AM_WITH_NLS - don't define IGNOTE_MSGFMT_HACK on the command-line because

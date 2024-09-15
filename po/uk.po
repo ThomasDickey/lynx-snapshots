@@ -3,7 +3,7 @@
 # Volodymyr M. Lisivka <lvm@mystery.lviv.net>, 2003
 # Dmytro O. Redchuk <dor@kiev-online.net>, 2001-2002
 # Olexander Kunytsa <kunia@snark.ukma.kiev.ua>, 2000-2001
-# $LynxId: uk.po,v 1.33 2008/12/15 00:21:55 tom Exp $
+# $LynxId: uk.po,v 1.35 2024/09/15 19:50:12 tom Exp $
 #
 msgid ""
 msgstr ""
@@ -13,6 +13,7 @@ msgstr ""
 "PO-Revision-Date: 2003-01-22 18:21EEST\n"
 "Last-Translator: Volodymyr M. Lisivka <lvm@mystery.lviv.net>\n"
 "Language-Team: Ukrainian <translation-team-uk@lists.sourceforge.net>\n"
+"Language: uk\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=koi8-u\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -26,11 +27,6 @@ msgstr ""
 #. * Lynx source, covering all but those messages which (a) are used for
 #. * debugging (CTRACE) or (b) are constants used in interaction with
 #. * other programs.
-#. *
-#. * Links to collections of alternate definitions, developed by the Lynx
-#. * User Community, are maintained in Lynx links:
-#. *
-#. *    http://www.subir.com/lynx.html
 #. *
 #. * See ABOUT-NLS and po/readme for details and location of contributed
 #. * translations.  When no translation is available, the English default is

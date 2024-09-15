@@ -1,4 +1,4 @@
-; $LynxId: lynx.nsi,v 1.84 2024/08/02 00:33:17 tom Exp $
+; $LynxId: lynx.nsi,v 1.85 2024/09/15 20:17:44 tom Exp $
 ; Script originally generated with the Venis Install Wizard, but customized.
 ; The Inno Setup script is preferred; but this can be built via cross-compiling.
 
@@ -9,8 +9,8 @@
 !define VERSION_EPOCH "2"
 !define VERSION_MAJOR "9"
 !define VERSION_MINOR "2"
-!define VERSION_LEVEL "6"
-!define VERSION_PATCH "f"
+!define VERSION_LEVEL "7"
+!define VERSION_PATCH "g"
 
 !define SUBKEY "Lynx"
 
