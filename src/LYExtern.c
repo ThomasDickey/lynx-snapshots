@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYExtern.c,v 1.55 2018/02/15 01:53:07 tom Exp $
+ * $LynxId: LYExtern.c,v 1.56 2025/01/06 16:54:01 tom Exp $
  *
  External application support.
  This feature allows lynx to pass a given URL to an external program.
@@ -241,15 +241,15 @@ static char *lookup_external(char *param,
     int pass, num_disabled, num_matched, num_choices, cur_choice;
     size_t length = 0;
     char *cmdbuf = NULL;
-    char **actions = 0;
-    char **choices = 0;
-    lynx_list_item_type *ptr = 0;
+    char **actions = NULL;
+    char **choices = NULL;
+    lynx_list_item_type *ptr = NULL;
 
     for (pass = 0; pass < 2; pass++) {
 	num_disabled = 0;
 	num_matched = 0;
 	num_choices = 0;
-	for (ptr = externals; ptr != 0; ptr = ptr->next) {
+	for (ptr = externals; ptr != NULL; ptr = ptr->next) {
 
 	    if (match_item_by_name(ptr, param, only_overriders)) {
 		++num_matched;
@@ -276,11 +276,11 @@ static char *lookup_external(char *param,
 		actions = typecallocn(char *, length + 1);
 		choices = typecallocn(char *, length + 1);
 
-		if (actions == 0 || choices == 0)
+		if (actions == NULL || choices == NULL)
 		    outofmem(__FILE__, "lookup_external");
 	    } else {
-		actions[num_choices] = 0;
-		choices[num_choices] = 0;
+		actions[num_choices] = NULL;
+		choices[num_choices] = NULL;
 	    }
 	}
     }
@@ -304,9 +304,9 @@ static char *lookup_external(char *param,
 	CTRACE((tfp, "selected choice %d of %d\n", cur_choice, num_choices));
 	if (cur_choice < 0) {
 	    HTInfoMsg(CANCELLED);
-	    cmdbuf = 0;
+	    cmdbuf = NULL;
 	}
-	for (pass = 0; choices[pass] != 0; pass++) {
+	for (pass = 0; choices[pass] != NULL; pass++) {
 	    if (pass == cur_choice) {
 		cmdbuf = actions[pass];
 	    } else {
@@ -317,7 +317,7 @@ static char *lookup_external(char *param,
     }
 
     if (actions) {
-	for (pass = 0; actions[pass] != 0; ++pass) {
+	for (pass = 0; actions[pass] != NULL; ++pass) {
 	    if (actions[pass] != cmdbuf)
 		FREE(actions[pass]);
 	}
@@ -325,7 +325,7 @@ static char *lookup_external(char *param,
     }
 
     if (choices) {
-	for (pass = 0; choices[pass] != 0; ++pass) {
+	for (pass = 0; choices[pass] != NULL; ++pass) {
 	    FREE(choices[pass]);
 	}
 	FREE(choices);

@@ -1,5 +1,5 @@
 /*
- * $LynxId: UCdomap.c,v 1.111 2023/01/05 09:17:16 tom Exp $
+ * $LynxId: UCdomap.c,v 1.112 2025/01/06 16:54:01 tom Exp $
  *
  *  UCdomap.c
  *  =========
@@ -444,8 +444,8 @@ static char ***unidefault_pagedir_str[32] =
     NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
 };
 
-static const u16 *UC_default_unitable = 0;
-static const struct unimapdesc_str *UC_default_unitable_str = 0;
+static const u16 *UC_default_unitable = NULL;
+static const struct unimapdesc_str *UC_default_unitable_str = NULL;
 
 static int con_insert_unipair(unsigned unicode, unsigned fontpos, int fordefault)
 {
@@ -1784,7 +1784,7 @@ static STRING2PTR UC_setup_LYCharSets_repl(int UC_charset_in_hndl,
     if (!prepl) {
 	FREE(tp);
 	FREE(ti);
-	return 0;
+	return NULL;
     }
 
     p = (const char **) prepl;
@@ -2463,7 +2463,7 @@ void LYFindLocaleCharset(void)
     CTRACE((tfp, "LYFindLocaleCharset(%d)\n", LYLocaleCharset));
     name = nl_langinfo(CODESET);
 
-    if (name != 0) {
+    if (name != NULL) {
 	int value = UCGetLYhndl_byMIME(name);
 
 	if (value >= 0) {
@@ -2515,7 +2515,7 @@ BOOL UCScanCode(UCode_t *target, const char *source, BOOL isHex)
 #else
 	&& (endptr - source) < (isHex ? 8 : 10)
 #endif
-	&& (endptr != 0)
+	&& (endptr != NULL)
 	&& (*endptr == '\0')) {
 	*target = (UCode_t) lcode;
 	status = TRUE;

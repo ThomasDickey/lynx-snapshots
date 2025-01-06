@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYLocal.c,v 1.135 2023/01/02 23:52:10 tom Exp $
+ * $LynxId: LYLocal.c,v 1.136 2025/01/06 16:34:28 tom Exp $
  *
  *  Routines to manipulate the local filesystem.
  *  Written by: Rick Mallett, Carleton University
@@ -284,7 +284,7 @@ DATA( 0,              NULL, NULL,
 
 static BOOLEAN cannot_stat(const char *name)
 {
-    char *tmpbuf = 0;
+    char *tmpbuf = NULL;
 
     HTSprintf0(&tmpbuf, gettext("Unable to get status of '%s'."), name);
     HTAlert(tmpbuf);
@@ -385,15 +385,15 @@ static char **make_argv(const char *command, ...)
     va_list ap;
 
     va_start(ap, command);
-    result[0] = 0;
+    result[0] = NULL;
     StrAllocCopy(result[argc++], command);
     do {
-	result[argc] = 0;
+	result[argc] = NULL;
 	value = (char *) va_arg(ap, char *);
 
-	if (value != 0)
+	if (value != NULL)
 	    StrAllocCopy(result[argc], value);
-    } while (result[argc++] != 0);
+    } while (result[argc++] != NULL);
     va_end(ap);
 
     return result;
@@ -403,7 +403,7 @@ static void free_argv(char **argv)
 {
     int argc;
 
-    for (argc = 0; argv[argc] != 0; ++argc) {
+    for (argc = 0; argv[argc] != NULL; ++argc) {
 	free(argv[argc]);
     }
 }
@@ -421,7 +421,7 @@ static int LYExecv(const char *path,
     CTRACE((tfp, "LYExecv:  Called inappropriately! (path=%s)\n", path));
 #else
     int n;
-    char *tmpbuf = 0;
+    char *tmpbuf = NULL;
 
 #if defined(__DJGPP__) || defined(_WINDOWS)
     (void) msg;
@@ -443,7 +443,7 @@ static int LYExecv(const char *path,
 
     if (TRACE) {
 	CTRACE((tfp, "LYExecv path='%s'\n", path));
-	for (n = 0; argv[n] != 0; n++)
+	for (n = 0; argv[n] != NULL; n++)
 	    CTRACE((tfp, "argv[%d] = '%s'\n", n, argv[n]));
     }
 
@@ -502,7 +502,7 @@ static int LYExecv(const char *path,
 	LYSleepAlert();
     }
     start_curses();
-    if (tmpbuf != 0) {
+    if (tmpbuf != NULL) {
 	if (rc == 0)
 	    HTAlert(tmpbuf);
 	FREE(tmpbuf);
@@ -519,7 +519,7 @@ static int make_directory(char *path)
 
     if ((program = HTGetProgramPath(ppMKDIR)) != NULL) {
 	char **args;
-	char *msg = 0;
+	char *msg = NULL;
 
 	HTSprintf0(&msg, "make directory %s", path);
 	args = make_argv("mkdir",
@@ -605,7 +605,7 @@ static int touch_file(char *path)
     } else {
 	FILE *fp;
 
-	if ((fp = fopen(path, BIN_W)) != 0) {
+	if ((fp = fopen(path, BIN_W)) != NULL) {
 	    fclose(fp);
 	    code = 1;
 	} else {
@@ -622,7 +622,7 @@ static int move_file(char *source, char *target)
     const char *program;
 
     if ((program = HTGetProgramPath(ppMV)) != NULL) {
-	char *msg = 0;
+	char *msg = NULL;
 	char **args;
 
 	HTSprintf0(&msg, gettext("move %s to %s"), source, target);
@@ -635,7 +635,7 @@ static int move_file(char *source, char *target)
 	free_argv(args);
     } else {
 	struct stat sb;
-	char *actual = 0;
+	char *actual = NULL;
 
 	/* the caller sets up a target directory; we need a file path */
 	if (stat(target, &sb) == 0
@@ -916,7 +916,7 @@ static int modify_name(char *testpath)
 	    /*
 	     * Do not allow the user to also change the location at this time.
 	     */
-	    if (LYLastPathSep(tmpbuf->str) != 0) {
+	    if (LYLastPathSep(tmpbuf->str) != NULL) {
 		HTAlert(gettext("Illegal character (path-separator) found! Request ignored."));
 	    } else if (strlen(tmpbuf->str)) {
 		if ((cp = LYLastPathSep(testpath)) != NULL) {
@@ -1207,7 +1207,7 @@ static int remove_single(char *testpath)
 {
     int code = 0;
     char *cp;
-    char *tmpbuf = 0;
+    char *tmpbuf = NULL;
     struct stat dir_info;
     BOOL is_directory = FALSE;
 
@@ -1490,7 +1490,7 @@ static int permit_location(char *destpath,
 				   start working on the masks. */
 
 	/* Will now operate only on filename part. */
-	if ((destpath = HTURLPath_toFile(destpath, TRUE, FALSE)) == 0)
+	if ((destpath = HTURLPath_toFile(destpath, TRUE, FALSE)) == NULL)
 	    return (code);
 	if (strlen(destpath) >= LY_MAXPATH) {
 	    FREE(destpath);
@@ -1646,14 +1646,14 @@ void showtags(HTList *t)
 
 static char *DirectoryOf(char *pathname)
 {
-    char *result = 0;
+    char *result = NULL;
     char *leaf;
 
     StrAllocCopy(result, pathname);
     leaf = LYPathLeaf(result);
 
     if (leaf != result) {
-	const char *result1 = 0;
+	const char *result1 = NULL;
 
 	*leaf = '\0';
 	if (!LYisRootPath(result))
@@ -1709,7 +1709,7 @@ static char *match_op(const char *prefix,
 #endif
 	return data + len;
     }
-    return 0;
+    return NULL;
 }
 
 /*
@@ -1724,7 +1724,7 @@ static char *build_command(char *line,
     const char *program;
     const char *tar_path = HTGetProgramPath(ppTAR);
 
-    if ((arg = match_op("DECOMPRESS", line)) != 0) {
+    if ((arg = match_op("DECOMPRESS", line)) != NULL) {
 #define FMT_UNCOMPRESS "%s %s"
 	if ((program = HTGetProgramPath(ppUNCOMPRESS)) != NULL) {
 	    HTAddParam(&buffer, FMT_UNCOMPRESS, 1, program);
@@ -1734,7 +1734,7 @@ static char *build_command(char *line,
 	return buffer;
     }
 #if defined(OK_UUDECODE) && !defined(ARCHIVE_ONLY)
-    if ((arg = match_op("UUDECODE", line)) != 0) {
+    if ((arg = match_op("UUDECODE", line)) != NULL) {
 #define FMT_UUDECODE "%s %s"
 	if ((program = HTGetProgramPath(ppUUDECODE)) != NULL) {
 	    HTAddParam(&buffer, FMT_UUDECODE, 1, program);
@@ -1750,7 +1750,7 @@ static char *build_command(char *line,
     if (tar_path != NULL) {
 # ifndef ARCHIVE_ONLY
 #  ifdef OK_GZIP
-	if ((arg = match_op("UNTAR_GZ", line)) != 0) {
+	if ((arg = match_op("UNTAR_GZ", line)) != NULL) {
 #define FMT_UNTAR_GZ "cd %s; %s -qdc %s |  %s %s %s"
 	    if ((program = HTGetProgramPath(ppGZIP)) != NULL) {
 		dirName = DirectoryOf(arg);
@@ -1765,7 +1765,7 @@ static char *build_command(char *line,
 	    return buffer;
 	}
 #  endif /* OK_GZIP */
-	if ((arg = match_op("UNTAR_Z", line)) != 0) {
+	if ((arg = match_op("UNTAR_Z", line)) != NULL) {
 #define FMT_UNTAR_Z "cd %s; %s %s |  %s %s %s"
 	    if ((program = HTGetProgramPath(ppZCAT)) != NULL) {
 		dirName = DirectoryOf(arg);
@@ -1779,7 +1779,7 @@ static char *build_command(char *line,
 	    }
 	    return buffer;
 	}
-	if ((arg = match_op("UNTAR", line)) != 0) {
+	if ((arg = match_op("UNTAR", line)) != NULL) {
 #define FMT_UNTAR "cd %s; %s %s %s"
 	    dirName = DirectoryOf(arg);
 	    HTAddParam(&buffer, FMT_UNTAR, 1, dirName);
@@ -1792,7 +1792,7 @@ static char *build_command(char *line,
 # endif	/* !ARCHIVE_ONLY */
 
 # ifdef OK_GZIP
-	if ((arg = match_op("TAR_GZ", line)) != 0) {
+	if ((arg = match_op("TAR_GZ", line)) != NULL) {
 #define FMT_TAR_GZ "cd %s; %s %s %s %s | %s -qc >%s%s"
 	    if ((program = HTGetProgramPath(ppGZIP)) != NULL) {
 		dirName = DirectoryOf(arg);
@@ -1810,7 +1810,7 @@ static char *build_command(char *line,
 	}
 # endif	/* OK_GZIP */
 
-	if ((arg = match_op("TAR_Z", line)) != 0) {
+	if ((arg = match_op("TAR_Z", line)) != NULL) {
 #define FMT_TAR_Z "cd %s; %s %s %s %s | %s >%s%s"
 	    if ((program = HTGetProgramPath(ppCOMPRESS)) != NULL) {
 		dirName = DirectoryOf(arg);
@@ -1827,7 +1827,7 @@ static char *build_command(char *line,
 	    return buffer;
 	}
 
-	if ((arg = match_op("TAR", line)) != 0) {
+	if ((arg = match_op("TAR", line)) != NULL) {
 #define FMT_TAR "cd %s; %s %s %s %s.tar %s"
 	    dirName = DirectoryOf(arg);
 	    HTAddParam(&buffer, FMT_TAR, 1, dirName);
@@ -1843,7 +1843,7 @@ static char *build_command(char *line,
 #endif /* OK_TAR */
 
 #ifdef OK_GZIP
-    if ((arg = match_op("GZIP", line)) != 0) {
+    if ((arg = match_op("GZIP", line)) != NULL) {
 #define FMT_GZIP "%s -q %s"
 	if ((program = HTGetProgramPath(ppGZIP)) != NULL) {
 	    HTAddParam(&buffer, FMT_GZIP, 1, program);
@@ -1853,7 +1853,7 @@ static char *build_command(char *line,
 	return buffer;
     }
 #ifndef ARCHIVE_ONLY
-    if ((arg = match_op("UNGZIP", line)) != 0) {
+    if ((arg = match_op("UNGZIP", line)) != NULL) {
 #define FMT_UNGZIP "%s -d %s"
 	if ((program = HTGetProgramPath(ppGZIP)) != NULL) {
 	    HTAddParam(&buffer, FMT_UNGZIP, 1, program);
@@ -1866,7 +1866,7 @@ static char *build_command(char *line,
 #endif /* OK_GZIP */
 
 #ifdef OK_ZIP
-    if ((arg = match_op("ZIP", line)) != 0) {
+    if ((arg = match_op("ZIP", line)) != NULL) {
 #define FMT_ZIP "cd %s; %s -rq %s.zip %s"
 	if ((program = HTGetProgramPath(ppZIP)) != NULL) {
 	    dirName = DirectoryOf(arg);
@@ -1879,7 +1879,7 @@ static char *build_command(char *line,
 	return buffer;
     }
 #if !defined(ARCHIVE_ONLY)
-    if ((arg = match_op("UNZIP", line)) != 0) {
+    if ((arg = match_op("UNZIP", line)) != NULL) {
 #define FMT_UNZIP "cd %s; %s -q %s"
 	if ((program = HTGetProgramPath(ppUNZIP)) != NULL) {
 	    dirName = DirectoryOf(arg);
@@ -1893,7 +1893,7 @@ static char *build_command(char *line,
 # endif	/* !ARCHIVE_ONLY */
 #endif /* OK_ZIP */
 
-    if ((arg = match_op("COMPRESS", line)) != 0) {
+    if ((arg = match_op("COMPRESS", line)) != NULL) {
 #define FMT_COMPRESS "%s %s"
 	if ((program = HTGetProgramPath(ppCOMPRESS)) != NULL) {
 	    HTAddParam(&buffer, FMT_COMPRESS, 1, program);
@@ -1908,7 +1908,7 @@ static char *build_command(char *line,
 
 /*
  * Perform file management operations for LYNXDIRED URL's.  Attempt to be
- * consistent.  These are (pseudo) URLs - i.e., they should be in URL syntax: 
+ * consistent.  These are (pseudo) URLs - i.e., they should be in URL syntax:
  * some bytes will be URL-escaped with '%'.  This is necessary because these
  * (pseudo) URLs will go through some of the same kinds of interpretations and
  * mutilations as real ones:  HTParse, stripping off #fragments etc.  (Some
@@ -1936,16 +1936,16 @@ int local_dired(DocInfo *doc)
     StrAllocCopy(line, line_url);
     HTUnEscape(line);		/* _file_ (not URL) syntax, for those functions
 				   that need it.  Don't forget to FREE it. */
-    if (match_op("CHDIR", line) != 0) {
+    if (match_op("CHDIR", line) != NULL) {
 #ifdef SUPPORT_CHDIR
 	handle_LYK_CHDIR();
 	do_pop_doc = FALSE;
 #endif
-	arg = 0;		/* do something to avoid cc's complaints */
-    } else if ((arg = match_op("NEW_FILE", line)) != 0) {
+	arg = NULL;		/* do something to avoid cc's complaints */
+    } else if ((arg = match_op("NEW_FILE", line)) != NULL) {
 	if (create_file(arg) > 0)
 	    LYforce_no_cache = TRUE;
-    } else if ((arg = match_op("NEW_FOLDER", line)) != 0) {
+    } else if ((arg = match_op("NEW_FOLDER", line)) != NULL) {
 	if (create_directory(arg) > 0)
 	    LYforce_no_cache = TRUE;
 #ifdef OK_INSTALL
@@ -1961,17 +1961,17 @@ int local_dired(DocInfo *doc)
 	local_install(arg, NULL, &tp);
 	LYpop(doc);
 #endif /* OK_INSTALL */
-    } else if ((arg = match_op("MODIFY_NAME", line)) != 0) {
+    } else if ((arg = match_op("MODIFY_NAME", line)) != NULL) {
 	if (modify_name(arg) > 0)
 	    LYforce_no_cache = TRUE;
-    } else if ((arg = match_op("MODIFY_LOCATION", line)) != 0) {
+    } else if ((arg = match_op("MODIFY_LOCATION", line)) != NULL) {
 	if (modify_location(arg) > 0)
 	    LYforce_no_cache = TRUE;
-    } else if ((arg = match_op("MOVE_TAGGED", line_url)) != 0) {
+    } else if ((arg = match_op("MOVE_TAGGED", line_url)) != NULL) {
 	if (modify_tagged(arg) > 0)
 	    LYforce_no_cache = TRUE;
 #ifdef OK_PERMIT
-    } else if ((arg = match_op("PERMIT_SRC", line)) != 0) {
+    } else if ((arg = match_op("PERMIT_SRC", line)) != NULL) {
 	permit_location(NULL, arg, &tp);
 	if (tp) {
 	    /*
@@ -1982,21 +1982,21 @@ int local_dired(DocInfo *doc)
 	}
 	FREE(line);
 	return 0;
-    } else if ((arg = match_op("PERMIT_LOCATION", line_url)) != 0) {
+    } else if ((arg = match_op("PERMIT_LOCATION", line_url)) != NULL) {
 	permit_location(arg, NULL, &tp);
 #endif /* OK_PERMIT */
-    } else if ((arg = match_op("REMOVE_SINGLE", line)) != 0) {
+    } else if ((arg = match_op("REMOVE_SINGLE", line)) != NULL) {
 	if (remove_single(arg) > 0)
 	    LYforce_no_cache = TRUE;
-    } else if (match_op("REMOVE_TAGGED", line) != 0) {
+    } else if (match_op("REMOVE_TAGGED", line) != NULL) {
 	if (remove_tagged())
 	    LYforce_no_cache = TRUE;
-    } else if (match_op("CLEAR_TAGGED", line) != 0) {
+    } else if (match_op("CLEAR_TAGGED", line) != NULL) {
 	clear_tags();
-    } else if ((arg = match_op("UPLOAD", line)) != 0) {
+    } else if ((arg = match_op("UPLOAD", line)) != NULL) {
 	/*
 	 * They're written by LYUpload_options() HTUnEscaped; don't want to
-	 * change that for now...  so pass through without more unescaping. 
+	 * change that for now...  so pass through without more unescaping.
 	 * Directory names containing '#' will probably fail.
 	 */
 	if (LYUpload(line_url))
@@ -2010,7 +2010,7 @@ int local_dired(DocInfo *doc)
 
 	buffer = build_command(line, dirName, arg);
 
-	if (buffer != 0) {
+	if (buffer != NULL) {
 	    if ((int) strlen(buffer) < LYcolLimit - 14) {
 		HTSprintf0(&tmpbuf, gettext("Executing %s "), buffer);
 	    } else {
@@ -2058,7 +2058,7 @@ int dired_options(DocInfo *doc, char **newfile)
     struct dired_menu *mp;
     char buf[2048];
 
-    if ((fp0 = InternalPageFP(tempfile, FALSE)) == 0)
+    if ((fp0 = InternalPageFP(tempfile, FALSE)) == NULL)
 	return (0);
 
     /*
@@ -2251,7 +2251,7 @@ static void clear_install_path(void)
  *
  * On success *argvp points to new args vector, *pathp is auxiliary.  On
  * success returns index of next argument, else -1.  This is generic enough
- * that it could be used for other calls than install, except the atexit call. 
+ * that it could be used for other calls than install, except the atexit call.
  * Go through this trouble for install because INSTALL_ARGS may be significant,
  * and someone may configure it with more than one significant flags.  - kw
  */
@@ -2514,7 +2514,7 @@ void add_menu_item(char *str)
     /*
      * Conditional on tagged != NULL ?
      */
-    if ((cp = StrChr(str, ':')) != 0) {
+    if ((cp = StrChr(str, ':')) != NULL) {
 	*cp++ = '\0';
 	if (strcasecomp(str, "tag") == 0) {
 	    tmp->cond = DE_TAG;
@@ -2532,17 +2532,17 @@ void add_menu_item(char *str)
 	 * Conditional on matching suffix.
 	 */
 	str = cp;
-	if ((cp = StrChr(str, ':')) != 0) {
+	if ((cp = StrChr(str, ':')) != NULL) {
 	    *cp++ = '\0';
 	    StrAllocCopy(tmp->sfx, str);
 
 	    str = cp;
-	    if ((cp = StrChr(str, ':')) != 0) {
+	    if ((cp = StrChr(str, ':')) != NULL) {
 		*cp++ = '\0';
 		StrAllocCopy(tmp->link, str);
 
 		str = cp;
-		if ((cp = StrChr(str, ':')) != 0) {
+		if ((cp = StrChr(str, ':')) != NULL) {
 		    *cp++ = '\0';
 		    StrAllocCopy(tmp->rest, str);
 

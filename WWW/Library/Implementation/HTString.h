@@ -1,8 +1,8 @@
 /*
- * $LynxId: HTString.h,v 1.41 2021/06/09 19:30:55 tom Exp $
+ * $LynxId: HTString.h,v 1.42 2025/01/06 15:20:50 tom Exp $
  *						String handling for libwww
  *                                         STRINGS
- *                                            
+ *
  * Case-independent string comparison and allocations with copies etc
  */
 #ifndef HTSTRING_H
@@ -141,12 +141,12 @@ extern "C" {
     extern BOOL HTSABEql(bstring *a, bstring *b);
     extern void HTSABFree(bstring **ptr);
 
-#define BStrLen(s)    (((s) != 0) ? (s)->len : 0)
-#define BStrData(s)   (((s) != 0) ? (s)->str : 0)
+#define BStrLen(s)    (((s) != NULL) ? (s)->len : 0)
+#define BStrData(s)   (((s) != NULL) ? (s)->str : NULL)
 
 #define BINEQ(a,b)    (HTSABEql(a,b))	/* like STREQ() */
 
-#define isBEmpty(p)   ((p) == 0 || BStrData(p) == 0 || BStrLen(p) == 0)
+#define isBEmpty(p)   ((p) == NULL || BStrData(p) == NULL || BStrLen(p) == 0)
 
 #define BStrAlloc(d,n)   HTSABAlloc( &(d), n)
 #define BStrCopy(d,s)    HTSABCopy( &(d), BStrData(s), BStrLen(s))

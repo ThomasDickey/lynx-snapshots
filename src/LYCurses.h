@@ -1,4 +1,4 @@
-/* $LynxId: LYCurses.h,v 1.98 2023/10/23 23:35:36 tom Exp $ */
+/* $LynxId: LYCurses.h,v 1.99 2025/01/06 15:52:34 tom Exp $ */
 #ifndef LYCURSES_H
 #define LYCURSES_H
 
@@ -345,7 +345,7 @@ extern "C" {
     extern void LYsubwindow(WINDOW * param);
     extern WINDOW *LYtopwindow(void);
 
-#define LYstopPopup() LYsubwindow(0)
+#define LYstopPopup() LYsubwindow(NULL)
 #endif				/* NCURSES */
 
     extern void LYbox(WINDOW * win, int formfield);

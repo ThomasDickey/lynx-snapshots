@@ -3,7 +3,7 @@
 
   This table is generated from Unicode Character Database, Version 2.1.5
   available from ftp.unicode.org, and looks as natural way to get case mapping
-  equivalents for unicodes.  (well, too much characters the cost of 3 Kb only). 
+  equivalents for unicodes.  (well, too much characters the cost of 3 Kb only).
   Few words from the original README.txt quoted:
 
 UNICODE 2.1 CHARACTER DATABASE

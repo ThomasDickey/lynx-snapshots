@@ -1,4 +1,4 @@
-/* $LynxId: LYSession.c,v 1.12 2018/07/08 15:22:44 tom Exp $ */
+/* $LynxId: LYSession.c,v 1.13 2025/01/06 16:34:28 tom Exp $ */
 
 #include <LYSession.h>
 
@@ -60,7 +60,7 @@ void RestoreSession(void)
 {
     char *my_filename = get_filename(sessionin_file);
     FILE *fp;
-    char *buffer = 0;
+    char *buffer = NULL;
     DocInfo doc;
     VisitedLink *vl;
     int i = 0;
@@ -71,7 +71,7 @@ void RestoreSession(void)
     memset(&doc, 0, sizeof(doc));
 
     /*
-     * This should be done only once, here:  iff USE_SESSIONS is defined or: 
+     * This should be done only once, here:  iff USE_SESSIONS is defined or:
      * in mainloop(), otherwise history entries are lost
      */
     nhist = 0;
@@ -89,11 +89,11 @@ void RestoreSession(void)
 	 * This should be safe, entries are added to lynx until memory is
 	 * exhausted
 	 */
-	while (LYSafeGets(&buffer, fp) != 0) {
+	while (LYSafeGets(&buffer, fp) != NULL) {
 	    LYTrimNewline(buffer);
 	    if (*buffer == '/') {
 #ifdef SEARCH_OUT_SESSION
-		if ((value1 = StrChr(buffer, ' ')) == 0) {
+		if ((value1 = StrChr(buffer, ' ')) == NULL) {
 		    continue;
 		} else {
 		    value1++;
@@ -102,7 +102,7 @@ void RestoreSession(void)
 #endif /* SEARCH_OUT_SESSION */
 	    } else if (*buffer == 'g') {
 #ifdef GOTOURL_OUT_SESSION
-		if ((value1 = StrChr(buffer, ' ')) == 0)
+		if ((value1 = StrChr(buffer, ' ')) == NULL)
 		    continue;
 		else {
 		    value1++;
@@ -111,19 +111,19 @@ void RestoreSession(void)
 #endif /* GOTOURL_OUT_SESSION */
 	    } else if (*buffer == 'h') {
 #ifdef HISTORY_OUT_SESSION
-		if ((rsline = StrChr(buffer, ' ')) == 0)
+		if ((rsline = StrChr(buffer, ' ')) == NULL)
 		    continue;
 		else {
 		    rsline++;
-		    if ((linktext = StrChr(rsline, ' ')) == 0)
+		    if ((linktext = StrChr(rsline, ' ')) == NULL)
 			continue;
 		    else
 			*linktext++ = 0;
-		    if ((value1 = StrChr(linktext, ' ')) == 0)
+		    if ((value1 = StrChr(linktext, ' ')) == NULL)
 			continue;
 		    else
 			*value1++ = 0;
-		    if ((value2 = StrChr(value1, '\t')) != 0) {
+		    if ((value2 = StrChr(value1, '\t')) != NULL) {
 			*value2++ = 0;
 			doc.line = atoi(rsline);
 			doc.link = atoi(linktext);
@@ -135,15 +135,15 @@ void RestoreSession(void)
 #endif /* HISTORY_OUT_SESSION */
 	    } else if (*buffer == 'V') {
 #ifdef VLINK_OUT_SESSION
-		if ((rslevel = StrChr(buffer, ' ')) == 0)
+		if ((rslevel = StrChr(buffer, ' ')) == NULL)
 		    continue;
 		else {
 		    rslevel++;
-		    if ((value1 = StrChr(rslevel, ' ')) == 0)
+		    if ((value1 = StrChr(rslevel, ' ')) == NULL)
 			continue;
 		    else
 			*value1++ = 0;
-		    if ((value2 = StrChr(value1, '\t')) != 0) {
+		    if ((value2 = StrChr(value1, '\t')) != NULL) {
 			*value2++ = 0;
 			StrAllocCopy(doc.address, value1);
 			StrAllocCopy(doc.title, value2);

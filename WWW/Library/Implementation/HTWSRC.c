@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTWSRC.c,v 1.31 2020/01/21 22:05:46 tom Exp $
+ * $LynxId: HTWSRC.c,v 1.32 2025/01/06 15:48:56 tom Exp $
  *
  *			Parse WAIS Source file			HTWSRC.c
  *			======================
@@ -34,10 +34,10 @@ struct _HTStructured {
 
 #define PUTC(c) (*me->target->isa->put_character)(me->target, c)
 #define PUTS(s) (*me->target->isa->put_string)(me->target, s)
-#define START(e) (*me->target->isa->start_element)(me->target, e, 0, 0, -1, 0)
-#define END(e) (*me->target->isa->end_element)(me->target, e, 0)
+#define START(e) (*me->target->isa->start_element)(me->target, e, NULL, NULL, -1, NULL)
+#define END(e) (*me->target->isa->end_element)(me->target, e, NULL)
 #define MAYBE_END(e) if (HTML_dtd.tags[e].contents != SGML_EMPTY) \
-			(*me->target->isa->end_element)(me->target, e, 0)
+			(*me->target->isa->end_element)(me->target, e, NULL)
 
 /*	Here are the parameters which can be specified in a  source file
 */
@@ -75,7 +75,7 @@ static const char *par_name[] =
     "font-size",
 #define PAR_UNKNOWN 22
     "unknown",
-    0,				/* Terminate list */
+    NULL,			/* Terminate list */
 #define PAR_COUNT 23
 };
 
@@ -309,7 +309,7 @@ static void give_parameter(HTStream *me, int p)
 static void WSRC_gen_html(HTStream *me, int source_file)
 {
     if (me->par_value[PAR_DATABASE_NAME]) {
-	char *shortname = 0;
+	char *shortname = NULL;
 	int l;
 
 	StrAllocCopy(shortname, me->par_value[PAR_DATABASE_NAME]);
@@ -477,7 +477,7 @@ HTStream *HTWSRCConvert(HTPresentation *pres, HTParentAnchor *anchor,
 	int p;
 
 	for (p = 0; p < PAR_COUNT; p++) {	/* Clear out parameter values */
-	    me->par_value[p] = 0;
+	    me->par_value[p] = NULL;
 	}
     }
     me->state = beginning;

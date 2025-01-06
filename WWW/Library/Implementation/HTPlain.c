@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTPlain.c,v 1.61 2020/01/21 22:05:46 tom Exp $
+ * $LynxId: HTPlain.c,v 1.62 2025/01/06 15:13:11 tom Exp $
  *
  *		Plain text object		HTWrite.c
  *		=================
@@ -401,7 +401,7 @@ static void HTPlain_write(HTStream *me, const char *s, int l)
 	     * Now only ignore it for color style, which doesn't handle it
 	     * anyway.  Otherwise pass it on as LY_SOFT_HYPHEN and let HText
 	     * deal with it.  It should be either ignored, or displayed as a
-	     * hyphen if it was indeed at the end of a line.  Well it should. 
+	     * hyphen if it was indeed at the end of a line.  Well it should.
 	     * - kw
 	     */
 	} else if (code == CH_SHY) {

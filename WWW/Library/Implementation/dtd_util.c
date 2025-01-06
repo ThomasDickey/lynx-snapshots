@@ -1,5 +1,5 @@
 /*
- * $LynxId: dtd_util.c,v 1.89 2022/09/29 23:51:16 tom Exp $
+ * $LynxId: dtd_util.c,v 1.90 2025/01/06 18:10:33 tom Exp $
  *
  * Given a SGML_dtd structure, write a corresponding flat file, or "C" source.
  * Given the flat-file, write the "C" source.
@@ -85,13 +85,13 @@ static const attr core_attr_list[] = {
 	{ "ID"            T(i) },
 	{ "STYLE"         T(N) },
 	{ "TITLE"         T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const attr i18n_attr_list[] = {
 	{ "DIR"           T(N) },
 	{ "LANG"          T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const attr events_attr_list[] = {
@@ -105,12 +105,12 @@ static const attr events_attr_list[] = {
 	{ "ONMOUSEOUT"    T(N) },
 	{ "ONMOUSEOVER"   T(N) },
 	{ "ONMOUSEUP"     T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const attr align_attr_list[] = {
 	{ "ALIGN"         T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const attr cellalign_attr_list[] = {
@@ -118,12 +118,12 @@ static const attr cellalign_attr_list[] = {
 	{ "CHAR"          T(N) },
 	{ "CHAROFF"       T(N) },
 	{ "VALIGN"        T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const attr bgcolor_attr_list[] = {
 	{ "BGCOLOR"       T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 #undef T
@@ -634,7 +634,7 @@ static void dump_AttrItem(FILE *output, const attr * data)
 
 static void dump_AttrItem0(FILE *output)
 {
-    fprintf(output, "\t{ 0               T(N) }\t/* Terminate list */\n");
+    fprintf(output, "\t{ NULL            T(N) }\t/* Terminate list */\n");
 }
 
 static void dump_src_AttrType(FILE *output, const char *name, AttrList data, const char **from)
@@ -647,7 +647,7 @@ static void dump_src_AttrType(FILE *output, const char *name, AttrList data, con
 	    dump_AttrItem(output, data + n);
 	}
     }
-    fprintf(output, "\t{ 0               T(N) }	/* Terminate list */\n");
+    fprintf(output, "\t{ NULL            T(N) }	/* Terminate list */\n");
     fprintf(output, "};\n");
     NOTE("");
     fprintf(output, "static const AttrType %s_attr_type[] = {\n", name);
@@ -659,7 +659,7 @@ static void dump_src_AttrType(FILE *output, const char *name, AttrList data, con
     } else {
 	fprintf(output, "\t{ ATTR_TYPE(%s) },\n", name);
     }
-    fprintf(output, "\t{ 0, 0 },\n");
+    fprintf(output, "\t{ NULL, NULL },\n");
     fprintf(output, "};\n");
     NOTE("");
 }
@@ -712,7 +712,7 @@ static void dump_source(FILE *output, const SGML_dtd * dtd, int dtd_version)
 	ATTR_TYPE(align),
 	ATTR_TYPE(cellalign),
 	ATTR_TYPE(bgcolor),
-	{0, 0}
+	{NULL, NULL}
     };
     AttrType *gt;
     TagAlias aliases;

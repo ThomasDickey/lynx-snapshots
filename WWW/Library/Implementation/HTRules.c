@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTRules.c,v 1.47 2017/07/02 19:45:22 tom Exp $
+ * $LynxId: HTRules.c,v 1.48 2025/01/06 15:35:41 tom Exp $
  *
  *	Configuration manager for Hypertext Daemon		HTRules.c
  *	==========================================
@@ -62,10 +62,10 @@ char *HTSearchScript = NULL;	/* Search script name.          */
  *	---------------------
  */
 
-static rule *rules = 0;		/* Pointer to first on list */
+static rule *rules = NULL;	/* Pointer to first on list */
 
 #ifndef PUT_ON_HEAD
-static rule *rule_tail = 0;	/* Pointer to last on list */
+static rule *rule_tail = NULL;	/* Pointer to last on list */
 #endif
 
 /*	Add rule to the list					HTAddRule()
@@ -97,7 +97,7 @@ int HTAddRule(HTRuleOp op, const char *pattern,
 	StrAllocCopy(pEquiv, equiv);
 	temp->equiv = pEquiv;
     } else {
-	temp->equiv = 0;
+	temp->equiv = NULL;
     }
     if (cond_op) {
 	StrAllocCopy(temp->condition_op, cond_op);
@@ -127,7 +127,7 @@ int HTAddRule(HTRuleOp op, const char *pattern,
     temp->next = rules;
     rules = temp;
 #else
-    temp->next = 0;
+    temp->next = NULL;
     if (rule_tail)
 	rule_tail->next = temp;
     else
@@ -160,7 +160,7 @@ void HTClearRules(void)
 	FREE(temp);
     }
 #ifndef PUT_ON_HEAD
-    rule_tail = 0;
+    rule_tail = NULL;
 #endif
 }
 

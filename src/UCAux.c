@@ -1,5 +1,5 @@
 /*
- * $LynxId: UCAux.c,v 1.59 2024/01/15 11:24:17 tom Exp $
+ * $LynxId: UCAux.c,v 1.60 2025/01/06 15:16:59 tom Exp $
  */
 #include <HTUtils.h>
 
@@ -62,7 +62,7 @@ BOOL UCCanTranslateFromTo(int from,
 	     * document is not CJK, but the check may be for capability in
 	     * relation to another document, for which CJK mode might be turned
 	     * on when retrieved.  Thus, when the from charset is CJK, check if
-	     * the to charset is CJK, and return NO or YES in relation to that. 
+	     * the to charset is CJK, and return NO or YES in relation to that.
 	     * - FM
 	     */
 	    if (LYCharSet_UC[to].enc != UCT_ENC_CJK)

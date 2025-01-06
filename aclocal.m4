@@ -1,4 +1,4 @@
-dnl $LynxId: aclocal.m4,v 1.350 2024/09/15 20:13:53 tom Exp $
+dnl $LynxId: aclocal.m4,v 1.351 2024/12/21 13:44:12 tom Exp $
 dnl Macros for auto-configure script.
 dnl by Thomas E. Dickey <dickey@invisible-island.net>
 dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
@@ -86,7 +86,7 @@ AC_DEFUN([AM_GNU_GETTEXT],
    fi
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl AM_ICONV version: 12 updated: 2007/07/30 19:12:03
+dnl AM_ICONV version: 13 updated: 2024/10/16 03:56:13
 dnl --------
 dnl Inserted as requested by gettext 0.10.40
 dnl File from /usr/share/aclocal
@@ -139,7 +139,7 @@ size_t iconv();
     if test "$am_cv_proto_iconv_const" = yes ; then
       am_cv_proto_iconv_arg1="const"
     else
-      am_cv_proto_iconv_arg1=""
+      am_cv_proto_iconv_arg1="/* nothing */"
     fi
 
     AC_DEFINE_UNQUOTED(ICONV_CONST, $am_cv_proto_iconv_arg1,
@@ -1064,7 +1064,7 @@ if test "$cf_cv_bool_defs" = no ; then
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_BUILD_CC version: 13 updated: 2024/06/22 13:42:22
+dnl CF_BUILD_CC version: 14 updated: 2024/12/14 11:58:01
 dnl -----------
 dnl If we're cross-compiling, allow the user to override the tools and their
 dnl options.  The configure script is oriented toward identifying the host
@@ -1142,7 +1142,7 @@ if test "$cross_compiling" = yes ; then
 	AC_TRY_RUN([#include <stdio.h>
 		int main(int argc, char *argv[])
 		{
-			${cf_cv_main_return:-return}(argc < 0 || argv == 0 || argv[0] == 0);
+			${cf_cv_main_return:-return}(argc < 0 || argv == (void*)0 || argv[0] == (void*)0);
 		}
 	],
 		cf_ok_build_cc=yes,
@@ -1723,7 +1723,7 @@ if test "$cf_cv_color_curses" = yes ; then
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_CONST_X_STRING version: 8 updated: 2023/12/01 17:22:50
+dnl CF_CONST_X_STRING version: 9 updated: 2024/12/04 03:49:57
 dnl -----------------
 dnl The X11R4-X11R6 Xt specification uses an ambiguous String type for most
 dnl character-strings.
@@ -1750,7 +1750,7 @@ CF_SAVE_XTRA_FLAGS([CF_CONST_X_STRING])
 
 AC_TRY_COMPILE(
 [
-#include <stdlib.h>
+$ac_includes_default
 #include <X11/Intrinsic.h>
 ],
 [String foo = malloc(1); free((void*)foo)],[
@@ -1761,7 +1761,7 @@ AC_CACHE_CHECK(for X11/Xt const-feature,cf_cv_const_x_string,[
 #undef  _CONST_X_STRING
 #define _CONST_X_STRING	/* X11R7.8 (perhaps) */
 #undef  XTSTRINGDEFINES	/* X11R5 and later */
-#include <stdlib.h>
+$ac_includes_default
 #include <X11/Intrinsic.h>
 		],[String foo = malloc(1); *foo = 0],[
 			cf_cv_const_x_string=no
@@ -3180,7 +3180,7 @@ CF_INTEL_COMPILER(GCC,INTEL_COMPILER,CFLAGS)
 CF_CLANG_COMPILER(GCC,CLANG_COMPILER,CFLAGS)
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_GCC_WARNINGS version: 41 updated: 2021/01/01 16:53:59
+dnl CF_GCC_WARNINGS version: 43 updated: 2024/12/21 08:44:12
 dnl ---------------
 dnl Check if the compiler supports useful warning options.  There's a few that
 dnl we don't use, simply because they're too noisy:
@@ -5249,14 +5249,17 @@ AC_SUBST(PROG_EXT)
 test -n "$PROG_EXT" && AC_DEFINE_UNQUOTED(PROG_EXT,"$PROG_EXT",[Define to the program extension (normally blank)])
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_PROG_LINT version: 5 updated: 2022/08/20 15:44:13
+dnl CF_PROG_LINT version: 7 updated: 2024/11/30 14:37:45
 dnl ------------
 AC_DEFUN([CF_PROG_LINT],
 [
 AC_CHECK_PROGS(LINT, lint cppcheck splint)
 case "x$LINT" in
+(xlint|x*/lint) # NetBSD 10
+	test -z "$LINT_OPTS" && LINT_OPTS="-chapbrxzgFS -v -Ac11"
+	;;
 (xcppcheck|x*/cppcheck)
-	test -z "$LINT_OPTS" && LINT_OPTS="--enable=all"
+	test -z "$LINT_OPTS" && LINT_OPTS="--enable=all -D__CPPCHECK__"
 	;;
 esac
 AC_SUBST(LINT_OPTS)
@@ -7462,7 +7465,7 @@ esac
 
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_XOPEN_SOURCE version: 67 updated: 2023/09/06 18:55:27
+dnl CF_XOPEN_SOURCE version: 68 updated: 2024/11/09 18:07:29
 dnl ---------------
 dnl Try to get _XOPEN_SOURCE defined properly that we can use POSIX functions,
 dnl or adapt to the vendor's definitions to get equivalent functionality,
@@ -7524,6 +7527,9 @@ case "$host_os" in
 	;;
 (linux*gnu|linux*gnuabi64|linux*gnuabin32|linux*gnueabi|linux*gnueabihf|linux*gnux32|uclinux*|gnu*|mint*|k*bsd*-gnu|cygwin|msys|mingw*|linux*uclibc)
 	CF_GNU_SOURCE($cf_XOPEN_SOURCE)
+	;;
+linux*musl)
+	cf_xopen_source="-D_BSD_SOURCE"
 	;;
 (minix*)
 	cf_xopen_source="-D_NETBSD_SOURCE" # POSIX.1-2001 features are ifdef'd with this...

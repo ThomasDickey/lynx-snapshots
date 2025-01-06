@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTP.c,v 1.186 2024/08/01 23:58:49 Steffen.Nurpmeso Exp $
+ * $LynxId: HTTP.c,v 1.187 2025/01/06 15:22:26 tom Exp $
  *
  * HyperText Transfer Protocol	- Client implementation		HTTP.c
  * ===========================
@@ -569,7 +569,7 @@ int ws_netread(int fd, char *buf, int len)
  */
 char *HTSkipToAt(char *host, int *gen_delims)
 {
-    char *result = 0;
+    char *result = NULL;
     char *s = host;
     int pass = 0;
     int ch;
@@ -607,9 +607,9 @@ static char *fake_hostname(char *auth)
     char *colon = NULL;
 
     StrAllocCopy(result, auth);
-    if ((colon = strchr(result, ':')) != 0)
+    if ((colon = strchr(result, ':')) != NULL)
 	*colon = '\0';
-    if (strchr(result, '.') == 0)
+    if (strchr(result, '.') == NULL)
 	FREE(result);
     return result;
 }
@@ -623,7 +623,7 @@ void strip_userid(char *host, int parse_only)
     char *p1 = host;
     char *p2 = HTSkipToAt(host, &gen_delims);
 
-    if (p2 != 0) {
+    if (p2 != NULL) {
 	char *msg = NULL;
 	char *auth = NULL;
 	char *fake = NULL;
@@ -672,7 +672,7 @@ void strip_userid(char *host, int parse_only)
 		       gettext("User/password may be confused with hostname: '%s' (e.g, '%s')"),
 		       auth, fake);
 	}
-	if (msg != 0 && !parse_only)
+	if (msg != NULL && !parse_only)
 	    HTAlert(msg);
 	if (do_trimming) {
 	    while ((*p1++ = *p2++) != '\0') {
@@ -695,7 +695,7 @@ static BOOL acceptEncoding(int code)
     BOOL result = FALSE;
 
     if ((code & LYAcceptEncoding) != 0) {
-	const char *program = 0;
+	const char *program = NULL;
 
 	switch (code) {
 	case encodingGZIP:
@@ -750,7 +750,7 @@ static char *StripIpv6Brackets(char *host)
     int port_number;
     char *p;
 
-    if ((p = HTParsePort(host, &port_number)) != 0)
+    if ((p = HTParsePort(host, &port_number)) != NULL)
 	*p = '\0';
 
     if (*host == '[') {
@@ -922,7 +922,7 @@ static int HTLoadHTTP(const char *arg,
      * All initializations are moved down here from up above, so we can start
      * over here...
      */
-    eol = 0;
+    eol = NULL;
     length = 0;
     doing_redirect = FALSE;
     permanent_redirection = FALSE;
@@ -1437,14 +1437,14 @@ static int HTLoadHTTP(const char *arg,
 	    CTRACE((tfp,
 		    "omit Accept-Encoding to work-around interaction with -source\n"));
 	} else {
-	    char *list = 0;
+	    char *list = NULL;
 	    int j, k;
 
 	    for (j = 1; j < encodingALL; j <<= 1) {
 		if (acceptEncoding(j)) {
-		    for (k = 0; tbl_preferred_encoding[k].name != 0; ++k) {
+		    for (k = 0; tbl_preferred_encoding[k].name != NULL; ++k) {
 			if (tbl_preferred_encoding[k].value == j) {
-			    if (list != 0)
+			    if (list != NULL)
 				StrAllocCat(list, ", ");
 			    StrAllocCat(list, tbl_preferred_encoding[k].name);
 			    break;
@@ -1453,7 +1453,7 @@ static int HTLoadHTTP(const char *arg,
 		}
 	    }
 
-	    if (list != 0) {
+	    if (list != NULL) {
 		HTBprintf(&command, "Accept-Encoding: %s%c%c", list, CR, LF);
 		free(list);
 	    }
@@ -2078,7 +2078,7 @@ static int HTLoadHTTP(const char *arg,
 	     * anything else) when !eol.  Otherwise, set the value of length to
 	     * what we have beyond eol (i.e., beyond the status line).  - FM
 	     */
-	    if (eol != 0) {
+	    if (eol != NULL) {
 		start_of_data = (eol + 1);
 	    } else {
 		start_of_data = empty;
@@ -2187,7 +2187,7 @@ static int HTLoadHTTP(const char *arg,
 #endif /* DISABLE_NEWS */
 			did_connect = TRUE;
 			already_retrying = TRUE;
-			eol = 0;
+			eol = NULL;
 			length = 0;
 			doing_redirect = FALSE;
 			permanent_redirection = FALSE;
@@ -2833,7 +2833,7 @@ GLOBALDEF(HTProtocol, HTTP, _HTTP_C_GLOBALDEF_1_INIT);
 GLOBALDEF(HTProtocol, HTTPS, _HTTP_C_GLOBALDEF_2_INIT);
 #else
 GLOBALDEF HTProtocol HTTP =
-{"http", HTLoadHTTP, 0};
+{"http", HTLoadHTTP, NULL};
 GLOBALDEF HTProtocol HTTPS =
-{"https", HTLoadHTTP, 0};
+{"https", HTLoadHTTP, NULL};
 #endif /* GLOBALDEF_IS_MACRO */

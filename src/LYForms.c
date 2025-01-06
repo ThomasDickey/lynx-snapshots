@@ -1,4 +1,4 @@
-/* $LynxId: LYForms.c,v 1.119 2022/04/02 00:13:32 Paul.G.Fox Exp $ */
+/* $LynxId: LYForms.c,v 1.120 2025/01/06 16:16:35 tom Exp $ */
 #include <HTUtils.h>
 #include <HTCJK.h>
 #include <HTTP.h>
@@ -35,13 +35,13 @@ static int form_getstr(int cur,
  */
 static char **options_list(OptionType * opt_ptr)
 {
-    char **result = 0;
+    char **result = NULL;
     size_t len;
     int pass;
     OptionType *tmp_ptr;
 
     for (pass = 0; pass < 2; pass++) {
-	for (tmp_ptr = opt_ptr, len = 0; tmp_ptr != 0; tmp_ptr = tmp_ptr->next) {
+	for (tmp_ptr = opt_ptr, len = 0; tmp_ptr != NULL; tmp_ptr = tmp_ptr->next) {
 	    if (pass != 0)
 		result[len] = tmp_ptr->name;
 	    len++;
@@ -50,10 +50,10 @@ static char **options_list(OptionType * opt_ptr)
 	    len++;
 	    result = typecallocn(char *, len);
 
-	    if (result == 0)
+	    if (result == NULL)
 		outofmem(__FILE__, "options_list");
 	} else {
-	    result[len] = 0;
+	    result[len] = NULL;
 	}
     }
 
@@ -73,7 +73,7 @@ int change_form_link_ex(int cur,
     int newdoc_changed = 0;
     int c = DO_NOTHING;
     int title_adjust = (no_title ? -TITLE_LINES : 0);
-    char **my_data = 0;
+    char **my_data = NULL;
 
     /*
      * If there is no form to perform action on, don't do anything.
@@ -99,7 +99,7 @@ int change_form_link_ex(int cur,
 	break;
 
     case F_OPTION_LIST_TYPE:
-	if (form->select_list == 0) {
+	if (form->select_list == NULL) {
 	    HTAlert(BAD_HTML_NO_POPUP);
 	    c = DO_NOTHING;
 	    break;

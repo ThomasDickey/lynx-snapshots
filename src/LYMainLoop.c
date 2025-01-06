@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMainLoop.c,v 1.256 2024/04/11 21:53:34 tom Exp $
+ * $LynxId: LYMainLoop.c,v 1.257 2025/01/06 16:15:43 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTAccess.h>
@@ -164,8 +164,8 @@ static void set_ws_title(char *str)
 #include <LYLeaks.h>
 
 /* two constants: */
-HTLinkType *HTInternalLink = 0;
-HTAtom *WWW_SOURCE = 0;
+HTLinkType *HTInternalLink = NULL;
+HTAtom *WWW_SOURCE = NULL;
 
 #define NONINTERNAL_OR_PHYS_DIFFERENT(p,n) \
 	((track_internal_links && \
@@ -296,7 +296,7 @@ static void turn_trace_back_on(BOOLEAN *trace_flag_ptr)
 FILE *TraceFP(void)
 {
 #ifndef NO_LYNX_TRACE
-    if (LYTraceLogFP != 0) {
+    if (LYTraceLogFP != NULL) {
 	return LYTraceLogFP;
     }
 #endif /* NO_LYNX_TRACE */
@@ -372,11 +372,11 @@ BOOLEAN LYOpenTraceLog(void)
 void LYCloseTracelog(void)
 {
 #ifndef NO_LYNX_TRACE
-    if (LYTraceLogFP != 0) {
+    if (LYTraceLogFP != NULL) {
 	fflush(stdout);
 	fflush(stderr);
 	fclose(LYTraceLogFP);
-	LYTraceLogFP = 0;
+	LYTraceLogFP = NULL;
     }
 #endif /* NO_LYNX_TRACE */
 }
@@ -739,7 +739,7 @@ static BOOL do_check_recall(int ch,
     char *cp;
     BOOL ret = FALSE;
 
-    if (*old_user_input == 0)
+    if (*old_user_input == NULL)
 	StrAllocCopy(*old_user_input, "");
 
     for (;;) {
@@ -1021,7 +1021,7 @@ static BOOLEAN check_history(void)
 	&& !LYresubmit_posts
 	&& HDOC(nhist - 1).post_data
 	&& BINEQ(curdoc.post_data, HDOC(nhist - 1).post_data)
-	&& (base = HText_getContentBase()) != 0) {
+	&& (base = HText_getContentBase()) != NULL) {
 	char *text = !isLYNXIMGMAP(HDOC(nhist - 1).address)
 	? HDOC(nhist - 1).address
 	: HDOC(nhist - 1).address + LEN_LYNXIMGMAP;
@@ -1520,7 +1520,7 @@ static FormInfo *FindFormAction(FormInfo * given, int submit)
 	result = given;
     } else {
 	for (i = 0; i < nlinks; i++) {
-	    if ((fi = links[i].l_form) != 0 &&
+	    if ((fi = links[i].l_form) != NULL &&
 		fi->number == given->number &&
 		(SameFormAction(fi, submit))) {
 		result = fi;
@@ -1533,9 +1533,9 @@ static FormInfo *FindFormAction(FormInfo * given, int submit)
 
 static FormInfo *MakeFormAction(FormInfo * given, int submit)
 {
-    FormInfo *result = 0;
+    FormInfo *result = NULL;
 
-    if (given != 0) {
+    if (given != NULL) {
 	result = typecalloc(FormInfo);
 
 	if (result == NULL)
@@ -1543,7 +1543,7 @@ static FormInfo *MakeFormAction(FormInfo * given, int submit)
 
 	*result = *given;
 	if (submit) {
-	    if (result->submit_action == 0) {
+	    if (result->submit_action == NULL) {
 		PerFormInfo *pfi = HText_PerFormInfo(result->number);
 
 		*result = pfi->data;
@@ -1563,12 +1563,12 @@ static void handle_LYK_SUBMIT(int cur, DocInfo *doc, BOOLEAN *refresh_screen)
     FormInfo *make = NULL;
     char *save_submit_action = NULL;
 
-    if (form == 0) {
+    if (form == NULL) {
 	make = MakeFormAction(links[cur].l_form, 1);
 	form = make;
     }
 
-    if (form != 0) {
+    if (form != NULL) {
 	StrAllocCopy(save_submit_action, form->submit_action);
 	form->submit_action = HTPrompt(EDIT_SUBMIT_URL, form->submit_action);
 
@@ -1592,12 +1592,12 @@ static void handle_LYK_RESET(int cur, BOOLEAN *refresh_screen)
     FormInfo *form = FindFormAction(links[cur].l_form, 0);
     FormInfo *make = NULL;
 
-    if (form == 0) {
+    if (form == NULL) {
 	make = MakeFormAction(links[cur].l_form, 0);
 	form = make;
     }
 
-    if (form != 0) {
+    if (form != NULL) {
 	HTInfoMsg(RESETTING_FORM);
 	HText_ResetForm(form);
 	*refresh_screen = TRUE;
@@ -1820,7 +1820,7 @@ static int handle_LYK_COMMAND(bstring **user_input)
 	src = LYSkipBlanks((*user_input)->str);
 	tmp = LYSkipNonBlanks(src);
 	*tmp = 0;
-	ch = ((mp = LYStringToKcmd(src)) != 0) ? mp->code : LYK_UNKNOWN;
+	ch = ((mp = LYStringToKcmd(src)) != NULL) ? mp->code : LYK_UNKNOWN;
 	CTRACE((tfp, "LYK_COMMAND(%s.%s) = %d\n", src, tmp, (int) ch));
 	if (ch == 0) {
 	    return *src ? -1 : 0;
@@ -3124,7 +3124,7 @@ static BOOLEAN handle_LYK_HEAD(int *cmd)
 		       FormIsReadonly(links[curdoc.link].l_form)) {
 		HTUserMsg(FORM_ACTION_DISABLED);
 	    } else if (links[curdoc.link].type == WWW_FORM_LINK_TYPE &&
-		       links[curdoc.link].l_form->submit_action != 0 &&
+		       links[curdoc.link].l_form->submit_action != NULL &&
 		       !isLYNXCGI(links[curdoc.link].l_form->submit_action) &&
 		       StrNCmp(links[curdoc.link].l_form->submit_action,
 			       "http", 4)) {
@@ -3556,7 +3556,7 @@ static char *urlencode(char *str)
 		*ptr = '+';
 		ptr++;
 	    } else if (ch > 127 ||
-		       StrChr(":/?#[]@!$&'()*+,;=", ch) != 0) {
+		       StrChr(":/?#[]@!$&'()*+,;=", ch) != NULL) {
 		*ptr++ = '%';
 		*ptr++ = HEX(ch >> 4);
 		*ptr++ = HEX(ch);
@@ -3585,7 +3585,7 @@ static BOOLEAN check_JUMP_param(char **url_template)
 
     CTRACE((tfp, "check_JUMP_param: %s\n", NONNULL(result)));
 
-    while (result != NULL && (subs = strstr(result, "%s")) != 0) {
+    while (result != NULL && (subs = strstr(result, "%s")) != NULL) {
 	char prompt[MAX_LINE];
 	RecallType recall = NORECALL;
 
@@ -3613,7 +3613,7 @@ static BOOLEAN check_JUMP_param(char **url_template)
 	    int n;
 	    char *update = realloc(result, want + 1);
 
-	    if (update == 0) {
+	    if (update == NULL) {
 		HTInfoMsg(NOT_ENOUGH_MEMORY);
 		code = FALSE;
 		break;
@@ -4475,7 +4475,7 @@ static void handle_LYK_SHELL(BOOLEAN *refresh_screen,
 	{
 	    static char *shell = NULL;
 
-	    if (shell == 0)
+	    if (shell == NULL)
 		StrAllocCopy(shell, LYSysShell());
 	    LYSystem(shell);
 	}
@@ -7095,7 +7095,7 @@ int mainloop(void)
 	    follow_col = -1;
 
 	CTRACE((tfp, "Handling key %d as %s\n", cmd,
-		((LYKeycodeToKcmd((LYKeymapCode) cmd) != 0)
+		((LYKeycodeToKcmd((LYKeymapCode) cmd) != NULL)
 		 ? LYKeycodeToKcmd((LYKeymapCode) cmd)->name
 		 : "unknown")));
 	switch (cmd) {
@@ -8079,8 +8079,8 @@ static void form_noviceline(int disabled)
 
 static void exit_immediately_with_error_message(int state, int first_file)
 {
-    char *buf = 0;
-    char *buf2 = 0;
+    char *buf = NULL;
+    char *buf2 = NULL;
 
     if (first_file) {
 	/* print statusline messages as a hint, if any */
@@ -8111,7 +8111,7 @@ static void exit_immediately_with_error_message(int state, int first_file)
     if (!dump_output_immediately)
 	cleanup();
 
-    if (buf != 0) {
+    if (buf != NULL) {
 #ifdef UNIX
 	if (dump_output_immediately) {
 	    fputs(buf, stderr);

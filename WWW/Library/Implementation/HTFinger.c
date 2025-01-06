@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFinger.c,v 1.31 2013/11/28 11:27:50 tom Exp $
+ * $LynxId: HTFinger.c,v 1.32 2025/01/06 15:47:35 tom Exp $
  *
  *			FINGER ACCESS				HTFinger.c
  *			=============
@@ -48,8 +48,8 @@
 
 #define PUTC(c) (*targetClass.put_character)(target, c)
 #define PUTS(s) (*targetClass.put_string)(target, s)
-#define START(e) (*targetClass.start_element)(target, e, 0, 0, -1, 0)
-#define END(e) (*targetClass.end_element)(target, e, 0)
+#define START(e) (*targetClass.start_element)(target, e, NULL, NULL, -1, NULL)
+#define END(e) (*targetClass.end_element)(target, e, NULL)
 #define FREE_TARGET (*targetClass._free)(target)
 #define NEXT_CHAR HTGetCharacter()
 
@@ -91,7 +91,7 @@ static void start_anchor(const char *href)
     }
     ((const char **) value)[HTML_A_HREF] = href;
     (*targetClass.start_element) (target, HTML_A, present,
-				  (const char **) value, -1, 0);
+				  (const char **) value, -1, NULL);
 
 }
 
@@ -284,9 +284,9 @@ int HTLoadFinger(const char *arg,
 	IsGopherURL = TRUE;
     }
 
-    param = 0;
+    param = NULL;
     sitename = StrAllocCopy(param, p1);
-    if (param == 0) {
+    if (param == NULL) {
 	HTAlert(COULD_NOT_LOAD_DATA);
 	return HT_NOT_LOADED;
     } else if ((slash = StrChr(sitename, '/')) != NULL) {
@@ -330,12 +330,12 @@ int HTLoadFinger(const char *arg,
     if (result == HT_LOADED) {
 	/* Load the string for making a connection/
 	 */
-	str = 0;
+	str = NULL;
 	HTSprintf0(&str, "lose://%s/", sitename);
 
 	/* Load the command for the finger server.
 	 */
-	command = 0;
+	command = NULL;
 	if (at_sign && slash) {
 	    if (*slash == 'w' || *slash == 'W') {
 		HTSprintf0(&command, "/w %s%c%c", username, CR, LF);

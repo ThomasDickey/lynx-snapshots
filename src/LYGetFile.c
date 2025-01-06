@@ -1,4 +1,4 @@
-/* $LynxId: LYGetFile.c,v 1.97 2024/01/14 20:02:21 Viatrix Exp $ */
+/* $LynxId: LYGetFile.c,v 1.98 2025/01/06 16:03:46 tom Exp $ */
 #include <HTUtils.h>
 #include <HTTP.h>
 #include <HTAnchor.h>		/* Anchor class */
@@ -160,7 +160,7 @@ int getfile(DocInfo *doc, int *target)
 		    FREE(temp);
 		    return (NULLFILE);
 		} else if (value > 65535 || value < 0) {
-		    char *msg = 0;
+		    char *msg = NULL;
 
 		    HTSprintf0(&msg, PORT_INVALID, (unsigned long) value);
 		    HTAlert(msg);
@@ -344,7 +344,7 @@ int getfile(DocInfo *doc, int *target)
 	    if (LYDidRename) {
 		/*
 		 * The temporary file was saved to disk via a rename(), so we
-		 * can't access the temporary file again via the download menu. 
+		 * can't access the temporary file again via the download menu.
 		 * Clear the flag, and return NULLFILE to pop.  - FM
 		 */
 		LYDidRename = FALSE;
@@ -509,7 +509,7 @@ int getfile(DocInfo *doc, int *target)
 		}
 
 	    } else {
-		char *buf = 0;
+		char *buf = NULL;
 
 		HTSprintf0(&buf,
 			   EXECUTION_DISABLED_FOR_FILE,
@@ -1020,7 +1020,7 @@ int getfile(DocInfo *doc, int *target)
 		LYFreePostData(doc);
 		WWWDoc.post_data = NULL;
 		WWWDoc.post_content_type = NULL;
-		WWWDoc.bookmark = doc->bookmark = FALSE;
+		WWWDoc.bookmark = doc->bookmark = NULL;
 		WWWDoc.isHEAD = doc->isHEAD = FALSE;
 		WWWDoc.safe = doc->safe = FALSE;
 		HTOutputFormat = WWW_PRESENT;
@@ -1127,7 +1127,7 @@ void srcmode_for_next_retrieval(int mode)
  * If follow_link_number returns PRINT_ERROR an error message will be given to
  * the user.
  *
- * If follow_link_number returns DO_FORMS_STUFF some forms stuff will be done. 
+ * If follow_link_number returns DO_FORMS_STUFF some forms stuff will be done.
  * (Not yet implemented.)
  *
  * If follow_link_number returns DO_NOTHING nothing special will run after it.
@@ -1279,9 +1279,9 @@ struct trust {
     struct trust *next;
 };
 
-static struct trust *trusted_exec = 0;
+static struct trust *trusted_exec = NULL;
 static struct trust *always_trusted_exec;
-static struct trust *trusted_cgi = 0;
+static struct trust *trusted_cgi = NULL;
 
 static struct trust *new_trust(const char *src, const char *path, int type)
 {
@@ -1301,7 +1301,7 @@ static struct trust *new_trust(const char *src, const char *path, int type)
 
 static struct trust *get_trust(struct trust **table, const char *src, int type)
 {
-    if (*table == 0) {
+    if (*table == NULL) {
 	*table = new_trust(src, "", type);
     }
     return *table;
@@ -1442,7 +1442,7 @@ BOOLEAN exec_ok(const char *source,
 	allowed_extra_chars = " _-:./@~$+=\t";
     for (cp = linktext; *cp != '\0'; cp++) {
 	if (!isalnum(UCH(*cp)) && !StrChr(allowed_extra_chars, *cp)) {
-	    char *buf = 0;
+	    char *buf = NULL;
 
 	    HTSprintf0(&buf,
 		       BADCHAR_IN_EXEC_LINK,
@@ -1471,7 +1471,7 @@ BOOLEAN exec_ok(const char *source,
 	tp = tp->next;
     }
     if (Type == EXEC_PATH &&
-	always_trusted_exec->next != 0) {
+	always_trusted_exec->next != NULL) {
 	Type = ALWAYS_EXEC_PATH;
 	tp = always_trusted_exec;
 	goto check_tp_for_entry;
@@ -1531,7 +1531,7 @@ static int fix_httplike_urls(DocInfo *doc, UrlTypes type)
 	char *second = StrChr(first, ':');
 
 	CTRACE((tfp, "fix_httplike_urls: URL '%s'\n", doc->address));
-	if (second == 0)
+	if (second == NULL)
 	    second = first + strlen(first);
 	else
 	    *second++ = '\0';

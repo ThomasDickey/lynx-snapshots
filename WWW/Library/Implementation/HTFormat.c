@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFormat.c,v 1.100 2024/08/02 07:51:09 tom Exp $
+ * $LynxId: HTFormat.c,v 1.101 2025/01/06 15:38:51 tom Exp $
  *
  *		Manage different file formats			HTFormat.c
  *		=============================
@@ -328,7 +328,7 @@ int HTGetSSLCharacter(void *handle)
 }
 #endif /* USE_SSL */
 
-/* Match maintype to any MIME type starting with maintype, for example: 
+/* Match maintype to any MIME type starting with maintype, for example:
  * image/gif should match image
  */
 static int half_match(char *trial_type, char *target)
@@ -394,10 +394,10 @@ static HTPresentation *HTFindPresentation(HTFormat rep_in,
     int i;
     HTPresentation *pres;
     HTPresentation *match;
-    HTPresentation *strong_wildcard_match = 0;
-    HTPresentation *weak_wildcard_match = 0;
-    HTPresentation *last_default_match = 0;
-    HTPresentation *strong_subtype_wildcard_match = 0;
+    HTPresentation *strong_wildcard_match = NULL;
+    HTPresentation *weak_wildcard_match = NULL;
+    HTPresentation *last_default_match = NULL;
+    HTPresentation *strong_subtype_wildcard_match = NULL;
 
     CTRACE((tfp, THIS_FUNC ": Looking up presentation for %s to %s\n",
 	    HTAtom_name(rep_in), HTAtom_name(rep_out)));
@@ -664,7 +664,7 @@ void HTDisplayPartial(void)
     if (display_partial) {
 	/*
 	 * HText_getNumOfLines() = "current" number of complete lines received
-	 * NumOfLines_partial = number of lines at the moment of last repaint. 
+	 * NumOfLines_partial = number of lines at the moment of last repaint.
 	 * (we update NumOfLines_partial only when we repaint the display.)
 	 *
 	 * display_partial could only be enabled in HText_new() so a new
@@ -824,7 +824,7 @@ int HTCopy(HTParentAnchor *anchor,
 #ifdef UNIX
 		    /*
 		     * Treat what we've received already as the complete
-		     * transmission, but not without giving the user an alert. 
+		     * transmission, but not without giving the user an alert.
 		     * I don't know about all the different TCP stacks for VMS
 		     * etc., so this is currently only for UNIX.  - kw
 		     */
@@ -885,10 +885,10 @@ int HTCopy(HTParentAnchor *anchor,
 	}
 #endif /* NOT_ASCII */
 
-	header_length = anchor != 0 ? anchor->header_length : 0;
+	header_length = anchor != NULL ? anchor->header_length : 0;
 
 	(*targetClass.put_block) (sink, input_buffer, status);
-	if (anchor != 0 && anchor->inHEAD) {
+	if (anchor != NULL && anchor->inHEAD) {
 	    if (!suppress_readprogress) {
 		statusline(gettext("Reading headers..."));
 	    }
@@ -900,7 +900,7 @@ int HTCopy(HTParentAnchor *anchor,
 	     * HTMIME, which detects the end of the server headers.  There
 	     * may be additional (non-header) data in that block.
 	     */
-	    if (anchor != 0 && (anchor->header_length > header_length)) {
+	    if (anchor != NULL && (anchor->header_length > header_length)) {
 		int header = (int) (anchor->header_length - header_length);
 
 		CTRACE((tfp, "HTCopy read %" PRI_off_t " header bytes "
@@ -925,7 +925,7 @@ int HTCopy(HTParentAnchor *anchor,
 	if (limit > 0 && bytes >= limit)
 	    break;
     }				/* next bufferload */
-    if (anchor != 0) {
+    if (anchor != NULL) {
 	CTRACE((tfp, "HTCopy copied %"
 		PRI_off_t " actual, %"
 		PRI_off_t " limit\n", CAST_off_t (bytes), CAST_off_t (limit)));
@@ -1453,7 +1453,7 @@ static int HTBrFileCopy(FILE *brfp, HTStream *sink)
 	     * brotli library should return
 	     *  BROTLI_DECODER_RESULT_NEEDS_MORE_OUTPUT,
 	     * but actually returns
-	     *  BROTLI_DECODER_RESULT_ERROR 
+	     *  BROTLI_DECODER_RESULT_ERROR
 	     *
 	     * Accommodate possible improvements...
 	     */
@@ -1674,7 +1674,7 @@ int HTParseSocket(HTFormat rep_in,
     stream = HTStreamStack(rep_in, format_out, sink, anchor);
 
     if (!stream) {
-	char *buffer = 0;
+	char *buffer = NULL;
 
 	if (LYCancelDownload) {
 	    LYCancelDownload = FALSE;
@@ -1738,7 +1738,7 @@ int HTParseFile(HTFormat rep_in,
 	stream = HTStreamStack(rep_in, format_out, sink, anchor);
 
 	if (!stream || !stream->isa) {
-	    char *buffer = 0;
+	    char *buffer = NULL;
 
 	    if (LYCancelDownload) {
 		LYCancelDownload = FALSE;
@@ -1810,7 +1810,7 @@ int HTParseMem(HTFormat rep_in,
 
     stream = HTStreamStack(rep_in, format_out, sink, anchor);
     if (!stream || !stream->isa) {
-	char *buffer = 0;
+	char *buffer = NULL;
 
 	HTSprintf0(&buffer, CANNOT_CONVERT_I_TO_O,
 		   HTAtom_name(rep_in), HTAtom_name(format_out));
@@ -1879,7 +1879,7 @@ int HTParseGzFile(HTFormat rep_in,
     stream = HTStreamStack(rep_in, format_out, sink, anchor);
 
     if (!stream || !stream->isa) {
-	char *buffer = 0;
+	char *buffer = NULL;
 
 	HTCloseGzFile(gzfp);
 	if (LYCancelDownload) {
@@ -1952,7 +1952,7 @@ int HTParseZzFile(HTFormat rep_in,
     stream = HTStreamStack(rep_in, format_out, sink, anchor);
 
     if (!stream || !stream->isa) {
-	char *buffer = 0;
+	char *buffer = NULL;
 
 	fclose(zzfp);
 	if (LYCancelDownload) {
@@ -2033,7 +2033,7 @@ int HTParseBzFile(HTFormat rep_in,
     stream = HTStreamStack(rep_in, format_out, sink, anchor);
 
     if (!stream || !stream->isa) {
-	char *buffer = 0;
+	char *buffer = NULL;
 
 	HTCloseBzFile(bzfp);
 	if (LYCancelDownload) {
@@ -2110,7 +2110,7 @@ int HTParseBrFile(HTFormat rep_in,
     stream = HTStreamStack(rep_in, format_out, sink, anchor);
 
     if (!stream || !stream->isa) {
-	char *buffer = 0;
+	char *buffer = NULL;
 
 	fclose(brfp);
 	if (LYCancelDownload) {
@@ -2186,7 +2186,7 @@ int HTParseZstdFile(HTFormat rep_in,
     stream = HTStreamStack(rep_in, format_out, sink, anchor);
 
     if (!stream || !stream->isa) {
-	char *buffer = 0;
+	char *buffer = NULL;
 
 	fclose(zfp);
 	if (LYCancelDownload) {

@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYEditmap.c,v 1.76 2018/12/27 10:33:52 tom Exp $
+ * $LynxId: LYEditmap.c,v 1.77 2025/01/06 16:30:57 tom Exp $
  *
  * LYEditMap.c
  * Keybindings for line and form editing.
@@ -102,7 +102,7 @@ static struct emap ekmap[] = {
 #endif
   SEPARATOR,
   {"AIX",	LYE_AIX,	"Hex 97"},
-  {0,           -1,             0},
+  {NULL,        -1,             NULL},
 };
 #undef SEPARATOR
 /* *INDENT-ON* */
@@ -1245,7 +1245,7 @@ const char *LYLineeditHelpURLs[] =
 static struct emap *name2emap(const char *name)
 {
     struct emap *mp;
-    struct emap *result = 0;
+    struct emap *result = NULL;
 
     if (non_empty(name)) {
 	for (mp = ekmap; mp->name != NULL; mp++) {
@@ -1261,7 +1261,7 @@ static struct emap *name2emap(const char *name)
 static struct emap *code2emap(int code)
 {
     struct emap *mp;
-    struct emap *result = 0;
+    struct emap *result = NULL;
 
     for (mp = ekmap; mp->name != NULL; mp++) {
 	if (mp->code == code) {
@@ -1281,7 +1281,7 @@ int lecname_to_lec(const char *func)
     struct emap *mp;
     int result = -1;
 
-    if ((mp = name2emap(func)) != 0) {
+    if ((mp = name2emap(func)) != NULL) {
 	result = mp->code;
     }
     return result;
@@ -1290,9 +1290,9 @@ int lecname_to_lec(const char *func)
 const char *lec_to_lecname(int code)
 {
     struct emap *mp;
-    const char *result = 0;
+    const char *result = NULL;
 
-    if ((mp = code2emap(code)) != 0) {
+    if ((mp = code2emap(code)) != NULL) {
 	result = mp->name;
     }
     return result;
@@ -1761,7 +1761,7 @@ void LYinitEditmap(void)
 
 static char *showRanges(int *state)
 {
-    char *result = 0;
+    char *result = NULL;
     int range[2];
     int i;
 
@@ -1796,8 +1796,8 @@ static int LYLoadEditmap(const char *arg GCC_UNUSED,
     HTStream *target;
     int state[KEYMAP_SIZE];
     int width[2];
-    char *buf = 0;
-    char *ranges = 0;
+    char *buf = NULL;
+    char *ranges = NULL;
     struct emap *mp;
     int i;
     int hanging;
@@ -1805,7 +1805,7 @@ static int LYLoadEditmap(const char *arg GCC_UNUSED,
     int had_output = FALSE;
     int result;
 
-    if ((target = HTStreamStack(format_in, format_out, sink, anAnchor)) != 0) {
+    if ((target = HTStreamStack(format_in, format_out, sink, anAnchor)) != NULL) {
 	anAnchor->no_cache = TRUE;
 
 	HTSprintf0(&buf,
@@ -1826,7 +1826,7 @@ static int LYLoadEditmap(const char *arg GCC_UNUSED,
 	    } else {
 		int need;
 
-		if ((mp = code2emap(code)) != 0) {
+		if ((mp = code2emap(code)) != NULL) {
 		    state[i] = 0;
 		    if ((need = (int) strlen(mp->name)) > width[0])
 			width[0] = need;
@@ -1852,7 +1852,7 @@ static int LYLoadEditmap(const char *arg GCC_UNUSED,
 	PUTS(buf);
 
 	/* Show by groups to match the arrangement in the handmade files. */
-	for (mp = ekmap; mp->name != 0; ++mp) {
+	for (mp = ekmap; mp->name != NULL; ++mp) {
 	    if (isEmpty(mp->name)) {
 		if (had_output) {
 		    PUTS("\n");
@@ -1926,6 +1926,6 @@ GLOBALDEF(HTProtocol, LYLynxEditmap, _LYEDITMAP_C_GLOBALDEF_1_INIT);
 #else
 GLOBALDEF HTProtocol LYLynxEditmap =
 {
-    "LYNXEDITMAP", LYLoadEditmap, 0
+    "LYNXEDITMAP", LYLoadEditmap, NULL
 };
 #endif /* GLOBALDEF_IS_MACRO */

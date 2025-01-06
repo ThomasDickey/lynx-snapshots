@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFormat.h,v 1.43 2024/08/01 23:58:49 Steffen.Nurpmeso Exp $
+ * $LynxId: HTFormat.h,v 1.44 2025/01/06 15:13:11 tom Exp $
  *
  *                                            HTFormat: The format manager in the WWW Library
  *                          MANAGE DIFFERENT DOCUMENT FORMATS
@@ -111,7 +111,7 @@ extern "C" {
 
 /*
 
-   These are regular MIME types.  HTML is assumed to be added by the W3 code. 
+   These are regular MIME types.  HTML is assumed to be added by the W3 code.
    application/octet-stream was mistakenly application/binary in earlier libwww
    versions (pre 2.11).
 
@@ -159,7 +159,7 @@ extern "C" {
 The HTPresentation and HTConverter types
 
    This HTPresentation structure represents a possible conversion algorithm
-   from one format to another.  It includes a pointer to a conversion routine. 
+   from one format to another.  It includes a pointer to a conversion routine.
    The conversion routine returns a stream to which data should be fed.  See
    also HTStreamStack which scans the list of registered converters and calls
    one.  See the initialisation module for a list of conversion routines.
@@ -308,7 +308,7 @@ HTSetConversion:   Register a conversion routine
 HTStreamStack:   Create a stack of streams
 
    This is the routine which actually sets up the conversion.  It currently
-   checks only for direct conversions, but multi-stage conversions are forseen. 
+   checks only for direct conversions, but multi-stage conversions are forseen.
    It takes a stream into which the output should be sent in the final format,
    builds the conversion stack, and returns a stream into which the data in the
    input format should be fed.  The anchor is passed because hypertxet objects
@@ -427,7 +427,7 @@ HTCopyNoCR: Copy a socket to a stream, stripping CR characters.
 
 Clear input buffer and set file number
 
-   This routine and the one below provide simple character input from sockets. 
+   This routine and the one below provide simple character input from sockets.
    (They are left over from the older architecture and may not be used very
    much.) The existence of a common routine and buffer saves memory space in
    small implementations.

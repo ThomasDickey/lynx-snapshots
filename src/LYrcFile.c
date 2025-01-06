@@ -1,4 +1,4 @@
-/* $LynxId: LYrcFile.c,v 1.108 2024/08/02 00:20:16 Steffen.Nurpmeso Exp $ */
+/* $LynxId: LYrcFile.c,v 1.109 2025/01/06 17:59:02 tom Exp $ */
 #include <HTUtils.h>
 #include <HTFTP.h>
 #include <LYUtils.h>
@@ -208,7 +208,7 @@ static BOOL getBool(char *src)
 
 const char *LYputEnum(Config_Enum * table, int value)
 {
-    while (table->name != 0) {
+    while (table->name != NULL) {
 	if (table->value == value) {
 	    return table->name;
 	}
@@ -220,12 +220,12 @@ const char *LYputEnum(Config_Enum * table, int value)
 BOOL LYgetEnum(Config_Enum * table, const char *name,
 	       int *result)
 {
-    Config_Enum *found = 0;
+    Config_Enum *found = NULL;
     unsigned len = (unsigned) strlen(name);
     int match = 0;
 
     if (len != 0) {
-	while (table->name != 0) {
+	while (table->name != NULL) {
 	    if (!strncasecomp(table->name, name, (int) len)) {
 		found = table;
 		if (!strcasecomp(table->name, name)) {
@@ -246,24 +246,24 @@ BOOL LYgetEnum(Config_Enum * table, const char *name,
 }
 
 /* these are for data that are normally not read/written from .lynxrc */
-#define PARSE_SET(n,v,h)   {n,    1, CONF_BOOL,  UNION_SET(v), 0, 0, 0, h}
-#define PARSE_ARY(n,v,t,h) {n,    1, CONF_ARRAY, UNION_INT(v), t, 0, 0, h}
-#define PARSE_ENU(n,v,t,h) {n,    1, CONF_ENUM,  UNION_INT(v), 0, t, 0, h}
-#define PARSE_LIS(n,v,h)   {n,    1, CONF_LIS,   UNION_STR(v), 0, 0, 0, h}
-#define PARSE_STR(n,v,h)   {n,    1, CONF_STR,   UNION_STR(v), 0, 0, 0, h}
-#define PARSE_FUN(n,v,w,h) {n,    1, CONF_FUN,   UNION_FUN(v), 0, 0, w, h}
-#define PARSE_MBM(n,h)     {n,    1, CONF_MBM,   UNION_DEF(0), 0, 0, 0, h}
+#define PARSE_SET(n,v,h)   {n,    1, CONF_BOOL,  UNION_SET(v), NULL, NULL, NULL, h}
+#define PARSE_ARY(n,v,t,h) {n,    1, CONF_ARRAY, UNION_INT(v), t,    NULL, NULL, h}
+#define PARSE_ENU(n,v,t,h) {n,    1, CONF_ENUM,  UNION_INT(v), NULL, t,    NULL, h}
+#define PARSE_LIS(n,v,h)   {n,    1, CONF_LIS,   UNION_STR(v), NULL, NULL, NULL, h}
+#define PARSE_STR(n,v,h)   {n,    1, CONF_STR,   UNION_STR(v), NULL, NULL, NULL, h}
+#define PARSE_FUN(n,v,w,h) {n,    1, CONF_FUN,   UNION_FUN(v), NULL, NULL, w,    h}
+#define PARSE_MBM(n,h)     {n,    1, CONF_MBM,   UNION_DEF(0), NULL, NULL, NULL, h}
 
 /* these are for data that are optionally read/written from .lynxrc */
-#define MAYBE_SET(n,v,h)   {n,    0, CONF_BOOL,  UNION_SET(v), 0, 0, 0, h}
-#define MAYBE_ARY(n,v,t,h) {n,    0, CONF_ARRAY, UNION_INT(v), t, 0, 0, h}
-#define MAYBE_ENU(n,v,t,h) {n,    0, CONF_ENUM,  UNION_INT(v), 0, t, 0, h}
-#define MAYBE_LIS(n,v,h)   {n,    0, CONF_LIS,   UNION_STR(v), 0, 0, 0, h}
-#define MAYBE_STR(n,v,h)   {n,    0, CONF_STR,   UNION_STR(v), 0, 0, 0, h}
-#define MAYBE_FUN(n,v,w,h) {n,    0, CONF_FUN,   UNION_FUN(v), 0, 0, w, h}
-#define MAYBE_MBM(n,h)     {n,    0, CONF_MBM,   UNION_DEF(0), 0, 0, 0, h}
+#define MAYBE_SET(n,v,h)   {n,    0, CONF_BOOL,  UNION_SET(v), NULL, NULL, NULL, h}
+#define MAYBE_ARY(n,v,t,h) {n,    0, CONF_ARRAY, UNION_INT(v), t,    0,    0,    h}
+#define MAYBE_ENU(n,v,t,h) {n,    0, CONF_ENUM,  UNION_INT(v), NULL, t,    NULL, h}
+#define MAYBE_LIS(n,v,h)   {n,    0, CONF_LIS,   UNION_STR(v), 0,    0,    0,    h}
+#define MAYBE_STR(n,v,h)   {n,    0, CONF_STR,   UNION_STR(v), NULL, NULL, NULL, h}
+#define MAYBE_FUN(n,v,w,h) {n,    0, CONF_FUN,   UNION_FUN(v), NULL, NULL, w,    h}
+#define MAYBE_MBM(n,h)     {n,    0, CONF_MBM,   UNION_DEF(0), 0,    0,    0,    h}
 
-#define PARSE_NIL          {NULL, 1, CONF_NIL,   UNION_DEF(0), 0, 0, 0, 0}
+#define PARSE_NIL          {NULL, 1, CONF_NIL,   UNION_DEF(0), NULL, NULL, NULL, NULL}
 
 typedef enum {
     CONF_NIL = 0
@@ -704,7 +704,7 @@ static Config_Type *lookup_config(const char *name)
     Config_Type *tbl = Config_Table;
     char ch = (char) TOUPPER(*name);
 
-    while (tbl->name != 0) {
+    while (tbl->name != NULL) {
 	if (tbl->enabled) {
 	    char ch1 = tbl->name[0];
 
@@ -737,7 +737,7 @@ BOOL LYsetRcValue(const char *name, const char *param)
     CTRACE2(TRACE_CFG, (tfp, "LYrcFile %s:%s\n", name, value));
 
     tbl = lookup_config(name);
-    if (tbl->name == 0) {
+    if (tbl->name == NULL) {
 	const char *special = RC_MULTI_BOOKMARK;
 
 	if (!strncasecomp(name, special, (int) strlen(special))) {
@@ -747,7 +747,7 @@ BOOL LYsetRcValue(const char *name, const char *param)
 	 * lynx ignores unknown keywords.
 	 * This includes known keywords where there is no ENABLE_LYNXRC.
 	 */
-	if (tbl->name == 0) {
+	if (tbl->name == NULL) {
 	    CTRACE((tfp, "LYrcFile: ignored %s=%s\n", name, value));
 	    FREE(orig_value);
 	    return FALSE;
@@ -757,17 +757,17 @@ BOOL LYsetRcValue(const char *name, const char *param)
     q = ParseUnionOf(tbl);
     switch (tbl->type) {
     case CONF_BOOL:
-	if (q->set_value != 0)
+	if (q->set_value != NULL)
 	    *(q->set_value) = getBool(value);
 	break;
 
     case CONF_FUN:
-	if (q->fun_value != 0)
+	if (q->fun_value != NULL)
 	    (*(q->fun_value)) (value);
 	break;
 
     case CONF_ARRAY:
-	for (n = 0; tbl->strings[n] != 0; ++n) {
+	for (n = 0; tbl->strings[n] != NULL; ++n) {
 	    if (!strcasecomp(value, tbl->strings[n])) {
 		*(q->int_value) = n;
 		break;
@@ -776,12 +776,12 @@ BOOL LYsetRcValue(const char *name, const char *param)
 	break;
 
     case CONF_ENUM:
-	if (tbl->table != 0)
+	if (tbl->table != NULL)
 	    LYgetEnum(tbl->table, value, q->int_value);
 	break;
 
     case CONF_INT:
-	if (q->int_value != 0) {
+	if (q->int_value != NULL) {
 	    int ival;
 
 	    if (1 == sscanf(value, "%d", &ival))
@@ -790,7 +790,7 @@ BOOL LYsetRcValue(const char *name, const char *param)
 	break;
 
     case CONF_LIS:
-	if (q->str_value != 0) {
+	if (q->str_value != NULL) {
 	    if (*(q->str_value) != NULL)
 		StrAllocCat(*(q->str_value), ",");
 	    StrAllocCat(*(q->str_value), value);
@@ -802,7 +802,7 @@ BOOL LYsetRcValue(const char *name, const char *param)
 	    sprintf(MBM_line, "multi_bookmark%c", UCH(LYindex2MBM(n)));
 
 	    if (!strcasecomp(name, MBM_line)) {
-		if ((notes = StrChr(value, ',')) != 0) {
+		if ((notes = StrChr(value, ',')) != NULL) {
 		    *notes++ = '\0';
 		    LYTrimTrailing(value);
 		    notes = LYSkipBlanks(notes);
@@ -817,7 +817,7 @@ BOOL LYsetRcValue(const char *name, const char *param)
 	break;
 
     case CONF_STR:
-	if (q->str_value != 0)
+	if (q->str_value != NULL)
 	    StrAllocCopy(*(q->str_value), value);
 	break;
 
@@ -869,7 +869,7 @@ void read_rc(FILE *fp)
 	/*
 	 * Parse the "name=value" strings.
 	 */
-	if ((value = StrChr(name, '=')) == 0) {
+	if ((value = StrChr(name, '=')) == NULL) {
 	    CTRACE((tfp, "LYrcFile: missing '=' %s\n", name));
 	    continue;
 	}
@@ -1032,7 +1032,7 @@ It is not this file.\n\
 "));
     fprintf(fp, "\n");
 
-    while (tbl->name != 0) {
+    while (tbl->name != NULL) {
 	ParseUnionPtr q = ParseUnionOf(tbl);
 
 	if (!tbl->enabled) {
@@ -1051,12 +1051,12 @@ It is not this file.\n\
 	    break;
 
 	case CONF_FUN:
-	    if (tbl->write_it != 0)
+	    if (tbl->write_it != NULL)
 		tbl->write_it(fp, tbl);
 	    break;
 
 	case CONF_ARRAY:
-	    for (n = 0; tbl->strings[n] != 0; ++n)
+	    for (n = 0; tbl->strings[n] != NULL; ++n)
 		fprintf(fp, "#    %s\n", tbl->strings[n]);
 	    fprintf(fp, "%s=%s\n\n", tbl->name,
 		    tbl->strings[*(q->int_value)]);
@@ -1076,7 +1076,7 @@ It is not this file.\n\
 		fprintf(fp, "multi_bookmark%c=", UCH(LYindex2MBM(n)));
 
 		fprintf(fp, "%s", NonNull(MBM_A_subbookmark[n]));
-		if (MBM_A_subdescript[n] != 0
+		if (MBM_A_subdescript[n] != NULL
 		    && *MBM_A_subdescript[n] != 0)
 		    fprintf(fp, ",%s", MBM_A_subdescript[n]);
 		fprintf(fp, "\n");
@@ -1088,7 +1088,7 @@ It is not this file.\n\
 	    /* FALLTHRU */
 	case CONF_STR:
 	    fprintf(fp, "%s=%s\n\n", tbl->name,
-		    (q->str_value != 0 && *(q->str_value) != 0)
+		    (q->str_value != NULL && *(q->str_value) != NULL)
 		    ? *(q->str_value)
 		    : "");
 	    break;
@@ -1119,7 +1119,7 @@ BOOL will_save_rc(const char *name)
 {
     Config_Type *tbl = lookup_config(name);
 
-    return (BOOL) (tbl->name != 0);
+    return (BOOL) (tbl->name != NULL);
 }
 
 int enable_lynxrc(char *value)
@@ -1127,12 +1127,12 @@ int enable_lynxrc(char *value)
     Config_Type *tbl;
     char *colon = StrChr(value, ':');
 
-    if (colon != 0) {
+    if (colon != NULL) {
 	*colon++ = 0;
 	LYTrimLeading(value);
 	LYTrimTrailing(value);
 
-	for (tbl = Config_Table; tbl->name != 0; tbl++) {
+	for (tbl = Config_Table; tbl->name != NULL; tbl++) {
 	    if (!strcasecomp(value, tbl->name)) {
 		tbl->enabled = getBool(colon);
 		break;

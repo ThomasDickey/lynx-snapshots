@@ -117,7 +117,7 @@ void HTBTree_add(HTBTree *tree,
 
     /* father_of_element is a pointer to the structure that is the father of
      * the new object "object".  added_element is a pointer to the structure
-     * that contains or will contain the new object "object". 
+     * that contains or will contain the new object "object".
      * father_of_forefather and forefather_of_element are pointers that are
      * used to modify the depths of upper elements, when needed.
      *

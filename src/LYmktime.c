@@ -1,4 +1,4 @@
-/* $LynxId: LYmktime.c,v 1.20 2019/08/28 22:54:45 tom Exp $ */
+/* $LynxId: LYmktime.c,v 1.21 2025/01/06 16:12:05 tom Exp $ */
 
 #include <LYStrings.h>
 #include <LYUtils.h>
@@ -53,13 +53,13 @@ FILE *TraceFP(void)
  *	"Mon,  1 Jan 1996 13:45:35 GMT" or
  *	"dd-mm-yyyy"
  * as an argument, and returns its conversion to clock format (seconds since
- * 00:00:00 Jan 1 1970), or 0 if the string doesn't match the expected pattern. 
+ * 00:00:00 Jan 1 1970), or 0 if the string doesn't match the expected pattern.
  * It also returns 0 if the time is in the past and the "absolute" argument is
  * FALSE.  It is intended for handling 'expires' strings in Version 0 cookies
  * homologously to 'max-age' strings in Version 1 cookies, for which 0 is the
- * minimum, and greater values are handled as '[max-age seconds] + time(NULL)'. 
+ * minimum, and greater values are handled as '[max-age seconds] + time(NULL)'.
  * If "absolute" is TRUE, we return the clock format value itself, but if
- * anything goes wrong when parsing the expected patterns, we still return 0. 
+ * anything goes wrong when parsing the expected patterns, we still return 0.
  * - FM
  */
 time_t LYmktime(char *string,
@@ -70,7 +70,7 @@ time_t LYmktime(char *string,
 
     if (non_empty(string)) {
 	CTRACE((tfp, "LYmktime: Parsing '%s'\n", string));
-	if ((result = parsedate(string, 0)) == ((time_t) -1))
+	if ((result = parsedate(string, NULL)) == ((time_t) -1))
 	    result = 0;
 
 	if (!absolute) {

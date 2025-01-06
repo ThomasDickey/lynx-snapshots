@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYPrettySrc.c,v 1.36 2018/03/06 10:27:28 tom Exp $
+ * $LynxId: LYPrettySrc.c,v 1.37 2025/01/06 16:27:23 tom Exp $
  *
  * HTML source syntax highlighting
  * by Vlad Harchev <hvv@hippo.ru>
@@ -109,19 +109,19 @@ static void append_close_tag(const char *tagname,
     }
 
     subj = typecalloc(HT_tagspec);
-    if (subj == 0)
+    if (subj == NULL)
 	outofmem(__FILE__, "append_close_tag");
 
     subj->element = (HTMLElement) idx;
 
     subj->present = typecallocn(BOOL, (unsigned) nattr);
 
-    if (subj->present == 0)
+    if (subj->present == NULL)
 	outofmem(__FILE__, "append_close_tag");
 
     subj->value = typecallocn(char *, (unsigned) nattr);
 
-    if (subj->value == 0)
+    if (subj->value == NULL)
 	outofmem(__FILE__, "append_close_tag");
 
     subj->start = FALSE;
@@ -182,8 +182,8 @@ int html_src_parse_tagspec(char *ts,
     BOOL stop = FALSE;
     BOOL code = FALSE;
     char *p = ts;
-    char *tagstart = 0;
-    char *tagend = 0;
+    char *tagstart = NULL;
+    char *tagend = NULL;
     char *classstart;
     char *classend;
     char save, save1;
@@ -243,7 +243,7 @@ int html_src_parse_tagspec(char *ts,
 		save = *tagend;
 
 		*tagend = '\0';
-		classstart = 0;
+		classstart = NULL;
 		if (checkonly) {
 		    int idx = html_src_tag_index(tagstart);
 
@@ -407,7 +407,7 @@ void HTMLSRC_init_caches(int dont_exit)
 
 	CTRACE2(TRACE_CFG, (tfp, "parsing lexeme %d: %s\n", i + 1, buf));
 
-	if ((p = StrChr(buf, ':')) != 0)
+	if ((p = StrChr(buf, ':')) != NULL)
 	    *p = '\0';
 	if (!html_src_parse_tagspec(buf,
 				    (HTlexeme) i,

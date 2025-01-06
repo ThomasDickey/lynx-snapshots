@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTInit.c,v 1.104 2024/08/02 00:21:34 Steffen.Nurpmeso Exp $
+ * $LynxId: HTInit.c,v 1.105 2025/01/06 16:21:31 tom Exp $
  *
  *		Configuration-specific Initialization		HTInit.c
  *		----------------------------------------
@@ -43,7 +43,7 @@ static int HTLoadExtensionsConfigFile(char *fn);
        HTSetSuffix5(suffix, mimetype, type, description, 1.0)
 
 #define SET_PRESENT(mimetype, command, quality, delay) \
-  HTSetPresentation(mimetype, command, 0, quality, delay, 0.0, 0L, media)
+  HTSetPresentation(mimetype, command, NULL, quality, delay, 0.0, 0L, media)
 
 #define SET_EXTERNL(rep_in, rep_out, command, quality) \
     HTSetConversion(rep_in, rep_out, command, quality, 3.0, 0.0, 0L, mediaEXT)
@@ -63,7 +63,7 @@ void HTFormatInit(void)
     SET_PRESENT("audio/basic", "open %s", 1.0, 2.0);
     SET_PRESENT("*", "open %s", 1.0, 0.0);
 #else
-    if (LYgetXDisplay() != 0) {	/* Must have X11 */
+    if (LYgetXDisplay() != NULL) {	/* Must have X11 */
 	SET_PRESENT("application/postscript", "ghostview %s&", 1.0, 3.0);
 	if (non_empty(XLoadImageCommand)) {
 	    /* *INDENT-OFF* */
@@ -376,7 +376,7 @@ static int ProcessMailcapEntry(FILE *fp, struct MailcapEntry *mc, AcceptMedia me
 	ExitWithError(MEMORY_EXHAUSTED_ABORT);
 
     *rawentry = '\0';
-    while (LYSafeGets(&LineBuf, fp) != 0) {
+    while (LYSafeGets(&LineBuf, fp) != NULL) {
 	LYTrimNewline(LineBuf);
 	if (LineBuf[0] == '#' || LineBuf[0] == '\0')
 	    continue;
@@ -541,7 +541,7 @@ static const char *LYSkipToken(const char *s)
 {
     static const char tspecials[] = "\"()<>@,;:\\/[]?.=";
 
-    while (*s != '\0' && !WHITE(*s) && StrChr(tspecials, *s) == 0) {
+    while (*s != '\0' && !WHITE(*s) && StrChr(tspecials, *s) == NULL) {
 	++s;
     }
     return s;
@@ -562,7 +562,7 @@ static const char *LYSkipValue(const char *s)
 static char *LYCopyValue(const char *s)
 {
     const char *t;
-    char *result = 0;
+    char *result = NULL;
     int j, k;
 
     if (*s == DQUOTE) {
@@ -591,15 +591,15 @@ static char *LYCopyValue(const char *s)
 static char *LYGetContentType(const char *name,
 			      const char *params)
 {
-    char *result = 0;
+    char *result = NULL;
 
-    if (params != 0) {
-	if (name != 0) {
+    if (params != NULL) {
+	if (name != NULL) {
 	    size_t length = strlen(name);
 	    const char *test = StrChr(params, ';');	/* skip type/subtype */
 	    const char *next;
 
-	    while (test != 0) {
+	    while (test != NULL) {
 		BOOL found = FALSE;
 
 		++test;		/* skip the ';' */
@@ -663,7 +663,7 @@ BOOL LYMailcapUsesPctS(const char *controlstring)
 		break;
 	    case L_CURL:
 		next = StrChr(from, R_CURL);
-		if (next != 0) {
+		if (next != NULL) {
 		    from = next;
 		    break;
 		}
@@ -725,7 +725,7 @@ static int BuildCommand(HTChunk *cmd,
 			controlstring));
 		break;
 	    case 't':
-		if (params == 0)
+		if (params == NULL)
 		    result = 1;
 		if (content_type != NULL) {
 		    HTChunkPuts(cmd, content_type);
@@ -738,12 +738,12 @@ static int BuildCommand(HTChunk *cmd,
 		break;
 	    case L_CURL:
 		next = StrChr(from, R_CURL);
-		if (next != 0) {
-		    if (params != 0) {
+		if (next != NULL) {
+		    if (params != NULL) {
 			++from;
-			name = 0;
+			name = NULL;
 			HTSprintf0(&name, "%.*s", (int) (next - from), from);
-			if ((value = LYGetContentType(name, params)) != 0) {
+			if ((value = LYGetContentType(name, params)) != NULL) {
 			    HTChunkPuts(cmd, value);
 			    FREE(value);
 			} else if (name) {
@@ -800,7 +800,7 @@ int LYTestMailcapCommand(const char *testcommand,
     int rc;
     int result;
     char TmpFileName[LY_MAXPATH];
-    HTChunk *expanded = 0;
+    HTChunk *expanded = NULL;
 
     CTrace((tfp, "LYTestMailcapCommand:\n\ttest=%s\n\ttype=%s\n\targs=%s\n",
 	    NONNULL(testcommand),
@@ -808,7 +808,7 @@ int LYTestMailcapCommand(const char *testcommand,
 	    NONNULL(params)));
 
     if (LYMailcapUsesPctS(testcommand)) {
-	if (LYOpenTemp(TmpFileName, HTML_SUFFIX, "w") == 0)
+	if (LYOpenTemp(TmpFileName, HTML_SUFFIX, "w") == NULL)
 	    ExitWithError(CANNOT_OPEN_TEMP);
 	LYCloseTemp(TmpFileName);
     } else {
@@ -847,8 +847,8 @@ char *LYMakeMailcapCommand(const char *command,
 			   const char *params,
 			   const char *filename)
 {
-    HTChunk *expanded = 0;
-    char *result = 0;
+    HTChunk *expanded = NULL;
+    char *result = NULL;
 
     CTrace((tfp, "LYMakeMailcapCommand:\n\ttest=%s\n\ttype=%s\n\targs=%s\n",
 	    NONNULL(command),
@@ -1068,7 +1068,7 @@ static int HTLoadTypesConfigFile(char *fn, AcceptMedia media)
  * labels in FTP directory listings, but that can now be done with the
  * description field (using HTSetSuffix5).  AFAIK the only effect of such
  * "fancy" (and mostly invalid) types that cannot be reproduced by using a
- * description fields is some statusline messages in SaveToFile (HTFWriter.c). 
+ * description fields is some statusline messages in SaveToFile (HTFWriter.c).
  * And showing the user an invalid MIME type as the 'Content-type:' is not such
  * a hot idea anyway, IMO.  Still, if you want it, it is still possible (even
  * in lynx.cfg now), but use of it in the defaults below has been reduced.
@@ -1406,7 +1406,7 @@ void HTFileInit(void)
     CTrace((tfp,
 	    "HTFileInit: Default (HTInit) extension maps not compiled in.\n"));
     /*
-     * The following two are still used if BUILTIN_SUFFIX_MAPS was undefined. 
+     * The following two are still used if BUILTIN_SUFFIX_MAPS was undefined.
      * Without one of them, lynx would always need to have a mapping specified
      * in a lynx.cfg or mime.types file to be usable for local HTML files at
      * all.  That includes many of the generated user interface pages.  - kw

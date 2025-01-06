@@ -1,5 +1,5 @@
 /*
- * $LynxId: SGML.c,v 1.188 2024/04/11 20:22:19 tom Exp $
+ * $LynxId: SGML.c,v 1.189 2025/01/06 15:29:41 tom Exp $
  *
  *			General SGML Parser code		SGML.c
  *			========================
@@ -850,7 +850,7 @@ static void handle_doctype(HTStream *me)
     const char *s = me->string->data;
 
     CTRACE((tfp, "SGML Doctype:\n<%s>\n", s));
-    if (strstr(s, "DTD XHTML ") != 0) {
+    if (strstr(s, "DTD XHTML ") != NULL) {
 	CTRACE((tfp, "...processing extended HTML\n"));
 	me->extended_html = TRUE;
     }
@@ -902,7 +902,7 @@ static void handle_processing_instruction(HTStream *me)
 	if (!flag) {
 	    char *t = strstr(s, "encoding=");
 
-	    if (t != 0) {
+	    if (t != NULL) {
 		char delim = 0;
 
 		t += 9;
@@ -1344,7 +1344,7 @@ static void start_element(HTStream *me)
     /* Fall through to the non-extended code - kw */
 
     /*
-     * If we are not in a SELECT block, check if this is a SELECT start tag. 
+     * If we are not in a SELECT block, check if this is a SELECT start tag.
      * Otherwise (i.e., we are in a SELECT block) accept only OPTION as valid,
      * terminate the SELECT block if it is any other form-related element, and
      * otherwise ignore it.  - FM
@@ -1621,7 +1621,7 @@ static BOOL ignore_when_empty(HTTag * tag)
 
     if (!LYPreparsedSource
 	&& LYxhtml_parsing
-	&& tag->name != 0
+	&& tag->name != NULL
 	&& !(tag->flags & Tgf_mafse)
 	&& tag->contents != SGML_EMPTY
 	&& tag->tagclass != Tgc_Plike
@@ -3078,7 +3078,7 @@ static void SGML_character(HTStream *me, int c_in)
 		   (TOASCII(clong) <= 160 &&	/* S/390 -- gil -- 1196 */
 		    (c != '/' && c != '?' && c != '_' && c != ':'))) {
 	    /*
-	     * '<' must be followed by an ASCII letter to be a valid start tag. 
+	     * '<' must be followed by an ASCII letter to be a valid start tag.
 	     * Here it isn't, nor do we have a '/' for an end tag, nor one of
 	     * some other characters with a special meaning for SGML or which
 	     * are likely to be legal Name Start characters in XML or some
@@ -3188,7 +3188,7 @@ static void SGML_character(HTStream *me, int c_in)
 		CTRACE((tfp, "SGML: *** Unknown element \"%s\"\n",
 			string->data));
 		/*
-		 * Fall through and treat like valid tag for attribute parsing. 
+		 * Fall through and treat like valid tag for attribute parsing.
 		 * - KW
 		 */
 
@@ -3811,7 +3811,7 @@ static void SGML_character(HTStream *me, int c_in)
 		if (IS_CJK_TTY) {
 		    if (string->data[0] == '$') {
 			if (string->data[1] == 'B' || string->data[1] == '@') {
-			    char *jis_buf = 0;
+			    char *jis_buf = NULL;
 
 			    HTSprintf0(&jis_buf, "\033%s", string->data);
 			    TO_EUC((const unsigned char *) jis_buf,
@@ -3873,7 +3873,7 @@ static void SGML_character(HTStream *me, int c_in)
 	    me->state = S_tag_gap;
 	} else if (TOASCII(c) == '\033') {	/* S/390 -- gil -- 1213 */
 	    /*
-	     * Setting up for possible single quotes in CJK escape sequences. 
+	     * Setting up for possible single quotes in CJK escape sequences.
 	     * - Takuya ASADA (asada@three-a.co.jp)
 	     */
 	    me->state = S_esc_sq;
@@ -3918,7 +3918,7 @@ static void SGML_character(HTStream *me, int c_in)
 		goto top1;	/* back and treat it as the tag terminator */
 	} else if (TOASCII(c) == '\033') {	/* S/390 -- gil -- 1230 */
 	    /*
-	     * Setting up for possible double quotes in CJK escape sequences. 
+	     * Setting up for possible double quotes in CJK escape sequences.
 	     * - Takuya ASADA (asada@three-a.co.jp)
 	     */
 	    me->state = S_esc_dq;
@@ -3953,7 +3953,7 @@ static void SGML_character(HTStream *me, int c_in)
 				     IsNmChar(c) : IsNmStart(c))) {
 	    HTChunkPutc(string, c);
 	} else {		/* End of end tag name */
-	    HTTag *t = 0;
+	    HTTag *t = NULL;
 
 #ifdef USE_PRETTYSRC
 	    BOOL psrc_tagname_processed = FALSE;
@@ -4041,7 +4041,7 @@ static void SGML_character(HTStream *me, int c_in)
 		    end_element(me, me->current_tag);
 		} else if (tag_OK && (branch == 0)) {
 		    /*
-		     * Don't treat these end tags as invalid, nor act on them. 
+		     * Don't treat these end tags as invalid, nor act on them.
 		     * - FM
 		     */
 		    CTRACE((tfp, "SGML: `</%s%c' found!  Ignoring it.\n",
@@ -4420,7 +4420,7 @@ static void SGML_character(HTStream *me, int c_in)
   after_switch:
     /*
      * Check whether an external function has added anything to the include
-     * buffer.  If so, move the new stuff to the beginning of active_include. 
+     * buffer.  If so, move the new stuff to the beginning of active_include.
      * - kw
      */
     if (me->include != NULL) {
@@ -4494,7 +4494,7 @@ static void SGML_character(HTStream *me, int c_in)
     }
 
     /*
-     * Check whether an external function has added anything to the csi buffer. 
+     * Check whether an external function has added anything to the csi buffer.
      * - FM
      */
     if (me->csi != NULL) {
@@ -5008,12 +5008,12 @@ static const unsigned char *repairJIStoEUC(const unsigned char *src,
 		return s;
 	    }
 	if (!IS_JIS7(ch1, ch2))
-	    return 0;
+	    return NULL;
 
 	*d++ = UCH(0x80 | ch1);
 	*d++ = UCH(0x80 | ch2);
     }
-    return 0;
+    return NULL;
 }
 
 unsigned char *TO_EUC(const unsigned char *jis,

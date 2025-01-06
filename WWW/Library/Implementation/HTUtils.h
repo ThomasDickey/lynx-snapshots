@@ -1,9 +1,9 @@
 /*
- * $LynxId: HTUtils.h,v 1.137 2024/03/17 23:04:27 tom Exp $
+ * $LynxId: HTUtils.h,v 1.138 2025/01/06 15:53:44 tom Exp $
  *
  * Utility macros for the W3 code library
  * MACROS FOR GENERAL USE
- * 
+ *
  * See also:  the system dependent file "www_tcp.h", which is included here.
  */
 
@@ -364,11 +364,13 @@ Standard C library for malloc() etc
 
 #define DeConst(p)   (void *)(intptr_t)(p)
 
-#define isEmpty(s)   ((s) == 0 || *(s) == 0)
+#define isEmpty(s)   ((s) == NULL || *(s) == 0)
+#define isEmptyS(s)  ((s) == NULL || *(s) == NULL)
 #define non_empty(s) !isEmpty(s)
+#define non_emptyS(s) !isEmptyS(s)
 
-#define NonNull(s) (((s) != 0) ? s : "")
-#define NONNULL(s) (((s) != 0) ? s : "(null)")
+#define NonNull(s) (((s) != NULL) ? s : "")
+#define NONNULL(s) (((s) != NULL) ? s : "(null)")
 
 /* array/table size */
 #define	TABLESIZE(v)	(sizeof(v)/sizeof(v[0]))
@@ -541,7 +543,7 @@ Out Of Memory checking for malloc() return:
 
 #endif /* TOLOWER */
 
-#define FREE(x)    {if (x != 0) {free((char *)x); x = NULL;}}
+#define FREE(x)    {if (x != NULL) {free((char *)x); x = NULL;}}
 
 /*
 
@@ -702,7 +704,7 @@ extern int WWW_TraceMask;
 #define CTRACE(p)         ((void)((TRACE) && ( LY_SHOWWHERE fprintf p )))
 #define CTRACE2(m,p)      ((void)((m)     && ( LY_SHOWWHERE fprintf p )))
 #define tfp TraceFP()
-#define CTRACE_SLEEP(secs) if (TRACE && LYTraceLogFP == 0) sleep((unsigned)secs)
+#define CTRACE_SLEEP(secs) if (TRACE && LYTraceLogFP == NULL) sleep((unsigned)secs)
 #define CTRACE_FLUSH(fp)   if (TRACE) fflush(fp)
 
 #include <www_tcp.h>

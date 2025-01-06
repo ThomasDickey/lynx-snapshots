@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTAccess.c,v 1.88 2024/06/22 14:22:25 tom Exp $
+ * $LynxId: HTAccess.c,v 1.89 2025/01/06 15:20:32 tom Exp $
  *
  *		Access Manager					HTAccess.c
  *		==============
@@ -406,7 +406,7 @@ static int get_physical(const char *addr,
     using_proxy = NO;
 
 #ifndef NO_RULES
-    if ((physical = HTTranslate(addr)) == 0) {
+    if ((physical = HTTranslate(addr)) == NULL) {
 	if (redirecting_url) {
 	    return HT_REDIRECTING;
 	}
@@ -872,7 +872,7 @@ static BOOL HTLoadDocument(const char *full_address,	/* may include #fragment */
 	 * currently always returns TRUE if the target has a LYNXIMGMAP URL, so
 	 * that an internally generated pseudo-document will normally not be
 	 * re-used unless condition (2) applies.  (Condition (1) cannot apply
-	 * since in LYMap.c, no_cache is always set in the anchor object). 
+	 * since in LYMap.c, no_cache is always set in the anchor object).
 	 * This doesn't guarantee that the resource from which the MAP element
 	 * is taken will be read again (reloaded) when the list of links for a
 	 * client-side image map is regenerated, when in some cases it should
@@ -894,7 +894,7 @@ static BOOL HTLoadDocument(const char *full_address,	/* may include #fragment */
 	 * for this (by setting LYinternal_flag as necessary) is implemented
 	 * elsewhere.  There is a specific test for LYNXIMGMAP here so that the
 	 * generated pseudo-document will not be re-used unless
-	 * LYoverride_no_cache is set.  The same caveat as above applies w.r.t. 
+	 * LYoverride_no_cache is set.  The same caveat as above applies w.r.t.
 	 * reloading of the underlying resource.
 	 *
 	 * We also should be checking other aspects of cache regulation (e.g.,
@@ -990,7 +990,7 @@ static BOOL HTLoadDocument(const char *full_address,	/* may include #fragment */
 	/* NO!! - FM */
 	/*
 	 * Doing this via HTMIME.c meant that the redirection cover page was
-	 * already loaded before we learned that we want a different URL. 
+	 * already loaded before we learned that we want a different URL.
 	 * Also, changing anchor->address, as Lynx was doing, meant we could
 	 * never again access its hash table entry, creating an insolvable
 	 * memory leak.  Instead, if we had a 301 status and set
@@ -999,7 +999,7 @@ static BOOL HTLoadDocument(const char *full_address,	/* may include #fragment */
 	 * subsequent access attempts.  We'll check recursively, and retrieve
 	 * the final URL if we had multiple redirections to it.  If we just
 	 * went to HTLoad now, as Lou originally had this, we couldn't do
-	 * Lynx's security checks and alternate handling of some URL types. 
+	 * Lynx's security checks and alternate handling of some URL types.
 	 * So, instead, we'll go all the way back to the top of getfile in
 	 * LYGetFile.c when the status is HT_REDIRECTING.  This may seem
 	 * bizarre, but it works like a charm!  - FM
@@ -1089,9 +1089,9 @@ static BOOL HTLoadDocument(const char *full_address,	/* may include #fragment */
 	 * If you get this, then please find which routine is returning a
 	 * positive unrecognized error code!
 	 */
-	fprintf(stderr, "%s", 
+	fprintf(stderr, "%s",
 		gettext("**** HTAccess: socket or file number returned by obsolete load routine!\n"));
-	fprintf(stderr, "%s", 
+	fprintf(stderr, "%s",
 		gettext("**** HTAccess: Internal software error.  Please mail lynx-dev@nongnu.org!\n"));
 	fprintf(stderr, gettext("**** HTAccess: Status returned was: %d\n"), status);
 	exit_immediately(EXIT_FAILURE);

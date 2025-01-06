@@ -1,4 +1,4 @@
-/* $LynxId: LYDownload.c,v 1.72 2021/07/29 20:30:00 tom Exp $ */
+/* $LynxId: LYDownload.c,v 1.73 2025/01/06 16:17:09 tom Exp $ */
 #include <HTUtils.h>
 #include <HTParse.h>
 #include <HTList.h>
@@ -30,11 +30,11 @@ void LYDownload(char *line)
     char *Line = NULL, *method, *file, *sug_file = NULL;
     int method_number;
     int count;
-    char *the_command = 0;
+    char *the_command = NULL;
     bstring *buffer = NULL;
     bstring *command = NULL;
     char *cp;
-    lynx_list_item_type *download_command = 0;
+    lynx_list_item_type *download_command = NULL;
     int ch;
     RecallType recall;
     int FnameTotal;
@@ -57,7 +57,7 @@ void LYDownload(char *line)
     /*
      * Make a copy of the LYNXDOWNLOAD internal URL for parsing.  - FM
      */
-    if (StrAllocCopy(Line, line) == 0)
+    if (StrAllocCopy(Line, line) == NULL)
 	goto failed;
 
     /*
@@ -493,7 +493,7 @@ int LYdownload_options(char **newfile, char *data_file)
     StrAllocCopy(sug_filename, *newfile);
     change_sug_filename(sug_filename);
 
-    if ((fp0 = InternalPageFP(tempfile, TRUE)) == 0)
+    if ((fp0 = InternalPageFP(tempfile, TRUE)) == NULL)
 	return (-1);
 
     StrAllocCopy(downloaded_url, *newfile);

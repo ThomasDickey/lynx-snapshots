@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYStyle.c,v 1.111 2021/06/09 22:00:35 tom Exp $
+ * $LynxId: LYStyle.c,v 1.112 2025/01/06 16:27:23 tom Exp $
  *
  * character level styles for Lynx
  * (c) 1996 Rob Partington -- donated to the Lyncei (if they want it :-)
@@ -162,7 +162,7 @@ static void parse_either(const char *attrs,
 		*next = '\0';
 	    if ((value = string_to_attr(temp_attrs)) != 0)
 		*monop |= value;
-	    else if (colorp != 0
+	    else if (colorp != NULL
 		     && (value = check_color(temp_attrs, dft_color)) != ERR_COLOR)
 		*colorp = value;
 
@@ -282,15 +282,15 @@ static void parse_style(char *param)
 	int style;
 	int *set_hash;
     } table[] = {
-	{ "default",		-1,			0 }, /* default fg/bg */
-	{ "alink",		DSTYLE_ALINK,		0 }, /* active link */
-	{ "a",			DSTYLE_LINK,		0 }, /* normal link */
-	{ "a",			HTML_A,			0 }, /* normal link */
-	{ "status",		DSTYLE_STATUS,		0 }, /* status bar */
-	{ "label",		DSTYLE_OPTION,		0 }, /* [INLINE]'s */
-	{ "value",		DSTYLE_VALUE,		0 }, /* [INLINE]'s */
-	{ "normal",		DSTYLE_NORMAL,		0 },
-	{ "candy",		DSTYLE_CANDY,		0 }, /* [INLINE]'s */
+	{ "default",		-1,			NULL }, /* default fg/bg */
+	{ "alink",		DSTYLE_ALINK,		NULL }, /* active link */
+	{ "a",			DSTYLE_LINK,		NULL }, /* normal link */
+	{ "a",			HTML_A,			NULL }, /* normal link */
+	{ "status",		DSTYLE_STATUS,		NULL }, /* status bar */
+	{ "label",		DSTYLE_OPTION,		NULL }, /* [INLINE]'s */
+	{ "value",		DSTYLE_VALUE,		NULL }, /* [INLINE]'s */
+	{ "normal",		DSTYLE_NORMAL,		NULL },
+	{ "candy",		DSTYLE_CANDY,		NULL }, /* [INLINE]'s */
 	{ "whereis",		DSTYLE_WHEREIS,		&s_whereis },
 	{ "edit.active.pad",	DSTYLE_ELEMENTS,	&s_aedit_pad },
 	{ "edit.active.arrow",	DSTYLE_ELEMENTS,	&s_aedit_arr },
@@ -315,20 +315,20 @@ static void parse_style(char *param)
     unsigned n;
     BOOL found = FALSE;
 
-    char *buffer = 0;
-    char *tmp = 0;
+    char *buffer = NULL;
+    char *tmp = NULL;
     char *element, *mono;
     const char *fg, *bg;
 
-    if (param == 0)
+    if (param == NULL)
 	return;
     CTRACE2(TRACE_STYLE, (tfp, "parse_style(%s)\n", param));
     StrAllocCopy(buffer, param);
-    if (buffer == 0)
+    if (buffer == NULL)
 	return;
 
     TrimLowercase(buffer);
-    if ((tmp = StrChr(buffer, ':')) == 0) {
+    if ((tmp = StrChr(buffer, ':')) == NULL) {
 	fprintf(stderr, gettext("\
 Syntax Error parsing style in lss file:\n\
 [%s]\n\
@@ -370,7 +370,7 @@ where OBJECT is one of EM,STRONG,B,I,U,BLINK etc.\n\n"), buffer);
     for (n = 0; n < TABLESIZE(table); n++) {
 	if (!strcasecomp(element, table[n].name)) {
 	    parse_attributes(mono, fg, bg, table[n].style, table[n].name);
-	    if (table[n].set_hash != 0)
+	    if (table[n].set_hash != NULL)
 		*(table[n].set_hash) = color_style_1(table[n].name);
 	    found = TRUE;
 	    break;
@@ -413,7 +413,7 @@ static void free_lss_list(void)
 {
     LSS_NAMES *obj;
 
-    while ((obj = HTList_objectAt(list_of_lss_files, 0)) != 0) {
+    while ((obj = HTList_objectAt(list_of_lss_files, 0)) != NULL) {
 	FREE(obj->given);
 	FREE(obj->actual);
 	FREE(obj);
@@ -534,7 +534,7 @@ static void initialise_default_stylesheet(void)
      * table.
      */
     for (n = 0; n < (unsigned) HTML_dtd.number_of_tags; ++n) {
-	char *name = 0;
+	char *name = NULL;
 
 	HTSprintf0(&name, "%s:%s", HTML_dtd.tags[n].name, normal);
 	parse_style(name);
@@ -543,8 +543,8 @@ static void initialise_default_stylesheet(void)
 
     for (n = 0; n < TABLESIZE(table2); ++n) {
 	int code = table2[n].color;
-	char *name = 0;
-	char *value = 0;
+	char *name = NULL;
+	char *value = NULL;
 
 	switch (code) {
 	case 0:
@@ -560,7 +560,7 @@ static void initialise_default_stylesheet(void)
 	HTSprintf0(&name, "%s:%s", table2[n].type, value);
 	parse_style(name);
 	FREE(name);
-	if (value != normal && value != strong && value != 0)
+	if (value != normal && value != strong && value != NULL)
 	    free(value);
     }
     FREE(normal);
@@ -570,7 +570,7 @@ static void initialise_default_stylesheet(void)
 void parse_userstyles(void)
 {
     char *name;
-    HTList *cur = LYuse_color_style ? lss_styles : 0;
+    HTList *cur = LYuse_color_style ? lss_styles : NULL;
 
     colorPairs = 0;
     style_initialiseHashTable();
@@ -648,14 +648,14 @@ static int style_readFromFileREC(char *lss_filename,
 			  lss_filename ? lss_filename : "?!? empty ?!?"));
     if (isEmpty(lss_filename))
 	return -1;
-    if ((fh = LYOpenCFG(lss_filename, parent_filename, LYNX_LSS_FILE)) == 0) {
+    if ((fh = LYOpenCFG(lss_filename, parent_filename, LYNX_LSS_FILE)) == NULL) {
 	/* this should probably be an alert or something */
 	CTRACE2(TRACE_STYLE, (tfp,
 			      "CSS:Can't open style file '%s', using defaults\n", lss_filename));
 	return -1;
     }
 
-    if (parent_filename == 0) {
+    if (parent_filename == NULL) {
 	free_colorstylestuff();
     }
 
@@ -670,7 +670,7 @@ static int style_readFromFileREC(char *lss_filename,
     }
 
     LYCloseInput(fh);
-    if ((parent_filename == 0) && LYCursesON)
+    if ((parent_filename == NULL) && LYCursesON)
 	parse_userstyles();
     return 0;
 }
@@ -692,7 +692,7 @@ void TrimColorClass(const char *tagname,
     sprintf(tmp, ";%.*s", (int) sizeof(tmp) - 3, tagname);
     TrimLowercase(tmp);
 
-    if ((lookfrom = styleclassname) != 0) {
+    if ((lookfrom = styleclassname) != NULL) {
 	do {
 	    end = start;
 	    start = strstr(lookfrom, tmp);
@@ -756,9 +756,9 @@ void cache_tag_styles(void)
 
 static unsigned *RefCachedStyle(int y, int x)
 {
-    unsigned *result = 0;
+    unsigned *result = NULL;
 
-    if (cached_styles_ptr == 0) {
+    if (cached_styles_ptr == NULL) {
 	cached_styles_rows = display_lines;
 	cached_styles_cols = LYcols;
 	cached_styles_ptr = typecallocn(unsigned, SIZEOF_CACHED_STYLES);
@@ -774,7 +774,7 @@ static unsigned *RefCachedStyle(int y, int x)
 
 BOOL ValidCachedStyle(int y, int x)
 {
-    return (BOOL) (RefCachedStyle(y, x) != 0);
+    return (BOOL) (RefCachedStyle(y, x) != NULL);
 }
 
 unsigned GetCachedStyle(int y, int x)
@@ -782,7 +782,7 @@ unsigned GetCachedStyle(int y, int x)
     unsigned value = 0;
     unsigned *cache = RefCachedStyle(y, x);
 
-    if (cache != 0) {
+    if (cache != NULL) {
 	value = *cache;
     }
     return value;
@@ -792,7 +792,7 @@ void SetCachedStyle(int y, int x, unsigned value)
 {
     unsigned *cache = RefCachedStyle(y, x);
 
-    if (cache != 0) {
+    if (cache != NULL) {
 	*cache = value;
     }
 }
@@ -853,11 +853,11 @@ void add_to_lss_list(const char *source, const char *resolved)
 	    NonNull(source),
 	    NonNull(resolved)));
 
-    if (list_of_lss_files == 0) {
+    if (list_of_lss_files == NULL) {
 	list_of_lss_files = HTList_new();
     }
 
-    while ((chk = HTList_objectAt(list_of_lss_files, position++)) != 0) {
+    while ((chk = HTList_objectAt(list_of_lss_files, position++)) != NULL) {
 	if (!strcmp(source, chk->given)) {
 	    found = TRUE;
 	    if (resolved && !chk->actual) {
@@ -892,11 +892,11 @@ void init_color_styles(char **from_cmdline, const char *default_styles)
      * If a command-line "-lss" option was given, or if an environment variable
      * is found, use that in preference to data from lynx.cfg
      */
-    if (user_lss_file == 0)
+    if (user_lss_file == NULL)
 	user_lss_file = LYGetEnv("LYNX_LSS");
-    if (user_lss_file == 0)
+    if (user_lss_file == NULL)
 	user_lss_file = LYGetEnv("lynx_lss");
-    if (user_lss_file != 0)
+    if (user_lss_file != NULL)
 	empty_lss_list = (*user_lss_file == '\0');
 
     /*
@@ -905,17 +905,17 @@ void init_color_styles(char **from_cmdline, const char *default_styles)
     if (empty_lss_list) {
 	CTRACE((tfp, "init_color_styles: overridden/empty\n"));
 	return;
-    } else if (list_of_lss_files == 0) {
-	char *source = 0;
+    } else if (list_of_lss_files == NULL) {
+	char *source = NULL;
 	char *config;
 
 	StrAllocCopy(source, default_styles);
 	config = source;
-	while ((cp = LYstrsep(&config, ";")) != 0) {
+	while ((cp = LYstrsep(&config, ";")) != NULL) {
 	    char *target;
 
 	    target = find_lss_file(LYPathLeaf(cp));
-	    if (target != 0) {
+	    if (target != NULL) {
 		add_to_lss_list(cp, target);
 		FREE(target);
 	    }
@@ -923,10 +923,10 @@ void init_color_styles(char **from_cmdline, const char *default_styles)
 	FREE(source);
     }
 
-    if (user_lss_file != 0) {
+    if (user_lss_file != NULL) {
 	FREE(lynx_lss_file);
 	lynx_lss_file = find_lss_file(cp = user_lss_file);
-	*from_cmdline = 0;
+	*from_cmdline = NULL;
     } else {
 	lynx_lss_file = find_lss_file(cp = DeConst(LYNX_LSS_FILE));
     }

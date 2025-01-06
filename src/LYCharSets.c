@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYCharSets.c,v 1.74 2024/03/15 16:15:07 tom Exp $
+ * $LynxId: LYCharSets.c,v 1.75 2025/01/06 15:16:58 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTCJK.h>
@@ -58,7 +58,7 @@ int displayed_display_charset_idx;
  * Currently we only declare some charset's properties here (such as MIME
  * names, etc.), it does not include real mapping.
  *
- * There is a place marked "Add your new character sets HERE" in this file. 
+ * There is a place marked "Add your new character sets HERE" in this file.
  * Make up a character set and add it in the same style as the ISO_LATIN1 set
  * below, giving it a unique name.
  *
@@ -360,7 +360,7 @@ const char *LYchar_set_names[MAXCHARSETS + 1] =
 };
 
 /*
- * Associate additional pieces of info with each of the charsets listed above. 
+ * Associate additional pieces of info with each of the charsets listed above.
  * Will be automatically modified (and extended) by charset translations which
  * are loaded using the chartrans mechanism.  Most important piece of info to
  * put here is a MIME charset name.  Used for chartrans (see UCDefs.h).  The
@@ -842,8 +842,8 @@ const char *HTMLGetEntityName(UCode_t code)
  * Function to return the UCode_t (long int) value for entity names.  It
  * returns 0 if not found.
  *
- * unicode_entities[] handles all the names from old style entities[] too. 
- * Lynx now calls unicode_entities[] only through this function: 
+ * unicode_entities[] handles all the names from old style entities[] too.
+ * Lynx now calls unicode_entities[] only through this function:
  * HTMLGetEntityUCValue().  Note, we need not check for special characters here
  * in function or even before it, we should check them *after* invoking this
  * function, see put_special_unicodes() in SGML.c.

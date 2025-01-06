@@ -70,7 +70,7 @@ HTAddRule:  Add rule to the list
 
   equiv                  points to the equivalent string with * for the place where the
                          text matched by * goes; or to other 2nd parameter
-                         meaning depends on op).			 
+                         meaning depends on op).
 
   cond_op,               additional condition for applying rule; cond_op should
   cond                   be either NULL (no additional condition), or one of

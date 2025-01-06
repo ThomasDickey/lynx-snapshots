@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYJump.c,v 1.52 2018/03/18 19:17:00 tom Exp $
+ * $LynxId: LYJump.c,v 1.53 2025/01/06 16:25:40 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTAlert.h>
@@ -195,7 +195,7 @@ char *LYJump(int key)
     while (jtp && jtp->key && jtp->key != key)
 	jtp = jtp->next;
     if (!jtp) {
-	char *msg = 0;
+	char *msg = NULL;
 
 	HTSprintf0(&msg, KEY_NOT_MAPPED_TO_JUMP_FILE, key);
 	HTAlert(msg);

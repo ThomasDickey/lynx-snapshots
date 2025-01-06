@@ -1,4 +1,4 @@
-/* $LynxId: LYKeymap.c,v 1.125 2024/01/10 08:53:58 tom Exp $ */
+/* $LynxId: LYKeymap.c,v 1.126 2025/01/06 16:19:03 tom Exp $ */
 #include <HTUtils.h>
 #include <LYUtils.h>
 #include <LYGlobalDefs.h>
@@ -693,8 +693,8 @@ HTList *LYcommandList(void)
 	unsigned j;
 
 	myList = HTList_new();
-	for (j = 0; revmap[j].name != 0; j++) {
-	    if (revmap[j].doc != 0) {
+	for (j = 0; revmap[j].name != NULL; j++) {
+	    if (revmap[j].doc != NULL) {
 		char *data = NULL;
 
 		StrAllocCopy(data, revmap[j].name);
@@ -711,10 +711,10 @@ HTList *LYcommandList(void)
 Kcmd *LYKeycodeToKcmd(LYKeymapCode code)
 {
     unsigned j;
-    Kcmd *result = 0;
+    Kcmd *result = NULL;
 
     if (code > LYK_UNKNOWN) {
-	for (j = 0; revmap[j].name != 0; j++) {
+	for (j = 0; revmap[j].name != NULL; j++) {
 	    if (revmap[j].code == code) {
 		result = revmap + j;
 		break;
@@ -732,29 +732,29 @@ Kcmd *LYStringToKcmd(const char *name)
     size_t need = strlen(name);
     size_t j;
     BOOL exact = FALSE;
-    Kcmd *result = 0;
-    Kcmd *maybe = 0;
+    Kcmd *result = NULL;
+    Kcmd *maybe = NULL;
 
     if (non_empty(name)) {
-	for (j = 0; revmap[j].name != 0; j++) {
+	for (j = 0; revmap[j].name != NULL; j++) {
 	    if (!strcasecomp(revmap[j].name, name)) {
 		result = revmap + j;
 		break;
 	    } else if (!exact
 		       && !strncasecomp(revmap[j].name, name, (int) need)) {
-		if (maybe == 0) {
+		if (maybe == NULL) {
 		    maybe = revmap + j;
 		} else {
 		    if (revmap[j].name[need] != 0
 			&& maybe->name[need] != 0) {
-			maybe = 0;
+			maybe = NULL;
 			exact = TRUE;
 		    }
 		}
 	    }
 	}
     }
-    return (result != 0) ? result : maybe;
+    return (result != NULL) ? result : maybe;
 }
 
 char *LYKeycodeToString(int c,
@@ -803,13 +803,13 @@ int LYStringToKeycode(char *src)
     } else if (len == 2 && *src == '^') {
 	key = src[1] & 0x1f;
     } else if (len > 2 && !strncasecomp(src, "0x", 2)) {
-	char *dst = 0;
+	char *dst = NULL;
 
 	key = (int) strtol(src, &dst, 0);
 	if (non_empty(dst))
 	    key = -1;
     } else if (len > 6 && !strncasecomp(src, "key-", 4)) {
-	char *dst = 0;
+	char *dst = NULL;
 
 	key = (int) strtol(src + 4, &dst, 0);
 	if (isEmpty(dst))
@@ -833,7 +833,7 @@ static char *pretty_html(int c)
     char *src = LYKeycodeToString(c, TRUE);
 
 
-    if (src != 0) {
+    if (src != NULL) {
 	/* *INDENT-OFF* */
 	static const struct {
 	    int	code;
@@ -876,27 +876,27 @@ static char *pretty_html(int c)
 	return buf;
     }
 
-    return 0;
+    return NULL;
 }
 
 static char *format_binding(LYKeymap_t *table, int i)
 {
     LYKeymap_t the_key = table[i];
-    char *buf = 0;
+    char *buf = NULL;
     char *formatted;
     Kcmd *rmap = LYKeycodeToKcmd((LYKeymapCode) the_key);
 
-    if (rmap != 0
-	&& rmap->name != 0
-	&& rmap->doc != 0
-	&& (formatted = pretty_html(i - 1)) != 0) {
+    if (rmap != NULL
+	&& rmap->name != NULL
+	&& rmap->doc != NULL
+	&& (formatted = pretty_html(i - 1)) != NULL) {
 	HTSprintf0(&buf, "%-*s %-13s %s\n",
 		   PRETTY_LEN, formatted,
 		   rmap->name,
 		   rmap->doc);
 	return buf;
     }
-    return 0;
+    return NULL;
 }
 
 /* if both is true, produce an additional line for the corresponding
@@ -909,13 +909,13 @@ static void print_binding(HTStream *target, int i, int both)
 #if defined(DIRED_SUPPORT) && defined(OK_OVERRIDE)
     if (prev_lynx_edit_mode && !no_dired_support &&
 	(lac1 = key_override[i]) != LYK_UNKNOWN) {
-	if ((buf = format_binding(key_override, i)) != 0) {
+	if ((buf = format_binding(key_override, i)) != NULL) {
 	    PUTS(buf);
 	    FREE(buf);
 	}
     } else
 #endif /* DIRED_SUPPORT && OK_OVERRIDE */
-    if ((buf = format_binding(keymap, i)) != 0) {
+    if ((buf = format_binding(keymap, i)) != NULL) {
 	lac1 = keymap[i];
 	PUTS(buf);
 	FREE(buf);
@@ -928,13 +928,13 @@ static void print_binding(HTStream *target, int i, int both)
 #if defined(DIRED_SUPPORT) && defined(OK_OVERRIDE)
     if (prev_lynx_edit_mode && !no_dired_support && key_override[i]) {
 	if (key_override[i] != lac1 &&
-	    (buf = format_binding(key_override, i)) != 0) {
+	    (buf = format_binding(key_override, i)) != NULL) {
 	    PUTS(buf);
 	    FREE(buf);
 	}
     } else
 #endif /* DIRED_SUPPORT && OK_OVERRIDE */
-    if (keymap[i] != lac1 && (buf = format_binding(keymap, i)) != 0) {
+    if (keymap[i] != lac1 && (buf = format_binding(keymap, i)) != NULL) {
 	PUTS(buf);
 	FREE(buf);
     }
@@ -948,7 +948,7 @@ int lacname_to_lac(const char *func)
 {
     Kcmd *mp = LYStringToKcmd(func);
 
-    return (mp != 0) ? (int) mp->code : -1;
+    return (mp != NULL) ? (int) mp->code : -1;
 }
 
 /*
@@ -967,10 +967,10 @@ int lkcstring_to_lkc(const char *src)
     } else if (strlen(src) == 2 && *src == '^') {
 	c = src[1] & 037;
     } else if (strlen(src) >= 2 && isdigit(UCH(*src))) {
-	char *next = 0;
+	char *next = NULL;
 
 	c = (int) strtol(src, &next, 0);
-	if (next != 0 && *next != '\0')
+	if (next != NULL && *next != '\0')
 	    c = (-1);
 #ifdef USE_KEYMAPS
     } else {
@@ -1001,7 +1001,7 @@ static int LYLoadKeymap(const char *arg GCC_UNUSED,
 {
     HTFormat format_in = WWW_HTML;
     HTStream *target;
-    char *buf = 0;
+    char *buf = NULL;
     int i;
 
     /*
@@ -1049,7 +1049,7 @@ static int LYLoadKeymap(const char *arg GCC_UNUSED,
 GLOBALDEF(HTProtocol, LYLynxKeymap, _LYKEYMAP_C_GLOBALDEF_1_INIT);
 #else
 GLOBALDEF HTProtocol LYLynxKeymap =
-{"LYNXKEYMAP", LYLoadKeymap, 0};
+{"LYNXKEYMAP", LYLoadKeymap, NULL};
 #endif /* GLOBALDEF_IS_MACRO */
 
 /*
@@ -1083,7 +1083,7 @@ int remap(char *key,
 	     */
 	    if (!(c & (LKC_ISLECLAC | LKC_ISLAC))) {
 		c &= LKC_MASK;
-		if ((mp = LYStringToKcmd(func)) != 0) {
+		if ((mp = LYStringToKcmd(func)) != NULL) {
 #if defined(DIRED_SUPPORT) && defined(OK_OVERRIDE)
 		    if (for_dired)
 			key_override[KHR(c)] = mp->code;
@@ -1234,8 +1234,8 @@ char *key_for_func(int func)
 
     if ((i = LYReverseKeymap(func)) >= 0) {
 	formatted = LYKeycodeToString(i, TRUE);
-	StrAllocCopy(buf, formatted != 0 ? formatted : "?");
-    } else if (buf == 0) {
+	StrAllocCopy(buf, formatted != NULL ? formatted : "?");
+    } else if (buf == NULL) {
 	StrAllocCopy(buf, "");
     }
     return buf;
@@ -1244,7 +1244,7 @@ char *key_for_func(int func)
 /*
  * Given one or two keys as lynxkeycodes, returns an allocated string
  * representing the key(s) suitable for statusline messages, or NULL if no
- * valid lynxkeycode is passed in (i.e., lkc_first < 0 or some other failure). 
+ * valid lynxkeycode is passed in (i.e., lkc_first < 0 or some other failure).
  * The caller must free the string.  - kw
  */
 char *fmt_keys(int lkc_first,
@@ -1293,7 +1293,7 @@ char *fmt_keys(int lkc_first,
  * different; e.g., small ASCII letters will be returned in preference to
  * capital ones.  Cf.  LYKeyForEditAction, LYEditKeyForAction in LYEditmap.c
  * which use the same order to find a best key.  In addition, this function
- * takes the dired override map into account while LYReverseKeymap doesn't. 
+ * takes the dired override map into account while LYReverseKeymap doesn't.
  * The caller must free the returned string.  - kw
  */
 #define FIRST_I 97
@@ -1326,7 +1326,7 @@ static int best_reverse_keymap(int lac)
 
 /*
  * This function returns a string representing a key mapped to a LYK_foo
- * function, or NULL if not found.  The string may represent a pair of keys. 
+ * function, or NULL if not found.  The string may represent a pair of keys.
  * if context_code is FOR_INPUT, an appropriate binding for use while in the
  * (forms) line editor is sought.  - kw
  */

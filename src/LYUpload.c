@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYUpload.c,v 1.41 2021/07/29 20:32:26 tom Exp $
+ * $LynxId: LYUpload.c,v 1.42 2025/01/06 16:25:40 tom Exp $
  *
  *  Routines to upload files to the local filesystem.
  *  Created by: Rick Mallett, Carleton University
@@ -35,7 +35,7 @@
 #define SUBDIR_COMMAND "cd %s ; "
 
 /*
- * LYUpload uploads a file to a given location using a specified upload method. 
+ * LYUpload uploads a file to a given location using a specified upload method.
  * It parses an incoming link that looks like:
  *	LYNXDIRED://UPLOAD=<#>/TO=<STRING>
  */
@@ -44,11 +44,11 @@ int LYUpload(char *line)
     char *method, *directory;
     int method_number;
     int count;
-    char *the_upload = 0;
+    char *the_upload = NULL;
     char tmpbuf[LY_MAXPATH];
     char *filename = NULL;
-    lynx_list_item_type *upload_command = 0;
-    char *the_command = 0;
+    lynx_list_item_type *upload_command = NULL;
+    char *the_command = NULL;
 
     /*
      * Use configured upload commands.
@@ -146,7 +146,7 @@ int LYUpload(char *line)
     FREE(the_command);
     FREE(the_upload);
 #if defined(MULTI_USER_UNIX)
-    if (filename != 0)
+    if (filename != NULL)
 	chmod(filename, HIDE_CHMOD);
 #endif /* UNIX */
     FREE(filename);
@@ -164,7 +164,7 @@ int LYUpload(char *line)
 
 /*
  * LYUpload_options writes out the current upload choices to a file so that the
- * user can select printers in the same way that they select all other links. 
+ * user can select printers in the same way that they select all other links.
  * Upload links look like:
  *	LYNXDIRED://UPLOAD=<#>/TO=<STRING>
  */
@@ -177,7 +177,7 @@ int LYUpload_options(char **newfile,
     int count;
     char *curloc = NULL;
 
-    if ((fp0 = InternalPageFP(tempfile, TRUE)) == 0)
+    if ((fp0 = InternalPageFP(tempfile, TRUE)) == NULL)
 	return (-1);
 
 #ifdef VMS

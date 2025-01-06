@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYPrint.c,v 1.109 2021/07/29 20:38:35 tom Exp $
+ * $LynxId: LYPrint.c,v 1.110 2025/01/06 16:16:35 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTAccess.h>
@@ -84,7 +84,7 @@ static void set_environ(int name,
 	"LYNX_PRINT_LASTMOD",
     };
     static char *pointers[MAX_PUTENV];
-    char *envbuffer = 0;
+    char *envbuffer = NULL;
 
 #ifdef VMS
 #define SET_ENVIRON(name, value, no_value) set_environ(name, value, no_value)
@@ -112,13 +112,13 @@ static void set_environ(int name,
 
 static char *suggested_filename(DocInfo *newdoc)
 {
-    char *sug_filename = 0;
+    char *sug_filename = NULL;
     int rootlen;
 
     /*
      * Load the suggested filename string.  - FM
      */
-    if (HText_getSugFname() != 0)
+    if (HText_getSugFname() != NULL)
 	StrAllocCopy(sug_filename, HText_getSugFname());	/* must be freed */
     else
 	StrAllocCopy(sug_filename, newdoc->address);	/* must be freed */
@@ -281,7 +281,7 @@ static BOOLEAN confirm_by_pages(const char *prompt,
 	pages++;
 
     if (pages > 4) {
-	char *msg = 0;
+	char *msg = NULL;
 
 	HTSprintf0(&msg, prompt, pages);
 	c = HTConfirmDefault(msg, YES);
@@ -811,7 +811,7 @@ static void send_file_to_printer(DocInfo *newdoc,
 {
     BOOLEAN FirstRecall = TRUE;
     FILE *outfile_fp;
-    char *the_command = 0;
+    char *the_command = NULL;
     bstring *my_file = NULL;
     char my_temp[LY_MAXPATH];
     int FnameTotal, FnameNum = -1;
@@ -1261,13 +1261,13 @@ int print_options(char **newfile,
 		  int lines_in_file)
 {
     static char my_temp[LY_MAXPATH] = "\0";
-    char *buffer = 0;
+    char *buffer = NULL;
     int count;
     int pages;
     FILE *fp0;
     lynx_list_item_type *cur_printer;
 
-    if ((fp0 = InternalPageFP(my_temp, TRUE)) == 0)
+    if ((fp0 = InternalPageFP(my_temp, TRUE)) == NULL)
 	return (-1);
 
     LYLocalFileToURL(newfile, my_temp);

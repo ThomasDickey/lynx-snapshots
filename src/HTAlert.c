@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTAlert.c,v 1.103 2017/07/02 19:54:30 tom Exp $
+ * $LynxId: HTAlert.c,v 1.104 2025/01/06 15:57:39 tom Exp $
  *
  *	Displaying messages and getting input for Lynx Browser
  *	==========================================================
@@ -157,8 +157,8 @@ void HTProgress(const char *Msg)
 
 const char *HTProgressUnits(int rate)
 {
-    static const char *bunits = 0;
-    static const char *kbunits = 0;
+    static const char *bunits = NULL;
+    static const char *kbunits = NULL;
 
     if (!bunits) {
 	bunits = gettext("bytes");
@@ -313,9 +313,9 @@ void HTReadProgress(off_t bytes, off_t total)
 	    }
 
 	    if (total > 0)
-		was_units = sprint_bytes(totalp, total, 0);
+		was_units = sprint_bytes(totalp, total, NULL);
 	    else
-		was_units = 0;
+		was_units = NULL;
 	    sprint_bytes(bytesp, bytes, was_units);
 
 	    switch ((TransferRate) LYTransferRate) {
@@ -356,7 +356,7 @@ void HTReadProgress(off_t bytes, off_t total)
 
 		if (LYTransferRate != rateOFF
 		    && transfer_rate > 0) {
-		    sprint_bytes(transferp, transfer_rate, 0);
+		    sprint_bytes(transferp, transfer_rate, NULL);
 		    HTSprintf(&line, gettext(", %s/sec"), transferp);
 		}
 		break;
@@ -886,7 +886,7 @@ BOOL HTConfirmCookie(domain_entry * de, const char *server,
      */
     if (!LYAcceptAllCookies) {
 	int namelen, valuelen, space_free, percentage;
-	char *message = 0;
+	char *message = NULL;
 
 	space_free = (LYcolLimit
 		      - (LYstrCells(prompt)
@@ -1020,8 +1020,8 @@ int HTConfirmPostRedirect(const char *Redirecting_url, int server_status)
 {
     int result = -1;
     char *show_POST_url = NULL;
-    char *StatusInfo = 0;
-    char *url = 0;
+    char *StatusInfo = NULL;
+    char *url = NULL;
     int on_screen = 0;		/* 0 - show menu
 
 				 * 1 - show url

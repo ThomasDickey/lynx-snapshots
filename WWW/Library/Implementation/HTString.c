@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTString.c,v 1.82 2022/03/12 12:19:10 Gisle.Vanem Exp $
+ * $LynxId: HTString.c,v 1.83 2025/01/06 15:38:51 tom Exp $
  *
  *	Case-independent string comparison		HTString.c
  *
@@ -155,7 +155,7 @@ int strncasecomp(const char *a,
 	SHOW_ASTERISK((tfp, "test @%d, '%s' vs '%s' %s\n", __LINE__, a,b,c))
 
 /*
- * Compare names as described in RFC 2818: ignore case, allow wildcards. 
+ * Compare names as described in RFC 2818: ignore case, allow wildcards.
  * Return zero on a match, nonzero on mismatch -TD
  *
  * From RFC 2818:
@@ -299,7 +299,7 @@ int AS_ncmp(const char *p,
 char *HTSACopy(char **dest,
 	       const char *src)
 {
-    if (src != 0) {
+    if (src != NULL) {
 	if (src != *dest) {
 	    size_t size = strlen(src) + 1;
 
@@ -352,14 +352,14 @@ void HTSAFree_extra(char *s)
 char *HTSACopy_extra(char **dest,
 		     const char *src)
 {
-    if (src != 0) {
+    if (src != NULL) {
 	size_t srcsize = strlen(src) + 1;
 	EXTRA_TYPE size = 0;
 
-	if (*dest != 0) {
+	if (*dest != NULL) {
 	    size = *(EXTRA_TYPE *) (void *) ((*dest) - EXTRA_SIZE);
 	}
-	if ((*dest == 0) || (size < srcsize)) {
+	if ((*dest == NULL) || (size < srcsize)) {
 	    FREE_extra(*dest);
 	    size = srcsize * 2;	/* x2 step */
 	    *dest = (char *) malloc(size + EXTRA_SIZE);
@@ -457,7 +457,7 @@ char *HTNextTok(char **pstr,
     BOOL get_closing_char_too = FALSE;
     char closer;
 
-    if (isEmpty(pstr))
+    if (isEmptyS(pstr))
 	return NULL;
     if (!delims)
 	delims = " ;,=";
@@ -578,11 +578,11 @@ char *HTNextTok(char **pstr,
 
 static char *HTAlloc(char *ptr, size_t length)
 {
-    if (ptr != 0)
+    if (ptr != NULL)
 	ptr = (char *) realloc(ptr, length);
     else
 	ptr = (char *) malloc(length);
-    if (ptr == 0)
+    if (ptr == NULL)
 	outofmem(__FILE__, "HTAlloc");
     return ptr;
 }
@@ -630,8 +630,8 @@ PUBLIC_IF_FIND_LEAKS char *StrAllocVsprintf(char **pstr,
     /*
      * Use vasprintf() if we have it, since it is simplest.
      */
-    char *result = 0;
-    char *temp = 0;
+    char *result = NULL;
+    char *temp = NULL;
 
     /* discard old destination if no length was given */
     if (pstr && !dst_len) {
@@ -644,8 +644,8 @@ PUBLIC_IF_FIND_LEAKS char *StrAllocVsprintf(char **pstr,
 	    size_t src_len = strlen(temp);
 	    size_t new_len = dst_len + src_len + 1;
 
-	    result = HTAlloc(pstr ? *pstr : 0, new_len);
-	    if (result != 0) {
+	    result = HTAlloc(pstr ? *pstr : NULL, new_len);
+	    if (result != NULL) {
 		strcpy(result + dst_len, temp);
 	    }
 	    (free) (temp);
@@ -655,7 +655,7 @@ PUBLIC_IF_FIND_LEAKS char *StrAllocVsprintf(char **pstr,
 	}
     }
 
-    if (pstr != 0)
+    if (pstr != NULL)
 	*pstr = result;
 
     return result;
@@ -900,13 +900,13 @@ PUBLIC_IF_FIND_LEAKS char *StrAllocVsprintf(char **pstr,
 #endif
 char *HTSprintf(char **pstr, const char *fmt, ...)
 {
-    char *result = 0;
+    char *result = NULL;
     size_t inuse = 0;
     va_list ap;
 
     LYva_start(ap, fmt);
     {
-	if (pstr != 0 && *pstr != 0)
+	if (pstr != NULL && *pstr != NULL)
 	    inuse = strlen(*pstr);
 	result = StrAllocVsprintf(pstr, inuse, fmt, &ap);
     }
@@ -927,7 +927,7 @@ char *HTSprintf(char **pstr, const char *fmt, ...)
 #endif
 char *HTSprintf0(char **pstr, const char *fmt, ...)
 {
-    char *result = 0;
+    char *result = NULL;
     va_list ap;
 
     LYva_start(ap, fmt);
@@ -954,12 +954,12 @@ char *HTQuoteParameter(const char *parameter)
     size_t quoted = 0;
     char *result;
 
-    if (parameter == 0)
+    if (parameter == NULL)
 	parameter = "";
 
     last = strlen(parameter);
     for (i = 0; i < last; ++i)
-	if (StrChr("\\&#$^*?(){}<>\"';`|", parameter[i]) != 0
+	if (StrChr("\\&#$^*?(){}<>\"';`|", parameter[i]) != NULL
 	    || isspace(UCH(parameter[i])))
 	    ++quoted;
 
@@ -1116,7 +1116,7 @@ void HTAddXpand(char **result,
 	    if (HTIsParam(next)) {
 		if (next != last) {
 		    size_t len = ((size_t) (next - last)
-				  + ((*result != 0)
+				  + ((*result != NULL)
 				     ? strlen(*result)
 				     : 0));
 
@@ -1159,7 +1159,7 @@ void HTAddXpand(char **result,
 #endif /* USE_QUOTED_PARAMETER */
 
 /*
- * Append string to a system command that we are constructing, without quoting. 
+ * Append string to a system command that we are constructing, without quoting.
  * We're given the index of the newest parameter we're processing.  Zero
  * indicates none, so a value of '1' indicates that we copy from the beginning
  * of the command string up to the first parameter, substitute the quoted
@@ -1180,13 +1180,13 @@ void HTAddToCmd(char **result,
 	if (number <= 1) {
 	    FREE(*result);
 	}
-	if (string == 0)
+	if (string == NULL)
 	    string = "";
 	while (next[0] != 0) {
 	    if (HTIsParam(next)) {
 		if (next != last) {
 		    size_t len = ((size_t) (next - last)
-				  + ((*result != 0)
+				  + ((*result != NULL)
 				     ? strlen(*result)
 				     : 0));
 
@@ -1254,17 +1254,17 @@ void HTEndParam(char **result,
  */
 void HTSABAlloc(bstring **dest, int len)
 {
-    if (*dest == 0) {
+    if (*dest == NULL) {
 	*dest = typecalloc(bstring);
 
-	if (*dest == 0)
+	if (*dest == NULL)
 	    outofmem(__FILE__, "HTSABAlloc");
     }
 
     if ((*dest)->len != len) {
 	(*dest)->str = typeRealloc(char, (*dest)->str, len);
 
-	if ((*dest)->str == 0)
+	if ((*dest)->str == NULL)
 	    outofmem(__FILE__, "HTSABAlloc");
 
 	(*dest)->len = len;
@@ -1372,8 +1372,8 @@ void HTSABCat0(bstring **dest, const char *src)
  */
 BOOL HTSABEql(bstring *a, bstring *b)
 {
-    unsigned len_a = (unsigned) ((a != 0) ? a->len : 0);
-    unsigned len_b = (unsigned) ((b != 0) ? b->len : 0);
+    unsigned len_a = (unsigned) ((a != NULL) ? a->len : 0);
+    unsigned len_b = (unsigned) ((b != NULL) ? b->len : 0);
 
     if (len_a == len_b) {
 	if (len_a == 0
@@ -1401,8 +1401,8 @@ void HTSABFree(bstring **ptr)
  */
 bstring *HTBprintf(bstring **pstr, const char *fmt, ...)
 {
-    bstring *result = 0;
-    char *temp = 0;
+    bstring *result = NULL;
+    char *temp = NULL;
     va_list ap;
 
     LYva_start(ap, fmt);
@@ -1429,7 +1429,7 @@ void trace_bstring2(const char *text,
 {
     int n;
 
-    if (text != 0) {
+    if (text != NULL) {
 	for (n = 0; n < size; ++n) {
 	    int ch = UCH(text[n]);
 

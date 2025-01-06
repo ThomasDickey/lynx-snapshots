@@ -1,4 +1,4 @@
-/* $LynxId: LYShowInfo.c,v 1.86 2024/01/15 18:16:29 tom Exp $ */
+/* $LynxId: LYShowInfo.c,v 1.87 2025/01/06 15:51:59 tom Exp $ */
 #include <HTUtils.h>
 #include <HTFile.h>
 #include <HTParse.h>
@@ -464,7 +464,7 @@ int LYShowInfo(DocInfo *doc,
 				  gettext("No Links on the current page")));
 	}
 
-	if ((cp = HText_getHttpHeaders()) != 0) {
+	if ((cp = HText_getHttpHeaders()) != NULL) {
 	    fprintf(fp0, "<h2>%s</h2>",
 		    LYEntifyTitle(&buffer, gettext("Server Headers:")));
 	    fprintf(fp0, "<pre>%s</pre>",

@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYCharUtils.c,v 1.137 2021/10/24 00:47:08 tom Exp $
+ * $LynxId: LYCharUtils.c,v 1.138 2025/01/06 16:25:40 tom Exp $
  *
  *  Functions associated with LYCharSets.c and the Lynx version of HTML.c - FM
  *  ==========================================================================
@@ -59,7 +59,7 @@ static size_t count_char(const char *value, int ch)
 }
 
 /*
- * This function converts any ampersands in a pre-allocated string to "&amp;". 
+ * This function converts any ampersands in a pre-allocated string to "&amp;".
  * If brackets is TRUE, it also converts any angle-brackets to "&lt;" or "&gt;".
  */
 void LYEntify(char **in_out,
@@ -223,7 +223,7 @@ static BOOL MustEntify(const char *source)
     BOOL result;
 
 #ifdef CJK_EX
-    if (IS_CJK_TTY && StrChr(source, '\033') != 0) {
+    if (IS_CJK_TTY && StrChr(source, '\033') != NULL) {
 	result = TRUE;
     } else
 #endif
@@ -243,7 +243,7 @@ static BOOL MustEntify(const char *source)
  */
 const char *LYEntifyTitle(char **target, const char *source)
 {
-    const char *result = 0;
+    const char *result = NULL;
 
     if (MustEntify(source)) {
 	StrAllocCopy(*target, source);
@@ -257,7 +257,7 @@ const char *LYEntifyTitle(char **target, const char *source)
 
 const char *LYEntifyValue(char **target, const char *source)
 {
-    const char *result = 0;
+    const char *result = NULL;
 
     if (MustEntify(source)) {
 	StrAllocCopy(*target, source);
@@ -423,7 +423,7 @@ char *LYFindEndOfComment(char *str)
     }
 
     /*
-     * Invalid comment, so return the first '>' from the start of the string. 
+     * Invalid comment, so return the first '>' from the start of the string.
      * - FM
      */
     return cp1;
@@ -531,7 +531,7 @@ void LYFillLocalFileURL(char **href,
 
 void LYAddMETAcharsetToStream(HTStream *target, int disp_chndl)
 {
-    char *buf = 0;
+    char *buf = NULL;
 
     if (disp_chndl == -1)
 	/*
@@ -539,7 +539,7 @@ void LYAddMETAcharsetToStream(HTStream *target, int disp_chndl)
 	 */
 	disp_chndl = current_char_set;
 
-    if (target != 0 && disp_chndl >= 0) {
+    if (target != NULL && disp_chndl >= 0) {
 	HTSprintf0(&buf, "<META %s content=\"" STR_HTML ";charset=%s\">\n",
 		   "http-equiv=\"content-type\"",
 		   LYCharSet_UC[disp_chndl].MIMEname);
@@ -1068,7 +1068,7 @@ char **LYUCFullyTranslateString(char **str,
     char *p;
     char *q, *qs;
     HTChunk *chunk = NULL;
-    char *cp = 0;
+    char *cp = NULL;
     char cpe = 0;
     char *esc = NULL;
     char replace_buf[64];
@@ -1081,7 +1081,7 @@ char **LYUCFullyTranslateString(char **str,
     BOOLEAN no_bytetrans;
     UCTransParams T;
     BOOL from_is_utf8 = FALSE;
-    char *puni = 0;
+    char *puni = NULL;
     enum _state {
 	S_text,
 	S_esc,
@@ -1693,9 +1693,9 @@ char **LYUCFullyTranslateString(char **str,
 		state = S_got_outchar;
 		break;
 
-		/* The following disabled section doesn't make sense any more. 
+		/* The following disabled section doesn't make sense any more.
 		 * It used to make sense in the past, when S_check_named would
-		 * look in "old style" tables in addition to what it does now. 
+		 * look in "old style" tables in addition to what it does now.
 		 * Disabling of going to S_check_name here prevents endless
 		 * looping between S_check_uni and S_check_names states, which
 		 * could occur here for Latin 1 codes for some cs_to if they
@@ -2815,7 +2815,7 @@ void LYHandleSELECT(HTStructured * me, const BOOL *present,
 	    if (ptr &&
 		me->sp[0].tag_number == HTML_PRE && strlen(ptr) > 6) {
 		/*
-		 * The code inadequately handles OPTION fields in PRE tags. 
+		 * The code inadequately handles OPTION fields in PRE tags.
 		 * We'll put up a minimum of 6 characters, and if any more
 		 * would exceed the wrap column, we'll ignore them.
 		 */
@@ -2904,7 +2904,7 @@ int LYLegitimizeHREF(HTStructured * me, char **href,
 		 * it may actually have blanks in the name.
 		 * Try to accommodate. See also HTParse().
 		 */
-		if (LYRemoveNewlines(p) || StrChr(p, '\t') != 0) {
+		if (LYRemoveNewlines(p) || StrChr(p, '\t') != NULL) {
 		    LYRemoveBlanks(p);	/* a compromise... */
 		}
 
@@ -3060,7 +3060,7 @@ void LYCheckForContentBase(HTStructured * me)
     present[HTML_BASE_HREF] = YES;
     value[HTML_BASE_HREF] = (const char *) cp;
     (*me->isa->start_element) (me, HTML_BASE, present, value,
-			       0, 0);
+			       0, NULL);
     FREE(cp);
 }
 
@@ -3396,7 +3396,7 @@ void LYformTitle(char **dst,
     if (HTCJK == JAPANESE) {
 	char *tmp_buffer = NULL;
 
-	if ((tmp_buffer = (char *) malloc(strlen(src) + 1)) == 0)
+	if ((tmp_buffer = (char *) malloc(strlen(src) + 1)) == NULL)
 	    outofmem(__FILE__, "LYformTitle");
 
 	switch (kanji_code) {	/* 1997/11/22 (Sat) 09:28:00 */

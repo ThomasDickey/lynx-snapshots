@@ -1,5 +1,5 @@
 /*
- * $LynxId: makeuctb.c,v 1.52 2021/03/22 22:52:58 tom Exp $
+ * $LynxId: makeuctb.c,v 1.53 2025/01/06 16:51:05 tom Exp $
  *
  *  makeuctb.c, derived from conmakehash.c   - kw
  *
@@ -58,7 +58,7 @@
  */
 typedef u16 unicode;
 
-static FILE *chdr = 0;
+static FILE *chdr = NULL;
 
 /*
  * Since we may be writing the formatted file to stdout, ensure that we flush
@@ -69,7 +69,7 @@ static GCC_NORETURN void done(int code);
 
 static void done(int code)
 {
-    if (chdr != 0) {
+    if (chdr != NULL) {
 	fflush(chdr);
 	fclose(chdr);
     }
@@ -147,7 +147,7 @@ static int getunicode(char **p0)
 	return -1;
     }
     *p0 = p + 6;
-    return (int) strtol((p + 2), 0, 16);
+    return (int) strtol((p + 2), NULL, 16);
 }
 
 /*
@@ -308,7 +308,7 @@ int main(int argc, char **argv)
 
     FILE *ctbl;
     char buffer[65536];
-    char *outname = 0;
+    char *outname = NULL;
     unsigned n;
     int fontlen;
     int i, nuni, nent;
@@ -341,10 +341,10 @@ int main(int argc, char **argv)
     } else if (ctbl == stdin) {
 	chdr = stdout;
 	hdrname = "stdout";
-    } else if ((outname = (char *) malloc(strlen(tblname) + 3)) != 0) {
+    } else if ((outname = (char *) malloc(strlen(tblname) + 3)) != NULL) {
 	strcpy(outname, tblname);
 	hdrname = outname;
-	if ((p = strrchr(outname, '.')) == 0)
+	if ((p = strrchr(outname, '.')) == NULL)
 	    p = outname + strlen(outname);
 	strcpy(p, ".h");
     } else {
@@ -352,7 +352,7 @@ int main(int argc, char **argv)
 	done(EX_NOINPUT);
     }
 
-    if (chdr == 0) {
+    if (chdr == NULL) {
 	chdr = fopen(hdrname, "w");
 	if (!chdr) {
 	    perror(hdrname);
@@ -429,7 +429,7 @@ int main(int argc, char **argv)
 	    while (*p == ' ' || *p == '\t') {
 		p++;
 	    }
-	    RawOrEnc = (int) strtol(p, 0, 10);
+	    RawOrEnc = (int) strtol(p, NULL, 10);
 	    Raw_found = 1;
 	    continue;
 
@@ -515,7 +515,7 @@ int main(int argc, char **argv)
 	    while (*p == ' ' || *p == '\t') {
 		p++;
 	    }
-	    CodePage = (int) strtol(p, 0, 10);
+	    CodePage = (int) strtol(p, NULL, 10);
 	    continue;
 	}
 
@@ -760,7 +760,7 @@ int main(int argc, char **argv)
 	StrNCpy(this_MIMEcharset, argv[3], UC_MAXLEN_MIMECSNAME);
     } else if (this_MIMEcharset[0] == '\0') {
 	StrNCpy(this_MIMEcharset, tblname, UC_MAXLEN_MIMECSNAME);
-	if ((p = StrChr(this_MIMEcharset, '.')) != 0) {
+	if ((p = StrChr(this_MIMEcharset, '.')) != NULL) {
 	    *p = '\0';
 	}
     }
@@ -806,7 +806,7 @@ int main(int argc, char **argv)
  *\n\
  */\n\
 \n\
-static const u8 dfont_unicount%s[%d] = \n\
+static const u8 dfont_unicount%s[%d] =\n\
 %c\n\t", argv[0], argv[1], id_append, fontlen, L_CURL);
 
     for (i = 0; i < fontlen; i++) {
@@ -832,7 +832,7 @@ static const u8 dfont_unicount%s[%d] = \n\
     }
 
     if (nuni) {
-	fprintf(chdr, "\nstatic const u16 dfont_unitable%s[%d] = \n%c\n\t",
+	fprintf(chdr, "\nstatic const u16 dfont_unitable%s[%d] =\n%c\n\t",
 		id_append, nuni, L_CURL);
     } else {
 	fprintf(chdr,
@@ -858,7 +858,7 @@ static const u8 dfont_unicount%s[%d] = \n\
 
     if (themap_str.entry_ct) {
 	fprintf(chdr, "\n\
-static struct unipair_str repl_map%s[%d] = \n\
+static struct unipair_str repl_map%s[%d] =\n\
 %c\n\t", id_append, themap_str.entry_ct, L_CURL);
     } else {
 	fprintf(chdr, "\n\

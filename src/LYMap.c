@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMap.c,v 1.50 2018/03/05 22:32:14 tom Exp $
+ * $LynxId: LYMap.c,v 1.52 2025/01/06 18:35:47 tom Exp $
  *			Lynx Client-side Image MAP Support	       LYMap.c
  *			==================================
  *
@@ -163,7 +163,7 @@ BOOL LYAddImageMap(char *address,
     if (theList) {
 	cur = theList;
 	while (NULL != (old = (LYImageMap *) HTList_nextObject(cur))) {
-	    if (old->address == 0)	/* shouldn't happen */
+	    if (old->address == NULL)	/* shouldn't happen */
 		continue;
 	    if (!strcmp(old->address, address)) {
 		FREE(old->address);
@@ -349,7 +349,7 @@ static void fill_DocAddress(DocAddress *wwwdoc,
 }
 
 /*
- * Get the appropriate list for creating a LYNXIMGMAP:  pseudo- document: 
+ * Get the appropriate list for creating a LYNXIMGMAP:  pseudo- document:
  * either the global list (LynxMaps), or the specific list if a List Page for a
  * POST response is requested.  Also fill in the DocAddress structure etc.  by
  * calling fill_DocAddress().
@@ -374,7 +374,7 @@ static HTList *get_the_list(DocAddress *wwwdoc,
 
     if (anchor->post_data) {
 	fill_DocAddress(wwwdoc, address, anchor, punderlying);
-	if (non_empty(punderlying)) {
+	if (non_emptyS(punderlying)) {
 	    result = (*punderlying)->imaps;
 	} else {
 	    result = anchor->imaps;
@@ -556,7 +556,7 @@ static int LYLoadIMGmap(const char *arg,
     PUTS(buf);
     /*
      * This page is a list of titles and anchors for them.  Since titles
-     * already passed SGML/HTML stage they are converted to current_char_set. 
+     * already passed SGML/HTML stage they are converted to current_char_set.
      * That is why we insist on META charset for this page.
      */
     HTSprintf0(&buf, "<title>%s</title>\n", MapTitle);
@@ -642,5 +642,5 @@ void LYPrintImgMaps(FILE *fp)
 GLOBALDEF(HTProtocol, LYLynxIMGmap, _LYIMGMAP_C_GLOBALDEF_1_INIT);
 #else
 GLOBALDEF HTProtocol LYLynxIMGmap =
-{"LYNXIMGMAP", LYLoadIMGmap, 0};
+{"LYNXIMGMAP", LYLoadIMGmap, NULL};
 #endif /* GLOBALDEF_IS_MACRO */

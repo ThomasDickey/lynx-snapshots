@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFWriter.c,v 1.133 2024/08/02 07:50:14 tom Exp $
+ * $LynxId: HTFWriter.c,v 1.134 2025/01/06 16:19:03 tom Exp $
  *
  *		FILE WRITER				HTFWrite.h
  *		===========
@@ -157,14 +157,14 @@ static void decompress_gzip(HTStream *me)
     char copied[LY_MAXPATH];
     FILE *fp = LYOpenTemp(copied, ".tmp.gz", BIN_W);
 
-    if (fp != 0) {
+    if (fp != NULL) {
 #ifdef USE_ZLIB
 	char buffer[BUFSIZ];
 	gzFile gzfp;
 	int status;
 
 	CTRACE((tfp, "decompressing '%s'\n", in_name));
-	if ((gzfp = gzopen(in_name, BIN_R)) != 0) {
+	if ((gzfp = gzopen(in_name, BIN_R)) != NULL) {
 	    BOOL success = TRUE;
 	    size_t actual = 0;
 
@@ -234,7 +234,7 @@ static void decompress_br(HTStream *me)
     char copied[LY_MAXPATH];
     FILE *fp = LYOpenTemp(copied, ".br", BIN_W);
 
-    if (fp != 0) {
+    if (fp != NULL) {
 #ifdef USE_BROTLI
 #define INPUT_BUFFER_SIZE BUFSIZ
 	char *brotli_buffer = NULL;
@@ -300,7 +300,7 @@ static void decompress_br(HTStream *me)
 		     * brotli library should return
 		     *  BROTLI_DECODER_RESULT_NEEDS_MORE_OUTPUT,
 		     * but actually returns
-		     *  BROTLI_DECODER_RESULT_ERROR 
+		     *  BROTLI_DECODER_RESULT_ERROR
 		     *
 		     * Accommodate possible improvements...
 		     */
@@ -509,7 +509,7 @@ static void HTFWriter_free(HTStream *me)
     if (me->end_command) {	/* Temp file */
 	LYCloseTempFP(me->fp);
 	/*
-	 * Handle a special case where the server used "Content-Type:  gzip". 
+	 * Handle a special case where the server used "Content-Type:  gzip".
 	 * Normally that feeds into the presentation stages, but if the link
 	 * happens to point to something that will not be presented, but
 	 * instead offered as a download, it comes here.  In that case, ungzip
@@ -717,7 +717,7 @@ static void HTFWriter_free(HTStream *me)
 			 * copy the temp file to another temp file (or even the
 			 * same!).  We can skip this needless duplication by
 			 * using the viewer_command which has already been
-			 * determined when the HTCompressed stream was created. 
+			 * determined when the HTCompressed stream was created.
 			 * - kw
 			 */
 			FREE(me->end_command);
@@ -947,7 +947,7 @@ static char *mailcap_substitute(HTParentAnchor *anchor,
 #if defined(UNIX)
     /* if we don't have a "%s" token, expect to provide the file via stdin */
     if (!LYMailcapUsesPctS(pres->command)) {
-	char *prepend = 0;
+	char *prepend = NULL;
 	const char *format = "( %s ) < %s";
 
 	HTSprintf(&prepend, "( %s", result);	/* ...avoid quoting */
@@ -997,7 +997,7 @@ HTStream *HTSaveAndExecute(HTPresentation *pres,
 		/* allow it to continue */
 		;
 	    } else {
-		char *buf = 0;
+		char *buf = NULL;
 
 		HTSprintf0(&buf, EXECUTION_DISABLED_FOR_FILE,
 			   key_for_func(LYK_OPTIONS));
@@ -1083,7 +1083,7 @@ HTStream *HTSaveAndExecute(HTPresentation *pres,
 	} else if (!strncasecomp(pres->rep->name, "text/", 5)) {
 	    suffix = TEXT_SUFFIX;
 	} else if ((suffix = HTFileSuffix(pres->rep,
-					  anchor->content_encoding)) == 0
+					  anchor->content_encoding)) == NULL
 		   || *suffix != '.') {
 	    if (!strncasecomp(pres->rep->name, "application/", 12)) {
 		suffix = BIN_SUFFIX;
@@ -1239,7 +1239,7 @@ HTStream *HTSaveToFile(HTPresentation *pres,
 	} else if (!strncasecomp(pres->rep->name, "application/", 12)) {
 	    suffix = BIN_SUFFIX;
 	} else if ((suffix = HTFileSuffix(pres->rep,
-					  anchor->content_encoding)) == 0
+					  anchor->content_encoding)) == NULL
 		   || *suffix != '.') {
 	    suffix = HTML_SUFFIX;
 	}
@@ -1414,7 +1414,7 @@ HTStream *HTCompressed(HTPresentation *pres,
 	     * end of the list, and unless the quality is lower, we prefer
 	     * those.
 	     */
-	    if (Pres == 0)
+	    if (Pres == NULL)
 		Pres = Pnow;
 	    else if (Pres->quality > Pnow->quality)
 		continue;

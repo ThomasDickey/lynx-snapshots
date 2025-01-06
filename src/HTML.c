@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTML.c,v 1.200 2022/07/22 20:22:13 tom Exp $
+ * $LynxId: HTML.c,v 1.201 2025/01/06 16:21:31 tom Exp $
  *
  *		Structured stream to Rich hypertext converter
  *		============================================
@@ -743,8 +743,8 @@ void HTML_write(HTStructured * me, const char *s, int l)
 #define INTERN_LT         INTERN_CHK(intern_flag)
 
 #ifdef USE_COLOR_STYLE
-static char *Style_className = 0;
-static char *Style_className_end = 0;
+static char *Style_className = NULL;
+static char *Style_className_end = NULL;
 static size_t Style_className_len = 0;
 static int hcode;
 
@@ -765,7 +765,7 @@ static void addClassName(const char *prefix,
 
     if ((have + need) >= Style_className_len) {
 	Style_className_len += 1024 + 2 * (have + need);
-	if (Style_className == 0) {
+	if (Style_className == NULL) {
 	    Style_className = typeMallocn(char, Style_className_len);
 	} else {
 	    Style_className = typeRealloc(char, Style_className, Style_className_len);
@@ -813,7 +813,7 @@ static void LYStartArea(HTStructured * obj, const char *href,
     }
 
     (*obj->isa->start_element) (obj, HTML_AREA, new_present, new_value,
-				tag_charset, 0);
+				tag_charset, NULL);
 }
 
 static void LYHandleFIG(HTStructured * me, const BOOL *present,
@@ -1449,7 +1449,7 @@ static int HTML_start_element(HTStructured * me, int element_number,
 #ifdef USE_COLOR_STYLE
 	    if (present && present[HTML_LINK_CLASS] &&
 		non_empty(value[HTML_LINK_CLASS])) {
-		char *tmp = 0;
+		char *tmp = NULL;
 		int hcode2;
 
 		HTSprintf0(&tmp, "link.%s.%s", value[HTML_LINK_CLASS], title);
@@ -1530,7 +1530,7 @@ static int HTML_start_element(HTStructured * me, int element_number,
 
     case HTML_STYLE:
 	/*
-	 * We're getting it as Literal text, which, for now, we'll just ignore. 
+	 * We're getting it as Literal text, which, for now, we'll just ignore.
 	 * - FM
 	 */
 	HTChunkClear(&me->style_block);
@@ -1538,7 +1538,7 @@ static int HTML_start_element(HTStructured * me, int element_number,
 
     case HTML_SCRIPT:
 	/*
-	 * We're getting it as Literal text, which, for now, we'll just ignore. 
+	 * We're getting it as Literal text, which, for now, we'll just ignore.
 	 * - FM
 	 */
 	HTChunkClear(&me->script);
@@ -1776,7 +1776,7 @@ static int HTML_start_element(HTStructured * me, int element_number,
 	 */
 
 	/*
-	 * Check whether we have an H# in a list, and if so, treat it as an LH. 
+	 * Check whether we have an H# in a list, and if so, treat it as an LH.
 	 * - FM
 	 */
 	if ((me->List_Nesting_Level >= 0) &&
@@ -1956,7 +1956,7 @@ static int HTML_start_element(HTStructured * me, int element_number,
 	    me->inP = FALSE;
 
 	    /*
-	     * Reset the alignment appropriately for the division and/or block. 
+	     * Reset the alignment appropriately for the division and/or block.
 	     * - FM
 	     */
 	    if (me->List_Nesting_Level < 0 &&
@@ -2211,7 +2211,7 @@ static int HTML_start_element(HTStructured * me, int element_number,
 	/*
 	 * Set our inPRE flag to FALSE so that a newline immediately following
 	 * the PRE start tag will be ignored.  HTML_put_character() will set it
-	 * to TRUE when the first character within the PRE block is received. 
+	 * to TRUE when the first character within the PRE block is received.
 	 * - FM
 	 */
 	me->inPRE = FALSE;
@@ -2748,7 +2748,7 @@ static int HTML_start_element(HTStructured * me, int element_number,
     case HTML_A:
 	/*
 	 * If we are looking for client-side image maps, then handle an A
-	 * within a MAP that has a COORDS attribute as an AREA tag. 
+	 * within a MAP that has a COORDS attribute as an AREA tag.
 	 * Unfortunately we lose the anchor text this way for the LYNXIMGMAP,
 	 * we would have to do much more parsing to collect it.  After
 	 * potentially handling the A as AREA, always return immediately if
@@ -2988,7 +2988,7 @@ static int HTML_start_element(HTStructured * me, int element_number,
 	     */
 	    /*
 	     * If the USEMAP value is a lone fragment and LYSeekFragMAPinCur is
-	     * set, we'll use the current document's URL for resolving. 
+	     * set, we'll use the current document's URL for resolving.
 	     * Otherwise use the BASE.  - kw
 	     */
 	    Base = ((me->inBASE &&
@@ -3171,7 +3171,7 @@ static int HTML_start_element(HTStructured * me, int element_number,
 			if ((ID_A = HTAnchor_findChildAndLink(me->node_anchor,	/* Parent */
 							      id_string,	/* Tag */
 							      NULL,	/* Address */
-							      0)) != NULL) {	/* Type */
+							      NULL)) != NULL) {	/* Type */
 			    HText_beginAnchor(me->text, me->inUnderline, ID_A);
 			    HText_endAnchor(me->text, 0);
 			}
@@ -3217,7 +3217,7 @@ static int HTML_start_element(HTStructured * me, int element_number,
 		    if ((ID_A = HTAnchor_findChildAndLink(me->node_anchor,	/* Parent */
 							  id_string,	/* Tag */
 							  NULL,		/* Address */
-							  0)) != NULL) {	/* Type */
+							  NULL)) != NULL) {	/* Type */
 			HText_beginAnchor(me->text, me->inUnderline, ID_A);
 			HText_endAnchor(me->text, 0);
 		    }
@@ -3229,7 +3229,7 @@ static int HTML_start_element(HTStructured * me, int element_number,
 		    if ((ID_A = HTAnchor_findChildAndLink(me->node_anchor,	/* Parent */
 							  id_string,	/* Tag */
 							  NULL,		/* Address */
-							  0)) != NULL) {	/* Type */
+							  NULL)) != NULL) {	/* Type */
 			HText_beginAnchor(me->text, me->inUnderline, ID_A);
 			HText_endAnchor(me->text, 0);
 		    }
@@ -3272,7 +3272,7 @@ static int HTML_start_element(HTStructured * me, int element_number,
 		    if ((ID_A = HTAnchor_findChildAndLink(me->node_anchor,	/* Parent */
 							  id_string,	/* Tag */
 							  NULL,		/* Address */
-							  0)) != NULL) {	/* Type */
+							  NULL)) != NULL) {	/* Type */
 			HText_beginAnchor(me->text, me->inUnderline, ID_A);
 			HText_endAnchor(me->text, 0);
 		    }
@@ -3408,7 +3408,7 @@ static int HTML_start_element(HTStructured * me, int element_number,
 	}
 
 	/*
-	 * Generate a target anchor in this place in the containing document. 
+	 * Generate a target anchor in this place in the containing document.
 	 * MAP can now contain block markup, if it doesn't contain any AREAs
 	 * (or A anchors with COORDS converted to AREAs) the current location
 	 * can be used as a fallback for following a USEMAP link.  - kw
@@ -4314,7 +4314,7 @@ static int HTML_start_element(HTStructured * me, int element_number,
 		    StrAllocCopy(I.value, "BUTTON");
 		    faked_button = TRUE;
 		}
-	    } else if (I.value == 0) {
+	    } else if (I.value == NULL) {
 		StrAllocCopy(I.value, "BUTTON");
 	    }
 
@@ -4371,7 +4371,7 @@ static int HTML_start_element(HTStructured * me, int element_number,
 		 * present before the start of the string, as when we use all
 		 * underscores instead of the INPUT's actual value, but we
 		 * could still get a wrap at the right margin, instead, if the
-		 * value is greater than a line width for the current style. 
+		 * value is greater than a line width for the current style.
 		 * Also, if chars somehow ended up longer than the length of
 		 * the actual value (shouldn't have), we'll continue padding
 		 * with nbsp up to the length of chars.  - FM
@@ -4666,7 +4666,7 @@ static int HTML_start_element(HTStructured * me, int element_number,
 	    } else if (HaveSRClink == TRUE) {
 		/*
 		 * We put up an [IMAGE] link and '-' for a TYPE="image" and
-		 * didn't get a VALUE or ALT string, so fake a "Submit" value. 
+		 * didn't get a VALUE or ALT string, so fake a "Submit" value.
 		 * If we didn't put up a link, then HText_beginInput() will use
 		 * "[IMAGE]-Submit".  - FM
 		 */
@@ -4780,13 +4780,13 @@ static int HTML_start_element(HTStructured * me, int element_number,
 		       IsSubmitOrReset == FALSE) {
 		/*
 		 * This is not a submit or reset button, and we are in a PRE
-		 * block with a field intended to exceed 6 character widths. 
+		 * block with a field intended to exceed 6 character widths.
 		 * The code inadequately handles INPUT fields in PRE tags if
 		 * wraps occur (at the right margin) for the underscore
 		 * placeholders.  We'll put up a minimum of 6 underscores,
 		 * since we should have wrapped artificially, above, if the
 		 * INPUT begins within 6 columns of the right margin, and if
-		 * any more would exceed the wrap column, we'll ignore them. 
+		 * any more would exceed the wrap column, we'll ignore them.
 		 * Note that if we somehow get tripped up and a wrap still does
 		 * occur before all 6 of the underscores are output, the
 		 * wrapped ones won't be treated as part of the editing window,
@@ -5089,7 +5089,7 @@ static int HTML_start_element(HTStructured * me, int element_number,
 		    if ((ID_A = HTAnchor_findChildAndLink(me->node_anchor,	/* Parent */
 							  value[HTML_OPTION_ID],	/* Tag */
 							  NULL,		/* Address */
-							  0)) != NULL) {	/* Type */
+							  NULL)) != NULL) {	/* Type */
 			HText_beginAnchor(me->text, me->inUnderline, ID_A);
 			HText_endAnchor(me->text, 0);
 			I.id = value[HTML_OPTION_ID];
@@ -5660,7 +5660,7 @@ static int HTML_end_element(HTStructured * me, int element_number,
 		    me->objects_figged_open > 0) {
 		    /*
 		     * It's an OBJECT for which we substituted a FIG, so pop
-		     * the FIG and pretend that's what we are being called for. 
+		     * the FIG and pretend that's what we are being called for.
 		     * - kw
 		     */
 		    CTRACE2(TRACE_STYLE,
@@ -5801,7 +5801,7 @@ static int HTML_end_element(HTStructured * me, int element_number,
 
     case HTML_STYLE:
 	/*
-	 * We're getting it as Literal text, which, for now, we'll just ignore. 
+	 * We're getting it as Literal text, which, for now, we'll just ignore.
 	 * - FM
 	 */
 	HTChunkTerminate(&me->style_block);
@@ -5813,7 +5813,7 @@ static int HTML_end_element(HTStructured * me, int element_number,
 
     case HTML_SCRIPT:
 	/*
-	 * We're getting it as Literal text, which, for now, we'll just ignore. 
+	 * We're getting it as Literal text, which, for now, we'll just ignore.
 	 * - FM
 	 */
 	HTChunkTerminate(&me->script);
@@ -6237,7 +6237,7 @@ static int HTML_end_element(HTStructured * me, int element_number,
 		     * that it should not regard the current OBJECT ended but
 		     * should treat its contents as mixed.  Normally these
 		     * cases would have already handled in the real
-		     * start_element call, so this block may not be necessary. 
+		     * start_element call, so this block may not be necessary.
 		     * - kw
 		     */
 		    CTRACE((tfp, "%s:\n%s\n",
@@ -6320,7 +6320,7 @@ static int HTML_end_element(HTStructured * me, int element_number,
 			 * Well we don't need to do this any more, nested
 			 * objects should either not get here any more at all
 			 * or can be handled fine by other code below.  Leave
-			 * in place for now as a special case for LYMapsOnly. 
+			 * in place for now as a special case for LYMapsOnly.
 			 * - kw
 			 */
 			if (LYMapsOnly && (!last_map || last_map < first_end))
@@ -6357,7 +6357,7 @@ static int HTML_end_element(HTStructured * me, int element_number,
 	     * If its content has SHAPES, convert it to FIG.  - FM
 	     *
 	     * This is now handled in our start_element without using include
-	     * if the SGML parser cooperates, so this block may be unnecessary. 
+	     * if the SGML parser cooperates, so this block may be unnecessary.
 	     * - kw
 	     */
 	    if (me->object_shapes == TRUE && !LYMapsOnly) {
@@ -6619,7 +6619,7 @@ static int HTML_end_element(HTStructured * me, int element_number,
 	/*
 	 * If we are in a list and are on the first line with no text following
 	 * a bullet or number, don't force a newline.  This could happen if we
-	 * were called from HTML_start_element() due to a missing FORM end tag. 
+	 * were called from HTML_start_element() due to a missing FORM end tag.
 	 * - FM
 	 */
 	if (!(me->List_Nesting_Level >= 0 && !me->inP))
@@ -6706,8 +6706,8 @@ static int HTML_end_element(HTStructured * me, int element_number,
 	     * SGML_character().
 	     *
 	     * If TEXTAREA is handled as SGML_LITTERAL (the old way), we need
-	     * to SGML-unescape any character references and NCRs here. 
-	     * Otherwise this will already have happened in the SGML.c parsing. 
+	     * to SGML-unescape any character references and NCRs here.
+	     * Otherwise this will already have happened in the SGML.c parsing.
 	     * - kw
 	     */
 	    me->UsePlainSpace = TRUE;
@@ -6919,7 +6919,7 @@ static int HTML_end_element(HTStructured * me, int element_number,
 		     !me->sp->style->freeFormat) &&
 		    strlen(ptr) > 6) {
 		    /*
-		     * The code inadequately handles OPTION fields in PRE tags. 
+		     * The code inadequately handles OPTION fields in PRE tags.
 		     * We'll put up a minimum of 6 characters, and if any more
 		     * would exceed the wrap column, we'll ignore them.
 		     */
@@ -7184,7 +7184,7 @@ static void HTML_free(HTStructured * me)
 	if (me->option.size > 0) {
 	    /*
 	     * If we still have data in the me->option chunk after forcing a
-	     * close of a still-open form, something must have gone very wrong. 
+	     * close of a still-open form, something must have gone very wrong.
 	     * - kw
 	     */
 	    if (LYBadHTML(me)) {
@@ -7203,7 +7203,7 @@ static void HTML_free(HTStructured * me)
 	if (me->textarea.size > 0) {
 	    /*
 	     * If we still have data in the me->textarea chunk after forcing a
-	     * close of a still-open form, something must have gone very wrong. 
+	     * close of a still-open form, something must have gone very wrong.
 	     * - kw
 	     */
 	    if (LYBadHTML(me)) {
@@ -7227,9 +7227,9 @@ static void HTML_free(HTStructured * me)
 	if (!dump_output_immediately &&
 	    HText_sourceAnchors(me->text) < 1 &&
 	    HText_HiddenLinkCount(me->text) > 0) {
-	    HTML_start_element(me, HTML_P, 0, 0, -1, &include);
+	    HTML_start_element(me, HTML_P, NULL, NULL, -1, &include);
 	    HTML_put_character(me, '[');
-	    HTML_start_element(me, HTML_EM, 0, 0, -1, &include);
+	    HTML_start_element(me, HTML_EM, NULL, NULL, -1, &include);
 	    HTML_put_string(me,
 			    gettext("Document has only hidden links.  Use the 'l'ist command."));
 	    HTML_end_element(me, HTML_EM, &include);
@@ -7472,7 +7472,7 @@ static void get_styles(void)
  */
 HTStyle *LYstyles(int style_number)
 {
-    if (styles[style_number] == 0)
+    if (styles[style_number] == NULL)
 	get_styles();
     return styles[style_number];
 }
@@ -7580,10 +7580,10 @@ HTStructured *HTML_new(HTParentAnchor *anchor,
 
     HTChunkInit(&me->script, 128);
 
-    me->text = 0;
+    me->text = NULL;
     me->style_change = YES;	/* Force check leading to text creation */
     me->new_style = default_style;
-    me->old_style = 0;
+    me->old_style = NULL;
     me->current_default_alignment = HT_LEFT;
     me->sp = (me->stack + MAX_NESTING - 1);
     me->skip_stack = 0;
@@ -7722,7 +7722,7 @@ static void CacheThru_do_free(HTStream *me)
 	    me->status = HT_ERROR;
 	LYCloseTempFP(me->fp);
 	if (me->status == HT_OK) {
-	    char *cp_freeme = 0;
+	    char *cp_freeme = NULL;
 
 	    me->anchor->source_cache_file = me->filename;
 	    CTRACE((tfp,
@@ -8123,7 +8123,7 @@ static char *MakeNewTitle(STRING2PTR value, int src_type)
     char *newtitle = NULL;
 
     StrAllocCopy(newtitle, "[");
-    if (value != 0 && value[src_type] != 0) {
+    if (value != NULL && value[src_type] != NULL) {
 	ptr = strrchr(value[src_type], '/');
 	if (!ptr) {
 	    StrAllocCat(newtitle, value[src_type]);
@@ -8131,7 +8131,7 @@ static char *MakeNewTitle(STRING2PTR value, int src_type)
 	    StrAllocCat(newtitle, ptr + 1);
 	}
     } else {
-	ptr = 0;
+	ptr = NULL;
     }
 #ifdef SH_EX			/* 1998/04/02 (Thu) 16:02:00 */
 
@@ -8167,7 +8167,7 @@ static char *MakeNewImageValue(STRING2PTR value)
     StrAllocCopy(newtitle, "[");
     ptr = (value[HTML_INPUT_SRC]
 	   ? strrchr(value[HTML_INPUT_SRC], '/')
-	   : 0);
+	   : NULL);
     if (!ptr) {
 	StrAllocCat(newtitle, value[HTML_INPUT_SRC]);
     } else {

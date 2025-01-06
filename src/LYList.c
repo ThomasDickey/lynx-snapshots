@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYList.c,v 1.55 2020/02/23 21:20:05 tom Exp $
+ * $LynxId: LYList.c,v 1.56 2025/01/06 16:25:40 tom Exp $
  *
  *			Lynx Document Reference List Support	      LYList.c
  *			====================================
@@ -66,7 +66,7 @@ int showlist(DocInfo *newdoc, int titles)
 	return (-1);
     }
 
-    if ((fp0 = InternalPageFP(tempfile, titles == last_titles)) == 0)
+    if ((fp0 = InternalPageFP(tempfile, titles == last_titles)) == NULL)
 	return (-1);
 
     LYLocalFileToURL(&(newdoc->address), tempfile);
@@ -112,7 +112,7 @@ int showlist(DocInfo *newdoc, int titles)
 	char *address;
 	const char *title;
 
-	if (child == 0) {
+	if (child == NULL) {
 	    /*
 	     * child should not be 0 unless form field numbering is on and cnt
 	     * is the number of a form input field.  HText_FormDescNumber()
@@ -256,10 +256,10 @@ static int print_refs(FILE *fp, int titles, int refs)
 	const char *title;
 	int counter = result + 1;
 
-	if (child == 0) {
+	if (child == NULL) {
 	    /*
 	     * child should not be 0 unless form field numbering is on and
-	     * cnt is the number of a form input field. 
+	     * cnt is the number of a form input field.
 	     * HText_FormDescNumber() will set desc to a description of
 	     * what type of input field this is.  We'll create a
 	     * within-document link to ensure that the link numbers on the

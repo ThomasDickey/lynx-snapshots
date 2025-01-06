@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTStyle.h,v 1.20 2023/10/24 08:14:54 tom Exp $
+ * $LynxId: HTStyle.h,v 1.21 2025/01/06 15:13:11 tom Exp $
 					    HTStyle: Style management for libwww
                               STYLE DEFINITION FOR HYPERTEXT
 
@@ -20,7 +20,7 @@ Overriding this module
    standard style sheets gets going.
 
    If it IS common code, then both the hypertext object and HTStyle.c must know
-   the structure of a style, so HTStyle.h is a suitable place to put that. 
+   the structure of a style, so HTStyle.h is a suitable place to put that.
    HTStyle.c has to be compiled with a knowledge of the
 
    It we take it out of the library, then of course HTStyle could be declared

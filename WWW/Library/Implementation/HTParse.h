@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTParse.h,v 1.26 2021/07/05 20:56:50 tom Exp $
+ * $LynxId: HTParse.h,v 1.27 2025/01/06 15:20:32 tom Exp $
  *				HTParse:  URL parsing in the WWW Library
  *				HTPARSE
  *
@@ -18,9 +18,9 @@
 extern "C" {
 #endif
 
-#define RFC_3986_UNRESERVED(c) (isalnum(UCH(c)) || strchr("-._~", UCH(c)) != 0)
-#define RFC_3986_GEN_DELIMS(c) ((c) != 0 && strchr(":/?#[]@", UCH(c)) != 0)
-#define RFC_3986_SUB_DELIMS(c) ((c) != 0 && strchr("!$&'()*+,;=", UCH(c)) != 0)
+#define RFC_3986_UNRESERVED(c) (isalnum(UCH(c)) || strchr("-._~", UCH(c)) != NULL)
+#define RFC_3986_GEN_DELIMS(c) ((c) != 0 && strchr(":/?#[]@", UCH(c)) != NULL)
+#define RFC_3986_SUB_DELIMS(c) ((c) != 0 && strchr("!$&'()*+,;=", UCH(c)) != NULL)
 
 /*
  *  The following are flag bits which may be ORed together to form

@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTML.h,v 1.36 2022/07/22 20:22:13 tom Exp $
+ * $LynxId: HTML.h,v 1.37 2025/01/06 15:16:58 tom Exp $
  *
  *					HTML to rich text converter for libwww
  *
@@ -38,7 +38,7 @@ extern "C" {
 	LYUCFullyTranslateString(s, cs_from, cs_to, NO, spcls, p, h, Back, st_HTML)
 /*
  * Strings from attributes which should be converted to some kind of "standard"
- * representation (character encoding), was Latin-1, esp.  URLs (incl. 
+ * representation (character encoding), was Latin-1, esp.  URLs (incl.
  * #fragments) and HTML NAME and ID stuff.
  */
 #define TRANSLATE_AND_UNESCAPE_TO_STD(s) \

@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYCgi.c,v 1.72 2018/03/18 18:56:05 tom Exp $
+ * $LynxId: LYCgi.c,v 1.73 2025/01/06 16:25:40 tom Exp $
  *                   Lynx CGI support                              LYCgi.c
  *                   ================
  *
@@ -390,7 +390,7 @@ static int LYLoadCGI(const char *arg,
 			       sink, anAnchor);
 
 	if (target == NULL) {
-	    char *tmp = 0;
+	    char *tmp = NULL;
 
 	    HTSprintf0(&tmp, CANNOT_CONVERT_I_TO_O,
 		       HTAtom_name(format_in),
@@ -753,5 +753,5 @@ static int LYLoadCGI(const char *arg,
 GLOBALDEF(HTProtocol, LYLynxCGI, _LYCGI_C_GLOBALDEF_1_INIT);
 #else
 GLOBALDEF HTProtocol LYLynxCGI =
-{"lynxcgi", LYLoadCGI, 0};
+{"lynxcgi", LYLoadCGI, NULL};
 #endif /* GLOBALDEF_IS_MACRO */

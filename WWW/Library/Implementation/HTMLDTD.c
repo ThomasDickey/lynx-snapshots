@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTMLDTD.c,v 1.58 2021/07/23 00:00:03 tom Exp $
+ * $LynxId: HTMLDTD.c,v 1.59 2025/01/06 15:42:46 tom Exp $
  *
  *		Our Static DTD for HTML
  *		-----------------------
@@ -243,7 +243,7 @@ void HTSwitchDTD(int new_flag)
 
 HTTag HTTag_unrecognized =
 
-{NULL_HTTag, NULL, 0, 0, SGML_EMPTY, T__UNREC_, 0, 0};
+{NULL_HTTag, NULL, 0, NULL, SGML_EMPTY, T__UNREC_, 0, 0};
 
 /*
  *	Utility Routine:  Useful for people building HTML objects.
@@ -280,7 +280,7 @@ void HTStartAnchor(HTStructured * obj, const char *name,
 	value[HTML_A_HREF] = (const char *) href;
     }
 
-    (*obj->isa->start_element) (obj, HTML_A, present, value, -1, 0);
+    (*obj->isa->start_element) (obj, HTML_A, present, value, -1, NULL);
 }
 
 void HTStartAnchor5(HTStructured * obj, const char *name,
@@ -308,7 +308,7 @@ void HTStartAnchor5(HTStructured * obj, const char *name,
 	value[HTML_A_TYPE] = linktype;
     }
 
-    (*obj->isa->start_element) (obj, HTML_A, present, value, tag_charset, 0);
+    (*obj->isa->start_element) (obj, HTML_A, present, value, tag_charset, NULL);
 }
 
 void HTStartIsIndex(HTStructured * obj, const char *prompt,
@@ -330,5 +330,5 @@ void HTStartIsIndex(HTStructured * obj, const char *prompt,
 	value[HTML_ISINDEX_HREF] = (const char *) href;
     }
 
-    (*obj->isa->start_element) (obj, HTML_ISINDEX, present, value, -1, 0);
+    (*obj->isa->start_element) (obj, HTML_ISINDEX, present, value, -1, NULL);
 }

@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYHash.c,v 1.39 2018/03/29 00:38:59 tom Exp $
+ * $LynxId: LYHash.c,v 1.40 2025/01/06 16:27:23 tom Exp $
  *
  * A hash table for the (fake) CSS support in Lynx-rp
  * (c) 1996 Rob Partington
@@ -29,7 +29,7 @@ static char *get_buffer(size_t need)
     if (++need > limit) {
 	char *test = realloc(buffer, (limit = (1 + need) * 2));
 
-	if (test == 0)
+	if (test == NULL)
 	    outofmem(__FILE__, "LYHash");
 	buffer = test;
     }
@@ -58,7 +58,7 @@ static HASH_TYPE cs_hash(const char *string)
 	int nn = (n + hash) % HASH_SIZE;
 
 	data = &hashStyles[nn];
-	if (data->name == 0 || !strcmp(string, data->name)) {
+	if (data->name == NULL || !strcmp(string, data->name)) {
 	    best = nn;
 	    hash = nn;
 	    break;
@@ -66,7 +66,7 @@ static HASH_TYPE cs_hash(const char *string)
 	++count_bump;
     }
     data = &hashStyles[best];
-    if (data->name != 0) {
+    if (data->name != NULL) {
 	if (strcmp(string, data->name)) {
 	    CTRACE_STYLE((tfp, "cs_hash(%s) overwriting %d\n", string, data->name));
 	    FREE(data->name);
@@ -119,7 +119,7 @@ void report_hashStyles(void)
     int count_used = 0;
 
     for (i = 0; i < CSHASHSIZE; i++) {
-	count_name += (hashStyles[i].name != 0);
+	count_name += (hashStyles[i].name != NULL);
 	count_used += (hashStyles[i].used != 0);
     }
     CTRACE((tfp, "Style hash:\n"));

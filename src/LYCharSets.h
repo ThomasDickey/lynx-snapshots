@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYCharSets.h,v 1.34 2012/02/10 18:43:40 tom Exp $
+ * $LynxId: LYCharSets.h,v 1.35 2025/01/06 15:16:58 tom Exp $
  */
 #ifndef LYCHARSETS_H
 #define LYCHARSETS_H
@@ -62,7 +62,7 @@ extern "C" {
     UCode_t LYcp1252ToUnicode(UCode_t code);
 
 /*
- * HTMLGetEntityName calls LYEntityNames for iso-8859-1 entity names only. 
+ * HTMLGetEntityName calls LYEntityNames for iso-8859-1 entity names only.
  * This is an obsolete technique but widely used in the code.  Note that
  * unicode number in general may have several equivalent entity names because
  * of synonyms.

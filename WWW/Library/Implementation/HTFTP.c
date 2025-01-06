@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFTP.c,v 1.150 2024/08/01 23:58:49 Steffen.Nurpmeso Exp $
+ * $LynxId: HTFTP.c,v 1.151 2025/01/06 15:32:59 tom Exp $
  *
  *			File Transfer Protocol (FTP) Client
  *			for a WorldWideWeb browser
@@ -54,7 +54,7 @@
  * 		Error reporting to user.
  * 		400 & 500 errors are ack'ed by user with windows.
  * 		Use configuration file for user names
- * 
+ *
  *		Note for portability this version does not use select() and
  *		so does not watch the control and data channels at the
  *		same time.
@@ -149,8 +149,8 @@ typedef struct _connection {
 
 #define PUTC(c)      (*target->isa->put_character) (target, c)
 #define PUTS(s)      (*target->isa->put_string)    (target, s)
-#define START(e)     (*target->isa->start_element) (target, e, 0, 0, -1, 0)
-#define END(e)       (*target->isa->end_element)   (target, e, 0)
+#define START(e)     (*target->isa->start_element) (target, e, NULL, NULL, -1, NULL)
+#define END(e)       (*target->isa->end_element)   (target, e, NULL)
 #define FREE_TARGET  (*target->isa->_free)         (target)
 #define ABORT_TARGET (*target->isa->_free)         (target)
 
@@ -347,7 +347,7 @@ char *HTVMS_name(const char *nn,
 	HTSprintf0(&vmsname, "%s%s:[%s]%s",
 		   nodename, filename + 1, second + 1, last + 1);
 	*second = *last = '/';	/* restore filename */
-	if ((p = StrChr(vmsname, '[')) != 0) {
+	if ((p = StrChr(vmsname, '[')) != NULL) {
 	    while (*p != '\0' && *p != ']') {
 		if (*p == '/')
 		    *p = '.';	/* Convert dir sep.  to dots */
@@ -642,7 +642,7 @@ static int send_cmd_1(const char *verb)
 
 static int send_cmd_2(const char *verb, const char *param)
 {
-    char *command = 0;
+    char *command = NULL;
     int status;
 
     HTSprintf0(&command, "%s %s%c%c", verb, param, CR, LF);
@@ -792,7 +792,7 @@ static int get_connection(const char *arg,
 			  HTParentAnchor *anchor)
 {
     int status;
-    char *command = 0;
+    char *command = NULL;
     connection *con;
     char *username = NULL;
     char *password = NULL;
@@ -808,7 +808,7 @@ static int get_connection(const char *arg,
 	firstuse = FALSE;
     }
 
-    if (control != 0) {
+    if (control != NULL) {
 	connection *next = control->next;
 
 	if (control->socket != -1) {
@@ -1031,9 +1031,9 @@ static int get_connection(const char *arg,
 	    char *tilde = strstr(arg, "/~");
 
 	    use_list = TRUE;
-	    if (tilde != 0
+	    if (tilde != NULL
 		&& tilde[2] != 0
-		&& strstr(response_text + 4, "MadGoat") != 0) {
+		&& strstr(response_text + 4, "MadGoat") != NULL) {
 		server_type = UNIX_SERVER;
 		CTRACE((tfp, "HTFTP: Treating VMS as UNIX server.\n"));
 	    } else {
@@ -1636,7 +1636,7 @@ static void parse_ls_line(char *line,
     /*
      * Extract the file-permissions, as a string.
      */
-    if ((cp = StrChr(line, ' ')) != 0) {
+    if ((cp = StrChr(line, ' ')) != NULL) {
 	if ((cp - line) == 10) {
 	    *cp = '\0';
 	    StrAllocCopy(entry->file_mode, line);
@@ -1646,9 +1646,9 @@ static void parse_ls_line(char *line,
 	/*
 	 * Next is the link-count.
 	 */
-	next = 0;
+	next = NULL;
 	entry->file_links = (unsigned long) strtol(cp, &next, 10);
-	if (next == 0 || *next != ' ') {
+	if (next == NULL || *next != ' ') {
 	    entry->file_links = 0;
 	    next = cp;
 	} else {
@@ -1659,7 +1659,7 @@ static void parse_ls_line(char *line,
 	 */
 	while (isspace(UCH(*cp)))
 	    ++cp;
-	if ((next = StrChr(cp, ' ')) != 0)
+	if ((next = StrChr(cp, ' ')) != NULL)
 	    *next = '\0';
 	if (*cp != '\0')
 	    StrAllocCopy(entry->file_user, cp);
@@ -1670,7 +1670,7 @@ static void parse_ls_line(char *line,
 	    cp = (next + 1);
 	    while (isspace(UCH(*cp)))
 		++cp;
-	    if ((next = StrChr(cp, ' ')) != 0)
+	    if ((next = StrChr(cp, ' ')) != NULL)
 		*next = '\0';
 	    if (*cp != '\0')
 		StrAllocCopy(entry->file_group, cp);
@@ -2264,7 +2264,7 @@ static EntryInfo *parse_dir_entry(char *entry,
     case DLS_SERVER:
 
 	/*
-	 * Interpret and edit LIST output from a Unix server in "dls" format. 
+	 * Interpret and edit LIST output from a Unix server in "dls" format.
 	 * This one must have claimed to be Unix in order to get here; if the
 	 * first line looks fishy, we revert to Unix and hope that fits better
 	 * (this recovery is untested).  - kw
@@ -2735,9 +2735,9 @@ static void LYListFmtParse(const char *fmtstr,
     char *start;
     char *str = NULL;
     char *buf = NULL;
-    BOOL is_directory = (BOOL) (data->file_mode != 0 &&
+    BOOL is_directory = (BOOL) (data->file_mode != NULL &&
 				(TOUPPER(data->file_mode[0]) == 'D'));
-    BOOL is_symlinked = (BOOL) (data->file_mode != 0 &&
+    BOOL is_symlinked = (BOOL) (data->file_mode != NULL &&
 				(TOUPPER(data->file_mode[0]) == 'L'));
     BOOL remove_size = (BOOL) (is_directory || is_symlinked);
 
@@ -2781,9 +2781,9 @@ static void LYListFmtParse(const char *fmtstr,
 	    FormatStr(&buf, start, data->filename);
 	    PUTS(buf);
 	    END(HTML_A);
-	    if (buf != 0)
+	    if (buf != NULL)
 		*buf = '\0';
-	    if (c != 'A' && data->linkname != 0) {
+	    if (c != 'A' && data->linkname != NULL) {
 		PUTS(" -> ");
 		PUTS(data->linkname);
 	    }
@@ -3670,7 +3670,7 @@ int HTFTPLoad(const char *name,
 			*cp1 = '\0';
 			status = send_cwd(cp);
 			if (status != 2) {
-			    char *dotslash = 0;
+			    char *dotslash = NULL;
 
 			    if ((cp1 = StrChr(cp, '[')) != NULL) {
 				*cp1++ = '\0';
@@ -3818,7 +3818,7 @@ int HTFTPLoad(const char *name,
 		    (cp = StrChr(filename, '/')) != NULL &&
 		    (cp1 = strrchr(cp, '/')) != NULL &&
 		    (cp1 - cp) > 1) {
-		    char *tmp = 0;
+		    char *tmp = NULL;
 
 		    HTSprintf0(&tmp, "[.%.*s]", (int) (cp1 - cp - 1), cp + 1);
 

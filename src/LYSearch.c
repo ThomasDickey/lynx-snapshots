@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYSearch.c,v 1.40 2013/10/13 20:23:07 tom Exp $
+ * $LynxId: LYSearch.c,v 1.41 2025/01/06 16:20:49 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTAlert.h>
@@ -11,7 +11,7 @@
 
 #include <LYLeaks.h>
 
-#define MATCH(a,b) (BOOL)(LYno_attr_strstr(a, b) != 0)
+#define MATCH(a,b) (BOOL)(LYno_attr_strstr(a, b) != NULL)
 
 /*
  * Handle special field-related comparisons for anchor_has_target() and
@@ -185,7 +185,7 @@ BOOL textsearch(DocInfo *cur_doc,
 	 * prev_target.
 	 */
 	BStrCopy(*prev_target, my_prev_target);
-    } else if (*prev_target == 0) {
+    } else if (*prev_target == NULL) {
 	BStrCopy0(*prev_target, "");
     }
 

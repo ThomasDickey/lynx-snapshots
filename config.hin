@@ -1,5 +1,5 @@
 /*
- * $LynxId: config.hin,v 1.156 2024/08/01 23:58:49 Steffen.Nurpmeso Exp $
+ * $LynxId: config.hin,v 1.157 2025/01/06 18:29:11 tom Exp $
  * vile:cmode
  *
  * The configure script translates "config.hin" into "lynx_cfg.h"
@@ -22,12 +22,12 @@
 #undef COPY_PATH		/* CF_PATH_PROG(cp) */
 #undef CURS_PERFORMANCE		/* CF_CURS_PERFORMANCE */
 #undef DEBUG			/* configure --enable-debug */
-#undef DECL_ERRNO
-#undef DECL_GETGRGID
-#undef DECL_GETGRNAM
-#undef DECL_SLEEP
-#undef DECL_STRSTR
-#undef DECL_SYS_ERRLIST
+#undef DECL_ERRNO		/* CF_CHECK_ERRNO */
+#undef DECL_GETGRGID		/* CF_CHECK_FUNCDECLS */
+#undef DECL_GETGRNAM		/* CF_CHECK_FUNCDECLS */
+#undef DECL_SLEEP		/* CF_CHECK_FUNCDECLS */
+#undef DECL_STRSTR		/* CF_CHECK_FUNCDECLS */
+#undef DECL_SYS_ERRLIST		/* CF_SYS_ERRLIST */
 #undef DIRED_SUPPORT		/* AC_ARG_WITH(dired) */
 #undef DISABLE_BIBP		/* CF_ARG_DISABLE(bibp-urls) */
 #undef DISABLE_FINGER		/* CF_ARG_DISABLE(finger) */
@@ -186,7 +186,7 @@
 #undef HAVE_ZERROR
 #undef HAVE__NC_FREEALL		/* ncurses debugging extension */
 #undef HAVE__NC_FREE_AND_EXIT	/* ncurses debugging extension */
-#undef ICONV_CONST
+#undef ICONV_CONST		/* AM_ICONV */
 #undef IGNORE_CTRL_C		/* FIXME: make tests? */
 #undef INCLUDE_PROTOTYPES	/* CF_SOCKS5 */
 #undef INSTALL_ARGS		/* CF_PATH_PROG(install) */
@@ -256,7 +256,7 @@
 #undef ULTRIX			/* config.sub */
 #undef UNCOMPRESS_PATH		/* CF_PATH_PROG(gunzip) */
 #undef UNDERLINE_LINKS		/* CF_ARG_ENABLE(underlines) */
-#undef UNIX
+#undef UNIX			/* CF_PDCURSES_X11 */
 #undef UNZIP_PATH		/* CF_PATH_PROG(unzip) */
 #undef USE_ADDRLIST_PAGE	/* CF_ARG_DISABLE(addrlist-page) */
 #undef USE_ALT_BINDINGS		/* CF_ARG_DISABLE(alt-bindings) */

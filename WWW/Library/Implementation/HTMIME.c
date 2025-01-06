@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTMIME.c,v 1.102 2022/03/12 14:47:02 tom Exp $
+ * $LynxId: HTMIME.c,v 1.103 2025/01/06 15:38:51 tom Exp $
  *
  *			MIME Message Parse			HTMIME.c
  *			==================
@@ -226,7 +226,7 @@ static void dequote(char *url)
  */
 static const char *UncompressedContentType(HTStream *me, CompressFileType method)
 {
-    const char *result = 0;
+    const char *result = NULL;
     char *address = me->anchor->address;
     const char *expected = HTCompressTypeToSuffix(method);
     const char *actual = strrchr(address, '.');
@@ -234,10 +234,10 @@ static const char *UncompressedContentType(HTStream *me, CompressFileType method
     /*
      * We have to ensure the suffix is consistent, to use HTFileFormat().
      */
-    if (actual != 0 && !strcasecomp(actual, expected)) {
+    if (actual != NULL && !strcasecomp(actual, expected)) {
 	HTFormat format;
-	HTAtom *pencoding = 0;
-	const char *description = 0;
+	HTAtom *pencoding = NULL;
+	const char *description = NULL;
 
 	format = HTFileFormat(address, &pencoding, &description);
 	result = HTAtom_name(format);
@@ -266,7 +266,7 @@ static int pumpData(HTStream *me)
 	me->anchor->no_content_encoding = TRUE;
     if ((method != cftNone)
 	&& isEmpty(me->anchor->content_encoding)
-	&& (new_content = UncompressedContentType(me, method)) != 0) {
+	&& (new_content = UncompressedContentType(me, method)) != NULL) {
 
 	new_encoding = HTCompressTypeToEncoding(method);
 	CTRACE((tfp, "reinterpreting as content-type:%s, encoding:%s\n",
@@ -456,7 +456,7 @@ static int pumpData(HTStream *me)
     }
     /*
      * If we have an Expires header and haven't already set the no_cache
-     * element for the anchor, check if we should set it based on that header. 
+     * element for the anchor, check if we should set it based on that header.
      * - FM
      */
     if (me->anchor->no_cache == FALSE &&
@@ -1162,7 +1162,7 @@ static void HTMIME_put_character(HTStream *me, int c)
     }
 
     /*
-     * This slightly simple conversion just strips CR and turns LF to newline. 
+     * This slightly simple conversion just strips CR and turns LF to newline.
      * On unix LF is \n but on Mac \n is CR for example.  See NetToText for an
      * implementation which preserves single CR or LF.
      */
@@ -2213,7 +2213,7 @@ HTStream *HTMIMEConvert(HTPresentation *pres,
     me->set_cookie = NULL;	/* Not set yet */
     me->set_cookie2 = NULL;	/* Not set yet */
     me->refresh_url = NULL;	/* Not set yet */
-    me->c_t_encoding = 0;	/* Not set yet */
+    me->c_t_encoding = NULL;	/* Not set yet */
     me->compression_encoding = NULL;	/* Not set yet */
     me->net_ascii = NO;		/* Local character set */
 
@@ -2305,7 +2305,7 @@ static void HTmmdec_base64(char **t,
     int d, count, j, val;
     char *buf, *bp, nw[4], *p;
 
-    if ((buf = typeMallocn(char, strlen(s) * 3 + 1)) == 0)
+    if ((buf = typeMallocn(char, strlen(s) * 3 + 1)) == NULL)
 	  outofmem(__FILE__, "HTmmdec_base64");
 
     for (bp = buf; *s; s += 4) {
@@ -2347,7 +2347,7 @@ static void HTmmdec_quote(char **t,
 {
     char *buf, cval, *bp, *p;
 
-    if ((buf = typeMallocn(char, strlen(s) + 1)) == 0)
+    if ((buf = typeMallocn(char, strlen(s) + 1)) == NULL)
 	  outofmem(__FILE__, "HTmmdec_quote");
 
     for (bp = buf; *s;) {
@@ -2391,7 +2391,7 @@ void HTmmdecode(char **target,
     char *s, *t, *u;
     int base64, quote;
 
-    if ((buf = typeMallocn(char, strlen(source) + 1)) == 0)
+    if ((buf = typeMallocn(char, strlen(source) + 1)) == NULL)
 	  outofmem(__FILE__, "HTmmdecode");
 
     for (s = source, *(u = buf) = '\0'; *s;) {
@@ -2412,7 +2412,7 @@ void HTmmdecode(char **target,
 		    u--;
 		}
 	    }
-	    if (mmbuf == 0)	/* allocate buffer big enough for source */
+	    if (mmbuf == NULL)	/* allocate buffer big enough for source */
 		StrAllocCopy(mmbuf, source);
 	    for (s += 16, t = mmbuf; *s;) {
 		if (s[0] == '?' && s[1] == '=') {
@@ -2466,7 +2466,7 @@ int HTrjis(char **t,
 	return 1;
     }
 
-    if ((buf = typeMallocn(char, strlen(s) * 2 + 1)) == 0)
+    if ((buf = typeMallocn(char, strlen(s) * 2 + 1)) == NULL)
 	  outofmem(__FILE__, "HTrjis");
 
     for (p = buf; *s;) {

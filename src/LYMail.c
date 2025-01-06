@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMail.c,v 1.100 2020/01/21 21:33:27 tom Exp $
+ * $LynxId: LYMail.c,v 1.101 2025/01/06 15:57:39 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTParse.h>
@@ -154,7 +154,7 @@ static void extract_body(char **dst,
     const char *keyword = "body=";
     int len = (int) strlen(keyword);
     int i;
-    char *cp, *cp0, *cp1, *temp = 0;
+    char *cp, *cp0, *cp1, *temp = NULL;
 
     cp = (src + 1);
     while (*cp != '\0') {
@@ -166,7 +166,7 @@ static void extract_body(char **dst,
 	    }
 	    if (*cp) {
 		/*
-		 * Break up the value into lines with a maximum length of 78. 
+		 * Break up the value into lines with a maximum length of 78.
 		 * - FM
 		 */
 		StrAllocCopy(temp, cp);
@@ -255,7 +255,7 @@ static int header_prompt(const char *label,
     char buffer[LINESIZE];
     int ok;
 
-    if (*result != 0) {
+    if (*result != NULL) {
 	LYaddstr(CTRL_U_TO_ERASE);
 	LYStrNCpy(buffer, *result, sizeof(buffer) - 1);
     } else
@@ -504,7 +504,7 @@ FILE *LYPipeToMailer(void)
     if (LYSystemMail()) {
 	HTSprintf0(&buffer, "%s %s", system_mail, system_mail_flags);
 	fp = popen(buffer, "w");
-	CTRACE((tfp, "popen(%s) %s\n", buffer, fp != 0 ? "OK" : "FAIL"));
+	CTRACE((tfp, "popen(%s) %s\n", buffer, fp != NULL ? "OK" : "FAIL"));
 	FREE(buffer);
     }
     return fp;
@@ -728,7 +728,7 @@ void mailform(const char *mailto_address,
 	}
     }
 #if CAN_PIPE_TO_MAILER
-    if ((fd = LYPipeToMailer()) == 0) {
+    if ((fd = LYPipeToMailer()) == NULL) {
 	HTAlert(FORM_MAILTO_FAILED);
 	goto cleanup;
     }
@@ -1002,7 +1002,7 @@ void mailmsg(int cur,
 	return;
     }
 #if CAN_PIPE_TO_MAILER
-    if ((fd = LYPipeToMailer()) == 0) {
+    if ((fd = LYPipeToMailer()) == NULL) {
 	FREE(address);
 	CTRACE((tfp, "mailmsg: '%s' failed.\n", cmd));
 	return;
@@ -1308,7 +1308,7 @@ void reply_by_mail(char *mail_address,
      * header.  This assumes that the same character set is used for composing
      * the mail which is currently selected as display character set...  Don't
      * send a charset if we have a CJK character set selected, since it may not
-     * be appropriate for mail...  Also don't use an unofficial "x-" charset. 
+     * be appropriate for mail...  Also don't use an unofficial "x-" charset.
      * Also if the charset would be "us-ascii" (7-bit replacements selected,
      * don't send any MIME headers.  - kw
      */
@@ -1685,7 +1685,7 @@ void reply_by_mail(char *mail_address,
     _statusline(SENDING_YOUR_MSG);
 #if CAN_PIPE_TO_MAILER
     signal(SIGINT, SIG_IGN);
-    if ((fp = LYPipeToMailer()) == 0) {
+    if ((fp = LYPipeToMailer()) == NULL) {
 	HTInfoMsg(CANCELLED);
     }
 #else
@@ -1693,7 +1693,7 @@ void reply_by_mail(char *mail_address,
 	HTAlert(MAILTO_URL_TEMPOPEN_FAILED);
     }
 #endif /* CAN_PIPE_TO_MAILER */
-    if (fp != 0) {
+    if (fp != NULL) {
 	fd = fopen(my_tmpfile, TXT_R);
 	if (fd == NULL) {
 	    HTInfoMsg(CANCELLED);

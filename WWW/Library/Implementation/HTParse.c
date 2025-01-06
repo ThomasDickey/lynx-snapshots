@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTParse.c,v 1.101 2023/10/24 00:11:42 tom Exp $
+ * $LynxId: HTParse.c,v 1.102 2025/01/06 15:18:39 tom Exp $
  *
  *		Parse HyperText Document Address		HTParse.c
  *		================================
@@ -201,7 +201,7 @@ static char *strchr_or_end(char *string, int ch)
 {
     char *result = StrChr(string, ch);
 
-    if (result == 0) {
+    if (result == NULL) {
 	result = string + strlen(string);
     }
     return result;
@@ -222,14 +222,14 @@ char *HTParsePort(char *host, int *portp)
 
     *portp = 0;
     if (host != NULL) {
-	while (*host != '\0' && result == 0) {
+	while (*host != '\0' && result == NULL) {
 	    switch (*host++) {
 	    case ':':
 		if (brackets == 0 && isdigit(UCH(*host))) {
 		    char *next = NULL;
 
 		    *portp = (int) strtol(host, &next, 10);
-		    if (next != 0 && next != host && *next == '\0') {
+		    if (next != NULL && next != host && *next == '\0') {
 			result = (host - 1);
 			CTRACE((tfp, "HTParsePort %d\n", *portp));
 		    }
@@ -754,7 +754,7 @@ char *HTParse(const char *aName,
      * If there are any blanks remaining in the string, escape them as needed.
      * See the discussion in LYLegitimizeHREF() for example.
      */
-    if ((p = StrChr(result, ' ')) != 0) {
+    if ((p = StrChr(result, ' ')) != NULL) {
 	switch (is_url(result)) {
 	case UNKNOWN_URL_TYPE:
 	    CTRACE((tfp, "HTParse:      ignore:`%s'\n", result));
@@ -789,7 +789,7 @@ char *HTParse(const char *aName,
 		p[0] = HEX_ESCAPE;
 		p[1] = '2';
 		p[2] = '0';
-	    } while ((p = StrChr(result, ' ')) != 0);
+	    } while ((p = StrChr(result, ' ')) != NULL);
 	    break;
 	}
     }

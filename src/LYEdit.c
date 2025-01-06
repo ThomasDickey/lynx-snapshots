@@ -1,4 +1,4 @@
-/* $LynxId: LYEdit.c,v 1.43 2021/06/09 21:39:57 tom Exp $ */
+/* $LynxId: LYEdit.c,v 1.44 2025/01/06 15:51:59 tom Exp $ */
 #include <HTUtils.h>
 #include <HTParse.h>
 #include <HTAlert.h>
@@ -37,7 +37,7 @@ BOOLEAN editor_can_position(void)
     unsigned n;
 
     for (n = 0; n < TABLESIZE(table); n++) {
-	if (LYstrstr(editor, table[n]) != 0) {
+	if (LYstrstr(editor, table[n]) != NULL) {
 	    return TRUE;
 	}
     }

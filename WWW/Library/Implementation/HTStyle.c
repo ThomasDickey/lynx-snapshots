@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTStyle.c,v 1.17 2023/10/24 08:14:31 tom Exp $
+ * $LynxId: HTStyle.c,v 1.18 2025/01/06 15:34:03 tom Exp $
  *
  *	Style Implementation for Hypertext			HTStyle.c
  *	==================================
@@ -71,7 +71,7 @@ HTStyle *HTStyleNamed(HTStyleSheet *self, const char *name)
  */
 HTStyleSheet *HTStyleSheetAddStyle(HTStyleSheet *self, HTStyle *style)
 {
-    style->next = 0;		/* The style will go on the end */
+    style->next = NULL;		/* The style will go on the end */
     if (!self->styles) {
 	self->styles = style;
     } else {
@@ -121,7 +121,7 @@ HTStyleSheet *HTStyleSheetFree(HTStyleSheet *self)
 {
     HTStyle *style;
 
-    while ((style = self->styles) != 0) {
+    while ((style = self->styles) != NULL) {
 	self->styles = style->next;
 	HTStyleFree(style);
     }

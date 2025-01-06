@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTNews.c,v 1.81 2022/04/01 00:18:22 tom Exp $
+ * $LynxId: HTNews.c,v 1.82 2025/01/06 15:45:53 tom Exp $
  *
  *			NEWS ACCESS				HTNews.c
  *			===========
@@ -123,10 +123,10 @@ static char *dbuf = NULL;	/* dynamic buffer for long messages etc. */
 #define PUTC(c) (*targetClass.put_character)(target, c)
 #define PUTS(s) (*targetClass.put_string)(target, s)
 #define RAW_PUTS(s) (*rawtargetClass.put_string)(rawtarget, s)
-#define START(e) (*targetClass.start_element)(target, e, 0, 0, -1, 0)
-#define END(e) (*targetClass.end_element)(target, e, 0)
+#define START(e) (*targetClass.start_element)(target, e, NULL, NULL, -1, NULL)
+#define END(e) (*targetClass.end_element)(target, e, NULL)
 #define MAYBE_END(e) if (HTML_dtd.tags[e].contents != SGML_EMPTY) \
-			(*targetClass.end_element)(target, e, 0)
+			(*targetClass.end_element)(target, e, NULL)
 #define FREE_TARGET if (rawtext) (*rawtargetClass._free)(rawtarget); \
 			else (*targetClass._free)(target)
 #define ABORT_TARGET if (rawtext) (*rawtargetClass._abort)(rawtarget, NULL); \
@@ -186,8 +186,8 @@ static void load_NNTP_AuthInfo(void)
 
     LYAddPathToHome(fname, sizeof(fname), NEWS_AUTH_FILE);
 
-    if ((fp = fopen(fname, "r")) != 0) {
-	while (fgets(buffer, (int) sizeof(buffer), fp) != 0) {
+    if ((fp = fopen(fname, "r")) != NULL) {
+	while (fgets(buffer, (int) sizeof(buffer), fp) != NULL) {
 	    char the_host[LINE_LENGTH + 1];
 	    char the_pass[LINE_LENGTH + 1];
 	    char the_user[LINE_LENGTH + 1];
@@ -569,7 +569,7 @@ static NNTPAuthResult HTHandleAuthInfo(char *host)
 	    }
 	    if (status == 281) {
 		/*
-		 * Password also is accepted, and everything has been stored. 
+		 * Password also is accepted, and everything has been stored.
 		 * - FM
 		 */
 		if (auth) {
@@ -728,7 +728,7 @@ static void start_anchor(const char *href)
     for (i = 0; i < HTML_A_ATTRIBUTES; i++)
 	present[i] = (BOOL) (i == HTML_A_HREF);
     value[HTML_A_HREF] = href;
-    (*targetClass.start_element) (target, HTML_A, present, value, -1, 0);
+    (*targetClass.start_element) (target, HTML_A, present, value, -1, NULL);
 }
 
 /*	Start link element
@@ -744,7 +744,7 @@ static void start_link(const char *href, const char *rev)
 	present[i] = (BOOL) (i == HTML_LINK_HREF || i == HTML_LINK_REV);
     value[HTML_LINK_HREF] = href;
     value[HTML_LINK_REV] = rev;
-    (*targetClass.start_element) (target, HTML_LINK, present, value, -1, 0);
+    (*targetClass.start_element) (target, HTML_LINK, present, value, -1, NULL);
 }
 
 /*	Start list element
@@ -762,7 +762,7 @@ static void start_list(int seqnum)
     sprintf(SeqNum, "%d", seqnum);
     value[HTML_OL_SEQNUM] = SeqNum;
     value[HTML_OL_START] = SeqNum;
-    (*targetClass.start_element) (target, HTML_OL, present, value, -1, 0);
+    (*targetClass.start_element) (target, HTML_OL, present, value, -1, NULL);
 }
 
 /*	Paste in an Anchor
@@ -2165,7 +2165,7 @@ static int HTLoadNews(const char *arg,
     BOOL sreply_wanted;		/* Flag: followup SSL post was asked for */
     BOOL head_wanted = NO;	/* Flag: want HEAD of single article */
     int first, last;		/* First and last articles asked for */
-    char *cp = 0;
+    char *cp = NULL;
     char *ListArg = NULL;
     char *ProxyHost = NULL;
     char *ProxyHREF = NULL;
@@ -2503,8 +2503,8 @@ static int HTLoadNews(const char *arg,
 	    }
 	    SnipIn(command, "GROUP %.*s", 9, groupName);
 	} else {
-	    size_t add_open = (size_t) (StrChr(p1, '<') == 0);
-	    size_t add_close = (size_t) (StrChr(p1, '>') == 0);
+	    size_t add_open = (size_t) (StrChr(p1, '<') == NULL);
+	    size_t add_close = (size_t) (StrChr(p1, '>') == NULL);
 
 	    if (strlen(p1) + add_open + add_close >= 252) {
 		FREE(ProxyHost);
@@ -3050,7 +3050,7 @@ void HTClearNNTPAuthInfo(void)
 {
     /*
      * Need code to check cached documents and do something to ensure that any
-     * protected documents no longer can be accessed without a new retrieval. 
+     * protected documents no longer can be accessed without a new retrieval.
      * - FM
      */
 

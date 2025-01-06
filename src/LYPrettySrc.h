@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYPrettySrc.h,v 1.13 2020/01/21 21:38:33 tom Exp $
+ * $LynxId: LYPrettySrc.h,v 1.14 2025/01/06 15:16:58 tom Exp $
  */
 #ifndef LYPrettySrc_H
 #define LYPrettySrc_H
@@ -13,7 +13,7 @@ extern "C" {
 #endif
     extern BOOL psrc_convert_string;
 
-    /*whether HTML_put_string should convert string passed with 
+    /*whether HTML_put_string should convert string passed with
        TRANSLATE_AND_UNESCAPE_TO_STD */
     extern BOOL psrc_view;
     extern BOOLEAN LYpsrc;
@@ -24,12 +24,12 @@ extern "C" {
  */
     extern BOOL sgml_in_psrc_was_initialized;
 
-    extern BOOL psrc_nested_call;	/* this is used when distinguishing whether 
+    extern BOOL psrc_nested_call;	/* this is used when distinguishing whether
 
 					   the current call is nested or not in HTML.c HTML_{start,end}_element.
 					   It ==FALSE if psrc_view==FALSE || sgml_in_psrc_was_initialized==TRUE */
 
-    extern BOOL psrc_first_tag;	/* this is also used in HTML.c to trigger the 
+    extern BOOL psrc_first_tag;	/* this is also used in HTML.c to trigger the
 
 				   1st tag to perform special.
 				 */

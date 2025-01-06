@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYStructs.h,v 1.32 2021/06/09 20:56:05 tom Exp $
+ * $LynxId: LYStructs.h,v 1.33 2025/01/06 17:14:30 tom Exp $
  */
 #ifndef LYSTRUCTS_H
 #define LYSTRUCTS_H
@@ -156,14 +156,14 @@ extern "C" {
 #define ParseUnionOf(tbl)  tbl
 #define ParseData          ParseUnionMembers
 
-#define UNION_ADD(v) &v,  0,  0,  0,  0,  0,  0
-#define UNION_SET(v)  0, &v,  0,  0,  0,  0,  0
-#define UNION_INT(v)  0,  0, &v,  0,  0,  0,  0
-#define UNION_STR(v)  0,  0,  0, &v,  0,  0,  0
-#define UNION_ENV(v)  0,  0,  0,  v,  0,  0,  0
-#define UNION_FUN(v)  0,  0,  0,  0,  v,  0,  0
-#define UNION_DEF(v)  0,  0,  0,  0,  0,  v,  0
-#define UNION_LST(v)  0,  0,  0,  0,  0,  0, &v
+#define UNION_ADD(v)  &v,    NULL, NULL, NULL, NULL, 0,  NULL
+#define UNION_SET(v)  NULL,  &v,   NULL, NULL, NULL, 0,  NULL
+#define UNION_INT(v)  NULL,  NULL, &v,   NULL, NULL, 0,  NULL
+#define UNION_STR(v)  NULL,  NULL, NULL, &v,   NULL, 0,  NULL
+#define UNION_ENV(v)  NULL,  NULL, NULL, v,    NULL, 0,  NULL
+#define UNION_FUN(v)  NULL,  NULL, NULL, NULL, v,    0,  NULL
+#define UNION_DEF(v)  NULL,  NULL, NULL, NULL, NULL, v,  NULL
+#define UNION_LST(v)  NULL,  NULL, NULL, NULL, NULL, 0,  &v
 
 #else
 

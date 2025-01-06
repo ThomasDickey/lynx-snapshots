@@ -1,4 +1,4 @@
-/* $LynxId: LYOptions.c,v 1.187 2024/08/02 07:52:49 tom Exp $ */
+/* $LynxId: LYOptions.c,v 1.188 2025/01/06 16:13:36 tom Exp $ */
 #include <HTUtils.h>
 #include <HTFTP.h>
 #include <HTTP.h>		/* 'reloading' flag */
@@ -52,10 +52,10 @@ static int LYChosenShowColor = SHOW_COLOR_UNKNOWN;	/* whether to show and save *
 BOOLEAN LYCheckUserAgent(void)
 {
     if (non_empty(LYUserAgent)) {
-	if (strstr(LYUserAgent, "Lynx") == 0
-	    && strstr(LYUserAgent, "lynx") == 0
-	    && strstr(LYUserAgent, "L_y_n_x") == 0
-	    && strstr(LYUserAgent, "l_y_n_x") == 0) {
+	if (strstr(LYUserAgent, "Lynx") == NULL
+	    && strstr(LYUserAgent, "lynx") == NULL
+	    && strstr(LYUserAgent, "L_y_n_x") == NULL
+	    && strstr(LYUserAgent, "l_y_n_x") == NULL) {
 	    return FALSE;
 	}
     }
@@ -1597,7 +1597,7 @@ static void show_choice(const char *choice,
 {
     int len = 0;
 
-    if (choice != 0) {
+    if (choice != NULL) {
 	len = (int) strlen(choice);
 
 	LYaddstr(choice);
@@ -1805,7 +1805,7 @@ void edit_bookmarks(void)
     LYmove(0, 5);
     lynx_start_h1_color();
     if (LYlines < (MBM_V_MAXFILES + MULTI_OFFSET)) {
-	char *ehead_buffer = 0;
+	char *ehead_buffer = NULL;
 
 	HTSprintf0(&ehead_buffer, MULTIBOOKMARKS_EHEAD_MASK, MBM_current);
 	LYaddstr(ehead_buffer);
@@ -2119,7 +2119,7 @@ typedef struct {
     const char *HtmlName;
 } OptValues;
 
-#define END_OPTIONS {0, 0, 0}
+#define END_OPTIONS {0, NULL, NULL}
 
 #define HasOptValues(table) (((table) != NULL) && ((table)->LongName != NULL))
 
@@ -2550,7 +2550,7 @@ static const char *ssl_client_key_file = RC_SSL_CLIENT_KEY_FILE;
 static void PutOptValues(FILE *fp, int value,
 			 OptValues * table)
 {
-    while (table->LongName != 0) {
+    while (table->LongName != NULL) {
 	if (table->HtmlName) {
 	    PutOption(fp,
 		      value == table->value,
@@ -2564,7 +2564,7 @@ static void PutOptValues(FILE *fp, int value,
 static BOOLEAN GetOptValues(OptValues * table, char *value,
 			    int *result)
 {
-    while (table->LongName != 0) {
+    while (table->LongName != NULL) {
 	if (table->HtmlName && !strcmp(value, table->HtmlName)) {
 	    *result = table->value;
 	    return TRUE;
@@ -2601,7 +2601,7 @@ void build_lss_enum(HTList *list)
 	    outofmem(__FILE__, "build_lss_enum");
 
 	color_style_values[position++] = bool_values[0];
-	while ((obj = HTList_objectAt(list, position - 1)) != 0) {
+	while ((obj = HTList_objectAt(list, position - 1)) != NULL) {
 	    color_style_values[position].value = position;
 	    color_style_values[position].LongName = obj->given;
 	    color_style_values[position].HtmlName = obj->given;
@@ -2623,8 +2623,8 @@ static int get_color_style_value(void)
 	LSS_NAMES *obj;
 	int position = 1;
 
-	while ((obj = HTList_objectAt(color_style_list, position - 1)) != 0) {
-	    if (obj->actual != 0 && !strcmp(obj->actual, lynx_lss_file)) {
+	while ((obj = HTList_objectAt(color_style_list, position - 1)) != NULL) {
+	    if (obj->actual != NULL && !strcmp(obj->actual, lynx_lss_file)) {
 		result = position;
 		break;
 	    } else if (!strcmp(obj->given, lynx_lss_file)) {
@@ -2642,12 +2642,12 @@ static int get_color_style_value(void)
  */
 static char *get_color_style_config(int code)
 {
-    char *result = 0;
+    char *result = NULL;
 
     if (LYuse_color_style) {
 	LSS_NAMES *obj;
 
-	if ((obj = HTList_objectAt(color_style_list, code - 1)) != 0) {
+	if ((obj = HTList_objectAt(color_style_list, code - 1)) != NULL) {
 	    result = obj->actual;
 	}
     }
@@ -2791,7 +2791,7 @@ static int gen_options(char **newfile);
 
 int postoptions(DocInfo *newdoc)
 {
-    PostPair *data = 0;
+    PostPair *data = NULL;
     DocAddress WWWDoc;		/* need on exit */
     int i;
     int code = 0;
@@ -3533,7 +3533,7 @@ int postoptions(DocInfo *newdoc)
 	 * the resource is from a http or https or lynxcgi URL (the only
 	 * protocols which currently do anything with this information).  Set
 	 * reloading = TRUE so that proxy caches will be flushed, which is
-	 * necessary until the time when all proxies understand HTTP 1.1 Vary: 
+	 * necessary until the time when all proxies understand HTTP 1.1 Vary:
 	 * and all Servers properly use it...  Treat like case LYK_RELOAD (see
 	 * comments there).  - KW
 	 */
@@ -3590,7 +3590,7 @@ static char *NewSecureValue(void)
     static char oops[] = "?";
 
     FREE(secure_value);
-    if ((secure_value = typeMallocn(char, 80)) != 0) {
+    if ((secure_value = typeMallocn(char, 80)) != NULL) {
 #if defined(RAND_MAX)
 	long key = (long) lynx_rand();
 
@@ -3648,7 +3648,7 @@ static const char *check_if_write_lynxrc(STRING2PTR table)
     int n;
     const char *result = NULL;
 
-    for (n = 0; table[n] != 0; ++n) {
+    for (n = 0; table[n] != NULL; ++n) {
 	result = table[n];
 	if (!will_save_rc(result))
 	    break;
@@ -3659,7 +3659,7 @@ static const char *check_if_write_lynxrc(STRING2PTR table)
 /*
  * The options menu treats "Cookies" as a single enumeration, but it is read
  * from lynx.cfg (and perhaps .lynxrc) as a set of booleans.  Check if any are
- * not writable to .lynxrc, so we can show the user. 
+ * not writable to .lynxrc, so we can show the user.
  */
 static const char *will_save_cookies(void)
 {
@@ -3676,7 +3676,7 @@ static const char *will_save_cookies(void)
 /*
  * The options menu treats "Show images" as a single enumeration, but it is
  * read from lynx.cfg (and perhaps .lynxrc) as a set of booleans.  Check if any
- * are not writable to .lynxrc, so we can show the user. 
+ * are not writable to .lynxrc, so we can show the user.
  */
 static const char *will_save_images(void)
 {
@@ -3725,7 +3725,7 @@ static int gen_options(char **newfile)
 				? LYcolLimit - (LABEL_LEN + 2 + MARGIN_LEN)
 				: 7);	/* cf: PutLabel */
 
-    if ((fp0 = InternalPageFP(tempfile, TRUE)) == 0)
+    if ((fp0 = InternalPageFP(tempfile, TRUE)) == NULL)
 	return (NOT_FOUND);
 
     LYLocalFileToURL(newfile, tempfile);
@@ -4275,7 +4275,7 @@ static int gen_options(char **newfile)
     /* Show transfer rate: SELECT */
     PutLabel(fp0, gettext("Show transfer rate"), show_rate_string);
     BeginSelect(fp0, show_rate_string);
-    for (i = 0; rate_values[i].LongName != 0; ++i) {
+    for (i = 0; rate_values[i].LongName != NULL; ++i) {
 	char *message = NULL;
 
 	HTSprintf0(&message,

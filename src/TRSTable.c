@@ -1,5 +1,5 @@
 /*
- * $LynxId: TRSTable.c,v 1.45 2024/04/11 20:41:16 tom Exp $
+ * $LynxId: TRSTable.c,v 1.46 2025/01/06 16:27:23 tom Exp $
  *		Simple table object
  *		===================
  * Authors
@@ -242,7 +242,7 @@ struct _STable_info *Stbl_startTABLE(int alignment)
 	me->s.icell_core = -1;
 #ifdef EXP_NESTED_TABLES
 	if (nested_tables)
-	    me->enclosing = 0;
+	    me->enclosing = NULL;
 #endif
     }
     return me;
@@ -1346,7 +1346,7 @@ static int Stbl_fakeFinishCellInTable(STable_info *me,
 
 	    /* Ignore cells, they belong to the next row now */
 	    lastrow->allocated = 0;
-	    lastrow->cells = 0;
+	    lastrow->cells = NULL;
 	    if (need_cells) {
 		lastrow->cells = typecallocn(STable_cellinfo, (unsigned) need_cells);
 
@@ -1976,7 +1976,7 @@ void Stbl_update_enclosing(STable_info *me, int max_width,
 
 	    CTRACE2(TRACE_TRST, (tfp,
 				 "TRST:Stbl_update_enclosing: width too large, aborting enclosing\n"));
-	    me->enclosing = 0;
+	    me->enclosing = NULL;
 	    while (stbl) {
 		STable_info *enclosing = stbl->enclosing;
 
@@ -2000,14 +2000,14 @@ void Stbl_set_enclosing(STable_info *me, STable_info *enclosing, struct _TextAnc
 STable_info *Stbl_get_enclosing(STable_info *me)
 {
     if (!me)
-	return 0;
+	return NULL;
     return me->enclosing;
 }
 
 struct _TextAnchor *Stbl_get_last_anchor_before(STable_info *me)
 {
     if (!me)
-	return 0;
+	return NULL;
     return me->enclosing_last_anchor_before_stbl;
 }
 #endif

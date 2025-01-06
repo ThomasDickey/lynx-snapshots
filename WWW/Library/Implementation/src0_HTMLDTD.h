@@ -1,4 +1,4 @@
-/* $LynxId: src0_HTMLDTD.h,v 1.49 2022/09/30 00:04:06 tom Exp $ */
+/* $LynxId: src0_HTMLDTD.h,v 1.51 2025/01/06 18:10:47 tom Exp $ */
 #ifndef src_HTMLDTD_H0
 #define src_HTMLDTD_H0 1
 
@@ -155,23 +155,23 @@ static const attr core_attr_list[] = {
 	{ "ID"            T(i) },
 	{ "STYLE"         T(N) },
 	{ "TITLE"         T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const AttrType core_attr_type[] = {
 	{ ATTR_TYPE(core) },
-	{ 0, 0 },
+	{ NULL, NULL },
 };
 
 static const attr i18n_attr_list[] = {
 	{ "DIR"           T(N) },
 	{ "LANG"          T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const AttrType i18n_attr_type[] = {
 	{ ATTR_TYPE(i18n) },
-	{ 0, 0 },
+	{ NULL, NULL },
 };
 
 static const attr events_attr_list[] = {
@@ -185,22 +185,22 @@ static const attr events_attr_list[] = {
 	{ "ONMOUSEOUT"    T(N) },
 	{ "ONMOUSEOVER"   T(N) },
 	{ "ONMOUSEUP"     T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const AttrType events_attr_type[] = {
 	{ ATTR_TYPE(events) },
-	{ 0, 0 },
+	{ NULL, NULL },
 };
 
 static const attr align_attr_list[] = {
 	{ "ALIGN"         T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const AttrType align_attr_type[] = {
 	{ ATTR_TYPE(align) },
-	{ 0, 0 },
+	{ NULL, NULL },
 };
 
 static const attr cellalign_attr_list[] = {
@@ -208,22 +208,22 @@ static const attr cellalign_attr_list[] = {
 	{ "CHAR"          T(N) },
 	{ "CHAROFF"       T(N) },
 	{ "VALIGN"        T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const AttrType cellalign_attr_type[] = {
 	{ ATTR_TYPE(cellalign) },
-	{ 0, 0 },
+	{ NULL, NULL },
 };
 
 static const attr bgcolor_attr_list[] = {
 	{ "BGCOLOR"       T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const AttrType bgcolor_attr_type[] = {
 	{ ATTR_TYPE(bgcolor) },
-	{ 0, 0 },
+	{ NULL, NULL },
 };
 
 
@@ -248,7 +248,7 @@ static const attr A_attr_list[] = {
 	{ "TARGET"        T(N) },
 	{ "TYPE"          T(N) },
 	{ "URN"           T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const AttrType A_attr_type[] = {
@@ -256,20 +256,20 @@ static const AttrType A_attr_type[] = {
 	{ ATTR_TYPE(events) },
 	{ ATTR_TYPE(i18n) },
 	{ ATTR_TYPE(A) },
-	{ 0, 0 },
+	{ NULL, NULL },
 };
 
 static const attr ADDRESS_attr_list[] = {
 	{ "CLEAR"         T(N) },
 	{ "NOWRAP"        T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const AttrType ADDRESS_attr_type[] = {
 	{ ATTR_TYPE(core) },
 	{ ATTR_TYPE(i18n) },
 	{ ATTR_TYPE(ADDRESS) },
-	{ 0, 0 },
+	{ NULL, NULL },
 };
 
 static const attr APPLET_attr_list[] = {
@@ -283,7 +283,7 @@ static const attr APPLET_attr_list[] = {
 	{ "NAME"          T(i) },
 	{ "VSPACE"        T(N) },
 	{ "WIDTH"         T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const AttrType APPLET_attr_type[] = {
@@ -291,7 +291,7 @@ static const AttrType APPLET_attr_type[] = {
 	{ ATTR_TYPE(core) },
 	{ ATTR_TYPE(i18n) },
 	{ ATTR_TYPE(APPLET) },
-	{ 0, 0 },
+	{ NULL, NULL },
 };
 
 static const attr AREA_attr_list[] = {
@@ -307,7 +307,7 @@ static const attr AREA_attr_list[] = {
 	{ "SHAPE"         T(N) },
 	{ "TABINDEX"      T(N) },
 	{ "TARGET"        T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const AttrType AREA_attr_type[] = {
@@ -315,33 +315,33 @@ static const AttrType AREA_attr_type[] = {
 	{ ATTR_TYPE(events) },
 	{ ATTR_TYPE(i18n) },
 	{ ATTR_TYPE(AREA) },
-	{ 0, 0 },
+	{ NULL, NULL },
 };
 
 static const attr BASE_attr_list[] = {
 	{ "HREF"          T(h) },
 	{ "TARGET"        T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const AttrType BASE_attr_type[] = {
 	{ ATTR_TYPE(core) },
 	{ ATTR_TYPE(BASE) },
-	{ 0, 0 },
+	{ NULL, NULL },
 };
 
 static const attr BGSOUND_attr_list[] = {
 	{ "CLEAR"         T(N) },
 	{ "LOOP"          T(N) },
 	{ "SRC"           T(h) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const AttrType BGSOUND_attr_type[] = {
 	{ ATTR_TYPE(core) },
 	{ ATTR_TYPE(i18n) },
 	{ ATTR_TYPE(BGSOUND) },
-	{ 0, 0 },
+	{ NULL, NULL },
 };
 
 static const attr BODY_attr_list[] = {
@@ -353,7 +353,7 @@ static const attr BODY_attr_list[] = {
 	{ "ONUNLOAD"      T(N) },
 	{ "TEXT"          T(N) },
 	{ "VLINK"         T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const AttrType BODY_attr_type[] = {
@@ -361,7 +361,7 @@ static const AttrType BODY_attr_type[] = {
 	{ ATTR_TYPE(core) },
 	{ ATTR_TYPE(i18n) },
 	{ ATTR_TYPE(BODY) },
-	{ 0, 0 },
+	{ NULL, NULL },
 };
 
 static const attr BODYTEXT_attr_list[] = {
@@ -373,28 +373,28 @@ static const attr BODYTEXT_attr_list[] = {
 	{ "TYPE"          T(N) },
 	{ "VALUE"         T(N) },
 	{ "VALUETYPE"     T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const AttrType BODYTEXT_attr_type[] = {
 	{ ATTR_TYPE(core) },
 	{ ATTR_TYPE(i18n) },
 	{ ATTR_TYPE(BODYTEXT) },
-	{ 0, 0 },
+	{ NULL, NULL },
 };
 
 static const attr BQ_attr_list[] = {
 	{ "CITE"          T(h) },
 	{ "CLEAR"         T(N) },
 	{ "NOWRAP"        T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const AttrType BQ_attr_type[] = {
 	{ ATTR_TYPE(core) },
 	{ ATTR_TYPE(i18n) },
 	{ ATTR_TYPE(BQ) },
-	{ 0, 0 },
+	{ NULL, NULL },
 };
 
 static const attr BUTTON_attr_list[] = {
@@ -409,7 +409,7 @@ static const attr BUTTON_attr_list[] = {
 	{ "TABINDEX"      T(N) },
 	{ "TYPE"          T(N) },
 	{ "VALUE"         T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const AttrType BUTTON_attr_type[] = {
@@ -417,13 +417,13 @@ static const AttrType BUTTON_attr_type[] = {
 	{ ATTR_TYPE(events) },
 	{ ATTR_TYPE(i18n) },
 	{ ATTR_TYPE(BUTTON) },
-	{ 0, 0 },
+	{ NULL, NULL },
 };
 
 static const attr CAPTION_attr_list[] = {
 	{ "ACCESSKEY"     T(N) },
 	{ "CLEAR"         T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const AttrType CAPTION_attr_type[] = {
@@ -432,14 +432,14 @@ static const AttrType CAPTION_attr_type[] = {
 	{ ATTR_TYPE(events) },
 	{ ATTR_TYPE(i18n) },
 	{ ATTR_TYPE(CAPTION) },
-	{ 0, 0 },
+	{ NULL, NULL },
 };
 
 static const attr COL_attr_list[] = {
 	{ "CLEAR"         T(N) },
 	{ "SPAN"          T(N) },
 	{ "WIDTH"         T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const AttrType COL_attr_type[] = {
@@ -448,13 +448,13 @@ static const AttrType COL_attr_type[] = {
 	{ ATTR_TYPE(events) },
 	{ ATTR_TYPE(i18n) },
 	{ ATTR_TYPE(COL) },
-	{ 0, 0 },
+	{ NULL, NULL },
 };
 
 static const attr DEL_attr_list[] = {
 	{ "CITE"          T(N) },
 	{ "DATETIME"      T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const AttrType DEL_attr_type[] = {
@@ -462,12 +462,12 @@ static const AttrType DEL_attr_type[] = {
 	{ ATTR_TYPE(events) },
 	{ ATTR_TYPE(i18n) },
 	{ ATTR_TYPE(DEL) },
-	{ 0, 0 },
+	{ NULL, NULL },
 };
 
 static const attr DIV_attr_list[] = {
 	{ "CLEAR"         T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const AttrType DIV_attr_type[] = {
@@ -475,20 +475,20 @@ static const AttrType DIV_attr_type[] = {
 	{ ATTR_TYPE(core) },
 	{ ATTR_TYPE(i18n) },
 	{ ATTR_TYPE(DIV) },
-	{ 0, 0 },
+	{ NULL, NULL },
 };
 
 static const attr DL_attr_list[] = {
 	{ "CLEAR"         T(N) },
 	{ "COMPACT"       T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const AttrType DL_attr_type[] = {
 	{ ATTR_TYPE(core) },
 	{ ATTR_TYPE(i18n) },
 	{ ATTR_TYPE(DL) },
-	{ 0, 0 },
+	{ NULL, NULL },
 };
 
 static const attr EMBED_attr_list[] = {
@@ -506,7 +506,7 @@ static const attr EMBED_attr_list[] = {
 	{ "UNITS"         T(N) },
 	{ "USEMAP"        T(N) },
 	{ "WIDTH"         T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const AttrType EMBED_attr_type[] = {
@@ -514,7 +514,7 @@ static const AttrType EMBED_attr_type[] = {
 	{ ATTR_TYPE(core) },
 	{ ATTR_TYPE(i18n) },
 	{ ATTR_TYPE(EMBED) },
-	{ 0, 0 },
+	{ NULL, NULL },
 };
 
 static const attr FIG_attr_list[] = {
@@ -528,7 +528,7 @@ static const attr FIG_attr_list[] = {
 	{ "SRC"           T(h) },
 	{ "UNITS"         T(N) },
 	{ "WIDTH"         T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const AttrType FIG_attr_type[] = {
@@ -536,7 +536,7 @@ static const AttrType FIG_attr_type[] = {
 	{ ATTR_TYPE(core) },
 	{ ATTR_TYPE(i18n) },
 	{ ATTR_TYPE(FIG) },
-	{ 0, 0 },
+	{ NULL, NULL },
 };
 
 static const attr FONT_attr_list[] = {
@@ -545,14 +545,14 @@ static const attr FONT_attr_list[] = {
 	{ "END"           T(N) },
 	{ "FACE"          T(N) },
 	{ "SIZE"          T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const AttrType FONT_attr_type[] = {
 	{ ATTR_TYPE(core) },
 	{ ATTR_TYPE(i18n) },
 	{ ATTR_TYPE(FONT) },
-	{ 0, 0 },
+	{ NULL, NULL },
 };
 
 static const attr FORM_attr_list[] = {
@@ -567,14 +567,14 @@ static const attr FORM_attr_list[] = {
 	{ "SCRIPT"        T(N) },
 	{ "SUBJECT"       T(N) },
 	{ "TARGET"        T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const AttrType FORM_attr_type[] = {
 	{ ATTR_TYPE(core) },
 	{ ATTR_TYPE(i18n) },
 	{ ATTR_TYPE(FORM) },
-	{ 0, 0 },
+	{ NULL, NULL },
 };
 
 static const attr FRAME_attr_list[] = {
@@ -586,13 +586,13 @@ static const attr FRAME_attr_list[] = {
 	{ "NORESIZE"      T(N) },
 	{ "SCROLLING"     T(N) },
 	{ "SRC"           T(h) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const AttrType FRAME_attr_type[] = {
 	{ ATTR_TYPE(core) },
 	{ ATTR_TYPE(FRAME) },
-	{ 0, 0 },
+	{ NULL, NULL },
 };
 
 static const attr FRAMESET_attr_list[] = {
@@ -600,17 +600,17 @@ static const attr FRAMESET_attr_list[] = {
 	{ "ONLOAD"        T(N) },
 	{ "ONUNLOAD"      T(N) },
 	{ "ROWS"          T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const AttrType FRAMESET_attr_type[] = {
 	{ ATTR_TYPE(FRAMESET) },
-	{ 0, 0 },
+	{ NULL, NULL },
 };
 
 static const attr GEN_attr_list[] = {
 	{ "CLEAR"         T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const AttrType GEN_attr_type[] = {
@@ -618,12 +618,12 @@ static const AttrType GEN_attr_type[] = {
 	{ ATTR_TYPE(events) },
 	{ ATTR_TYPE(i18n) },
 	{ ATTR_TYPE(GEN) },
-	{ 0, 0 },
+	{ NULL, NULL },
 };
 
 static const attr GEN5_attr_list[] = {
 	{ "ROLE"          T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const AttrType GEN5_attr_type[] = {
@@ -631,7 +631,7 @@ static const AttrType GEN5_attr_type[] = {
 	{ ATTR_TYPE(events) },
 	{ ATTR_TYPE(i18n) },
 	{ ATTR_TYPE(GEN5) },
-	{ 0, 0 },
+	{ NULL, NULL },
 };
 
 static const attr H_attr_list[] = {
@@ -642,7 +642,7 @@ static const attr H_attr_list[] = {
 	{ "SEQNUM"        T(N) },
 	{ "SKIP"          T(N) },
 	{ "SRC"           T(h) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const AttrType H_attr_type[] = {
@@ -651,7 +651,7 @@ static const AttrType H_attr_type[] = {
 	{ ATTR_TYPE(events) },
 	{ ATTR_TYPE(i18n) },
 	{ ATTR_TYPE(H) },
-	{ 0, 0 },
+	{ NULL, NULL },
 };
 
 static const attr HR_attr_list[] = {
@@ -661,7 +661,7 @@ static const attr HR_attr_list[] = {
 	{ "SIZE"          T(N) },
 	{ "SRC"           T(h) },
 	{ "WIDTH"         T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const AttrType HR_attr_type[] = {
@@ -669,7 +669,7 @@ static const AttrType HR_attr_type[] = {
 	{ ATTR_TYPE(core) },
 	{ ATTR_TYPE(i18n) },
 	{ ATTR_TYPE(HR) },
-	{ 0, 0 },
+	{ NULL, NULL },
 };
 
 static const attr IFRAME_attr_list[] = {
@@ -682,14 +682,14 @@ static const attr IFRAME_attr_list[] = {
 	{ "SCROLLING"     T(N) },
 	{ "SRC"           T(h) },
 	{ "WIDTH"         T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const AttrType IFRAME_attr_type[] = {
 	{ ATTR_TYPE(align) },
 	{ ATTR_TYPE(core) },
 	{ ATTR_TYPE(IFRAME) },
-	{ 0, 0 },
+	{ NULL, NULL },
 };
 
 static const attr IMG_attr_list[] = {
@@ -708,7 +708,7 @@ static const attr IMG_attr_list[] = {
 	{ "USEMAP"        T(h) },
 	{ "VSPACE"        T(N) },
 	{ "WIDTH"         T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const AttrType IMG_attr_type[] = {
@@ -717,7 +717,7 @@ static const AttrType IMG_attr_type[] = {
 	{ ATTR_TYPE(events) },
 	{ ATTR_TYPE(i18n) },
 	{ ATTR_TYPE(IMG) },
-	{ 0, 0 },
+	{ NULL, NULL },
 };
 
 static const attr INPUT_attr_list[] = {
@@ -749,7 +749,7 @@ static const attr INPUT_attr_list[] = {
 	{ "USEMAP"        T(N) },
 	{ "VALUE"         T(N) },
 	{ "WIDTH"         T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const AttrType INPUT_attr_type[] = {
@@ -758,34 +758,34 @@ static const AttrType INPUT_attr_type[] = {
 	{ ATTR_TYPE(events) },
 	{ ATTR_TYPE(i18n) },
 	{ ATTR_TYPE(INPUT) },
-	{ 0, 0 },
+	{ NULL, NULL },
 };
 
 static const attr ISINDEX_attr_list[] = {
 	{ "ACTION"        T(h) },
 	{ "HREF"          T(h) },
 	{ "PROMPT"        T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const AttrType ISINDEX_attr_type[] = {
 	{ ATTR_TYPE(core) },
 	{ ATTR_TYPE(i18n) },
 	{ ATTR_TYPE(ISINDEX) },
-	{ 0, 0 },
+	{ NULL, NULL },
 };
 
 static const attr KEYGEN_attr_list[] = {
 	{ "CHALLENGE"     T(N) },
 	{ "NAME"          T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const AttrType KEYGEN_attr_type[] = {
 	{ ATTR_TYPE(core) },
 	{ ATTR_TYPE(i18n) },
 	{ ATTR_TYPE(KEYGEN) },
-	{ 0, 0 },
+	{ NULL, NULL },
 };
 
 static const attr LABEL_attr_list[] = {
@@ -794,7 +794,7 @@ static const attr LABEL_attr_list[] = {
 	{ "FOR"           T(N) },
 	{ "ONBLUR"        T(N) },
 	{ "ONFOCUS"       T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const AttrType LABEL_attr_type[] = {
@@ -802,7 +802,7 @@ static const AttrType LABEL_attr_type[] = {
 	{ ATTR_TYPE(events) },
 	{ ATTR_TYPE(i18n) },
 	{ ATTR_TYPE(LABEL) },
-	{ 0, 0 },
+	{ NULL, NULL },
 };
 
 static const attr LI_attr_list[] = {
@@ -813,7 +813,7 @@ static const attr LI_attr_list[] = {
 	{ "SRC"           T(h) },
 	{ "TYPE"          T(N) },
 	{ "VALUE"         T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const AttrType LI_attr_type[] = {
@@ -821,7 +821,7 @@ static const AttrType LI_attr_type[] = {
 	{ ATTR_TYPE(events) },
 	{ ATTR_TYPE(i18n) },
 	{ ATTR_TYPE(LI) },
-	{ 0, 0 },
+	{ NULL, NULL },
 };
 
 static const attr LINK_attr_list[] = {
@@ -833,7 +833,7 @@ static const attr LINK_attr_list[] = {
 	{ "REV"           T(N) },
 	{ "TARGET"        T(N) },
 	{ "TYPE"          T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const AttrType LINK_attr_type[] = {
@@ -841,33 +841,33 @@ static const AttrType LINK_attr_type[] = {
 	{ ATTR_TYPE(events) },
 	{ ATTR_TYPE(i18n) },
 	{ ATTR_TYPE(LINK) },
-	{ 0, 0 },
+	{ NULL, NULL },
 };
 
 static const attr MAP_attr_list[] = {
 	{ "CLEAR"         T(N) },
 	{ "NAME"          T(i) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const AttrType MAP_attr_type[] = {
 	{ ATTR_TYPE(core) },
 	{ ATTR_TYPE(i18n) },
 	{ ATTR_TYPE(MAP) },
-	{ 0, 0 },
+	{ NULL, NULL },
 };
 
 static const attr MATH_attr_list[] = {
 	{ "BOX"           T(N) },
 	{ "CLEAR"         T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const AttrType MATH_attr_type[] = {
 	{ ATTR_TYPE(core) },
 	{ ATTR_TYPE(i18n) },
 	{ ATTR_TYPE(MATH) },
-	{ 0, 0 },
+	{ NULL, NULL },
 };
 
 static const attr META_attr_list[] = {
@@ -876,22 +876,22 @@ static const attr META_attr_list[] = {
 	{ "HTTP-EQUIV"    T(N) },
 	{ "NAME"          T(N) },
 	{ "SCHEME"        T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const AttrType META_attr_type[] = {
 	{ ATTR_TYPE(META) },
-	{ 0, 0 },
+	{ NULL, NULL },
 };
 
 static const attr NEXTID_attr_list[] = {
 	{ "N"             T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const AttrType NEXTID_attr_type[] = {
 	{ ATTR_TYPE(NEXTID) },
-	{ 0, 0 },
+	{ NULL, NULL },
 };
 
 static const attr NOTE_attr_list[] = {
@@ -899,14 +899,14 @@ static const attr NOTE_attr_list[] = {
 	{ "MD"            T(N) },
 	{ "ROLE"          T(x) },
 	{ "SRC"           T(h) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const AttrType NOTE_attr_type[] = {
 	{ ATTR_TYPE(core) },
 	{ ATTR_TYPE(i18n) },
 	{ ATTR_TYPE(NOTE) },
-	{ 0, 0 },
+	{ NULL, NULL },
 };
 
 static const attr OBJECT_attr_list[] = {
@@ -929,7 +929,7 @@ static const attr OBJECT_attr_list[] = {
 	{ "USEMAP"        T(h) },
 	{ "VSPACE"        T(N) },
 	{ "WIDTH"         T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const AttrType OBJECT_attr_type[] = {
@@ -938,7 +938,7 @@ static const AttrType OBJECT_attr_type[] = {
 	{ ATTR_TYPE(events) },
 	{ ATTR_TYPE(i18n) },
 	{ ATTR_TYPE(OBJECT) },
-	{ 0, 0 },
+	{ NULL, NULL },
 };
 
 static const attr OL_attr_list[] = {
@@ -948,14 +948,14 @@ static const attr OL_attr_list[] = {
 	{ "SEQNUM"        T(N) },
 	{ "START"         T(N) },
 	{ "TYPE"          T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const AttrType OL_attr_type[] = {
 	{ ATTR_TYPE(core) },
 	{ ATTR_TYPE(i18n) },
 	{ ATTR_TYPE(OL) },
-	{ 0, 0 },
+	{ NULL, NULL },
 };
 
 static const attr OPTION_attr_list[] = {
@@ -966,7 +966,7 @@ static const attr OPTION_attr_list[] = {
 	{ "SELECTED"      T(N) },
 	{ "SHAPE"         T(N) },
 	{ "VALUE"         T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const AttrType OPTION_attr_type[] = {
@@ -974,7 +974,7 @@ static const AttrType OPTION_attr_type[] = {
 	{ ATTR_TYPE(events) },
 	{ ATTR_TYPE(i18n) },
 	{ ATTR_TYPE(OPTION) },
-	{ 0, 0 },
+	{ NULL, NULL },
 };
 
 static const attr OVERLAY_attr_list[] = {
@@ -986,19 +986,19 @@ static const attr OVERLAY_attr_list[] = {
 	{ "WIDTH"         T(N) },
 	{ "X"             T(N) },
 	{ "Y"             T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const AttrType OVERLAY_attr_type[] = {
 	{ ATTR_TYPE(core) },
 	{ ATTR_TYPE(OVERLAY) },
-	{ 0, 0 },
+	{ NULL, NULL },
 };
 
 static const attr P_attr_list[] = {
 	{ "CLEAR"         T(N) },
 	{ "NOWRAP"        T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const AttrType P_attr_type[] = {
@@ -1006,7 +1006,7 @@ static const AttrType P_attr_type[] = {
 	{ ATTR_TYPE(core) },
 	{ ATTR_TYPE(i18n) },
 	{ ATTR_TYPE(P) },
-	{ 0, 0 },
+	{ NULL, NULL },
 };
 
 static const attr PARAM_attr_list[] = {
@@ -1022,27 +1022,27 @@ static const attr PARAM_attr_list[] = {
 	{ "VALUE"         T(N) },
 	{ "VALUEREF"      T(N) },
 	{ "VALUETYPE"     T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const AttrType PARAM_attr_type[] = {
 	{ ATTR_TYPE(core) },
 	{ ATTR_TYPE(i18n) },
 	{ ATTR_TYPE(PARAM) },
-	{ 0, 0 },
+	{ NULL, NULL },
 };
 
 static const attr Q_attr_list[] = {
 	{ "CITE"          T(h) },
 	{ "CLEAR"         T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const AttrType Q_attr_type[] = {
 	{ ATTR_TYPE(core) },
 	{ ATTR_TYPE(i18n) },
 	{ ATTR_TYPE(Q) },
-	{ 0, 0 },
+	{ NULL, NULL },
 };
 
 static const attr SCRIPT_attr_list[] = {
@@ -1056,14 +1056,14 @@ static const attr SCRIPT_attr_list[] = {
 	{ "SCRIPTENGINE"  T(N) },
 	{ "SRC"           T(h) },
 	{ "TYPE"          T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const AttrType SCRIPT_attr_type[] = {
 	{ ATTR_TYPE(core) },
 	{ ATTR_TYPE(i18n) },
 	{ ATTR_TYPE(SCRIPT) },
-	{ 0, 0 },
+	{ NULL, NULL },
 };
 
 static const attr SELECT_attr_list[] = {
@@ -1082,7 +1082,7 @@ static const attr SELECT_attr_list[] = {
 	{ "TABINDEX"      T(N) },
 	{ "UNITS"         T(N) },
 	{ "WIDTH"         T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const AttrType SELECT_attr_type[] = {
@@ -1090,21 +1090,21 @@ static const AttrType SELECT_attr_type[] = {
 	{ ATTR_TYPE(core) },
 	{ ATTR_TYPE(i18n) },
 	{ ATTR_TYPE(SELECT) },
-	{ 0, 0 },
+	{ NULL, NULL },
 };
 
 static const attr STYLE_attr_list[] = {
 	{ "MEDIA"         T(N) },
 	{ "NOTATION"      T(N) },
 	{ "TYPE"          T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const AttrType STYLE_attr_type[] = {
 	{ ATTR_TYPE(core) },
 	{ ATTR_TYPE(i18n) },
 	{ ATTR_TYPE(STYLE) },
-	{ 0, 0 },
+	{ NULL, NULL },
 };
 
 static const attr TAB_attr_list[] = {
@@ -1112,7 +1112,7 @@ static const attr TAB_attr_list[] = {
 	{ "DP"            T(N) },
 	{ "INDENT"        T(N) },
 	{ "TO"            T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const AttrType TAB_attr_type[] = {
@@ -1120,7 +1120,7 @@ static const AttrType TAB_attr_type[] = {
 	{ ATTR_TYPE(core) },
 	{ ATTR_TYPE(i18n) },
 	{ ATTR_TYPE(TAB) },
-	{ 0, 0 },
+	{ NULL, NULL },
 };
 
 static const attr TABLE_attr_list[] = {
@@ -1139,7 +1139,7 @@ static const attr TABLE_attr_list[] = {
 	{ "SUMMARY"       T(N) },
 	{ "UNITS"         T(N) },
 	{ "WIDTH"         T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const AttrType TABLE_attr_type[] = {
@@ -1148,7 +1148,7 @@ static const AttrType TABLE_attr_type[] = {
 	{ ATTR_TYPE(events) },
 	{ ATTR_TYPE(i18n) },
 	{ ATTR_TYPE(TABLE) },
-	{ 0, 0 },
+	{ NULL, NULL },
 };
 
 static const attr TD_attr_list[] = {
@@ -1165,7 +1165,7 @@ static const attr TD_attr_list[] = {
 	{ "ROWSPAN"       T(N) },
 	{ "SCOPE"         T(N) },
 	{ "WIDTH"         T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const AttrType TD_attr_type[] = {
@@ -1173,7 +1173,7 @@ static const AttrType TD_attr_type[] = {
 	{ ATTR_TYPE(core) },
 	{ ATTR_TYPE(i18n) },
 	{ ATTR_TYPE(TD) },
-	{ 0, 0 },
+	{ NULL, NULL },
 };
 
 static const attr TEXTAREA_attr_list[] = {
@@ -1192,7 +1192,7 @@ static const attr TEXTAREA_attr_list[] = {
 	{ "READONLY"      T(N) },
 	{ "ROWS"          T(N) },
 	{ "TABINDEX"      T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const AttrType TEXTAREA_attr_type[] = {
@@ -1201,14 +1201,14 @@ static const AttrType TEXTAREA_attr_type[] = {
 	{ ATTR_TYPE(events) },
 	{ ATTR_TYPE(i18n) },
 	{ ATTR_TYPE(TEXTAREA) },
-	{ 0, 0 },
+	{ NULL, NULL },
 };
 
 static const attr TR_attr_list[] = {
 	{ "CLEAR"         T(N) },
 	{ "DP"            T(N) },
 	{ "NOWRAP"        T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const AttrType TR_attr_type[] = {
@@ -1217,7 +1217,7 @@ static const AttrType TR_attr_type[] = {
 	{ ATTR_TYPE(events) },
 	{ ATTR_TYPE(i18n) },
 	{ ATTR_TYPE(TR) },
-	{ 0, 0 },
+	{ NULL, NULL },
 };
 
 static const attr UL_attr_list[] = {
@@ -1229,14 +1229,14 @@ static const attr UL_attr_list[] = {
 	{ "SRC"           T(h) },
 	{ "TYPE"          T(N) },
 	{ "WRAP"          T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const AttrType UL_attr_type[] = {
 	{ ATTR_TYPE(core) },
 	{ ATTR_TYPE(i18n) },
 	{ ATTR_TYPE(UL) },
-	{ 0, 0 },
+	{ NULL, NULL },
 };
 
 
@@ -1267,7 +1267,7 @@ static const attr A_attr[] = {          /* A attributes */
 	{ "TITLE"         T(N) },
 	{ "TYPE"          T(N) },
 	{ "URN"           T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const attr ADDRESS_attr[] = {    /* ADDRESS attributes */
@@ -1279,7 +1279,7 @@ static const attr ADDRESS_attr[] = {    /* ADDRESS attributes */
 	{ "NOWRAP"        T(N) },
 	{ "STYLE"         T(N) },
 	{ "TITLE"         T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const attr APPLET_attr[] = {     /* APPLET attributes */
@@ -1300,7 +1300,7 @@ static const attr APPLET_attr[] = {     /* APPLET attributes */
 	{ "TITLE"         T(N) },
 	{ "VSPACE"        T(N) },
 	{ "WIDTH"         T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const attr AREA_attr[] = {       /* AREA attributes */
@@ -1322,7 +1322,7 @@ static const attr AREA_attr[] = {       /* AREA attributes */
 	{ "TABINDEX"      T(N) },
 	{ "TARGET"        T(N) },
 	{ "TITLE"         T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const attr BASE_attr[] = {       /* BASE attributes */
@@ -1332,7 +1332,7 @@ static const attr BASE_attr[] = {       /* BASE attributes */
 	{ "STYLE"         T(N) },
 	{ "TARGET"        T(N) },
 	{ "TITLE"         T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const attr BGSOUND_attr[] = {    /* BGSOUND attributes */
@@ -1345,7 +1345,7 @@ static const attr BGSOUND_attr[] = {    /* BGSOUND attributes */
 	{ "SRC"           T(h) },
 	{ "STYLE"         T(N) },
 	{ "TITLE"         T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const attr BODY_attr[] = {       /* BODY attributes */
@@ -1364,7 +1364,7 @@ static const attr BODY_attr[] = {       /* BODY attributes */
 	{ "TEXT"          T(N) },
 	{ "TITLE"         T(N) },
 	{ "VLINK"         T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const attr BODYTEXT_attr[] = {   /* BODYTEXT attributes */
@@ -1382,7 +1382,7 @@ static const attr BODYTEXT_attr[] = {   /* BODYTEXT attributes */
 	{ "TYPE"          T(N) },
 	{ "VALUE"         T(N) },
 	{ "VALUETYPE"     T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const attr BQ_attr[] = {         /* BLOCKQUOTE attributes */
@@ -1395,7 +1395,7 @@ static const attr BQ_attr[] = {         /* BLOCKQUOTE attributes */
 	{ "NOWRAP"        T(N) },
 	{ "STYLE"         T(N) },
 	{ "TITLE"         T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const attr BUTTON_attr[] = {     /* BUTTON attributes */
@@ -1416,7 +1416,7 @@ static const attr BUTTON_attr[] = {     /* BUTTON attributes */
 	{ "TITLE"         T(N) },
 	{ "TYPE"          T(N) },
 	{ "VALUE"         T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const attr CAPTION_attr[] = {    /* CAPTION attributes */
@@ -1429,7 +1429,7 @@ static const attr CAPTION_attr[] = {    /* CAPTION attributes */
 	{ "LANG"          T(N) },
 	{ "STYLE"         T(N) },
 	{ "TITLE"         T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const attr COL_attr[] = {        /* COL attributes */
@@ -1446,7 +1446,7 @@ static const attr COL_attr[] = {        /* COL attributes */
 	{ "TITLE"         T(N) },
 	{ "VALIGN"        T(N) },
 	{ "WIDTH"         T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const attr DEL_attr[] = {        /* DEL attributes */
@@ -1458,7 +1458,7 @@ static const attr DEL_attr[] = {        /* DEL attributes */
 	{ "LANG"          T(N) },
 	{ "STYLE"         T(N) },
 	{ "TITLE"         T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const attr DIV_attr[] = {        /* CENTER attributes */
@@ -1470,7 +1470,7 @@ static const attr DIV_attr[] = {        /* CENTER attributes */
 	{ "LANG"          T(N) },
 	{ "STYLE"         T(N) },
 	{ "TITLE"         T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const attr DL_attr[] = {         /* DL attributes */
@@ -1482,7 +1482,7 @@ static const attr DL_attr[] = {         /* DL attributes */
 	{ "LANG"          T(N) },
 	{ "STYLE"         T(N) },
 	{ "TITLE"         T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const attr EMBED_attr[] = {      /* EMBED attributes */
@@ -1507,7 +1507,7 @@ static const attr EMBED_attr[] = {      /* EMBED attributes */
 	{ "UNITS"         T(N) },
 	{ "USEMAP"        T(N) },
 	{ "WIDTH"         T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const attr FIG_attr[] = {        /* FIG attributes */
@@ -1528,7 +1528,7 @@ static const attr FIG_attr[] = {        /* FIG attributes */
 	{ "TITLE"         T(N) },
 	{ "UNITS"         T(N) },
 	{ "WIDTH"         T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const attr FONT_attr[] = {       /* BASEFONT attributes */
@@ -1543,7 +1543,7 @@ static const attr FONT_attr[] = {       /* BASEFONT attributes */
 	{ "SIZE"          T(N) },
 	{ "STYLE"         T(N) },
 	{ "TITLE"         T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const attr FORM_attr[] = {       /* FORM attributes */
@@ -1564,7 +1564,7 @@ static const attr FORM_attr[] = {       /* FORM attributes */
 	{ "SUBJECT"       T(N) },
 	{ "TARGET"        T(N) },
 	{ "TITLE"         T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const attr FRAME_attr[] = {      /* FRAME attributes */
@@ -1580,7 +1580,7 @@ static const attr FRAME_attr[] = {      /* FRAME attributes */
 	{ "SRC"           T(h) },
 	{ "STYLE"         T(N) },
 	{ "TITLE"         T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const attr FRAMESET_attr[] = {   /* FRAMESET attributes */
@@ -1588,7 +1588,7 @@ static const attr FRAMESET_attr[] = {   /* FRAMESET attributes */
 	{ "ONLOAD"        T(N) },
 	{ "ONUNLOAD"      T(N) },
 	{ "ROWS"          T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const attr GEN_attr[] = {        /* ABBR attributes */
@@ -1599,7 +1599,7 @@ static const attr GEN_attr[] = {        /* ABBR attributes */
 	{ "LANG"          T(N) },
 	{ "STYLE"         T(N) },
 	{ "TITLE"         T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const attr GEN5_attr[] = {       /* ARTICLE attributes */
@@ -1610,7 +1610,7 @@ static const attr GEN5_attr[] = {       /* ARTICLE attributes */
 	{ "ROLE"          T(N) },
 	{ "STYLE"         T(N) },
 	{ "TITLE"         T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const attr H_attr[] = {          /* H1 attributes */
@@ -1628,7 +1628,7 @@ static const attr H_attr[] = {          /* H1 attributes */
 	{ "SRC"           T(h) },
 	{ "STYLE"         T(N) },
 	{ "TITLE"         T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const attr HR_attr[] = {         /* HR attributes */
@@ -1645,7 +1645,7 @@ static const attr HR_attr[] = {         /* HR attributes */
 	{ "STYLE"         T(N) },
 	{ "TITLE"         T(N) },
 	{ "WIDTH"         T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const attr IFRAME_attr[] = {     /* IFRAME attributes */
@@ -1663,7 +1663,7 @@ static const attr IFRAME_attr[] = {     /* IFRAME attributes */
 	{ "STYLE"         T(N) },
 	{ "TITLE"         T(N) },
 	{ "WIDTH"         T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const attr IMG_attr[] = {        /* IMG attributes */
@@ -1689,7 +1689,7 @@ static const attr IMG_attr[] = {        /* IMG attributes */
 	{ "USEMAP"        T(h) },
 	{ "VSPACE"        T(N) },
 	{ "WIDTH"         T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const attr INPUT_attr[] = {      /* INPUT attributes */
@@ -1728,7 +1728,7 @@ static const attr INPUT_attr[] = {      /* INPUT attributes */
 	{ "USEMAP"        T(N) },
 	{ "VALUE"         T(N) },
 	{ "WIDTH"         T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const attr ISINDEX_attr[] = {    /* ISINDEX attributes */
@@ -1741,7 +1741,7 @@ static const attr ISINDEX_attr[] = {    /* ISINDEX attributes */
 	{ "PROMPT"        T(N) },
 	{ "STYLE"         T(N) },
 	{ "TITLE"         T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const attr KEYGEN_attr[] = {     /* KEYGEN attributes */
@@ -1753,7 +1753,7 @@ static const attr KEYGEN_attr[] = {     /* KEYGEN attributes */
 	{ "NAME"          T(N) },
 	{ "STYLE"         T(N) },
 	{ "TITLE"         T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const attr LABEL_attr[] = {      /* LABEL attributes */
@@ -1768,7 +1768,7 @@ static const attr LABEL_attr[] = {      /* LABEL attributes */
 	{ "ONFOCUS"       T(N) },
 	{ "STYLE"         T(N) },
 	{ "TITLE"         T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const attr LI_attr[] = {         /* LI attributes */
@@ -1785,7 +1785,7 @@ static const attr LI_attr[] = {         /* LI attributes */
 	{ "TITLE"         T(N) },
 	{ "TYPE"          T(N) },
 	{ "VALUE"         T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const attr LINK_attr[] = {       /* LINK attributes */
@@ -1803,7 +1803,7 @@ static const attr LINK_attr[] = {       /* LINK attributes */
 	{ "TARGET"        T(N) },
 	{ "TITLE"         T(N) },
 	{ "TYPE"          T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const attr MAP_attr[] = {        /* MAP attributes */
@@ -1815,7 +1815,7 @@ static const attr MAP_attr[] = {        /* MAP attributes */
 	{ "NAME"          T(i) },
 	{ "STYLE"         T(N) },
 	{ "TITLE"         T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const attr MATH_attr[] = {       /* MATH attributes */
@@ -1827,7 +1827,7 @@ static const attr MATH_attr[] = {       /* MATH attributes */
 	{ "LANG"          T(N) },
 	{ "STYLE"         T(N) },
 	{ "TITLE"         T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const attr META_attr[] = {       /* META attributes */
@@ -1836,12 +1836,12 @@ static const attr META_attr[] = {       /* META attributes */
 	{ "HTTP-EQUIV"    T(N) },
 	{ "NAME"          T(N) },
 	{ "SCHEME"        T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const attr NEXTID_attr[] = {     /* NEXTID attributes */
 	{ "N"             T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const attr NOTE_attr[] = {       /* NOTE attributes */
@@ -1855,7 +1855,7 @@ static const attr NOTE_attr[] = {       /* NOTE attributes */
 	{ "SRC"           T(h) },
 	{ "STYLE"         T(N) },
 	{ "TITLE"         T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const attr OBJECT_attr[] = {     /* OBJECT attributes */
@@ -1885,7 +1885,7 @@ static const attr OBJECT_attr[] = {     /* OBJECT attributes */
 	{ "USEMAP"        T(h) },
 	{ "VSPACE"        T(N) },
 	{ "WIDTH"         T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const attr OL_attr[] = {         /* OL attributes */
@@ -1901,7 +1901,7 @@ static const attr OL_attr[] = {         /* OL attributes */
 	{ "STYLE"         T(N) },
 	{ "TITLE"         T(N) },
 	{ "TYPE"          T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const attr OPTION_attr[] = {     /* OPTION attributes */
@@ -1918,7 +1918,7 @@ static const attr OPTION_attr[] = {     /* OPTION attributes */
 	{ "STYLE"         T(N) },
 	{ "TITLE"         T(N) },
 	{ "VALUE"         T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const attr OVERLAY_attr[] = {    /* OVERLAY attributes */
@@ -1934,7 +1934,7 @@ static const attr OVERLAY_attr[] = {    /* OVERLAY attributes */
 	{ "WIDTH"         T(N) },
 	{ "X"             T(N) },
 	{ "Y"             T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const attr P_attr[] = {          /* P attributes */
@@ -1947,7 +1947,7 @@ static const attr P_attr[] = {          /* P attributes */
 	{ "NOWRAP"        T(N) },
 	{ "STYLE"         T(N) },
 	{ "TITLE"         T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const attr PARAM_attr[] = {      /* PARAM attributes */
@@ -1969,7 +1969,7 @@ static const attr PARAM_attr[] = {      /* PARAM attributes */
 	{ "VALUE"         T(N) },
 	{ "VALUEREF"      T(N) },
 	{ "VALUETYPE"     T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const attr Q_attr[] = {          /* Q attributes */
@@ -1981,7 +1981,7 @@ static const attr Q_attr[] = {          /* Q attributes */
 	{ "LANG"          T(N) },
 	{ "STYLE"         T(N) },
 	{ "TITLE"         T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const attr SCRIPT_attr[] = {     /* SCRIPT attributes */
@@ -2001,7 +2001,7 @@ static const attr SCRIPT_attr[] = {     /* SCRIPT attributes */
 	{ "STYLE"         T(N) },
 	{ "TITLE"         T(N) },
 	{ "TYPE"          T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const attr SELECT_attr[] = {     /* SELECT attributes */
@@ -2027,7 +2027,7 @@ static const attr SELECT_attr[] = {     /* SELECT attributes */
 	{ "TITLE"         T(N) },
 	{ "UNITS"         T(N) },
 	{ "WIDTH"         T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const attr STYLE_attr[] = {      /* STYLE attributes */
@@ -2040,7 +2040,7 @@ static const attr STYLE_attr[] = {      /* STYLE attributes */
 	{ "STYLE"         T(N) },
 	{ "TITLE"         T(N) },
 	{ "TYPE"          T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const attr TAB_attr[] = {        /* TAB attributes */
@@ -2055,7 +2055,7 @@ static const attr TAB_attr[] = {        /* TAB attributes */
 	{ "STYLE"         T(N) },
 	{ "TITLE"         T(N) },
 	{ "TO"            T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const attr TABLE_attr[] = {      /* TABLE attributes */
@@ -2081,7 +2081,7 @@ static const attr TABLE_attr[] = {      /* TABLE attributes */
 	{ "TITLE"         T(N) },
 	{ "UNITS"         T(N) },
 	{ "WIDTH"         T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const attr TD_attr[] = {         /* TD attributes */
@@ -2108,7 +2108,7 @@ static const attr TD_attr[] = {         /* TD attributes */
 	{ "TITLE"         T(N) },
 	{ "VALIGN"        T(N) },
 	{ "WIDTH"         T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const attr TEXTAREA_attr[] = {   /* TEXTAREA attributes */
@@ -2134,7 +2134,7 @@ static const attr TEXTAREA_attr[] = {   /* TEXTAREA attributes */
 	{ "STYLE"         T(N) },
 	{ "TABINDEX"      T(N) },
 	{ "TITLE"         T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const attr TR_attr[] = {         /* TBODY attributes */
@@ -2151,7 +2151,7 @@ static const attr TR_attr[] = {         /* TBODY attributes */
 	{ "STYLE"         T(N) },
 	{ "TITLE"         T(N) },
 	{ "VALIGN"        T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 static const attr UL_attr[] = {         /* DIR attributes */
@@ -2169,7 +2169,7 @@ static const attr UL_attr[] = {         /* DIR attributes */
 	{ "TITLE"         T(N) },
 	{ "TYPE"          T(N) },
 	{ "WRAP"          T(N) },
-	{ 0               T(N) }	/* Terminate list */
+	{ NULL            T(N) }	/* Terminate list */
 };
 
 /* *INDENT-ON* */

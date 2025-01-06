@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTCP.c,v 1.169 2024/01/14 19:19:39 tom Exp $
+ * $LynxId: HTTCP.c,v 1.170 2025/01/06 15:32:59 tom Exp $
  *
  *			Generic Communication Code		HTTCP.c
  *			==========================
@@ -47,7 +47,7 @@
 #include <netdb.h>
 #endif /* __DJGPP__ */
 
-#define OK_HOST(p) ((p) != 0 && ((p)->h_length) != 0)
+#define OK_HOST(p) ((p) != NULL && ((p)->h_length) != 0)
 
 #ifdef SVR4_BSDSELECT
 int BSDselect(int nfds,
@@ -483,7 +483,7 @@ static unsigned read_hostent(int fd, char *buffer, size_t length)
 
 	if (data->h_addr_list) {
 	    data->h_addr_list = next_ptr;
-	    while (next_ptr[num_addrs] != 0) {
+	    while (next_ptr[num_addrs] != NULL) {
 		++num_addrs;
 	    }
 	    next_ptr += (num_addrs + 1);
@@ -492,7 +492,7 @@ static unsigned read_hostent(int fd, char *buffer, size_t length)
 
 	if (data->h_aliases) {
 	    data->h_aliases = next_ptr;
-	    while (next_ptr[num_aliases] != 0) {
+	    while (next_ptr[num_aliases] != NULL) {
 		++num_aliases;
 	    }
 	    next_char += (size_t) (num_aliases + 1) * sizeof(data->h_aliases[0]);
@@ -546,10 +546,10 @@ static size_t fill_rehostent(void **rehostent,
 {
     static const char *this_func = "fill_rehostent";
 
-    LYNX_HOSTENT *data = 0;
+    LYNX_HOSTENT *data = NULL;
     int num_addrs = 0;
     int num_aliases = 0;
-    char *result = 0;
+    char *result = NULL;
     char *p_next_char;
     char **p_next_charptr;
     size_t name_len = 0;
@@ -578,7 +578,7 @@ static size_t fill_rehostent(void **rehostent,
 	need += ((size_t) num_aliases + 1) * sizeof(phost->h_aliases[0]);
     }
 
-    if ((result = calloc(need, sizeof(char))) == 0)
+    if ((result = calloc(need, sizeof(char))) == NULL)
 	  outofmem(__FILE__, this_func);
 
     *rehostent = result;
@@ -736,7 +736,7 @@ static BOOL setup_nsl_fork(void (*really) (const char *,
      * with errno == ECHILD when no children.) -BL
      */
     do {
-	waitret = waitpid(-1, 0, WNOHANG);
+	waitret = waitpid(-1, NULL, WNOHANG);
     } while (waitret > 0 || (waitret == -1 && errno == EINTR));
     waitret = 0;
 
@@ -946,7 +946,7 @@ static BOOL setup_nsl_fork(void (*really) (const char *,
 		    /*
 		     * Then get the full reorganized hostent.  -BL, kw
 		     */
-		    if ((*rehostent = malloc(statuses.rehostentlen)) == 0)
+		    if ((*rehostent = malloc(statuses.rehostentlen)) == NULL)
 			outofmem(__FILE__, this_func);
 		    readret = (*readit) (pfd[0], *rehostent, statuses.rehostentlen);
 #ifdef DEBUG_HOSTENT
@@ -1050,7 +1050,7 @@ static void really_gethostbyname(const char *host,
 				 void **rehostent)
 {
     LYNX_HOSTENT *phost;	/* Pointer to host - See netdb.h */
-    LYNX_HOSTENT *result = 0;
+    LYNX_HOSTENT *result = NULL;
 
     (void) port;
 
@@ -1128,7 +1128,7 @@ static LYNX_HOSTENT *LYGetHostByName(char *host)
 
 #ifdef NSL_FORK
     /* for transfer of result between from child to parent: */
-    LYNX_HOSTENT *rehostent = 0;
+    LYNX_HOSTENT *rehostent = NULL;
 #endif /* NSL_FORK */
 
     LYNX_HOSTENT *result_phost = NULL;
@@ -1482,14 +1482,14 @@ static size_t fill_addrinfo(void **buffer,
     char *heap;
 
     CTRACE((tfp, "filladdr_info %p\n", (const void *) phost));
-    for (q = phost; q != 0; q = q->ai_next) {
+    for (q = phost; q != NULL; q = q->ai_next) {
 	++limit;
 	need += q->ai_addrlen;
 	need += sizeof(LYNX_ADDRINFO);
     }
     CTRACE((tfp, "...fill_addrinfo %d:%lu\n", limit, (unsigned long) need));
 
-    if ((result = (LYNX_ADDRINFO *) calloc(1, need)) == 0)
+    if ((result = (LYNX_ADDRINFO *) calloc(1, need)) == NULL)
 	outofmem(__FILE__, this_func);
 
     *buffer = actual = result;
@@ -1516,7 +1516,7 @@ static size_t fill_addrinfo(void **buffer,
 
 	actual->ai_next = ((count + 1 < limit)
 			   ? (actual + 1)
-			   : 0);
+			   : NULL);
 	++actual;
     }
     return (size_t) (heap - (char *) result);
@@ -1548,7 +1548,7 @@ static unsigned read_addrinfo(int fd, char *buffer, size_t length)
 	    res->ai_next = (res + 1);
 	    ++res;
 	} else {
-	    res->ai_next = 0;
+	    res->ai_next = NULL;
 	}
     }
 
@@ -1566,7 +1566,7 @@ static void really_getaddrinfo(const char *host,
 			       STATUSES * statuses,
 			       void **result)
 {
-    LYNX_ADDRINFO hints, *res = 0;
+    LYNX_ADDRINFO hints, *res = NULL;
     int error;
 
     memset(&hints, 0, sizeof(hints));
@@ -1606,7 +1606,7 @@ static LYNX_ADDRINFO *HTGetAddrInfo(const char *str,
 {
 #ifdef NSL_FORK
     /* for transfer of result between from child to parent: */
-    void *readdrinfo = 0;
+    void *readdrinfo = NULL;
 
 #else
     LYNX_ADDRINFO hints;
@@ -1666,7 +1666,7 @@ static LYNX_ADDRINFO *HTGetAddrInfo(const char *str,
 BOOLEAN HTCheckAddrInfo(const char *str, const int defport)
 {
     LYNX_ADDRINFO *data = HTGetAddrInfo(str, defport);
-    BOOLEAN result = (data != 0);
+    BOOLEAN result = (data != NULL);
 
     FREE_NSL_FORK(data);
     return result;
@@ -1828,7 +1828,7 @@ int HTDoConnect(const char *url,
     char const *emsg;
 
 #ifdef INET6
-    LYNX_ADDRINFO *res = 0, *res0 = 0;
+    LYNX_ADDRINFO *res = NULL, *res0 = NULL;
 
 #else
     struct sockaddr_in sock_A;

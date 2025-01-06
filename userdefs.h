@@ -1,9 +1,9 @@
 /*
- * $LynxId: userdefs.h,v 1.404 2024/09/15 20:17:44 tom Exp $
+ * $LynxId: userdefs.h,v 1.406 2025/01/06 19:49:20 tom Exp $
  *
  * Lynx - Hypertext navigation system
  *
- *   Copyright 1996-2023,2024 Thomas E. Dickey and Lynx Developers Group
+ *   Copyright 1996-2024,2025 Thomas E. Dickey and Lynx Developers Group
  *   Note: GNU General Public License is not a copyright.
  *
  *   (c) Copyright 1992, 1993, 1994 University of Kansas
@@ -1241,7 +1241,7 @@
 
 /********************************
  * If PREVENT_KEYBOARD_WRAPAROUND is defined, using the keyboard to
- * move past the end (or beginning) of a page results in a warning. 
+ * move past the end (or beginning) of a page results in a warning.
  * Otherwise, such motions cause the cursor to wrap from bottom to top
  * (or top to bottom) of page.  Note that for pages which fit
  * completely on one screen, wraparound always occurs, so this only
@@ -1451,10 +1451,10 @@
  */
 
 #define LYNX_NAME     "Lynx"
-#define LYNX_VERSION  "2.9.2g"
+#define LYNX_VERSION  "2.9.2h"
 #define LYNX_WWW_HOME "https://lynx.invisible-island.net/"
 #define LYNX_WWW_DIST "https://lynx.invisible-island.net/current/"
-#define LYNX_DATE     "15 Sep 2024"
+#define LYNX_DATE     "06 Jan 2025"
 
 #ifdef UNICODE
 #define W32_STRING(s) L##s

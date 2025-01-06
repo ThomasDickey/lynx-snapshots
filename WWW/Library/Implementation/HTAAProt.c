@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTAAProt.c,v 1.34 2016/11/24 15:29:50 tom Exp $
+ * $LynxId: HTAAProt.c,v 1.35 2025/01/06 15:41:30 tom Exp $
  *
  * MODULE							HTAAProt.c
  *		PROTECTION FILE PARSING MODULE
@@ -343,7 +343,7 @@ static HTAAProt *HTAAProt_new(const char *cur_docname,
 	CTRACE((tfp, "HTAAProt_new: Loading protection file `%s'\n",
 		prot_filename));
 
-	if ((prot = typecalloc(HTAAProt)) == 0)
+	if ((prot = typecalloc(HTAAProt)) == NULL)
 	      outofmem(__FILE__, "HTAAProt_new");
 
 	prot->ctemplate = NULL;
@@ -357,7 +357,7 @@ static HTAAProt *HTAAProt_new(const char *cur_docname,
 	if (prot_filename && NULL != (fp = fopen(prot_filename, TXT_R))) {
 	    HTAA_parseProtFile(prot, fp);
 	    fclose(fp);
-	    if ((cache_item = typecalloc(HTAAProtCache)) == 0)
+	    if ((cache_item = typecalloc(HTAAProtCache)) == NULL)
 		outofmem(__FILE__, "HTAAProt_new");
 
 	    cache_item->prot = prot;
@@ -624,8 +624,8 @@ const char *HTAA_UidToName(int uid GCC_UNUSED)
 	    return data->name;
     }
 
-    if ((pw = getpwuid((uid_t) uid)) != 0
-	&& pw->pw_name != 0) {
+    if ((pw = getpwuid((uid_t) uid)) != NULL
+	&& pw->pw_name != NULL) {
 	CTRACE((tfp, "%s(%d) returned (%s:%d:...)\n",
 		"HTAA_UidToName: getpwuid",
 		uid,
@@ -658,7 +658,7 @@ int HTAA_NameToUid(const char *name GCC_UNUSED)
 	    return data->user;
     }
 
-    if ((pw = getpwnam(name)) != 0) {
+    if ((pw = getpwnam(name)) != NULL) {
 	CTRACE((tfp, "%s(%s) returned (%s:%d:...)\n",
 		"HTAA_NameToUid: getpwnam",
 		name,
@@ -691,8 +691,8 @@ const char *HTAA_GidToName(int gid GCC_UNUSED)
 	    return data->name;
     }
 
-    if ((gr = getgrgid((gid_t) gid)) != 0
-	&& gr->gr_name != 0) {
+    if ((gr = getgrgid((gid_t) gid)) != NULL
+	&& gr->gr_name != NULL) {
 	CTRACE((tfp, "%s(%d) returned (%s:%d:...)\n",
 		"HTAA_GidToName: getgrgid",
 		gid,
@@ -725,7 +725,7 @@ int HTAA_NameToGid(const char *name GCC_UNUSED)
 	    return data->user;
     }
 
-    if ((gr = getgrnam(name)) != 0) {
+    if ((gr = getgrnam(name)) != NULL) {
 	CTRACE((tfp, "%s(%s) returned (%s:%d:...)\n",
 		"HTAA_NameToGid: getgrnam",
 		name,

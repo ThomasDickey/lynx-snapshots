@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTAnchor.c,v 1.82 2020/01/21 21:58:52 tom Exp $
+ * $LynxId: HTAnchor.c,v 1.83 2025/01/06 15:34:03 tom Exp $
  *
  *	Hypertext "Anchor" Object				HTAnchor.c
  *	==========================
@@ -266,7 +266,7 @@ static HTChildAnchor *HTAnchor_addChild(HTParentAnchor *parent)
 	    (void *) child,
 	    (void *) child->parent));
 
-    child->tag = 0;
+    child->tag = NULL;
     HTList_linkObject(&parent->children_notag, child, &child->_add_children_notag);
 
     return (child);
@@ -297,8 +297,8 @@ HTChildAnchor *HTAnchor_findChildAndLink(HTParentAnchor *parent,	/* May not be 0
 	    (ltype == HTInternalLink) ? " (internal link)" : "",
 	    NonNull(href)));
 
-    if (parent == 0) {
-	child = 0;
+    if (parent == NULL) {
+	child = NULL;
     } else {
 	if (non_empty(tag)) {
 	    child = HTAnchor_findNamedChild(parent->parent, tag);
@@ -685,7 +685,7 @@ BOOL HTAnchor_delete(HTParentAnchor0 *me)
 
 /*
  * Unnamed children (children_notag) have no sense without HText - delete them
- * and their links if we are about to free HText.  Document currently exists. 
+ * and their links if we are about to free HText.  Document currently exists.
  * Called within HText_free().
  */
 void HTAnchor_delete_links(HTParentAnchor *me)
@@ -712,7 +712,7 @@ void HTAnchor_delete_links(HTParentAnchor *me)
     if (!HTList_isEmpty(&me->children_notag)) {
 	cur = &me->children_notag;
 	while ((child =
-		(HTChildAnchor *) HTList_unlinkLastObject(cur)) != 0) {
+		(HTChildAnchor *) HTList_unlinkLastObject(cur)) != NULL) {
 	    deleteLinks(child);
 	    /* child allocated in HText pool, HText_free() will free it later */
 	}
@@ -786,7 +786,7 @@ static void HTParentAnchor_free(HTParentAnchor *me)
     /*
      * Original code wanted a way to clean out the HTFormat if no longer needed
      * (ref count?).  I'll leave it alone since those HTAtom objects are a
-     * little harder to know where they are being referenced all at one time. 
+     * little harder to know where they are being referenced all at one time.
      * (near static)
      */
 

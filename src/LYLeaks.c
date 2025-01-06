@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYLeaks.c,v 1.43 2018/12/27 23:48:37 Kamil.Dudka Exp $
+ * $LynxId: LYLeaks.c,v 1.44 2025/01/06 15:16:58 tom Exp $
  *
  *	Copyright (c) 1994, University of Kansas, All Rights Reserved
  *	(this file was rewritten twice - 1998/1999 and 2003/2004)
@@ -701,7 +701,7 @@ void LYLeakFree(void *vp_Alloced,
     } else {
 
 	/*
-	 * Find the pointer in the allocated list.  If not found, bad pointer. 
+	 * Find the pointer in the allocated list.  If not found, bad pointer.
 	 * If found, free list item and vp_Alloced.
 	 */
 	ALp_free = FindInList(vp_Alloced);
