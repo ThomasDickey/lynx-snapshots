@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTAlert.c,v 1.104 2025/01/06 15:57:39 tom Exp $
+ * $LynxId: HTAlert.c,v 1.106 2025/01/07 23:57:54 tom Exp $
  *
  *	Displaying messages and getting input for Lynx Browser
  *	==========================================================
@@ -106,7 +106,7 @@ void HTInfoMsg2(const char *Msg2, const char *Arg)
     _user_message(Msg2, Arg);
     if (non_empty(Msg2)) {
 	CTRACE((tfp, "Info message: "));
-	CTRACE((tfp, Msg2, Arg));
+	CTRACE((tfp, HT_FMT("%s", Msg2), Arg));
 	CTRACE((tfp, "\n"));
 	LYstore_message2(Msg2, Arg);
 	LYSleepInfo();
@@ -137,7 +137,7 @@ void HTUserMsg2(const char *Msg2, const char *Arg)
     _user_message(Msg2, Arg);
     if (non_empty(Msg2)) {
 	CTRACE((tfp, "User message: "));
-	CTRACE((tfp, Msg2, Arg));
+	CTRACE((tfp, HT_FMT("%s", Msg2), Arg));
 	CTRACE((tfp, "\n"));
 	LYstore_message2(Msg2, Arg);
 	LYSleepMsg();
@@ -200,37 +200,39 @@ static const char *sprint_bytes(char *s, off_t n, const char *was_units)
 #define TIME_HMS_LENGTH (36)
 static char *sprint_tbuf(char *s, long t)
 {
-    const char *format = ((LYTransferRate == rateEtaBYTES2 ||
-			   LYTransferRate == rateEtaKB2)
-			  ? "% 2ld%c"
-			  : "%ld%c");
+#undef MY_FMT
+#define MY_FMT ((LYTransferRate == rateEtaBYTES2 \
+		|| LYTransferRate == rateEtaKB2) \
+		  ? "% 2ld%c" \
+		  : "%ld%c")
     char *base = s;
 
     if (t < 0) {
 	strcpy(s, "forever");
     } else {
 	if (t > (3600 * 24)) {
-	    sprintf(s, format, t / (3600 * 24), 'd');
+	    sprintf(s, MY_FMT, t / (3600 * 24), 'd');
 	    s += strlen(s);
 	    t %= (3600 * 24);
 	}
 	if (t > 3600) {
-	    sprintf(s, format, t / 3600, 'h');
+	    sprintf(s, MY_FMT, t / 3600, 'h');
 	    s += strlen(s);
 	    t %= 3600;
 	}
 	if (t > 60) {
-	    sprintf(s, format, t / 60, 'm');
+	    sprintf(s, MY_FMT, t / 60, 'm');
 	    s += strlen(s);
 	    t %= 60;
 	}
 	if (s == base) {
 	    sprintf(s, "% 2ld sec", t);
 	} else if (t != 0) {
-	    sprintf(s, format, t, 's');
+	    sprintf(s, MY_FMT, t, 's');
 	}
     }
     return base;
+#undef MY_FMT
 }
 #endif /* USE_READPROGRESS */
 
@@ -325,7 +327,7 @@ void HTReadProgress(off_t bytes, off_t total)
 		 * If we know the total size of the file, we can compute
 		 * a percentage, and show a corresponding progress bar.
 		 */
-		HTSprintf0(&line, gettext("Read %s of data"), bytesp);
+		HTSprintf0(&line, LY_MSG("Read %s of data"), bytesp);
 
 		if (total > 0) {
 		    float percent = (float) bytes / (float) total;
@@ -348,16 +350,16 @@ void HTReadProgress(off_t bytes, off_t total)
 #endif
 	    default:
 		if (total > 0) {
-		    HTSprintf0(&line, gettext("Read %s of %s of data"),
+		    HTSprintf0(&line, LY_MSG("Read %s of %s of data"),
 			       bytesp, totalp);
 		} else {
-		    HTSprintf0(&line, gettext("Read %s of data"), bytesp);
+		    HTSprintf0(&line, LY_MSG("Read %s of data"), bytesp);
 		}
 
 		if (LYTransferRate != rateOFF
 		    && transfer_rate > 0) {
 		    sprint_bytes(transferp, transfer_rate, NULL);
-		    HTSprintf(&line, gettext(", %s/sec"), transferp);
+		    HTSprintf(&line, LY_MSG(", %s/sec"), transferp);
 		}
 		break;
 	    }
@@ -371,11 +373,11 @@ void HTReadProgress(off_t bytes, off_t total)
 
 		if (now - last_active >= 5)
 		    HTSprintf(&line,
-			      gettext(" (stalled for %s)"),
+			      LY_MSG(" (stalled for %s)"),
 			      sprint_tbuf(tbuf, (long) (now - last_active)));
 		if (total > 0 && transfer_rate)
 		    HTSprintf(&line,
-			      gettext(", ETA %s"),
+			      LY_MSG(", ETA %s"),
 			      sprint_tbuf(tbuf, (long) ((total - bytes) / transfer_rate)));
 	    }
 #endif
@@ -578,6 +580,8 @@ BOOL confirm_post_resub(const char *address,
 			int if_imgmap,
 			int if_file)
 {
+#undef MY_FMT
+#define MY_FMT HT_FMT("%s", msg)
     size_t len1;
     const char *msg = CONFIRM_POST_RESUBMISSION_TO;
     char buf[240];
@@ -604,30 +608,38 @@ BOOL confirm_post_resub(const char *address,
     } else if (dump_output_immediately) {
 	return (NO);
     }
+    (void) msg;
     if (maxlen >= sizeof(buf))
 	maxlen = sizeof(buf) - 1;
     if ((len1 = strlen(msg)) +
 	strlen(address) <= maxlen) {
-	sprintf(buf, msg, address);
+	sprintf(buf, MY_FMT, address);
 	return HTConfirm(buf);
     }
-    if (len1 + strlen(temp = HTParse(address, "",
-				     PARSE_ACCESS + PARSE_HOST + PARSE_PATH
-				     + PARSE_PUNCTUATION)) <= maxlen) {
-	sprintf(buf, msg, temp);
+    temp = HTParse(address, "", (PARSE_ACCESS
+				 + PARSE_HOST
+				 + PARSE_PATH
+				 + PARSE_PUNCTUATION));
+    if (temp == NULL)
+	return NO;
+    if (len1 + strlen(temp) <= maxlen) {
+	sprintf(buf, MY_FMT, temp);
 	res = HTConfirm(buf);
 	FREE(temp);
 	return (res);
     }
     FREE(temp);
     if (title && (len1 + strlen(title) <= maxlen)) {
-	sprintf(buf, msg, title);
+	sprintf(buf, MY_FMT, title);
 	return HTConfirm(buf);
     }
-    if (len1 + strlen(temp = HTParse(address, "",
-				     PARSE_ACCESS + PARSE_HOST
-				     + PARSE_PUNCTUATION)) <= maxlen) {
-	sprintf(buf, msg, temp);
+    temp = HTParse(address, "", (PARSE_ACCESS
+				 + PARSE_HOST
+				 + PARSE_PUNCTUATION));
+    if (temp == NULL)
+	return NO;
+    if (len1 + strlen(temp) <= maxlen) {
+	sprintf(buf, MY_FMT, temp);
 	res = HTConfirm(buf);
 	FREE(temp);
 	return (res);
@@ -635,13 +647,14 @@ BOOL confirm_post_resub(const char *address,
     FREE(temp);
     if ((temp = HTParse(address, "", PARSE_HOST)) && *temp &&
 	len1 + strlen(temp) <= maxlen) {
-	sprintf(buf, msg, temp);
+	sprintf(buf, MY_FMT, temp);
 	res = HTConfirm(buf);
 	FREE(temp);
 	return (res);
     }
     FREE(temp);
     return HTConfirm(CONFIRM_POST_RESUBMISSION);
+#undef MY_FMT
 }
 
 /*	Prompt for answer and get text back.		HTPrompt()
@@ -906,7 +919,8 @@ BOOL HTConfirmCookie(domain_entry * de, const char *server,
 	    namelen = (percentage * namelen) / 100;
 	    valuelen = (percentage * valuelen) / 100;
 	}
-	HTSprintf(&message, prompt, server, namelen, name, valuelen, value);
+	HTSprintf(&message, HT_FMT("%s%.*s%.*s", prompt),
+		  server, namelen, name, valuelen, value);
 	_statusline(message);
 	FREE(message);
     }

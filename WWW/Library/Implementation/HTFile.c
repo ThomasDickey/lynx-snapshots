@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFile.c,v 1.168 2025/01/06 15:26:29 tom Exp $
+ * $LynxId: HTFile.c,v 1.169 2025/01/07 15:18:17 tom Exp $
  *
  *			File Access				HTFile.c
  *			===========
@@ -184,7 +184,7 @@ static char *FormatStr(char **bufp,
 
     if (*start) {
 	sprintf(fmt, "%%%.*ss", (int) sizeof(fmt) - 3, start);
-	HTSprintf0(bufp, fmt, entry);
+	HTSprintf0(bufp, HT_FMT("%s", fmt), entry);
     } else if (*bufp && !(entry && *entry)) {
 	**bufp = '\0';
     } else if (entry) {
@@ -203,7 +203,7 @@ static char *FormatSize(char **bufp,
 	sprintf(fmt, "%%%.*s" PRI_off_t,
 		  (int) sizeof(fmt) - DigitsOf(start) - 3, start);
 
-	HTSprintf0(bufp, fmt, entry);
+	HTSprintf0(bufp, HT_FMT("%" PRI_off_t, fmt), entry);
     } else {
 	sprintf(fmt, "%" PRI_off_t, CAST_off_t (entry));
 
@@ -220,7 +220,7 @@ static char *FormatNum(char **bufp,
 
     if (*start) {
 	sprintf(fmt, "%%%.*sd", (int) sizeof(fmt) - 3, start);
-	HTSprintf0(bufp, fmt, entry);
+	HTSprintf0(bufp, HT_FMT("%d", fmt), entry);
     } else {
 	sprintf(fmt, "%d", entry);
 	StrAllocCopy(*bufp, fmt);

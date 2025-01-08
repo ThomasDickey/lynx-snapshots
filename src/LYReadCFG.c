@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYReadCFG.c,v 1.203 2025/01/06 17:44:38 tom Exp $
+ * $LynxId: LYReadCFG.c,v 1.205 2025/01/08 00:38:28 tom Exp $
  */
 #ifndef NO_RULES
 #include <HTRules.h>
@@ -434,14 +434,14 @@ static void exit_with_color_syntax(char *error_line)
 {
     unsigned int i;
 
-    fprintf(stderr, gettext("\
+    fputs(gettext("\
 Syntax Error parsing COLOR in configuration file:\n\
 The line must be of the form:\n\
 COLOR:INTEGER:FOREGROUND:BACKGROUND\n\
 \n\
 Here FOREGROUND and BACKGROUND must be one of:\n\
-The special strings 'nocolor' or 'default', or\n")
-	);
+The special strings 'nocolor' or 'default', or\n"),
+	  stderr);
     for (i = 0; i < 16; i += 4) {
 	fprintf(stderr, "%16s %16s %16s %16s\n",
 		Color_Strings[i], Color_Strings[i + 1],
@@ -761,14 +761,14 @@ static int keymap_fun(char *key)
 	} else if (efunc && strncasecomp(efunc + 1, "DIRED", 5) == 0) {
 	    if (!remap(key, strtok(func, " \t\n:#"), TRUE)) {
 		fprintf(stderr,
-			gettext("key remapping of %s to %s for %s failed\n"),
+			LY_MSG("key remapping of %s to %s for %s failed\n"),
 			key, func, efunc + 1);
 	    } else if (!strcmp("TOGGLE_HELP", func)) {
 		LYUseNoviceLineTwo = FALSE;
 	    }
 	    return 0;
 	} else if (!remap(key, strtok(func, " \t\n:#"), FALSE)) {
-	    fprintf(stderr, gettext("key remapping of %s to %s failed\n"),
+	    fprintf(stderr, LY_MSG("key remapping of %s to %s failed\n"),
 		    key, func);
 	} else {
 	    if (!strcmp("TOGGLE_HELP", func))
@@ -789,7 +789,7 @@ static int keymap_fun(char *key)
 			select_edi = (int) strtol(sselect_edi, endp, 10);
 		    if (**endp != '\0') {
 			fprintf(stderr,
-				gettext("invalid line-editor selection %s for key %s, selecting all\n"),
+				LY_MSG("invalid line-editor selection %s for key %s, selecting all\n"),
 				sselect_edi, key);
 			select_edi = 0;
 		    }
@@ -814,7 +814,7 @@ static int keymap_fun(char *key)
 		    }
 		    if (!success)
 			fprintf(stderr,
-				gettext("setting of line-editor binding for key %s (0x%x) to 0x%x for %s failed\n"),
+				LY_MSG("setting of line-editor binding for key %s (0x%x) to 0x%x for %s failed\n"),
 				key,
 				(unsigned) lkc,
 				(unsigned) lec,
@@ -829,14 +829,14 @@ static int keymap_fun(char *key)
 		if (!success) {
 		    if (lec != -1) {
 			fprintf(stderr,
-				gettext("setting of line-editor binding for key %s (0x%x) to 0x%x for %s failed\n"),
+				LY_MSG("setting of line-editor binding for key %s (0x%x) to 0x%x for %s failed\n"),
 				key,
 				(unsigned) lkc,
 				(unsigned) lec,
 				efunc);
 		    } else {
 			fprintf(stderr,
-				gettext("setting of line-editor binding for key %s (0x%x) for %s failed\n"),
+				LY_MSG("setting of line-editor binding for key %s (0x%x) for %s failed\n"),
 				key,
 				(unsigned) lkc,
 				efunc);
@@ -934,7 +934,7 @@ static int cern_rulesfile_fun(char *value)
 	return 0;
     }
     fprintf(stderr,
-	    gettext("Lynx: cannot start, CERN rules file %s is not available\n"),
+	    LY_MSG("Lynx: cannot start, CERN rules file %s is not available\n"),
 	    non_empty(rulesfile2) ? rulesfile2 : gettext("(no name)"));
     exit_immediately(EXIT_FAILURE);
     return 0;			/* though redundant, for compiler-warnings */
@@ -2085,10 +2085,10 @@ static void do_read_cfg(const char *cfg_filename,
      */
     if (nesting_level > 10) {
 	fprintf(stderr,
-		gettext("More than %d nested lynx.cfg includes -- perhaps there is a loop?!?\n"),
+		LY_MSG("More than %d nested lynx.cfg includes -- perhaps there is a loop?!?\n"),
 		nesting_level - 1);
-	fprintf(stderr, gettext("Last attempted include was '%s',\n"), cfg_filename);
-	fprintf(stderr, gettext("included from '%s'.\n"), parent_filename);
+	fprintf(stderr, LY_MSG("Last attempted include was '%s',\n"), cfg_filename);
+	fprintf(stderr, LY_MSG("included from '%s'.\n"), parent_filename);
 	exit_immediately(EXIT_FAILURE);
     }
     /*
@@ -2570,7 +2570,7 @@ int lynx_cfg_infopage(DocInfo *newdoc)
 #endif /* !NO_CONFIG_INFO */
 
 	    fprintf(fp0, "<em>%s</em>\n\n",
-		    gettext("The following is read from your lynx.cfg file."));
+		    LY_MSG("The following is read from your lynx.cfg file."));
 
 	/*
 	 * Process the configuration file.

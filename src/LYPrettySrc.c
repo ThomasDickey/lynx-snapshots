@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYPrettySrc.c,v 1.37 2025/01/06 16:27:23 tom Exp $
+ * $LynxId: LYPrettySrc.c,v 1.39 2025/01/08 00:25:37 tom Exp $
  *
  * HTML source syntax highlighting
  * by Vlad Harchev <hvv@hippo.ru>
@@ -381,10 +381,9 @@ void html_src_on_lynxcfg_reload(void)
 static void failed_init(const char *tag, int lexeme)
 {
     fprintf(stderr,
-	    gettext("parse-error while caching %s tagspec of lexeme %d\n"),
+	    LY_MSG("parse-error while caching %s tagspec of lexeme %d\n"),
 	    tag, lexeme);
-    fprintf(stderr,
-	    gettext("Use -trace -trace-mask=8 to see details in log.\n"));
+    fputs(gettext("Use -trace -trace-mask=8 to see details in log.\n"), stderr);
     exit_immediately(EXIT_FAILURE);
 }
 

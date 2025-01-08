@@ -1,4 +1,4 @@
-/* $LynxId: LYEdit.c,v 1.44 2025/01/06 15:51:59 tom Exp $ */
+/* $LynxId: LYEdit.c,v 1.45 2025/01/07 23:54:45 tom Exp $ */
 #include <HTUtils.h>
 #include <HTParse.h>
 #include <HTAlert.h>
@@ -269,7 +269,7 @@ void edit_temporary_file(char *filename,
 		     : "reason unknown")));
 	    LYFixCursesOn("show error warning:");
 	    if (rv == -1) {
-		HTUserMsg2(gettext("Error starting editor, %s"),
+		HTUserMsg2(LY_MSG("Error starting editor, %s"),
 			   LYStrerror(save_err));
 	    } else if (WIFSIGNALED(rv)) {
 		HTAlwaysAlert(NULL, gettext("Editor killed by signal"));
@@ -277,7 +277,7 @@ void edit_temporary_file(char *filename,
 		char exitcode[80];
 
 		sprintf(exitcode, "%d", WEXITSTATUS(rv));
-		HTUserMsg2(gettext("Editor returned with error status %s"),
+		HTUserMsg2(LY_MSG("Editor returned with error status %s"),
 			   exitcode);
 	    } else
 #endif

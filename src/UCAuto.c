@@ -1,5 +1,5 @@
 /*
- * $LynxId: UCAuto.c,v 1.56 2021/06/09 22:29:43 tom Exp $
+ * $LynxId: UCAuto.c,v 1.57 2025/01/07 23:30:53 tom Exp $
  *
  *  This file contains code for changing the Linux console mode.
  *  Currently some names for font files are hardwired in here.
@@ -605,7 +605,7 @@ int Find_Best_Display_Charset(int ord)
 	    return ord;		/* OK to find nothing */
 	if (!*s) {
 	    sprintf(buf,
-		    gettext("No destination for '%.80s' in CHARSET_SWITCH_RULES"),
+		    LY_MSG("No destination for '%.80s' in CHARSET_SWITCH_RULES"),
 		    name);
 	    HTInfoMsg(buf);
 	    return ord;
@@ -640,7 +640,7 @@ int Find_Best_Display_Charset(int ord)
     n = UCGetLYhndl_byMIME(buf);
     if (n < 0) {
 	sprintf(buf,
-		gettext("Unknown charset name '%.*s' in CHARSET_SWITCH_RULES"),
+		LY_MSG("Unknown charset name '%.*s' in CHARSET_SWITCH_RULES"),
 		s - r, r);
 	HTInfoMsg(buf);
 	return ord;
@@ -694,7 +694,7 @@ static int _Switch_Display_Charset(int ord, enum switch_display_charset_t really
 	if (rc == 0)
 	    goto report;
       err:
-	sprintf(msgbuf, gettext("Can't change to '%s': err=%#x=%d"), name, rc, rc);
+	sprintf(msgbuf, LY_MSG("Can't change to '%s': err=%#x=%d"), name, rc, rc);
 	HTInfoMsg(msgbuf);
 	return -1;
     }
@@ -732,7 +732,7 @@ static int _Switch_Display_Charset(int ord, enum switch_display_charset_t really
 	rc = VioGetFont(font, 0);	/* Retrieve data for current font */
 	if (rc) {
 	    sprintf(msgbuf,
-		    gettext("Can't fetch current font info: err=%#x=%d"), rc, rc);
+		    LY_MSG("Can't fetch current font info: err=%#x=%d"), rc, rc);
 	    HTInfoMsg(msgbuf);
 	    ord = ord1 = auto_display_charset;
 	    goto retry;
@@ -748,7 +748,7 @@ static int _Switch_Display_Charset(int ord, enum switch_display_charset_t really
 		charsets_directory, font->cyCell, font->cxCell, name);
 	file = fopen(fnamebuf, BIN_R);
 	if (!file) {
-	    sprintf(msgbuf, gettext("Can't open font file '%s'"), fnamebuf);
+	    sprintf(msgbuf, LY_MSG("Can't open font file '%s'"), fnamebuf);
 	    HTInfoMsg(msgbuf);
 	    ord = ord1 = auto_display_charset;
 	    goto retry;
@@ -757,7 +757,7 @@ static int _Switch_Display_Charset(int ord, enum switch_display_charset_t really
 	fseek(file, 0, SEEK_END);
 	if (ftell(file) - i != font->cbData) {
 	    fclose(file);
-	    sprintf(msgbuf, gettext("Mismatch of size of font file '%s'"), fnamebuf);
+	    sprintf(msgbuf, LY_MSG("Mismatch of size of font file '%s'"), fnamebuf);
 	    HTAlert(msgbuf);
 	    ord = ord1 = auto_display_charset;
 	    goto retry;
@@ -767,7 +767,7 @@ static int _Switch_Display_Charset(int ord, enum switch_display_charset_t really
 	fclose(file);
 	rc = VioSetFont(font, 0);	/* Put it all back.. */
 	if (rc) {
-	    sprintf(msgbuf, gettext("Can't set font: err=%#x=%d"), rc, rc);
+	    sprintf(msgbuf, LY_MSG("Can't set font: err=%#x=%d"), rc, rc);
 	    HTInfoMsg(msgbuf);
 	    ord = ord1 = auto_display_charset;
 	    font_loaded_for = -1;

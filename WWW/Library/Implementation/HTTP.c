@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTP.c,v 1.187 2025/01/06 15:22:26 tom Exp $
+ * $LynxId: HTTP.c,v 1.189 2025/01/07 23:55:21 tom Exp $
  *
  * HyperText Transfer Protocol	- Client implementation		HTTP.c
  * ===========================
@@ -138,17 +138,18 @@ static void SSL_single_prompt(char **target, const char *source)
 static void SSL_double_prompt(char **target, const char *format, const char
 			      *arg1, const char *arg2)
 {
-    HTSprintf0(target, format, arg1, arg2);
+    (void) format;
+    HTSprintf0(target, HT_FMT("%s%s", format), arg1, arg2);
     if (needs_limit(*target)) {
 	char *parg2 = limited_string(arg2, *target);
 
 	*target = NULL;
-	HTSprintf0(target, format, arg1, parg2);
+	HTSprintf0(target, HT_FMT("%s%s", format), arg1, parg2);
 	if (needs_limit(*target)) {
 	    char *parg1 = limited_string(arg1, *target);
 
 	    *target = NULL;
-	    HTSprintf0(target, format, parg1, parg2);
+	    HTSprintf0(target, HT_FMT("%s%s", format), parg1, parg2);
 	    free(parg1);
 	}
 	free(parg2);
@@ -162,7 +163,7 @@ static int HTSSLCallback(int preverify_ok, X509_STORE_CTX * x509_ctx GCC_UNUSED)
 
 #ifdef USE_X509_SUPPORT
     HTSprintf0(&msg,
-	       gettext("SSL callback:%s, preverify_ok=%d, ssl_okay=%d"),
+	       LY_MSG("SSL callback:%s, preverify_ok=%d, ssl_okay=%d"),
 	       X509_verify_cert_error_string((long) X509_STORE_CTX_get_error(x509_ctx)),
 	       preverify_ok, ssl_okay);
     _HTProgress(msg);
@@ -665,11 +666,11 @@ void strip_userid(char *host, int parse_only)
 	}
 	if (*host == '\0' && sub_delims) {
 	    HTSprintf0(&msg,
-		       gettext("User/password contains only punctuation: %s"),
+		       LY_MSG("User/password contains only punctuation: %s"),
 		       auth);
 	} else if ((fake = fake_hostname(host)) != NULL) {
 	    HTSprintf0(&msg,
-		       gettext("User/password may be confused with hostname: '%s' (e.g, '%s')"),
+		       LY_MSG("User/password may be confused with hostname: '%s' (e.g, '%s')"),
 		       auth, fake);
 	}
 	if (msg != NULL && !parse_only)
@@ -732,7 +733,7 @@ static void show_cert_issuer(X509 * peer_cert GCC_UNUSED)
     char *msg = NULL;
 
     X509_NAME_oneline(X509_get_issuer_name(peer_cert), ssl_dn, (int) sizeof(ssl_dn));
-    HTSprintf0(&msg, gettext("Certificate issued by: %s"), ssl_dn);
+    HTSprintf0(&msg, LY_MSG("Certificate issued by: %s"), ssl_dn);
     _HTProgress(msg);
     FREE(msg);
 #elif defined(USE_GNUTLS_INCL)
@@ -1155,7 +1156,7 @@ static int HTLoadHTTP(const char *arg,
 		status_sslcertcheck = 2;	/* 2 = verified peer */
 		/* I think this is cool to have in the logs -TG */
 		HTSprintf0(&msg,
-			   gettext("Verified connection to %s (cert=%s)"),
+			   LY_MSG("Verified connection to %s (cert=%s)"),
 			   ssl_host, cert_host);
 		_HTProgress(msg);
 		FREE(msg);
@@ -1205,7 +1206,7 @@ static int HTLoadHTTP(const char *arg,
 		    if (strcasecomp_asterisk(ssl_host, buf) == 0) {
 			status_sslcertcheck = 2;
 			HTSprintf0(&msg,
-				   gettext("Verified connection to %s (subj=%s)"),
+				   LY_MSG("Verified connection to %s (subj=%s)"),
 				   ssl_host, buf);
 			_HTProgress(msg);
 			FREE(msg);
@@ -1247,7 +1248,7 @@ static int HTLoadHTTP(const char *arg,
 			  strcasecomp_asterisk) (ssl_host, cert_host)) {
 			status_sslcertcheck = 2;
 			HTSprintf0(&msg,
-				   gettext("Verified connection to %s (subj=%s)"),
+				   LY_MSG("Verified connection to %s (subj=%s)"),
 				   ssl_host, cert_host);
 			_HTProgress(msg);
 			FREE(msg);
@@ -1280,7 +1281,7 @@ static int HTLoadHTTP(const char *arg,
 			      gettext("Can't find common name in certificate"));
 	} else if (status_sslcertcheck == 1) {
 	    SSL_double_prompt(&msg,
-			      gettext("SSL error:host(%s)!=cert(%s)-Continue?"),
+			      LY_MSG("SSL error:host(%s)!=cert(%s)-Continue?"),
 			      ssl_host, ssl_all_cns);
 	}
 
@@ -1295,7 +1296,7 @@ static int HTLoadHTTP(const char *arg,
 		goto done;
 	    }
 	    SSL_double_prompt(&msg,
-			      gettext("UNVERIFIED connection to %s (cert=%s)"),
+			      LY_MSG("UNVERIFIED connection to %s (cert=%s)"),
 			      ssl_host, ssl_all_cns ? ssl_all_cns : "NONE");
 	    _HTProgress(msg);
 	    FREE(msg);
@@ -1304,7 +1305,7 @@ static int HTLoadHTTP(const char *arg,
 	show_cert_issuer(peer_cert);
 
 	HTSprintf0(&msg,
-		   gettext("Secure %d-bit %s (%s) HTTP connection"),
+		   LY_MSG("Secure %d-bit %s (%s) HTTP connection"),
 		   SSL_get_cipher_bits(handle, NULL),
 		   SSL_get_cipher_version(handle),
 		   SSL_get_cipher(handle));

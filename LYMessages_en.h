@@ -1,9 +1,9 @@
 /*
- * $LynxId: LYMessages_en.h,v 1.82 2019/08/24 00:37:02 tom Exp $
+ * $LynxId: LYMessages_en.h,v 1.83 2025/01/07 23:59:28 tom Exp $
  *
  * Lynx - Hypertext navigation system
  *
- *   Copyright 1997-2019 Thomas E. Dickey
+ *   Copyright 1997-2025 Thomas E. Dickey
  *   Copyright 1992, 1993, 1994 University of Kansas
  *   Released 1995 using GNU General Public License
  */
@@ -25,7 +25,7 @@
  * translations.  When no translation is available, the English default is
  * used.
  */
-#define ALERT_FORMAT gettext("Alert!: %s")
+#define ALERT_FORMAT LY_MSG("Alert!: %s")
 #define WELCOME_MSG gettext("Welcome")
 #define REALLY_QUIT gettext("Are you sure you want to quit?")
 #ifdef VMS
@@ -54,21 +54,21 @@
 #ifdef TEXTFIELDS_MAY_NEED_ACTIVATION
 /* Inactive input fields, messages used with -tna option - kw */
 #define FORM_LINK_TEXT_ADV_MSG_INA \
- gettext("(Textfield \"%s\") Inactive.  Press <return> to activate.")
+ LY_MSG("(Textfield \"%s\") Inactive.  Press <return> to activate.")
 #define FORM_LINK_TEXT_MESSAGE_INA \
  gettext("(Text entry field) Inactive.  Press <return> to activate.")
 #define FORM_LINK_TEXTAREA_ADV_MSG_INA \
- gettext("(Textarea \"%s\") Inactive.  Press <return> to activate.")
+ LY_MSG("(Textarea \"%s\") Inactive.  Press <return> to activate.")
 #define FORM_LINK_TEXTAREA_MESSAGE_INA \
  gettext("(Textarea) Inactive.  Press <return> to activate.")
 #define FORM_LINK_TEXTAREA_ADV_MSG_INA_E \
- gettext("(Textarea \"%s\") Inactive.  Press <return> to activate (%s for editor).")
+ LY_MSG("(Textarea \"%s\") Inactive.  Press <return> to activate (%s for editor).")
 #define FORM_LINK_TEXTAREA_MESSAGE_INA_E \
- gettext("(Textarea) Inactive.  Press <return> to activate (%s for editor).")
+ LY_MSG("(Textarea) Inactive.  Press <return> to activate (%s for editor).")
 #define FORM_LINK_TEXT_SUBMIT_MESSAGE_INA \
  gettext("(Form field) Inactive.  Use <return> to edit.")
 #define FORM_TEXT_SUBMIT_MESSAGE_INA_X \
- gettext("(Form field) Inactive.  Use <return> to edit (%s to submit with no cache).")
+ LY_MSG("(Form field) Inactive.  Use <return> to edit (%s to submit with no cache).")
 #define FORM_TEXT_RESUBMIT_MESSAGE_INA \
  gettext("(Form field) Inactive. Press <return> to edit, press <return> twice to submit.")
 #define FORM_TEXT_SUBMIT_MAILTO_MSG_INA \
@@ -81,23 +81,23 @@
 #define FORM_LINK_FILE_MESSAGE \
  gettext("(File entry field) Enter filename.  Use UP or DOWN arrows or tab to move off.")
 #define FORM_LINK_TEXT_ADV_MSG \
- gettext("(Textfield \"%s\") Enter text.  Use UP or DOWN arrows or tab to move off.")
+ LY_MSG("(Textfield \"%s\") Enter text.  Use UP or DOWN arrows or tab to move off.")
 #define FORM_LINK_TEXT_MESSAGE \
- gettext("(Textfield \"%s\") Enter text.  Use UP or DOWN arrows or tab to move off.")
+ LY_MSG("(Textfield \"%s\") Enter text.  Use UP or DOWN arrows or tab to move off.")
 #define FORM_LINK_TEXTAREA_ADV_MSG \
- gettext("(Textarea \"%s\") Enter text. Use UP/DOWN arrows or TAB to move off.")
+ LY_MSG("(Textarea \"%s\") Enter text. Use UP/DOWN arrows or TAB to move off.")
 #define FORM_LINK_TEXTAREA_MESSAGE \
  gettext("(Textarea) Enter text. Use UP/DOWN arrows or TAB to move off.")
 #define FORM_LINK_TEXTAREA_ADV_MSG_E \
- gettext("(Textarea \"%s\") Enter text. Use UP/DOWN arrows or TAB to move off (%s for editor).")
+ LY_MSG("(Textarea \"%s\") Enter text. Use UP/DOWN arrows or TAB to move off (%s for editor).")
 #define FORM_LINK_TEXTAREA_MESSAGE_E \
- gettext("(Textarea) Enter text. Use UP/DOWN arrows or TAB to move off (%s for editor).")
+ LY_MSG("(Textarea) Enter text. Use UP/DOWN arrows or TAB to move off (%s for editor).")
 #define FORM_LINK_TEXT_UNM_MSG \
  gettext("UNMODIFIABLE form text field.  Use UP or DOWN arrows or tab to move off.")
 #define FORM_LINK_TEXT_SUBMIT_MESSAGE \
  gettext("(Form field) Enter text.  Use <return> to submit.")
 #define FORM_LINK_TEXT_SUBMIT_MESSAGE_X \
- gettext("(Form field) Enter text.  Use <return> to submit (%s for no cache).")
+ LY_MSG("(Form field) Enter text.  Use <return> to submit (%s for no cache).")
 #define FORM_LINK_TEXT_RESUBMIT_MESSAGE \
  gettext("(Form field) Enter text.  Use <return> to submit, arrows or tab to move off.")
 #define FORM_LINK_TEXT_SUBMIT_UNM_MSG \
@@ -111,13 +111,13 @@
 #define FORM_LINK_PASSWORD_UNM_MSG \
  gettext("UNMODIFIABLE form password.  Use UP or DOWN arrows or tab to move off.")
 #define FORM_LINK_CHECKBOX_ADV_MSG \
- gettext("(Checkbox \"%s\")   Use right-arrow or <return> to toggle.")
+ LY_MSG("(Checkbox \"%s\")   Use right-arrow or <return> to toggle.")
 #define FORM_LINK_CHECKBOX_MESSAGE \
  gettext("(Checkbox Field)   Use right-arrow or <return> to toggle.")
 #define FORM_LINK_CHECKBOX_UNM_MSG \
  gettext("UNMODIFIABLE form checkbox.  Use UP or DOWN arrows or tab to move off.")
 #define FORM_LINK_RADIO_ADV_MSG \
- gettext("(Radio Button \"%s\")   Use right-arrow or <return> to toggle.")
+ LY_MSG("(Radio Button \"%s\")   Use right-arrow or <return> to toggle.")
 #define FORM_LINK_RADIO_MESSAGE \
  gettext("(Radio Button)   Use right-arrow or <return> to toggle.")
 #define FORM_LINK_RADIO_UNM_MSG \
@@ -145,15 +145,15 @@
 #define FORM_LINK_BUTTON_MESSAGE \
  gettext("(Script button)   Use UP or DOWN arrows or tab to move off.")
 #define FORM_LINK_BUTTON_ADV_MSG \
- gettext("(Script button \"%s\")   Use UP or DOWN arrows or tab to move off.")
+ LY_MSG("(Script button \"%s\")   Use UP or DOWN arrows or tab to move off.")
 #define FORM_LINK_BUTTON_DIS_MSG \
  gettext("DISABLED Script button.  Use UP or DOWN arrows or tab to move off.")
 #define FORM_LINK_OPTION_LIST_ADV_MSG \
- gettext("(Option list \"%s\") Hit return to select option.")
+ LY_MSG("(Option list \"%s\") Hit return to select option.")
 #define FORM_LINK_OPTION_LIST_MESSAGE \
  gettext("(Option list) Hit return and use arrow keys and return to select option.")
 #define CHOICE_LIST_ADV_MSG \
- gettext("(Choice entry \"%s\") Use arrow keys and return to select option.")
+ LY_MSG("(Choice entry \"%s\") Use arrow keys and return to select option.")
 #define CHOICE_LIST_MESSAGE \
  gettext("(Choice list) Hit return and use arrow keys and return to select option.")
 #define MOUSE_CHOICE_MESSAGE \
@@ -168,23 +168,23 @@
  gettext("Reloading document.  Any form entries will be lost!")
 #define LINK_NOT_IN_FORM \
  gettext("The current link is not in a FORM")
-#define CANNOT_TRANSCODE_FORM gettext("Warning: Cannot transcode form data to charset %s!")
+#define CANNOT_TRANSCODE_FORM LY_MSG("Warning: Cannot transcode form data to charset %s!")
 
 #define NORMAL_LINK_MESSAGE \
  gettext("(NORMAL LINK)   Use right-arrow or <return> to activate.")
 #define LINK_NOT_FOUND gettext("The resource requested is not available at this time.")
 #define ENTER_LYNX_COMMAND gettext("Enter Lynx keystroke command: ")
 #define WWW_FIND_MESSAGE gettext("Looking up ")
-#define WWW_WAIT_MESSAGE gettext("Getting %s")
-#define WWW_SKIP_MESSAGE gettext("Skipping %s")
-#define WWW_USING_MESSAGE gettext("Using %s")
-#define WWW_ILLEGAL_URL_MESSAGE gettext("Illegal URL: %s")
-#define WWW_BAD_ADDR_MESSAGE gettext("Badly formed address %s")
-#define ADVANCED_URL_MESSAGE gettext("URL: %s")
+#define WWW_WAIT_MESSAGE LY_MSG("Getting %s")
+#define WWW_SKIP_MESSAGE LY_MSG("Skipping %s")
+#define WWW_USING_MESSAGE LY_MSG("Using %s")
+#define WWW_ILLEGAL_URL_MESSAGE LY_MSG("Illegal URL: %s")
+#define WWW_BAD_ADDR_MESSAGE LY_MSG("Badly formed address %s")
+#define ADVANCED_URL_MESSAGE LY_MSG("URL: %s")
 #define WWW_FAIL_MESSAGE gettext("Unable to access WWW file!!!")
-#define WWW_INDEX_MESSAGE gettext("This is a searchable index.  Use %s to search.")
+#define WWW_INDEX_MESSAGE LY_MSG("This is a searchable index.  Use %s to search.")
 #define WWW_INDEX_MORE_MESSAGE \
- gettext("--More--  This is a searchable index.  Use %s to search.")
+ LY_MSG("--More--  This is a searchable index.  Use %s to search.")
 #define BAD_LINK_NUM_ENTERED gettext("You have entered an invalid link number.")
 #define SOURCE_HELP \
  gettext("Currently viewing document source.  Press '\\' to return to rendered version.")
@@ -205,9 +205,9 @@
 #define FORM_NOVICELINE_TWO_DELBL \
  gettext("      Ctrl-U to delete text in field, [Backspace] to delete a character    ")
 #define FORM_NOVICELINE_TWO_VAR \
- gettext("    %s to delete all text in field, [Backspace] to delete a character    ")
+ LY_MSG("    %s to delete all text in field, [Backspace] to delete a character    ")
 #define FORM_NOVICELINE_TWO_DELBL_VAR \
- gettext("      %s to delete text in field, [Backspace] to delete a character    ")
+ LY_MSG("      %s to delete text in field, [Backspace] to delete a character    ")
 
 /* mailto */
 #define BAD_FORM_MAILTO gettext("Malformed mailto form submission!  Cancelled!")
@@ -301,7 +301,7 @@
 #define BOOKMARKS_DISABLED gettext("Bookmark features are currently disabled.")
 #define BOOKMARK_EXEC_DISABLED gettext("Execution via bookmarks is disabled.")
 #define BOOKMARK_FILE_NOT_DEFINED \
- gettext("Bookmark file is not defined. Use %s to see options.")
+ LY_MSG("Bookmark file is not defined. Use %s to see options.")
 #define NO_TEMP_FOR_HOTLIST \
  gettext("Unable to open tempfile for X Mosaic hotlist conversion.")
 #define BOOKMARK_OPEN_FAILED gettext("ERROR - unable to open bookmark file.")
@@ -362,8 +362,8 @@
 #define USING_DTD_1 gettext("Now using SortaSGML parsing of HTML!")
 #define ALREADY_AT_END gettext("You are already at the end of this document.")
 #define ALREADY_AT_BEGIN gettext("You are already at the beginning of this document.")
-#define ALREADY_AT_PAGE gettext("You are already at page %d of this document.")
-#define LINK_ALREADY_CURRENT gettext("Link number %d already is current.")
+#define ALREADY_AT_PAGE LY_MSG("You are already at page %d of this document.")
+#define LINK_ALREADY_CURRENT LY_MSG("Link number %d already is current.")
 #define ALREADY_AT_FIRST gettext("You are already at the first document")
 #define NO_LINKS_ABOVE gettext("There are no links above this line of the document.")
 #define NO_LINKS_BELOW gettext("There are no links below this line of the document.")
@@ -383,7 +383,7 @@
 #define POPUP_FAILED gettext("Unable to create popup window!")
 #define GOTO_DISALLOWED gettext("Goto a random URL is disallowed!")
 #define GOTO_NON_HTTP_DISALLOWED gettext("Goto a non-http URL is disallowed!")
-#define GOTO_XXXX_DISALLOWED gettext("You are not allowed to goto \"%s\" URLs")
+#define GOTO_XXXX_DISALLOWED LY_MSG("You are not allowed to goto \"%s\" URLs")
 #define URL_TO_OPEN gettext("URL to open: ")
 #define EDIT_CURRENT_GOTO gettext("Edit the current Goto URL: ")
 #define EDIT_THE_PREV_GOTO gettext("Edit the previous Goto URL: ")
@@ -403,7 +403,7 @@
 #define EDIT_CURRENT_SHORTCUT gettext("Edit the current shortcut: ")
 #define EDIT_THE_PREV_SHORTCUT gettext("Edit the previous shortcut: ")
 #define EDIT_A_PREV_SHORTCUT gettext("Edit a previous shortcut: ")
-#define KEY_NOT_MAPPED_TO_JUMP_FILE gettext("Key '%c' is not mapped to a jump file!")
+#define KEY_NOT_MAPPED_TO_JUMP_FILE LY_MSG("Key '%c' is not mapped to a jump file!")
 #define CANNOT_LOCATE_JUMP_FILE gettext("Cannot locate jump file!")
 #define CANNOT_OPEN_JUMP_FILE gettext("Cannot open jump file!")
 #define ERROR_READING_JUMP_FILE gettext("Error reading jump file!")
@@ -417,7 +417,7 @@
  gettext("Not a searchable indexed document -- press '/' to search for a text string")
 #define NO_OWNER \
  gettext("No owner is defined for this file so you cannot send a comment")
-#define NO_OWNER_USE gettext("No owner is defined. Use %s?")
+#define NO_OWNER_USE LY_MSG("No owner is defined. Use %s?")
 #define CONFIRM_COMMENT gettext("Do you wish to send a comment?")
 #define MAIL_DISALLOWED gettext("Mail is disallowed so you cannot send a comment")
 #define EDIT_DISABLED gettext("The 'e'dit command is currently disabled.")
@@ -433,13 +433,13 @@
 #define TRAV_WAS_INTERRUPTED gettext("TRAVERSAL WAS INTERRUPTED")
 #define FOLLOW_LINK_NUMBER gettext("Follow link (or goto link or page) number: ")
 #define SELECT_OPTION_NUMBER gettext("Select option (or page) number: ")
-#define OPTION_ALREADY_CURRENT gettext("Option number %d already is current.")
+#define OPTION_ALREADY_CURRENT LY_MSG("Option number %d already is current.")
 #define ALREADY_AT_OPTION_END \
  gettext("You are already at the end of this option list.")
 #define ALREADY_AT_OPTION_BEGIN \
  gettext("You are already at the beginning of this option list.")
 #define ALREADY_AT_OPTION_PAGE \
- gettext("You are already at page %d of this option list.")
+ LY_MSG("You are already at page %d of this option list.")
 #define BAD_OPTION_NUM_ENTERED gettext("You have entered an invalid option number.")
 #define BAD_HTML_USE_TRACE gettext("** Bad HTML!!  Use -trace to diagnose. **")
 #define GIVE_FILENAME gettext("Give name of file to save in")
@@ -448,13 +448,13 @@
 #define CANNOT_OPEN_OUTPUT gettext("Can't open output file!  Cancelling!")
 #define EXECUTION_DISABLED gettext("Execution is disabled.")
 #define EXECUTION_DISABLED_FOR_FILE \
- gettext("Execution is not enabled for this file.  See the Options menu (use %s).")
+ LY_MSG("Execution is not enabled for this file.  See the Options menu (use %s).")
 #define EXECUTION_NOT_COMPILED \
  gettext("Execution capabilities are not compiled into this version.")
 #define CANNOT_DISPLAY_FILE gettext("This file cannot be displayed on this terminal.")
 #define CANNOT_DISPLAY_FILE_D_OR_C \
  gettext("This file cannot be displayed on this terminal:  D)ownload, or C)ancel")
-#define MSG_DOWNLOAD_OR_CANCEL gettext("%s  D)ownload, or C)ancel")
+#define MSG_DOWNLOAD_OR_CANCEL LY_MSG("%s  D)ownload, or C)ancel")
 #define CANCELLING_FILE gettext("Cancelling file.")
 #define RETRIEVING_FILE gettext("Retrieving file.  - PLEASE WAIT -")
 #define FILENAME_PROMPT gettext("Enter a filename: ")
@@ -473,7 +473,7 @@
 #define READING_DIRECTORY gettext("Reading directory...")
 #define BUILDING_DIR_LIST gettext("Building directory listing...")
 #define SAVING gettext("Saving...")
-#define COULD_NOT_EDIT_FILE gettext("Could not edit file '%s'.")
+#define COULD_NOT_EDIT_FILE LY_MSG("Could not edit file '%s'.")
 #define COULD_NOT_ACCESS_DOCUMENT gettext("Unable to access document!")
 #define COULD_NOT_ACCESS_FILE gettext("Could not access file.")
 #define COULD_NOT_ACCESS_DIR gettext("Could not access directory.")
@@ -497,13 +497,13 @@
 #define CGI_DISABLED gettext("cgi support has been disabled.")
 #define CGI_NOT_COMPILED \
  gettext("Lynxcgi capabilities are not compiled into this version.")
-#define CANNOT_CONVERT_I_TO_O gettext("Sorry, no known way of converting %s to %s.")
+#define CANNOT_CONVERT_I_TO_O LY_MSG("Sorry, no known way of converting %s to %s.")
 #define CONNECT_SET_FAILED gettext("Unable to set up connection.")
 #define CONNECT_FAILED gettext("Unable to make connection")
 #define MALFORMED_EXEC_REQUEST \
  gettext("Executable link rejected due to malformed request.")
 #define BADCHAR_IN_EXEC_LINK \
- gettext("Executable link rejected due to `%c' character.")
+ LY_MSG("Executable link rejected due to `%c' character.")
 #define RELPATH_IN_EXEC_LINK \
  gettext("Executable link rejected due to relative path string ('../').")
 #define BADLOCPATH_IN_EXEC_LINK \
@@ -526,7 +526,7 @@
 #define SPAWNING_EDITOR_FOR_NEWS \
  gettext("Spawning your selected editor to edit news message")
 #define POST_MSG_PROMPT gettext("Post this message?")
-#define APPEND_SIG_FILE gettext("Append '%s'?")
+#define APPEND_SIG_FILE LY_MSG("Append '%s'?")
 #define POSTING_TO_NEWS gettext("Posting to newsgroup(s)...")
 #ifdef VMS
 #define HAVE_UNREAD_MAIL_MSG gettext("*** You have unread mail. ***")
@@ -550,12 +550,12 @@
 #define MAILING_FILE gettext("Mailing file.  Please wait...")
 #define MAIL_REQUEST_FAILED gettext("ERROR - Unable to mail file")
 #define CONFIRM_LONG_SCREEN_PRINT \
- gettext("File is %d screens long.  Are you sure you want to print?")
+ LY_MSG("File is %d screens long.  Are you sure you want to print?")
 #define PRINT_REQUEST_CANCELLED gettext("Print request cancelled!!!")
 #define PRESS_RETURN_TO_BEGIN gettext("Press <return> to begin: ")
 #define PRESS_RETURN_TO_FINISH gettext("Press <return> to finish: ")
 #define CONFIRM_LONG_PAGE_PRINT \
- gettext("File is %d pages long.  Are you sure you want to print?")
+ LY_MSG("File is %d pages long.  Are you sure you want to print?")
 #define CHECK_PRINTER \
  gettext("Be sure your printer is on-line.  Press <return> to start printing:")
 #define FILE_ALLOC_FAILED gettext("ERROR - Unable to allocate file space!!!")
@@ -578,7 +578,7 @@
  gettext("Screen height must be at least 22 lines for the Options menu!")
 #endif /* !NO_OPTION_MENU */
 #define NEED_ADVANCED_USER_MODE gettext("That key requires Advanced User mode.")
-#define CONTENT_TYPE_MSG gettext("Content-type: %s")
+#define CONTENT_TYPE_MSG LY_MSG("Content-type: %s")
 #define COMMAND_PROMPT gettext("Command: ")
 #define COMMAND_UNKNOWN gettext("Unknown or ambiguous command")
 #define VERSION_SEGMENT gettext(" Version ")
@@ -611,7 +611,7 @@
 #define BOOKMARK_CHANGE_DISALLOWED \
  gettext("You are not allowed to change the bookmark file!")
 #define COLOR_TOGGLE_DISABLED gettext("Terminal does not support color")
-#define COLOR_TOGGLE_DISABLED_FOR_TERM gettext("Your '%s' terminal does not support color.")
+#define COLOR_TOGGLE_DISABLED_FOR_TERM LY_MSG("Your '%s' terminal does not support color.")
 #define DOTFILE_ACCESS_DISABLED gettext("Access to dot files is disabled!")
 #define UA_NO_LYNX_WARNING \
  gettext("User-Agent string does not contain \"Lynx\" or \"L_y_n_x\"")
@@ -631,10 +631,10 @@
 #define ERROR_UNCOMPRESSING_TEMP gettext("Error uncompressing temporary file!")
 #define UNSUPPORTED_URL_SCHEME gettext("Unsupported URL scheme!")
 #define UNSUPPORTED_DATA_URL gettext("Unsupported data: URL!  Use SHOWINFO, for now.")
-#define TOO_MANY_REDIRECTIONS gettext("Redirection limit of %d URL's reached.")
+#define TOO_MANY_REDIRECTIONS LY_MSG("Redirection limit of %d URL's reached.")
 #define ILLEGAL_REDIRECTION_URL gettext("Illegal redirection URL received from server!")
 #define	SERVER_ASKED_FOR_REDIRECTION \
- gettext("Server asked for %d redirection of POST content to")
+ LY_MSG("Server asked for %d redirection of POST content to")
 #define REDIRECTION_WITH_BAD_LOCATION "Got redirection with a bad Location header."
 #define REDIRECTION_WITH_NO_LOCATION "Got redirection with no Location header."
 #define	PROCEED_GET_CANCEL gettext("P)roceed, use G)ET or C)ancel ")
@@ -646,21 +646,21 @@
 #define CONFIRM_POST_RESUBMISSION \
  gettext("Document from Form with POST content.  Resubmit?")
 #define CONFIRM_POST_RESUBMISSION_TO \
- gettext("Resubmit POST content to %s ?")
+ LY_MSG("Resubmit POST content to %s ?")
 #define CONFIRM_POST_LIST_RELOAD \
- gettext("List from document with POST data.  Reload %s ?")
+ LY_MSG("List from document with POST data.  Reload %s ?")
 #define CONFIRM_POST_DOC_HEAD \
  gettext("Document from POST action, HEAD may not be understood.  Proceed?")
 #define CONFIRM_POST_LINK_HEAD \
  gettext("Form submit action is POST, HEAD may not be understood.  Proceed?")
 #define CONFIRM_WO_PASSWORD gettext("Proceed without a username and password?")
-#define CONFIRM_PROCEED gettext("Proceed (%s)?")
+#define CONFIRM_PROCEED LY_MSG("Proceed (%s)?")
 #define CANNOT_POST gettext("Cannot POST to this host.")
 #define IGNORED_POST gettext("POST not supported for this URL - ignoring POST data!")
 #define DISCARDING_POST_DATA gettext("Discarding POST data...")
 #define WILL_NOT_RELOAD_DOC gettext("Document will not be reloaded!")
 #define	LOCATION_HEADER gettext("Location: ")
-#define STRING_NOT_FOUND gettext("'%s' not found!")
+#define STRING_NOT_FOUND LY_MSG("'%s' not found!")
 #define MULTIBOOKMARKS_DEFAULT gettext("Default Bookmark File")
 #define MULTIBOOKMARKS_SMALL gettext("Screen too small! (8x35 min)")
 #define MULTIBOOKMARKS_SAVE gettext("Select destination or ^G to Cancel: ")
@@ -669,10 +669,10 @@
 #define MULTIBOOKMARKS_SELF \
  gettext("Reproduce L)ink in this bookmark file or C)ancel? (l,c): ")
 #define MULTIBOOKMARKS_DISALLOWED gettext("Multiple bookmark support is not available.")
-#define MULTIBOOKMARKS_SHEAD_MASK gettext(" Select Bookmark (screen %d of %d)")
+#define MULTIBOOKMARKS_SHEAD_MASK LY_MSG(" Select Bookmark (screen %d of %d)")
 #define MULTIBOOKMARKS_SHEAD gettext("       Select Bookmark")
 #define MULTIBOOKMARKS_EHEAD_MASK \
- gettext("Editing Bookmark DESCRIPTION and FILEPATH (%d of 2)")
+ LY_MSG("Editing Bookmark DESCRIPTION and FILEPATH (%d of 2)")
 #define MULTIBOOKMARKS_EHEAD \
  gettext("         Editing Bookmark DESCRIPTION and FILEPATH")
 #define MULTIBOOKMARKS_LETTER gettext("Letter: ")
@@ -720,11 +720,11 @@
 
 /* Cookies messages */
 #define ADVANCED_COOKIE_CONFIRMATION \
- gettext("%s cookie: %.*s=%.*s  Allow? (Y/N/Always/neVer)")
+ LY_MSG("%s cookie: %.*s=%.*s  Allow? (Y/N/Always/neVer)")
 #define INVALID_COOKIE_DOMAIN_CONFIRMATION \
- gettext("Accept invalid cookie domain=%s for '%s'?")
+ LY_MSG("Accept invalid cookie domain=%s for '%s'?")
 #define INVALID_COOKIE_PATH_CONFIRMATION \
- gettext("Accept invalid cookie path=%s as a prefix of '%s'?")
+ LY_MSG("Accept invalid cookie path=%s as a prefix of '%s'?")
 #define ALLOWING_COOKIE gettext("Allowing this cookie.")
 #define REJECTING_COOKIE gettext("Rejecting this cookie.")
 #define COOKIE_JAR_IS_EMPTY gettext("The Cookie Jar is empty.")
@@ -750,15 +750,15 @@
 #define DELETE_DOMAIN_SET_ALLOW_OR_CANCEL \
  gettext("D)elete domain, set allow A)lways/P)rompt/neV)er, or C)ancel? ")
 #define DOMAIN_COOKIES_EATEN gettext("All cookies in the domain have been eaten!")
-#define ALWAYS_ALLOWING_COOKIES gettext("'A'lways allowing from domain '%s'.")
-#define NEVER_ALLOWING_COOKIES gettext("ne'V'er allowing from domain '%s'.")
-#define PROMPTING_TO_ALLOW_COOKIES gettext("'P'rompting to allow from domain '%s'.")
+#define ALWAYS_ALLOWING_COOKIES LY_MSG("'A'lways allowing from domain '%s'.")
+#define NEVER_ALLOWING_COOKIES LY_MSG("ne'V'er allowing from domain '%s'.")
+#define PROMPTING_TO_ALLOW_COOKIES LY_MSG("'P'rompting to allow from domain '%s'.")
 #define DELETE_ALL_COOKIES_IN_DOMAIN gettext("Delete all cookies in this domain?")
 #define ALL_COOKIES_EATEN gettext("All of the cookies in the jar have been eaten!")
 
 #define PORT_NINETEEN_INVALID gettext("Port 19 not permitted in URLs.")
 #define PORT_TWENTYFIVE_INVALID gettext("Port 25 not permitted in URLs.")
-#define PORT_INVALID gettext("Port %lu not permitted in URLs.")
+#define PORT_INVALID LY_MSG("Port %lu not permitted in URLs.")
 #define URL_PORT_BAD gettext("URL has a bad port field.")
 #define HTML_STACK_OVERRUN gettext("Maximum nesting of HTML elements exceeded.")
 #define BAD_PARTIAL_REFERENCE gettext("Bad partial reference!  Stripping lead dots.")
@@ -795,7 +795,7 @@
 #define GOPHER_CSO_INDEX        gettext("CSO index")
 #define GOPHER_CSO_INDEX_SUBTITLE gettext("\nThis is a searchable index of a CSO database.\n")
 #define GOPHER_CSO_SEARCH_RESULTS gettext("CSO Search Results")
-#define GOPHER_CSO_SEEK_FAILED  gettext("Seek fail on %s\n")
+#define GOPHER_CSO_SEEK_FAILED  LY_MSG("Seek fail on %s\n")
 #define GOPHER_CSO_SOLICIT_KEYWORDS gettext("\nPress the 's' key and enter search keywords.\n")
 #define GOPHER_INDEX_SUBTITLE   gettext("\nThis is a searchable Gopher index.\n")
 #define GOPHER_INDEX_TITLE      gettext("Gopher index")
@@ -815,17 +815,17 @@
 #define FAILED_CANNOT_POST_SSL  gettext("This client does not contain support for posting to news with SSL.")
 
 /* HTStyle.c */
-#define STYLE_DUMP_FONT         gettext("Style %d `%s' SGML:%s.  Font %s %.1f point.\n")
-#define STYLE_DUMP_INDENT       gettext("\tIndents: first=%.0f others=%.0f, Height=%.1f Desc=%.1f\n"
-#define STYLE_DUMP_ALIGN        gettext("\tAlign=%d, %d tabs. (%.0f before, %.0f after)\n")
-#define STYLE_DUMP_TAB          gettext("\t\tTab kind=%d at %.0f\n")
+#define STYLE_DUMP_FONT         LY_MSG("Style %d `%s' SGML:%s.  Font %s %.1f point.\n")
+#define STYLE_DUMP_INDENT       LY_MSG("\tIndents: first=%.0f others=%.0f, Height=%.1f Desc=%.1f\n"
+#define STYLE_DUMP_ALIGN        LY_MSG("\tAlign=%d, %d tabs. (%.0f before, %.0f after)\n")
+#define STYLE_DUMP_TAB          LY_MSG("\t\tTab kind=%d at %.0f\n")
 
 /* HTTP.c */
 #define FAILED_NEED_PASSWD      gettext("Can't proceed without a username and password.")
 #define FAILED_RETRY_WITH_AUTH  gettext("Can't retry with authorization!  Contact the server's WebMaster.")
 #define FAILED_RETRY_WITH_PROXY gettext("Can't retry with proxy authorization!  Contact the server's WebMaster.")
 #define HTTP_RETRY_WITH_PROXY   gettext("Retrying with proxy authorization information.")
-#define SSL_FORCED_PROMPT	gettext("SSL error:%s-Continue?")
+#define SSL_FORCED_PROMPT	LY_MSG("SSL error:%s-Continue?")
 
 /* HTWAIS.c */
 #define HTWAIS_MESSAGE_TOO_BIG  gettext("HTWAIS: Return message too large.")
@@ -833,9 +833,9 @@
 
 /* Miscellaneous status */
 #define RETRYING_AS_HTTP0       gettext("Retrying as HTTP0 request.")
-#define TRANSFERRED_X_BYTES     gettext("Transferred %d bytes")
+#define TRANSFERRED_X_BYTES     LY_MSG("Transferred %d bytes")
 #define TRANSFER_COMPLETE       gettext("Data transfer complete")
-#define FAILED_READING_KEYMAP   gettext("Error processing line %d of %s\n")
+#define FAILED_READING_KEYMAP   LY_MSG("Error processing line %d of %s\n")
 
 /* Lynx internal page titles */
 #define ADDRLIST_PAGE_TITLE	gettext("Address List Page")

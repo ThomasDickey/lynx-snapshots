@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMainLoop.c,v 1.257 2025/01/06 16:15:43 tom Exp $
+ * $LynxId: LYMainLoop.c,v 1.258 2025/01/08 00:06:03 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTAccess.h>
@@ -588,7 +588,7 @@ static int do_change_link(void)
 	    char *msgtmp = NULL;
 
 	    HTSprintf0(&msgtmp,
-		       gettext("Internal error: Invalid mouse link %d!"),
+		       LY_MSG("Internal error: Invalid mouse link %d!"),
 		       mouse_tmp);
 	    HTAlert(msgtmp);
 	    FREE(msgtmp);
@@ -3591,7 +3591,7 @@ static BOOLEAN check_JUMP_param(char **url_template)
 
 	CTRACE((tfp, "Prompt for query param%d: %s\n", param, result));
 
-	sprintf(prompt, gettext("Query parameter %d: "), param++);
+	sprintf(prompt, LY_MSG("Query parameter %d: "), param++);
 	statusline(prompt);
 	BStrCopy0(input, "");
 
@@ -6820,7 +6820,7 @@ int mainloop(void)
 		    if (!dump_output_immediately)
 			cleanup();
 		    fprintf(fp,
-			    gettext("Fatal error - could not open output file %s\n"),
+			    LY_MSG("Fatal error - could not open output file %s\n"),
 			    cfile);
 		    CleanupMainLoop();
 		    if (!dump_output_immediately) {
@@ -7746,7 +7746,7 @@ int mainloop(void)
 		goto new_cmd;
 	    break;
 #else
-	(void) key_count;
+	    (void) key_count;
 #endif
 
 #ifdef USE_MAXSCREEN_TOGGLE

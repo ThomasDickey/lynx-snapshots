@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYPrint.c,v 1.110 2025/01/06 16:16:35 tom Exp $
+ * $LynxId: LYPrint.c,v 1.112 2025/01/07 23:46:16 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTAccess.h>
@@ -283,7 +283,9 @@ static BOOLEAN confirm_by_pages(const char *prompt,
     if (pages > 4) {
 	char *msg = NULL;
 
-	HTSprintf0(&msg, prompt, pages);
+	HTSprintf0(&msg, HT_FMT("%d", prompt), pages);
+	(void) prompt;
+
 	c = HTConfirmDefault(msg, YES);
 	FREE(msg);
 
@@ -953,7 +955,7 @@ static void send_file_to_printer(DocInfo *newdoc,
     signal(SIGINT, cleanup_sig);
 #endif /* !VMS */
 #ifdef SH_EX
-    fprintf(stdout, gettext(" Print job complete.\n"));
+    fprintf(stdout, LY_MSG(" Print job complete.\n"));
     fflush(stdout);
 #endif
     SetOutputMode(O_BINARY);

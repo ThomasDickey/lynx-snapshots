@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYHistory.c,v 1.95 2025/01/06 16:16:35 tom Exp $
+ * $LynxId: LYHistory.c,v 1.96 2025/01/07 15:21:22 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTP.h>
@@ -1045,7 +1045,7 @@ void LYstore_message2(const char *message,
     if (message != NULL) {
 	char *temp = NULL;
 
-	HTSprintf0(&temp, message, NonNull(argument));
+	HTSprintf0(&temp, HT_FMT("%s", message), NonNull(argument));
 	to_stack(temp);
     }
 }

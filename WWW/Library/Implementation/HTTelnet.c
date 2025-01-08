@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTelnet.c,v 1.41 2013/11/28 11:15:19 tom Exp $
+ * $LynxId: HTTelnet.c,v 1.42 2025/01/07 18:36:05 tom Exp $
  *
  *		Telnet Access, Rlogin, etc			HTTelnet.c
  *		==========================
@@ -110,9 +110,9 @@ static int remote_session(char *acc_method, char *host)
 
 	CTRACE((tfp, "HTTelnet: Invalid hostname %s!\n", host));
 	HTSprintf0(&prefix,
-		   gettext("remote %s session:"), acc_method);
+		   LY_MSG("remote %s session:"), acc_method);
 	HTSprintf0(&line,
-		   gettext("Invalid hostname %s"), host);
+		   LY_MSG("Invalid hostname %s"), host);
 	HTAlwaysAlert(prefix, line);
 	FREE(prefix);
 	FREE(line);

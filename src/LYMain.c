@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMain.c,v 1.302 2025/01/06 17:04:34 tom Exp $
+ * $LynxId: LYMain.c,v 1.305 2025/01/08 00:49:51 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTP.h>
@@ -1543,7 +1543,7 @@ int main(int argc,
      */
     if (!LYCanReadFile(lynx_cfg_file)) {
 	fprintf(stderr,
-		gettext("\nConfiguration file \"%s\" is not available.\n\n"),
+		LY_MSG("\nConfiguration file \"%s\" is not available.\n\n"),
 		lynx_cfg_file);
 	exit_immediately(EXIT_FAILURE);
     }
@@ -1553,7 +1553,7 @@ int main(int argc,
      * CHARTRANS handling.  - KW
      */
     if (!LYCharSetsDeclared()) {
-	fprintf(stderr, gettext("\nLynx character sets not declared.\n\n"));
+	fputs(gettext("\nLynx character sets not declared.\n\n"), stderr);
 	exit_immediately(EXIT_FAILURE);
     }
     /*
@@ -1709,9 +1709,8 @@ int main(int argc,
 	}
 	if (ignored) {
 	    fprintf(stderr,
-		    gettext("Ignored %d characters from standard input.\n"), ignored);
-	    fprintf(stderr,
-		    gettext("Use \"-stdin\" or \"-\" to tell how to handle piped input.\n"));
+		    LY_MSG("Ignored %d characters from standard input.\n"), ignored);
+	    fputs(gettext("Use \"-stdin\" or \"-\" to tell how to handle piped input.\n"), stderr);
 	}
     }
 #endif /* HAVE_TTYNAME */
@@ -2672,7 +2671,7 @@ static int convert_to_fun(char *next_arg)
 		    chndl = UCLYhndl_for_unrec;
 		if (chndl < 0) {
 		    fprintf(stderr,
-			    gettext("Lynx: ignoring unrecognized charset=%s\n"), cp2);
+			    LY_MSG("Lynx: ignoring unrecognized charset=%s\n"), cp2);
 		} else {
 		    current_char_set = chndl;
 		}
@@ -2716,7 +2715,7 @@ static int display_charset_fun(char *next_arg)
 #endif
     if (i < 0) {		/* do nothing here: so fallback to lynx.cfg */
 	fprintf(stderr,
-		gettext("Lynx: ignoring unrecognized charset=%s\n"), next_arg);
+		LY_MSG("Lynx: ignoring unrecognized charset=%s\n"), next_arg);
     } else
 	current_char_set = i;
     return 0;
@@ -3233,7 +3232,7 @@ static int version_fun(char *next_arg GCC_UNUSED)
     SetLocale();
     SetOutputMode(O_TEXT);
 
-    HTSprintf0(&result, gettext("%s Version %s (%s)"),
+    HTSprintf0(&result, LY_MSG("%s Version %s (%s)"),
 	       LYNX_NAME, LYNX_VERSION,
 	       LYVersionDate());
 
@@ -3274,7 +3273,7 @@ static int version_fun(char *next_arg GCC_UNUSED)
  * systems, according to predefined compiler symbols.
  */
 #ifdef SYSTEM_NAME
-    printf(gettext("Built on %s%s.\n"), SYSTEM_NAME, BUILDSTAMP);
+    printf(LY_MSG("Built on %s%s.\n"), SYSTEM_NAME, BUILDSTAMP);
 #elif defined(__CYGWIN__)
     printf("Compiled by CYGWIN%s.\n", BUILDSTAMP);
 #elif defined(__BORLANDC__)
@@ -4150,8 +4149,8 @@ static void print_help_and_exit(int exit_status)
 
     SetOutputMode(O_TEXT);
 
-    fprintf(stdout, gettext("USAGE: %s [options] [file]\n"), pgm);
-    fprintf(stdout, gettext("Options are:\n"));
+    fprintf(stdout, LY_MSG("USAGE: %s [options] [file]\n"), pgm);
+    fputs(gettext("Options are:\n"), stdout);
 #ifdef VMS
     print_help_strings("",
 		       "receive the arguments from stdin (enclose\n\
@@ -4454,7 +4453,7 @@ static BOOL parse_arg(char **argv,
     if (pgm == NULL)
 	pgm = "LYNX";
 
-    fprintf(stderr, gettext("%s: Invalid Option: %s\n"), pgm, argv[0]);
+    fprintf(stderr, LY_MSG("%s: Invalid Option: %s\n"), pgm, argv[0]);
     print_help_and_exit(-1);
     return FALSE;
 }

@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTString.c,v 1.83 2025/01/06 15:38:51 tom Exp $
+ * $LynxId: HTString.c,v 1.84 2025/01/08 01:19:36 tom Exp $
  *
  *	Case-independent string comparison		HTString.c
  *
@@ -938,6 +938,95 @@ char *HTSprintf0(char **pstr, const char *fmt, ...)
 
     return (result);
 }
+
+#if LY_TEST_FMTS == 1
+/*
+ * Check if the parameter points to the beginning of a conversion
+ * specification, ignoring "%%". 
+ */
+static BOOL is_format(const char *source)
+{
+    BOOL result = FALSE;
+
+    if (source != NULL && source[0] == '%' && source[1] != '%')
+	result = TRUE;
+    return result;
+}
+
+/*
+ * Skip to the next conversion specifier, returning NULL if no more are found.
+ */
+static const char *next_format(const char *source)
+{
+    if (source != NULL) {
+	if (is_format(source))
+	    ++source;
+	while (*source != '\0' && !is_format(source))
+	    ++source;
+	if (*source == '\0')
+	    source = NULL;
+    }
+    return source;
+}
+
+/*
+ * Compare the conversion specifier to which expect/actual point.
+ */
+static BOOL same_format(const char *expect, const char *actual)
+{
+    BOOL result = FALSE;
+
+    if (expect != NULL && actual != NULL) {
+	result = TRUE;
+	while (*expect != '\0' && *actual != '\0') {
+	    if (*expect != *actual) {
+		result = FALSE;
+		break;
+	    }
+	    if (strchr("diouxXeEfFgGcsp", *expect) != NULL)
+		break;
+	    expect++;
+	    actual++;
+	}
+    }
+    return result;
+}
+
+/*
+ * At runtime, compare the reference 'expect' format to 'actual', to log cases
+ * of missing or unexpected parameters, e.g., due to a coding error or problem
+ * with message translation.
+ */
+const char *LYtextFmts(const char *expect, const char *actual)
+{
+    const char *result = actual;
+
+    if (TRACE) {
+	const char *assume = expect;
+	BOOL problem = FALSE;
+
+	if (!is_format(expect))
+	    expect = next_format(expect);
+	if (!is_format(actual))
+	    actual = next_format(actual);
+	while (expect != NULL && actual != NULL) {
+	    if (!same_format(expect, actual)) {
+		problem = TRUE;
+		break;
+	    }
+	    expect = next_format(expect);
+	    actual = next_format(actual);
+	}
+	if (!problem && (expect != NULL || actual != NULL))
+	    problem = TRUE;
+	if (problem) {
+	    CTRACE((tfp, "LYtextFmts \"%s\" vs \"%s\"\n", assume, result));
+	}
+    }
+
+    return result;
+}
+#endif
 
 /*
  * Returns a quoted or escaped form of the given parameter, suitable for use in

@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTCP.c,v 1.170 2025/01/06 15:32:59 tom Exp $
+ * $LynxId: HTTCP.c,v 1.171 2025/01/07 22:55:07 tom Exp $
  *
  *			Generic Communication Code		HTTCP.c
  *			==========================
@@ -1879,7 +1879,7 @@ int HTDoConnect(const char *url,
 	url = socks5_new_url;
 
 	HTSprintf0(&socks5_protocol,
-		   gettext("(for %s at %s) SOCKS5"),
+		   LY_MSG("(for %s at %s) SOCKS5"),
 		   protocol, socks5_host);
 	protocol = socks5_protocol;
     }
@@ -1906,7 +1906,7 @@ int HTDoConnect(const char *url,
     /* HTParseInet() is useless! */
     res0 = HTGetAddrInfo(host, default_port);
     if (res0 == NULL) {
-	HTSprintf0(&line, gettext("Unable to locate remote host %s."), host);
+	HTSprintf0(&line, LY_MSG("Unable to locate remote host %s."), host);
 	_HTProgress(line);
 	status = HT_NO_DATA;
 	goto cleanup;
@@ -1920,10 +1920,10 @@ int HTDoConnect(const char *url,
 		 * but not HTAlert, because typically there will be other
 		 * alerts from the callers.  - kw
 		 */
-		HTUserMsg2(gettext("Invalid hostname %s"), host);
+		HTUserMsg2(LY_MSG("Invalid hostname %s"), host);
 	    } else {
 		HTSprintf0(&line,
-			   gettext("Unable to locate remote host %s."), host);
+			   LY_MSG("Unable to locate remote host %s."), host);
 		_HTProgress(line);
 	    }
 	    status = HT_NO_DATA;
@@ -1932,7 +1932,7 @@ int HTDoConnect(const char *url,
     }
 #endif /* INET6 */
 
-    HTSprintf0(&line, gettext("Making %s connection to %s"), protocol, host);
+    HTSprintf0(&line, LY_MSG("Making %s connection to %s"), protocol, host);
     _HTProgress(line);
 
     /*
@@ -1956,7 +1956,7 @@ int HTDoConnect(const char *url,
 			portbuf, (socklen_t) sizeof(portbuf),
 			NI_NUMERICHOST | NI_NUMERICSERV);
 	    HTSprintf0(&line,
-		       gettext("socket failed: family %d addr %s port %s."),
+		       LY_MSG("socket failed: family %d addr %s port %s."),
 		       res->ai_family, hostbuf, portbuf);
 	    _HTProgress(line);
 	    continue;
@@ -2274,7 +2274,7 @@ int HTDoConnect(const char *url,
 	}
 
 	/* RFC 1928: CONNECT request */
-	HTSprintf0(&line, gettext("SOCKS5: connecting to %s"), socks5_host);
+	HTSprintf0(&line, LY_MSG("SOCKS5: connecting to %s"), socks5_host);
 	_HTProgress(line);
 	pbuf[0] = 0x05;		/* VER: protocol version: X'05' */
 	pbuf[1] = 0x01;		/* CMD: CONNECT X'01' */

@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFTP.c,v 1.151 2025/01/06 15:32:59 tom Exp $
+ * $LynxId: HTFTP.c,v 1.153 2025/01/07 22:55:07 tom Exp $
  *
  *			File Transfer Protocol (FTP) Client
  *			for a WorldWideWeb browser
@@ -867,7 +867,7 @@ static int get_connection(const char *arg,
 		    !user_entered_password) {
 
 		    StrAllocCopy(last_username_and_host, tmp);
-		    HTSprintf0(&tmp, gettext("Enter password for user %s@%s:"),
+		    HTSprintf0(&tmp, LY_MSG("Enter password for user %s@%s:"),
 			       username, p1);
 		    FREE(user_entered_password);
 		    user_entered_password = HTPromptPassword(tmp, NULL);
@@ -2671,7 +2671,7 @@ static char *FormatStr(char **bufp,
 
     if (*start) {
 	sprintf(fmt, "%%%.*ss", (int) sizeof(fmt) - 3, start);
-	HTSprintf(bufp, fmt, value);
+	HTSprintf(bufp, HT_FMT("%s", fmt), value);
     } else if (*bufp && !(value && *value)) {
 	;
     } else if (value) {
@@ -2690,7 +2690,7 @@ static char *FormatSize(char **bufp,
 	sprintf(fmt, "%%%.*s" PRI_off_t,
 		  (int) sizeof(fmt) - DigitsOf(start) - 3, start);
 
-	HTSprintf(bufp, fmt, value);
+	HTSprintf(bufp, HT_FMT("%" PRI_off_t, fmt), value);
     } else {
 	sprintf(fmt, "%" PRI_off_t, CAST_off_t (value));
 
@@ -2708,7 +2708,7 @@ static char *FormatNum(char **bufp,
     if (*start) {
 	sprintf(fmt, "%%%.*sld",
 		(int) sizeof(fmt) - DigitsOf(start) - 3, start);
-	HTSprintf(bufp, fmt, value);
+	HTSprintf(bufp, HT_FMT("%ld", fmt), value);
     } else {
 	sprintf(fmt, "%lu", value);
 	StrAllocCat(*bufp, fmt);
@@ -3063,7 +3063,7 @@ static int read_directory(HTParentAnchor *parent,
 	    BytesReceived += chunk->size;
 	    if (BytesReceived > BytesReported + 1024) {
 #ifdef _WINDOWS
-		sprintf(NumBytes, gettext("Transferred %d bytes (%5d)"),
+		sprintf(NumBytes, LY_MSG("Transferred %d bytes (%5d)"),
 			BytesReceived, ws_read_per_sec);
 #else
 		sprintf(NumBytes, TRANSFERRED_X_BYTES, BytesReceived);

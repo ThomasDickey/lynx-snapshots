@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTGopher.c,v 1.78 2025/01/06 15:47:35 tom Exp $
+ * $LynxId: HTGopher.c,v 1.80 2025/01/07 15:25:47 tom Exp $
  *
  *			GOPHER ACCESS				HTGopher.c
  *			=============
@@ -373,18 +373,19 @@ static void parse_menu(const char *arg GCC_UNUSED,
 		       (gtype != GOPHER_DUPLICATE ||
 			this_type != GOPHER_ERROR)) {
 		char *address = NULL;
-		const char *format = *selector ? "%s//%s@%s/" : "%s//%s/";
 
 		if (gtype == GOPHER_TELNET) {
 		    PUTS(" (TEL) ");
 		    if (*selector == '/')
 			++selector;
-		    HTSprintf0(&address, format, STR_TELNET_URL, selector, host);
+		    HTSprintf0(&address, "%s//%s%s%s/", STR_TELNET_URL,
+			       selector, (*selector ? "@" : ""), host);
 		} else if (gtype == GOPHER_TN3270) {
 		    PUTS("(3270) ");
 		    if (*selector == '/')
 			++selector;
-		    HTSprintf0(&address, format, STR_TN3270_URL, selector, host);
+		    HTSprintf0(&address, "%s//%s%s%s/", STR_TN3270_URL,
+			       selector, (*selector ? "@" : ""), host);
 		} else {	/* If parsed ok */
 		    char *r;
 

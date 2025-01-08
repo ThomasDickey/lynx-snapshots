@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYLocal.c,v 1.136 2025/01/06 16:34:28 tom Exp $
+ * $LynxId: LYLocal.c,v 1.138 2025/01/08 00:37:39 tom Exp $
  *
  *  Routines to manipulate the local filesystem.
  *  Written by: Rick Mallett, Carleton University
@@ -286,7 +286,7 @@ static BOOLEAN cannot_stat(const char *name)
 {
     char *tmpbuf = NULL;
 
-    HTSprintf0(&tmpbuf, gettext("Unable to get status of '%s'."), name);
+    HTSprintf0(&tmpbuf, LY_MSG("Unable to get status of '%s'."), name);
     HTAlert(tmpbuf);
     FREE(tmpbuf);
     return FALSE;
@@ -453,7 +453,7 @@ static int LYExecv(const char *path,
 
     switch (pid) {
     case -1:
-	HTSprintf0(&tmpbuf, gettext("Unable to %s due to system error!"), msg);
+	HTSprintf0(&tmpbuf, LY_MSG("Unable to %s due to system error!"), msg);
 	rc = 0;
 	break;			/* don't fall thru! - KW */
 
@@ -487,7 +487,7 @@ static int LYExecv(const char *path,
 	    || (WIFSIGNALED(wstatus)
 		&& (WTERMSIG(wstatus) > 0))) {	/* error return */
 	    HTSprintf0(&tmpbuf,
-		       gettext("Probable failure to %s due to system error!"),
+		       LY_MSG("Probable failure to %s due to system error!"),
 		       msg);
 	    rc = 0;
 	}
@@ -552,7 +552,7 @@ static int remove_file(char *path)
 			 "-f",
 			 path,
 			 NULL);
-	HTSprintf0(&tmpbuf, gettext("remove %s"), path);
+	HTSprintf0(&tmpbuf, LY_MSG("remove %s"), path);
 	code = LYExecv(program, args, tmpbuf);
 	FREE(tmpbuf);
 	free_argv(args);
@@ -575,7 +575,7 @@ static int remove_directory(char *path)
 	args = make_argv("rmdir",
 			 path,
 			 NULL);
-	HTSprintf0(&tmpbuf, gettext("remove %s"), path);
+	HTSprintf0(&tmpbuf, LY_MSG("remove %s"), path);
 	code = LYExecv(program, args, tmpbuf);
 	FREE(tmpbuf);
 	free_argv(args);
@@ -595,7 +595,7 @@ static int touch_file(char *path)
 	char **args;
 	char *msg = NULL;
 
-	HTSprintf0(&msg, gettext("touch %s"), path);
+	HTSprintf0(&msg, LY_MSG("touch %s"), path);
 	args = make_argv("touch",
 			 path,
 			 NULL);
@@ -625,7 +625,7 @@ static int move_file(char *source, char *target)
 	char *msg = NULL;
 	char **args;
 
-	HTSprintf0(&msg, gettext("move %s to %s"), source, target);
+	HTSprintf0(&msg, LY_MSG("move %s to %s"), source, target);
 	args = make_argv("mv",
 			 source,
 			 target,
@@ -1230,24 +1230,24 @@ static int remove_single(char *testpath)
 	 */
 	if (strlen(cp) < 37) {
 	    HTSprintf0(&tmpbuf,
-		       gettext("Remove directory '%s'?"), cp);
+		       LY_MSG("Remove directory '%s'?"), cp);
 	} else {
-	    HTSprintf0(&tmpbuf,
-		       gettext("Remove directory?"));
+	    StrAllocCopy(tmpbuf,
+			 LY_MSG("Remove directory?"));
 	}
 	is_directory = TRUE;
     } else if (S_ISREG(dir_info.st_mode)) {
 	if (strlen(cp) < 60) {
-	    HTSprintf0(&tmpbuf, gettext("Remove file '%s'?"), cp);
+	    HTSprintf0(&tmpbuf, LY_MSG("Remove file '%s'?"), cp);
 	} else {
-	    HTSprintf0(&tmpbuf, gettext("Remove file?"));
+	    StrAllocCopy(tmpbuf, LY_MSG("Remove file?"));
 	}
 #ifdef S_IFLNK
     } else if (S_ISLNK(dir_info.st_mode)) {
 	if (strlen(cp) < 50) {
-	    HTSprintf0(&tmpbuf, gettext("Remove symbolic link '%s'?"), cp);
+	    HTSprintf0(&tmpbuf, LY_MSG("Remove symbolic link '%s'?"), cp);
 	} else {
-	    HTSprintf0(&tmpbuf, gettext("Remove symbolic link?"));
+	    StrAllocCopy(tmpbuf, LY_MSG("Remove symbolic link?"));
 	}
 #endif
     } else {
@@ -2012,10 +2012,10 @@ int local_dired(DocInfo *doc)
 
 	if (buffer != NULL) {
 	    if ((int) strlen(buffer) < LYcolLimit - 14) {
-		HTSprintf0(&tmpbuf, gettext("Executing %s "), buffer);
+		HTSprintf0(&tmpbuf, LY_MSG("Executing %s "), buffer);
 	    } else {
-		HTSprintf0(&tmpbuf,
-			   gettext("Executing system command. This might take a while."));
+		StrAllocCopy(tmpbuf,
+			     LY_MSG("Executing system command. This might take a while."));
 	    }
 	    _statusline(tmpbuf);
 	    stop_curses();
@@ -2416,14 +2416,14 @@ BOOLEAN local_install(char *destpath,
     if (HTList_isEmpty(tagged)) {
 	/* simplistic detection of identical src and dest - kw */
 	if (!strcmp(savepath, destpath)) {
-	    HTUserMsg2(gettext("Source and target are the same: %s"),
+	    HTUserMsg2(LY_MSG("Source and target are the same: %s"),
 		       savepath);
 	    FREE(tmpdest);
 	    return (-1);	/* don't do it */
 	} else if (!StrNCmp(savepath, destpath, strlen(destpath)) &&
 		   LYIsPathSep(savepath[strlen(destpath)]) &&
 		   LYLastPathSep(savepath + strlen(destpath) + 1) == 0) {
-	    HTUserMsg2(gettext("Already in target directory: %s"),
+	    HTUserMsg2(LY_MSG("Already in target directory: %s"),
 		       savepath);
 	    FREE(tmpdest);
 	    return 0;		/* don't do it */
@@ -2447,14 +2447,14 @@ BOOLEAN local_install(char *destpath,
 
 	    /* simplistic detection of identical src and dest - kw */
 	    if (!strcmp(args[src], destpath)) {
-		HTUserMsg2(gettext("Source and target are the same: %s"),
+		HTUserMsg2(LY_MSG("Source and target are the same: %s"),
 			   args[src]);
 		FREE(args[src]);
 		continue;	/* skip this source file */
 	    } else if (!StrNCmp(args[src], destpath, strlen(destpath)) &&
 		       LYIsPathSep(args[src][strlen(destpath)]) &&
 		       LYLastPathSep(args[src] + strlen(destpath) + 1) == 0) {
-		HTUserMsg2(gettext("Already in target directory: %s"),
+		HTUserMsg2(LY_MSG("Already in target directory: %s"),
 			   args[src]);
 		FREE(args[src]);
 		continue;	/* skip this source file */

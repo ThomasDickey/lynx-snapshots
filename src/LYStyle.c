@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYStyle.c,v 1.112 2025/01/06 16:27:23 tom Exp $
+ * $LynxId: LYStyle.c,v 1.113 2025/01/07 18:55:33 tom Exp $
  *
  * character level styles for Lynx
  * (c) 1996 Rob Partington -- donated to the Lyncei (if they want it :-)
@@ -329,7 +329,7 @@ static void parse_style(char *param)
 
     TrimLowercase(buffer);
     if ((tmp = StrChr(buffer, ':')) == NULL) {
-	fprintf(stderr, gettext("\
+	fprintf(stderr, LY_MSG("\
 Syntax Error parsing style in lss file:\n\
 [%s]\n\
 The line must be of the form:\n\
@@ -938,7 +938,7 @@ void init_color_styles(char **from_cmdline, const char *default_styles)
      * If the lynx-style file is not available, inform the user and exit.
      */
     if (!LYCanReadFile(lynx_lss_file)) {
-	fprintf(stderr, gettext("\nLynx file \"%s\" is not available.\n\n"),
+	fprintf(stderr, LY_MSG("\nLynx file \"%s\" is not available.\n\n"),
 		NonNull(cp));
 	exit_immediately(EXIT_FAILURE);
     }

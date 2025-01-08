@@ -1,9 +1,9 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: lynx 2.9.2f\n"
+"Project-Id-Version: lynx 2.9.2h\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-15 15:59-0400\n"
+"POT-Creation-Date: 2025-01-07 14:02-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -3212,110 +3212,110 @@ msgstr ""
 msgid "Socket read failed (too many tries)."
 msgstr ""
 
-#: WWW/Library/Implementation/HTTP.c:165
+#: WWW/Library/Implementation/HTTP.c:166
 #, c-format
 msgid "SSL callback:%s, preverify_ok=%d, ssl_okay=%d"
 msgstr ""
 
-#: WWW/Library/Implementation/HTTP.c:668
+#: WWW/Library/Implementation/HTTP.c:669
 #, c-format
 msgid "User/password contains only punctuation: %s"
 msgstr ""
 
-#: WWW/Library/Implementation/HTTP.c:672
+#: WWW/Library/Implementation/HTTP.c:673
 #, c-format
 msgid "User/password may be confused with hostname: '%s' (e.g, '%s')"
 msgstr ""
 
-#: WWW/Library/Implementation/HTTP.c:735
+#: WWW/Library/Implementation/HTTP.c:736
 #, c-format
 msgid "Certificate issued by: %s"
 msgstr ""
 
-#: WWW/Library/Implementation/HTTP.c:941
+#: WWW/Library/Implementation/HTTP.c:942
 msgid "This client does not contain support for HTTPS URLs."
 msgstr ""
 
-#: WWW/Library/Implementation/HTTP.c:966
+#: WWW/Library/Implementation/HTTP.c:967
 msgid "Unable to connect to remote host."
 msgstr ""
 
-#: WWW/Library/Implementation/HTTP.c:1010
+#: WWW/Library/Implementation/HTTP.c:1011
 msgid "Retrying connection without TLS."
 msgstr ""
 
-#: WWW/Library/Implementation/HTTP.c:1062
+#: WWW/Library/Implementation/HTTP.c:1063
 msgid "GnuTLS error when trying to verify certificate."
 msgstr ""
 
-#: WWW/Library/Implementation/HTTP.c:1075
+#: WWW/Library/Implementation/HTTP.c:1076
 msgid "the certificate has no known issuer"
 msgstr ""
 
-#: WWW/Library/Implementation/HTTP.c:1077
+#: WWW/Library/Implementation/HTTP.c:1078
 msgid "no issuer was found"
 msgstr ""
 
-#: WWW/Library/Implementation/HTTP.c:1079
+#: WWW/Library/Implementation/HTTP.c:1080
 msgid "issuer is not a CA"
 msgstr ""
 
-#: WWW/Library/Implementation/HTTP.c:1081
+#: WWW/Library/Implementation/HTTP.c:1082
 msgid "the certificate has been revoked"
 msgstr ""
 
-#: WWW/Library/Implementation/HTTP.c:1083
+#: WWW/Library/Implementation/HTTP.c:1084
 msgid "the certificate is not trusted"
 msgstr ""
 
-#: WWW/Library/Implementation/HTTP.c:1158
+#: WWW/Library/Implementation/HTTP.c:1159
 #, c-format
 msgid "Verified connection to %s (cert=%s)"
 msgstr ""
 
-#: WWW/Library/Implementation/HTTP.c:1208
-#: WWW/Library/Implementation/HTTP.c:1250
+#: WWW/Library/Implementation/HTTP.c:1209
+#: WWW/Library/Implementation/HTTP.c:1251
 #, c-format
 msgid "Verified connection to %s (subj=%s)"
 msgstr ""
 
-#: WWW/Library/Implementation/HTTP.c:1280
+#: WWW/Library/Implementation/HTTP.c:1281
 msgid "Can't find common name in certificate"
 msgstr ""
 
-#: WWW/Library/Implementation/HTTP.c:1283
+#: WWW/Library/Implementation/HTTP.c:1284
 #, c-format
 msgid "SSL error:host(%s)!=cert(%s)-Continue?"
 msgstr ""
 
-#: WWW/Library/Implementation/HTTP.c:1290
+#: WWW/Library/Implementation/HTTP.c:1291
 msgid "SSL error"
 msgstr ""
 
-#: WWW/Library/Implementation/HTTP.c:1298
+#: WWW/Library/Implementation/HTTP.c:1299
 #, c-format
 msgid "UNVERIFIED connection to %s (cert=%s)"
 msgstr ""
 
-#: WWW/Library/Implementation/HTTP.c:1307
+#: WWW/Library/Implementation/HTTP.c:1308
 #, c-format
 msgid "Secure %d-bit %s (%s) HTTP connection"
 msgstr ""
 
-#: WWW/Library/Implementation/HTTP.c:1777
+#: WWW/Library/Implementation/HTTP.c:1778
 msgid "Sending HTTP request."
 msgstr ""
 
-#: WWW/Library/Implementation/HTTP.c:1819
+#: WWW/Library/Implementation/HTTP.c:1820
 msgid "Unexpected network write error; connection aborted."
 msgstr ""
 
-#: WWW/Library/Implementation/HTTP.c:1825
+#: WWW/Library/Implementation/HTTP.c:1826
 msgid "HTTP request sent; waiting for response."
 msgstr ""
 
-#: WWW/Library/Implementation/HTTP.c:1898
-#: WWW/Library/Implementation/HTTP.c:1908
+#: WWW/Library/Implementation/HTTP.c:1899
+#: WWW/Library/Implementation/HTTP.c:1909
 msgid "Unexpected network read error; connection aborted."
 msgstr ""
 
@@ -3328,7 +3328,7 @@ msgstr ""
 #. * line and possibly other headers, so we'll deal with them by
 #. * showing the full header to the user as text/plain.  - FM
 #.
-#: WWW/Library/Implementation/HTTP.c:2111
+#: WWW/Library/Implementation/HTTP.c:2112
 msgid "Got unexpected Informational Status."
 msgstr ""
 
@@ -3338,7 +3338,7 @@ msgstr ""
 #. * content.  We'll instruct the user to do that, and
 #. * restore the current document.  - FM
 #.
-#: WWW/Library/Implementation/HTTP.c:2145
+#: WWW/Library/Implementation/HTTP.c:2146
 msgid "Request fulfilled.  Reset Content."
 msgstr ""
 
@@ -3348,27 +3348,27 @@ msgstr ""
 #. * status is inappropriate.  We'll deal with it by showing
 #. * the full header to the user as text/plain.  - FM
 #.
-#: WWW/Library/Implementation/HTTP.c:2263
+#: WWW/Library/Implementation/HTTP.c:2264
 msgid "Got unexpected 304 Not Modified status."
 msgstr ""
 
-#: WWW/Library/Implementation/HTTP.c:2326
+#: WWW/Library/Implementation/HTTP.c:2327
 msgid "Redirection of POST content requires user approval."
 msgstr ""
 
-#: WWW/Library/Implementation/HTTP.c:2342
+#: WWW/Library/Implementation/HTTP.c:2343
 msgid "Have POST content.  Treating Permanent Redirection as Temporary.\n"
 msgstr ""
 
-#: WWW/Library/Implementation/HTTP.c:2388
+#: WWW/Library/Implementation/HTTP.c:2389
 msgid "Retrying with access authorization information."
 msgstr ""
 
-#: WWW/Library/Implementation/HTTP.c:2400
+#: WWW/Library/Implementation/HTTP.c:2401
 msgid "Show the 401 message body?"
 msgstr ""
 
-#: WWW/Library/Implementation/HTTP.c:2444
+#: WWW/Library/Implementation/HTTP.c:2445
 msgid "Show the 407 message body?"
 msgstr ""
 
@@ -3376,7 +3376,7 @@ msgstr ""
 #. * Bad or unknown server_status number.  Take a chance and hope
 #. * there is something to display.  - FM
 #.
-#: WWW/Library/Implementation/HTTP.c:2544
+#: WWW/Library/Implementation/HTTP.c:2545
 msgid "Unknown status reply from server!"
 msgstr ""
 
@@ -3675,32 +3675,32 @@ msgstr ""
 #. * If we know the total size of the file, we can compute
 #. * a percentage, and show a corresponding progress bar.
 #.
-#: src/HTAlert.c:328 src/HTAlert.c:354
+#: src/HTAlert.c:330 src/HTAlert.c:356
 #, c-format
 msgid "Read %s of data"
 msgstr ""
 
-#: src/HTAlert.c:351
+#: src/HTAlert.c:353
 #, c-format
 msgid "Read %s of %s of data"
 msgstr ""
 
-#: src/HTAlert.c:360
+#: src/HTAlert.c:362
 #, c-format
 msgid ", %s/sec"
 msgstr ""
 
-#: src/HTAlert.c:374
+#: src/HTAlert.c:376
 #, c-format
 msgid " (stalled for %s)"
 msgstr ""
 
-#: src/HTAlert.c:378
+#: src/HTAlert.c:380
 #, c-format
 msgid ", ETA %s"
 msgstr ""
 
-#: src/HTAlert.c:400
+#: src/HTAlert.c:402
 msgid " (Press 'z' to abort)"
 msgstr ""
 
@@ -3729,11 +3729,11 @@ msgstr ""
 #. * Lynx will also accept y Y n N as responses unless there is a conflict
 #. * with the first letter of the "yes" or "no" translation.
 #.
-#: src/HTAlert.c:438 src/HTAlert.c:486
+#: src/HTAlert.c:440 src/HTAlert.c:488
 msgid "yes"
 msgstr ""
 
-#: src/HTAlert.c:441 src/HTAlert.c:487
+#: src/HTAlert.c:443 src/HTAlert.c:489
 msgid "no"
 msgstr ""
 
@@ -3753,7 +3753,7 @@ msgstr ""
 #. * (Y/N/Always/neVer)              - English (original)
 #. * (O/N/Toujours/Jamais)           - French
 #.
-#: src/HTAlert.c:938
+#: src/HTAlert.c:952
 msgid "Y/N/A/V"
 msgstr ""
 
@@ -3825,7 +3825,7 @@ msgstr ""
 msgid "File may be recoverable from %s during this session"
 msgstr ""
 
-#: src/LYCgi.c:161
+#: src/LYCgi.c:179
 #, c-format
 msgid "Do you want to execute \"%s\"?"
 msgstr ""
@@ -3834,23 +3834,23 @@ msgstr ""
 #. * Neither the path as given nor any components examined by backing up
 #. * were stat()able.  - kw
 #.
-#: src/LYCgi.c:276
+#: src/LYCgi.c:277
 msgid "Unable to access cgi script"
 msgstr ""
 
-#: src/LYCgi.c:709 src/LYCgi.c:712
+#: src/LYCgi.c:710 src/LYCgi.c:713
 msgid "Good Advice"
 msgstr ""
 
-#: src/LYCgi.c:716
+#: src/LYCgi.c:717
 msgid "An excellent http server for VMS is available via"
 msgstr ""
 
-#: src/LYCgi.c:723
+#: src/LYCgi.c:724
 msgid "this link"
 msgstr ""
 
-#: src/LYCgi.c:727
+#: src/LYCgi.c:728
 msgid "It provides state of the art CGI script support.\n"
 msgstr ""
 
@@ -3910,7 +3910,6 @@ msgid ""
 msgstr ""
 
 #: src/LYCurses.c:2521
-#, c-format
 msgid ""
 "\n"
 "Please notify your system administrator to confirm a bug, and if\n"
@@ -3962,7 +3961,7 @@ msgstr ""
 msgid "Save to disk disabled."
 msgstr ""
 
-#: src/LYDownload.c:563 src/LYPrint.c:1331
+#: src/LYDownload.c:563 src/LYPrint.c:1333
 msgid "Local additions:"
 msgstr ""
 
@@ -4390,7 +4389,6 @@ msgid ""
 msgstr ""
 
 #: src/LYMain.c:1556
-#, c-format
 msgid ""
 "\n"
 "Lynx character sets not declared.\n"
@@ -4403,7 +4401,6 @@ msgid "Ignored %d characters from standard input.\n"
 msgstr ""
 
 #: src/LYMain.c:1714
-#, c-format
 msgid "Use \"-stdin\" or \"-\" to tell how to handle piped input.\n"
 msgstr ""
 
@@ -4454,7 +4451,6 @@ msgid "USAGE: %s [options] [file]\n"
 msgstr ""
 
 #: src/LYMain.c:4154
-#, c-format
 msgid "Options are:\n"
 msgstr ""
 
@@ -5299,69 +5295,67 @@ msgstr ""
 msgid "View the file "
 msgstr ""
 
-#: src/LYPrint.c:956
-#, c-format
+#: src/LYPrint.c:958
 msgid " Print job complete.\n"
 msgstr ""
 
-#: src/LYPrint.c:1283
+#: src/LYPrint.c:1285
 msgid "Document:"
 msgstr ""
 
-#: src/LYPrint.c:1284
+#: src/LYPrint.c:1286
 msgid "Number of lines:"
 msgstr ""
 
-#: src/LYPrint.c:1285
+#: src/LYPrint.c:1287
 msgid "Number of pages:"
 msgstr ""
 
-#: src/LYPrint.c:1286
+#: src/LYPrint.c:1288
 msgid "pages"
 msgstr ""
 
-#: src/LYPrint.c:1286
+#: src/LYPrint.c:1288
 msgid "page"
 msgstr ""
 
-#: src/LYPrint.c:1287
+#: src/LYPrint.c:1289
 msgid "(approximately)"
 msgstr ""
 
-#: src/LYPrint.c:1294
+#: src/LYPrint.c:1296
 msgid "Some print functions have been disabled!"
 msgstr ""
 
-#: src/LYPrint.c:1298
+#: src/LYPrint.c:1300
 msgid "Standard print options:"
 msgstr ""
 
-#: src/LYPrint.c:1299
+#: src/LYPrint.c:1301
 msgid "Print options:"
 msgstr ""
 
-#: src/LYPrint.c:1306
+#: src/LYPrint.c:1308
 msgid "Save to a local file"
 msgstr ""
 
-#: src/LYPrint.c:1308
+#: src/LYPrint.c:1310
 msgid "Save to disk disabled"
 msgstr ""
 
-#: src/LYPrint.c:1315
+#: src/LYPrint.c:1317
 msgid "Mail the file"
 msgstr ""
 
-#: src/LYPrint.c:1322
+#: src/LYPrint.c:1324
 msgid "Print to the screen"
 msgstr ""
 
-#: src/LYPrint.c:1327
+#: src/LYPrint.c:1329
 msgid "Print out on a printer attached to your vt100 terminal"
 msgstr ""
 
 #: src/LYReadCFG.c:437
-#, c-format
 msgid ""
 "Syntax Error parsing COLOR in configuration file:\n"
 "The line must be of the form:\n"
@@ -5728,12 +5722,10 @@ msgid "unknown restriction"
 msgstr ""
 
 #: src/LYUtils.c:3903
-#, c-format
 msgid "No restrictions set.\n"
 msgstr ""
 
 #: src/LYUtils.c:3906
-#, c-format
 msgid "Restrictions set:\n"
 msgstr ""
 

@@ -1,4 +1,4 @@
-# $LynxId: makefile.inn,v 1.33 2024/01/14 21:39:14 tom Exp $
+# $LynxId: makefile.inn,v 1.34 2025/01/07 18:33:28 tom Exp $
 #
 # Makefile for program source directory in GNU NLS utilities package.
 # Copyright (C) 1995, 1996, 1997 by Ulrich Drepper <drepper@gnu.ai.mit.edu>
@@ -136,6 +136,7 @@ $(srcdir)/$(PACKAGE).pot: $(POTFILES)
 	  --add-comments \
 	  --keyword=_ \
 	  --keyword=N_ \
+	  --keyword=LY_MSG \
 	  --files-from=$(srcdir)/POTFILES.in \
 	&& test ! -f $(PACKAGE).po \
 	   || ( rm -f $(srcdir)/$(PACKAGE).pot \

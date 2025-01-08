@@ -1,5 +1,5 @@
 /*
- * $LynxId: GridText.c,v 1.350 2025/01/06 16:09:15 tom Exp $
+ * $LynxId: GridText.c,v 1.352 2025/01/07 23:04:28 tom Exp $
  *
  *		Character grid hypertext object
  *		===============================
@@ -1766,7 +1766,7 @@ static void display_title(HText *text)
 	percent[0] = '\0';
     } else if ((display_lines) <= 0 && LYlines > 0 &&
 	       text->top_of_screen <= 99999 && text->Lines <= 999999) {
-	sprintf(percent, gettext(" (l%d of %d)"),
+	sprintf(percent, LY_MSG(" (l%d of %d)"),
 		text->top_of_screen, text->Lines);
     } else if ((text->Lines >= display_lines) && (display_lines > 0)) {
 	int total_pages = ((text->Lines + display_lines)
@@ -1775,7 +1775,7 @@ static void display_title(HText *text)
 				  ? 0
 				  : (text->Lines - display_lines));
 
-	sprintf(percent, gettext(" (p%d of %d)"),
+	sprintf(percent, LY_MSG(" (p%d of %d)"),
 		((text->top_of_screen > start_of_last_page)
 		 ? total_pages
 		 : ((text->top_of_screen + display_lines) / (display_lines))),
@@ -8847,7 +8847,7 @@ void user_message(const char *message,
     } else {
 	char *temp = NULL;
 
-	HTSprintf0(&temp, message, NonNull(argument));
+	HTSprintf0(&temp, HT_FMT("%s", message), NonNull(argument));
 	statusline(temp);
 	FREE(temp);
     }
@@ -11017,7 +11017,7 @@ static char *escape_or_quote_name(const char *name,
 	StrAllocCopy(escaped1, "Content-Disposition: form-data");
 	HTSprintf(&escaped1, "; name=\"%s\"", name);
 	if (MultipartContentType)
-	    HTSprintf(&escaped1, MultipartContentType, STR_PLAINTEXT);
+	    HTSprintf(&escaped1, HT_FMT("%s", MultipartContentType), STR_PLAINTEXT);
 	if (quoting == QUOTE_BASE64)
 	    StrAllocCat(escaped1, "\r\nContent-Transfer-Encoding: base64");
 	StrAllocCat(escaped1, "\r\n\r\n");
@@ -12016,7 +12016,7 @@ int HText_SubmitForm(FormInfo * submit_item, DocInfo *doc,
     }
 
     if (submit_item->submit_method == URL_MAIL_METHOD) {
-	HTUserMsg2(gettext("Submitting %s"), submit_item->submit_action);
+	HTUserMsg2(LY_MSG("Submitting %s"), submit_item->submit_action);
 	HTSABCat(&my_query, "", 1);	/* append null */
 	mailform((submit_item->submit_action + 7),
 		 (isEmpty(submit_item->submit_title)

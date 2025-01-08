@@ -1,4 +1,4 @@
-/* $LynxId: LYOptions.c,v 1.188 2025/01/06 16:13:36 tom Exp $ */
+/* $LynxId: LYOptions.c,v 1.190 2025/01/07 23:57:54 tom Exp $ */
 #include <HTUtils.h>
 #include <HTFTP.h>
 #include <HTTP.h>		/* 'reloading' flag */
@@ -2869,7 +2869,7 @@ int postoptions(DocInfo *newdoc)
 
 	/*  We may have been spoofed? */
 	HTSprintf0(&buf,
-		   gettext("Use %s to invoke the Options menu!"),
+		   LY_MSG("Use %s to invoke the Options menu!"),
 		   key_for_func_ext(LYK_OPTIONS, FOR_PANEL));
 	HTAlert(buf);
 	FREE(buf);
@@ -2898,7 +2898,7 @@ int postoptions(DocInfo *newdoc)
 		 * page that had been on the history stack. - kw
 		 */
 		HTSprintf0(&buf,
-			   gettext("Use %s to invoke the Options menu!"),
+			   LY_MSG("Use %s to invoke the Options menu!"),
 			   key_for_func_ext(LYK_OPTIONS, FOR_PANEL));
 		HTAlert(buf);
 		FREE(data);
@@ -4279,7 +4279,7 @@ static int gen_options(char **newfile)
 	char *message = NULL;
 
 	HTSprintf0(&message,
-		   rate_values[i].LongName,
+		   HT_FMT("%s", rate_values[i].LongName),
 		   HTProgressUnits(rate_values[i].value));
 	PutOption(fp0,
 		  LYTransferRate == rate_values[i].value,

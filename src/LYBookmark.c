@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYBookmark.c,v 1.93 2025/01/06 16:12:05 tom Exp $
+ * $LynxId: LYBookmark.c,v 1.94 2025/01/07 23:29:22 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTAlert.h>
@@ -168,7 +168,7 @@ static const char *convert_mosaic_bookmark_file(const char *filename_buffer)
 	return ("");		/* should always open */
 
     fprintf(nfp, "<head>\n<title>%s</title>\n</head>\n", MOSAIC_BOOKMARK_TITLE);
-    fprintf(nfp, "%s\n\n<p>\n<ol>\n", gettext("\
+    fprintf(nfp, "%s\n\n<p>\n<ol>\n", LY_MSG("\
      This file is an HTML representation of the X Mosaic hotlist file.\n\
      Outdated or invalid links may be removed by using the\n\
      remove bookmark command, it is usually the 'R' key but may have\n\
@@ -663,7 +663,7 @@ void save_bookmark_link(const char *address,
 	fprintf(fp, "<body>\n");
 #ifdef _WINDOWS
 	fprintf(fp, "<p>%s",
-		gettext("     You can delete links by the 'R' key<br>\n<ol>\n"));
+		LY_MSG("     You can delete links by the 'R' key<br>\n<ol>\n"));
 #else
 	fprintf(fp, "<p>%s<br>\n%s\n\n<!--\n%s\n--></p>\n\n<ol>\n",
 		gettext("\
@@ -972,7 +972,7 @@ void remove_bookmark_link(int cur,
     if (fp != NULL)
 	LYCloseInput(fp);
     if (keep_tempfile) {
-	HTUserMsg2(gettext("File may be recoverable from %s during this session"),
+	HTUserMsg2(LY_MSG("File may be recoverable from %s during this session"),
 		   newfile);
     } else {
 	(void) LYRemoveTemp(newfile);

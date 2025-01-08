@@ -1,4 +1,4 @@
-/* $LynxId: LYrcFile.c,v 1.109 2025/01/06 17:59:02 tom Exp $ */
+/* $LynxId: LYrcFile.c,v 1.110 2025/01/07 18:52:13 tom Exp $ */
 #include <HTUtils.h>
 #include <HTFTP.h>
 #include <LYUtils.h>
@@ -929,7 +929,7 @@ static void write_list(FILE *fp, const char *list)
  */
 static void explain_keypad_mode(FILE *fp)
 {
-    write_list(fp, gettext("\
+    write_list(fp, LY_MSG("\
 If keypad_mode is set to \"NUMBERS_AS_ARROWS\", then the numbers on\n\
 your keypad when the numlock is on will act as arrow keys:\n\
             8 = Up Arrow\n\
@@ -938,11 +938,11 @@ your keypad when the numlock is on will act as arrow keys:\n\
 and the corresponding keyboard numbers will act as arrow keys,\n\
 regardless of whether numlock is on.\n\
 "));
-    write_list(fp, gettext("\
+    write_list(fp, LY_MSG("\
 If keypad_mode is set to \"LINKS_ARE_NUMBERED\", then numbers will\n\
 appear next to each link and numbers are used to select links.\n\
 "));
-    write_list(fp, gettext("\
+    write_list(fp, LY_MSG("\
 If keypad_mode is set to \"LINKS_AND_FORM_FIELDS_ARE_NUMBERED\", then\n\
 numbers will appear next to each link and visible form input field.\n\
 Numbers are used to select links, or to move the \"current link\" to a\n\
@@ -951,7 +951,7 @@ indexed so that the user may type an option number to select an option in\n\
 a popup menu, even if the option isn't visible on the screen.  Reference\n\
 lists and output from the list command also enumerate form inputs.\n\
 "));
-    write_list(fp, gettext("\
+    write_list(fp, LY_MSG("\
 NOTE: Some fixed format documents may look disfigured when\n\
 \"LINKS_ARE_NUMBERED\" or \"LINKS_AND_FORM_FIELDS_ARE_NUMBERED\" are\n\
 enabled.\n\
@@ -983,7 +983,7 @@ int save_rc(FILE *fp)
 	}
     }
 
-    write_list(fp, gettext("\
+    write_list(fp, LY_MSG("\
 Lynx User Defaults File\n\
 \n\
 "));
@@ -992,35 +992,35 @@ Lynx User Defaults File\n\
      * We have either the HTML options form, or the older menu, or both.
      */
 #ifndef NO_OPTION_FORMS
-    write_list(fp, gettext("\
+    write_list(fp, LY_MSG("\
 This file contains options saved from the Lynx Options Screen (normally\n\
 with the 'o' key).  To save options with that screen, you must select the\n\
 checkbox:\n\
 "));
     fprintf(fp, "#\t%s\n", SAVE_OPTIONS);
     fprintf(fp, "#\n");
-    write_list(fp, gettext("\
+    write_list(fp, LY_MSG("\
 You must then save the settings using the link on the line above the\n\
 checkbox:\n\
 "));
     fprintf(fp, "#\t%s\n", ACCEPT_CHANGES);
     fprintf(fp, "#\n");
 #ifndef NO_OPTION_MENU
-    write_list(fp, gettext("\
+    write_list(fp, LY_MSG("\
 You may also use the command-line option \"-forms_options\", which displays\n\
 the simpler Options Menu instead.  Save options with that using the '>' key.\n\
 \n\
 "));
 #endif
 #else /* we only have old options-menu */
-    write_list(fp, gettext("\
+    write_list(fp, LY_MSG("\
 This file contains options saved from the Lynx Options Screen (normally\n\
 with the '>' key).\n\
 \n\
 "));
 #endif
 
-    write_list(fp, gettext("\
+    write_list(fp, LY_MSG("\
 There is normally no need to edit this file manually, since the defaults\n\
 here can be controlled from the Options Screen, and the next time options\n\
 are saved from the Options Screen this file will be completely rewritten.\n\
@@ -1040,7 +1040,7 @@ It is not this file.\n\
 	    continue;
 	}
 	if (tbl->note != NULL) {
-	    write_list(fp, gettext(tbl->note));
+	    write_list(fp, LY_MSG(tbl->note));
 	} else if (tbl->table == tbl_keypad_mode) {
 	    explain_keypad_mode(fp);
 	}

@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTAABrow.c,v 1.44 2025/01/06 15:41:30 tom Exp $
+ * $LynxId: HTAABrow.c,v 1.45 2025/01/07 22:55:07 tom Exp $
  *
  * MODULE							HTAABrow.c
  *		BROWSER SIDE ACCESS AUTHORIZATION MODULE
@@ -572,7 +572,7 @@ static void fill_in_userinfo(HTAARealm *realm, const char *hostname)
 	    if (prior && strcmp(realm->username, my_info)) {
 		msg = NULL;
 		HTSprintf0(&msg,
-			   gettext("username for realm %s changed from %s to %s"),
+			   LY_MSG("username for realm %s changed from %s to %s"),
 			   realm->realmname,
 			   realm->username,
 			   my_info);
@@ -588,7 +588,7 @@ static void fill_in_userinfo(HTAARealm *realm, const char *hostname)
 		if (prior && strcmp(realm->password, colon)) {
 		    msg = NULL;
 		    HTSprintf0(&msg,
-			       gettext("password for realm %s user %s changed"),
+			       LY_MSG("password for realm %s user %s changed"),
 			       realm->realmname,
 			       realm->username);
 		    HTAlert(msg);
@@ -700,7 +700,7 @@ static char *compose_auth_string(const char *hostname,
 	    HTSprintf0(&thePort, ":%d", setup->server->portnumber);
 	}
 
-	HTSprintf0(&msg, gettext("Username for '%s' at %s '%s%s':"),
+	HTSprintf0(&msg, LY_MSG("Username for '%s' at %s '%s%s':"),
 		   realm->realmname,
 		   (IsProxy ? "proxy" : "server"),
 		   (theHost ? theHost : "??"),
@@ -1159,7 +1159,7 @@ BOOL HTAA_shouldRetryWithAuth(char *start_of_headers,
 		(!IsProxy &&
 		 0 == strcasecomp(fieldname, "WWW-Authenticate:"))) {
 		if (isEmpty(arg1) || isEmpty(args)) {
-		    HTSprintf0(&temp, gettext("Invalid header '%s%s%s%s%s'"), line,
+		    HTSprintf0(&temp, LY_MSG("Invalid header '%s%s%s%s%s'"), line,
 			       (non_empty(arg1) ? " " : ""),
 			       NonNull(arg1),
 			       (non_empty(args) ? " " : ""),

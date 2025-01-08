@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYLeaks.c,v 1.44 2025/01/06 15:16:58 tom Exp $
+ * $LynxId: LYLeaks.c,v 1.45 2025/01/07 23:15:27 tom Exp $
  *
  *	Copyright (c) 1994, University of Kansas, All Rights Reserved
  *	(this file was rewritten twice - 1998/1999 and 2003/2004)
@@ -1017,7 +1017,7 @@ static char *LYLeakSAVsprintf(char **dest,
 			      const short ssi_Line,
 			      size_t inuse,
 			      const char *fmt,
-			      va_list * ap)
+			      va_list *ap)
 {
     AllocationList *ALp_old;
     void *vp_oldAlloced;

@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTAccess.c,v 1.89 2025/01/06 15:20:32 tom Exp $
+ * $LynxId: HTAccess.c,v 1.90 2025/01/07 22:51:05 tom Exp $
  *
  *		Access Manager					HTAccess.c
  *		==============
@@ -1093,7 +1093,7 @@ static BOOL HTLoadDocument(const char *full_address,	/* may include #fragment */
 		gettext("**** HTAccess: socket or file number returned by obsolete load routine!\n"));
 	fprintf(stderr, "%s",
 		gettext("**** HTAccess: Internal software error.  Please mail lynx-dev@nongnu.org!\n"));
-	fprintf(stderr, gettext("**** HTAccess: Status returned was: %d\n"), status);
+	fprintf(stderr, LY_MSG("**** HTAccess: Status returned was: %d\n"), status);
 	exit_immediately(EXIT_FAILURE);
     }
 

@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTMIME.c,v 1.103 2025/01/06 15:38:51 tom Exp $
+ * $LynxId: HTMIME.c,v 1.105 2025/01/08 00:23:14 tom Exp $
  *
  *			MIME Message Parse			HTMIME.c
  *			==================
@@ -568,8 +568,8 @@ static int pumpData(HTStream *me)
 	    if (url != NULL && me->format == WWW_HTML) {
 		CTRACE((tfp,
 			"Formatting refresh-url as first line of result\n"));
-		HTSprintf0(&txt, gettext("Refresh: "));
-		HTSprintf(&txt, gettext("%s seconds "), num);
+		StrAllocCopy(txt, gettext("Refresh: "));
+		HTSprintf(&txt, LY_MSG("%s seconds "), num);
 		dequote(url);
 		HTSprintf(&txt, "<a href=\"%s%s\">%s</a><br>", base, url, url);
 		CTRACE((tfp, "URL %s%s\n", base, url));

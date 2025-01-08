@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTWAIS.c,v 1.42 2023/10/24 08:10:31 tom Exp $
+ * $LynxId: HTWAIS.c,v 1.43 2025/01/07 22:56:37 tom Exp $
  *
  *	WorldWideWeb - Wide Area Information Server Access	HTWAIS.c
  *	==================================================
@@ -461,7 +461,7 @@ static void display_search_response(HTStructured * target, SearchResponseAPDU *r
     START(HTML_EM);
     PUTS(the_database);
     END(HTML_EM);
-    sprintf(line, gettext(" contains the following %d item%s relevant to \""),
+    sprintf(line, LY_MSG(" contains the following %d item%s relevant to \""),
 	    (int) (response->NumberOfRecordsReturned),
 	    response->NumberOfRecordsReturned == 1 ? "" : "s");
     PUTS(line);

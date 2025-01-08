@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTML.c,v 1.201 2025/01/06 16:21:31 tom Exp $
+ * $LynxId: HTML.c,v 1.202 2025/01/07 23:04:28 tom Exp $
  *
  *		Structured stream to Rich hypertext converter
  *		============================================
@@ -3171,7 +3171,7 @@ static int HTML_start_element(HTStructured * me, int element_number,
 			if ((ID_A = HTAnchor_findChildAndLink(me->node_anchor,	/* Parent */
 							      id_string,	/* Tag */
 							      NULL,	/* Address */
-							      NULL)) != NULL) {	/* Type */
+							      NULL)) != NULL) {		/* Type */
 			    HText_beginAnchor(me->text, me->inUnderline, ID_A);
 			    HText_endAnchor(me->text, 0);
 			}

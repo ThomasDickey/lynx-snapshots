@@ -1,4 +1,4 @@
-/* $LynxId: LYCurses.c,v 1.210 2025/01/06 16:12:05 tom Exp $ */
+/* $LynxId: LYCurses.c,v 1.211 2025/01/07 23:25:28 tom Exp $ */
 #include <HTUtils.h>
 #include <HTAlert.h>
 
@@ -2515,10 +2515,10 @@ void VMSexit(void)
     if (!DidCleanup) {
 	if (LYOutOfMemory == FALSE) {
 	    fprintf(stderr,
-		    gettext("\nA Fatal error has occurred in %s Ver. %s\n"),
+		    LY_MSG("\nA Fatal error has occurred in %s Ver. %s\n"),
 		    LYNX_NAME, LYNX_VERSION);
 	    fprintf(stderr,
-		    gettext("\nPlease notify your system administrator to confirm a bug, and if\n\
+		    LY_MSG("\nPlease notify your system administrator to confirm a bug, and if\n\
 confirmed, to notify the lynx-dev list.  Bug reports should have concise\n\
 descriptions of the command and/or URL which causes the problem, the\n\
 operating system name with version number, the TCPIP implementation, the\n\

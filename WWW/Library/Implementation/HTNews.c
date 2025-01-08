@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTNews.c,v 1.82 2025/01/06 15:45:53 tom Exp $
+ * $LynxId: HTNews.c,v 1.83 2025/01/07 23:01:40 tom Exp $
  *
  *			NEWS ACCESS				HTNews.c
  *			===========
@@ -436,7 +436,7 @@ static NNTPAuthResult HTHandleAuthInfo(char *host)
 
     while (tries) {
 	if (UserName == NULL) {
-	    HTSprintf0(&msg, gettext("Username for news host '%s':"), host);
+	    HTSprintf0(&msg, LY_MSG("Username for news host '%s':"), host);
 	    UserName = HTPrompt(msg, NULL);
 	    FREE(msg);
 	    if (!(UserName && *UserName)) {
@@ -518,7 +518,7 @@ static NNTPAuthResult HTHandleAuthInfo(char *host)
 	tries = 3;
 	while (tries) {
 	    if (PassWord == NULL) {
-		HTSprintf0(&msg, gettext("Password for news host '%s':"), host);
+		HTSprintf0(&msg, LY_MSG("Password for news host '%s':"), host);
 		PassWord = HTPromptPassword(msg, NULL);
 		FREE(msg);
 		if (!(PassWord && *PassWord)) {
@@ -1722,7 +1722,7 @@ static int read_list(char *arg)
 	char *msg = NULL;
 
 	START(HTML_DT);
-	HTSprintf0(&msg, gettext("No matches for: %s"), arg);
+	HTSprintf0(&msg, LY_MSG("No matches for: %s"), arg);
 	PUTS(msg);
 	MAYBE_END(HTML_DT);
 	FREE(msg);
@@ -1797,7 +1797,7 @@ static int read_group(const char *groupName,
     /*
      * Set window title.
      */
-    HTSprintf0(&temp, gettext("%s,  Articles %d-%d"),
+    HTSprintf0(&temp, LY_MSG("%s,  Articles %d-%d"),
 	       groupName, first_required, last_required);
     START(HTML_H1);
     PUTS(temp);
@@ -1833,7 +1833,7 @@ static int read_group(const char *groupName,
 #ifdef USE_XHDR
     if (count > FAST_THRESHOLD) {
 	HTSprintf0(&temp,
-		   gettext("\nThere are about %d articles currently available in %s, IDs as follows:\n\n"),
+		   LY_MSG("\nThere are about %d articles currently available in %s, IDs as follows:\n\n"),
 		   count, groupName);
 	PUTS(temp);
 	FREE(temp);
@@ -2644,7 +2644,7 @@ static int HTLoadNews(const char *arg,
 		      spost_wanted || sreply_wanted)) {
 		    ABORT_TARGET;
 		}
-		HTSprintf0(&dbuf, gettext("Could not access %s."), NewsHost);
+		HTSprintf0(&dbuf, LY_MSG("Could not access %s."), NewsHost);
 		FREE(NewsHost);
 		FREE(NewsHREF);
 		FREE(ProxyHost);
@@ -2750,11 +2750,11 @@ static int HTLoadNews(const char *arg,
 		    }
 		    if (response_text[0]) {
 			HTSprintf0(&dbuf,
-				   gettext("Can't read news info.  News host %.20s responded: %.200s"),
+				   LY_MSG("Can't read news info.  News host %.20s responded: %.200s"),
 				   NewsHost, response_text);
 		    } else {
 			HTSprintf0(&dbuf,
-				   gettext("Can't read news info, empty response from host %s"),
+				   LY_MSG("Can't read news info, empty response from host %s"),
 				   NewsHost);
 		    }
 		    return HTLoadError(stream, 500, dbuf);
