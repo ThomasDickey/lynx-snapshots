@@ -1,9 +1,10 @@
--- $LynxId: CHANGES,v 1.1216 2025/01/17 08:47:44 tom Exp $
+-- $LynxId: CHANGES,v 1.1217 2025/06/18 00:18:06 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2025-01-17 (2.9.2j)
+2025-06-17 (2.9.2k)
+* review/update copyright/licenses for test-package.
 * add conditional macros for LY_TEST_FMTS to help check for format mismatch -TD
 * correct sprintf-format used for gopher telnet connections -Ben Collver
 * fix stricter gcc15 warnings -TD

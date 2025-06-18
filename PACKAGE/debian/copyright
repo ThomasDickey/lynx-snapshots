@@ -1,103 +1,131 @@
-Upstream source https://lynx.invisible-island.net/current/
+Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: lynx
+Upstream-Contact: Thomas E. Dickey <dickey@invisible-island.net>
+Source: https://lynx.invisible-island.net/current/
 
-Current maintainer: Thomas Dickey <dickey@invisible-island.net>
-
--------------------------------------------------------------------------------
-
-Copyright 1997-2024,2025 Thomas E. Dickey
-Copyright (C) 1995 University of Kansas.
-
-Most of the content of the lynx release (and corresponding copyright) is
-the work of developers on the lynx-dev mailing list, who have agreed to
-distribute their work under the terms and conditions of the GNU General
-Public License (Version 2).  Note that the License text after the terms
-and conditions is advisory in nature, and contains neither terms nor
-conditions.  You may choose to follow that advice.
-
-Any licensing questions should be directed to the mailing list:
-
+Files: *
+Copyright:  1997-2024,2025 Thomas E. Dickey
+            1992-1994 University of Kansas
+            1992-2024 Free Software Foundation, Inc.
+            1995 DJ Delorie
+            1996 Rob Partington
+License: GPL-2
+Comment:
+ Most of the content of the lynx release (and corresponding copyright) is
+ the work of developers on the lynx-dev mailing list, who have agreed to
+ distribute their work under the terms and conditions of the GNU General
+ Public License (Version 2).  Note that the License text after the terms
+ and conditions is advisory in nature, and contains neither terms nor
+ conditions.  You may choose to follow that advice.
+ .
+ Any licensing questions should be directed to the mailing list:
+ .
 	lynx-dev@nongnu.org
-
-or to the maintainer (Thomas E. Dickey):
-
+ .
+ or to the maintainer (Thomas E. Dickey):
+ .
 	dickey@invisible-island.net
+ .
+ On Debian systems, the complete text of the GNU General
+ Public License can be found in '/usr/share/common-licenses/GPL-2'
 
--------------------------------------------------------------------------------
+Files:      WWW/Library/Implementation/HTFTP.c
+Copyright:  1994 Trustees of Dartmouth College
+License:    GPL-2
 
-Files: aclocal.m4
-License: other-BSD
-Copyright: 1997-2024,2025 by Thomas E. Dickey
-    Permission to use, copy, modify, and distribute this software and its
-    documentation for any purpose and without fee is hereby granted,
-    provided that the above copyright notice appear in all copies and that
-    both that copyright notice and this permission notice appear in
-    supporting documentation, and that the name of the above listed
-    copyright holder(s) not be used in advertising or publicity pertaining
-    to distribution of the software without specific, written prior
-    permission.
+Files:      WWW/Library/Implementation/HTTP.c
+Copyright:  2006 Thorsten Glaser
+License:    GPL-2
 
-    THE ABOVE LISTED COPYRIGHT HOLDER(S) DISCLAIM ALL WARRANTIES WITH REGARD
-    TO THIS SOFTWARE, INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
-    AND FITNESS, IN NO EVENT SHALL THE ABOVE LISTED COPYRIGHT HOLDER(S) BE
-    LIABLE FOR ANY SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
-    WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
-    ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
-    OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+Files:      po/makefile.inn
+Copyright:  1995-1997 Ulrich Drepper
+License:    GPL-2
 
-Files: install-sh
+Files:      src/chrtrans/caselower.h
+            src/chrtrans/iso01_uni.tbl
+            src/chrtrans/iso02_uni.tbl
+            src/chrtrans/iso03_uni.tbl
+            src/chrtrans/iso04_uni.tbl
+            src/chrtrans/iso05_uni.tbl
+            src/chrtrans/iso06_uni.tbl
+            src/chrtrans/iso07_uni.tbl
+            src/chrtrans/iso08_uni.tbl
+            src/chrtrans/iso09_uni.tbl
+            src/chrtrans/next_uni.tbl
+Copyright:  1991-1999 Unicode, Inc.
+License:    Unicode
+ This file is provided as-is by Unicode, Inc. (The Unicode Consortium).
+ No claims are made as to fitness for any particular purpose.  No
+ warranties of any kind are expressed or implied.  The recipient
+ agrees to determine applicability of information provided.  If this
+ file has been provided on optical media by Unicode, Inc., the sole
+ remedy for any claim will be exchange of defective media within 90
+ days of receipt.
+ . 
+ Unicode, Inc. hereby grants the right to freely use the information
+ supplied in this file in the creation of products supporting the
+ Unicode Standard, and to make copies of this file in any form for
+ internal or external distribution as long as this notice remains
+ attached.
+
+Files:      src/chrtrans/makeuctb.c
+Copyright:  1995 H. Peter Anvin
+License:    GPL-2
+
+Files:      src/mktime.c
+Copyright:  1997 Free Software Foundation, Inc.
+License:    GPL-2
+
+Files:      src/parsdate.c
+            src/parsdate.y
+Copyright:
+License:    public domain
+
+Files:      src/strstr.c
+Copyright:  1997 Free Software Foundation, Inc.
+License:    GPL-2
+
+Files:      src/wcwidth.c
+            src/wcwidth.h
+Copyright:  2000-2018 Thomas E. Dickey
+License:    X11
+
+Files:      aclocal.m4
+Copyright:  1997-2024,2025 by Thomas E. Dickey
+License:    X11
+
+Files:      configure.in
+Copyright:  1997-2025 Thomas E. Dickey
+License:    X11
+
+Files:      install-sh
 Copyright:  1994 X Consortium
-License: other-BSD
-    Permission is hereby granted, free of charge, to any person obtaining a copy
-    of this software and associated documentation files (the "Software"), to
-    deal in the Software without restriction, including without limitation the
-    rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
-    sell copies of the Software, and to permit persons to whom the Software is
-    furnished to do so, subject to the following conditions:
+License:    X11
+Comment:
+ FSF changes to this file are in the public domain.
 
-    The above copyright notice and this permission notice shall be included in
-    all copies or substantial portions of the Software.
-
-    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-    X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
-    AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNEC-
-    TION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-    Except as contained in this notice, the name of the X Consortium shall not
-    be used in advertising or otherwise to promote the sale, use or other deal-
-    ings in this Software without prior written authorization from the X Consor-
-    tium.
-
-    FSF changes to this file are in the public domain.
-
-    Calling this script install-sh is preferred over install.sh, to prevent
-    `make' implicit rules from creating a file called install from it
-    when there is no Makefile.
-
-    This script is compatible with the BSD install script, but was written
-    from scratch.  It can only install one file at a time, a restriction
-    shared with many OS's install programs.
-
-Files: debian/*
+Files:      debian/*
 Copyright:  2010-2019,2020 Thomas E. Dickey
-License: other-BSD
-    Permission to use, copy, modify, and distribute this software and its
-    documentation for any purpose and without fee is hereby granted,
-    provided that the above copyright notice appear in all copies and that
-    both that copyright notice and this permission notice appear in
-    supporting documentation, and that the name of the above listed
-    copyright holder(s) not be used in advertising or publicity pertaining
-    to distribution of the software without specific, written prior
-    permission.
+License:    X11
 
-    THE ABOVE LISTED COPYRIGHT HOLDER(S) DISCLAIM ALL WARRANTIES WITH REGARD
-    TO THIS SOFTWARE, INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
-    AND FITNESS, IN NO EVENT SHALL THE ABOVE LISTED COPYRIGHT HOLDER(S) BE
-    LIABLE FOR ANY SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
-    WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
-    ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
-    OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+Files:      sample/mailcap
+Copyright:  1991 Bell Communications Research, Inc. (Bellcore)
+License:    metamail
+ Permission to use, copy, modify, and distribute this material 
+ for any purpose and without fee is hereby granted, provided 
+ that the above copyright notice and this permission notice 
+ appear in all copies, and that the name of Bellcore not be 
+ used in advertising or publicity pertaining to this 
+ material without the specific, prior written permission 
+ of an authorized representative of Bellcore.  BELLCORE 
+ MAKES NO REPRESENTATIONS ABOUT THE ACCURACY OR SUITABILITY 
+ OF THIS MATERIAL FOR ANY PURPOSE.  IT IS PROVIDED "AS IS", 
+ WITHOUT ANY EXPRESS OR IMPLIED WARRANTIES.
 
-On Debian systems, the complete text of the GNU General
-Public License can be found in '/usr/share/common-licenses/GPL-2'
+Files:      sample/mhtml-tool
+Copyright:  2024 Thomas E. Dickey
+            2018 Tudor M. Pristavu
+            2012 Volker Schatz
+License:    Artistic-1.0-Perl
+Comment:
+ It may be copied and/or modified under the same terms as Perl.
