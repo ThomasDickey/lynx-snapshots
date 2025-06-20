@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTCP.c,v 1.171 2025/01/07 22:55:07 tom Exp $
+ * $LynxId: HTTCP.c,v 1.172 2025/06/19 18:49:10 Eric.Lindblad Exp $
  *
  *			Generic Communication Code		HTTCP.c
  *			==========================
@@ -1806,7 +1806,7 @@ static void set_timeout(struct timeval *timeoutp)
 #endif /* UCX && VAXC */
 #endif /* MULTINET */
 /*
- *  Interruptible connect as implemented for Mosaic by Marc Andreesen
+ *  Interruptible connect as implemented for Mosaic by Marc Andreessen
  *  and hacked in for Lynx years ago by Lou Montulli, and further
  *  modified over the years by numerous Lynx lovers. - FM
  */

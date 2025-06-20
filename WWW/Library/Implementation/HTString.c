@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTString.c,v 1.84 2025/01/08 01:19:36 tom Exp $
+ * $LynxId: HTString.c,v 1.85 2025/06/19 20:52:54 Eric.Lindblad Exp $
  *
  *	Case-independent string comparison		HTString.c
  *
@@ -380,7 +380,7 @@ char *HTSACopy_extra(char **dest,
  *
  * On entry,
  *	*pstr	points to a string containing white space separated
- *		field, optionlly quoted.
+ *		field, optionally quoted.
  *
  * On exit,
  *	*pstr	has been moved to the first delimiter past the

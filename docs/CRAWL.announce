@@ -58,7 +58,7 @@ TRAVERSE_FILE (traverse.dat):
 
 TRAVERSE_FOUND_FILE (traverse2.dat):
                   Contains a list of all URLs that were traversed, in the
-                  order encountered or re-encountered (but not re-travered)
+                  order encountered or re-encountered (but not re-traversed)
                   during a traversal run, and the TITLEs of the documents
                   (separated from the URLs by TABs)  A URL and TITLE may be
                   present in this list many times.  To simplify the list,

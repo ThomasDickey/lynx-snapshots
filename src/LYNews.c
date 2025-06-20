@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYNews.c,v 1.63 2025/01/06 16:17:09 tom Exp $
+ * $LynxId: LYNews.c,v 1.65 2025/06/19 22:04:17 tom Exp $
  */
 #include <HTUtils.h>
 #ifndef DISABLE_NEWS
@@ -145,7 +145,7 @@ char *LYNewsPost(char *newsgroups,
     }
 
     /*
-     * The newsgroups could be a comma-seperated list.  It need not have
+     * The newsgroups could be a comma-separated list.  It need not have
      * spaces, but deal with any that may also have been hex escaped.  - FM
      */
     StrAllocCopy(NewsGroups, newsgroups);
@@ -354,7 +354,7 @@ char *LYNewsPost(char *newsgroups,
 
     } else {
 	/*
-	 * Use the built in line editior.
+	 * Use the built in line editor.
 	 */
 	LYaddstr(gettext("\n\n Please enter your message below."));
 	LYaddstr(gettext("\n When you are done, press enter and put a single period (.)"));

@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTML.c,v 1.202 2025/01/07 23:04:28 tom Exp $
+ * $LynxId: HTML.c,v 1.204 2025/06/19 22:17:29 tom Exp $
  *
  *		Structured stream to Rich hypertext converter
  *		============================================
@@ -719,7 +719,7 @@ void HTML_write(HTStructured * me, const char *s, int l)
  * *If track_internal_links is false, URL-less URL-References are
  *  resolved differently from URL-References with a non-empty URL (using the
  *  current stream's retrieval address instead of the base), but we make no
- *  further distinction.  Resolution is then as in the examples above, execept
+ *  further distinction.  Resolution is then as in the examples above, except
  *  that there is no "(marked internal)".
  *
  * *Note that this doesn't apply to form ACTIONs (always resolved using base,
@@ -5045,7 +5045,7 @@ static int HTML_start_element(HTStructured * me, int element_number,
 		}
 
 		/*
-		 * Inititialize.
+		 * Initialize.
 		 */
 		memset(&I, 0, sizeof(I));
 		I.name_cs = -1;
@@ -6541,7 +6541,7 @@ static int HTML_end_element(HTStructured * me, int element_number,
 	}
 
 	/*
-	 * Re-intialize all of the OBJECT elements.  - FM
+	 * Re-initialize all of the OBJECT elements.  - FM
 	 */
       End_Object:
 	clear_objectdata(me);
@@ -7081,7 +7081,7 @@ static int HTML_end_element(HTStructured * me, int element_number,
 	FREE(me->xinclude);
     }
 #ifdef USE_COLOR_STYLE
-    if (!skip_stack_requested) {	/*don't emit stylechanges if skipped stack element - VH */
+    if (!skip_stack_requested) {	/*don't emit style changes if skipped stack element - VH */
 	FastTrimColorClass(HTML_dtd.tags[element_number].name,
 			   HTML_dtd.tags[element_number].name_len,
 			   Style_className,

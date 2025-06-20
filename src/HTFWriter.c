@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFWriter.c,v 1.134 2025/01/06 16:19:03 tom Exp $
+ * $LynxId: HTFWriter.c,v 1.135 2025/06/19 18:51:05 Eric.Lindblad Exp $
  *
  *		FILE WRITER				HTFWrite.h
  *		===========
@@ -962,7 +962,7 @@ static char *mailcap_substitute(HTParentAnchor *anchor,
 /*	Take action using a system command
  *	----------------------------------
  *
- *	originally from Ghostview handling by Marc Andreseen.
+ *	originally from Ghostview handling by Marc Andreessen.
  *	Creates temporary file, writes to it, executes system command
  *	on end-document.  The suffix of the temp file can be given
  *	in case the application is fussy, or so that a generic opener can
@@ -1128,7 +1128,7 @@ HTStream *HTSaveAndExecute(HTPresentation *pres,
  *
  *	usually a binary file that can't be displayed
  *
- *	originally from Ghostview handling by Marc Andreseen.
+ *	originally from Ghostview handling by Marc Andreessen.
  *	Asks the user if he wants to continue, creates a temporary
  *	file, and writes to it.  In HTSaveToFile_Free
  *	the user will see a list of choices for download

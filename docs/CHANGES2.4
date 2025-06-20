@@ -247,7 +247,7 @@ Worked in mods from David Trueman (david@cs.dal.ca) - FM:
   to indicate FIXED 512 record format.  See the documentation in
   userdefs.h, lynx.cfg and FIXED512.COM for more information. - FM
 02-08-95
-* Fixed glitch in HTInit.c which mis-casted the default MIME type for
+* Fixed glitch in HTInit.c which mis-cast the default MIME type for
   files with a .sh extension, causing the EXEC_SCRIPT function to be
   dysfunctional. - FM
 * I think I finally have Lynx showing "(p# of N)" properly in the title
@@ -587,7 +587,7 @@ Worked in mods from David Trueman (david@cs.dal.ca) - FM:
   return or exit values of scripts, and report -1 or 0 as it's own return
   value.  If a "test" script is used on VMS in conjunction with .mailcap
   for setting viewers, it should return -1 if the test fails and 0 or 1 if
-  it passes (the "test" script can be DCL or an exectutable, and should be
+  it passes (the "test" script can be DCL or an executable, and should be
   defined as a foreign command).  If you don't have a "test" script, don't
   include that instruction in .mailcap. - FM
 * The tmpaddress pointer in do_www_search() of GridText.c needed to be
@@ -801,7 +801,7 @@ Mods based on patches from George Lindholm (lindholm@ucs.ubc.ca) - FM:
 09-22-94
 * Finished up redirection handling.  Will now handle serial redirections
   across multiple sites (with an arbitrary limit of 10, to prevent the
-  possibilily of an infinite loop of circular redirections), works properly
+  possibility of an infinite loop of circular redirections), works properly
   with redirections via the VALUE fields of OPTION tags, and no longer alters
   any anchor addresses, avoiding all the problems that caused in the hash
   table. - FM
@@ -882,7 +882,7 @@ Mods based on patches from George Lindholm (lindholm@ucs.ubc.ca) - FM:
 * Modified for handling of Telnet URLs with spaces/other characters in the
   username.
 5-26-94
-* Began terminating memory leaks with extreme predjudice.
+* Began terminating memory leaks with extreme prejudice.
 5-24-94
 * WAIS searches will now work when they are of type "www/present" as opposed
   to only viewing the source.

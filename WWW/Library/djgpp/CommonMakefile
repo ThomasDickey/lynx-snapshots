@@ -11,7 +11,7 @@
 #	make update	Copy installed version into installed version
 #	make uninstall	Unlink installed version from the system
 #	make clean	Remove intermediate files
-#	make cleanall	Remove intremediate files and products
+#	make cleanall	Remove intermediate files and products
 #
 # Macros required to be defined already for make:
 #

@@ -30,7 +30,7 @@ Server's Representation of Document (Tree) Protections
 
 Callbacks for rule system
 
-   The following three functioncs are called by the rule system:
+   The following three functions are called by the rule system:
 
       HTAA_clearProtections() when starting to translate a filename
 

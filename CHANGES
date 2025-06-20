@@ -1,9 +1,14 @@
--- $LynxId: CHANGES,v 1.1217 2025/06/18 00:18:06 tom Exp $
+-- $LynxId: CHANGES,v 1.1223 2025/06/19 22:19:59 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2025-06-17 (2.9.2k)
+2025-06-19 (2.9.2l)
+* spelling fixes (Eric Lindblad)
+* fix typos in user guide (patch by David Apps)
+* correct parsing of named-entity, accepting ".", ":", "_", "-" -TD
+* update src/chrtrans/entities.h using https://www.w3.org/TR/xml-entity-names/
+  (report by Brian Inglis) -TD
 * review/update copyright/licenses for test-package.
 * add conditional macros for LY_TEST_FMTS to help check for format mismatch -TD
 * correct sprintf-format used for gopher telnet connections -Ben Collver
@@ -4557,7 +4562,7 @@ recently, FreeBSD 4.1, NetBSD 1.5 and OpenBSD 2.8 (curses/ncurses).
   width of 112 chars -IZ
 * enable <BR> and <P> in TRSTables.  The table still needs to fit into the
   screen width without line wrapping.  A tiny bit of additional work may be
-  needed to allow tables-inside-tables too; then any table should be rendable
+  needed to allow tables-inside-tables too; then any table should be renderable
   as a table after an appropriate screen resizing.  This patch also should make
   around 70% of TRSTable.c unreachable.  A lot of simplification can be made,
   and most of the current convoluted hackery may be removed.  Since this
@@ -5063,7 +5068,7 @@ recently, FreeBSD 4.1, NetBSD 1.5 and OpenBSD 2.8 (curses/ncurses).
 * update option_help.html to describe the Visited Pages settings -TD
 * correct order of body_attr[] and button_attr[] in HTMLDTD.c -TD
 * correction for IMG attributes in HTMLDTD.c -KW
-* tweak form-based options menu:  General Preferencies now has User Mode,
+* tweak form-based options menu:  General Preferences now has User Mode,
   Editor, Searching type and Cookies (suggested by PW).  Correct misspelled
   gettext'ed message, introduced in pre.7 -LP, DK
 * note in configure --help and INSTALLATION that color-style is implemented
@@ -9424,7 +9429,7 @@ recently, FreeBSD 4.1, NetBSD 1.5 and OpenBSD 2.8 (curses/ncurses).
   safest case or any other value.  If blank, use display character set
   (default, compatibility).  Currently implemented only for "subject" in
   "print-to-email" - LP
-* fix SGML.c so invalid characters are not dispalayed in hex UHHHH but just
+* fix SGML.c so invalid characters are not displayed in hex UHHHH but just
   omitted as already done for plain/text mode - LP
 * fix download' suggested file name (8bit) - LP
 * correct logic error in "Change Location" command, and allow "~" there in

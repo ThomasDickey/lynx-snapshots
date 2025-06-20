@@ -132,7 +132,7 @@ sub quoted {
     return sprintf( "'%s'", $param );
 }
 
-# Add approriate ordinal suffix to a number.
+# Add appropriate ordinal suffix to a number.
 # -> Number
 # <- String of number with ordinal suffix
 sub ordinal {

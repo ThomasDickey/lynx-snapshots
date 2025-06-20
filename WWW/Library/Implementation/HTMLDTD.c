@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTMLDTD.c,v 1.59 2025/01/06 15:42:46 tom Exp $
+ * $LynxId: HTMLDTD.c,v 1.60 2025/06/19 20:53:38 Eric.Lindblad Exp $
  *
  *		Our Static DTD for HTML
  *		-----------------------
@@ -252,7 +252,7 @@ HTTag HTTag_unrecognized =
 /*	Start anchor element
  *	--------------------
  *
- *	It is kinda convenient to have a particulr routine for
+ *	It is kinda convenient to have a particular routine for
  *	starting an anchor element, as everything else for HTML is
  *	simple anyway.
  */

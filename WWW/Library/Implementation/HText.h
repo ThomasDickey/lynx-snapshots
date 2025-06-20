@@ -1,11 +1,11 @@
 /*
- * $LynxId: HText.h,v 1.18 2025/01/06 15:13:11 tom Exp $
+ * $LynxId: HText.h,v 1.19 2025/06/19 19:51:32 Eric.Lindblad Exp $
  *                                                           Rich Hypertext object for libWWW
  *                                RICH HYPERTEXT OBJECT
  *
  * This is the C interface to the Objective-C (or whatever) Style-oriented
  * HyperText class.  It is used when a style-oriented text object is available
- * or craeted in order to display hypertext.
+ * or created in order to display hypertext.
  */
 #ifndef HTEXT_H
 #define HTEXT_H

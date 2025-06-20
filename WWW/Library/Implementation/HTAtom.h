@@ -4,7 +4,7 @@
  *                      =======================
  *
  *      Atoms are names which are given representative pointer values
- *      so that they can be stored more efficiently, and compaisons
+ *      so that they can be stored more efficiently, and comparisons
  *      for equality done more efficiently.
  *
  *      HTAtom_for(string) returns a representative value such that it

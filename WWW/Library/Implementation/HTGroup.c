@@ -43,7 +43,7 @@
 #include <HTUtils.h>
 
 #include <HTAAUtil.h>
-#include <HTLex.h>		/* Lexical analysor     */
+#include <HTLex.h>		/* Lexical analyser     */
 #include <HTGroup.h>		/* Implemented here     */
 
 #include <LYUtils.h>

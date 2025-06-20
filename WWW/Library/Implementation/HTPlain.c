@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTPlain.c,v 1.62 2025/01/06 15:13:11 tom Exp $
+ * $LynxId: HTPlain.c,v 1.63 2025/06/19 18:45:22 Eric.Lindblad Exp $
  *
  *		Plain text object		HTWrite.c
  *		=================
@@ -447,7 +447,7 @@ static void HTPlain_write(HTStream *me, const char *s, int l)
 		   (uck = UCTransUniCharStr(replace_buf, 60, code,
 					    me->outUCLYhndl, 0) >= 0)) {
 	    /*
-	     * No further tests for valididy - assume that whoever defined
+	     * No further tests for validity - assume that whoever defined
 	     * replacement strings knew what she was doing.
 	     */
 	    HText_appendText(me->text, replace_buf);

@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTVMSUtils.c,v 1.40 2020/01/21 21:58:29 tom Exp $
+ * $LynxId: HTVMSUtils.c,v 1.41 2025/06/19 20:54:30 Eric.Lindblad Exp $
  *
  * MODULE							HTVMSUtil.c
  *		VMS Utility Routines
@@ -307,16 +307,16 @@ int HTStat(const char *filename,
     /*
        the following stuff does not work in VMS with a normal stat...
        -->   /disk$user/duns/www if www is a directory
-       is statted like:  /disk$user/duns/www.dir
+       is stat'ed like:  /disk$user/duns/www.dir
        after a normal stat has failed
        -->   /disk$user/duns     if duns is a toplevel directory
-       is statted like:  /disk$user/000000/duns.dir
+       is stat'ed like:  /disk$user/000000/duns.dir
        -->   /disk$user since disk$user is a device
-       is statted like:  /disk$user/000000/000000.dir
+       is stat'ed like:  /disk$user/000000/000000.dir
        -->   /
        searches all devices, no solution yet...
        -->   /vxcern!/disk$cr/wwwteam/login.com
-       is not statted but granted with fake information...
+       is not stat'ed but granted with fake information...
      */
     int Result;
     int Len;

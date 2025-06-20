@@ -1,5 +1,5 @@
 /*
- * $LynxId: GridText.c,v 1.352 2025/01/07 23:04:28 tom Exp $
+ * $LynxId: GridText.c,v 1.353 2025/06/19 19:54:34 Eric.Lindblad Exp $
  *
  *		Character grid hypertext object
  *		===============================
@@ -9137,7 +9137,7 @@ BOOLEAN HTdocument_settings_changed(void)
 
     if (TRACE) {
 	/*
-	 * If we're tracing, note everying that has changed.
+	 * If we're tracing, note everything that has changed.
 	 */
 	trace_setting_change("CLICKABLE_IMAGES",
 			     HTMainText->clickable_images, clickable_images);

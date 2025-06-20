@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTAAProt.c,v 1.35 2025/01/06 15:41:30 tom Exp $
+ * $LynxId: HTAAProt.c,v 1.36 2025/06/19 18:54:14 Eric.Lindblad Exp $
  *
  * MODULE							HTAAProt.c
  *		PROTECTION FILE PARSING MODULE
@@ -29,7 +29,7 @@
 #endif /* not VMS */
 
 #include <HTAAUtil.h>
-#include <HTLex.h>		/* Lexical analysor     */
+#include <HTLex.h>		/* Lexical analyser     */
 #include <HTAAProt.h>		/* Implemented here     */
 
 #include <LYUtils.h>

@@ -1954,5 +1954,5 @@ U+009c:ST
 U+009d:OC
 U+009e:PM
 U+009f:AC
-# Characters in Private Use Area (e000-f8ff) do not have ussigned numbers
+# Characters in Private Use Area (e000-f8ff) do not have unassigned numbers
 # according Unicode 2.0

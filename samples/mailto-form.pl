@@ -41,7 +41,7 @@
 # - Tell lynx to actually use the lynxcgi scripts for mailto URLs.
 #   There are two variants:
 #   a) Redirect "mailto"
-#   Requires patched lynx, currently not yet in the developent code.
+#   Requires patched lynx, currently not yet in the development code.
 #   Use the following two lines in the file that is configured as
 #   RULESFILE in lynxcfg:
 #      PermitRedirection mailto:*

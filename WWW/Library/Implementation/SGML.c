@@ -1,5 +1,5 @@
 /*
- * $LynxId: SGML.c,v 1.189 2025/01/06 15:29:41 tom Exp $
+ * $LynxId: SGML.c,v 1.190 2025/06/19 17:09:58 tom Exp $
  *
  *			General SGML Parser code		SGML.c
  *			========================
@@ -2606,11 +2606,9 @@ static void SGML_character(HTStream *me, int c_in)
 	 * Handle possible named entity.
 	 */
     case S_entity:
-	if (TOASCII(clong) < 127 && (string->size ?	/* S/390 -- gil -- 1029 */
-				     isalnum(UCH(c)) : isalpha(UCH(c)))) {
-	    /* Should probably use IsNmStart/IsNmChar above (is that right?),
-	       but the world is not ready for that - there's &nbsp: (note
-	       colon!) and stuff around. */
+	if (TOASCII(clong) < 127 && (string->size
+				     ? IsNmChar(c)
+				     : IsNmStart(c))) {
 	    /*
 	     * Accept valid ASCII character.  - FM
 	     */
