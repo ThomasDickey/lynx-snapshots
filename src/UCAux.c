@@ -1,5 +1,5 @@
 /*
- * $LynxId: UCAux.c,v 1.60 2025/01/06 15:16:59 tom Exp $
+ * $LynxId: UCAux.c,v 1.61 2025/07/22 19:50:18 tom Exp $
  */
 #include <HTUtils.h>
 
@@ -414,7 +414,7 @@ void UCSetBoxChars(int cset,
 		static char acsc_name[] = "acsc";
 		char *map = tigetstr(acsc_name);
 
-		if (map != 0) {
+		if (map != NULL) {
 		    CTRACE((tfp, "build terminal line-drawing map\n"));
 		    while (map[0] != 0 && map[1] != 0) {
 			for (n = 0; n < TABLESIZE(table); ++n) {

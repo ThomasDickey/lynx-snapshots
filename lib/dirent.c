@@ -1,27 +1,27 @@
 /*
- * $LynxId: dirent.c,v 1.7 2018/02/17 17:52:45 tom Exp $
+ * $LynxId: dirent.c,v 1.8 2025/07/13 20:06:23 tom Exp $
  *
- * dir.c for MS-DOS by Samuel Lam <skl@van-bc.UUCP>, June/87 
+ * dir.c for MS-DOS by Samuel Lam <skl@van-bc.UUCP>, June/87
  */
 
 /* #ifdef WIN32 */
-/* 
- * @(#)dir.c 1.4 87/11/06 Public Domain. 
- * 
- *  A public domain implementation of BSD directory routines for 
- *  MS-DOS.  Written by Michael Rendell ({uunet,utai}michael@garfield), 
- *  August 1897 
- *  Ported to OS/2 by Kai Uwe Rommel 
- *  December 1989, February 1990 
- *  Ported to Windows NT 22 May 91 
- *    other mods Summer '92 brianmo@microsoft.com 
+/*
+ * @(#)dir.c 1.4 87/11/06 Public Domain.
+ *
+ *  A public domain implementation of BSD directory routines for
+ *  MS-DOS.  Written by Michael Rendell ({uunet,utai}michael@garfield),
+ *  August 1897
+ *  Ported to OS/2 by Kai Uwe Rommel
+ *  December 1989, February 1990
+ *  Ported to Windows NT 22 May 91
+ *    other mods Summer '92 brianmo@microsoft.com
  *  opendirx() was horribly written, very inefficient, and did not take care
  *    of all cases.  It is still not too clean, but it is far more efficient.
  *    Changes made by Gordon Chaffee (chaffee@bugs-bunny.cs.berkeley.edu)
  */
 
-/*Includes: 
- *    crt 
+/*Includes:
+ *    crt
  */
 #ifdef HAVE_CONFIG_H
 #include "lynx_cfg.h"
@@ -47,13 +47,13 @@
 
 #define stat _stat
 
-/* 
- *    NT specific 
+/*
+ *    NT specific
  */
 #include <stdio.h>
 
-/* 
- *    random typedefs 
+/*
+ *    random typedefs
  */
 #define HDIR        HANDLE
 #define HFILE       HANDLE
@@ -63,8 +63,8 @@
 #define INVALID_HANDLE_VALUE ((HDIR) 0xffffffff)
 #endif
 
-/* 
- *    local functions 
+/*
+ *    local functions
  */
 static char *getdirent(char *);
 static void free_dircontents(struct _dircontents *);

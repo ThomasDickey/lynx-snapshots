@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFormat.c,v 1.101 2025/01/06 15:38:51 tom Exp $
+ * $LynxId: HTFormat.c,v 1.102 2025/07/22 00:21:37 tom Exp $
  *
  *		Manage different file formats			HTFormat.c
  *		=============================
@@ -15,7 +15,7 @@
 
 #define HTSTREAM_INTERNAL 1
 
-#include <HTUtils.h>
+#include <HTTLS.h>
 
 /* Implements:
 */

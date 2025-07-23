@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTString.c,v 1.85 2025/06/19 20:52:54 Eric.Lindblad Exp $
+ * $LynxId: HTString.c,v 1.86 2025/07/13 20:06:23 tom Exp $
  *
  *	Case-independent string comparison		HTString.c
  *
@@ -942,7 +942,7 @@ char *HTSprintf0(char **pstr, const char *fmt, ...)
 #if LY_TEST_FMTS == 1
 /*
  * Check if the parameter points to the beginning of a conversion
- * specification, ignoring "%%". 
+ * specification, ignoring "%%".
  */
 static BOOL is_format(const char *source)
 {

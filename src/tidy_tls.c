@@ -1,6 +1,6 @@
 /*
- * $LynxId: tidy_tls.c,v 1.41 2020/03/03 11:46:07 Gisle.Vanem Exp $
- * Copyright 2008-2019,2020 Thomas E. Dickey
+ * $LynxId: tidy_tls.c,v 1.44 2025/07/21 21:50:12 tom Exp $
+ * Copyright 2008-2020,2025 Thomas E. Dickey
  * with fix Copyright 2008 by Thomas Viehmann
  *
  * Required libraries:
@@ -528,6 +528,16 @@ int SSL_set_fd(SSL * ssl, int fd)
     gnutls_transport_set_ptr(ssl->gnutls_state,
 			     (gnutls_transport_ptr_t) (intptr_t) (fd));
     return 1;
+}
+
+/*
+ * Set the server name for the SSL object.
+ */
+int SSL_set_tlsext_host_name(SSL * ssl, char *host)
+{
+    return gnutls_server_name_set(ssl->gnutls_state,
+				  GNUTLS_NAME_DNS,
+				  host, strlen(host));
 }
 
 /*

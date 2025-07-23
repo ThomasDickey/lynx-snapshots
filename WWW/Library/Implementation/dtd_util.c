@@ -1,5 +1,5 @@
 /*
- * $LynxId: dtd_util.c,v 1.90 2025/01/06 18:10:33 tom Exp $
+ * $LynxId: dtd_util.c,v 1.91 2025/07/22 00:09:42 tom Exp $
  *
  * Given a SGML_dtd structure, write a corresponding flat file, or "C" source.
  * Given the flat-file, write the "C" source.
@@ -734,6 +734,8 @@ static void dump_source(FILE *output, const SGML_dtd * dtd, int dtd_version)
      */
     NOTE("#ifndef once_HTMLDTD");
     NOTE("#define once_HTMLDTD 1");
+    NOTE("");
+    NOTE("#include <HTMLDTD.h>");
     NOTE("");
 
     /* construct TagClass-define's */

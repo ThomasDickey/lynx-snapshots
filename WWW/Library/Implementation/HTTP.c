@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTP.c,v 1.189 2025/01/07 23:55:21 tom Exp $
+ * $LynxId: HTTP.c,v 1.208 2025/07/22 00:33:24 tom Exp $
  *
  * HyperText Transfer Protocol	- Client implementation		HTTP.c
  * ===========================
@@ -7,15 +7,12 @@
  * 27 Jan 1994	PDM  Added Ari Luotonen's Fix for Reload when using proxy
  *		     servers.
  * 28 Apr 1997	AJL,FM Do Proxy Authorisation.
+ * 04 Jul 2025  Nate Choe, Use newly-made TLS API
  */
 
-#include <HTUtils.h>
+#include <HTNews.h>
 #include <HTTP.h>
 #include <LYUtils.h>
-
-#ifdef USE_SSL
-#include <HTNews.h>
-#endif
 
 #define HTTP_PORT   80
 #define HTTPS_PORT  443
@@ -27,63 +24,15 @@
 
 #include <HTParse.h>
 #include <HTTCP.h>
-#include <HTFormat.h>
 #include <HTFile.h>
 #include <HTAlert.h>
-#include <HTMIME.h>
-#include <HTML.h>
-#include <HTInit.h>
 #include <HTAABrow.h>
-#include <HTAccess.h>		/* Are we using an HTTP gateway? */
 
-#include <LYCookie.h>
 #include <LYGlobalDefs.h>
 #include <GridText.h>
 #include <LYStrings.h>
-#include <LYUtils.h>
 #include <LYrcFile.h>
 #include <LYLeaks.h>
-#include <LYCurses.h>
-
-#ifdef USE_SSL
-
-#ifdef USE_OPENSSL_INCL
-#include <openssl/x509v3.h>
-#endif
-
-#if defined(LIBRESSL_VERSION_NUMBER)
-/* OpenSSL and LibreSSL version numbers do not correspond */
-
-#if LIBRESSL_VERSION_NUMBER >= 0x2060100fL
-#define SSL_set_no_TLSV1()		SSL_set_min_proto_version(handle, TLS1_1_VERSION)
-#endif
-
-#elif defined(OPENSSL_VERSION_NUMBER) && (OPENSSL_VERSION_NUMBER >= 0x10100000L)
-
-#define SSLEAY_VERSION_NUMBER		OPENSSL_VERSION_NUMBER
-#undef  SSL_load_error_strings
-#undef  SSLeay_add_ssl_algorithms
-#define ASN1_STRING_data		ASN1_STRING_get0_data
-#define TLS_client_method()		SSLv23_client_method()
-#define SSL_load_error_strings()	/* nothing */
-#define SSLeay_add_ssl_algorithms()	/* nothing */
-#define SSL_set_no_TLSV1()		SSL_set_min_proto_version(handle, TLS1_1_VERSION)
-
-#elif defined(SSLEAY_VERSION_NUMBER)
-
-#define TLS_client_method()		SSLv23_client_method()
-
-#endif
-
-#ifndef SSL_set_no_TLSV1
-#define SSL_set_no_TLSV1()		SSL_set_options(handle, SSL_OP_NO_TLSv1)
-#endif
-
-#ifdef USE_GNUTLS_INCL
-#include <gnutls/x509.h>
-#endif
-
-#endif /* USE_SSL */
 
 BOOLEAN reloading = FALSE;	/* Reloading => send no-cache pragma to proxy */
 char *redirecting_url = NULL;	/* Location: value. */
@@ -91,259 +40,8 @@ BOOL permanent_redirection = FALSE;	/* Got 301 status? */
 BOOL redirect_post_content = FALSE;	/* Don't convert to GET? */
 
 #ifdef USE_SSL
-SSL_CTX *ssl_ctx = NULL;	/* SSL ctx */
-SSL *SSL_handle = NULL;
-static int ssl_okay;
 
-static void free_ssl_ctx(void)
-{
-    if (ssl_ctx != NULL)
-	SSL_CTX_free(ssl_ctx);
-}
-
-static BOOL needs_limit(const char *actual)
-{
-    return ((int) strlen(actual) > LYcols - 7) ? TRUE : FALSE;
-}
-
-static char *limited_string(const char *source, const char *actual)
-{
-    int limit = ((int) strlen(source)
-		 - ((int) strlen(actual) - (LYcols - 10)));
-    char *temp = NULL;
-
-    StrAllocCopy(temp, source);
-    if (limit < 0)
-	limit = 0;
-    strcpy(temp + limit, "...");
-    return temp;
-}
-
-/*
- * If the error message is too long to fit in the line, truncate that to fit
- * within the limits for prompting.
- */
-static void SSL_single_prompt(char **target, const char *source)
-{
-    HTSprintf0(target, SSL_FORCED_PROMPT, source);
-    if (needs_limit(*target)) {
-	char *temp = limited_string(source, *target);
-
-	*target = NULL;
-	HTSprintf0(target, SSL_FORCED_PROMPT, temp);
-	free(temp);
-    }
-}
-
-static void SSL_double_prompt(char **target, const char *format, const char
-			      *arg1, const char *arg2)
-{
-    (void) format;
-    HTSprintf0(target, HT_FMT("%s%s", format), arg1, arg2);
-    if (needs_limit(*target)) {
-	char *parg2 = limited_string(arg2, *target);
-
-	*target = NULL;
-	HTSprintf0(target, HT_FMT("%s%s", format), arg1, parg2);
-	if (needs_limit(*target)) {
-	    char *parg1 = limited_string(arg1, *target);
-
-	    *target = NULL;
-	    HTSprintf0(target, HT_FMT("%s%s", format), parg1, parg2);
-	    free(parg1);
-	}
-	free(parg2);
-    }
-}
-
-static int HTSSLCallback(int preverify_ok, X509_STORE_CTX * x509_ctx GCC_UNUSED)
-{
-    char *msg = NULL;
-    int result = 1;
-
-#ifdef USE_X509_SUPPORT
-    HTSprintf0(&msg,
-	       LY_MSG("SSL callback:%s, preverify_ok=%d, ssl_okay=%d"),
-	       X509_verify_cert_error_string((long) X509_STORE_CTX_get_error(x509_ctx)),
-	       preverify_ok, ssl_okay);
-    _HTProgress(msg);
-    FREE(msg);
-#endif
-
-#ifndef USE_NSS_COMPAT_INCL
-    if (!(preverify_ok || ssl_okay || ssl_noprompt)) {
-#ifdef USE_X509_SUPPORT
-	SSL_single_prompt(&msg,
-			  X509_verify_cert_error_string((long)
-							X509_STORE_CTX_get_error(x509_ctx)));
-	if (HTForcedPrompt(ssl_noprompt, msg, NO))
-	    ssl_okay = 1;
-	else
-	    result = 0;
-#endif
-
-	FREE(msg);
-    }
-#endif
-    return result;
-}
-
-SSL *HTGetSSLHandle(void)
-{
-#ifdef USE_GNUTLS_INCL
-    static char *certfile = NULL;
-#endif
-    static char *client_keyfile = NULL;
-    static char *client_certfile = NULL;
-
-    if (ssl_ctx == NULL) {
-	/*
-	 * First time only.
-	 */
-#if SSLEAY_VERSION_NUMBER < 0x0800
-	if ((ssl_ctx = SSL_CTX_new()) != NULL) {
-	    X509_set_default_verify_paths(ssl_ctx->cert);
-	}
-#else
-	SSLeay_add_ssl_algorithms();
-	if ((ssl_ctx = SSL_CTX_new(TLS_client_method())) != NULL) {
-#ifdef SSL_OP_NO_SSLv2
-	    SSL_CTX_set_options(ssl_ctx, SSL_OP_ALL | SSL_OP_NO_SSLv2);
-#else
-	    SSL_CTX_set_options(ssl_ctx, SSL_OP_ALL);
-#endif
-#ifdef SSL_OP_NO_COMPRESSION
-	    SSL_CTX_set_options(ssl_ctx, SSL_OP_NO_COMPRESSION);
-#endif
-#ifdef SSL_MODE_AUTO_RETRY
-	    SSL_CTX_set_mode(ssl_ctx, SSL_MODE_AUTO_RETRY);
-#endif
-#ifdef SSL_MODE_RELEASE_BUFFERS
-	    SSL_CTX_set_mode(ssl_ctx, SSL_MODE_RELEASE_BUFFERS);
-#endif
-	    SSL_CTX_set_default_verify_paths(ssl_ctx);
-	    SSL_CTX_set_verify(ssl_ctx, SSL_VERIFY_PEER, HTSSLCallback);
-	}
-#endif /* SSLEAY_VERSION_NUMBER < 0x0800 */
-#if defined(USE_PROGRAM_DIR) & !defined(USE_GNUTLS_INCL)
-	if (ssl_ctx != NULL) {
-	    X509_LOOKUP *lookup;
-
-	    lookup = X509_STORE_add_lookup(ssl_ctx->cert_store,
-					   X509_LOOKUP_file());
-	    if (lookup != NULL) {
-		char *certfile = NULL;
-
-		HTSprintf0(&certfile, "%s\\cert.pem", program_dir);
-		X509_LOOKUP_load_file(lookup, certfile, X509_FILETYPE_PEM);
-		FREE(certfile);
-	    }
-	}
-#endif
-#ifdef USE_GNUTLS_INCL
-	if ((certfile = LYGetEnv("SSL_CERT_FILE")) != NULL) {
-	    CTRACE((tfp,
-		    "HTGetSSLHandle: certfile is set to %s by SSL_CERT_FILE\n",
-		    certfile));
-	} else {
-	    if (non_empty(SSL_cert_file)) {
-		certfile = SSL_cert_file;
-		CTRACE((tfp,
-			"HTGetSSLHandle: certfile is set to %s by config SSL_CERT_FILE\n",
-			certfile));
-	    }
-#if defined(USE_PROGRAM_DIR)
-	    else {
-		HTSprintf0(&(certfile), "%s\\cert.pem", program_dir);
-		CTRACE((tfp,
-			"HTGetSSLHandle: certfile is set to %s by installed directory\n", certfile));
-	    }
-#endif
-	}
-#endif
-	atexit(free_ssl_ctx);
-    }
-
-    if (non_empty(SSL_client_key_file)) {
-	client_keyfile = SSL_client_key_file;
-	CTRACE((tfp,
-		"HTGetSSLHandle: client key file is set to %s by config SSL_CLIENT_KEY_FILE\n",
-		client_keyfile));
-    }
-
-    if (non_empty(SSL_client_cert_file)) {
-	client_certfile = SSL_client_cert_file;
-	CTRACE((tfp,
-		"HTGetSSLHandle: client cert file is set to %s by config SSL_CLIENT_CERT_FILE\n",
-		client_certfile));
-    }
-#ifdef USE_GNUTLS_INCL
-    ssl_ctx->certfile = certfile;
-    ssl_ctx->certfile_type = GNUTLS_X509_FMT_PEM;
-    ssl_ctx->client_keyfile = client_keyfile;
-    ssl_ctx->client_keyfile_type = GNUTLS_X509_FMT_PEM;
-    ssl_ctx->client_certfile = client_certfile;
-    ssl_ctx->client_certfile_type = GNUTLS_X509_FMT_PEM;
-#elif SSLEAY_VERSION_NUMBER >= 0x0930
-    if (client_certfile != NULL) {
-	if (client_keyfile == NULL) {
-	    client_keyfile = client_certfile;
-	}
-	SSL_CTX_use_certificate_chain_file(ssl_ctx, client_certfile);
-	SSL_CTX_use_PrivateKey_file(ssl_ctx, client_keyfile, SSL_FILETYPE_PEM);
-    }
-#endif
-    ssl_okay = 0;
-    return (SSL_new(ssl_ctx));
-}
-
-void HTSSLInitPRNG(void)
-{
-#if SSLEAY_VERSION_NUMBER >= 0x00905100
-    if (RAND_status() == 0) {
-	char rand_file[256];
-	time_t t;
-	long l, seed;
-
-#ifndef _WINDOWS
-	pid_t pid;
-
-#else
-	DWORD pid;
-#endif
-
-	t = time(NULL);
-
-#ifndef _WINDOWS
-	pid = getpid();
-#else
-	pid = GetCurrentThreadId();
-#endif
-
-	RAND_file_name(rand_file, 256L);
-	CTRACE((tfp, "HTTP: Seeding PRNG\n"));
-	/* Seed as much as 1024 bytes from RAND_file_name */
-	RAND_load_file(rand_file, 1024L);
-	/* Seed in time (mod_ssl does this) */
-	RAND_seed((unsigned char *) &t, (int) sizeof(time_t));
-
-	/* Seed in pid (mod_ssl does this) */
-	RAND_seed((unsigned char *) &pid, (int) sizeof(pid));
-	/* Initialize system's random number generator */
-	RAND_bytes((unsigned char *) &seed, (int) sizeof(long));
-
-	lynx_srand((unsigned) seed);
-	while (RAND_status() == 0) {
-	    /* Repeatedly seed the PRNG using the system's random number generator until it has been seeded with enough data */
-	    l = (long) lynx_rand();
-	    RAND_seed((unsigned char *) &l, (int) sizeof(long));
-	}
-	/* Write a rand_file */
-	RAND_write_file(rand_file);
-    }
-#endif /* SSLEAY_VERSION_NUMBER >= 0x00905100 */
-    return;
-}
+SSL * SSL_handle = NULL;
 
 #define HTTP_NETREAD(sock, buff, size, handle) \
 	(handle \
@@ -363,9 +61,11 @@ void HTSSLInitPRNG(void)
 	}
 
 #else
+
 #define HTTP_NETREAD(a, b, c, d)   NETREAD(a, b, c)
 #define HTTP_NETWRITE(a, b, c, d)  NETWRITE(a, b, c)
 #define HTTP_NETCLOSE(a, b)  (void)NETCLOSE(a)
+
 #endif /* USE_SSL */
 
 #ifdef _WINDOWS			/* 1997/11/06 (Thu) 13:00:08 */
@@ -725,65 +425,6 @@ static BOOL acceptEncoding(int code)
     return result;
 }
 
-#ifdef USE_SSL
-static void show_cert_issuer(X509 * peer_cert GCC_UNUSED)
-{
-#if defined(USE_OPENSSL_INCL) || defined(USE_GNUTLS_FUNCS)
-    char ssl_dn[1024];
-    char *msg = NULL;
-
-    X509_NAME_oneline(X509_get_issuer_name(peer_cert), ssl_dn, (int) sizeof(ssl_dn));
-    HTSprintf0(&msg, LY_MSG("Certificate issued by: %s"), ssl_dn);
-    _HTProgress(msg);
-    FREE(msg);
-#elif defined(USE_GNUTLS_INCL)
-    /* the OpenSSL "compat" code compiles but dumps core with GNU TLS */
-#endif
-}
-#endif
-
-/*
- * Remove IPv6 brackets (and any port-number) from the given host-string.
- */
-#ifdef USE_SSL
-static char *StripIpv6Brackets(char *host)
-{
-    int port_number;
-    char *p;
-
-    if ((p = HTParsePort(host, &port_number)) != NULL)
-	*p = '\0';
-
-    if (*host == '[') {
-	p = host + strlen(host) - 1;
-	if (*p == ']') {
-	    *p = '\0';
-	    for (p = host; (p[0] = p[1]) != '\0'; ++p) {
-		;		/* EMPTY */
-	    }
-	}
-    }
-    return host;
-}
-#endif
-
-/*
- * Remove user/password, if any, from the given host-string.
- */
-#ifdef USE_SSL
-static char *StripUserAuthents(char *host)
-{
-    char *p = strchr(host, '@');
-
-    if (p != NULL) {
-	char *q = host;
-
-	while ((*q++ = *++p) != '\0') ;
-    }
-    return host;
-}
-#endif
-
 /*		Load Document from HTTP Server			HTLoadHTTP()
  *		==============================
  *
@@ -841,31 +482,14 @@ static int HTLoadHTTP(const char *arg,
     int len = 0;
 
 #ifdef USE_SSL
+    SSL *handle = NULL;		/* The SSL handle */
+
     unsigned long SSLerror;
     BOOL do_connect = FALSE;	/* ARE WE going to use a proxy tunnel ? */
     BOOL did_connect = FALSE;	/* ARE WE actually using a proxy tunnel ? */
     const char *connect_url = NULL;	/* The URL being proxied */
     char *connect_host = NULL;	/* The host being proxied */
-    SSL *handle = NULL;		/* The SSL handle */
-    X509 *peer_cert;		/* The peer certificate */
-    char ssl_dn[1024];
-    char *cert_host;
-    char *ssl_host;
-    char *p;
-    char *msg = NULL;
-    int status_sslcertcheck;
-    char *ssl_dn_start;
-    char *ssl_all_cns = NULL;
-
-#ifdef USE_GNUTLS_INCL
-    int ret;
-    unsigned tls_status;
-#endif
-
-#if (SSLEAY_VERSION_NUMBER >= 0x0900) && !defined(USE_GNUTLS_FUNCS)
     BOOL try_tls = TRUE;
-#endif /* SSLEAY_VERSION_NUMBER >= 0x0900 */
-    SSL_handle = NULL;
 #else
     void *handle = NULL;
 #endif /* USE_SSL */
@@ -974,345 +598,25 @@ static int HTLoadHTTP(const char *arg,
      * If this is an https document, then do the SSL stuff here.
      */
     if (did_connect || !StrNCmp(url, "https", 5)) {
-	SSL_handle = handle = HTGetSSLHandle();
-	SSL_set_fd(handle, s);
-	/* get host we're connecting to */
-	ssl_host = HTParse(url, "", PARSE_HOST);
-	ssl_host = StripIpv6Brackets(ssl_host);
-	ssl_host = StripUserAuthents(ssl_host);
-#if defined(USE_GNUTLS_FUNCS)
-	ret = gnutls_server_name_set(handle->gnutls_state,
-				     GNUTLS_NAME_DNS,
-				     ssl_host, strlen(ssl_host));
-	CTRACE((tfp, "...called gnutls_server_name_set(%s) ->%d\n", ssl_host, ret));
-#elif SSLEAY_VERSION_NUMBER >= 0x0900
-#ifndef USE_NSS_COMPAT_INCL
-	if (!try_tls) {
-	    SSL_set_no_TLSV1();
-	    CTRACE((tfp, "...adding SSL_OP_NO_TLSv1\n"));
-	}
-#if OPENSSL_VERSION_NUMBER >= 0x0090806fL && !defined(OPENSSL_NO_TLSEXT)
-	else {
-	    int ret = (int) SSL_set_tlsext_host_name(handle, ssl_host);
+	int max_version;
 
-	    CTRACE((tfp, "...called SSL_set_tlsext_host_name(%s) ->%d\n",
-		    ssl_host, ret));
-	}
-#endif
-#endif
-#endif /* SSLEAY_VERSION_NUMBER >= 0x0900 */
-	HTSSLInitPRNG();
-	status = SSL_connect(handle);
+	/* If TLS failed, we try again with just SSL */
+	max_version = try_tls ? HTTLS_ANY_VERSION : HTSSL_MAX_VERSION;
 
-	if (status <= 0) {
-#if (SSLEAY_VERSION_NUMBER >= 0x0900)
-#if !defined(USE_GNUTLS_FUNCS)
+	SSL_handle = handle = HTSSLConnect(s, url,
+					   HTTLS_ANY_VERSION, max_version);
+
+	if (handle == NULL) {
+	    if (did_connect)
+		HTTP_NETCLOSE(s, handle);
 	    if (try_tls) {
 		_HTProgress(gettext("Retrying connection without TLS."));
 		try_tls = FALSE;
-		if (did_connect)
-		    HTTP_NETCLOSE(s, handle);
 		goto try_again;
-	    } else
-#endif
-	    {
-		CTRACE((tfp,
-			"HTTP: Unable to complete SSL handshake for '%s', SSL_connect=%d, SSL error stack dump follows\n",
-			url, status));
-		SSL_load_error_strings();
-		while ((SSLerror = ERR_get_error()) != 0) {
-		    CTRACE((tfp, "HTTP: SSL: %s\n", ERR_error_string(SSLerror, NULL)));
-		}
-		HTAlert("Unable to make secure connection to remote host.");
-		if (did_connect)
-		    HTTP_NETCLOSE(s, handle);
-		status = HT_NOT_LOADED;
-		goto done;
 	    }
-#else
-	    unsigned long SSLerror;
-
-	    CTRACE((tfp,
-		    "HTTP: Unable to complete SSL handshake for '%s', SSL_connect=%d, SSL error stack dump follows\n",
-		    url, status));
-	    SSL_load_error_strings();
-	    while ((SSLerror = ERR_get_error()) != 0) {
-		CTRACE((tfp, "HTTP: SSL: %s\n", ERR_error_string(SSLerror, NULL)));
-	    }
-	    HTAlert("Unable to make secure connection to remote host.");
-	    if (did_connect)
-		HTTP_NETCLOSE(s, handle);
 	    status = HT_NOT_LOADED;
 	    goto done;
-#endif /* SSLEAY_VERSION_NUMBER >= 0x0900 */
 	}
-#ifdef USE_GNUTLS_INCL
-	gnutls_certificate_set_verify_flags(handle->gnutls_cred,
-					    GNUTLS_VERIFY_DO_NOT_ALLOW_SAME |
-					    GNUTLS_VERIFY_ALLOW_X509_V1_CA_CRT);
-	ret = gnutls_certificate_verify_peers2(handle->gnutls_state, &tls_status);
-	if (ret < 0 || tls_status != 0) {
-	    int flag_continue = 1;
-
-#if GNUTLS_VERSION_NUMBER >= 0x030104
-	    int type;
-	    gnutls_datum_t out;
-
-	    if (ret < 0) {
-		SSL_single_prompt(&msg,
-				  gettext("GnuTLS error when trying to verify certificate."));
-	    } else {
-		type = gnutls_certificate_type_get(handle->gnutls_state);
-		(void) gnutls_certificate_verification_status_print(tls_status,
-								    type,
-								    &out, 0);
-		SSL_single_prompt(&msg, (const char *) out.data);
-		gnutls_free(out.data);
-	    }
-#else
-	    char *msg2;
-
-	    if (ret == 0 && tls_status & GNUTLS_CERT_SIGNER_NOT_FOUND) {
-		msg2 = gettext("the certificate has no known issuer");
-	    } else if (tls_status & GNUTLS_CERT_SIGNER_NOT_FOUND) {
-		msg2 = gettext("no issuer was found");
-	    } else if (tls_status & GNUTLS_CERT_SIGNER_NOT_CA) {
-		msg2 = gettext("issuer is not a CA");
-	    } else if (tls_status & GNUTLS_CERT_REVOKED) {
-		msg2 = gettext("the certificate has been revoked");
-	    } else {
-		msg2 = gettext("the certificate is not trusted");
-	    }
-	    SSL_single_prompt(&msg, msg2);
-#endif
-	    CTRACE((tfp, "HTLoadHTTP: %s\n", msg));
-	    if (!ssl_noprompt) {
-		if (!HTForcedPrompt(ssl_noprompt, msg, NO)) {
-		    flag_continue = 0;
-		}
-	    } else if (ssl_noprompt == FORCE_PROMPT_NO) {
-		flag_continue = 0;
-	    }
-	    FREE(msg);
-	    if (flag_continue == 0) {
-		status = HT_NOT_LOADED;
-		FREE(msg);
-		goto done;
-	    }
-	}
-#endif
-
-	peer_cert = (X509 *) SSL_get_peer_certificate(handle);
-#if defined(USE_OPENSSL_INCL) || defined(USE_GNUTLS_FUNCS)
-	X509_NAME_oneline(X509_get_subject_name(peer_cert),
-			  ssl_dn, (int) sizeof(ssl_dn));
-#elif defined(USE_GNUTLS_INCL)
-	X509_NAME_oneline(X509_get_subject_name(peer_cert),
-			  ssl_dn + 1, (int) sizeof(ssl_dn) - 1);
-
-	/* Iterate over DN in incompatible GnuTLS format to bring it into OpenSSL format */
-	ssl_dn[0] = '/';
-	ssl_dn_start = ssl_dn;
-	while (*ssl_dn_start) {
-	    if ((*ssl_dn_start == ',') && (*(ssl_dn_start + 1) == ' ')) {
-		*ssl_dn_start++ = '/';
-		if (*(p = ssl_dn_start) != 0) {
-		    while ((p[0] = p[1]) != 0)
-			++p;
-		}
-	    } else {
-		ssl_dn_start++;
-	    }
-	}
-#endif
-
-	/*
-	 * X.509 DN validation taking ALL CN fields into account
-	 * (c) 2006 Thorsten Glaser <tg@mirbsd.de>
-	 */
-
-	/* initialise status information */
-	status_sslcertcheck = 0;	/* 0 = no CN found in DN */
-	ssl_dn_start = ssl_dn;
-
-	/* validate all CNs found in DN */
-	CTRACE((tfp, "Validating CNs in '%s'\n", ssl_dn_start));
-	while ((cert_host = strstr(ssl_dn_start, "/CN=")) != NULL) {
-	    status_sslcertcheck = 1;	/* 1 = could not verify CN */
-	    /* start of CommonName */
-	    cert_host += 4;
-	    /* find next part of DistinguishedName */
-	    if ((p = StrChr(cert_host, '/')) != NULL) {
-		*p = '\0';
-		ssl_dn_start = p;	/* yes this points to the NUL byte */
-	    } else
-		ssl_dn_start = NULL;
-	    cert_host = StripIpv6Brackets(cert_host);
-
-	    /* verify this CN */
-	    CTRACE((tfp, "Matching\n\tssl_host  '%s'\n\tcert_host '%s'\n",
-		    ssl_host, cert_host));
-	    if (!strcasecomp_asterisk(ssl_host, cert_host)) {
-		status_sslcertcheck = 2;	/* 2 = verified peer */
-		/* I think this is cool to have in the logs -TG */
-		HTSprintf0(&msg,
-			   LY_MSG("Verified connection to %s (cert=%s)"),
-			   ssl_host, cert_host);
-		_HTProgress(msg);
-		FREE(msg);
-		/* no need to continue the verification loop */
-		break;
-	    }
-
-	    /* add this CN to list of failed CNs */
-	    if (ssl_all_cns == NULL)
-		StrAllocCopy(ssl_all_cns, "CN<");
-	    else
-		StrAllocCat(ssl_all_cns, ":CN<");
-	    StrAllocCat(ssl_all_cns, cert_host);
-	    StrAllocCat(ssl_all_cns, ">");
-	    /* if we cannot retry, don't try it */
-	    if (ssl_dn_start == NULL)
-		break;
-	    /* now retry next CN found in DN */
-	    *ssl_dn_start = '/';	/* formerly NUL byte */
-	}
-
-	/* check the X.509v3 Subject Alternative Name */
-#ifdef USE_GNUTLS_INCL
-	if (status_sslcertcheck < 2) {
-	    int i;
-	    size_t size;
-	    gnutls_x509_crt_t cert;
-	    static char buf[2048];
-
-	    /* import the certificate to the x509_crt format */
-	    if (gnutls_x509_crt_init(&cert) == 0) {
-
-		if (gnutls_x509_crt_import(cert, peer_cert,
-					   GNUTLS_X509_FMT_DER) < 0) {
-		    gnutls_x509_crt_deinit(cert);
-		    goto done;
-		}
-
-		ret = 0;
-		for (i = 0; !(ret < 0); i++) {
-		    size = sizeof(buf);
-		    ret = gnutls_x509_crt_get_subject_alt_name(cert,
-							       (unsigned) i,
-							       buf, &size,
-							       NULL);
-
-		    if (strcasecomp_asterisk(ssl_host, buf) == 0) {
-			status_sslcertcheck = 2;
-			HTSprintf0(&msg,
-				   LY_MSG("Verified connection to %s (subj=%s)"),
-				   ssl_host, buf);
-			_HTProgress(msg);
-			FREE(msg);
-			break;
-		    }
-
-		}
-	    }
-	}
-#endif
-#ifdef USE_OPENSSL_INCL
-	if (status_sslcertcheck < 2) {
-	    STACK_OF(GENERAL_NAME) * gens;
-	    int i, numalts;
-	    const GENERAL_NAME *gn;
-
-	    gens = (STACK_OF(GENERAL_NAME) *)
-		X509_get_ext_d2i(peer_cert, NID_subject_alt_name, NULL, NULL);
-
-	    if (gens != NULL) {
-		numalts = sk_GENERAL_NAME_num(gens);
-		for (i = 0; i < numalts; ++i) {
-		    gn = sk_GENERAL_NAME_value(gens, i);
-		    if (gn->type == GEN_DNS)
-			cert_host = (char *) ASN1_STRING_data(gn->d.ia5);
-		    else if (gn->type == GEN_IPADD) {
-			/* XXX untested -TG */
-			size_t j = (size_t) ASN1_STRING_length(gn->d.ia5);
-
-			cert_host = (char *) malloc(j + 1);
-			MemCpy(cert_host, ASN1_STRING_data(gn->d.ia5), j);
-			cert_host[j] = '\0';
-		    } else
-			continue;
-		    status_sslcertcheck = 1;	/* got at least one */
-		    /* verify this SubjectAltName (see above) */
-		    cert_host = StripIpv6Brackets(cert_host);
-		    if (!(gn->type == GEN_IPADD ? strcasecomp :
-			  strcasecomp_asterisk) (ssl_host, cert_host)) {
-			status_sslcertcheck = 2;
-			HTSprintf0(&msg,
-				   LY_MSG("Verified connection to %s (subj=%s)"),
-				   ssl_host, cert_host);
-			_HTProgress(msg);
-			FREE(msg);
-			if (gn->type == GEN_IPADD)
-			    free(cert_host);
-			break;
-		    }
-		    /* add to list of failed CNs */
-		    if (ssl_all_cns == NULL)
-			StrAllocCopy(ssl_all_cns, "SAN<");
-		    else
-			StrAllocCat(ssl_all_cns, ":SAN<");
-		    if (gn->type == GEN_DNS)
-			StrAllocCat(ssl_all_cns, "DNS=");
-		    else if (gn->type == GEN_IPADD)
-			StrAllocCat(ssl_all_cns, "IP=");
-		    StrAllocCat(ssl_all_cns, cert_host);
-		    StrAllocCat(ssl_all_cns, ">");
-		    if (gn->type == GEN_IPADD)
-			free(cert_host);
-		}
-		sk_GENERAL_NAME_free(gens);
-	    }
-	}
-#endif /* USE_OPENSSL_INCL */
-
-	/* if an error occurred, format the appropriate message */
-	if (status_sslcertcheck == 0) {
-	    SSL_single_prompt(&msg,
-			      gettext("Can't find common name in certificate"));
-	} else if (status_sslcertcheck == 1) {
-	    SSL_double_prompt(&msg,
-			      LY_MSG("SSL error:host(%s)!=cert(%s)-Continue?"),
-			      ssl_host, ssl_all_cns);
-	}
-
-	/* if an error occurred, let the user decide how much he trusts */
-	if (status_sslcertcheck < 2) {
-	    if (msg == NULL)
-		StrAllocCopy(msg, gettext("SSL error"));
-	    if (!HTForcedPrompt(ssl_noprompt, msg, NO)) {
-		status = HT_NOT_LOADED;
-		FREE(msg);
-		FREE(ssl_all_cns);
-		goto done;
-	    }
-	    SSL_double_prompt(&msg,
-			      LY_MSG("UNVERIFIED connection to %s (cert=%s)"),
-			      ssl_host, ssl_all_cns ? ssl_all_cns : "NONE");
-	    _HTProgress(msg);
-	    FREE(msg);
-	}
-
-	show_cert_issuer(peer_cert);
-
-	HTSprintf0(&msg,
-		   LY_MSG("Secure %d-bit %s (%s) HTTP connection"),
-		   SSL_get_cipher_bits(handle, NULL),
-		   SSL_get_cipher_version(handle),
-		   SSL_get_cipher(handle));
-	_HTProgress(msg);
-	FREE(msg);
-	FREE(ssl_all_cns);
-	FREE(ssl_host);
     }
 #endif /* USE_SSL */
 
@@ -2306,7 +1610,7 @@ static int HTLoadHTTP(const char *arg,
 		 * interactive user, with option to use 303 for 301 (but not
 		 * for 307), and otherwise refuse the redirection.  We also
 		 * don't allow permanent redirection if we keep POST content.
-		 * If we don't find the Location header or it's value is
+		 * If we don't find the Location header or its value is
 		 * zero-length, we display whatever the server returned, and
 		 * the user should RELOAD that to try again, or make a
 		 * selection from it if it contains links, or Left-Arrow to the

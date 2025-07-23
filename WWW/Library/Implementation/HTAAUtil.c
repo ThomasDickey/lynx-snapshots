@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTAAUtil.c,v 1.37 2025/01/06 15:41:30 tom Exp $
+ * $LynxId: HTAAUtil.c,v 1.39 2025/07/22 00:36:14 tom Exp $
  *
  * MODULE							HTAAUtil.c
  *		COMMON PARTS OF ACCESS AUTHORIZATION MODULE
@@ -46,12 +46,11 @@
  *
  */
 
-#include <HTUtils.h>
+#include <HTTLS.h>
 
 #include <HTAAUtil.h>		/* Implemented here     */
 #include <HTAssoc.h>		/* Assoc list           */
 #include <HTTCP.h>
-#include <HTTP.h>
 
 #include <LYStrings.h>
 #include <LYUtils.h>

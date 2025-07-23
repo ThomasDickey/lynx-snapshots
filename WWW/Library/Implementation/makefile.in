@@ -1,4 +1,4 @@
-# $LynxId: makefile.in,v 1.36 2024/03/17 22:13:00 tom Exp $
+# $LynxId: makefile.in,v 1.37 2025/07/13 20:32:30 tom Exp $
 # Make WWW under unix for a.n.other unix system (bsd)
 # Use this as a template
 
@@ -115,7 +115,8 @@ COMMON = $(LOB)/HTParse$o $(LOB)/HTAccess$o $(LOB)/HTTP$o \
 	$(LOB)/HTGroup$o \
 	$(LOB)/HTAAProt$o \
 	$(LOB)/HTAssoc$o  $(LOB)/HTLex$o    $(LOB)/HTUU$o \
-	$(LOB)/HTDOS$o
+	$(LOB)/HTDOS$o \
+	$(LOB)/HTTLS$o
 
 CFILES = $(CMN)HTParse.c $(CMN)HTAccess.c $(CMN)HTTP.c $(CMN)HTFile.c \
 	$(CMN)HTBTree.c \
@@ -131,7 +132,8 @@ CFILES = $(CMN)HTParse.c $(CMN)HTAccess.c $(CMN)HTTP.c $(CMN)HTFile.c \
 	$(CMN)HTAABrow.c \
 	$(CMN)HTGroup.c  \
 	$(CMN)HTAAProt.c \
-	$(CMN)HTAssoc.c  $(CMN)HTLex.c    $(CMN)HTUU.c
+	$(CMN)HTAssoc.c  $(CMN)HTLex.c    $(CMN)HTUU.c \
+	$(CMN)HTTLS.c
 
 HFILES = $(CMN)HTParse.h $(CMN)HTAccess.h $(CMN)HTTP.h $(CMN)HTFile.h \
 	$(CMN)HTBTree.h $(CMN)HTFTP.h $(CMN)HTTCP.h \
@@ -151,7 +153,8 @@ HFILES = $(CMN)HTParse.h $(CMN)HTAccess.h $(CMN)HTTP.h $(CMN)HTFile.h \
 	$(CMN)HTAABrow.h \
 	$(CMN)HTGroup.h  \
 	$(CMN)HTAAProt.h \
-	$(CMN)HTAssoc.h  $(CMN)HTLex.h    $(CMN)HTUU.h
+	$(CMN)HTAssoc.h  $(CMN)HTLex.h    $(CMN)HTUU.h \
+	$(CMN)HTTLS.h
 
 C_SRC		= $(COMMON:$o=.c)
 
@@ -321,6 +324,9 @@ $(LOB)/HTVMS_WaisUI$o : $(CMN)HTVMS_WaisUI.c $(CMN)HTUtils.h
 
 $(LOB)/HTDOS$o : $(CMN)HTDOS.c $(CMN)HTUtils.h
 	$(COMPILE) $(CMN)HTDOS.c
+
+$(LOB)/HTTLS$o : $(CMN)HTTLS.c $(CMN)HTUtils.h
+	$(COMPILE) $(CMN)HTTLS.c
 
 # Utilities
 $(LOB)/dtd_util$o : $(CMN)dtd_util.c $(CMN)HTUtils.h

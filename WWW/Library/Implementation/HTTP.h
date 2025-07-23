@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTP.h,v 1.12 2020/01/21 21:59:06 tom Exp $
+ * $LynxId: HTTP.h,v 1.13 2025/07/22 00:19:25 tom Exp $
  *
  * /Net/dxcern/userd/timbl/hypertext/WWW/Library/Implementation/HTTP.html
  *                                HYPERTEXT TRANSFER PROTOCOL
@@ -36,10 +36,6 @@ extern "C" {
     extern char *redirecting_url;
     extern BOOL permanent_redirection;
     extern BOOL redirect_post_content;
-
-#ifdef USE_SSL
-    extern SSL *SSL_handle;
-#endif
 
 #ifdef __cplusplus
 }

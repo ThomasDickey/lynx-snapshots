@@ -1,9 +1,11 @@
-/* $LynxId: src1_HTMLDTD.h,v 1.50 2025/01/06 18:10:47 tom Exp $ */
+/* $LynxId: src1_HTMLDTD.h,v 1.51 2025/07/22 00:10:17 tom Exp $ */
 #ifndef src_HTMLDTD_H1
 #define src_HTMLDTD_H1 1
 
 #ifndef once_HTMLDTD
 #define once_HTMLDTD 1
+
+#include <HTMLDTD.h>
 
 #define T_A             0x00008,0x0B007,0x0FF17,0x37787,0x77BA7,0x8604F,0x00014
 #define T_ABBR          0x00002,0x8B04F,0x8FFFF,0xA778F,0xF7FBF,0x00003,0x00000

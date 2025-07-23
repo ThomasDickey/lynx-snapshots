@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYGlobalDefs.h,v 1.155 2023/10/23 08:04:43 tom Exp $
+ * $LynxId: LYGlobalDefs.h,v 1.156 2025/07/22 00:28:23 tom Exp $
  *
  * global variable definitions
  */
@@ -7,9 +7,9 @@
 #ifndef LYGLOBALDEFS_H
 #define LYGLOBALDEFS_H
 
-#ifndef HTUTILS_H
-#include <HTUtils.h>
-#endif /* HTUTILS_H */
+#ifndef HTTLS_H
+#include <HTTLS.h>
+#endif /* HTTLS_H */
 
 #ifndef LYSTRUCTS_H
 #include <LYStructs.h>

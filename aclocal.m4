@@ -1,4 +1,4 @@
-dnl $LynxId: aclocal.m4,v 1.354 2025/06/17 23:54:52 tom Exp $
+dnl $LynxId: aclocal.m4,v 1.359 2025/07/23 00:49:23 tom Exp $
 dnl Macros for auto-configure script.
 dnl by Thomas E. Dickey <dickey@invisible-island.net>
 dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
@@ -3353,7 +3353,7 @@ AC_SUBST(GLOB_FULLPATH_POSIX)
 AC_SUBST(GLOB_FULLPATH_OTHER)
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_GNUTLS version: 27 updated: 2021/01/02 09:31:20
+dnl CF_GNUTLS version: 28 updated: 2025/07/22 20:48:03
 dnl ---------
 dnl Check for gnutls library (TLS "is" SSL)
 dnl $1 = the [optional] directory in which the library may be found
@@ -3416,9 +3416,7 @@ AC_DEFUN([CF_GNUTLS],[
 		esac
 	fi
 
-	ifelse([$2],,
-		[AC_DEFINE(USE_GNUTLS_INCL,1,[Define to 1 if we should include gnutls headers])],
-		[AC_DEFINE(USE_GNUTLS_FUNCS,1,[Define to 1 if we should use gnutls functions])])
+	AC_DEFINE(USE_GNUTLS_INCL,1,[Define to 1 if we should include gnutls headers])
 
 	if test "$cf_cv_have_gnutls" = no ; then
 		cf_gnutls_CPPFLAGS=$CPPFLAGS
@@ -3449,7 +3447,7 @@ AC_DEFUN([CF_GNUTLS],[
 			CF_ADD_LIBDIR($cf_cv_library_path_gnutls)
 		fi
 		CF_ADD_LIBS(-lgnutls)
-		AC_CHECK_FUNCS(gnutls_protocol_set_priority)
+		AC_CHECK_FUNCS(gnutls_protocol_set_enabled gnutls_protocol_set_priority)
 		AC_CHECK_FUNC(gnutls_rnd,
 				[AC_DEFINE(HAVE_GNUTLS_RND,1,[Define to 1 if we have gnutls_rnd])],
 				[CF_ADD_LIBS(-lgcrypt)])
@@ -4776,97 +4774,6 @@ case ".$with_cflags" in
 	esac
 	;;
 esac
-])dnl
-dnl ---------------------------------------------------------------------------
-dnl CF_NSS_COMPAT version: 7 updated: 2021/01/02 09:31:20
-dnl -------------
-dnl Check for NSS compatible SSL libraries
-dnl $1 = the [optional] directory in which the library may be found
-AC_DEFUN([CF_NSS_COMPAT],[
-check=`pkg-config --version 2>/dev/null`
-if test -n "$check" ; then
-	cf_ssl_library=`pkg-config --libs nss`
-	cf_ssl_cflags=`pkg-config --cflags nss`
-else
-	# Without pkg-config, we'll kludge in some defaults
-	cf_ssl_library="-lssl3 -lsmime3 -lnss3 -lplds4 -lplc4 -lnspr4 -lpthread -ldl"
-	cf_ssl_cflags="-I/usr/include/nss3 -I/usr/include/nspr4"
-fi
-cf_ssl_library="-lnss_compat_ossl $cf_ssl_library"
-
-case "$1" in
-(no)
-	cf_ssl_root=
-	;;
-(yes)
-	AC_CHECK_LIB(nss_compat_ossl, SSL_get_version,[],[
-		cf_ssl_root=/usr/local/nss_compat_ossl
-		if test -d "$cf_ssl_root" ; then
-			CF_VERBOSE(assume it is in $cf_ssl_root)
-			cf_ssl_library="-L$cf_ssl_root/lib $cf_ssl_library"
-		else
-			AC_MSG_ERROR(cannot find NSS compliant libraries)
-		fi
-	],
-	[-lnss_compat_ossl])
-	;;
-(*)
-	if test -d "$1" ; then
-		if test -d "$1/include" ; then
-			cf_ssl_root=$1
-		elif test -d "$1/../include" ; then
-			cf_ssl_root=$1/..
-		else
-			AC_MSG_ERROR(cannot find NSS compliant library under $1)
-		fi
-		cf_ssl_library="-L$cf_ssl_root/lib $cf_ssl_library"
-	else
-		AC_MSG_WARN(expected a directory: $1)
-	fi
-	;;
-esac
-CF_ADD_LIBS($cf_ssl_library)
-
-cf_ssl_subincs=yes
-if test -n "$cf_ssl_root" ; then
-	if test -d "$cf_ssl_root/include" ; then
-		cf_ssl_cflags="-I$cf_ssl_root/include  $cf_ssl_cflags"
-		test -d "$cf_ssl_root/include/nss_compat_ossl" || cf_ssl_subincs=no
-	fi
-fi
-CF_ADD_CFLAGS($cf_ssl_cflags)
-
-if test "$cf_ssl_subincs" = yes ; then
-AC_MSG_CHECKING(for NSS compliant include directory)
-AC_TRY_COMPILE([
-#include <stdio.h>
-#include <nss_compat_ossl/nss_compat_ossl.h>],
-	[SSL_shutdown((SSL *)0)],
-	[cf_ssl_incl=yes],
-	[cf_ssl_incl=no])
-AC_MSG_RESULT($cf_ssl_incl)
-test "$cf_ssl_incl" = yes && AC_DEFINE(USE_NSS_COMPAT_INCL,1,[Define to 1 if we should use nss compatibility header])
-fi
-
-AC_MSG_CHECKING(if we can link to NSS compliant library)
-AC_TRY_LINK([
-#include <stdio.h>
-#ifdef USE_NSS_COMPAT_INCL
-#include <nss_compat_ossl/nss_compat_ossl.h>
-#else
-#include <ssl.h>
-#endif
-],
-	[SSL_shutdown((SSL *)0)],
-	[cf_ssl_library=yes],
-	[cf_ssl_library=no])
-AC_MSG_RESULT($cf_ssl_library)
-if test "$cf_ssl_library" = yes ; then
-	AC_DEFINE(USE_SSL,1,[Define to 1 if we should use SSL])
-	AC_DEFINE(USE_X509_SUPPORT,1,[Define to 1 if the SSL library provides X509 support])
-else
-	AC_MSG_ERROR(Cannot link with NSS compliant libraries)
-fi
 ])dnl
 dnl ---------------------------------------------------------------------------
 dnl CF_OUR_MESSAGES version: 9 updated: 2024/04/08 18:39:25
@@ -6634,22 +6541,6 @@ AC_MSG_RESULT($cf_cv_tm_gmtoff)
 test "$cf_cv_tm_gmtoff" = no && AC_DEFINE(DONT_HAVE_TM_GMTOFF,1,[Define to 1 if the tm-struct defines .tm_gmtoff member])
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_TRIM_X_LIBS version: 3 updated: 2015/04/12 15:39:00
-dnl --------------
-dnl Trim extra base X libraries added as a workaround for inconsistent library
-dnl dependencies returned by "new" pkg-config files.
-AC_DEFUN([CF_TRIM_X_LIBS],[
-	for cf_trim_lib in Xmu Xt X11
-	do
-		case "$LIBS" in
-		(*-l$cf_trim_lib\ *-l$cf_trim_lib*)
-			LIBS=`echo "$LIBS " | sed -e 's/  / /g' -e 's%-l'"$cf_trim_lib"' %%' -e 's/ $//'`
-			CF_VERBOSE(..trimmed $LIBS)
-			;;
-		esac
-	done
-])
-dnl ---------------------------------------------------------------------------
 dnl CF_TRY_PKG_CONFIG version: 7 updated: 2025/01/10 19:55:54
 dnl -----------------
 dnl This is a simple wrapper to use for pkg-config, for libraries which may be
@@ -8127,28 +8018,26 @@ dnl Trim something using sed, then trim extra whitespace
 dnl $1 = extra parameters, e.g., in CF_STRIP_G_OPT
 define([CF__SED_TRIMBLANKS],[sed ifelse($1,,,[$1] )-e 's%[[	]]% %g' -e 's% [[ ]]*% %g' -e 's%^ %%' -e 's% [$]%%'])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF__SSL_BODY version: 2 updated: 2008/04/13 10:56:06
+dnl CF__SSL_BODY version: 3 updated: 2025/07/22 20:48:03
 dnl ------------
 dnl Body for test-compile of SSL code.
 define([CF__SSL_BODY],[
-#ifdef USE_GNUTLS_FUNCS
+#ifdef USE_GNUTLS_INCL
     gnutls_global_init();
 #else
     SSL_shutdown((SSL *)0)
 #endif
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF__SSL_HEAD version: 2 updated: 2008/04/13 10:56:06
+dnl CF__SSL_HEAD version: 3 updated: 2025/07/22 20:48:03
 dnl ------------
 dnl Headers for test-compile of SSL code.
 define([CF__SSL_HEAD],[
 #include <stdio.h>
 #if defined(USE_OPENSSL_INCL)
 #include <openssl/ssl.h>
-#elif defined(USE_GNUTLS_FUNCS)
-#include <gnutls/gnutls.h>
 #elif defined(USE_GNUTLS_INCL)
-#include <gnutls/openssl.h>
+#include <gnutls/gnutls.h>
 #else
 #include <ssl.h>
 #endif

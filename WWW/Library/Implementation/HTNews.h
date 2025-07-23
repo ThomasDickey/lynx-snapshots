@@ -10,6 +10,7 @@
 #ifndef HTNEWS_H
 #define HTNEWS_H
 
+#include <HTTLS.h>
 #include <HTAccess.h>
 #include <HTAnchor.h>
 

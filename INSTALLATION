@@ -470,10 +470,6 @@ II. Compile instructions -- UNIX
 	fonts) according to the current Display Character Set.  (Linux console
 	only.  *Use with discretion.*  See docs/README.chartrans.)
 
-  --enable-gnutls-compat		(define USE_GNUTLS_FUNCS)
-	When --with-gnutls is used, tell whether to use GNUTLS's OpenSSL
-	compatibility library or use GNUTLS's low-level API directly.
-
   --enable-gzip-help
 	Install the lynx help files in gzip'd format [*.gz] to save space.
 
@@ -666,8 +662,6 @@ II. Compile instructions -- UNIX
 	are assumed to be in the parallel "include" directory.  The default
 	is /usr/local/gnutls.
 
-	See the "--enable-gnutls-compat" option.
-
   --with-libiconv-prefix=DIR
 	search for libiconv in DIR/include and DIR/lib
 
@@ -692,16 +686,6 @@ II. Compile instructions -- UNIX
 	under which the locale (i.e., language) files are installed.  The
 	default value is derived at configure time, and depends on whether GNU
 	or native gettext is used.
-
-  --with-nss-compat[=XXX]		(define USE_NSS_COMPAT_INCL)
-	Use this option to configure with the NSS library's OpenSSL-compatible
-	interface.
-	See docs/README.ssl for additional information.
-
-	The optional value XXX specifies the directory in which the library
-	can be found, and may be either the path of the "lib" directory,
-	or one level above.  In either case, the corresponding header files
-	are assumed to be in the parallel "include" directory.
 
   --with-pkg-config[=XXX]
 	Use pkg-config, if available, to tell how to build with certain
@@ -1514,4 +1498,4 @@ VIII. Acknowledgment
 
 -- 1999/04/24 - H. Nelson <lynx-admin@irm.nara.kindai.ac.jp>
 -- vile:txtmode
--- $LynxId: INSTALLATION,v 1.142 2024/08/01 23:58:49 Steffen.Nurpmeso Exp $
+-- $LynxId: INSTALLATION,v 1.144 2025/07/18 21:24:24 tom Exp $

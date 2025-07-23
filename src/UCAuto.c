@@ -1,5 +1,5 @@
 /*
- * $LynxId: UCAuto.c,v 1.57 2025/01/07 23:30:53 tom Exp $
+ * $LynxId: UCAuto.c,v 1.58 2025/07/22 19:50:31 tom Exp $
  *
  *  This file contains code for changing the Linux console mode.
  *  Currently some names for font files are hardwired in here.
@@ -132,7 +132,7 @@ static int call_setfont(const char *font,
      * console-data package has only a few unicode maps.
      */
     if (!isSetFont())
-	umap = 0;
+	umap = NULL;
 
     if ((font && T_font_fn && !strcmp(font, T_font_fn))
 	&& (umap && T_umap_fn && !strcmp(umap, T_umap_fn))) {
@@ -262,7 +262,7 @@ void UCChangeTerminalCodepage(int newcs,
     /*
      * Restore the original character set.
      */
-    if (newcs < 0 || p == 0) {
+    if (newcs < 0 || p == NULL) {
 	if (non_empty(old_font) &&
 	    non_empty(old_umap)) {
 
@@ -288,7 +288,7 @@ void UCChangeTerminalCodepage(int newcs,
 		FREE(tmpbuf1);
 	    }
 	}
-	if (newcs < 0 && p == 0) {
+	if (newcs < 0 && p == NULL) {
 	    if (old_font) {
 		(void) LYRemoveTemp(old_font);
 		FREE(old_font);
@@ -303,17 +303,17 @@ void UCChangeTerminalCodepage(int newcs,
 	    }
 	}
 	return;
-    } else if (lastcs < 0 && old_umap == 0 && old_font == 0) {
+    } else if (lastcs < 0 && old_umap == NULL && old_font == NULL) {
 	FILE *fp1;
 	FILE *fp2 = NULL;
 
-	if ((old_font = typecallocn(char, LY_MAXPATH)) != 0)
+	if ((old_font = typecallocn(char, LY_MAXPATH)) != NULL)
 	      old_umap = typecallocn(char, LY_MAXPATH);
 
 	if (old_font == NULL)
 	    outofmem(__FILE__, "UCChangeTerminalCodepage");
 
-	if ((fp1 = LYOpenTemp(old_font, ".fnt", BIN_W)) != 0)
+	if ((fp1 = LYOpenTemp(old_font, ".fnt", BIN_W)) != NULL)
 	    fp2 = LYOpenTemp(old_umap, ".uni", BIN_W);
 
 	if (fp1 && fp2) {

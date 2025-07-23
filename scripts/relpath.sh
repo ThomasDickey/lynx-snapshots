@@ -30,12 +30,12 @@ prefix=""
 
 source="`echo "$source" | sed -e 's%/$%%'`/"
 target="`echo "$target" | sed -e 's%/$%%'`/"
-remain=`echo "$source" | sed -e 's%^'$target'%%'`
+remain=`echo "$source" | sed -e 's%^'"$target"'%%'`
 while [ -n "$target" ] && [ "$source" = "$remain" ]
 do
 	prefix="../$prefix"
 	target=`echo "$target" | sed -e 's%/[^/]*/$%/%'`
-	remain=`echo "$source" | sed -e 's%^'$target'%%'`
+	remain=`echo "$source" | sed -e 's%^'"$target"'%%'`
 done
 result="${prefix}${remain}"
 [ -n "$result" ] || result="."

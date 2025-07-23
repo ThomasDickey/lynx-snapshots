@@ -1,9 +1,14 @@
--- $LynxId: CHANGES,v 1.1223 2025/06/19 22:19:59 tom Exp $
+-- $LynxId: CHANGES,v 1.1227 2025/07/22 00:03:09 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2025-06-19 (2.9.2l)
+2025-07-21 (2.9.2m)
+* remove --enable-gnutls-compat configure option -TD
+* remove --with-nss-compat configure option -TD
+  see https://fedoraproject.org/wiki/Nss_compat_ossl
+* modify HTTPS connection to retry with different versions of SSL and TLS
+  (patch by Nate Choe)
 * spelling fixes (Eric Lindblad)
 * fix typos in user guide (patch by David Apps)
 * correct parsing of named-entity, accepting ".", ":", "_", "-" -TD

@@ -1,5 +1,5 @@
 /*
- * $LynxId: config.hin,v 1.157 2025/01/06 18:29:11 tom Exp $
+ * $LynxId: config.hin,v 1.158 2025/07/22 23:47:03 tom Exp $
  * vile:cmode
  *
  * The configure script translates "config.hin" into "lynx_cfg.h"
@@ -85,8 +85,9 @@
 #undef HAVE_GETTEXT		/* AM_WITH_NLS */
 #undef HAVE_GETTIMEOFDAY
 #undef HAVE_GETUID
-#undef HAVE_GNUTLS_PROTOCOL_SET_PRIORITY
-#undef HAVE_GNUTLS_RND
+#undef HAVE_GNUTLS_PROTOCOL_SET_ENABLED /* CF_GNUTLS */
+#undef HAVE_GNUTLS_PROTOCOL_SET_PRIORITY /* CF_GNUTLS */
+#undef HAVE_GNUTLS_RND		/* CF_GNUTLS */
 #undef HAVE_H_ERRNO
 #undef HAVE_ICONV		/* AM_ICONV */
 #undef HAVE_INET_ATON		/* CF_INET_ADDR */

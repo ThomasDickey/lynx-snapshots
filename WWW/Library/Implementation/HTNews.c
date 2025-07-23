@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTNews.c,v 1.83 2025/01/07 23:01:40 tom Exp $
+ * $LynxId: HTNews.c,v 1.85 2025/07/22 00:34:58 tom Exp $
  *
  *			NEWS ACCESS				HTNews.c
  *			===========
@@ -9,18 +9,13 @@
  *	29 Nov 91	Downgraded to C, for portable implementation.
  */
 
-#include <HTUtils.h>		/* Coding convention macros */
+#include <HTNews.h>		/* Coding convention macros */
 
 #ifndef DISABLE_NEWS
 
 /* Implements:
 */
-#include <HTNews.h>
-
-#include <HTCJK.h>
 #include <HTMIME.h>
-#include <HTFont.h>
-#include <HTFormat.h>
 #include <HTTCP.h>
 #include <LYUtils.h>
 #include <LYStrings.h>

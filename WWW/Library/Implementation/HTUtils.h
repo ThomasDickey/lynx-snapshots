@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTUtils.h,v 1.138 2025/01/06 15:53:44 tom Exp $
+ * $LynxId: HTUtils.h,v 1.141 2025/07/22 00:18:23 tom Exp $
  *
  * Utility macros for the W3 code library
  * MACROS FOR GENERAL USE
@@ -757,47 +757,6 @@ extern int WWW_TraceMask;
 #include <socks.h>
 #endif /* USE_SOCKS5 */
 
-#ifdef USE_SSL
-
-#define free_func free__func
-
-#ifdef USE_OPENSSL_INCL
-#include <openssl/ssl.h>
-#include <openssl/crypto.h>
-#include <openssl/rand.h>
-#include <openssl/err.h>
-
-#else
-
-#if defined(USE_GNUTLS_FUNCS)
-#include <tidy_tls.h>
-#define USE_GNUTLS_INCL 1	/* do this for the ".c" ifdef's */
-#elif defined(USE_GNUTLS_INCL)
-#include <gnutls/openssl.h>
-/*
- * GNUTLS's implementation of OpenSSL is very incomplete and rudimentary.
- * For a start, let's make it compile (TD - 2003/4/13).
- */
-#ifndef SSL_VERIFY_PEER
-#define SSL_VERIFY_PEER			0x01
-#endif
-#else
-
-#ifdef USE_NSS_COMPAT_INCL
-#include <nss_compat_ossl/nss_compat_ossl.h>
-
-#else /* assume SSLeay */
-#include <ssl.h>
-#include <crypto.h>
-#include <rand.h>
-#include <err.h>
-#endif
-#endif
-#endif /* USE_OPENSSL_INCL */
-
-#undef free_func
-#endif /* USE_SSL */
-
 #ifdef HAVE_BSD_STDLIB_H
 #include <bsd/stdlib.h>		/* prototype for arc4random.h */
 #elif defined(HAVE_BSD_RANDOM_H)
@@ -835,12 +794,6 @@ extern "C" {
 
     extern char *HTSkipToAt(char *host, int *gen_delims);
     extern void strip_userid(char *host, int warn);
-
-#ifdef USE_SSL
-    extern SSL *HTGetSSLHandle(void);
-    extern void HTSSLInitPRNG(void);
-    extern int HTGetSSLCharacter(void *handle);
-#endif				/* USE_SSL */
 
 #ifdef __cplusplus
 }
