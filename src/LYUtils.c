@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYUtils.c,v 1.310 2025/01/06 16:15:43 tom Exp $
+ * $LynxId: LYUtils.c,v 1.312 2025/07/24 21:06:56 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTCP.h>
@@ -3900,10 +3900,10 @@ void print_restrictions_to_fd(FILE *fp)
 	}
     }
     if (!count) {
-	fprintf(fp, gettext("No restrictions set.\n"));
+	fputs(gettext("No restrictions set.\n"), fp);
 	return;
     }
-    fprintf(fp, gettext("Restrictions set:\n"));
+    fprintf(fp, "%s", gettext("Restrictions set:\n"));
     for (i = 0; i < TABLESIZE(restrictions); i++) {
 	if (*(restrictions[i].flag) == TRUE) {
 	    /* if "goto" is restricted, don't bother tell about its

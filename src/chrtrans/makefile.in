@@ -1,4 +1,4 @@
-# $LynxId: makefile.in,v 1.45 2021/03/14 17:14:26 emil Exp $
+# $LynxId: makefile.in,v 1.46 2025/07/24 19:54:00 tom Exp $
 #
 # Makefile for the makeuctb and unicode tables.
 #
@@ -44,7 +44,8 @@ CPP_OPTS	= \
 		-I$(top_srcdir)/$(WWWINC) \
 		-I$(top_srcdir)/ \
 		$(SITE_DEFS) $(BUILD_CPPFLAGS)
-CC_OPTS		= $(CPP_OPTS) $(BUILD_CFLAGS)
+
+LINK		= @LINK_PREFIX@ $(BUILD_CC)
 
 LINT		= @LINT@
 LINTOPTS	= @LINT_OPTS@
@@ -117,7 +118,7 @@ OBJS		= makeuctb$o
 C_SRC		= $(OBJS:$o=.c)
 
 $(MAKEUCTB) : $(OBJS)
-	$(BUILD_CC) $(CC_OPTS) $(BUILD_LDFLAGS) -o $@ $(OBJS) $(BUILD_LIBS)
+	$(LINK) $(BUILD_CFLAGS) $(BUILD_LDFLAGS) -o $@ $(OBJS) $(BUILD_LIBS)
 
 makeuctb$o : $(srcdir)/UCkd.h $(srcdir)/makeuctb.c
 
@@ -125,7 +126,7 @@ makeuctb$o : $(srcdir)/UCkd.h $(srcdir)/makeuctb.c
 
 .c$o:
 	@RULE_CC@
-	@ECHO_CC@$(BUILD_CC) $(CC_OPTS) -c $(srcdir)/$*.c
+	@ECHO_CC@$(BUILD_CC) $(CPP_OPTS) $(BUILD_CFLAGS) -c $(srcdir)/$*.c
 
 .c.i:
 	@RULE_CC@

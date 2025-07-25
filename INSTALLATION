@@ -134,10 +134,10 @@ II. Compile instructions -- UNIX
     library available to link to.  Native curses (on the system when it was
     installed) are often broken, so you may get superior performance if you
     have either
-    
+
 	    "ncurses" ("https://invisible-island.net/ncurses") or
 	    "slang"   ("https://www.jedsoft.org/slang/").
-    
+
     If you install these libraries in your home directory or a non-default
     location, you may need to set the CPPFLAGS (full path to include files) and
     LIBS (full path to library files) environment variables BEFORE running
@@ -297,7 +297,7 @@ II. Compile instructions -- UNIX
 	various utilities invoked by lynx as external commands.  By default,
 	full pathnames are compiled in for the the locations where configure
 	finds these commands at configure time.
-	
+
 	Affected commands include
 		chmod compress cp gzip install mkdir mv rm tar touch gunzip
 		unzip brotli bzip2 uudecode zcat zip zstd telnet tn3270 rlogin
@@ -327,7 +327,7 @@ II. Compile instructions -- UNIX
 
   --disable-japanese-utf8		(define USE_JAPANESEUTF8_SUPPORT)
 	use Japanese UTF-8 logic, which uses iconv to convert pages with
-	charset euc-jp, shift_jis to utf-8. 
+	charset euc-jp, shift_jis to utf-8.
 
   --disable-justify-elts		(define USE_JUSTIFY_ELTS)
 	Do not use element-justification logic.
@@ -336,6 +336,10 @@ II. Compile instructions -- UNIX
 
 	Use this option to disable the compiler and linker options that
 	provide largefile interfaces.
+
+  --disable-link-prefix
+
+	Use this option to not trim unneeded libraries from link command
 
   --disable-locale-charset		(define USE_LOCALE_CHARSET)
   	Use nl_langinfo(CODESET) to determine initial value for display
@@ -513,11 +517,11 @@ II. Compile instructions -- UNIX
 
 	This relies upon external programs (msgfmt and xgettext) to format
 	the message catalogs:
-	
+
 	    + Unless you set the environment variables MSGFMT and XGETTEXT to
 	      the full pathnames of these utilities, the configure script will
 	      search for the GNU versions of these utilities.
-	      
+
 	      It will also search for the GNU version of the corresponding
 	      gettext() runtime function.  On some platforms (such as Solaris),
 	      this search gives misleading results.
@@ -1498,4 +1502,4 @@ VIII. Acknowledgment
 
 -- 1999/04/24 - H. Nelson <lynx-admin@irm.nara.kindai.ac.jp>
 -- vile:txtmode
--- $LynxId: INSTALLATION,v 1.144 2025/07/18 21:24:24 tom Exp $
+-- $LynxId: INSTALLATION,v 1.145 2025/07/24 19:59:17 tom Exp $

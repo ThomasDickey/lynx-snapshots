@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYCookie.c,v 1.148 2025/01/06 16:27:23 tom Exp $
+ * $LynxId: LYCookie.c,v 1.149 2025/07/24 21:00:14 tom Exp $
  *
  *			       Lynx Cookie Support		   LYCookie.c
  *			       ===================
@@ -2580,7 +2580,7 @@ static int LYHandleCookies(const char *arg,
     HTSprintf0(&buf, "%s</div>\n", OR_CHANGE_ALLOW);
     PUTS(buf);
 
-    HTSprintf0(&buf, "<dl compact>\n");
+    StrAllocCopy(buf, "<dl compact>\n");
     PUTS(buf);
     for (dl = domain_list; dl != NULL; dl = dl->next) {
 	de = (domain_entry *) (dl->object);
@@ -2599,17 +2599,17 @@ static int LYHandleCookies(const char *arg,
 	PUTS(buf);
 	switch (de->bv) {
 	case (ACCEPT_ALWAYS):
-	    HTSprintf0(&buf, COOKIES_ALWAYS_ALLOWED);
+	    StrAllocCopy(buf, COOKIES_ALWAYS_ALLOWED);
 	    break;
 	case (REJECT_ALWAYS):
-	    HTSprintf0(&buf, COOKIES_NEVER_ALLOWED);
+	    StrAllocCopy(buf, COOKIES_NEVER_ALLOWED);
 	    break;
 	case (QUERY_USER):
-	    HTSprintf0(&buf, COOKIES_ALLOWED_VIA_PROMPT);
+	    StrAllocCopy(buf, COOKIES_ALLOWED_VIA_PROMPT);
 	    break;
 	}
 	PUTS(buf);
-	HTSprintf0(&buf, "\n");
+	StrAllocCopy(buf, "\n");
 	PUTS(buf);
 
 	/*
@@ -2718,10 +2718,10 @@ static int LYHandleCookies(const char *arg,
 			"" : "\n"));
 	    PUTS(buf);
 	}
-	HTSprintf0(&buf, "\n");
+	StrAllocCopy(buf, "\n");
 	PUTS(buf);
     }
-    HTSprintf0(&buf, "</dl>\n</body>\n</html>\n");
+    StrAllocCopy(buf, "</dl>\n</body>\n</html>\n");
     PUTS(buf);
 
     /*

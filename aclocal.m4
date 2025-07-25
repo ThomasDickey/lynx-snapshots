@@ -1,4 +1,4 @@
-dnl $LynxId: aclocal.m4,v 1.359 2025/07/23 00:49:23 tom Exp $
+dnl $LynxId: aclocal.m4,v 1.363 2025/07/25 00:06:47 tom Exp $
 dnl Macros for auto-configure script.
 dnl by Thomas E. Dickey <dickey@invisible-island.net>
 dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
@@ -3881,6 +3881,28 @@ CF_SUBDIR_PATH($1,$2,lib)
 $1="$cf_library_path_list [$]$1"
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl CF_LINK_PREFIX version: 2 updated: 2021/01/06 16:19:35
+dnl --------------
+dnl Use xterm's plink.sh script as a link-prefix, to trim unneeded libraries.
+dnl This is optional since in some obscure cases of weak-linkage it may be
+dnl possible to trim too much.
+AC_DEFUN([CF_LINK_PREFIX],
+[
+AC_MSG_CHECKING(if you want to trim unneeded libraries)
+CF_ARG_DISABLE(link-prefix,
+	[  --disable-link-prefix   do not trim unneeded libraries from link command],
+	[enable_link_prefix=no],
+	[enable_link_prefix=yes])
+AC_MSG_RESULT($enable_link_prefix)
+if test $enable_link_prefix = yes
+then
+	LINK_PREFIX='$(SHELL) $(top_srcdir)/plink.sh'
+else
+	LINK_PREFIX=
+fi
+AC_SUBST(LINK_PREFIX)
+])dnl
+dnl ---------------------------------------------------------------------------
 dnl CF_LOCALE version: 7 updated: 2023/01/11 04:05:23
 dnl ---------
 dnl Check if we have setlocale() and its header, <locale.h>
@@ -3898,49 +3920,6 @@ $ac_includes_default
 	])
 AC_MSG_RESULT($cf_cv_locale)
 test "$cf_cv_locale" = yes && { ifelse($1,,AC_DEFINE(LOCALE,1,[Define to 1 if we have locale support]),[$1]) }
-])dnl
-dnl ---------------------------------------------------------------------------
-dnl CF_MAKEFLAGS version: 21 updated: 2021/09/04 06:47:34
-dnl ------------
-dnl Some 'make' programs support ${MAKEFLAGS}, some ${MFLAGS}, to pass 'make'
-dnl options to lower-levels.  It is very useful for "make -n" -- if we have it.
-dnl (GNU 'make' does both, something POSIX 'make', which happens to make the
-dnl ${MAKEFLAGS} variable incompatible because it adds the assignments :-)
-AC_DEFUN([CF_MAKEFLAGS],
-[AC_REQUIRE([AC_PROG_FGREP])dnl
-
-AC_CACHE_CHECK(for makeflags variable, cf_cv_makeflags,[
-	cf_cv_makeflags=''
-	for cf_option in '-${MAKEFLAGS}' '${MFLAGS}'
-	do
-		cat >cf_makeflags.tmp <<CF_EOF
-SHELL = $SHELL
-all :
-	@ echo '.$cf_option'
-CF_EOF
-		cf_result=`${MAKE:-make} -k -f cf_makeflags.tmp 2>/dev/null | ${FGREP-fgrep} -v "ing directory" | sed -e 's,[[ 	]]*$,,'`
-		case "$cf_result" in
-		(.*k|.*kw)
-			cf_result="`${MAKE:-make} -k -f cf_makeflags.tmp CC=cc 2>/dev/null`"
-			case "$cf_result" in
-			(.*CC=*)	cf_cv_makeflags=
-				;;
-			(*)	cf_cv_makeflags=$cf_option
-				;;
-			esac
-			break
-			;;
-		(.-)
-			;;
-		(*)
-			CF_MSG_LOG(given option \"$cf_option\", no match \"$cf_result\")
-			;;
-		esac
-	done
-	rm -f cf_makeflags.tmp
-])
-
-AC_SUBST(cf_cv_makeflags)
 ])dnl
 dnl ---------------------------------------------------------------------------
 dnl CF_MAKE_PHONY version: 3 updated: 2021/01/08 16:08:21
@@ -6054,7 +6033,7 @@ define([CF_SRAND_PARSE],[
 	esac
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_SSL version: 26 updated: 2021/01/02 09:31:20
+dnl CF_SSL version: 27 updated: 2025/07/24 20:06:11
 dnl ------
 dnl Check for ssl library
 dnl $1 = [optional] directory in which the library may be found, set by AC_ARG_WITH
@@ -6188,6 +6167,7 @@ AC_DEFUN([CF_SSL],[
 				;;
 			esac
 		fi
+		AC_CHECK_FUNCS(SSL_clear_options)
 		CF_CHECK_SSL_X509
 	fi
 ])dnl

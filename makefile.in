@@ -1,4 +1,4 @@
-# $LynxId: makefile.in,v 1.200 2024/05/31 23:03:20 tom Exp $
+# $LynxId: makefile.in,v 1.201 2025/07/24 17:49:15 tom Exp $
 ##makefile for lynx
 
 SHELL		= @CONFIG_SHELL@
@@ -109,7 +109,7 @@ COMPRESS_EXT=@COMPRESS_EXT@
 # Path of scripts directory
 scripts_dir=$(srcdir)/scripts
 
-MAKE_RECUR = $(MAKE) @cf_cv_makeflags@ DESTDIR="$(DESTDIR)" CC="$(CC)"
+MAKE_RECUR = $(MAKE) DESTDIR="$(DESTDIR)" CC="$(CC)"
 
 @LYNXCFG_MAKE@CFG2HTML = alphatoc.html body.html cattoc.html
 

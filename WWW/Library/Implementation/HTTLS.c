@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTLS.c,v 1.18 2025/07/22 23:40:39 tom Exp $
+ * $LynxId: HTTLS.c,v 1.20 2025/07/24 17:43:45 tom Exp $
  *
  *                          TRANSPORT LAYER SECURITY
  *
@@ -70,6 +70,10 @@
 
 #ifndef SSL_OP_NO_TLSv1_3
 #define SSL_OP_NO_TLSv1_3 -5
+#endif
+
+#ifndef MAX
+#define MAX(x, y) ((x) > (y) ? (x) : (y))
 #endif
 
 SSL_CTX *ssl_ctx = NULL;	/* SSL ctx */
@@ -425,6 +429,11 @@ static void configure_handle(SSL * handle, char *host,
     (void) optm;
     (void) retl;
 
+    (void) handle;
+    (void) host;
+    (void) min_version;
+    (void) max_version;
+
 #if defined(USE_GNUTLS_INCL)
     /* gnutls */
 
@@ -514,8 +523,10 @@ static void configure_handle(SSL * handle, char *host,
 	}
     }
 
+#if defined(SSL_clear_options) || defined(HAVE_SSL_CLEAR_OPTIONS)
     retl = SSL_clear_options(handle, optm);
     CTRACE((tfp, "...called SSL_clear_options(%ld) ->%ld\n", optm, retl));
+#endif
     retl = SSL_set_options(handle, opts);
     CTRACE((tfp, "...called SSL_set_options(%ld) ->%ld\n", opts, retl));
 

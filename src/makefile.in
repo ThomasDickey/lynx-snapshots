@@ -1,4 +1,4 @@
-# $LynxId: makefile.in,v 1.80 2024/04/03 23:50:55 tom Exp $
+# $LynxId: makefile.in,v 1.82 2025/07/24 19:42:19 tom Exp $
 # template-makefile for Lynx src directory
 
 SHELL		= @CONFIG_SHELL@
@@ -21,6 +21,7 @@ localedir	= @NLS_DATADIR@/locale
 CC		= @CC@
 CPP		= @CPP@
 CFLAGS		= @CFLAGS@ @EXTRA_CPPFLAGS@
+LINK		= @LINK_PREFIX@ $(CC) $(CFLAGS)
 DEFS		= @DEFS@
 CHARSET_DEFS	= @CHARSET_DEFS@
 CPPFLAGS	= @CPPFLAGS@
@@ -36,7 +37,7 @@ BUILD_EXEEXT	= @BUILD_EXEEXT@
 BUILD_LDFLAGS	= @BUILD_LDFLAGS@
 BUILD_LIBS	= @BUILD_LIBS@
 
-MAKE_RECUR	= $(MAKE) @cf_cv_makeflags@ DESTDIR="$(DESTDIR)" CC="$(CC)"
+MAKE_RECUR	= $(MAKE) DESTDIR="$(DESTDIR)" CC="$(CC)"
 
 YACC		= @YACC@
 WINDRES		= @WINDRES@
@@ -63,7 +64,6 @@ CPP_OPTS	= $(DEFS) $(CHARSET_DEFS) \
 		-I$(top_srcdir)/src \
 		-I$(top_srcdir)/$(WWWINC) \
 		$(SITE_DEFS) $(CPPFLAGS)
-CC_OPTS		= $(CFLAGS) $(CPP_OPTS)
 
 LINT		= @LINT@
 LINTOPTS	=
@@ -96,7 +96,7 @@ all: lynx$x
 # yacc builds .c in target directory, not $(srcdir)
 .c$o:
 	@RULE_CC@
-	@ECHO_CC@$(CC) $(CC_OPTS) -c $<
+	@ECHO_CC@$(CC) $(CFLAGS) $(CPP_OPTS) -c $<
 
 .c.i:
 	@RULE_CC@
@@ -104,7 +104,7 @@ all: lynx$x
 
 lynx$x:   message $(top_builddir)/LYHelp.h $(OBJS) $(WWWLIB)
 	@echo "Linking and creating Lynx executable"
-	$(CC) $(CC_OPTS) $(LDFLAGS) -o $@  $(OBJS) $(WWWLIB) $(LIBS)
+	$(LINK) $(CPP_OPTS) $(LDFLAGS) -o $@  $(OBJS) $(WWWLIB) $(LIBS)
 	@echo "Copying Lynx executable into top-level directory"
 	rm -f $(top_builddir)/$@
 	cp $@ $(top_builddir)/
@@ -221,11 +221,11 @@ UCAux$o : UCAux.c $(CMN)UCAux.h $(CMN)UCDefs.h
 LYCookie$o : $(top_srcdir)/userdefs.h
 
 test_mktime.o: $(srcdir)/LYmktime.c
-	$(CC) -o $@ $(CC_OPTS) -DTEST_DRIVER -c $(srcdir)/LYmktime.c
+	$(CC) -o $@ $(CFLAGS) $(CPP_OPTS) -DTEST_DRIVER -c $(srcdir)/LYmktime.c
 
 # test-driver for LYmktime
 test_mktime: test_mktime.o parsdate.o LYebcdic.o
-	$(CC) -o $@ $(CC_OPTS) test_mktime.o parsdate.o LYebcdic.o
+	$(LINK) -o $@ test_mktime.o parsdate.o LYebcdic.o
 
 # update generated source (may be in ".", or srcdir)
 parsdate.c : $(srcdir)/parsdate.y
@@ -234,6 +234,6 @@ parsdate.c : $(srcdir)/parsdate.y
 	mv y.tab.c $@
 
 depend : $(TABLES)
-	makedepend -fmakefile -- $(CC_OPTS) -- $(C_SRC)
+	makedepend -fmakefile -- $(CPP_OPTS) -- $(C_SRC)
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
