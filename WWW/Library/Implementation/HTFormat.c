@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFormat.c,v 1.102 2025/07/22 00:21:37 tom Exp $
+ * $LynxId: HTFormat.c,v 1.103 2025/07/25 19:26:58 tom Exp $
  *
  *		Manage different file formats			HTFormat.c
  *		=============================
@@ -1464,8 +1464,9 @@ static int HTBrFileCopy(FILE *brfp, HTStream *sink)
      * finally, pump that data into the output stream.
      */
     if (status2 == BROTLI_DECODER_RESULT_SUCCESS) {
-	CTRACE((tfp, THIS_FUNC ": decompressed %ld -> %ld (1:%.1f)\n",
-		brotli_size, normal_size,
+	CTRACE((tfp, THIS_FUNC ": decompressed %lu -> %lu (1:%.1f)\n",
+		(unsigned long) brotli_size,
+		(unsigned long) normal_size,
 		(double) normal_size / (double) brotli_size));
 	(*targetClass.put_block) (sink, normal_buffer, (int) normal_size);
 	bytes += status;

@@ -1,4 +1,4 @@
-/* $LynxId: LYCurses.c,v 1.211 2025/01/07 23:25:28 tom Exp $ */
+/* $LynxId: LYCurses.c,v 1.212 2025/07/27 21:21:50 tom Exp $ */
 #include <HTUtils.h>
 #include <HTAlert.h>
 
@@ -2329,15 +2329,15 @@ int LYstrExtent0(const char *string,
     if (non_empty(string) && used > 0 && lynx_called_initscr) {
 	if (fake_max < maxCells) {
 	    fake_max = (maxCells + 1) * 2;
-	    if (fake_win != 0) {
+	    if (fake_win != NULL) {
 		delwin(fake_win);
-		fake_win = 0;
+		fake_win = NULL;
 	    }
 	}
-	if (fake_win == 0) {
+	if (fake_win == NULL) {
 	    fake_win = newwin(2, fake_max, 0, 0);
 	}
-	if (fake_win != 0) {
+	if (fake_win != NULL) {
 	    int new_x = 0;
 	    int new_y = 0;
 	    int x = 0;

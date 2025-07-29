@@ -1,5 +1,5 @@
 /*
- * $LynxId: GridText.c,v 1.353 2025/06/19 19:54:34 Eric.Lindblad Exp $
+ * $LynxId: GridText.c,v 1.354 2025/07/27 21:22:17 tom Exp $
  *
  *		Character grid hypertext object
  *		===============================
@@ -14221,7 +14221,7 @@ static void move_to_glyph(int YP,
      * Add offset, making sure that we do not
      * go over the COLS limit on the display.
      */
-    if (hightext != 0) {
+    if (hightext != NULL) {
 #ifdef WIDEC_CURSES
 	last_i = i + LYstrExtent2(data, datasize);
 #endif

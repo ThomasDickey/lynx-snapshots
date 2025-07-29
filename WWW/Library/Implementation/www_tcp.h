@@ -1,5 +1,5 @@
 /*                System dependencies in the W3 library
- * $LynxId: www_tcp.h,v 1.63 2024/03/17 23:04:27 tom Exp $
+ * $LynxId: www_tcp.h,v 1.64 2025/07/25 19:57:16 tom Exp $
  *
                                    SYSTEM DEPENDENCIES
 
@@ -987,11 +987,17 @@ typedef struct sockaddr_storage SockA;
 #define SOCKADDR_OF(param) (&((param).soc_address))
 
 #ifndef SA_LEN
+#ifdef SOCKADDR_LEN_INET
+#define SA_LEN(x) (((x)->sa_family == AF_INET6) \
+		   ? sizeof(struct sockaddr_in6) \
+		   : sizeof(struct sockaddr_in))
+#else
 #define SA_LEN(x) (((x)->sa_family == AF_INET6) \
 		   ? sizeof(struct sockaddr_in6) \
 		   : (((x)->sa_family == AF_INET) \
 		      ? sizeof(struct sockaddr_in) \
 		      : sizeof(struct sockaddr)))	/* AF_UNSPEC? */
+#endif
 #endif
 
 #ifdef SIN6_LEN

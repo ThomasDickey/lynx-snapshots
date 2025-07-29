@@ -1,4 +1,4 @@
-dnl $LynxId: configure.in,v 1.396 2025/07/24 19:36:39 tom Exp $
+dnl $LynxId: configure.in,v 1.398 2025/07/26 00:40:25 tom Exp $
 dnl
 dnl Process this file with autoconf to produce a configure script.
 dnl
@@ -34,10 +34,10 @@ dnl sale, use or other dealings in this Software without prior written
 dnl authorization.
 dnl ---------------------------------------------------------------------------
 dnl
-AC_REVISION($Revision: 1.396 $)
+AC_REVISION($Revision: 1.398 $)
 
 AC_PREREQ(2.52.20231210)
-AC_INIT(lynx,2.9.2n,lynx-dev@nongnu.org)
+AC_INIT(lynx,2.9.2o,lynx-dev@nongnu.org)
 
 AC_CONFIG_SRCDIR(userdefs.h)
 
@@ -766,6 +766,7 @@ CF_CHECK_SIZEOF(off_t,4)
 CF_CHECK_SIZEOF(size_t,4)
 CF_CHECK_SIZEOF(time_t,4)
 AC_CHECK_TYPE(intptr_t, long)
+CF_SOCKADDR_LEN
 
 dnl --------------------------------------------------------------------------
 dnl Checks for library units

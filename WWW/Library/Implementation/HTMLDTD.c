@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTMLDTD.c,v 1.60 2025/06/19 20:53:38 Eric.Lindblad Exp $
+ * $LynxId: HTMLDTD.c,v 1.61 2025/07/25 19:31:24 tom Exp $
  *
  *		Our Static DTD for HTML
  *		-----------------------
@@ -228,11 +228,12 @@ const SGML_dtd HTML_dtd =
    twice... - kw */
 void HTSwitchDTD(int new_flag)
 {
+    assert(sizeof(tags_table1) == sizeof(tags_table0));
     if (TRACE)
 	CTRACE((tfp,
 		"HTMLDTD: Copying %s DTD element info of size %d, %d * %d\n",
 		new_flag ? "strict" : "tagsoup",
-		(int) (new_flag ? sizeof(tags_table1) : sizeof(tags_table0)),
+		(int) sizeof(tags_table0),
 		HTML_ALL_ELEMENTS,
 		(int) sizeof(HTTag)));
     if (new_flag)

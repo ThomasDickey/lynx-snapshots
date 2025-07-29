@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMain.c,v 1.305 2025/01/08 00:49:51 tom Exp $
+ * $LynxId: LYMain.c,v 1.306 2025/07/27 21:21:20 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTP.h>
@@ -1006,7 +1006,7 @@ void LYSetTextDomain(void)
 #if defined(HAVE_LIBINTL_H)
     const char *cp;
 
-    if ((cp = LYGetEnv("LYNX_LOCALEDIR")) == 0) {
+    if ((cp = LYGetEnv("LYNX_LOCALEDIR")) == NULL) {
 #ifdef USE_PROGRAM_DIR
 	char *localedir = NULL;
 

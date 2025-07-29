@@ -1,4 +1,4 @@
-dnl $LynxId: aclocal.m4,v 1.363 2025/07/25 00:06:47 tom Exp $
+dnl $LynxId: aclocal.m4,v 1.371 2025/07/29 20:48:53 tom Exp $
 dnl Macros for auto-configure script.
 dnl by Thomas E. Dickey <dickey@invisible-island.net>
 dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
@@ -1580,7 +1580,7 @@ fi
 
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_CHECK_SIZEOF version: 4 updated: 2021/01/02 09:31:20
+dnl CF_CHECK_SIZEOF version: 6 updated: 2025/07/29 16:47:04
 dnl ---------------
 dnl Improve on AC_CHECK_SIZEOF for cases when the build-environment is
 dnl deficient, e.g., if someone tries to build in busybox.  Use the second
@@ -1590,20 +1590,20 @@ dnl By the way, 2.13/2.52 differ in AC_CHECK_SIZEOF regarding the types they
 dnl can detect; the former includes only stdio.h for types while the latter
 dnl includes several header files.
 AC_DEFUN([CF_CHECK_SIZEOF],[
-AC_CHECK_SIZEOF([$1],[$2])
-if test "${ac_cv_type_$1+set}" = set; then
-	cf_cv_sizeof="$ac_cv_sizeof_$1"
-	if test "${ac_cv_sizeof_$1+set}" != set; then
+AC_CHECK_SIZEOF($@)
+if test "${AS_TR_SH([ac_cv_type_$1])+set}" = set; then
+	cf_my_sizeof="$AS_TR_SH([ac_cv_sizeof_$1])"
+	if test "${AS_TR_SH([ac_cv_sizeof_$1])+set}" != set; then
 		AC_MSG_WARN(using $2 for sizeof $1)
-		ac_cv_sizeof_$1=$2
-	elif test "x${ac_cv_sizeof_$1}" = x0; then
+		AS_TR_SH([ac_cv_sizeof_$1])=$2
+	elif test "x${AS_TR_SH([ac_cv_sizeof_$1])}" = x0; then
 		AC_MSG_WARN([sizeof $1 not found, using $2])
-		ac_cv_sizeof_$1=$2
+		AS_TR_SH([ac_cv_sizeof_$1])=$2
 	fi
-	if test "x$ac_cv_sizeof_$1" != "x$cf_cv_sizeof"
+	if test "x$AS_TR_SH([ac_cv_sizeof_$1])" != "x$cf_my_sizeof"
 	then
-		CF_UPPER(cf_cv_type,sizeof_$1)
-		sed -e "s/\\([[ 	]]${cf_cv_type}[[ 	]]\\).*/\\1$ac_cv_sizeof_$1/" confdefs.h >conftest.val
+		CF_UPPER(cf_cv_type,AS_TR_SH([sizeof_$1]))
+		sed -e "s/\\([[ 	]]${cf_cv_type}[[ 	]]\\).*/\\1$AS_TR_SH([ac_cv_sizeof_$1])/" confdefs.h >conftest.val
 		mv conftest.val confdefs.h
 	fi
 fi
@@ -3353,7 +3353,7 @@ AC_SUBST(GLOB_FULLPATH_POSIX)
 AC_SUBST(GLOB_FULLPATH_OTHER)
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_GNUTLS version: 28 updated: 2025/07/22 20:48:03
+dnl CF_GNUTLS version: 29 updated: 2025/07/29 16:47:04
 dnl ---------
 dnl Check for gnutls library (TLS "is" SSL)
 dnl $1 = the [optional] directory in which the library may be found
@@ -3416,11 +3416,10 @@ AC_DEFUN([CF_GNUTLS],[
 		esac
 	fi
 
-	AC_DEFINE(USE_GNUTLS_INCL,1,[Define to 1 if we should include gnutls headers])
-
 	if test "$cf_cv_have_gnutls" = no ; then
 		cf_gnutls_CPPFLAGS=$CPPFLAGS
 
+		CPPFLAGS="$CPPFLAGS -DUSE_GNUTLS_INCL"
 		CF_FIND_LINKAGE(CF__SSL_HEAD,
 			CF__SSL_BODY,
 			gnutls,
@@ -3433,6 +3432,22 @@ AC_DEFUN([CF_GNUTLS],[
 	fi
 
 	if test "$cf_cv_have_gnutls" = yes ; then
+		AC_MSG_CHECKING(if gnutls is usable)
+		AC_TRY_COMPILE([
+$ac_includes_default
+#include <gnutls/gnutls.h>
+],[
+#if defined(GNUTLS_VERSION_NUMBER) && GNUTLS_VERSION_NUMBER >= 0x10000
+#else
+#error gnutls is not usable
+#endif],
+			[AC_MSG_RESULT(perhaps)],
+			[AC_MSG_RESULT(no)
+			 cf_cv_have_gnutls=no])
+	fi
+
+	if test "$cf_cv_have_gnutls" = yes ; then
+		AC_DEFINE(USE_GNUTLS_INCL,1,[Define to 1 if we should include gnutls headers])
 		if test -n "$cf_cv_header_path_gnutls" ; then
 			AC_DEFINE(USE_SSL)
 			case "$cf_cv_header_path_gnutls" in
@@ -5800,6 +5815,38 @@ CF_CHECK_TYPE(SLsmg_Color_Type,int,[#include <slang.h>])
 CF_CHECK_TYPE(SLtt_Char_Type,unsigned long,[#include <slang.h>])
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl CF_SOCKADDR_LEN version: 1 updated: 2025/07/27 19:06:03
+dnl ---------------
+dnl Check if the size of sockaddr_in (INET) is the same as sockaddr (generic).
+dnl That helps with gcc's -Wduplicated-branches for Lynx.
+AC_DEFUN([CF_SOCKADDR_LEN],[
+cf_includes_network="\
+$ac_includes_default
+#include <sys/socket.h>
+#include <netinet/in.h>
+"
+CF_CHECK_SIZEOF([struct sockaddr_in],256,[$cf_includes_network])
+CF_CHECK_SIZEOF(struct sockaddr,256,[$cf_includes_network])
+
+AC_CACHE_CHECK(if SA_LEN can be simplified,cf_cv_sockaddr_len,[
+	cf_cv_sockaddr_len=no
+	if test "x$ac_cv_sizeof_struct_sockaddr" = "x$ac_cv_sizeof_struct_sockaddr_in"
+	then
+		if test "x$ac_cv_sizeof_struct_sockaddr" = "x256" || test -z "$ac_cv_sizeof_struct_sockaddr"
+		then
+			cf_cv_sockaddr_len=unknown
+		else
+			cf_cv_sockaddr_len=yes
+		fi
+	fi
+])
+
+if test "$cf_cv_sockaddr_len" = yes
+then
+	AC_DEFINE(SOCKADDR_LEN_INET,1,[Define to 1 if sizeof(sockaddr) == sizeof(sockaddr_in)])
+fi
+])dnl
+dnl ---------------------------------------------------------------------------
 dnl CF_SOCKS version: 9 updated: 2012/11/08 20:57:52
 dnl --------
 dnl Check for socks library
@@ -6185,13 +6232,13 @@ AC_DEFUN([CF_STRIP_O_OPT],[
 $1=`echo "${$1}" | CF__SED_TRIMBLANKS(-e 's%-O[[1-9]]\? %%' -e 's%-O[[1-9]]\?$%%')`
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_STRUCT_TERMIOS version: 13 updated: 2023/12/03 19:38:54
+dnl CF_STRUCT_TERMIOS version: 14 updated: 2025/07/19 12:19:51
 dnl -----------------
 dnl Some machines require _POSIX_SOURCE to completely define struct termios.
 AC_DEFUN([CF_STRUCT_TERMIOS],[
 AC_REQUIRE([CF_XOPEN_SOURCE])
 
-AC_CHECK_HEADERS( \
+AC_CHECK_HEADERS( sgtty.h \
 termio.h \
 termios.h \
 unistd.h \
@@ -7108,15 +7155,15 @@ fi
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_WITH_BROTLI version: 2 updated: 2024/04/09 18:37:41
+dnl CF_WITH_BROTLI version: 3 updated: 2025/07/29 16:47:04
 dnl --------------
 dnl Check for Brotli decoder library
 dnl
 dnl $1 = optional path for headers/library
 AC_DEFUN([CF_WITH_BROTLI],[
   CF_ADD_OPTIONAL_PATH($1, [brotli library])
-
   CF_FIND_LINKAGE([
+$ac_includes_default
 #include <brotli/decode.h>
 ],[
     BrotliDecoderDecompressStream(
@@ -7221,7 +7268,7 @@ if test "$with_dmalloc" = yes ; then
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_WITH_IDNA version: 12 updated: 2024/04/09 18:37:41
+dnl CF_WITH_IDNA version: 13 updated: 2025/07/29 16:47:04
 dnl ------------
 dnl Check for libidn2, use it if found.  Otherwise, check for libidn, use that.
 dnl
@@ -7230,7 +7277,7 @@ AC_DEFUN([CF_WITH_IDNA],[
 CF_ADD_OPTIONAL_PATH($1, [idna library])
 
 CF_FIND_LINKAGE([
-#include <stdio.h>
+$ac_includes_default
 #include <idn2.h>
 ],[
 	char *output = 0;
@@ -7401,7 +7448,7 @@ esac
 
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_XOPEN_SOURCE version: 68 updated: 2024/11/09 18:07:29
+dnl CF_XOPEN_SOURCE version: 69 updated: 2025/07/26 14:09:49
 dnl ---------------
 dnl Try to get _XOPEN_SOURCE defined properly that we can use POSIX functions,
 dnl or adapt to the vendor's definitions to get equivalent functionality,
@@ -7461,7 +7508,7 @@ case "$host_os" in
 	cf_xopen_source="-D_SGI_SOURCE"
 	cf_XOPEN_SOURCE=
 	;;
-(linux*gnu|linux*gnuabi64|linux*gnuabin32|linux*gnueabi|linux*gnueabihf|linux*gnux32|uclinux*|gnu*|mint*|k*bsd*-gnu|cygwin|msys|mingw*|linux*uclibc)
+(linux*gnu|linux*gnuabi64|linux*gnuabin32|linux*gnuabielfv*|linux*gnueabi|linux*gnueabihf|linux*gnux32|uclinux*|gnu*|mint*|k*bsd*-gnu|cygwin|msys|mingw*|linux*uclibc)
 	CF_GNU_SOURCE($cf_XOPEN_SOURCE)
 	;;
 linux*musl)

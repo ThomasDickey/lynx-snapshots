@@ -1,5 +1,5 @@
 /*
- * $LynxId: config.hin,v 1.159 2025/07/24 17:48:05 tom Exp $
+ * $LynxId: config.hin,v 1.160 2025/07/25 19:58:24 tom Exp $
  * vile:cmode
  *
  * The configure script translates "config.hin" into "lynx_cfg.h"
@@ -237,6 +237,7 @@
 #undef SIZEOF_TIME_T		/* AC_CHECK_SIZEOF(time_t) */
 #undef SLsmg_Color_Type		/* CF_SLANG_UNIX_DEFS */
 #undef SLtt_Char_Type		/* CF_SLANG_UNIX_DEFS */
+#undef SOCKADDR_LEN_INET	/* CF_SOCKADDR_LEN */
 #undef SOCKS			/* CF_SOCKS, CF_SOCKS5 */
 #undef STDC_HEADERS		/* AC_CHECK_DECL(exit) */
 #undef STDC_NORETURN		/* CF_C11_NORETURN */

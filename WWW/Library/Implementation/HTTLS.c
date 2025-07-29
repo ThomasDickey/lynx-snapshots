@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTLS.c,v 1.20 2025/07/24 17:43:45 tom Exp $
+ * $LynxId: HTTLS.c,v 1.21 2025/07/25 19:34:13 tom Exp $
  *
  *                          TRANSPORT LAYER SECURITY
  *
@@ -524,10 +524,10 @@ static void configure_handle(SSL * handle, char *host,
     }
 
 #if defined(SSL_clear_options) || defined(HAVE_SSL_CLEAR_OPTIONS)
-    retl = SSL_clear_options(handle, optm);
+    retl = (unsigned long) SSL_clear_options(handle, optm);
     CTRACE((tfp, "...called SSL_clear_options(%ld) ->%ld\n", optm, retl));
 #endif
-    retl = SSL_set_options(handle, opts);
+    retl = (unsigned long) SSL_set_options(handle, opts);
     CTRACE((tfp, "...called SSL_set_options(%ld) ->%ld\n", opts, retl));
 
 #else

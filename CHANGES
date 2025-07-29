@@ -1,9 +1,9 @@
--- $LynxId: CHANGES,v 1.1230 2025/07/24 19:56:52 tom Exp $
+-- $LynxId: CHANGES,v 1.1233 2025/07/29 20:49:31 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2025-07-24 (2.9.2n)
+2025-07-29 (2.9.2o)
 * use plink.sh script to trim unnecessary libraries when linking -TD
 * remove redundant configure macros -TD
 * remove --enable-gnutls-compat configure option -TD

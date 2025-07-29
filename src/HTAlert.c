@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTAlert.c,v 1.106 2025/01/07 23:57:54 tom Exp $
+ * $LynxId: HTAlert.c,v 1.107 2025/07/27 21:20:54 tom Exp $
  *
  *	Displaying messages and getting input for Lynx Browser
  *	==========================================================
@@ -952,9 +952,9 @@ BOOL HTConfirmCookie(domain_entry * de, const char *server,
 		char *p = gettext("Y/N/A/V");	/* placeholder for comment */
 		const char *s = "YNAV\007\003";		/* see ADVANCED_COOKIE_CONFIRMATION */
 
-		if (StrChr(s, ch) == 0
+		if (StrChr(s, ch) == NULL
 		    && isalpha(ch)
-		    && (p = strrchr(prompt, L_PAREN)) != 0) {
+		    && (p = strrchr(prompt, L_PAREN)) != NULL) {
 
 		    CTRACE((tfp, "Looking for %c in %s\n", ch, p));
 		    while (*p != R_PAREN && *p != 0 && isalpha(UCH(*s))) {

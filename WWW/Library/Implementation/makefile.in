@@ -1,4 +1,4 @@
-# $LynxId: makefile.in,v 1.37 2025/07/13 20:32:30 tom Exp $
+# $LynxId: makefile.in,v 1.39 2025/07/27 19:55:27 tom Exp $
 # Make WWW under unix for a.n.other unix system (bsd)
 # Use this as a template
 
@@ -55,9 +55,6 @@ BINDIR		= @bindir@
 # Where is the WWW source root?
 WWW = $(top_srcdir)/WWW
 
-#  Where should temporary (object) files go?
-WTMP = ../..
-
 # (Version.make)
 VC = 2.14
 #______________________________________________________________________
@@ -81,6 +78,8 @@ SHELL = @CONFIG_SHELL@
 # WWW = ../..	For [cernlib] build in this directory
 
 CMN = $(WWW)/Library/Implementation/
+APP = $(top_srcdir)/src/
+TOP = ../../../
 
 # Where shall we put the objects and built library?
 
@@ -101,60 +100,99 @@ CFLAGS2 = $(CFLAGS) $(LYFLAGS) $(WAISCFLAGS) -I$(CMN) -DACCESS_AUTH
 
 COMPILE	= $(ECHO) $(CC) $(CFLAGS2) -c
 
-COMMON = $(LOB)/HTParse$o $(LOB)/HTAccess$o $(LOB)/HTTP$o \
-	$(LOB)/HTFile$o	$(LOB)/HTBTree$o $(LOB)/HTFTP$o $(LOB)/HTTCP$o \
-	$(LOB)/SGML$o $(LOB)/HTMLDTD$o $(LOB)/HTChunk$o \
-	$(LOB)/HTPlain$o \
-	$(LOB)/HTMLGen$o \
-	$(LOB)/HTAtom$o $(LOB)/HTAnchor$o $(LOB)/HTStyle$o \
-	$(LOB)/HTList$o $(LOB)/HTString$o \
-	$(LOB)/HTRules$o $(LOB)/HTFormat$o  $(LOB)/HTMIME$o \
-	$(LOB)/HTNews$o  $(LOB)/HTGopher$o \
-	$(LOB)/HTTelnet$o $(LOB)/HTFinger$o $(LOB)/HTWSRC$o $(HTWAIS_o) \
-	$(LOB)/HTAAUtil$o $(LOB)/HTAABrow$o \
-	$(LOB)/HTGroup$o \
-	$(LOB)/HTAAProt$o \
-	$(LOB)/HTAssoc$o  $(LOB)/HTLex$o    $(LOB)/HTUU$o \
-	$(LOB)/HTDOS$o \
-	$(LOB)/HTTLS$o
+COMMON = $(HTWAIS_o) \
+	$(LOB)/HTAABrow$o $(LOB)/HTAAProt$o $(LOB)/HTAAUtil$o \
+	$(LOB)/HTAccess$o $(LOB)/HTAnchor$o $(LOB)/HTAssoc$o \
+	$(LOB)/HTAtom$o   $(LOB)/HTBTree$o  $(LOB)/HTChunk$o \
+	$(LOB)/HTDOS$o    $(LOB)/HTFTP$o    $(LOB)/HTFile$o \
+	$(LOB)/HTFinger$o $(LOB)/HTFormat$o $(LOB)/HTGopher$o \
+	$(LOB)/HTGroup$o  $(LOB)/HTLex$o    $(LOB)/HTList$o \
+	$(LOB)/HTMIME$o   $(LOB)/HTMLDTD$o  $(LOB)/HTMLGen$o \
+	$(LOB)/HTNews$o   $(LOB)/HTParse$o  $(LOB)/HTPlain$o \
+	$(LOB)/HTRules$o  $(LOB)/HTString$o $(LOB)/HTStyle$o \
+	$(LOB)/HTTCP$o    $(LOB)/HTTLS$o    $(LOB)/HTTP$o \
+	$(LOB)/HTTelnet$o $(LOB)/HTUU$o     $(LOB)/HTWSRC$o \
+	$(LOB)/SGML$o
 
-CFILES = $(CMN)HTParse.c $(CMN)HTAccess.c $(CMN)HTTP.c $(CMN)HTFile.c \
-	$(CMN)HTBTree.c \
-	$(CMN)HTFTP.c	$(CMN)HTTCP.c	  $(CMN)SGML.c \
-	$(CMN)HTMLDTD.c \
-	$(CMN)HTPlain.c	\
-	$(CMN)HTMLGen.c \
-	$(CMN)HTChunk.c $(CMN)HTAtom.c    $(CMN)HTAnchor.c $(CMN)HTStyle.c \
-	$(CMN)HTList.c  $(CMN)HTString.c  $(CMN)HTRules.c \
-	$(CMN)HTFormat.c $(CMN)HTMIME.c \
-	$(CMN)HTNews.c  $(CMN)HTGopher.c  $(CMN)HTTelnet.c \
-	$(CMN)HTFinger.c $(HTWAIS_c)	  $(CMN)HTWSRC.c \
-	$(CMN)HTAABrow.c \
-	$(CMN)HTGroup.c  \
-	$(CMN)HTAAProt.c \
-	$(CMN)HTAssoc.c  $(CMN)HTLex.c    $(CMN)HTUU.c \
-	$(CMN)HTTLS.c
+CFILES = $(HTWAIS_c) \
+	$(CMN)HTAABrow.c  $(CMN)HTAAProt.c  $(CMN)HTAAUtil.c \
+	$(CMN)HTAccess.c  $(CMN)HTAnchor.c  $(CMN)HTAssoc.c \
+	$(CMN)HTAtom.c    $(CMN)HTBTree.c   $(CMN)HTChunk.c \
+	$(CMN)HTDOS.c     $(CMN)HTFTP.c     $(CMN)HTFile.c \
+	$(CMN)HTFinger.c  $(CMN)HTFormat.c  $(CMN)HTGopher.c \
+	$(CMN)HTGroup.c   $(CMN)HTLex.c     $(CMN)HTList.c \
+	$(CMN)HTMIME.c    $(CMN)HTMLDTD.c   $(CMN)HTMLGen.c \
+	$(CMN)HTNews.c    $(CMN)HTParse.c   $(CMN)HTPlain.c \
+	$(CMN)HTRules.c   $(CMN)HTString.c  $(CMN)HTStyle.c \
+	$(CMN)HTTCP.c     $(CMN)HTTLS.c     $(CMN)HTTP.c \
+	$(CMN)HTTelnet.c  $(CMN)HTUU.c      $(CMN)HTWSRC.c \
+	$(CMN)SGML.c
 
-HFILES = $(CMN)HTParse.h $(CMN)HTAccess.h $(CMN)HTTP.h $(CMN)HTFile.h \
-	$(CMN)HTBTree.h $(CMN)HTFTP.h $(CMN)HTTCP.h \
-	$(CMN)SGML.h $(CMN)HTML.h $(CMN)HTMLDTD.h $(CMN)HTChunk.h \
-	$(CMN)HTPlain.h	\
-	$(CMN)HTFWriter.h	$(CMN)HTMLGen.h \
-	$(CMN)HTStream.h \
-	$(CMN)HTAtom.h $(CMN)HTAnchor.h $(CMN)HTStyle.h \
-	$(CMN)HTList.h \
-	$(CMN)HTString.h $(CMN)HTRules.h \
-	$(CMN)HTFormat.h $(CMN)HTInit.h \
-	$(CMN)HTMIME.h $(CMN)HTNews.h \
-	$(CMN)HTGopher.h \
-	$(CMN)HTUtils.h $(CMN)www_tcp.h $(CMN)HText.h \
-	$(CMN)HTTelnet.h $(CMN)HTFinger.h \
-	$(CMN)HTWAIS.h  $(CMN)HTWSRC.h \
-	$(CMN)HTAABrow.h \
-	$(CMN)HTGroup.h  \
-	$(CMN)HTAAProt.h \
-	$(CMN)HTAssoc.h  $(CMN)HTLex.h    $(CMN)HTUU.h \
-	$(CMN)HTTLS.h
+HFILES = \
+	$(CMN)HTAABrow.h  $(CMN)HTAAProt.h  $(CMN)HTAccess.h \
+	$(CMN)HTAnchor.h  $(CMN)HTAssoc.h   $(CMN)HTAtom.h \
+	$(CMN)HTBTree.h   $(CMN)HTChunk.h   $(CMN)HTFTP.h \
+	$(CMN)HTFWriter.h $(CMN)HTFile.h    $(CMN)HTFinger.h \
+	$(CMN)HTFormat.h  $(CMN)HTGopher.h  $(CMN)HTGroup.h \
+	$(CMN)HTInit.h    $(CMN)HTLex.h     $(CMN)HTList.h \
+	$(CMN)HTMIME.h    $(CMN)HTML.h      $(CMN)HTMLDTD.h \
+	$(CMN)HTMLGen.h   $(CMN)HTNews.h    $(CMN)HTParse.h \
+	$(CMN)HTPlain.h   $(CMN)HTRules.h   $(CMN)HTStream.h \
+	$(CMN)HTString.h  $(CMN)HTStyle.h   $(CMN)HTTCP.h \
+	$(CMN)HTTLS.h     $(CMN)HTTP.h      $(CMN)HTTelnet.h \
+	$(CMN)HTUU.h      $(CMN)HTUtils.h   $(CMN)HTWAIS.h \
+	$(CMN)HTWSRC.h    $(CMN)HText.h     $(CMN)SGML.h \
+	$(CMN)www_tcp.h
+
+HTAABROW_H      = $(CMN)HTAABrow.h  $(CMN)HTAAUtil.h
+HTAAPROT_H      = $(CMN)HTAAProt.h  $(CMN)HTGroup.h  $(CMN)HTAssoc.h
+HTAAUTIL_H      = $(CMN)HTAAUtil.h  $(CMN)HTList.h
+HTACCESS_H      = $(CMN)HTAccess.h  $(CMN)HTAnchor.h $(CMN)HTFormat.h
+HTANCHOR_H      = $(CMN)HTAnchor.h  $(CMN)HTList.h   $(CMN)HTBTree.h $(CMN)HTChunk.h $(CMN)HTAtom.h $(CMN)UCDefs.h $(CMN)HTFormat.h
+HTASSOC_H       = $(CMN)HTAssoc.h   $(CMN)HTList.h
+HTATOM_H        = $(CMN)HTAtom.h    $(CMN)HTList.h
+HTBTREE_H       = $(CMN)HTBTree.h   $(CMN)HTUtils.h
+HTCJK_H         = $(CMN)HTCJK.h     $(CMN)HTUtils.h
+HTCHUNK_H       = $(CMN)HTChunk.h   $(CMN)HTUtils.h  $(CMN)UCMap.h
+HTDOS_H         = $(CMN)HTDOS.h     $(CMN)HTUtils.h
+HTFTP_H         = $(CMN)HTFTP.h     $(CMN)HTAnchor.h $(CMN)HTStream.h $(CMN)HTParse.h
+HTFWRITER_H     = $(CMN)HTFWriter.h $(CMN)HTStream.h $(CMN)HTFormat.h
+HTFILE_H        = $(CMN)HTFile.h    $(CMN)HTFormat.h $(CMN)HTAccess.h $(APP)HTML.h
+HTFINGER_H      = $(CMN)HTFinger.h  $(CMN)HTAccess.h $(CMN)HTAnchor.h
+HTFORMAT_H      = $(CMN)HTFormat.h  $(CMN)HTStream.h $(CMN)HTAtom.h $(CMN)HTList.h $(CMN)HTAnchor.h $(CMN)HTChunk.h
+HTGOPHER_H      = $(CMN)HTGopher.h  $(CMN)HTAccess.h $(CMN)HTAnchor.h
+HTGROUP_H       = $(CMN)HTGroup.h   $(CMN)HTList.h
+HTINIT_H        = $(CMN)HTInit.h    $(CMN)HTUtils.h
+HTLEX_H         = $(CMN)HTLex.h     $(CMN)HTUtils.h
+HTLIST_H        = $(CMN)HTList.h    $(CMN)HTUtils.h
+HTMIME_H        = $(CMN)HTMIME.h    $(CMN)HTStream.h $(CMN)HTAnchor.h
+HTMLDTD_H       = $(CMN)HTMLDTD.h   $(CMN)SGML.h     $(APP)HTFont.h $(CMN)hdr_HTMLDTD.h
+HTMLGEN_H       = $(CMN)HTMLGen.h   $(APP)HTML.h $(CMN)HTStream.h
+HTNEWS_H        = $(CMN)HTNews.h    $(HTTLS_H)   $(CMN)HTAccess.h $(CMN)HTAnchor.h
+HTPARSE_H       = $(CMN)HTParse.h   $(CMN)HTUtils.h
+HTPLAIN_H       = $(CMN)HTPlain.h   $(CMN)HTStream.h $(CMN)HTAnchor.h
+HTRULES_H       = $(CMN)HTRules.h   $(CMN)HTUtils.h
+HTSTREAM_H      = $(CMN)HTStream.h  $(CMN)HTUtils.h
+HTSTRING_H      = $(CMN)HTString.h  $(CMN)HTUtils.h
+HTSTYLE_H       = $(CMN)HTStyle.h   $(CMN)HTAnchor.h
+HTTCP_H         = $(CMN)HTTCP.h     $(CMN)HTUtils.h
+HTTLS_H         = $(CMN)HTTLS.h     $(CMN)HTUtils.h
+HTTP_H          = $(CMN)HTTP.h      $(CMN)HTAccess.h
+HTTELNET_H      = $(CMN)HTTelnet.h  $(CMN)HTAccess.h
+HTUU_H          = $(CMN)HTUU.h      $(CMN)HTUtils.h
+HTUTILS_H       = $(CMN)HTUtils.h   $(TOP)lynx_cfg.h $(CMN)HTString.h $(CMD)LYexit.h $(top_srcdir)/userdefs.h 
+HTWAIS_H        = $(CMN)HTWAIS.h    $(CMN)HTAccess.h
+HTWSRC_H        = $(CMN)HTWSRC.h    $(CMN)HTFormat.h
+HTEXT_H         = $(CMN)HText.h     $(CMN)HTAnchor.h $(CMN)HTStyle.h $(CMN)HTStream.h $(CMN)SGML.h
+LYLEAKS_H       = $(CMN)LYLeaks.h   $(CMN)HTUtils.h
+LYEXIT_H        = $(CMN)LYexit.h    $(CMN)HTUtils.h
+SGML_H          = $(CMN)SGML.h      $(CMN)HTStream.h $(CMN)HTAnchor.h $(APP)LYJustify.h
+UCAUX_H         = $(CMN)UCAux.h     $(CMN)HTUtils.h $(CMN)UCDefs.h $(CMN)HTStream.h $(CMN)UCMap.h
+UCDEFS_H        = $(CMN)UCDefs.h    $(CMN)HTUtils.h
+UCMAP_H         = $(CMN)UCMap.h     $(CMN)HTUtils.h
+SRC0_HTMLDTD_H  = $(CMN)src0_HTMLDTD.h $(HTMLDTD_H)
+SRC1_HTMLDTD_H  = $(CMN)src1_HTMLDTD.h $(HTMLDTD_H)
+WWW_WAIT_H      = $(CMN)www_wait.h  $(CMN)HTUtils.h
 
 C_SRC		= $(COMMON:$o=.c)
 
@@ -199,137 +237,451 @@ tags:
 #			Common code
 #			-----------
 
-$(LOB)/HTList$o : $(CMN)HTList.c $(CMN)HTUtils.h $(CMN)HTList.h
+$(LOB)/HTList$o : $(CMN)HTList.c \
+		$(HTLIST_H) \
+		$(HTUTILS_H) \
+		$(LYLEAKS_H)
 	$(COMPILE) $(CMN)HTList.c
 
-$(LOB)/HTAnchor$o : $(CMN)HTAnchor.c $(CMN)HTUtils.h $(CMN)HTList.h
+$(LOB)/HTAnchor$o : $(CMN)HTAnchor.c \
+		$(APP)GridText.h \
+		$(APP)LYCharSets.h \
+		$(APP)LYUtils.h \
+		$(HTANCHOR_H) \
+		$(HTPARSE_H) \
+		$(HTSTRING_H) \
+		$(HTUTILS_H) \
+		$(LYLEAKS_H) \
+		$(UCAUX_H) \
+		$(UCMAP_H)
 	$(COMPILE) $(CMN)HTAnchor.c
 
-$(LOB)/HTFormat$o : $(CMN)HTFormat.c $(CMN)HTUtils.h $(CMN)HTList.h
+$(LOB)/HTFormat$o : $(CMN)HTFormat.c \
+		$(APP)GridText.h \
+		$(APP)HTAlert.h \
+		$(APP)HTML.h \
+		$(APP)LYGlobalDefs.h \
+		$(APP)LYMainLoop.h \
+		$(APP)LYUtils.h \
+		$(HTEXT_H) \
+		$(CMN)HTFormat.h \
+		$(HTFWRITER_H) \
+		$(HTINIT_H) \
+		$(HTLIST_H) \
+		$(HTMLDTD_H) \
+		$(HTMLGEN_H) \
+		$(HTPLAIN_H) \
+		$(HTTCP_H) \
+		$(HTTLS_H) \
+		$(HTTP_H) \
+		$(LYEXIT_H) \
+		$(LYLEAKS_H) \
+		$(SGML_H)
 	$(COMPILE) $(CMN)HTFormat.c
 
-$(LOB)/HTMIME$o : $(CMN)HTMIME.c $(CMN)HTUtils.h $(CMN)HTList.h
+$(LOB)/HTMIME$o : $(CMN)HTMIME.c \
+		$(APP)HTAlert.h \
+		$(APP)LYCharSets.h \
+		$(APP)LYCharUtils.h \
+		$(APP)LYCharVals.h \
+		$(APP)LYCookie.h \
+		$(APP)LYGlobalDefs.h \
+		$(APP)LYStrings.h \
+		$(APP)LYUtils.h \
+		$(HTCJK_H) \
+		$(HTFILE_H) \
+		$(HTMIME_H) \
+		$(HTTP_H) \
+		$(HTUTILS_H) \
+		$(LYLEAKS_H) \
+		$(UCAUX_H) \
+		$(UCDEFS_H) \
+		$(UCMAP_H)
 	$(COMPILE) $(CMN)HTMIME.c
 
-$(LOB)/HTNews$o : $(CMN)HTNews.c $(CMN)HTUtils.h $(CMN)HTList.h\
-	 $(CMN)HTMLDTD.h
+$(LOB)/HTNews$o : $(CMN)HTNews.c \
+		$(APP)HTAlert.h \
+		$(APP)HTML.h \
+		$(APP)LYGlobalDefs.h \
+		$(APP)LYNews.h \
+		$(APP)LYStrings.h \
+		$(APP)LYUtils.h \
+		$(HTACCESS_H) \
+		$(HTFORMAT_H) \
+		$(HTMIME_H) \
+		$(HTNEWS_H) \
+		$(HTPARSE_H) \
+		$(HTTCP_H) \
+		$(LYLEAKS_H)
 	$(COMPILE) $(CMN)HTNews.c
 
-$(LOB)/HTGopher$o : $(CMN)HTGopher.c $(CMN)HTUtils.h $(CMN)HTList.h \
-	 $(CMN)HTMLDTD.h
+$(LOB)/HTGopher$o : $(CMN)HTGopher.c \
+		$(APP)HTAlert.h \
+		$(APP)HTML.h \
+		$(APP)LYGlobalDefs.h \
+		$(APP)LYStrings.h \
+		$(APP)LYUtils.h \
+		$(HTFILE_H) \
+		$(HTFINGER_H) \
+		$(HTFORMAT_H) \
+		$(HTGOPHER_H) \
+		$(HTPARSE_H) \
+		$(HTTCP_H) \
+		$(HTUTILS_H) \
+		$(LYLEAKS_H)
 	$(COMPILE) $(CMN)HTGopher.c
 
-$(LOB)/HTTelnet$o : $(CMN)HTTelnet.c $(CMN)HTUtils.h $(CMN)HTTelnet.h $(CMN)../../../userdefs.h
+$(LOB)/HTTelnet$o : $(CMN)HTTelnet.c \
+		$(APP)HTAlert.h \
+		$(APP)LYClean.h \
+		$(APP)LYStrings.h \
+		$(APP)LYUtils.h \
+		$(HTACCESS_H) \
+		$(HTANCHOR_H) \
+		$(HTEXT_H) \
+		$(HTFILE_H) \
+		$(HTPARSE_H) \
+		$(HTTCP_H) \
+		$(HTTELNET_H) \
+		$(HTTP_H) \
+		$(HTUTILS_H) \
+		$(LYLEAKS_H)
 	$(COMPILE) $(CMN)HTTelnet.c
 
-$(LOB)/HTFinger$o : $(CMN)HTFinger.c $(CMN)HTUtils.h $(CMN)HTList.h \
-	$(CMN)HTMLDTD.h
+$(LOB)/HTFinger$o : $(CMN)HTFinger.c \
+		$(APP)HTAlert.h \
+		$(APP)HTML.h \
+		$(APP)LYUtils.h \
+		$(HTFINGER_H) \
+		$(HTFORMAT_H) \
+		$(HTPARSE_H) \
+		$(HTSTRING_H) \
+		$(HTTCP_H) \
+		$(HTUTILS_H) \
+		$(LYLEAKS_H)
 	$(COMPILE) $(CMN)HTFinger.c
 
-$(LOB)/HTStyle$o : $(CMN)HTStyle.c $(CMN)HTUtils.h
+$(LOB)/HTStyle$o : $(CMN)HTStyle.c \
+		$(HTSTYLE_H) \
+		$(HTUTILS_H) \
+		$(LYLEAKS_H)
 	$(COMPILE) $(CMN)HTStyle.c
 
-$(LOB)/HTAtom$o : $(CMN)HTAtom.c $(CMN)HTUtils.h $(CMN)HTList.h
+$(LOB)/HTAtom$o : $(CMN)HTAtom.c \
+		$(HTATOM_H) \
+		$(HTLIST_H) \
+		$(HTUTILS_H) \
+		$(LYEXIT_H) \
+		$(LYLEAKS_H)
 	$(COMPILE) $(CMN)HTAtom.c
 
-$(LOB)/HTChunk$o : $(CMN)HTChunk.c $(CMN)HTUtils.h
+$(LOB)/HTChunk$o : $(CMN)HTChunk.c \
+		$(HTCHUNK_H) \
+		$(HTUTILS_H) \
+		$(LYLEAKS_H)
 	$(COMPILE) $(CMN)HTChunk.c
 
-$(LOB)/HTString$o : $(CMN)HTString.c $(CMN)HTUtils.h $(CMN)Version.make
+$(LOB)/HTString$o : $(CMN)HTString.c $(CMN)Version.make \
+		$(APP)LYStrings.h \
+		$(APP)LYUtils.h \
+		$(HTFILE_H) \
+		$(HTUTILS_H) \
+		$(LYLEAKS_H)
 	$(COMPILE) -DVC=\"$(VC)\" $(CMN)HTString.c
 
-$(LOB)/HTRules$o : $(CMN)HTRules.c $(CMN)HTUtils.h $(CMN)Version.make \
-	 $(CMN)HTAAProt.h
+$(LOB)/HTRules$o : $(CMN)HTRules.c \
+		$(APP)HTAlert.h \
+		$(APP)LYGlobalDefs.h \
+		$(APP)LYStrings.h \
+		$(APP)LYUtils.h \
+		$(HTAAPROT_H) \
+		$(HTFILE_H) \
+		$(HTRULES_H) \
+		$(HTTP_H) \
+		$(HTUTILS_H) \
+		$(LYLEAKS_H)
 	$(COMPILE) -DVC=\"$(VC)\" $(CMN)HTRules.c
 
-$(LOB)/SGML$o : $(CMN)SGML.c $(CMN)HTUtils.h $(CMN)UCAux.h
+$(LOB)/SGML$o : $(CMN)SGML.c \
+		$(APP)AttrList.h \
+		$(APP)LYCharSets.h \
+		$(APP)LYCharVals.h \
+		$(APP)LYGlobalDefs.h \
+		$(APP)LYStrings.h \
+		$(APP)LYUtils.h \
+		$(HTACCESS_H) \
+		$(HTCHUNK_H) \
+		$(HTMLDTD_H) \
+		$(HTUTILS_H) \
+		$(LYLEAKS_H) \
+		$(SGML_H) \
+		$(UCAUX_H)
 	$(COMPILE) $(CMN)SGML.c
 
-$(LOB)/HTMLGen$o : $(CMN)HTMLGen.c $(CMN)HTUtils.h $(CMN)HTMLDTD.h
+$(LOB)/HTMLGen$o : $(CMN)HTMLGen.c \
+		$(APP)AttrList.h \
+		$(APP)LYCharUtils.h \
+		$(APP)LYCurses.h \
+		$(APP)LYGlobalDefs.h \
+		$(APP)LYHash.h \
+		$(APP)LYStyle.h \
+		$(HTFORMAT_H) \
+		$(HTMLDTD_H) \
+		$(HTMLGEN_H) \
+		$(HTSTREAM_H) \
+		$(HTUTILS_H) \
+		$(LYLEAKS_H) \
+		$(SGML_H)
 	$(COMPILE) $(CMN)HTMLGen.c
 
-$(LOB)/HTMLDTD$o : $(CMN)HTMLDTD.c $(CMN)SGML.h
+$(LOB)/HTMLDTD$o : $(CMN)HTMLDTD.c \
+		$(APP)LYJustify.h \
+		$(HTMLDTD_H) \
+		$(HTUTILS_H) \
+		$(LYLEAKS_H) \
+		$(SRC0_HTMLDTD_H) \
+		$(SRC1_HTMLDTD_H)
 	$(COMPILE) $(CMN)HTMLDTD.c
 
-$(LOB)/HTPlain$o : $(CMN)HTPlain.c $(CMN)HTPlain.h $(CMN)HTStream.h \
-	 $(CMN)UCAux.h
+$(LOB)/HTPlain$o : $(CMN)HTPlain.c \
+		$(APP)HTML.h \
+		$(APP)LYCharSets.h \
+		$(APP)LYCharVals.h \
+		$(APP)LYStrings.h \
+		$(HTCHUNK_H) \
+		$(HTCJK_H) \
+		$(HTEXT_H) \
+		$(HTMLDTD_H) \
+		$(HTPLAIN_H) \
+		$(HTSTYLE_H) \
+		$(HTUTILS_H) \
+		$(LYLEAKS_H) \
+		$(UCAUX_H) \
+		$(UCDEFS_H) \
+		$(UCMAP_H)
 	$(COMPILE) $(CMN)HTPlain.c
 
-$(LOB)/HTWAIS$o : $(CMN)HTWAIS.c $(CMN)HTUtils.h $(CMN)HTList.h
+$(LOB)/HTWAIS$o : $(CMN)HTWAIS.c \
+		$(APP)HTAlert.h \
+		$(APP)HTML.h \
+		$(APP)LYStrings.h \
+		$(APP)LYUtils.h \
+		$(HTACCESS_H) \
+		$(HTCJK_H) \
+		$(HTPARSE_H) \
+		$(HTTCP_H) \
+		$(HTUTILS_H) \
+		$(HTVMS_WAISPROT_H) \
+		$(HTVMS_WAISUI_H) \
+		$(HTWSRC_H) \
+		$(LYLEAKS_H)
 	$(COMPILE) $(WAISINC) $(CMN)HTWAIS.c
 
-$(LOB)/HTWSRC$o : $(CMN)HTWSRC.c $(CMN)HTUtils.h $(CMN)HTList.h
+$(LOB)/HTWSRC$o : $(CMN)HTWSRC.c \
+		$(APP)HTML.h \
+		$(APP)LYUtils.h \
+		$(HTPARSE_H) \
+		$(HTUTILS_H) \
+		$(HTWSRC_H) \
+		$(LYLEAKS_H)
 	$(COMPILE) $(CMN)HTWSRC.c
 
 #	Access Authorization
 
-$(LOB)/HTAAUtil$o : $(CMN)HTAAUtil.c $(CMN)HTAAUtil.h \
-	 $(CMN)HTUtils.h $(CMN)HTString.h
+$(LOB)/HTAAUtil$o : $(CMN)HTAAUtil.c \
+		$(APP)LYStrings.h \
+		$(APP)LYUtils.h \
+		$(HTAAUTIL_H) \
+		$(HTASSOC_H) \
+		$(HTTCP_H) \
+		$(HTTLS_H) \
+		$(LYLEAKS_H)
 	$(COMPILE) $(CMN)HTAAUtil.c
 
-$(LOB)/HTGroup$o : $(CMN)HTGroup.c $(CMN)HTGroup.h \
-	 $(CMN)HTAAUtil.h \
-	 $(CMN)HTAssoc.h $(CMN)HTLex.h
+$(LOB)/HTGroup$o : $(CMN)HTGroup.c \
+		$(APP)LYUtils.h \
+		$(HTAAUTIL_H) \
+		$(HTGROUP_H) \
+		$(HTLEX_H) \
+		$(HTUTILS_H) \
+		$(LYLEAKS_H)
 	$(COMPILE) $(CMN)HTGroup.c
 
-$(LOB)/HTAABrow$o : $(CMN)HTAABrow.c $(CMN)HTAABrow.h \
-	 $(CMN)HTAAUtil.h $(CMN)HTUU.h \
-	 $(CMN)HTUtils.h $(CMN)HTString.h \
-	 $(CMN)HTParse.h $(CMN)HTList.h \
-	 $(CMN)HTAssoc.h
+$(LOB)/HTAABrow$o : $(CMN)HTAABrow.c \
+		$(APP)HTAlert.h \
+		$(HTAABROW_H) \
+		$(HTAAUTIL_H) \
+		$(HTACCESS_H) \
+		$(HTASSOC_H) \
+		$(HTLIST_H) \
+		$(HTPARSE_H) \
+		$(HTSTRING_H) \
+		$(HTUTILS_H) \
+		$(HTUU_H) \
+		$(LYLEAKS_H)
 	$(COMPILE) $(CMN)HTAABrow.c
 
-$(LOB)/HTAAProt$o : $(CMN)HTAAProt.c $(CMN)HTAAProt.h \
-	 $(CMN)HTUtils.h $(CMN)HTAAUtil.h \
-	 $(CMN)HTAssoc.h $(CMN)HTLex.h
+$(LOB)/HTAAProt$o : $(CMN)HTAAProt.c \
+		$(APP)LYUtils.h \
+		$(HTAAPROT_H) \
+		$(HTAAUTIL_H) \
+		$(HTLEX_H) \
+		$(HTUTILS_H) \
+		$(LYLEAKS_H)
 	$(COMPILE) $(CMN)HTAAProt.c
 
-$(LOB)/HTAssoc$o : $(CMN)HTAssoc.c $(CMN)HTAssoc.h \
-	$(CMN)HTUtils.h $(CMN)HTString.h $(CMN)HTList.h
+$(LOB)/HTAssoc$o : $(CMN)HTAssoc.c \
+		$(HTASSOC_H) \
+		$(HTUTILS_H) \
+		$(LYLEAKS_H)
 	$(COMPILE) $(CMN)HTAssoc.c
 
-$(LOB)/HTLex$o : $(CMN)HTLex.c $(CMN)HTLex.h $(CMN)HTUtils.h
+$(LOB)/HTLex$o : $(CMN)HTLex.c \
+		$(HTLEX_H) \
+		$(HTUTILS_H) \
+		$(LYLEAKS_H)
 	$(COMPILE) $(CMN)HTLex.c
 
-$(LOB)/HTUU$o : $(CMN)HTUU.c $(CMN)HTUU.h $(CMN)HTUtils.h
+$(LOB)/HTUU$o : $(CMN)HTUU.c \
+		$(HTUTILS_H) \
+		$(HTUU_H) \
+		$(LYLEAKS_H)
 	$(COMPILE) $(CMN)HTUU.c
 
 
 #	Communications & Files
 
-$(LOB)/HTTP$o : $(CMN)HTTP.c $(CMN)HTUtils.h $(CMN)HTAABrow.h
+$(LOB)/HTTP$o : $(CMN)HTTP.c \
+		$(APP)GridText.h \
+		$(APP)HTAlert.h \
+		$(APP)LYGlobalDefs.h \
+		$(APP)LYStrings.h \
+		$(APP)LYUtils.h \
+		$(APP)LYrcFile.h \
+		$(HTAABROW_H) \
+		$(HTFILE_H) \
+		$(HTNEWS_H) \
+		$(HTPARSE_H) \
+		$(HTTCP_H) \
+		$(HTTP_H) \
+		$(LYLEAKS_H)
 	$(COMPILE) $(CMN)HTTP.c
 
-$(LOB)/HTTCP$o : $(CMN)HTTCP.c $(CMN)HTUtils.h
+$(LOB)/HTTCP$o : $(CMN)HTTCP.c \
+		$(APP)HTAlert.h \
+		$(APP)LYGlobalDefs.h \
+		$(APP)LYUtils.h \
+		$(HTPARSE_H) \
+		$(HTTCP_H) \
+		$(HTUTILS_H) \
+		$(LYLEAKS_H)
 	$(COMPILE) $(CMN)HTTCP.c
 
-$(LOB)/HTFile$o : $(CMN)HTFile.c $(CMN)HTUtils.h \
-	 $(CMN)HTMLDTD.h
+$(LOB)/HTFile$o : $(CMN)HTFile.c \
+		$(APP)GridText.h \
+		$(APP)HTAlert.h \
+		$(APP)HTML.h \
+		$(APP)LYCharSets.h \
+		$(APP)LYGlobalDefs.h \
+		$(APP)LYStrings.h \
+		$(APP)LYUtils.h \
+		$(HTAAPROT_H) \
+		$(HTANCHOR_H) \
+		$(HTATOM_H) \
+		$(HTBTREE_H) \
+		$(HTCJK_H) \
+		$(HTDOS_H) \
+		$(HTFILE_H) \
+		$(HTFTP_H) \
+		$(HTFWRITER_H) \
+		$(HTINIT_H) \
+		$(HTPARSE_H) \
+		$(HTTCP_H) \
+		$(HTUTILS_H) \
+		$(LYEXIT_H) \
+		$(LYLEAKS_H) \
+		$(UCAUX_H) \
+		$(UCDEFS_H) \
+		$(UCMAP_H)
 	$(COMPILE) $(CMN)HTFile.c
 
-$(LOB)/HTBTree$o : $(CMN)HTBTree.c $(CMN)HTUtils.h
+$(LOB)/HTBTree$o : $(CMN)HTBTree.c \
+		$(HTBTREE_H) \
+		$(HTUTILS_H) \
+		$(LYLEAKS_H)
 	$(COMPILE) $(CMN)HTBTree.c
 
-$(LOB)/HTFTP$o : $(CMN)HTFTP.c $(CMN)HTUtils.h
+$(LOB)/HTFTP$o : $(CMN)HTFTP.c \
+		$(APP)HTAlert.h \
+		$(APP)HTFont.h \
+		$(APP)HTML.h \
+		$(APP)LYGlobalDefs.h \
+		$(APP)LYStrings.h \
+		$(APP)LYUtils.h \
+		$(HTANCHOR_H) \
+		$(HTBTREE_H) \
+		$(HTCHUNK_H) \
+		$(HTFILE_H) \
+		$(HTFTP_H) \
+		$(HTPARSE_H) \
+		$(HTTCP_H) \
+		$(HTTP_H) \
+		$(HTUTILS_H) \
+		$(LYLEAKS_H)
 	$(COMPILE) $(CMN)HTFTP.c
 
-$(LOB)/HTAccess$o : $(CMN)HTAccess.c $(CMN)HTUtils.h
+$(LOB)/HTAccess$o : $(CMN)HTAccess.c \
+		$(APP)GridText.h \
+		$(APP)HTAlert.h \
+		$(APP)HTML.h \
+		$(APP)LYGlobalDefs.h \
+		$(APP)LYStrings.h \
+		$(APP)LYUtils.h \
+		$(HTACCESS_H) \
+		$(HTCJK_H) \
+		$(HTEXT_H) \
+		$(HTLIST_H) \
+		$(HTPARSE_H) \
+		$(HTRULES_H) \
+		$(HTTP_H) \
+		$(HTUTILS_H) \
+		$(LYEXIT_H) \
+		$(LYLEAKS_H) \
+		$(UCMAP_H)
 	$(COMPILE) $(CMN)HTAccess.c
 
-$(LOB)/HTParse$o : $(CMN)HTParse.c $(CMN)HTUtils.h
+$(LOB)/HTParse$o : $(CMN)HTParse.c \
+		$(APP)LYCharUtils.h \
+		$(APP)LYGlobalDefs.h \
+		$(APP)LYStrings.h \
+		$(APP)LYUtils.h \
+		$(HTPARSE_H) \
+		$(HTUTILS_H) \
+		$(LYLEAKS_H)
 	$(COMPILE) $(CMN)HTParse.c
 
-$(LOB)/HTVMS_WaisUI$o : $(CMN)HTVMS_WaisUI.c $(CMN)HTUtils.h
-	$(COMPILE) $(CMN)HTVMS_WaisUI.c
-
-$(LOB)/HTDOS$o : $(CMN)HTDOS.c $(CMN)HTUtils.h
+$(LOB)/HTDOS$o : $(CMN)HTDOS.c \
+		$(APP)HTAlert.h \
+		$(APP)LYGlobalDefs.h \
+		$(APP)LYStrings.h \
+		$(APP)LYUtils.h \
+		$(HTDOS_H) \
+		$(HTUTILS_H) \
+		$(LYLEAKS_H)
 	$(COMPILE) $(CMN)HTDOS.c
 
-$(LOB)/HTTLS$o : $(CMN)HTTLS.c $(CMN)HTUtils.h
+$(LOB)/HTTLS$o : $(CMN)HTTLS.c \
+		$(APP)HTAlert.h \
+		$(APP)LYGlobalDefs.h \
+		$(APP)LYUtils.h \
+		$(HTPARSE_H) \
+		$(HTTLS_H)
 	$(COMPILE) $(CMN)HTTLS.c
 
 # Utilities
-$(LOB)/dtd_util$o : $(CMN)dtd_util.c $(CMN)HTUtils.h
+$(LOB)/dtd_util$o : $(CMN)dtd_util.c \
+		$(HTUTILS_H) \
+		$(HTMLDTD_H)
 	$(COMPILE) $(CMN)dtd_util.c
 
 DTD_UTIL = $(LOB)/dtd_util$o $(LOB)/HTMLDTD$o
