@@ -3,7 +3,7 @@
 <HEAD>
 <TITLE>Tags to Test Color-Style</TITLE>
 <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
-<link href="nobody" rev="made">
+<link href="nobody" rel="author">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 </HEAD>
 
@@ -94,9 +94,9 @@ This is a <var>"var"</var> tag.
 <h1>Forms</h1>
 <hr>
 <form action="http://localhost/cgi-bin/bogus-parms" method="get">
-First: <input type="text" name="First" size=20>
-Last: <input type="text" name="Last" size=20>
-Description: <textarea rows=3 cols=40>
+First: <input type="text" name="First" size="20">
+Last: <input type="text" name="Last" size="20">
+Description: <textarea rows="3" cols="40">
 contents of textarea
 </textarea>
 <hr>
@@ -131,7 +131,7 @@ contents of textarea
 <input type="reset" value="Reset this form">
 </form>
 <!-- ====================================================================== -->
-<table border=2 summary="unquoted table">
+<table border="2" summary="unquoted table">
 <caption>Unquoted Table</caption>
 <tr>
 <td>First:</td>
@@ -145,7 +145,7 @@ contents of textarea
 <td>lower-right</td></tr>
 </table>
 <!-- ====================================================================== -->
-<blockquote><table border=2 summary="quoted table">
+<blockquote><table border="2" summary="quoted table">
 <caption>Quoted Table</caption>
 <tr>
 <td>First:</td>
@@ -172,48 +172,48 @@ contents of textarea
 <h1>Definition List</h1>
 This is an definition list:
 <dl>
-<dt>the first dt
-<dd>the first dd
-<dt>the second dt
-<dd>the second dd
-<dl>
-<dt>the first dt
-<dd>the first dd
-<dt>the second dt
-<dd>the second dd
-<dt>the third dt
-<dd>the third dd
-</dl>
-<dt>the third dt
-<dd>the third dd
+<dt>the first dt</dt>
+<dd>the first dd</dd>
+<dt>the second dt</dt>
+<dd>the second dd</dd>
+<dd><dl>
+<dt>the first dt</dt>
+<dd>the first dd</dd>
+<dt>the second dt</dt>
+<dd>the second dd</dd>
+<dt>the third dt</dt>
+<dd>the third dd</dd>
+</dl></dd>
+<dt>the third dt</dt>
+<dd>the third dd</dd>
 </dl>
 <!-- ====================================================================== -->
 <br>
 <h1>Unordered List</h1>
 This is an unordered list:
 <ul>
-<li>first item
-<li>second item
-<ul>
-<li>first item
-<li>second item
-<li>third item
-</ul>
-<li>third item
+<li>first item</li>
+<li>second item</li>
+<li><ul>
+<li>first item</li>
+<li>second item</li>
+<li>third item</li>
+</ul></li>
+<li>third item</li>
 </ul>
 <!-- ====================================================================== -->
 <br>
 <h1>Ordered List</h1>
 This is an ordered list:
 <ol>
-<li>first item
-<li>second item
-<ol>
-<li>first item
-<li>second item
-<li>third item
-</ol>
-<li>third item
+<li>first item</li>
+<li>second item</li>
+<li><ol>
+<li>first item</li>
+<li>second item</li>
+<li>third item</li>
+</ol></li>
+<li>third item</li>
 </ol>
 
 </BODY>

@@ -1,9 +1,11 @@
--- $LynxId: CHANGES,v 1.1233 2025/07/29 20:49:31 tom Exp $
+-- $LynxId: CHANGES,v 1.1235 2025/07/31 00:16:19 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2025-07-29 (2.9.2o)
+2025-07-30 (2.9.2p)
+* document link rel="author" in user's guide, use instead of link rev="made" in
+  samples and documentation, cf: 2.8.7dev.11 -TD
 * use plink.sh script to trim unnecessary libraries when linking -TD
 * remove redundant configure macros -TD
 * remove --enable-gnutls-compat configure option -TD

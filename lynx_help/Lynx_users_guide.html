@@ -1,11 +1,11 @@
-<!-- $LynxId: Lynx_users_guide.html,v 1.164 2025/06/19 18:27:11 David.App Exp $ -->
+<!-- $LynxId: Lynx_users_guide.html,v 1.165 2025/07/30 22:38:27 tom Exp $ -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN">
 <html>
 <head>
   <meta name="generator" content=
   "HTML Tidy for HTML5 for Linux version 5.6.0">
   <title>Lynx Users Guide v2.9.2</title>
-  <link rev="made" href="mailto:lynx-dev@nongnu.org">
+  <link rel="author" href="mailto:lynx-dev@nongnu.org">
   <meta http-equiv="Content-Type" content=
   "text/html; charset=us-ascii">
   <meta name="description" content=
@@ -984,8 +984,8 @@
 
       <p>When the value given here or by an -assume_charset command
       line flag is in effect, Lynx will treat documents as if they
-      were encoded accordingly. This option is active when &ldquo;Raw
-      8-bit or CJK Mode&rdquo; is OFF.</p>
+      were encoded accordingly. This option is active when
+      &ldquo;Raw 8-bit or CJK Mode&rdquo; is OFF.</p>
     </dd>
 
     <dt><a name="optinfo-auto_session" id=
@@ -1956,11 +1956,25 @@
   <p>At any time while viewing documents within Lynx, you may use
   the &ldquo;<samp>c</samp>&rdquo; command to send a mail message
   to the owner of the current document if the author of the
-  document has specified ownership. (Note to authors: if you want
-  to assign the ownership to your document, you need to add into
-  HEAD section a LINK element with appropriate value for REV
-  attribute. Two values are recognized: <em>owner</em> and
-  <em>made</em> (these are case insensitive). For example,</p>
+  document has specified ownership.</p>
+
+  <p>Note to authors: if you want to assign the ownership to your
+  document, you need to add into HEAD section a LINK element with
+  appropriate value for the REL (HTML5) or REV (HTML4)
+  attribute.</p>
+
+  <p>One value is recognized for REL: <em>author</em>
+  (case-insensitive). For example:</p>
+
+  <pre>
+&lt;HEAD&gt;
+    &hellip;
+    &lt;LINK REL="author" HREF="mailto:user@somedomain.com"&gt;
+    &hellip;
+&lt;/HEAD&gt;
+</pre>
+  <p>Two values are recognized for REV: <em>owner</em> and
+  <em>made</em> (case insensitive). For example,</p>
 
   <pre>
 &lt;HEAD&gt;
@@ -3244,29 +3258,34 @@ the other two cannot be saved between sessions.
   "http://www.w3.org/MarkUp/html3/Contents.html">HTML 3.0</a> REL
   attribute tokens in LINK elements for creating a <em>banner</em>,
   and a number of others which have subsequently been proposed.
-  These <em>banner</em> tokens are <em>Home</em>, <em>ToC</em>,
-  <em>Contents</em>, <em>Index</em>, <em>Glossary</em>,
-  <em>Copyright</em>, <em>Up</em>, <em>Next</em>,
-  <em>Previous</em>, <em>Prev</em>, <em>Help</em>, <em>Search</em>,
-  <em>Top</em>, <em>Origin</em>, <em>Navigator</em>,
-  <em>Child</em>, <em>Disclaimer</em>, <em>Sibling</em>,
-  <em>Parent</em>, <em>Author</em>, <em>Editor</em>,
-  <em>Publisher</em>, <em>Trademark</em>, <em>Meta</em>,
-  <em>URC</em>, <em>Hotlist</em>, <em>Begin</em>, <em>First</em>,
-  <em>End</em>, <em>Last</em>, <em>Pointer</em>,
-  <em>Translation</em>, <em>Definition</em>, <em>Chapter</em>,
-  <em>Section</em>, <em>Subsection</em>, <em>Alternate</em>,
-  <em>Documentation</em>, <em>Biblioentry</em>,
-  <em>Bibliography</em>, <em>Start</em>, <em>Appendix</em>,
-  <em>Bookmark</em> and <em>Banner</em>. Any LINK elements with
-  those tokens as the REL attribute value, and an HREF attribute
-  value in the LINK, will invoke creation of a <em>banner</em> at
-  the top of the first page, with the element's HREF as the link,
-  and the token as the default link name. If a TITLE attribute is
-  included in the LINK, its value will be used as the link name
-  instead of the default. <em>Bookmark</em> and <em>Banner</em> are
-  intended to be accompanied by a TITLE attribute, which in effect
-  makes the namespace for REL <em>banner</em> tokens infinite.</p>
+  These <em>banner</em> tokens are</p>
+
+  <blockquote>
+    <p><em>Home</em>, <em>ToC</em>, <em>Contents</em>,
+    <em>Index</em>, <em>Glossary</em>, <em>Copyright</em>,
+    <em>Up</em>, <em>Next</em>, <em>Previous</em>, <em>Prev</em>,
+    <em>Help</em>, <em>Search</em>, <em>Top</em>, <em>Origin</em>,
+    <em>Navigator</em>, <em>Child</em>, <em>Disclaimer</em>,
+    <em>Sibling</em>, <em>Parent</em>, <em>Author</em>,
+    <em>Editor</em>, <em>Publisher</em>, <em>Trademark</em>,
+    <em>Meta</em>, <em>URC</em>, <em>Hotlist</em>, <em>Begin</em>,
+    <em>First</em>, <em>End</em>, <em>Last</em>, <em>Pointer</em>,
+    <em>Translation</em>, <em>Definition</em>, <em>Chapter</em>,
+    <em>Section</em>, <em>Subsection</em>, <em>Alternate</em>,
+    <em>Documentation</em>, <em>Biblioentry</em>,
+    <em>Bibliography</em>, <em>Start</em>, <em>Appendix</em>,
+    <em>Bookmark</em> and <em>Banner</em>.</p>
+  </blockquote>
+
+  <p>Any LINK elements with those tokens as the REL attribute
+  value, and an HREF attribute value in the LINK, will invoke
+  creation of a <em>banner</em> at the top of the first page, with
+  the element's HREF as the link, and the token as the default link
+  name. If a TITLE attribute is included in the LINK, its value
+  will be used as the link name instead of the default.
+  <em>Bookmark</em> and <em>Banner</em> are intended to be
+  accompanied by a TITLE attribute, which in effect makes the
+  namespace for REL <em>banner</em> tokens infinite.</p>
 
   <p>If the special token <em>Help</em> is used as the REL value
   and no HREF is included in the LINK, Lynx will use its own
@@ -3639,8 +3658,8 @@ the other two cannot be saved between sessions.
   files, and that default setting can be toggled via the
   <em>-cookies</em> command line switch. The SET_COOKIES symbol can
   be further modified by the ACCEPT_ALL_COOKIES mode. If
-  ACCEPT_ALL_COOKIES is TRUE, and SET_COOKIES is TRUE, Lynx
-  will accept all cookies. Additionally, the cookies that are
+  ACCEPT_ALL_COOKIES is TRUE, and SET_COOKIES is TRUE, Lynx will
+  accept all cookies. Additionally, the cookies that are
   automatically accepted or rejected by Lynx can be further
   modified with the COOKIE_ACCEPT_DOMAINS and COOKIE_REJECT_DOMAINS
   options in your .lynxrc file, each of which is a comma-separated
@@ -5711,8 +5730,8 @@ lynx -source ./ &gt;foo.html
   others) and the WWW community.</p>
 
   <p>Contributors have generally been acknowledged in the CHANGES
-  file. Earlier CHANGES files can be found in the docs/ subdirectory
-  of this distribution.</p>
+  file. Earlier CHANGES files can be found in the docs/
+  subdirectory of this distribution.</p>
 
   <p>Information on obtaining the most current version of Lynx is
   available at <a href=
