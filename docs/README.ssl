@@ -17,16 +17,16 @@ This is based on, and requires, the OpenSSL library.  OpenSSL's distribution
 and use may be restricted by licenses and laws.  For information on obtaining
 OpenSSL, as well as information on its distribution, see
 
-	http://www.openssl.org/
+	https://www.openssl.org/
 
 The main distribution site is at
 
-	ftp://ftp.openssl.org/source/
+	https://openssl.org/source/
 
 Lynx also has experimental support for GnuTLS (configure option --with-gnutls).
 For information on GnuTLS, see
 
-	http://www.gnu.org/software/gnutls/
+	https://www.gnu.org/software/gnutls/
 
 To test your version of Lynx for SSL support, try it out with an SSL site.
 Below are secure (https) pages which will load if your browser contains SSL
@@ -46,24 +46,3 @@ correct certificate handling possibilities and procedures in lynx.
 
 Users are reminded to check the laws and regulations about encryption software
 in their own countries.
-
-Here is the URL for US notification rules:
-
-	http://www.bxa.doc.gov/Encryption/PubAvailEncSourceCodeNofify.html
-
-Note that that isn't a typo; it really is "Nofify". The site contains
-links to the full EAR regulations.
-
-Lynx is GPL'd, for our own use it falls under the regulations in EAR section
-740.13(e)(1):
-
-    (1) Encryption source code controlled under 5D002, which would be
-        considered publicly available under section 734.3(b)(3) and
-        which is not subject an express agreement for the payment a
-        licensing fee or royalty for commercial production or sale of
-        any product developed with the source code, is released from
-        EI controls and may be exported or reexported without review
-        under License Exception TSU, provided you have submitted
-        written notification to BXA of the Internet location (e.g.,
-        URL or Internet address) or a copy of source code by the time
-        of export.

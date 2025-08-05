@@ -680,6 +680,11 @@ II. Compile instructions -- UNIX
 	to make the default behavior match the non-color-style (if no --lss
 	option is given, and no COLOR_STYLE setting is in lynx.cfg).
 
+  --with-man2html[=XXX]
+	Optionally use man2html (or some other program XXX)
+		https://invisible-island.net/scripts/man2html.html
+	when generating lynx.html from lynx.man
+
   --with-mime-libdir=list		(define MIME_LIBDIR)
 	Use this option to specify the system directory containing the
 	mime.types and mailcap files.
@@ -1505,4 +1510,4 @@ VIII. Acknowledgment
 
 -- 1999/04/24 - H. Nelson <lynx-admin@irm.nara.kindai.ac.jp>
 -- vile:txtmode
--- $LynxId: INSTALLATION,v 1.148 2025/08/03 20:06:12 tom Exp $
+-- $LynxId: INSTALLATION,v 1.149 2025/08/05 20:31:12 tom Exp $

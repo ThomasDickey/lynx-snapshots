@@ -1,9 +1,11 @@
--- $LynxId: CHANGES,v 1.1241 2025/08/05 00:09:29 tom Exp $
+-- $LynxId: CHANGES,v 1.1243 2025/08/05 20:34:38 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2025-08-04 (2.9.2q)
+2025-08-05 (2.9.2r)
+* add configure option --with-man2html, to help with generating html file from
+  the manpage -TD
 * modify --enable-locale-charset option to be enabled by default for ncurses,
   and change the compiled-in default for the corresponding option to true,
   for ncurses -TD

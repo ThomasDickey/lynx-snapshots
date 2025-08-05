@@ -1,4 +1,4 @@
-dnl $LynxId: configure.in,v 1.405 2025/08/04 20:52:13 tom Exp $
+dnl $LynxId: configure.in,v 1.408 2025/08/05 20:34:38 tom Exp $
 dnl
 dnl Process this file with autoconf to produce a configure script.
 dnl
@@ -34,10 +34,10 @@ dnl sale, use or other dealings in this Software without prior written
 dnl authorization.
 dnl ---------------------------------------------------------------------------
 dnl
-AC_REVISION($Revision: 1.405 $)
+AC_REVISION($Revision: 1.408 $)
 
 AC_PREREQ(2.52.20231210)
-AC_INIT(lynx,2.9.2q,lynx-dev@nongnu.org)
+AC_INIT(lynx,2.9.2r,lynx-dev@nongnu.org)
 
 AC_CONFIG_SRCDIR(userdefs.h)
 
@@ -614,38 +614,6 @@ AC_MSG_RESULT($LYNX_CFG_PATH)
 test -z "$LYNX_CFG_PATH" && LYNX_CFG_PATH="`echo "$LYNX_CFG_FILE" | sed -e 's%/[[^/]]*$%%'`"
 test "x$LYNX_CFG_PATH" = xno && LYNX_CFG_PATH=
 AC_DEFINE_UNQUOTED(LYNX_CFG_PATH,"$LYNX_CFG_PATH",[Define to default path for Lynx config-files])
-
-dnl --------------------------------------------------------------------------
-AC_MSG_CHECKING(if htmlized lynx.cfg should be built)
-CF_ARG_ENABLE(htmlized-cfg,
-[  --enable-htmlized-cfg   build htmlized lynx.cfg],
-	[use_htmlized_cfg=$enableval],
-	[use_htmlized_cfg=no])
-AC_MSG_RESULT($use_htmlized_cfg)
-
-LYNXCFG_MAKE=''
-LYNXCFG_NO_MAKE=''
-if test "$use_htmlized_cfg" = no ; then
-	LYNXCFG_MAKE='#'
-else
-	LYNXCFG_NO_MAKE='#'
-fi
-AC_SUBST(LYNXCFG_MAKE)
-AC_SUBST(LYNXCFG_NO_MAKE)
-
-dnl --------------------------------------------------------------------------
-AC_MSG_CHECKING(if local doc directory should be linked to help page)
-CF_ARG_ENABLE(local-docs,
-[  --enable-local-docs     link local doc-directory to help-page],
-	[use_local_docs=$enableval],
-	[use_local_docs=no])
-AC_MSG_RESULT($use_local_docs)
-
-LYNXDOC_MAKE=''
-if test "$use_local_docs" = no ; then
-	LYNXDOC_MAKE='#'
-fi
-AC_SUBST(LYNXDOC_MAKE)
 
 dnl --------------------------------------------------------------------------
 
@@ -1297,12 +1265,54 @@ test "$use_underline" = yes && AC_DEFINE(UNDERLINE_LINKS,1,[Define to 1 if xxx])
 test "$use_underline" = no  && AC_DEFINE(UNDERLINE_LINKS,0,[Define to 0 if xxx])
 
 dnl --------------------------------------------------------------------------
+CF_HELP_MESSAGE(
+Documentation:)
+
+dnl --------------------------------------------------------------------------
+AC_MSG_CHECKING(if htmlized lynx.cfg should be built)
+CF_ARG_ENABLE(htmlized-cfg,
+[  --enable-htmlized-cfg   build htmlized lynx.cfg],
+	[use_htmlized_cfg=$enableval],
+	[use_htmlized_cfg=no])
+AC_MSG_RESULT($use_htmlized_cfg)
+
+LYNXCFG_MAKE=''
+LYNXCFG_NO_MAKE=''
+if test "$use_htmlized_cfg" = no ; then
+	LYNXCFG_MAKE='#'
+else
+	LYNXCFG_NO_MAKE='#'
+fi
+AC_SUBST(LYNXCFG_MAKE)
+AC_SUBST(LYNXCFG_NO_MAKE)
+
+dnl --------------------------------------------------------------------------
+AC_MSG_CHECKING(if local doc directory should be linked to help page)
+CF_ARG_ENABLE(local-docs,
+[  --enable-local-docs     link local doc-directory to help-page],
+	[use_local_docs=$enableval],
+	[use_local_docs=no])
+AC_MSG_RESULT($use_local_docs)
+
+LYNXDOC_MAKE=''
+if test "$use_local_docs" = no ; then
+	LYNXDOC_MAKE='#'
+fi
+AC_SUBST(LYNXDOC_MAKE)
+
+dnl --------------------------------------------------------------------------
 AC_MSG_CHECKING(if help files should be gzip'ed)
 CF_ARG_ENABLE(gzip-help,
 [  --enable-gzip-help      install gzip'ed help files],
 	[use_gzip_help=$enableval],
 	[use_gzip_help=no])
 AC_MSG_RESULT($use_gzip_help)
+
+CF_WITH_MAN2HTML
+
+dnl --------------------------------------------------------------------------
+CF_HELP_MESSAGE(
+Compression Libraries/Utilities:)
 
 dnl --------------------------------------------------------------------------
 AC_MSG_CHECKING(if you want to use libbz2 for decompression of some bzip2 files)
@@ -1674,3 +1684,4 @@ AC_OUTPUT(
 	use_our_messages=$use_our_messages
 	]
 )
+CF_MAKE_DOCS(lynx,man)
