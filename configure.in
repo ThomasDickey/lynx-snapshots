@@ -1,4 +1,4 @@
-dnl $LynxId: configure.in,v 1.399 2025/07/31 00:16:19 tom Exp $
+dnl $LynxId: configure.in,v 1.405 2025/08/04 20:52:13 tom Exp $
 dnl
 dnl Process this file with autoconf to produce a configure script.
 dnl
@@ -34,10 +34,10 @@ dnl sale, use or other dealings in this Software without prior written
 dnl authorization.
 dnl ---------------------------------------------------------------------------
 dnl
-AC_REVISION($Revision: 1.399 $)
+AC_REVISION($Revision: 1.405 $)
 
 AC_PREREQ(2.52.20231210)
-AC_INIT(lynx,2.9.2p,lynx-dev@nongnu.org)
+AC_INIT(lynx,2.9.2q,lynx-dev@nongnu.org)
 
 AC_CONFIG_SRCDIR(userdefs.h)
 
@@ -659,13 +659,52 @@ MIME_LIBDIR=`echo "$MIME_LIBDIR" | sed -e 's,/$,,' -e 's,$,/,'`
 AC_DEFINE_UNQUOTED(MIME_LIBDIR,"$MIME_LIBDIR",[Define to default path for MIME library])
 
 dnl --------------------------------------------------------------------------
+
+AC_MSG_CHECKING(for usable UTF-8 support)
+cf_full_locale=$use_wide_curses
+if test "$cf_full_locale" = yes; then
+	case $cf_cv_screen in
+	(ncurses*)
+		;;
+	(*)
+		cf_full_locale=no
+		;;
+	esac
+fi
+AC_MSG_RESULT($cf_full_locale)
+
+dnl --------------------------------------------------------------------------
 AC_MSG_CHECKING(if locale-charset selection logic should be used)
 CF_ARG_DISABLE(locale-charset,
 [  --disable-locale-charset use locale-charset selection logic],
 	[use_locale_charset=$enableval],
 	[use_locale_charset=yes])
 AC_MSG_RESULT($use_locale_charset)
-test "$use_locale_charset" != no && AC_DEFINE(USE_LOCALE_CHARSET,1,[Define to 1 if locale-charset selection logic should be used])
+if test "$use_locale_charset" != no; then
+	AC_DEFINE(USE_LOCALE_CHARSET,1,[Define to 1 if locale-charset selection logic should be used])
+	DEFAULT_LOCALE_CHARSET=FALSE
+	test $cf_full_locale = yes && DEFAULT_LOCALE_CHARSET=TRUE
+else
+	DEFAULT_LOCALE_CHARSET=DISABLED
+fi
+AC_DEFINE_UNQUOTED(DEFAULT_LOCALE_CHARSET,$DEFAULT_LOCALE_CHARSET,[Define to show the default value of locale_charset option])
+AC_SUBST(DEFAULT_LOCALE_CHARSET)
+
+dnl --------------------------------------------------------------------------
+AC_MSG_CHECKING(if wcwidth/UTF-8 logic should be used)
+CF_ARG_DISABLE(wcwidth-support,
+[  --enable-wcwidth-support use wcwidth/UTF-8 logic],
+	[use_wcwidth=$enableval],
+	[use_wcwidth=maybe])
+if test "$use_wcwidth" = maybe; then
+	if test "$cf_full_locale" != no; then
+		use_wcwidth=yes
+	else
+		use_wcwidth=no
+	fi
+fi
+AC_MSG_RESULT($use_wcwidth)
+test "$use_wcwidth" != no && AC_DEFINE(USE_WCWIDTH_SUPPORT,1,[Define to 1 if wcwidth/UTF-8 logic should be used])
 
 dnl --------------------------------------------------------------------------
 dnl Check for subsets of compiled-in tables.
@@ -963,15 +1002,6 @@ fi
 else
 	CF_VERBOSE(skipping CJK features which depend on iconv)
 fi
-
-dnl --------------------------------------------------------------------------
-AC_MSG_CHECKING(if experimental wcwidth/UTF-8 logic should be used)
-CF_ARG_ENABLE(wcwidth-support,
-[  --enable-wcwidth-support use experimental wcwidth/UTF-8 logic],
-	[use_wcwidth=$enableval],
-	[use_wcwidth=no])
-AC_MSG_RESULT($use_wcwidth)
-test "$use_wcwidth" != no && AC_DEFINE(EXP_WCWIDTH_SUPPORT,1,[Define to 1 if experimental wcwidth/UTF-8 logic should be used])
 
 dnl --------------------------------------------------------------------------
 use_dft_colors=no

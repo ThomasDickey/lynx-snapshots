@@ -1,5 +1,5 @@
 /*
- * $LynxId: config.hin,v 1.160 2025/07/25 19:58:24 tom Exp $
+ * $LynxId: config.hin,v 1.162 2025/08/03 22:01:04 tom Exp $
  * vile:cmode
  *
  * The configure script translates "config.hin" into "lynx_cfg.h"
@@ -28,6 +28,7 @@
 #undef DECL_SLEEP		/* CF_CHECK_FUNCDECLS */
 #undef DECL_STRSTR		/* CF_CHECK_FUNCDECLS */
 #undef DECL_SYS_ERRLIST		/* CF_SYS_ERRLIST */
+#undef DEFAULT_LOCALE_CHARSET	/* CF_ARG_DISABLE(locale-charset) */
 #undef DIRED_SUPPORT		/* AC_ARG_WITH(dired) */
 #undef DISABLE_BIBP		/* CF_ARG_DISABLE(bibp-urls) */
 #undef DISABLE_FINGER		/* CF_ARG_DISABLE(finger) */
@@ -46,7 +47,6 @@
 #undef EXP_CHINESEUTF8_SUPPORT	/* CF_ARG_ENABLE(chinese-utf8) */
 #undef EXP_KEYBOARD_LAYOUT	/* CF_ARG_ENABLE(kbd-layout) */
 #undef EXP_NESTED_TABLES	/* CF_ARG_ENABLE(nested-tables) */
-#undef EXP_WCWIDTH_SUPPORT	/* CF_ARG_ENABLE(wcwidth-support) */
 #undef FANCY_CURSES		/* CF_FANCY_CURSES */
 #undef GCC_NORETURN		/* CF_GCC_ATTRIBUTES */
 #undef GCC_PRINTF		/* CF_GCC_ATTRIBUTES */
@@ -294,6 +294,7 @@
 #undef USE_SOURCE_CACHE		/* CF_ARG_DISABLE(source-cache) */
 #undef USE_SSL			/* CF_SSL */
 #undef USE_SYSV_UTMP		/* CF_UTMP */
+#undef USE_WCWIDTH_SUPPORT	/* CF_ARG_DISABLE(wcwidth-support) */
 #undef USE_X509_SUPPORT		/* CF_GNUTLS, CF_SSL */
 #undef USE_ZLIB			/* AC_ARG_WITH(zlib) */
 #undef USE_ZSTD			/* AC_ARG_WITH(zstd) */

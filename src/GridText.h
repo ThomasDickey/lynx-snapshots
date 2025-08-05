@@ -1,5 +1,5 @@
 /*
- * $LynxId: GridText.h,v 1.70 2022/06/12 16:38:03 KIHARA.Hideto Exp $
+ * $LynxId: GridText.h,v 1.71 2025/08/03 20:14:37 tom Exp $
  *
  * Specialities of GridText as subclass of HText
  */
@@ -264,10 +264,10 @@ US-ASCII control characters <32 which are not defined in Unicode standard
     extern BOOL HText_AreDifferent(HTParentAnchor *anchor,
 				   const char *full_address);
 
-    extern int HText_EditTextArea(LinkInfo * form_link);
-    extern void HText_EditTextField(LinkInfo * form_link);
-    extern void HText_ExpandTextarea(LinkInfo * form_link, int newlines);
-    extern int HText_InsertFile(LinkInfo * form_link);
+    extern int HText_EditTextArea(LinkInfo *form_link);
+    extern void HText_EditTextField(LinkInfo *form_link);
+    extern void HText_ExpandTextarea(LinkInfo *form_link, int newlines);
+    extern int HText_InsertFile(LinkInfo *form_link);
 
     extern void redraw_lines_of_link(int cur);
     extern void LYMoveToLink(int cur,
@@ -292,7 +292,7 @@ US-ASCII control characters <32 which are not defined in Unicode standard
     extern HTkcode HText_getSpecifiedKcode(HText *text);
     extern void HText_updateSpecifiedKcode(HText *text, HTkcode kcode);
 
-#if defined(EXP_WCWIDTH_SUPPORT) || defined(EXP_JAPANESE_SPACES)
+#if defined(USE_WCWIDTH_SUPPORT) || defined(EXP_JAPANESE_SPACES)
     extern BOOL isUTF8CJChar(const char *s);
 #endif
 

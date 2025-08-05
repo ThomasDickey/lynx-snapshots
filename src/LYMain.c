@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMain.c,v 1.306 2025/07/27 21:21:20 tom Exp $
+ * $LynxId: LYMain.c,v 1.307 2025/08/03 21:51:26 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTP.h>
@@ -617,7 +617,7 @@ int justify_max_void_percent = 35;
 #endif
 
 #ifdef USE_LOCALE_CHARSET
-BOOLEAN LYLocaleCharset = FALSE;
+BOOLEAN LYLocaleCharset = DEFAULT_LOCALE_CHARSET;
 #endif
 BOOLEAN assumed_charset = FALSE;
 

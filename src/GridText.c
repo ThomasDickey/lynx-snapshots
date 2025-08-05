@@ -1,5 +1,5 @@
 /*
- * $LynxId: GridText.c,v 1.354 2025/07/27 21:22:17 tom Exp $
+ * $LynxId: GridText.c,v 1.355 2025/08/03 20:02:09 tom Exp $
  *
  *		Character grid hypertext object
  *		===============================
@@ -52,7 +52,7 @@
 #include <LYStyle.h>
 #endif
 
-#ifdef EXP_WCWIDTH_SUPPORT
+#ifdef USE_WCWIDTH_SUPPORT
 #  ifdef HAVE_WCWIDTH
 #    ifdef HAVE_WCHAR_H
 #      include <wchar.h>
@@ -605,12 +605,12 @@ char star_string[MAX_LINE + 1];
 static int ctrl_chars_on_this_line = 0;		/* num of ctrl chars in current line */
 static int utfxtra_on_this_line = 0;	/* num of UTF-8 extra bytes in line,
 					   they *also* count as ctrl chars. */
-#ifdef EXP_WCWIDTH_SUPPORT
+#ifdef USE_WCWIDTH_SUPPORT
 static int utfxtracells_on_this_line = 0;	/* num of UTF-8 extra cells in line */
 #endif
 
 #ifdef WIDEC_CURSES
-# ifdef EXP_WCWIDTH_SUPPORT	/* TODO: support for !WIDEC_CURSES */
+# ifdef USE_WCWIDTH_SUPPORT	/* TODO: support for !WIDEC_CURSES */
 #define UTFXTRA_ON_THIS_LINE utfxtracells_on_this_line
 # else
 #define UTFXTRA_ON_THIS_LINE 0
@@ -739,7 +739,7 @@ static void *LY_check_calloc(size_t nmemb, size_t size)
 
 #endif /* CHECK_FREE_MEM */
 
-#ifdef EXP_WCWIDTH_SUPPORT
+#ifdef USE_WCWIDTH_SUPPORT
 static int utfextracells(const char *s)
 {
     UCode_t ucs = UCGetUniFromUtf8String(&s);
@@ -761,9 +761,9 @@ static void permit_split_after_CJchar(HText *text, const char *s, unsigned short
     if (isUTF8CJChar(s))
 	text->permissible_split = pos;
 }
-#endif /* EXP_WCWIDTH_SUPPORT */
+#endif /* USE_WCWIDTH_SUPPORT */
 
-#if defined(EXP_WCWIDTH_SUPPORT) || defined(EXP_JAPANESE_SPACES)
+#if defined(USE_WCWIDTH_SUPPORT) || defined(EXP_JAPANESE_SPACES)
 BOOL isUTF8CJChar(const char *s)
 {
     UCode_t u = UCGetUniFromUtf8String(&s);
@@ -778,7 +778,7 @@ BOOL isUTF8CJChar(const char *s)
 	return YES;
     return NO;
 }
-#endif /* EXP_WCWIDTH_SUPPORT || EXP_JAPANESE_SPACES */
+#endif /* USE_WCWIDTH_SUPPORT || EXP_JAPANESE_SPACES */
 
 #ifdef USE_COLOR_STYLE
 /*
@@ -2770,7 +2770,7 @@ static HTLine *insert_blanks_in_line(HTLine *line, int line_number,
 		    break;
 		ioldc++;
 		pre = s + 1;
-#ifdef EXP_WCWIDTH_SUPPORT
+#ifdef USE_WCWIDTH_SUPPORT
 		if (text && text->T.output_utf8 && IS_UTF_FIRST(*s))
 		    ioldc += utfextracells(s);
 #endif
@@ -2916,7 +2916,7 @@ static void split_line(HText *text, unsigned split)
 
     ctrl_chars_on_this_line = 0;	/*reset since we are going to a new line */
     utfxtra_on_this_line = 0;	/*reset too, we'll count them */
-#ifdef EXP_WCWIDTH_SUPPORT
+#ifdef USE_WCWIDTH_SUPPORT
     utfxtracells_on_this_line = 0;
 #endif
     HText_setLastChar(text, ' ');
@@ -3046,7 +3046,7 @@ static void split_line(HText *text, unsigned split)
 		    ctrl_chars_on_this_line++;
 		} else if (IS_UTF_EXTRA(p[i])) {
 		    utfxtra_on_this_line++;
-#ifdef EXP_WCWIDTH_SUPPORT
+#ifdef USE_WCWIDTH_SUPPORT
 		} else if (IS_UTF_FIRST(p[i])) {
 		    utfxtracells_on_this_line += utfextracells(&p[i]);
 #endif
@@ -4209,7 +4209,7 @@ void HText_appendCharacter(HText *text, int ch)
 		utfxtra_on_this_line++;
 		ctrl_chars_on_this_line++;
 	    }
-#ifdef EXP_WCWIDTH_SUPPORT
+#ifdef USE_WCWIDTH_SUPPORT
 	    /* update utfxtracells_on_this_line on last byte of UTF-8 sequence */
 	    {
 		/* find start position of UTF-8 sequence */
@@ -4447,7 +4447,7 @@ void HText_appendCharacter(HText *text, int ch)
 	    (actual
 	     + (int) style->rightIndent
 	     + ((IS_CJK_TTY && text->kanji_buf) ? 1 : 0)
-#ifdef EXP_WCWIDTH_SUPPORT
+#ifdef USE_WCWIDTH_SUPPORT
 	     + utfxtracells_on_this_line
 #endif
 	    ) >= WRAP_COLS(text))
@@ -9344,7 +9344,7 @@ static int HText_TrueLineSize(HTLine *line, HText *text, int IgnoreSpaces)
 		UCH(line->data[i]) != HT_NON_BREAK_SPACE &&
 		UCH(line->data[i]) != HT_EN_SPACE) {
 		true_size++;
-#ifdef EXP_WCWIDTH_SUPPORT
+#ifdef USE_WCWIDTH_SUPPORT
 		if (text && text->T.output_utf8 &&
 		    IS_UTF_FIRST(line->data[i])) {
 		    true_size += utfextracells(&(line->data[i]));
@@ -9357,7 +9357,7 @@ static int HText_TrueLineSize(HTLine *line, HText *text, int IgnoreSpaces)
 	    if (!IsSpecialAttrChar(line->data[i]) &&
 		IS_UTF8_EXTRA(line->data[i])) {
 		true_size++;
-#ifdef EXP_WCWIDTH_SUPPORT
+#ifdef USE_WCWIDTH_SUPPORT
 		if (text && text->T.output_utf8 &&
 		    IS_UTF_FIRST(line->data[i])) {
 		    true_size += utfextracells(&(line->data[i]));

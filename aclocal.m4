@@ -1,4 +1,4 @@
-dnl $LynxId: aclocal.m4,v 1.371 2025/07/29 20:48:53 tom Exp $
+dnl $LynxId: aclocal.m4,v 1.372 2025/08/04 20:30:12 tom Exp $
 dnl Macros for auto-configure script.
 dnl by Thomas E. Dickey <dickey@invisible-island.net>
 dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
@@ -997,7 +997,7 @@ dnl Parameters:
 dnl $1 = option name
 dnl $2 = help-string
 dnl $3 = action to perform if option is not default
-dnl $4 = action if perform if option is default
+dnl $4 = action to perform if option is default
 dnl $5 = default option value (either 'yes' or 'no')
 AC_DEFUN([CF_ARG_OPTION],
 [AC_ARG_ENABLE([$1],[$2],[test "$enableval" != ifelse([$5],no,yes,no) && enableval=ifelse([$5],no,no,yes)

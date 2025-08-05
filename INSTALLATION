@@ -333,12 +333,10 @@ II. Compile instructions -- UNIX
 	Do not use element-justification logic.
 
   --disable-largefile			(prevent defining LONG_LIST)
-
 	Use this option to disable the compiler and linker options that
 	provide largefile interfaces.
 
   --disable-link-prefix
-
 	Use this option to not trim unneeded libraries from link command
 
   --disable-locale-charset		(define USE_LOCALE_CHARSET)
@@ -414,6 +412,9 @@ II. Compile instructions -- UNIX
 	We recommend that you leave this enabled, since we need this
 	information to diagnose problems with either Lynx or the sites to which
 	you connect.
+
+  --disable-wcwidth-support		(define USE_WCWIDTH_SUPPORT
+	use wcwidth/UTF-8 logic, e.g., with wide-character ncurses
 
   --enable-arc4random			(define USE_ASCII_CTYPES)
 	Enable/disable configure script check for arc4random.
@@ -554,15 +555,17 @@ II. Compile instructions -- UNIX
   --enable-wais
 	Use this option to turn on configure check for freeWAIS library.
 
-  --enable-wcwidth-support		(define EXP_WCWIDTH_SUPPORT)
-	use experimental wcwidth/UTF-8 logic.
-
   --enable-widec
 	Use this option to allow the configure script to look for wide-curses
 	features.  If you do not specify the option, the configure script
 	will look for these features if --with-screen=ncursesw is given.
-	For this release of Lynx, we recommend the ncursew library built from
-	ncurses 5.5.
+
+	For this release of Lynx, we recommend the ncursesw library (i.e.,
+	the "wide-character" configuration of ncurses).  In this case,
+	Lynx's default for the configuration setting LOCALE_CHARSET is "ON".
+
+	Other curses libraries provide limited support for Unicode.
+	The slang configuration does not provide usable support for Unicode.
 
   --sysconfdir				(affect LYNX_CFG_FILE)
 	Defines the location where you want the lynx.cfg file installed.
@@ -1502,4 +1505,4 @@ VIII. Acknowledgment
 
 -- 1999/04/24 - H. Nelson <lynx-admin@irm.nara.kindai.ac.jp>
 -- vile:txtmode
--- $LynxId: INSTALLATION,v 1.145 2025/07/24 19:59:17 tom Exp $
+-- $LynxId: INSTALLATION,v 1.148 2025/08/03 20:06:12 tom Exp $

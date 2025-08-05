@@ -1,9 +1,14 @@
--- $LynxId: CHANGES,v 1.1235 2025/07/31 00:16:19 tom Exp $
+-- $LynxId: CHANGES,v 1.1241 2025/08/05 00:09:29 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2025-07-30 (2.9.2p)
+2025-08-04 (2.9.2q)
+* modify --enable-locale-charset option to be enabled by default for ncurses,
+  and change the compiled-in default for the corresponding option to true,
+  for ncurses -TD
+* change default for --enable-wcwidth-support to enabled if built with wide
+  character ncurses -TD
 * document link rel="author" in user's guide, use instead of link rev="made" in
   samples and documentation, cf: 2.8.7dev.11 -TD
 * use plink.sh script to trim unnecessary libraries when linking -TD
