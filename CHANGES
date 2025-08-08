@@ -1,9 +1,11 @@
--- $LynxId: CHANGES,v 1.1243 2025/08/05 20:34:38 tom Exp $
+-- $LynxId: CHANGES,v 1.1245 2025/08/08 00:17:14 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2025-08-05 (2.9.2r)
+2025-08-06 (2.9.2s)
+* increase the limit for color-style changes per line to work with pages such
+  as https://nano-editor.org/ (report by Rajeev V Pillai) -TD
 * add configure option --with-man2html, to help with generating html file from
   the manpage -TD
 * modify --enable-locale-charset option to be enabled by default for ncurses,

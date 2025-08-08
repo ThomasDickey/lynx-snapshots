@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTML.c,v 1.204 2025/06/19 22:17:29 tom Exp $
+ * $LynxId: HTML.c,v 1.205 2025/08/07 23:57:38 tom Exp $
  *
  *		Structured stream to Rich hypertext converter
  *		============================================
@@ -5471,7 +5471,7 @@ static int HTML_start_element(HTStructured * me, int element_number,
 	}
 
 	CTRACE((tfp,
-		"HTML:begin_element[%d]: adding style to stack - %s (%s)\n",
+		"HTML:begin_element[%d]: Push style onto stack - %s (%s)\n",
 		(int) STACKLEVEL(me),
 		NONNULL(GetHTStyleName(me->new_style)),
 		HTML_dtd.tags[ElementNumber].name));
@@ -5678,9 +5678,10 @@ static int HTML_end_element(HTStructured * me, int element_number,
 	    (me->sp)++;
 	    CTRACE2(TRACE_STYLE,
 		    (tfp,
-		     "HTML:end_element[%d]: Popped style off stack - %s\n",
+		     "HTML:end_element[%d]: Popped style from stack - %s (%s)\n",
 		     (int) STACKLEVEL(me),
-		     NONNULL(GetHTStyleName(me->sp->style))));
+		     NONNULL(GetHTStyleName(me->sp->style)),
+		     HTML_dtd.tags[(me->sp - 1)[0].tag_number].name));
 	} else {
 	    CTRACE2(TRACE_STYLE, (tfp,
 				  "Stack underflow error!  Tried to pop off more styles than exist in stack\n"));

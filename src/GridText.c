@@ -1,5 +1,5 @@
 /*
- * $LynxId: GridText.c,v 1.355 2025/08/03 20:02:09 tom Exp $
+ * $LynxId: GridText.c,v 1.356 2025/08/08 00:11:44 tom Exp $
  *
  *		Character grid hypertext object
  *		===============================
@@ -189,7 +189,7 @@ typedef struct {
 } HTStyleChange;
 
 #if defined(USE_COLOR_STYLE)
-#define MAX_STYLES_ON_LINE   64
+#define MAX_STYLES_ON_LINE   MAX_LINE
   /* buffers used when current line is being aggregated, in split_line() */
 static HTStyleChange stylechanges_buffers[2][MAX_STYLES_ON_LINE];
 #endif
