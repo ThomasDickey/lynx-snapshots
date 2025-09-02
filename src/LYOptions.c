@@ -1,4 +1,4 @@
-/* $LynxId: LYOptions.c,v 1.190 2025/01/07 23:57:54 tom Exp $ */
+/* $LynxId: LYOptions.c,v 1.191 2025/09/01 23:20:51 tom Exp $ */
 #include <HTUtils.h>
 #include <HTFTP.h>
 #include <HTTP.h>		/* 'reloading' flag */
@@ -2483,20 +2483,20 @@ static const char *preferred_encoding_string = RC_PREFERRED_ENCODING;
 static OptValues encoding_values[] =
 {
     {encodingNONE, N_("None"), "encoding_none"},
-#if defined(USE_ZLIB) || defined(GZIP_PATH)
+#if defined(USE_ZLIB) && defined(GZIP_PATH)
     {encodingGZIP, N_("gzip"), "encoding_gzip"},
     {encodingDEFLATE, N_("deflate"), "encoding_deflate"},
 #endif
-#if defined(USE_ZLIB) || defined(COMPRESS_PATH)
+#if defined(USE_ZLIB) && defined(COMPRESS_PATH)
     {encodingCOMPRESS, N_("compress"), "encoding_compress"},
 #endif
-#if defined(USE_BZLIB) || defined(BZIP2_PATH)
+#if defined(USE_BZLIB) && defined(BZIP2_PATH)
     {encodingBZIP2, N_("bzip2"), "encoding_bzip2"},
 #endif
-#if defined(USE_BROTLI) || defined(BROTLI_PATH)
+#if defined(USE_BROTLI) && defined(BROTLI_PATH)
     {encodingBROTLI, N_("brotli"), "encoding_brotli"},
 #endif
-#if defined(USE_ZSTD) || defined(ZSTD_PATH)
+#if defined(USE_ZSTD) && defined(ZSTD_PATH)
     {encodingZSTD, N_("zstd"), "encoding_zstd"},
 #endif
     {encodingALL, N_("All"), "encoding_all"},

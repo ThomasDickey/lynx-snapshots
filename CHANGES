@@ -1,9 +1,12 @@
--- $LynxId: CHANGES,v 1.1245 2025/08/08 00:17:14 tom Exp $
+-- $LynxId: CHANGES,v 1.1247 2025/09/02 00:03:23 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2025-08-06 (2.9.2s)
+2025-09-01 (2.9.2t)
+* change ifdef's for configuring compression encodings to require both the
+  library and the related command-line tool to ensure that Accept-Encoding
+  will work consistently for downloads (report by Riku Virtanen) -TD
 * increase the limit for color-style changes per line to work with pages such
   as https://nano-editor.org/ (report by Rajeev V Pillai) -TD
 * add configure option --with-man2html, to help with generating html file from

@@ -1,4 +1,4 @@
-/* $LynxId: LYrcFile.c,v 1.110 2025/01/07 18:52:13 tom Exp $ */
+/* $LynxId: LYrcFile.c,v 1.111 2025/09/01 22:52:07 tom Exp $ */
 #include <HTUtils.h>
 #include <HTFTP.h>
 #include <LYUtils.h>
@@ -110,20 +110,20 @@ Config_Enum tbl_preferred_content[] = {
 /* the names in this table are used as lowercase in HTTP.c */
 Config_Enum tbl_preferred_encoding[] = {
     { "none",		encodingNONE },
-#if defined(USE_ZLIB) || defined(GZIP_PATH)
+#if defined(USE_ZLIB) && defined(GZIP_PATH)
     { "gzip",		encodingGZIP },
     { "deflate",	encodingDEFLATE },
 #endif
-#if defined(USE_ZLIB) || defined(COMPRESS_PATH)
+#if defined(USE_ZLIB) && defined(COMPRESS_PATH)
     { "compress",	encodingCOMPRESS },
 #endif
-#if defined(USE_BZLIB) || defined(BZIP2_PATH)
+#if defined(USE_BZLIB) && defined(BZIP2_PATH)
     { "bzip2",		encodingBZIP2 },
 #endif
-#if defined(USE_BROTLI) || defined(BROTLI_PATH)
+#if defined(USE_BROTLI) && defined(BROTLI_PATH)
     { "br",		encodingBROTLI },
 #endif
-#if defined(USE_ZSTD) || defined(ZSTD_PATH)
+#if defined(USE_ZSTD) && defined(ZSTD_PATH)
     { "zstd",		encodingZSTD },
 #endif
     { "all",		encodingALL },
