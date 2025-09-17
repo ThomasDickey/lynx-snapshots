@@ -1,5 +1,5 @@
 /*
- * $LynxId: UCdomap.c,v 1.112 2025/01/06 16:54:01 tom Exp $
+ * $LynxId: UCdomap.c,v 1.115 2025/09/17 22:24:13 tom Exp $
  *
  *  UCdomap.c
  *  =========
@@ -708,7 +708,7 @@ static int conv_uni_to_pc(long ucs,
 	 * Not a printable character.
 	 */
 	return ucError;
-    } else if (ucs == 0xfeff || (ucs >= 0x200b && ucs <= 0x200f)) {
+    } else if (is_ucs_zero_width(ucs)) {
 	/*
 	 * Zero-width space.
 	 */
@@ -772,7 +772,7 @@ static int conv_uni_to_str(char *outbuf,
 	 * Not a printable character.
 	 */
 	return ucError;
-    } else if (ucs == 0xfeff || (ucs >= 0x200b && ucs <= 0x200f)) {
+    } else if (is_ucs_zero_width(ucs)) {
 	/*
 	 * Zero-width space.
 	 */

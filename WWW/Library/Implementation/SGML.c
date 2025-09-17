@@ -1,5 +1,5 @@
 /*
- * $LynxId: SGML.c,v 1.190 2025/06/19 17:09:58 tom Exp $
+ * $LynxId: SGML.c,v 1.193 2025/09/17 22:33:34 tom Exp $
  *
  *			General SGML Parser code		SGML.c
  *			========================
@@ -554,8 +554,9 @@ static void handle_attribute_value(HTStream *me, const char *s)
  *  Special codes - ones those output depend on parsing.
  *
  *  Additional issue, like handling bidirectional text if necessary
- *  may be called from here:  zwnj (8204), zwj (8205), lrm (8206), rlm (8207)
- *  - currently they are ignored in SGML.c and LYCharUtils.c
+ *  may be called from here:
+ *      zwnj (U+200C), zwj (U+200D), lrm (U+200E), rlm (U+200F)
+ *  Currently they are ignored in SGML.c and LYCharUtils.c
  *  but also in UCdomap.c because they are non printable...
  *
  */
@@ -705,7 +706,7 @@ static void handle_entity(HTStream *me, int term)
 		PUTC(FROMASCII((char) uck));
 	    FoundEntity = TRUE;
 	    return;
-	} else if ((uck == -4 ||
+	} else if ((uck == ucNotFound ||
 		    (me->T.repl_translated_C0 &&
 		     uck > 0 && uck < 32)) &&
 	    /*
@@ -761,7 +762,7 @@ static void handle_entity(HTStream *me, int term)
 	}
 /* =============== work in ASCII above here ===============  S/390 -- gil -- 0682 */
 	/*
-	 * Ignore zwnj (8204) and zwj (8205), if we get to here.  Note that
+	 * Ignore zwnj (U+200C) and zwj (U+200D), if we get to here.  Note that
 	 * zwnj may have been handled as <WBR> by the calling function.  - FM
 	 */
 	if (!strcmp(s, "zwnj") ||
@@ -776,7 +777,7 @@ static void handle_entity(HTStream *me, int term)
 	    return;
 	}
 	/*
-	 * Ignore lrm (8206), and rln (8207), if we get to here.  - FM
+	 * Ignore lrm (U+200E), and rln (U+200F), if we get to here.  - FM
 	 */
 	if (!strcmp(s, "lrm") ||
 	    !strcmp(s, "rlm")) {
@@ -1930,7 +1931,7 @@ static void SGML_character(HTStream *me, int c_in)
 	    }
 	    goto top1;
 	} else {
-	    uck = -1;
+	    uck = ucError;
 	    if (me->T.transp) {
 		uck = UCTransCharStr(replace_buf, 60, (char) c,
 				     me->inUCLYhndl,
@@ -2290,7 +2291,7 @@ static void SGML_character(HTStream *me, int c_in)
 	     */
 	    PUTC(FROMASCII((char) uck));
 	} else if ((chk &&
-		    (uck == -4 ||
+		    (uck == ucNotFound ||
 		     (me->T.repl_translated_C0 &&
 		      uck > 0 && uck < 32))) &&
 	    /*
@@ -2642,7 +2643,7 @@ static void SGML_character(HTStream *me, int c_in)
 		 (me->element_stack->tag &&
 		  me->element_stack->tag->contents == SGML_MIXED))) {
 		/*
-		 * Handle zwnj (8204) as <WBR>.  - FM
+		 * Handle zwnj (U+200C) as <WBR>.  - FM
 		 */
 		char temp[8];
 
@@ -2769,17 +2770,17 @@ static void SGML_character(HTStream *me, int c_in)
 		/*
 		 * Check for special values.  - FM
 		 */
-		if ((code == 8204) &&
+		if ((code == 0x200C) &&
 		    (!me->element_stack ||
 		     (me->element_stack->tag &&
 		      me->element_stack->tag->contents == SGML_MIXED))) {
 		    /*
-		     * Handle zwnj (8204) as <WBR>.  - FM
+		     * Handle zwnj (U+200C) as <WBR>.  - FM
 		     */
 		    char temp[8];
 
 		    CTRACE((tfp,
-			    "SGML_character: Handling '8204' (zwnj) reference as 'WBR' element.\n"));
+			    "SGML_character: Handling 'U+%04lX' (zwnj) reference as 'WBR' element.\n", code));
 
 		    /*
 		     * Include the terminator if it is not the standard
@@ -2843,7 +2844,9 @@ static void SGML_character(HTStream *me, int c_in)
 			put_pretty_number(me);
 		    }
 #endif
-		} else if ((uck == -4 ||
+		} else if (uck == ucZeroWidth) {
+		    ;		/* EMPTY */
+		} else if ((uck == ucNotFound ||
 			    (me->T.repl_translated_C0 &&
 			     uck > 0 && uck < 32)) &&
 		    /*
@@ -2864,12 +2867,9 @@ static void SGML_character(HTStream *me, int c_in)
 		} else if (me->T.output_utf8 && PUTUTF8(code)) {
 		    ;		/* do nothing more */
 		    /*
-		     * Ignore 8205 (zwj), 8206 (lrm), and 8207 (rln), if we get
-		     * to here.  - FM
+		     * Ignore zero-width and left/right marks
 		     */
-		} else if (code == 8205 ||
-			   code == 8206 ||
-			   code == 8207) {
+		} else if (is_ucs_zero_width(code)) {
 		    if (TRACE) {
 			string->size--;
 			LYStrNCpy(replace_buf,

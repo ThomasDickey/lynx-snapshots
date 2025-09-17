@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYCharUtils.c,v 1.138 2025/01/06 16:25:40 tom Exp $
+ * $LynxId: LYCharUtils.c,v 1.141 2025/09/17 22:30:54 tom Exp $
  *
  *  Functions associated with LYCharSets.c and the Lynx version of HTML.c - FM
  *  ==========================================================================
@@ -1622,7 +1622,7 @@ char **LYUCFullyTranslateString(char **str,
 		code = uck;
 		state = S_got_outchar;
 		break;
-	    } else if ((uck == -4 ||
+	    } else if ((uck == ucNotFound ||
 			(repl_translated_C0 &&
 			 uck > 0 && uck < 32)) &&
 		/*
@@ -1658,12 +1658,9 @@ char **LYUCFullyTranslateString(char **str,
 		}
 		break;
 		/*
-		 * Ignore 8204 (zwnj), 8205 (zwj) 8206 (lrm), and 8207 (rlm),
-		 * for now, if we got this far without finding a representation
-		 * for them.
+		 * Ignore zero-width and left/right marks.
 		 */
-	    } else if (code == 8204 || code == 8205 ||
-		       code == 8206 || code == 8207) {
+	    } else if (is_ucs_zero_width(code)) {
 		CTRACE((tfp, "LYUCFullyTranslateString: Ignoring '%"
 			PRI_UCode_t "'.\n", CAST_UCode_t (code)));
 		replace_buf[0] = '\0';

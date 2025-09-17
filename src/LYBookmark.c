@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYBookmark.c,v 1.94 2025/01/07 23:29:22 tom Exp $
+ * $LynxId: LYBookmark.c,v 1.96 2025/09/17 22:38:25 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTAlert.h>
@@ -1300,7 +1300,7 @@ static BOOLEAN havevisible(const char *Title)
 	}
 	if (unicode <= 32 || unicode == 0xa0 || unicode == 0xad)
 	    continue;
-	if (unicode < 0x2000 || unicode >= 0x200f) {
+	if (!is_ucs_spacing(unicode) && !is_ucs_zero_width(unicode)) {
 	    result = TRUE;
 	    break;
 	}

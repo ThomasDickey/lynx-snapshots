@@ -1,5 +1,5 @@
 /*
- * $LynxId: userdefs.h,v 1.423 2025/09/01 22:26:44 tom Exp $
+ * $LynxId: userdefs.h,v 1.425 2025/09/17 23:31:59 tom Exp $
  *
  * Lynx - Hypertext navigation system
  *
@@ -1243,7 +1243,7 @@
  * Set a compiled-in default for the LOCALE_CHARSET option in lynx.cfg,
  * which may be overridden by the configure script or makefiles.
  */
-#ifndef DEFAULT_LOCALE_CHARSET  
+#ifndef DEFAULT_LOCALE_CHARSET
 #define DEFAULT_LOCALE_CHARSET  FALSE
 #endif
 
@@ -1459,10 +1459,10 @@
  */
 
 #define LYNX_NAME     "Lynx"
-#define LYNX_VERSION  "2.9.2t"
+#define LYNX_VERSION  "2.9.2u"
 #define LYNX_WWW_HOME "https://lynx.invisible-island.net/"
 #define LYNX_WWW_DIST "https://lynx.invisible-island.net/current/"
-#define LYNX_DATE     "01 Sep 2025"
+#define LYNX_DATE     "17 Sep 2025"
 
 #ifdef UNICODE
 #define W32_STRING(s) L##s

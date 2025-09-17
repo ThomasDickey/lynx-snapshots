@@ -1,5 +1,5 @@
 /*
- * $LynxId: UCMap.h,v 1.30 2023/01/05 09:17:15 tom Exp $
+ * $LynxId: UCMap.h,v 1.34 2025/09/17 23:12:02 tom Exp $
  */
 #ifndef UCMAP_H
 #define UCMAP_H
@@ -12,8 +12,18 @@
 extern "C" {
 #endif
 
-#define UCS_HIDE 0xffff
-#define UCS_REPL 0xfffd
+#define UCS_LRM		0x200E	/* left-to-right mark */
+#define UCS_RLM		0x200F	/* right-to-left mark */
+#define UCS_ZWNBSP	0xFEFF	/* BOM -- or zero width no-break space */
+
+#define UCS_REPL	0xFFFD
+#define UCS_HIDE	0xFFFF
+
+#define is_ucs_spacing(n) \
+	(((n) >= 0x2002 && (n) <= 0x200A))
+
+#define is_ucs_zero_width(n) \
+	((n) == UCS_ZWNBSP || ((n) >= 0x200B && (n) <= 0x200F))
 
     typedef enum {
 	ucError = -1,

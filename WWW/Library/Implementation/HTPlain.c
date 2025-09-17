@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTPlain.c,v 1.63 2025/06/19 18:45:22 Eric.Lindblad Exp $
+ * $LynxId: HTPlain.c,v 1.67 2025/09/17 22:32:29 tom Exp $
  *
  *		Plain text object		HTWrite.c
  *		=================
@@ -188,7 +188,7 @@ static void HTPlain_write(HTStream *me, const char *s, int l)
     int c;
     unsigned c_unsign;
     BOOL chk;
-    UCode_t code, uck = -1;
+    UCode_t code, uck = ucError;
     int saved_char_in = '\0';
 
     for (p = s; p < e; p++) {
@@ -330,7 +330,7 @@ static void HTPlain_write(HTStream *me, const char *s, int l)
 			c_unsign = UCH(c);
 		    }
 		} else {
-		    uck = -1;
+		    uck = ucError;
 		    if (me->T.transp) {
 			uck = UCTransCharStr(replace_buf, 60, c,
 					     me->inUCLYhndl,
@@ -438,8 +438,10 @@ static void HTPlain_write(HTStream *me, const char *s, int l)
 		    ":'%c'.\n",
 		    uck, FROMASCII(UCH(uck))));
 	    HText_appendCharacter(me->text, ((char) (uck & 0xff)));
+	} else if (chk && (uck == ucZeroWidth)) {
+	    ;			/* EMPTY */
 	} else if (chk &&
-		   (uck == -4 ||
+		   (uck == ucNotFound ||
 		    (me->T.repl_translated_C0 && uck > 0 && uck < ' ')) &&	/* S/390 -- gil -- 0481 */
 	    /*
 	     * Not found; look for replacement string.
@@ -496,7 +498,7 @@ static void HTPlain_write(HTStream *me, const char *s, int l)
 		 */
 		c = FROMASCII((char) uck);
 		HText_appendCharacter(me->text, c);
-	    } else if ((chk && uck == -4) &&
+	    } else if ((chk && uck == ucNotFound) &&
 		       (uck = UCTransUniCharStr(replace_buf,
 						60, code,
 						UCGetLYhndl_byMIME("us-ascii"),
@@ -505,14 +507,9 @@ static void HTPlain_write(HTStream *me, const char *s, int l)
 		 * Got a replacement string (yippey).  - FM
 		 */
 		HText_appendText(me->text, replace_buf);
-	    } else if (code == 8204 || code == 8205) {
+	    } else if (is_ucs_zero_width(code)) {
 		/*
-		 * Ignore 8204 (zwnj) or 8205 (zwj), if we get to here.  - FM
-		 */
-		CTRACE((tfp, "HTPlain_write: Ignoring '%" PRI_UCode_t "'.\n", code));
-	    } else if (code == 8206 || code == 8207) {
-		/*
-		 * Ignore 8206 (lrm) or 8207 (rlm), if we get to here.  - FM
+		 * Ignore zero-with and left/right marks
 		 */
 		CTRACE((tfp, "HTPlain_write: Ignoring '%" PRI_UCode_t "'.\n", code));
 	    } else {
