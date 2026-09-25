@@ -1,12 +1,15 @@
--- $LynxId: CHANGES,v 1.1271 2026/05/31 09:48:03 tom Exp $
+-- $LynxId: CHANGES,v 1.1273 2026/09/25 23:13:15 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2026-05-31 (2.9.3a)
+2026-09-25 (2.9.3b)
+* update po/zh_TW.po from
+    http://translationproject.org/latest/lynx
 * use updated Unicode license information for iso*_uni.tbl, next_uni.tbl and
   koi8-r.html (report by Andreas Metzler).
 * fix some stale URLs in lynx_help/ -TD
+* update config.guess (2026-05-17), config.sub (2026-05-17)
 
 2026-05-26 (2.9.3)
 * correct position of whereis highlighting in wrapped lines, e.g., in source

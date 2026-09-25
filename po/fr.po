@@ -3,15 +3,13 @@
 # This file is distributed under the same license as the lynx package.
 # You may freely copy this file and add messages and translations
 # as long no comments are removed.
-# FIRST AUTHOR:
+#
 # * * * * * * * * * *
-# The French translations for Lynx were created by the
-# Chebucto Project.
+# The French translations for Lynx were created by the Chebucto Project.
 # Contributors include:
 # Chris Maxwell (CM)
 # David Potter
 # David Trueman (NdT)
-#
 # * * * * * * * * * *
 #
 # relecture complète 09/2008 N. Provost

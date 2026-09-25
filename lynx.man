@@ -1,6 +1,6 @@
-.\" $LynxId: lynx.man,v 1.198 2026/05/30 13:34:21 tom Exp $
+.\" $LynxId: lynx.man,v 1.199 2026/09/25 23:09:51 tom Exp $
 .\" **************************************************************************
-.TH LYNX 1 2026-05-30 "Lynx 2.9.3a" "Lynx \(en the \fItext\fP web browser"
+.TH LYNX 1 2026-09-25 "Lynx 2.9.3b" "Lynx \(en the \fItext\fP web browser"
 .
 .ie \n(.g \{\
 .ds `` \(lq
