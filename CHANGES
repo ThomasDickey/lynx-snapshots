@@ -1,9 +1,11 @@
--- $LynxId: CHANGES,v 1.1273 2026/09/25 23:13:15 tom Exp $
+-- $LynxId: CHANGES,v 1.1275 2026/10/05 16:36:52 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2026-09-25 (2.9.3b)
+2026-10-05 (2.9.3c)
+* cppcheck fixes in WWW -TD
+* fix an unused-function warning in LYCurses.c (patch by Akın Alp Ozturk)
 * update po/zh_TW.po from
     http://translationproject.org/latest/lynx
 * use updated Unicode license information for iso*_uni.tbl, next_uni.tbl and

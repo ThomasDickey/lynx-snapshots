@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTAnchor.h,v 1.40 2018/03/11 18:43:50 tom Exp $
+ * $LynxId: HTAnchor.h,v 1.41 2026/10/05 13:54:19 tom Exp $
  *
  *	Hypertext "Anchor" Object				     HTAnchor.h
  *	==========================
@@ -352,10 +352,10 @@ extern "C" {
     /* Manipulation of links
      * ---------------------
      */
-    extern HTAnchor *HTAnchor_followLink(HTChildAnchor *me);
+    extern HTAnchor *HTAnchor_followLink(const HTChildAnchor *me);
 
     extern HTAnchor *HTAnchor_followTypedLink(HTChildAnchor *me,
-					      HTLinkType *type);
+					      const HTLinkType *type);
 
     /* Read and write methods
      * ----------------------
@@ -365,7 +365,7 @@ extern "C" {
     /* Protocol
      * --------
      */
-    extern void *HTAnchor_protocol(HTParentAnchor *me);
+    extern void *HTAnchor_protocol(const HTParentAnchor *me);
 
     extern void HTAnchor_setProtocol(HTParentAnchor *me,
 				     void *protocol);
@@ -373,10 +373,10 @@ extern "C" {
     /* Physical address
      * ----------------
      */
-    extern char *HTAnchor_physical(HTParentAnchor *me);
+    extern char *HTAnchor_physical(const HTParentAnchor *me);
 
     extern void HTAnchor_setPhysical(HTParentAnchor *me,
-				     char *protocol);
+				     const char *protocol);
 
     extern LYUCcharset *HTAnchor_getUCInfoStage(HTParentAnchor *me,
 						int which_stage);

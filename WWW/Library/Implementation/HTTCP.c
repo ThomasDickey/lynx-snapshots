@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTCP.c,v 1.173 2026/04/20 08:14:02 tom Exp $
+ * $LynxId: HTTCP.c,v 1.174 2026/10/05 16:09:32 tom Exp $
  *
  *			Generic Communication Code		HTTCP.c
  *			==========================
@@ -390,8 +390,6 @@ static void dump_hostent(const char *msgprefix,
 			 const void *data)
 {
     if (TRACE) {
-	int i;
-	char **pcnt;
 	const LYNX_HOSTENT *phost = data;
 
 	CTRACE((tfp, "%s: %p ", msgprefix, (const void *) phost));
@@ -404,6 +402,8 @@ static void dump_hostent(const char *msgprefix,
 	    }
 	    CTRACE((tfp, "\n\t h_aliases = %p", (void *) phost->h_aliases));
 	    if (phost->h_aliases) {
+		char **pcnt;
+
 		CTRACE((tfp, " {"));
 		for (pcnt = phost->h_aliases; *pcnt; pcnt++) {
 		    CTRACE((tfp, "%s %p \"%s\"",
@@ -415,12 +415,19 @@ static void dump_hostent(const char *msgprefix,
 	    } else {
 		CTRACE((tfp, ",\n\t"));
 	    }
+
 	    CTRACE((tfp, " h_addrtype = %d,", phost->h_addrtype));
 	    CTRACE((tfp, " h_length = %d,\n\t", phost->h_length));
 	    CTRACE((tfp, " h_addr_list = %p", (void *) phost->h_addr_list));
+
 	    if (phost->h_addr_list) {
+		char **pcnt;
+
 		CTRACE((tfp, " {"));
+
 		for (pcnt = phost->h_addr_list; *pcnt; pcnt++) {
+		    int i;
+
 		    CTRACE((tfp, "%s %p",
 			    (pcnt == phost->h_addr_list ? "" : ","),
 			    (void *) *pcnt));
@@ -680,6 +687,8 @@ extern int h_errno;
 #endif
 #endif
 
+#define close_fd(fd) do { if (fd >= 0) { close(fd); fd = -1; } } while (0)
+
 static BOOL setup_nsl_fork(void (*really) (const char *,
 					   const char *,
 					   STATUSES *,
@@ -724,7 +733,7 @@ static BOOL setup_nsl_fork(void (*really) (const char *,
     long dns_patience = 30;	/* how many seconds will we wait for DNS? */
     int child_exited = 0;
 
-    pfd[0] = pfd[1] = 0;
+    pfd[0] = pfd[1] = -1;
     memset(&statuses, 0, sizeof(STATUSES));
     statuses.h_errno_valid = NO;
 
@@ -741,8 +750,12 @@ static BOOL setup_nsl_fork(void (*really) (const char *,
     } while (waitret > 0 || (waitret == -1 && errno == EINTR));
     waitret = 0;
 
-    IGNORE_RC(pipe(pfd));
-
+    if (pipe(pfd) < 0) {
+	return FALSE;
+    }
+    if (pfd[0] < 0 || pfd[1] < 0) {
+	goto failed;
+    }
 #if HAVE_SIGACTION
     /*
      * Attempt to prevent a rare situation where the child could execute
@@ -811,7 +824,7 @@ static BOOL setup_nsl_fork(void (*really) (const char *,
 	/*
 	 * Child won't use read side.  -BL
 	 */
-	close(pfd[0]);
+	close_fd(pfd[0]);
 #ifdef HAVE_H_ERRNO
 	/* to detect cases when it doesn't get set although it should */
 	h_errno = -2;
@@ -832,7 +845,7 @@ static BOOL setup_nsl_fork(void (*really) (const char *,
 	     * Return our resulting rehostent through pipe...
 	     */
 	    IGNORE_RC(write(pfd[1], *rehostent, statuses.rehostentlen));
-	    close(pfd[1]);
+	    close_fd(pfd[1]);
 	    _exit(0);
 	} else {
 	    /*
@@ -840,25 +853,23 @@ static BOOL setup_nsl_fork(void (*really) (const char *,
 	     */
 	    _exit(1);
 	}
-    }
+
+    } else if (fpid < 0) {
+	goto failed;
+    } else {
 #if HAVE_SIGACTION
-    /*
-     * (parent) Restore signal mask to whatever it was before the fork.  -
-     * kw
-     */
-    sigprocmask(SIG_SETMASK, &old_sigset, NULL);
+	/*
+	 * (parent) Restore signal mask to whatever it was before the fork.  -
+	 * kw
+	 */
+	sigprocmask(SIG_SETMASK, &old_sigset, NULL);
 #endif /* HAVE_SIGACTION */
 
-    /*
-     * (parent) Wait until lookup finishes, or interrupt, or cycled too
-     * many times (just in case) -BL
-     */
-
-    close(pfd[1]);		/* parent won't use write side -BL */
-
-    if (fpid < 0) {		/* fork failed */
-	close(pfd[0]);
-	goto failed;
+	/*
+	 * (parent) Wait until lookup finishes, or interrupt, or cycled too
+	 * many times (just in case) -BL
+	 */
+	close_fd(pfd[1]);	/* parent won't use write side -BL */
     }
 
     while (child_exited || (long) (time((time_t *) 0) - start_time) < dns_patience) {
@@ -1002,12 +1013,12 @@ static BOOL setup_nsl_fork(void (*really) (const char *,
 	    CTRACE((tfp, "%s: INTERRUPTED gethostbyname.\n", this_func));
 	    kill(fpid, SIGTERM);
 	    waitpid(fpid, NULL, WNOHANG);
-	    close(pfd[0]);
+	    close_fd(pfd[0]);
 	    lynx_nsl_status = HT_INTERRUPTED;
 	    return FALSE;
 	}
     }
-    close(pfd[0]);
+    close_fd(pfd[0]);
     if (waitret <= 0) {
 	kill(fpid, SIGTERM);
 	waitret = waitpid(fpid, &waitstat, WNOHANG);
@@ -1034,11 +1045,12 @@ static BOOL setup_nsl_fork(void (*really) (const char *,
 		    this_func, (int) waitret, WSTOPSIG(waitstat)));
 	}
     }
-    if (!got_rehostent) {
-	goto failed;
+    if (got_rehostent) {
+	return TRUE;
     }
-    return TRUE;
   failed:
+    close_fd(pfd[0]);
+    close_fd(pfd[1]);
     return FALSE;
 }
 
@@ -1050,8 +1062,8 @@ static void really_gethostbyname(const char *host,
 				 STATUSES * statuses,
 				 void **rehostent)
 {
-    LYNX_HOSTENT *phost;	/* Pointer to host - See netdb.h */
-    LYNX_HOSTENT *result = NULL;
+    const LYNX_HOSTENT *phost;	/* Pointer to host - See netdb.h */
+    const LYNX_HOSTENT *result = NULL;
 
     (void) port;
 
@@ -1616,7 +1628,8 @@ static LYNX_ADDRINFO *HTGetAddrInfo(const char *str,
     LYNX_ADDRINFO *res;
     char *p;
     char *s = NULL;
-    char *host, *port;
+    const char *host;
+    char *port;
     char pbuf[80];
 
     StrAllocCopy(s, str);

@@ -247,10 +247,11 @@ static Item *parse_item(FILE *fp)
 static ItemList *parse_item_list(FILE *fp)
 {
     ItemList *item_list = HTList_new();
-    Item *item;
-    LexItem lex_item;
 
     for (;;) {
+	Item *item;
+	LexItem lex_item;
+
 	if (!(item = parse_item(fp))) {
 	    HTList_delete(item_list);	/* @@@@ */
 	    item_list = NULL;
@@ -400,7 +401,7 @@ static void print_item(Item *item)
 	UserDefList *cur1 = item->user_def_list;
 	AddressDefList *cur2 = item->address_def_list;
 	Ref *user_ref = (Ref *) HTList_nextObject(cur1);
-	Ref *addr_ref = (Ref *) HTList_nextObject(cur2);
+	const Ref *addr_ref = (const Ref *) HTList_nextObject(cur2);
 
 	if (user_ref) {
 	    fprintf(tfp, "\t[%s%s", user_ref->name,
@@ -424,14 +425,15 @@ static void print_item(Item *item)
 
 static void print_item_list(ItemList *item_list)
 {
-    ItemList *cur = item_list;
-    Item *item;
-
-    if (!item_list)
+    if (!item_list) {
 	fprintf(tfp, "EMPTY");
-    else
+    } else {
+	ItemList *cur = item_list;
+	Item *item;
+
 	while (NULL != (item = (Item *) HTList_nextObject(cur)))
 	    print_item(item);
+    }
 }
 
 void HTAA_printGroupDef(GroupDef *group_def)

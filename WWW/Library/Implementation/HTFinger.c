@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFinger.c,v 1.32 2025/01/06 15:47:35 tom Exp $
+ * $LynxId: HTFinger.c,v 1.33 2026/10/05 15:12:19 tom Exp $
  *
  *			FINGER ACCESS				HTFinger.c
  *			=============
@@ -256,7 +256,6 @@ int HTLoadFinger(const char *arg,
     char *slash, *at_sign;	/* Fields extracted from URL */
     char *command, *str, *param;	/* Buffers */
     int port;			/* Port number from URL */
-    int status;			/* tcp return */
     int result = HT_LOADED;
     BOOL IsGopherURL = FALSE;
     const char *p1 = arg;
@@ -328,6 +327,8 @@ int HTLoadFinger(const char *arg,
     }
 
     if (result == HT_LOADED) {
+	int status;		/* tcp return */
+
 	/* Load the string for making a connection/
 	 */
 	str = NULL;

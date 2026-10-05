@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTMLGen.c,v 1.48 2025/01/06 18:02:15 tom Exp $
+ * $LynxId: HTMLGen.c,v 1.50 2026/10/05 14:59:33 tom Exp $
  *
  *		HTML Generator
  *		==============
@@ -211,7 +211,7 @@ static void HTMLGen_put_character(HTStructured * me, int c)
 
 	if (me->write_pointer > (me->buffer + 1)) {
 	    char delims[5];
-	    char *p;
+	    const char *p;
 
 	    strcpy(delims, ",;:.");	/* @@ english bias */
 	    p = StrChr(delims, me->write_pointer[-2]);
@@ -242,7 +242,7 @@ static void HTMLGen_put_character(HTStructured * me, int c)
 						 me->buffer + 1));
 	    me->line_break[me->cleanness][0] = line_break_char;
 	    {			/* move next line in */
-		char *p = saved;
+		const char *p = saved;
 		char *q;
 
 		for (q = me->buffer; p < me->write_pointer;)
@@ -317,7 +317,7 @@ static int HTMLGen_start_element(HTStructured * me, int element_number,
 {
     int i;
     BOOL was_preformatted = me->preformatted;
-    HTTag *tag = &HTML_dtd.tags[element_number];
+    const HTTag *tag = &HTML_dtd.tags[element_number];
 
 #if defined(USE_COLOR_STYLE)
     char *title = NULL;
@@ -587,7 +587,7 @@ static void HTMLGen_free(HTStructured * me)
 #ifdef USE_COLOR_STYLE
     FREE(Style_className);
 #endif
-    FREE(me);
+    free(me);
 }
 
 static void PlainToHTML_free(HTStructured * me)

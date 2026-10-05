@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTAnchor.c,v 1.83 2025/01/06 15:34:03 tom Exp $
+ * $LynxId: HTAnchor.c,v 1.85 2026/10/05 13:53:11 tom Exp $
  *
  *	Hypertext "Anchor" Object				HTAnchor.c
  *	==========================
@@ -208,9 +208,9 @@ static int compare_anchors(void *l,
 static HTChildAnchor *HTAnchor_findNamedChild(HTParentAnchor0 *parent,
 					      const char *tag)
 {
-    HTChildAnchor *child;
-
     if (parent && tag && *tag) {	/* TBL */
+	HTChildAnchor *child;
+
 	if (parent->children) {
 	    /*
 	     * Parent has children.  Search them.
@@ -678,7 +678,7 @@ BOOL HTAnchor_delete(HTParentAnchor0 *me)
     /*
      * Finally, kill the parent anchor passed in.
      */
-    FREE(me);
+    free(me);
 
     return (YES);
 }
@@ -690,9 +690,6 @@ BOOL HTAnchor_delete(HTParentAnchor0 *me)
  */
 void HTAnchor_delete_links(HTParentAnchor *me)
 {
-    HTList *cur;
-    HTChildAnchor *child;
-
     /*
      * Do nothing if nothing to do.
      */
@@ -710,7 +707,9 @@ void HTAnchor_delete_links(HTParentAnchor *me)
      * Delete all outgoing links from unnamed children.
      */
     if (!HTList_isEmpty(&me->children_notag)) {
-	cur = &me->children_notag;
+	HTChildAnchor *child;
+	HTList *cur = &me->children_notag;
+
 	while ((child =
 		(HTChildAnchor *) HTList_unlinkLastObject(cur)) != NULL) {
 	    deleteLinks(child);
@@ -864,9 +863,9 @@ char *HTAnchor_short_address(HTAnchor * me)
     const char chop[] = "file://localhost/";
     char *addr = HTAnchor_address(me);
 
-    if (!strncmp(addr, chop, sizeof(chop) - 1)) {
+    if (addr != NULL && !strncmp(addr, chop, sizeof(chop) - 1)) {
 	char *a = addr + 7;
-	char *b = addr + sizeof(chop) - 2;
+	const char *b = addr + sizeof(chop) - 2;
 
 	while ((*a++ = *b++) != '\0') {
 	    ;
@@ -948,10 +947,10 @@ const char *HTAnchor_title(HTParentAnchor *me)
 void HTAnchor_setTitle(HTParentAnchor *me,
 		       const char *title)
 {
-    int i;
-
     if (me) {
 	if (title) {
+	    int i;
+
 	    StrAllocCopy(me->title, title);
 	    for (i = 0; me->title[i]; i++) {
 		if (UCH(me->title[i]) == 1 ||
@@ -974,9 +973,9 @@ void HTAnchor_setTitle(HTParentAnchor *me,
 void HTAnchor_appendTitle(HTParentAnchor *me,
 			  const char *title)
 {
-    int i;
-
     if (me) {
+	int i;
+
 	StrAllocCat(me->title, title);
 	for (i = 0; me->title[i]; i++) {
 	    if (UCH(me->title[i]) == 1 ||
@@ -1026,9 +1025,9 @@ const char *HTAnchor_RevTitle(HTParentAnchor *me)
 void HTAnchor_setRevTitle(HTParentAnchor *me,
 			  const char *title)
 {
-    int i;
-
     if (me) {
+	int i;
+
 	StrAllocCopy(me->RevTitle, title);
 	for (i = 0; me->RevTitle[i]; i++) {
 	    if (UCH(me->RevTitle[i]) == 1 ||
@@ -1174,13 +1173,13 @@ BOOL HTAnchor_setSubject(HTParentAnchor *me,
 /*	Manipulation of links
  *	---------------------
  */
-HTAnchor *HTAnchor_followLink(HTChildAnchor *me)
+HTAnchor *HTAnchor_followLink(const HTChildAnchor *me)
 {
     return (me->dest);
 }
 
 HTAnchor *HTAnchor_followTypedLink(HTChildAnchor *me,
-				   HTLinkType *type)
+				   const HTLinkType *type)
 {
     if (me->type == type)
 	return (me->dest);
@@ -1201,7 +1200,7 @@ HTList *HTAnchor_methods(HTParentAnchor *me)
 /*	Protocol
  *	--------
  */
-void *HTAnchor_protocol(HTParentAnchor *me)
+void *HTAnchor_protocol(const HTParentAnchor *me)
 {
     return (me->protocol);
 }
@@ -1215,13 +1214,13 @@ void HTAnchor_setProtocol(HTParentAnchor *me,
 /*	Physical Address
  *	----------------
  */
-char *HTAnchor_physical(HTParentAnchor *me)
+char *HTAnchor_physical(const HTParentAnchor *me)
 {
     return (me->physical);
 }
 
 void HTAnchor_setPhysical(HTParentAnchor *me,
-			  char *physical)
+			  const char *physical)
 {
     if (me) {
 	StrAllocCopy(me->physical, physical);
@@ -1229,7 +1228,7 @@ void HTAnchor_setPhysical(HTParentAnchor *me,
 }
 
 #ifdef DEBUG
-static void show_stages(HTParentAnchor *me, const char *tag, int which_stage)
+static void show_stages(const HTParentAnchor *me, const char *tag, int which_stage)
 {
     int j;
 
@@ -1425,7 +1424,7 @@ LYUCcharset *HTAnchor_copyUCInfoStage(HTParentAnchor *me,
 	/*
 	 * This will allocate and initialize, if not yet done.
 	 */
-	LYUCcharset *p_from = HTAnchor_getUCInfoStage(me, from_stage);
+	const LYUCcharset *p_from = HTAnchor_getUCInfoStage(me, from_stage);
 	LYUCcharset *p_to = HTAnchor_getUCInfoStage(me, to_stage);
 
 	/*

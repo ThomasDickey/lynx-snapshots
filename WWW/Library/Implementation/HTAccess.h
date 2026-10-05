@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTAccess.h,v 1.22 2024/01/10 23:54:11 tom Exp $
+ * $LynxId: HTAccess.h,v 1.23 2026/10/05 13:34:58 tom Exp $
  *					HTAccess:  Access manager for libwww
  *			ACCESS MANAGER
  *
@@ -118,7 +118,7 @@ Load a document from relative name
 
  */
     extern BOOL HTLoadRelative(const char *relative_name,
-			       HTParentAnchor *here);
+			       const HTParentAnchor *here);
 
 /*
 
@@ -160,7 +160,7 @@ Search
   here                    The anchor of the object being searched
 
  */
-    extern BOOL HTSearch(const char *keywords, HTParentAnchor *here);
+    extern BOOL HTSearch(const char *keywords, const HTParentAnchor *here);
 
 /*
 

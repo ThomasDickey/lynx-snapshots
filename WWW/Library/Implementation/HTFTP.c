@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFTP.c,v 1.154 2026/04/19 22:44:53 tom Exp $
+ * $LynxId: HTFTP.c,v 1.156 2026/10/05 15:12:19 tom Exp $
  *
  *			File Transfer Protocol (FTP) Client
  *			for a WorldWideWeb browser
@@ -428,7 +428,7 @@ static void init_help_message_cache(void)
     FREE(help_message_buffer);
 }
 
-static void help_message_cache_add(char *string)
+static void help_message_cache_add(const char *string)
 {
     if (help_message_buffer)
 	StrAllocCat(help_message_buffer, string);
@@ -505,7 +505,7 @@ static BOOL find_response(HTList *list)
 {
     BOOL result = FALSE;
     HTList *p = list;
-    char *value;
+    const char *value;
 
     while ((value = (char *) HTList_nextObject(p)) != NULL) {
 	if (LYstrstr(response_text, value)) {
@@ -678,15 +678,14 @@ static int set_mac_binary(eServerType ServerType)
 
 static void get_ftp_pwd(eServerType *ServerType, BOOLEAN *UseList)
 {
-    char *cp;
-
     /* get the working directory (to see what it looks like) */
     int status = response("PWD\r\n");
 
     if (status < 0) {
 	return;
     } else {
-	cp = StrChr(response_text + 5, '"');
+	char *cp = StrChr(response_text + 5, '"');
+
 	if (cp)
 	    *cp = '\0';
 	if (*ServerType == TCPC_SERVER) {
@@ -1410,7 +1409,7 @@ static void set_years_and_date(void)
     char day[8], month[8], date[12];
     time_t NowTime;
     int i;
-    char *printable;
+    const char *printable;
 
     NowTime = time(NULL);
     printable = ctime(&NowTime);
@@ -1471,7 +1470,7 @@ static void free_entryinfo_struct_contents(EntryInfo *entry_info)
  *		"Dec 12 1989  " or
  *		"FCv 23 1990  " ...
  */
-static BOOLEAN is_ls_date(char *s)
+static BOOLEAN is_ls_date(const char *s)
 {
     /* must start with three alpha characters */
     if (!isalpha(UCH(*s++)) || !isalpha(UCH(*s++)) || !isalpha(UCH(*s++)))
@@ -1536,7 +1535,7 @@ static BOOLEAN is_ls_date(char *s)
 static void parse_eplf_line(char *line,
 			    EntryInfo *info)
 {
-    char *cp = line;
+    const char *cp = line;
     char ct[26];
     off_t size;
     time_t secs;
@@ -1788,7 +1787,7 @@ static void parse_dls_line(char *line,
  *	Format the name, date, and size from a VMS LIST line
  *	into the EntryInfo structure - FM
  */
-static void parse_vms_dir_entry(char *line,
+static void parse_vms_dir_entry(const char *line,
 				EntryInfo *entry_info)
 {
     int i, j;
@@ -1932,7 +1931,7 @@ static void parse_ms_windows_dir_entry(char *line,
 {
     char *cp = line;
     char *cps, *cpd, date[16];
-    char *end = line + strlen(line);
+    const char *end = line + strlen(line);
 
     /*  Get rid of blank or junk lines.  */
     cp = LYSkipBlanks(cp);
@@ -2109,10 +2108,8 @@ static void parse_cms_dir_entry(char *line,
 {
     char *cp = line;
     char *cps, *cpd, date[16];
-    char *end = line + strlen(line);
+    const char *end = line + strlen(line);
     int RecordLength = 0;
-    int Records = 0;
-    int i;
 
     /*  Get rid of blank or junk lines.  */
     cp = LYSkipBlanks(cp);
@@ -2172,6 +2169,8 @@ static void parse_cms_dir_entry(char *line,
     /* Track down the number of records or the dash. */
     cp = cps;
     if (cps < end) {
+	int Records = 0;
+
 	cp = LYSkipBlanks(cp);
 	cps = LYSkipNonBlanks(cp);
 	*cps++ = '\0';
@@ -2200,7 +2199,10 @@ static void parse_cms_dir_entry(char *line,
 	 isdigit(UCH(*(cps + 1))) && isdigit(UCH(*(cps + 2))) && *(cps + 3) == ':')) {
 	cps += 3;
 	*cps = '\0';
+
 	if ((cps - cpd) >= 14) {
+	    int i;
+
 	    cpd = (cps - 14);
 	    *(cpd + 2) = '\0';	/* Month */
 	    *(cpd + 5) = '\0';	/* Day */
@@ -2251,7 +2253,7 @@ static EntryInfo *parse_dir_entry(char *entry,
     int i;
     int len;
     BOOLEAN remove_size = FALSE;
-    char *cp;
+    const char *cp;
 
     entry_info = typecalloc(EntryInfo);
 
@@ -2614,7 +2616,6 @@ static void formatDate(char target[16], EntryInfo *entry)
 static int compare_EntryInfo_structs(EntryInfo *entry1, EntryInfo *entry2)
 {
     int status;
-    char date1[16], date2[16];
     int result = strcmp(entry1->filename, entry2->filename);
 
     switch (HTfileSortMethod) {
@@ -2638,6 +2639,8 @@ static int compare_EntryInfo_structs(EntryInfo *entry1, EntryInfo *entry2)
 	if (entry1->date && entry2->date &&
 	    strlen(entry1->date) == 12 &&
 	    strlen(entry2->date) == 12) {
+	    char date1[16], date2[16];
+
 	    /*
 	     * Set the years and date, if we don't have them yet.
 	     */
@@ -2664,7 +2667,7 @@ static int compare_EntryInfo_structs(EntryInfo *entry1, EntryInfo *entry2)
 
 #ifdef LONG_LIST
 static char *FormatStr(char **bufp,
-		       char *start,
+		       const char *start,
 		       const char *value)
 {
     char fmt[512];
@@ -2727,7 +2730,7 @@ static void FlushParse(HTStructured * target, char **buf)
 static void LYListFmtParse(const char *fmtstr,
 			   EntryInfo *data,
 			   HTStructured * target,
-			   char *tail)
+			   const char *tail)
 {
     char c;
     char *s;
@@ -2954,7 +2957,7 @@ static int read_directory(HTParentAnchor *parent,
     } else if (!strcmp(filename, "/")) {	/* Root path. */
 	StrAllocCopy(lastpath, "/foo/..");
     } else {
-	char *p = strrchr(filename, '/');	/* Find the lastslash. */
+	const char *p = strrchr(filename, '/');		/* Find the lastslash. */
 	char *cp;
 
 	if (server_type == CMS_SERVER) {
@@ -3954,9 +3957,9 @@ int HTFTPLoad(const char *name,
 	    }
 	    status = send_cmd_2("RETR", filename);
 	    if (status >= 5) {
-		int check;
-
 		if (Broken_RETR) {
+		    int check;
+
 		    CTRACE((tfp, "{{reconnecting...\n"));
 		    close_connection(control);
 		    check = setup_connection(name, anchor);

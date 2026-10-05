@@ -40,8 +40,6 @@ void unlex(LexItem lex_item)
 
 LexItem lex(FILE *fp)
 {
-    int ch = 0;
-
     if (fp != cache) {		/* This cache doesn't work ok because the system  */
 	cache = fp;		/* often assign same FILE structure the next open */
 	HTlex_line = 1;		/* file.  So, if there are syntax errors in setup *
@@ -58,6 +56,8 @@ LexItem lex(FILE *fp)
     lex_template = NO;
 
     for (;;) {
+	int ch;
+
 	switch (ch = getc(fp)) {
 	case EOF:
 	case ' ':

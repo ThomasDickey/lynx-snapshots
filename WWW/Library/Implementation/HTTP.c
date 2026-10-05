@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTP.c,v 1.208 2025/07/22 00:33:24 tom Exp $
+ * $LynxId: HTTP.c,v 1.210 2026/10/05 16:16:43 tom Exp $
  *
  * HyperText Transfer Protocol	- Client implementation		HTTP.c
  * ===========================
@@ -302,7 +302,7 @@ char *HTSkipToAt(char *host, int *gen_delims)
     return result;
 }
 
-static char *fake_hostname(char *auth)
+static char *fake_hostname(const char *auth)
 {
     char *result = NULL;
     char *colon = NULL;
@@ -822,7 +822,7 @@ static int HTLoadHTTP(const char *arg,
 
 	if (LYSendUserAgent || no_useragent) {
 	    if (non_empty(LYUserAgent)) {
-		char *cp = LYSkipBlanks(LYUserAgent);
+		const char *cp = LYSkipBlanks(LYUserAgent);
 
 		/* Won't send it at all if all blank - kw */
 		if (*cp != '\0')
@@ -849,7 +849,7 @@ static int HTLoadHTTP(const char *arg,
 		cp = HTLoadedDocumentURL();	/* @@@ Try both? - kw */
 	    BStrCat0(command, "Referer: ");
 	    if (isLYNXIMGMAP(cp)) {
-		char *pound = findPoundSelector(cp);
+		const char *pound = findPoundSelector(cp);
 		int nn = (pound ? (int) (pound - cp) : (int) strlen(cp));
 
 		HTSABCat(&command, cp + LEN_LYNXIMGMAP, nn);
@@ -1336,9 +1336,12 @@ static int HTLoadHTTP(const char *arg,
 	/*
 	 * Rule out a non-HTTP/1.n reply as best we can.
 	 */
-	if (fields < 2 || !server_version[0] || server_version[0] != 'H' ||
-	    server_version[1] != 'T' || server_version[2] != 'T' ||
-	    server_version[3] != 'P' || server_version[4] != '/' ||
+	if (fields < 2 ||
+	    server_version[0] != 'H' ||
+	    server_version[1] != 'T' ||
+	    server_version[2] != 'T' ||
+	    server_version[3] != 'P' ||
+	    server_version[4] != '/' ||
 	    server_version[6] != '.') {
 	    /*
 	     * Ugh!  An HTTP0 reply,

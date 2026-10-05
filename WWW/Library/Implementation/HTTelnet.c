@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTelnet.c,v 1.42 2025/01/07 18:36:05 tom Exp $
+ * $LynxId: HTTelnet.c,v 1.43 2026/10/05 14:30:39 tom Exp $
  *
  *		Telnet Access, Rlogin, etc			HTTelnet.c
  *		==========================
@@ -48,7 +48,7 @@ static void do_system(char *command)
 	CTRACE((tfp, "HTTelnet: Command is: %s\n\n", command));
 	LYSystem(command);
     }
-    FREE(command);
+    free(command);
 }
 
 /*	Telnet or "rlogin" access

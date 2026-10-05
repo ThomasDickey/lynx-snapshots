@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFile.c,v 1.170 2026/04/19 22:46:40 tom Exp $
+ * $LynxId: HTFile.c,v 1.172 2026/10/05 15:12:19 tom Exp $
  *
  *			File Access				HTFile.c
  *			===========
@@ -177,7 +177,7 @@ static void free_suffixes(void);
 
 #ifdef LONG_LIST
 static char *FormatStr(char **bufp,
-		       char *start,
+		       const char *start,
 		       const char *entry)
 {
     char fmt[512];
@@ -213,7 +213,7 @@ static char *FormatSize(char **bufp,
 }
 
 static char *FormatNum(char **bufp,
-		       char *start,
+		       const char *start,
 		       int entry)
 {
     char fmt[512];
@@ -230,9 +230,9 @@ static char *FormatNum(char **bufp,
 
 static void LYListFmtParse(const char *fmtstr,
 			   DIRED * data,
-			   char *file,
+			   const char *file,
 			   HTStructured * target,
-			   char *tail)
+			   const char *tail)
 {
     char c;
     char *s;
@@ -247,7 +247,7 @@ static void LYListFmtParse(const char *fmtstr,
     const char *name;
 #endif
     time_t now;
-    char *datestr;
+    const char *datestr;
 
 #ifdef S_IFLNK
     int len;
@@ -789,7 +789,7 @@ char *WWW_nameOfFile(const char *name)
  *	Returns a pointer to a suitable suffix string if one has been
  *	found, else "".
  */
-const char *HTFileSuffix(HTAtom *rep,
+const char *HTFileSuffix(const HTAtom *rep,
 			 const char *enc)
 {
     HTSuffix *suff;
@@ -988,7 +988,6 @@ HTFormat HTCharsetFormat(HTFormat format,
 {
     char *cp = NULL, *cp1, *cp2, *cp3 = NULL, *cp4;
     BOOL chartrans_ok = FALSE;
-    int chndl = -1;
     const char *format_name = format->name;
 
     FREE(anchor->charset);
@@ -998,6 +997,8 @@ HTFormat HTCharsetFormat(HTFormat format,
     LYLowerCase(cp);
     if (((cp1 = StrChr(cp, ';')) != NULL) &&
 	(cp2 = strstr(cp1, "charset")) != NULL) {
+	int chndl;
+
 	CTRACE((tfp, "HTCharsetFormat: Extended MIME Content-Type is %s\n",
 		format_name));
 	cp2 += 7;
@@ -1039,12 +1040,12 @@ HTFormat HTCharsetFormat(HTFormat format,
 	    }
 	}
 	if (chartrans_ok) {
-	    LYUCcharset *p_in = HTAnchor_getUCInfoStage(anchor,
-							UCT_STAGE_MIME);
-	    LYUCcharset *p_out = HTAnchor_setUCInfoStage(anchor,
-							 current_char_set,
-							 UCT_STAGE_HTEXT,
-							 UCT_SETBY_DEFAULT);
+	    const LYUCcharset *p_in = HTAnchor_getUCInfoStage(anchor,
+							      UCT_STAGE_MIME);
+	    const LYUCcharset *p_out = HTAnchor_setUCInfoStage(anchor,
+							       current_char_set,
+							       UCT_STAGE_HTEXT,
+							       UCT_SETBY_DEFAULT);
 
 	    if (!p_out) {
 		/*
@@ -1449,7 +1450,7 @@ CompressFileType HTContentTypeToCompressType(const char *ct)
 /*
  * "Encoding" is jargon for compression-type.  Provide a reverse mapping.
  */
-BOOL IsCompressionFormat(HTAtom *format, CompressFileType check)
+BOOL IsCompressionFormat(const HTAtom *format, CompressFileType check)
 {
     BOOL result = FALSE;
 
@@ -1519,7 +1520,6 @@ BOOL HTEditable(const char *filename GCC_UNUSED)
     uid_t myUid;
     int ngroups;		/* The number of groups  */
     struct stat fileStatus;
-    int i;
 
     if (stat(filename, &fileStatus))	/* Get details of filename */
 	return NO;		/* Can't even access file! */
@@ -1549,8 +1549,9 @@ BOOL HTEditable(const char *filename GCC_UNUSED)
 	&&(fileStatus.st_uid == myUid))
 	return YES;
 
-    if (fileStatus.st_mode & 0020)	/* Group I am in can write? */
-    {
+    if (fileStatus.st_mode & 0020) {	/* Group I am in can write? */
+	int i;
+
 	for (i = 0; i < ngroups; i++) {
 	    if (groups[i] == fileStatus.st_gid)
 		return YES;
@@ -1588,13 +1589,15 @@ void HTDirEntry(HTStructured * target, const char *tail, const char *entry)
     char *relative = NULL;
     char *stripped = NULL;
     char *escaped = NULL;
-    int len;
 
     if (entry == NULL)
 	entry = "";
     StrAllocCopy(escaped, entry);
     LYTrimPathSep(escaped);
+
     if (strcmp(escaped, "..") != 0) {
+	int len;
+
 	stripped = escaped;
 	escaped = HTEscape(stripped, URL_XPALPHAS);
 	if (((len = (int) strlen(escaped)) > 2) &&
@@ -1788,7 +1791,7 @@ BOOL HTDirTitles(HTStructured * target, HTParentAnchor *anchor,
     if (current - path > 0
 	&& LYIsPathSep(current[-1])
 	&& current[0] != '\0') {	/* was a slash AND something else too */
-	char *parent = NULL;
+	const char *parent = NULL;
 	char *relative = NULL;
 
 	current[-1] = '\0';
@@ -1908,13 +1911,14 @@ static void do_readme(HTStructured * target, const char *localname)
 {
     FILE *fp;
     char *readme_file_name = NULL;
-    int ch;
 
     HTSprintf0(&readme_file_name, "%s/%s", localname, HT_DIR_README_FILE);
 
     fp = fopen(readme_file_name, "r");
 
     if (fp) {
+	int ch;
+
 	START(HTML_PRE);
 	while ((ch = fgetc(fp)) != EOF) {
 	    PUTC((char) ch);
@@ -1990,7 +1994,7 @@ static int dired_cmp(void *a, void *b)
     return code;
 }
 
-static int print_local_dir(DIR *dp, char *localname,
+static int print_local_dir(DIR *dp, const char *localname,
 			   HTParentAnchor *anchor,
 			   HTFormat format_out,
 			   HTStream *sink)
@@ -1998,7 +2002,7 @@ static int print_local_dir(DIR *dp, char *localname,
     HTStructured *target;	/* HTML object */
     HTBTree *bt;
     HTStructuredClass targetClass;
-    STRUCT_DIRENT *dirbuf;
+    const STRUCT_DIRENT *dirbuf;
     char *pathname = NULL;
     char *tail = NULL;
     const char *p;
@@ -2501,7 +2505,7 @@ static int decompressAndParse(HTParentAnchor *anchor,
 			      HTStream *sink,
 			      char *nodename GCC_UNUSED,
 			      char *filename,
-			      HTAtom *myEncoding,
+			      const HTAtom *myEncoding,
 			      HTFormat format,
 			      int *statusp)
 {
@@ -2797,7 +2801,7 @@ static int decompressAndParse(HTParentAnchor *anchor,
 		} else {
 		    char *anchor_path = HTParse(anchor->address, "",
 						PARSE_PATH + PARSE_PUNCTUATION);
-		    char *lastslash;
+		    const char *lastslash;
 
 		    HTUnEscape(anchor_path);
 		    lastslash = strrchr(anchor_path, '/');
@@ -3042,7 +3046,7 @@ int HTLoadFile(const char *addr,
 	    DIR *dp = NULL;
 	    BOOL forget_multi = NO;
 
-	    STRUCT_DIRENT *dirbuf;
+	    const STRUCT_DIRENT *dirbuf;
 	    float best = (float) NO_VALUE_FOUND;	/* So far best is bad */
 	    HTFormat best_rep = NULL;	/* Set when rep found */
 	    HTAtom *best_enc = NULL;

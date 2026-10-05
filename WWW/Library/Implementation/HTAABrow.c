@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTAABrow.c,v 1.45 2025/01/07 22:55:07 tom Exp $
+ * $LynxId: HTAABrow.c,v 1.48 2026/10/05 14:24:14 tom Exp $
  *
  * MODULE							HTAABrow.c
  *		BROWSER SIDE ACCESS AUTHORIZATION MODULE
@@ -224,15 +224,18 @@ static HTAAServer *HTAAServer_new(const char *hostname,
  */
 static void HTAAServer_delete(HTAAServer *killme)
 {
-    int n, i;
-    HTAASetup *setup;
-    HTAARealm *realm;
-    HTList *cur;
-
     if (killme) {
+	HTAARealm *realm;
+	HTList *cur;
+
 	if (killme->setups != NULL) {
-	    n = HTList_count(killme->setups);
+
+	    int n = HTList_count(killme->setups);
+	    int i;
+
 	    for (i = (n - 1); i >= 0; i--) {
+		HTAASetup *setup;
+
 		if ((setup = (HTAASetup *) HTList_objectAt(killme->setups,
 							   i)) != NULL) {
 		    HTAASetup_delete(setup);
@@ -256,7 +259,7 @@ static void HTAAServer_delete(HTAAServer *killme)
 	FREE(killme->hostname);
 
 	HTList_removeObject(server_table, (void *) killme);
-	FREE(killme);
+	free(killme);
     }
 }
 
@@ -325,7 +328,6 @@ static HTAASetup *HTAASetup_lookup(const char *hostname,
 				   int IsProxy)
 {
     HTAAServer *server;
-    HTAASetup *setup;
 
     if (portnumber <= 0)
 	portnumber = 80;
@@ -336,6 +338,7 @@ static HTAASetup *HTAASetup_lookup(const char *hostname,
 					    IsProxy))) {
 
 	HTList *cur = server->setups;
+	HTAASetup *setup;
 
 	CTRACE((tfp, "%s %s (%s:%d:%s)\n",
 		"HTAASetup_lookup: resolving setup for",
@@ -383,7 +386,8 @@ static HTAASetup *HTAASetup_lookup(const char *hostname,
  *	returns		a new HTAASetup node, and also adds it as
  *			part of the HTAAServer given as parameter.
  */
-static HTAASetup *HTAASetup_new(HTAAServer *server, char *ctemplate,
+static HTAASetup *HTAASetup_new(HTAAServer *server,
+				const char *ctemplate,
 				HTList *valid_schemes,
 				HTAssocList **scheme_specifics)
 {
@@ -398,8 +402,7 @@ static HTAASetup *HTAASetup_new(HTAAServer *server, char *ctemplate,
     setup->retry = NO;
     setup->server = server;
     setup->ctemplate = NULL;
-    if (ctemplate)
-	StrAllocCopy(setup->ctemplate, ctemplate);
+    StrAllocCopy(setup->ctemplate, ctemplate);
     setup->valid_schemes = valid_schemes;
     setup->scheme_specifics = scheme_specifics;
 
@@ -430,7 +433,7 @@ static void HTAASetup_delete(HTAASetup * killme)
 	    if (killme->scheme_specifics[scheme])
 		HTAssocList_delete(killme->scheme_specifics[scheme]);
 	FREE(killme->scheme_specifics);
-	FREE(killme);
+	free(killme);
     }
 }
 
@@ -449,10 +452,10 @@ static void HTAASetup_delete(HTAASetup * killme)
  */
 static void HTAASetup_updateSpecifics(HTAASetup * setup, HTAssocList **specifics)
 {
-    int scheme;
-
     if (setup) {
 	if (setup->scheme_specifics) {
+	    int scheme;
+
 	    for (scheme = 0; scheme < HTAA_MAX_SCHEMES; scheme++) {
 		if (setup->scheme_specifics[scheme])
 		    HTAssocList_delete(setup->scheme_specifics[scheme]);
@@ -539,7 +542,7 @@ BOOL HTAA_HaveUserinfo(const char *hostname)
     char *my_info = NULL;
 
     if (StrAllocCopy(my_info, hostname) != NULL) {
-	char *at_sign = HTSkipToAt(my_info, &gen_delims);
+	const char *at_sign = HTSkipToAt(my_info, &gen_delims);
 
 	free(my_info);
 	if (at_sign != NULL && gen_delims == 0)
@@ -565,7 +568,7 @@ static void fill_in_userinfo(HTAARealm *realm, const char *hostname)
 	if ((colon = StrChr(my_info, ':')) != NULL) {
 	    *colon++ = '\0';
 	}
-	if (non_empty(my_info)) {
+	if (*my_info != '\0') {
 	    char *msg;
 	    BOOL prior = non_empty(realm->username);
 
@@ -815,11 +818,11 @@ static char *compose_auth_string(const char *hostname,
  */
 static HTAAScheme HTAA_selectScheme(HTAASetup * setup)
 {
-    int scheme;
-
     if (setup && setup->valid_schemes) {
+	int scheme;
+
 	for (scheme = HTAA_BASIC; scheme < HTAA_MAX_SCHEMES; scheme++) {
-	    void *object = (void *) (intptr_t) scheme;
+	    const void *object = (void *) (intptr_t) scheme;
 
 	    if (-1 < HTList_indexOf(setup->valid_schemes, object))
 		return (HTAAScheme) scheme;
@@ -839,12 +842,13 @@ static HTAAScheme HTAA_selectScheme(HTAASetup * setup)
  */
 static void free_HTAAGlobals(void)
 {
-    HTAAServer *server;
-    int n, i;
-
     if (server_table != NULL) {
-	n = HTList_count(server_table);
+	int n = HTList_count(server_table);
+	int i;
+
 	for (i = (n - 1); i >= 0; i--) {
+	    HTAAServer *server;
+
 	    if ((server = (HTAAServer *) HTList_objectAt(server_table,
 							 i)) != NULL) {
 		HTAAServer_delete(server);
@@ -890,7 +894,7 @@ char *HTAA_composeAuth(const char *hostname,
 		       const char *docname,
 		       int IsProxy)
 {
-    char *auth_string;
+    const char *auth_string;
     BOOL retry;
     HTAAScheme scheme;
     size_t len;

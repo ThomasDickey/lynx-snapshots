@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTAccess.c,v 1.90 2025/01/07 22:51:05 tom Exp $
+ * $LynxId: HTAccess.c,v 1.91 2026/10/05 13:48:25 tom Exp $
  *
  *		Access Manager					HTAccess.c
  *		==============
@@ -494,7 +494,9 @@ static int get_physical(const char *addr,
     }
 
     if (!override_flag && !using_proxy) {
-	char *gateway_parameter = NULL, *gateway, *proxy;
+	char *gateway_parameter = NULL;
+	const char *gateway;
+	const char *proxy;
 
 	/*
 	 * Search for gateways.
@@ -517,8 +519,6 @@ static int get_physical(const char *addr,
 
 	if (gateway)
 	    CTRACE((tfp, "Gateway found: %s\n", gateway));
-	if (proxy)
-	    CTRACE((tfp, "proxy server found: %s\n", proxy));
 
 	/*
 	 * Proxy servers have precedence over gateway servers.
@@ -526,9 +526,10 @@ static int get_physical(const char *addr,
 	if (proxy) {
 	    char *gatewayed = NULL;
 
+	    CTRACE((tfp, "proxy server found: %s\n", proxy));
 	    StrAllocCopy(gatewayed, proxy);
 	    if (!StrNCmp(gatewayed, "http", 4)) {
-		char *cp = strrchr(gatewayed, '/');
+		const char *cp = strrchr(gatewayed, '/');
 
 		/* Append a slash to the proxy specification if it doesn't
 		 * end in one but otherwise looks normal (starts with "http",
@@ -610,11 +611,11 @@ static int get_physical(const char *addr,
  */
 void LYUCPushAssumed(HTParentAnchor *anchor)
 {
-    int anchor_LYhndl = -1;
-    LYUCcharset *anchor_UCI = NULL;
+    const LYUCcharset *anchor_UCI = NULL;
 
     if (anchor) {
-	anchor_LYhndl = HTAnchor_getUCLYhndl(anchor, UCT_STAGE_PARSER);
+	int anchor_LYhndl = HTAnchor_getUCLYhndl(anchor, UCT_STAGE_PARSER);
+
 	if (anchor_LYhndl >= 0)
 	    anchor_UCI = HTAnchor_getUCInfoStage(anchor,
 						 UCT_STAGE_PARSER);
@@ -1149,12 +1150,12 @@ BOOL HTLoadAbsolute(const DocAddress *docaddr)
  *		     NO      Failure
  */
 BOOL HTLoadRelative(const char *relative_name,
-		    HTParentAnchor *here)
+		    const HTParentAnchor *here)
 {
     DocAddress full_address;
     BOOL result;
     char *mycopy = NULL;
-    char *stripped = NULL;
+    const char *stripped = NULL;
 
     full_address.address = NULL;
     full_address.post_data = NULL;
@@ -1200,7 +1201,7 @@ static char hex(int i)
 }
 
 BOOL HTSearch(const char *keywords,
-	      HTParentAnchor *here)
+	      const HTParentAnchor *here)
 {
 #define acceptable \
 "1234567890abcdefghijlkmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.-_"
@@ -1289,7 +1290,7 @@ BOOL HTSearchAbsolute(const char *keywords,
 		      char *indexname)
 {
     DocAddress abs_doc;
-    HTParentAnchor *anchor;
+    const HTParentAnchor *anchor;
 
     abs_doc.address = indexname;
     abs_doc.post_data = NULL;

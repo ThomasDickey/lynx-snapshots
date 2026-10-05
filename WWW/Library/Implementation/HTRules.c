@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTRules.c,v 1.49 2025/01/07 15:44:34 tom Exp $
+ * $LynxId: HTRules.c,v 1.51 2026/10/05 15:56:30 tom Exp $
  *
  *	Configuration manager for Hypertext Daemon		HTRules.c
  *	==========================================
@@ -164,7 +164,7 @@ void HTClearRules(void)
 #endif
 }
 
-static BOOL rule_cond_ok(rule * r)
+static BOOL rule_cond_ok(const rule * r)
 {
     BOOL result;
 
@@ -452,10 +452,9 @@ char *HTTranslate(const char *required)
  */
 int HTSetConfiguration(char *config)
 {
-    HTRuleOp op;
     char *line = NULL;
     char *pointer = NULL;
-    char *word1;
+    const char *word1;
     const char *word2;
     const char *word3;
     const char *cond_op = NULL;
@@ -500,7 +499,7 @@ int HTSetConfiguration(char *config)
     }
 
     if (0 == strcasecomp(word1, "suffix")) {
-	char *encoding = HTNextField(&pointer);
+	const char *encoding = HTNextField(&pointer);
 
 	status = 0;
 	if (pointer)
@@ -544,22 +543,38 @@ int HTSetConfiguration(char *config)
 	StrAllocCopy(HTSearchScript, word2);	/* Search script name */
 
     } else {
-	op = 0 == strcasecomp(word1, "map") ? HT_Map
-	    : 0 == strcasecomp(word1, "pass") ? HT_Pass
-	    : 0 == strcasecomp(word1, "fail") ? HT_Fail
-	    : 0 == strcasecomp(word1, "redirect") ? HT_Redirect
-	    : 0 == strncasecomp(word1, "redirectperm", 12) ? HT_RedirectPerm
-	    : 0 == strcasecomp(word1, "redirecttemp") ? HT_Redirect
-	    : 0 == strcasecomp(word1, "permitredirection") ? HT_PermitRedir
-	    : 0 == strcasecomp(word1, "useproxy") ? HT_UseProxy
-	    : 0 == strcasecomp(word1, "alert") ? HT_Alert
-	    : 0 == strcasecomp(word1, "alwaysalert") ? HT_AlwaysAlert
-	    : 0 == strcasecomp(word1, "progress") ? HT_Progress
-	    : 0 == strcasecomp(word1, "usermsg") ? HT_UserMsg
-	    : 0 == strcasecomp(word1, "infomsg") ? HT_InfoMsg
-	    : 0 == strcasecomp(word1, "defprot") ? HT_DefProt
-	    : 0 == strcasecomp(word1, "protect") ? HT_Protect
-	    : HT_Invalid;
+	HTRuleOp op = ((0 == strcasecomp(word1, "map"))
+		       ? HT_Map
+		       : (0 == strcasecomp(word1, "pass"))
+		       ? HT_Pass
+		       : (0 == strcasecomp(word1, "fail"))
+		       ? HT_Fail
+		       : (0 == strcasecomp(word1, "redirect"))
+		       ? HT_Redirect
+		       : (0 == strncasecomp(word1, "redirectperm", 12))
+		       ? HT_RedirectPerm
+		       : (0 == strcasecomp(word1, "redirecttemp"))
+		       ? HT_Redirect
+		       : (0 == strcasecomp(word1, "permitredirection"))
+		       ? HT_PermitRedir
+		       : (0 == strcasecomp(word1, "useproxy"))
+		       ? HT_UseProxy
+		       : (0 == strcasecomp(word1, "alert"))
+		       ? HT_Alert
+		       : (0 == strcasecomp(word1, "alwaysalert"))
+		       ? HT_AlwaysAlert
+		       : (0 == strcasecomp(word1, "progress"))
+		       ? HT_Progress
+		       : (0 == strcasecomp(word1, "usermsg"))
+		       ? HT_UserMsg
+		       : (0 == strcasecomp(word1, "infomsg"))
+		       ? HT_InfoMsg
+		       : (0 == strcasecomp(word1, "defprot"))
+		       ? HT_DefProt
+		       : (0 == strcasecomp(word1, "protect"))
+		       ? HT_Protect
+		       : HT_Invalid);
+
 	if (op == HT_Invalid) {
 	    fprintf(stderr, "HTRule: %s '%s'\n", RULE_INCORRECT, config);
 	} else {

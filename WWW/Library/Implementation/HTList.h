@@ -76,7 +76,7 @@ extern "C" {
 /*	Remove specified object from list.
 */
     extern BOOL HTList_removeObject(HTList *me,
-				    void *oldObject);
+				    const void *oldObject);
 
 /*	Remove object at a given position in the list, where 0 is the
  *	object pointed to by the head (returns a pointer to the element
@@ -105,7 +105,7 @@ extern "C" {
  *	means it is pointed to by the head; returns -1 if not found).
  */
     extern int HTList_indexOf(HTList *me,
-			      void *object);
+			      const void *object);
 
 /*	Return pointer to the object at a specified position in the list,
  *	where 0 is the object pointed to by the head (returns NULL if
@@ -134,7 +134,7 @@ extern "C" {
  *	It does not free memory.
  */
     extern BOOL HTList_unlinkObject(HTList *me,
-				    void *oldObject);
+				    const void *oldObject);
 
 #ifdef __cplusplus
 }

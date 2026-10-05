@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTMIME.c,v 1.105 2025/01/08 00:23:14 tom Exp $
+ * $LynxId: HTMIME.c,v 1.109 2026/10/05 16:20:13 tom Exp $
  *
  *			MIME Message Parse			HTMIME.c
  *			==================
@@ -196,7 +196,7 @@ void HTMIME_TrimDoubleQuotes(char *value)
  */
 static BOOL content_is_compressed(HTStream *me)
 {
-    char *encoding = me->anchor->content_encoding;
+    const char *encoding = me->anchor->content_encoding;
     BOOL result = (BOOL) (HTEncodingToCompressType(encoding) != cftNone);
 
     CTRACE((tfp, "content is%s compressed\n", result ? "" : " NOT"));
@@ -353,10 +353,10 @@ static int pumpData(HTStream *me)
 					    UCT_SETBY_MIME);
 		}
 		if (chartrans_ok) {
-		    LYUCcharset *p_in =
+		    const LYUCcharset *p_in =
 		    HTAnchor_getUCInfoStage(me->anchor,
 					    UCT_STAGE_MIME);
-		    LYUCcharset *p_out =
+		    const LYUCcharset *p_out =
 		    HTAnchor_setUCInfoStage(me->anchor,
 					    current_char_set,
 					    UCT_STAGE_HTEXT,
@@ -562,10 +562,11 @@ static int pumpData(HTStream *me)
 	    char *url = NULL;
 	    char *num = NULL;
 	    char *txt = NULL;
-	    const char *base = "";	/* FIXME: refresh_url may be relative to doc */
 
 	    LYParseRefreshURL(me->refresh_url, &num, &url);
 	    if (url != NULL && me->format == WWW_HTML) {
+		const char *base = "";	/* FIXME: refresh_url may be relative to doc */
+
 		CTRACE((tfp,
 			"Formatting refresh-url as first line of result\n"));
 		StrAllocCopy(txt, gettext("Refresh: "));
@@ -1138,7 +1139,6 @@ static void HTMIME_put_character(HTStream *me, int c)
 	if (c != CR && c != LF) {
 	    return;
 	}
-	me->state = mcCHUNKED_COUNT_CR;
 
 	/* FALLTHRU */
     case mcCHUNKED_COUNT_CR:
@@ -2082,12 +2082,12 @@ static void HTMIME_put_character(HTStream *me, int c)
 static void HTMIME_put_string(HTStream *me,
 			      const char *s)
 {
-    const char *p;
-
     if (me->state == MIME_TRANSPARENT) {	/* Optimisation */
 	(*me->targetClass.put_string) (me->target, s);
 
     } else if (me->state != MIME_IGNORE) {
+	const char *p;
+
 	CTRACE((tfp, "HTMIME:  %s\n", s));
 
 	for (p = s; *p; p++)
@@ -2102,12 +2102,12 @@ static void HTMIME_write(HTStream *me,
 			 const char *s,
 			 int l)
 {
-    const char *p;
-
     if (me->state == MIME_TRANSPARENT) {	/* Optimisation */
 	(*me->targetClass.put_block) (me->target, s, l);
 
     } else {
+	const char *p;
+
 	CTRACE((tfp, "HTMIME:  %.*s\n", l, s));
 
 	for (p = s; p < s + l; p++)
@@ -2126,7 +2126,7 @@ static void HTMIME_free(HTStream *me)
 	FREE(me->compression_encoding);
 	if (me->target)
 	    (*me->targetClass._free) (me->target);
-	FREE(me);
+	free(me);
     }
 }
 
@@ -2140,7 +2140,7 @@ static void HTMIME_abort(HTStream *me,
 	FREE(me->compression_encoding);
 	if (me->target)
 	    (*me->targetClass._abort) (me->target, e);
-	FREE(me);
+	free(me);
     }
 }
 
@@ -2302,14 +2302,16 @@ static int HTmmcont = 0;
 static void HTmmdec_base64(char **t,
 			   char *s)
 {
-    int d, count, j, val;
-    char *buf, *bp, nw[4], *p;
+    int d, count, j;
+    char *buf, *bp, nw[4];
+    const char *p;
 
     if ((buf = typeMallocn(char, strlen(s) * 3 + 1)) == NULL)
 	  outofmem(__FILE__, "HTmmdec_base64");
 
     for (bp = buf; *s; s += 4) {
-	val = 0;
+	int val = 0;
+
 	if (s[2] == '=')
 	    count = 1;
 	else if (s[3] == '=')
@@ -2345,7 +2347,8 @@ static void HTmmdec_base64(char **t,
 static void HTmmdec_quote(char **t,
 			  char *s)
 {
-    char *buf, cval, *bp, *p;
+    char *buf, cval, *bp;
+    const char *p;
 
     if ((buf = typeMallocn(char, strlen(s) + 1)) == NULL)
 	  outofmem(__FILE__, "HTmmdec_quote");

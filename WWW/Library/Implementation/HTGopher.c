@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTGopher.c,v 1.80 2025/01/07 15:25:47 tom Exp $
+ * $LynxId: HTGopher.c,v 1.82 2026/10/05 15:27:22 tom Exp $
  *
  *			GOPHER ACCESS				HTGopher.c
  *			=============
@@ -232,7 +232,7 @@ static void parse_menu(const char *arg GCC_UNUSED,
     int bytes = 0;
     int BytesReported = 0;
     char buffer[128];
-    BOOL *valid_chars;
+    const BOOL *valid_chars;
 
 #define TAB		'\t'
 #define HEX_ESCAPE	'%'
@@ -519,7 +519,9 @@ static void parse_cso(const char *arg,
     int ich;
     char line[BIG];
     char *p = line;
-    char *first_colon, *second_colon, last_char = '\0';
+    const char *first_colon;
+    char *second_colon;
+    char last_char = '\0';
     const char *title;
 
     START(HTML_HEAD);
@@ -775,9 +777,10 @@ static void de_escape(char *command, const char *selector)
 static void free_CSOfields(void)
 {
     CSOfield_info *cur = CSOfields;
-    CSOfield_info *prev;
 
     while (cur) {
+	CSOfield_info *prev;
+
 	if (cur->name != cur->name_buf)
 	    FREE(cur->name);
 	if (cur->attributes != cur->attr_buf)
@@ -930,7 +933,8 @@ static void interpret_cso_key(const char *key,
  */
 static int parse_cso_field_info(CSOfield_info *blk)
 {
-    char *info, *max_spec;
+    char *info;
+    const char *max_spec;
 
     /*
      * Initialize all fields to default values.
@@ -976,7 +980,8 @@ static int parse_cso_fields(char *buf,
     char *p = buf;
     int i, code = 0, prev_code;
     size_t alen;
-    char *indx, *name;
+    const char *indx;
+    const char *name;
     CSOfield_info *last, *newf;
 
     last = CSOfields = (CSOfield_info *) 0;

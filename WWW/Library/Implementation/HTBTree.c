@@ -40,7 +40,7 @@ static void HTBTElement_free(HTBTElement *element)
 	    HTBTElement_free(element->left);
 	if (element->right != NULL)
 	    HTBTElement_free(element->right);
-	FREE(element);
+	free(element);
     }
 }
 
@@ -50,7 +50,7 @@ static void HTBTElement_free(HTBTElement *element)
 void HTBTree_free(HTBTree *tree)
 {
     HTBTElement_free(tree->top);
-    FREE(tree);
+    free(tree);
 }
 
 /*********************************************************
@@ -64,7 +64,7 @@ static void HTBTElementAndObject_free(HTBTElement *element)
 	if (element->right != NULL)
 	    HTBTElementAndObject_free(element->right);
 	FREE(element->object);
-	FREE(element);
+	free(element);
     }
 }
 
@@ -74,7 +74,7 @@ static void HTBTElementAndObject_free(HTBTElement *element)
 void HTBTreeAndObject_free(HTBTree *tree)
 {
     HTBTElementAndObject_free(tree->top);
-    FREE(tree);
+    free(tree);
 }
 
 /*********************************************************************
@@ -84,16 +84,15 @@ void *HTBTree_search(HTBTree *tree,
 		     void *object)
 {
     HTBTElement *cur = tree->top;
-    int res;
 
     while (cur != NULL) {
-	res = tree->compare(object, cur->object);
+	int res = tree->compare(object, cur->object);
 
 	if (res == 0)
 	    return cur->object;
 	else if (res < 0)
 	    cur = cur->left;
-	else if (res > 0)
+	else
 	    cur = cur->right;
     }
     return NULL;
@@ -112,8 +111,6 @@ void HTBTree_add(HTBTree *tree,
     HTBTElement *added_element;
     HTBTElement *forefather_of_element;
     HTBTElement *father_of_forefather;
-    BOOL father_found, top_found;
-    int depth, depth2, corrections;
 
     /* father_of_element is a pointer to the structure that is the father of
      * the new object "object".  added_element is a pointer to the structure
@@ -151,7 +148,11 @@ void HTBTree_add(HTBTree *tree,
 	tree->top->right = NULL;
 	tree->top->right_depth = 0;
     } else {
-	father_found = YES;
+	BOOL father_found = YES;
+	BOOL top_found;
+	int depth, depth2;
+	int corrections;
+
 	father_of_element = tree->top;
 	added_element = NULL;
 	father_of_forefather = NULL;

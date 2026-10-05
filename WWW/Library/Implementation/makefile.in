@@ -1,4 +1,4 @@
-# $LynxId: makefile.in,v 1.39 2025/07/27 19:55:27 tom Exp $
+# $LynxId: makefile.in,v 1.40 2026/09/26 19:09:01 tom Exp $
 # Make WWW under unix for a.n.other unix system (bsd)
 # Use this as a template
 
@@ -43,7 +43,7 @@ LY_CFLAGS	= @CFLAGS@ @EXTRA_CFLAGS@
 CFLAGS		= $(CPPOPTS) $(LY_CFLAGS)
 
 LINT		= @LINT@
-LINTOPTS	=
+LINTOPTS	= @LINT_OPTS@
 
 CTAGS		= @CTAGS@
 

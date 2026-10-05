@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTParse.c,v 1.102 2025/01/06 15:18:39 tom Exp $
+ * $LynxId: HTParse.c,v 1.104 2026/10/05 15:50:23 tom Exp $
  *
  *		Parse HyperText Document Address		HTParse.c
  *		================================
@@ -217,11 +217,12 @@ static char *strchr_or_end(char *string, int ch)
  */
 char *HTParsePort(char *host, int *portp)
 {
-    int brackets = 0;
     char *result = NULL;
 
     *portp = 0;
     if (host != NULL) {
+	int brackets = 0;
+
 	while (*host != '\0' && result == NULL) {
 	    switch (*host++) {
 	    case ':':
@@ -268,7 +269,7 @@ static int hex_decode(int ch)
 static void convert_to_idna(char *host)
 {
     size_t length = strlen(host);
-    char *endhost = host + length;
+    const char *endhost = host + length;
     char *buffer = malloc(length + 1);
     char *params = malloc(length + 1);
     char *output = NULL;
@@ -387,7 +388,7 @@ char *HTParse(const char *aName,
     char *name = NULL;
     char *rel = NULL;
     char *p, *q;
-    char *acc_method;
+    const char *acc_method;
     struct struct_parts given, related;
 
     CTRACE((tfp, "HTParse: aName:`%s'\n", aName));
@@ -837,12 +838,11 @@ const char *HTParseAnchor(const char *aName)
 	 */
 	struct struct_parts given;
 	size_t need = ((unsigned) ((p - aName) + (int) strlen(p) + 1));
-	char *name;
 
 	if (need > (size_t) max_uri_size) {
 	    p += strlen(p);
 	} else {
-	    name = (char *) LYalloca(need);
+	    char *name = (char *) LYalloca(need);
 
 	    if (name == NULL) {
 		outofmem(__FILE__, "HTParseAnchor");
@@ -881,7 +881,7 @@ void HTSimplify(char *filename, BOOL absolute)
 
 #define debug_at(at)	atln = at
 #endif
-    char *mark;
+    const char *mark;
     char *p;
     size_t limit;
 
@@ -1228,7 +1228,7 @@ static char from_hex(int c)
 
 char *HTUnEscape(char *str)
 {
-    char *p = str;
+    const char *p = str;
     char *q = str;
 
     if (!(p && *p))
@@ -1279,12 +1279,13 @@ char *HTUnEscapeSome(char *str,
 {
     char *p = str;
     char *q = str;
-    char testcode;
 
     if (p == NULL || *p == '\0' || do_trans == NULL || *do_trans == '\0')
 	return str;
 
     while (*p != '\0') {
+	char testcode;
+
 	if (*p == HEX_ESCAPE &&
 	    p[1] && p[2] &&	/* tests shouldn't be needed, but.. */
 	    isxdigit(UCH(p[1])) &&

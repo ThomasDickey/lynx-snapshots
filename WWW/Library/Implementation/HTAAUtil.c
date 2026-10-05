@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTAAUtil.c,v 1.39 2025/07/22 00:36:14 tom Exp $
+ * $LynxId: HTAAUtil.c,v 1.40 2026/10/05 13:30:04 tom Exp $
  *
  * MODULE							HTAAUtil.c
  *		COMMON PARTS OF ACCESS AUTHORIZATION MODULE
@@ -186,9 +186,9 @@ const char *HTAAMethod_name(HTAAMethod method)
 BOOL HTAAMethod_inList(HTAAMethod method, HTList *list)
 {
     HTList *cur = list;
-    char *item;
+    const char *item;
 
-    while (NULL != (item = (char *) HTList_nextObject(cur))) {
+    while (NULL != (item = (const char *) HTList_nextObject(cur))) {
 	CTRACE((tfp, " %s", item));
 	if (method == HTAAMethod_enum(item))
 	    return YES;
@@ -224,7 +224,6 @@ BOOL HTAA_templateMatch(const char *ctemplate,
 {
     const char *p = ctemplate;
     const char *q = filename;
-    int m;
 
     for (; *p && *q && *p == *q; p++, q++)	/* Find first mismatch */
 	;			/* do nothing else */
@@ -232,8 +231,8 @@ BOOL HTAA_templateMatch(const char *ctemplate,
     if (!*p && !*q)
 	return YES;		/* Equally long equal strings */
     else if ('*' == *p) {	/* Wildcard */
-	p++;			/* Skip wildcard character */
-	m = (int) (strlen(q) - strlen(p));	/* Amount to match to wildcard */
+	int m = (int) (strlen(q) - strlen(++p));
+
 	if (m < 0)
 	    return NO;		/* No match, filename too short */
 	else {			/* Skip the matched characters and compare */
@@ -274,7 +273,6 @@ BOOL HTAA_templateCaseMatch(const char *ctemplate,
 {
     const char *p = ctemplate;
     const char *q = filename;
-    int m;
 
     /* Find first mismatch */
     for (; *p && *q && TOUPPER(*p) == TOUPPER(*q); p++, q++) ;	/* do nothing else */
@@ -282,8 +280,8 @@ BOOL HTAA_templateCaseMatch(const char *ctemplate,
     if (!*p && !*q)
 	return YES;		/* Equally long equal strings */
     else if ('*' == *p) {	/* Wildcard */
-	p++;			/* Skip wildcard character */
-	m = (int) (strlen(q) - strlen(p));	/* Amount to match to wildcard */
+	int m = (int) (strlen(q) - strlen(++p));
+
 	if (m < 0)
 	    return NO;		/* No match, filename too short */
 	else {			/* Skip the matched characters and compare */
@@ -468,7 +466,7 @@ static void FreeHTAAUtil(void)
  *			will use this buffer first and then
  *			proceed to read from socket.
  */
-void HTAA_setupReader(char *start_of_headers,
+void HTAA_setupReader(const char *start_of_headers,
 		      size_t length,
 		      int soc)
 {
@@ -480,9 +478,17 @@ void HTAA_setupReader(char *start_of_headers,
 	    buffer_length = BUFFER_SIZE;
 	buffer = (char *) malloc((size_t) (sizeof(char) * (buffer_length + 1)));
     } else if (length > buffer_length) {	/* need more space? */
+	char *next;
+
 	buffer_length = length;
-	buffer = (char *) realloc((char *) buffer,
-				  (size_t) (sizeof(char) * (buffer_length + 1)));
+	next = (char *) realloc((char *) buffer,
+				(size_t) (sizeof(char) * (buffer_length + 1)));
+
+	if (next == NULL) {
+	    FREE(buffer);
+	} else {
+	    buffer = next;
+	}
     }
     if (buffer == NULL)
 	outofmem(__FILE__, "HTAA_setupReader");

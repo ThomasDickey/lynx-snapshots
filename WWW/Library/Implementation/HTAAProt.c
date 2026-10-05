@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTAAProt.c,v 1.36 2025/06/19 18:54:14 Eric.Lindblad Exp $
+ * $LynxId: HTAAProt.c,v 1.37 2026/10/05 13:07:10 tom Exp $
  *
  * MODULE							HTAAProt.c
  *		PROTECTION FILE PARSING MODULE
@@ -326,7 +326,6 @@ static HTAAProt *HTAAProt_new(const char *cur_docname,
     HTList *cur = prot_cache;
     HTAAProtCache *cache_item = NULL;
     HTAAProt *prot;
-    FILE *fp;
 
     if (!prot_cache)
 	prot_cache = HTList_new();
@@ -340,6 +339,8 @@ static HTAAProt *HTAAProt_new(const char *cur_docname,
 	CTRACE((tfp, "%s `%s' already in cache\n",
 		"HTAAProt_new: Protection file", prot_filename));
     } else {
+	FILE *fp;
+
 	CTRACE((tfp, "HTAAProt_new: Loading protection file `%s'\n",
 		prot_filename));
 
@@ -648,7 +649,7 @@ const char *HTAA_UidToName(int uid GCC_UNUSED)
 int HTAA_NameToUid(const char *name GCC_UNUSED)
 {
 #ifndef NOUSERS
-    struct passwd *pw;
+    const struct passwd *pw;
     HTList *me = known_pwd;
 
     while (HTList_nextObject(me)) {
@@ -715,7 +716,7 @@ const char *HTAA_GidToName(int gid GCC_UNUSED)
 int HTAA_NameToGid(const char *name GCC_UNUSED)
 {
 #ifndef NOUSERS
-    struct group *gr;
+    const struct group *gr;
     HTList *me = known_grp;
 
     while (HTList_nextObject(me)) {

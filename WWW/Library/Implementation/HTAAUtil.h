@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTAAUtil.h,v 1.13 2010/10/27 00:09:52 tom Exp $
+ * $LynxId: HTAAUtil.h,v 1.14 2026/10/05 13:28:39 tom Exp $
  *
  *                                            Utilities for the Authorization parts of libwww
  *           COMMON PARTS OF AUTHORIZATION MODULE TO BOTH SERVER AND BROWSER
@@ -285,7 +285,7 @@ Header Line Reader
  *                      will use this buffer first and then
  *                      proceed to read from socket.
  */
-    extern void HTAA_setupReader(char *start_of_headers,
+    extern void HTAA_setupReader(const char *start_of_headers,
 				 size_t length,
 				 int soc);
 

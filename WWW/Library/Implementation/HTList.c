@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTList.c,v 1.20 2016/11/24 15:29:50 tom Exp $
+ * $LynxId: HTList.c,v 1.23 2026/10/05 15:37:52 tom Exp $
  *
  *	A small List class					      HTList.c
  *	==================
@@ -206,14 +206,14 @@ void HTList_insertObjectAt(HTList *me, void *newObject,
 /*	Unlink specified object from list.
  *	It does not free memory.
  */
-BOOL HTList_unlinkObject(HTList *me, void *oldObject)
+BOOL HTList_unlinkObject(HTList *me, const void *oldObject)
 {
     HTList *temp = me;
-    HTList *prevNode;
 
     if (temp && oldObject) {
 	while (temp->next) {
-	    prevNode = temp;
+	    HTList *prevNode = temp;
+
 	    temp = temp->next;
 	    if (temp->object == oldObject) {
 		prevNode->next = temp->next;
@@ -228,14 +228,14 @@ BOOL HTList_unlinkObject(HTList *me, void *oldObject)
 
 /*	Remove specified object from list.
 */
-BOOL HTList_removeObject(HTList *me, void *oldObject)
+BOOL HTList_removeObject(HTList *me, const void *oldObject)
 {
     HTList *temp = me;
-    HTList *prevNode;
 
     if (temp && oldObject) {
 	while (temp->next) {
-	    prevNode = temp;
+	    HTList *prevNode = temp;
+
 	    temp = temp->next;
 	    if (temp->object == oldObject) {
 		prevNode->next = temp->next;
@@ -255,12 +255,12 @@ BOOL HTList_removeObject(HTList *me, void *oldObject)
 void *HTList_removeObjectAt(HTList *me, int position)
 {
     HTList *temp = me;
-    HTList *prevNode;
     int pos = position;
     void *result = NULL;
 
     if (temp != NULL && pos >= 0) {
-	prevNode = temp;
+	HTList *prevNode = temp;
+
 	while ((temp = temp->next) != NULL) {
 	    if (pos == 0) {
 		prevNode->next = temp->next;
@@ -282,12 +282,10 @@ void *HTList_removeObjectAt(HTList *me, int position)
  */
 void *HTList_unlinkLastObject(HTList *me)
 {
-    HTList *lastNode;
-    void *lastObject;
-
     if (me && me->next) {
-	lastNode = me->next;
-	lastObject = lastNode->object;
+	HTList *lastNode = me->next;
+	void *lastObject = lastNode->object;
+
 	me->next = lastNode->next;
 	lastNode->next = NULL;
 	lastNode->object = NULL;
@@ -303,12 +301,10 @@ void *HTList_unlinkLastObject(HTList *me)
  */
 void *HTList_removeLastObject(HTList *me)
 {
-    HTList *lastNode;
-    void *lastObject;
-
     if (me && me->next) {
-	lastNode = me->next;
-	lastObject = lastNode->object;
+	HTList *lastNode = me->next;
+	void *lastObject = lastNode->object;
+
 	me->next = lastNode->next;
 	FREE(lastNode);
 	return lastObject;
@@ -323,27 +319,20 @@ void *HTList_removeLastObject(HTList *me)
  */
 void *HTList_removeFirstObject(HTList *me)
 {
-    HTList *temp = me;
-    HTList *prevNode;
-    void *firstObject;
+    void *firstObject = NULL;
 
-    if (!temp)
-	return NULL;
+    if (me != NULL && me->next != NULL) {
+	HTList *prevNode = me;
 
-    prevNode = temp;
-    if (temp->next) {
-	while (temp->next) {
-	    prevNode = temp;
-	    temp = temp->next;
+	while (me->next) {
+	    prevNode = me;
+	    me = me->next;
 	}
-	firstObject = temp->object;
+	firstObject = me->object;
 	prevNode->next = NULL;
-	FREE(temp);
-	return firstObject;
-
-    } else {			/* Empty list */
-	return NULL;
+	free(me);
     }
+    return firstObject;
 }
 
 /*	Determine total number of objects in the list,
@@ -364,12 +353,13 @@ int HTList_count(HTList *me)
 /*	Determine position of an object in the list (a value of 0
  *	means it is pointed to by the head; returns -1 if not found).
  */
-int HTList_indexOf(HTList *me, void *object)
+int HTList_indexOf(HTList *me, const void *object)
 {
     HTList *temp = me;
-    int position = 0;
 
     if (temp) {
+	int position = 0;
+
 	while ((temp = temp->next)) {
 	    if (temp->object == object)
 		return position;

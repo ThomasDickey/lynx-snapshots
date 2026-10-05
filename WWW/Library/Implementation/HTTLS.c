@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTLS.c,v 1.21 2025/07/25 19:34:13 tom Exp $
+ * $LynxId: HTTLS.c,v 1.22 2026/10/05 17:04:55 tom Exp $
  *
  *                          TRANSPORT LAYER SECURITY
  *
@@ -369,7 +369,7 @@ static void show_cert_issuer(X509 * peer_cert GCC_UNUSED)
  */
 static char *StripUserAuthents(char *host)
 {
-    char *p = strchr(host, '@');
+    const char *p = strchr(host, '@');
 
     if (p != NULL) {
 	char *q = host;
@@ -750,7 +750,6 @@ static int altname_valid(X509 * peer_cert, char *host, char **all_cns)
 #elif defined(USE_OPENSSL_INCL)
     STACK_OF(GENERAL_NAME) * gens;
     int i, numalts, result;
-    const GENERAL_NAME *gn;
     char *cert_host, *msg;
 
     gens = (STACK_OF(GENERAL_NAME) *)
@@ -763,9 +762,10 @@ static int altname_valid(X509 * peer_cert, char *host, char **all_cns)
 
     numalts = sk_GENERAL_NAME_num(gens);
     for (i = 0; i < numalts; ++i) {
-	gn = sk_GENERAL_NAME_value(gens, i);
+	const GENERAL_NAME *gn = sk_GENERAL_NAME_value(gens, i);
+
 	if (gn->type == GEN_DNS) {
-	    cert_host = (char *) ASN1_STRING_data(gn->d.ia5);
+	    cert_host = (const char *) ASN1_STRING_data(gn->d.ia5);
 	} else if (gn->type == GEN_IPADD) {
 	    /* XXX untested -TG */
 	    size_t j = (size_t) ASN1_STRING_length(gn->d.ia5);

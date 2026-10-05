@@ -1,4 +1,4 @@
-/* $LynxId: LYCurses.c,v 1.212 2025/07/27 21:21:50 tom Exp $ */
+/* $LynxId: LYCurses.c,v 1.213 2026/09/25 23:35:51 Akın.Alp.Ozturk Exp $ */
 #include <HTUtils.h>
 #include <HTAlert.h>
 
@@ -918,12 +918,14 @@ static int fake_max;
 
 static SCREEN *LYscreen = NULL;
 
+#if defined(USE_DEFAULT_COLORS)
 static void delete_screen(SCREEN * screen)
 {
     delete_fake_win();
     delete_subwindow();
     delscreen(screen);
 }
+#endif
 
 #define LYDELSCR()		/* ncurses does not need this */
 

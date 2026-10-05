@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTStyle.c,v 1.18 2025/01/06 15:34:03 tom Exp $
+ * $LynxId: HTStyle.c,v 1.19 2026/10/05 14:59:33 tom Exp $
  *
  *	Style Implementation for Hypertext			HTStyle.c
  *	==================================
@@ -45,7 +45,7 @@ HTStyle *HTStyleFree(HTStyle *self)
 {
     FREE(self->w_name);
     FREE(self->w_SGMLTag);
-    FREE(self);
+    free(self);
     return NULL;
 }
 
@@ -125,6 +125,6 @@ HTStyleSheet *HTStyleSheetFree(HTStyleSheet *self)
 	self->styles = style->next;
 	HTStyleFree(style);
     }
-    FREE(self);
+    free(self);
     return NULL;
 }

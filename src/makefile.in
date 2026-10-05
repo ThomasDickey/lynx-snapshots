@@ -1,4 +1,4 @@
-# $LynxId: makefile.in,v 1.82 2025/07/24 19:42:19 tom Exp $
+# $LynxId: makefile.in,v 1.83 2026/09/26 19:08:18 tom Exp $
 # template-makefile for Lynx src directory
 
 SHELL		= @CONFIG_SHELL@
@@ -66,7 +66,7 @@ CPP_OPTS	= $(DEFS) $(CHARSET_DEFS) \
 		$(SITE_DEFS) $(CPPFLAGS)
 
 LINT		= @LINT@
-LINTOPTS	=
+LINTOPTS	= @LINT_OPTS@
 
 CTAGS		= @CTAGS@
 

@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTString.h,v 1.45 2025/01/08 00:30:50 tom Exp $
+ * $LynxId: HTString.h,v 1.46 2026/10/05 14:27:06 tom Exp $
  *						String handling for libwww
  *                                         STRINGS
  *
@@ -180,7 +180,7 @@ extern "C" {
 
     extern bstring *HTBprintf(bstring **pstr, const char *fmt, ...) GCC_PRINTFLIKE(2,3);
 
-    extern void trace_bstring(bstring *data);
+    extern void trace_bstring(const bstring *data);
     extern void trace_bstring2(const char *text, int size);
 
 #ifdef __cplusplus

@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTString.c,v 1.87 2026/04/21 00:30:54 tom Exp $
+ * $LynxId: HTString.c,v 1.90 2026/10/05 16:21:27 tom Exp $
  *
  *	Case-independent string comparison		HTString.c
  *
@@ -450,7 +450,7 @@ char *HTNextTok(char **pstr,
 		const char *bracks,
 		char *found)
 {
-    char *p = *pstr;
+    char *p;
     char *start = NULL;
     BOOL get_blanks, skip_comments;
     BOOL get_comments;
@@ -459,6 +459,8 @@ char *HTNextTok(char **pstr,
 
     if (isEmptyS(pstr))
 	return NULL;
+
+    p = *pstr;
     if (!delims)
 	delims = " ;,=";
     if (!bracks)
@@ -901,11 +903,12 @@ PUBLIC_IF_FIND_LEAKS char *StrAllocVsprintf(char **pstr,
 char *HTSprintf(char **pstr, const char *fmt, ...)
 {
     char *result = NULL;
-    size_t inuse = 0;
     va_list ap;
 
     LYva_start(ap, fmt);
     {
+	size_t inuse = 0;
+
 	if (pstr != NULL && *pstr != NULL)
 	    inuse = strlen(*pstr);
 	result = StrAllocVsprintf(pstr, inuse, fmt, &ap);
@@ -1549,7 +1552,7 @@ void trace_bstring2(const char *text,
     }
 }
 
-void trace_bstring(bstring *data)
+void trace_bstring(const bstring *data)
 {
     trace_bstring2(BStrData(data), BStrLen(data));
 }

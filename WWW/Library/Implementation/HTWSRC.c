@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTWSRC.c,v 1.32 2025/01/06 15:48:56 tom Exp $
+ * $LynxId: HTWSRC.c,v 1.33 2026/10/05 14:59:33 tom Exp $
  *
  *			Parse WAIS Source file			HTWSRC.c
  *			======================
@@ -437,7 +437,7 @@ static void WSRCParser_free(HTStream *me)
 	    FREE(me->par_value[p]);
 	}
     }
-    FREE(me);
+    free(me);
 }
 
 static void WSRCParser_abort(HTStream *me, HTError e GCC_UNUSED)

@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFile.h,v 1.39 2025/01/06 15:13:11 tom Exp $
+ * $LynxId: HTFile.h,v 1.40 2026/10/05 14:12:06 tom Exp $
  *							File access in libwww
  *				FILE ACCESS
  *
@@ -235,7 +235,7 @@ extern "C" {
 /*
  *  Check if a given content-encoding (format) matches something we support.
  */
-    extern BOOL IsCompressionFormat(HTAtom *format, CompressFileType check);
+    extern BOOL IsCompressionFormat(const HTAtom *format, CompressFileType check);
 /*
  *  Determine compression type from the content-type and/or content-encoding.
  */
@@ -303,7 +303,7 @@ extern "C" {
  *  returns		a pointer to a suitable suffix string if one has
  *			been found, else NULL.
  */
-    extern const char *HTFileSuffix(HTAtom *rep,
+    extern const char *HTFileSuffix(const HTAtom *rep,
 				    const char *enc);
 
 /*

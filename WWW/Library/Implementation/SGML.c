@@ -1,5 +1,5 @@
 /*
- * $LynxId: SGML.c,v 1.194 2026/04/19 22:48:57 tom Exp $
+ * $LynxId: SGML.c,v 1.196 2026/10/05 15:12:19 tom Exp $
  *
  *			General SGML Parser code		SGML.c
  *			========================
@@ -312,7 +312,7 @@ static HTElement *pool_alloc(void)
 static void pool_free(HTElement * e)
 {
     if (depth > DEPTH)
-	FREE(e);
+	free(e);
     depth--;
     return;
 }
@@ -469,7 +469,7 @@ static int current_is_class = 0;
 
 static void handle_attribute_name(HTStream *me, const char *s)
 {
-    HTTag *tag = me->current_tag;
+    const HTTag *tag = me->current_tag;
     const attr *attributes = tag->attributes;
     int high, low, i, diff;
 
@@ -1033,7 +1033,7 @@ typedef enum {
     close_valid = 2
 } canclose_t;
 
-static canclose_t can_close(HTTag * new_tag, HTTag * stacked_tag)
+static canclose_t can_close(const HTTag * new_tag, const HTTag * stacked_tag)
 {
     canclose_t result;
 
@@ -1078,7 +1078,7 @@ static void do_close_stacked(HTStream *me)
 		: NO);
 }
 
-static int is_on_stack(HTStream *me, HTTag * old_tag)
+static int is_on_stack(HTStream *me, const HTTag * old_tag)
 {
     HTElement *stacked = me->element_stack;
     int i = 1;
@@ -1192,7 +1192,7 @@ static void end_element(HTStream *me, HTTag * old_tag)
 	int status = HT_OK;
 	HTMLElement e;
 	HTElement *N = me->element_stack;
-	HTTag *t = (N->tag != old_tag) ? NORMAL_TAGP(N->tag) : N->tag;
+	const HTTag *t = (N->tag != old_tag) ? NORMAL_TAGP(N->tag) : N->tag;
 
 	if (old_tag != t) {	/* Mismatch: syntax error */
 	    if (me->element_stack->next) {	/* This is not the last level */
@@ -1208,7 +1208,7 @@ static void end_element(HTStream *me, HTTag * old_tag)
 	}
 
 	e = NORMAL_TAGNUM(TAGNUM_OF_TAGP(t));
-	CTRACE2(TRACE_SGML, (tfp, "tagnum(%p) = %d\n", (void *) t, (int) e));
+	CTRACE2(TRACE_SGML, (tfp, "tagnum(%p) = %d\n", (const void *) t, (int) e));
 #ifdef USE_PRETTYSRC
 	if (!psrc_view)		/* Don't actually pass call on if viewing psrc - kw */
 #endif
@@ -1255,7 +1255,6 @@ static void start_element(HTStream *me)
     int status;
     HTTag *new_tag = me->current_tag;
     HTMLElement e = TAGNUM_OF_TAGP(new_tag);
-    BOOL ok = FALSE;
 
     BOOL valid = YES;
     BOOL direct_container = YES;
@@ -1367,6 +1366,8 @@ static void start_element(HTStream *me)
 	 * We are in a SELECT block.  - FM
 	 */
 	if (strcasecomp(new_tag->name, "OPTION")) {
+	    BOOL ok = FALSE;
+
 	    /*
 	     * Ugh, it is not an OPTION.  - FM
 	     */
@@ -1534,7 +1535,7 @@ static void SGML_free(HTStream *me)
     HTChunkFree(me->string);
     for (i = 0; i < MAX_ATTRIBUTES; i++)
 	FREE_extra(me->value[i]);
-    FREE(me);
+    free(me);
 
 #ifdef USE_PRETTYSRC
     sgml_in_psrc_was_initialized = FALSE;
@@ -1575,7 +1576,7 @@ static void SGML_abort(HTStream *me, HTError e)
     HTChunkFree(me->string);
     for (i = 0; i < MAX_ATTRIBUTES; i++)
 	FREE_extra(me->value[i]);
-    FREE(me);
+    free(me);
 
 #ifdef USE_PRETTYSRC
     sgml_in_psrc_was_initialized = FALSE;
@@ -1603,7 +1604,7 @@ void SGML_setCallerData(HTStream *me, void *data)
 #endif /* CALLERDATA */
 
 #ifdef USE_PRETTYSRC
-static void transform_tag(HTStream *me, HTChunk *string)
+static void transform_tag(const HTStream *me, HTChunk *string)
 {
     if (!me->strict_xml) {
 	if (tagname_transform != 1) {
@@ -1616,7 +1617,7 @@ static void transform_tag(HTStream *me, HTChunk *string)
 }
 #endif /* USE_PRETTYSRC */
 
-static BOOL ignore_when_empty(HTTag * tag)
+static BOOL ignore_when_empty(const HTTag * tag)
 {
     BOOL result = FALSE;
 
@@ -1687,7 +1688,7 @@ static void SGML_character(HTStream *me, int c_in)
     const SGML_dtd *dtd = me->dtd;
     HTChunk *string = me->string;
     const char *EntityName;
-    HTTag *testtag = NULL;
+    const HTTag *testtag = NULL;
     BOOLEAN chk;		/* Helps (?) walk through all the else ifs... */
     UCode_t clong, uck = 0;	/* Enough bits for UCS4 ... */
     int testlast;
@@ -4897,12 +4898,13 @@ unsigned char *SJIS_TO_EUC1(unsigned HI,
 unsigned char *SJIS_TO_EUC(unsigned char *src,
 			   unsigned char *dst)
 {
-    unsigned char hi, lo, *sp, *dp;
+    unsigned char hi, *sp, *dp;
     int in_sjis = 0;
 
     in_sjis = IS_SJIS_STR(src);
     for (sp = src, dp = dst; (hi = sp[0]) != '\0';) {
-	lo = sp[1];
+	unsigned char lo = sp[1];
+
 	if (TREAT_SJIS && IS_SJIS(hi, lo, in_sjis)) {
 	    SJIS_TO_JIS1(hi, lo, dp);
 	    dp[0] |= 0x80;
@@ -4947,7 +4949,7 @@ unsigned char *EUC_TO_JIS(unsigned char *src,
 {
     unsigned char kana_mode = 0;
     unsigned char cch;
-    unsigned char *sp = src;
+    const unsigned char *sp = src;
     unsigned char *dp = dst;
     int is_JIS = 0;
 

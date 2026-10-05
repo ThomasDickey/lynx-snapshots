@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFormat.c,v 1.104 2026/04/20 08:08:36 tom Exp $
+ * $LynxId: HTFormat.c,v 1.107 2026/10/05 15:56:30 tom Exp $
  *
  *		Manage different file formats			HTFormat.c
  *		=============================
@@ -331,9 +331,9 @@ int HTGetSSLCharacter(void *handle)
 /* Match maintype to any MIME type starting with maintype, for example:
  * image/gif should match image
  */
-static int half_match(char *trial_type, char *target)
+static int half_match(const char *trial_type, const char *target)
 {
-    char *cp = StrChr(trial_type, '/');
+    const char *cp = StrChr(trial_type, '/');
 
     /* if no '/' or no '*' */
     if (!cp || *(cp + 1) != '*')
@@ -353,7 +353,7 @@ static int half_match(char *trial_type, char *target)
  * Evaluate a deferred mailcap test command, i.e.,. one that substitutes the
  * document's charset or other values in %{name} format.
  */
-static BOOL failsMailcap(HTPresentation *pres, HTParentAnchor *anchor)
+static BOOL failsMailcap(const HTPresentation *pres, const HTParentAnchor *anchor)
 {
     BOOL result = FALSE;
 
@@ -385,15 +385,15 @@ static BOOL failsMailcap(HTPresentation *pres, HTParentAnchor *anchor)
 static HTPresentation *HTFindPresentation(HTFormat rep_in,
 					  HTFormat rep_out,
 					  HTPresentation *fill_in,
-					  HTParentAnchor *anchor)
+					  const HTParentAnchor *anchor)
 {
 #undef THIS_FUNC
 #define THIS_FUNC "HTFindPresentation"
-    HTAtom *wildcard = NULL;	/* = HTAtom_for("*"); lookup when needed - kw */
+    const HTAtom *wildcard = NULL;	/* = HTAtom_for("*"); lookup when needed - kw */
     int n;
     int i;
     HTPresentation *pres;
-    HTPresentation *match;
+    const HTPresentation *match;
     HTPresentation *strong_wildcard_match = NULL;
     HTPresentation *weak_wildcard_match = NULL;
     HTPresentation *last_default_match = NULL;
@@ -573,12 +573,13 @@ void HTFilterPresentations(void)
 {
     int i, j;
     int n = HTList_count(HTPresentations);
-    HTPresentation *p, *q;
     BOOL matched;
-    char *s, *t;
 
     CTRACE((tfp, "HTFilterPresentations (AcceptMedia %#x)\n", LYAcceptMedia));
     for (i = 0; i < n; i++) {
+	HTPresentation *p;
+	const char *s;
+
 	p = (HTPresentation *) HTList_objectAt(HTPresentations, i);
 	s = HTAtom_name(p->rep);
 
@@ -591,6 +592,9 @@ void HTFilterPresentations(void)
 	    && p->quality <= 1.0 && p->quality >= 0.0) {
 	    matched = TRUE;
 	    for (j = 0; j < i; j++) {
+		HTPresentation *q;
+		const char *t;
+
 		q = (HTPresentation *) HTList_objectAt(HTPresentations, j);
 		t = HTAtom_name(q->rep);
 
@@ -618,7 +622,7 @@ float HTStackValue(HTFormat rep_in,
 		   double initial_value,
 		   long int length)
 {
-    HTAtom *wildcard = WWW_WILDCARD_REP_OUT;
+    const HTAtom *wildcard = WWW_WILDCARD_REP_OUT;
 
     CTRACE((tfp, "HTFormat: Evaluating stream stack for %s worth %.3f to %s\n",
 	    HTAtom_name(rep_in), initial_value, HTAtom_name(rep_out)));
@@ -629,9 +633,10 @@ float HTStackValue(HTFormat rep_in,
     {
 	int n = HTList_count(HTPresentations);
 	int i;
-	HTPresentation *pres;
 
 	for (i = 0; i < n; i++) {
+	    const HTPresentation *pres;
+
 	    pres = (HTPresentation *) HTList_objectAt(HTPresentations, i);
 	    if (pres->rep == rep_in &&
 		(pres->rep_out == rep_out || pres->rep_out == wildcard)) {
@@ -1096,7 +1101,6 @@ int HTMemCopy(HTChunk *chunk, HTStream *sink)
 static int HTGzFileCopy(gzFile gzfp, HTStream *sink)
 {
     HTStreamClass targetClass;
-    int status;
     off_t bytes;
     int gzerrnum;
     int rv = HT_OK;
@@ -1109,7 +1113,8 @@ static int HTGzFileCopy(gzFile gzfp, HTStream *sink)
      */
     HTReadProgress(bytes = 0, (off_t) 0);
     for (;;) {
-	status = gzread(gzfp, input_buffer, INPUT_BUFFER_SIZE);
+	int status = gzread(gzfp, input_buffer, INPUT_BUFFER_SIZE);
+
 	if (status <= 0) {	/* EOF or error */
 	    if (status == 0) {
 		rv = HT_LOADED;
@@ -1303,7 +1308,6 @@ static int HTZzFileCopy(FILE *zzfp, HTStream *sink)
 static int HTBzFileCopy(BZFILE * bzfp, HTStream *sink)
 {
     HTStreamClass targetClass;
-    int status;
     off_t bytes;
     int bzerrnum;
     int rv = HT_OK;
@@ -1316,7 +1320,8 @@ static int HTBzFileCopy(BZFILE * bzfp, HTStream *sink)
      */
     HTReadProgress(bytes = 0, (off_t) 0);
     for (;;) {
-	status = BZ2_bzread(bzfp, input_buffer, INPUT_BUFFER_SIZE);
+	int status = BZ2_bzread(bzfp, input_buffer, INPUT_BUFFER_SIZE);
+
 	if (status <= 0) {	/* EOF or error */
 	    if (status == 0) {
 		rv = HT_LOADED;
@@ -1387,9 +1392,7 @@ static int HTBrFileCopy(FILE *brfp, HTStream *sink)
     char *checks_buffer;
     size_t brotli_size;
     size_t brotli_limit = 0;
-    size_t brotli_offset;
     size_t normal_size;
-    size_t normal_limit = 0;
 
     /*  Push the data down the stream
      */
@@ -1404,8 +1407,8 @@ static int HTBrFileCopy(FILE *brfp, HTStream *sink)
      */
     for (;;) {
 	size_t input_chunk = INPUT_BUFFER_SIZE;
+	size_t brotli_offset = brotli_limit;
 
-	brotli_offset = brotli_limit;
 	brotli_limit += input_chunk;
 	checks_buffer = realloc(brotli_buffer, brotli_limit);
 	if (checks_buffer == NULL)
@@ -1437,6 +1440,8 @@ static int HTBrFileCopy(FILE *brfp, HTStream *sink)
      * library succeeds.
      */
     if (bytes > 0) {
+	size_t normal_limit = 0;
+
 	do {
 	    if (normal_limit == 0)
 		normal_limit = (10 * brotli_limit) + INPUT_BUFFER_SIZE;
@@ -1610,7 +1615,6 @@ void HTCopyNoCR(HTParentAnchor *anchor GCC_UNUSED,
 		HTStream *sink)
 {
     HTStreamClass targetClass;
-    int character;
 
     /*  Push the data, ignoring CRLF, down the stream
      */
@@ -1624,7 +1628,8 @@ void HTCopyNoCR(HTParentAnchor *anchor GCC_UNUSED,
      */
     HTInitInput(file_number);
     for (;;) {
-	character = HTGetCharacter();
+	int character = HTGetCharacter();
+
 	if (character == EOF)
 	    break;
 	(*targetClass.put_character) (sink, (char) character);
@@ -1672,7 +1677,6 @@ int HTParseSocket(HTFormat rep_in,
 		  HTStream *sink)
 {
     HTStream *stream;
-    HTStreamClass targetClass;
     int rv;
 
     stream = HTStreamStack(rep_in, format_out, sink, anchor);
@@ -1690,6 +1694,8 @@ int HTParseSocket(HTFormat rep_in,
 	rv = HTLoadError(sink, 501, buffer);	/* returns -501 */
 	FREE(buffer);
     } else {
+	HTStreamClass targetClass;
+
 	/*
 	 * Push the data, don't worry about CRLF we can strip them later.
 	 */
@@ -1731,15 +1737,12 @@ int HTParseFile(HTFormat rep_in,
 		FILE *fp,
 		HTStream *sink)
 {
-    HTStream *stream;
-    HTStreamClass targetClass;
-    int rv;
     int result;
 
     if (fp == NULL) {
 	result = HT_LOADED;
     } else {
-	stream = HTStreamStack(rep_in, format_out, sink, anchor);
+	HTStream *stream = HTStreamStack(rep_in, format_out, sink, anchor);
 
 	if (!stream || !stream->isa) {
 	    char *buffer = NULL;
@@ -1748,6 +1751,8 @@ int HTParseFile(HTFormat rep_in,
 		LYCancelDownload = FALSE;
 		result = -1;
 	    } else {
+		int rv;
+
 		HTSprintf0(&buffer, CANNOT_CONVERT_I_TO_O,
 			   HTAtom_name(rep_in), HTAtom_name(format_out));
 		CTRACE((tfp, "HTFormat(in HTParseFile): %s\n", buffer));
@@ -1756,6 +1761,8 @@ int HTParseFile(HTFormat rep_in,
 		result = rv;
 	    }
 	} else {
+	    HTStreamClass targetClass;
+	    int rv;
 
 	    /*
 	     * Push the data down the stream
@@ -1808,13 +1815,12 @@ int HTParseMem(HTFormat rep_in,
 	       HTStream *sink)
 {
     HTStream *stream;
-    HTStreamClass targetClass;
-    int rv;
     int result;
 
     stream = HTStreamStack(rep_in, format_out, sink, anchor);
     if (!stream || !stream->isa) {
 	char *buffer = NULL;
+	int rv;
 
 	HTSprintf0(&buffer, CANNOT_CONVERT_I_TO_O,
 		   HTAtom_name(rep_in), HTAtom_name(format_out));
@@ -1823,6 +1829,7 @@ int HTParseMem(HTFormat rep_in,
 	FREE(buffer);
 	result = rv;
     } else {
+	HTStreamClass targetClass;
 
 	/* Push the data down the stream
 	 */
@@ -1876,7 +1883,6 @@ int HTParseGzFile(HTFormat rep_in,
 		  HTStream *sink)
 {
     HTStream *stream;
-    HTStreamClass targetClass;
     int rv;
     int result;
 
@@ -1898,6 +1904,7 @@ int HTParseGzFile(HTFormat rep_in,
 	    result = rv;
 	}
     } else {
+	HTStreamClass targetClass;
 
 	/*
 	 * Push the data down the stream
@@ -1949,7 +1956,6 @@ int HTParseZzFile(HTFormat rep_in,
 		  HTStream *sink)
 {
     HTStream *stream;
-    HTStreamClass targetClass;
     int rv;
     int result;
 
@@ -1971,6 +1977,7 @@ int HTParseZzFile(HTFormat rep_in,
 	    result = rv;
 	}
     } else {
+	HTStreamClass targetClass;
 
 	/*
 	 * Push the data down the stream
@@ -2030,7 +2037,6 @@ int HTParseBzFile(HTFormat rep_in,
 		  HTStream *sink)
 {
     HTStream *stream;
-    HTStreamClass targetClass;
     int rv;
     int result;
 
@@ -2052,6 +2058,7 @@ int HTParseBzFile(HTFormat rep_in,
 	    result = rv;
 	}
     } else {
+	HTStreamClass targetClass;
 
 	/*
 	 * Push the data down the stream
@@ -2107,7 +2114,6 @@ int HTParseBrFile(HTFormat rep_in,
 #undef THIS_FUNC
 #define THIS_FUNC "HTParseBrFile"
     HTStream *stream;
-    HTStreamClass targetClass;
     int rv;
     int result;
 
@@ -2129,6 +2135,7 @@ int HTParseBrFile(HTFormat rep_in,
 	    result = rv;
 	}
     } else {
+	HTStreamClass targetClass;
 
 	/*
 	 * Push the data down the stream
@@ -2183,7 +2190,6 @@ int HTParseZstdFile(HTFormat rep_in,
 		    HTStream *sink)
 {
     HTStream *stream;
-    HTStreamClass targetClass;
     int rv;
     int result;
 
@@ -2205,6 +2211,8 @@ int HTParseZstdFile(HTFormat rep_in,
 	    result = rv;
 	}
     } else {
+	HTStreamClass targetClass;
+
 	/*
 	 * Push the data down the stream
 	 *
@@ -2280,13 +2288,13 @@ static void NetToText_put_block(HTStream *me, const char *s, int l)
 static void NetToText_free(HTStream *me)
 {
     (me->sink->isa->_free) (me->sink);	/* Close rest of pipe */
-    FREE(me);
+    free(me);
 }
 
 static void NetToText_abort(HTStream *me, HTError e)
 {
     me->sink->isa->_abort(me->sink, e);		/* Abort rest of pipe */
-    FREE(me);
+    free(me);
 }
 
 /*	The class structure

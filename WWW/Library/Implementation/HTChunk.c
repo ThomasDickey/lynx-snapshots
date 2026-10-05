@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTChunk.c,v 1.31 2026/04/20 08:20:08 tom Exp $
+ * $LynxId: HTChunk.c,v 1.32 2026/10/05 14:45:00 tom Exp $
  *
  *		Chunk handling:	Flexible arrays
  *		===============================
@@ -300,9 +300,9 @@ void HTChunkTerminate(HTChunk *ch)
  */
 void HTChunkPuts(HTChunk *ch, const char *s)
 {
-    const char *p;
-
     if (s != NULL && ch != NULL) {
+	const char *p;
+
 	for (p = s; *p; p++) {
 	    if (ch->size >= ch->allocated) {
 		if (!HTChunkRealloc(ch, ch->growby))
@@ -316,9 +316,9 @@ void HTChunkPuts(HTChunk *ch, const char *s)
 /* like above but no realloc: extend to another chunk if necessary */
 HTChunk *HTChunkPuts2(HTChunk *ch, const char *s)
 {
-    const char *p;
-
     if (s != NULL) {
+	const char *p;
+
 	for (p = s; *p; p++) {
 	    if (ch->size >= ch->allocated) {
 		HTChunk *chunk = HTChunkCreateMayFail(ch->growby, ch->failok);

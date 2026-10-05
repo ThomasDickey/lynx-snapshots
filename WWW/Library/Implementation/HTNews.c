@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTNews.c,v 1.87 2026/05/25 16:55:26 tom Exp $
+ * $LynxId: HTNews.c,v 1.89 2026/10/05 15:48:15 tom Exp $
  *
  *			NEWS ACCESS				HTNews.c
  *			===========
@@ -626,7 +626,7 @@ static NNTPAuthResult HTHandleAuthInfo(char *host)
  *	" Tim Berners-Lee <tim@online.cern.ch> "
  *  or	" tim@online.cern.ch ( Tim Berners-Lee ) "
  */
-static char *author_name(char *email)
+static char *author_name(const char *email)
 {
     char *p, *e;
 
@@ -663,7 +663,7 @@ static char *author_name(char *email)
  *	" Lou Montulli <montulli@spaced.out.galaxy.net> "
  *  or	" montulli@spaced.out.galaxy.net ( Lou "The Stud" Montulli ) "
  */
-static char *author_address(char *email)
+static char *author_address(const char *email)
 {
     char *p, *at, *e;
 
@@ -814,9 +814,10 @@ static void write_anchors(char *text)
 {
     char *start = text;
     char *end;
-    char c;
 
     for (;;) {
+	char c;
+
 	for (; *start && (WHITE(*start)); start++) ;	/* Find start */
 	if (!*start)
 	    return;		/* (Done) */
@@ -856,9 +857,10 @@ static void abort_socket(void)
  *  Determine if a line is a valid header line.			valid_header
  *  -------------------------------------------
  */
-static BOOLEAN valid_header(char *line)
+static BOOLEAN valid_header(const char *line)
 {
-    char *colon, *space;
+    char *colon;
+    const char *space;
 
     /*
      * Blank or tab in first position implies this is a continuation header.
@@ -891,16 +893,15 @@ static BOOLEAN valid_header(char *line)
  *	s		Global socket number is OK
  *	postfile	file with header and article to post.
  */
-static void post_article(char *postfile)
+static void post_article(const char *postfile)
 {
     char line[512];
     char buf[512];
     char crlf[3];
-    char *cp;
     int status;
     FILE *fd;
     int in_header = 1, seen_header = 0, seen_fromline = 0;
-    int blen = 0, llen = 0;
+    int blen = 0;
 
     /*
      * Open the temporary file with the nntp headers and message body.  - FM
@@ -915,7 +916,11 @@ static void post_article(char *postfile)
      */
     buf[0] = '\0';
     sprintf(crlf, "%c%c", CR, LF);
+
     while (fgets(line, (int) sizeof(line) - 2, fd) != NULL) {
+	char *cp;
+	int llen;
+
 	if ((cp = StrChr(line, '\n')) != NULL)
 	    *cp = '\0';
 	if (line[0] == '.') {
@@ -1459,7 +1464,7 @@ static int read_article(HTParentAnchor *thisanchor)
 
 		    while ((p2 = strstr(l, "rticle <")) != NULL) {
 			char *q = strrchr(p2, '>');
-			char *at = strrchr(p2, '@');
+			const char *at = strrchr(p2, '@');
 
 			if (q && at && at < q) {
 			    char c = q[1];

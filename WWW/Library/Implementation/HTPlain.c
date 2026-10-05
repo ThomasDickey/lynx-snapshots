@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTPlain.c,v 1.67 2025/09/17 22:32:29 tom Exp $
+ * $LynxId: HTPlain.c,v 1.69 2026/10/05 16:14:55 tom Exp $
  *
  *		Plain text object		HTWrite.c
  *		=================
@@ -201,8 +201,7 @@ static void HTPlain_write(HTStream *me, const char *s, int l)
 	}
 #else
 	if (*p == '\b') {
-	    if (HTPlain_lastraw >= UCH(' ') &&
-		HTPlain_lastraw != '\r' && HTPlain_lastraw != '\n') {
+	    if (HTPlain_lastraw >= UCH(' ')) {
 		if (!HTPlain_bs_pending) {
 		    HTPlain_bs_pending = 1;
 		    continue;
@@ -541,7 +540,7 @@ static void HTPlain_free(HTStream *me)
 {
     if (HTPlain_bs_pending >= 2)
 	HText_appendCharacter(me->text, '_');
-    FREE(me);
+    free(me);
 }
 
 /*	End writing
