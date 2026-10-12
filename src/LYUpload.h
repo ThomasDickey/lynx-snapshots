@@ -9,7 +9,7 @@
 extern "C" {
 #endif
     extern int LYUpload(char *line);
-    extern int LYUpload_options(char **newfile, char *directory);
+    extern int LYUpload_options(char **newfile, const char *directory);
 
 #ifdef __cplusplus
 }

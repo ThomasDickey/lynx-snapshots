@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYExtern.c,v 1.56 2025/01/06 16:54:01 tom Exp $
+ * $LynxId: LYExtern.c,v 1.58 2026/10/12 20:05:23 tom Exp $
  *
  External application support.
  This feature allows lynx to pass a given URL to an external program.
@@ -142,8 +142,8 @@ static char *escapeParameter(CONST char *parameter)
 #endif /* WIN_EX */
 
 static void format(char **result,
-		   char *fmt,
-		   char *parm)
+		   const char *fmt,
+		   const char *parm)
 {
     *result = NULL;
     HTAddParam(result, fmt, 1, parm);
@@ -158,8 +158,8 @@ static void format(char **result,
  * Prevent spoofing of the shell.  Dunno how this needs to be modified for VMS
  * or DOS.  - kw
  */
-static char *format_command(char *command,
-			    char *param)
+static char *format_command(const char *command,
+			    const char *param)
 {
     char *cmdbuf = NULL;
 
@@ -235,10 +235,10 @@ static char *format_command(char *command,
  * more than one possibility, make a popup menu of the matching commands and
  * allow the user to select one.  Return the selected command.
  */
-static char *lookup_external(char *param,
+static char *lookup_external(const char *param,
 			     int only_overriders)
 {
-    int pass, num_disabled, num_matched, num_choices, cur_choice;
+    int pass, num_disabled, num_matched, num_choices;
     size_t length = 0;
     char *cmdbuf = NULL;
     char **actions = NULL;
@@ -290,6 +290,7 @@ static char *lookup_external(char *param,
 	HTUserMsg(EXTERNALS_DISABLED);
     } else if (num_choices > 1) {
 	int old_y, old_x;
+	int cur_choice;
 
 	LYGetYX(old_y, old_x);
 	cur_choice = LYhandlePopupList(-1,
@@ -334,7 +335,7 @@ static char *lookup_external(char *param,
     return cmdbuf;
 }
 
-BOOL run_external(char *param,
+BOOL run_external(const char *param,
 		  int only_overriders)
 {
 #ifdef WIN_EX

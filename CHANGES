@@ -1,10 +1,10 @@
--- $LynxId: CHANGES,v 1.1275 2026/10/05 16:36:52 tom Exp $
+-- $LynxId: CHANGES,v 1.1276 2026/10/12 19:29:48 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2026-10-05 (2.9.3c)
-* cppcheck fixes in WWW -TD
+2026-10-12 (2.9.3d)
+* cppcheck fixes in WWW, src -TD
 * fix an unused-function warning in LYCurses.c (patch by Akın Alp Ozturk)
 * update po/zh_TW.po from
     http://translationproject.org/latest/lynx

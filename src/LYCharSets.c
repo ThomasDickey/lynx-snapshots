@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYCharSets.c,v 1.75 2025/01/06 15:16:58 tom Exp $
+ * $LynxId: LYCharSets.c,v 1.77 2026/10/12 20:34:25 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTCJK.h>
@@ -689,31 +689,41 @@ static const names_pairs OLD_charset_names[] =
  * lynx.cfg and .lynxrc in both MIME name and "human-readable" name (old and
  * new style).  Returns -1 if not recognized.
  */
-int UCGetLYhndl_byAnyName(char *value)
+int UCGetLYhndl_byAnyName(const char *value)
 {
-    int i;
+    int result = -1;
 
-    if (value == NULL)
-	return -1;
+    if (value != NULL) {
+	char *trimmed = NULL;
+	int i;
 
-    LYTrimTrailing(value);
-    CTRACE((tfp, "UCGetLYhndl_byAnyName(%s)\n", value));
+	StrAllocCopy(trimmed, value);
+	LYTrimTrailing(trimmed);
+	CTRACE((tfp, "UCGetLYhndl_byAnyName(%s)\n", trimmed));
 
-    /* search by name */
-    for (i = 0; (i < MAXCHARSETS && LYchar_set_names[i]); i++) {
-	if (!strcmp(value, LYchar_set_names[i])) {
-	    return i;		/* OK */
+	/* search by name */
+	for (i = 0; (i < MAXCHARSETS && LYchar_set_names[i]); i++) {
+	    if (!strcmp(trimmed, LYchar_set_names[i])) {
+		result = i;
+		break;
+	    }
 	}
-    }
 
-    /* search by old name from 2.8/2.7.2 version */
-    for (i = 0; (OLD_charset_names[i].fullname); i++) {
-	if (!strcmp(value, OLD_charset_names[i].fullname)) {
-	    return UCGetLYhndl_byMIME(OLD_charset_names[i].MIMEname);	/* OK */
+	if (result < 0) {
+	    /* search by old name from 2.8/2.7.2 version */
+	    for (i = 0; (OLD_charset_names[i].fullname); i++) {
+		if (!strcmp(trimmed, OLD_charset_names[i].fullname)) {
+		    result = UCGetLYhndl_byMIME(OLD_charset_names[i].MIMEname);
+		    break;
+		}
+	    }
 	}
-    }
 
-    return UCGetLYhndl_byMIME(value);	/* by MIME */
+	if (result < 0)
+	    result = UCGetLYhndl_byMIME(trimmed);	/* by MIME */
+	free(trimmed);
+    }
+    return result;
 }
 
 /*

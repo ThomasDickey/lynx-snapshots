@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYCharUtils.c,v 1.142 2026/04/21 00:00:18 tom Exp $
+ * $LynxId: LYCharUtils.c,v 1.144 2026/10/12 22:59:53 tom Exp $
  *
  *  Functions associated with LYCharSets.c and the Lynx version of HTML.c - FM
  *  ==========================================================================
@@ -1470,7 +1470,7 @@ char **LYUCFullyTranslateString(char **str,
 
 	case S_check_ent:
 	    if (*p == '&') {
-		char *pp = p + 1;
+		const char *pp = p + 1;
 
 		len = strlen(pp);
 		/*
@@ -2072,8 +2072,8 @@ void LYHandleMETA(HTStructured * me, const BOOL *present,
     if (isEmpty(me->node_anchor->charset) &&
 	(charset ||
 	 (!strcasecomp(NonNull(http_equiv), "Content-Type") && content))) {
-	LYUCcharset *p_in = NULL;
-	LYUCcharset *p_out = NULL;
+	const LYUCcharset *p_in = NULL;
+	const LYUCcharset *p_out = NULL;
 
 	if (charset) {
 	    LYLowerCase(charset);
@@ -2673,7 +2673,6 @@ void LYHandleSELECT(HTStructured * me, const BOOL *present,
 		    char **include GCC_UNUSED,
 		    int start)
 {
-    int i;
 
     if (start == TRUE) {
 	char *name = NULL;
@@ -2812,6 +2811,8 @@ void LYHandleSELECT(HTStructured * me, const BOOL *present,
 	     */
 	    if (ptr &&
 		me->sp[0].tag_number == HTML_PRE && strlen(ptr) > 6) {
+		int i;
+
 		/*
 		 * The code inadequately handles OPTION fields in PRE tags.
 		 * We'll put up a minimum of 6 characters, and if any more
@@ -2956,13 +2957,14 @@ int LYLegitimizeHREF(HTStructured * me, char **href,
 	 * FM
 	 */
 	char *temp = NULL, *path = NULL, *cp;
-	const char *str = "";
 
 	temp = HTParse(*href, Base, PARSE_ALL);
 	path = HTParse(temp, "", PARSE_PATH + PARSE_PUNCTUATION);
 	if (!StrNCmp(path, "/..", 3)) {
 	    cp = (path + 3);
 	    if (LYIsHtmlSep(*cp) || *cp == '\0') {
+		const char *str = "";
+
 		if (Base[4] == 's') {
 		    str = "s";
 		}
@@ -3236,7 +3238,7 @@ void LYResetParagraphAlignment(HTStructured * me)
  *  some other HTStructured object like in HTMLGen.c), or the new
  *  functions could be added to the SGML.h interface.
  */
-BOOLEAN LYCheckForCSI(HTParentAnchor *anchor,
+BOOLEAN LYCheckForCSI(const HTParentAnchor *anchor,
 		      char **url)
 {
     if (!(anchor && anchor->address))

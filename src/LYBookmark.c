@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYBookmark.c,v 1.96 2025/09/17 22:38:25 tom Exp $
+ * $LynxId: LYBookmark.c,v 1.98 2026/10/12 22:59:49 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTAlert.h>
@@ -35,7 +35,7 @@ static const char *convert_mosaic_bookmark_file(const char *filename_buffer);
 
 unsigned LYindex2MBM(int n)
 {
-    static char MBMcodes[MBM_V_MAXFILES + 2] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    static const char MBMcodes[MBM_V_MAXFILES + 2] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
     return n >= 0 && n <= MBM_V_MAXFILES ? UCH(MBMcodes[n]) : UCH('?');
 }
@@ -686,7 +686,7 @@ Note: if you edit this file manually\n\
      */
     if (is_mosaic_hotlist) {
 	time_t NowTime = time(NULL);
-	char *TimeString = (char *) ctime(&NowTime);
+	const char *TimeString = (char *) ctime(&NowTime);
 
 	/*
 	 * TimeString has a \n at the end.
@@ -743,7 +743,7 @@ Note: if you edit this file manually\n\
  * itself.  - FM
  */
 void remove_bookmark_link(int cur,
-			  char *cur_bookmark_page)
+			  const char *cur_bookmark_page)
 {
     FILE *fp, *nfp;
     char *buf = NULL;
@@ -1275,12 +1275,12 @@ static BOOLEAN havevisible(const char *Title)
 {
     BOOLEAN result = FALSE;
     const char *p = Title;
-    unsigned char c;
     long unicode;
 
     UCTransToUni(0, -1);	/* reset internal state */
     for (; *p; p++) {
-	c = UCH(TOASCII(*p));
+	unsigned char c = UCH(TOASCII(*p));
+
 	if (c > 32 && c < 127) {
 	    result = TRUE;
 	    break;
@@ -1343,7 +1343,6 @@ static char *title_convert8bit(const char *Title)
 {
     const char *p = Title;
     char *p0;
-    char *q;
     char *comment = NULL;
     char *ncr = NULL;
     char *buf = NULL;
@@ -1375,6 +1374,8 @@ static char *title_convert8bit(const char *Title)
     }
 
     if (comment != NULL) {
+	char *q;
+
 	/*
 	 * Cleanup comment, collapse multiple dashes into one dash, skip '>'.
 	 */
@@ -1405,7 +1406,7 @@ static char *title_convert8bit(const char *Title)
  * Since this is the "Default Bookmark File", we save it as a global, and as
  * the first MBM_A_subbookmark entry.
  */
-void set_default_bookmark_page(char *value)
+void set_default_bookmark_page(const char *value)
 {
     if (value != NULL) {
 	if (bookmark_page == NULL

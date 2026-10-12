@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYPrettySrc.c,v 1.39 2025/01/08 00:25:37 tom Exp $
+ * $LynxId: LYPrettySrc.c,v 1.41 2026/10/12 20:30:35 tom Exp $
  *
  * HTML source syntax highlighting
  * by Vlad Harchev <hvv@hippo.ru>
@@ -78,7 +78,7 @@ int attrname_transform = 2;
 
 static int html_src_tag_index(const char *tagname)
 {
-    HTTag *tag = SGMLFindTag(&HTML_dtd, tagname);
+    const HTTag *tag = SGMLFindTag(&HTML_dtd, tagname);
 
     return (tag && tag != &HTTag_unrecognized) ? (int) (tag - HTML_dtd.tags) : -1;
 }
@@ -95,7 +95,7 @@ static void append_close_tag(const char *tagname,
 			     HT_tagspec ** tail)
 {
     int idx, nattr;
-    HTTag *tag;
+    const HTTag *tag;
     HT_tagspec *subj;
 
     idx = html_src_tag_index(tagname);
@@ -182,9 +182,9 @@ int html_src_parse_tagspec(char *ts,
     BOOL stop = FALSE;
     BOOL code = FALSE;
     char *p = ts;
-    char *tagstart = NULL;
+    const char *tagstart = NULL;
     char *tagend = NULL;
-    char *classstart;
+    const char *classstart;
     char *classend;
     char save, save1;
     char after_excl = FALSE;
@@ -390,12 +390,13 @@ static void failed_init(const char *tag, int lexeme)
 void HTMLSRC_init_caches(int dont_exit)
 {
     int i;
-    char *p;
     char buf[1000];
     static char empty[] = "";
 
     CTRACE2(TRACE_CFG, (tfp, "HTMLSRC_init_caches(%d tagspecs)\n", HTL_num_lexemes));
     for (i = 0; i < HTL_num_lexemes; ++i) {
+	char *p;
+
 	/*we assume that HT_tagspecs was NULLs at when program started */
 	LYStrNCpy(buf,
 		  HTL_tagspecs[i]

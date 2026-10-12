@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYStrings.h,v 1.118 2024/06/06 00:00:13 tom Exp $
+ * $LynxId: LYStrings.h,v 1.119 2026/10/12 17:11:55 tom Exp $
  */
 #ifndef LYSTRINGS_H
 #define LYSTRINGS_H
@@ -334,7 +334,7 @@ extern "C" {
     extern BOOLEAN LYRemoveNewlines(char *buffer);
     extern BOOLEAN LYTrimStartfile(char *buffer);
     extern LYExtraKeys LYnameToExtraKeys(const char *name);
-    extern char *LYElideString(char *str, int cut_pos);
+    extern char *LYElideString(const char *str, int cut_pos);
     extern char *LYReduceBlanks(char *buffer);
     extern char *LYRemoveBlanks(char *buffer);
     extern char *LYSkipBlanks(char *buffer);
@@ -358,7 +358,7 @@ extern "C" {
     extern void LYFinishEdit(FieldEditor * edit);
     extern void LYLowerCase(char *buffer);
     extern void LYRefreshEdit(FieldEditor * edit);
-    extern void LYSetupEdit(FieldEditor * edit, char *old,
+    extern void LYSetupEdit(FieldEditor * edit, const char *old,
 			    unsigned buffer_limit,
 			    int display_limit);
     extern void LYTrimAllStartfile(char *buffer);
@@ -394,7 +394,7 @@ extern "C" {
 
 #define LYLineEdit(e,c,m) LYDoEdit(e, c, EditBinding(c) & ~LYE_DF, m)
 
-    extern int LYEditInsert(FieldEditor * edit, unsigned const char *s,
+    extern int LYEditInsert(FieldEditor * edit, const unsigned char *s,
 			    int len, int map_active,
 			    int maxMessage);
 

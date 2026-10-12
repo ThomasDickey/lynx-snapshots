@@ -3,7 +3,7 @@
 #include <LYLeaks.h>
 
 /*
- *  $LynxId: parsdate.y,v 1.32 2024/01/15 11:09:08 tom Exp $
+ *  $LynxId: parsdate.y,v 1.34 2026/10/12 20:08:14 tom Exp $
  *
  *  This module is adapted and extended from tin, to use for LYmktime().
  *
@@ -617,7 +617,7 @@ static time_t Convert(time_t Month, time_t Day, time_t Year, time_t Hours,
     if (dst == DSTon) {
 	Julian -= DST_OFFSET * 60 * 60;
     } else if (dst == DSTmaybe) {
-	struct tm *tm = localtime(&tod);
+	const struct tm *tm = localtime(&tod);
 
 	if (tm != NULL) {
 	    if (tm->tm_isdst)
@@ -631,7 +631,7 @@ static time_t Convert(time_t Month, time_t Day, time_t Year, time_t Hours,
 
 static time_t DSTcorrect(time_t Start, time_t Future)
 {
-    struct tm *tm;
+    const struct tm *tm;
     time_t StartDay;
     time_t FutureDay;
 
@@ -648,7 +648,7 @@ static time_t DSTcorrect(time_t Start, time_t Future)
 
 static time_t RelativeMonth(time_t Start, time_t RelMonth)
 {
-    struct tm *tm;
+    const struct tm *tm;
     time_t Month;
     time_t Year;
 
@@ -782,8 +782,6 @@ static int date_lex(void)
     int c;
     char *p;
     char buff[20];
-    int sign;
-    int i;
     int nesting;
 
     /* Get first character after the whitespace. */
@@ -813,6 +811,9 @@ static int date_lex(void)
 
     /* A number? */
     if (CTYPE(isdigit, c) || c == '-' || c == '+') {
+	int i;
+	int sign;
+
 	if (c == '-' || c == '+') {
 	    sign = c == '-' ? -1 : 1;
 	    yyInput++;
@@ -858,7 +859,7 @@ static int GetTimeInfo(TIMEINFO * Now)
 {
     static time_t LastTime;
     static long LastTzone;
-    struct tm *tm;
+    const struct tm *tm;
 
 #if	defined(HAVE_GETTIMEOFDAY)
     struct timeval tv;
@@ -927,7 +928,7 @@ static void parsedate_leaks(void)
 time_t parsedate(char *p,
 		 TIMEINFO * now)
 {
-    struct tm *tm;
+    const struct tm *tm;
     TIMEINFO ti;
     time_t Start;
 

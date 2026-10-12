@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYLocal.c,v 1.139 2026/04/19 22:58:14 tom Exp $
+ * $LynxId: LYLocal.c,v 1.142 2026/10/12 23:36:18 tom Exp $
  *
  *  Routines to manipulate the local filesystem.
  *  Written by: Rick Mallett, Carleton University
@@ -335,7 +335,7 @@ static BOOLEAN ok_stat(const char *name, struct stat *sb)
 }
 
 #ifdef HAVE_LSTAT
-static BOOLEAN ok_lstat(char *name, struct stat *sb)
+static BOOLEAN ok_lstat(const char *name, struct stat *sb)
 {
     CTRACE((tfp, "testing ok_lstat(%s)\n", name));
     if (lstat(name, sb) < 0) {
@@ -347,7 +347,7 @@ static BOOLEAN ok_lstat(char *name, struct stat *sb)
 #define ok_lstat(name,sb) ok_stat(name,sb)
 #endif
 
-static BOOLEAN ok_file_or_dir(struct stat *sb)
+static BOOLEAN ok_file_or_dir(const struct stat *sb)
 {
     if (!S_ISDIR(sb->st_mode)
 	&& !S_ISREG(sb->st_mode)) {
@@ -381,7 +381,7 @@ static char **make_argv(const char *command, ...)
 {
     static char *result[MAX_ARGC];
     int argc = 0;
-    char *value;
+    const char *value;
     va_list ap;
 
     va_start(ap, command);
@@ -682,8 +682,8 @@ static BOOLEAN not_already_exists(char *name)
     return FALSE;
 }
 
-static BOOLEAN dir_has_same_owner(struct stat *dst_info,
-				  struct stat *src_info)
+static BOOLEAN dir_has_same_owner(const struct stat *dst_info,
+				  const struct stat *src_info)
 {
     if (S_ISDIR(dst_info->st_mode)) {
 	if (dst_info->st_uid == src_info->st_uid) {
@@ -700,8 +700,8 @@ static BOOLEAN dir_has_same_owner(struct stat *dst_info,
 /*
  * Make sure the source and target are not the same location.
  */
-static BOOLEAN same_location(struct stat *dst_info,
-			     struct stat *src_info)
+static BOOLEAN same_location(const struct stat *dst_info,
+			     const struct stat *src_info)
 {
     BOOLEAN result = FALSE;
 
@@ -775,7 +775,7 @@ static char *parse_directory(char *path)
 	path = strip_trailing_slash(path);
 	path = HTParse(".", path, PARSE_PATH + PARSE_PUNCTUATION);
 	result = HTURLPath_toFile(path, TRUE, FALSE);
-	FREE(path);
+	free(path);
     } else {			/* Last resort, should never happen. */
 	result = HTURLPath_toFile(".", TRUE, FALSE);
     }
@@ -788,7 +788,7 @@ static char *parse_directory(char *path)
  * The 'testpath' parameter is the current location, used for resolving
  * relative target specifications.
  */
-static int modify_tagged(char *testpath)
+static int modify_tagged(const char *testpath)
 {
     char *cp;
     bstring *given_target = NULL;
@@ -798,7 +798,6 @@ static int modify_tagged(char *testpath)
     struct stat src_info;
     struct stat dst_info;
     int count = 0;
-    HTList *tag;
 
     CTRACE((tfp, "modify_tagged(%s)\n", testpath));
 
@@ -809,7 +808,10 @@ static int modify_tagged(char *testpath)
 
     BStrCopy0(given_target, "");
     (void) LYgetBString(&given_target, FALSE, 0, NORECALL);
+
     if (!isBEmpty(given_target)) {
+	HTList *tag;
+
 	/*
 	 * Replace ~/ references to the home directory.
 	 */
@@ -886,7 +888,6 @@ static int modify_tagged(char *testpath)
  */
 static int modify_name(char *testpath)
 {
-    const char *cp;
     bstring *tmpbuf = NULL;
     char *newpath = NULL;
     struct stat dir_info;
@@ -898,6 +899,7 @@ static int modify_name(char *testpath)
     testpath = strip_trailing_slash(testpath);
 
     if (ok_stat(testpath, &dir_info)) {
+	const char *cp;
 
 	/*
 	 * Change the name of the file or directory.
@@ -947,7 +949,6 @@ static int modify_name(char *testpath)
 static int modify_location(char *testpath)
 {
     const char *cp;
-    const char *sp;
     bstring *tmpbuf = NULL;
     char *newpath = NULL;
     char *savepath = NULL;
@@ -976,8 +977,11 @@ static int modify_location(char *testpath)
 
     BStrCopy0(tmpbuf, testpath);
     *LYPathLeaf(tmpbuf->str) = '\0';
+
     if (get_filename(cp, &tmpbuf)) {
 	if (strlen(tmpbuf->str)) {
+	    const char *sp;
+
 	    StrAllocCopy(savepath, testpath);
 	    StrAllocCopy(newpath, testpath);
 
@@ -1103,7 +1107,7 @@ int local_modify(DocInfo *doc, char **newpath)
 /*
  * Create a new empty file in the current directory.
  */
-static int create_file(char *current_location)
+static int create_file(const char *current_location)
 {
     int code = FALSE;
     bstring *tmpbuf = NULL;
@@ -1140,7 +1144,7 @@ static int create_file(char *current_location)
 /*
  * Create a new directory in the current directory.
  */
-static int create_directory(char *current_location)
+static int create_directory(const char *current_location)
 {
     int code = FALSE;
     bstring *tmpbuf = NULL;
@@ -1174,7 +1178,7 @@ static int create_directory(char *current_location)
 /*
  * Create a file or a directory at the current location.
  */
-int local_create(DocInfo *doc)
+int local_create(const DocInfo *doc)
 {
     int ans;
     char *cp;
@@ -1270,12 +1274,11 @@ static int remove_single(char *testpath)
  */
 int local_remove(DocInfo *doc)
 {
-    char *cp, *tp;
-    char testpath[DIRED_MAXBUF];
-    int count, i;
+    char *cp;
 
     if (!HTList_isEmpty(tagged)) {
-	count = remove_tagged();
+	int count = remove_tagged();
+
 	if (doc->link > (nlinks - count - 1))
 	    doc->link = (nlinks - count - 1);
 	doc->link = ((doc->link < 0)
@@ -1285,9 +1288,14 @@ int local_remove(DocInfo *doc)
     } else if (doc->link < 0 || doc->link > nlinks) {
 	return 0;
     }
+
     cp = links[doc->link].lname;
+
     if (is_url(cp) == FILE_URL_TYPE) {
-	tp = HTfullURL_toFile(cp);
+	int i;
+	char testpath[DIRED_MAXBUF];
+	char *tp = HTfullURL_toFile(cp);
+
 	if (strlen(tp) >= DIRED_MAXBUF) {
 	    FREE(tp);
 	    return 0;
@@ -1311,7 +1319,7 @@ int local_remove(DocInfo *doc)
 
 static bstring *LYValidPermitFile = NULL;
 
-static long permit_bits(char *string_mode)
+static long permit_bits(const char *string_mode)
 {
     if (!strcmp(string_mode, "IRUSR"))
 	return S_IRUSR;
@@ -1358,7 +1366,7 @@ static int permit_location(char *destpath,
 	 * Create form.
 	 */
 	FILE *fp0;
-	char *user_filename;
+	const char *user_filename;
 	const char *group_name;
 
 	srcpath = strip_trailing_slash(srcpath);
@@ -1469,7 +1477,7 @@ static int permit_location(char *destpath,
 	 * Make sure we have a valid set-permission file comparison string
 	 * loaded via a previous call with srcpath != NULL.  - KW
 	 */
-	if (isBEmpty(LYValidPermitFile)) {
+	if (isBEmpty(LYValidPermitFile) || destpath == NULL) {
 	    if (LYCursesON)
 		HTAlert(INVALID_PERMIT_URL);
 	    else
@@ -1630,11 +1638,11 @@ void tagflag(int flag,
 void showtags(HTList *t)
 {
     int i;
-    HTList *s;
-    char *name;
 
     for (i = 0; i < nlinks; i++) {
-	s = t;
+	HTList *s = t;
+	const char *name;
+
 	while ((name = (char *) HTList_nextObject(s)) != NULL) {
 	    if (!strcmp(links[i].lname, name)) {
 		tagflag(TRUE, i);
@@ -1644,7 +1652,7 @@ void showtags(HTList *t)
     }
 }
 
-static char *DirectoryOf(char *pathname)
+static char *DirectoryOf(const char *pathname)
 {
     char *result = NULL;
     char *leaf;
@@ -1717,7 +1725,7 @@ static char *match_op(const char *prefix,
  * references to avoid spoofing the shell.
  */
 static char *build_command(char *line,
-			   char *dirName,
+			   const char *dirName,
 			   char *arg)
 {
     char *buffer = NULL;
@@ -2042,7 +2050,7 @@ int local_dired(DocInfo *doc)
 /*
  * Provide a menu of file management options.
  */
-int dired_options(DocInfo *doc, char **newfile)
+int dired_options(const DocInfo *doc, char **newfile)
 {
     static char tempfile[LY_MAXPATH];
     const char *my_suffix;
@@ -2207,8 +2215,6 @@ int dired_options(DocInfo *doc, char **newfile)
 static int get_filename(const char *prompt,
 			bstring **bufp)
 {
-    const char *cp;
-
     _statusline(prompt);
 
     (void) LYgetBString(bufp, FALSE, 0, NORECALL);
@@ -2216,7 +2222,9 @@ static int get_filename(const char *prompt,
 	HTAlert(gettext("Illegal filename; request ignored."));
 	return FALSE;
     } else if (no_dotfiles || !show_dotfiles) {
-	cp = LYLastPathSep((*bufp)->str);	/* find last slash */
+	const char *cp = LYLastPathSep((*bufp)->str);
+
+	/* find last slash */
 	if (cp)
 	    cp += 1;
 	else
@@ -2494,7 +2502,7 @@ void clear_tags(void)
 /*
  * Handle DIRED menu item.
  */
-void add_menu_item(char *str)
+void add_menu_item(const char *str)
 {
     struct dired_menu *tmp, *mp;
     char *cp;

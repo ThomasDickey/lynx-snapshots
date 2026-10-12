@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYCharUtils.h,v 1.28 2012/02/10 18:36:39 tom Exp $
+ * $LynxId: LYCharUtils.h,v 1.29 2026/10/12 13:01:21 tom Exp $
  */
 #ifndef LYCHARUTILS_H
 #define LYCHARUTILS_H
@@ -96,7 +96,7 @@ extern "C" {
     extern void LYEnsureDoubleSpace(HTStructured * me);
     extern void LYEnsureSingleSpace(HTStructured * me);
     extern void LYResetParagraphAlignment(HTStructured * me);
-    extern BOOLEAN LYCheckForCSI(HTParentAnchor *anchor,
+    extern BOOLEAN LYCheckForCSI(const HTParentAnchor *anchor,
 				 char **url);
 
 #endif				/* Lynx_HTML_Handler */

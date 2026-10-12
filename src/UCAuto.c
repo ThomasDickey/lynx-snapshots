@@ -1,5 +1,5 @@
 /*
- * $LynxId: UCAuto.c,v 1.58 2025/07/22 19:50:31 tom Exp $
+ * $LynxId: UCAuto.c,v 1.60 2026/10/12 20:12:55 tom Exp $
  *
  *  This file contains code for changing the Linux console mode.
  *  Currently some names for font files are hardwired in here.
@@ -126,7 +126,6 @@ static int call_setfont(const char *font,
 {
     const char *program = GetSetfontPath();
     char *T_setfont_cmd = NULL;
-    int rv;
 
     /*
      * console-data package has only a few unicode maps.
@@ -168,6 +167,8 @@ static int call_setfont(const char *font,
     }
 
     if (T_setfont_cmd) {
+	int rv;
+
 	CTRACE((tfp, "Changing font: '%s'\n", T_setfont_cmd));
 	rv = LYSystem(T_setfont_cmd);
 	FREE(T_setfont_cmd);
@@ -227,7 +228,7 @@ static BOOL on_console(void)
  * This is the thing that actually gets called from display_page().
  */
 void UCChangeTerminalCodepage(int newcs,
-			      LYUCcharset *p)
+			      const LYUCcharset *p)
 {
     const char *program = GetSetfontPath();
     static int lastcs = -1;
@@ -559,7 +560,7 @@ void UCChangeTerminalCodepage(int newcs,
  * This is the thing that actually gets called from display_page().
  */
 void UCChangeTerminalCodepage(int newcs,
-			      LYUCcharset *p)
+			      const LYUCcharset *p)
 {
 #ifdef __EMX__
     int res = 0;
@@ -809,7 +810,7 @@ int Switch_Display_Charset(const int ord, const enum switch_display_charset_t re
  * This is the thing that actually gets called from display_page().
  */
 void UCChangeTerminalCodepage(int newcs GCC_UNUSED,
-			      LYUCcharset *p GCC_UNUSED)
+			      const LYUCcharset *p GCC_UNUSED)
 {
     CTRACE((tfp, "UCChangeTerminalCodepage: Called, but not implemented!"));
 }

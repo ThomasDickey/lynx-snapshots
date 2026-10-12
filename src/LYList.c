@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYList.c,v 1.56 2025/01/06 16:25:40 tom Exp $
+ * $LynxId: LYList.c,v 1.58 2026/10/12 22:59:58 tom Exp $
  *
  *			Lynx Document Reference List Support	      LYList.c
  *			====================================
@@ -48,7 +48,8 @@ int showlist(DocInfo *newdoc, int titles)
     static char tempfile[LY_MAXPATH];
     static BOOLEAN last_titles = TRUE;
     FILE *fp0;
-    char *Address = NULL, *Title = NULL, *cp = NULL;
+    char *Address = NULL, *Title = NULL;
+    const char *cp = NULL;
     char *LinkTitle = NULL;	/* Rel stored as property of link, not of dest */
     BOOLEAN intern_w_post = FALSE;
     const char *desc = "unknown field or link";
@@ -349,11 +350,12 @@ static void print_hidden_refs(FILE *fp, int refs, int hidden_links)
  */
 void printlist(FILE *fp, int titles)
 {
-    int refs, hidden_links;
+    int refs;
 
     refs = HText_sourceAnchors(HTMainText);
     if (refs > 0 || LYHiddenLinks == HIDDENLINKS_SEPARATE) {
-	hidden_links = HText_HiddenLinkCount(HTMainText);
+	int hidden_links = HText_HiddenLinkCount(HTMainText);
+
 	if (refs > 0 || hidden_links > 0) {
 	    if (links_are_numbered() || fields_are_numbered())
 		fprintf(fp, "\n%s\n\n", gettext("References"));

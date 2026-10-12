@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFWriter.c,v 1.136 2026/04/20 23:43:00 tom Exp $
+ * $LynxId: HTFWriter.c,v 1.139 2026/10/12 23:27:42 tom Exp $
  *
  *		FILE WRITER				HTFWrite.h
  *		===========
@@ -101,7 +101,7 @@ struct _HTStream {
 /*	Error handling
  *	------------------
  */
-static void HTFWriter_error(HTStream *me, const char *id)
+static void HTFWriter_error(const HTStream *me, const char *id)
 {
     char buf[200];
 
@@ -141,10 +141,9 @@ static void HTFWriter_put_string(HTStream *me, const char *s)
  */
 static void HTFWriter_write(HTStream *me, const char *s, int l)
 {
-    size_t result;
-
     if (me->fp) {
-	result = fwrite(s, (size_t) 1, (size_t) l, me->fp);
+	size_t result = fwrite(s, (size_t) 1, (size_t) l, me->fp);
+
 	if (result != (size_t) l) {
 	    HTFWriter_error(me, "HTFWriter_write");
 	}
@@ -159,12 +158,12 @@ static void decompress_gzip(HTStream *me)
 
     if (fp != NULL) {
 #ifdef USE_ZLIB
-	char buffer[BUFSIZ];
 	gzFile gzfp;
-	int status;
 
 	CTRACE((tfp, "decompressing '%s'\n", in_name));
 	if ((gzfp = gzopen(in_name, BIN_R)) != NULL) {
+	    int status;
+	    char buffer[BUFSIZ];
 	    BOOL success = TRUE;
 	    size_t actual = 0;
 
@@ -239,20 +238,20 @@ static void decompress_br(HTStream *me)
 #define INPUT_BUFFER_SIZE BUFSIZ
 	char *brotli_buffer = NULL;
 	char *normal_buffer = NULL;
-	size_t brotli_size = 0;
 	size_t brotli_limit = 0;
-	size_t brotli_offset;
 	size_t normal_size = 0;
-	size_t normal_limit = 0;
 	BrotliDecoderResult status2 = BROTLI_DECODER_RESULT_ERROR;
-	int status;
-	off_t bytes = 0;
 	FILE *ifp = fopen(in_name, BIN_R);
 
 	if (ifp != NULL) {
+	    size_t brotli_size = 0;
+	    off_t bytes = 0;
+
 	    CTRACE((tfp, "reading '%s'\n", in_name));
 	    for (;;) {
+		size_t brotli_offset;
 		size_t input_chunk = INPUT_BUFFER_SIZE;
+		int status;
 
 		brotli_offset = brotli_limit;
 		brotli_limit += input_chunk;
@@ -282,6 +281,8 @@ static void decompress_br(HTStream *me)
 	     * library succeeds.
 	     */
 	    if (bytes > 0) {
+		size_t normal_limit = 0;
+
 		do {
 		    if (normal_limit == 0)
 			normal_limit = (10 * brotli_limit) + INPUT_BUFFER_SIZE;
@@ -311,8 +312,9 @@ static void decompress_br(HTStream *me)
 	     * finally, pump that data into the output stream.
 	     */
 	    if (status2 == BROTLI_DECODER_RESULT_SUCCESS) {
-		CTRACE((tfp, THIS_FUNC ": decompressed %ld -> %ld (1:%.1f)\n",
-			brotli_size, normal_size,
+		CTRACE((tfp, THIS_FUNC ": decompressed %lu -> %lu (1:%.1f)\n",
+			(unsigned long) brotli_size,
+			(unsigned long) normal_size,
 			(double) normal_size / (double) brotli_size));
 		fwrite(normal_buffer, sizeof(char), normal_size, fp);
 	    }
@@ -848,7 +850,7 @@ static void HTFWriter_free(HTStream *me)
 	exit_immediately(EXIT_SUCCESS);
     }
 
-    FREE(me);
+    free(me);
     return;
 }
 
@@ -889,7 +891,7 @@ static void HTFWriter_abort(HTStream *me, HTError e GCC_UNUSED)
 
     FREE(WWW_Download_File);
 
-    FREE(me);
+    free(me);
 }
 
 /*	Structured Object Class
@@ -935,9 +937,9 @@ HTStream *HTFWriter_new(FILE *fp)
  *
  *	See mailcap spec for description of template.
  */
-static char *mailcap_substitute(HTParentAnchor *anchor,
-				HTPresentation *pres,
-				char *fnam)
+static char *mailcap_substitute(const HTParentAnchor *anchor,
+				const HTPresentation *pres,
+				const char *fnam)
 {
     char *result = LYMakeMailcapCommand(pres->command,
 					HTAtom_name(pres->rep),
@@ -1378,7 +1380,7 @@ HTStream *HTCompressed(HTPresentation *pres,
     HTStream *me;
     HTFormat format;
     char *type = NULL;
-    HTPresentation *Pres = NULL;
+    const HTPresentation *Pres = NULL;
     HTPresentation *Pnow = NULL;
     int n, i;
     BOOL can_present = FALSE;

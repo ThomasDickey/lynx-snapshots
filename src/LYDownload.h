@@ -8,7 +8,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-    extern void LYDownload(char *line);
+    extern void LYDownload(const char *line);
     extern int LYdownload_options(char **newfile, char *data_file);
 
 #ifdef VMS

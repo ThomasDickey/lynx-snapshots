@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYUtils.c,v 1.314 2026/05/25 00:27:54 tom Exp $
+ * $LynxId: LYUtils.c,v 1.315 2026/10/12 17:22:14 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTCP.h>
@@ -2143,7 +2143,7 @@ void LYLocalhostAliases_free(void)
 /*
  * Utility for listing hosts to be treated as local aliases.  - FM
  */
-void LYAddLocalhostAlias(char *alias)
+void LYAddLocalhostAlias(const char *alias)
 {
     char *LocalAlias = NULL;
 
@@ -7419,12 +7419,15 @@ char *LYgetXDisplay(void)
  * Set the value of the X-Window $DISPLAY variable (yes it leaks memory, but
  * that is putenv's fault).
  */
-void LYsetXDisplay(char *new_display)
+void LYsetXDisplay(const char *new_display)
 {
     if (new_display != NULL) {
 #ifdef VMS
-	LYUpperCase(new_display);
-	Define_VMSLogical(DISPLAY, new_display);
+	char *upper_display = NULL;
+
+	StrAllocCopy(upper_display, new_display);
+	LYUpperCase(upper_display);
+	Define_VMSLogical(DISPLAY, upper_display);
 #else
 	static char *display_putenv_command;
 

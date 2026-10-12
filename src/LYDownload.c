@@ -1,4 +1,4 @@
-/* $LynxId: LYDownload.c,v 1.73 2025/01/06 16:17:09 tom Exp $ */
+/* $LynxId: LYDownload.c,v 1.74 2026/10/12 12:50:50 tom Exp $ */
 #include <HTUtils.h>
 #include <HTParse.h>
 #include <HTList.h>
@@ -25,7 +25,7 @@ BOOLEAN LYDidRename = FALSE;
 
 static char LYValidDownloadFile[LY_MAXPATH] = "\0";
 
-void LYDownload(char *line)
+void LYDownload(const char *line)
 {
     char *Line = NULL, *method, *file, *sug_file = NULL;
     int method_number;
@@ -33,7 +33,7 @@ void LYDownload(char *line)
     char *the_command = NULL;
     bstring *buffer = NULL;
     bstring *command = NULL;
-    char *cp;
+    const char *cp;
     lynx_list_item_type *download_command = NULL;
     int ch;
     RecallType recall;

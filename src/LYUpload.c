@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYUpload.c,v 1.42 2025/01/06 16:25:40 tom Exp $
+ * $LynxId: LYUpload.c,v 1.43 2026/10/12 12:59:26 tom Exp $
  *
  *  Routines to upload files to the local filesystem.
  *  Created by: Rick Mallett, Carleton University
@@ -169,7 +169,7 @@ int LYUpload(char *line)
  *	LYNXDIRED://UPLOAD=<#>/TO=<STRING>
  */
 int LYUpload_options(char **newfile,
-		     char *directory)
+		     const char *directory)
 {
     static char tempfile[LY_MAXPATH];
     FILE *fp0;

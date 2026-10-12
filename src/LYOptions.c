@@ -1,4 +1,4 @@
-/* $LynxId: LYOptions.c,v 1.191 2025/09/01 23:20:51 tom Exp $ */
+/* $LynxId: LYOptions.c,v 1.192 2026/10/12 12:20:58 tom Exp $ */
 #include <HTUtils.h>
 #include <HTFTP.h>
 #include <HTTP.h>		/* 'reloading' flag */
@@ -64,7 +64,7 @@ BOOLEAN LYCheckUserAgent(void)
 
 static void validate_x_display(void)
 {
-    char *cp;
+    const char *cp;
 
     if ((cp = LYgetXDisplay()) != NULL) {
 	StrAllocCopy(x_display, cp);
@@ -73,7 +73,7 @@ static void validate_x_display(void)
     }
 }
 
-static void summarize_x_display(char *display_option)
+static void summarize_x_display(const char *display_option)
 {
     if ((x_display == NULL && *display_option == '\0') ||
 	(x_display != NULL && !strcmp(x_display, display_option))) {
@@ -1192,7 +1192,7 @@ void LYoptions(void)
 	    if (no_option_save) {
 #if defined(COLOR_CURSES)
 		if (!has_colors()) {
-		    char *terminal = LYGetEnv("TERM");
+		    const char *terminal = LYGetEnv("TERM");
 
 		    if (terminal)
 			HTUserMsg2(COLOR_TOGGLE_DISABLED_FOR_TERM,
@@ -1247,7 +1247,7 @@ void LYoptions(void)
 #if defined(COLOR_CURSES)
 		    again = (BOOLEAN) (chosen == SHOW_COLOR_ON && !has_colors());
 		    if (again) {
-			char *terminal = LYGetEnv("TERM");
+			const char *terminal = LYGetEnv("TERM");
 
 			if (terminal)
 			    HTUserMsg2(COLOR_TOGGLE_DISABLED_FOR_TERM,
@@ -2548,7 +2548,7 @@ static const char *ssl_client_key_file = RC_SSL_CLIENT_KEY_FILE;
 	fprintf(fp,"</select>\n")
 
 static void PutOptValues(FILE *fp, int value,
-			 OptValues * table)
+			 const OptValues * table)
 {
     while (table->LongName != NULL) {
 	if (table->HtmlName) {
@@ -2561,7 +2561,8 @@ static void PutOptValues(FILE *fp, int value,
     }
 }
 
-static BOOLEAN GetOptValues(OptValues * table, char *value,
+static BOOLEAN GetOptValues(const OptValues * table,
+			    const char *value,
 			    int *result)
 {
     while (table->LongName != NULL) {
@@ -2592,7 +2593,7 @@ void build_lss_enum(HTList *list)
 
     FREE(color_style_values);
     if (count != 0) {
-	LSS_NAMES *obj;
+	const LSS_NAMES *obj;
 	int position = 0;
 
 	color_style_values = typecallocn(OptValues, count + 2);
@@ -2620,7 +2621,7 @@ static int get_color_style_value(void)
     int result = 0;
 
     if (LYuse_color_style && non_empty(lynx_lss_file)) {
-	LSS_NAMES *obj;
+	const LSS_NAMES *obj;
 	int position = 1;
 
 	while ((obj = HTList_objectAt(color_style_list, position - 1)) != NULL) {

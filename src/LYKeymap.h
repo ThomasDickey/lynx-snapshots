@@ -1,4 +1,4 @@
-/* $LynxId: LYKeymap.h,v 1.55 2015/10/07 23:34:55 tom Exp $ */
+/* $LynxId: LYKeymap.h,v 1.56 2026/10/12 12:52:21 tom Exp $ */
 #ifndef LYKEYMAP_H
 #define LYKEYMAP_H
 
@@ -17,11 +17,11 @@ extern "C" {
     extern char *key_for_func(int func);
     extern char *key_for_func_ext(int lac, int context_code);
     extern int LYReverseKeymap(int KeyName);
-    extern int LYStringToKeycode(char *src);
+    extern int LYStringToKeycode(const char *src);
     extern int lacname_to_lac(const char *func);
     extern int lecname_to_lec(const char *func);
     extern int lkcstring_to_lkc(const char *src);
-    extern int remap(char *key, const char *func, int for_dired);
+    extern int remap(const char *key, const char *func, int for_dired);
     extern void print_keymap(char **newfile);
     extern void reset_emacs_keys(void);
     extern void reset_numbers_as_arrows(void);
@@ -45,7 +45,7 @@ extern "C" {
     extern int current_layout;
     extern LYKbLayout_t *LYKbLayouts[];
     extern const char *LYKbLayoutNames[];
-    extern BOOLEAN LYSetKbLayout(char *layout_id);
+    extern BOOLEAN LYSetKbLayout(const char *layout_id);
 #endif
 
 #if defined(DIRED_SUPPORT) && defined(OK_OVERRIDE)

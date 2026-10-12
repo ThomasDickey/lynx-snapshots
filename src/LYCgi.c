@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYCgi.c,v 1.76 2026/04/21 08:03:56 tom Exp $
+ * $LynxId: LYCgi.c,v 1.77 2026/10/12 20:41:53 tom Exp $
  *                   Lynx CGI support                              LYCgi.c
  *                   ================
  *
@@ -160,13 +160,14 @@ static BOOL can_exec_cgi(const char *linktext, const char *linkargs)
 {
     char *message = NULL;
     char *command = NULL;
-    char *p;
     BOOL result = TRUE;
 
     if (!exec_ok(HTLoadedDocumentURL(), linktext, CGI_PATH)) {
 	/* exec_ok gives out msg. */
 	result = FALSE;
     } else {
+	char *p;
+
 	StrAllocCopy(command, linktext);
 	if (non_empty(linkargs)) {
 	    HTSprintf(&command, " %s", linkargs);

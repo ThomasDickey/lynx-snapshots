@@ -1,4 +1,4 @@
-/* $LynxId: LYGetFile.c,v 1.98 2025/01/06 16:03:46 tom Exp $ */
+/* $LynxId: LYGetFile.c,v 1.100 2026/10/12 21:10:18 tom Exp $ */
 #include <HTUtils.h>
 #include <HTTP.h>
 #include <HTAnchor.h>		/* Anchor class */
@@ -142,7 +142,7 @@ int getfile(DocInfo *doc, int *target)
      */
     if ((temp = HTParse(doc->address, "", PARSE_HOST)) != NULL &&
 	strlen(temp) > 3) {
-	char *cp1;
+	const char *cp1;
 
 	if ((cp1 = StrChr(temp, '@')) == NULL)
 	    cp1 = temp;
@@ -463,7 +463,7 @@ int getfile(DocInfo *doc, int *target)
 		/*
 		 * Bug puts slash on end if none is in the string.
 		 */
-		char *last_slash = strrchr(doc->address, '/');
+		const char *last_slash = strrchr(doc->address, '/');
 
 		if (last_slash - doc->address
 		    == (int) strlen(doc->address) - 1)
@@ -585,7 +585,7 @@ int getfile(DocInfo *doc, int *target)
 	} else if (url_type == TELNET_URL_TYPE ||
 		   url_type == TN3270_URL_TYPE ||
 		   url_type == TELNET_GOPHER_URL_TYPE) {
-	    char *proxy;
+	    const char *proxy;
 
 	    if (!telnet_ok) {
 		HTUserMsg(TELNET_DISABLED);
@@ -630,7 +630,7 @@ int getfile(DocInfo *doc, int *target)
 #endif
 
 	} else if (url_type == RLOGIN_URL_TYPE) {
-	    char *proxy;
+	    const char *proxy;
 
 	    if (!rlogin_ok) {
 		HTUserMsg(RLOGIN_DISABLED);
@@ -1138,10 +1138,9 @@ int follow_link_number(int c,
 		       int *num)
 {
     bstring *temp = NULL;
-    char *p;
+    const char *p;
     int rel = 0;
     int new_top, new_link;
-    BOOL want_go;
     int curline = *num;		/* passed in from mainloop() */
     int code;
 
@@ -1218,7 +1217,7 @@ int follow_link_number(int c,
 	 * Check if we want to make the link corresponding to the number the
 	 * current link, rather than ACTIVATE-ing it.
 	 */
-	want_go = (BOOL) (c == 'g' || c == 'G');
+	BOOL want_go = (BOOL) (c == 'g' || c == 'G');
 
 	/* If rel, add or subtract num from current link, or
 	 * nearest previous/subsequent link if current link is not on screen.
@@ -1484,7 +1483,7 @@ BOOLEAN exec_ok(const char *source,
 
 static int fix_httplike_urls(DocInfo *doc, UrlTypes type)
 {
-    char *slash;
+    const char *slash;
 
     /*
      * If there's a fragment present, our simplistic methods won't work.  - kw

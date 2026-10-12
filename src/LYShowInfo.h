@@ -13,7 +13,7 @@ extern "C" {
     extern const char *LYVersionDate(void);
     extern int LYShowInfo(DocInfo *doc,
 			  DocInfo *newdoc,
-			  char *owner_address);
+			  const char *owner_address);
 
 #ifdef __cplusplus
 }

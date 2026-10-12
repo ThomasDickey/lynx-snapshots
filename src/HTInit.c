@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTInit.c,v 1.105 2025/01/06 16:21:31 tom Exp $
+ * $LynxId: HTInit.c,v 1.108 2026/10/12 23:45:24 tom Exp $
  *
  *		Configuration-specific Initialization		HTInit.c
  *		----------------------------------------
@@ -33,8 +33,8 @@
 
 #define CTrace(p) CTRACE2(TRACE_CFG, p)
 
-static int HTLoadTypesConfigFile(char *fn, AcceptMedia media);
-static int HTLoadExtensionsConfigFile(char *fn);
+static int HTLoadTypesConfigFile(const char *fn, AcceptMedia media);
+static int HTLoadExtensionsConfigFile(const char *fn);
 
 #define SET_SUFFIX1(suffix, description, type) \
 	HTSetSuffix(suffix, description, type, 1.0)
@@ -316,7 +316,7 @@ static void TrimCommand(char *command)
     LYTrimTrailing(command);
 #ifdef UNIX
     {
-	char *s = command;
+	const char *s = command;
 	char *d = command;
 	int ch;
 	int c0 = ' ';
@@ -446,10 +446,12 @@ static int ProcessMailcapEntry(FILE *fp, struct MailcapEntry *mc, AcceptMedia me
 
 	t = GetCommand(s, &mallocd_string);
 	arg = mallocd_string;
-	eq = StrChr(arg, '=');
-	if (eq) {
-	    *eq++ = '\0';
-	    eq = LYSkipBlanks(eq);
+	if (arg != NULL) {
+	    eq = StrChr(arg, '=');
+	    if (eq) {
+		*eq++ = '\0';
+		eq = LYSkipBlanks(eq);
+	    }
 	}
 	if (non_empty(arg)) {
 	    arg = Cleanse(arg);
@@ -563,9 +565,10 @@ static char *LYCopyValue(const char *s)
 {
     const char *t;
     char *result = NULL;
-    int j, k;
 
     if (*s == DQUOTE) {
+	int j, k;
+
 	t = LYSkipQuoted(s);
 	StrAllocCopy(result, s + 1);
 	result[t - s - 2] = '\0';
@@ -694,6 +697,7 @@ static int BuildCommand(HTChunk *cmd,
 {
 #ifdef UNIX
     const char *discard = " >/dev/null 2>&1 ";
+
 #else
     const char *discard = "";
 #endif
@@ -866,7 +870,7 @@ char *LYMakeMailcapCommand(const char *command,
 #define RTR_lookup      1
 #define RTR_add         2
 
-static int RememberTestResult(int mode, char *cmd, int result)
+static int RememberTestResult(int mode, const char *cmd, int result)
 {
     struct cmdlist_s {
 	char *cmd;
@@ -928,10 +932,10 @@ static int PassesTest(struct MailcapEntry *mc)
 	CTrace((tfp, "PassesTest: Testing for XWINDOWS environment.\n"));
 	if (LYgetXDisplay() != NULL) {
 	    CTrace((tfp, "PassesTest: Test passed!\n"));
-	    return (0 == 0);
+	    return TRUE;
 	} else {
 	    CTrace((tfp, "PassesTest: Test failed!\n"));
-	    return (-1 == 0);
+	    return FALSE;
 	}
     }
     if (SameCommand(mc->testcommand, "test -z \"$DISPLAY\"")) {
@@ -939,10 +943,10 @@ static int PassesTest(struct MailcapEntry *mc)
 	CTrace((tfp, "PassesTest: Testing for NON_XWINDOWS environment.\n"));
 	if (LYgetXDisplay() == NULL) {
 	    CTrace((tfp, "PassesTest: Test passed!\n"));
-	    return (0 == 0);
+	    return TRUE;
 	} else {
 	    CTrace((tfp, "PassesTest: Test failed!\n"));
-	    return (-1 == 0);
+	    return FALSE;
 	}
     }
 
@@ -953,7 +957,7 @@ static int PassesTest(struct MailcapEntry *mc)
 	FREE(mc->testcommand);
 	CTrace((tfp, "PassesTest: Testing for LYNX environment.\n"));
 	CTrace((tfp, "PassesTest: Test passed!\n"));
-	return (0 == 0);
+	return TRUE;
     } else
 	/*
 	 *  ... or failure for this one! - FM
@@ -962,7 +966,7 @@ static int PassesTest(struct MailcapEntry *mc)
 	FREE(mc->testcommand);
 	CTrace((tfp, "PassesTest: Testing for non-LYNX environment.\n"));
 	CTrace((tfp, "PassesTest: Test failed!\n"));
-	return (-1 == 0);
+	return FALSE;
     }
 
     result = RememberTestResult(RTR_lookup, mc->testcommand, 0);
@@ -987,7 +991,7 @@ static int PassesTest(struct MailcapEntry *mc)
     return (result >= 0);
 }
 
-static int ProcessMailcapFile(char *file, AcceptMedia media)
+static int ProcessMailcapFile(const char *file, AcceptMedia media)
 {
     struct MailcapEntry mc;
     FILE *fp;
@@ -997,7 +1001,7 @@ static int ProcessMailcapFile(char *file, AcceptMedia media)
     if ((fp = fopen(file, TXT_R)) == NULL) {
 	CTrace((tfp, "ProcessMailcapFile: Could not open '%s'.\n",
 		file));
-	return (-1 == 0);
+	return FALSE;
     }
 
     while (fp && !feof(fp)) {
@@ -1005,7 +1009,7 @@ static int ProcessMailcapFile(char *file, AcceptMedia media)
     }
     LYCloseInput(fp);
     RememberTestResult(RTR_forget, NULL, 0);
-    return (0 == 0);
+    return TRUE;
 }
 
 static int ExitWithError(const char *txt)
@@ -1021,7 +1025,7 @@ static int ExitWithError(const char *txt)
  * behavior, which means that the last match wins. - kw */
 static int reverse_mailcap = 1;
 
-static int HTLoadTypesConfigFile(char *fn, AcceptMedia media)
+static int HTLoadTypesConfigFile(const char *fn, AcceptMedia media)
 {
     int result = 0;
     HTList *saved = HTPresentations;
@@ -1443,13 +1447,14 @@ void HTFileInit(void)
 
 static int HTGetLine(char *s, int n, FILE *f)
 {
-    register int i = 0, r;
+    int i = 0;
 
     if (!f)
 	return (1);
 
     while (1) {
-	r = fgetc(f);
+	int r = fgetc(f);
+
 	s[i] = (char) r;
 
 	if (s[i] == CR) {
@@ -1490,7 +1495,7 @@ static void HTGetWord(char *word, char *line, int stop, int stop2)
     return;
 }
 
-static int HTLoadExtensionsConfigFile(char *fn)
+static int HTLoadExtensionsConfigFile(const char *fn)
 {
     char line[MAX_STRING_LEN];
     char word[MAX_STRING_LEN];

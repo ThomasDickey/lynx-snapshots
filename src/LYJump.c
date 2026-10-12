@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYJump.c,v 1.53 2025/01/06 16:25:40 tom Exp $
+ * $LynxId: LYJump.c,v 1.54 2026/10/12 12:59:26 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTAlert.h>
@@ -52,7 +52,7 @@ void LYJumpTable_free(void)
  * Utility for listing shortcuts, making any repeated
  * shortcut the most current in the list. - FM
  */
-void LYAddJumpShortcut(HTList *historyp, char *shortcut)
+void LYAddJumpShortcut(HTList *historyp, const char *shortcut)
 {
     char *tmp = NULL;
     char *old;
@@ -78,7 +78,7 @@ void LYAddJumpShortcut(HTList *historyp, char *shortcut)
 BOOL LYJumpInit(char *config)
 {
     struct JumpTable *jtp;
-    char *cp;
+    const char *cp;
 
     /*
      * Create a JumpTable structure.
@@ -181,7 +181,8 @@ char *LYJump(int key)
 
     JumpDatum seeking;
     JumpDatum *found;
-    char *bp, *cp;
+    char *bp;
+    const char *cp;
     struct JumpTable *jtp;
     int ch;
     RecallType recall;

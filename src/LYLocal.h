@@ -10,7 +10,7 @@ extern "C" {
 #ifdef DIRED_SUPPORT
 /* Special return code for LYMainLoop.c */
 #define PERMIT_FORM_RESULT (-99)
-    extern int local_create(DocInfo *doc);
+    extern int local_create(const DocInfo *doc);
     extern int local_modify(DocInfo *doc, char **newpath);
     extern int local_remove(DocInfo *doc);
 
@@ -21,9 +21,9 @@ extern "C" {
 /* MainLoop needs to know about this one for atexit cleanup */
     extern void clear_tags(void);
 
-    extern int dired_options(DocInfo *doc, char **newfile);
+    extern int dired_options(const DocInfo *doc, char **newfile);
     extern int local_dired(DocInfo *doc);
-    extern void add_menu_item(char *str);
+    extern void add_menu_item(const char *str);
     extern void reset_dired_menu(void);
     extern void showtags(HTList *tag);
     extern void tagflag(int flag, int cur);

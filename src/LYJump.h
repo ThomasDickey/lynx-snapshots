@@ -1,4 +1,4 @@
-/* $LynxId: LYJump.h,v 1.8 2009/01/01 22:41:42 tom Exp $ */
+/* $LynxId: LYJump.h,v 1.9 2026/10/12 13:01:21 tom Exp $ */
 #ifndef LYJUMP_H
 #define LYJUMP_H
 
@@ -26,7 +26,7 @@ extern "C" {
 
     extern struct JumpTable *JThead;
     extern void LYJumpTable_free(void);
-    extern void LYAddJumpShortcut(HTList *the_history, char *shortcut);
+    extern void LYAddJumpShortcut(HTList *the_history, const char *shortcut);
     extern BOOL LYJumpInit(char *config);
     extern char *LYJump(int key);
 

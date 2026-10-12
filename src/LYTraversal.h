@@ -11,10 +11,10 @@
 extern "C" {
 #endif
     extern BOOLEAN lookup_link(char *target);
-    extern void add_to_table(char *target);
-    extern void add_to_traverse_list(char *fname, char *prev_link_name);
+    extern void add_to_table(const char *target);
+    extern void add_to_traverse_list(const char *fname, const char *prev_link_name);
     extern void dump_traversal_history(void);
-    extern void add_to_reject_list(char *target);
+    extern void add_to_reject_list(const char *target);
     extern BOOLEAN lookup_reject(char *target);
 
 #ifdef __cplusplus

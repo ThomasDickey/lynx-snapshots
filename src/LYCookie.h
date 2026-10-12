@@ -1,4 +1,4 @@
-/* $LynxId: LYCookie.h,v 1.20 2011/06/07 08:29:39 tom Exp $ */
+/* $LynxId: LYCookie.h,v 1.21 2026/10/12 13:11:44 tom Exp $ */
 #ifndef LYCOOKIES_H
 #define LYCOOKIES_H
 
@@ -46,11 +46,11 @@ extern "C" {
 			    const char *SetCookie2,
 			    const char *address);
     extern char *LYAddCookieHeader(char *hostname,
-				   char *partialpath,
+				   const char *partialpath,
 				   int port,
 				   int secure);
-    extern void LYStoreCookies(char *cookie_file);
-    extern void LYLoadCookies(char *cookie_file);
+    extern void LYStoreCookies(const char *cookie_file);
+    extern void LYLoadCookies(const char *cookie_file);
     extern void LYConfigCookies(void);
 
 #ifdef __cplusplus

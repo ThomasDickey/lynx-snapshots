@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYTraversal.c,v 1.30 2010/09/24 22:57:01 tom Exp $
+ * $LynxId: LYTraversal.c,v 1.32 2026/10/12 20:41:53 tom Exp $
  */
 #include <HTUtils.h>
 #include <LYGlobalDefs.h>
@@ -65,7 +65,7 @@ BOOLEAN lookup_link(char *target)
     return (BOOL) (result);
 }
 
-void add_to_table(char *target)
+void add_to_table(const char *target)
 {
 
     FILE *ifp;
@@ -79,7 +79,7 @@ void add_to_table(char *target)
     LYCloseOutput(ifp);
 }
 
-void add_to_traverse_list(char *fname, char *prev_link_name)
+void add_to_traverse_list(const char *fname, const char *prev_link_name)
 {
 
     FILE *ifp;
@@ -117,7 +117,7 @@ void dump_traversal_history(void)
     LYCloseOutput(ifp);
 }
 
-void add_to_reject_list(char *target)
+void add_to_reject_list(const char *target)
 {
 
     FILE *ifp;
@@ -147,7 +147,6 @@ BOOLEAN lookup_reject(char *target)
     FILE *ifp;
     char *buffer = NULL;
     char *line = NULL;
-    size_t len;
     int result = FALSE;
 
     if ((ifp = fopen(TRAVERSE_REJECT_FILE, TXT_R)) == NULL) {
@@ -157,6 +156,8 @@ BOOLEAN lookup_reject(char *target)
     HTSprintf0(&line, "%s", target);
 
     while (LYSafeGets(&buffer, ifp) != NULL && !result) {
+	size_t len;
+
 	LYTrimTrailing(buffer);
 	len = strlen(buffer);
 	if (len != 0) {		/* if not an empty line */

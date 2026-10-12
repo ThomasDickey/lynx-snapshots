@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTAlert.c,v 1.109 2026/05/24 15:16:48 WaitronCharm Exp $
+ * $LynxId: HTAlert.c,v 1.110 2026/10/12 23:00:01 tom Exp $
  *
  *	Displaying messages and getting input for Lynx Browser
  *	==========================================================
@@ -902,7 +902,7 @@ BOOL HTConfirmCookie(domain_entry * de, const char *server,
      * Estimate how much of the cookie we can show.
      */
     if (!LYAcceptAllCookies) {
-	int namelen, valuelen, space_free, percentage;
+	int namelen, valuelen, space_free;
 	char *message = NULL;
 
 	space_free = (LYcolLimit
@@ -919,7 +919,8 @@ BOOL HTConfirmCookie(domain_entry * de, const char *server,
 	     * the whole cookie.  Reduce them both by a percentage.
 	     * This should be smarter.
 	     */
-	    percentage = (100 * space_free) / (namelen + valuelen);
+	    int percentage = (100 * space_free) / (namelen + valuelen);
+
 	    namelen = (percentage * namelen) / 100;
 	    valuelen = (percentage * valuelen) / 100;
 	}

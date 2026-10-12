@@ -1,4 +1,4 @@
-/* $LynxId: LYStyle.h,v 1.20 2020/01/21 21:35:25 tom Exp $ */
+/* $LynxId: LYStyle.h,v 1.21 2026/10/12 13:14:08 tom Exp $ */
 #ifndef LYSTYLE_H
 #define LYSTYLE_H
 
@@ -28,7 +28,7 @@ extern "C" {
 
     extern void style_defaultStyleSheet(void);
 
-    extern int style_readFromFile(char *file);
+    extern int style_readFromFile(const char *file);
 
     extern void TrimColorClass(const char *tagname,
 			       char *styleclassname,
@@ -66,7 +66,7 @@ extern "C" {
      */
     extern void FastTrimColorClass(const char *tag_name,
 				   unsigned name_len,
-				   char *stylename,
+				   const char *stylename,
 				   char **pstylename_end,
 				   int *hcode);
 

@@ -5,7 +5,7 @@
 #define YYBYACC 1
 #define YYMAJOR 2
 #define YYMINOR 0
-#define YYPATCH 20241231
+#define YYPATCH 20260126
 
 #define YYEMPTY        (-1)
 #define yyclearin      (yychar = YYEMPTY)
@@ -25,7 +25,7 @@
 #include <LYLeaks.h>
 
 /*
- *  $LynxId: parsdate.y,v 1.32 2024/01/15 11:09:08 tom Exp $
+ *  $LynxId: parsdate.y,v 1.34 2026/10/12 20:08:14 tom Exp $
  *
  *  This module is adapted and extended from tin, to use for LYmktime().
  *
@@ -839,7 +839,7 @@ static time_t Convert(time_t Month, time_t Day, time_t Year, time_t Hours,
     if (dst == DSTon) {
 	Julian -= DST_OFFSET * 60 * 60;
     } else if (dst == DSTmaybe) {
-	struct tm *tm = localtime(&tod);
+	const struct tm *tm = localtime(&tod);
 
 	if (tm != NULL) {
 	    if (tm->tm_isdst)
@@ -853,7 +853,7 @@ static time_t Convert(time_t Month, time_t Day, time_t Year, time_t Hours,
 
 static time_t DSTcorrect(time_t Start, time_t Future)
 {
-    struct tm *tm;
+    const struct tm *tm;
     time_t StartDay;
     time_t FutureDay;
 
@@ -870,7 +870,7 @@ static time_t DSTcorrect(time_t Start, time_t Future)
 
 static time_t RelativeMonth(time_t Start, time_t RelMonth)
 {
-    struct tm *tm;
+    const struct tm *tm;
     time_t Month;
     time_t Year;
 
@@ -1004,8 +1004,6 @@ static int date_lex(void)
     int c;
     char *p;
     char buff[20];
-    int sign;
-    int i;
     int nesting;
 
     /* Get first character after the whitespace. */
@@ -1035,6 +1033,9 @@ static int date_lex(void)
 
     /* A number? */
     if (CTYPE(isdigit, c) || c == '-' || c == '+') {
+	int i;
+	int sign;
+
 	if (c == '-' || c == '+') {
 	    sign = c == '-' ? -1 : 1;
 	    yyInput++;
@@ -1080,7 +1081,7 @@ static int GetTimeInfo(TIMEINFO * Now)
 {
     static time_t LastTime;
     static long LastTzone;
-    struct tm *tm;
+    const struct tm *tm;
 
 #if	defined(HAVE_GETTIMEOFDAY)
     struct timeval tv;
@@ -1149,7 +1150,7 @@ static void parsedate_leaks(void)
 time_t parsedate(char *p,
 		 TIMEINFO * now)
 {
-    struct tm *tm;
+    const struct tm *tm;
     TIMEINFO ti;
     time_t Start;
 
@@ -1211,7 +1212,7 @@ time_t parsedate(char *p,
      * from the error return value.  (Alternately could set errno on error.) */
     return (Start == BAD_TIME) ? 0 : Start;
 }
-#line 1215 "y.tab.c"
+#line 1216 "y.tab.c"
 
 /* For use in generated program */
 #define yydepth (int)(yystack.s_mark - yystack.s_base)
@@ -1892,7 +1893,7 @@ case 3:
 	    }
 #endif	/* defined(lint) */
 	}
-#line 1896 "y.tab.c"
+#line 1897 "y.tab.c"
 break;
 case 4:
 #line 166 "./parsdate.y"
@@ -1900,14 +1901,14 @@ case 4:
 	    yyHaveTime++;
 	    yyTimezone = yystack.l_mark[0].Number;
 	}
-#line 1904 "y.tab.c"
+#line 1905 "y.tab.c"
 break;
 case 5:
 #line 170 "./parsdate.y"
 	{
 	    yyHaveDate++;
 	}
-#line 1911 "y.tab.c"
+#line 1912 "y.tab.c"
 break;
 case 6:
 #line 173 "./parsdate.y"
@@ -1915,7 +1916,7 @@ case 6:
 	    yyHaveDate++;
 	    yyHaveTime++;
 	}
-#line 1919 "y.tab.c"
+#line 1920 "y.tab.c"
 break;
 case 7:
 #line 177 "./parsdate.y"
@@ -1924,14 +1925,14 @@ case 7:
 	    yyHaveTime++;
 	    yyTimezone = yystack.l_mark[0].Number;
 	}
-#line 1928 "y.tab.c"
+#line 1929 "y.tab.c"
 break;
 case 8:
 #line 182 "./parsdate.y"
 	{
 	    yyHaveRel = 1;
 	}
-#line 1935 "y.tab.c"
+#line 1936 "y.tab.c"
 break;
 case 9:
 #line 187 "./parsdate.y"
@@ -1947,7 +1948,7 @@ case 9:
 	    yySeconds = 0;
 	    yyMeridian = yystack.l_mark[0].Meridian;
 	}
-#line 1951 "y.tab.c"
+#line 1952 "y.tab.c"
 break;
 case 10:
 #line 199 "./parsdate.y"
@@ -1957,7 +1958,7 @@ case 10:
 	    yySeconds = 0;
 	    yyMeridian = yystack.l_mark[0].Meridian;
 	}
-#line 1961 "y.tab.c"
+#line 1962 "y.tab.c"
 break;
 case 11:
 #line 205 "./parsdate.y"
@@ -1968,7 +1969,7 @@ case 11:
 	    yyMeridian = MER24;
 	    yyDSTmode = DSToff;
 	}
-#line 1972 "y.tab.c"
+#line 1973 "y.tab.c"
 break;
 case 12:
 #line 212 "./parsdate.y"
@@ -1978,7 +1979,7 @@ case 12:
 	    yySeconds = yystack.l_mark[-1].Number;
 	    yyMeridian = yystack.l_mark[0].Meridian;
 	}
-#line 1982 "y.tab.c"
+#line 1983 "y.tab.c"
 break;
 case 13:
 #line 218 "./parsdate.y"
@@ -1990,7 +1991,7 @@ case 13:
 	    yyMeridian = MER24;
 	    yyDSTmode = DSToff;
 	}
-#line 1994 "y.tab.c"
+#line 1995 "y.tab.c"
 break;
 case 14:
 #line 228 "./parsdate.y"
@@ -1998,7 +1999,7 @@ case 14:
 	    yyval.Number = yystack.l_mark[0].Number;
 	    yyDSTmode = DSToff;
 	}
-#line 2002 "y.tab.c"
+#line 2003 "y.tab.c"
 break;
 case 15:
 #line 232 "./parsdate.y"
@@ -2006,7 +2007,7 @@ case 15:
 	    yyval.Number = yystack.l_mark[0].Number;
 	    yyDSTmode = DSTon;
 	}
-#line 2010 "y.tab.c"
+#line 2011 "y.tab.c"
 break;
 case 16:
 #line 236 "./parsdate.y"
@@ -2014,7 +2015,7 @@ case 16:
 	    yyTimezone = yystack.l_mark[-1].Number;
 	    yyDSTmode = DSTon;
 	}
-#line 2018 "y.tab.c"
+#line 2019 "y.tab.c"
 break;
 case 17:
 #line 240 "./parsdate.y"
@@ -2026,7 +2027,7 @@ case 17:
 	    yyval.Number = yystack.l_mark[0].Number;
 	    yyDSTmode = DSToff;
 	}
-#line 2030 "y.tab.c"
+#line 2031 "y.tab.c"
 break;
 case 18:
 #line 248 "./parsdate.y"
@@ -2034,7 +2035,7 @@ case 18:
 	    yyval.Number = yystack.l_mark[0].Number;
 	    yyDSTmode = DSToff;
 	}
-#line 2038 "y.tab.c"
+#line 2039 "y.tab.c"
 break;
 case 19:
 #line 254 "./parsdate.y"
@@ -2057,7 +2058,7 @@ case 19:
 		yyval.Number = -((yystack.l_mark[0].Number / 100) * 60 + i);
 	    }
 	}
-#line 2061 "y.tab.c"
+#line 2062 "y.tab.c"
 break;
 case 20:
 #line 275 "./parsdate.y"
@@ -2065,7 +2066,7 @@ case 20:
 	    yyMonth = yystack.l_mark[-2].Number;
 	    yyDay = yystack.l_mark[0].Number;
 	}
-#line 2069 "y.tab.c"
+#line 2070 "y.tab.c"
 break;
 case 21:
 #line 279 "./parsdate.y"
@@ -2081,7 +2082,7 @@ case 21:
 		yyYear = yystack.l_mark[0].Number;
 	    }
 	}
-#line 2085 "y.tab.c"
+#line 2086 "y.tab.c"
 break;
 case 22:
 #line 291 "./parsdate.y"
@@ -2089,7 +2090,7 @@ case 22:
 	    yyMonth = yystack.l_mark[-1].Number;
 	    yyDay = yystack.l_mark[0].Number;
 	}
-#line 2093 "y.tab.c"
+#line 2094 "y.tab.c"
 break;
 case 23:
 #line 295 "./parsdate.y"
@@ -2098,7 +2099,7 @@ case 23:
 	    yyDay = yystack.l_mark[-2].Number;
 	    yyYear = yystack.l_mark[0].Number;
 	}
-#line 2102 "y.tab.c"
+#line 2103 "y.tab.c"
 break;
 case 24:
 #line 300 "./parsdate.y"
@@ -2106,7 +2107,7 @@ case 24:
 	    yyDay = yystack.l_mark[-1].Number;
 	    yyMonth = yystack.l_mark[0].Number;
 	}
-#line 2110 "y.tab.c"
+#line 2111 "y.tab.c"
 break;
 case 25:
 #line 304 "./parsdate.y"
@@ -2115,7 +2116,7 @@ case 25:
 	    yyMonth = yystack.l_mark[-1].Number;
 	    yyYear = yystack.l_mark[0].Number;
 	}
-#line 2119 "y.tab.c"
+#line 2120 "y.tab.c"
 break;
 case 26:
 #line 309 "./parsdate.y"
@@ -2124,7 +2125,7 @@ case 26:
 	    yyMonth = yystack.l_mark[-1].Number;
 	    yyYear = yystack.l_mark[0].Number;
 	}
-#line 2128 "y.tab.c"
+#line 2129 "y.tab.c"
 break;
 case 27:
 #line 314 "./parsdate.y"
@@ -2133,7 +2134,7 @@ case 27:
 	    yyMonth = yystack.l_mark[-1].Number;
 	    yyYear = -yystack.l_mark[0].Number;
 	}
-#line 2137 "y.tab.c"
+#line 2138 "y.tab.c"
 break;
 case 28:
 #line 319 "./parsdate.y"
@@ -2144,7 +2145,7 @@ case 28:
 	    yyDSTmode = DSToff;	/* assume midnight if no time given */
 	    yyTimezone = 0;	/* Lynx assumes GMT for this format */
 	}
-#line 2148 "y.tab.c"
+#line 2149 "y.tab.c"
 break;
 case 29:
 #line 328 "./parsdate.y"
@@ -2156,51 +2157,51 @@ case 29:
 	    yyMinutes = yystack.l_mark[-3].Number;
 	    yySeconds = yystack.l_mark[-1].Number;
 	}
-#line 2160 "y.tab.c"
+#line 2161 "y.tab.c"
 break;
 case 30:
 #line 338 "./parsdate.y"
 	{
 	    yyRelSeconds += yystack.l_mark[-1].Number * yystack.l_mark[0].Number;
 	}
-#line 2167 "y.tab.c"
+#line 2168 "y.tab.c"
 break;
 case 31:
 #line 341 "./parsdate.y"
 	{
 	    yyRelSeconds += yystack.l_mark[-1].Number * yystack.l_mark[0].Number;
 	}
-#line 2174 "y.tab.c"
+#line 2175 "y.tab.c"
 break;
 case 32:
 #line 344 "./parsdate.y"
 	{
 	    yyRelMonth += yystack.l_mark[-1].Number * yystack.l_mark[0].Number;
 	}
-#line 2181 "y.tab.c"
+#line 2182 "y.tab.c"
 break;
 case 33:
 #line 347 "./parsdate.y"
 	{
 	    yyRelMonth += yystack.l_mark[-1].Number * yystack.l_mark[0].Number;
 	}
-#line 2188 "y.tab.c"
+#line 2189 "y.tab.c"
 break;
 case 34:
 #line 352 "./parsdate.y"
 	{
 	    yyval.Meridian = MER24;
 	}
-#line 2195 "y.tab.c"
+#line 2196 "y.tab.c"
 break;
 case 35:
 #line 355 "./parsdate.y"
 	{
 	    yyval.Meridian = yystack.l_mark[0].Meridian;
 	}
-#line 2202 "y.tab.c"
+#line 2203 "y.tab.c"
 break;
-#line 2204 "y.tab.c"
+#line 2205 "y.tab.c"
     default:
         break;
     }

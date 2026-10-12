@@ -1,5 +1,5 @@
 /*
- * $LynxId: UCdomap.c,v 1.115 2025/09/17 22:24:13 tom Exp $
+ * $LynxId: UCdomap.c,v 1.117 2026/10/12 23:00:01 tom Exp $
  *
  *  UCdomap.c
  *  =========
@@ -288,7 +288,7 @@ static void con_clear_unimap(int fordefault);
 static void con_clear_unimap_str(int fordefault);
 static void con_set_default_unimap(void);
 static int UC_con_set_unimap(int UC_charset_out_hndl, int update_flag);
-static int UC_con_set_unimap_str(unsigned ct, struct unipair_str *list, int fordefault);
+static int UC_con_set_unimap_str(unsigned ct, const struct unipair_str *list, int fordefault);
 static int conv_uni_to_pc(long ucs, int usedefault);
 static int conv_uni_to_str(char *outbuf, int buflen, UCode_t ucs, int usedefault);
 static void UCconsole_map_init(void);
@@ -310,8 +310,8 @@ static int default_UChndl = -1;
 
 static void set_inverse_transl(int i)
 {
-    int j, glyph;
-    u16 *p = translations[i];
+    int j;
+    const u16 *p = translations[i];
     unsigned char *q = inverse_translations[i];
 
     if (!q) {
@@ -329,7 +329,8 @@ static void set_inverse_transl(int i)
 	q[j] = 0;
 
     for (j = 0; j < E_TABSZ; j++) {
-	glyph = conv_uni_to_pc((long) p[j], 0);
+	int glyph = conv_uni_to_pc((long) p[j], 0);
+
 	if (glyph >= 0 && glyph < MAX_GLYPH && q[glyph] < 32) {
 	    /*
 	     * Prefer '-' above SHY etc.
@@ -449,7 +450,6 @@ static const struct unimapdesc_str *UC_default_unitable_str = NULL;
 
 static int con_insert_unipair(unsigned unicode, unsigned fontpos, int fordefault)
 {
-    int i;
     unsigned n;
     u16 **p1, *p2;
 
@@ -467,6 +467,8 @@ static int con_insert_unipair(unsigned unicode, unsigned fontpos, int fordefault
     }
 
     if (!(p2 = p1[n = (unicode >> 6) & 0x1f])) {
+	int i;
+
 	p2 = p1[n] = (u16 *) malloc(64 * sizeof(u16));
 	if (!p2)
 	    return ucError;
@@ -662,12 +664,15 @@ static int UC_con_set_unimap(int UC_charset_out_hndl,
     return 0;
 }
 
-static int UC_con_set_unimap_str(unsigned ct, struct unipair_str *list,
+static int UC_con_set_unimap_str(unsigned ct,
+				 const struct unipair_str *list,
 				 int fordefault)
 {
-    int err = 0, err1;
+    int err = 0;
 
     while (ct--) {
+	int err1;
+
 	if ((err1 = con_insert_unipair_str(list->unicode,
 					   list->replace_str,
 					   fordefault)) != 0) {
@@ -693,7 +698,8 @@ static int conv_uni_to_pc(long ucs,
 			  int usedefault)
 {
     int h;
-    u16 **p1, *p2;
+    u16 **p1;
+    const u16 *p2;
 
     /*
      * Only 16-bit codes supported at this time.
@@ -753,7 +759,7 @@ static int conv_uni_to_str(char *outbuf,
 			   UCode_t ucs,
 			   int usedefault)
 {
-    char *h;
+    const char *h;
     char ***p1, **p2;
 
     /*
@@ -825,7 +831,6 @@ int UCTransUniChar(UCode_t unicode,
     int rc = 0;
     int UChndl_out;
     int isdefault, trydefault = 0;
-    const u16 *ut;
 
     if ((UChndl_out = LYCharSet_UC[charset_out].UChndl) < 0) {
 	if (LYCharSet_UC[charset_out].codepage < 0) {
@@ -846,7 +851,8 @@ int UCTransUniChar(UCode_t unicode,
     }
 
     if (!isdefault) {
-	ut = UCInfo[UChndl_out].unitable;
+	const u16 *ut = UCInfo[UChndl_out].unitable;
+
 	if (ut != UC_current_unitable) {
 	    rc = UC_con_set_unimap(UChndl_out, 1);
 	    if (rc < 0) {
@@ -1298,12 +1304,10 @@ int UCReverseTransChar(int ch_out,
 		       int charset_in,
 		       int charset_out)
 {
-    int Gn;
     int rc = ucError;
     int UChndl_in, UChndl_out;
     int isdefault;
     int i_ch = UCH(ch_out);
-    const u16 *ut;
 
     if (charset_in == charset_out)
 	return UCH(ch_out);
@@ -1332,8 +1336,11 @@ int UCReverseTransChar(int ch_out,
 	 * just ASCII chars and trying to back-translate those should
 	 * not give anything but themselves.  - kw
 	 */
-	ut = UCInfo[UChndl_out].unitable;
+	const u16 *ut = UCInfo[UChndl_out].unitable;
+
 	if (ut == UC_current_unitable) {
+	    int Gn;
+
 	    if ((Gn = UCInfo[UChndl_in].GN) < 0) {
 		Gn = UC_MapGN(UChndl_in, 1);
 	    }
@@ -1364,7 +1371,6 @@ int UCTransCharStr(char *outbuf,
     int UChndl_in, UChndl_out;
     int isdefault, trydefault = 0;
     struct unimapdesc_str *repl;
-    const u16 *ut;
     int upd = 0;
 
     if (buflen < 2)
@@ -1400,7 +1406,8 @@ int UCTransCharStr(char *outbuf,
 
     if (chk_single_flag) {
 	if (!isdefault) {
-	    ut = UCInfo[UChndl_out].unitable;
+	    const u16 *ut = UCInfo[UChndl_out].unitable;
+
 	    if (ut == UC_current_unitable) {
 		if (upd)
 		    set_inverse_transl(Gn);
@@ -1723,7 +1730,7 @@ static STRING2PTR UC_setup_LYCharSets_repl(int UC_charset_in_hndl,
     const char *s7;
     const char *s8;
     size_t i;
-    int j, changed;
+    int changed;
     u16 k;
     u8 *ti;
 
@@ -1747,6 +1754,8 @@ static STRING2PTR UC_setup_LYCharSets_repl(int UC_charset_in_hndl,
      */
     if (UCInfo[UC_charset_in_hndl].num_uni > 0) {
 	for (i = 0; i < 256; i++) {
+	    int j;
+
 	    if ((j = UCInfo[UC_charset_in_hndl].unicount[i])) {
 		if ((k = *pp) >= 160 && k < 256 && i >= lowest8) {
 		    ti[k - 160] = UCH(i);
@@ -1758,7 +1767,7 @@ static STRING2PTR UC_setup_LYCharSets_repl(int UC_charset_in_hndl,
 	}
     } {
 	u16 ct;
-	struct unipair_str *list;
+	const struct unipair_str *list;
 
 	/*
 	 * Determine if we have any mapping of a Unicode in the range
@@ -2458,7 +2467,7 @@ static char *nl_langinfo(nl_item item)
  */
 void LYFindLocaleCharset(void)
 {
-    char *name;
+    const char *name;
 
     CTRACE((tfp, "LYFindLocaleCharset(%d)\n", LYLocaleCharset));
     name = nl_langinfo(CODESET);

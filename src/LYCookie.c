@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYCookie.c,v 1.149 2025/07/24 21:00:14 tom Exp $
+ * $LynxId: LYCookie.c,v 1.152 2026/10/12 23:18:58 tom Exp $
  *
  *			       Lynx Cookie Support		   LYCookie.c
  *			       ===================
@@ -173,7 +173,7 @@ static void freeCookie(cookie * co)
 	FREE(co->ddomain);
 	FREE(co->path);
 	FREE(co->PortList);
-	FREE(co);
+	free(co);
     }
 }
 
@@ -389,7 +389,7 @@ static domain_entry *find_domain_entry(const char *name)
 	    de = (domain_entry *) hl->object;
 	    if (de != NULL && de->domain != NULL && de->ddomain != NULL) {
 		CTrace((tfp,
-			"...test_domain_entry(%s) ->(%s) bv:%u, invcheck_bv:%u\n",
+			"...test_domain_entry(%s) ->(%s) bv:%d, invcheck_bv:%d\n",
 			find,
 			NonNull(de->ddomain),
 			de->bv,
@@ -794,7 +794,6 @@ static void store_cookie(cookie * co, const char *hostname,
 	total_cookies++;
     } else {
 	freeCookie(co);
-	co = NULL;
     }
 }
 
@@ -803,7 +802,7 @@ static void store_cookie(cookie * co, const char *hostname,
  *  include in a Cookie: request header. - AK & FM
  */
 static char *scan_cookie_sublist(char *hostname,
-				 char *path,
+				 const char *path,
 				 int port,
 				 HTList *sublist,
 				 char *header,
@@ -819,7 +818,7 @@ static char *scan_cookie_sublist(char *hostname,
 	next = hl->next;
 	co = (cookie *) hl->object;
 
-	if (co == NULL) {
+	if (co == NULL || co->ddomain == NULL) {
 	    continue;
 	}
 
@@ -1010,11 +1009,10 @@ static unsigned parse_attribute(unsigned flags,
 				int attr_len,
 				char *value,
 				const char *address,
-				char *hostname,
+				const char *hostname,
 				int port)
 {
     BOOLEAN known_attr = NO;
-    int url_type;
 
     CTrace((tfp, "parse_attribute %.*s\n", attr_len, attr_start));
 
@@ -1068,6 +1066,8 @@ static unsigned parse_attribute(unsigned flags,
 	 * Don't process a repeat commentURL.  - FM
 	 */
 	    cur_cookie->commentURL == NULL) {
+	    int url_type;
+
 	    /*
 	     * We should get only absolute URLs as values, but will resolve
 	     * versus the request's URL just in case.  - FM
@@ -1105,7 +1105,7 @@ static unsigned parse_attribute(unsigned flags,
 	     */
 	    if (value[0] != '.' && value[0] != '\0' &&
 		value[1] != '\0' && strcasecomp(value, hostname)) {
-		char *ptr = StrChr(value, '.');
+		const char *ptr = StrChr(value, '.');
 
 		if (ptr != NULL && ptr[1] != '\0') {
 		    ptr = value;
@@ -1149,7 +1149,7 @@ static unsigned parse_attribute(unsigned flags,
 	 * Don't process a repeat port.  - FM
 	 */
 	    cur_cookie->PortList == NULL) {
-	    char *cp = value;
+	    const char *cp = value;
 
 	    while ((*cp != '\0') &&
 		   (isdigit(UCH(*cp)) ||
@@ -1245,8 +1245,8 @@ static unsigned parse_attribute(unsigned flags,
 static void LYProcessSetCookies(const char *SetCookie,
 				const char *SetCookie2,
 				const char *address,
-				char *hostname,
-				char *path,
+				const char *hostname,
+				const char *path,
 				int port)
 {
     const char *p, *attr_start, *attr_end, *value_start, *value_end;
@@ -1970,7 +1970,7 @@ void LYSetCookie(const char *SetCookie,
  *  if needed. - AK & FM
  */
 char *LYAddCookieHeader(char *hostname,
-			char *path,
+			const char *path,
 			int port,
 			int secure)
 {
@@ -2021,7 +2021,7 @@ char *LYAddCookieHeader(char *hostname,
 static int number_of_file_cookies = 0;
 
 /* rjp - cookie loading */
-void LYLoadCookies(char *cookie_file)
+void LYLoadCookies(const char *cookie_file)
 {
     FILE *cookie_handle;
     char *buf = NULL;
@@ -2055,7 +2055,8 @@ void LYLoadCookies(char *cookie_file)
     while (LYSafeGets(&buf, cookie_handle) != NULL) {
 	cookie *moo;
 	int tok_loop;
-	char *tok_out, *tok_ptr;
+	const char *tok_out;
+	char *tok_ptr;
 
 	LYTrimNewline(buf);
 	if (buf[0] == '\0' || buf[0] == '#') {
@@ -2175,14 +2176,14 @@ void LYLoadCookies(char *cookie_file)
     LYCloseInput(cookie_handle);
 }
 
-static FILE *NewCookieFile(char *cookie_file)
+static FILE *NewCookieFile(const char *cookie_file)
 {
     CTrace((tfp, "LYStoreCookies: save cookies to %s on exit\n", cookie_file));
     return LYNewTxtFile(cookie_file);
 }
 
 /* rjp - persistent cookie support */
-void LYStoreCookies(char *cookie_file)
+void LYStoreCookies(const char *cookie_file)
 {
     HTList *dl, *cl;
     domain_entry *de;
@@ -2739,7 +2740,7 @@ static int LYHandleCookies(const char *arg,
  *      comma-delimited list of domains.  cookie_domain_flags handles
  *      invcheck behavior, as well as accept/reject behavior. - BJP
  */
-static void cookie_domain_flag_set(char *domainstr,
+static void cookie_domain_flag_set(const char *domainstr,
 				   int flag)
 {
     domain_entry *de = NULL;
@@ -2836,7 +2837,7 @@ static void cookie_domain_flag_set(char *domainstr,
 	    break;
 	}
 	CTrace((tfp,
-		"cookie_domain_flag_set (%s, bv=%u, invcheck_bv=%u)\n",
+		"cookie_domain_flag_set (%s, bv=%d, invcheck_bv=%d)\n",
 		strsmall, de->bv, de->invcheck_bv));
     }
 

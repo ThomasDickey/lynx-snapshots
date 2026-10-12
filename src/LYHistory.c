@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYHistory.c,v 1.97 2025/06/19 19:50:22 Eric.Lindblad Exp $
+ * $LynxId: LYHistory.c,v 1.100 2026/10/12 23:27:42 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTP.h>
@@ -460,7 +460,8 @@ int LYpush(DocInfo *doc, int force_push)
 	   history item. - kw */
 	if (nhist > 0) {
 	    DocAddress WWWDoc;
-	    HTParentAnchor *thisparent, *thatparent = NULL;
+	    const HTParentAnchor *thisparent;
+	    const HTParentAnchor *thatparent = NULL;
 
 	    WWWDoc.address = doc->address;
 	    WWWDoc.post_data = doc->post_data;
@@ -598,7 +599,7 @@ void LYhist_prev_register(DocInfo *doc)
 /*
  * Move to the next filename, link and line number from the history.
  */
-int LYhist_next(DocInfo *doc, DocInfo *newdoc)
+int LYhist_next(const DocInfo *doc, DocInfo *newdoc)
 {
     if (nhist_extra <= 1)	/* == 1 when we are the last one */
 	return 0;
@@ -724,7 +725,6 @@ BOOLEAN historytarget(DocInfo *newdoc)
     int number;
     DocAddress WWWDoc;
     HTParentAnchor *tmpanchor;
-    HText *text;
     BOOLEAN treat_as_intern = FALSE;
 
     if ((!newdoc || !newdoc->address) ||
@@ -771,6 +771,8 @@ BOOLEAN historytarget(DocInfo *newdoc)
      * resubmit the form.  - FM
      */
     if (newdoc->post_data != NULL) {
+	const HText *text;
+
 	WWWDoc.address = newdoc->address;
 	WWWDoc.post_data = newdoc->post_data;
 	WWWDoc.post_content_type = newdoc->post_content_type;
@@ -991,7 +993,7 @@ static void to_stack(char *str)
     if (buffstack == NULL)
 	buffstack = typecallocn(char *, (size_t) status_buf_size);
 
-    FREE(buffstack[topOfStack]);
+    free(buffstack[topOfStack]);
     buffstack[topOfStack] = str;
     topOfStack++;
 #ifdef LY_FIND_LEAKS
@@ -1014,9 +1016,9 @@ static void to_stack(char *str)
  */
 void LYstatusline_messages_on_exit(char **buf)
 {
-    int i;
-
     if (buffstack != NULL) {
+	int i;
+
 	StrAllocCat(*buf, "\n");
 	/* print messages in chronological order:
 	 * probably a single message but let's do it.

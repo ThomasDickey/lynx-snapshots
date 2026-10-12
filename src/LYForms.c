@@ -1,4 +1,4 @@
-/* $LynxId: LYForms.c,v 1.121 2026/05/18 23:31:45 tom Exp $ */
+/* $LynxId: LYForms.c,v 1.122 2026/10/12 12:49:49 tom Exp $ */
 #include <HTUtils.h>
 #include <HTCJK.h>
 #include <HTTP.h>
@@ -68,8 +68,8 @@ int change_form_link_ex(int cur,
 			int redraw_only)
 {
     FormInfo *form = links[cur].l_form;
-    char *link_name;
-    char *link_value;
+    const char *link_name;
+    const char *link_value;
     int newdoc_changed = 0;
     int c = DO_NOTHING;
     int title_adjust = (no_title ? -TITLE_LINES : 0);
@@ -593,7 +593,8 @@ static int form_getstr(int cur,
 	}
 #ifdef CAN_CUT_AND_PASTE	/* 1998/10/01 (Thu) 19:19:22 */
 	if (action == LYE_PASTE) {
-	    unsigned char *s = (unsigned char *) get_clip_grab(), *e;
+	    unsigned char *s = (unsigned char *) get_clip_grab();
+	    const unsigned char *e;
 	    char *buf = NULL;
 	    int len;
 

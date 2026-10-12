@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYPrint.c,v 1.113 2025/07/24 21:06:02 tom Exp $
+ * $LynxId: LYPrint.c,v 1.116 2026/10/12 23:29:50 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTAccess.h>
@@ -63,7 +63,7 @@
 static int remove_quotes(char *string);
 #endif /* USE_VMS_MAILER */
 
-static char *subject_translate8bit(char *source);
+static char *subject_translate8bit(const char *source);
 
 #define LYNX_PRINT_TITLE   0
 #define LYNX_PRINT_URL     1
@@ -110,7 +110,7 @@ static void set_environ(int name,
 #endif
 }
 
-static char *suggested_filename(DocInfo *newdoc)
+static char *suggested_filename(const DocInfo *newdoc)
 {
     char *sug_filename = NULL;
     int rootlen;
@@ -135,9 +135,8 @@ static char *suggested_filename(DocInfo *newdoc)
 static void SetupFilename(bstring **filename,
 			  const char *sug_filename)
 {
-    HTFormat format;
     HTAtom *encoding;
-    char *cp;
+    const char *cp;
 
     BStrCopy0(*filename, sug_filename);		/* add suggestion info */
     /*
@@ -151,7 +150,8 @@ static void SetupFilename(bstring **filename,
     change_sug_filename((*filename)->str);
     if (!(HTisDocumentSource())
 	&& (cp = strrchr((*filename)->str, '.')) != NULL) {
-	format = HTFileFormat((*filename)->str, &encoding, NULL);
+	HTFormat format = HTFileFormat((*filename)->str, &encoding, NULL);
+
 	CTRACE((tfp, "... format %s\n", format->name));
 	if (!strcasecomp(format->name, STR_HTML) ||
 	    !IsUnityEnc(encoding)) {
@@ -177,7 +177,6 @@ static int RecallFilename(bstring **filename,
 			  int flag)
 {
     int ch;
-    char *cp;
     RecallType recall;
 
     /*
@@ -191,7 +190,10 @@ static int RecallFilename(bstring **filename,
 
     if ((ch = LYgetBString(filename, FALSE, 0, recall)) < 0 ||
 	isBEmpty(*filename) || ch == UPARROW_KEY || ch == DNARROW_KEY) {
+	const char *cp;
+
 	if (recall && ch == UPARROW_KEY) {
+
 	    if (*first) {
 		*first = FALSE;
 		/*
@@ -274,7 +276,6 @@ static BOOLEAN confirm_by_pages(const char *prompt,
 				int lines_per_page)
 {
     int pages = lines_in_file / (lines_per_page + 1);
-    int c;
 
     /* count fractional pages ! */
     if ((lines_in_file % (LYlines + 1)) > 0)
@@ -282,6 +283,7 @@ static BOOLEAN confirm_by_pages(const char *prompt,
 
     if (pages > 4) {
 	char *msg = NULL;
+	int c;
 
 	HTSprintf0(&msg, HT_FMT("%d", prompt), pages);
 	(void) prompt;
@@ -299,9 +301,9 @@ static BOOLEAN confirm_by_pages(const char *prompt,
     return TRUE;
 }
 
-static void send_file_to_file(DocInfo *newdoc,
-			      char *content_base,
-			      char *sug_filename)
+static void send_file_to_file(const DocInfo *newdoc,
+			      const char *content_base,
+			      const char *sug_filename)
 {
     BOOLEAN FirstRecall = TRUE;
     BOOLEAN use_cte;
@@ -310,7 +312,7 @@ static void send_file_to_file(DocInfo *newdoc,
     bstring *buffer = NULL;
     bstring *filename = NULL;
     int FnameNum = -1;
-    int FnameTotal;
+    int FnameTotal = 0;
     int c = 0;
 
     _statusline(FILENAME_PROMPT);
@@ -476,9 +478,9 @@ static void send_file_to_file(DocInfo *newdoc,
     return;
 }
 
-static void send_file_to_mail(DocInfo *newdoc,
-			      char *content_base,
-			      char *content_location)
+static void send_file_to_mail(const DocInfo *newdoc,
+			      const char *content_base,
+			      const char *content_location)
 {
     static BOOLEAN first_mail_preparsed = TRUE;
 
@@ -806,9 +808,9 @@ static void send_file_to_mail(DocInfo *newdoc,
     return;
 }
 
-static void send_file_to_printer(DocInfo *newdoc,
-				 char *content_base,
-				 char *sug_filename,
+static void send_file_to_printer(const DocInfo *newdoc,
+				 const char *content_base,
+				 const char *sug_filename,
 				 int printer_number)
 {
     BOOLEAN FirstRecall = TRUE;
@@ -816,7 +818,8 @@ static void send_file_to_printer(DocInfo *newdoc,
     char *the_command = NULL;
     bstring *my_file = NULL;
     char my_temp[LY_MAXPATH];
-    int FnameTotal, FnameNum = -1;
+    int FnameTotal = 0;
+    int FnameNum = -1;
     lynx_list_item_type *cur_printer;
 
     outfile_fp = LYOpenTemp(my_temp,
@@ -967,8 +970,8 @@ static void send_file_to_printer(DocInfo *newdoc,
     return;
 }
 
-static void send_file_to_screen(DocInfo *newdoc,
-				char *content_base,
+static void send_file_to_screen(const DocInfo *newdoc,
+				const char *content_base,
 				int Lpansi)
 {
     FILE *outfile_fp;
@@ -1222,7 +1225,7 @@ static int remove_quotes(char *string)
  * Always returns a new allocated string which has to be freed.
  */
 #include <LYCharUtils.h>
-static char *subject_translate8bit(char *source)
+static char *subject_translate8bit(const char *source)
 {
     char *target = NULL;
 
@@ -1373,7 +1376,7 @@ char *GetFileName(void)
 
     BOOLEAN FirstRecall = TRUE;
     int FnameNum = -1;
-    int FnameTotal;
+    int FnameTotal = 0;
 
     _statusline(FILENAME_PROMPT);
 

@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYEditmap.c,v 1.77 2025/01/06 16:30:57 tom Exp $
+ * $LynxId: LYEditmap.c,v 1.79 2026/10/12 20:35:00 tom Exp $
  *
  * LYEditMap.c
  * Keybindings for line and form editing.
@@ -1278,7 +1278,7 @@ static struct emap *code2emap(int code)
  */
 int lecname_to_lec(const char *func)
 {
-    struct emap *mp;
+    const struct emap *mp;
     int result = -1;
 
     if ((mp = name2emap(func)) != NULL) {
@@ -1289,7 +1289,7 @@ int lecname_to_lec(const char *func)
 
 const char *lec_to_lecname(int code)
 {
-    struct emap *mp;
+    const struct emap *mp;
     const char *result = NULL;
 
     if ((mp = code2emap(code)) != NULL) {
@@ -1795,17 +1795,18 @@ static int LYLoadEditmap(const char *arg GCC_UNUSED,
     HTFormat format_in = WWW_HTML;
     HTStream *target;
     int state[KEYMAP_SIZE];
-    int width[2];
     char *buf = NULL;
     char *ranges = NULL;
-    struct emap *mp;
-    int i;
-    int hanging;
-    int wrapped;
-    int had_output = FALSE;
     int result;
 
     if ((target = HTStreamStack(format_in, format_out, sink, anAnchor)) != NULL) {
+	struct emap *mp;
+	int width[2];
+	int i;
+	int hanging;
+	int wrapped;
+	int had_output = FALSE;
+
 	anAnchor->no_cache = TRUE;
 
 	HTSprintf0(&buf,
@@ -1824,9 +1825,9 @@ static int LYLoadEditmap(const char *arg GCC_UNUSED,
 	    if (code == LYE_NOP) {
 		state[i] = 1;
 	    } else {
-		int need;
-
 		if ((mp = code2emap(code)) != NULL) {
+		    int need;
+
 		    state[i] = 0;
 		    if ((need = (int) strlen(mp->name)) > width[0])
 			width[0] = need;
@@ -1872,8 +1873,8 @@ static int LYLoadEditmap(const char *arg GCC_UNUSED,
 		    int code = CurrentLineEditor()[i];
 
 		    if ((code == mp->code) && !state[i]) {
-			char *value = LYKeycodeToString(i, (i >= 160 &&
-							    i <= 255));
+			const char *value = LYKeycodeToString(i, (i >= 160 &&
+								  i <= 255));
 			int before = wrapped + (ranges ? ((int)
 							  strlen(ranges)) : 0);
 			int after = before;

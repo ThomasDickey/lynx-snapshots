@@ -1,4 +1,4 @@
-/* $LynxId: LYStrings.c,v 1.284 2026/04/21 00:05:44 tom Exp $ */
+/* $LynxId: LYStrings.c,v 1.287 2026/10/12 23:15:59 tom Exp $ */
 #include <HTUtils.h>
 #include <HTCJK.h>
 #include <UCAux.h>
@@ -318,14 +318,14 @@ void LYCloseCloset(RecallType recall)
  * match, i.e., the newest since we search from the top.  This should be made
  * more intelligent, but works for now.
  */
-static char *LYFindInCloset(RecallType recall, char *base)
+static char *LYFindInCloset(RecallType recall, const char *base)
 {
     HTList *list = whichRecall(recall);
-    char *data;
     size_t len = strlen(base);
 
     while (!HTList_isEmpty(list)) {
-	data = (char *) HTList_nextObject(list);
+	char *data = (char *) HTList_nextObject(list);
+
 	if (data != NULL && !StrNCmp(base, data, len))
 	    return (data);
     }
@@ -333,7 +333,7 @@ static char *LYFindInCloset(RecallType recall, char *base)
     return (NULL);
 }
 
-static void LYAddToCloset(RecallType recall, char *str)
+static void LYAddToCloset(RecallType recall, const char *str)
 {
     HTList *list = whichRecall(recall);
     char *data = NULL;
@@ -646,8 +646,6 @@ const char *LYmbcs_skip_glyphs(const char *data,
 			       int n_glyphs,
 			       int utf_flag)
 {
-    int i_glyphs = 0;
-
     if (n_glyphs < 0)
 	n_glyphs = 0;
 
@@ -658,6 +656,8 @@ const char *LYmbcs_skip_glyphs(const char *data,
 		    break;
 	    }
 	} else {
+	    int i_glyphs = 0;
+
 	    while (*data) {
 		if (IS_NEW_GLYPH(*data)) {
 		    if (i_glyphs++ >= n_glyphs) {
@@ -2780,7 +2780,7 @@ const char *LYSkipCNonBlanks(const char *buffer)
  */
 void LYTrimLeading(char *buffer)
 {
-    char *skipped = LYSkipBlanks(buffer);
+    const char *skipped = LYSkipBlanks(buffer);
 
     while ((*buffer++ = *skipped++) != 0) ;
 }
@@ -2811,16 +2811,20 @@ void LYTrimTrailing(char *buffer)
 /* 1997/11/10 (Mon) 14:26:10, originally string_short() in LYExterns.c, but
  * moved here because LYExterns is not always configured.
  */
-char *LYElideString(char *str,
+char *LYElideString(const char *str,
 		    int cut_pos)
 {
-    char buff[MAX_LINE], *s, *d;
+    char buff[MAX_LINE];
     static char s_str[MAX_LINE];
     int len;
 
     LYStrNCpy(buff, str, sizeof(buff) - 1);
     len = (int) strlen(buff);
+
     if (len > (LYcolLimit - 9)) {
+	const char *s;
+	char *d;
+
 	buff[cut_pos] = '.';
 	buff[cut_pos + 1] = '.';
 	for (s = (buff + len) - (LYcolLimit - 9) + cut_pos + 1,
@@ -2965,7 +2969,9 @@ void LYFinishEdit(FieldEditor * edit)
     FREE(Offs2Col);
 }
 
-void LYSetupEdit(FieldEditor * edit, char *old_value, unsigned buffer_limit, int display_limit)
+void LYSetupEdit(FieldEditor * edit, const char *old_value,
+		 unsigned buffer_limit,
+		 int display_limit)
 {
     CTRACE((tfp, "LYSetupEdit buffer %lu, display %d:%s\n",
 	    (unsigned long) buffer_limit,
@@ -3029,7 +3035,7 @@ void LYSetupEdit(FieldEditor * edit, char *old_value, unsigned buffer_limit, int
 /*
  * Counts glyphs in a multibyte (sub)string s of length len.
  */
-static int mbcs_glyphs(char *s, int len)
+static int mbcs_glyphs(const char *s, int len)
 {
     int glyphs = 0;
     int i;
@@ -3052,7 +3058,7 @@ static int mbcs_glyphs(char *s, int len)
  * Check if there are no continuation bytes in the multibyte (sub)string of
  * length len.
  */
-static int mbcs_valid(char *s, int len, int limit)
+static int mbcs_valid(const char *s, int len, int limit)
 {
     int i;
     int result = FALSE;
@@ -3110,19 +3116,19 @@ static int mbcs_skip(char *s, int pos)
  * Given a string that would display (at least) the given number of cells,
  * determine the number of multibyte characters that comprised those cells.
  */
-static int cell2char(char *s, int cells)
+static int cell2char(const char *s, int cells)
 {
     int result = 0;
     int len = (int) strlen(s);
     int pos;
-    int have;
 
     CTRACE_EDIT((tfp, "cell2char(%d) %d:%s\n", cells, len, s));
     if (len != 0) {
 	int best = -1;
 
 	for (pos = 0; pos <= len; ++pos) {
-	    have = LYstrExtent2(s, pos);
+	    int have = LYstrExtent2(s, pos);
+
 	    CTRACE_EDIT((tfp, "  %2d:%2d:%.*s\n", pos, have, pos, s));
 	    if (have >= cells) {
 		if (cells <= 0)
@@ -3622,7 +3628,7 @@ int get_popup_number(const char *msg,
 	*c = '\0';
 	*rel = '\0';
     } else {
-	char *p = temp->str;
+	const char *p = temp->str;
 
 	*rel = '\0';
 	result = atoi(p);
@@ -3987,7 +3993,7 @@ void LYRefreshEdit(FieldEditor * edit)
     LYrefresh();
 }
 
-static void reinsertEdit(FieldEditor * edit, char *result)
+static void reinsertEdit(FieldEditor * edit, const char *result)
 {
     if (result != NULL) {
 	LYDoEdit(edit, '\0', LYE_ERASE, FALSE);
@@ -4014,7 +4020,6 @@ static char **sortedList(HTList *list, int ignorecase)
 {
     size_t count = (unsigned) HTList_count(list);
     size_t j = 0;
-    size_t k, jk;
     char **result = typecallocn(char *, count + 1);
 
     if (result == NULL)
@@ -4029,13 +4034,17 @@ static char **sortedList(HTList *list, int ignorecase)
 
 	/* remove duplicate entries from the sorted index */
 	for (j = 0; result[j] != NULL; j++) {
-	    k = j;
+	    size_t k = j;
+
 	    while (result[k] != NULL
 		   && !strcmp(result[j], result[k])) {
 		k++;
 	    }
 	    k--;
+
 	    if (j != k) {
+		size_t jk;
+
 		for (jk = j;; jk++) {
 		    result[jk] = result[jk + k - j];
 		    if (result[jk] == NULL)
@@ -4060,10 +4069,10 @@ int LYarrayLength(STRING2PTR list)
 int LYarrayWidth(STRING2PTR list)
 {
     int result = 0;
-    int check;
 
     while (*list != NULL) {
-	check = (int) strlen(*list++);
+	int check = (int) strlen(*list++);
+
 	if (check > result)
 	    result = check;
     }
@@ -4205,7 +4214,7 @@ int LYhandlePopupList(int cur_choice,
     static bstring *prev_target = NULL;		/* Search string buffer */
     static bstring *next_target = NULL;		/* Next search buffer */
     static BOOL first = TRUE;
-    char *cp;
+    const char *cp;
     int ch = 0;
     RecallType recall;
     int QueryTotal;
@@ -5266,7 +5275,8 @@ int LYgetBString(bstring **inputline,
 #ifdef CAN_CUT_AND_PASTE
 	case LYE_PASTE:
 	    {
-		unsigned char *s = (unsigned char *) get_clip_grab(), *e;
+		const unsigned char *s = (const unsigned char *) get_clip_grab();
+		const unsigned char *e;
 		size_t len;
 
 		if (!s)
@@ -5275,7 +5285,7 @@ int LYgetBString(bstring **inputline,
 		e = s + len;
 
 		if (len != 0) {
-		    unsigned char *e1 = s;
+		    const unsigned char *e1 = s;
 
 		    while (e1 < e) {
 			if (*e1 < ' ') {	/* Stop here? */
@@ -5504,10 +5514,11 @@ int LYscanFloat(const char *source, float *result)
 char *LYstrsep(char **stringp,
 	       const char *delim)
 {
-    char *marker;
     char *result = NULL;
 
     if (non_emptyS(stringp)) {
+	char *marker;
+
 	result = *stringp;	/* will return the old value */
 	marker = strpbrk(*stringp, delim);
 	if (marker) {
@@ -5531,14 +5542,17 @@ char *LYstrsep(char **stringp,
 char *LYstrstr(char *haystack,
 	       const char *needle)
 {
-    int len = (int) strlen(needle);
     char *result = NULL;
 
-    for (; *haystack != '\0'; haystack++) {
-	if (0 == UPPER8(*haystack, *needle)) {
-	    if (0 == strncasecomp8(haystack + 1, needle + 1, len - 1)) {
-		result = haystack;
-		break;
+    if (needle != NULL) {
+	int len = (int) strlen(needle);
+
+	for (; *haystack != '\0'; haystack++) {
+	    if (0 == UPPER8(*haystack, *needle)) {
+		if (0 == strncasecomp8(haystack + 1, needle + 1, len - 1)) {
+		    result = haystack;
+		    break;
+		}
 	    }
 	}
     }
@@ -5561,7 +5575,6 @@ char *LYstrstr(char *haystack,
 const char *LYno_attr_char_case_strstr(const char *haystack,
 				       const char *needle)
 {
-    const char *refptr, *tstptr;
     const char *result = NULL;
 
     if (haystack != NULL && needle != NULL) {
@@ -5569,7 +5582,10 @@ const char *LYno_attr_char_case_strstr(const char *haystack,
 	SkipSpecialChars(haystack);
 
 	for (; *haystack != '\0' && (result == NULL); haystack++) {
+
 	    if (0 == UPPER8(*haystack, *needle)) {
+		const char *refptr, *tstptr;
+
 		refptr = haystack + 1;
 		tstptr = needle + 1;
 
@@ -5611,7 +5627,6 @@ const char *LYno_attr_char_case_strstr(const char *haystack,
 const char *LYno_attr_char_strstr(const char *haystack,
 				  const char *needle)
 {
-    const char *refptr, *tstptr;
     const char *result = NULL;
 
     if (haystack != NULL && needle != NULL) {
@@ -5620,6 +5635,8 @@ const char *LYno_attr_char_strstr(const char *haystack,
 
 	for (; *haystack != '\0' && (result == NULL); haystack++) {
 	    if ((*haystack) == (*needle)) {
+		const char *refptr, *tstptr;
+
 		refptr = haystack + 1;
 		tstptr = needle + 1;
 
@@ -5676,13 +5693,10 @@ const char *LYno_attr_mbcs_case_strstr(const char *haystack,
 				       int *nstartp,
 				       int *nendp)
 {
-    const char *refptr;
-    const char *tstptr;
-    int len = 0;
-    int offset;
     const char *result = NULL;
 
     if (haystack != NULL && needle != NULL) {
+	int len = 0;
 
 	SkipSpecialChars(haystack);
 
@@ -5692,6 +5706,9 @@ const char *LYno_attr_mbcs_case_strstr(const char *haystack,
 		 IsNormalChar(*(haystack + 1))) ||
 		(0 == UPPER8(*haystack, *needle))) {
 		int tarlen = 0;
+		const char *refptr;
+		const char *tstptr;
+		int offset;
 
 		offset = len;
 		len++;
@@ -5814,19 +5831,19 @@ const char *LYno_attr_mbcs_strstr(const char *haystack,
 				  int *nstartp,
 				  int *nendp)
 {
-    const char *refptr;
-    const char *tstptr;
-    int len = 0;
-    int offset;
     const char *result = NULL;
 
     if (haystack != NULL && needle != NULL) {
+	int len = 0;
 
 	SkipSpecialChars(haystack);
 
 	for (; *haystack != '\0' && (result == NULL); haystack++) {
 	    if ((*haystack) == (*needle)) {
 		int tarlen = 0;
+		const char *refptr;
+		const char *tstptr;
+		int offset;
 
 		offset = len;
 		len++;
@@ -5979,17 +5996,20 @@ char *SNACat(char **target,
  */
 static long UniToLowerCase(long upper)
 {
-    size_t i, high, low;
-    long diff = 0;
     long result = upper;
 
     if (upper > 0) {
+	size_t high, low;
+
 	/*
 	 * Try unicode_to_lower_case[].
 	 */
 	low = 0;
 	high = TABLESIZE(unicode_to_lower_case);
 	while (low < high) {
+	    size_t i;
+	    long diff;
+
 	    /*
 	     * Binary search.
 	     */
@@ -6042,12 +6062,12 @@ int UPPER8(int ch1, int ch2)
 	    result = (TOUPPER(ch1) - TOUPPER(ch2));	/* old-style */
 	} else {
 	    long uni_ch2 = UCTransToUni((char) ch2, current_char_set);
-	    long uni_ch1;
 
 	    if (uni_ch2 < 0) {
 		result = UCH(ch1);
 	    } else {
-		uni_ch1 = UCTransToUni((char) ch1, current_char_set);
+		long uni_ch1 = UCTransToUni((char) ch1, current_char_set);
+
 		result = (int) (UniToLowerCase(uni_ch1) - UniToLowerCase(uni_ch2));
 	    }
 	}
@@ -6101,11 +6121,12 @@ static FILE *cmd_script;
 void LYOpenCmdLogfile(int argc,
 		      char **argv)
 {
-    int n;
-
     if (non_empty(lynx_cmd_logfile)) {
 	cmd_logfile = LYNewTxtFile(lynx_cmd_logfile);
+
 	if (cmd_logfile != NULL) {
+	    int n;
+
 	    fprintf(cmd_logfile, "# Command logfile created by %s %s (%s)\n",
 		    LYNX_NAME, LYNX_VERSION, LYVersionDate());
 	    for (n = 0; n < argc; n++) {

@@ -15,9 +15,9 @@ extern "C" {
     extern int select_menu_multi_bookmarks(void);
     extern int select_multi_bookmarks(void);
     extern void LYMBM_statusline(const char *text);
-    extern void remove_bookmark_link(int cur, char *cur_bookmark_page);
+    extern void remove_bookmark_link(int cur, const char *cur_bookmark_page);
     extern void save_bookmark_link(const char *address, const char *title);
-    extern void set_default_bookmark_page(char *value);
+    extern void set_default_bookmark_page(const char *value);
 
 #ifdef __cplusplus
 }

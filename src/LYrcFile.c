@@ -1,4 +1,4 @@
-/* $LynxId: LYrcFile.c,v 1.111 2025/09/01 22:52:07 tom Exp $ */
+/* $LynxId: LYrcFile.c,v 1.113 2026/10/12 22:59:49 tom Exp $ */
 #include <HTUtils.h>
 #include <HTFTP.h>
 #include <LYUtils.h>
@@ -201,7 +201,7 @@ Config_Enum tbl_force_prompt[] = {
 };
 /* *INDENT-ON* */
 
-static BOOL getBool(char *src)
+static BOOL getBool(const char *src)
 {
     return (BOOL) (!strncasecomp(src, "on", 2) || !strncasecomp(src, "true", 4));
 }
@@ -222,9 +222,10 @@ BOOL LYgetEnum(Config_Enum * table, const char *name,
 {
     Config_Enum *found = NULL;
     unsigned len = (unsigned) strlen(name);
-    int match = 0;
 
     if (len != 0) {
+	int match = 0;
+
 	while (table->name != NULL) {
 	    if (!strncasecomp(table->name, name, (int) len)) {
 		found = table;
@@ -284,11 +285,11 @@ typedef struct config_type {
       ParseData;
     const char **strings;
     Config_Enum *table;
-    void (*write_it) (FILE *fp, struct config_type *);
+    void (*write_it) (FILE *fp, const struct config_type *);
     const char *note;
 } Config_Type;
 
-static int get_assume_charset(char *value)
+static int get_assume_charset(const char *value)
 {
     int i;
 
@@ -301,7 +302,7 @@ static int get_assume_charset(char *value)
     return 0;
 }
 
-static void put_assume_charset(FILE *fp, struct config_type *tbl)
+static void put_assume_charset(FILE *fp, const struct config_type *tbl)
 {
     int i;
 
@@ -310,7 +311,7 @@ static void put_assume_charset(FILE *fp, struct config_type *tbl)
     fprintf(fp, "%s=%s\n\n", tbl->name, LYCharSet_UC[UCLYhndl_for_unspec].MIMEname);
 }
 
-static int get_display_charset(char *value)
+static int get_display_charset(const char *value)
 {
     int i = 0;
 
@@ -320,7 +321,7 @@ static int get_display_charset(char *value)
     return 0;
 }
 
-static void put_display_charset(FILE *fp, struct config_type *tbl)
+static void put_display_charset(FILE *fp, const struct config_type *tbl)
 {
     int i;
 
@@ -329,19 +330,19 @@ static void put_display_charset(FILE *fp, struct config_type *tbl)
     fprintf(fp, "%s=%s\n\n", tbl->name, LYchar_set_names[current_char_set]);
 }
 
-static int get_editor(char *value)
+static int get_editor(const char *value)
 {
     if (!system_editor)
 	StrAllocCopy(editor, value);
     return 0;
 }
 
-static void put_editor(FILE *fp, struct config_type *tbl)
+static void put_editor(FILE *fp, const struct config_type *tbl)
 {
     fprintf(fp, "%s=%s\n\n", tbl->name, NonNull(editor));
 }
 
-int get_http_protocol(char *value)
+int get_http_protocol(const char *value)
 {
     int found = HTprotocolLevel;
 
@@ -352,12 +353,12 @@ int get_http_protocol(char *value)
     return 0;
 }
 
-static void put_http_protocol(FILE *fp, struct config_type *tbl)
+static void put_http_protocol(FILE *fp, const struct config_type *tbl)
 {
     fprintf(fp, "%s=%s\n\n", tbl->name, LYputEnum(tbl_HTTP_protocol, HTprotocolLevel));
 }
 
-int get_tagsoup(char *value)
+int get_tagsoup(const char *value)
 {
     int found = Old_DTD;
 
@@ -369,10 +370,11 @@ int get_tagsoup(char *value)
     return 0;
 }
 
-static void put_tagsoup(FILE *fp, struct config_type *tbl)
+static void put_tagsoup(FILE *fp, const struct config_type *tbl)
 {
     fprintf(fp, "%s=%s\n\n", tbl->name, LYputEnum(tbl_DTD_recovery, Old_DTD));
 }
+
 
 /* This table is searched ignoring case */
 /* *INDENT-OFF* */
@@ -1117,27 +1119,33 @@ It is not this file.\n\
  */
 BOOL will_save_rc(const char *name)
 {
-    Config_Type *tbl = lookup_config(name);
+    const Config_Type *tbl = lookup_config(name);
 
     return (BOOL) (tbl->name != NULL);
 }
 
-int enable_lynxrc(char *value)
+int enable_lynxrc(const char *value)
 {
-    Config_Type *tbl;
-    char *colon = StrChr(value, ':');
+    char *copied = NULL;
+    char *colon;
+
+    StrAllocCopy(copied, value);
+    colon = StrChr(copied, ':');
 
     if (colon != NULL) {
+	Config_Type *tbl;
+
 	*colon++ = 0;
-	LYTrimLeading(value);
-	LYTrimTrailing(value);
+	LYTrimLeading(copied);
+	LYTrimTrailing(copied);
 
 	for (tbl = Config_Table; tbl->name != NULL; tbl++) {
-	    if (!strcasecomp(value, tbl->name)) {
+	    if (!strcasecomp(copied, tbl->name)) {
 		tbl->enabled = getBool(colon);
 		break;
 	    }
 	}
     }
+    free(copied);
     return 0;
 }

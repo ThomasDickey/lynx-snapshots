@@ -1,4 +1,4 @@
-/* $LynxId: LYKeymap.c,v 1.126 2025/01/06 16:19:03 tom Exp $ */
+/* $LynxId: LYKeymap.c,v 1.128 2026/10/12 22:59:53 tom Exp $ */
 #include <HTUtils.h>
 #include <LYUtils.h>
 #include <LYGlobalDefs.h>
@@ -710,10 +710,11 @@ HTList *LYcommandList(void)
  */
 Kcmd *LYKeycodeToKcmd(LYKeymapCode code)
 {
-    unsigned j;
     Kcmd *result = NULL;
 
     if (code > LYK_UNKNOWN) {
+	unsigned j;
+
 	for (j = 0; revmap[j].name != NULL; j++) {
 	    if (revmap[j].code == code) {
 		result = revmap + j;
@@ -729,13 +730,14 @@ Kcmd *LYKeycodeToKcmd(LYKeymapCode code)
  */
 Kcmd *LYStringToKcmd(const char *name)
 {
-    size_t need = strlen(name);
-    size_t j;
-    BOOL exact = FALSE;
     Kcmd *result = NULL;
     Kcmd *maybe = NULL;
 
     if (non_empty(name)) {
+	BOOL exact = FALSE;
+	size_t need = strlen(name);
+	size_t j;
+
 	for (j = 0; revmap[j].name != NULL; j++) {
 	    if (!strcasecomp(revmap[j].name, name)) {
 		result = revmap + j;
@@ -792,9 +794,8 @@ char *LYKeycodeToString(int c,
     return buf;
 }
 
-int LYStringToKeycode(char *src)
+int LYStringToKeycode(const char *src)
 {
-    unsigned n;
     int key = -1;
     int len = (int) strlen(src);
 
@@ -815,7 +816,10 @@ int LYStringToKeycode(char *src)
 	if (isEmpty(dst))
 	    key = -1;
     }
+
     if (key < 0) {
+	unsigned n;
+
 	for (n = 0; n < TABLESIZE(named_keys); n++) {
 	    if (!strcasecomp(named_keys[n].name, src)) {
 		key = named_keys[n].key;
@@ -830,7 +834,7 @@ int LYStringToKeycode(char *src)
 
 static char *pretty_html(int c)
 {
-    char *src = LYKeycodeToString(c, TRUE);
+    const char *src = LYKeycodeToString(c, TRUE);
 
 
     if (src != NULL) {
@@ -850,10 +854,10 @@ static char *pretty_html(int c)
 	char *dst = buf;
 	int adj = 0;
 	unsigned n;
-	BOOLEAN found;
 
 	while ((c = *src++) != 0) {
-	    found = FALSE;
+	    BOOLEAN found = FALSE;
+
 	    for (n = 0; n < TABLESIZE(table); n++) {
 		if (c == table[n].code) {
 		    found = TRUE;
@@ -879,7 +883,7 @@ static char *pretty_html(int c)
     return NULL;
 }
 
-static char *format_binding(LYKeymap_t *table, int i)
+static char *format_binding(const LYKeymap_t *table, int i)
 {
     LYKeymap_t the_key = table[i];
     char *buf = NULL;
@@ -946,7 +950,7 @@ static void print_binding(HTStream *target, int i, int both)
  */
 int lacname_to_lac(const char *func)
 {
-    Kcmd *mp = LYStringToKcmd(func);
+    const Kcmd *mp = LYStringToKcmd(func);
 
     return (mp != NULL) ? (int) mp->code : -1;
 }
@@ -1060,11 +1064,11 @@ GLOBALDEF HTProtocol LYLynxKeymap =
  * when for_dired is requested.
  * returns lynxkeycode value != 0 if the mapping was made, 0 if not.
  */
-int remap(char *key,
+int remap(const char *key,
 	  const char *func,
 	  int for_dired)
 {
-    Kcmd *mp;
+    const Kcmd *mp;
     int c;
     int result = 0;
 
@@ -1230,7 +1234,7 @@ char *key_for_func(int func)
 {
     static char *buf;
     int i;
-    char *formatted;
+    const char *formatted;
 
     if ((i = LYReverseKeymap(func)) >= 0) {
 	formatted = LYKeycodeToString(i, TRUE);
@@ -1253,7 +1257,6 @@ char *fmt_keys(int lkc_first,
     char *buf = NULL;
     BOOLEAN quotes = FALSE;
     char *fmt_first;
-    char *fmt_second;
 
     if (lkc_first < 0)
 	return NULL;
@@ -1272,7 +1275,8 @@ char *fmt_keys(int lkc_first,
 	StrAllocCopy(buf, fmt_first);
     }
     if (lkc_second >= 0) {
-	fmt_second = LYKeycodeToString(lkc_second, TRUE);
+	char *fmt_second = LYKeycodeToString(lkc_second, TRUE);
+
 	if (!fmt_second) {
 	    FREE(buf);
 	    return NULL;
@@ -1399,7 +1403,7 @@ int LYReverseKeymap(int KeyName)
 }
 
 #ifdef EXP_KEYBOARD_LAYOUT
-BOOLEAN LYSetKbLayout(char *layout_id)
+BOOLEAN LYSetKbLayout(const char *layout_id)
 {
     int i;
     BOOLEAN result = FALSE;

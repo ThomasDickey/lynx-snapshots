@@ -1,4 +1,4 @@
-/* $LynxId: LYUtils.h,v 1.103 2026/04/19 22:59:30 tom Exp $ */
+/* $LynxId: LYUtils.h,v 1.104 2026/10/12 12:27:06 tom Exp $ */
 #ifndef LYUTILS_H
 #define LYUTILS_H
 
@@ -181,7 +181,7 @@ extern "C" {
     extern void LYAddHilite(int cur, char *text, int x);
     extern void LYAddHtmlSep(char **path);
     extern void LYAddHtmlSep0(char *path);
-    extern void LYAddLocalhostAlias(char *alias);
+    extern void LYAddLocalhostAlias(const char *alias);
     extern void LYAddPathSep(char **path);
     extern void LYAddPathSep0(char *path);
     extern void LYAddPathToHome(char *fbuffer, size_t fbuffer_size, const char *fname);
@@ -207,7 +207,7 @@ extern "C" {
     extern void LYTrimRelFromAbsPath(char *path);
     extern void LYhighlight(int flag, int cur, const char *target);
     extern void LYmsec_delay(unsigned msec);
-    extern void LYsetXDisplay(char *new_display);
+    extern void LYsetXDisplay(const char *new_display);
     extern void WriteInternalTitle(FILE *fp0, const char *Title);
     extern void WriteStreamTitle(HTStream *target, const char *Title);
     extern void change_sug_filename(char *fname);

@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMap.c,v 1.53 2026/04/20 23:57:58 tom Exp $
+ * $LynxId: LYMap.c,v 1.55 2026/10/12 20:29:35 tom Exp $
  *			Lynx Client-side Image MAP Support	       LYMap.c
  *			==================================
  *
@@ -119,8 +119,8 @@ static void LYLynxMaps_free(void)
  * pre-existing LYImageMap entry so that it will have only those from AREA tags
  * for the current analysis of MAP element content.  - FM
  */
-BOOL LYAddImageMap(char *address,
-		   char *title,
+BOOL LYAddImageMap(const char *address,
+		   const char *title,
 		   HTParentAnchor *node_anchor)
 {
     LYImageMap *tmp = NULL;
@@ -202,9 +202,9 @@ BOOL LYAddImageMap(char *address,
  * Utility for adding LYMapElement's to LYImageMap's
  * in the appropriate list. - FM
  */
-BOOL LYAddMapElement(char *map,
-		     char *address,
-		     char *title,
+BOOL LYAddMapElement(const char *map,
+		     const char *address,
+		     const char *title,
 		     HTParentAnchor *node_anchor,
 		     int intern_flag GCC_UNUSED)
 {
@@ -287,9 +287,9 @@ BOOL LYAddMapElement(char *map,
  * Utility for checking whether an LYImageMap entry with a given address
  * already exists in the LynxMaps structure.  - FM
  */
-BOOL LYHaveImageMap(char *address)
+BOOL LYHaveImageMap(const char *address)
 {
-    LYImageMap *Map;
+    const LYImageMap *Map;
     HTList *cur = LynxMaps;
 
     if (!(cur && non_empty(address)))
@@ -400,14 +400,14 @@ static int LYLoadIMGmap(const char *arg,
     HTFormat format_in = WWW_HTML;
     HTStream *target = NULL;
     char *buf = NULL;
-    LYMapElement *tmp = NULL;
+    const LYMapElement *tmp = NULL;
     LYImageMap *theMap = NULL;
     char *MapTitle = NULL;
     char *MapAddress = NULL;
     HTList *theList;
     HTList *cur = NULL;
     const char *address = NULL;
-    char *cp = NULL;
+    const char *cp = NULL;
     DocAddress WWWDoc;
     HTParentAnchor *underlying;
     BOOL old_cache_setting = LYforce_no_cache;
@@ -607,15 +607,17 @@ static int LYLoadIMGmap(const char *arg,
 void LYPrintImgMaps(FILE *fp)
 {
     const char *only = HTLoadedDocumentURL();
-    size_t only_len = strlen(only);
     HTList *outer = LynxMaps;
-    HTList *inner;
     LYImageMap *map;
-    LYMapElement *elt;
-    int count;
 
     if (HTList_count(outer) > 0) {
+	size_t only_len = strlen(only);
+
 	while (NULL != (map = (LYImageMap *) HTList_nextObject(outer))) {
+	    HTList *inner;
+	    const LYMapElement *elt;
+	    int count;
+
 	    if (only_len != 0) {
 		if (StrNCmp(only, map->address, only_len)
 		    || (map->address[only_len] != '\0'

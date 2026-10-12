@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTML.c,v 1.214 2026/05/25 16:52:47 tom Exp $
+ * $LynxId: HTML.c,v 1.217 2026/10/12 23:26:34 tom Exp $
  *
  *		Structured stream to Rich hypertext converter
  *		============================================
@@ -935,7 +935,7 @@ static void clear_objectdata(HTStructured * me)
 
 static char *ResolveActionLink(HTStructured * me, char *action)
 {
-    HTChildAnchor *source;
+    const HTChildAnchor *source;
     HTAnchor *link_dest;
 
     CTRACE((tfp, "Entering ResolveActionLink %s\n", NonNull(action)));
@@ -1941,7 +1941,7 @@ static int HTML_start_element(HTStructured * me, int element_number,
 		isdigit(UCH(*value[HTML_HR_WIDTH])) &&
 		value[HTML_HR_WIDTH][strlen(value[HTML_HR_WIDTH]) - 1] == '%') {
 		char *percent = NULL;
-		int Percent, Width;
+		int Percent;
 
 		StrAllocCopy(percent, value[HTML_HR_WIDTH]);
 		percent[strlen(percent) - 1] = '\0';
@@ -1949,7 +1949,8 @@ static int HTML_start_element(HTStructured * me, int element_number,
 		if (Percent > 100 || Percent < 1)
 		    width -= 5;
 		else {
-		    Width = (width * Percent) / 100;
+		    int Width = (width * Percent) / 100;
+
 		    if (Width < 1)
 			width = 1;
 		    else
@@ -2036,7 +2037,6 @@ static int HTML_start_element(HTStructured * me, int element_number,
 		    value[HTML_TAB_INDENT] &&
 		    isdigit(UCH(*value[HTML_TAB_INDENT])))) {
 	    int column, target = -1;
-	    int enval = 2;
 
 	    column = HText_getCurrentColumn(me->text);
 	    if (HaveAttrValue(HTML_TAB_TO)) {
@@ -2055,6 +2055,8 @@ static int HTML_start_element(HTStructured * me, int element_number,
 		 * The INDENT value is in "en" (enval per column) units.
 		 * Divide it by enval, rounding odd values up.  - FM
 		 */
+		int enval = 2;
+
 		target =
 		    (int) (((1.0 * atoi(value[HTML_TAB_INDENT])) / enval) + (0.5));
 	    }
@@ -5069,10 +5071,11 @@ static int HTML_start_element(HTStructured * me, int element_number,
 	    if (HTCurSelectGroupType == F_RADIO_TYPE &&
 		LYSelectPopups &&
 		fields_are_numbered()) {
-		char marker[8];
 		int opnum = HText_getOptionNum(me->text);
 
 		if (opnum > 0 && opnum < 100000) {
+		    char marker[8];
+
 		    sprintf(marker, "(%d)", opnum);
 		    HTML_put_string(me, marker);
 		    for (i = (int) strlen(marker); i < 5; ++i) {
@@ -6065,7 +6068,8 @@ static int HTML_end_element(HTStructured * me, int element_number,
 	{
 	    int s = 0, e = 0;
 	    char *start = NULL, *first_end = NULL, *last_end = NULL;
-	    char *first_map = NULL, *last_map = NULL;
+	    const char *first_map = NULL;
+	    const char *last_map = NULL;
 	    BOOL have_param = FALSE;
 	    char *data = NULL;
 
@@ -7198,7 +7202,7 @@ static void HTML_free(HTStructured * me)
     FREE(me->map_address);
     FREE(me->LastOptionValue);
     clear_objectdata(me);
-    FREE(me);
+    free(me);
 }
 
 static void HTML_abort(HTStructured * me, HTError e)
@@ -7287,7 +7291,7 @@ static void HTML_abort(HTStructured * me, HTError e)
     FREE(me->LastOptionValue);
     FREE(me->xinclude);
     clear_objectdata(me);
-    FREE(me);
+    free(me);
 }
 
 /*	Get Styles from style sheet
@@ -7662,7 +7666,7 @@ static void CacheThru_free(HTStream *me)
 {
     CacheThru_do_free(me);
     (*me->actions->_free) (me->target);
-    FREE(me);
+    free(me);
 }
 
 static void CacheThru_abort(HTStream *me, HTError e)
@@ -7687,7 +7691,7 @@ static void CacheThru_abort(HTStream *me, HTError e)
 	CacheThru_do_free(me);
     }
     (*me->actions->_abort) (me->target, e);
-    FREE(me);
+    free(me);
 }
 
 /*
@@ -7757,7 +7761,7 @@ static HTStream *CacheThru_new(HTParentAnchor *anchor,
     char *cp_freeme = NULL;
     char filename[LY_MAXPATH];
     HTStream *stream = NULL;
-    HTProtocol *p = (HTProtocol *) anchor->protocol;
+    const HTProtocol *p = (HTProtocol *) anchor->protocol;
 
     /*
      * Neatly and transparently vanish if source caching is disabled.
@@ -8042,6 +8046,7 @@ static char *MakeNewTitle(STRING2PTR value, int src_type)
     } else {
 	/* normal title */
 	char *cp = strrchr(newtitle, '.');
+
 	if (cp) {
 	    if (AS_casecomp(cp, ".gif") == 0)
 		*cp = '\0';

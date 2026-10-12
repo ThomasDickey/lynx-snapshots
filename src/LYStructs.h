@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYStructs.h,v 1.35 2025/10/29 00:13:52 tom Exp $
+ * $LynxId: LYStructs.h,v 1.36 2026/10/12 12:10:19 tom Exp $
  */
 #ifndef LYSTRUCTS_H
 #define LYSTRUCTS_H
@@ -140,7 +140,7 @@ extern "C" {
 	int value;
     } Config_Enum;
 
-    typedef int (*ParseFunc) (char *);
+    typedef int (*ParseFunc) (const char *);
 
 #define ParseUnionMembers \
 	lynx_list_item_type** add_value; \

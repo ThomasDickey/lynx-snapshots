@@ -6,7 +6,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-    extern void UCChangeTerminalCodepage(int newcs, LYUCcharset *p);
+    extern void UCChangeTerminalCodepage(int newcs, const LYUCcharset *p);
 
 #ifdef __cplusplus
 }

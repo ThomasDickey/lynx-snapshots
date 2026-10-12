@@ -1,5 +1,5 @@
 /*
- * $LynxId: HText.h,v 1.19 2025/06/19 19:51:32 Eric.Lindblad Exp $
+ * $LynxId: HText.h,v 1.20 2026/10/12 11:58:59 tom Exp $
  *                                                           Rich Hypertext object for libWWW
  *                                RICH HYPERTEXT OBJECT
  *
@@ -152,7 +152,7 @@ Object Building methods
   RETURN THE ANCHOR ASSOCIATED WITH THIS NODE
 
  */
-    extern HTParentAnchor *HText_nodeAnchor(HText *me);
+    extern HTParentAnchor *HText_nodeAnchor(const HText *me);
 
 /*
 
@@ -167,7 +167,7 @@ Browsing functions
  */
 
     extern BOOL HText_select(HText *text);
-    extern BOOL HText_selectAnchor(HText *text, HTChildAnchor *anchor);
+    extern BOOL HText_selectAnchor(HText *text, const HTChildAnchor *anchor);
 
 /*
 
@@ -182,36 +182,37 @@ Editing functions
 */
 /*      Apply this style to the selection
 */
-    extern void HText_applyStyle(HText *me, HTStyle *style);
+    extern void HText_applyStyle(const HText *me, const HTStyle *style);
 
 /*      Update all text with changed style.
 */
-    extern void HText_updateStyle(HText *me, HTStyle *style);
+    extern void HText_updateStyle(const HText *me, const HTStyle *style);
 
 /*      Return style of  selection
 */
-    extern HTStyle *HText_selectionStyle(HText *me, HTStyleSheet *sheet);
+    extern HTStyle *HText_selectionStyle(const HText *me, const HTStyleSheet *sheet);
 
 /*      Paste in styled text
 */
-    extern void HText_replaceSel(HText *me, const char *aString,
-				 HTStyle *aStyle);
+    extern void HText_replaceSel(const HText *me,
+				 const char *aString,
+				 const HTStyle *aStyle);
 
 /*      Apply this style to the selection and all similarly formatted text
  *      (style recovery only)
  */
-    extern void HTextApplyToSimilar(HText *me, HTStyle *style);
+    extern void HTextApplyToSimilar(const HText *me, const HTStyle *style);
 
 /*      Select the first unstyled run.
  *      (style recovery only)
  */
-    extern void HTextSelectUnstyled(HText *me, HTStyleSheet *sheet);
+    extern void HTextSelectUnstyled(const HText *me, const HTStyleSheet *sheet);
 
 /*      Anchor handling:
 */
-    extern void HText_unlinkSelection(HText *me);
-    extern HTAnchor *HText_referenceSelected(HText *me);
-    extern HTAnchor *HText_linkSelTo(HText *me, HTAnchor * anchor);
+    extern void HText_unlinkSelection(const HText *me);
+    extern HTAnchor *HText_referenceSelected(const HText *me);
+    extern HTAnchor *HText_linkSelTo(const HText *me, const HTAnchor * anchor);
 
 #ifdef __cplusplus
 }

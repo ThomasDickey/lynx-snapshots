@@ -1,5 +1,5 @@
 /*
- * $LynxId: TRSTable.c,v 1.46 2025/01/06 16:27:23 tom Exp $
+ * $LynxId: TRSTable.c,v 1.49 2026/10/12 23:27:42 tom Exp $
  *		Simple table object
  *		===================
  * Authors
@@ -269,7 +269,7 @@ void Stbl_free(STable_info *me)
     free_rowinfo(&me->rowspans2eog);
     if (me)
 	FREE(me->sumcols);
-    FREE(me);
+    free(me);
 }
 
 /*
@@ -929,7 +929,7 @@ static int Stbl_reserveCellsInTable(STable_info *me, int icell,
 				    int colspan,
 				    int rowspan)
 {
-    STable_rowinfo *rows, *row;
+    STable_rowinfo *rows;
     int growby;
     int i;
 
@@ -975,10 +975,12 @@ static int Stbl_reserveCellsInTable(STable_info *me, int icell,
 	if (!rows)
 	    return 0;		/* ignore silently, no free memory, may be recoverable */
 	for (i = 0; i < growby; i++) {
-	    row = rows + me->allocated_rows + i;
+	    STable_rowinfo *row = rows + me->allocated_rows + i;
+
 	    row->allocated = 0;
 	    row->offset = 0;
 	    row->content = 0;
+
 	    if (!me->rowspans2eog.allocated) {
 		row->cells = NULL;
 	    } else {
@@ -1040,7 +1042,7 @@ static void Stbl_cancelRowSpans(STable_info *me)
 int Stbl_addRowToTable(STable_info *me, int alignment,
 		       int lineno)
 {
-    STable_rowinfo *rows, *row;
+    STable_rowinfo *rows;
     STable_states *s = &me->s;
 
     CTRACE2(TRACE_TRST,
@@ -1061,20 +1063,23 @@ int Stbl_addRowToTable(STable_info *me, int alignment,
     s->x_td = -1;
 
     {
-	int i;
 	int growby = 0;
 
 	while (me->nrows + 2 >= me->allocated_rows + growby)
 	    growby += ROWS_GROWBY;
+
 	if (growby) {
 	    if (me->allocated_rows == 0 && !me->rows) {
 		rows = typecallocn(STable_rowinfo, (unsigned) growby);
 	    } else {
+		int i;
+
 		rows = typeRealloc(STable_rowinfo, me->rows,
 				     (unsigned) (me->allocated_rows + growby));
 
 		for (i = 0; rows && i < growby; i++) {
-		    row = rows + me->allocated_rows + i;
+		    STable_rowinfo *row = rows + me->allocated_rows + i;
+
 		    if (!me->rowspans2eog.allocated) {
 			row->allocated = 0;
 			row->cells = NULL;
@@ -1162,8 +1167,6 @@ static void update_sumcols0(STable_cellinfo *sumcols,
 			    int ispan,
 			    int allocated_sumcols)
 {
-    int i;
-
     if (len > 0) {
 	int sumpos = pos;
 	int prevsumpos = sumcols[icell + ispan].pos;
@@ -1178,8 +1181,12 @@ static void update_sumcols0(STable_cellinfo *sumcols,
 		sumpos = sumcols[icell + ispan - 1].pos +
 		    sumcols[icell + ispan - 1].len;
 	}
+
 	advance = sumpos - prevsumpos;
+
 	if (advance > 0) {
+	    int i;
+
 	    for (i = icell + ispan; i < allocated_sumcols; i++) {
 		if (ispan > 0 && sumcols[i].colspan < -1) {
 		    if (i + sumcols[i].colspan < icell + ispan) {
@@ -1205,12 +1212,11 @@ static void update_sumcols0(STable_cellinfo *sumcols,
 }
 
 static int get_remaining_colspan(STable_rowinfo *me,
-				 STable_cellinfo *colinfo,
+				 const STable_cellinfo *colinfo,
 				 int ncolinfo,
 				 int colspan,
 				 int ncols_sofar)
 {
-    int i;
     int last_colspan = (me->ncells
 			? me->cells[me->ncells - 1].colspan
 			: 1);
@@ -1220,6 +1226,8 @@ static int get_remaining_colspan(STable_rowinfo *me,
 			ncols_sofar - (me->ncells + last_colspan - 1));
 	colspan = HTMAX(colspan, 0);
     } else {
+	int i;
+
 	for (i = me->ncells + last_colspan - 1; i < ncolinfo - 1; i++)
 	    if (colinfo[i].cLine == EOCOLG)
 		break;
@@ -1277,7 +1285,7 @@ static int Stbl_fakeFinishCellInTable(STable_info *me,
 	int end_td = (TRST_ENDCELL_ENDTD | TRST_FAKING_CELLS);
 	int need_reserved = 0;
 	int prev_reserved_last = -1;
-	STable_rowinfo *prev_row;
+	const STable_rowinfo *prev_row;
 	int prev_row_n2 = (int) (lastrow - me->rows);
 
 	CTRACE2(TRACE_TRST,
@@ -1639,7 +1647,7 @@ int Stbl_addColInfo(STable_info *me,
 		    int alignment,
 		    int isgroup)
 {
-    STable_cellinfo *sumcols, *sumcol;
+    STable_cellinfo *sumcols;
     int i, icolinfo;
 
     CTRACE2(TRACE_TRST,
@@ -1675,6 +1683,8 @@ int Stbl_addColInfo(STable_info *me,
 				        (unsigned) (me->allocated_sumcols + growby));
 
 		for (i = 0; sumcols && i < growby; i++) {
+		    STable_cellinfo *sumcol;
+
 		    sumcol = sumcols + me->allocated_sumcols + i;
 		    sumcol->pos = sumcols[me->allocated_sumcols - 1].pos;
 		    sumcol->len = 0;
@@ -1757,7 +1767,7 @@ int Stbl_finishTABLE(STable_info *me)
 	    continue;		/* Not a continuation line */
 	minoffset = nextrow[-1].offset;		/* Line before first continuation */
 	CTRACE2(TRACE_TRST, (tfp,
-			     "TRST:Stbl_finishTABLE, l=%d, offset=%d, ended=%u.\n",
+			     "TRST:Stbl_finishTABLE, l=%d, offset=%d, ended=%d.\n",
 			     i, nextrow[-1].offset, nextrow[-1].ended));
 
 	/* Find the common part of the requested offsets */
@@ -1771,7 +1781,7 @@ int Stbl_finishTABLE(STable_info *me)
 		minoffset = nextrow->offset;
 	    CTRACE2(TRACE_TRST,
 		    (tfp,
-		     "TRST:Stbl_finishTABLE, l=%d, offset=%d, ended=%u.\n",
+		     "TRST:Stbl_finishTABLE, l=%d, offset=%d, ended=%d.\n",
 		     j, nextrow->offset, nextrow[-1].ended));
 	    nextrow++;
 	    j++;
@@ -1865,13 +1875,15 @@ static int get_fixup_positions(STable_rowinfo *me, int *oldpos,
 			       STable_cellinfo *sumcols)
 {
     int i = 0, ip = 0;
-    int next_i, newlen;
+    int newlen;
     int ninserts;
 
     if (!me)
 	return -1;
+
     while (i < me->ncells) {
 	int offset;
+	int next_i;
 
 	next_i = i + HTMAX(1, me->cells[i].colspan);
 	if (me->cells[i].cLine != me->Line) {
@@ -1997,14 +2009,14 @@ void Stbl_set_enclosing(STable_info *me, STable_info *enclosing, struct _TextAnc
     me->enclosing_last_anchor_before_stbl = enclosing_last_anchor_before_stbl;
 }
 
-STable_info *Stbl_get_enclosing(STable_info *me)
+STable_info *Stbl_get_enclosing(const STable_info *me)
 {
     if (!me)
 	return NULL;
     return me->enclosing;
 }
 
-struct _TextAnchor *Stbl_get_last_anchor_before(STable_info *me)
+struct _TextAnchor *Stbl_get_last_anchor_before(const STable_info *me)
 {
     if (!me)
 	return NULL;

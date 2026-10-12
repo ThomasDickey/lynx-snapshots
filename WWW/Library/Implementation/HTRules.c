@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTRules.c,v 1.51 2026/10/05 15:56:30 tom Exp $
+ * $LynxId: HTRules.c,v 1.52 2026/10/12 12:44:23 tom Exp $
  *
  *	Configuration manager for Hypertext Daemon		HTRules.c
  *	==========================================
@@ -450,7 +450,7 @@ char *HTTranslate(const char *required)
  *
  * returns	0 OK, < 0 syntax error.
  */
-int HTSetConfiguration(char *config)
+int HTSetConfiguration(const char *config)
 {
     char *line = NULL;
     char *pointer = NULL;

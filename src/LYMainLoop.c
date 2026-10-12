@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMainLoop.c,v 1.259 2025/10/27 08:00:28 tom Exp $
+ * $LynxId: LYMainLoop.c,v 1.261 2026/10/12 22:59:49 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTAccess.h>
@@ -185,8 +185,8 @@ static int are_phys_different(DocInfo *doc1, DocInfo *doc2);
 
 #define FASTTAB
 
-static int sametext(char *een,
-		    char *twee)
+static int sametext(const char *een,
+		    const char *twee)
 {
     if (een && twee)
 	return (strcmp(een, twee) == 0);
@@ -456,7 +456,7 @@ static void set_address(DocInfo *doc, const char *address)
     StrAllocCopy(doc->address, address);
 }
 
-static void copy_address(DocInfo *dst, DocInfo *src)
+static void copy_address(DocInfo *dst, const DocInfo *src)
 {
     StrAllocCopy(dst->address, src->address);
 }
@@ -736,7 +736,7 @@ static BOOL do_check_recall(int ch,
 			    RecallType recall,
 			    BOOLEAN *FirstURLRecall)
 {
-    char *cp;
+    const char *cp;
     BOOL ret = FALSE;
 
     if (*old_user_input == NULL)
@@ -924,7 +924,6 @@ static int find_link_near_col(int col,
 static int DoTraversal(int c,
 		       BOOLEAN *crawl_ok)
 {
-    BOOLEAN rlink_rejected = FALSE;
     BOOLEAN rlink_exists;
     BOOLEAN rlink_allowed;
 
@@ -933,7 +932,8 @@ static int DoTraversal(int c,
 			   links[curdoc.link].lname != NULL);
 
     if (rlink_exists) {
-	rlink_rejected = lookup_reject(links[curdoc.link].lname);
+	BOOLEAN rlink_rejected = lookup_reject(links[curdoc.link].lname);
+
 	if (!rlink_rejected &&
 	    traversal_host &&
 	    links[curdoc.link].lname) {
@@ -977,8 +977,7 @@ static int DoTraversal(int c,
 	    c = RTARROW_KEY;
 	}
     } else {			/* no good right link, so only down and left arrow ok */
-	if (rlink_exists /* && !rlink_rejected */ )
-	    /* uncomment in previous line to avoid duplicates - kw */
+	if (rlink_exists)
 	    add_to_reject_list(links[curdoc.link].lname);
 	if (more_links ||
 	    (curdoc.link > -1 && curdoc.link < nlinks - 1)) {
@@ -1022,9 +1021,9 @@ static BOOLEAN check_history(void)
 	&& HDOC(nhist - 1).post_data
 	&& BINEQ(curdoc.post_data, HDOC(nhist - 1).post_data)
 	&& (base = HText_getContentBase()) != NULL) {
-	char *text = !isLYNXIMGMAP(HDOC(nhist - 1).address)
-	? HDOC(nhist - 1).address
-	: HDOC(nhist - 1).address + LEN_LYNXIMGMAP;
+	const char *text = (!isLYNXIMGMAP(HDOC(nhist - 1).address)
+			    ? HDOC(nhist - 1).address
+			    : HDOC(nhist - 1).address + LEN_LYNXIMGMAP);
 
 	if (!StrNCmp(base, text, strlen(base))) {
 	    /*
@@ -1512,13 +1511,14 @@ static FormInfo *FindFormAction(FormInfo * given, int submit)
 {
     FormInfo *result = NULL;
     FormInfo *fi;
-    int i;
 
     if (given == NULL) {
 	HTAlert(LINK_NOT_IN_FORM);
     } else if (SameFormAction(given, submit)) {
 	result = given;
     } else {
+	int i;
+
 	for (i = 0; i < nlinks; i++) {
 	    if ((fi = links[i].l_form) != NULL &&
 		fi->number == given->number &&
@@ -1531,7 +1531,7 @@ static FormInfo *FindFormAction(FormInfo * given, int submit)
     return result;
 }
 
-static FormInfo *MakeFormAction(FormInfo * given, int submit)
+static FormInfo *MakeFormAction(const FormInfo * given, int submit)
 {
     FormInfo *result = NULL;
 
@@ -1544,7 +1544,7 @@ static FormInfo *MakeFormAction(FormInfo * given, int submit)
 	*result = *given;
 	if (submit) {
 	    if (result->submit_action == NULL) {
-		PerFormInfo *pfi = HText_PerFormInfo(result->number);
+		const PerFormInfo *pfi = HText_PerFormInfo(result->number);
 
 		if (pfi == NULL) {
 		    CTRACE((tfp,
@@ -1595,7 +1595,7 @@ static void handle_LYK_SUBMIT(int cur, DocInfo *doc, BOOLEAN *refresh_screen)
 
 static void handle_LYK_RESET(int cur, BOOLEAN *refresh_screen)
 {
-    FormInfo *form = FindFormAction(links[cur].l_form, 0);
+    const FormInfo *form = FindFormAction(links[cur].l_form, 0);
     FormInfo *make = NULL;
 
     if (form == NULL) {
@@ -1816,13 +1816,13 @@ static void handle_LYK_CLEAR_AUTH(int *old_c,
 
 static int handle_LYK_COMMAND(bstring **user_input)
 {
-    LYKeymapCode ch;
-    Kcmd *mp;
-    char *src, *tmp;
-
     BStrCopy0((*user_input), "");
     _statusline(": ");
     if (LYgetBString(user_input, FALSE, 0, RECALL_CMD) >= 0) {
+	LYKeymapCode ch;
+	Kcmd *mp;
+	char *src, *tmp;
+
 	src = LYSkipBlanks((*user_input)->str);
 	tmp = LYSkipNonBlanks(src);
 	*tmp = 0;
@@ -1842,8 +1842,6 @@ static void handle_LYK_COMMENT(BOOLEAN *refresh_screen,
 			       int *old_c,
 			       int real_c)
 {
-    int c;
-
     if (!*owner_address_p &&
 	strncasecomp(curdoc.address, "http", 4)) {
 	if (*old_c != real_c) {
@@ -1864,11 +1862,13 @@ static void handle_LYK_COMMENT(BOOLEAN *refresh_screen,
 		 */
 		char *address = NULL;
 		char *temp = HTParse(curdoc.address, "", PARSE_PATH);
-		char *cp;
+		int c;
 
 		if (temp != NULL) {
 		    HTUnEscape(temp);
 		    if (LYIsTilde(*temp) && strlen(temp) > 1) {
+			char *cp;
+
 			/*
 			 * It's a ~user URL so guess user@host.  - FM
 			 */
@@ -2372,12 +2372,13 @@ static void handle_LYK_DOWN_xxx(int *old_c,
 				int real_c,
 				int scroll_by)
 {
-    int i;
-
     if (more_text) {
 	LYChgNewline(scroll_by);
+
 	if (nlinks > 0 && curdoc.link > -1 &&
 	    links[curdoc.link].ly > scroll_by) {
+	    int i;
+
 	    newdoc.link = curdoc.link;
 	    for (i = 0; links[i].ly <= scroll_by; i++)
 		--newdoc.link;
@@ -2845,7 +2846,7 @@ static BOOLEAN handle_LYK_FASTBACKW_LINK(int *cmd,
 	 */
 	if (LinkIsTextarea(curdoc.link)) {
 	    int thisgroup = links[curdoc.link].l_form->number;
-	    char *thisname = links[curdoc.link].l_form->name;
+	    const char *thisname = links[curdoc.link].l_form->name;
 
 	    if (curdoc.link > 0 &&
 		!(LinkIsTextarea(0) &&
@@ -2891,7 +2892,7 @@ static BOOLEAN handle_LYK_FASTBACKW_LINK(int *cmd,
 	if (nextlink > 0 &&
 	    LinkIsTextarea(nextlink)) {
 	    int thisgroup = links[nextlink].l_form->number;
-	    char *thisname = links[nextlink].l_form->name;
+	    const char *thisname = links[nextlink].l_form->name;
 
 	    if (LinkIsTextarea(0) &&
 		links[0].l_form->number == thisgroup &&
@@ -2944,7 +2945,7 @@ static void handle_LYK_FASTFORW_LINK(int *old_c,
 	 */
 	if (LinkIsTextarea(curdoc.link)) {
 	    int thisgroup = links[curdoc.link].l_form->number;
-	    char *thisname = links[curdoc.link].l_form->name;
+	    const char *thisname = links[curdoc.link].l_form->name;
 
 	    if (curdoc.link < nlinks - 1 &&
 		!(LinkIsTextarea(nlinks - 1) &&
@@ -3090,9 +3091,9 @@ static BOOLEAN handle_LYK_HEAD(int *cmd)
 	_statusline(HEAD_D_L_OR_CANCEL);
 	c = LYgetch_single();
 	if (c == 'D') {
-	    char *scheme = !isLYNXIMGMAP(curdoc.address)
-	    ? curdoc.address
-	    : curdoc.address + LEN_LYNXIMGMAP;
+	    const char *scheme = (!isLYNXIMGMAP(curdoc.address)
+				  ? curdoc.address
+				  : curdoc.address + LEN_LYNXIMGMAP);
 
 	    if (LYCanDoHEAD(scheme) != TRUE) {
 		HTUserMsg(DOC_NOT_HTTP_URL);
@@ -3174,9 +3175,9 @@ static BOOLEAN handle_LYK_HEAD(int *cmd)
 		c = 'D';
 	    }
 	    if (c == 'D') {
-		char *scheme = !isLYNXIMGMAP(curdoc.address)
-		? curdoc.address
-		: curdoc.address + LEN_LYNXIMGMAP;
+		const char *scheme = (!isLYNXIMGMAP(curdoc.address)
+				      ? curdoc.address
+				      : curdoc.address + LEN_LYNXIMGMAP);
 
 		/*
 		 * The user didn't cancel, so check if a HEAD request is
@@ -3544,15 +3545,13 @@ static const char *hexy = "0123456789ABCDEF";
  * URL-encode a parameter which can then be appended to a URI.
  * RFC-3986 lists reserved characters, which should be encoded.
  */
-static char *urlencode(char *str)
+static char *urlencode(const char *str)
 {
     char *result = NULL;
-    char *ptr;
-    int ch;
 
     if (str != NULL) {
-	result = malloc(strlen(str) * 3 + 1);
-	ptr = result;
+	char *ptr = result = malloc(strlen(str) * 3 + 1);
+	int ch;
 
 	if (result == NULL)
 	    outofmem(__FILE__, "urlencode");
@@ -3583,7 +3582,7 @@ static char *urlencode(char *str)
 static BOOLEAN check_JUMP_param(char **url_template)
 {
     int param = 1;
-    char *subs;
+    const char *subs;
     char *result = *url_template;
     char *encoded = NULL;
     int code = TRUE;
@@ -4104,7 +4103,7 @@ static void handle_LYK_NEXT_LINK(int c,
 	if (LinkIsTextarea(curdoc.link) &&
 	    c == '\t') {
 	    int thisgroup = links[curdoc.link].l_form->number;
-	    char *thisname = links[curdoc.link].l_form->name;
+	    const char *thisname = links[curdoc.link].l_form->name;
 
 	    do
 		curdoc.link++;
@@ -4773,15 +4772,15 @@ static void handle_LYK_TOOLBAR(BOOLEAN *try_internal,
 			       int *old_c,
 			       int real_c)
 {
-    char *cp;
-    char *toolbar = NULL;
-
     if (!HText_hasToolbar(HTMainText)) {
 	if (*old_c != real_c) {
 	    *old_c = real_c;
 	    HTUserMsg(NO_TOOLBAR);
 	}
     } else if (*old_c != real_c) {
+	char *cp;
+	char *toolbar = NULL;
+
 	*old_c = real_c;
 	cp = trimPoundSelector(curdoc.address);
 	HTSprintf0(&toolbar, "%s#%s", curdoc.address, LYToolbarName);
@@ -5415,41 +5414,31 @@ static void handle_LYK_SHIFT_RIGHT(BOOLEAN *flag, int count)
 static BOOLEAN handle_LYK_LINEWRAP_TOGGLE(int *cmd,
 					  BOOLEAN *flag)
 {
-    static const char *choices[] =
-    {
-	"Try to fit screen width",
-	"No line wrap in columns",
-	"Wrap columns at screen width",
-	"Wrap columns at 3/4 screen width",
-	"Wrap columns at 2/3 screen width",
-	"Wrap columns at 1/2 screen width",
-	"Wrap columns at 1/3 screen width",
-	"Wrap columns at 1/4 screen width",
-	NULL
-    };
-    static int wrap[] =
-    {
-	0,
-	0,
-	12,			/* In units of 1/12 */
-	9,
-	8,
-	6,
-	4,
-	3
-    };
-    int c;
     int code = FALSE;
 
     CTRACE((tfp, "Entering handle_LYK_LINEWRAP_TOGGLE\n"));
     if (LYwin != stdscr) {
+	static const char *choices[] =
+	{
+	    "Try to fit screen width",
+	    "No line wrap in columns",
+	    "Wrap columns at screen width",
+	    "Wrap columns at 3/4 screen width",
+	    "Wrap columns at 2/3 screen width",
+	    "Wrap columns at 1/2 screen width",
+	    "Wrap columns at 1/3 screen width",
+	    "Wrap columns at 1/4 screen width",
+	    NULL
+	};
+
 	/* Somehow the mouse is over the number instead of being over the
 	   name, so we decrease x. */
-	c = LYChoosePopup(!LYwideLines,
-			  LYlines / 2 - 2,
-			  LYcolLimit / 2 - 6,
-			  choices, (int) TABLESIZE(choices) - 1,
-			  FALSE, TRUE);
+	int c = LYChoosePopup(!LYwideLines,
+			      LYlines / 2 - 2,
+			      LYcolLimit / 2 - 6,
+			      choices, (int) TABLESIZE(choices) - 1,
+			      FALSE, TRUE);
+
 	/*
 	 * LYhandlePopupList() wasn't really meant to be used outside of
 	 * old-style Options menu processing.  One result of mis-using it here
@@ -5457,6 +5446,18 @@ static BOOLEAN handle_LYK_LINEWRAP_TOGGLE(int *cmd,
 	 * handler and the term_options global variable.  - kw
 	 */
 	if (!term_options) {
+	    static const int wrap[] =
+	    {
+		0,
+		0,
+		12,		/* In units of 1/12 */
+		9,
+		8,
+		6,
+		4,
+		3
+	    };
+
 	    CTRACE((tfp,
 		    "...setting LYwideLines %d, LYtableCols %d (have %d and %d)\n",
 		    c, wrap[c],
@@ -5841,7 +5842,7 @@ int mainloop(void)
 		    }
 		}
 		if (try_internal) {
-		    char *hashp = findPoundSelector(newdoc.address);
+		    const char *hashp = findPoundSelector(newdoc.address);
 
 		    if (hashp) {
 			HTFindPoundSelector(hashp + 1);
@@ -5862,7 +5863,7 @@ int mainloop(void)
 		} else {
 		    if (newdoc.internal_link && newdoc.address &&
 			*newdoc.address == '#' && nhist > 0) {
-			char *cp0;
+			const char *cp0;
 
 			if (isLYNXIMGMAP(HDOC(nhist_1).address))
 			    cp0 = HDOC(nhist_1).address + LEN_LYNXIMGMAP;
@@ -5926,7 +5927,7 @@ int mainloop(void)
 			!isLYNXHIST(NonNull(newdoc.address)) &&
 			!isLYNXCACHE(NonNull(newdoc.address)) &&
 			!isLYNXCOOKIE(NonNull(newdoc.address))) {
-			char *mail_owner = NULL;
+			const char *mail_owner = NULL;
 
 			if (owner_address && isMAILTO_URL(owner_address)) {
 			    mail_owner = owner_address + LEN_MAILTO_URL;
@@ -7234,12 +7235,13 @@ int mainloop(void)
 #ifdef CAN_CUT_AND_PASTE
 	case LYK_TO_CLIPBOARD:	/* ^S */
 	    {
-		char *s;
-		int ch2;
+		const char *s;
 
 		/* The logic resembles one of ADD_BOOKMARK */
 		if (nlinks > 0 && links[curdoc.link].lname
 		    && links[curdoc.link].type != WWW_FORM_LINK_TYPE) {
+		    int ch2;
+
 		    /* Makes sense to copy a link */
 		    _statusline("Copy D)ocument's or L)ink's URL to clipboard or C)ancel?");
 		    ch2 = LYgetch_single();
@@ -7266,7 +7268,9 @@ int mainloop(void)
 	    if (no_goto && !LYValidate) {	/*  Go to not allowed. - FM */
 		HTUserMsg(GOTO_DISALLOWED);
 	    } else {
-		unsigned char *s = (unsigned char *) get_clip_grab(), *e, *t;
+		unsigned char *s = (unsigned char *) get_clip_grab();
+		const unsigned char *e;
+		unsigned char *t;
 		char *buf;
 		int len2;
 
@@ -7900,7 +7904,7 @@ static void HTGotoURLs_free(void)
  * Utility for listing Goto URLs, making any repeated URLs the most current in
  * the list.  - FM
  */
-void HTAddGotoURL(char *url)
+void HTAddGotoURL(const char *url)
 {
     char *mycopy = NULL;
     char *old;
@@ -7992,7 +7996,7 @@ static void show_main_statusline(const LinkInfo *curlink,
 	/*
 	 * Show the URL or, for some internal links, the fragment
 	 */
-	char *cp = NULL;
+	const char *cp = NULL;
 
 	if (curlink->type == WWW_INTERN_LINK_TYPE &&
 	    !isLYNXIMGMAP(curlink->lname)) {
@@ -8172,7 +8176,6 @@ static void status_link(const char *curlink_name,
 	    char *buf = NULL;
 	    int cut_from_pos;
 	    int cut_to_pos;
-	    int n;
 
 	    StrAllocCopy(buf, curlink_name);
 	    /*
@@ -8196,6 +8199,8 @@ static void status_link(const char *curlink_name,
 	     * at least MIN_STATUS characters.
 	     */
 	    if (cut_from_pos > MIN_STATUS) {
+		int n;
+
 		for (n = 1; n <= 3; n++)
 		    buf[cut_from_pos + n] = '.';
 		for (n = 0; cut_to_pos + n <= length; n++)

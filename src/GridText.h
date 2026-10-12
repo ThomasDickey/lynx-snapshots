@@ -1,5 +1,5 @@
 /*
- * $LynxId: GridText.h,v 1.72 2026/05/24 19:12:12 tom Exp $
+ * $LynxId: GridText.h,v 1.74 2026/10/12 23:23:28 tom Exp $
  *
  * Specialities of GridText as subclass of HText
  */
@@ -72,7 +72,7 @@ US-ASCII control characters <32 which are not defined in Unicode standard
 
 /*	Is there any file left?
 */
-    extern BOOL HText_canScrollUp(HText *text);
+    extern BOOL HText_canScrollUp(const HText *text);
     extern BOOL HText_canScrollDown(void);
 
 /*	Move display within window
@@ -81,7 +81,7 @@ US-ASCII control characters <32 which are not defined in Unicode standard
     extern void HText_scrollDown(HText *text);	/* One page */
     extern void HText_scrollTop(HText *text);
     extern void HText_scrollBottom(HText *text);
-    extern void HText_pageDisplay(int line_num, char *target);
+    extern void HText_pageDisplay(int line_num, const char *target);
     extern BOOL HText_pageHasPrevTarget(void);
 
     extern int HText_LinksInLines(HText *text, int line_num, int Lines);
@@ -92,7 +92,7 @@ US-ASCII control characters <32 which are not defined in Unicode standard
     extern int HText_anchorRelativeTo(HText *text, int top_lineno, int anchor_num);
 
     extern void HText_setLastChar(HText *text, int ch);
-    extern char HText_getLastChar(HText *text);
+    extern char HText_getLastChar(const HText *text);
 #ifdef EXP_JAPANESE_SPACES
     extern BOOL HText_checkLastChar_needSpaceOnJoinLines(HText *text);
 #endif
@@ -155,8 +155,8 @@ US-ASCII control characters <32 which are not defined in Unicode standard
 #endif
 
     extern BOOL HTLoadedDocumentEightbit(void);
-    extern BOOL HText_LastLineEmpty(HText *me, int IgnoreSpaces);
-    extern BOOL HText_PreviousLineEmpty(HText *me, int IgnoreSpaces);
+    extern BOOL HText_LastLineEmpty(const HText *me, int IgnoreSpaces);
+    extern BOOL HText_PreviousLineEmpty(const HText *me, int IgnoreSpaces);
     extern BOOL HText_inLineOne(HText *text);
     extern BOOLEAN HTLoadedDocumentIsHEAD(void);
     extern BOOLEAN HTLoadedDocumentIsSafe(void);
@@ -168,14 +168,14 @@ US-ASCII control characters <32 which are not defined in Unicode standard
     extern const char *HText_HiddenLinkAt(HText *text, int number);
     extern int HText_HiddenLinkCount(HText *text);
     extern int HText_LastLineOffset(HText *me);
-    extern int HText_LastLineSize(HText *me, int IgnoreSpaces);
-    extern int HText_PreviousLineSize(HText *me, int IgnoreSpaces);
+    extern int HText_LastLineSize(const HText *me, int IgnoreSpaces);
+    extern int HText_PreviousLineSize(const HText *me, int IgnoreSpaces);
     extern int HText_getCurrentColumn(HText *text);
-    extern int HText_getLines(HText *text);
+    extern int HText_getLines(const HText *text);
     extern int HText_getMaximumColumn(HText *text);
     extern int HText_getNumOfBytes(void);
     extern int HText_getNumOfLines(void);
-    extern int HText_getPreferredTopLine(HText *text, int line_number);
+    extern int HText_getPreferredTopLine(const HText *text, int line_number);
     extern int HText_getTabIDColumn(HText *text, const char *name);
     extern int HText_getTopOfScreen(void);
     extern int do_www_search(DocInfo *doc);
@@ -191,7 +191,7 @@ US-ASCII control characters <32 which are not defined in Unicode standard
     extern void HText_cancelStbl(HText *);
     extern void HText_endStblCOLGROUP(HText *);
     extern void HText_endStblTD(HText *);
-    extern void HText_endStblTR(HText *);
+    extern void HText_endStblTR(const HText *);
     extern void HText_startStblCOL(HText *, int, int, int);
     extern void HText_startStblRowGroup(HText *, int);
     extern void HText_startStblTABLE(HText *, int);
@@ -199,20 +199,20 @@ US-ASCII control characters <32 which are not defined in Unicode standard
     extern void HText_startStblTR(HText *, int);
 
 /* forms stuff */
-    extern void HText_beginForm(char *action,
-				char *method,
-				char *enctype,
-				char *title,
+    extern void HText_beginForm(const char *action,
+				const char *method,
+				const char *enctype,
+				const char *title,
 				const char *accept_cs);
     extern void HText_endForm(HText *text);
-    extern void HText_beginSelect(char *name,
+    extern void HText_beginSelect(const char *name,
 				  int name_cs,
 				  int multiple,
-				  char *len);
-    extern int HText_getOptionNum(HText *text);
+				  const char *len);
+    extern int HText_getOptionNum(const HText *text);
     extern char *HText_setLastOptionValue(HText *text,
 					  char *value,
-					  char *submit_value,
+					  const char *submit_value,
 					  int order,
 					  int checked,
 					  int val_cs,
@@ -222,17 +222,18 @@ US-ASCII control characters <32 which are not defined in Unicode standard
 				InputFieldData * I);
     extern void HText_endInput(HText *text);
     extern PerFormInfo *HText_PerFormInfo(int number);
-    extern int HText_SubmitForm(FormInfo * submit_item, DocInfo *doc,
+    extern int HText_SubmitForm(const FormInfo * submit_item,
+				DocInfo *doc,
 				const char *link_name,
 				const char *link_value);
     extern void HText_DisableCurrentForm(void);
-    extern void HText_ResetForm(FormInfo * form);
+    extern void HText_ResetForm(const FormInfo * form);
     extern void HText_activateRadioButton(FormInfo * form);
     extern BOOLEAN HText_HaveUserChangedForms(HText *text);
 
     extern HTList *search_queries;	/* Previous isindex and whereis queries */
     extern void HTSearchQueries_free(void);
-    extern void HTAddSearchQuery(char *query);
+    extern void HTAddSearchQuery(const char *query);
 
     extern void user_message(const char *message,
 			     const char *argument);
@@ -241,34 +242,34 @@ US-ASCII control characters <32 which are not defined in Unicode standard
 
     extern void www_user_search(int start_line,
 				DocInfo *doc,
-				char *target,
+				const char *target,
 				int direction);
 
     extern void print_crawl_to_fd(FILE *fp,
-				  char *thelink,
-				  char *thetitle);
-    extern char *stub_HTAnchor_address(HTAnchor * me);
+				  const char *thelink,
+				  const char *thetitle);
+    extern char *stub_HTAnchor_address(const HTAnchor * me);
 
     extern void HText_setToolbar(HText *text);
-    extern BOOL HText_hasToolbar(HText *text);
+    extern BOOL HText_hasToolbar(const HText *text);
 
     extern void HText_setNoCache(HText *text);
-    extern BOOL HText_hasNoCacheSet(HText *text);
+    extern BOOL HText_hasNoCacheSet(const HText *text);
 
     extern BOOL HText_hasUTF8OutputSet(HText *text);
     extern void HText_setKcode(HText *text,
 			       const char *charset,
-			       LYUCcharset *p_in);
+			       const LYUCcharset *p_in);
 
     extern void HText_setBreakPoint(HText *text);
 
     extern BOOL HText_AreDifferent(HTParentAnchor *anchor,
 				   const char *full_address);
 
-    extern int HText_EditTextArea(LinkInfo *form_link);
+    extern int HText_EditTextArea(const LinkInfo *form_link);
     extern void HText_EditTextField(LinkInfo *form_link);
-    extern void HText_ExpandTextarea(LinkInfo *form_link, int newlines);
-    extern int HText_InsertFile(LinkInfo *form_link);
+    extern void HText_ExpandTextarea(const LinkInfo *form_link, int newlines);
+    extern int HText_InsertFile(const LinkInfo *form_link);
 
     extern void redraw_lines_of_link(int cur);
     extern void LYMoveToLink(int cur,
@@ -288,9 +289,9 @@ US-ASCII control characters <32 which are not defined in Unicode standard
     extern HTkcode last_kcode;
 #endif
 
-    extern HTkcode HText_getKcode(HText *text);
+    extern HTkcode HText_getKcode(const HText *text);
     extern void HText_updateKcode(HText *text, HTkcode kcode);
-    extern HTkcode HText_getSpecifiedKcode(HText *text);
+    extern HTkcode HText_getSpecifiedKcode(const HText *text);
     extern void HText_updateSpecifiedKcode(HText *text, HTkcode kcode);
 
 #if defined(USE_WCWIDTH_SUPPORT) || defined(EXP_JAPANESE_SPACES)

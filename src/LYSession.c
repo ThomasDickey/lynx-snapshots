@@ -1,4 +1,4 @@
-/* $LynxId: LYSession.c,v 1.13 2025/01/06 16:34:28 tom Exp $ */
+/* $LynxId: LYSession.c,v 1.14 2026/10/12 13:09:33 tom Exp $ */
 
 #include <LYSession.h>
 
@@ -58,7 +58,7 @@ static char *get_filename(char *given_name)
  */
 void RestoreSession(void)
 {
-    char *my_filename = get_filename(sessionin_file);
+    const char *my_filename = get_filename(sessionin_file);
     FILE *fp;
     char *buffer = NULL;
     DocInfo doc;
@@ -66,7 +66,9 @@ void RestoreSession(void)
     int i = 0;
     short errors = 10;		/* how many syntax errors are allowed in
 				 * session file before aborting. */
-    char *value1, *value2, *rsline, *linktext, *rslevel;
+    char *value1, *value2, *linktext;
+    const char *rsline;
+    const char *rslevel;
 
     memset(&doc, 0, sizeof(doc));
 
@@ -177,9 +179,9 @@ void RestoreSession(void)
  */
 void SaveSession(void)
 {
-    char *my_filename = get_filename(sessionout_file);
+    const char *my_filename = get_filename(sessionout_file);
     FILE *fp;
-    VisitedLink *vl;
+    const VisitedLink *vl;
     int i, j, k;
 
     if (my_filename == NULL) {

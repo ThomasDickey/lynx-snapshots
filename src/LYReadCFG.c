@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYReadCFG.c,v 1.205 2025/01/08 00:38:28 tom Exp $
+ * $LynxId: LYReadCFG.c,v 1.207 2026/10/12 20:51:43 tom Exp $
  */
 #ifndef NO_RULES
 #include <HTRules.h>
@@ -81,7 +81,7 @@ static const char *find_colon(const char *buffer)
 }
 
 static void free_item_list_item(lynx_list_item_type **list,
-				lynx_list_item_type *ptr)
+				const lynx_list_item_type *ptr)
 {
     lynx_list_item_type *prev;
     lynx_list_item_type *cur;
@@ -192,7 +192,7 @@ static const char *parse_list_string(char **target, const char *source)
  * Process string buffer fields for DOWNLOADER or UPLOADER
  *                               or PRINTERS   or EXTERNALS menus
  */
-static void add_item_to_list(char *buffer,
+static void add_item_to_list(const char *buffer,
 			     lynx_list_item_type **list_ptr,
 			     int special,
 			     int menu_name)
@@ -299,7 +299,7 @@ static void add_item_to_list(char *buffer,
 }
 
 lynx_list_item_type *find_item_by_number(lynx_list_item_type *list_ptr,
-					 char *number)
+					 const char *number)
 {
     int value = atoi(number);
 
@@ -430,7 +430,7 @@ const char *lookup_color(int code)
 /*
  * Exit routine for failed COLOR parsing.
  */
-static void exit_with_color_syntax(char *error_line)
+static void exit_with_color_syntax(const char *error_line)
 {
     unsigned int i;
 
@@ -456,7 +456,7 @@ The special strings 'nocolor' or 'default', or\n"),
 /*
  * Process string buffer fields for COLOR setting.
  */
-static void parse_color(char *buffer)
+static void parse_color(const char *buffer)
 {
     int color;
     const char *fg, *bg;
@@ -547,7 +547,7 @@ typedef struct {
     Config_Enum *table;
 } Config_Type;
 
-static int assume_charset_fun(char *value)
+static int assume_charset_fun(const char *value)
 {
     assumed_charset = TRUE;
     UCLYhndl_for_unspec = safeUCGetLYhndl_byMIME(value);
@@ -560,19 +560,19 @@ static int assume_charset_fun(char *value)
     return 0;
 }
 
-static int assume_local_charset_fun(char *value)
+static int assume_local_charset_fun(const char *value)
 {
     UCLYhndl_HTFile_for_unspec = safeUCGetLYhndl_byMIME(value);
     return 0;
 }
 
-static int assume_unrec_charset_fun(char *value)
+static int assume_unrec_charset_fun(const char *value)
 {
     UCLYhndl_for_unrec = safeUCGetLYhndl_byMIME(value);
     return 0;
 }
 
-static int character_set_fun(char *value)
+static int character_set_fun(const char *value)
 {
     int i = UCGetLYhndl_byAnyName(value);	/* by MIME or full name */
 
@@ -591,7 +591,7 @@ static int character_set_fun(char *value)
     return 0;
 }
 
-static int outgoing_mail_charset_fun(char *value)
+static int outgoing_mail_charset_fun(const char *value)
 {
     outgoing_mail_charset = UCGetLYhndl_byMIME(value);
     /* -1 if NULL or not recognized value: no translation (compatibility) */
@@ -603,12 +603,13 @@ static int outgoing_mail_charset_fun(char *value)
 /*
  * Process string buffer fields for ASSUMED_COLOR setting.
  */
-static int assumed_color_fun(char *buffer)
+static int assumed_color_fun(const char *buffer)
 {
-    const char *fg = buffer, *bg;
+    const char *fg = buffer;
     char *temp_fg = NULL;
 
     if (LYuse_default_colors) {
+	const char *bg;
 
 	/*
 	 * We are expecting a line of the form:
@@ -635,7 +636,7 @@ static int assumed_color_fun(char *buffer)
 #endif /* EXP_ASSUMED_COLOR */
 
 #ifdef USE_COLOR_TABLE
-static int color_fun(char *value)
+static int color_fun(const char *value)
 {
     parse_color(value);
     return 0;
@@ -643,7 +644,7 @@ static int color_fun(char *value)
 #endif
 
 #ifdef USE_COLOR_STYLE
-static int lynx_lss_file_fun(char *value)
+static int lynx_lss_file_fun(const char *value)
 {
     CTRACE((tfp, "lynx_lss_file_fun '%s'\n", NonNull(value)));
     if (isEmpty(value)) {
@@ -679,7 +680,7 @@ void update_default_colors(void)
     }
 }
 
-static int default_colors_fun(char *value)
+static int default_colors_fun(const char *value)
 {
     LYuse_default_colors = is_true(value);
     update_default_colors();
@@ -687,13 +688,13 @@ static int default_colors_fun(char *value)
 }
 #endif
 
-static int default_bookmark_file_fun(char *value)
+static int default_bookmark_file_fun(const char *value)
 {
     set_default_bookmark_page(value);
     return 0;
 }
 
-static int default_cache_size_fun(char *value)
+static int default_cache_size_fun(const char *value)
 {
     HTCacheSize = atoi(value);
     if (HTCacheSize < 2)
@@ -701,14 +702,14 @@ static int default_cache_size_fun(char *value)
     return 0;
 }
 
-static int default_editor_fun(char *value)
+static int default_editor_fun(const char *value)
 {
     if (!system_editor)
 	StrAllocCopy(editor, value);
     return 0;
 }
 
-static int numbers_as_arrows_fun(char *value)
+static int numbers_as_arrows_fun(const char *value)
 {
     if (is_true(value))
 	keypad_mode = NUMBERS_AS_ARROWS;
@@ -719,14 +720,14 @@ static int numbers_as_arrows_fun(char *value)
 }
 
 #ifdef DIRED_SUPPORT
-static int dired_menu_fun(char *value)
+static int dired_menu_fun(const char *value)
 {
     add_menu_item(value);
     return 0;
 }
 #endif
 
-static int jumpfile_fun(char *value)
+static int jumpfile_fun(const char *value)
 {
     char *buffer = NULL;
 
@@ -739,7 +740,7 @@ static int jumpfile_fun(char *value)
 }
 
 #ifdef EXP_KEYBOARD_LAYOUT
-static int keyboard_layout_fun(char *key)
+static int keyboard_layout_fun(const char *key)
 {
     if (!LYSetKbLayout(key))
 	CTRACE((tfp, "Failed to set keyboard layout %s\n", key));
@@ -747,7 +748,7 @@ static int keyboard_layout_fun(char *key)
 }
 #endif /* EXP_KEYBOARD_LAYOUT */
 
-static int keymap_fun(char *key)
+static int keymap_fun(const char *key)
 {
     char *func, *efunc;
 
@@ -848,21 +849,21 @@ static int keymap_fun(char *key)
     return 0;
 }
 
-static int localhost_alias_fun(char *value)
+static int localhost_alias_fun(const char *value)
 {
     LYAddLocalhostAlias(value);
     return 0;
 }
 
 #ifdef LYNXCGI_LINKS
-static int lynxcgi_environment_fun(char *value)
+static int lynxcgi_environment_fun(const char *value)
 {
     add_lynxcgi_environment(value);
     return 0;
 }
 #endif
 
-static int lynx_sig_file_fun(char *value)
+static int lynx_sig_file_fun(const char *value)
 {
     char temp[LY_MAXPATH];
 
@@ -879,7 +880,7 @@ static int lynx_sig_file_fun(char *value)
 }
 
 #ifndef DISABLE_NEWS
-static int news_chunk_size_fun(char *value)
+static int news_chunk_size_fun(const char *value)
 {
     HTNewsChunkSize = atoi(value);
     /*
@@ -891,7 +892,7 @@ static int news_chunk_size_fun(char *value)
     return 0;
 }
 
-static int news_max_chunk_fun(char *value)
+static int news_max_chunk_fun(const char *value)
 {
     HTNewsMaxChunk = atoi(value);
     /*
@@ -903,7 +904,7 @@ static int news_max_chunk_fun(char *value)
     return 0;
 }
 
-static int news_posting_fun(char *value)
+static int news_posting_fun(const char *value)
 {
     LYNewsPosting = is_true(value);
     no_newspost = (BOOL) (LYNewsPosting == FALSE);
@@ -912,24 +913,21 @@ static int news_posting_fun(char *value)
 #endif /* DISABLE_NEWS */
 
 #ifndef NO_RULES
-static int cern_rulesfile_fun(char *value)
+static int cern_rulesfile_fun(const char *value)
 {
-    char *rulesfile1 = NULL;
     char *rulesfile2 = NULL;
 
     if (HTLoadRules(value) >= 0) {
 	return 0;
     }
-    StrAllocCopy(rulesfile1, value);
-    LYTrimLeading(value);
-    LYTrimTrailing(value);
 
     StrAllocCopy(rulesfile2, value);
+    LYTrimLeading(rulesfile2);
+    LYTrimTrailing(rulesfile2);
     LYTildeExpand(&rulesfile2, FALSE);
 
-    if (strcmp(rulesfile1, rulesfile2) &&
+    if (strcmp(value, rulesfile2) &&
 	HTLoadRules(rulesfile2) >= 0) {
-	FREE(rulesfile1);
 	FREE(rulesfile2);
 	return 0;
     }
@@ -941,7 +939,7 @@ static int cern_rulesfile_fun(char *value)
 }
 #endif /* NO_RULES */
 
-static int referer_with_query_fun(char *value)
+static int referer_with_query_fun(const char *value)
 {
     if (!strncasecomp(value, "SEND", 4))
 	LYRefererWithQuery = 'S';
@@ -952,7 +950,7 @@ static int referer_with_query_fun(char *value)
     return 0;
 }
 
-static int status_buffer_size_fun(char *value)
+static int status_buffer_size_fun(const char *value)
 {
     status_buf_size = atoi(value);
     if (status_buf_size < 2)
@@ -960,7 +958,7 @@ static int status_buffer_size_fun(char *value)
     return 0;
 }
 
-static int startfile_fun(char *value)
+static int startfile_fun(const char *value)
 {
     StrAllocCopy(startfile, value);
 
@@ -977,7 +975,7 @@ static int startfile_fun(char *value)
     return 0;
 }
 
-static int suffix_fun(char *value)
+static int suffix_fun(const char *value)
 {
     char *mime_type, *p, *parsed;
     const char *encoding = NULL;
@@ -1057,13 +1055,16 @@ static int suffix_fun(char *value)
     return 0;
 }
 
-static int suffix_order_fun(char *value)
+static int suffix_order_fun(const char *value)
 {
-    char *p = value;
-    char *optn;
+    char *p = NULL;
+    char *save;
+    const char *optn;
     BOOLEAN want_file_init_now = FALSE;
 
     LYUseBuiltinSuffixes = TRUE;
+    StrAllocCopy(p, value);
+    save = p;
     while ((optn = HTNextTok(&p, ", ", "", NULL)) != NULL) {
 	if (!strcasecomp(optn, "NO_BUILTIN")) {
 	    LYUseBuiltinSuffixes = FALSE;
@@ -1081,10 +1082,11 @@ static int suffix_order_fun(char *value)
 	HTFileInit();
 	FileInitAlreadyDone = TRUE;
     }
+    free(save);
     return 0;
 }
 
-static int system_editor_fun(char *value)
+static int system_editor_fun(const char *value)
 {
     StrAllocCopy(editor, value);
     system_editor = TRUE;
@@ -1094,13 +1096,13 @@ static int system_editor_fun(char *value)
 #define SetViewer(mime_type, viewer) \
     HTSetPresentation(mime_type, viewer, NULL, 1.0, 3.0, 0.0, 0L, mediaCFG)
 
-static int viewer_fun(char *value)
+static int viewer_fun(const char *value)
 {
-    char *mime_type;
+    char *mime_type = NULL;
     char *viewer;
     char *environment;
 
-    mime_type = value;
+    StrAllocCopy(mime_type, value);
 
     if ((strlen(value) < 3)
 	|| (NULL == (viewer = StrChr(mime_type, ':'))))
@@ -1134,10 +1136,11 @@ static int viewer_fun(char *value)
 	SetViewer(mime_type, viewer);
     }
 
+    free(mime_type);
     return 0;
 }
 
-static int nonrest_sigwinch_fun(char *value)
+static int nonrest_sigwinch_fun(const char *value)
 {
     if (!strncasecomp(value, "XWINDOWS", 8)) {
 	LYNonRestartingSIGWINCH = (BOOL) (LYgetXDisplay() != NULL);
@@ -1166,13 +1169,16 @@ static void matched_charset_choice(int display_charset,
 	charset_subsets[i].hide_assumed = FALSE;
 }
 
-static int parse_charset_choice(char *p,
+static int parse_charset_choice(const char *value,
 				int display_charset)	/*if FALSE, then assumed doc charset */
 {
+    char *p = NULL;
+    int code = 0;
     int len, i;
     int matches = 0;
 
     /*only one charset choice is allowed per line! */
+    StrAllocCopy(p, value);
     LYTrimHead(p);
     LYTrimTail(p);
     CTRACE((tfp, "parsing charset choice for %s:\"%s\"",
@@ -1180,9 +1186,8 @@ static int parse_charset_choice(char *p,
     len = (int) strlen(p);
     if (!len) {
 	CTRACE((tfp, " - EMPTY STRING\n"));
-	return 1;
-    }
-    if (*p == '*' && len == 1) {
+	code = 1;
+    } else if (*p == '*' && len == 1) {
 	if (display_charset)
 	    for (custom_display_charset = TRUE, i = 0; i < LYNumCharsets; ++i)
 		charset_subsets[i].hide_display = FALSE;
@@ -1190,9 +1195,7 @@ static int parse_charset_choice(char *p,
 	    for (custom_assumed_doc_charset = TRUE, i = 0; i < LYNumCharsets; ++i)
 		charset_subsets[i].hide_assumed = FALSE;
 	CTRACE((tfp, " - all unhidden\n"));
-	return 0;
-    }
-    if (p[len - 1] == '*') {
+    } else if (p[len - 1] == '*') {
 	--len;
 	for (i = 0; i < LYNumCharsets; ++i) {
 	    if ((!strncasecomp(p, LYchar_set_names[i], len)) ||
@@ -1202,7 +1205,6 @@ static int parse_charset_choice(char *p,
 	    }
 	}
 	CTRACE((tfp, " - %d matches\n", matches));
-	return 0;
     } else {
 	for (i = 0; i < LYNumCharsets; ++i) {
 	    if ((!strcasecomp(p, LYchar_set_names[i])) ||
@@ -1210,20 +1212,23 @@ static int parse_charset_choice(char *p,
 		matched_charset_choice(display_charset, i);
 		++matches;
 		CTRACE((tfp, " - OK, %d matches\n", matches));
+		free(p);
 		return 0;
 	    }
 	}
 	CTRACE((tfp, " - NOT recognised\n"));
-	return 1;
+	code = 1;
     }
+    free(p);
+    return code;
 }
 
-static int parse_display_charset_choice(char *p)
+static int parse_display_charset_choice(const char *p)
 {
     return parse_charset_choice(p, 1);
 }
 
-static int parse_assumed_doc_charset_choice(char *p)
+static int parse_assumed_doc_charset_choice(const char *p)
 {
     return parse_charset_choice(p, 0);
 }
@@ -1235,7 +1240,7 @@ static int parse_assumed_doc_charset_choice(char *p)
  * EXTERNAL and EXTERNAL_MENU share the same list.  EXTERNAL_MENU allows
  * setting a different name than the command string.
  */
-static int external_fun(char *str)
+static int external_fun(const char *str)
 {
     add_item_to_list(str, &externals, FALSE, TRUE);
     return 0;
@@ -1243,8 +1248,8 @@ static int external_fun(char *str)
 #endif
 
 #ifdef USE_PRETTYSRC
-static void html_src_bad_syntax(char *value,
-				char *option_name)
+static void html_src_bad_syntax(const char *value,
+				const char *option_name)
 {
     char *buf = NULL;
 
@@ -1255,7 +1260,7 @@ static void html_src_bad_syntax(char *value,
 }
 
 static int parse_html_src_spec(HTlexeme lexeme_code, char *value,
-			       char *option_name)
+			       const char *option_name)
 {
     /* Now checking the value for being correct.  Since HTML_dtd is not
      * initialized completely (member tags points to non-initiailized data), we
@@ -1291,7 +1296,7 @@ static int parse_html_src_spec(HTlexeme lexeme_code, char *value,
     return 0;
 }
 
-static int psrcspec_fun(char *s)
+static int psrcspec_fun(const char *s)
 {
     char *e;
     /* *INDENT-OFF* */
@@ -1333,7 +1338,7 @@ static int psrcspec_fun(char *s)
     return 0;
 }
 
-static int read_htmlsrc_attrname_xform(char *str)
+static int read_htmlsrc_attrname_xform(const char *str)
 {
     int val;
 
@@ -1351,7 +1356,7 @@ static int read_htmlsrc_attrname_xform(char *str)
     return 0;
 }
 
-static int read_htmlsrc_tagname_xform(char *str)
+static int read_htmlsrc_tagname_xform(const char *str)
 {
     int val;
 
@@ -1371,7 +1376,7 @@ static int read_htmlsrc_tagname_xform(char *str)
 #endif
 
 #ifdef USE_SESSIONS
-static int session_limit_fun(char *value)
+static int session_limit_fun(const char *value)
 {
     session_limit = (short) atoi(value);
     if (session_limit < 1)
@@ -1383,7 +1388,7 @@ static int session_limit_fun(char *value)
 #endif /* USE_SESSIONS */
 
 #if defined(PDCURSES) && defined(PDC_BUILD) && PDC_BUILD >= 2401
-static int screen_size_fun(char *value)
+static int screen_size_fun(const char *value)
 {
     char *cp;
 
@@ -1407,7 +1412,7 @@ static int screen_size_fun(char *value)
 #endif
 
 #if defined(HAVE_LIBINTL_H)
-static int message_language_fun(char *value)
+static int message_language_fun(const char *value)
 {
     char *tmp = NULL;
 
@@ -2233,7 +2238,7 @@ static void do_read_cfg(const char *cfg_filename,
 
 		if (p1) {
 		    while (*(p1 = LYSkipBlanks(p1)) != 0) {
-			Config_Type *tbl2;
+			const Config_Type *tbl2;
 
 			p2 = LYSkipNonBlanks(p1);
 			savechar = *p2;
@@ -2246,9 +2251,9 @@ static void do_read_cfg(const char *cfg_filename,
 					"unknown option name %s in %s\n",
 					p1, cfg_filename);
 			} else {
-			    unsigned i;
-
 			    if (!any_optname_found) {
+				unsigned i;
+
 				any_optname_found = TRUE;
 				for (i = 0; i < NOPTS_; ++i)
 				    cur_set[i] = TRUE;

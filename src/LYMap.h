@@ -1,4 +1,4 @@
-/* $LynxId: LYMap.h,v 1.12 2010/09/25 11:35:42 tom Exp $ */
+/* $LynxId: LYMap.h,v 1.13 2026/10/12 13:10:50 tom Exp $ */
 #ifndef LYMAP_H
 #define LYMAP_H
 
@@ -16,12 +16,15 @@ extern "C" {
 
     extern void ImageMapList_free(HTList *list);
     extern void LYPrintImgMaps(FILE *fp);
-    extern BOOL LYAddImageMap(char *address, char *title,
+    extern BOOL LYAddImageMap(const char *address,
+			      const char *title,
 			      HTParentAnchor *node_anchor);
-    extern BOOL LYAddMapElement(char *map, char *address, char *title,
+    extern BOOL LYAddMapElement(const char *map,
+				const char *address,
+				const char *title,
 				HTParentAnchor *node_anchor,
 				int intern_flag);
-    extern BOOL LYHaveImageMap(char *address);
+    extern BOOL LYHaveImageMap(const char *address);
 
 #ifdef __cplusplus
 }

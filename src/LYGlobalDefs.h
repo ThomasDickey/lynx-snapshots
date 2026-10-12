@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYGlobalDefs.h,v 1.157 2026/05/24 15:16:14 WaitronCharm Exp $
+ * $LynxId: LYGlobalDefs.h,v 1.158 2026/10/12 17:20:56 tom Exp $
  *
  * global variable definitions
  */
@@ -448,7 +448,7 @@ extern "C" {
     extern char *socks5_proxy;
     extern char *form_post_data;	/* User data for post form */
     extern char *form_get_data;	/* User data for get form */
-    extern char *http_error_file;	/* Place HTTP status code in this file */
+    extern const char *http_error_file;		/* Place HTTP status code in this file */
     extern char *authentication_info[2];	/* Id:Password for protected documents */
     extern char *proxyauth_info[2];	/* Id:Password for protected proxy server */
     extern BOOLEAN HEAD_request;	/* Do a HEAD request */

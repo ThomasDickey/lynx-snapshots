@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMail.c,v 1.102 2025/01/07 23:46:16 tom Exp $
+ * $LynxId: LYMail.c,v 1.104 2026/10/12 19:44:45 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTParse.h>
@@ -66,7 +66,7 @@ static void remove_tildes(char *string)
 }
 
 static void comma_append(char **dst,
-			 char *src)
+			 const char *src)
 {
     if (*src) {
 	while (*src == ',' || isspace(UCH(*src)))
@@ -119,7 +119,7 @@ static void extract_subject(char *dst,
 {
     const char *keyword = "subject=";
     int len = (int) strlen(keyword);
-    char *cp, *cp1;
+    char *cp;
 
     cp = (src + 1);
     while (*cp != '\0') {
@@ -128,7 +128,10 @@ static void extract_subject(char *dst,
 	    break;
 	cp++;
     }
+
     if (*cp) {
+	char *cp1;
+
 	cp += len;
 	if ((cp1 = StrChr(cp, '&')) != NULL) {
 	    *cp1 = '\0';
@@ -280,7 +283,7 @@ static int header_prompt(const char *label,
 
 static void show_addresses(char *addresses)
 {
-    char *cp = addresses;
+    const char *cp = addresses;
     char *cp1;
 
     while ((cp1 = StrChr(cp, ',')) != NULL) {
@@ -905,9 +908,9 @@ void mailform(const char *mailto_address,
  *  telling of errors (i.e., link not available).
  */
 void mailmsg(int cur,
-	     char *owner_address,
-	     char *filename,
-	     char *linkname)
+	     const char *owner_address,
+	     const char *filename,
+	     const char *linkname)
 {
     FILE *fd, *fp;
     char *address = NULL;
@@ -1131,7 +1134,7 @@ void mailmsg(int cur,
  *  reply_by_mail() invokes sendmail on Unix or mail on VMS to send
  *  a comment from the users to the owner
  */
-void reply_by_mail(char *mail_address,
+void reply_by_mail(const char *mail_address,
 		   char *filename,
 		   const char *title,
 		   const char *refid)
@@ -1147,7 +1150,8 @@ void reply_by_mail(char *mail_address,
     char *keywords = NULL;
     char *searchpart = NULL;
     char *body = NULL;
-    char *cp = NULL, *cp1 = NULL;
+    char *cp = NULL;
+    const char *cp1 = NULL;
     int i;
     int c = 0;			/* user input */
     char my_tmpfile[LY_MAXPATH];

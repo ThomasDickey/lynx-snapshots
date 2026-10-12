@@ -1,4 +1,4 @@
-/* $LynxId: LYShowInfo.c,v 1.87 2025/01/06 15:51:59 tom Exp $ */
+/* $LynxId: LYShowInfo.c,v 1.88 2026/10/12 17:14:18 tom Exp $ */
 #include <HTUtils.h>
 #include <HTFile.h>
 #include <HTParse.h>
@@ -122,7 +122,7 @@ static void dt_URL(FILE *fp0, const char *address)
  */
 int LYShowInfo(DocInfo *doc,
 	       DocInfo *newdoc,
-	       char *owner_address)
+	       const char *owner_address)
 {
     static char tempfile[LY_MAXPATH] = "\0";
 
@@ -160,7 +160,7 @@ int LYShowInfo(DocInfo *doc,
 	(url_type = is_url(links[doc->link].lname)) != 0 &&
 	(url_type == LYNXEXEC_URL_TYPE ||
 	 url_type == LYNXPROG_URL_TYPE)) {
-	char *last_slash = strrchr(links[doc->link].lname, '/');
+	const char *last_slash = strrchr(links[doc->link].lname, '/');
 	int next_to_last = (int) strlen(links[doc->link].lname) - 1;
 
 	if ((last_slash - links[doc->link].lname) == next_to_last) {
@@ -336,8 +336,8 @@ int LYShowInfo(DocInfo *doc,
 	    ADD_SS(gettext("Charset:"),
 		   HTLoadedDocumentCharset());
 	} else {
-	    LYUCcharset *p_in = HTAnchor_getUCInfoStage(HTMainAnchor,
-							UCT_STAGE_PARSER);
+	    const LYUCcharset *p_in = HTAnchor_getUCInfoStage(HTMainAnchor,
+							      UCT_STAGE_PARSER);
 
 	    if (!p_in || isEmpty(p_in->MIMEname) ||
 		HTAnchor_getUCLYhndl(HTMainAnchor, UCT_STAGE_PARSER) < 0) {
@@ -433,7 +433,7 @@ int LYShowInfo(DocInfo *doc,
 		links[doc->link].type == WWW_FORM_LINK_TYPE) {
 		if (links[doc->link].l_form->submit_method) {
 		    int method = links[doc->link].l_form->submit_method;
-		    char *enctype = links[doc->link].l_form->submit_enctype;
+		    const char *enctype = links[doc->link].l_form->submit_enctype;
 
 		    ADD_SS(gettext("Method:"),
 			   ((method == URL_POST_METHOD) ? "POST" :

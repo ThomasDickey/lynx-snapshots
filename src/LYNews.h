@@ -1,4 +1,4 @@
-/* $LynxId: LYNews.h,v 1.10 2010/09/25 11:35:12 tom Exp $ */
+/* $LynxId: LYNews.h,v 1.11 2026/10/12 12:52:31 tom Exp $ */
 #ifndef LYNEWSPOST_H
 #define LYNEWSPOST_H
 
@@ -11,7 +11,7 @@ extern "C" {
 #endif
     extern BOOLEAN term_message;
 
-    extern char *LYNewsPost(char *newsgroups, int followup);
+    extern char *LYNewsPost(const char *newsgroups, int followup);
 
 #ifdef __cplusplus
 }

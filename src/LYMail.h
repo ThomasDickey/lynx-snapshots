@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMail.h,v 1.17 2011/06/02 10:37:23 tom Exp $
+ * $LynxId: LYMail.h,v 1.18 2026/10/12 11:43:28 tom Exp $
  */
 #ifndef LYMAIL_H
 #define LYMAIL_H
@@ -74,10 +74,10 @@ extern "C" {
 			 const char *mailto_content,
 			 const char *mailto_type);
     extern void mailmsg(int cur,
-			char *owner_address,
-			char *filename,
-			char *linkname);
-    extern void reply_by_mail(char *mail_address,
+			const char *owner_address,
+			const char *filename,
+			const char *linkname);
+    extern void reply_by_mail(const char *mail_address,
 			      char *filename,
 			      const char *title,
 			      const char *refid);

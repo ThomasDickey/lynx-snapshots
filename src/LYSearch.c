@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYSearch.c,v 1.41 2025/01/06 16:20:49 tom Exp $
+ * $LynxId: LYSearch.c,v 1.43 2026/10/12 20:51:43 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTAlert.h>
@@ -77,7 +77,7 @@ BOOL field_has_target(FormInfo * field, const char *target)
  * see also anchor_has_target
  */
 static BOOL link_has_target(int cur,
-			    char *target)
+			    const char *target)
 {
     LinkInfo *a = &links[cur];
     char *text = NULL;
@@ -112,11 +112,11 @@ static BOOL link_has_target(int cur,
  */
 
 static int check_next_target_in_links(int *cur,
-				      char *target)
+				      const char *target)
 {
-    int i;
-
     if (nlinks != 0) {
+	int i;
+
 	for (i = *cur + 1; i < nlinks; ++i) {
 	    if (link_has_target(i, target)) {
 		*cur = i;
@@ -128,11 +128,11 @@ static int check_next_target_in_links(int *cur,
 }
 
 static int check_prev_target_in_links(int *cur,
-				      char *target)
+				      const char *target)
 {
-    int i;
-
     if (nlinks != 0) {
+	int i;
+
 	for (i = *cur - 1; i >= 0; --i) {
 	    if (link_has_target(i, target)) {
 		*cur = i;
@@ -160,7 +160,7 @@ BOOL textsearch(DocInfo *cur_doc,
     int oldcur = cur_doc->link;
     static bstring *my_prev_target = NULL;
     static BOOL first = TRUE;
-    char *cp;
+    const char *cp;
     int ch = 0;
     RecallType recall;
     int QueryTotal;

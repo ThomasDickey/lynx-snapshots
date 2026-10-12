@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYNews.c,v 1.66 2026/04/20 23:01:25 tom Exp $
+ * $LynxId: LYNews.c,v 1.67 2026/10/12 12:50:50 tom Exp $
  */
 #include <HTUtils.h>
 #ifndef DISABLE_NEWS
@@ -82,7 +82,7 @@ static BOOLEAN message_has_content(const char *filename,
  *  a lead slash, and followup is TRUE for newsreply or
  *  snewsreply URLs.  - FM
  */
-char *LYNewsPost(char *newsgroups,
+char *LYNewsPost(const char *newsgroups,
 		 int followup)
 {
     char user_input[MAX_LINE];
@@ -98,7 +98,7 @@ char *LYNewsPost(char *newsgroups,
     char *postfile = NULL;
     char *NewsGroups = NULL;
     char *References = NULL;
-    char *org = NULL;
+    const char *org = NULL;
     FILE *fp = NULL;
     BOOLEAN nonempty = FALSE;
     BOOLEAN nonspaces = FALSE;

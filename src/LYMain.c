@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMain.c,v 1.312 2026/05/24 15:38:20 tom Exp $
+ * $LynxId: LYMain.c,v 1.314 2026/10/12 21:23:35 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTP.h>
@@ -461,7 +461,7 @@ char *global_type_map = NULL;	/* global mailcap */
 char *helpfile = NULL;		/* the main help file */
 char *helpfilepath = NULL;	/* the path to the help file set */
 char *homepage = NULL;		/* home page or main screen */
-char *http_error_file = NULL;	/* Place HTTP status code in this file */
+const char *http_error_file = NULL;	/* Place HTTP status code in this file */
 char *indexfile = NULL;		/* an index file if there is one */
 char *jumpfile = NULL;		/* the name of the default jumps file */
 char *jumpprompt = NULL;	/* the default jumps prompt */
@@ -1056,7 +1056,7 @@ int main(int argc,
     BOOL LYGetStdinArgs = FALSE;
 
 #if USE_GETPWUID
-    struct passwd *my_pwd;
+    const struct passwd *my_pwd;
 #endif
 
 #ifdef _WINDOWS
@@ -1312,7 +1312,7 @@ int main(int argc,
 	LYTildeExpand(&lynx_temp_space, TRUE);
 
     if ((cp = strstr(lynx_temp_space, "$USER")) != NULL) {
-	char *cp1;
+	const char *cp1;
 
 	if ((cp1 = LYGetEnv("USER")) != NULL) {
 	    *cp = '\0';
@@ -1625,8 +1625,8 @@ int main(int argc,
     read_cfg(lynx_cfg_file, "main program", 1, (FILE *) 0);
 
     {
-	static char *client_keyfile = NULL;
-	static char *client_certfile = NULL;
+	static const char *client_keyfile = NULL;
+	static const char *client_certfile = NULL;
 
 	if ((client_keyfile = LYGetEnv("SSL_CLIENT_KEY_FILE")) != NULL) {
 	    CTRACE((tfp,
@@ -2516,7 +2516,7 @@ typedef struct parse_args_type {
 } Config_Type;
 
 /* -auth, -pauth */
-static int parse_authentication(char *next_arg,
+static int parse_authentication(const char *next_arg,
 				char **result)
 {
     /*
@@ -2526,7 +2526,6 @@ static int parse_authentication(char *next_arg,
 
     if (next_arg != NULL) {
 	StrAllocCopy(auth_info, next_arg);
-	memset(next_arg, ' ', strlen(next_arg));	/* Let's not show too much */
     }
 
     if (auth_info != NULL) {
@@ -2547,7 +2546,7 @@ static int parse_authentication(char *next_arg,
 }
 
 /* -anonymous */
-static int anonymous_fun(char *next_arg GCC_UNUSED)
+static int anonymous_fun(const char *next_arg GCC_UNUSED)
 {
     if (!LYValidate && !LYRestricted)
 	parse_restrictions("default");
@@ -2556,7 +2555,7 @@ static int anonymous_fun(char *next_arg GCC_UNUSED)
 }
 
 /* -assume_charset */
-static int assume_charset_fun(char *next_arg)
+static int assume_charset_fun(const char *next_arg)
 {
     assumed_charset = TRUE;
     UCLYhndl_for_unspec = safeUCGetLYhndl_byMIME(next_arg);
@@ -2570,28 +2569,28 @@ static int assume_charset_fun(char *next_arg)
 }
 
 /* -assume_local_charset */
-static int assume_local_charset_fun(char *next_arg)
+static int assume_local_charset_fun(const char *next_arg)
 {
     UCLYhndl_HTFile_for_unspec = safeUCGetLYhndl_byMIME(next_arg);
     return 0;
 }
 
 /* -assume_unrec_charset */
-static int assume_unrec_charset_fun(char *next_arg)
+static int assume_unrec_charset_fun(const char *next_arg)
 {
     UCLYhndl_for_unrec = safeUCGetLYhndl_byMIME(next_arg);
     return 0;
 }
 
 /* -auth */
-static int auth_fun(char *next_arg)
+static int auth_fun(const char *next_arg)
 {
     parse_authentication(next_arg, authentication_info);
     return 0;
 }
 
 /* -base */
-static int base_fun(char *next_arg GCC_UNUSED)
+static int base_fun(const char *next_arg GCC_UNUSED)
 {
     /*
      * Treat -source equivalently to an interactive download with
@@ -2608,7 +2607,7 @@ static int base_fun(char *next_arg GCC_UNUSED)
 }
 
 /* -cache */
-static int cache_fun(char *next_arg)
+static int cache_fun(const char *next_arg)
 {
     if (next_arg != NULL)
 	HTCacheSize = atoi(next_arg);
@@ -2622,7 +2621,7 @@ static int cache_fun(char *next_arg)
 }
 
 /* -child */
-static int child_fun(char *next_arg GCC_UNUSED)
+static int child_fun(const char *next_arg GCC_UNUSED)
 {
     child_lynx = TRUE;
     no_disk_save = TRUE;
@@ -2631,7 +2630,7 @@ static int child_fun(char *next_arg GCC_UNUSED)
 }
 
 /* -child_relaxed */
-static int child_relaxed_fun(char *next_arg GCC_UNUSED)
+static int child_relaxed_fun(const char *next_arg GCC_UNUSED)
 {
     child_lynx = TRUE;
     return 0;
@@ -2639,7 +2638,7 @@ static int child_relaxed_fun(char *next_arg GCC_UNUSED)
 
 #ifdef USE_SLANG
 /* -color */
-static int color_fun(char *next_arg GCC_UNUSED)
+static int color_fun(const char *next_arg GCC_UNUSED)
 {
     Lynx_Color_Flags |= SL_LYNX_USE_COLOR;
 
@@ -2651,18 +2650,19 @@ static int color_fun(char *next_arg GCC_UNUSED)
 #endif
 
 /* -convert_to */
-static int convert_to_fun(char *next_arg)
+static int convert_to_fun(const char *next_arg)
 {
     if (next_arg != NULL) {
 	char *outformat = NULL;
-	char *cp1, *cp2, *cp4;
-	int chndl;
+	char *cp1, *cp2;
 
 	StrAllocCopy(outformat, next_arg);
-	/* not lowercased, to allow for experimentation - kw */
-	/*LYLowerCase(outformat); */
+
 	if ((cp1 = StrChr(outformat, ';')) != NULL) {
 	    if ((cp2 = LYstrstr(cp1, "charset")) != NULL) {
+		char *cp4;
+		int chndl;
+
 		cp2 += 7;
 		while (*cp2 == ' ' || *cp2 == '=' || *cp2 == '"')
 		    cp2++;
@@ -2693,7 +2693,7 @@ static int convert_to_fun(char *next_arg)
 }
 
 /* -crawl */
-static int crawl_fun(char *next_arg GCC_UNUSED)
+static int crawl_fun(const char *next_arg GCC_UNUSED)
 {
     crawl = TRUE;
     LYcols = DFT_COLS;
@@ -2701,7 +2701,7 @@ static int crawl_fun(char *next_arg GCC_UNUSED)
 }
 
 /* -display */
-static int display_fun(char *next_arg)
+static int display_fun(const char *next_arg)
 {
     if (next_arg != NULL) {
 	LYsetXDisplay(next_arg);
@@ -2711,7 +2711,7 @@ static int display_fun(char *next_arg)
 }
 
 /* -display_charset */
-static int display_charset_fun(char *next_arg)
+static int display_charset_fun(const char *next_arg)
 {
     int i = UCGetLYhndl_byMIME(next_arg);
 
@@ -2728,14 +2728,14 @@ static int display_charset_fun(char *next_arg)
 }
 
 /* -dump */
-static int dump_output_fun(char *next_arg GCC_UNUSED)
+static int dump_output_fun(const char *next_arg GCC_UNUSED)
 {
     force_dump_mode();
     return 0;
 }
 
 /* -editor */
-static int editor_fun(char *next_arg)
+static int editor_fun(const char *next_arg)
 {
     if (next_arg != NULL)
 	StrAllocCopy(editor, next_arg);
@@ -2744,7 +2744,7 @@ static int editor_fun(char *next_arg)
 }
 
 /* -error_file */
-static int error_file_fun(char *next_arg)
+static int error_file_fun(const char *next_arg)
 {
     /*
      * Output return (success/failure) code of an HTTP transaction.
@@ -2756,7 +2756,7 @@ static int error_file_fun(char *next_arg)
 
 #if defined(EXEC_LINKS) || defined(EXEC_SCRIPTS)
 /* -exec */
-static int exec_fun(char *next_arg GCC_UNUSED)
+static int exec_fun(const char *next_arg GCC_UNUSED)
 {
 #ifndef NEVER_ALLOW_REMOTE_EXEC
     local_exec = TRUE;
@@ -2768,7 +2768,7 @@ static int exec_fun(char *next_arg GCC_UNUSED)
 #endif
 
 /* -get_data */
-static int get_data_fun(char *next_arg GCC_UNUSED)
+static int get_data_fun(const char *next_arg GCC_UNUSED)
 {
     /*
      * User data for GET form.
@@ -2804,7 +2804,7 @@ static int get_data_fun(char *next_arg GCC_UNUSED)
 }
 
 /* -help */
-static int help_fun(char *next_arg GCC_UNUSED)
+static int help_fun(const char *next_arg GCC_UNUSED)
 {
     print_help_and_exit();
     /* NOT REACHED */
@@ -2812,18 +2812,18 @@ static int help_fun(char *next_arg GCC_UNUSED)
 }
 
 /* -hiddenlinks */
-int hiddenlinks_fun(char *next_arg)
+int hiddenlinks_fun(const char *next_arg)
 {
-    /* *INDENT-OFF* */
-    static Config_Enum table[] = {
-	{ "merge",	HIDDENLINKS_MERGE },
-	{ "listonly",	HIDDENLINKS_SEPARATE },
-	{ "ignore",	HIDDENLINKS_IGNORE },
-	{ NULL,		-1 },
-    };
-    /* *INDENT-ON* */
-
     if (next_arg != NULL) {
+	/* *INDENT-OFF* */
+	static Config_Enum table[] = {
+	    { "merge",	HIDDENLINKS_MERGE },
+	    { "listonly",	HIDDENLINKS_SEPARATE },
+	    { "ignore",	HIDDENLINKS_IGNORE },
+	    { NULL,		-1 },
+	};
+	/* *INDENT-ON* */
+
 	if (!LYgetEnum(table, next_arg, &LYHiddenLinks))
 	    print_help_and_exit();
     } else {
@@ -2834,7 +2834,7 @@ int hiddenlinks_fun(char *next_arg)
 }
 
 /* -homepage */
-static int homepage_fun(char *next_arg)
+static int homepage_fun(const char *next_arg)
 {
     if (next_arg != NULL) {
 	StrAllocCopy(homepage, next_arg);
@@ -2844,7 +2844,7 @@ static int homepage_fun(char *next_arg)
 }
 
 /* -mime_header */
-static int mime_header_fun(char *next_arg GCC_UNUSED)
+static int mime_header_fun(const char *next_arg GCC_UNUSED)
 {
     /*
      * Include mime headers and force source dump.
@@ -2859,7 +2859,7 @@ static int mime_header_fun(char *next_arg GCC_UNUSED)
 
 #ifndef DISABLE_NEWS
 /* -newschunksize */
-static int newschunksize_fun(char *next_arg)
+static int newschunksize_fun(const char *next_arg)
 {
     if (next_arg != NULL) {
 	HTNewsChunkSize = atoi(next_arg);
@@ -2874,7 +2874,7 @@ static int newschunksize_fun(char *next_arg)
 }
 
 /* -newsmaxchunk */
-static int newsmaxchunk_fun(char *next_arg)
+static int newsmaxchunk_fun(const char *next_arg)
 {
     if (next_arg) {
 	HTNewsMaxChunk = atoi(next_arg);
@@ -2890,21 +2890,21 @@ static int newsmaxchunk_fun(char *next_arg)
 #endif /* not DISABLE_NEWS */
 
 /* -nobold */
-static int nobold_fun(char *next_arg GCC_UNUSED)
+static int nobold_fun(const char *next_arg GCC_UNUSED)
 {
     LYnoVideo(1);
     return 0;
 }
 
 /* -nobrowse */
-static int nobrowse_fun(char *next_arg GCC_UNUSED)
+static int nobrowse_fun(const char *next_arg GCC_UNUSED)
 {
     HTDirAccess = HT_DIR_FORBID;
     return 0;
 }
 
 /* -nocolor */
-static int nocolor_fun(char *next_arg GCC_UNUSED)
+static int nocolor_fun(const char *next_arg GCC_UNUSED)
 {
     LYShowColor = SHOW_COLOR_NEVER;
 #ifdef USE_SLANG
@@ -2915,35 +2915,35 @@ static int nocolor_fun(char *next_arg GCC_UNUSED)
 }
 
 /* -nopause */
-static int nopause_fun(char *next_arg GCC_UNUSED)
+static int nopause_fun(const char *next_arg GCC_UNUSED)
 {
     no_pause = TRUE;
     return 0;
 }
 
 /* -nomore */
-static int nomore_fun(char *next_arg GCC_UNUSED)
+static int nomore_fun(const char *next_arg GCC_UNUSED)
 {
     nomore = TRUE;
     return 0;
 }
 
 /* -noreverse */
-static int noreverse_fun(char *next_arg GCC_UNUSED)
+static int noreverse_fun(const char *next_arg GCC_UNUSED)
 {
     LYnoVideo(2);
     return 0;
 }
 
 /* -nounderline */
-static int nounderline_fun(char *next_arg GCC_UNUSED)
+static int nounderline_fun(const char *next_arg GCC_UNUSED)
 {
     LYnoVideo(4);
     return 0;
 }
 
 /* -nozap */
-static int nozap_fun(char *next_arg)
+static int nozap_fun(const char *next_arg)
 {
     LYNoZapKey = 1;		/* everything but "initially" treated as "full" - kw */
     if (next_arg != NULL) {
@@ -2955,14 +2955,14 @@ static int nozap_fun(char *next_arg)
 }
 
 /* -pauth */
-static int pauth_fun(char *next_arg)
+static int pauth_fun(const char *next_arg)
 {
     parse_authentication(next_arg, proxyauth_info);
     return 0;
 }
 
 /* -post_data */
-static int post_data_fun(char *next_arg GCC_UNUSED)
+static int post_data_fun(const char *next_arg GCC_UNUSED)
 {
     /*
      * User data for POST form.
@@ -3012,7 +3012,7 @@ static const char *show_restriction(const char *name)
 }
 
 /* -restrictions */
-static int restrictions_fun(char *next_arg)
+static int restrictions_fun(const char *next_arg)
 {
     /* *INDENT-OFF* */
     static const struct {
@@ -3134,20 +3134,19 @@ G)oto's" },
     };
     /* *INDENT-ON* */
 
-    static const char *Usage[] =
-    {
-	""
-	,"USAGE: lynx -restrictions=[option][,option][,option]"
-	,"List of Options:"
-	,"  ?                 when used alone, list restrictions in effect."
-
-    };
-    unsigned j, k, column = 0;
-    const char *name;
-    const char *value;
-    BOOLEAN found, first;
-
     if (isEmpty(next_arg)) {
+	static const char *Usage[] =
+	{
+	    ""
+	    ,"USAGE: lynx -restrictions=[option][,option][,option]"
+	    ,"List of Options:"
+	    ,"  ?                 when used alone, list restrictions in effect."
+
+	};
+	unsigned j, column = 0;
+	const char *value;
+	BOOLEAN first;
+
 	SetOutputMode(O_TEXT);
 	for (j = 0; j < TABLESIZE(Usage); j++) {
 	    printf("%s\n", Usage[j]);
@@ -3162,8 +3161,12 @@ G)oto's" },
 	    print_help_strings(table[j].name, table[j].help, value, FALSE);
 	}
 	first = TRUE;
+
 	for (j = 0; j < TABLESIZE(table); j++) {
-	    found = FALSE;
+	    unsigned k;
+	    const char *name;
+	    BOOLEAN found = FALSE;
+
 	    if ((name = index_to_restriction(j)) == NULL) {
 		break;
 	    }
@@ -3202,14 +3205,14 @@ G)oto's" },
 }
 
 /* -selective */
-static int selective_fun(char *next_arg GCC_UNUSED)
+static int selective_fun(const char *next_arg GCC_UNUSED)
 {
     HTDirAccess = HT_DIR_SELECTIVE;
     return 0;
 }
 
 /* -source */
-static int source_fun(char *next_arg GCC_UNUSED)
+static int source_fun(const char *next_arg GCC_UNUSED)
 {
     force_dump_mode();
     HTOutputFormat = (LYPrependBase ?
@@ -3219,7 +3222,7 @@ static int source_fun(char *next_arg GCC_UNUSED)
 }
 
 /* -traversal */
-static int traversal_fun(char *next_arg GCC_UNUSED)
+static int traversal_fun(const char *next_arg GCC_UNUSED)
 {
     traversal = TRUE;
 #ifdef USE_SLANG
@@ -3232,7 +3235,7 @@ static int traversal_fun(char *next_arg GCC_UNUSED)
 }
 
 /* -version */
-static int version_fun(char *next_arg GCC_UNUSED)
+static int version_fun(const char *next_arg GCC_UNUSED)
 {
     char *result = NULL;
 
@@ -3314,7 +3317,7 @@ static int version_fun(char *next_arg GCC_UNUSED)
 }
 
 /* -width */
-static int width_fun(char *next_arg)
+static int width_fun(const char *next_arg)
 {
     if (next_arg != NULL) {
 	int w = atoi(next_arg);
@@ -3328,7 +3331,7 @@ static int width_fun(char *next_arg)
 
 #if defined(PDCURSES) && defined(PDC_BUILD) && PDC_BUILD >= 2401
 /* -scrsize */
-static int scrsize_fun(char *next_arg)
+static int scrsize_fun(const char *next_arg)
 {
     if (next_arg != 0) {
 	char *cp;
@@ -4106,7 +4109,6 @@ static void print_help_strings(const char *name,
 			       int option)
 {
     int pad;
-    int c;
     int first;
     int field_width = 20;
 
@@ -4129,6 +4131,8 @@ static void print_help_strings(const char *name,
     if (StrChr(help, '\n') == NULL) {
 	fprintf(stdout, "%s", help);
     } else {
+	int c;
+
 	while ((c = *help) != 0) {
 	    if (c == '\n') {
 		if ((pad = --first) < 0) {
@@ -4171,8 +4175,9 @@ in double-quotes (\"-\") on VMS)", NULL, TRUE);
 #endif /* VMS */
 
     for (p = Arg_Table; p->name != NULL; p++) {
-	char temp[LINESIZE], *value = temp;
-	ParseUnionPtr q = ParseUnionOf(p);
+	char temp[LINESIZE];
+	const char *value = temp;
+	const ParseUnionPtr q = ParseUnionOf(p);
 
 	switch (p->type & ARG_TYPE_MASK) {
 	case TOGGLE_ARG:

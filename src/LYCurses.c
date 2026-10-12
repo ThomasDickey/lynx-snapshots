@@ -1,4 +1,4 @@
-/* $LynxId: LYCurses.c,v 1.213 2026/09/25 23:35:51 Akın.Alp.Ozturk Exp $ */
+/* $LynxId: LYCurses.c,v 1.215 2026/10/12 20:51:43 tom Exp $ */
 #include <HTUtils.h>
 #include <HTAlert.h>
 
@@ -81,7 +81,7 @@ BOOLEAN LYuseCursesPads = TRUE;	/* use pads for left/right shifting */
  * end.
  */
 
-static int dumbterm(char *terminal);
+static int dumbterm(const char *terminal);
 BOOLEAN LYCursesON = FALSE;
 
 #if defined(USE_BLINK) && defined(__EMX__)
@@ -423,7 +423,7 @@ void setHashStyle(int style,
 static void LYAttrset(WINDOW * win, int color,
 		      int mono)
 {
-    char *shown = NULL;
+    const char *shown = NULL;
 
     if (lynx_has_color
 	&& LYShowColor >= SHOW_COLOR_ON
@@ -781,12 +781,12 @@ static void lynx_init_color_pair(int n)
 
 static void lynx_map_color(int n)
 {
-    int j;
-
     CTRACE((tfp, "lynx_map_color(%d)\n", n));
 
     if (n + 1 < (int) TABLESIZE(lynx_color_pairs)
 	&& n < (int) TABLESIZE(lynx_color_cfg)) {
+	int j;
+
 	for (j = n + 1; j < COLOR_PAIRS_MAX; j += COLOR_CFG_MAX) {
 	    lynx_color_pairs[j].fg = lynx_color_cfg[n].fg;
 	    lynx_color_pairs[j].bg = lynx_color_cfg[n].bg;
@@ -1927,7 +1927,7 @@ BOOLEAN setup(char *terminal)
 {
     char *term_putenv = NULL;
     char *buffer = NULL;
-    char *cp;
+    const char *cp;
 
     /*
      * If the display was not set by a command line option then see if it is
@@ -1990,7 +1990,7 @@ BOOLEAN setup(char *terminal)
     return (1);
 }
 
-static int dumbterm(char *terminal)
+static int dumbterm(const char *terminal)
 {
     int dumb = FALSE;
 

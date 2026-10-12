@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYStyle.c,v 1.113 2025/01/07 18:55:33 tom Exp $
+ * $LynxId: LYStyle.c,v 1.115 2026/10/12 22:59:58 tom Exp $
  *
  * character level styles for Lynx
  * (c) 1996 Rob Partington -- donated to the Lyncei (if they want it :-)
@@ -145,7 +145,6 @@ static void parse_either(const char *attrs,
 			 int *monop,
 			 int *colorp)
 {
-    int value;
     char *temp_attrs = NULL;
 
     if (StrAllocCopy(temp_attrs, attrs) != NULL) {
@@ -154,6 +153,7 @@ static void parse_either(const char *attrs,
 	while (*temp_attrs != '\0') {
 	    char *next = StrChr(temp_attrs, '+');
 	    char save = (char) ((next != NULL) ? *next : '\0');
+	    int value;
 
 	    if (next == NULL)
 		next = temp_attrs + strlen(temp_attrs);
@@ -274,7 +274,7 @@ static void parse_attributes(const char *mono,
 /* parse a style option of the format
  * STYLE:<OBJECT>:FG:BG
  */
-static void parse_style(char *param)
+static void parse_style(const char *param)
 {
     /* *INDENT-OFF* */
     static struct {
@@ -317,7 +317,8 @@ static void parse_style(char *param)
 
     char *buffer = NULL;
     char *tmp = NULL;
-    char *element, *mono;
+    const char *element;
+    char *mono;
     const char *fg, *bg;
 
     if (param == NULL)
@@ -388,7 +389,7 @@ where OBJECT is one of EM,STRONG,B,I,U,BLINK etc.\n\n"), buffer);
     } else {
 	/* It must be a HTML element, so look through the list until we find it. */
 	int element_number = -1;
-	HTTag *t = SGMLFindTag(&HTML_dtd, element);
+	const HTTag *t = SGMLFindTag(&HTML_dtd, element);
 
 	if (t && t->name) {
 	    element_number = (int) (t - HTML_dtd.tags);
@@ -569,7 +570,6 @@ static void initialise_default_stylesheet(void)
 
 void parse_userstyles(void)
 {
-    char *name;
     HTList *cur = LYuse_color_style ? lss_styles : NULL;
 
     colorPairs = 0;
@@ -578,6 +578,8 @@ void parse_userstyles(void)
     if (HTList_isEmpty(cur)) {
 	initialise_default_stylesheet();
     } else {
+	const char *name;
+
 	while ((name = (char *) HTList_nextObject(cur)) != NULL) {
 	    CTRACE2(TRACE_STYLE, (tfp, "LSS:%s\n",
 				  (name
@@ -612,7 +614,7 @@ void parse_userstyles(void)
  * for it to have the same semantic as other lines: works at any place
  * of the style file, the first line overrides the later ones.
  */
-static void HStyle_addStyle(char *buffer)
+static void HStyle_addStyle(const char *buffer)
 {
     char *name = NULL;
 
@@ -638,8 +640,8 @@ static void HStyle_addStyle(char *buffer)
     HTList_addObject(lss_styles, name);
 }
 
-static int style_readFromFileREC(char *lss_filename,
-				 char *parent_filename)
+static int style_readFromFileREC(const char *lss_filename,
+				 const char *parent_filename)
 {
     FILE *fh;
     char *buffer = NULL;
@@ -675,7 +677,7 @@ static int style_readFromFileREC(char *lss_filename,
     return 0;
 }
 
-int style_readFromFile(char *filename)
+int style_readFromFile(const char *filename)
 {
     return style_readFromFileREC(filename, (char *) 0);
 }
@@ -686,13 +688,15 @@ void TrimColorClass(const char *tagname,
 		    char *styleclassname,
 		    int *phcode)
 {
-    char *end, *start = NULL, *lookfrom;
+    char *start = NULL, *lookfrom;
     char tmp[64];
 
     sprintf(tmp, ";%.*s", (int) sizeof(tmp) - 3, tagname);
     TrimLowercase(tmp);
 
     if ((lookfrom = styleclassname) != NULL) {
+	char *end;
+
 	do {
 	    end = start;
 	    start = strstr(lookfrom, tmp);
@@ -714,7 +718,7 @@ void TrimColorClass(const char *tagname,
  */
 void FastTrimColorClass(const char *tag_name,
 			unsigned name_len,
-			char *stylename,
+			const char *stylename,
 			char **pstylename_end,	/*will be modified */
 			int *phcode)	/*will be modified */
 {
@@ -780,7 +784,7 @@ BOOL ValidCachedStyle(int y, int x)
 unsigned GetCachedStyle(int y, int x)
 {
     unsigned value = 0;
-    unsigned *cache = RefCachedStyle(y, x);
+    const unsigned *cache = RefCachedStyle(y, x);
 
     if (cache != NULL) {
 	value = *cache;
