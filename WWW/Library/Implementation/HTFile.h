@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFile.h,v 1.40 2026/10/05 14:12:06 tom Exp $
+ * $LynxId: HTFile.h,v 1.41 2026/10/15 23:51:12 tom Exp $
  *							File access in libwww
  *				FILE ACCESS
  *
@@ -81,7 +81,7 @@ extern "C" {
  * changed to return TRUE if parent directory link was generated,
  * FALSE otherwise - KW
  */
-    extern BOOL HTDirTitles(HTStructured * target, HTParentAnchor *anchor,
+    extern BOOL HTDirTitles(HTStructured * target, const HTParentAnchor *anchor,
 			    HTFormat format_out,
 			    int tildeIsTop);
 
@@ -239,7 +239,7 @@ extern "C" {
 /*
  *  Determine compression type from the content-type and/or content-encoding.
  */
-    extern CompressFileType HTContentToCompressType(HTParentAnchor *anchor);
+    extern CompressFileType HTContentToCompressType(const HTParentAnchor *anchor);
 /*
  *  Determine compression encoding from the compression method.
  */

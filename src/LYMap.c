@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMap.c,v 1.55 2026/10/12 20:29:35 tom Exp $
+ * $LynxId: LYMap.c,v 1.56 2026/10/15 23:41:02 tom Exp $
  *			Lynx Client-side Image MAP Support	       LYMap.c
  *			==================================
  *
@@ -56,8 +56,8 @@ void ImageMapList_free(HTList *theList)
 {
     LYImageMap *map;
     LYMapElement *element;
-    HTList *cur = theList;
-    HTList *current;
+    const HTList *cur = theList;
+    const HTList *current;
 
     if (!cur)
 	return;
@@ -125,9 +125,9 @@ BOOL LYAddImageMap(const char *address,
 {
     LYImageMap *tmp = NULL;
     LYImageMap *old = NULL;
-    HTList *cur = NULL;
+    const HTList *cur = NULL;
     HTList *theList = NULL;
-    HTList *curele = NULL;
+    const HTList *curele = NULL;
     LYMapElement *ele = NULL;
 
     if (isEmpty(address))
@@ -210,8 +210,8 @@ BOOL LYAddMapElement(const char *map,
 {
     LYMapElement *tmp = NULL;
     LYImageMap *theMap = NULL;
-    HTList *theList = NULL;
-    HTList *cur = NULL;
+    const HTList *theList = NULL;
+    const HTList *cur = NULL;
 
     if (isEmpty(map) || isEmpty(address))
 	return FALSE;
@@ -290,7 +290,7 @@ BOOL LYAddMapElement(const char *map,
 BOOL LYHaveImageMap(const char *address)
 {
     const LYImageMap *Map;
-    HTList *cur = LynxMaps;
+    const HTList *cur = LynxMaps;
 
     if (!(cur && non_empty(address)))
 	return FALSE;
@@ -401,11 +401,11 @@ static int LYLoadIMGmap(const char *arg,
     HTStream *target = NULL;
     char *buf = NULL;
     const LYMapElement *tmp = NULL;
-    LYImageMap *theMap = NULL;
+    const LYImageMap *theMap = NULL;
     char *MapTitle = NULL;
     char *MapAddress = NULL;
-    HTList *theList;
-    HTList *cur = NULL;
+    const HTList *theList;
+    const HTList *cur = NULL;
     const char *address = NULL;
     const char *cp = NULL;
     DocAddress WWWDoc;
@@ -607,14 +607,14 @@ static int LYLoadIMGmap(const char *arg,
 void LYPrintImgMaps(FILE *fp)
 {
     const char *only = HTLoadedDocumentURL();
-    HTList *outer = LynxMaps;
-    LYImageMap *map;
+    const HTList *outer = LynxMaps;
+    const LYImageMap *map;
 
     if (HTList_count(outer) > 0) {
 	size_t only_len = strlen(only);
 
 	while (NULL != (map = (LYImageMap *) HTList_nextObject(outer))) {
-	    HTList *inner;
+	    const HTList *inner;
 	    const LYMapElement *elt;
 	    int count;
 

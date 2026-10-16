@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTPlain.c,v 1.69 2026/10/05 16:14:55 tom Exp $
+ * $LynxId: HTPlain.c,v 1.70 2026/10/15 23:06:44 tom Exp $
  *
  *		Plain text object		HTWrite.c
  *		=================
@@ -446,7 +446,7 @@ static void HTPlain_write(HTStream *me, const char *s, int l)
 	     * Not found; look for replacement string.
 	     */
 		   (uck = UCTransUniCharStr(replace_buf, 60, code,
-					    me->outUCLYhndl, 0) >= 0)) {
+					    me->outUCLYhndl, 0)) >= 0) {
 	    /*
 	     * No further tests for validity - assume that whoever defined
 	     * replacement strings knew what she was doing.
@@ -501,7 +501,7 @@ static void HTPlain_write(HTStream *me, const char *s, int l)
 		       (uck = UCTransUniCharStr(replace_buf,
 						60, code,
 						UCGetLYhndl_byMIME("us-ascii"),
-						0) >= 0)) {
+						0)) >= 0) {
 		/*
 		 * Got a replacement string (yippey).  - FM
 		 */

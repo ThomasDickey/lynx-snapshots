@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTAssoc.c,v 1.13 2026/10/05 14:40:30 tom Exp $
+ * $LynxId: HTAssoc.c,v 1.14 2026/10/15 22:51:42 tom Exp $
  *
  * MODULE							HTAssoc.c
  *	    ASSOCIATION LIST FOR STORING NAME-VALUE PAIRS.
@@ -32,7 +32,7 @@ HTAssocList *HTAssocList_new(void)
 void HTAssocList_delete(HTAssocList *alist)
 {
     if (alist) {
-	HTAssocList *cur = alist;
+	const HTAssocList *cur = alist;
 	HTAssoc *assoc;
 
 	while (NULL != (assoc = (HTAssoc *) HTList_nextObject(cur))) {
@@ -67,11 +67,11 @@ void HTAssocList_add(HTAssocList *alist,
     }
 }
 
-char *HTAssocList_lookup(HTAssocList *alist,
+char *HTAssocList_lookup(const HTAssocList *alist,
 			 const char *name)
 {
-    HTAssocList *cur = alist;
-    HTAssoc *assoc;
+    const HTAssocList *cur = alist;
+    const HTAssoc *assoc;
 
     while (NULL != (assoc = (HTAssoc *) HTList_nextObject(cur))) {
 	if (!strncasecomp(assoc->name, name, (int) strlen(name)))

@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTAAProt.c,v 1.37 2026/10/05 13:07:10 tom Exp $
+ * $LynxId: HTAAProt.c,v 1.38 2026/10/15 23:00:11 tom Exp $
  *
  * MODULE							HTAAProt.c
  *		PROTECTION FILE PARSING MODULE
@@ -323,7 +323,7 @@ static HTAAProt *HTAAProt_new(const char *cur_docname,
 			      const char *prot_filename,
 			      const char *ids)
 {
-    HTList *cur = prot_cache;
+    const HTList *cur = prot_cache;
     HTAAProtCache *cache_item = NULL;
     HTAAProt *prot;
 
@@ -615,11 +615,11 @@ static void save_uid_info(const char *name, int user)
 const char *HTAA_UidToName(int uid GCC_UNUSED)
 {
 #ifndef NOUSERS
-    struct passwd *pw;
+    const struct passwd *pw;
     HTList *me = known_pwd;
 
     while (HTList_nextObject(me)) {
-	USER_DATA *data = (USER_DATA *) (me->object);
+	const USER_DATA *data = (USER_DATA *) (me->object);
 
 	if (uid == data->user)
 	    return data->name;
@@ -653,7 +653,7 @@ int HTAA_NameToUid(const char *name GCC_UNUSED)
     HTList *me = known_pwd;
 
     while (HTList_nextObject(me)) {
-	USER_DATA *data = (USER_DATA *) (me->object);
+	const USER_DATA *data = (USER_DATA *) (me->object);
 
 	if (!strcmp(name, data->name))
 	    return data->user;
@@ -682,11 +682,11 @@ int HTAA_NameToUid(const char *name GCC_UNUSED)
 const char *HTAA_GidToName(int gid GCC_UNUSED)
 {
 #ifndef NOUSERS
-    struct group *gr;
+    const struct group *gr;
     HTList *me = known_grp;
 
     while (HTList_nextObject(me)) {
-	USER_DATA *data = (USER_DATA *) (me->object);
+	const USER_DATA *data = (USER_DATA *) (me->object);
 
 	if (gid == data->user)
 	    return data->name;
@@ -720,7 +720,7 @@ int HTAA_NameToGid(const char *name GCC_UNUSED)
     HTList *me = known_grp;
 
     while (HTList_nextObject(me)) {
-	USER_DATA *data = (USER_DATA *) (me->object);
+	const USER_DATA *data = (USER_DATA *) (me->object);
 
 	if (!strcmp(name, data->name))
 	    return data->user;

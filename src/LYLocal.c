@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYLocal.c,v 1.142 2026/10/12 23:36:18 tom Exp $
+ * $LynxId: LYLocal.c,v 1.145 2026/10/15 23:41:02 tom Exp $
  *
  *  Routines to manipulate the local filesystem.
  *  Written by: Rick Mallett, Carleton University
@@ -727,7 +727,7 @@ static int remove_tagged(void)
     char *testpath = NULL;
     struct stat dir_info;
     int count;
-    HTList *tag;
+    const HTList *tag;
 
     if (HTList_isEmpty(tagged))	/* should never happen */
 	return 0;
@@ -810,7 +810,7 @@ static int modify_tagged(const char *testpath)
     (void) LYgetBString(&given_target, FALSE, 0, NORECALL);
 
     if (!isBEmpty(given_target)) {
-	HTList *tag;
+	const HTList *tag;
 
 	/*
 	 * Replace ~/ references to the home directory.
@@ -1635,12 +1635,12 @@ void tagflag(int flag,
 /*
  * Handle DIRED tags.
  */
-void showtags(HTList *t)
+void showtags(const HTList *t)
 {
     int i;
 
     for (i = 0; i < nlinks; i++) {
-	HTList *s = t;
+	const HTList *s = t;
 	const char *name;
 
 	while ((name = (char *) HTList_nextObject(s)) != NULL) {
@@ -2056,7 +2056,7 @@ int dired_options(const DocInfo *doc, char **newfile)
     const char *my_suffix;
     char *path = NULL;
     char *dir;
-    lynx_list_item_type *nxt;
+    const lynx_list_item_type *nxt;
     struct stat dir_info;
     FILE *fp0;
     char *dir_url;
@@ -2135,9 +2135,6 @@ int dired_options(const DocInfo *doc, char **newfile)
 		    (i == 1 ? "" : " ,"), cp1);
 	    FREE(cp1);
 	}
-	if (n > m) {
-	    fprintf(fp0, " , ...");
-	}
 	fprintf(fp0, "<p>\n");
 	FREE(cd);
     }
@@ -2175,6 +2172,7 @@ int dired_options(const DocInfo *doc, char **newfile)
 	    continue;
 	dir_url = HTEscape(dir, URL_PATH);
 	path_url = HTEscape(path, URL_PATH);
+	*buf = '\0';
 	fprintf(fp0, "<a href=\"%s",
 		render_item(GetDiredHref(mp),
 			    path_url, dir_url, buf, sizeof(buf), YES));
@@ -2647,7 +2645,7 @@ static char *render_item(const char *s,
 	    case 'l':
 	    case 't':
 		if (!HTList_isEmpty(tagged)) {
-		    HTList *cur = tagged;
+		    const HTList *cur = tagged;
 		    char *name;
 
 		    while (!overrun &&

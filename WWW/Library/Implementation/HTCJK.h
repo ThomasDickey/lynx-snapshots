@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTCJK.h,v 1.22 2021/07/01 23:51:38 tom Exp $
+ * $LynxId: HTCJK.h,v 1.23 2026/10/15 23:24:23 tom Exp $
  *
  *			CJK character converter		HTCJK.h
  *			=======================
@@ -99,7 +99,7 @@ extern "C" {
     extern unsigned char *EUC_TO_SJIS(unsigned char *src,
 				      unsigned char *dst);
 
-    extern unsigned char *EUC_TO_JIS(unsigned char *src,
+    extern unsigned char *EUC_TO_JIS(const unsigned char *src,
 				     unsigned char *dst,
 				     const char *toK,
 				     const char *toA);

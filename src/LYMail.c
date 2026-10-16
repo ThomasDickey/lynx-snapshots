@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMail.c,v 1.104 2026/10/12 19:44:45 tom Exp $
+ * $LynxId: LYMail.c,v 1.105 2026/10/15 23:09:07 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTParse.h>
@@ -281,7 +281,7 @@ static int header_prompt(const char *label,
     return ok;
 }
 
-static void show_addresses(char *addresses)
+static void show_addresses(const char *addresses)
 {
     const char *cp = addresses;
     char *cp1;

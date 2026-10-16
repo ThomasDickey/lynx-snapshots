@@ -1,4 +1,4 @@
-/* $LynxId: LYStrings.c,v 1.287 2026/10/12 23:15:59 tom Exp $ */
+/* $LynxId: LYStrings.c,v 1.290 2026/10/13 19:34:05 tom Exp $ */
 #include <HTUtils.h>
 #include <HTCJK.h>
 #include <UCAux.h>
@@ -2082,7 +2082,7 @@ static int LYgetch_for(int code)
 	    break;
 	}
 	if (isdigit(a) && found_CSI(c, b) && d != -1 && !found_TLD(d))
-	    d = GetChar();
+	    (void) GetChar();
 	if (!done_esc && (a & ~0xFF) == 0) {
 	    if (a == b && !found_CSI(c, b) && c == CH_ESC) {
 		current_modifier = LKC_MOD2;
@@ -3041,11 +3041,11 @@ static int mbcs_glyphs(const char *s, int len)
     int i;
 
     if (IS_UTF8_TTY) {
-	for (i = 0; s[i] && i < len; i++)
+	for (i = 0; i < len && s[i]; i++)
 	    if (!IS_UTF8_EXTRA(s[i]))
 		glyphs++;
     } else if (IS_CJK_TTY) {
-	for (i = 0; s[i] && i < len; i++, glyphs++)
+	for (i = 0; i < len && s[i]; i++, glyphs++)
 	    if (is8bits(s[i]))
 		i++;
     } else {
@@ -3064,7 +3064,7 @@ static int mbcs_valid(const char *s, int len, int limit)
     int result = FALSE;
 
     if (IS_UTF8_TTY) {
-	for (i = 0; s[i] && i < limit; i++) {
+	for (i = 0; i < limit && s[i]; i++) {
 	    if (!IS_UTF8_EXTRA(s[i])) {
 		if ((i + 1) == len) {
 		    result = TRUE;
@@ -3073,7 +3073,7 @@ static int mbcs_valid(const char *s, int len, int limit)
 	    }
 	}
     } else if (IS_CJK_TTY) {
-	for (i = 0; s[i] && i < limit; i++) {
+	for (i = 0; i < limit && s[i]; i++) {
 	    if (!is8bits(s[i])) {
 		if ((i + 1) == len) {
 		    result = TRUE;
@@ -4200,7 +4200,8 @@ int LYhandlePopupList(int cur_choice,
 		      int for_mouse)
 {
     BOOLEAN numbered = (BOOLEAN) (keypad_mode != NUMBERS_AS_ARROWS);
-    int c = 0, cmd = 0, i = 0, j = 0, rel = 0;
+    int c;
+    int cmd = 0, i = 0, j = 0, rel = 0;
     int orig_choice;
     WINDOW *form_window;
     int num_choices = 0;
@@ -5448,7 +5449,7 @@ int LYscanFloat2(const char **source, float *result)
     src = LYSkipCBlanks(src);
     *result = 0.0;
     if (StrChr(src, '.') != NULL) {
-	long frc_part = 0;
+	long frc_part;
 	float scale = 1.0;
 
 	if (*src != '.') {
@@ -6019,7 +6020,7 @@ static long UniToLowerCase(long upper)
 		low = i + 1;
 	    } else if (diff > 0) {
 		high = i;
-	    } else if (diff == 0) {
+	    } else {
 		result = unicode_to_lower_case[i].lower;
 		break;
 	    }

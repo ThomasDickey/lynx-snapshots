@@ -1,4 +1,4 @@
-/* $LynxId: LYDownload.c,v 1.74 2026/10/12 12:50:50 tom Exp $ */
+/* $LynxId: LYDownload.c,v 1.75 2026/10/15 23:16:27 tom Exp $ */
 #include <HTUtils.h>
 #include <HTParse.h>
 #include <HTList.h>
@@ -34,7 +34,7 @@ void LYDownload(const char *line)
     bstring *buffer = NULL;
     bstring *command = NULL;
     const char *cp;
-    lynx_list_item_type *download_command = NULL;
+    const lynx_list_item_type *download_command = NULL;
     int ch;
     RecallType recall;
     int FnameTotal;

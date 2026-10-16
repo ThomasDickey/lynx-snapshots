@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYCookie.c,v 1.152 2026/10/12 23:18:58 tom Exp $
+ * $LynxId: LYCookie.c,v 1.154 2026/10/15 23:19:08 tom Exp $
  *
  *			       Lynx Cookie Support		   LYCookie.c
  *			       ===================
@@ -1250,7 +1250,8 @@ static void LYProcessSetCookies(const char *SetCookie,
 				int port)
 {
     const char *p, *attr_start, *attr_end, *value_start, *value_end;
-    HTList *CombinedCookies = NULL, *cl = NULL;
+    HTList *CombinedCookies = NULL;
+    const HTList *cl = NULL;
     cookie *cur_cookie = NULL, *co = NULL;
     int cookie_len = 0;
     int NumCookies = 0;
@@ -1558,7 +1559,6 @@ static void LYProcessSetCookies(const char *SetCookie,
 		(cur_cookie->name ? cur_cookie->name : "[no name]"),
 		(cur_cookie->value ? cur_cookie->value : "[no value]")));
 	CTrace((tfp, "                     due to invalid port!\n"));
-	NumCookies--;
 	freeCookie(cur_cookie);
 	cur_cookie = NULL;
     }

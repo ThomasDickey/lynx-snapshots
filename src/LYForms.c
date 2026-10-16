@@ -1,4 +1,4 @@
-/* $LynxId: LYForms.c,v 1.122 2026/10/12 12:49:49 tom Exp $ */
+/* $LynxId: LYForms.c,v 1.123 2026/10/14 22:54:14 tom Exp $ */
 #include <HTUtils.h>
 #include <HTCJK.h>
 #include <HTTP.h>
@@ -761,6 +761,7 @@ static int form_getstr(int cur,
 		    switch (action) {
 		    case LYE_BACK_LL:
 			if (cur > 0
+			    && cur < nlinks - 1
 			    && links[cur - 1].ly == links[cur].ly) {
 			    goto breakfor;
 			}

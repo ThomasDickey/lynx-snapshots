@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYBookmark.c,v 1.98 2026/10/12 22:59:49 tom Exp $
+ * $LynxId: LYBookmark.c,v 1.99 2026/10/15 23:38:40 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTAlert.h>
@@ -375,7 +375,7 @@ void save_bookmark_link(const char *address,
     bstring *string_data = NULL;
     bstring *tmp_data = NULL;
     DocAddress WWWDoc;
-    HTParentAnchor *tmpanchor;
+    const HTParentAnchor *tmpanchor;
     HText *text;
 
     /*

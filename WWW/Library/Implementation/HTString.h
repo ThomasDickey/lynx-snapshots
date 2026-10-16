@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTString.h,v 1.46 2026/10/05 14:27:06 tom Exp $
+ * $LynxId: HTString.h,v 1.47 2026/10/15 23:23:13 tom Exp $
  *						String handling for libwww
  *                                         STRINGS
  *
@@ -160,7 +160,7 @@ extern "C" {
     extern void HTSABCopy0(bstring **dest, const char *src);
     extern void HTSABCat(bstring **dest, const char *src, int len);
     extern void HTSABCat0(bstring **dest, const char *src);
-    extern BOOL HTSABEql(bstring *a, bstring *b);
+    extern BOOL HTSABEql(const bstring *a, const bstring *b);
     extern void HTSABFree(bstring **ptr);
 
 #define BStrLen(s)    (((s) != NULL) ? (s)->len : 0)

@@ -99,19 +99,19 @@ extern "C" {
 /*	Determine total number of objects in the list,
  *	not counting the head.
  */
-    extern int HTList_count(HTList *me);
+    extern int HTList_count(const HTList *me);
 
 /*	Determine position of an object in the list (a value of 0
  *	means it is pointed to by the head; returns -1 if not found).
  */
-    extern int HTList_indexOf(HTList *me,
+    extern int HTList_indexOf(const HTList *me,
 			      const void *object);
 
 /*	Return pointer to the object at a specified position in the list,
  *	where 0 is the object pointed to by the head (returns NULL if
  *	the list is empty, or if it doesn't exist - Yuk!).
  */
-    extern void *HTList_objectAt(HTList *me,
+    extern void *HTList_objectAt(const HTList *me,
 				 int position);
 
 /*      Link object to START of list (so it is pointed to by the head).

@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTNews.c,v 1.89 2026/10/05 15:48:15 tom Exp $
+ * $LynxId: HTNews.c,v 1.90 2026/10/15 23:35:14 tom Exp $
  *
  *			NEWS ACCESS				HTNews.c
  *			===========
@@ -152,7 +152,7 @@ static void free_news_globals(void)
 
 static void free_NNTP_AuthInfo(void)
 {
-    HTList *cur = NNTP_AuthInfo;
+    const HTList *cur = NNTP_AuthInfo;
     NNTPAuth *auth = NULL;
 
     if (!cur)
@@ -390,7 +390,7 @@ typedef enum {
  */
 static NNTPAuthResult HTHandleAuthInfo(char *host)
 {
-    HTList *cur = NULL;
+    const HTList *cur = NULL;
     NNTPAuth *auth = NULL;
     char *UserName = NULL;
     char *PassWord = NULL;

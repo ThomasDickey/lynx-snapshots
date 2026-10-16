@@ -1,5 +1,5 @@
 /*
- * $LynxId: UCAuto.c,v 1.60 2026/10/12 20:12:55 tom Exp $
+ * $LynxId: UCAuto.c,v 1.61 2026/10/13 23:18:50 tom Exp $
  *
  *  This file contains code for changing the Linux console mode.
  *  Currently some names for font files are hardwired in here.
@@ -308,11 +308,13 @@ void UCChangeTerminalCodepage(int newcs,
 	FILE *fp1;
 	FILE *fp2 = NULL;
 
-	if ((old_font = typecallocn(char, LY_MAXPATH)) != NULL)
-	      old_umap = typecallocn(char, LY_MAXPATH);
+	AssertAlloc(old_font,
+		    typecallocn(char, LY_MAXPATH),
+		    "UCChangeTerminalCodepage");
 
-	if (old_font == NULL)
-	    outofmem(__FILE__, "UCChangeTerminalCodepage");
+	AssertAlloc(old_umap,
+		    typecallocn(char, LY_MAXPATH),
+		    "UCChangeTerminalCodepage");
 
 	if ((fp1 = LYOpenTemp(old_font, ".fnt", BIN_W)) != NULL)
 	    fp2 = LYOpenTemp(old_umap, ".uni", BIN_W);
@@ -337,11 +339,17 @@ void UCChangeTerminalCodepage(int newcs,
 	    LYCloseTempFP(fp2);
 
 	    /* free up a few bytes */
-	    if ((nlen = strlen(old_font) + 1) < LY_MAXPATH)
-		old_font = typeRealloc(char, old_font, nlen);
+	    if ((nlen = strlen(old_font) + 1) < LY_MAXPATH) {
+		AssertAlloc(old_font,
+			    typeRealloc(char, old_font, nlen),
+			    "UCChangeTerminalCodepage");
+	    }
 
-	    if ((nlen = strlen(old_umap) + 1) < LY_MAXPATH)
-		old_umap = typeRealloc(char, old_umap, nlen);
+	    if ((nlen = strlen(old_umap) + 1) < LY_MAXPATH) {
+		AssertAlloc(old_umap,
+			    typeRealloc(char, old_umap, nlen),
+			    "UCChangeTerminalCodepage");
+	    }
 	} else {
 	    if (fp1)
 		(void) LYRemoveTemp(old_font);

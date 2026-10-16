@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTCP.c,v 1.174 2026/10/05 16:09:32 tom Exp $
+ * $LynxId: HTTCP.c,v 1.175 2026/10/15 23:35:14 tom Exp $
  *
  *			Generic Communication Code		HTTCP.c
  *			==========================
@@ -284,7 +284,7 @@ const char *HTInetString(LY_SOCKADDR * soc_A)
 {
 #ifdef INET6
     static char hostbuf[MAXHOSTNAMELEN];
-    struct sockaddr *soc_addr = &(soc_A->soc_address);
+    const struct sockaddr *soc_addr = &(soc_A->soc_address);
 
     getnameinfo(soc_addr,
 		SA_LEN(soc_addr),

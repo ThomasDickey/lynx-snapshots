@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYHistory.c,v 1.100 2026/10/12 23:27:42 tom Exp $
+ * $LynxId: LYHistory.c,v 1.105 2026/10/15 23:39:51 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTP.h>
@@ -98,7 +98,7 @@ static void trace_history(const char *tag)
 void LYAddVisitedLink(DocInfo *doc)
 {
     VisitedLink *tmp;
-    HTList *cur;
+    const HTList *cur;
     const char *title = (doc->title ? doc->title : NO_TITLE);
 
     if (isEmpty(doc->address)) {
@@ -119,7 +119,6 @@ void LYAddVisitedLink(DocInfo *doc)
 	    LYIsUIPage(doc->address, UIP_VLINKS) ||
 	    LYIsUIPage(doc->address, UIP_SHOWINFO) ||
 	    isLYNXMESSAGES(doc->address) ||
-	    ((related = 0) != 0) ||
 #ifdef DIRED_SUPPORT
 	    LYIsUIPage(doc->address, UIP_DIRED_MENU) ||
 	    LYIsUIPage(doc->address, UIP_UPLOAD_OPTIONS) ||
@@ -178,8 +177,7 @@ void LYAddVisitedLink(DocInfo *doc)
 	}
     }
 
-    if ((tmp = typecalloc(VisitedLink)) == NULL)
-	outofmem(__FILE__, "LYAddVisitedLink");
+    AssertAlloc(tmp, typecalloc(VisitedLink), "LYAddVisitedLink");
 
     StrAllocCopy(tmp->address, doc->address);
     LYformTitle(&(tmp->title), title);
@@ -251,9 +249,7 @@ BOOLEAN LYwouldPush(const char *title,
 	     */
 	    return TRUE;
 	}
-    }
 
-    if (docurl) {
 	rc = (BOOLEAN)
 	    !(LYIsUIPage(docurl, UIP_HISTORY)
 	      || LYIsUIPage(docurl, UIP_PRINT_OPTIONS)
@@ -329,7 +325,7 @@ static void clean_all_history(void)
 #endif
 
 /* FIXME What is the relationship to are_different() from the mainloop?! */
-static int are_identical(HistInfo * doc, DocInfo *doc1)
+static int are_identical(HistInfo * doc, const DocInfo *doc1)
 {
     return (STREQ(doc1->address, doc->hdoc.address)
 	    && BINEQ(doc1->post_data, doc->hdoc.post_data)
@@ -349,13 +345,15 @@ void LYAllocHistory(unsigned entries)
 	want = ((size_t) size_history) * sizeof(*history);
 
 	if (history == NULL) {
-	    history = typecallocn(HistInfo, want);
+	    AssertAlloc(history,
+			typecallocn(HistInfo, want),
+			"LYAllocHistory");
 	} else {
-	    history = typeRealloc(HistInfo, history, want);
+	    AssertAlloc(history,
+			typeRealloc(HistInfo, history, want),
+			"LYAllocHistory");
 	    memset(&history[save], 0, size_history - save);
 	}
-	if (history == NULL)
-	    outofmem(__FILE__, "LYAllocHistory");
     }
     CTRACE((tfp, "...LYAllocHistory %u vs %u\n", entries, size_history));
 }
@@ -724,7 +722,7 @@ BOOLEAN historytarget(DocInfo *newdoc)
 {
     int number;
     DocAddress WWWDoc;
-    HTParentAnchor *tmpanchor;
+    const HTParentAnchor *tmpanchor;
     BOOLEAN treat_as_intern = FALSE;
 
     if ((!newdoc || !newdoc->address) ||
@@ -815,7 +813,7 @@ int LYShowVisitedLinks(char **newfile)
     char *Address = NULL;
     int x, tot;
     FILE *fp0;
-    VisitedLink *vl;
+    const VisitedLink *vl;
     HTList *cur = Visited_Links;
     int offset;
     int ret = 0;
@@ -876,27 +874,29 @@ int LYShowVisitedLinks(char **newfile)
 	    x--;
 	else
 	    x++;
+
 	if (vl == PrevActiveVisitedLink) {
 	    if (Visited_Links_As & VISITED_LINKS_REVERSE)
 		ret = tot - x + 2;
 	    else
 		ret = x + 3;
-	}
-	if (vl == PrevActiveVisitedLink) {
 	    post_arrow = "<A NAME=current></A>";
 	    /* Otherwise levels 0 and 1 look the same when with arrow: */
 	    arrow = (vl->level && (Visited_Links_As & VISITED_LINKS_AS_TREE))
 		? "==>" : "=>";
 	    StrAllocCat(*newfile, "#current");
 	}
+
 	if (Visited_Links_As & VISITED_LINKS_AS_TREE) {
 	    offset = 2 * vl->level;
 	    if (offset > 24)
 		offset = (offset + 24) / 2;
 	    if (offset > LYcols * 3 / 4)
 		offset = LYcols * 3 / 4;
-	} else
+	} else {
 	    offset = (x > 99 ? 0 : x < 10 ? 2 : 1);
+	}
+
 	if (non_empty(vl->title)) {
 	    StrAllocCopy(Title, vl->title);
 	    LYEntify(&Title, TRUE);
@@ -990,8 +990,11 @@ static void to_stack(char *str)
     /*
      * Register string.
      */
-    if (buffstack == NULL)
-	buffstack = typecallocn(char *, (size_t) status_buf_size);
+    if (buffstack == NULL) {
+	AssertAlloc(buffstack,
+		    typecallocn(char *, (size_t) status_buf_size),
+		    "to_stack");
+    }
 
     free(buffstack[topOfStack]);
     buffstack[topOfStack] = str;

@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYSearch.c,v 1.43 2026/10/12 20:51:43 tom Exp $
+ * $LynxId: LYSearch.c,v 1.44 2026/10/15 23:39:15 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTAlert.h>
@@ -20,7 +20,7 @@
 BOOL field_has_target(FormInfo * field, const char *target)
 {
     BOOL result = FALSE;
-    OptionType *option;
+    const OptionType *option;
     char *stars = NULL;
     const char *cp;
 

@@ -1,5 +1,5 @@
 /*
- * $LynxId: makeuctb.c,v 1.53 2025/01/06 16:51:05 tom Exp $
+ * $LynxId: makeuctb.c,v 1.55 2026/10/15 22:39:16 tom Exp $
  *
  *  makeuctb.c, derived from conmakehash.c   - kw
  *
@@ -168,10 +168,8 @@ static int CodePage = 0;
 
 #define MAX_UNIPAIRS 4500
 
-static void addpair_str(char *str, int un)
+static void addpair_str(const char *str, int un)
 {
-    int i = 0;
-
     if (un <= 0xfffe) {
 	if (!themap_str.entry_ct) {
 	    /*
@@ -186,6 +184,8 @@ static void addpair_str(char *str, int un)
 		done(EX_DATAERR);
 	    }
 	} else {
+	    int i;
+
 	    /*
 	     *  Check that it isn't a duplicate.
 	     */
@@ -217,8 +217,6 @@ static void addpair_str(char *str, int un)
 
 static void addpair(int fp, int un)
 {
-    int i;
-
     if (!Raw_found) {		/* enc not (yet) explicitly given with 'R' */
 	if (fp >= 128) {
 	    if (RawOrEnc != UCT_ENC_8BIT && RawOrEnc <= UCT_ENC_8859) {
@@ -236,6 +234,8 @@ static void addpair(int fp, int un)
 	}
     }
     if (un <= 0xfffe) {
+	int i;
+
 	/*
 	 *  Check that it isn't a duplicate.
 	 */
@@ -523,7 +523,6 @@ int main(int argc, char **argv)
 	    un0 = getunicode(&p);
 	    if (un0 < 0) {
 		fprintf(stderr, "Bad input line: %s\n", buffer);
-		done(EX_DATAERR);
 		fprintf(stderr,
 			"%s: Bad Unicode range corresponding to font position range 0x%x-0x%x\n",
 			tblname, fp0, fp1);

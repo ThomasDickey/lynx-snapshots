@@ -1,5 +1,5 @@
 /*
- * $LynxId: DefaultStyle.c,v 1.21 2025/01/06 16:30:50 tom Exp $
+ * $LynxId: DefaultStyle.c,v 1.22 2026/10/15 22:39:44 tom Exp $
  *
  *	A real style sheet for the Character Grid browser
  *
@@ -456,7 +456,8 @@ static void FreeDefaultStyle(void)
 
 HTStyleSheet *DefaultStyle(HTStyle ***result_array)
 {
-    HTStyle *p, *q;
+    const HTStyle *p;
+    HTStyle *q;
 
     /*
      * The first time we're called, allocate a copy of the 'sheet' linked

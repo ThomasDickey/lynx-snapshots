@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTAABrow.c,v 1.48 2026/10/05 14:24:14 tom Exp $
+ * $LynxId: HTAABrow.c,v 1.49 2026/10/15 22:51:18 tom Exp $
  *
  * MODULE							HTAABrow.c
  *		BROWSER SIDE ACCESS AUTHORIZATION MODULE
@@ -226,7 +226,7 @@ static void HTAAServer_delete(HTAAServer *killme)
 {
     if (killme) {
 	HTAARealm *realm;
-	HTList *cur;
+	const HTList *cur;
 
 	if (killme->setups != NULL) {
 
@@ -282,7 +282,7 @@ static HTAAServer *HTAAServer_lookup(const char *hostname,
 				     int IsProxy)
 {
     if (hostname) {
-	HTList *cur = server_table;
+	const HTList *cur = server_table;
 	HTAAServer *server;
 
 	if (portnumber <= 0)
@@ -327,7 +327,7 @@ static HTAASetup *HTAASetup_lookup(const char *hostname,
 				   const char *docname,
 				   int IsProxy)
 {
-    HTAAServer *server;
+    const HTAAServer *server;
 
     if (portnumber <= 0)
 	portnumber = 80;
@@ -337,7 +337,7 @@ static HTAASetup *HTAASetup_lookup(const char *hostname,
 					    portnumber,
 					    IsProxy))) {
 
-	HTList *cur = server->setups;
+	const HTList *cur = server->setups;
 	HTAASetup *setup;
 
 	CTRACE((tfp, "%s %s (%s:%d:%s)\n",
@@ -477,11 +477,11 @@ static void HTAASetup_updateSpecifics(HTAASetup * setup, HTAssocList **specifics
  * ON EXIT:
  *	returns		the realm.  NULL, if not found.
  */
-static HTAARealm *HTAARealm_lookup(HTList *realm_table,
+static HTAARealm *HTAARealm_lookup(const HTList *realm_table,
 				   const char *realmname)
 {
     if (realm_table && realmname) {
-	HTList *cur = realm_table;
+	const HTList *cur = realm_table;
 	HTAARealm *realm;
 
 	while (NULL != (realm = (HTAARealm *) HTList_nextObject(cur))) {
@@ -642,7 +642,7 @@ static char *compose_auth_string(const char *hostname,
     char *msg = NULL;
     char *username = NULL;
     char *password = NULL;
-    char *realmname = NULL;
+    const char *realmname = NULL;
     char *theHost = NULL;
     char *proxiedHost = NULL;
     char *thePort = NULL;
@@ -816,7 +816,7 @@ static char *compose_auth_string(const char *hostname,
  * ON EXIT:
  *	returns	the authentication scheme to use.
  */
-static HTAAScheme HTAA_selectScheme(HTAASetup * setup)
+static HTAAScheme HTAA_selectScheme(const HTAASetup * setup)
 {
     if (setup && setup->valid_schemes) {
 	int scheme;
@@ -1118,7 +1118,7 @@ char *HTAA_composeAuth(const char *hostname,
  *				  field (in function HTAA_composeAuth()).
  *			NO, otherwise.
  */
-BOOL HTAA_shouldRetryWithAuth(char *start_of_headers,
+BOOL HTAA_shouldRetryWithAuth(const char *start_of_headers,
 			      size_t length,
 			      int soc,
 			      int IsProxy)
@@ -1154,7 +1154,7 @@ BOOL HTAA_shouldRetryWithAuth(char *start_of_headers,
 	if (StrChr(line, ':')) {	/* Valid header line */
 
 	    char *p = line;
-	    char *fieldname = HTNextField(&p);
+	    const char *fieldname = HTNextField(&p);
 	    char *arg1 = HTNextField(&p);
 	    char *args = p;
 

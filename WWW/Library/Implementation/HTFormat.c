@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFormat.c,v 1.107 2026/10/05 15:56:30 tom Exp $
+ * $LynxId: HTFormat.c,v 1.108 2026/10/15 23:04:47 tom Exp $
  *
  *		Manage different file formats			HTFormat.c
  *		=============================
@@ -573,7 +573,6 @@ void HTFilterPresentations(void)
 {
     int i, j;
     int n = HTList_count(HTPresentations);
-    BOOL matched;
 
     CTRACE((tfp, "HTFilterPresentations (AcceptMedia %#x)\n", LYAcceptMedia));
     for (i = 0; i < n; i++) {
@@ -590,7 +589,8 @@ void HTFilterPresentations(void)
 	    && strcasecomp(s, "www/mime")
 	    && strcasecomp(s, "www/compressed")
 	    && p->quality <= 1.0 && p->quality >= 0.0) {
-	    matched = TRUE;
+	    BOOL matched = TRUE;
+
 	    for (j = 0; j < i; j++) {
 		HTPresentation *q;
 		const char *t;

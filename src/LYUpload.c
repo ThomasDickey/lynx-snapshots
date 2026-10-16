@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYUpload.c,v 1.43 2026/10/12 12:59:26 tom Exp $
+ * $LynxId: LYUpload.c,v 1.44 2026/10/15 23:40:19 tom Exp $
  *
  *  Routines to upload files to the local filesystem.
  *  Created by: Rick Mallett, Carleton University
@@ -47,7 +47,7 @@ int LYUpload(char *line)
     char *the_upload = NULL;
     char tmpbuf[LY_MAXPATH];
     char *filename = NULL;
-    lynx_list_item_type *upload_command = NULL;
+    const lynx_list_item_type *upload_command = NULL;
     char *the_command = NULL;
 
     /*

@@ -399,7 +399,7 @@ static void print_item(Item *item)
 	fprintf(tfp, "\tNULL-ITEM\n");
     else {
 	UserDefList *cur1 = item->user_def_list;
-	AddressDefList *cur2 = item->address_def_list;
+	const AddressDefList *cur2 = item->address_def_list;
 	Ref *user_ref = (Ref *) HTList_nextObject(cur1);
 	const Ref *addr_ref = (const Ref *) HTList_nextObject(cur2);
 
@@ -428,7 +428,7 @@ static void print_item_list(ItemList *item_list)
     if (!item_list) {
 	fprintf(tfp, "EMPTY");
     } else {
-	ItemList *cur = item_list;
+	const ItemList *cur = item_list;
 	Item *item;
 
 	while (NULL != (item = (Item *) HTList_nextObject(cur)))

@@ -1,4 +1,4 @@
-/* $LynxId: LYOptions.c,v 1.192 2026/10/12 12:20:58 tom Exp $ */
+/* $LynxId: LYOptions.c,v 1.193 2026/10/14 21:19:27 tom Exp $ */
 #include <HTUtils.h>
 #include <HTFTP.h>
 #include <HTTP.h>		/* 'reloading' flag */
@@ -735,7 +735,9 @@ void LYoptions(void)
 	    /*
 	     * Set the new DISPLAY variable.  - FM
 	     */
-	    LYsetXDisplay(my_data->str);
+	    if (!isBEmpty(my_data)) {
+		LYsetXDisplay(my_data->str);
+	    }
 	    validate_x_display();
 	    LYaddstr(x_display ? x_display : "NONE");
 	    LYclrtoeol();
@@ -1615,7 +1617,7 @@ static int boolean_choice(int cur_choice,
 			  STRING2PTR choices)
 {
     int response = 0;
-    int cmd = 0;
+    int cmd;
     int number = 0;
     int col = (column >= 0 ? column : COL_OPTION_VALUES);
     int orig_choice = cur_choice;

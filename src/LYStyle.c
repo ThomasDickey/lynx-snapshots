@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYStyle.c,v 1.115 2026/10/12 22:59:58 tom Exp $
+ * $LynxId: LYStyle.c,v 1.117 2026/10/15 07:41:21 tom Exp $
  *
  * character level styles for Lynx
  * (c) 1996 Rob Partington -- donated to the Lyncei (if they want it :-)
@@ -127,7 +127,10 @@ static bucket *new_bucket(const char *name)
 
 bucket *nostyle_bucket(void)
 {
-    return new_bucket("<NOSTYLE>");
+    static bucket *cached;
+    if (cached == NULL)
+	cached = new_bucket("<NOSTYLE>");
+    return cached;
 }
 
 static char *TrimLowercase(char *buffer)

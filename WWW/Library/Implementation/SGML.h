@@ -1,5 +1,5 @@
 /*
- * $LynxId: SGML.h,v 1.51 2026/10/12 13:29:38 tom Exp $
+ * $LynxId: SGML.h,v 1.52 2026/10/15 23:25:57 tom Exp $
  *			       SGML parse and stream definition for libwww
  *                             SGML AND STRUCTURED STREAMS
  *
@@ -243,7 +243,7 @@ Structured Object definition
   anything target-specific. - kw
   */
     extern BOOLEAN LYCheckForCSI(const HTParentAnchor *anchor, char **url);
-    extern void LYDoCSI(char *url, const char *comment, char **csi);
+    extern void LYDoCSI(const char *url, const char *comment, char **csi);
     extern BOOLEAN LYCommentHacks(HTParentAnchor *anchor, const char *comment);
 
 /*

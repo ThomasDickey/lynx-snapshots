@@ -1,4 +1,4 @@
-/* $LynxId: LYUtils.h,v 1.104 2026/10/12 12:27:06 tom Exp $ */
+/* $LynxId: LYUtils.h,v 1.105 2026/10/15 23:44:52 tom Exp $ */
 #ifndef LYUTILS_H
 #define LYUTILS_H
 
@@ -144,10 +144,10 @@ extern "C" {
     extern FILE *LYOpenScratch(char *result, const char *prefix);
     extern FILE *LYOpenTemp(char *result, const char *suffix, const char *mode);
     extern FILE *LYOpenTempRewrite(char *result, const char *suffix, const char *mode);
-    extern FILE *LYReopenTemp(char *name);
+    extern FILE *LYReopenTemp(const char *name);
     extern char *Current_Dir(char *pathname);
     extern char *LYAbsOrHomePath(char **fname);
-    extern char *LYAddPathToSave(char *fname);
+    extern char *LYAddPathToSave(const char *fname);
     extern char *LYFindConfigFile(const char *nominal, const char *dftfile);
     extern char *LYGetEnv(const char *name);
     extern char *LYPathLeaf(char *pathname);
@@ -163,10 +163,10 @@ extern "C" {
     extern const char *wwwName(const char *pathname);
     extern int HTCheckForInterrupt(void);
     extern int LYConsoleInputFD(int need_selectable);
-    extern int LYRenameFile(char *src, char *dst);
-    extern int LYCopyFile(char *src, char *dst);
+    extern int LYRenameFile(const char *src, const char *dst);
+    extern int LYCopyFile(const char *src, const char *dst);
     extern int LYGetHilitePos(int cur, int count);
-    extern int LYRemoveTemp(char *name);
+    extern int LYRemoveTemp(const char *name);
     extern int LYReopenInput(void);
     extern int LYSystem(char *command);
     extern int LYValidateOutput(char *filename);
@@ -176,7 +176,7 @@ extern "C" {
     extern time_t LYmktime(char *string, int absolute);
     extern void BeginInternalPage(FILE *fp0, const char *Title, const char *HelpURL);
     extern void EndInternalPage(FILE *fp0);
-    extern void HTAddSugFilename(char *fname);
+    extern void HTAddSugFilename(const char *fname);
     extern void HTSugFilenames_free(void);
     extern void LYAddHilite(int cur, char *text, int x);
     extern void LYAddHtmlSep(char **path);
@@ -188,10 +188,10 @@ extern "C" {
     extern void LYCheckBibHost(void);
     extern void LYCheckMail(void);
     extern void LYCleanupTemp(void);
-    extern void LYCloseTemp(char *name);
-    extern void LYCloseTempFP(FILE *fp);
+    extern void LYCloseTemp(const char *name);
+    extern void LYCloseTempFP(const FILE *fp);
     extern void LYConvertToURL(char **AllocatedString, int fixit);
-    extern void LYDoCSI(char *url, const char *comment, char **csi);
+    extern void LYDoCSI(const char *url, const char *comment, char **csi);
     extern void LYEnsureAbsoluteURL(char **href, const char *name, int fixit);
     extern void LYFakeZap(int set);
     extern void LYFixCursesOn(const char *reason);
@@ -200,7 +200,7 @@ extern "C" {
     extern void LYGetScreenSize(int sig);
     extern void LYLocalFileToURL(char **target, const char *source);
     extern void LYLocalhostAliases_free(void);
-    extern void LYRenamedTemp(char *oldname, char *newname);
+    extern void LYRenamedTemp(const char *oldname, const char *newname);
     extern void LYSetHilite(int cur, const char *text);
     extern void LYTrimHtmlSep(char *path);
     extern void LYTrimPathSep(char *path);

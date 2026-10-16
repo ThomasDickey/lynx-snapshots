@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYrcFile.h,v 1.61 2026/10/12 12:36:23 tom Exp $
+ * $LynxId: LYrcFile.h,v 1.62 2026/10/15 23:45:51 tom Exp $
  */
 #ifndef LYRCFILE_H
 #define LYRCFILE_H
@@ -306,10 +306,10 @@ extern Config_Enum tbl_preferred_media[];
 extern Config_Enum tbl_transfer_rate[];
 extern Config_Enum tbl_user_mode[];
 
-extern BOOL LYgetEnum(Config_Enum * table, const char *name, int *result);
+extern BOOL LYgetEnum(const Config_Enum * table, const char *name, int *result);
 extern BOOL LYsetRcValue(const char *name, const char *param);
 extern BOOL will_save_rc(const char *name);
-extern const char *LYputEnum(Config_Enum * table, int value);
+extern const char *LYputEnum(const Config_Enum * table, int value);
 extern int enable_lynxrc(const char *value);
 extern int get_http_protocol(const char *value);
 extern int get_tagsoup(const char *value);

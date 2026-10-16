@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYCharUtils.c,v 1.144 2026/10/12 22:59:53 tom Exp $
+ * $LynxId: LYCharUtils.c,v 1.147 2026/10/15 23:41:02 tom Exp $
  *
  *  Functions associated with LYCharSets.c and the Lynx version of HTML.c - FM
  *  ==========================================================================
@@ -68,7 +68,6 @@ void LYEntify(char **in_out,
     char *source = *in_out;
     char *target;
     char *result = NULL;
-    size_t count_AMPs = 0;
     size_t count_LTs = 0;
     size_t count_GTs = 0;
 
@@ -85,7 +84,7 @@ void LYEntify(char **in_out,
 #endif
 
     if (non_empty(source)) {
-	count_AMPs = count_char(*in_out, '&');
+	size_t count_AMPs = count_char(*in_out, '&');
 	if (brackets) {
 	    count_LTs = count_char(*in_out, '<');
 	    count_GTs = count_char(*in_out, '>');
@@ -1148,7 +1147,7 @@ char **LYUCFullyTranslateString(char **str,
 #endif
 	) {
 	no_bytetrans = TRUE;
-    } else if (cs_to <= 0 && cs_from == cs_to && (!Back || cs_to < 0)) {
+    } else if (cs_to <= 0 && cs_from == cs_to && !Back) {
 	no_bytetrans = TRUE;
     } else {
 	/* No need to translate or examine the string any further */
@@ -1163,12 +1162,10 @@ char **LYUCFullyTranslateString(char **str,
 
     /* Can't do, caller should figure out what to do... */
     if (!UCCanTranslateFromTo(cs_from, cs_to)) {
-	if (cs_to < 0)
-	    return NULL;
 	if (!do_ent && no_bytetrans)
 	    return NULL;
 	no_bytetrans = TRUE;
-    } else if (cs_to < 0) {
+    } else {
 	do_ent = FALSE;
     }
 
@@ -1969,8 +1966,8 @@ void LYParseRefreshURL(char *content,
 		       char **p_seconds,
 		       char **p_address)
 {
-    char *cp;
-    char *cp1 = NULL;
+    const char *cp;
+    const char *cp1 = NULL;
     char *Seconds = NULL;
 
     /*
@@ -2758,7 +2755,7 @@ void LYHandleSELECT(HTStructured * me, const BOOL *present,
 	/*
 	 * Handle end tag.
 	 */
-	char *ptr;
+	const char *ptr;
 
 	/*
 	 * Make sure we had a select start tag.

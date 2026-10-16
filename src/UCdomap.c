@@ -1,5 +1,5 @@
 /*
- * $LynxId: UCdomap.c,v 1.117 2026/10/12 23:00:01 tom Exp $
+ * $LynxId: UCdomap.c,v 1.119 2026/10/14 08:18:33 tom Exp $
  *
  *  UCdomap.c
  *  =========
@@ -1528,7 +1528,6 @@ static int getLYhndl_byCP(const char *prefix,
 int UCGetLYhndl_byMIME(const char *value)
 {
     int i;
-    int LYhndl = -1;
 
     if (isEmpty(value)) {
 	CTRACE((tfp,
@@ -1642,6 +1641,8 @@ int UCGetLYhndl_byMIME(const char *value)
 	isdigit(UCH(value[3])) &&
 	isdigit(UCH(value[4])) &&
 	isdigit(UCH(value[5]))) {
+	int LYhndl;
+
 	/*
 	 * For "ibmNNN<...>" or "cp-NNN", try "cpNNN<...>"
 	 * if not yet found.  - KW & FM
@@ -2041,7 +2042,7 @@ static int UC_NoUctb_Register_with_LYCharSets(const char *UC_MIMEcharset,
      * Search by MIME name, (LYchar_set_names may differ...)
      * ignore if already present!
      */
-    for (i = 0; i < MAXCHARSETS && LYchar_set_names[i] && LYhndl < 0; i++) {
+    for (i = 0; i < MAXCHARSETS && LYchar_set_names[i]; i++) {
 	if (LYCharSet_UC[i].MIMEname &&
 	    !strcmp(UC_MIMEcharset, LYCharSet_UC[i].MIMEname)) {
 	    return ucError;

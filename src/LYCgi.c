@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYCgi.c,v 1.77 2026/10/12 20:41:53 tom Exp $
+ * $LynxId: LYCgi.c,v 1.80 2026/10/16 18:51:23 tom Exp $
  *                   Lynx CGI support                              LYCgi.c
  *                   ================
  *
@@ -103,16 +103,14 @@ static void add_environment_value(const char *env_value)
     if (envc == envc_size) {	/* Need some more slots */
 	envc_size += 10;
 	if (env) {
-	    env = (char **) realloc(env,
-				    sizeof(env[0]) * (envc_size + 2));
-	    /* + terminator and base 0 */
+	    AssertAlloc(env,
+			realloc(env, sizeof(env[0]) * (envc_size + 2)),
+			"LYCgi");
 	} else {
-	    env = (char **) malloc(sizeof(env[0]) * (envc_size + 2));
-	    /* + terminator and base 0 */
+	    AssertAlloc(env,
+			malloc(sizeof(env[0]) * (envc_size + 2)),
+			"LYCgi");
 	    remember_alloced(env);
-	}
-	if (env == NULL) {
-	    outofmem(__FILE__, "LYCgi");
 	}
     }
 
@@ -361,7 +359,7 @@ static int LYLoadCGI(const char *arg,
     } else {
 	HTFormat format_in;
 	HTStream *target = NULL;	/* Unconverted data */
-	int rc1, rc2;
+	int rc1 = -1;
 	int fd1[2], fd2[2];
 	char buf[MAX_LINE];
 	int pid;
@@ -373,8 +371,8 @@ static int LYLoadCGI(const char *arg,
 	int wstatus;
 #endif
 
-	rc1 = fd1[0] = fd1[1] = -1;
-	rc2 = fd2[0] = fd2[1] = -1;
+	fd1[0] = fd1[1] = -1;
+	fd2[0] = fd2[1] = -1;
 
 	if (anAnchor->isHEAD || keep_mime_headers) {
 
@@ -405,7 +403,7 @@ static int LYLoadCGI(const char *arg,
 	    PERROR("pipe() failed");
 	    status = -3;
 
-	} else if ((rc2 = pipe(fd2)) < 0) {
+	} else if (pipe(fd2) < 0) {
 	    HTAlert(CONNECT_SET_FAILED);
 	    PERROR("pipe() failed");
 	    if (rc1 >= 0) {
@@ -691,10 +689,8 @@ static int LYLoadCGI(const char *arg,
 		    close(fd1[0]);
 		    close(fd1[1]);
 		}
-		if (rc2 >= 0) {
-		    close(fd2[0]);
-		    close(fd2[1]);
-		}
+		close(fd2[0]);
+		close(fd2[1]);
 		status = -1;
 	    }
 

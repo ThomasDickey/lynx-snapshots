@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYPrint.c,v 1.116 2026/10/12 23:29:50 tom Exp $
+ * $LynxId: LYPrint.c,v 1.117 2026/10/15 23:39:51 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTAccess.h>
@@ -820,7 +820,7 @@ static void send_file_to_printer(const DocInfo *newdoc,
     char my_temp[LY_MAXPATH];
     int FnameTotal = 0;
     int FnameNum = -1;
-    lynx_list_item_type *cur_printer;
+    const lynx_list_item_type *cur_printer;
 
     outfile_fp = LYOpenTemp(my_temp,
 			    (HTisDocumentSource())

@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYUtils.c,v 1.315 2026/10/12 17:22:14 tom Exp $
+ * $LynxId: LYUtils.c,v 1.317 2026/10/15 23:38:40 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTCP.h>
@@ -217,7 +217,7 @@ static LY_TEMP *FindTempfileByName(const char *name)
     return p;
 }
 
-static LY_TEMP *FindTempfileByFP(FILE *fp)
+static LY_TEMP *FindTempfileByFP(const FILE *fp)
 {
     LY_TEMP *p;
 
@@ -430,9 +430,13 @@ void LYAddHilite(int cur,
     want = (size_t) list->hl_len;
 
     if (have != NULL) {
-	have = typeRealloc(HiliteInfo, have, want);
+	AssertAlloc(have,
+		    typeRealloc(HiliteInfo, have, want),
+		    "LYAddHilite");
     } else {
-	have = typeMallocn(HiliteInfo, want);
+	AssertAlloc(have,
+		    typeMallocn(HiliteInfo, want),
+		    "LYAddHilite");
     }
     list->hl_info = have;
     have[need].hl_text = text;
@@ -1685,13 +1689,13 @@ int LYReopenInput(void)
 
 	CTRACE((tfp, "LYReopenInput open(%s) returned %d.\n", term_name, new_fd));
 	if (new_fd >= 0) {
-	    FILE *frp;
+	    const FILE *frp;
 
 	    close(new_fd);
 	    frp = freopen(term_name, "r", stdin);
 	    CTRACE((tfp,
 		    "LYReopenInput freopen(%s,\"r\",stdin) returned %p, stdin is now %p with fd %d.\n",
-		    term_name, (void *) frp, (void *) stdin, fileno(stdin)));
+		    term_name, (const void *) frp, (void *) stdin, fileno(stdin)));
 	    result = 1;
 	} else {
 	    result = -1;
@@ -2122,7 +2126,7 @@ void LYFreeStringList(HTList *list)
 {
     if (list != NULL) {
 	char *argument;
-	HTList *cur = list;
+	const HTList *cur = list;
 
 	while (NULL != (argument = (char *) HTList_nextObject(cur))) {
 	    FREE(argument);
@@ -2170,9 +2174,9 @@ void LYAddLocalhostAlias(const char *alias)
 BOOLEAN LYisLocalAlias(const char *filename)
 {
     char *host = NULL;
-    char *alias;
+    const char *alias;
     char *cp;
-    HTList *cur = localhost_aliases;
+    const HTList *cur = localhost_aliases;
 
     if (!cur || !filename)
 	return NO;
@@ -2635,7 +2639,7 @@ BOOLEAN LYFixCursesOnForAccess(const char *addr,
      * If curses is off when maybe it shouldn't...
      */
     if (!dump_output_immediately && !LYCursesON && physical) {
-	char *cp1;
+	const char *cp1;
 
 	/*
 	 * If requested resource wants to be accessed with curses off, and
@@ -2722,7 +2726,7 @@ BOOLEAN LYCanDoHEAD(const char *address)
 	char *acc_method = HTParse(temp0, "", PARSE_ACCESS);
 
 	if (non_empty(acc_method)) {
-	    char *proxy;
+	    const char *proxy;
 
 	    StrAllocCat(acc_method, "_proxy");
 	    proxy = LYGetEnv(acc_method);
@@ -2827,7 +2831,7 @@ char *LYFindConfigFile(const char *nominal, const char *dftfile)
     char *result = NULL;
     char *path = NULL;
     char *head = NULL;
-    char *leaf;
+    const char *leaf;
     char *item;
 
     if (non_empty(nominal)) {
@@ -2907,7 +2911,7 @@ char *LYFindConfigFile(const char *nominal, const char *dftfile)
  */
 void remove_backslashes(char *buf)
 {
-    char *cp;
+    const char *cp;
 
     for (cp = buf; *cp != '\0'; cp++) {
 
@@ -3189,11 +3193,11 @@ void HTSugFilenames_free(void)
  * Utility for listing suggested filenames, making any repeated filenames the
  * most current in the list.  - FM
  */
-void HTAddSugFilename(char *fname)
+void HTAddSugFilename(const char *fname)
 {
     char *tmp = NULL;
     char *old;
-    HTList *cur;
+    const HTList *cur;
 
     if (!non_empty(fname))
 	return;
@@ -3229,7 +3233,8 @@ void HTAddSugFilename(char *fname)
 void change_sug_filename(char *fname)
 {
     const char *cp2;
-    char *temp = NULL, *cp, *cp1, *end;
+    char *temp = NULL, *cp, *cp1;
+    const char *end;
 
 #ifdef VMS
     char *dot;
@@ -5012,7 +5017,7 @@ void LYTrimRelFromAbsPath(char *path)
  * markup will be included as if it were in the document.  Move this function
  * to a separate module for doing this kind of thing seriously, someday.  - FM
  */
-void LYDoCSI(char *url,
+void LYDoCSI(const char *url,
 	     const char *comment,
 	     char **csi)
 {
@@ -5073,7 +5078,7 @@ static void LYHomeDir_free(void)
 
 char *Current_Dir(char *pathname)
 {
-    char *result;
+    const char *result;
 
 #ifdef HAVE_GETCWD
     result = getcwd(pathname, (size_t) LY_MAXPATH);
@@ -5163,7 +5168,7 @@ static char *HomeEnv(void)
 const char *Home_Dir(void)
 {
     static const char *homedir = NULL;
-    char *cp = NULL;
+    const char *cp = NULL;
 
     if (homedir == NULL) {
 	if ((cp = HomeEnv()) == NULL) {
@@ -5179,7 +5184,7 @@ const char *Home_Dir(void)
 	    /*
 	     * One could use getlogin() and getpwnam() here instead.
 	     */
-	    struct passwd *pw = getpwuid(geteuid());
+	    const struct passwd *pw = getpwuid(geteuid());
 
 	    if (pw && pw->pw_dir) {
 		StrAllocCopy(HomeDir, pw->pw_dir);
@@ -5490,7 +5495,7 @@ char *LYTildeExpand(char **pathname,
 	} else {
 	    char *save;
 	    char saved = '\0';
-	    struct passwd *pw;
+	    const struct passwd *pw;
 
 	    for (save = temp; *save != '\0'; ++save) {
 		if (LYIsPathSep(*save)) {
@@ -5622,7 +5627,7 @@ void LYAddPathToHome(char *fbuffer,
  * an absolute pathname.  If there is no save-space defined, use the home
  * directory. Return a new string with the result.
  */
-char *LYAddPathToSave(char *fname)
+char *LYAddPathToSave(const char *fname)
 {
     char *result = NULL;
 
@@ -6149,7 +6154,7 @@ FILE *LYOpenTemp(char *result,
 /*
  * Reopen a temporary file
  */
-FILE *LYReopenTemp(char *name)
+FILE *LYReopenTemp(const char *name)
 {
     LY_TEMP *p;
     FILE *fp = NULL;
@@ -6363,7 +6368,7 @@ static void LY_close_temp(LY_TEMP * p)
 /*
  * Close a temp-file, given its name
  */
-void LYCloseTemp(char *name)
+void LYCloseTemp(const char *name)
 {
     LY_TEMP *p;
 
@@ -6378,7 +6383,7 @@ void LYCloseTemp(char *name)
 /*
  * Close a temp-file, given its file-pointer
  */
-void LYCloseTempFP(FILE *fp)
+void LYCloseTempFP(const FILE *fp)
 {
     LY_TEMP *p;
 
@@ -6392,7 +6397,7 @@ void LYCloseTempFP(FILE *fp)
 /*
  * Close a temp-file, removing it.
  */
-int LYRemoveTemp(char *name)
+int LYRemoveTemp(const char *name)
 {
     LY_TEMP *p, *q;
     int code = -1;
@@ -6445,8 +6450,8 @@ void LYCleanupTemp(void)
 /*
  * We renamed a temporary file.  Keep track so we can remove it on exit.
  */
-void LYRenamedTemp(char *oldname,
-		   char *newname)
+void LYRenamedTemp(const char *oldname,
+		   const char *newname)
 {
     LY_TEMP *p;
 
@@ -6554,8 +6559,8 @@ BOOL LYIsUIPage3(const char *url,
 			   !strcmp(ly_uip[i].url, url)) {
 		    result = YES;
 		} else if (ly_uip[i].flags & UIP_F_MULTI) {
-		    char *p;
-		    HTList *l0 = ly_uip[i].alturls;
+		    const char *p;
+		    const HTList *l0 = ly_uip[i].alturls;
 
 		    while ((p = (char *) HTList_nextObject(l0)) != NULL) {
 			if ((flagparam & UIP_P_FRAG)
@@ -6589,9 +6594,9 @@ void LYRegisterUIPage(const char *url,
 		StrAllocCopy(ly_uip[i].url, url);
 
 	    } else {
-		char *p;
+		const char *p;
 		int n = 0;
-		HTList *l0 = ly_uip[i].alturls;
+		const HTList *l0 = ly_uip[i].alturls;
 
 		while ((p = (char *) HTList_nextObject(l0)) != NULL) {
 		    if (!strcmp(p, url))
@@ -6937,7 +6942,7 @@ void LYTrimPathSep(char *path)
 void LYAddPathSep(char **path)
 {
     size_t len;
-    char *temp;
+    const char *temp;
 
     if ((path != NULL)
 	&& ((temp = *path) != NULL)
@@ -7000,7 +7005,7 @@ void LYTrimHtmlSep(char *path)
 void LYAddHtmlSep(char **path)
 {
     size_t len;
-    char *temp;
+    const char *temp;
 
     if ((path != NULL)
 	&& ((temp = *path) != NULL)
@@ -7029,8 +7034,8 @@ void LYAddHtmlSep0(char *path)
 /*
  * Rename a file
  */
-int LYRenameFile(char *src,
-		 char *dst)
+int LYRenameFile(const char *src,
+		 const char *dst)
 {
 #ifdef _WINDOWS
     /*
@@ -7049,8 +7054,8 @@ int LYRenameFile(char *src,
 /*
  * Copy a file
  */
-int LYCopyFile(char *src,
-	       char *dst)
+int LYCopyFile(const char *src,
+	       const char *dst)
 {
     int code;
     const char *program;
@@ -7285,7 +7290,7 @@ int LYSystem(char *command)
     fflush(stderr);
 
     if (do_free)
-	FREE(command);
+	free(command);
 #if !defined(UCX) || !defined(VAXC)	/* errno not modifiable ?? */
     set_errno(saved_errno);	/* may have been clobbered */
 #endif
@@ -7859,8 +7864,8 @@ void LYOpenlog(const char *banner)
     }
 }
 
-static BOOLEAN looks_like_password(char *first,
-				   char *last)
+static BOOLEAN looks_like_password(const char *first,
+				   const char *last)
 {
     BOOLEAN result = FALSE;
 
@@ -7879,8 +7884,8 @@ static BOOLEAN looks_like_password(char *first,
 void LYSyslog(char *arg)
 {
     char *colon1;
-    char *colon2;
-    char *atsign;
+    const char *colon2;
+    const char *atsign;
 
     if (syslog_requested_urls) {
 

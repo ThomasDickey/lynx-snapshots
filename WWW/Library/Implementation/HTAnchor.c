@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTAnchor.c,v 1.85 2026/10/05 13:53:11 tom Exp $
+ * $LynxId: HTAnchor.c,v 1.86 2026/10/15 23:33:22 tom Exp $
  *
  *	Hypertext "Anchor" Object				HTAnchor.c
  *	==========================
@@ -415,7 +415,7 @@ static HTParentAnchor0 *HTAnchor_findAddress_in_adult_table(const DocAddress *ne
      */
     HASH_TYPE hash;
     HTList *adults;
-    HTList *grownups;
+    const HTList *grownups;
     HTParentAnchor0 *foundAnchor;
     BOOL need_extra_info = (BOOL) (newdoc->post_data ||
 				   newdoc->post_content_type ||
@@ -836,7 +836,7 @@ void HTAnchor_setDocument(HTParentAnchor *me,
 	me->document = doc;
 }
 
-HyperDoc *HTAnchor_document(HTParentAnchor *me)
+HyperDoc *HTAnchor_document(const HTParentAnchor *me)
 {
     return (me ? me->document : NULL);
 }
@@ -881,7 +881,7 @@ void HTAnchor_setFormat(HTParentAnchor *me,
 	me->format = form;
 }
 
-HTFormat HTAnchor_format(HTParentAnchor *me)
+HTFormat HTAnchor_format(const HTParentAnchor *me)
 {
     return (me ? me->format : NULL);
 }
@@ -903,7 +903,7 @@ void HTAnchor_setPrompt(HTParentAnchor *me,
     }
 }
 
-BOOL HTAnchor_isIndex(HTParentAnchor *me)
+BOOL HTAnchor_isIndex(const HTParentAnchor *me)
 {
     return (BOOL) (me
 		   ? me->isIndex
@@ -939,7 +939,7 @@ void HTAnchor_setStyle(HTParentAnchor *me,
 
 /*	Title handling.
 */
-const char *HTAnchor_title(HTParentAnchor *me)
+const char *HTAnchor_title(const HTParentAnchor *me)
 {
     return (me ? me->title : NULL);
 }
@@ -988,7 +988,7 @@ void HTAnchor_appendTitle(HTParentAnchor *me,
 
 /*	Bookmark handling.
 */
-const char *HTAnchor_bookmark(HTParentAnchor *me)
+const char *HTAnchor_bookmark(const HTParentAnchor *me)
 {
     return (me ? me->bookmark : NULL);
 }
@@ -1002,7 +1002,7 @@ void HTAnchor_setBookmark(HTParentAnchor *me,
 
 /*	Owner handling.
 */
-const char *HTAnchor_owner(HTParentAnchor *me)
+const char *HTAnchor_owner(const HTParentAnchor *me)
 {
     return (me ? me->owner : NULL);
 }
@@ -1017,7 +1017,7 @@ void HTAnchor_setOwner(HTParentAnchor *me,
 
 /*	TITLE handling in LINKs with REV="made" or REV="owner". - FM
 */
-const char *HTAnchor_RevTitle(HTParentAnchor *me)
+const char *HTAnchor_RevTitle(const HTParentAnchor *me)
 {
     return (me ? me->RevTitle : NULL);
 }
@@ -1041,7 +1041,7 @@ void HTAnchor_setRevTitle(HTParentAnchor *me,
 #ifndef DISABLE_BIBP
 /*	Citehost for bibp links from LINKs with REL="citehost". - RDC
 */
-const char *HTAnchor_citehost(HTParentAnchor *me)
+const char *HTAnchor_citehost(const HTParentAnchor *me)
 {
     return (me ? me->citehost : NULL);
 }
@@ -1059,7 +1059,7 @@ void HTAnchor_setCitehost(HTParentAnchor *me,
  *	(will be loaded if we had a Content-Disposition
  *	 header or META element with filename=name.suffix)
  */
-const char *HTAnchor_SugFname(HTParentAnchor *me)
+const char *HTAnchor_SugFname(const HTParentAnchor *me)
 {
     return (me ? me->SugFname : NULL);
 }
@@ -1073,7 +1073,7 @@ const char *HTAnchor_http_headers(HTParentAnchor *me)
 
 /*	Content-Type handling (parameter list).
 */
-const char *HTAnchor_content_type_params(HTParentAnchor *me)
+const char *HTAnchor_content_type_params(const HTParentAnchor *me)
 {
     return (me ? me->content_type_params : NULL);
 }
@@ -1082,63 +1082,63 @@ const char *HTAnchor_content_type_params(HTParentAnchor *me)
  *	(will be loaded if we had a Content-Encoding
  *	 header.)
  */
-const char *HTAnchor_content_encoding(HTParentAnchor *me)
+const char *HTAnchor_content_encoding(const HTParentAnchor *me)
 {
     return (me ? me->content_encoding : NULL);
 }
 
 /*	Content-Type handling. - FM
 */
-const char *HTAnchor_content_type(HTParentAnchor *me)
+const char *HTAnchor_content_type(const HTParentAnchor *me)
 {
     return (me ? me->content_type : NULL);
 }
 
 /*	Last-Modified header handling. - FM
 */
-const char *HTAnchor_last_modified(HTParentAnchor *me)
+const char *HTAnchor_last_modified(const HTParentAnchor *me)
 {
     return (me ? me->last_modified : NULL);
 }
 
 /*	Date header handling. - FM
 */
-const char *HTAnchor_date(HTParentAnchor *me)
+const char *HTAnchor_date(const HTParentAnchor *me)
 {
     return (me ? me->date : NULL);
 }
 
 /*	Server header handling. - FM
 */
-const char *HTAnchor_server(HTParentAnchor *me)
+const char *HTAnchor_server(const HTParentAnchor *me)
 {
     return (me ? me->server : NULL);
 }
 
 /*	Safe header handling. - FM
 */
-BOOL HTAnchor_safe(HTParentAnchor *me)
+BOOL HTAnchor_safe(const HTParentAnchor *me)
 {
     return (BOOL) (me ? me->safe : FALSE);
 }
 
 /*	Content-Base header handling. - FM
 */
-const char *HTAnchor_content_base(HTParentAnchor *me)
+const char *HTAnchor_content_base(const HTParentAnchor *me)
 {
     return (me ? me->content_base : NULL);
 }
 
 /*	Content-Location header handling. - FM
 */
-const char *HTAnchor_content_location(HTParentAnchor *me)
+const char *HTAnchor_content_location(const HTParentAnchor *me)
 {
     return (me ? me->content_location : NULL);
 }
 
 /*	Message-ID, used for mail replies - kw
 */
-const char *HTAnchor_messageID(HTParentAnchor *me)
+const char *HTAnchor_messageID(const HTParentAnchor *me)
 {
     return (me ? me->message_id : NULL);
 }
@@ -1155,7 +1155,7 @@ BOOL HTAnchor_setMessageID(HTParentAnchor *me,
 
 /*	Subject, used for mail replies - kw
 */
-const char *HTAnchor_subject(HTParentAnchor *me)
+const char *HTAnchor_subject(const HTParentAnchor *me)
 {
     return (me ? me->subject : NULL);
 }
@@ -1178,7 +1178,7 @@ HTAnchor *HTAnchor_followLink(const HTChildAnchor *me)
     return (me->dest);
 }
 
-HTAnchor *HTAnchor_followTypedLink(HTChildAnchor *me,
+HTAnchor *HTAnchor_followTypedLink(const HTChildAnchor *me,
 				   const HTLinkType *type)
 {
     if (me->type == type)

@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTAAUtil.c,v 1.40 2026/10/05 13:30:04 tom Exp $
+ * $LynxId: HTAAUtil.c,v 1.41 2026/10/15 23:33:22 tom Exp $
  *
  * MODULE							HTAAUtil.c
  *		COMMON PARTS OF ACCESS AUTHORIZATION MODULE
@@ -183,9 +183,9 @@ const char *HTAAMethod_name(HTAAMethod method)
  *	returns		YES, if method was found.
  *			NO, if not found.
  */
-BOOL HTAAMethod_inList(HTAAMethod method, HTList *list)
+BOOL HTAAMethod_inList(HTAAMethod method, const HTList *list)
 {
-    HTList *cur = list;
+    const HTList *cur = list;
     const char *item;
 
     while (NULL != (item = (const char *) HTList_nextObject(cur))) {
@@ -317,9 +317,10 @@ BOOL HTAA_templateCaseMatch(const char *ctemplate,
 char *HTAA_makeProtectionTemplate(const char *docname)
 {
     char *ctemplate = NULL;
-    char *slash = NULL;
 
     if (docname) {
+	char *slash;
+
 	StrAllocCopy(ctemplate, docname);
 	slash = strrchr(ctemplate, '/');
 	if (slash)

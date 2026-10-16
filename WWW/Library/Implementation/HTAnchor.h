@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTAnchor.h,v 1.41 2026/10/05 13:54:19 tom Exp $
+ * $LynxId: HTAnchor.h,v 1.42 2026/10/15 23:22:00 tom Exp $
  *
  *	Hypertext "Anchor" Object				     HTAnchor.h
  *	==========================
@@ -218,7 +218,7 @@ extern "C" {
     extern void HTAnchor_setDocument(HTParentAnchor *me,
 				     HyperDoc *doc);
 
-    extern HyperDoc *HTAnchor_document(HTParentAnchor *me);
+    extern HyperDoc *HTAnchor_document(const HTParentAnchor *me);
 
     /* Returns the full URI of the anchor, child or parent
      * as a malloc'd string to be freed by the caller.
@@ -230,7 +230,7 @@ extern "C" {
     extern void HTAnchor_setFormat(HTParentAnchor *me,
 				   HTFormat form);
 
-    extern HTFormat HTAnchor_format(HTParentAnchor *me);
+    extern HTFormat HTAnchor_format(const HTParentAnchor *me);
 
     extern void HTAnchor_setIndex(HTParentAnchor *me,
 				  const char *address);
@@ -238,7 +238,7 @@ extern "C" {
     extern void HTAnchor_setPrompt(HTParentAnchor *me,
 				   const char *prompt);
 
-    extern BOOL HTAnchor_isIndex(HTParentAnchor *me);
+    extern BOOL HTAnchor_isIndex(const HTParentAnchor *me);
 
     extern BOOL HTAnchor_isISMAPScript(HTAnchor * me);
 
@@ -251,7 +251,7 @@ extern "C" {
 
     /* Title handling.
      */
-    extern const char *HTAnchor_title(HTParentAnchor *me);
+    extern const char *HTAnchor_title(const HTParentAnchor *me);
 
     extern void HTAnchor_setTitle(HTParentAnchor *me,
 				  const char *title);
@@ -261,28 +261,28 @@ extern "C" {
 
     /* Bookmark handling.
      */
-    extern const char *HTAnchor_bookmark(HTParentAnchor *me);
+    extern const char *HTAnchor_bookmark(const HTParentAnchor *me);
 
     extern void HTAnchor_setBookmark(HTParentAnchor *me,
 				     const char *bookmark);
 
     /* Owner handling.
      */
-    extern const char *HTAnchor_owner(HTParentAnchor *me);
+    extern const char *HTAnchor_owner(const HTParentAnchor *me);
 
     extern void HTAnchor_setOwner(HTParentAnchor *me,
 				  const char *owner);
 
     /* TITLE handling in LINKs with REV="made" or REV="owner".  - FM
      */
-    extern const char *HTAnchor_RevTitle(HTParentAnchor *me);
+    extern const char *HTAnchor_RevTitle(const HTParentAnchor *me);
 
     extern void HTAnchor_setRevTitle(HTParentAnchor *me,
 				     const char *title);
 
     /* Citehost for bibp links from LINKs with REL="citehost".  - RDC
      */
-    extern const char *HTAnchor_citehost(HTParentAnchor *me);
+    extern const char *HTAnchor_citehost(const HTParentAnchor *me);
 
     extern void HTAnchor_setCitehost(HTParentAnchor *me,
 				     const char *citehost);
@@ -291,7 +291,7 @@ extern "C" {
      * (will be loaded if we had a Content-Disposition
      * header or META element with filename=name.suffix)
      */
-    extern const char *HTAnchor_SugFname(HTParentAnchor *me);
+    extern const char *HTAnchor_SugFname(const HTParentAnchor *me);
 
     /* HTTP Headers.
      */
@@ -299,52 +299,52 @@ extern "C" {
 
     /* Content-Type handling (parameter list).
      */
-    extern const char *HTAnchor_content_type_params(HTParentAnchor *me);
+    extern const char *HTAnchor_content_type_params(const HTParentAnchor *me);
 
     /* Content-Type handling.  - FM
      */
-    extern const char *HTAnchor_content_type(HTParentAnchor *me);
+    extern const char *HTAnchor_content_type(const HTParentAnchor *me);
 
     /* Content-Encoding handling.  - FM
      * (will be loaded if we had a Content-Encoding
      * header.)
      */
-    extern const char *HTAnchor_content_encoding(HTParentAnchor *me);
+    extern const char *HTAnchor_content_encoding(const HTParentAnchor *me);
 
     /* Last-Modified header handling.  - FM
      */
-    extern const char *HTAnchor_last_modified(HTParentAnchor *me);
+    extern const char *HTAnchor_last_modified(const HTParentAnchor *me);
 
     /* Date header handling.  - FM
      */
-    extern const char *HTAnchor_date(HTParentAnchor *me);
+    extern const char *HTAnchor_date(const HTParentAnchor *me);
 
     /* Server header handling.  - FM
      */
-    extern const char *HTAnchor_server(HTParentAnchor *me);
+    extern const char *HTAnchor_server(const HTParentAnchor *me);
 
     /* Safe header handling.  - FM
      */
-    extern BOOL HTAnchor_safe(HTParentAnchor *me);
+    extern BOOL HTAnchor_safe(const HTParentAnchor *me);
 
     /* Content-Base header handling.  - FM
      */
-    extern const char *HTAnchor_content_base(HTParentAnchor *me);
+    extern const char *HTAnchor_content_base(const HTParentAnchor *me);
 
     /* Content-Location header handling.  - FM
      */
-    extern const char *HTAnchor_content_location(HTParentAnchor *me);
+    extern const char *HTAnchor_content_location(const HTParentAnchor *me);
 
     /* Message-ID, used for mail replies - kw
      */
-    extern const char *HTAnchor_messageID(HTParentAnchor *me);
+    extern const char *HTAnchor_messageID(const HTParentAnchor *me);
 
     extern BOOL HTAnchor_setMessageID(HTParentAnchor *me,
 				      const char *messageid);
 
     /* Subject, used for mail replies - kw
      */
-    extern const char *HTAnchor_subject(HTParentAnchor *me);
+    extern const char *HTAnchor_subject(const HTParentAnchor *me);
 
     extern BOOL HTAnchor_setSubject(HTParentAnchor *me,
 				    const char *subject);
@@ -354,7 +354,7 @@ extern "C" {
      */
     extern HTAnchor *HTAnchor_followLink(const HTChildAnchor *me);
 
-    extern HTAnchor *HTAnchor_followTypedLink(HTChildAnchor *me,
+    extern HTAnchor *HTAnchor_followTypedLink(const HTChildAnchor *me,
 					      const HTLinkType *type);
 
     /* Read and write methods

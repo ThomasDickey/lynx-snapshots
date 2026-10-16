@@ -1,4 +1,4 @@
-/* $LynxId: LYGetFile.c,v 1.100 2026/10/12 21:10:18 tom Exp $ */
+/* $LynxId: LYGetFile.c,v 1.102 2026/10/15 23:38:10 tom Exp $ */
 #include <HTUtils.h>
 #include <HTTP.h>
 #include <HTAnchor.h>		/* Anchor class */
@@ -70,7 +70,7 @@ int HTNoDataOK = 0;
 int getfile(DocInfo *doc, int *target)
 {
     UrlTypes url_type = NOT_A_URL_TYPE;
-    char *pound;
+    const char *pound;
     char *cp = NULL;
     char *temp = NULL;
     DocAddress WWWDoc;		/* a WWW absolute doc address struct */
@@ -146,11 +146,11 @@ int getfile(DocInfo *doc, int *target)
 
 	if ((cp1 = StrChr(temp, '@')) == NULL)
 	    cp1 = temp;
-	if ((cp = strrchr(cp1, ':')) != NULL) {
+	if ((cp1 = strrchr(cp1, ':')) != NULL) {
 	    long int value;
 
-	    cp++;
-	    if (sscanf(cp, "%ld", &value) == 1) {
+	    cp1++;
+	    if (sscanf(cp1, "%ld", &value) == 1) {
 		if (value == 19 || value == 65555) {
 		    HTAlert(PORT_NINETEEN_INVALID);
 		    FREE(temp);
@@ -168,7 +168,7 @@ int getfile(DocInfo *doc, int *target)
 		    FREE(temp);
 		    return (NULLFILE);
 		}
-	    } else if (isdigit(UCH(*cp))) {
+	    } else if (isdigit(UCH(*cp1))) {
 		HTAlert(URL_PORT_BAD);
 		FREE(temp);
 		return (NULLFILE);
@@ -526,7 +526,7 @@ int getfile(DocInfo *doc, int *target)
 	    if (no_mail) {
 		HTUserMsg(MAIL_DISABLED);
 	    } else if (!dump_output_immediately) {
-		HTParentAnchor *tmpanchor = HTAnchor_findAddress(&WWWDoc);
+		const HTParentAnchor *tmpanchor = HTAnchor_findAddress(&WWWDoc);
 		const char *title;
 		char *tmptitle = NULL;
 
@@ -1380,7 +1380,7 @@ BOOLEAN exec_ok(const char *source,
 		const char *linktext,
 		int type)
 {
-    struct trust *tp;
+    const struct trust *tp;
     const char *cp;
     const char *allowed_extra_chars;
     int Type = type;

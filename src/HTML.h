@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTML.h,v 1.37 2025/01/06 15:16:58 tom Exp $
+ * $LynxId: HTML.h,v 1.38 2026/10/15 23:29:03 tom Exp $
  *
  *					HTML to rich text converter for libwww
  *
@@ -273,7 +273,7 @@ extern "C" {
  * On exit,
  *      a return code like HT_LOADED if object exists else 60; 0
  */
-    extern int HTLoadError(HTStream *sink,
+    extern int HTLoadError(const HTStream *sink,
 			   int number,
 			   const char *message);
 

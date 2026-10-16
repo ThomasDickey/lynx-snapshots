@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTList.c,v 1.23 2026/10/05 15:37:52 tom Exp $
+ * $LynxId: HTList.c,v 1.24 2026/10/15 22:48:58 tom Exp $
  *
  *	A small List class					      HTList.c
  *	==================
@@ -338,9 +338,9 @@ void *HTList_removeFirstObject(HTList *me)
 /*	Determine total number of objects in the list,
  *	not counting the head.
  */
-int HTList_count(HTList *me)
+int HTList_count(const HTList *me)
 {
-    HTList *temp = me;
+    const HTList *temp = me;
     int count = 0;
 
     if (temp)
@@ -353,9 +353,9 @@ int HTList_count(HTList *me)
 /*	Determine position of an object in the list (a value of 0
  *	means it is pointed to by the head; returns -1 if not found).
  */
-int HTList_indexOf(HTList *me, const void *object)
+int HTList_indexOf(const HTList *me, const void *object)
 {
-    HTList *temp = me;
+    const HTList *temp = me;
 
     if (temp) {
 	int position = 0;
@@ -374,9 +374,9 @@ int HTList_indexOf(HTList *me, const void *object)
  *	where 0 is the object pointed to by the head (returns NULL if
  *	the list is empty, or if it doesn't exist - Yuk!).
  */
-void *HTList_objectAt(HTList *me, int position)
+void *HTList_objectAt(const HTList *me, int position)
 {
-    HTList *temp = me;
+    const HTList *temp = me;
     int pos = position;
 
     if (!temp || pos < 0)

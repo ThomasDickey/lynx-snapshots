@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYList.c,v 1.58 2026/10/12 22:59:58 tom Exp $
+ * $LynxId: LYList.c,v 1.59 2026/10/14 22:22:49 tom Exp $
  *
  *			Lynx Document Reference List Support	      LYList.c
  *			====================================
@@ -284,8 +284,10 @@ static int print_refs(FILE *fp, int titles, int refs)
 		title = titles ? HTAnchor_title(parent) : NULL;
 		if (links_are_numbered()) {
 		    value = HText_findAnchorNumber(helper);
-		    if (value <= result)
+		    if (value <= result) {
+			counter = value;
 			continue;
+		    }
 		    fprintf(fp, "%4d. ", value);
 		}
 		if (((HTAnchor *) parent != dest) && title) {

@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYJump.c,v 1.54 2026/10/12 12:59:26 tom Exp $
+ * $LynxId: LYJump.c,v 1.55 2026/10/15 23:17:36 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTAlert.h>
@@ -56,7 +56,7 @@ void LYAddJumpShortcut(HTList *historyp, const char *shortcut)
 {
     char *tmp = NULL;
     char *old;
-    HTList *cur = historyp;
+    const HTList *cur = historyp;
 
     if (!historyp || isEmpty(shortcut))
 	return;
@@ -180,7 +180,7 @@ char *LYJump(int key)
     static bstring *buf = NULL;
 
     JumpDatum seeking;
-    JumpDatum *found;
+    const JumpDatum *found;
     char *bp;
     const char *cp;
     struct JumpTable *jtp;

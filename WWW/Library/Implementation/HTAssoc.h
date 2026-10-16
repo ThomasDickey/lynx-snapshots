@@ -26,7 +26,7 @@ extern "C" {
 				const char *name,
 				const char *value);
 
-    extern char *HTAssocList_lookup(HTAssocList *alist,
+    extern char *HTAssocList_lookup(const HTAssocList *alist,
 				    const char *name);
 
 #ifdef __cplusplus

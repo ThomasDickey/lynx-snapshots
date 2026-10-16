@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFile.c,v 1.172 2026/10/05 15:12:19 tom Exp $
+ * $LynxId: HTFile.c,v 1.174 2026/10/16 18:52:31 tom Exp $
  *
  *			File Access				HTFile.c
  *			===========
@@ -229,7 +229,7 @@ static char *FormatNum(char **bufp,
 }
 
 static void LYListFmtParse(const char *fmtstr,
-			   DIRED * data,
+			   const DIRED * data,
 			   const char *file,
 			   HTStructured * target,
 			   const char *tail)
@@ -535,7 +535,7 @@ void HTSetSuffix5(const char *suffix,
     else if (strcmp(suffix, s_unknown_suffix) == 0)
 	suff = &unknown_suffix;
     else {
-	HTList *cur = HTSuffixes;
+	const HTList *cur = HTSuffixes;
 
 	while (NULL != (suff = (HTSuffix *) HTList_nextObject(cur))) {
 	    if (suff->suffix && 0 == strcmp(suff->suffix, suffix) &&
@@ -792,10 +792,10 @@ char *WWW_nameOfFile(const char *name)
 const char *HTFileSuffix(const HTAtom *rep,
 			 const char *enc)
 {
-    HTSuffix *suff;
+    const HTSuffix *suff;
 
 #ifdef FNAMES_8_3
-    HTSuffix *first_found = NULL;
+    const HTSuffix *first_found = NULL;
 #endif
     BOOL trivial_enc;
     int n;
@@ -1224,7 +1224,7 @@ void LYGetFileInfo(const char *filename,
  */
 float HTFileValue(const char *filename)
 {
-    HTSuffix *suff;
+    const HTSuffix *suff;
     int n;
     int i;
     int lf = (int) strlen(filename);
@@ -1489,7 +1489,7 @@ BOOL IsCompressionFormat(const HTAtom *format, CompressFileType check)
  * Check the anchor's content_type and content_encoding elements for a gzip or
  * Unix compressed file -FM, TD
  */
-CompressFileType HTContentToCompressType(HTParentAnchor *anchor)
+CompressFileType HTContentToCompressType(const HTParentAnchor *anchor)
 {
     CompressFileType method = cftNone;
     const char *ct = HTAnchor_content_type(anchor);
@@ -1674,7 +1674,7 @@ void HTStructured_meta(HTStructured * target, HTFormat format_out)
  *	calling function should use LYListFmtParse() to create a link
  *	to the parent directory.  Otherwise, it returns FALSE. - FM
  */
-BOOL HTDirTitles(HTStructured * target, HTParentAnchor *anchor,
+BOOL HTDirTitles(HTStructured * target, const HTParentAnchor *anchor,
 		 HTFormat format_out,
 		 int tildeIsTop)
 {
@@ -2189,7 +2189,7 @@ static int print_local_dir(DIR *dp, const char *localname,
 	state = 'I';
 
 	while (next_element != NULL) {
-	    DIRED *entry;
+	    const DIRED *entry;
 
 #ifndef DISP_PARTIAL
 	    if (num_of_entries_output % HTMAX(display_lines, 10) == 0) {

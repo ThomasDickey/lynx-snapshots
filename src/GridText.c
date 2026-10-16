@@ -1,5 +1,5 @@
 /*
- * $LynxId: GridText.c,v 1.363 2026/10/12 23:27:42 tom Exp $
+ * $LynxId: GridText.c,v 1.380 2026/10/15 23:37:24 tom Exp $
  *
  *		Character grid hypertext object
  *		===============================
@@ -372,7 +372,7 @@ typedef struct {
     char data[MAX_LINE + 2];
 } HTLineTemp;
 
-#define TEMP_LINE(p,n) ((HTLine *)&(p->temp_line[n]))
+#define TEMP_LINE(p,n) (&(p->temp_line[n].base))
 
 typedef struct _TextAnchor {
     struct _TextAnchor *next;
@@ -865,9 +865,9 @@ static void LYAddHiText(TextAnchor *a,
     a->lites.hl_len = (short) (a->lites.hl_len + 1);
     want = (size_t) (a->lites.hl_len) * sizeof(HiliteInfo);
     if (have != NULL) {
-	have = (HiliteInfo *) realloc(have, want);
+	AssertAlloc(have, realloc(have, want), "LYAddHiText");
     } else {
-	have = (HiliteInfo *) malloc(want);
+	AssertAlloc(have, malloc(want), "LYAddHiText");
     }
     a->lites.hl_info = have;
 
@@ -1032,7 +1032,7 @@ static void free_form_fields(FormInfo * input_field)
 
 static void FormList_delete(HTList *forms)
 {
-    HTList *cur = forms;
+    const HTList *cur = forms;
     PerFormInfo *form;
 
     while ((form = (PerFormInfo *) HTList_nextObject(cur)) != NULL)
@@ -1337,7 +1337,7 @@ void HText_free(HText *self)
      */
     if (self->tabs) {
 	HTTabID *Tab = NULL;
-	HTList *cur = self->tabs;
+	const HTList *cur = self->tabs;
 
 	while (NULL != (Tab = (HTTabID *) HTList_nextObject(cur))) {
 	    FREE(Tab->name);
@@ -1724,12 +1724,12 @@ static int display_line(HTLine *line,
 /*	Output the title line
  *	---------------------
  */
-static void display_title(HText *text)
+static void display_title(const HText *text)
 {
     char *title = NULL;
     char percent[40];
     unsigned char *tmp = NULL;
-    int i = 0, j = 0;
+    int i;
     int limit;
 
 #ifdef USE_COLOR_STYLE
@@ -1806,6 +1806,8 @@ static void display_title(HText *text)
 	    } else if (kanji_code == SJIS) {
 		TO_SJIS((unsigned char *) title, tmp);
 	    } else {
+		int j;
+
 		for (i = 0, j = 0; title[i]; i++) {
 		    if (title[i] != CH_ESC) {	/* S/390 -- gil -- 1487 */
 			tmp[j++] = UCH(title[i]);
@@ -2041,7 +2043,6 @@ static void display_page(HText *text,
     TextAnchor *Anchor_ptr = NULL;
     int stop_before_for_anchors;
     FormInfo *FormInfo_ptr;
-    BOOL display_flag = FALSE;
     HTAnchor *link_dest;
     HTAnchor *link_dest_intl = NULL;
     static int last_nlinks = 0;
@@ -2077,7 +2078,7 @@ static void display_page(HText *text,
     }
 #endif /* DISP_PARTIAL */
 
-    tmp[0] = tmp[1] = tmp[2] = '\0';
+    memset(tmp, 0, sizeof(tmp));
     if (target && *target == '\0')
 	target = NULL;
     text->page_has_target = NO;
@@ -2158,7 +2159,6 @@ static void display_page(HText *text,
     } else {
 	display_title(text);	/* will move cursor to top of screen */
     }
-    display_flag = TRUE;
 
 #ifdef USE_COLOR_STYLE
 #ifdef DISP_PARTIAL
@@ -2243,7 +2243,7 @@ static void display_page(HText *text,
 		size_t written = 0;
 		int x_off = offset + (int) (cp - data);
 		size_t len = strlen(target);
-		size_t utf_extra = 0;
+		size_t utf_extra;
 
 		text->page_has_target = YES;
 
@@ -2318,8 +2318,7 @@ static void display_page(HText *text,
 #endif /* SHOW_WHEREIS_TARGETS */
 
 	    /*
-	     * Stop if this is the last line.  Otherwise, make sure
-	     * display_flag is set and process the next line.  -FM
+	     * Stop if this is the last line.
 	     */
 	    if (line == text->last_line) {
 		/*
@@ -2340,7 +2339,6 @@ static void display_page(HText *text,
 		last_disp_partial = i + line_number;
 	    }
 #endif /* DISP_PARTIAL */
-	    display_flag = TRUE;
 	    line = line->next;
 	}			/* end of "Verify and display each line." loop */
     }
@@ -2434,7 +2432,6 @@ static void display_page(HText *text,
 		links[nlinks].l_form = NULL;
 
 		UpdateNumLinks();
-		display_flag = TRUE;
 
 	    } else if (Anchor_ptr->link_type == INPUT_ANCHOR
 		       && Anchor_ptr->input_field->type != F_HIDDEN_TYPE) {
@@ -2480,9 +2477,6 @@ static void display_page(HText *text,
 		 * Bold the link after incrementing nlinks.
 		 */
 		LYhighlight(FALSE, (nlinks - 1), target);
-
-		display_flag = TRUE;
-
 	    } else {
 		/*
 		 * Not showing anchor.
@@ -2525,16 +2519,10 @@ static void display_page(HText *text,
 	    more_links = TRUE;
     }
 
-    if (!display_flag) {
-	/*
-	 * Nothing on the page.
-	 */
-	LYaddstr("\n     Document is empty");
-    }
     display_scrollbar(text);
 
 #ifdef DISP_PARTIAL
-    if (display_partial && display_flag &&
+    if (display_partial &&
 	last_disp_partial >= text->top_of_screen &&
 	!enable_scrollback &&
 	!recent_sizechange) {	/*  really remember them if ok - kw  */
@@ -2729,13 +2717,17 @@ static HTLine *insert_blanks_in_line(HTLine *line,
     int head_processed;
     HTLine *mod_line;
     const char *newdata;
-    char *s = line->data;
-    const char *pre = s;
-    const char *copied = line->data;
+    char *s;
+    const char *pre;
+    const char *copied;
     char *t;
 
     if (!(line && line->size && ninserts))
 	return NULL;
+
+    pre = s = line->data;
+    copied = line->data;
+
     for (ip = 0; ip < ninserts; ip++)
 	if (newpos[ip] > oldpos[ip] &&
 	    (newpos[ip] - oldpos[ip]) > added_chars)
@@ -3516,14 +3508,17 @@ static void split_line(HText *text, unsigned split)
 	++ht_num_runs;
 
 	if (ht_num_runs != 1) {
-	    int *oldpos = (int *) malloc(sizeof(int)
-					 * 2 * (size_t) (ht_num_runs - 1));
-	    int *newpos = oldpos + ht_num_runs - 1;
+	    int *oldpos;
+	    int *newpos;
 	    int i = 1;
 	    int d_, r_;
 
+	    oldpos = (int *) malloc(sizeof(int)
+				    * 2 * (size_t) (ht_num_runs - 1));
+
 	    if (oldpos == NULL)
 		outofmem(__FILE__, "split_line_3");
+	    newpos = oldpos + ht_num_runs - 1;
 
 	    d_ = spare / (ht_num_runs - 1);
 	    r_ = spare % (ht_num_runs - 1);
@@ -3619,7 +3614,7 @@ static void do_new_line(HText *text, const char *fn, int ln)
 static void blank_lines(HText *text, int newlines)
 {
     if (HText_TrueEmptyLine(text->last_line, text, FALSE)) {	/* No text on current line */
-	HTLine *line = text->last_line->prev;
+	const HTLine *line = text->last_line->prev;
 	BOOL first = (BOOL) (line == text->last_line);
 
 	if (no_title && first)
@@ -3940,10 +3935,15 @@ void HText_appendCharacter(HText *text, int ch)
 	    } else if (ch == '(') {
 		text->state = S_paren;
 		return;
+	    } else if (ch == '@' || ch == 'B' || ch == 'A') {
+		text->state = S_nonascii_text;
+		if (ch == '@' || ch == 'B')
+		    text->kcode = JIS;
+		return;
 	    } else {
 		text->state = S_text;
 	    }
-	    /* FALLTHRU */
+	    break;
 
 	case S_dollar:
 	    /*
@@ -5085,7 +5085,7 @@ void HText_startStblTABLE(HText *me, int alignment)
 static void free_enclosed_stbl(HText *me)
 {
     if (me != NULL && me->enclosed_stbl != NULL) {
-	HTList *list = me->enclosed_stbl;
+	const HTList *list = me->enclosed_stbl;
 	STable_info *stbl;
 
 	while (NULL != (stbl = (STable_info *) HTList_nextObject(list))) {
@@ -5106,7 +5106,7 @@ static void free_enclosed_stbl(HText *me)
  */
 BOOLEAN HText_endStblTABLE(HText *me)
 {
-    int ncols, lines_changed = 0;
+    int ncols;
     STable_info *enclosing = NULL;
 
     if (!me || !me->stbl) {
@@ -5120,7 +5120,8 @@ BOOLEAN HText_endStblTABLE(HText *me)
     CTRACE((tfp, "endStblTABLE: ncols = %d.\n", ncols));
 
     if (ncols > 0) {
-	lines_changed = HText_insertBlanksInStblLines(me, ncols);
+	int lines_changed = HText_insertBlanksInStblLines(me, ncols);
+
 	CTRACE((tfp, "endStblTABLE: changed %d lines, done.\n", lines_changed));
 #ifdef DISP_PARTIAL
 	/* allow HTDisplayPartial() to redisplay the changed lines.
@@ -5272,7 +5273,7 @@ static void compute_show_number(TextAnchor *a)
 	&& (cur = a->anchor->dest) != NULL
 	&& cur->parent != NULL
 	&& cur->parent->address != NULL) {
-	TextAnchor *b;
+	const TextAnchor *b;
 	int match = 0;
 
 	for (b = HTMainText->first_anchor; b != a; b = b->next) {
@@ -5893,7 +5894,7 @@ void HText_appendText(HText *text, const char *str)
 
 static int remove_special_attr_chars(char *buf)
 {
-    register char *cp;
+    register const char *cp;
     register int soft_newline_count = 0;
 
     for (cp = buf; *cp != '\0'; cp++) {
@@ -6013,7 +6014,7 @@ static void HText_trimHightext(HText *text,
     TextAnchor *anchor_ptr;
     const TextAnchor *prev_a = NULL;
     HTLine *line_ptr;
-    HTLine *line_ptr2;
+    const HTLine *line_ptr2;
     unsigned char ch;
     char *hilite_str;
     int hilite_len;
@@ -6194,7 +6195,7 @@ static void HText_trimHightext(HText *text,
 	     * Double check that we have a line pointer, and if so, copy into
 	     * highlight text.
 	     */
-	    if (line_ptr2) {
+	    {
 		char *hi_string = NULL;
 		int hi_offset = line_ptr2->offset;
 
@@ -6391,7 +6392,7 @@ static const char *inputFieldDesc(const FormInfo * input)
 void HText_FormDescNumber(int number,
 			  const char **desc)
 {
-    TextAnchor *a;
+    const TextAnchor *a;
 
     if (!desc)
 	return;
@@ -6425,11 +6426,10 @@ int HTGetRelLinkNum(int num,
 		    int rel,
 		    int cur)
 {
-    TextAnchor *a;
+    const TextAnchor *a;
     const TextAnchor *l = NULL;
     int scrtop = HText_getTopOfScreen();	/*XXX +1? */
     int curline = links[cur].anchor_line_num;
-    int curpos = links[cur].lx;
     int on_screen = (curline >= scrtop && curline < (scrtop + display_lines));
 
     /* curanchor may or may not be the "current link", depending whether it's
@@ -6471,8 +6471,10 @@ int HTGetRelLinkNum(int num,
 	l = a;
 	curanchor = l->number;
     }
-    CTRACE((tfp, "  a=%p, l=%p, curanchor=%d\n", (void *) a, (const void *) l, curanchor));
+    CTRACE((tfp, "  a=%p, l=%p, curanchor=%d\n", (const void *) a, (const void *) l, curanchor));
     if (on_screen) {		/* on screen but not a numbered link */
+	int curpos = links[cur].lx;
+
 	for (; a; a = a->next) {
 	    if (a->number) {
 		l = a;
@@ -6611,9 +6613,12 @@ int HTGetLinkInfo(int number,
 		     */
 		    int max_offset = SEARCH_GOAL_LINE - 1;
 
+#if SEARCH_GOAL_LINE < 1
 		    if (max_offset < 0)
 			max_offset = 0;
-		    else if (max_offset >= display_lines)
+		    else
+#endif
+		    if (max_offset >= display_lines)
 			max_offset = display_lines - 1;
 		    *go_line = prev_anchor_line - max_offset;
 		    if (*go_line <= prev_prev_anchor_line)
@@ -6689,11 +6694,10 @@ static BOOLEAN same_anchor_or_field(int numberA,
     } else {
 	return (NO);
     }
-    if (formA->type != formB->type ||
-	formA->type != F_TEXTAREA_TYPE ||
-	formB->type != F_TEXTAREA_TYPE) {
+    if (formA->type != formB->type)
 	return (NO);
-    }
+    if (formA->type != F_TEXTAREA_TYPE)
+	return (NO);
     if (formA->number != formB->number)
 	return (NO);
     if (!formA->name || !formB->name)
@@ -6722,7 +6726,7 @@ static BOOLEAN same_anchor_or_field(int numberA,
 BOOL HText_TAHasMoreLines(int curlink,
 			  int direction)
 {
-    TextAnchor *a;
+    const TextAnchor *a;
     const TextAnchor *prev_a = NULL;
 
     if (!HTMainText)
@@ -7057,7 +7061,7 @@ int HText_getNumOfLines(void)
 int HText_getNumOfBytes(void)
 {
     int result = -1;
-    HTLine *line = NULL;
+    const HTLine *line = NULL;
 
     if (HTMainText != NULL) {
 	for (line = FirstHTLine(HTMainText);
@@ -7326,12 +7330,12 @@ BOOL HText_pageHasPrevTarget(void)
  * on the display.  It will not find a match when (for example) the source view
  * shows images that are not links in the html.
  */
-int HText_closestAnchor(HText *text, int offset)
+int HText_closestAnchor(const HText *text, int offset)
 {
     int result = -1;
     int absdiff = 0;
     int newdiff;
-    TextAnchor *Anchor_ptr = NULL;
+    const TextAnchor *Anchor_ptr = NULL;
     const TextAnchor *closest = NULL;
 
     for (Anchor_ptr = text->first_anchor;
@@ -7359,10 +7363,10 @@ int HText_closestAnchor(HText *text, int offset)
  * Find the offset for the given anchor, e.g., the inverse of
  * HText_closestAnchor().
  */
-int HText_locateAnchor(HText *text, int anchor_number)
+int HText_locateAnchor(const HText *text, int anchor_number)
 {
     int result = -1;
-    TextAnchor *Anchor_ptr = NULL;
+    const TextAnchor *Anchor_ptr = NULL;
 
     for (Anchor_ptr = text->first_anchor;
 	 Anchor_ptr != NULL;
@@ -7403,13 +7407,13 @@ static BOOL anchor_is_numbered(const TextAnchor *Anchor_ptr)
  * of each link, and may require adjusting the top line number used for the
  * display, before we recompute the links[] array.
  */
-int HText_getAbsLineNumber(HText *text,
+int HText_getAbsLineNumber(const HText *text,
 			   int anchor_number)
 {
     int result = -1;
 
     if (anchor_number >= 0 && text != NULL) {
-	TextAnchor *Anchor_ptr = NULL;
+	const TextAnchor *Anchor_ptr = NULL;
 
 	for (Anchor_ptr = text->first_anchor;
 	     Anchor_ptr != NULL;
@@ -7428,11 +7432,11 @@ int HText_getAbsLineNumber(HText *text,
  * Compute the link-number in a page, given the top line number of the page and
  * the absolute anchor number.
  */
-int HText_anchorRelativeTo(HText *text, int top_lineno, int anchor_number)
+int HText_anchorRelativeTo(const HText *text, int top_lineno, int anchor_number)
 {
     int result = 0;
     int from_top = 0;
-    TextAnchor *Anchor_ptr = NULL;
+    const TextAnchor *Anchor_ptr = NULL;
 
     for (Anchor_ptr = text->first_anchor;
 	 Anchor_ptr != NULL;
@@ -7454,14 +7458,14 @@ int HText_anchorRelativeTo(HText *text, int top_lineno, int anchor_number)
  * HText_LinksInLines returns the number of links in the
  * 'Lines' number of lines beginning with 'line_num'-1.  -FM
  */
-int HText_LinksInLines(HText *text,
+int HText_LinksInLines(const HText *text,
 		       int line_num,
 		       int Lines)
 {
     int total = 0;
     int start = (line_num - 1);
     int end = (start + Lines);
-    TextAnchor *Anchor_ptr = NULL;
+    const TextAnchor *Anchor_ptr = NULL;
 
     if (!text)
 	return total;
@@ -7491,7 +7495,7 @@ void HText_refresh(HText *text)
 	display_page(text, text->top_of_screen, "");
 }
 
-int HText_sourceAnchors(HText *text)
+int HText_sourceAnchors(const HText *text)
 {
     return (text ? text->last_anchor_number : -1);
 }
@@ -7594,9 +7598,9 @@ BOOL HText_select(HText *text)
  */
 BOOL HText_POSTReplyLoaded(DocInfo *doc)
 {
-    HText *text = NULL;
-    HTList *cur = loaded_texts;
-    bstring *post_data;
+    const HText *text = NULL;
+    const HTList *cur = loaded_texts;
+    const bstring *post_data;
     const char *address;
     BOOL is_head;
 
@@ -7634,7 +7638,7 @@ BOOL HText_POSTReplyLoaded(DocInfo *doc)
 
 BOOL HTFindPoundSelector(const char *selector)
 {
-    TextAnchor *a;
+    const TextAnchor *a;
 
     CTRACE((tfp, "FindPound: searching for \"%s\"\n", selector));
     for (a = HTMainText->first_anchor; a != NULL; a = a->next) {
@@ -7658,7 +7662,7 @@ BOOL HTFindPoundSelector(const char *selector)
 
 BOOL HText_selectAnchor(HText *text, const HTChildAnchor *anchor)
 {
-    TextAnchor *a;
+    const TextAnchor *a;
     int l;
 
     for (a = text->first_anchor; a; a = a->next) {
@@ -7757,7 +7761,7 @@ HTAnchor *HText_referenceSelected(const HText *me GCC_UNUSED)
 
 int HText_getTopOfScreen(void)
 {
-    HText *text = HTMainText;
+    const HText *text = HTMainText;
 
     return text != NULL ? text->top_of_screen : 0;
 }
@@ -7806,7 +7810,7 @@ void HTAddSearchQuery(const char *query)
 {
     char *new_query = NULL;
     char *old;
-    HTList *cur;
+    const HTList *cur;
 
     if (!non_empty(query))
 	return;
@@ -8117,7 +8121,7 @@ typedef struct _AnchorIndex {
 static unsigned countHTLines(void)
 {
     unsigned result = 0;
-    HTLine *line = FirstHTLine(HTMainText);
+    const HTLine *line = FirstHTLine(HTMainText);
 
     while (line != NULL) {
 	++result;
@@ -8262,7 +8266,7 @@ static void freeAnchorIndex(AnchorIndex ** inx, unsigned inx_size)
  * Return the column (counting from zero) at which a field should be overlaid
  * on the form.
  */
-static int FieldFirst(AnchorIndex * p, int wrap)
+static int FieldFirst(const AnchorIndex * p, int wrap)
 {
     return (wrap ? 0 : (p)->offset);
 }
@@ -8270,7 +8274,7 @@ static int FieldFirst(AnchorIndex * p, int wrap)
 /*
  * Return the column (counting from zero) just past the field in a form.
  */
-static int FieldLast(AnchorIndex * p, int wrap)
+static int FieldLast(const AnchorIndex * p, int wrap)
 {
     return ((p)->size - wrap) + FieldFirst(p, wrap);
 }
@@ -8591,7 +8595,7 @@ static void adjust_search_result(DocInfo *doc, int tentative_result,
 {
     if (tentative_result > 0) {
 	int anch_line = -1;
-	TextAnchor *a;
+	const TextAnchor *a;
 	int nl_closest = -1;
 	int goal = SEARCH_GOAL_LINE;
 	int max_offset;
@@ -8599,9 +8603,12 @@ static void adjust_search_result(DocInfo *doc, int tentative_result,
 				 tentative_result <= HTMainText->top_of_screen +
 				 display_lines);
 
+#if SEARCH_GOAL_LINE < 1
 	if (goal < 1)
 	    goal = 1;
-	else if (goal > display_lines)
+	else
+#endif
+	if (goal > display_lines)
 	    goal = display_lines;
 	max_offset = goal - 1;
 
@@ -8702,7 +8709,7 @@ static TextAnchor *line_num_to_anchor(int line_num)
 static int line_num_in_text(HText *text, const HTLine *line)
 {
     int result = 1;
-    HTLine *temp = FirstHTLine(text);
+    const HTLine *temp = FirstHTLine(text);
 
     while (temp != line) {
 	temp = temp->next;
@@ -8732,7 +8739,7 @@ static TextAnchor *get_prev_anchor(const TextAnchor *a)
 static int www_search_forward(int start_line,
 			      DocInfo *doc,
 			      const char *target,
-			      HTLine *line,
+			      const HTLine *line,
 			      int count)
 {
     int wrapped = 0;
@@ -8775,7 +8782,7 @@ static int www_search_forward(int start_line,
 static int www_search_backward(int start_line,
 			       DocInfo *doc,
 			       const char *target,
-			       HTLine *line,
+			       const HTLine *line,
 			       int count)
 {
     int wrapped = 0;
@@ -8820,7 +8827,7 @@ void www_user_search(int start_line,
 		     const char *target,
 		     int direction)
 {
-    HTLine *line;
+    const HTLine *line;
     int count;
 
     if (!HTMainText) {
@@ -9427,7 +9434,7 @@ void HText_NegateLineOne(HText *text)
     return;
 }
 
-BOOL HText_inLineOne(HText *text)
+BOOL HText_inLineOne(const HText *text)
 {
     if (text) {
 	return text->in_line_1;
@@ -9501,12 +9508,13 @@ int HText_getMaximumColumn(HText *text)
 void HText_setTabID(HText *text, const char *name)
 {
     HTTabID *Tab = NULL;
-    HTList *cur = text->tabs;
+    HTList *cur;
     HTList *last = NULL;
 
     if (!text || isEmpty(name))
 	return;
 
+    cur = text->tabs;
     if (!cur) {
 	cur = text->tabs = HTList_new();
     } else {
@@ -9530,13 +9538,13 @@ void HText_setTabID(HText *text, const char *name)
     return;
 }
 
-int HText_getTabIDColumn(HText *text, const char *name)
+int HText_getTabIDColumn(const HText *text, const char *name)
 {
     int column = 0;
     const HTTabID *Tab;
-    HTList *cur = text->tabs;
+    const HTList *cur;
 
-    if (text && non_empty(name) && cur) {
+    if (text && non_empty(name) && (cur = text->tabs) != NULL) {
 	while (NULL != (Tab = (HTTabID *) HTList_nextObject(cur))) {
 	    if (Tab->name && !strcmp(Tab->name, name))
 		break;
@@ -9615,7 +9623,7 @@ static void HText_AddHiddenLink(HText *text, const TextAnchor *textanchor)
  * This function returns the number of addresses
  * that are loaded in text->hidden_links.  -FM
  */
-int HText_HiddenLinkCount(HText *text)
+int HText_HiddenLinkCount(const HText *text)
 {
     int count = 0;
 
@@ -9630,7 +9638,7 @@ int HText_HiddenLinkCount(HText *text)
  * a hidden link, at the position (zero-based) in the
  * text->hidden_links list of the number argument.  -FM
  */
-const char *HText_HiddenLinkAt(HText *text, int number)
+const char *HText_HiddenLinkAt(const HText *text, int number)
 {
     char *href = NULL;
 
@@ -9875,7 +9883,7 @@ void HText_beginSelect(const char *name,
 int HText_getOptionNum(const HText *text)
 {
     const TextAnchor *a;
-    OptionType *op;
+    const OptionType *op;
     int n = 1;			/* start count at 1 */
 
     if (!(text && text->last_anchor))
@@ -10231,7 +10239,6 @@ int HText_beginInput(HText *text,
 {
     TextAnchor *a;
     FormInfo *f;
-    const char *cp_option = NULL;
     char *IValue = NULL;
     unsigned char *tmp = NULL;
     int i, j;
@@ -10343,7 +10350,6 @@ int HText_beginInput(HText *text,
      */
     /* set the values and let the parsing below do the work */
     if (I->type != NULL && !strcmp(I->type, "OPTION")) {
-	cp_option = I->type;
 	if (HTCurSelectGroupType == F_RADIO_TYPE)
 	    I->type = "OPTION_LIST";
 	else
@@ -10368,12 +10374,6 @@ int HText_beginInput(HText *text,
      */
     if (I->size != 0) {
 	f->size = I->size;
-	/*
-	 * Leave at zero for option lists.
-	 */
-	if (f->size == 0 && cp_option == NULL) {
-	    f->size = 20;	/* default */
-	}
     } else {
 	f->size = 20;		/* default */
     }
@@ -10825,7 +10825,8 @@ static int find_best_target_cs(char **best_csname,
     char *paccept = NULL;
     double bestq = -1.0;
     const char *bestmime = NULL;
-    char *field, *nextfield;
+    const char *field;
+    char *nextfield;
 
     StrAllocCopy(paccept, acceptstring);
     nextfield = paccept;
@@ -12190,9 +12191,9 @@ void HText_ResetForm(const FormInfo * form)
  * whether any forms content was changed by user so any information will be
  * lost.
  */
-BOOLEAN HText_HaveUserChangedForms(HText *text)
+BOOLEAN HText_HaveUserChangedForms(const HText *text)
 {
-    TextAnchor *anchor_ptr;
+    const TextAnchor *anchor_ptr;
 
     if (text == NULL)
 	return FALSE;
@@ -12492,7 +12493,7 @@ void HText_setBreakPoint(HText *text)
  *  based on any caching directives or analyses which
  *  claimed or suggested this. -FM
  */
-BOOL HText_AreDifferent(HTParentAnchor *anchor,
+BOOL HText_AreDifferent(const HTParentAnchor *anchor,
 			const char *full_address)
 {
     HTParentAnchor *MTanc;
@@ -13352,8 +13353,9 @@ static int finish_ExtEditForm(const LinkInfo *form_link,
 	 */
 	if ((size_t) (len0 + len) >= line_used) {
 	    line_used = (size_t) (3 * (len0 + len)) / 2;
-	    if ((line = typeRealloc(char, line, line_used)) == NULL)
-		  outofmem(__FILE__, "HText_EditTextArea");
+	    AssertAlloc(line,
+			typeRealloc(char, line, line_used),
+			"HText_EditTextArea");
 	}
 
 	strncat(line, lp, (size_t) len);
@@ -14050,7 +14052,7 @@ static void redraw_part_of_line(HTLine *line, const char *str,
     i = XP;
 
     /* Set up the multibyte character buffer  */
-    buffer[0] = buffer[1] = buffer[2] = '\0';
+    memset(buffer, 0, sizeof(buffer));
 
     data = str;
     end_of_data = data + len;

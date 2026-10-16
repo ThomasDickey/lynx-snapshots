@@ -1,5 +1,5 @@
 /*
- * $LynxId: SGML.c,v 1.196 2026/10/05 15:12:19 tom Exp $
+ * $LynxId: SGML.c,v 1.197 2026/10/15 23:08:34 tom Exp $
  *
  *			General SGML Parser code		SGML.c
  *			========================
@@ -1080,7 +1080,7 @@ static void do_close_stacked(HTStream *me)
 
 static int is_on_stack(HTStream *me, const HTTag * old_tag)
 {
-    HTElement *stacked = me->element_stack;
+    const HTElement *stacked = me->element_stack;
     int i = 1;
 
     for (; stacked; stacked = stacked->next, i++) {
@@ -1495,7 +1495,7 @@ static void SGML_free(HTStream *me)
 {
     int i;
     HTElement *cur;
-    HTTag *t;
+    const HTTag *t;
 
     /*
      * Free the buffers.  - FM
@@ -4942,7 +4942,7 @@ unsigned char *EUC_TO_SJIS(unsigned char *src,
 
 #define Strcpy(a,b)	(strcpy((char*)a,(const char*)b),&a[strlen((const char*)a)])
 
-unsigned char *EUC_TO_JIS(unsigned char *src,
+unsigned char *EUC_TO_JIS(const unsigned char *src,
 			  unsigned char *dst,
 			  const char *toK,
 			  const char *toA)
@@ -5106,7 +5106,7 @@ unsigned char *TO_EUC(const unsigned char *jis,
 
 static int is_EUC_JP(unsigned char *euc)
 {
-    unsigned char *cp;
+    const unsigned char *cp;
     int ch1, ch2;
 
     for (cp = euc; (ch1 = *cp) != '\0'; cp++) {

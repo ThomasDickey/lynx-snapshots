@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFTP.c,v 1.156 2026/10/05 15:12:19 tom Exp $
+ * $LynxId: HTFTP.c,v 1.157 2026/10/15 23:33:22 tom Exp $
  *
  *			File Transfer Protocol (FTP) Client
  *			for a WorldWideWeb browser
@@ -501,10 +501,10 @@ static int write_cmd(const char *cmd)
  * For each string in the list, check if it is found in the response text.
  * If so, return TRUE.
  */
-static BOOL find_response(HTList *list)
+static BOOL find_response(const HTList *list)
 {
     BOOL result = FALSE;
-    HTList *p = list;
+    const HTList *p = list;
     const char *value;
 
     while ((value = (char *) HTList_nextObject(p)) != NULL) {
@@ -1532,7 +1532,7 @@ static BOOLEAN is_ls_date(const char *s)
 /*
  * Extract the name, size, and date from an EPLF line.  - 08-06-96 DJB
  */
-static void parse_eplf_line(char *line,
+static void parse_eplf_line(const char *line,
 			    EntryInfo *info)
 {
     const char *cp = line;

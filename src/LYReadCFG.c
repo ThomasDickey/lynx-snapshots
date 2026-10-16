@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYReadCFG.c,v 1.207 2026/10/12 20:51:43 tom Exp $
+ * $LynxId: LYReadCFG.c,v 1.209 2026/10/15 23:15:50 tom Exp $
  */
 #ifndef NO_RULES
 #include <HTRules.h>
@@ -309,7 +309,7 @@ lynx_list_item_type *find_item_by_number(lynx_list_item_type *list_ptr,
     return list_ptr;
 }
 
-int match_item_by_name(lynx_list_item_type *ptr,
+int match_item_by_name(const lynx_list_item_type *ptr,
 		       const char *name,
 		       int only_overriders)
 {
@@ -662,7 +662,6 @@ void update_default_colors(void)
     int old_fg = default_fg;
     int old_bg = default_bg;
 
-    default_color_reset = !LYuse_default_colors;
     if (LYuse_default_colors) {
 	default_color_reset = FALSE;
 	default_fg = DEFAULT_COLOR;
@@ -808,7 +807,7 @@ static int keymap_fun(const char *key)
 		 * change...  At any rate, if PASS!  fails try it the same way
 		 * as for PASS.  - kw
 		 */
-		if (!success && strcasecomp(efunc, "PASS!") == 0) {
+		if (strcasecomp(efunc, "PASS!") == 0) {
 		    if (func) {
 			lec = LYE_FORM_LAC | lacname_to_lac(func);
 			success = (BOOL) LYRemapEditBinding(lkc, lec, select_edi);
@@ -2340,7 +2339,7 @@ static void do_read_cfg(const char *cfg_filename,
      * still available.  - FM
      */
     if (downloaders != NULL) {
-	lynx_list_item_type *cur_download;
+	const lynx_list_item_type *cur_download;
 
 	cur_download = downloaders;
 	while (cur_download != NULL) {

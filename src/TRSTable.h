@@ -1,4 +1,4 @@
-/* $LynxId: TRSTable.h,v 1.17 2026/10/12 13:11:44 tom Exp $ */
+/* $LynxId: TRSTable.h,v 1.18 2026/10/15 23:29:40 tom Exp $ */
 #ifndef TRSTABLE_H
 #define TRSTABLE_H
 
@@ -25,11 +25,11 @@ extern "C" {
 #define TRST_FAKING_CELLS	2
 #define Stbl_lineBreak(stbl,l,off,pos) Stbl_finishCellInTable(stbl, TRST_ENDCELL_LINEBREAK, l, off, pos)
 
-    extern int Stbl_getStartLine(STable_info *);
+    extern int Stbl_getStartLine(const STable_info *);
     extern int Stbl_getFixupPositions(STable_info *me, int lineno,
 				      int *oldpos,
 				      int *newpos);
-    extern short Stbl_getAlignment(STable_info *);
+    extern short Stbl_getAlignment(const STable_info *);
 
 #ifdef EXP_NESTED_TABLES
     extern void Stbl_update_enclosing(STable_info *me, int max_width,
@@ -38,7 +38,7 @@ extern "C" {
     extern void Stbl_set_enclosing(STable_info *me, STable_info *encl, struct _TextAnchor *last_anchor);
     extern STable_info *Stbl_get_enclosing(const STable_info *me);
     extern struct _TextAnchor *Stbl_get_last_anchor_before(const STable_info *me);
-    extern int Stbl_getStartLineDeep(STable_info *);
+    extern int Stbl_getStartLineDeep(const STable_info *);
 
 #else
 #define Stbl_getStartLineDeep(t) Stbl_getStartLine(t)

@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTAAUtil.h,v 1.14 2026/10/05 13:28:39 tom Exp $
+ * $LynxId: HTAAUtil.h,v 1.15 2026/10/15 23:41:29 tom Exp $
  *
  *                                            Utilities for the Authorization parts of libwww
  *           COMMON PARTS OF AUTHORIZATION MODULE TO BOTH SERVER AND BROWSER
@@ -147,7 +147,7 @@ Methods
  *      returns         YES, if method was found.
  *                      NO, if not found.
  */
-    extern BOOL HTAAMethod_inList(HTAAMethod method, HTList *list);
+    extern BOOL HTAAMethod_inList(HTAAMethod method, const HTList *list);
 
 /*
 

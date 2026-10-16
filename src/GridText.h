@@ -1,5 +1,5 @@
 /*
- * $LynxId: GridText.h,v 1.74 2026/10/12 23:23:28 tom Exp $
+ * $LynxId: GridText.h,v 1.75 2026/10/15 23:44:02 tom Exp $
  *
  * Specialities of GridText as subclass of HText
  */
@@ -84,12 +84,12 @@ US-ASCII control characters <32 which are not defined in Unicode standard
     extern void HText_pageDisplay(int line_num, const char *target);
     extern BOOL HText_pageHasPrevTarget(void);
 
-    extern int HText_LinksInLines(HText *text, int line_num, int Lines);
+    extern int HText_LinksInLines(const HText *text, int line_num, int Lines);
 
-    extern int HText_getAbsLineNumber(HText *text, int anchor_number);
-    extern int HText_closestAnchor(HText *text, int offset);
-    extern int HText_locateAnchor(HText *text, int anchor_number);
-    extern int HText_anchorRelativeTo(HText *text, int top_lineno, int anchor_num);
+    extern int HText_getAbsLineNumber(const HText *text, int anchor_number);
+    extern int HText_closestAnchor(const HText *text, int offset);
+    extern int HText_locateAnchor(const HText *text, int anchor_number);
+    extern int HText_anchorRelativeTo(const HText *text, int top_lineno, int anchor_num);
 
     extern void HText_setLastChar(HText *text, int ch);
     extern char HText_getLastChar(const HText *text);
@@ -97,7 +97,7 @@ US-ASCII control characters <32 which are not defined in Unicode standard
     extern BOOL HText_checkLastChar_needSpaceOnJoinLines(HText *text);
 #endif
 
-    extern int HText_sourceAnchors(HText *text);
+    extern int HText_sourceAnchors(const HText *text);
     extern void HText_setStale(HText *text);
     extern void HText_refresh(HText *text);
     extern const char *HText_getTitle(void);
@@ -157,7 +157,7 @@ US-ASCII control characters <32 which are not defined in Unicode standard
     extern BOOL HTLoadedDocumentEightbit(void);
     extern BOOL HText_LastLineEmpty(const HText *me, int IgnoreSpaces);
     extern BOOL HText_PreviousLineEmpty(const HText *me, int IgnoreSpaces);
-    extern BOOL HText_inLineOne(HText *text);
+    extern BOOL HText_inLineOne(const HText *text);
     extern BOOLEAN HTLoadedDocumentIsHEAD(void);
     extern BOOLEAN HTLoadedDocumentIsSafe(void);
     extern bstring *HTLoadedDocumentPost_data(void);
@@ -165,8 +165,8 @@ US-ASCII control characters <32 which are not defined in Unicode standard
     extern const char *HTLoadedDocumentCharset(void);
     extern const char *HTLoadedDocumentTitle(void);
     extern const char *HTLoadedDocumentURL(void);
-    extern const char *HText_HiddenLinkAt(HText *text, int number);
-    extern int HText_HiddenLinkCount(HText *text);
+    extern const char *HText_HiddenLinkAt(const HText *text, int number);
+    extern int HText_HiddenLinkCount(const HText *text);
     extern int HText_LastLineOffset(HText *me);
     extern int HText_LastLineSize(const HText *me, int IgnoreSpaces);
     extern int HText_PreviousLineSize(const HText *me, int IgnoreSpaces);
@@ -176,7 +176,7 @@ US-ASCII control characters <32 which are not defined in Unicode standard
     extern int HText_getNumOfBytes(void);
     extern int HText_getNumOfLines(void);
     extern int HText_getPreferredTopLine(const HText *text, int line_number);
-    extern int HText_getTabIDColumn(HText *text, const char *name);
+    extern int HText_getTabIDColumn(const HText *text, const char *name);
     extern int HText_getTopOfScreen(void);
     extern int do_www_search(DocInfo *doc);
     extern void HText_NegateLineOne(HText *text);
@@ -229,7 +229,7 @@ US-ASCII control characters <32 which are not defined in Unicode standard
     extern void HText_DisableCurrentForm(void);
     extern void HText_ResetForm(const FormInfo * form);
     extern void HText_activateRadioButton(FormInfo * form);
-    extern BOOLEAN HText_HaveUserChangedForms(HText *text);
+    extern BOOLEAN HText_HaveUserChangedForms(const HText *text);
 
     extern HTList *search_queries;	/* Previous isindex and whereis queries */
     extern void HTSearchQueries_free(void);
@@ -263,7 +263,7 @@ US-ASCII control characters <32 which are not defined in Unicode standard
 
     extern void HText_setBreakPoint(HText *text);
 
-    extern BOOL HText_AreDifferent(HTParentAnchor *anchor,
+    extern BOOL HText_AreDifferent(const HTParentAnchor *anchor,
 				   const char *full_address);
 
     extern int HText_EditTextArea(const LinkInfo *form_link);

@@ -1,4 +1,4 @@
-/* $LynxId: LYrcFile.c,v 1.113 2026/10/12 22:59:49 tom Exp $ */
+/* $LynxId: LYrcFile.c,v 1.114 2026/10/15 23:39:51 tom Exp $ */
 #include <HTUtils.h>
 #include <HTFTP.h>
 #include <LYUtils.h>
@@ -206,7 +206,7 @@ static BOOL getBool(const char *src)
     return (BOOL) (!strncasecomp(src, "on", 2) || !strncasecomp(src, "true", 4));
 }
 
-const char *LYputEnum(Config_Enum * table, int value)
+const char *LYputEnum(const Config_Enum * table, int value)
 {
     while (table->name != NULL) {
 	if (table->value == value) {
@@ -217,10 +217,10 @@ const char *LYputEnum(Config_Enum * table, int value)
     return "?";
 }
 
-BOOL LYgetEnum(Config_Enum * table, const char *name,
+BOOL LYgetEnum(const Config_Enum * table, const char *name,
 	       int *result)
 {
-    Config_Enum *found = NULL;
+    const Config_Enum *found = NULL;
     unsigned len = (unsigned) strlen(name);
 
     if (len != 0) {
@@ -1035,7 +1035,7 @@ It is not this file.\n\
     fprintf(fp, "\n");
 
     while (tbl->name != NULL) {
-	ParseUnionPtr q = ParseUnionOf(tbl);
+	const ParseUnionPtr q = ParseUnionOf(tbl);
 
 	if (!tbl->enabled) {
 	    tbl++;

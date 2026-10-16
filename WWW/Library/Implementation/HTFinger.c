@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFinger.c,v 1.33 2026/10/05 15:12:19 tom Exp $
+ * $LynxId: HTFinger.c,v 1.34 2026/10/15 23:27:52 tom Exp $
  *
  *			FINGER ACCESS				HTFinger.c
  *			=============
@@ -106,7 +106,7 @@ static void start_anchor(const char *href)
  *	Positive status is a Finger status.
  */
 
-static int response(char *command,
+static int response(const char *command,
 		    char *sitename,
 		    HTParentAnchor *anAnchor,
 		    HTFormat format_out,
@@ -128,7 +128,7 @@ static int response(char *command,
     /* Send the command.
      */
     CTRACE((tfp, "HTFinger command to be sent: %s", command));
-    status = (int) NETWRITE(finger_fd, (char *) command, (unsigned) length);
+    status = (int) NETWRITE(finger_fd, (const char *) command, (unsigned) length);
     if (status < 0) {
 	CTRACE((tfp, "HTFinger: Unable to send command. Disconnecting.\n"));
 	NETCLOSE(finger_fd);

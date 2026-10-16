@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMain.c,v 1.314 2026/10/12 21:23:35 tom Exp $
+ * $LynxId: LYMain.c,v 1.316 2026/10/15 23:11:57 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTTP.h>
@@ -976,9 +976,6 @@ static BOOL cleanup_win32(DWORD fdwCtrlType)
 static void append_ssl_version(char **target,
 			       const char *separator)
 {
-    char SSLLibraryVersion[256];
-    char *SSLcp;
-
     HTSprintf(target, " SSL-MM%s1.4.1", separator);
 
 #undef LYNX_SSL_VERSION
@@ -992,15 +989,21 @@ static void append_ssl_version(char **target,
 #endif
 
 #ifdef LYNX_SSL_VERSION
-    if (*separator == ' ')
-	StrAllocCat(*target, ",");
-    LYStrNCpy(SSLLibraryVersion, LYNX_SSL_VERSION, sizeof(SSLLibraryVersion) - 1);
-    if ((SSLcp = StrChr(SSLLibraryVersion, ' ')) != NULL) {
-	*SSLcp++ = *separator;
-	if ((SSLcp = StrChr(SSLcp, ' ')) != NULL) {
-	    *SSLcp = '\0';
-	    StrAllocCat(*target, " ");
-	    StrAllocCat(*target, SSLLibraryVersion);
+    {
+	char SSLLibraryVersion[256];
+	char *SSLcp;
+
+	if (*separator == ' ')
+	    StrAllocCat(*target, ",");
+	LYStrNCpy(SSLLibraryVersion, LYNX_SSL_VERSION,
+		  sizeof(SSLLibraryVersion) - 1);
+	if ((SSLcp = StrChr(SSLLibraryVersion, ' ')) != NULL) {
+	    *SSLcp++ = *separator;
+	    if ((SSLcp = StrChr(SSLcp, ' ')) != NULL) {
+		*SSLcp = '\0';
+		StrAllocCat(*target, " ");
+		StrAllocCat(*target, SSLLibraryVersion);
+	    }
 	}
     }
 #endif /* LYNX_SSL_VERSION */
@@ -1688,7 +1691,7 @@ int main(int argc,
      */
     if (LYStdinArgs != NULL) {
 	char *my_args[2];
-	HTList *cur = LYStdinArgs;
+	const HTList *cur = LYStdinArgs;
 
 	my_args[1] = NULL;
 	while (NULL != (my_args[0] = (char *) HTList_nextObject(cur))) {
@@ -4157,7 +4160,7 @@ static void print_help_strings(const char *name,
 
 static void print_help_and_exit(void)
 {
-    Config_Type *p;
+    const Config_Type *p;
 
     if (pgm == NULL)
 	pgm = "lynx";

@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTInit.c,v 1.108 2026/10/12 23:45:24 tom Exp $
+ * $LynxId: HTInit.c,v 1.110 2026/10/14 07:39:58 tom Exp $
  *
  *		Configuration-specific Initialization		HTInit.c
  *		----------------------------------------
@@ -256,12 +256,11 @@ struct MailcapEntry {
     int needtofree;
     char *label;
     char *printcommand;
-    char *nametemplate;
     float quality;
     long int maxbytes;
 };
 
-static int ExitWithError(const char *txt);
+static GCC_NORETURN void ExitWithError(const char *txt);
 static int PassesTest(struct MailcapEntry *mc);
 
 static char *GetCommand(char *s, char **t)
@@ -1004,7 +1003,7 @@ static int ProcessMailcapFile(const char *file, AcceptMedia media)
 	return FALSE;
     }
 
-    while (fp && !feof(fp)) {
+    while (!feof(fp)) {
 	ProcessMailcapEntry(fp, &mc, media);
     }
     LYCloseInput(fp);
@@ -1012,12 +1011,11 @@ static int ProcessMailcapFile(const char *file, AcceptMedia media)
     return TRUE;
 }
 
-static int ExitWithError(const char *txt)
+static void ExitWithError(const char *txt)
 {
     if (txt)
 	fprintf(tfp, "Lynx: %s\n", txt);
     exit_immediately(EXIT_FAILURE);
-    return (-1);
 }
 
 /* Reverse the entries from each mailcap after it has been read, so that

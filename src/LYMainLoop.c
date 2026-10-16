@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYMainLoop.c,v 1.261 2026/10/12 22:59:49 tom Exp $
+ * $LynxId: LYMainLoop.c,v 1.265 2026/10/15 23:38:10 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTAccess.h>
@@ -1194,7 +1194,7 @@ static int handle_LYK_ACTIVATE(int *c,
 		    textinput_activated &&
 		    (real_cmd == LYK_ACTIVATE ||
 		     real_cmd == LYK_MOUSE_SUBMIT)) {
-		    form_noviceline(FormIsReadonly(links[curdoc.link].l_form));
+		    form_noviceline(OkReadonlyForm(links[curdoc.link].l_form));
 		}
 	    }
 
@@ -2636,7 +2636,7 @@ static void handle_LYK_DWIMHELP(const char **cshelpfile)
      * if current link is a text input form field.  - kw
      */
     if (curdoc.link >= 0 && curdoc.link < nlinks &&
-	!FormIsReadonly(links[curdoc.link].l_form) &&
+	!OkReadonlyForm(links[curdoc.link].l_form) &&
 	LinkIsTextLike(curdoc.link)) {
 	*cshelpfile = STR_LYNXEDITMAP;
     }
@@ -3128,7 +3128,7 @@ static BOOLEAN handle_LYK_HEAD(int *cmd)
 		 StrNCmp(curdoc.address, "http", 4))) {
 		HTUserMsg(LINK_NOT_HTTP_URL);
 	    } else if (links[curdoc.link].type == WWW_FORM_LINK_TYPE &&
-		       FormIsReadonly(links[curdoc.link].l_form)) {
+		       OkReadonlyForm(links[curdoc.link].l_form)) {
 		HTUserMsg(FORM_ACTION_DISABLED);
 	    } else if (links[curdoc.link].type == WWW_FORM_LINK_TYPE &&
 		       links[curdoc.link].l_form->submit_action != NULL &&
@@ -3688,7 +3688,7 @@ static BOOLEAN handle_LYK_JUMP(int c,
 		*URLNum = *URLTotal;
 		*FirstURLRecall = TRUE;
 		if (!strcasecomp(ret, "Go :")) {
-		    if (recall) {
+		    if (*recall != NORECALL) {
 			*ch = UPARROW_KEY;
 			return TRUE;
 		    }
@@ -3738,13 +3738,13 @@ static void handle_LYK_KEYMAP(BOOLEAN *vi_keys_flag,
 	newdoc.isHEAD = FALSE;
 	newdoc.safe = FALSE;
 	newdoc.internal_link = FALSE;
+	LYforce_no_cache = TRUE;
 	/*
 	 * If vi_keys changed, the keymap did too, so force no cache, and reset
 	 * the flag.  - FM
 	 */
 	if (*vi_keys_flag != vi_keys ||
 	    *emacs_keys_flag != emacs_keys) {
-	    LYforce_no_cache = TRUE;
 	    *vi_keys_flag = vi_keys;
 	    *emacs_keys_flag = emacs_keys;
 	}
@@ -3757,7 +3757,6 @@ static void handle_LYK_KEYMAP(BOOLEAN *vi_keys_flag,
 	    prev_lynx_edit_mode = lynx_edit_mode;
 	}
 #endif /* DIRED_SUPPORT && OK_OVERRIDE */
-	LYforce_no_cache = TRUE;
     }
 }
 
@@ -4221,12 +4220,12 @@ static int handle_PREV_DOC(int *cmd,
 	 * cancel.  - FM
 	 */
 	DocAddress WWWDoc;
-	HTParentAnchor *tmpanchor;
-	BOOLEAN conf = FALSE, first = TRUE;
+	const HTParentAnchor *tmpanchor;
+	BOOLEAN first = TRUE;
 
 	HTLastConfirmCancelled();	/* reset flag */
 	while (nhist > 0) {
-	    conf = FALSE;
+	    BOOLEAN conf = FALSE;
 	    if (HDOC(nhist_1).post_data == NULL) {
 		break;
 	    }
@@ -4725,7 +4724,7 @@ static void handle_LYK_TAG_LINK(void)
 	    /*
 	     * HTList-based management of tag list, see LYLocal.c - KW
 	     */
-	    HTList *t1 = tagged;
+	    const HTList *t1 = tagged;
 	    char *tagname = NULL;
 	    BOOLEAN found = FALSE;
 
@@ -5081,7 +5080,7 @@ void handle_LYK_WHEREIS(int cmd,
 	*refresh_screen = TRUE;	/* doesn't really matter */
     } else if (!found) {
 	*refresh_screen = have_target_onscreen;
-    } else if (!have_target_onscreen && found) {
+    } else if (!have_target_onscreen) {
 	*refresh_screen = TRUE;
     } else if (www_search_result == curdoc.line &&
 	       curdoc.link == oldcur &&
@@ -5778,7 +5777,7 @@ int mainloop(void)
 		LYTraceLogFP != NULL &&
 		LYIsUIPage(newdoc.address, UIP_TRACELOG)) {
 		DocAddress WWWDoc;
-		HTParentAnchor *tmpanchor;
+		const HTParentAnchor *tmpanchor;
 
 		WWWDoc.address = newdoc.address;
 		WWWDoc.post_data = newdoc.post_data;
@@ -6850,7 +6849,7 @@ int mainloop(void)
 		     * Replace novice lines if in NOVICE_MODE.
 		     */
 		    if (user_mode == NOVICE_MODE) {
-			form_noviceline(FormIsReadonly(links[curdoc.link].l_form));
+			form_noviceline(OkReadonlyForm(links[curdoc.link].l_form));
 		    }
 		    real_c = change_form_link(curdoc.link,
 					      &newdoc, &refresh_screen,
@@ -6879,7 +6878,7 @@ int mainloop(void)
 #ifdef TEXTFIELDS_MAY_NEED_ACTIVATION
 		} else if (LinkIsTextarea(curdoc.link)
 			   && textfields_need_activation
-			   && !FormIsReadonly(links[curdoc.link].l_form)
+			   && !OkReadonlyForm(links[curdoc.link].l_form)
 			   && peek_mouse_link() < 0 &&
 			   (((LKC_TO_LAC(keymap, real_c) == LYK_NEXT_LINK ||
 #ifdef TEXTAREA_AUTOGROW
@@ -7908,7 +7907,7 @@ void HTAddGotoURL(const char *url)
 {
     char *mycopy = NULL;
     char *old;
-    HTList *cur;
+    const HTList *cur;
 
     if (isEmpty(url))
 	return;

@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTGopher.c,v 1.82 2026/10/05 15:27:22 tom Exp $
+ * $LynxId: HTGopher.c,v 1.83 2026/10/15 23:34:21 tom Exp $
  *
  *			GOPHER ACCESS				HTGopher.c
  *			=============
@@ -218,7 +218,7 @@ static void write_anchor(const char *text, const char *addr)
  *	============================
  */
 static void parse_menu(const char *arg GCC_UNUSED,
-		       HTParentAnchor *anAnchor)
+		       const HTParentAnchor *anAnchor)
 {
     char gtype;
     char this_type;
@@ -514,7 +514,7 @@ static void parse_menu(const char *arg GCC_UNUSED,
  *  secret@dxcern.cern.ch .
  */
 static void parse_cso(const char *arg,
-		      HTParentAnchor *anAnchor)
+		      const HTParentAnchor *anAnchor)
 {
     int ich;
     char line[BIG];
@@ -1142,7 +1142,7 @@ static int parse_cso_fields(char *buf,
 /*	Generate a form for submitting CSO/PH searches. - FM
  *	====================================================
  */
-static int generate_cso_form(char *host,
+static int generate_cso_form(const char *host,
 			     int port,
 			     char *buf,
 			     size_t bufsize,

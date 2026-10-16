@@ -25,7 +25,7 @@ extern "C" {
     extern int local_dired(DocInfo *doc);
     extern void add_menu_item(const char *str);
     extern void reset_dired_menu(void);
-    extern void showtags(HTList *tag);
+    extern void showtags(const HTList *tag);
     extern void tagflag(int flag, int cur);
 
 #endif				/* DIRED_SUPPORT */

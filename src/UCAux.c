@@ -1,5 +1,5 @@
 /*
- * $LynxId: UCAux.c,v 1.63 2025/09/17 22:35:54 tom Exp $
+ * $LynxId: UCAux.c,v 1.64 2026/10/13 19:42:50 tom Exp $
  */
 #include <HTUtils.h>
 
@@ -192,7 +192,6 @@ void UCSetTransParams(UCTransParams * pT, int cs_in,
 	 * Initialize local flags.  - FM
 	 */
 	BOOL intm_ucs = FALSE;
-	BOOL use_ucs = FALSE;
 
 	/*
 	 * Set this element if we want to treat the input as CJK.  - FM
@@ -231,6 +230,8 @@ void UCSetTransParams(UCTransParams * pT, int cs_in,
 	    pT->repl_translated_C0 = FALSE;
 	    pT->trans_from_uni = FALSE;		/* Not used for CJK. - KW */
 	} else {
+	    BOOL use_ucs;
+
 	    /*
 	     * Set up for all other charset combinations.  The intm_ucs flag is
 	     * set TRUE if the input charset is iso-8859-1 or UTF-8, or largely

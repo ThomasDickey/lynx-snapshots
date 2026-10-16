@@ -1,4 +1,4 @@
-/* $LynxId: LYCurses.c,v 1.215 2026/10/12 20:51:43 tom Exp $ */
+/* $LynxId: LYCurses.c,v 1.217 2026/10/15 23:44:30 tom Exp $ */
 #include <HTUtils.h>
 #include <HTAlert.h>
 
@@ -144,7 +144,7 @@ void LYsubAttr(int a)
 
 static void lynx_setup_attrs(void)
 {
-    static int monoattr[] =
+    static const int monoattr[] =
     {
 	0,
 	SLTT_BOLD_MASK,
@@ -449,8 +449,7 @@ void curses_w_style(WINDOW * win, int style,
 		    int dir)
 {
     int YP, XP;
-    bucket *ds;
-    BOOL free_ds = TRUE;
+    const bucket *ds;
 
     switch (style) {
     case NOSTYLE:
@@ -458,14 +457,11 @@ void curses_w_style(WINDOW * win, int style,
 	break;
     default:
 	ds = &hashStyles[style];
-	free_ds = FALSE;
 	break;
     }
 
     if (!ds->used) {
 	CTRACE2(TRACE_STYLE, (tfp, "CSS.CS:Style %d not configured\n", style));
-	if (free_ds)
-	    free(ds);
 	return;
     }
 
@@ -481,8 +477,6 @@ void curses_w_style(WINDOW * win, int style,
 	LYAttrset(win, ds->color, ds->mono);
 	if (win == LYwin)
 	    SetCachedStyle(YP, XP, (unsigned) s_normal);
-	if (free_ds)
-	    free(ds);
 	return;
     }
 
@@ -524,9 +518,6 @@ void curses_w_style(WINDOW * win, int style,
 	LYAttrset(win, ds->color, ds->mono);
 	break;
     }
-
-    if (free_ds)
-	free(ds);
 
     return;
 }
@@ -1310,7 +1301,6 @@ void start_curses(void)
     lynx_enable_mouse(1);
 
 #else /* USE_SLANG; Now using curses: */
-    int keypad_on = 0;
 
 #ifdef VMS
     /*
@@ -1412,7 +1402,6 @@ void start_curses(void)
 	/* Need to switch keypad on before initializing keymaps, otherwise
 	   when the keypad is switched on, some keybindings may be overridden. */
 	keypad(LYwin, TRUE);
-	keypad_on = 1;
 #  endif /* HAVE_KEYPAD */
 
 	if (-1 == lynx_initialize_keymaps()) {
@@ -1556,8 +1545,7 @@ void start_curses(void)
     noecho();
 
 #ifdef HAVE_KEYPAD
-    if (!keypad_on)
-	keypad(LYwin, TRUE);
+    keypad(LYwin, TRUE);
 #endif /* HAVE_KEYPAD */
 
     lynx_enable_mouse(1);
@@ -2119,9 +2107,9 @@ WINDOW *LYtopwindow(void)
 }
 #endif
 
-WINDOW *LYstartPopup(int *top_y,
+WINDOW *LYstartPopup(const int *top_y,
 		     int *left_x,
-		     int *height,
+		     const int *height,
 		     int *width)
 {
     WINDOW *form_window = NULL;

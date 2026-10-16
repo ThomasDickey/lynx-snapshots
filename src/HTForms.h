@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTForms.h,v 1.38 2026/05/18 23:27:43 tom Exp $
+ * $LynxId: HTForms.h,v 1.39 2026/10/13 22:28:20 tom Exp $
  */
 #ifndef HTFORMS_H
 #define HTFORMS_H
@@ -99,7 +99,8 @@ extern "C" {
 	char *accept_cs;
     } FormInfo;
 
-#define FormIsReadonly(form) ((form) && ((form)->disabled || (form)->readonly))
+#define FormIsReadonly(form) ((form)->disabled || (form)->readonly)
+#define OkReadonlyForm(form) ((form) != NULL && FormIsReadonly(form))
 
 /*
  * As structure for info associated with a form.  There is some redundancy

@@ -1,4 +1,4 @@
-/* $LynxId: LYCurses.h,v 1.99 2025/01/06 15:52:34 tom Exp $ */
+/* $LynxId: LYCurses.h,v 1.100 2026/10/14 23:41:27 tom Exp $ */
 #ifndef LYCURSES_H
 #define LYCURSES_H
 
@@ -349,7 +349,7 @@ extern "C" {
 #endif				/* NCURSES */
 
     extern void LYbox(WINDOW * win, int formfield);
-    extern WINDOW *LYstartPopup(int *top_y, int *left_x, int *height, int *width);
+    extern WINDOW *LYstartPopup(const int *top_y, int *left_x, const int *height, int *width);
 
 /*
  * Useful macros not in PDCurses or very old ncurses headers.

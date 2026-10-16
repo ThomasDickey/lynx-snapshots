@@ -1,5 +1,5 @@
 /*
- * $LynxId: TRSTable.c,v 1.49 2026/10/12 23:27:42 tom Exp $
+ * $LynxId: TRSTable.c,v 1.51 2026/10/15 23:19:25 tom Exp $
  *		Simple table object
  *		===================
  * Authors
@@ -1743,7 +1743,7 @@ int Stbl_finishTABLE(STable_info *me)
     if (!me || me->nrows <= 0 || me->ncols <= 0) {
 	return -1;
     }
-    if (me->nrows > 0 && me->rows[me->nrows - 1].ncells > 0) {
+    if (me->rows[me->nrows - 1].ncells > 0) {
 	if (s->pending_len > 0)
 	    me->rows[me->nrows - 1].cells[
 					     me->rows[me->nrows - 1].ncells - 1
@@ -1865,7 +1865,7 @@ int Stbl_finishTABLE(STable_info *me)
     return (curpos > MAX_STBL_POS ? -1 : me->ncols);
 }
 
-short Stbl_getAlignment(STable_info *me)
+short Stbl_getAlignment(const STable_info *me)
 {
     return (short) (me ? me->alignment : HT_ALIGN_NONE);
 }
@@ -1946,7 +1946,7 @@ int Stbl_getFixupPositions(STable_info *me, int lineno,
     return ninserts;
 }
 
-int Stbl_getStartLine(STable_info *me)
+int Stbl_getStartLine(const STable_info *me)
 {
     if (!me)
 	return -1;
@@ -1956,7 +1956,7 @@ int Stbl_getStartLine(STable_info *me)
 
 #ifdef EXP_NESTED_TABLES
 
-int Stbl_getStartLineDeep(STable_info *me)
+int Stbl_getStartLineDeep(const STable_info *me)
 {
     if (!me)
 	return -1;

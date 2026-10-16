@@ -1,4 +1,4 @@
-/* $LynxId: LYEdit.c,v 1.46 2026/10/12 11:37:19 tom Exp $ */
+/* $LynxId: LYEdit.c,v 1.47 2026/10/15 23:36:13 tom Exp $ */
 #include <HTUtils.h>
 #include <HTParse.h>
 #include <HTAlert.h>
@@ -17,7 +17,7 @@
 BOOLEAN editor_can_position(void)
 {
     const char *value;
-    HTList *p = positionable_editor;
+    const HTList *p = positionable_editor;
     static const char *table[] =
     {
 #ifdef VMS

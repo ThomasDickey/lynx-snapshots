@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTString.c,v 1.90 2026/10/05 16:21:27 tom Exp $
+ * $LynxId: HTString.c,v 1.91 2026/10/15 23:07:25 tom Exp $
  *
  *	Case-independent string comparison		HTString.c
  *
@@ -1464,7 +1464,7 @@ void HTSABCat0(bstring **dest, const char *src)
 /*
  * Compare two bstring's for equality
  */
-BOOL HTSABEql(bstring *a, bstring *b)
+BOOL HTSABEql(const bstring *a, const bstring *b)
 {
     unsigned len_a = (unsigned) ((a != NULL) ? a->len : 0);
     unsigned len_b = (unsigned) ((b != NULL) ? b->len : 0);

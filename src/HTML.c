@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTML.c,v 1.217 2026/10/12 23:26:34 tom Exp $
+ * $LynxId: HTML.c,v 1.222 2026/10/15 23:16:56 tom Exp $
  *
  *		Structured stream to Rich hypertext converter
  *		============================================
@@ -766,12 +766,14 @@ static void addClassName(const char *prefix,
     if ((have + need) >= Style_className_len) {
 	Style_className_len += 1024 + 2 * (have + need);
 	if (Style_className == NULL) {
-	    Style_className = typeMallocn(char, Style_className_len);
+	    AssertAlloc(Style_className,
+			typeMallocn(char, Style_className_len),
+			"addClassName");
 	} else {
-	    Style_className = typeRealloc(char, Style_className, Style_className_len);
+	    AssertAlloc(Style_className,
+			typeRealloc(char, Style_className, Style_className_len),
+			"addClassName");
 	}
-	if (Style_className == NULL)
-	    outofmem(__FILE__, "addClassName");
 	Style_className_end = Style_className + have;
     }
     if (offset)
@@ -2413,7 +2415,7 @@ static int HTML_start_element(HTStructured * me, int element_number,
 	     * Don't allow negative numbers less than or equal to our flags, or
 	     * numbers less than 1 if an Alphabetic or Roman TYPE.  - FM
 	     */
-	    if (present[HTML_OL_TYPE] && value[HTML_OL_TYPE]) {
+	    if (HaveAttrValue(HTML_OL_TYPE)) {
 		if (*value[HTML_OL_TYPE] == 'A') {
 		    me->OL_Type[(me->List_Nesting_Level < 11 ?
 				 me->List_Nesting_Level + 1 : 11)] = 'A';
@@ -3032,7 +3034,7 @@ static int HTML_start_element(HTStructured * me, int element_number,
 	if (((present) &&
 	     (present[HTML_IMG_ALT] && value[HTML_IMG_ALT])) &&
 	    (!clickable_images ||
-	     ((clickable_images || map_href) &&
+	     ((map_href) &&
 	      *value[HTML_IMG_ALT] != '\0'))) {
 	    StrAllocCopy(alt_string, value[HTML_IMG_ALT]);
 	    TRANSLATE_AND_UNESCAPE_ENTITIES(&alt_string,
@@ -3685,7 +3687,7 @@ static int HTML_start_element(HTStructured * me, int element_number,
 		       me->object_shapes == TRUE) {
 		LYHandleFIG(me, present, value,
 			    1,
-			    1 || me->object_ismap,
+			    1,
 			    me->object_id,
 			    ((me->object_data && !me->object_classid)
 			     ? value[HTML_OBJECT_DATA]
@@ -3763,7 +3765,7 @@ static int HTML_start_element(HTStructured * me, int element_number,
 	 */
 	if (IsPresent(HTML_APPLET_ALT) && value[HTML_APPLET_ALT] &&
 	    (!clickable_images ||
-	     (clickable_images && *value[HTML_APPLET_ALT] != '\0'))) {
+	     (*value[HTML_APPLET_ALT] != '\0'))) {
 	    StrAllocCopy(alt_string, value[HTML_APPLET_ALT]);
 	    TRANSLATE_AND_UNESCAPE_ENTITIES(&alt_string,
 					    me->UsePlainSpace, me->HiddenValue);
@@ -3922,7 +3924,7 @@ static int HTML_start_element(HTStructured * me, int element_number,
 	 */
 	if (IsPresent(HTML_EMBED_ALT) && value[HTML_EMBED_ALT] &&
 	    (!clickable_images ||
-	     (clickable_images && *value[HTML_EMBED_ALT] != '\0'))) {
+	     (*value[HTML_EMBED_ALT] != '\0'))) {
 	    StrAllocCopy(alt_string, value[HTML_EMBED_ALT]);
 	    TRANSLATE_AND_UNESCAPE_ENTITIES(&alt_string,
 					    me->UsePlainSpace, me->HiddenValue);
@@ -6231,12 +6233,12 @@ static int HTML_end_element(HTStructured * me, int element_number,
 			 * in place for now as a special case for LYMapsOnly.
 			 * - kw
 			 */
-			if (LYMapsOnly && (!last_map || last_map < first_end))
+			if (!last_map || last_map < first_end)
 			    *first_end = '\0';
 			else
 			    e = 0;
 			data = NULL;
-			if (LYMapsOnly && (!first_map || first_map > start))
+			if (!first_map || first_map > start)
 			    StrAllocCopy(data, start);
 			else
 			    StrAllocCopy(data, me->object.data);
@@ -6758,7 +6760,7 @@ static int HTML_end_element(HTStructured * me, int element_number,
 
     case HTML_SELECT:
 	{
-	    char *ptr = NULL;
+	    const char *ptr = NULL;
 
 	    /*
 	     * Make sure we had a select start tag.
@@ -7426,9 +7428,7 @@ HTStructured *HTML_new(HTParentAnchor *anchor,
 	exit_immediately(EXIT_FAILURE);
     }
 
-    me = typecalloc(HTStructured);
-    if (me == NULL)
-	outofmem(__FILE__, "HTML_new");
+    AssertAlloc(me, typecalloc(HTStructured), "HTML_new");
 
     /*
      * This used to call 'get_styles()' only on the first time through this
@@ -7783,9 +7783,7 @@ static HTStream *CacheThru_new(HTParentAnchor *anchor,
 
     CTRACE((tfp, "start CacheThru_new\n"));
 
-    stream = (HTStream *) malloc(sizeof(*stream));
-    if (!stream)
-	outofmem(__FILE__, "CacheThru_new");
+    AssertAlloc(stream, (HTStream *) malloc(sizeof(*stream)), "CacheThru_new");
 
     stream->isa = &PassThruCache;
     stream->anchor = anchor;
@@ -8013,7 +8011,8 @@ HTStream *XHTMLPresent(HTPresentation *pres GCC_UNUSED,
    the trivial implementation for lynx just generates a message
    and returns. - kw 1999-03-15)
 */
-int HTLoadError(HTStream *sink GCC_UNUSED, int number,
+int HTLoadError(const HTStream *sink GCC_UNUSED,
+		int number,
 		const char *message)
 {
     HTAlert(message);		/* @@@@@@@@@@@@@@@@@@@ */

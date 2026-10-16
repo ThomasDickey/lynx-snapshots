@@ -52,6 +52,16 @@ extern "C" {
  * Macros
  */
 
+#define AssertAlloc(value,expression,function) \
+	    do { \
+	    	void *_result = expression; \
+		if (_result == NULL) { \
+		    outofmem(__FILE__, function); \
+		} else { \
+		    value = _result; \
+		} \
+	    } while (0)
+
 /*
  * Function declarations
  */

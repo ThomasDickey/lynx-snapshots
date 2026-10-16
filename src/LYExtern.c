@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYExtern.c,v 1.58 2026/10/12 20:05:23 tom Exp $
+ * $LynxId: LYExtern.c,v 1.61 2026/10/15 23:41:02 tom Exp $
  *
  External application support.
  This feature allows lynx to pass a given URL to an external program.
@@ -192,15 +192,17 @@ static char *format_command(const char *command,
 
 	format(&cmdbuf, command, host);
     } else if (strncasecomp("file://localhost/", param, 17) == 0) {
-	char e_buff[LY_MAXPATH], *p;
+	char e_buff[LY_MAXPATH], *p = NULL;
 
-	p = param + 17;
+	StrAllocCopy(p, param + 17);
 	delete_danger_characters(p);
 	*e_buff = 0;
 	if (StrChr(p, ':') == NULL) {
 	    sprintf(e_buff, "%.3s/", windows_drive);
 	}
 	strncat(e_buff, p, sizeof(e_buff) - strlen(e_buff) - 1);
+	free(p);
+
 	p = strrchr(e_buff, '.');
 	if (p) {
 	    trimPoundSelector(p);
@@ -243,7 +245,7 @@ static char *lookup_external(const char *param,
     char *cmdbuf = NULL;
     char **actions = NULL;
     char **choices = NULL;
-    lynx_list_item_type *ptr = NULL;
+    const lynx_list_item_type *ptr = NULL;
 
     for (pass = 0; pass < 2; pass++) {
 	num_disabled = 0;
@@ -259,7 +261,7 @@ static char *lookup_external(const char *param,
 		} else {
 		    if (pass == 0) {
 			length++;
-		    } else if (pass != 0) {
+		    } else {
 			cmdbuf = format_command(ptr->command, param);
 			if (length > 1) {
 			    actions[num_choices] = cmdbuf;

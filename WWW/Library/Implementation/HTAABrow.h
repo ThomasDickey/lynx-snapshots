@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTAABrow.h,v 1.17 2016/11/24 23:32:22 tom Exp $
+ * $LynxId: HTAABrow.h,v 1.18 2026/10/15 22:52:16 tom Exp $
  *
  *                          BROWSER SIDE ACCESS AUTHORIZATION MODULE
 
@@ -105,7 +105,7 @@ extern "C" {
  *                                field (in function HTAA_composeAuth()).
  *                      NO, otherwise.
  */
-    extern BOOL HTAA_shouldRetryWithAuth(char *start_of_headers,
+    extern BOOL HTAA_shouldRetryWithAuth(const char *start_of_headers,
 					 size_t length,
 					 int soc,
 					 int IsProxy);

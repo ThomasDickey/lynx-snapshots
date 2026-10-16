@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTLS.c,v 1.22 2026/10/05 17:04:55 tom Exp $
+ * $LynxId: HTTLS.c,v 1.24 2026/10/16 18:51:48 tom Exp $
  *
  *                          TRANSPORT LAYER SECURITY
  *
@@ -78,6 +78,7 @@
 
 SSL_CTX *ssl_ctx = NULL;	/* SSL ctx */
 static int ssl_okay;
+
 
 #if SSLEAY_VERSION_NUMBER < 0x101000000
 /* *INDENT-OFF* */
@@ -765,7 +766,7 @@ static int altname_valid(X509 * peer_cert, char *host, char **all_cns)
 	const GENERAL_NAME *gn = sk_GENERAL_NAME_value(gens, i);
 
 	if (gn->type == GEN_DNS) {
-	    cert_host = (const char *) ASN1_STRING_data(gn->d.ia5);
+	    cert_host = (char *) ASN1_STRING_data(gn->d.ia5);
 	} else if (gn->type == GEN_IPADD) {
 	    /* XXX untested -TG */
 	    size_t j = (size_t) ASN1_STRING_length(gn->d.ia5);

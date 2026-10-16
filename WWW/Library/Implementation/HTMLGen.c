@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTMLGen.c,v 1.50 2026/10/05 14:59:33 tom Exp $
+ * $LynxId: HTMLGen.c,v 1.51 2026/10/15 23:35:14 tom Exp $
  *
  *		HTML Generator
  *		==============
@@ -231,7 +231,7 @@ static void HTMLGen_put_character(HTStructured * me, int c)
 	(me->overflowed && me->cleanness)) {
 	if (me->cleanness) {
 	    char line_break_char = me->line_break[me->cleanness][0];
-	    char *saved = me->line_break[me->cleanness];
+	    const char *saved = me->line_break[me->cleanness];
 
 	    if (me->delete_line_break_char[me->cleanness])
 		saved++;

@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFWriter.c,v 1.139 2026/10/12 23:27:42 tom Exp $
+ * $LynxId: HTFWriter.c,v 1.140 2026/10/15 23:40:06 tom Exp $
  *
  *		FILE WRITER				HTFWrite.h
  *		===========
@@ -229,7 +229,7 @@ static void decompress_br(HTStream *me)
 {
 #undef THIS_FUNC
 #define THIS_FUNC "decompress_br\n"
-    char *in_name = me->anchor->FileCache;
+    const char *in_name = me->anchor->FileCache;
     char copied[LY_MAXPATH];
     FILE *fp = LYOpenTemp(copied, ".br", BIN_W);
 
@@ -370,7 +370,7 @@ static void decompress_br(HTStream *me)
 
 static void decompress_zstd(HTStream *me)	/* XXX too small a buffer; EINTR? */
 {
-    char *in_name = me->anchor->FileCache;
+    const char *in_name = me->anchor->FileCache;
     char copied[LY_MAXPATH];
     FILE *ofp = LYOpenTemp(copied, ".tmp.zst", BIN_W);
 
@@ -1381,7 +1381,7 @@ HTStream *HTCompressed(HTPresentation *pres,
     HTFormat format;
     char *type = NULL;
     const HTPresentation *Pres = NULL;
-    HTPresentation *Pnow = NULL;
+    const HTPresentation *Pnow = NULL;
     int n, i;
     BOOL can_present = FALSE;
     char fnam[LY_MAXPATH];

@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYNews.c,v 1.67 2026/10/12 12:50:50 tom Exp $
+ * $LynxId: LYNews.c,v 1.69 2026/10/13 19:41:01 tom Exp $
  */
 #include <HTUtils.h>
 #ifndef DISABLE_NEWS
@@ -284,8 +284,9 @@ char *LYNewsPost(const char *newsgroups,
 	    strcpy(p + 1, "LYNX_ETC.TXT");
 	    if ((fp = fopen(fname, TXT_R)) != NULL) {
 		if (fgets(user_input, (int) sizeof(user_input), fp) != NULL) {
-		    if ((org = StrChr(user_input, '\n')) != NULL) {
-			*org = '\0';
+		    char *chk;
+		    if ((chk = StrChr(user_input, '\n')) != NULL) {
+			*chk = '\0';
 		    }
 		    if (user_input[0] != '\0') {
 			StrAllocCat(cp, user_input);
