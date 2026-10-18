@@ -1,4 +1,4 @@
-/* $LynxId: LYCurses.h,v 1.100 2026/10/14 23:41:27 tom Exp $ */
+/* $LynxId: LYCurses.h,v 1.101 2026/10/18 17:45:47 tom Exp $ */
 #ifndef LYCURSES_H
 #define LYCURSES_H
 
@@ -66,6 +66,7 @@ typedef struct {
 
 /* slang doesn't really do windows... */
 #define waddch(w,c)  LYaddch(c)
+#define waddnstr(w,s,n) addnstr(s,n)
 #define waddstr(w,s) addstr(s)
 #define wmove(win, row, col) SLsmg_gotorc(((win)?(win)->top_y:0) + (row), ((win)?(win)->left_x:0) + (col))
 
@@ -349,7 +350,8 @@ extern "C" {
 #endif				/* NCURSES */
 
     extern void LYbox(WINDOW * win, int formfield);
-    extern WINDOW *LYstartPopup(const int *top_y, int *left_x, const int *height, int *width);
+    extern WINDOW *LYstartPopup(const int *top_y, int *left_x,
+				const int *height, int *width);
 
 /*
  * Useful macros not in PDCurses or very old ncurses headers.
@@ -586,6 +588,7 @@ extern "C" {
 #define LINES SLtt_Screen_Rows
 #define move SLsmg_gotorc
 #define addstr SLsmg_write_string
+#define addnstr SLsmg_write_nstring
     extern void LY_SLerase(void);
 
 #define erase LY_SLerase

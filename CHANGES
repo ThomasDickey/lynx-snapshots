@@ -1,9 +1,12 @@
--- $LynxId: CHANGES,v 1.1278 2026/10/16 19:40:02 tom Exp $
+-- $LynxId: CHANGES,v 1.1280 2026/10/18 15:46:11 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2026-10-16 (2.9.3e)
+2026-10-18 (2.9.3f)
+* change LYwaddnstr to use waddstr rather than waddch in the workaround for
+  tab-expansion because the latter is not specified in X/Open Curses for
+  multibyte characters (patch by Valery Ushakov)
 * cppcheck fixes -TD
 * fix an unused-function warning in LYCurses.c (patch by Akın Alp Ozturk)
 * update po/zh_TW.po from

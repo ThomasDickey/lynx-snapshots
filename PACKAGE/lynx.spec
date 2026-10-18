@@ -1,9 +1,9 @@
-# $LynxId: lynx.spec,v 1.137 2026/10/16 19:40:02 tom Exp $
+# $LynxId: lynx.spec,v 1.138 2026/10/18 09:14:48 tom Exp $
 Summary: A text-based Web browser
 Name: lynx-dev
 Version: 2.9.3
 %global test_version 2.9.3
-Release: 6
+Release: 7
 License: GPL-2.0-only
 Group: Applications/Internet
 Source: https://invisible-island.net/archives/lynx/lynx%{test_version}.tgz
@@ -103,8 +103,8 @@ strip $RPM_BUILD_ROOT%{_bindir}/%{name}
 
 %changelog
 
-* Fri Oct 16 2026 Thomas E. Dickey
-- testing lynx 2.9.3-6
+* Sun Oct 18 2026 Thomas E. Dickey
+- testing lynx 2.9.3-7
 
 * Thu Aug 01 2024 Thomas E. Dickey
 - add zstd compression

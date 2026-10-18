@@ -1,4 +1,4 @@
-/* $LynxId: LYCurses.c,v 1.217 2026/10/15 23:44:30 tom Exp $ */
+/* $LynxId: LYCurses.c,v 1.220 2026/10/18 17:33:15 tom Exp $ */
 #include <HTUtils.h>
 #include <HTAlert.h>
 
@@ -2222,7 +2222,7 @@ void LYwaddnstr(WINDOW * w GCC_UNUSED,
 {
     int y0, x0;
     int y, x;
-    size_t inx;
+    const char *chunk;
 
     (void) y;
     (void) y0;
@@ -2277,19 +2277,34 @@ void LYwaddnstr(WINDOW * w GCC_UNUSED,
 #endif
     LYGetYX(y0, x0);
 
-    for (inx = 0; inx < len; ++inx) {
-	/*
-	 * Do tab-expansion relative to the base of the string (rather than
-	 * the screen) so that tabs in a TEXTAREA will look right.
-	 */
-	if (src[inx] == '\t') {
-	    LYGetYX(y, x);
-	    while ((++x - x0) % 8)
-		waddch(w, ' ');
-	    waddch(w, ' ');
-	} else {
-	    waddch(w, UCH(src[inx]));
+    /*
+     * waddnstr(w, src, len), but do tab-expansion relative to the
+     * base of the string (rather than the screen) so that tabs in a
+     * TEXTAREA will look right.
+     */
+    chunk = src;
+
+    while (*chunk != '\0') {
+	const char *tabp = strchr(chunk, '\t');
+	int ilen;
+
+	if (tabp == NULL) {
+	    if ((ilen = (int) (len - (size_t) (chunk - src))) > 0)
+		waddnstr(w, chunk, ilen);
+	    break;
 	}
+
+	if (tabp != chunk) {
+	    if ((ilen = (int) (tabp - chunk)) > 0)
+		waddnstr(w, chunk, ilen);
+	}
+
+	LYGetYX(y, x);
+	do {
+	    waddch(w, ' ');
+	} while ((++x - x0) % 8);
+
+	chunk = tabp + 1;
     }
 }
 
